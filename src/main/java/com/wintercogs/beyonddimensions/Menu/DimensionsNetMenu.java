@@ -81,7 +81,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 this.addSlot(new StoredItemStackSlot(this.itemStorage, col + row * 9, 36 + col * 18, 49+row * 18));
             }
         }
-        buildIndexList();
         // 添加玩家物品栏槽位 对应slots索引 45~71
         for (int row = 0; row < 3; ++row)
         {

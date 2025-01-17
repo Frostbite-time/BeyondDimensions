@@ -61,7 +61,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
            {
                buttonStateMap.put("SortMethodButton",ButtonState.SORT_DEFAULT);
            }
-        }).pos(0,36).build();
+        }).size(10,10).pos(this.leftPos+100+18*5,36).build();
         addRenderableWidget(sortButton);
 
         reverseButton = Button.builder(Component.empty(), button -> {
@@ -73,7 +73,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
            {
                buttonStateMap.put("ReverseButton",ButtonState.ENABLED);
            }
-        }).build();
+        }).size(10,10).pos(this.leftPos+100+18*4,36).build();
         addRenderableWidget(reverseButton);
 
         // 重写部分
