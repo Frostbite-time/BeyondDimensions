@@ -208,7 +208,8 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             }
         }
         updateSlotIndex();
-        PacketDistributor.sendToPlayer((ServerPlayer) this.player,new SlotIndexPacket(this.slotIndexList));
+        // 传入一个浅克隆，以防数据包还未编码时就被修改
+        PacketDistributor.sendToPlayer((ServerPlayer) this.player,new SlotIndexPacket((ArrayList<Integer>) this.slotIndexList.clone()));
         // 发送完数据包后立刻广播更改，而不是等待下一tick的更新。
         // 这可以有效减少槽位更新带来的肉眼可见的闪烁
         // 我要如何避免这件事？

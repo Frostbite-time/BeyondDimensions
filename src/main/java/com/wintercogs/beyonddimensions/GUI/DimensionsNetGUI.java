@@ -61,7 +61,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
            {
                buttonStateMap.put("SortMethodButton",ButtonState.SORT_DEFAULT);
            }
-        }).size(10,10).pos(this.leftPos+100+18*5,36).build();
+        }).size(10,10).pos(this.leftPos+100+18*5,40).build();
         addRenderableWidget(sortButton);
 
         reverseButton = Button.builder(Component.empty(), button -> {
@@ -73,13 +73,13 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
            {
                buttonStateMap.put("ReverseButton",ButtonState.ENABLED);
            }
-        }).size(10,10).pos(this.leftPos+100+18*4,36).build();
+        }).size(10,10).pos(this.leftPos+105+18*4,40).build();
         addRenderableWidget(reverseButton);
 
         // 重写部分
-        this.searchField = new EditBox(getFont(), this.leftPos, this.topPos, 89, this.getFont().lineHeight, Component.translatable("wintercogs.BeyondDimensions.DimensionsGuiSearch"));
+        this.searchField = new EditBox(getFont(), this.leftPos+48+36, this.topPos+26, 89, this.getFont().lineHeight, Component.translatable("wintercogs.BeyondDimensions.DimensionsGuiSearch"));
         this.searchField.setMaxLength(100);
-        this.searchField.setBordered(false);
+        this.searchField.setBordered(true);
         this.searchField.setVisible(true);
         this.searchField.setTextColor(16777215);
         addRenderableWidget(searchField);
