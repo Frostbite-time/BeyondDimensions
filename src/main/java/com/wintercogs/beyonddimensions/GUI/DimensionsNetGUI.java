@@ -3,6 +3,8 @@ package com.wintercogs.beyonddimensions.GUI;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
+import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.Packet.SearchAndButtonGuiPacket;
 import net.minecraft.client.gui.Font;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
@@ -27,8 +29,8 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/dimensions_net.png");
     private EditBox searchField;
     private HashMap<String, ButtonState> buttonStateMap = new HashMap<>();
-    private Button reverseButton;
-    private Button sortButton;
+    private ReverseButton reverseButton;
+    private SortMethodButton sortButton;
 
     public DimensionsNetGUI(DimensionsNetMenu container, Inventory playerInventory, Component title)
     {
@@ -44,37 +46,25 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         // 原父类方法--由于太少，显式写出来
         this.leftPos = (this.width - this.imageWidth) / 2;
         this.topPos = (this.height - this.imageHeight) / 2;
-        // 初始化搜索方案
-        buttonStateMap.put("ReverseButton",ButtonState.ENABLED);
-        buttonStateMap.put("SortMethodButton",ButtonState.SORT_QUANTITY);
 
-        sortButton = Button.builder(Component.empty(), button -> {
-           if (buttonStateMap.get("SortMethodButton")==ButtonState.SORT_DEFAULT)
-           {
-               buttonStateMap.put("SortMethodButton",ButtonState.SORT_NAME);
-           }
-           else if (buttonStateMap.get("SortMethodButton")==ButtonState.SORT_NAME)
-           {
-               buttonStateMap.put("SortMethodButton",ButtonState.SORT_QUANTITY);
-           }
-           else if(buttonStateMap.get("SortMethodButton")==ButtonState.SORT_QUANTITY)
-           {
-               buttonStateMap.put("SortMethodButton",ButtonState.SORT_DEFAULT);
-           }
-        }).size(10,10).pos(this.leftPos+100+18*5,40).build();
+        // 初始化按钮组件
+        sortButton = new SortMethodButton(this.leftPos+100+18*5,40,button ->
+        {
+            sortButton.toggleState();
+            buttonStateMap.put(sortButton.getName(),sortButton.currentState);
+        });
         addRenderableWidget(sortButton);
 
-        reverseButton = Button.builder(Component.empty(), button -> {
-           if(buttonStateMap.get("ReverseButton")==ButtonState.ENABLED)
-           {
-               buttonStateMap.put("ReverseButton",ButtonState.DISABLED);
-           }
-           else
-           {
-               buttonStateMap.put("ReverseButton",ButtonState.ENABLED);
-           }
-        }).size(10,10).pos(this.leftPos+105+18*4,40).build();
+        reverseButton = new ReverseButton(this.leftPos+100+18*4,40,button ->
+        {
+            reverseButton.toggleState();
+            buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
+        });
         addRenderableWidget(reverseButton);
+
+        // 初始化搜索方案
+        buttonStateMap.put(sortButton.getName(),sortButton.currentState);
+        buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
 
         // 重写部分
         this.searchField = new EditBox(getFont(), this.leftPos+48+36, this.topPos+26, 89, this.getFont().lineHeight, Component.translatable("wintercogs.BeyondDimensions.DimensionsGuiSearch"));
