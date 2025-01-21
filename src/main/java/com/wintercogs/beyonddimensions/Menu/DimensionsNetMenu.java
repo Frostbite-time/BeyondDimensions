@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
+import com.wintercogs.beyonddimensions.Packet.ScrollLinedataPacket;
 import com.wintercogs.beyonddimensions.Packet.SlotIndexPacket;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.Registries;
@@ -37,8 +38,9 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     public final Player player; //用于给player发送更新包
     public final DimensionsItemStorage itemStorage;
 
-    private int lines = 5; //渲染的menu行数
+    private int lines = 6; //渲染的menu行数
     public int lineData = 0;//从第几行开始渲染？
+    public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     public ArrayList<Integer> slotIndexList = new ArrayList<>(); // 存储索引的列表，用于在双端传输数据
     private String searchText = "";
     private HashMap<String,ButtonState> buttonStateMap = new HashMap<>();
@@ -78,7 +80,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new StoredItemStackSlot(this.itemStorage, col + row * 9, 36 + col * 18, 49+row * 18));
+                this.addSlot(new StoredItemStackSlot(this.itemStorage, col + row * 9, 8 + col * 18, 29+row * 18));
             }
         }
         // 添加玩家物品栏槽位 对应slots索引 45~71
@@ -86,23 +88,66 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 36 + col * 18, 153 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 151 + row * 18));
             }
         }
         // 添加快捷栏槽位 对应slots索引 72~80
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 36 + col * 18, 211));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 209));
+        }
+
+        // 此处检查是否为服务器端，如果是，则发送初始数据给客户端
+        if(player instanceof ServerPlayer)
+        {
+            maxLineData = itemStorage.getItemStorage().size() / 9 ;
+            if(itemStorage.getItemStorage().size() % 9 !=0)
+            {
+                maxLineData++;
+            }
+            maxLineData -= lines;
+            if(maxLineData < 0)
+            {
+                maxLineData = 0;
+            }
+
+            if (lineData < 0)
+            {
+                lineData = 0;
+            }
+            if (lineData > maxLineData)
+            {
+                lineData = maxLineData;
+            }
+            PacketDistributor.sendToPlayer((ServerPlayer) this.player,new ScrollLinedataPacket(lineData,maxLineData));
         }
     }
 
     public final void ScrollTo()
     {
-        if (lineData < 0)
-        {
-            lineData = 0;
-        }
+        // 限制翻页范围 由于目前只有客户端传翻页包时会改变linedata，所以只在此函数更新maxLineData即可
+//        maxLineData = itemStorage.getItemStorage().size() / 9 ;
+//        if(itemStorage.getItemStorage().size() % 9 !=0)
+//        {
+//            maxLineData++;
+//        }
+//        maxLineData -= lines;
+//        if(maxLineData < 0)
+//        {
+//            maxLineData = 0;
+//        }
+//
+//        if (lineData < 0)
+//        {
+//            lineData = 0;
+//        }
+//        if (lineData > maxLineData)
+//        {
+//            lineData = maxLineData;
+//        }
         buildIndexList();
+        // 服务端使用
+        //PacketDistributor.sendToPlayer((ServerPlayer) this.player,new ScrollLinedataPacket(lineData,maxLineData));
     }
 
     // 双端函数，用于同步数据
@@ -192,6 +237,27 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             Collections.reverse(cache);       // 反转 cache
         }
 
+        maxLineData = cacheIndex.size() / 9 ;
+        if(cacheIndex.size() % 9 !=0)
+        {
+            maxLineData++;
+        }
+        maxLineData -= lines;
+        if(maxLineData < 0)
+        {
+            maxLineData = 0;
+        }
+
+        if (lineData < 0)
+        {
+            lineData = 0;
+        }
+        if (lineData > maxLineData)
+        {
+            lineData = maxLineData;
+        }
+
+
         //填入索引表
         this.slotIndexList.clear();
         for (int i = 0; i < lines * 9; i++)
@@ -210,6 +276,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         updateSlotIndex();
         // 传入一个浅克隆，以防数据包还未编码时就被修改
         PacketDistributor.sendToPlayer((ServerPlayer) this.player,new SlotIndexPacket((ArrayList<Integer>) this.slotIndexList.clone()));
+        PacketDistributor.sendToPlayer((ServerPlayer) this.player,new ScrollLinedataPacket(lineData,maxLineData));//翻页包之滚轮更新
         // 发送完数据包后立刻广播更改，而不是等待下一tick的更新。
         // 这可以有效减少槽位更新带来的肉眼可见的闪烁
         // 我要如何避免这件事？

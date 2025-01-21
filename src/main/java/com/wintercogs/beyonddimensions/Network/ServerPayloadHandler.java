@@ -3,10 +3,7 @@ package com.wintercogs.beyonddimensions.Network;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Packet.OpenNetGuiPacket;
-import com.wintercogs.beyonddimensions.Packet.ScrollGuiPacket;
-import com.wintercogs.beyonddimensions.Packet.SearchAndButtonGuiPacket;
-import com.wintercogs.beyonddimensions.Packet.SlotIndexPacket;
+import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
@@ -116,6 +113,17 @@ public class ServerPayloadHandler
                     menu.loadSearchText(packet.searchText());
                     menu.loadButtonState(packet.buttonStateMap());
                     menu.buildIndexList();
+                }
+
+        );
+    }
+
+    public void handleScrollLinedataPacket(final ScrollLinedataPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
                 }
 
         );

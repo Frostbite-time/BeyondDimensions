@@ -47,6 +47,12 @@ public class IconButton extends Button
         }
     }
 
+    @Override
+    public void onRelease(double mouseX, double mouseY)
+    {
+        setFocused(false);
+    }
+
     protected void drawIcon(GuiGraphics st, int mouseX, int mouseY, float pt) {
         st.blitSprite(getIcon(), this.getX(), this.getY(), this.getWidth(), this.getHeight());
     }

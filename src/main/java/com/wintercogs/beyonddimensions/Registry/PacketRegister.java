@@ -3,10 +3,7 @@ package com.wintercogs.beyonddimensions.Registry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Network.ClientPayloadHandler;
 import com.wintercogs.beyonddimensions.Network.ServerPayloadHandler;
-import com.wintercogs.beyonddimensions.Packet.OpenNetGuiPacket;
-import com.wintercogs.beyonddimensions.Packet.ScrollGuiPacket;
-import com.wintercogs.beyonddimensions.Packet.SearchAndButtonGuiPacket;
-import com.wintercogs.beyonddimensions.Packet.SlotIndexPacket;
+import com.wintercogs.beyonddimensions.Packet.*;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -61,6 +58,16 @@ public class PacketRegister
                 new DirectionalPayloadHandler<>(
                         ClientPayloadHandler.getInstance()::handleSearchAndButtonGuiPacket,
                         ServerPayloadHandler.getInstance()::handleSearchAndButtonGuiPacket
+                )
+        );
+
+        // 注册 ScrollLinedataPacket 用于打开gui时
+        registrar.playBidirectional(
+                ScrollLinedataPacket.TYPE,
+                ScrollLinedataPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleScrollLinedataPacket,
+                        ServerPayloadHandler.getInstance()::handleScrollLinedataPacket
                 )
         );
     }
