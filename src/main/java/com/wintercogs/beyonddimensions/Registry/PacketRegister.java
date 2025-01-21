@@ -31,7 +31,7 @@ public class PacketRegister
 
         );
 
-        // 注册ScrollGuiPacket 用于打开gui时
+        // 注册ScrollGuiPacket 用于滑动UI
         registrar.playBidirectional(
                 ScrollGuiPacket.TYPE,
                 ScrollGuiPacket.STREAM_CODEC,
@@ -41,7 +41,7 @@ public class PacketRegister
                 )
         );
 
-        // 注册ScrollGuiPacket 用于打开gui时
+        // 注册ScrollGuiPacket 用于同步翻页、搜索、排序等操作对槽位的影响
         registrar.playBidirectional(
                 SlotIndexPacket.TYPE,
                 SlotIndexPacket.STREAM_CODEC,
@@ -51,7 +51,7 @@ public class PacketRegister
                 )
         );
 
-        // 注册 SearchAndButtonGuiPacket 用于打开gui时
+        // 注册 SearchAndButtonGuiPacket 用于从本地同步搜索和按钮状态
         registrar.playBidirectional(
                 SearchAndButtonGuiPacket.TYPE,
                 SearchAndButtonGuiPacket.STREAM_CODEC,
@@ -61,7 +61,7 @@ public class PacketRegister
                 )
         );
 
-        // 注册 ScrollLinedataPacket 用于打开gui时
+        // 注册 ScrollLinedataPacket 用于同步滑动条状态
         registrar.playBidirectional(
                 ScrollLinedataPacket.TYPE,
                 ScrollLinedataPacket.STREAM_CODEC,

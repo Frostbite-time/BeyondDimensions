@@ -2,22 +2,20 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
+import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
 import com.wintercogs.beyonddimensions.Packet.SearchAndButtonGuiPacket;
 import net.minecraft.client.gui.Font;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Packet.ScrollGuiPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.slf4j.Logger;
 import java.util.HashMap;
@@ -33,8 +31,8 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     private HashMap<String, ButtonState> buttonStateMap = new HashMap<>();
     private ReverseButton reverseButton;
     private SortMethodButton sortButton;
-    private static final ResourceLocation SCROLLER_TEXTURE = ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/big_scroller");
-    private double scrollCount = 0;
+    private BigScroller scroller;
+//    private double scrollCount = 0;
 
     public DimensionsNetGUI(DimensionsNetMenu container, Inventory playerInventory, Component title)
     {
@@ -79,6 +77,10 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         this.searchField.setVisible(true);
         this.searchField.setTextColor(16777215);
         addRenderableWidget(searchField);
+
+        // 初始化滚动按钮
+        this.scroller = new BigScroller(this.leftPos+175,this.topPos+23,99,0,menu.maxLineData);
+        addRenderableWidget(scroller);
     }
 
     @Override
@@ -86,6 +88,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         //父类无操作
         //每tick自动更新搜索方案
         PacketDistributor.sendToServer(new SearchAndButtonGuiPacket(searchField.getValue(),buttonStateMap));
+        scroller.updateScrollPosition(menu.lineData,menu.maxLineData);
     }
 
     @Override
@@ -104,12 +107,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         this.renderTooltip(guiGraphics, mouseX, mouseY);
         searchField.render(guiGraphics,mouseX,mouseY,partialTicks);
         reverseButton.render(guiGraphics,mouseX,mouseY,partialTicks);
-        int scrollerOffset;
-        if(menu.maxLineData != 0)
-            scrollerOffset = (int) (99 * ((float)menu.lineData/ (float)menu.maxLineData));
-        else
-            scrollerOffset = 0;
-        guiGraphics.blitSprite(SCROLLER_TEXTURE,this.leftPos+175,this.topPos+23+scrollerOffset,15,20);
+        scroller.render(guiGraphics,mouseX,mouseY,partialTicks);
     }
 
     @Override
@@ -131,25 +129,8 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
-        if(button ==0)
-        {
-            if(mouseX>=this.leftPos+175&&mouseX<=this.leftPos+175+15)
-            {
-                if(mouseY>=this.topPos+23&&mouseY<=this.topPos+23+119)
-                {
-                    if(menu.maxLineData !=0)
-                    {
-                        scrollCount += dragY;
-                        double scrollhold = (119/ menu.maxLineData)/1.5;
-                        if(scrollCount>scrollhold||scrollCount<-scrollhold)
-                        {
-                            PacketDistributor.sendToServer(new ScrollGuiPacket(-scrollCount));
-                            scrollCount = 0;
-                        }
-                    }
-                }
-            }
-        }
+        // 父类的覆写方法没有显式调用其被拖拽的子元素的拖拽方法，所以需要手动调用
+        scroller.mouseDragged(mouseX,mouseY,button,dragX,dragY);
         return true;
     }
 
@@ -171,24 +152,6 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
             }
         }
         return true;
-//        if(this.getFocused() == null)
-//        {
-//            return true;
-//        }
-//        boolean clickedCurrentFocused = false;
-//        for(GuiEventListener guieventlistener : this.children()) {
-//            if (guieventlistener.mouseClicked(mouseX, mouseY, button)) {
-//                if(this.getFocused() == guieventlistener)
-//                    clickedCurrentFocused = true;
-//            }
-//        }
-//        if(clickedCurrentFocused == false)
-//        {
-//            this.getFocused().setFocused(false);
-//            this.setFocused(null);
-//        }
-//
-//        return true;
     }
 
     public Font getFont() {
