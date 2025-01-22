@@ -19,7 +19,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.slf4j.Logger;
 import java.util.HashMap;
-
+import java.util.Objects;
 
 
 public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
@@ -29,6 +29,8 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/dimensions_net.png");
     private EditBox searchField;
     private HashMap<String, ButtonState> buttonStateMap = new HashMap<>();
+    private HashMap<String,ButtonState> lastButtonStateMap = new HashMap<>();
+    private String lastSearchText = "";
     private ReverseButton reverseButton;
     private SortMethodButton sortButton;
     private BigScroller scroller;
@@ -81,15 +83,22 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         // 初始化滚动按钮
         this.scroller = new BigScroller(this.leftPos+175,this.topPos+23,99,0,menu.maxLineData);
         addRenderableWidget(scroller);
+
+        lastButtonStateMap = new HashMap<>(buttonStateMap);
+        lastSearchText = searchField.getValue();
     }
 
     @Override
     protected void containerTick() {
         //父类无操作
         //每tick自动更新搜索方案
-        LOGGER.info("GUI更新");
-        PacketDistributor.sendToServer(new SearchAndButtonGuiPacket(searchField.getValue(),buttonStateMap));
-        scroller.updateScrollPosition(menu.lineData,menu.maxLineData);
+        if(!lastButtonStateMap.equals(buttonStateMap) || !Objects.equals(lastSearchText, searchField.getValue()))
+        {
+            PacketDistributor.sendToServer(new SearchAndButtonGuiPacket(searchField.getValue(),buttonStateMap));
+            lastButtonStateMap = new HashMap<>(buttonStateMap);
+            lastSearchText = searchField.getValue();
+        }
+        scroller.updateScrollPosition(menu.lineData,menu.maxLineData);// 客户端读取服务端同步过来的翻页数据并应用
     }
 
     @Override

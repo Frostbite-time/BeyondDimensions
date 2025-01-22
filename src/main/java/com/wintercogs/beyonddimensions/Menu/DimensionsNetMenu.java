@@ -9,7 +9,6 @@ import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.ScrollLinedataPacket;
 import com.wintercogs.beyonddimensions.Packet.SlotIndexPacket;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -129,30 +128,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
 
     public final void ScrollTo()
     {
-        // 限制翻页范围 由于目前只有客户端传翻页包时会改变linedata，所以只在此函数更新maxLineData即可
-//        maxLineData = itemStorage.getItemStorage().size() / 9 ;
-//        if(itemStorage.getItemStorage().size() % 9 !=0)
-//        {
-//            maxLineData++;
-//        }
-//        maxLineData -= lines;
-//        if(maxLineData < 0)
-//        {
-//            maxLineData = 0;
-//        }
-//
-//        if (lineData < 0)
-//        {
-//            lineData = 0;
-//        }
-//        if (lineData > maxLineData)
-//        {
-//            lineData = maxLineData;
-//        }
-        // 服务端使用
-        //PacketDistributor.sendToPlayer((ServerPlayer) this.player,new ScrollLinedataPacket(lineData,maxLineData));
-
-        //buildIndexList();
+        buildIndexList();
     }
 
     // 双端函数，用于同步数据
@@ -166,12 +142,13 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         this.buttonStateMap = buttonStateMap;
     }
 
-    // 服务端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList()
+    // 辅助方法，用于根据当前搜索状态等建立缓存索引表以及更新翻页数据
+    public ArrayList<Integer> buildStorageWithCurrentState()
     {
-        if(this.player instanceof LocalPlayer)
+        // 会返回一个存储了正确索引的列表，并更新与之对应的lineData数据
+        if(this.player.level().isClientSide)
         {
-            return;//确保只有服务端运行
+            return null;//确保只有服务端运行
         }
 
         //建立浅拷贝缓存，用于排序和筛选数据
@@ -241,9 +218,13 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             Collections.reverse(cacheIndex);  // 反转 cacheIndex
             Collections.reverse(cache);       // 反转 cache
         }
+        return cacheIndex;
+    }
 
-        maxLineData = cacheIndex.size() / 9 ;
-        if(cacheIndex.size() % 9 !=0)
+    public void updateScrollLineData(int dataSize)
+    {
+        maxLineData = dataSize / 9 ;
+        if(dataSize % 9 !=0)
         {
             maxLineData++;
         }
@@ -261,9 +242,21 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         {
             lineData = maxLineData;
         }
+    }
 
+    // 服务端函数，根据存储构建索引表 用于在动态搜索以及其他
+    public void buildIndexList()
+    {
+        if(this.player.level().isClientSide)
+        {
+            return;//确保只有服务端运行
+        }
 
-        //填入索引表
+        // 1 构建正确的索引数据
+        ArrayList<Integer> cacheIndex = buildStorageWithCurrentState();
+        // 2 构建linedata
+        updateScrollLineData(cacheIndex.size());
+        // 3 填入索引表
         this.slotIndexList.clear();
         for (int i = 0; i < lines * 9; i++)
         {
@@ -278,10 +271,14 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 this.slotIndexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
             }
         }
+        // 4 根据索引表更新槽位数据
         updateSlotIndex();
-        // 传入一个浅克隆，以防数据包还未编码时就被修改
-        PacketDistributor.sendToPlayer((ServerPlayer) this.player,new SlotIndexPacket((ArrayList<Integer>) this.slotIndexList.clone()));
+        // 5 同步数据
         PacketDistributor.sendToPlayer((ServerPlayer) this.player,new ScrollLinedataPacket(lineData,maxLineData));//翻页包之滚轮更新
+        PacketDistributor.sendToPlayer((ServerPlayer) this.player,
+                new SlotIndexPacket((ArrayList<Integer>) this.slotIndexList.clone()));// 向客户端更新槽数据
+
+
         // 发送完数据包后立刻广播更改，而不是等待下一tick的更新。
         // 这可以有效减少槽位更新带来的肉眼可见的闪烁
         // 我要如何避免这件事？
@@ -298,8 +295,16 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         // 页面闪烁有两个问题来源，其一，移除物品的逻辑在客户端与服务端同时执行，而客户端缺没有足够的数据支撑完成真正的移除操作，导致在列表化的存储系统中，
         // 当列表长度被减少，索引所对应的物品会被移动位置，而此时客户端会以其自身数据更新其自身显示，并在短时间内迅速收到来自服务端的同步消息再次更新到正确显示，从而导致闪烁
         // 其二，buildIndexList被来自客户端的搜索框与按钮状态每tick调用，当移除物品被调用的过快以至于和每tick调用撞上，会导致客户端连续收到2次更新消息，从而导致闪烁
+        // 为了应对上述问题，可能只有关闭客户端的自我操作，并在更新时手动使用broadcastFullState同步数据才能完美避开闪烁
+        // 同时，需要知道的是，broadcastChanges似乎只有在双端都有变动时才能触发更新逻辑
         broadcastFullState();
-        LOGGER.info("索引被重构");
+    }
+
+    @Override
+    public void broadcastChanges()
+    {
+        super.broadcastChanges();
+
     }
 
     // 客户端函数，根据传入读取索引表
@@ -345,7 +350,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     public ItemStack quickMoveStack(Player player, int index)
     {
         // 本地端逻辑
-        if(player instanceof LocalPlayer)
+        if(player.level().isClientSide)
         {
             return ItemStack.EMPTY;// 本地不执行逻辑
         }
@@ -353,7 +358,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         // 实现快速移动物品逻辑
         // 如果item在容器，移动到背包，在背包则移动到容器
         // 返回被移动的物品对象
-        LOGGER.info("快速移动被应用");
         ItemStack itemstack = ItemStack.EMPTY;
         ItemStack itemStack1;
         Slot slot = this.slots.get(index);
@@ -501,12 +505,11 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 event.setCanceled(false); // 通知双端点击事件未处理
                 return;
             }
-            if(event.getPlayer() instanceof LocalPlayer)
+            if(event.getPlayer().level().isClientSide)
             {   // 本地不处理该窗口的鼠标点击事件，同时防止其被其他逻辑处理
                 event.setCanceled(true); // 通知客户端点击事件已处理
                 return;
             }
-            LOGGER.info("为StoredItemStackSlot拦截鼠标事件");
             // 必须吐槽一句，这carried和click的对应竟然在menu写反了。。
             ItemStack clickItem = event.getCarriedItem();
             ItemStack carriedItem = event.getStackedOnItem();
