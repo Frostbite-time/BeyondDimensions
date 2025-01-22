@@ -59,6 +59,10 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     {
         //客户端的DimensionsNet不重要，只需要给予正确的槽索引，Menu会自动将内容同步
         this(id, playerInventory, new DimensionsNet(), new SimpleContainerData(1));
+        for(int i = 0;i<10000;i++)
+        {
+            this.itemStorage.getItemStorage().add(i,new StoredItemStack(ItemStack.EMPTY));
+        }
     }
 
     // 构造函数，用于初始化容器
@@ -145,9 +149,10 @@ public class DimensionsNetMenu extends AbstractContainerMenu
 //        {
 //            lineData = maxLineData;
 //        }
-        buildIndexList();
         // 服务端使用
         //PacketDistributor.sendToPlayer((ServerPlayer) this.player,new ScrollLinedataPacket(lineData,maxLineData));
+
+        //buildIndexList();
     }
 
     // 双端函数，用于同步数据
@@ -282,7 +287,19 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         // 我要如何避免这件事？
         // 新发现，最好不要手动broadcastChanges，除非你已经完成了在正确时机阻塞数据包的操作
         // 否则，这有可能导致两个broadcastChanges撞上，从而导致客户端崩溃
-        //broadcastChanges();
+        // 2025.1.21 发现：闪烁的问题似乎并非槽索引同步导致，经测试
+        // 快速翻页、快速移入物品、快速切换搜索以及筛选模式均不会导致闪烁
+        // 只有在非默认排序下，移除物品会导致闪烁无论速度快慢
+        // 终于解决了闪烁问题，只需要为每一个物品操作排除客户端影响，使客户端显示完全依赖于服务器传输数据即可
+        // ......并不是这个问题
+        // 虽还未能完全追根溯源，但是闪烁问题很可能是客户端与云端内容不一致导致反复更新或者云端快速2次发送内容不一致数据包导致。
+        // 明天可以尝试手动broadcast全局试试
+        // 2025.1.22 成功解决此问题：
+        // 页面闪烁有两个问题来源，其一，移除物品的逻辑在客户端与服务端同时执行，而客户端缺没有足够的数据支撑完成真正的移除操作，导致在列表化的存储系统中，
+        // 当列表长度被减少，索引所对应的物品会被移动位置，而此时客户端会以其自身数据更新其自身显示，并在短时间内迅速收到来自服务端的同步消息再次更新到正确显示，从而导致闪烁
+        // 其二，buildIndexList被来自客户端的搜索框与按钮状态每tick调用，当移除物品被调用的过快以至于和每tick调用撞上，会导致客户端连续收到2次更新消息，从而导致闪烁
+        broadcastFullState();
+        LOGGER.info("索引被重构");
     }
 
     // 客户端函数，根据传入读取索引表
@@ -315,7 +332,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         super.setItem(slotId, stateId, stack);
         //menu用于插入物品时的函数
         //此段重写仅保留，便于以后查询
-
+        //虽然没有太多研究，但这个函数很可能会在远端同步时候调用
     }
 
     @Override
@@ -327,9 +344,16 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     @Override
     public ItemStack quickMoveStack(Player player, int index)
     {
+        // 本地端逻辑
+        if(player instanceof LocalPlayer)
+        {
+            return ItemStack.EMPTY;// 本地不执行逻辑
+        }
+        // 服务端逻辑
         // 实现快速移动物品逻辑
         // 如果item在容器，移动到背包，在背包则移动到容器
         // 返回被移动的物品对象
+        LOGGER.info("快速移动被应用");
         ItemStack itemstack = ItemStack.EMPTY;
         ItemStack itemStack1;
         Slot slot = this.slots.get(index);
@@ -339,7 +363,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             {
                 itemstack = sSlot.getVanillaActualStack();
                 itemStack1 = sSlot.getVanillaActualStack();
-                LOGGER.info("循环中");
                 if (!this.moveItemStackTo(itemStack1, this.lines * 9, this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
@@ -349,7 +372,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             {
                 itemstack = slot.getItem().copy();
                 itemStack1 = slot.getItem().copy();
-                LOGGER.info("循环中");
                 if (!this.moveItemStackTo(itemStack1, 0, this.lines * 9, false))
                 {
                     return ItemStack.EMPTY;
@@ -476,7 +498,12 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         {
             if (!(event.getSlot() instanceof StoredItemStackSlot))
             {
-                event.setCanceled(false);
+                event.setCanceled(false); // 通知双端点击事件未处理
+                return;
+            }
+            if(event.getPlayer() instanceof LocalPlayer)
+            {   // 本地不处理该窗口的鼠标点击事件，同时防止其被其他逻辑处理
+                event.setCanceled(true); // 通知客户端点击事件已处理
                 return;
             }
             LOGGER.info("为StoredItemStackSlot拦截鼠标事件");

@@ -87,6 +87,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     protected void containerTick() {
         //父类无操作
         //每tick自动更新搜索方案
+        LOGGER.info("GUI更新");
         PacketDistributor.sendToServer(new SearchAndButtonGuiPacket(searchField.getValue(),buttonStateMap));
         scroller.updateScrollPosition(menu.lineData,menu.maxLineData);
     }
