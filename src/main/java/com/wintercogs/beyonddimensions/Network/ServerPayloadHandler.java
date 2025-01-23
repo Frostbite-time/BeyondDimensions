@@ -128,4 +128,15 @@ public class ServerPayloadHandler
 
         );
     }
+
+    public void handleItemStoragePacket(final ItemStoragePacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+
+        );
+    }
 }

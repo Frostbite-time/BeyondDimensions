@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase;
 
-
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 
 // 作为一个可以存储无限数量的 ItemStack
@@ -8,6 +9,8 @@ public class StoredItemStack
 {
     private ItemStack itemStack;
     private long count;
+
+    public static final StreamCodec<RegistryFriendlyByteBuf,StoredItemStack> STREAM_CODEC = storedItemStack_StreamCodec();
 
     public StoredItemStack(ItemStack itemStack)
     {
@@ -22,6 +25,7 @@ public class StoredItemStack
         this.itemStack.setCount(1);
         this.count = count;
     }
+
 
     public ItemStack getItemStack()
     {
@@ -90,6 +94,26 @@ public class StoredItemStack
         }
         else if (!ItemStack.isSameItemSameComponents(itemStack, other.itemStack)) return false;
         return true;
+    }
+
+
+    // 编码器，用于进行网络传输
+    static StreamCodec<RegistryFriendlyByteBuf, StoredItemStack> storedItemStack_StreamCodec()
+    {
+        return new StreamCodec<RegistryFriendlyByteBuf, StoredItemStack>() {
+            public StoredItemStack decode(RegistryFriendlyByteBuf buf) {
+                long count = buf.readLong();
+                ItemStack itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
+                return new StoredItemStack(itemStack,count);
+            }
+
+            public void encode(RegistryFriendlyByteBuf buf, StoredItemStack storedItemStack) {
+                // 先写入 count（物品的数量）
+                buf.writeLong(storedItemStack.count);
+                // 然后序列化 ItemStack 对象
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, storedItemStack.getItemStack());
+            }
+        };
     }
 
     @Override

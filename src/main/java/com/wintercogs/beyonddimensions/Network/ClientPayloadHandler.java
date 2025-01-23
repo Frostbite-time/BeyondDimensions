@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.world.entity.player.Player;
@@ -85,6 +86,28 @@ public class ClientPayloadHandler
                     menu = (DimensionsNetMenu) player.containerMenu;
                     menu.lineData = packet.lineData();
                     menu.maxLineData = packet.maxLineData();
+                }
+
+        );
+    }
+
+    public void handleItemStoragePacket(final ItemStoragePacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    DimensionsNetMenu menu;
+                    if (!(player.containerMenu instanceof DimensionsNetMenu))
+                    {
+                        return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
+                    menu = (DimensionsNetMenu) player.containerMenu;
+                    //menu.itemStorage.getItemStorage().clear();
+                    for(StoredItemStack storedItemStack : packet.storedItemStacks())
+                    {
+                        menu.itemStorage.getItemStorage().add(storedItemStack);
+                    }
                 }
 
         );

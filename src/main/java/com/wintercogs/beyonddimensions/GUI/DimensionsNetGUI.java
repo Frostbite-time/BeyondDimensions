@@ -18,7 +18,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.slf4j.Logger;
+
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Objects;
 
 
@@ -94,7 +96,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         //每tick自动更新搜索方案
         if(!lastButtonStateMap.equals(buttonStateMap) || !Objects.equals(lastSearchText, searchField.getValue()))
         {
-            PacketDistributor.sendToServer(new SearchAndButtonGuiPacket(searchField.getValue(),buttonStateMap));
+            PacketDistributor.sendToServer(new SearchAndButtonGuiPacket(searchField.getValue().toLowerCase(Locale.ROOT),buttonStateMap));
             lastButtonStateMap = new HashMap<>(buttonStateMap);
             lastSearchText = searchField.getValue();
         }

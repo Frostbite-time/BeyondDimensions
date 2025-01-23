@@ -7,10 +7,16 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
+import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.ScrollLinedataPacket;
 import com.wintercogs.beyonddimensions.Packet.SlotIndexPacket;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
@@ -122,7 +128,37 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             {
                 lineData = maxLineData;
             }
+
+            // 发送滑动数据
             PacketDistributor.sendToPlayer((ServerPlayer) this.player,new ScrollLinedataPacket(lineData,maxLineData));
+
+            // 分批次将存储空间内容发送给玩家
+            List<ItemStoragePacket> splitPackets = new ArrayList<>(); // 用于分割包
+            ArrayList<StoredItemStack> currentBatch = new ArrayList<>(); // 用于分割StoredItemStack
+            int currentBatchSize = 0; //检测当前包大小
+
+            for(StoredItemStack storedItemStack : new ArrayList<>(this.itemStorage.getItemStorage()))
+            {
+                FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(Unpooled.buffer()); // 创建一个 Netty 的 ByteBuf
+                RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(friendlyByteBuf, player.level().registryAccess());
+                StoredItemStack.STREAM_CODEC.encode(buffer,storedItemStack);
+                currentBatchSize += buffer.array().length;
+                if(currentBatchSize<1000000) //此处取整是为了留下冗余空间
+                {   // 如果添加了此次数据仍小于1MB则继续添加
+                    currentBatch.add(storedItemStack);
+                }
+                else
+                {   // 如果添加了数据将会大于1MB则准备数据包，然后将数据添加到下一次处理中
+                    splitPackets.add(new ItemStoragePacket(currentBatch));
+                    currentBatch.clear();
+                    currentBatch.add(storedItemStack);
+                    currentBatchSize = buffer.array().length;
+                }
+            }
+            for(ItemStoragePacket packet :splitPackets)
+            {
+                PacketDistributor.sendToPlayer((ServerPlayer) this.player,packet);
+            }
         }
     }
 
@@ -156,23 +192,40 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         ArrayList<Integer> cacheIndex = new ArrayList<>(); // 建立一个索引缓存，以防止索引混乱
         for(int i = 0;i<cache.size();i++)
             cacheIndex.add(i);
+
         //根据搜索框筛选数据
         if(searchText != null && !searchText.isEmpty())
-        {
+        {   // searchText会在传入之前执行小写化操作
             // 遍历缓存，进行筛选
             for (int i = 0; i < cache.size(); i++) {
                 StoredItemStack item = cache.get(i);
-
-                // 判断搜索文本是否包含在物品名称中
-                if (item.getVanillaMaxSizeStack().getDisplayName().getString() == null
-                        || !item.getVanillaMaxSizeStack().getDisplayName().getString().toLowerCase().contains(searchText.toLowerCase())) {
-                    // 不匹配时，从 cache 和 cacheIndex 中同时移除
+                // 不匹配时，从 cache 和 cacheIndex 中同时移除
+                if (item.getVanillaMaxSizeStack() == null||item.getVanillaMaxSizeStack() == ItemStack.EMPTY) {
+                    // 移除空气和空引用
                     cache.remove(i);
                     cacheIndex.remove(i);
                     i--;  // 移除元素后，需调整索引位置
+                    continue;
                 }
+                else
+                {
+                    boolean isfind = false;
+                    if(item.getVanillaMaxSizeStack().getHoverName().getString().contains(searchText))
+                    {
+                        isfind = true;
+                    }
+                    if(!isfind)
+                    {
+                        cache.remove(i);
+                        cacheIndex.remove(i);
+                        i--;  // 移除元素后，需调整索引位置
+                        continue;
+                    }
+                }
+
             }
         }
+
         //排序按钮筛选
         if(buttonStateMap.get("SortMethodButton")==ButtonState.SORT_DEFAULT)
         {
@@ -212,6 +265,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             }
             cache.sort(Comparator.comparingLong(StoredItemStack::getCount)); // 升序
         }
+
         //倒序按钮筛选
         if(buttonStateMap.get("ReverseButton")==ButtonState.ENABLED)
         {

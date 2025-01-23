@@ -70,5 +70,15 @@ public class PacketRegister
                         ServerPayloadHandler.getInstance()::handleScrollLinedataPacket
                 )
         );
+
+        // 注册 ItemStoragePacket 用于同步滑动条状态
+        registrar.playBidirectional(
+                ItemStoragePacket.TYPE,
+                ItemStoragePacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleItemStoragePacket,
+                        ServerPayloadHandler.getInstance()::handleItemStoragePacket
+                )
+        );
     }
 }
