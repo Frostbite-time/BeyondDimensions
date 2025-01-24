@@ -8,15 +8,12 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
-import com.wintercogs.beyonddimensions.Packet.ScrollLinedataPacket;
 import com.wintercogs.beyonddimensions.Packet.SlotIndexPacket;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
@@ -34,21 +31,28 @@ import java.util.*;
 import java.util.function.Supplier;
 
 // 备注：该菜单所使用的StoredItemStackSlot的物品堆叠处理将会用钩子进行覆写
-
+// 以itemStorage.getItemStorage()的列表为服务端需要向客户端同步的存储数据
+// 客户端会需要完整的正确的itemStorage数据，构建slotIndexList并向服务端同步
+// 服务端在收到数据后将利用slotIndexList更新slots列表
+// 最后AbstractContainerMenu会自动处理双端slot内容的同步
 public class DimensionsNetMenu extends AbstractContainerMenu
 {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public final Player player; //用于给player发送更新包
+    // 双端数据
+    public final Player player; //用于给player发送数据
     public final DimensionsItemStorage itemStorage;
-
+    public ArrayList<Integer> slotIndexList = new ArrayList<>(); // 存储索引的列表，用于在双端传输数据
+    // 客户端数据
     private int lines = 6; //渲染的menu行数
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
-    public ArrayList<Integer> slotIndexList = new ArrayList<>(); // 存储索引的列表，用于在双端传输数据
     private String searchText = "";
     private HashMap<String,ButtonState> buttonStateMap = new HashMap<>();
+    // 服务端数据
+
+
 
     // 构建注册用的信息
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
@@ -64,10 +68,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     {
         //客户端的DimensionsNet不重要，只需要给予正确的槽索引，Menu会自动将内容同步
         this(id, playerInventory, new DimensionsNet(), new SimpleContainerData(1));
-        for(int i = 0;i<10000;i++)
-        {
-            this.itemStorage.getItemStorage().add(i,new StoredItemStack(ItemStack.EMPTY));
-        }
     }
 
     // 构造函数，用于初始化容器
@@ -79,8 +79,8 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         this.player = playerInventory.player;
 
         // 初始化搜索方案
-        buttonStateMap.put("ReverseButton",ButtonState.ENABLED);
-        buttonStateMap.put("SortMethodButton",ButtonState.SORT_QUANTITY);
+        buttonStateMap.put("ReverseButton",ButtonState.DISABLED);
+        buttonStateMap.put("SortMethodButton",ButtonState.SORT_DEFAULT);
 
         // 开始添加槽位，其中addSlot会为menu自带的列表slots提供slot，
         // 而给slot本身传入的索引则对应其在背包中的索引
@@ -88,8 +88,8 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         for (int row = 0; row < lines; ++row)
         {
             for (int col = 0; col < 9; ++col)
-            {
-                this.addSlot(new StoredItemStackSlot(this.itemStorage, col + row * 9, 8 + col * 18, 29+row * 18));
+            {   // 添加槽而不设置数据
+                this.addSlot(new StoredItemStackSlot(this.itemStorage, -1, 8 + col * 18, 29+row * 18));
             }
         }
         // 添加玩家物品栏槽位 对应slots索引 45~71
@@ -104,61 +104,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         for (int col = 0; col < 9; ++col)
         {
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 209));
-        }
-
-        // 此处检查是否为服务器端，如果是，则发送初始数据给客户端
-        if(player instanceof ServerPlayer)
-        {
-            maxLineData = itemStorage.getItemStorage().size() / 9 ;
-            if(itemStorage.getItemStorage().size() % 9 !=0)
-            {
-                maxLineData++;
-            }
-            maxLineData -= lines;
-            if(maxLineData < 0)
-            {
-                maxLineData = 0;
-            }
-
-            if (lineData < 0)
-            {
-                lineData = 0;
-            }
-            if (lineData > maxLineData)
-            {
-                lineData = maxLineData;
-            }
-
-            // 发送滑动数据
-            PacketDistributor.sendToPlayer((ServerPlayer) this.player,new ScrollLinedataPacket(lineData,maxLineData));
-
-            // 分批次将存储空间内容发送给玩家
-            List<ItemStoragePacket> splitPackets = new ArrayList<>(); // 用于分割包
-            ArrayList<StoredItemStack> currentBatch = new ArrayList<>(); // 用于分割StoredItemStack
-            int currentBatchSize = 0; //检测当前包大小
-
-            for(StoredItemStack storedItemStack : new ArrayList<>(this.itemStorage.getItemStorage()))
-            {
-                FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(Unpooled.buffer()); // 创建一个 Netty 的 ByteBuf
-                RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(friendlyByteBuf, player.level().registryAccess());
-                StoredItemStack.STREAM_CODEC.encode(buffer,storedItemStack);
-                currentBatchSize += buffer.array().length;
-                if(currentBatchSize<1000000) //此处取整是为了留下冗余空间
-                {   // 如果添加了此次数据仍小于1MB则继续添加
-                    currentBatch.add(storedItemStack);
-                }
-                else
-                {   // 如果添加了数据将会大于1MB则准备数据包，然后将数据添加到下一次处理中
-                    splitPackets.add(new ItemStoragePacket(currentBatch));
-                    currentBatch.clear();
-                    currentBatch.add(storedItemStack);
-                    currentBatchSize = buffer.array().length;
-                }
-            }
-            for(ItemStoragePacket packet :splitPackets)
-            {
-                PacketDistributor.sendToPlayer((ServerPlayer) this.player,packet);
-            }
         }
     }
 
@@ -181,11 +126,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     // 辅助方法，用于根据当前搜索状态等建立缓存索引表以及更新翻页数据
     public ArrayList<Integer> buildStorageWithCurrentState()
     {
-        // 会返回一个存储了正确索引的列表，并更新与之对应的lineData数据
-        if(this.player.level().isClientSide)
-        {
-            return null;//确保只有服务端运行
-        }
 
         //建立浅拷贝缓存，用于排序和筛选数据
         ArrayList<StoredItemStack> cache = new ArrayList<>(this.itemStorage.getItemStorage());
@@ -214,6 +154,9 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                     {
                         isfind = true;
                     }
+
+
+
                     if(!isfind)
                     {
                         cache.remove(i);
@@ -301,85 +244,144 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     // 服务端函数，根据存储构建索引表 用于在动态搜索以及其他
     public void buildIndexList()
     {
-        if(this.player.level().isClientSide)
+        if(!this.player.level().isClientSide())
         {
-            return;//确保只有服务端运行
+            return;
         }
-
         // 1 构建正确的索引数据
         ArrayList<Integer> cacheIndex = buildStorageWithCurrentState();
         // 2 构建linedata
         updateScrollLineData(cacheIndex.size());
         // 3 填入索引表
-        this.slotIndexList.clear();
+
+//        this.slotIndexList.clear();
+//        for (int i = 0; i < lines * 9; i++)
+//        {
+//            //根据翻页数据构建索引列表
+//            if (i + lineData * 9 < cacheIndex.size())
+//            {
+//                int index = cacheIndex.get(i + lineData * 9);
+//                this.slotIndexList.add(index);
+//            }
+//            else
+//            {
+//                this.slotIndexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
+//            }
+//        }
+        ArrayList<Integer> indexList = new ArrayList<>();
         for (int i = 0; i < lines * 9; i++)
         {
             //根据翻页数据构建索引列表
             if (i + lineData * 9 < cacheIndex.size())
             {
                 int index = cacheIndex.get(i + lineData * 9);
-                this.slotIndexList.add(index);
+                indexList.add(index);
             }
             else
             {
-                this.slotIndexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
+                indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
             }
         }
-        // 4 根据索引表更新槽位数据
-        updateSlotIndex();
-        // 5 同步数据
-        PacketDistributor.sendToPlayer((ServerPlayer) this.player,new ScrollLinedataPacket(lineData,maxLineData));//翻页包之滚轮更新
-        PacketDistributor.sendToPlayer((ServerPlayer) this.player,
-                new SlotIndexPacket((ArrayList<Integer>) this.slotIndexList.clone()));// 向客户端更新槽数据
 
-
-        // 发送完数据包后立刻广播更改，而不是等待下一tick的更新。
-        // 这可以有效减少槽位更新带来的肉眼可见的闪烁
-        // 我要如何避免这件事？
-        // 新发现，最好不要手动broadcastChanges，除非你已经完成了在正确时机阻塞数据包的操作
-        // 否则，这有可能导致两个broadcastChanges撞上，从而导致客户端崩溃
-        // 2025.1.21 发现：闪烁的问题似乎并非槽索引同步导致，经测试
-        // 快速翻页、快速移入物品、快速切换搜索以及筛选模式均不会导致闪烁
-        // 只有在非默认排序下，移除物品会导致闪烁无论速度快慢
-        // 终于解决了闪烁问题，只需要为每一个物品操作排除客户端影响，使客户端显示完全依赖于服务器传输数据即可
-        // ......并不是这个问题
-        // 虽还未能完全追根溯源，但是闪烁问题很可能是客户端与云端内容不一致导致反复更新或者云端快速2次发送内容不一致数据包导致。
-        // 明天可以尝试手动broadcast全局试试
-        // 2025.1.22 成功解决此问题：
-        // 页面闪烁有两个问题来源，其一，移除物品的逻辑在客户端与服务端同时执行，而客户端缺没有足够的数据支撑完成真正的移除操作，导致在列表化的存储系统中，
-        // 当列表长度被减少，索引所对应的物品会被移动位置，而此时客户端会以其自身数据更新其自身显示，并在短时间内迅速收到来自服务端的同步消息再次更新到正确显示，从而导致闪烁
-        // 其二，buildIndexList被来自客户端的搜索框与按钮状态每tick调用，当移除物品被调用的过快以至于和每tick调用撞上，会导致客户端连续收到2次更新消息，从而导致闪烁
-        // 为了应对上述问题，可能只有关闭客户端的自我操作，并在更新时手动使用broadcastFullState同步数据才能完美避开闪烁
-        // 同时，需要知道的是，broadcastChanges似乎只有在双端都有变动时才能触发更新逻辑
-        broadcastFullState();
+        // 4 同步数据
+        PacketDistributor.sendToServer(new SlotIndexPacket((ArrayList<Integer>) indexList.clone()));
+        // 5 根据索引表更新槽位数据
+        updateSlotIndex(indexList);
     }
 
     @Override
     public void broadcastChanges()
     {
         super.broadcastChanges();
+    }
 
+    // 服务端函数，用于将存储空间完整发到客户端
+    public void sendStorage()
+    {
+        // 只有服务端才能发送存储数据给客户端
+        if(player instanceof ServerPlayer)
+        {
+            // 分批次将存储空间内容发送给玩家
+            List<ItemStoragePacket> splitPackets = new ArrayList<>(); // 用于分割包
+            ArrayList<StoredItemStack> currentBatch = new ArrayList<>(); // 用于分割StoredItemStack
+            ArrayList<Integer> currentIndexs = new ArrayList<>(); // 用于精确记录索引，防止因网络延时导致错误
+            int currentBatchSize = 0; //检测当前包大小
+            ArrayList<StoredItemStack> cacheList = new ArrayList<>(this.itemStorage.getItemStorage());
+            LOGGER.info("服务端报告：当前存储大小:{}",cacheList.size());
+            for(int i = 0;i<cacheList.size();i++)
+            {
+                StoredItemStack storedItemStack = cacheList.get(i);
+                FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(Unpooled.buffer()); // 创建一个 Netty 的 ByteBuf
+                RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(friendlyByteBuf, player.level().registryAccess());
+                StoredItemStack.STREAM_CODEC.encode(buffer,storedItemStack);
+                currentBatchSize += buffer.array().length;
+                currentBatchSize += Integer.SIZE;
+                currentBatchSize += 1;
+                if(currentBatchSize<900000) // 为了规避payload小于1MiB的规则，留下了冗余空间以防计算错误
+                {
+                    // 如果添加了此次数据仍小于900KB则继续添加
+                    currentBatch.add(storedItemStack);
+                    currentIndexs.add(i);
+                    LOGGER.info("添加了第{}个元素",currentBatch.size());
+                    if(i+1 == cacheList.size())
+                    {
+                        // 代表元素已经全部添加，这是最后一个包，将列表添加之后推出循环进入下一个步骤
+                        splitPackets.add(new ItemStoragePacket(new ArrayList<>(currentBatch) ,new ArrayList<>(currentIndexs),true));
+                        LOGGER.info("包汇报 大小{}",splitPackets.getLast().storedItemStacks().size());
+
+                        break;
+                    }
+                }
+                else
+                {   // 如果添加了数据将会大于1MB则准备数据包，然后将数据添加到下一次处理中
+                    splitPackets.add(new ItemStoragePacket(new ArrayList<>(currentBatch),new ArrayList<>(currentIndexs),false));
+                    LOGGER.info("包汇报 大小{}",splitPackets.getLast().storedItemStacks().size());
+                    currentBatch.clear();
+                    currentBatch.add(storedItemStack);
+                    currentIndexs.clear();
+                    currentIndexs.add(i);
+                    LOGGER.info("添加了第{}个元素",currentBatch.size());
+                    if(i+1 == cacheList.size())
+                    {
+                        // 代表元素已经全部添加，这是最后一个包，将列表添加之后推出循环进入下一个步骤
+                        splitPackets.add(new ItemStoragePacket(new ArrayList<>(currentBatch),new ArrayList<>(currentIndexs),true));
+                        LOGGER.info("包汇报 大小{}",splitPackets.getLast().storedItemStacks().size());
+                        break;
+                    }
+                    currentBatchSize = buffer.array().length;
+                    currentBatchSize += Integer.SIZE;
+                    currentBatchSize += 1;
+                }
+            }
+            LOGGER.info("服务端准备完成，共有包：{}个",splitPackets.size());
+            for(ItemStoragePacket packet :splitPackets)
+            {
+                LOGGER.info("包检验 大小{}",packet.storedItemStacks().size());
+                PacketDistributor.sendToPlayer((ServerPlayer) this.player,packet);
+            }
+        }
     }
 
     // 客户端函数，根据传入读取索引表
     public void loadIndexList(ArrayList<Integer> list)
     {
-        this.slotIndexList.clear();
+        //this.slotIndexList.clear();
         for(int i = 0; i<list.size();i++)
         {
-            this.slotIndexList.add(list.get(i));
+            ((StoredItemStackSlot) slots.get(i)).setTheSlotIndex(list.get(i));
+            //this.slotIndexList.add(list.get(i));
         }
-        updateSlotIndex();
+        //updateSlotIndex();
     }
 
     // 通用函数，根据索引表更新槽位
-    public void updateSlotIndex()
+    public void updateSlotIndex(ArrayList<Integer> indexList)
     {
         for (int row = 0; row < lines; ++row)
         {
             for (int col = 0; col < 9; ++col)
             {
-                ((StoredItemStackSlot) slots.get(col + row * 9)).setTheSlotIndex(this.slotIndexList.get(col + row * 9));
+                ((StoredItemStackSlot) slots.get(col + row * 9)).setTheSlotIndex(indexList.get(col + row * 9));
             }
         }
     }
@@ -389,9 +391,11 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     public void setItem(int slotId, int stateId, ItemStack stack)
     {
         super.setItem(slotId, stateId, stack);
+        //LOGGER.info("setItem被调用");
         //menu用于插入物品时的函数
         //此段重写仅保留，便于以后查询
         //虽然没有太多研究，但这个函数很可能会在远端同步时候调用
+        //经过排查，确实会在远程同步时候被客户端调用（服务端初始化是否调用未排查）
     }
 
     @Override
@@ -403,12 +407,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     @Override
     public ItemStack quickMoveStack(Player player, int index)
     {
-        // 本地端逻辑
-        if(player.level().isClientSide)
-        {
-            return ItemStack.EMPTY;// 本地不执行逻辑
-        }
-        // 服务端逻辑
         // 实现快速移动物品逻辑
         // 如果item在容器，移动到背包，在背包则移动到容器
         // 返回被移动的物品对象
@@ -442,7 +440,18 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 slot.setChanged();
             }
         }
-        buildIndexList();
+        if(player.level().isClientSide())
+        {
+            // 非常奇怪，根据调试buildIndexList直接调用会导致下一个tick执行时，本次操作被无效化
+            // 通过创建其他线程来创建调用则不会
+            // 根据观察，虚拟线程创建到成功调用函数在数百个样本中，少有超过5毫秒，基本上在2毫秒之内
+            // 理论上创建其他线程并没有将这次调用挪到下一个tick
+            // 所以为什么直接在当前路径直接调用会导致这个问题？太奇怪了
+            Thread.ofVirtual().start(()->{
+                Minecraft.getInstance().execute(this::buildIndexList);
+            });
+
+        }
         return ItemStack.EMPTY;
     }
 
@@ -559,11 +568,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 event.setCanceled(false); // 通知双端点击事件未处理
                 return;
             }
-            if(event.getPlayer().level().isClientSide)
-            {   // 本地不处理该窗口的鼠标点击事件，同时防止其被其他逻辑处理
-                event.setCanceled(true); // 通知客户端点击事件已处理
-                return;
-            }
             // 必须吐槽一句，这carried和click的对应竟然在menu写反了。。
             ItemStack clickItem = event.getCarriedItem();
             ItemStack carriedItem = event.getStackedOnItem();
@@ -612,7 +616,13 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             }
             if(player.containerMenu instanceof DimensionsNetMenu menu)
             {
-                menu.buildIndexList();//鼠标点击事件完成后，更新槽
+                if(player.level().isClientSide)
+                {
+                    Thread.ofVirtual().start(()->{
+                        Minecraft.getInstance().execute(menu::buildIndexList);
+                    });
+
+                }
             }
             event.setCanceled(true);// 标志事件被成功拦截，无需做其他处理
         }

@@ -59,6 +59,10 @@ public class StoredItemStackSlot extends Slot
     @Override
     public ItemStack getItem()
     {
+        if(getSlotIndex()<0)
+        {
+            return ItemStack.EMPTY;
+        }
         //从当前槽索引取物品
         StoredItemStack sItem = itemStorage.getStoredItemStackByIndex(getSlotIndex());
         if (sItem != null)
@@ -80,7 +84,7 @@ public class StoredItemStackSlot extends Slot
     @Override
     public void set(ItemStack stack)
     {
-        if (stack == ItemStack.EMPTY || stack == null)
+        if (stack == ItemStack.EMPTY || stack == null || getSlotIndex() <0)
             return;
         // 当尝试用一个物品真正覆盖这个槽内容会发生什么
         // 如果索引不存在，使用add自增长，如果存在，直接替换

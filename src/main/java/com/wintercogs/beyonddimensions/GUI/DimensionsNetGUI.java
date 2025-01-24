@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
+import com.wintercogs.beyonddimensions.Packet.CallSeverStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.SearchAndButtonGuiPacket;
 import net.minecraft.client.gui.Font;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
@@ -88,6 +89,10 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
 
         lastButtonStateMap = new HashMap<>(buttonStateMap);
         lastSearchText = searchField.getValue();
+
+        menu.itemStorage.getItemStorage().clear();
+        menu.suppressRemoteUpdates();
+        PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }
 
     @Override
@@ -96,11 +101,14 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         //每tick自动更新搜索方案
         if(!lastButtonStateMap.equals(buttonStateMap) || !Objects.equals(lastSearchText, searchField.getValue()))
         {
-            PacketDistributor.sendToServer(new SearchAndButtonGuiPacket(searchField.getValue().toLowerCase(Locale.ROOT),buttonStateMap));
+            //PacketDistributor.sendToServer(new SearchAndButtonGuiPacket(searchField.getValue().toLowerCase(Locale.ROOT),buttonStateMap));
+            menu.loadSearchText(searchField.getValue().toLowerCase(Locale.ROOT));
+            menu.loadButtonState(buttonStateMap);
+            menu.buildIndexList();
             lastButtonStateMap = new HashMap<>(buttonStateMap);
             lastSearchText = searchField.getValue();
         }
-        scroller.updateScrollPosition(menu.lineData,menu.maxLineData);// 客户端读取服务端同步过来的翻页数据并应用
+        scroller.updateScrollPosition(menu.lineData,menu.maxLineData);// 读取翻页数据并应用
     }
 
     @Override
@@ -134,7 +142,16 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
     {
         super.mouseScrolled(mouseX,mouseY,scrollX,scrollY);
-        PacketDistributor.sendToServer(new ScrollGuiPacket(scrollY));
+        //PacketDistributor.sendToServer(new ScrollGuiPacket(scrollY));
+        if (scrollY > 0)
+        {
+            menu.lineData--;
+        } else if(scrollY < 0)
+        {
+            menu.lineData++;
+        }
+        //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
+        menu.ScrollTo();
         return true;
     }
 
@@ -142,7 +159,16 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
         // 父类的覆写方法没有显式调用其被拖拽的子元素的拖拽方法，所以需要手动调用
-        scroller.mouseDragged(mouseX,mouseY,button,dragX,dragY);
+        int scrollY =  scroller.customDragAction(mouseX,mouseY,button,dragX,dragY);
+        if (scrollY > 0)
+        {
+            menu.lineData--;
+        } else if(scrollY < 0)
+        {
+            menu.lineData++;
+        }
+        //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
+        menu.ScrollTo();
         return true;
     }
 

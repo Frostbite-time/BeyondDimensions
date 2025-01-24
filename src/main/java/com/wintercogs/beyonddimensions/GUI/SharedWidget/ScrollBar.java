@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Packet.ScrollGuiPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -11,6 +12,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -48,6 +50,37 @@ public class ScrollBar extends AbstractWidget
         this.maxPosition = maxPosition;
     }
 
+    public int customDragAction(double mouseX, double mouseY,int button ,double dragX, double dragY)
+    {
+        if(button != 0)
+        {
+            return 0;
+        }
+        if(maxPosition !=0 && isDragging)
+        {
+            dragHold += dragY;
+            double scrollhold = ((double) maxScrollLength / maxPosition)/1.5;
+            if(dragHold>scrollhold||dragHold<-scrollhold)
+            {
+                double drag = dragHold;
+                dragHold = 0;
+                if(drag >0)
+                {
+                    return 1; //返回一个与drag同号的数，以便使用相同逻辑处理
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        return 0;
+    }
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.active && this.visible) {
@@ -76,18 +109,9 @@ public class ScrollBar extends AbstractWidget
     }
 
     @Override
-    protected void onDrag(double mouseX, double mouseY, double dragX, double dragY) {
-        LOGGER.info("搜查到拖拽行为");
-        if(maxPosition !=0 && isDragging)
-        {
-            dragHold += dragY;
-            double scrollhold = ((double) maxScrollLength / maxPosition)/1.5;
-            if(dragHold>scrollhold||dragHold<-scrollhold)
-            {
-                PacketDistributor.sendToServer(new ScrollGuiPacket(-dragHold));
-                dragHold = 0;
-            }
-        }
+    protected void onDrag(double mouseX, double mouseY, double dragX, double dragY)
+    {
+
     }
 
     @Override

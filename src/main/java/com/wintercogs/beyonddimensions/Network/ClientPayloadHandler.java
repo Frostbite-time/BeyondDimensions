@@ -1,12 +1,16 @@
 package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
 import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
+
+import java.util.ArrayList;
 
 
 public class ClientPayloadHandler
@@ -100,14 +104,44 @@ public class ClientPayloadHandler
                     DimensionsNetMenu menu;
                     if (!(player.containerMenu instanceof DimensionsNetMenu))
                     {
+                        LOGGER.info("客户端报告：未检测到菜单");
                         return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                     menu = (DimensionsNetMenu) player.containerMenu;
-                    //menu.itemStorage.getItemStorage().clear();
-                    for(StoredItemStack storedItemStack : packet.storedItemStacks())
+                    for(int i = 0;i<packet.storedItemStacks().size();i++)
                     {
-                        menu.itemStorage.getItemStorage().add(storedItemStack);
+                        DimensionsItemStorage itemStorage = menu.itemStorage;
+                        if (itemStorage.getItemStorage().size() > packet.indexs().get(i))
+                            itemStorage.getItemStorage().set(packet.indexs().get(i), packet.storedItemStacks().get(i));
+                        else if(itemStorage.getItemStorage().size() == packet.indexs().get(i))
+                            itemStorage.getItemStorage().add(packet.indexs().get(i), packet.storedItemStacks().get(i));
+                        else
+                        {
+                            //将size到Index-1之间的位置填充为空，然后填充Index位置
+                            // 扩展列表直到 targetIndex - 1，并填充 null
+                            while (itemStorage.getItemStorage().size() < packet.indexs().get(i)) {
+                                itemStorage.getItemStorage().add(new StoredItemStack(ItemStack.EMPTY));  // 填充空值
+                            }
+                            itemStorage.getItemStorage().add(packet.indexs().get(i), packet.storedItemStacks().get(i));
+                        }
                     }
+                    LOGGER.info("客户端报告：当前存储大小:{}",menu.itemStorage.getItemStorage().size());
+                    if(packet.end())
+                    {
+                        menu.buildIndexList();
+                        menu.resumeRemoteUpdates();
+                    }
+                }
+
+        );
+    }
+
+    public void handleCallSeverStoragePacket(final CallSeverStoragePacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
                 }
 
         );

@@ -92,7 +92,14 @@ public class ServerPayloadHandler
         context.enqueueWork(
                 () ->
                 {
-
+                    Player player = context.player();
+                    DimensionsNetMenu menu;
+                    if (!(player.containerMenu instanceof DimensionsNetMenu))
+                    {
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
+                    menu = (DimensionsNetMenu) player.containerMenu;
+                    menu.loadIndexList(packet.slotIndexList());
                 }
 
         );
@@ -135,6 +142,24 @@ public class ServerPayloadHandler
                 () ->
                 {
 
+                }
+
+        );
+    }
+
+    public void handleCallSeverStoragePacket(final CallSeverStoragePacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    DimensionsNetMenu menu;
+                    if (!(player.containerMenu instanceof DimensionsNetMenu))
+                    {
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
+                    menu = (DimensionsNetMenu) player.containerMenu;
+                    menu.sendStorage();
                 }
 
         );

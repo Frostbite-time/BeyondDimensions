@@ -80,5 +80,15 @@ public class PacketRegister
                         ServerPayloadHandler.getInstance()::handleItemStoragePacket
                 )
         );
+
+        // 注册 CallSeverStoragePacket 用于同步滑动条状态
+        registrar.playBidirectional(
+                CallSeverStoragePacket.TYPE,
+                CallSeverStoragePacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleCallSeverStoragePacket,
+                        ServerPayloadHandler.getInstance()::handleCallSeverStoragePacket
+                )
+        );
     }
 }
