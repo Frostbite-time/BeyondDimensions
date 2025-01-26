@@ -189,4 +189,19 @@ public class StoredItemStackSlot extends Slot
         this.theSlot = index;
     }
 
+    public int getItemCount()
+    {
+        if(getSlotIndex()<0)
+        {
+            return -1;
+        }
+        //从当前槽索引取物品
+        StoredItemStack sItem = itemStorage.getStoredItemStackByIndex(getSlotIndex());
+        if (sItem != null && sItem.getItemStack() != ItemStack.EMPTY)
+        {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
+            return sItem.getActualStack().getCount();
+        }
+        return -1;
+    }
+
 }

@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
 import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -128,7 +129,10 @@ public class ClientPayloadHandler
                     LOGGER.info("客户端报告：当前存储大小:{}",menu.itemStorage.getItemStorage().size());
                     if(packet.end())
                     {
-                        menu.buildIndexList();
+                        Thread.ofVirtual().start(()->{
+                            Minecraft.getInstance().execute(menu::buildIndexList);
+                        });
+                        //menu.buildIndexList();
                         menu.resumeRemoteUpdates();
                     }
                 }

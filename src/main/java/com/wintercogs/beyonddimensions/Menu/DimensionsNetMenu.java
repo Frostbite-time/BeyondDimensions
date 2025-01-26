@@ -9,17 +9,23 @@ import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.SlotIndexPacket;
+import com.wintercogs.beyonddimensions.Unit.Pinyin4jUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.ItemLore;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.ItemStackedOnOtherEvent;
@@ -43,7 +49,8 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     // 双端数据
     public final Player player; //用于给player发送数据
     public final DimensionsItemStorage itemStorage;
-    public ArrayList<Integer> slotIndexList = new ArrayList<>(); // 存储索引的列表，用于在双端传输数据
+    // 弃用，可能会在反复调用时成为隐患
+    public ArrayList<Integer> slotIndexList = new ArrayList<>();
     // 客户端数据
     private int lines = 6; //渲染的menu行数
     public int lineData = 0;//从第几行开始渲染？
@@ -109,7 +116,9 @@ public class DimensionsNetMenu extends AbstractContainerMenu
 
     public final void ScrollTo()
     {
-        buildIndexList();
+        Thread.ofVirtual().start(()->{
+            Minecraft.getInstance().execute(this::buildIndexList);
+        });
     }
 
     // 双端函数，用于同步数据
@@ -150,11 +159,61 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 else
                 {
                     boolean isfind = false;
-                    if(item.getVanillaMaxSizeStack().getHoverName().getString().contains(searchText))
+                    ItemStack itemStack = item.getVanillaMaxSizeStack();
+                    if(itemStack.getDisplayName().getString().toLowerCase(Locale.ENGLISH).contains(searchText))
                     {
                         isfind = true;
                     }
-
+                    if(Pinyin4jUtils.getAllPinyin(itemStack.getDisplayName().getString().toLowerCase(Locale.ENGLISH),false).contains(searchText))
+                    {
+                        isfind = true;
+                    }
+                    if(Pinyin4jUtils.getFirstPinYin(itemStack.getDisplayName().getString().toLowerCase(Locale.ENGLISH)).contains(searchText))
+                    {
+                        isfind = true;
+                    }
+                    if(itemStack.getComponents().get(DataComponents.CUSTOM_NAME) != null)
+                    {
+                        if(itemStack.getComponents().get(DataComponents.CUSTOM_NAME).getString().toLowerCase(Locale.ENGLISH).contains(searchText))
+                        {
+                            isfind = true;
+                        }
+                    }
+//                    if(itemStack.getComponents().get(DataComponents.CUSTOM_DATA) != null)
+//                    {
+//                        if(itemStack.getComponents().get(DataComponents.CUSTOM_DATA).)
+//                        {
+//                            isfind = true;
+//                        }
+//                    }
+                    if (itemStack.getComponents().get(DataComponents.LORE) != null)
+                    {
+                        ItemLore lore = itemStack.getComponents().get(DataComponents.LORE);
+                        for(Component alore : lore.lines())
+                        {
+                            if(alore.getString().toLowerCase(Locale.ENGLISH).contains(searchText))
+                            {
+                                isfind = true;
+                            }
+                        }
+                    }
+                    if(itemStack.getItem().getDescription().getString().toLowerCase(Locale.ENGLISH).contains(searchText))
+                    {
+                        LOGGER.info("描述：{}",itemStack.getItem().getDescription().getString());
+                        isfind = true;
+                    }
+                    List<Component> toolTips = itemStack.getTooltipLines(
+                            Item.TooltipContext.of(Minecraft.getInstance().level),
+                            Minecraft.getInstance().player,
+                            Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED
+                                    : TooltipFlag.Default.NORMAL);
+                    for (Component tooltip : toolTips)
+                    {
+                        if(tooltip.getString().toLowerCase(Locale.ENGLISH).contains(searchText))
+                        {
+                            isfind = true;
+                        }
+                    }
 
 
                     if(!isfind)
@@ -253,21 +312,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         // 2 构建linedata
         updateScrollLineData(cacheIndex.size());
         // 3 填入索引表
-
-//        this.slotIndexList.clear();
-//        for (int i = 0; i < lines * 9; i++)
-//        {
-//            //根据翻页数据构建索引列表
-//            if (i + lineData * 9 < cacheIndex.size())
-//            {
-//                int index = cacheIndex.get(i + lineData * 9);
-//                this.slotIndexList.add(index);
-//            }
-//            else
-//            {
-//                this.slotIndexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
-//            }
-//        }
         ArrayList<Integer> indexList = new ArrayList<>();
         for (int i = 0; i < lines * 9; i++)
         {
@@ -591,7 +635,16 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             {
                 if (carriedItem.isEmpty())
                 {   //槽位物品存在，携带物品为空，尝试取出槽位物品
-                    int j3 = clickaction == ClickAction.PRIMARY ? clickItem.getCount() : (clickItem.getCount() + 1) / 2;
+                    int num = 0;
+                    if(clickItem.getCount() > 64)
+                    {
+                        num = 64; // 一次取出最大不得超过64，次要按键不得超过32
+                    }
+                    else
+                    {
+                        num = clickItem.getCount();
+                    }
+                    int j3 = clickaction == ClickAction.PRIMARY ? num : (num + 1) / 2;
                     Optional<ItemStack> optional1 = slot.tryRemove(j3, Integer.MAX_VALUE, player);
                     optional1.ifPresent((p_150421_) ->
                     {

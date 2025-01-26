@@ -1,5 +1,7 @@
 {
   "menu.title.beyonddimensions.dimensionnetmenu": "维度网络",
   "beyonddimensions.scrollbar.usage.focused": "滚动条被选为焦点",
-  "beyonddimensions.scrollbar.usage.hovered": "鼠标当前在滚动条上"
+  "beyonddimensions.scrollbar.usage.hovered": "鼠标当前在滚动条上",
+  "key.categories.beyonddimensions": "超越维度",
+  "key.beyonddimensions.open_gui": "打开维度网络"
 }

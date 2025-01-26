@@ -1,22 +1,33 @@
 package com.wintercogs.beyonddimensions.GUI;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
+import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.CallSeverStoragePacket;
-import com.wintercogs.beyonddimensions.Packet.SearchAndButtonGuiPacket;
+import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
-import com.wintercogs.beyonddimensions.Packet.ScrollGuiPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.slf4j.Logger;
 
@@ -102,9 +113,11 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         if(!lastButtonStateMap.equals(buttonStateMap) || !Objects.equals(lastSearchText, searchField.getValue()))
         {
             //PacketDistributor.sendToServer(new SearchAndButtonGuiPacket(searchField.getValue().toLowerCase(Locale.ROOT),buttonStateMap));
-            menu.loadSearchText(searchField.getValue().toLowerCase(Locale.ROOT));
+            menu.loadSearchText(searchField.getValue().toLowerCase(Locale.ENGLISH));// 使英语文本与服务端保持一致
             menu.loadButtonState(buttonStateMap);
-            menu.buildIndexList();
+            Thread.ofVirtual().start(()->{
+                Minecraft.getInstance().execute(menu::buildIndexList);
+            });
             lastButtonStateMap = new HashMap<>(buttonStateMap);
             lastSearchText = searchField.getValue();
         }
@@ -135,6 +148,59 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     {
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752);
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+56+11, 4210752);
+    }
+
+    @Override
+    protected void renderSlot(GuiGraphics guiGraphics, Slot slot) {
+        if(slot instanceof StoredItemStackSlot sSlot)
+        {
+            int x = slot.x;
+            int y = slot.y;
+            ItemStack itemstack = slot.getItem();
+            if(itemstack != null)
+            {
+                var poseStack = guiGraphics.pose();
+                poseStack.pushPose();
+
+                var displayStack = itemstack.copy();
+                guiGraphics.renderItem(displayStack, x, y);
+                guiGraphics.renderItemDecorations(minecraft.font, displayStack, x, y, "");
+
+                poseStack.popPose();
+
+                int count = sSlot.getItemCount();
+                if(count<=0)
+                {
+                    return;
+                }
+                String countText = StringFormat.formatCount(count);
+
+                var stack = guiGraphics.pose();
+                stack.pushPose();
+                // According to ItemRenderer, text is 200 above items.
+                stack.translate(0, 0, 200);
+                stack.scale(0.666f, 0.666f, 0.666f);
+
+                RenderSystem.disableBlend();
+                final int X = (int) ((x + -1 + 16.0f + 2.0f - this.font.width(countText) * 0.666f)
+                        * 1.0f / 0.666f);
+                final int Y = (int) ((y + -1 + 16.0f - 5.0f * 0.666f) * 1.0f / 0.666f);
+                MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(512));
+                this.font.drawInBatch(countText, X + 1, Y + 1, 0x413f54, false, stack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0,
+                        15728880);
+                this.font.drawInBatch(countText, X, Y, 0xffffff, false, stack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0, 15728880);
+                buffer.endBatch();
+                RenderSystem.enableBlend();
+
+                stack.popPose();
+            }
+
+        }
+        else
+        {
+            super.renderSlot(guiGraphics,slot);
+        }
+
     }
 
 
@@ -190,6 +256,19 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        InputConstants.Key mouseKey = InputConstants.getKey(keyCode, scanCode);
+        if(this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey))
+        {
+            return true;
+        }
+        else
+        {
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
     }
 
     public Font getFont() {

@@ -119,7 +119,7 @@ public class ServerPayloadHandler
                     menu = (DimensionsNetMenu) player.containerMenu;
                     menu.loadSearchText(packet.searchText());
                     menu.loadButtonState(packet.buttonStateMap());
-                    menu.buildIndexList();
+                    //menu.buildIndexList();
                 }
 
         );
