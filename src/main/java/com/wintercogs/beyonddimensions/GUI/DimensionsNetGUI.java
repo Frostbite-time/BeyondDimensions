@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
@@ -45,8 +46,8 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     private final Logger LOGGER = LogUtils.getLogger();
     private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/dimensions_net.png");
     private EditBox searchField;
-    private HashMap<String, ButtonState> buttonStateMap = new HashMap<>();
-    private HashMap<String,ButtonState> lastButtonStateMap = new HashMap<>();
+    private HashMap<ButtonName, ButtonState> buttonStateMap = new HashMap<>();
+    private HashMap<ButtonName,ButtonState> lastButtonStateMap = new HashMap<>();
     private String lastSearchText = "";
     private ReverseButton reverseButton;
     private SortMethodButton sortButton;
@@ -115,8 +116,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         //每tick自动更新搜索方案
         if(!lastButtonStateMap.equals(buttonStateMap) || !Objects.equals(lastSearchText, searchField.getValue()))
         {
-            //PacketDistributor.sendToServer(new SearchAndButtonGuiPacket(searchField.getValue().toLowerCase(Locale.ROOT),buttonStateMap));
-            menu.loadSearchText(searchField.getValue().toLowerCase(Locale.ENGLISH));// 使英语文本与服务端保持一致
+            menu.loadSearchText(searchField.getValue().toLowerCase(Locale.ENGLISH));
             menu.loadButtonState(buttonStateMap);
             Thread.ofVirtual().start(()->{
                 Minecraft.getInstance().execute(menu::buildIndexList);

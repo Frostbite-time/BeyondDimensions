@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
@@ -13,7 +14,7 @@ import java.util.Objects;
 
 public class IconButton extends Button
 {
-    protected Component name;
+    protected ButtonName name;
     protected ResourceLocation icon;
 
     protected static final WidgetSprites SPRITES = new WidgetSprites(
@@ -24,7 +25,7 @@ public class IconButton extends Button
 
     // 从左到右的含义分别为
     // x起始、y起始、宽、高、组件、按钮名称（父类为按钮上的字）、按下按钮后的行为、叙述（使用默认叙述即可）
-    protected IconButton(int x, int y, int width, int height,ResourceLocation icon ,Component name, OnPress onPress)
+    protected IconButton(int x, int y, int width, int height,ResourceLocation icon ,ButtonName name, OnPress onPress)
     {
         super(x, y, width, height, Component.empty(), onPress, Button.DEFAULT_NARRATION);
         this.icon = icon;
@@ -66,13 +67,9 @@ public class IconButton extends Button
         this.icon = icon;
     }
 
-    public String getName()
+    public ButtonName getName()
     {
-        if(!Objects.equals(this.name, Component.empty()))
-        {
-            return name.getString();
-        }
-        return null;
+        return this.name;
     }
 
 

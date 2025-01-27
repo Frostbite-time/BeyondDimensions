@@ -2,17 +2,13 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
+import com.wintercogs.beyonddimensions.DataBase.*;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.SlotIndexPacket;
 import com.wintercogs.beyonddimensions.Unit.Pinyin4jUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -25,7 +21,6 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.ItemLore;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.ItemStackedOnOtherEvent;
@@ -49,14 +44,14 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     // 双端数据
     public final Player player; //用于给player发送数据
     public final DimensionsItemStorage itemStorage;
-    // 弃用，可能会在反复调用时成为隐患
+    // 用于定期向服务端传输数据
     public ArrayList<Integer> slotIndexList = new ArrayList<>();
     // 客户端数据
     private int lines = 6; //渲染的menu行数
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = "";
-    private HashMap<String,ButtonState> buttonStateMap = new HashMap<>();
+    private HashMap<ButtonName,ButtonState> buttonStateMap = new HashMap<>();
     // 服务端数据
 
 
@@ -86,8 +81,8 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         this.player = playerInventory.player;
 
         // 初始化搜索方案
-        buttonStateMap.put("ReverseButton",ButtonState.DISABLED);
-        buttonStateMap.put("SortMethodButton",ButtonState.SORT_DEFAULT);
+        buttonStateMap.put(ButtonName.ReverseButton,ButtonState.DISABLED);
+        buttonStateMap.put(ButtonName.SortMethodButton,ButtonState.SORT_DEFAULT);
 
         // 开始添加槽位，其中addSlot会为menu自带的列表slots提供slot，
         // 而给slot本身传入的索引则对应其在背包中的索引
@@ -127,7 +122,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         this.searchText = text;
     }
     // 双端函数，用于同步数据
-    public void loadButtonState(HashMap<String,ButtonState> buttonStateMap)
+    public void loadButtonState(HashMap<ButtonName,ButtonState> buttonStateMap)
     {
         this.buttonStateMap = buttonStateMap;
     }
@@ -197,11 +192,11 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         }
 
         //排序按钮筛选
-        if(buttonStateMap.get("SortMethodButton")==ButtonState.SORT_DEFAULT)
+        if(buttonStateMap.get(ButtonName.SortMethodButton)==ButtonState.SORT_DEFAULT)
         {
 
         }
-        else if(buttonStateMap.get("SortMethodButton")==ButtonState.SORT_NAME)
+        else if(buttonStateMap.get(ButtonName.SortMethodButton)==ButtonState.SORT_NAME)
         {
             ArrayList<Integer> sortCache = new ArrayList<>();
             // 按名称排序
@@ -218,7 +213,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             }
             Collections.sort(cache, Comparator.comparing(item -> item.getItemStack().getDisplayName().getString())); // 升序
         }
-        else if(buttonStateMap.get("SortMethodButton")==ButtonState.SORT_QUANTITY)
+        else if(buttonStateMap.get(ButtonName.SortMethodButton)==ButtonState.SORT_QUANTITY)
         {
             ArrayList<Integer> sortCache = new ArrayList<>();
             // 按数量排序
@@ -237,7 +232,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         }
 
         //倒序按钮筛选
-        if(buttonStateMap.get("ReverseButton")==ButtonState.ENABLED)
+        if(buttonStateMap.get(ButtonName.ReverseButton)==ButtonState.ENABLED)
         {
             Collections.reverse(cacheIndex);  // 反转 cacheIndex
             Collections.reverse(cache);       // 反转 cache
@@ -295,10 +290,15 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             }
         }
 
+
         // 4 同步数据
         PacketDistributor.sendToServer(new SlotIndexPacket((ArrayList<Integer>) indexList.clone()));
-        // 5 根据索引表更新槽位数据
-        updateSlotIndex(indexList);
+        // 将当前索引值传给服务器，服务端确认后会传回给客户端以应用
+    }
+
+    public void sendIndexToSever()
+    {
+        PacketDistributor.sendToServer(new SlotIndexPacket((ArrayList<Integer>) slotIndexList.clone()));
     }
 
     @Override
@@ -374,16 +374,13 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         }
     }
 
-    // 客户端函数，根据传入读取索引表
+    // 双端函数，根据传入列表构建索引
     public void loadIndexList(ArrayList<Integer> list)
     {
-        //this.slotIndexList.clear();
         for(int i = 0; i<list.size();i++)
         {
             ((StoredItemStackSlot) slots.get(i)).setTheSlotIndex(list.get(i));
-            //this.slotIndexList.add(list.get(i));
         }
-        //updateSlotIndex();
     }
 
     // 通用函数，根据索引表更新槽位
@@ -581,6 +578,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 return;
             }
             // 必须吐槽一句，这carried和click的对应竟然在menu写反了。。
+            // 以后neoforge更新可能还需要重新写这些
             ItemStack clickItem = event.getCarriedItem();
             ItemStack carriedItem = event.getStackedOnItem();
             StoredItemStackSlot slot = (StoredItemStackSlot) event.getSlot();

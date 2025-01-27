@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.GUI.Widget.Button;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
 import net.minecraft.network.chat.Component;
@@ -13,7 +14,7 @@ public class SortMethodButton extends StatusButton
 {
     public SortMethodButton(int x, int y, OnPress onPress)
     {
-        super(x, y, 16, 16, Component.literal("SortMethodButton"), onPress);
+        super(x, y, 16, 16, ButtonName.SortMethodButton, onPress);
     }
 
     @Override

@@ -132,7 +132,6 @@ public class ClientPayloadHandler
                         Thread.ofVirtual().start(()->{
                             Minecraft.getInstance().execute(menu::buildIndexList);
                         });
-                        //menu.buildIndexList();
                         menu.resumeRemoteUpdates();
                     }
                 }

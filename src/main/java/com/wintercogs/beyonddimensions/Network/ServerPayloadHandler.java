@@ -100,6 +100,8 @@ public class ServerPayloadHandler
                     }
                     menu = (DimensionsNetMenu) player.containerMenu;
                     menu.loadIndexList(packet.slotIndexList());
+                    // 服务端确认索引后将索引送回客户端应用
+                    PacketDistributor.sendToPlayer((ServerPlayer) player,packet);
                 }
 
         );

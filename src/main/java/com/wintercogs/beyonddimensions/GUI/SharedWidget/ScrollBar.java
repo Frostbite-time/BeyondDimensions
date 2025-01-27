@@ -66,11 +66,11 @@ public class ScrollBar extends AbstractWidget
                 dragHold = 0;
                 if(drag >0)
                 {
-                    return 1; //返回一个与drag同号的数，以便使用相同逻辑处理
+                    return -1; //返回一个与drag同号的数，以便使用相同逻辑处理
                 }
                 else
                 {
-                    return -1;
+                    return 1;
                 }
             }
             else
