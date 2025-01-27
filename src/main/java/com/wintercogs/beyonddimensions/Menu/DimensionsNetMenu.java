@@ -135,7 +135,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     // 辅助方法，用于根据当前搜索状态等建立缓存索引表以及更新翻页数据
     public ArrayList<Integer> buildStorageWithCurrentState()
     {
-
         //建立浅拷贝缓存，用于排序和筛选数据
         ArrayList<StoredItemStack> cache = new ArrayList<>(this.itemStorage.getItemStorage());
         ArrayList<Integer> cacheIndex = new ArrayList<>(); // 建立一个索引缓存，以防止索引混乱
@@ -149,7 +148,8 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             for (int i = 0; i < cache.size(); i++) {
                 StoredItemStack item = cache.get(i);
                 // 不匹配时，从 cache 和 cacheIndex 中同时移除
-                if (item.getVanillaMaxSizeStack() == null||item.getVanillaMaxSizeStack() == ItemStack.EMPTY) {
+                ItemStack itemStack = item.getVanillaMaxSizeStack();
+                if (itemStack == null||itemStack == ItemStack.EMPTY) {
                     // 移除空气和空引用
                     cache.remove(i);
                     cacheIndex.remove(i);
@@ -159,68 +159,36 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 else
                 {
                     boolean isfind = false;
-                    ItemStack itemStack = item.getVanillaMaxSizeStack();
-                    if(itemStack.getDisplayName().getString().toLowerCase(Locale.ENGLISH).contains(searchText))
+                    String displayName = itemStack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
+
+                    // 检查 显示名称or全拼or拼音首字母 是否符合
+                    if (displayName.contains(searchText) ||
+                            Pinyin4jUtils.getAllPinyin(displayName, false).contains(searchText) ||
+                            Pinyin4jUtils.getFirstPinYin(displayName).contains(searchText))
                     {
                         isfind = true;
                     }
-                    if(Pinyin4jUtils.getAllPinyin(itemStack.getDisplayName().getString().toLowerCase(Locale.ENGLISH),false).contains(searchText))
+                    else
                     {
-                        isfind = true;
-                    }
-                    if(Pinyin4jUtils.getFirstPinYin(itemStack.getDisplayName().getString().toLowerCase(Locale.ENGLISH)).contains(searchText))
-                    {
-                        isfind = true;
-                    }
-                    if(itemStack.getComponents().get(DataComponents.CUSTOM_NAME) != null)
-                    {
-                        if(itemStack.getComponents().get(DataComponents.CUSTOM_NAME).getString().toLowerCase(Locale.ENGLISH).contains(searchText))
-                        {
-                            isfind = true;
-                        }
-                    }
-//                    if(itemStack.getComponents().get(DataComponents.CUSTOM_DATA) != null)
-//                    {
-//                        if(itemStack.getComponents().get(DataComponents.CUSTOM_DATA).)
-//                        {
-//                            isfind = true;
-//                        }
-//                    }
-                    if (itemStack.getComponents().get(DataComponents.LORE) != null)
-                    {
-                        ItemLore lore = itemStack.getComponents().get(DataComponents.LORE);
-                        for(Component alore : lore.lines())
-                        {
-                            if(alore.getString().toLowerCase(Locale.ENGLISH).contains(searchText))
-                            {
+                        // 检查工具提示
+                        List<Component> toolTips = itemStack.getTooltipLines(
+                                Item.TooltipContext.of(Minecraft.getInstance().level),
+                                Minecraft.getInstance().player,
+                                Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED
+                                        : TooltipFlag.Default.NORMAL);
+
+                        for (Component tooltip : toolTips) {
+                            if (tooltip.getString().toLowerCase(Locale.ENGLISH).contains(searchText)) {
                                 isfind = true;
+                                break;
                             }
                         }
                     }
-                    if(itemStack.getItem().getDescription().getString().toLowerCase(Locale.ENGLISH).contains(searchText))
-                    {
-                        LOGGER.info("描述：{}",itemStack.getItem().getDescription().getString());
-                        isfind = true;
-                    }
-                    List<Component> toolTips = itemStack.getTooltipLines(
-                            Item.TooltipContext.of(Minecraft.getInstance().level),
-                            Minecraft.getInstance().player,
-                            Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED
-                                    : TooltipFlag.Default.NORMAL);
-                    for (Component tooltip : toolTips)
-                    {
-                        if(tooltip.getString().toLowerCase(Locale.ENGLISH).contains(searchText))
-                        {
-                            isfind = true;
-                        }
-                    }
 
-
-                    if(!isfind)
-                    {
+                    if (!isfind) {
                         cache.remove(i);
                         cacheIndex.remove(i);
-                        i--;  // 移除元素后，需调整索引位置
+                        i--; // 移除元素后，需调整索引位置
                         continue;
                     }
                 }

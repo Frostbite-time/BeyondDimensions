@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '1.0.21'
+    id 'net.neoforged.moddev' version '1.0.21' // 文档库位于 https://github.com/neoforged/ModDevGradle
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -124,7 +124,7 @@ dependencies {
             // 您的模组实际兼容的版本范围。
             // 注意，您可能会收到一个**低于您首选版本**的版本。例如，如果另一个模组只兼容到 1.7.24，
             // 那么在运行时，您的模组可能会使用 1.7.24 版本。
-            strictly '[2.5.0,)'
+            strictly '[2.5.0,)' //表示，大于等于2.5.0版本即可
             prefer '2.5.1' // 在您的开发环境中实际使用的版本
         }
     }

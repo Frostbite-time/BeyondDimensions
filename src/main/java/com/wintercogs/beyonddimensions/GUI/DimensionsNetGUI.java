@@ -29,11 +29,14 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
+import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 
 
 public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
@@ -261,6 +264,17 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         InputConstants.Key mouseKey = InputConstants.getKey(keyCode, scanCode);
+        if(this.searchField.isFocused())
+        {
+            if ((mouseKey.getValue()>=48 &&mouseKey.getValue()<=57) || // 属于数字键
+                    (mouseKey.getValue()>=65 &&mouseKey.getValue()<=90) || // 属于字母键
+                    (mouseKey.getValue()>=320 &&mouseKey.getValue()<=329) || // 属于小键盘数字
+                    mouseKey.getValue() == 32 ) // 属于空格
+            {
+                // 当搜索框为焦点且属于常见输入时，禁止其他操作
+                return true;
+            }
+        }
         if(this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey))
         {
             return true;
