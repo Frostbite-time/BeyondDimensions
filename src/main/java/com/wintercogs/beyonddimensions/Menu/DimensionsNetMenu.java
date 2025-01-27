@@ -136,6 +136,20 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         for(int i = 0;i<cache.size();i++)
             cacheIndex.add(i);
 
+        for (int i = 0; i < cache.size(); i++)
+        {
+            StoredItemStack item = cache.get(i);
+            // 不匹配时，从 cache 和 cacheIndex 中同时移除
+            ItemStack itemStack = item.getActualStack();
+            if (itemStack == null||itemStack.isEmpty()) {
+                // 移除空气和空引用
+                cache.remove(i);
+                cacheIndex.remove(i);
+                i--;  // 移除元素后，需调整索引位置
+                continue;
+            }
+        }
+
         //根据搜索框筛选数据
         if(searchText != null && !searchText.isEmpty())
         {   // searchText会在传入之前执行小写化操作
@@ -143,8 +157,8 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             for (int i = 0; i < cache.size(); i++) {
                 StoredItemStack item = cache.get(i);
                 // 不匹配时，从 cache 和 cacheIndex 中同时移除
-                ItemStack itemStack = item.getVanillaMaxSizeStack();
-                if (itemStack == null||itemStack == ItemStack.EMPTY) {
+                ItemStack itemStack = item.getActualStack();
+                if (itemStack == null||itemStack.isEmpty()) {
                     // 移除空气和空引用
                     cache.remove(i);
                     cacheIndex.remove(i);
@@ -449,13 +463,9 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 slot.setChanged();
             }
         }
+
         if(player.level().isClientSide())
         {
-            // 非常奇怪，根据调试buildIndexList直接调用会导致下一个tick执行时，本次操作被无效化
-            // 通过创建其他线程来创建调用则不会
-            // 根据观察，虚拟线程创建到成功调用函数在数百个样本中，少有超过5毫秒，基本上在2毫秒之内
-            // 理论上创建其他线程并没有将这次调用挪到下一个tick
-            // 所以为什么直接在当前路径直接调用会导致这个问题？太奇怪了
             Thread.ofVirtual().start(()->{
                 Minecraft.getInstance().execute(this::buildIndexList);
             });
@@ -633,7 +643,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             }
             if(player.containerMenu instanceof DimensionsNetMenu menu)
             {
-                if(player.level().isClientSide)
+                if(player.level().isClientSide())
                 {
                     Thread.ofVirtual().start(()->{
                         Minecraft.getInstance().execute(menu::buildIndexList);

@@ -72,7 +72,7 @@ public class DimensionsItemStorage
                     item.subCount(count); // subCount会将小于0的数变为0
                     if (item.getCount() == 0)
                     {
-                        itemStorage.remove(item);
+                        //itemStorage.remove(item);
                         OnChange();
                         return before_stack;
                     }
@@ -122,7 +122,7 @@ public class DimensionsItemStorage
             sItem.subCount(count); // subCount会将小于0的数变为0
             if (sItem.getCount() == 0)
             {
-                itemStorage.remove(sItem);
+                //itemStorage.remove(sItem);
                 OnChange();
                 return before_stack;
             }

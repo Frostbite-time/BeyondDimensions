@@ -59,6 +59,21 @@ public class StoredItemStack
         return s;
     }
 
+    public ItemStack getVanillaActualSizeStack()
+    {
+        ItemStack s = itemStack.copy();
+        if(count>s.getMaxStackSize())
+        {
+            s.setCount(s.getMaxStackSize());
+            return s;
+        }
+        else
+        {
+            s.setCount((int)count);
+            return s;
+        }
+    }
+
     public ItemStack getVanillaMaxSizeStack()
     {
         ItemStack s = itemStack.copy();
