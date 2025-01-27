@@ -8,10 +8,10 @@ import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.SlotIndexPacket;
 import com.wintercogs.beyonddimensions.Unit.Pinyin4jUtils;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.SlotAccess;
@@ -181,8 +181,8 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                     {
                         // 检查工具提示
                         List<Component> toolTips = itemStack.getTooltipLines(
-                                Item.TooltipContext.of(Minecraft.getInstance().level),
-                                Minecraft.getInstance().player,
+                                Item.TooltipContext.of(player.level()),
+                                player,
                                 Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED
                                         : TooltipFlag.Default.NORMAL);
 
