@@ -432,7 +432,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                     return ItemStack.EMPTY;
                 }
                 sSlot.remove(itemstack.getCount());
-                preSortRemove(sSlot.getSlotIndex());
             }
             else
             {
@@ -565,18 +564,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
 
         return flag;
     }
-
-    private void preSortRemove(int index)
-    {
-        for(int i = 0; i< lines*9;i++)
-        {
-            if(index>slots.get(i).getSlotIndex())
-            {
-                ((StoredItemStackSlot)slots.get(i)).setTheSlotIndex(slots.get(i).getSlotIndex()-1);
-            }
-        }
-    }
-
 
     public static class ItemStackedOnOtherHandler
     {
