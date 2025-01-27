@@ -422,8 +422,8 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         ItemStack itemstack = ItemStack.EMPTY;
         ItemStack itemStack1;
         Slot slot = this.slots.get(index);
-        if (slot != null && slot.hasItem()) {
-
+        if (slot != null && slot.hasItem())
+        {
             if(slot instanceof StoredItemStackSlot sSlot)
             {
                 itemstack = sSlot.getVanillaActualStack();
@@ -432,6 +432,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                     return ItemStack.EMPTY;
                 }
                 sSlot.remove(itemstack.getCount());
+                preSortRemove(sSlot.getSlotIndex());
             }
             else
             {
@@ -459,7 +460,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             Thread.ofVirtual().start(()->{
                 Minecraft.getInstance().execute(this::buildIndexList);
             });
-
         }
         return ItemStack.EMPTY;
     }
@@ -564,6 +564,17 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         }
 
         return flag;
+    }
+
+    private void preSortRemove(int index)
+    {
+        for(int i = 0; i< lines*9;i++)
+        {
+            if(index>slots.get(i).getSlotIndex())
+            {
+                ((StoredItemStackSlot)slots.get(i)).setTheSlotIndex(slots.get(i).getSlotIndex()-1);
+            }
+        }
     }
 
 
