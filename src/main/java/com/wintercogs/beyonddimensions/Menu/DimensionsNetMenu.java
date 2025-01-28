@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu;
 
+import com.google.common.base.Suppliers;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.*;
@@ -112,7 +113,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     public final void ScrollTo()
     {
         Thread.ofVirtual().start(()->{
-            Minecraft.getInstance().execute(this::buildIndexList);
+            Minecraft.getInstance().execute(() -> this.buildIndexList(new ArrayList<>(this.itemStorage.getItemStorage())));
         });
     }
 
@@ -128,10 +129,10 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     }
 
     // 辅助方法，用于根据当前搜索状态等建立缓存索引表以及更新翻页数据
-    public ArrayList<Integer> buildStorageWithCurrentState()
+    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<StoredItemStack> itemStorage)
     {
         //建立浅拷贝缓存，用于排序和筛选数据
-        ArrayList<StoredItemStack> cache = new ArrayList<>(this.itemStorage.getItemStorage());
+        ArrayList<StoredItemStack> cache = new ArrayList<>(itemStorage);
         ArrayList<Integer> cacheIndex = new ArrayList<>(); // 建立一个索引缓存，以防止索引混乱
         for(int i = 0;i<cache.size();i++)
             cacheIndex.add(i);
@@ -278,14 +279,14 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     }
 
     // 服务端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList()
+    public void buildIndexList(ArrayList<StoredItemStack> itemStorage)
     {
         if(!this.player.level().isClientSide())
         {
             return;
         }
         // 1 构建正确的索引数据
-        ArrayList<Integer> cacheIndex = buildStorageWithCurrentState();
+        ArrayList<Integer> cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
         // 2 构建linedata
         updateScrollLineData(cacheIndex.size());
         // 3 填入索引表
@@ -318,7 +319,28 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     @Override
     public void broadcastChanges()
     {
-        super.broadcastChanges();
+        for(int i = 0; i < this.slots.size(); ++i) {
+            Slot slot = (Slot)this.slots.get(i);
+            if(slot instanceof StoredItemStackSlot)
+                continue; // 不允许broadcastChanges自动同步StoredItemStackSlot以便自定义处理
+            ItemStack itemstack = (slot).getItem();
+            Objects.requireNonNull(itemstack);
+            Supplier<ItemStack> supplier = Suppliers.memoize(itemstack::copy);
+            this.triggerSlotListeners(i, itemstack, supplier);
+            this.synchronizeSlotToRemote(i, itemstack, supplier);
+        }
+
+        this.synchronizeCarriedToRemote();
+
+        for(int j = 0; j < this.dataSlots.size(); ++j) {
+            DataSlot dataslot = (DataSlot)this.dataSlots.get(j);
+            int k = dataslot.get();
+            if (dataslot.checkAndClearUpdateFlag()) {
+                this.updateDataSlotListeners(j, k);
+            }
+
+            this.synchronizeDataSlotToRemote(j, k);
+        }
     }
 
     // 服务端函数，用于将存储空间完整发到客户端
@@ -348,12 +370,10 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                     // 如果添加了此次数据仍小于900KB则继续添加
                     currentBatch.add(storedItemStack);
                     currentIndexs.add(i);
-                    LOGGER.info("添加了第{}个元素",currentBatch.size());
                     if(i+1 == cacheList.size())
                     {
                         // 代表元素已经全部添加，这是最后一个包，将列表添加之后推出循环进入下一个步骤
                         splitPackets.add(new ItemStoragePacket(new ArrayList<>(currentBatch) ,new ArrayList<>(currentIndexs),true));
-                        LOGGER.info("包汇报 大小{}",splitPackets.getLast().storedItemStacks().size());
 
                         break;
                     }
@@ -361,17 +381,14 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 else
                 {   // 如果添加了数据将会大于1MB则准备数据包，然后将数据添加到下一次处理中
                     splitPackets.add(new ItemStoragePacket(new ArrayList<>(currentBatch),new ArrayList<>(currentIndexs),false));
-                    LOGGER.info("包汇报 大小{}",splitPackets.getLast().storedItemStacks().size());
                     currentBatch.clear();
                     currentBatch.add(storedItemStack);
                     currentIndexs.clear();
                     currentIndexs.add(i);
-                    LOGGER.info("添加了第{}个元素",currentBatch.size());
                     if(i+1 == cacheList.size())
                     {
                         // 代表元素已经全部添加，这是最后一个包，将列表添加之后推出循环进入下一个步骤
                         splitPackets.add(new ItemStoragePacket(new ArrayList<>(currentBatch),new ArrayList<>(currentIndexs),true));
-                        LOGGER.info("包汇报 大小{}",splitPackets.getLast().storedItemStacks().size());
                         break;
                     }
                     currentBatchSize = buffer.array().length;
@@ -379,10 +396,8 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                     currentBatchSize += 1;
                 }
             }
-            LOGGER.info("服务端准备完成，共有包：{}个",splitPackets.size());
             for(ItemStoragePacket packet :splitPackets)
             {
-                LOGGER.info("包检验 大小{}",packet.storedItemStacks().size());
                 PacketDistributor.sendToPlayer((ServerPlayer) this.player,packet);
             }
         }
@@ -427,6 +442,23 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         return true; // 可根据需求修改条件
     }
 
+    // slot代表当前要操作的槽位
+    // button则是用int值代表鼠标点击使用的按键，分别为左键 右键 中键
+    // shiftdown为真则代表按下了shift
+    // heldItem代表当前玩家手上拿的Item
+    // sim代表当前操作是否为模拟操作
+    // 模拟操作则返回一个列表，存储了模拟后结果
+    // 非模拟操作直接操作真列表，返回null即可
+    public ArrayList<StoredItemStack> customClickHandler(Slot slot,int button,boolean shiftDown, ItemStack heldItem ,boolean sim)
+    {
+        // 该函数用于处理点击维度存储槽发生的事件
+        // 包含shift点击和普通点击
+        // 同时，从用到customClickHandler的类中，移除quickMoveStack和OnItemStackedHandle对于维度槽位的操作
+        // ps：其实吧。。。有维度槽位才会用到customClickHandler。。。没有维度槽位不需要customClickHandler额外处理
+        // 之所以多出customClickHandler是因为维度槽位的容器本体是数组，移除会导致索引变更的闪烁
+        return null;
+    }
+
     @Override
     public ItemStack quickMoveStack(Player player, int index)
     {
@@ -466,8 +498,30 @@ public class DimensionsNetMenu extends AbstractContainerMenu
 
         if(player.level().isClientSide())
         {
+            // 在为完成覆写之前，使用立刻构建索引来暂时实现效果
+            // 1 构建正确的索引数据
+            ArrayList<Integer> cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage.getItemStorage()));
+            // 2 构建linedata
+            updateScrollLineData(cacheIndex.size());
+            // 3 填入索引表
+            ArrayList<Integer> indexList = new ArrayList<>();
+            for (int i = 0; i < lines * 9; i++)
+            {
+                //根据翻页数据构建索引列表
+                if (i + lineData * 9 < cacheIndex.size())
+                {
+                    int index1 = cacheIndex.get(i + lineData * 9);
+                    indexList.add(index1);
+                }
+                else
+                {
+                    indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
+                }
+            }
+            updateSlotIndex(indexList);
+
             Thread.ofVirtual().start(()->{
-                Minecraft.getInstance().execute(this::buildIndexList);
+                Minecraft.getInstance().execute(() -> this.buildIndexList(new ArrayList<>(this.itemStorage.getItemStorage())));
             });
         }
         return ItemStack.EMPTY;
@@ -645,8 +699,30 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             {
                 if(player.level().isClientSide())
                 {
+                    // 在为完成覆写之前，使用立刻构建索引来暂时实现效果
+                    // 1 构建正确的索引数据
+                    ArrayList<Integer> cacheIndex = menu.buildStorageWithCurrentState(new ArrayList<>(menu.itemStorage.getItemStorage()));
+                    // 2 构建linedata
+                    menu.updateScrollLineData(cacheIndex.size());
+                    // 3 填入索引表
+                    ArrayList<Integer> indexList = new ArrayList<>();
+                    for (int i = 0; i < menu.lines * 9; i++)
+                    {
+                        //根据翻页数据构建索引列表
+                        if (i + menu.lineData * 9 < cacheIndex.size())
+                        {
+                            int index1 = cacheIndex.get(i + menu.lineData * 9);
+                            indexList.add(index1);
+                        }
+                        else
+                        {
+                            indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
+                        }
+                    }
+                    menu.updateSlotIndex(indexList);
+
                     Thread.ofVirtual().start(()->{
-                        Minecraft.getInstance().execute(menu::buildIndexList);
+                        Minecraft.getInstance().execute(() -> menu.buildIndexList(new ArrayList<>(menu.itemStorage.getItemStorage())));
                     });
 
                 }

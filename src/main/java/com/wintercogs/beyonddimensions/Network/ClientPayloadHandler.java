@@ -105,7 +105,6 @@ public class ClientPayloadHandler
                     DimensionsNetMenu menu;
                     if (!(player.containerMenu instanceof DimensionsNetMenu))
                     {
-                        LOGGER.info("客户端报告：未检测到菜单");
                         return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                     menu = (DimensionsNetMenu) player.containerMenu;
@@ -126,11 +125,10 @@ public class ClientPayloadHandler
                             itemStorage.getItemStorage().add(packet.indexs().get(i), packet.storedItemStacks().get(i));
                         }
                     }
-                    LOGGER.info("客户端报告：当前存储大小:{}",menu.itemStorage.getItemStorage().size());
                     if(packet.end())
                     {
                         Thread.ofVirtual().start(()->{
-                            Minecraft.getInstance().execute(menu::buildIndexList);
+                            Minecraft.getInstance().execute(() -> menu.buildIndexList(new ArrayList<>(menu.itemStorage.getItemStorage())));
                         });
                         menu.resumeRemoteUpdates();
                     }

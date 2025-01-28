@@ -38,7 +38,8 @@ neoForge {
         minecraftVersion = project.parchment_minecraft_version
     }
 
-    // This line is optional. Access Transformers are automatically detected
+    // 这一行是可选的，访问转换器会自动被检测
+    // 如果不放在默认位置则可能需要添加
     // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.

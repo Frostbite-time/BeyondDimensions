@@ -34,10 +34,7 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 import java.awt.event.KeyEvent;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 
 public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
@@ -119,7 +116,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
             menu.loadSearchText(searchField.getValue().toLowerCase(Locale.ENGLISH));
             menu.loadButtonState(buttonStateMap);
             Thread.ofVirtual().start(()->{
-                Minecraft.getInstance().execute(menu::buildIndexList);
+                Minecraft.getInstance().execute(() -> menu.buildIndexList(new ArrayList<>(menu.itemStorage.getItemStorage())));
             });
             lastButtonStateMap = new HashMap<>(buttonStateMap);
             lastSearchText = searchField.getValue();
