@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.DataBase.*;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.SlotIndexPacket;
+import com.wintercogs.beyonddimensions.Packet.SyncItemStoragePacket;
 import com.wintercogs.beyonddimensions.Unit.Pinyin4jUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.registries.Registries;
@@ -15,7 +16,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
@@ -27,6 +27,7 @@ import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.ItemStackedOnOtherEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -53,8 +54,11 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = "";
     private HashMap<ButtonName,ButtonState> buttonStateMap = new HashMap<>();
+    public boolean isHanding = false; // 用于标记当前是否向服务端发出操作请求却未得到回应
+                                        //true表示无正在处理未回应，false表示空闲
+    public DimensionsItemStorage viewerItemStorage; // 在客户端，用于显示物品
     // 服务端数据
-
+    private ArrayList<StoredItemStack> lastItemStorage;
 
 
     // 构建注册用的信息
@@ -79,7 +83,17 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         super(Dimensions_Net_Menu.get(), id);
         // 初始化维度网络容器
         this.itemStorage = data.getItemStorage();
+        viewerItemStorage = new DimensionsNet().getItemStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
         this.player = playerInventory.player;
+        if(!player.level().isClientSide())
+        {
+            // 将lastItemStorage设置为一个深克隆，以便后续进行比较
+            this.lastItemStorage = new ArrayList<>();
+            for(StoredItemStack storedItemStack : this.itemStorage.getItemStorage())
+            {
+                this.lastItemStorage.add(new StoredItemStack(storedItemStack));
+            }
+        }
 
         // 初始化搜索方案
         buttonStateMap.put(ButtonName.ReverseButton,ButtonState.DISABLED);
@@ -92,7 +106,11 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         {
             for (int col = 0; col < 9; ++col)
             {   // 添加槽而不设置数据
-                this.addSlot(new StoredItemStackSlot(this.itemStorage, -1, 8 + col * 18, 29+row * 18));
+                // 由于我们完全不依靠menu自带得方法来同步，所以可以传入一个和实际数据同步所用不一样的Storage
+                // 只需要保证我们能及时把数据从实际数据同步到viewerItemStorage
+                // 再将slot点击操作重写的物品种类依赖
+                // 我们再也不用把索引表在本地与云端传来传去
+                this.addSlot(new StoredItemStackSlot(viewerItemStorage, -1, 8 + col * 18, 29+row * 18));
             }
         }
         // 添加玩家物品栏槽位 对应slots索引 45~71
@@ -110,10 +128,37 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         }
     }
 
+    public void setHanding()
+    {
+        this.isHanding = true;
+        Thread.ofVirtual().start(() ->{
+            try
+            {
+                Thread.sleep(500);
+                Minecraft.getInstance().execute(() -> this.isHanding = false);
+            } catch (InterruptedException e)
+            {
+                throw new RuntimeException(e);
+            }
+
+        });
+    }
+
+    // 客户端函数，使用当前存储更新视觉存储并重建索引
+    public void updateViewerStorage()
+    {
+        viewerItemStorage.getItemStorage().clear();
+        for(StoredItemStack storedItemStack : this.itemStorage.getItemStorage())
+        {
+            this.viewerItemStorage.addItem(new StoredItemStack(storedItemStack));
+        }
+        buildIndexList(new ArrayList<>(viewerItemStorage.getItemStorage()));
+    }
+
     public final void ScrollTo()
     {
         Thread.ofVirtual().start(()->{
-            Minecraft.getInstance().execute(() -> this.buildIndexList(new ArrayList<>(this.itemStorage.getItemStorage())));
+            Minecraft.getInstance().execute(() -> this.buildIndexList(new ArrayList<>(this.viewerItemStorage.getItemStorage())));
         });
     }
 
@@ -278,7 +323,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         }
     }
 
-    // 服务端函数，根据存储构建索引表 用于在动态搜索以及其他
+    // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
     public void buildIndexList(ArrayList<StoredItemStack> itemStorage)
     {
         if(!this.player.level().isClientSide())
@@ -305,10 +350,39 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             }
         }
 
-
+        loadIndexList(indexList);
         // 4 同步数据
-        PacketDistributor.sendToServer(new SlotIndexPacket((ArrayList<Integer>) indexList.clone()));
+        //PacketDistributor.sendToServer(new SlotIndexPacket((ArrayList<Integer>) indexList.clone()));
         // 将当前索引值传给服务器，服务端确认后会传回给客户端以应用
+    }
+
+    public ArrayList<Integer> buildIndexListNoPacket(ArrayList<StoredItemStack> itemStorage)
+    {
+        if(!this.player.level().isClientSide())
+        {
+            return null;
+        }
+        // 1 构建正确的索引数据
+        ArrayList<Integer> cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
+        // 2 构建linedata
+        updateScrollLineData(cacheIndex.size());
+        // 3 填入索引表
+        ArrayList<Integer> indexList = new ArrayList<>();
+        for (int i = 0; i < lines * 9; i++)
+        {
+            //根据翻页数据构建索引列表
+            if (i + lineData * 9 < cacheIndex.size())
+            {
+                int index = cacheIndex.get(i + lineData * 9);
+                indexList.add(index);
+            }
+            else
+            {
+                indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
+            }
+        }
+
+        return new ArrayList<>(indexList);
     }
 
     public void sendIndexToSever()
@@ -340,6 +414,95 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             }
 
             this.synchronizeDataSlotToRemote(j, k);
+        }
+
+        // 开始运行原子化物品比较
+        ArrayList<StoredItemStack> changedItem = new ArrayList<>();
+        ArrayList<Integer> changedCount = new ArrayList<>();
+        // 深克隆2个缓存数组
+        ArrayList<StoredItemStack> cacheLast = new ArrayList<>();
+        for(StoredItemStack storedItemStack : this.lastItemStorage)
+        {
+            cacheLast.add(new StoredItemStack(storedItemStack));
+        }
+        ArrayList<StoredItemStack> cacheNow = new ArrayList<>();
+        for(StoredItemStack storedItemStack : this.itemStorage.getItemStorage())
+        {
+            cacheNow.add(new StoredItemStack(storedItemStack));
+        }
+        // 缓存结束后，立刻更新last列表
+        this.lastItemStorage.clear();
+        for(StoredItemStack storedItemStack : this.itemStorage.getItemStorage())
+        {
+            this.lastItemStorage.add(new StoredItemStack(storedItemStack));
+        }
+
+        // 接下来进行根据物品种类进行比较（即将List使用近似Map的比较方法），种类变化加入changedItem，数量变化加入changedCount，数量变化使用Now-Last
+        // 注意要处理last和now中可能导致的由于种类变化不同而改变了索引总数。对于Last有，而Now没有的种类意味着种类加入changedItem，数量为0-Last。反之则为种类加入changedItem，数量为Now-0
+        // 对于StoredItemStack类，equals方法可以有效比较2个物品是否为统一种类而不计较数量
+        // StoredItemStack.getCount可以获取数量进行进一步比较
+        // 创建合并数量Map（处理同类物品数量叠加）
+
+        // 注：以下代码为deepseek提供，未经检验
+        Map<StoredItemStack, Integer> lastMap = new HashMap<>();
+        for (StoredItemStack item : cacheLast) {
+            boolean found = false;
+            for (StoredItemStack key : lastMap.keySet()) {
+                if (key.equals(item)) {
+                    lastMap.put(key, (int) (lastMap.get(key) + item.getCount()));
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                lastMap.put(new StoredItemStack(item), (int) item.getCount());
+            }
+        }
+
+        Map<StoredItemStack, Integer> nowMap = new HashMap<>();
+        for (StoredItemStack item : cacheNow) {
+            boolean found = false;
+            for (StoredItemStack key : nowMap.keySet()) {
+                if (key.equals(item)) {
+                    nowMap.put(key, (int) (nowMap.get(key) + item.getCount()));
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                nowMap.put(new StoredItemStack(item), (int) item.getCount());
+            }
+        }
+
+        // 比较两个Map的差异
+        Set<StoredItemStack> allKeys = new HashSet<>();
+        allKeys.addAll(lastMap.keySet());
+        allKeys.addAll(nowMap.keySet());
+
+        for (StoredItemStack key : allKeys) {
+            int lastCount = lastMap.getOrDefault(key, 0);
+            int nowCount = nowMap.getOrDefault(key, 0);
+            int delta = nowCount - lastCount;
+
+            if (delta != 0) {
+                changedItem.add(key);
+                changedCount.add(delta);
+            }
+        }
+        if (!changedItem.isEmpty())
+        {
+            PacketDistributor.sendToPlayer((ServerPlayer) player,new SyncItemStoragePacket(changedItem,changedCount));
+        }
+
+    }
+
+    // 在手动执行物品增添后使用此函数可以阻止自动远程同步
+    public void refreshLast()
+    {
+        this.lastItemStorage.clear();
+        for(StoredItemStack storedItemStack : this.itemStorage.getItemStorage())
+        {
+            this.lastItemStorage.add(new StoredItemStack(storedItemStack));
         }
     }
 
@@ -449,81 +612,192 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     // sim代表当前操作是否为模拟操作
     // 模拟操作则返回一个列表，存储了模拟后结果
     // 非模拟操作直接操作真列表，返回null即可
-    public ArrayList<StoredItemStack> customClickHandler(Slot slot,int button,boolean shiftDown, ItemStack heldItem ,boolean sim)
+    public ArrayList<StoredItemStack> customClickHandler(int slotIndex,ItemStack clickItem,int button,boolean shiftDown,boolean sim)
     {
         // 该函数用于处理点击维度存储槽发生的事件
         // 包含shift点击和普通点击
         // 同时，从用到customClickHandler的类中，移除quickMoveStack和OnItemStackedHandle对于维度槽位的操作
         // ps：其实吧。。。有维度槽位才会用到customClickHandler。。。没有维度槽位不需要customClickHandler额外处理
         // 之所以多出customClickHandler是因为维度槽位的容器本体是数组，移除会导致索引变更的闪烁
-        return null;
+        if(sim) // 处理模拟逻辑
+        {
+            // 深克隆一个列表用于模拟操作
+            DimensionsItemStorage simItemStorage = new DimensionsNet().getItemStorage();
+            for(StoredItemStack storedItemStack : this.itemStorage.getItemStorage())
+            {
+                simItemStorage.addItem(new StoredItemStack(storedItemStack));
+            }
+            if(shiftDown)
+            {
+                quickMoveHandle(player,slotIndex,clickItem,simItemStorage,sim);
+            }
+            else
+            {
+                clickHandle(slotIndex,clickItem,button,player,simItemStorage,sim);
+            }
+            return (ArrayList<StoredItemStack>)simItemStorage.getItemStorage();
+        }
+        else // 处理真逻辑
+        {
+            DimensionsItemStorage trueItemStorage = this.itemStorage;
+            if(shiftDown)
+            {
+                quickMoveHandle(player,slotIndex,clickItem,trueItemStorage,sim);
+            }
+            else
+            {
+                clickHandle(slotIndex,clickItem,button,player,trueItemStorage,sim);
+            }
+            return null;
+        }
+
+    }
+
+    protected ItemStack quickMoveHandle(Player player,int slotIndex, ItemStack clickItem, DimensionsItemStorage itemStorage,boolean sim)
+    {
+        ItemStack itemstack = ItemStack.EMPTY;
+        ItemStack itemStack1;
+        Slot slot = this.slots.get(slotIndex);
+        if (slot != null && !clickItem.isEmpty())
+        {
+            if(slot instanceof StoredItemStackSlot)
+            {
+                StoredItemStackSlot sSlot = new StoredItemStackSlot(itemStorage,slot.getSlotIndex(),slot.x,slot.y);
+                itemStack1 = clickItem.copy();
+                int moveCount = checkCanMoveStackCount(itemStack1, this.lines * 9, this.slots.size(), true);
+                //moveCount为随机一个槽位可以放入的最大物品数量，给出的值不会超过物品数量
+                if(!sim)
+                {
+                    itemStack1.setCount(moveCount);
+                    if (!this.moveItemStackTo(itemStack1, this.lines * 9, this.slots.size(), true)) {
+                        return ItemStack.EMPTY;
+                    }
+                }
+                itemStorage.removeItem(clickItem,moveCount);
+            }
+            else
+            {
+                // 此处使用slot为玩家背包slot，为正常slot
+                itemstack = slot.getItem().copy();
+                itemStack1 = slot.getItem().copy();
+
+//                if (!this.moveItemStackTo(itemStack1, 0, this.lines * 9, false))
+//                {
+//                    return ItemStack.EMPTY;
+//                }
+                itemStorage.addItem(itemStack1,itemStack1.getCount());
+                if(!sim)
+                {
+                    slot.tryRemove(itemstack.getCount(),Integer.MAX_VALUE-1,player);
+                }
+            }
+            if (itemStack1.isEmpty()) {
+                if (!sim)
+                {
+                    slot.setByPlayer(ItemStack.EMPTY);
+                }
+            } else {
+                slot.setChanged();
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+    protected void clickHandle(int slotIndex,ItemStack clickItem, int button, Player player, DimensionsItemStorage itemStorage,boolean sim)
+    {
+        ItemStack carriedItem = this.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
+        StoredItemStackSlot slot = (StoredItemStackSlot) this.slots.get(slotIndex);
+        //ItemStack clickItem = clickItem;
+        //ClickAction clickaction = event.getClickAction();
+        //SlotAccess slotAccess = event.getCarriedSlotAccess(); //表示鼠标所携带的slot本身
+        //SlotAccess可以使用 setCarried方式非无缝替换
+        //clickaction使用我的button处理即可
+
+        //利用覆写处理玩家将物品插入槽位
+        //注：对于并非完全替换物品的情况，而更类似添加物品的情况，StoredItemStackSlot不可使用set，而应为setByPlayer
+        //前者将直接替换维度网络对应的索引物品，后者会将物品添加到其对应的维度网络
+        if (clickItem.isEmpty())
+        {
+            if (!carriedItem.isEmpty())
+            {   //槽位物品为空，携带物品存在，将携带物品插入槽位
+                int i3 = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
+                itemStorage.addItem(carriedItem,i3);
+                if(!sim)
+                {
+                    if(carriedItem.getCount()-i3 <=0)
+                    {
+                        setCarried(ItemStack.EMPTY);
+                    }
+                    else
+                    {
+                        ItemStack nowC = carriedItem.copy();
+                        nowC.setCount(carriedItem.getCount()-i3);
+                        setCarried(nowC);
+                    }
+                }
+            }
+        }
+        else if (slot.mayPickup(player))
+        {
+            if (carriedItem.isEmpty())
+            {   //槽位物品存在，携带物品为空，尝试取出槽位物品
+                int num = 0;
+                if(clickItem.getCount() > 64)
+                {
+                    num = 64; // 一次取出最大不得超过64，次要按键不得超过32
+                }
+                else
+                {
+                    num = clickItem.getCount();
+                }
+                int j3 = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? num : (num + 1) / 2;
+                if(j3 > clickItem.getMaxStackSize())
+                {
+                    j3 = clickItem.getMaxStackSize();
+                }
+                ItemStack optional1 = itemStorage.removeItem(clickItem,j3);
+                if(optional1 != null)
+                {
+                    if(!sim)
+                    {
+                        setCarried(optional1);
+                        itemStorage.OnChange();
+                    }
+                }
+//                optional1.ifPresent((p_150421_) ->
+//                {
+//                    setCarried(p_150421_);
+//                    itemStorage.OnChange();
+//                });
+            }
+            else if (slot.mayPlace(carriedItem))
+            {   //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
+                int k3 = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
+                itemStorage.addItem(carriedItem,k3);
+                if (!sim)
+                {
+                    if(carriedItem.getCount()-k3 <=0)
+                    {
+                        setCarried(ItemStack.EMPTY);
+                    }
+                    else
+                    {
+                        ItemStack nowC = carriedItem.copy();
+                        nowC.setCount(carriedItem.getCount()-k3);
+                        setCarried(nowC);
+                    }
+
+                }
+            }
+            else if (ItemStack.isSameItemSameComponents(clickItem, carriedItem))
+            {   //槽位物品存在，携带物品存在，物品不可放置，但是为同类型，尝试取出物品到携带槽最大上限
+                // 此情况在点击维度存储槽时永远不可能发生，如果发生，那么也什么都不做
+            }
+        }
     }
 
     @Override
     public ItemStack quickMoveStack(Player player, int index)
     {
-        // 实现快速移动物品逻辑
-        // 如果item在容器，移动到背包，在背包则移动到容器
-        // 返回被移动的物品对象
-        ItemStack itemstack = ItemStack.EMPTY;
-        ItemStack itemStack1;
-        Slot slot = this.slots.get(index);
-        if (slot != null && slot.hasItem())
-        {
-            if(slot instanceof StoredItemStackSlot sSlot)
-            {
-                itemstack = sSlot.getVanillaActualStack();
-                itemStack1 = sSlot.getVanillaActualStack();
-                if (!this.moveItemStackTo(itemStack1, this.lines * 9, this.slots.size(), true)) {
-                    return ItemStack.EMPTY;
-                }
-                sSlot.remove(itemstack.getCount());
-            }
-            else
-            {
-                itemstack = slot.getItem().copy();
-                itemStack1 = slot.getItem().copy();
-                if (!this.moveItemStackTo(itemStack1, 0, this.lines * 9, false))
-                {
-                    return ItemStack.EMPTY;
-                }
-                slot.tryRemove(itemstack.getCount(),Integer.MAX_VALUE-1,player);
-            }
-            if (itemStack1.isEmpty()) {
-                slot.setByPlayer(ItemStack.EMPTY);
-            } else {
-                slot.setChanged();
-            }
-        }
-
-        if(player.level().isClientSide())
-        {
-            // 在为完成覆写之前，使用立刻构建索引来暂时实现效果
-            // 1 构建正确的索引数据
-            ArrayList<Integer> cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage.getItemStorage()));
-            // 2 构建linedata
-            updateScrollLineData(cacheIndex.size());
-            // 3 填入索引表
-            ArrayList<Integer> indexList = new ArrayList<>();
-            for (int i = 0; i < lines * 9; i++)
-            {
-                //根据翻页数据构建索引列表
-                if (i + lineData * 9 < cacheIndex.size())
-                {
-                    int index1 = cacheIndex.get(i + lineData * 9);
-                    indexList.add(index1);
-                }
-                else
-                {
-                    indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
-                }
-            }
-            updateSlotIndex(indexList);
-
-            Thread.ofVirtual().start(()->{
-                Minecraft.getInstance().execute(() -> this.buildIndexList(new ArrayList<>(this.itemStorage.getItemStorage())));
-            });
-        }
         return ItemStack.EMPTY;
     }
 
@@ -629,6 +903,98 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         return flag;
     }
 
+    protected int checkCanMoveStackCount(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
+    {
+        int flag = 0;
+        int i = startIndex;
+        if (reverseDirection) {
+            i = endIndex - 1;
+        }
+
+        // 对于可堆叠物品
+        if (stack.isStackable()) {
+            while(!stack.isEmpty()) {
+                if (reverseDirection) {
+                    if (i < startIndex) {
+                        break;
+                    }
+                } else if (i >= endIndex) {
+                    break;
+                }
+
+                //对普通槽位和存储槽位分开处理
+                if(this.slots.get(i) instanceof StoredItemStackSlot slot)
+                {
+                    //为避免重复移动，此处留空
+                }
+                else
+                {   // 填充空槽
+                    Slot slot = (Slot)this.slots.get(i);
+                    ItemStack itemstack = slot.getItem();
+                    if (!itemstack.isEmpty() && ItemStack.isSameItemSameComponents(stack, itemstack)) {
+                        int j = itemstack.getCount() + stack.getCount(); //槽位物品数(itemstack)加上要放入的数量(stack)
+                        int k = slot.getMaxStackSize(itemstack);    //槽位可以放入的最大数
+                        if (j <= k) {
+                            flag = stack.getCount();
+                        } else if (itemstack.getCount() < k) {
+                            int maxCanPut = k - itemstack.getCount();
+                            flag = maxCanPut;
+                        }
+                    }
+                }
+
+                if (reverseDirection) {
+                    --i;
+                } else {
+                    ++i;
+                }
+            }
+        }
+        // 如果移动后stack不为空，则继续填充||完成不可堆叠物品的移动
+        if (!stack.isEmpty()) {
+            if (reverseDirection) {
+                i = endIndex - 1;
+            } else {
+                i = startIndex;
+            }
+
+            while(true) {
+                if (reverseDirection) {
+                    if (i < startIndex) {
+                        break;
+                    }
+                } else if (i >= endIndex) {
+                    break;
+                }
+
+                if(this.slots.get(i) instanceof StoredItemStackSlot slot)
+                {   // 物品由背包移动到存储器
+                    flag = stack.getCount();
+                    break;
+                }
+                else
+                {   // 填充非空槽
+                    Slot slot1 = (Slot)this.slots.get(i);
+                    ItemStack itemstack1 = slot1.getItem();
+                    if (itemstack1.isEmpty() && slot1.mayPlace(stack)) {
+                        flag = stack.getCount();
+                        break;
+                    }
+                }
+
+
+
+                if (reverseDirection) {
+                    --i;
+                } else {
+                    ++i;
+                }
+            }
+        }
+
+        return flag;
+    }
+
     public static class ItemStackedOnOtherHandler
     {
         @SubscribeEvent
@@ -639,95 +1005,14 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 event.setCanceled(false); // 通知双端点击事件未处理
                 return;
             }
+            else
+            {
+                event.setCanceled(true); // 通知双端点击事件处理
+                return;
+            }
             // 必须吐槽一句，这carried和click的对应竟然在menu写反了。。
             // 以后neoforge更新可能还需要重新写这些
-            ItemStack clickItem = event.getCarriedItem();
-            ItemStack carriedItem = event.getStackedOnItem();
-            StoredItemStackSlot slot = (StoredItemStackSlot) event.getSlot();
-            Player player = event.getPlayer();
-            ClickAction clickaction = event.getClickAction();
-            SlotAccess slotAccess = event.getCarriedSlotAccess(); //表示鼠标所携带的slot本身
 
-            //利用覆写处理玩家将物品插入槽位
-            //注：对于并非完全替换物品的情况，而更类似添加物品的情况，StoredItemStackSlot不可使用set，而应为setByPlayer
-            //前者将直接替换维度网络对应的索引物品，后者会将物品添加到其对应的维度网络
-            if (clickItem.isEmpty())
-            {
-                if (!carriedItem.isEmpty())
-                {   //槽位物品为空，携带物品存在，将携带物品插入槽位
-                    int i3 = clickaction == ClickAction.PRIMARY ? carriedItem.getCount() : 1;
-                    slotAccess.set(slot.safeInsert(carriedItem, i3));
-                }
-            }
-            else if (slot.mayPickup(player))
-            {
-                if (carriedItem.isEmpty())
-                {   //槽位物品存在，携带物品为空，尝试取出槽位物品
-                    int num = 0;
-                    if(clickItem.getCount() > 64)
-                    {
-                        num = 64; // 一次取出最大不得超过64，次要按键不得超过32
-                    }
-                    else
-                    {
-                        num = clickItem.getCount();
-                    }
-                    int j3 = clickaction == ClickAction.PRIMARY ? num : (num + 1) / 2;
-                    Optional<ItemStack> optional1 = slot.tryRemove(j3, Integer.MAX_VALUE, player);
-                    optional1.ifPresent((p_150421_) ->
-                    {
-                        slotAccess.set(p_150421_);
-                        slot.onTake(player, p_150421_);
-                    });
-                }
-                else if (slot.mayPlace(carriedItem))
-                {   //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
-                    int k3 = clickaction == ClickAction.PRIMARY ? carriedItem.getCount() : 1;
-                    slotAccess.set(slot.safeInsert(carriedItem, k3));
-                }
-                else if (ItemStack.isSameItemSameComponents(clickItem, carriedItem))
-                {   //槽位物品存在，携带物品存在，物品不可放置，但是为同类型，尝试取出物品到携带槽最大上限
-                    Optional<ItemStack> optional = slot.tryRemove(clickItem.getCount(), carriedItem.getMaxStackSize() - carriedItem.getCount(), player);
-                    optional.ifPresent((p_150428_) ->
-                    {
-                        carriedItem.grow(p_150428_.getCount());
-                        slot.onTake(player, p_150428_);
-                    });
-                }
-            }
-            if(player.containerMenu instanceof DimensionsNetMenu menu)
-            {
-                if(player.level().isClientSide())
-                {
-                    // 在为完成覆写之前，使用立刻构建索引来暂时实现效果
-                    // 1 构建正确的索引数据
-                    ArrayList<Integer> cacheIndex = menu.buildStorageWithCurrentState(new ArrayList<>(menu.itemStorage.getItemStorage()));
-                    // 2 构建linedata
-                    menu.updateScrollLineData(cacheIndex.size());
-                    // 3 填入索引表
-                    ArrayList<Integer> indexList = new ArrayList<>();
-                    for (int i = 0; i < menu.lines * 9; i++)
-                    {
-                        //根据翻页数据构建索引列表
-                        if (i + menu.lineData * 9 < cacheIndex.size())
-                        {
-                            int index1 = cacheIndex.get(i + menu.lineData * 9);
-                            indexList.add(index1);
-                        }
-                        else
-                        {
-                            indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
-                        }
-                    }
-                    menu.updateSlotIndex(indexList);
-
-                    Thread.ofVirtual().start(()->{
-                        Minecraft.getInstance().execute(() -> menu.buildIndexList(new ArrayList<>(menu.itemStorage.getItemStorage())));
-                    });
-
-                }
-            }
-            event.setCanceled(true);// 标志事件被成功拦截，无需做其他处理
         }
     }
 }

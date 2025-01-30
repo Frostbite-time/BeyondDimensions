@@ -90,5 +90,25 @@ public class PacketRegister
                         ServerPayloadHandler.getInstance()::handleCallSeverStoragePacket
                 )
         );
+
+        // 注册 SyncItemStoragePacket 用于同步滑动条状态
+        registrar.playBidirectional(
+                SyncItemStoragePacket.TYPE,
+                SyncItemStoragePacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleSyncItemStoragePacket,
+                        ServerPayloadHandler.getInstance()::handleSyncItemStoragePacket
+                )
+        );
+
+        // 注册 CallSeverClickPacket 用于同步滑动条状态
+        registrar.playBidirectional(
+                CallSeverClickPacket.TYPE,
+                CallSeverClickPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleCallSeverClickPacket,
+                        ServerPayloadHandler.getInstance()::handleCallSeverClickPacket
+                )
+        );
     }
 }

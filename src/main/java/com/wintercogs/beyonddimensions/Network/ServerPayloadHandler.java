@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -162,6 +163,38 @@ public class ServerPayloadHandler
                     }
                     menu = (DimensionsNetMenu) player.containerMenu;
                     menu.sendStorage();
+                }
+
+        );
+    }
+
+    public void handleSyncItemStoragePacket(final SyncItemStoragePacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+
+        );
+    }
+
+    public void handleCallSeverClickPacket(final CallSeverClickPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    DimensionsNetMenu menu;
+                    if (!(player.containerMenu instanceof DimensionsNetMenu))
+                    {
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
+                    menu = (DimensionsNetMenu) player.containerMenu;
+                    menu.customClickHandler(packet.slotIndex(),packet.clickItem(),packet.button(),packet.shiftDown(),false);
+                    menu.broadcastChanges();
+                    // 这里发包不是让客户端执行操作，而是解除锁定
+                    PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, ItemStack.EMPTY,1,false));
                 }
 
         );

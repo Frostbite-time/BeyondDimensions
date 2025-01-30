@@ -55,7 +55,29 @@ public class DimensionsItemStorage
         }
         itemStorage.add(new StoredItemStack(itemStack, count));
         OnChange();
+    }
 
+    public void addItem(StoredItemStack storedItemStack)
+    {
+        if(storedItemStack == null)
+        {
+            return;
+        }
+        if (storedItemStack.getItemStack().isEmpty())
+        {
+            return;
+        }
+        for (StoredItemStack item : itemStorage)
+        {
+            if (item.equals(storedItemStack))
+            {
+                item.addCount(storedItemStack.getCount());
+                OnChange();
+                return;
+            }
+        }
+        itemStorage.add(new StoredItemStack(storedItemStack));
+        OnChange();
     }
 
     // 移除物品 并返回被移除的物品
@@ -164,6 +186,15 @@ public class DimensionsItemStorage
             }
         }
         return null;
+    }
+
+    public boolean hasStoredItemStackType(StoredItemStack sItemStack)
+    {
+        if (itemStorage.contains(sItemStack))
+        {
+            return true;
+        }
+        return false;
     }
 
     // 将物品存储转换为 NBT 数据

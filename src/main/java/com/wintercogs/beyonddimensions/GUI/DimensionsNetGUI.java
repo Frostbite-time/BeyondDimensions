@@ -7,10 +7,13 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
+import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
+import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
 import com.wintercogs.beyonddimensions.Packet.CallSeverStoragePacket;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.ChatFormatting;
@@ -116,7 +119,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
             menu.loadSearchText(searchField.getValue().toLowerCase(Locale.ENGLISH));
             menu.loadButtonState(buttonStateMap);
             Thread.ofVirtual().start(()->{
-                Minecraft.getInstance().execute(() -> menu.buildIndexList(new ArrayList<>(menu.itemStorage.getItemStorage())));
+                Minecraft.getInstance().execute(() -> menu.buildIndexList(new ArrayList<>(menu.viewerItemStorage.getItemStorage())));
             });
             lastButtonStateMap = new HashMap<>(buttonStateMap);
             lastSearchText = searchField.getValue();
@@ -203,6 +206,54 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
 
     }
 
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    {
+        super.mouseReleased(mouseX,mouseY,button);
+        Slot slot = findSlot(mouseX,mouseY);
+        if (menu.isHanding || slot == null)
+        {
+            return true;
+        }
+        int slotId = slot.index;
+        ItemStack clickItem;
+        if(hasShiftDown())
+        {
+            if(slot instanceof StoredItemStackSlot sSlot)
+            {
+                clickItem = sSlot.getVanillaActualStack();
+            }
+            else
+            {
+                clickItem = slot.getItem();
+            }
+            //ArrayList<StoredItemStack> simItemStorage =  menu.customClickHandler(slotId,mouseButton,true,true);
+            //ArrayList<Integer> simIndex = menu.buildIndexListNoPacket(simItemStorage);
+            menu.isHanding = true;
+            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,true));
+
+            //menu.setHanding();
+        }
+        else
+        {
+            if(slot instanceof StoredItemStackSlot sSlot)
+            {
+                clickItem = sSlot.getVanillaActualStack();
+                //ArrayList<StoredItemStack> simItemStorage = menu.customClickHandler(slotId,mouseButton,false,true);
+                //ArrayList<Integer> simIndex = menu.buildIndexListNoPacket(simItemStorage);
+                menu.isHanding = true;
+                PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
+
+                //menu.setHanding();
+            }
+        }
+        return true;
+    }
+    @Override
+    protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type)
+    {
+        super.slotClicked(slot,slotId,mouseButton,type);
+    }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)

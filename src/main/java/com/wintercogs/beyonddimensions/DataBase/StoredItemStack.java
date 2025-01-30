@@ -12,6 +12,13 @@ public class StoredItemStack
 
     public static final StreamCodec<RegistryFriendlyByteBuf,StoredItemStack> STREAM_CODEC = storedItemStack_StreamCodec();
 
+    public StoredItemStack(StoredItemStack storedItemStack)
+    {   // 用于深克隆的函数
+        this.itemStack = storedItemStack.itemStack.copy();
+        this.itemStack.setCount(1);
+        this.count = storedItemStack.getCount();
+    }
+
     public StoredItemStack(ItemStack itemStack)
     {
         this.itemStack = itemStack.copy();
