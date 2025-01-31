@@ -191,7 +191,7 @@ public class ServerPayloadHandler
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                     menu = (DimensionsNetMenu) player.containerMenu;
-                    menu.customClickHandler(packet.slotIndex(),packet.clickItem(),packet.button(),packet.shiftDown(),false);
+                    menu.customClickHandler(packet.slotIndex(),packet.clickItem(),packet.button(),packet.shiftDown());
                     menu.broadcastChanges();
                     // 这里发包不是让客户端执行操作，而是解除锁定
                     PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, ItemStack.EMPTY,1,false));

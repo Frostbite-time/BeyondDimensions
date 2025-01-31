@@ -249,11 +249,6 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         }
         return true;
     }
-    @Override
-    protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type)
-    {
-        super.slotClicked(slot,slotId,mouseButton,type);
-    }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
