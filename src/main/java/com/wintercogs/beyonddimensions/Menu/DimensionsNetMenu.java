@@ -1,12 +1,10 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.google.common.base.Suppliers;
-import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.*;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
-import com.wintercogs.beyonddimensions.Packet.SlotIndexPacket;
 import com.wintercogs.beyonddimensions.Packet.SyncItemStoragePacket;
 import com.wintercogs.beyonddimensions.Unit.Pinyin4jUtils;
 import io.netty.buffer.Unpooled;
@@ -28,37 +26,30 @@ import net.neoforged.neoforge.event.ItemStackedOnOtherEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.lwjgl.glfw.GLFW;
-import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-// 备注：该菜单所使用的StoredItemStackSlot的物品堆叠处理将会用钩子进行覆写
-// 以itemStorage.getItemStorage()的列表为服务端需要向客户端同步的存储数据
-// 客户端会需要完整的正确的itemStorage数据，构建slotIndexList并向服务端同步
-// 服务端在收到数据后将利用slotIndexList更新slots列表
-// 最后AbstractContainerMenu会自动处理双端slot内容的同步
+/**
+ * 打开维度网络时候所用到的Menu，处理了网络同步以及点击操作等问题
+ */
 public class DimensionsNetMenu extends AbstractContainerMenu
 {
-
-    private static final Logger LOGGER = LogUtils.getLogger();
-
-    // 双端数据
-    public final Player player; //用于给player发送数据
-    public final DimensionsItemStorage itemStorage;
-    // 用于定期向服务端传输数据
-    public ArrayList<Integer> slotIndexList = new ArrayList<>();
-    // 客户端数据
+    /// 双端通用数据
+    private final Player player; // 打开Menu的玩家实例
+    public final DimensionsItemStorage itemStorage; // Menu所对应的存储，服务端通过savedData获取，客户端通过网络请求获取
+    /// 客户端数据
     private int lines = 6; //渲染的menu行数
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
-    private HashMap<ButtonName,ButtonState> buttonStateMap = new HashMap<>();
-    public boolean isHanding = false; // 用于标记当前是否向服务端发出操作请求却未得到回应
-                                        //true表示无正在处理未回应，false表示空闲
+    private HashMap<ButtonName,ButtonState> buttonStateMap = new HashMap<>(); // 客户端的按钮状态
+    public boolean isHanding = false; // 用于标记当前是否向服务端发出操作请求却未得到回应 true表示无正在处理未回应，false表示空闲
     public DimensionsItemStorage viewerItemStorage; // 在客户端，用于显示物品
-    // 服务端数据
-    private ArrayList<StoredItemStack> lastItemStorage;
+    /// 服务端数据
+    private ArrayList<StoredItemStack> lastItemStorage; // 记录截至上一次同步时的存储状态，用于同步数据
 
 
     // 构建注册用的信息
@@ -70,14 +61,21 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     // 因为就是这样设计的， 所以传入new就可以了。
 
 
-    // 客户端构造函数，用于从缓冲区读取数据
+    /**
+     * 客户端构造函数
+     * @param playerInventory 玩家背包
+     */
     public DimensionsNetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        //客户端的DimensionsNet不重要，只需要给予正确的槽索引，Menu会自动将内容同步
-        this(id, playerInventory, new DimensionsNet(), new SimpleContainerData(1));
+        this(id, playerInventory, new DimensionsNet(), new SimpleContainerData(0));
     }
 
-    // 构造函数，用于初始化容器
+    /**
+     * 服务端构造函数
+     * @param playerInventory 玩家背包
+     * @param data 维度网络信息，包含了存储信息
+     * @param uselessContainer 此处无用，传入new SimpleContainerData(0)即可
+     */
     public DimensionsNetMenu(int id, Inventory playerInventory, DimensionsNet data, SimpleContainerData uselessContainer)
     {
         super(Dimensions_Net_Menu.get(), id);
@@ -101,7 +99,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
 
         // 开始添加槽位，其中addSlot会为menu自带的列表slots提供slot，
         // 而给slot本身传入的索引则对应其在背包中的索引
-        // 添加维度网络槽位 对应slots索引 0~44
+        // 添加维度网络槽位 对应slots索引 0~53
         for (int row = 0; row < lines; ++row)
         {
             for (int col = 0; col < 9; ++col)
@@ -109,11 +107,10 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 // 由于我们完全不依靠menu自带得方法来同步，所以可以传入一个和实际数据同步所用不一样的Storage
                 // 只需要保证我们能及时把数据从实际数据同步到viewerItemStorage
                 // 再将slot点击操作重写的物品种类依赖
-                // 我们再也不用把索引表在本地与云端传来传去
                 this.addSlot(new StoredItemStackSlot(viewerItemStorage, -1, 8 + col * 18, 29+row * 18));
             }
         }
-        // 添加玩家物品栏槽位 对应slots索引 45~71
+        // 添加玩家物品栏槽位 对应slots索引 54~80
         for (int row = 0; row < 3; ++row)
         {
             for (int col = 0; col < 9; ++col)
@@ -121,14 +118,17 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 151 + row * 18));
             }
         }
-        // 添加快捷栏槽位 对应slots索引 72~80
+        // 添加快捷栏槽位 对应slots索引 81~89
         for (int col = 0; col < 9; ++col)
         {
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 209));
         }
     }
 
-    // 客户端函数，使用当前存储更新视觉存储并重建索引
+    /**
+     * 客户端专用函数，服务端请勿调用<br>
+     * 使用当前客户端的真存储来更新视觉存储，然后重构索引以刷新显示
+     */
     public void updateViewerStorage()
     {
         viewerItemStorage.getItemStorage().clear();
@@ -139,129 +139,109 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         buildIndexList(new ArrayList<>(viewerItemStorage.getItemStorage()));
     }
 
+    /**
+     * 利用当前视觉存储信息重构索引
+     * 翻页操作集成在GUI部分
+     */
     public final void ScrollTo()
     {
         this.buildIndexList(new ArrayList<>(this.viewerItemStorage.getItemStorage()));
     }
 
-    // 双端函数，用于同步数据
+    /**
+     * 设置当前菜单searchText，过程中会将其按照英文本地化惯例进行小写化处理
+     * @param text 传入的文本
+     */
     public void loadSearchText(String text)
     {
-        this.searchText = text;
+        this.searchText = text.toLowerCase(Locale.ENGLISH);
     }
-    // 双端函数，用于同步数据
+
+    /**
+     * 设置当前菜单的buttonStateMap
+     * @param buttonStateMap 传入的Map
+     */
     public void loadButtonState(HashMap<ButtonName,ButtonState> buttonStateMap)
     {
         this.buttonStateMap = buttonStateMap;
     }
 
-    // 辅助方法，用于根据当前搜索状态等建立缓存索引表以及更新翻页数据
-    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<StoredItemStack> itemStorage)
-    {
-        //建立浅拷贝缓存，用于排序和筛选数据
-        ArrayList<StoredItemStack> cache = new ArrayList<>(itemStorage);
-        ArrayList<Integer> cacheIndex = new ArrayList<>(); // 建立一个索引缓存，以防止索引混乱
-        for(int i = 0;i<cache.size();i++)
-            cacheIndex.add(i);
+    /**
+     * 根据当前的搜索状态、按钮状态对存储进行排序
+     * @param itemStorage 要排序的存储
+     * @return 完成排序的索引列表
+     */
+    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<StoredItemStack> itemStorage) {
+        // 合并过滤空气和搜索逻辑，避免遍历时删除
+        ArrayList<StoredItemStack> cache = new ArrayList<>();
+        ArrayList<Integer> cacheIndex = new ArrayList<>();
+        for (int i = 0; i < itemStorage.size(); i++) {
+            StoredItemStack item = itemStorage.get(i);
+            ItemStack stack = item.getActualStack();
+            if (stack == null || stack.isEmpty()) continue;
 
-        for (int i = 0; i < cache.size(); i++)
-        {
-            StoredItemStack item = cache.get(i);
-            ItemStack itemStack = item.getActualStack();
-            // 移除空气和空引用
-            if (itemStack == null||itemStack.isEmpty()) {
-                cache.remove(i);
-                cacheIndex.remove(i);
-                i--;  // 移除元素后，需调整索引位置
-            }
-        }
+            // 提前过滤空气，并缓存名称和拼音
+            String displayName = stack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
+            String allPinyin = Pinyin4jUtils.getAllPinyin(displayName, false);
+            String firstPinyin = Pinyin4jUtils.getFirstPinYin(displayName);
+            boolean matchesSearch = searchText == null || searchText.isEmpty() ||
+                    displayName.contains(searchText) ||
+                    allPinyin.contains(searchText) ||
+                    firstPinyin.contains(searchText) ||
+                    checkTooltipMatches(stack,searchText);
 
-        //根据搜索框筛选数据
-        if(searchText != null && !searchText.isEmpty())
-        {
-            // 遍历缓存，进行筛选
-            for (int i = 0; i < cache.size(); i++) {
-                StoredItemStack item = cache.get(i);
-                ItemStack itemStack = item.getActualStack();
-                boolean isfind = false;
-                String displayName = itemStack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
-                // 检查 显示名称or全拼or拼音首字母 是否符合
-                if (displayName.contains(searchText) ||
-                        Pinyin4jUtils.getAllPinyin(displayName, false).contains(searchText) ||
-                        Pinyin4jUtils.getFirstPinYin(displayName).contains(searchText))
-                {
-                    isfind = true;
-                }
-                else
-                {
-                    // 检查工具提示
-                    List<Component> toolTips = itemStack.getTooltipLines(
-                            Item.TooltipContext.of(player.level()),
-                            player,
-                            Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED
-                                    : TooltipFlag.Default.NORMAL);
-                    for (Component tooltip : toolTips) {
-                        if (tooltip.getString().toLowerCase(Locale.ENGLISH).contains(searchText)) {
-                            isfind = true;
-                            break;
-                        }
-                    }
-                }
-                if (!isfind) {
-                    cache.remove(i);
-                    cacheIndex.remove(i);
-                    i--; // 移除元素后，需调整索引位置
-                }
+            if (matchesSearch) {
+                cache.add(item);
+                cacheIndex.add(i);
             }
         }
 
-        //排序按钮筛选
-        if(buttonStateMap.get(ButtonName.SortMethodButton)==ButtonState.SORT_DEFAULT)
-        {
-            // 保留显式处理
-        }
-        else if(buttonStateMap.get(ButtonName.SortMethodButton)==ButtonState.SORT_NAME)
-        {
-            ArrayList<Integer> sortCache = new ArrayList<>();
-            // 按名称排序
-            for(int i = 0;i<cache.size();i++)
-            {
-                sortCache.add(i);
+        // 统一排序逻辑，避免重复代码
+        ButtonState sortState = buttonStateMap.get(ButtonName.SortMethodButton);
+        if (sortState != ButtonState.SORT_DEFAULT) {
+            Comparator<StoredItemStack> comparator = sortState == ButtonState.SORT_NAME ?
+                    Comparator.comparing(item -> item.getItemStack().getDisplayName().getString()) :
+                    Comparator.comparingLong(StoredItemStack::getCount);
+
+            // 生成索引排序映射
+            ArrayList<StoredItemStack> finalCache = cache;
+            List<Integer> indices = IntStream.range(0, cache.size())
+                    .boxed()
+                    .sorted((a, b) -> comparator.compare(finalCache.get(a), finalCache.get(b)))
+                    .collect(Collectors.toList());
+
+            // 这一步排序完成后不再需要缓存
+            // 根据排序结果重组索引
+            ArrayList<Integer> sortedIndices = new ArrayList<>(cacheIndex.size());
+            for (int index : indices) {
+                sortedIndices.add(cacheIndex.get(index));
             }
-            // 按名称升序，首先根据cache名称排序缓存数组，然后通过缓存数组排序cacheIndex，最后让cache根据名称自排序
-            Collections.sort(sortCache, Comparator.comparing(index -> cache.get(index).getItemStack().getDisplayName().getString())); // 按名称排序
-            ArrayList<Integer> toSortCacheIndex = new ArrayList<>(cacheIndex);
-            for(int i = 0;i<cacheIndex.size();i++)
-            {
-                cacheIndex.set(i,toSortCacheIndex.get(sortCache.get(i)));
-            }
-            Collections.sort(cache, Comparator.comparing(item -> item.getItemStack().getDisplayName().getString())); // 升序
-        }
-        else if(buttonStateMap.get(ButtonName.SortMethodButton)==ButtonState.SORT_QUANTITY)
-        {
-            ArrayList<Integer> sortCache = new ArrayList<>();
-            // 按数量排序
-            for(int i = 0;i<cache.size();i++)
-            {
-                sortCache.add(i);
-            }
-            // 按数量升序，首先根据cache名称排序缓存数组，然后通过缓存数组排序cacheIndex，最后让cache按数量自排序
-            sortCache.sort(Comparator.comparingLong(index -> cache.get(index).getCount())); // 按数量
-            ArrayList<Integer> toSortCacheIndex = new ArrayList<>(cacheIndex);
-            for(int i = 0;i<cacheIndex.size();i++)
-            {
-                cacheIndex.set(i,toSortCacheIndex.get(sortCache.get(i)));
-            }
-            cache.sort(Comparator.comparingLong(StoredItemStack::getCount)); // 升序
+            cacheIndex = sortedIndices;
         }
 
-        //倒序按钮筛选
-        if(buttonStateMap.get(ButtonName.ReverseButton)==ButtonState.ENABLED)
-        {
-            Collections.reverse(cacheIndex);  // 反转 cacheIndex
-            Collections.reverse(cache);       // 反转 cache
+        // 直接通过排序器处理倒序，避免反转操作
+        if (buttonStateMap.get(ButtonName.ReverseButton) == ButtonState.ENABLED) {
+            Collections.reverse(cacheIndex);
         }
+
         return cacheIndex;
+    }
+
+    /**
+     * 检查文本是否存在于目标物品堆叠
+     * @param stack 目标物品堆叠
+     * @param matchText 文本
+     * @return 结果为真则意味存在
+     */
+    private boolean checkTooltipMatches(ItemStack stack, String matchText) {
+        List<Component> toolTips = stack.getTooltipLines(
+                Item.TooltipContext.of(player.level()),
+                player,
+                Minecraft.getInstance().options.advancedItemTooltips ?
+                        TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
+        );
+        return toolTips.stream()
+                .anyMatch(tooltip -> tooltip.getString().toLowerCase(Locale.ENGLISH).contains(matchText));
     }
 
     public void updateScrollLineData(int dataSize)
@@ -307,6 +287,11 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         loadIndexList(indexList);
     }
 
+    /**
+     * 网络传输
+     * 禁止了父类对{@link com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot}槽位的传输
+     * 自定义了如何将存储从服务端传到客户端
+     */
     @Override
     public void broadcastChanges()
     {
@@ -496,6 +481,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         return true; // 可根据需求修改条件
     }
 
+    // 自定义点击操作
     public ArrayList<StoredItemStack> customClickHandler(int slotIndex,ItemStack clickItem,int button,boolean shiftDown)
     {
         // 该函数用于处理点击维度存储槽发生的事件
@@ -515,6 +501,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         return null;
     }
 
+    // 自定义的快速移动操作
     protected ItemStack quickMoveHandle(Player player,int slotIndex, ItemStack clickItem, DimensionsItemStorage itemStorage)
     {
         ItemStack cacheStack;
@@ -553,6 +540,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         return ItemStack.EMPTY;
     }
 
+    // 自定义的非快速移动操作
     protected void clickHandle(int slotIndex,ItemStack clickItem, int button, Player player, DimensionsItemStorage itemStorage)
     {
         ItemStack carriedItem = this.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
@@ -623,6 +611,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         return ItemStack.EMPTY;
     }
 
+    // 将stack传输到所有能找到的槽位
     @Override
     protected boolean moveItemStackTo(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
     {

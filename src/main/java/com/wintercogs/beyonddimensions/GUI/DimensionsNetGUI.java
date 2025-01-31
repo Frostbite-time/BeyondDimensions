@@ -43,7 +43,6 @@ import java.util.*;
 public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
 {
 
-    private final Logger LOGGER = LogUtils.getLogger();
     private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/dimensions_net.png");
     private EditBox searchField;
     private HashMap<ButtonName, ButtonState> buttonStateMap = new HashMap<>();
@@ -52,7 +51,6 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     private ReverseButton reverseButton;
     private SortMethodButton sortButton;
     private BigScroller scroller;
-//    private double scrollCount = 0;
 
     public DimensionsNetGUI(DimensionsNetMenu container, Inventory playerInventory, Component title)
     {
@@ -66,7 +64,6 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
 
     @Override
     protected void init() {
-        // 原父类方法--由于太少，显式写出来
         // 如果以后图片大小有变，显示中心所期望的大小仍然是x:176,y:235用于计算
         this.leftPos = (this.width - 176)/2;
         this.topPos = (this.height - 235)/2;
@@ -86,11 +83,10 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         });
         addRenderableWidget(reverseButton);
 
-        // 初始化搜索方案
         buttonStateMap.put(sortButton.getName(),sortButton.currentState);
         buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
 
-        // 重写部分
+        // 初始化搜索方案
         this.searchField = new EditBox(getFont(), this.leftPos+20+26, this.topPos+4, 89, this.getFont().lineHeight+2, Component.translatable("wintercogs.BeyondDimensions.DimensionsGuiSearch"));
         this.searchField.setMaxLength(100);
         this.searchField.setBordered(true);
@@ -116,7 +112,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         //每tick自动更新搜索方案
         if(!lastButtonStateMap.equals(buttonStateMap) || !Objects.equals(lastSearchText, searchField.getValue()))
         {
-            menu.loadSearchText(searchField.getValue().toLowerCase(Locale.ENGLISH));
+            menu.loadSearchText(searchField.getValue());
             menu.loadButtonState(buttonStateMap);
             menu.buildIndexList(new ArrayList<>(menu.viewerItemStorage.getItemStorage()));
             lastButtonStateMap = new HashMap<>(buttonStateMap);
@@ -225,24 +221,16 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
             {
                 clickItem = slot.getItem();
             }
-            //ArrayList<StoredItemStack> simItemStorage =  menu.customClickHandler(slotId,mouseButton,true,true);
-            //ArrayList<Integer> simIndex = menu.buildIndexListNoPacket(simItemStorage);
             menu.isHanding = true;
             PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,true));
-
-            //menu.setHanding();
         }
         else
         {
             if(slot instanceof StoredItemStackSlot sSlot)
             {
                 clickItem = sSlot.getVanillaActualStack();
-                //ArrayList<StoredItemStack> simItemStorage = menu.customClickHandler(slotId,mouseButton,false,true);
-                //ArrayList<Integer> simIndex = menu.buildIndexListNoPacket(simItemStorage);
                 menu.isHanding = true;
                 PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
-
-                //menu.setHanding();
             }
         }
         return true;
@@ -252,7 +240,6 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
     {
         super.mouseScrolled(mouseX,mouseY,scrollX,scrollY);
-        //PacketDistributor.sendToServer(new ScrollGuiPacket(scrollY));
         if (scrollY > 0)
         {
             menu.lineData--;
@@ -329,6 +316,5 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     public Font getFont() {
         return font;
     }
-
 
 }

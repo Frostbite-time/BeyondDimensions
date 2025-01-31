@@ -41,7 +41,7 @@ public class ServerPayloadHandler
                     {
                         LOGGER.info("玩家存在维度空间:{}，尝试打开GUI", net.getId());
                         context.player().openMenu(new SimpleMenuProvider(
-                                (containerId, playerInventory, _player) -> new DimensionsNetMenu(containerId, playerInventory, net, new SimpleContainerData(1)),
+                                (containerId, playerInventory, _player) -> new DimensionsNetMenu(containerId, playerInventory, net, new SimpleContainerData(0)),
                                 Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                         ));
                     } else
