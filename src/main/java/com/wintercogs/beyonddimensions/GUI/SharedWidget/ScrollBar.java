@@ -2,20 +2,15 @@ package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
-import com.wintercogs.beyonddimensions.Packet.ScrollGuiPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.slf4j.Logger;
 
 // 这是一个自定义的滑动条类，要实例化它，你需要传入以下数据

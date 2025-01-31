@@ -38,65 +38,6 @@ public class ClientPayloadHandler
         );
     }
 
-    public void handleScrollGuiPacket(final ScrollGuiPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                }
-
-        );
-    }
-
-    public void handleSlotIndexPacket(final SlotIndexPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-                    Player player = context.player();
-                    DimensionsNetMenu menu;
-                    if (!(player.containerMenu instanceof DimensionsNetMenu))
-                    {
-                        return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
-                    menu = (DimensionsNetMenu) player.containerMenu;
-                    menu.loadIndexList(packet.slotIndexList());
-                }
-
-        );
-    }
-
-    public void handleSearchAndButtonGuiPacket(final SearchAndButtonGuiPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                }
-
-        );
-    }
-
-    public void handleScrollLinedataPacket(final ScrollLinedataPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-                    Player player = context.player();
-                    DimensionsNetMenu menu;
-                    if (!(player.containerMenu instanceof DimensionsNetMenu))
-                    {
-                        return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
-                    menu = (DimensionsNetMenu) player.containerMenu;
-                    menu.lineData = packet.lineData();
-                    menu.maxLineData = packet.maxLineData();
-                }
-
-        );
-    }
-
     public void handleItemStoragePacket(final ItemStoragePacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
@@ -128,11 +69,8 @@ public class ClientPayloadHandler
                     }
                     if(packet.end())
                     {
-                        // 数据初始化完成 同步到显示
-                        for(StoredItemStack storedItemStack : menu.itemStorage.getItemStorage())
-                        {
-                            menu.viewerItemStorage.addItem(new StoredItemStack(storedItemStack));
-                        }
+                        // 收到结束信号，更新视图，重建索引
+                        menu.updateViewerStorage();
                         menu.buildIndexList(new ArrayList<>(menu.viewerItemStorage.getItemStorage()));
                         menu.resumeRemoteUpdates();
                     }

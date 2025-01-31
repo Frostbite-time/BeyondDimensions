@@ -31,46 +31,6 @@ public class PacketRegister
 
         );
 
-        // 注册ScrollGuiPacket 用于滑动UI
-        registrar.playBidirectional(
-                ScrollGuiPacket.TYPE,
-                ScrollGuiPacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleScrollGuiPacket,
-                        ServerPayloadHandler.getInstance()::handleScrollGuiPacket
-                )
-        );
-
-        // 注册ScrollGuiPacket 用于同步翻页、搜索、排序等操作对槽位的影响
-        registrar.playBidirectional(
-                SlotIndexPacket.TYPE,
-                SlotIndexPacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleSlotIndexPacket,
-                        ServerPayloadHandler.getInstance()::handleSlotIndexPacket
-                )
-        );
-
-        // 注册 SearchAndButtonGuiPacket 用于从本地同步搜索和按钮状态
-        registrar.playBidirectional(
-                SearchAndButtonGuiPacket.TYPE,
-                SearchAndButtonGuiPacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleSearchAndButtonGuiPacket,
-                        ServerPayloadHandler.getInstance()::handleSearchAndButtonGuiPacket
-                )
-        );
-
-        // 注册 ScrollLinedataPacket 用于同步滑动条状态
-        registrar.playBidirectional(
-                ScrollLinedataPacket.TYPE,
-                ScrollLinedataPacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleScrollLinedataPacket,
-                        ServerPayloadHandler.getInstance()::handleScrollLinedataPacket
-                )
-        );
-
         // 注册 ItemStoragePacket 用于同步滑动条状态
         registrar.playBidirectional(
                 ItemStoragePacket.TYPE,
