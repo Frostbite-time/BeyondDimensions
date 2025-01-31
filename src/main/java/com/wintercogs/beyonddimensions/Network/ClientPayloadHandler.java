@@ -133,9 +133,7 @@ public class ClientPayloadHandler
                         {
                             menu.viewerItemStorage.addItem(new StoredItemStack(storedItemStack));
                         }
-                        Thread.ofVirtual().start(()->{
-                            Minecraft.getInstance().execute(() -> menu.buildIndexList(new ArrayList<>(menu.viewerItemStorage.getItemStorage())));
-                        });
+                        menu.buildIndexList(new ArrayList<>(menu.viewerItemStorage.getItemStorage()));
                         menu.resumeRemoteUpdates();
                     }
                 }

@@ -52,7 +52,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     private int lines = 6; //渲染的menu行数
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
-    private String searchText = "";
+    private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
     private HashMap<ButtonName,ButtonState> buttonStateMap = new HashMap<>();
     public boolean isHanding = false; // 用于标记当前是否向服务端发出操作请求却未得到回应
                                         //true表示无正在处理未回应，false表示空闲
@@ -128,22 +128,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         }
     }
 
-    public void setHanding()
-    {
-        this.isHanding = true;
-        Thread.ofVirtual().start(() ->{
-            try
-            {
-                Thread.sleep(500);
-                Minecraft.getInstance().execute(() -> this.isHanding = false);
-            } catch (InterruptedException e)
-            {
-                throw new RuntimeException(e);
-            }
-
-        });
-    }
-
     // 客户端函数，使用当前存储更新视觉存储并重建索引
     public void updateViewerStorage()
     {
@@ -157,9 +141,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
 
     public final void ScrollTo()
     {
-        Thread.ofVirtual().start(()->{
-            Minecraft.getInstance().execute(() -> this.buildIndexList(new ArrayList<>(this.viewerItemStorage.getItemStorage())));
-        });
+        this.buildIndexList(new ArrayList<>(this.viewerItemStorage.getItemStorage()));
     }
 
     // 双端函数，用于同步数据
@@ -185,76 +167,58 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         for (int i = 0; i < cache.size(); i++)
         {
             StoredItemStack item = cache.get(i);
-            // 不匹配时，从 cache 和 cacheIndex 中同时移除
             ItemStack itemStack = item.getActualStack();
+            // 移除空气和空引用
             if (itemStack == null||itemStack.isEmpty()) {
-                // 移除空气和空引用
                 cache.remove(i);
                 cacheIndex.remove(i);
                 i--;  // 移除元素后，需调整索引位置
-                continue;
             }
         }
 
         //根据搜索框筛选数据
         if(searchText != null && !searchText.isEmpty())
-        {   // searchText会在传入之前执行小写化操作
+        {
             // 遍历缓存，进行筛选
             for (int i = 0; i < cache.size(); i++) {
                 StoredItemStack item = cache.get(i);
-                // 不匹配时，从 cache 和 cacheIndex 中同时移除
                 ItemStack itemStack = item.getActualStack();
-                if (itemStack == null||itemStack.isEmpty()) {
-                    // 移除空气和空引用
-                    cache.remove(i);
-                    cacheIndex.remove(i);
-                    i--;  // 移除元素后，需调整索引位置
-                    continue;
+                boolean isfind = false;
+                String displayName = itemStack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
+                // 检查 显示名称or全拼or拼音首字母 是否符合
+                if (displayName.contains(searchText) ||
+                        Pinyin4jUtils.getAllPinyin(displayName, false).contains(searchText) ||
+                        Pinyin4jUtils.getFirstPinYin(displayName).contains(searchText))
+                {
+                    isfind = true;
                 }
                 else
                 {
-                    boolean isfind = false;
-                    String displayName = itemStack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
-
-                    // 检查 显示名称or全拼or拼音首字母 是否符合
-                    if (displayName.contains(searchText) ||
-                            Pinyin4jUtils.getAllPinyin(displayName, false).contains(searchText) ||
-                            Pinyin4jUtils.getFirstPinYin(displayName).contains(searchText))
-                    {
-                        isfind = true;
-                    }
-                    else
-                    {
-                        // 检查工具提示
-                        List<Component> toolTips = itemStack.getTooltipLines(
-                                Item.TooltipContext.of(player.level()),
-                                player,
-                                Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED
-                                        : TooltipFlag.Default.NORMAL);
-
-                        for (Component tooltip : toolTips) {
-                            if (tooltip.getString().toLowerCase(Locale.ENGLISH).contains(searchText)) {
-                                isfind = true;
-                                break;
-                            }
+                    // 检查工具提示
+                    List<Component> toolTips = itemStack.getTooltipLines(
+                            Item.TooltipContext.of(player.level()),
+                            player,
+                            Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED
+                                    : TooltipFlag.Default.NORMAL);
+                    for (Component tooltip : toolTips) {
+                        if (tooltip.getString().toLowerCase(Locale.ENGLISH).contains(searchText)) {
+                            isfind = true;
+                            break;
                         }
                     }
-
-                    if (!isfind) {
-                        cache.remove(i);
-                        cacheIndex.remove(i);
-                        i--; // 移除元素后，需调整索引位置
-                        continue;
-                    }
                 }
-
+                if (!isfind) {
+                    cache.remove(i);
+                    cacheIndex.remove(i);
+                    i--; // 移除元素后，需调整索引位置
+                }
             }
         }
 
         //排序按钮筛选
         if(buttonStateMap.get(ButtonName.SortMethodButton)==ButtonState.SORT_DEFAULT)
         {
-
+            // 保留显式处理
         }
         else if(buttonStateMap.get(ButtonName.SortMethodButton)==ButtonState.SORT_NAME)
         {
@@ -303,24 +267,14 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     public void updateScrollLineData(int dataSize)
     {
         maxLineData = dataSize / 9 ;
-        if(dataSize % 9 !=0)
+        if(dataSize % 9 !=0) //如果余数不为0，说明还有一行，加1
         {
             maxLineData++;
         }
         maxLineData -= lines;
-        if(maxLineData < 0)
-        {
-            maxLineData = 0;
-        }
-
-        if (lineData < 0)
-        {
-            lineData = 0;
-        }
-        if (lineData > maxLineData)
-        {
-            lineData = maxLineData;
-        }
+        maxLineData = Math.max(maxLineData,0);
+        lineData = Math.max(lineData,0);
+        lineData = Math.min(lineData,maxLineData);
     }
 
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
@@ -349,55 +303,18 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
             }
         }
-
+        // 加载索引表
         loadIndexList(indexList);
-        // 4 同步数据
-        //PacketDistributor.sendToServer(new SlotIndexPacket((ArrayList<Integer>) indexList.clone()));
-        // 将当前索引值传给服务器，服务端确认后会传回给客户端以应用
-    }
-
-    public ArrayList<Integer> buildIndexListNoPacket(ArrayList<StoredItemStack> itemStorage)
-    {
-        if(!this.player.level().isClientSide())
-        {
-            return null;
-        }
-        // 1 构建正确的索引数据
-        ArrayList<Integer> cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
-        // 2 构建linedata
-        updateScrollLineData(cacheIndex.size());
-        // 3 填入索引表
-        ArrayList<Integer> indexList = new ArrayList<>();
-        for (int i = 0; i < lines * 9; i++)
-        {
-            //根据翻页数据构建索引列表
-            if (i + lineData * 9 < cacheIndex.size())
-            {
-                int index = cacheIndex.get(i + lineData * 9);
-                indexList.add(index);
-            }
-            else
-            {
-                indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
-            }
-        }
-
-        return new ArrayList<>(indexList);
-    }
-
-    public void sendIndexToSever()
-    {
-        PacketDistributor.sendToServer(new SlotIndexPacket((ArrayList<Integer>) slotIndexList.clone()));
     }
 
     @Override
     public void broadcastChanges()
     {
         for(int i = 0; i < this.slots.size(); ++i) {
-            Slot slot = (Slot)this.slots.get(i);
+            Slot slot = this.slots.get(i);
             if(slot instanceof StoredItemStackSlot)
                 continue; // 不允许broadcastChanges自动同步StoredItemStackSlot以便自定义处理
-            ItemStack itemstack = (slot).getItem();
+            ItemStack itemstack = slot.getItem();
             Objects.requireNonNull(itemstack);
             Supplier<ItemStack> supplier = Suppliers.memoize(itemstack::copy);
             this.triggerSlotListeners(i, itemstack, supplier);
@@ -431,19 +348,14 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             cacheNow.add(new StoredItemStack(storedItemStack));
         }
         // 缓存结束后，立刻更新last列表
-        this.lastItemStorage.clear();
-        for(StoredItemStack storedItemStack : this.itemStorage.getItemStorage())
-        {
-            this.lastItemStorage.add(new StoredItemStack(storedItemStack));
-        }
+        refreshLast();
 
         // 接下来进行根据物品种类进行比较（即将List使用近似Map的比较方法），种类变化加入changedItem，数量变化加入changedCount，数量变化使用Now-Last
         // 注意要处理last和now中可能导致的由于种类变化不同而改变了索引总数。对于Last有，而Now没有的种类意味着种类加入changedItem，数量为0-Last。反之则为种类加入changedItem，数量为Now-0
         // 对于StoredItemStack类，equals方法可以有效比较2个物品是否为统一种类而不计较数量
         // StoredItemStack.getCount可以获取数量进行进一步比较
-        // 创建合并数量Map（处理同类物品数量叠加）
 
-        // 注：以下代码为deepseek提供，未经检验
+        //为两个缓存数组分别创建Map，并检验是否有相同物品，如果有，则合并
         Map<StoredItemStack, Integer> lastMap = new HashMap<>();
         for (StoredItemStack item : cacheLast) {
             boolean found = false;
@@ -458,7 +370,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 lastMap.put(new StoredItemStack(item), (int) item.getCount());
             }
         }
-
         Map<StoredItemStack, Integer> nowMap = new HashMap<>();
         for (StoredItemStack item : cacheNow) {
             boolean found = false;
@@ -480,11 +391,12 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         allKeys.addAll(nowMap.keySet());
 
         for (StoredItemStack key : allKeys) {
+            // 尝试通过键获取物品，如果未能找到键则返回0来说明没有此物品
             int lastCount = lastMap.getOrDefault(key, 0);
             int nowCount = nowMap.getOrDefault(key, 0);
-            int delta = nowCount - lastCount;
+            int delta = nowCount - lastCount; // 获取增量（变化量）
 
-            if (delta != 0) {
+            if (delta != 0) {   // 增量不为0意味着有变化，则加入到变化列表中
                 changedItem.add(key);
                 changedCount.add(delta);
             }

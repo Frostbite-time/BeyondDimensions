@@ -118,9 +118,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         {
             menu.loadSearchText(searchField.getValue().toLowerCase(Locale.ENGLISH));
             menu.loadButtonState(buttonStateMap);
-            Thread.ofVirtual().start(()->{
-                Minecraft.getInstance().execute(() -> menu.buildIndexList(new ArrayList<>(menu.viewerItemStorage.getItemStorage())));
-            });
+            menu.buildIndexList(new ArrayList<>(menu.viewerItemStorage.getItemStorage()));
             lastButtonStateMap = new HashMap<>(buttonStateMap);
             lastSearchText = searchField.getValue();
         }
