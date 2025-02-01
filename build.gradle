@@ -1,8 +1,8 @@
 plugins {
-    id 'java'
+    id 'idea'
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '1.0.21' // 文档库位于 https://github.com/neoforged/ModDevGradle
+    id 'net.neoforged.moddev' version '2.0.76'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -19,7 +19,6 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
-    maven { url "https://mvnrepository.com/" }
 }
 
 base {
@@ -38,8 +37,7 @@ neoForge {
         minecraftVersion = project.parchment_minecraft_version
     }
 
-    // 这一行是可选的，访问转换器会自动被检测
-    // 如果不放在默认位置则可能需要添加
+    // This line is optional. Access Transformers are automatically detected
     // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
@@ -54,7 +52,7 @@ neoForge {
 
         server {
             server()
-            //programArgument '--nogui'
+            programArgument ''
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
@@ -89,8 +87,6 @@ neoForge {
             // You can set various levels here.
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             logLevel = org.slf4j.event.Level.DEBUG
-
-
         }
     }
 
@@ -116,7 +112,6 @@ configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
 
-
 dependencies {
 
     // 引入对拼音库的依赖 并将其打包到模组
@@ -131,7 +126,6 @@ dependencies {
     }
     // 必须要在此显式声明依赖，否则在运行时会找不到
     additionalRuntimeClasspath "com.belerweb:pinyin4j:2.5.1"
-
 
 
     // Example optional mod dependency with JEI

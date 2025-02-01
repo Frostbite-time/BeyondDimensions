@@ -201,42 +201,6 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
-    {
-        super.mouseReleased(mouseX,mouseY,button);
-        Slot slot = findSlot(mouseX,mouseY);
-        if (menu.isHanding || slot == null)
-        {
-            return true;
-        }
-        int slotId = slot.index;
-        ItemStack clickItem;
-        if(hasShiftDown())
-        {
-            if(slot instanceof StoredItemStackSlot sSlot)
-            {
-                clickItem = sSlot.getVanillaActualStack();
-            }
-            else
-            {
-                clickItem = slot.getItem();
-            }
-            menu.isHanding = true;
-            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,true));
-        }
-        else
-        {
-            if(slot instanceof StoredItemStackSlot sSlot)
-            {
-                clickItem = sSlot.getVanillaActualStack();
-                menu.isHanding = true;
-                PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
-            }
-        }
-        return true;
-    }
-
-    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
     {
         super.mouseScrolled(mouseX,mouseY,scrollX,scrollY);
@@ -273,7 +237,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         super.mouseClicked(mouseX,mouseY,button);
 
-        // 检查当前点击是否命中搜索框
+        // 处理对搜索框的焦点取消
         boolean flag =  searchField.active && searchField.visible && mouseX >= (double)searchField.getX() && mouseY >= (double)searchField.getY() && mouseX < (double)(searchField.getX() + searchField.getWidth()) && mouseY < (double)(searchField.getY() + searchField.getHeight());
         if(!flag)
         {
@@ -286,6 +250,40 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
                 }
             }
         }
+
+        // 处理点击槽位
+        Slot slot = findSlot(mouseX,mouseY);
+        if(slot != null)
+        {
+            if (!menu.isHanding)
+            {
+                int slotId = slot.index;
+                ItemStack clickItem;
+                if(hasShiftDown())
+                {
+                    if(slot instanceof StoredItemStackSlot sSlot)
+                    {
+                        clickItem = sSlot.getVanillaActualStack();
+                    }
+                    else
+                    {
+                        clickItem = slot.getItem();
+                    }
+                    menu.isHanding = true;
+                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,true));
+                }
+                else
+                {
+                    if(slot instanceof StoredItemStackSlot sSlot)
+                    {
+                        clickItem = sSlot.getVanillaActualStack();
+                        menu.isHanding = true;
+                        PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
+                    }
+                }
+            }
+        }
+
         return true;
     }
 
