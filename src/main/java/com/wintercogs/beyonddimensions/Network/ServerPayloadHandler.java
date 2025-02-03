@@ -52,6 +52,7 @@ public class ServerPayloadHandler
                         DimensionsNet newNet = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), netId);
                         newNet.setId(Integer.parseInt(numId));
                         newNet.setOwner(player.getUUID());
+                        newNet.addManager(player.getUUID());
                         newNet.addPlayer(player.getUUID());
                         newNet.setDirty();
                         LOGGER.info("成功创建维度空间，id:{}。/n尝试打开GUI", netId);

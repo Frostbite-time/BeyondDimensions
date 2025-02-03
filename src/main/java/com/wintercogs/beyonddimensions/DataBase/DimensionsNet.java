@@ -22,10 +22,13 @@ public class DimensionsNet extends SavedData
     // 每个维度网络具有一个唯一标识符
     private int id;
 
-    // 网络管理者
+    // 网络持有者
     private UUID owner;
 
-    // 与该网络绑定的玩家
+    // 网络管理员 包含网络所有者
+    private final Set<UUID> managers = new HashSet<>();
+
+    // 与该网络绑定的玩家 包含网络管理者
     private final Set<UUID> players = new HashSet<>();
 
     // 网络的物品存储空间
@@ -107,6 +110,12 @@ public class DimensionsNet extends SavedData
 
         net.itemStorage.deserializeNBT(registryAccess, tag.getCompound("ItemStorage"));
 
+        if (tag.contains("Managers"))
+        {
+            ListTag managerList = tag.getList("Managers",8);
+            managerList.forEach(manager -> net.managers.add(UUID.fromString(manager.getAsString())));
+        }
+
         if (tag.contains("Players"))
         {
             ListTag playerList = tag.getList("Players", 8); // 8 表示 StringTag
@@ -124,6 +133,15 @@ public class DimensionsNet extends SavedData
         tag.putInt("Id", this.id);
         // 保存网络所有者 UUID
         tag.putUUID("Owner", this.owner);
+
+        // 保存网络管理者
+        ListTag managerListTag = new ListTag();
+        for (UUID manager : managers)
+        {
+            managerListTag.add(StringTag.valueOf(manager.toString()));
+        }
+        tag.put("Managers",managerListTag);
+
         // 保存绑定的玩家列表
         ListTag playerListTag = new ListTag();
         for (UUID player : players)
@@ -166,6 +184,29 @@ public class DimensionsNet extends SavedData
         setDirty();
     }
 
+    // 获取所有管理员
+    public Set<UUID> getManagers()
+    {
+        return managers;
+    }
+
+    // 添加管理员
+    public void addManager(UUID managerId)
+    {
+        managers.add(managerId);
+        setDirty();
+    }
+
+    public void removeManager(UUID managerId)
+    {
+        if(managerId == owner)
+        {
+            return;
+        }
+        managers.remove(managerId);
+        setDirty();
+    }
+
     // 获取所有绑定的玩家
     public Set<UUID> getPlayers()
     {
@@ -182,7 +223,15 @@ public class DimensionsNet extends SavedData
     // 移除玩家
     public void removePlayer(UUID playerId)
     {
+        if(playerId == owner)
+        {
+            return;
+        }
         players.remove(playerId);
+        if(managers.contains(playerId))
+        {
+            managers.remove(playerId);
+        }
         setDirty();
     }
 
