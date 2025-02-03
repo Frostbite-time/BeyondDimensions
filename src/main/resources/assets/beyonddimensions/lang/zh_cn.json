@@ -1,7 +1,16 @@
 {
+
   "menu.title.beyonddimensions.dimensionnetmenu": "维度网络",
   "beyonddimensions.scrollbar.usage.focused": "滚动条被选为焦点",
   "beyonddimensions.scrollbar.usage.hovered": "鼠标当前在滚动条上",
+
   "key.categories.beyonddimensions": "超越维度",
-  "key.beyonddimensions.open_gui": "打开维度网络"
+  "key.beyonddimensions.open_gui": "打开维度网络",
+
+  "item.beyonddimensions.net_creater": "网络创造器",
+
+  "block.beyonddimensions.net_control": "网络控制器",
+
+  "creativetab.beyonddimensions.items": "超越维度-物品",
+  "creativetab.beyonddimensions.blocks": "超越维度-方块"
 }

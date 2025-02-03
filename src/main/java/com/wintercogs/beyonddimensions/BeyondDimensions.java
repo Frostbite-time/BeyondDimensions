@@ -1,7 +1,12 @@
 package com.wintercogs.beyonddimensions;
 
+import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
+import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
+import com.wintercogs.beyonddimensions.block.ModBlocks;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 import net.neoforged.api.distmarker.Dist;
@@ -28,6 +33,7 @@ public class BeyondDimensions
     {
 
         modEventBus.addListener(this::commonSetup);
+//        modEventBus.addListener(this::addCreative);
 
         // 注册事件
         NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
@@ -38,11 +44,31 @@ public class BeyondDimensions
         // 调用UIRegister的构造函数，从而注册所有UI
         UIRegister.register(modEventBus);
 
+        // 注册创造模式菜单
+        ModCreativeModeTabs.register(modEventBus);
+
+        // 注册物品
+        ModItems.register(modEventBus);
+
+        // 注册方块
+        ModBlocks.register(modEventBus);
+
+
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
     {
+
     }
+
+//    private void addCreative(BuildCreativeModeTabContentsEvent event)
+//    {
+//        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS)
+//        {
+//            event.accept(ModItems.NET_CREATER);
+//            event.accept(ModBlocks.NET_CONTROL);
+//        }
+//    }
 
 
     @SubscribeEvent
