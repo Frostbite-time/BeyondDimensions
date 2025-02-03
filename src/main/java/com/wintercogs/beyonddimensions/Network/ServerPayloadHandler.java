@@ -44,18 +44,6 @@ public class ServerPayloadHandler
                                 (containerId, playerInventory, _player) -> new DimensionsNetMenu(containerId, playerInventory, net, new SimpleContainerData(0)),
                                 Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                         ));
-                    } else
-                    {
-                        LOGGER.info("当前玩家无维度空间，正在创建......");
-                        String netId = DimensionsNet.buildNewNetName(player);
-                        String numId = netId.replace("BDNet_", "");
-                        DimensionsNet newNet = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), netId);
-                        newNet.setId(Integer.parseInt(numId));
-                        newNet.setOwner(player.getUUID());
-                        newNet.addManager(player.getUUID());
-                        newNet.addPlayer(player.getUUID());
-                        newNet.setDirty();
-                        LOGGER.info("成功创建维度空间，id:{}。/n尝试打开GUI", netId);
                     }
 
                 }
