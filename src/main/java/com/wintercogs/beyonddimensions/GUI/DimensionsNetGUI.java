@@ -250,6 +250,10 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
                 }
             }
         }
+        else if(button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 右键点击搜索框则清空搜索框内容
+        {
+            searchField.setValue("");
+        }
 
         // 处理点击槽位
         Slot slot = findSlot(mouseX,mouseY);
