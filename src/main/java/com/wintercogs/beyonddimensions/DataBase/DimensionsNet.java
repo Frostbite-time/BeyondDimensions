@@ -5,6 +5,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -69,6 +70,19 @@ public class DimensionsNet extends SavedData
         return "BDNet_" + netId;
     }
 
+    public static DimensionsNet getNetFromId(int id, Level storageProvider)
+    {
+        if(id<0)
+        {
+            return null;
+        }
+        DimensionsNet net = storageProvider.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), "BDNet_" + id);
+        if(net !=null)
+        {
+            return net;
+        }
+        return null;
+    }
 
     public static DimensionsNet getNetFromPlayer(Player player)
     {

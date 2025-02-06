@@ -1,11 +1,13 @@
 package com.wintercogs.beyonddimensions;
 
+import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 import net.neoforged.api.distmarker.Dist;
@@ -32,6 +34,8 @@ public class BeyondDimensions
     {
 
         modEventBus.addListener(this::commonSetup);
+        //为存储网络的接口方块注册物品交互能力
+        modEventBus.addListener(NetInterfaceBlockEntity::registerCapability);
 
         // 注册事件
         NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
