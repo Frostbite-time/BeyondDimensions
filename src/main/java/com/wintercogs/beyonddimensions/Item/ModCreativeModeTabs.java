@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Item;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.block.ModBlocks;
+import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -35,6 +35,7 @@ public class ModCreativeModeTabs
                     .title(Component.translatable("creativetab.beyonddimensions.blocks"))
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModBlocks.NET_CONTROL);
+                        output.accept(ModBlocks.NET_INTERFACE);
                     })
                     .build());
 

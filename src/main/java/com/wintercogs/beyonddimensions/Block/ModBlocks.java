@@ -1,6 +1,7 @@
-package com.wintercogs.beyonddimensions.block;
+package com.wintercogs.beyonddimensions.Block;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Block.Custom.NetInterfaceBlock;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -20,7 +21,10 @@ public class ModBlocks
     
     public static final  DeferredBlock<Block> NET_CONTROL = registerBlock("net_control",
             ()-> new Block(BlockBehaviour.Properties.of()
-                    .strength(4f).requiresCorrectToolForDrops().sound(SoundType.AMETHYST)));
+                    .strength(4f).sound(SoundType.AMETHYST)));
+
+    public static final DeferredBlock<Block> NET_INTERFACE = registerBlock("net_interface",
+            ()-> new NetInterfaceBlock(BlockBehaviour.Properties.of().strength(2f)));
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block)
     {
