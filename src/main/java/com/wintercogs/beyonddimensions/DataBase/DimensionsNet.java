@@ -78,13 +78,9 @@ public class DimensionsNet extends SavedData
             DimensionsNet net = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), "BDNet_" + netId);
             if (net != null)
             {
-                for (UUID id : net.getPlayers())
+                if(net.players.contains(player.getUUID()))
                 {
-                    // 使用字符串比较uuid，否则在硬盘读写后uuid可能无法比较
-                    if (player.getStringUUID().equals(id.toString()))
-                    {
-                        return net;
-                    }
+                    return net;
                 }
             }
             else
@@ -199,7 +195,7 @@ public class DimensionsNet extends SavedData
 
     public void removeManager(UUID managerId)
     {
-        if(managerId == owner)
+        if(managers.contains(owner))
         {
             return;
         }
@@ -233,6 +229,16 @@ public class DimensionsNet extends SavedData
             managers.remove(playerId);
         }
         setDirty();
+    }
+
+    public boolean isManager(Player player)
+    {
+        boolean flag = false;
+        if(managers.contains(player.getUUID()))
+        {
+            flag = true;
+        }
+        return flag;
     }
 
     //物品存储

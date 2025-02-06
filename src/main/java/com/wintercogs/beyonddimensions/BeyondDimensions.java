@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions;
 
+import com.wintercogs.beyonddimensions.Block.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
@@ -31,7 +32,6 @@ public class BeyondDimensions
     {
 
         modEventBus.addListener(this::commonSetup);
-//        modEventBus.addListener(this::addCreative);
 
         // 注册事件
         NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
@@ -51,6 +51,8 @@ public class BeyondDimensions
         // 注册方块
         ModBlocks.register(modEventBus);
 
+        // 注册方块实体
+        ModBlockEntities.register(modEventBus);
 
     }
 
@@ -58,16 +60,6 @@ public class BeyondDimensions
     {
 
     }
-
-//    private void addCreative(BuildCreativeModeTabContentsEvent event)
-//    {
-//        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS)
-//        {
-//            event.accept(ModItems.NET_CREATER);
-//            event.accept(ModBlocks.NET_CONTROL);
-//        }
-//    }
-
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event)
