@@ -423,7 +423,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer()); // 创建一个 Netty 的 ByteBuf
                 RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());
                 StoredItemStack.STREAM_CODEC.encode(registryBuf,stack);
-                int entrySize = registryBuf.array().length + Integer.BYTES + 1; // 物品的字节数、索引的字节数、结束标记的字节数
+                int entrySize = registryBuf.readableBytes() + Integer.BYTES + 1; // 物品的字节数、索引的字节数、结束标记的字节数
 
                 boolean isLastItem = (i == storage.size() - 1);
                 // 如果添加之后包会比最大负载大，则分包，然后把物品添加到下一个包
@@ -511,16 +511,24 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             // 物品从存储移动到背包
             if(slot instanceof StoredItemStackSlot)
             {
-                // moveItemStackTo会改变itemStack1，所以我们给出clickItem的深克隆
                 cacheStack = clickItem.copy();
                 int moveCount = checkCanMoveStackCount(cacheStack, this.lines * 9, this.slots.size(), true);
                 moveCount = Math.min(moveCount,cacheStack.getCount());
-                cacheStack.setCount(moveCount);
-                if (!this.moveItemStackTo(cacheStack, this.lines * 9, this.slots.size(), true)) {
-                    return ItemStack.EMPTY;
+                int nowCount = 0;
+                StoredItemStack nowStack = itemStorage.getStoredItemStack(new StoredItemStack(cacheStack));
+                if(nowStack != null)
+                {
+                    nowCount = (int) nowStack.getCount();
                 }
-                // 最后，为了防止moveItemStackTo结束后itemStack1变成了空物品，取原本未被改变的clickItem配合算出的移除数量来移除物品
-                itemStorage.removeItem(clickItem,moveCount);
+                moveCount = Math.min(moveCount,nowCount);
+                if(moveCount>=0)
+                {
+                    cacheStack.setCount(moveCount);
+                    if (!this.moveItemStackTo(cacheStack, this.lines * 9, this.slots.size(), true)) {
+                        return ItemStack.EMPTY;
+                    }
+                    itemStorage.removeItem(clickItem,moveCount);
+                }
             }
             else // 物品由背包移动到存储
             {
