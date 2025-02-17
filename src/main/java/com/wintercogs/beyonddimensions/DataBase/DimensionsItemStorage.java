@@ -6,12 +6,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class DimensionsItemStorage
+public class DimensionsItemStorage implements IItemHandler
 {
 
     private DimensionsNet net; // 用于通知维度网络进行保存
@@ -242,4 +243,85 @@ public class DimensionsItemStorage
         net.setDirty();
     }
 
+    @Override
+    public int getSlots() {
+        return itemStorage.size();
+    }
+
+    @Override
+    public ItemStack getStackInSlot(int slot) {
+        return itemStorage.get(slot).getActualStack();
+    }
+
+    @Override
+    public ItemStack insertItem(int slot, ItemStack itemStack, boolean simulate) {
+        if(simulate)
+        {
+            return ItemStack.EMPTY;
+        }
+        addItem(itemStack,itemStack.getCount());
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public ItemStack extractItem(int slot, int count, boolean simulate) {
+        if(simulate)
+        {
+            // 从索引中移除物品 并返回被移除的物品堆叠
+            if (slot > itemStorage.size())
+            {
+                return ItemStack.EMPTY;
+            }
+            StoredItemStack sItem = itemStorage.get(slot);
+
+            if (sItem != null)
+            {
+                //确保一次交互被移除的物品不超过该堆叠原版的最大叠加
+                ItemStack before_stack;
+                if (sItem.getCount() > sItem.getItemStack().getMaxStackSize())
+                {
+                    before_stack = sItem.getVanillaMaxSizeStack();
+                }
+                else
+                {
+                    before_stack = sItem.getActualStack();
+                }
+                if (count > before_stack.getMaxStackSize())
+                {
+                    count = before_stack.getMaxStackSize();
+                }
+
+                // 实际执行移除的逻辑
+                StoredItemStack simulateItem = new StoredItemStack(sItem);
+                simulateItem.subCount(count); // subCount会将小于0的数变为0
+                if (simulateItem.getCount() == 0)
+                {
+                    return before_stack.copy();
+                }
+                else
+                {
+                    ItemStack new_stack = before_stack.copy();
+                    new_stack.setCount((int) count);
+                    return new_stack;
+                }
+            }
+
+            return ItemStack.EMPTY;
+        }
+        else
+        {
+            return removeItem(slot,count);
+        }
+
+    }
+
+    @Override
+    public int getSlotLimit(int slot) {
+        return Integer.MAX_VALUE-1;
+    }
+
+    @Override
+    public boolean isItemValid(int i, ItemStack itemStack) {
+        return true;
+    }
 }

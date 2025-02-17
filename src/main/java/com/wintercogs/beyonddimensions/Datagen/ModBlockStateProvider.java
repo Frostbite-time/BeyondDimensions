@@ -20,6 +20,7 @@ public class ModBlockStateProvider extends BlockStateProvider
     {
         blockWithItem(ModBlocks.NET_CONTROL);
         blockWithItem(ModBlocks.NET_INTERFACE);
+        blockWithItem(ModBlocks.NET_PATHWAY);
     }
 
     private void blockWithItem(DeferredBlock<?> deferredBlock)

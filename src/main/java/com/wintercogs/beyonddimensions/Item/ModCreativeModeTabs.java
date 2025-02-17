@@ -36,6 +36,7 @@ public class ModCreativeModeTabs
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModBlocks.NET_CONTROL);
                         output.accept(ModBlocks.NET_INTERFACE);
+                        output.accept(ModBlocks.NET_PATHWAY);
                     })
                     .build());
 

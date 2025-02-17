@@ -25,6 +25,7 @@ public class ModBlockTagProvider extends BlockTagsProvider
         // 标记以下方块使用镐子挖掘更快
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
                 .add(ModBlocks.NET_CONTROL.get())
-                .add(ModBlocks.NET_INTERFACE.get());
+                .add(ModBlocks.NET_INTERFACE.get())
+                .add(ModBlocks.NET_PATHWAY.get());
     }
 }

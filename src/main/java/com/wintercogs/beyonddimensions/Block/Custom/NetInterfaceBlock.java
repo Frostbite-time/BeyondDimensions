@@ -42,23 +42,6 @@ public class NetInterfaceBlock extends Block implements EntityBlock
                         NetInterfaceBlockEntity.tick(level1, pos, state1, (NetInterfaceBlockEntity) blockEntity);
     }
 
-//    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-//        super.tick(state,level,pos,random);
-//        LOGGER.info("tick执行");
-//        if(level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity)
-//        {
-//            if(blockEntity.getNetId() != -1)
-//            {
-//                blockEntity.transTime++;
-//                if(blockEntity.transTime>=blockEntity.transHold)
-//                {
-//                    blockEntity.transTime = 0;
-//                    blockEntity.transferToNet(level);
-//                }
-//            }
-//        }
-//    }
-
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
     {
