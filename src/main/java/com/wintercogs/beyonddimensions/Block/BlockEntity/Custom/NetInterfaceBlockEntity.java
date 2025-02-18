@@ -5,25 +5,17 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.items.ItemStackHandler;
-import org.jetbrains.annotations.Nullable;
 
-public class NetInterfaceBlockEntity extends BlockEntity implements Container
+public class NetInterfaceBlockEntity extends NetedBlockEntity implements Container
 {
-    // 存储接口所对应的维度网络id，用于和维度网络交互
-    private int netId = -1; // 初始化为-1，表示未绑定
     public final int transHold = 20;
     public int transTime = 0;
 
@@ -67,7 +59,7 @@ public class NetInterfaceBlockEntity extends BlockEntity implements Container
 
     public void transferToNet(Level level)
     {
-        DimensionsNet net = DimensionsNet.getNetFromId(netId,level);
+        DimensionsNet net = DimensionsNet.getNetFromId(getNetId(),level);
         if(net != null)
         {
             for(int i=0; i<9; i++)
@@ -79,22 +71,10 @@ public class NetInterfaceBlockEntity extends BlockEntity implements Container
         }
     }
 
-    public int getNetId()
-    {
-        return this.netId;
-    }
-
-    public void setNetId(int netId)
-    {
-        this.netId = netId;
-        setChanged();
-    }
-
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag,registries);
-        this.netId = tag.getInt("netId");
         this.itemStackHandler.deserializeNBT(registries,tag.getCompound("inventory"));
     }
 
@@ -102,35 +82,7 @@ public class NetInterfaceBlockEntity extends BlockEntity implements Container
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.saveAdditional(tag, registries);
-        tag.putInt("netId",this.netId);
         tag.put("inventory",itemStackHandler.serializeNBT(registries));
-    }
-
-    @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
-    {
-        CompoundTag tag = new CompoundTag();
-        saveAdditional(tag,registries);
-        return tag;
-    }
-
-    @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider)
-    {
-        super.handleUpdateTag(tag, lookupProvider);
-    }
-
-    @Override // 使用此数据包进行同步
-    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket()
-    {
-        return ClientboundBlockEntityDataPacket.create(this);
-    }
-
-    // 在接受更新数据包时做一些自定义操作
-    @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider)
-    {
-        super.onDataPacket(net, pkt, lookupProvider);
     }
 
     @Override

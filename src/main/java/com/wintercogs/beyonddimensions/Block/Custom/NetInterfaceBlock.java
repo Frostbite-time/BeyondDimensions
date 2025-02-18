@@ -2,12 +2,9 @@ package com.wintercogs.beyonddimensions.Block.Custom;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetInterfaceBlockEntity;
-import com.wintercogs.beyonddimensions.Block.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
+import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -23,7 +20,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-public class NetInterfaceBlock extends Block implements EntityBlock
+public class NetInterfaceBlock extends NetedBlock implements EntityBlock
 {
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -45,40 +42,7 @@ public class NetInterfaceBlock extends Block implements EntityBlock
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
     {
-        // 空手右键可以设定网络接口所绑定的网络
-        if(!player.getMainHandItem().isEmpty())
-        {
-            return InteractionResult.PASS;
-        }
-        if(!level.isClientSide())
-        {
-            if(level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity)
-            {
-                if(blockEntity.getNetId() == -1)
-                {
-                    DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-                    if(net != null)
-                    {
-                        blockEntity.setNetId(net.getId());
-                    }
-                }
-                else
-                {
-                    DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-                    if(net != null)
-                    {
-                        if(net.getId() == blockEntity.getNetId())
-                        {
-                            if(net.isManager(player))
-                            {
-                                blockEntity.setNetId(-1);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return InteractionResult.SUCCESS;
+        return super.useWithoutItem(state,level,pos,player,hitResult);
     }
 
     @Override

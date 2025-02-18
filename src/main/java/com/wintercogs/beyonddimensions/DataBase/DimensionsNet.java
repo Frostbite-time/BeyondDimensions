@@ -36,15 +36,9 @@ public class DimensionsNet extends SavedData
     private DimensionsItemStorage itemStorage;
 
 
-
-
-
-
-    // 构造函数，传入网络管理者的UUID
     public DimensionsNet()
     {
         itemStorage = new DimensionsItemStorage(this);
-
     }
 
     // 基本函数
@@ -243,6 +237,18 @@ public class DimensionsNet extends SavedData
             managers.remove(playerId);
         }
         setDirty();
+    }
+
+    public boolean isOwner(Player player)
+    {
+        if(player.getUUID().equals(getOwner()))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public boolean isManager(Player player)
