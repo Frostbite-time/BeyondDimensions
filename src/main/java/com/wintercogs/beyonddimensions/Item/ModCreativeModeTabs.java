@@ -24,6 +24,8 @@ public class ModCreativeModeTabs
                     .title(Component.translatable("creativetab.beyonddimensions.items"))
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModItems.NET_CREATER);
+                        output.accept(ModItems.NET_MEMBER_INVITER);
+                        output.accept(ModItems.NET_MANAGER_INVITER);
                     })
                     .build());
 

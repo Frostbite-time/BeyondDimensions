@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
@@ -50,6 +51,9 @@ public class BeyondDimensions
 
         // 注册创造模式菜单
         ModCreativeModeTabs.register(modEventBus);
+
+        // 注册物品组件
+        ModDataComponents.register(modEventBus);
 
         // 注册物品
         ModItems.register(modEventBus);

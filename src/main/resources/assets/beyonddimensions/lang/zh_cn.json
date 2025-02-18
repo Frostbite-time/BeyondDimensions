@@ -8,6 +8,8 @@
   "key.beyonddimensions.open_gui": "打开维度网络",
 
   "item.beyonddimensions.net_creater": "网络创造器",
+  "item.beyonddimensions.net_member_inviter": "维度成员邀请符",
+  "item.beyonddimensions.net_manager_inviter": "维度管理员邀请符",
 
   "block.beyonddimensions.net_control": "网络控制器",
   "block.beyonddimensions.net_interface": "网络接口",

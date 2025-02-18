@@ -18,5 +18,7 @@ public class ModItemModelProvider extends ItemModelProvider
     protected void registerModels()
     {
         basicItem(ModItems.NET_CREATER.get());
+        basicItem(ModItems.NET_MEMBER_INVITER.get());
+        basicItem(ModItems.NET_MANAGER_INVITER.get());
     }
 }
