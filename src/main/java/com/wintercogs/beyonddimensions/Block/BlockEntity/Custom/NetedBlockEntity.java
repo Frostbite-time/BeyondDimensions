@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -62,6 +63,22 @@ public abstract class NetedBlockEntity extends BlockEntity
             this.netId = -1;
             setChanged();
         }
+    }
+
+    public DimensionsNet getNet()
+    {
+        if(netId>=0)
+        {
+            if(getLevel() instanceof ServerLevel)
+            {
+                return DimensionsNet.getNetFromId(netId,getLevel());
+            }
+        }
+        else
+        {
+            return null;
+        }
+        return null;
     }
 
     @Override

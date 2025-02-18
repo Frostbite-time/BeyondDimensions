@@ -27,8 +27,12 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
                     {
                         return new ItemStackHandler(0);
                     }
-                    DimensionsNet net = DimensionsNet.getNetFromId(be.getNetId(),be.getLevel());
-                    return net.getItemStorage();
+                    DimensionsNet net = be.getNet();
+                    if(net != null)
+                    {
+                        return net.getItemStorage();
+                    }
+                    return new ItemStackHandler(0);
                 } // 根据方向返回处理器
         );
     }

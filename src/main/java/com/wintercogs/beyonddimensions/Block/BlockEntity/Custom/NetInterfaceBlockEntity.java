@@ -52,14 +52,14 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements Contain
             if(blockEntity.transTime>=blockEntity.transHold)
             {
                 blockEntity.transTime = 0;
-                blockEntity.transferToNet(level);
+                blockEntity.transferToNet();
             }
         }
     }
 
-    public void transferToNet(Level level)
+    public void transferToNet()
     {
-        DimensionsNet net = DimensionsNet.getNetFromId(getNetId(),level);
+        DimensionsNet net = getNet();
         if(net != null)
         {
             for(int i=0; i<9; i++)
