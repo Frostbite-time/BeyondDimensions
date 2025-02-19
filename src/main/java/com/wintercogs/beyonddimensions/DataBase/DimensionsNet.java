@@ -1,10 +1,12 @@
 package com.wintercogs.beyonddimensions.DataBase;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -251,6 +253,18 @@ public class DimensionsNet extends SavedData
         }
     }
 
+    public boolean isOwner(UUID playerId)
+    {
+        if(playerId.equals(getOwner()))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     public boolean isManager(Player player)
     {
         boolean flag = false;
@@ -259,6 +273,38 @@ public class DimensionsNet extends SavedData
             flag = true;
         }
         return flag;
+    }
+
+    public boolean isManager(UUID playerId)
+    {
+        boolean flag = false;
+        if(managers.contains(playerId))
+        {
+            flag = true;
+        }
+        return flag;
+    }
+
+    public HashMap<UUID,PlayerPermissionInfo> getPlayerPermissionInfoMap(Level playerInfoProvider)
+    {
+
+        HashMap<UUID,PlayerPermissionInfo> infoMap = new HashMap<>();
+        for(UUID playerId :players)
+        {
+            if(isOwner(playerId))
+            {
+                infoMap.put(playerId, new PlayerPermissionInfo(PlayerNameHelper.getPlayerNameByUUID(playerId,playerInfoProvider),NetPermissionlevel.Owner));
+            }
+            else if(isManager(playerId))
+            {
+                infoMap.put(playerId, new PlayerPermissionInfo(PlayerNameHelper.getPlayerNameByUUID(playerId,playerInfoProvider),NetPermissionlevel.Manager));
+            }
+            else
+            {
+                infoMap.put(playerId, new PlayerPermissionInfo(PlayerNameHelper.getPlayerNameByUUID(playerId,playerInfoProvider),NetPermissionlevel.Member));
+            }
+        }
+        return infoMap;
     }
 
     //物品存储

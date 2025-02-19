@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Network;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -107,6 +108,35 @@ public class ServerPayloadHandler
                     menu.broadcastChanges();
                     // 这里发包不是让客户端执行操作，而是解除锁定
                     PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, ItemStack.EMPTY,1,false));
+                }
+
+        );
+    }
+
+    public void handleCallServerPlayerInfoPacket(final CallServerPlayerInfoPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    NetControlMenu menu;
+                    if (!(player.containerMenu instanceof NetControlMenu))
+                    {
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
+                    menu = (NetControlMenu) player.containerMenu;
+                    menu.sendPlayerInfo();
+                }
+
+        );
+    }
+
+    public void handlePlayerPermissionInfoPacket(final PlayerPermissionInfoPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
                 }
 
         );

@@ -2,11 +2,13 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
+import com.wintercogs.beyonddimensions.Packet.CallServerPlayerInfoPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
 {
@@ -26,6 +28,8 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
     protected void init() {
         this.leftPos = (this.width - 256)/2;
         this.topPos = (this.height - 256)/2;
+
+        PacketDistributor.sendToServer(new CallServerPlayerInfoPacket());
     }
 
     @Override

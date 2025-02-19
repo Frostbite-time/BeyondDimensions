@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
 import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
+import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
@@ -146,6 +147,35 @@ public class ClientPayloadHandler
                     }
                     menu = (DimensionsNetMenu) player.containerMenu;
                     menu.isHanding = false;
+                }
+
+        );
+    }
+
+    public void handleCallServerPlayerInfoPacket(final CallServerPlayerInfoPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+
+        );
+    }
+
+    public void handlePlayerPermissionInfoPacket(final PlayerPermissionInfoPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    NetControlMenu menu;
+                    if (!(player.containerMenu instanceof NetControlMenu))
+                    {
+                        return;
+                    }
+                    menu = (NetControlMenu) player.containerMenu;
+                    menu.loadPlayerInfo(packet.infoMap());
                 }
 
         );
