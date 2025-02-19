@@ -1,13 +1,13 @@
 package com.wintercogs.beyonddimensions.Block;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Block.Custom.NetControlBlock;
 import com.wintercogs.beyonddimensions.Block.Custom.NetInterfaceBlock;
 import com.wintercogs.beyonddimensions.Block.Custom.NetPathwayBlock;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -21,8 +21,8 @@ public class ModBlocks
             DeferredRegister.createBlocks(BeyondDimensions.MODID);
     
     public static final  DeferredBlock<Block> NET_CONTROL = registerBlock("net_control",
-            ()-> new Block(BlockBehaviour.Properties.of()
-                    .strength(4f).sound(SoundType.AMETHYST)));
+            ()-> new NetControlBlock(BlockBehaviour.Properties.of()
+                    .strength(4f)));
 
     public static final DeferredBlock<Block> NET_INTERFACE = registerBlock("net_interface",
             ()-> new NetInterfaceBlock(BlockBehaviour.Properties.of().strength(2f)));
