@@ -90,5 +90,15 @@ public class PacketRegister
                         ServerPayloadHandler.getInstance()::handlePlayerPermissionInfoPacket
                 )
         );
+
+        // 注册 CallSeverClickPacket 用于同步滑动条状态
+        registrar.playBidirectional(
+                NetControlActionPacket.TYPE,
+                NetControlActionPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleNetControlActionPacket,
+                        ServerPayloadHandler.getInstance()::handleNetControlActionPacket
+                )
+        );
     }
 }

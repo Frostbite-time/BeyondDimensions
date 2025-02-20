@@ -180,4 +180,15 @@ public class ClientPayloadHandler
 
         );
     }
+
+    public void handleNetControlActionPacket(final NetControlActionPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+
+        );
+    }
 }

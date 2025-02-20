@@ -69,14 +69,14 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         this.topPos = (this.height - 235)/2;
 
         // 初始化按钮组件
-        sortButton = new SortMethodButton(this.leftPos+72+18*5-5,20,button ->
+        sortButton = new SortMethodButton(this.leftPos+72+18*5-5,this.topPos+6,button ->
         {
             sortButton.toggleState();
             buttonStateMap.put(sortButton.getName(),sortButton.currentState);
         });
         addRenderableWidget(sortButton);
 
-        reverseButton = new ReverseButton(this.leftPos+72+18*4-5,20,button ->
+        reverseButton = new ReverseButton(this.leftPos+72+18*4-5,this.topPos+6,button ->
         {
             reverseButton.toggleState();
             buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);

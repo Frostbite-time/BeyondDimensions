@@ -205,7 +205,7 @@ public class DimensionsNet extends SavedData
 
     public void removeManager(UUID managerId)
     {
-        if(managers.contains(owner))
+        if(managerId.equals(owner))
         {
             return;
         }

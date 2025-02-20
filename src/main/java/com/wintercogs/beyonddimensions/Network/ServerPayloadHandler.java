@@ -141,4 +141,22 @@ public class ServerPayloadHandler
 
         );
     }
+
+    public void handleNetControlActionPacket(final NetControlActionPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    NetControlMenu menu;
+                    if (!(player.containerMenu instanceof NetControlMenu))
+                    {
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
+                    menu = (NetControlMenu) player.containerMenu;
+                    menu.handlePlayerAction(packet.receiver(),packet.action());
+                }
+
+        );
+    }
 }
