@@ -65,10 +65,6 @@ public class NetControlMenu extends AbstractContainerMenu
 
     public void loadPlayerInfo(HashMap<UUID, PlayerPermissionInfo> playerInfo)
     {
-        for(int i = 0;i<30;i++)
-        {
-            playerInfo.put(UUID.randomUUID(),new PlayerPermissionInfo("awsd", NetPermissionlevel.Member));
-        }
         this.playerInfo = playerInfo;
     }
 
