@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
+import com.wintercogs.beyonddimensions.DataBase.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.Packet.PlayerPermissionInfoPacket;
 import net.minecraft.core.registries.Registries;
@@ -64,6 +65,10 @@ public class NetControlMenu extends AbstractContainerMenu
 
     public void loadPlayerInfo(HashMap<UUID, PlayerPermissionInfo> playerInfo)
     {
+        for(int i = 0;i<30;i++)
+        {
+            playerInfo.put(UUID.randomUUID(),new PlayerPermissionInfo("awsd", NetPermissionlevel.Member));
+        }
         this.playerInfo = playerInfo;
     }
 
@@ -71,46 +76,37 @@ public class NetControlMenu extends AbstractContainerMenu
     {
         if(action == NetControlAction.SetOwner)
         {
-            LOGGER.info("尝试设为所有者");
             // 执行者是所有者，且接收者不为玩家，则可以设置新所有者
             if(net.isOwner(player)&&!player.getUUID().equals(receiver))
             {
-                LOGGER.info("成功设为所有者");
                 net.setOwner(receiver);
             }
         }
         else if(action == NetControlAction.SetManager)
         {
-            LOGGER.info("尝试设为管理员");
             // 执行者是所有者，且接收者不为管理员，则可以被添加为管理员
             if(net.isOwner(player)&&!net.isManager(receiver))
             {
-                LOGGER.info("成功设为管理员");
                 net.addManager(receiver);
             }
         }
         else if(action == NetControlAction.RemoveManager)
         {
-            LOGGER.info("尝试移除管理员");
             // 执行者是所有者，且接收者为管理员，且接收者并非所有者，则可以被移除管理员权限
             if(net.isOwner(player)&&net.isManager(receiver)&&!net.isOwner(receiver))
             {
-                LOGGER.info("成功移除管理员");
                 net.removeManager(receiver);
             }
         }
         else if(action == NetControlAction.RemovePlayer)
         {
-            LOGGER.info("尝试移除成员");
             // 执行者是管理员，被执行者不是管理员，可以移除成员
             if(net.isManager(player)&&!net.isManager(receiver))
             {
-                LOGGER.info("成功移除成员");
                 net.removePlayer(receiver);
             }
             else if(player.getUUID().equals(receiver)&&!net.isOwner(receiver)) // 否则，移除者是自己，并且自己不是所有者，可以移除
             {
-                LOGGER.info("成功移除成员");
                 net.removePlayer(receiver);
             }
         }

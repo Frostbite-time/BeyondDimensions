@@ -37,6 +37,10 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
     private Button removeManagerButton;
     private Button removeMemberButton;
 
+    private final int maxShowPlayers = 20;
+    private int nowShowPlayer = 0;
+    private int nowTopShowPlayer = 0;
+
     private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_control.png");
 
     public NetControlGUI(NetControlMenu menu, Inventory playerInventory, Component title)
@@ -46,6 +50,59 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
         // 去除空白的真实部分，用于计算图片显示的最佳位置
         this.imageWidth = 256;
         this.imageHeight = 235;
+    }
+
+    private void updatePlayerWidget()
+    {
+        ArrayList<PermissionInfoButton> cacheList = new ArrayList<>();
+        for (Map.Entry<UUID, PlayerPermissionInfo> entry : menu.playerInfo.entrySet()) {
+            UUID key = entry.getKey();
+            PlayerPermissionInfo value = entry.getValue();
+
+            cacheList.add(new PermissionInfoButton(0,0,84,10, key, value, Component.literal("test"),button -> {
+                PermissionInfoButton permissionInfoButton = (PermissionInfoButton) button;
+                currentPlayerId = permissionInfoButton.getPlayerId();
+                currentPlayerName = permissionInfoButton.getPermissionInfo().name();
+                currentPlayerPermissionLevel = permissionInfoButton.getPermissionInfo().level();
+            }));
+        }
+        cacheList.sort(
+                Comparator.comparing((PermissionInfoButton button) -> button.getPermissionInfo().level()).thenComparing(
+                        button -> button.getPermissionInfo().name()
+                )
+        );
+        nowShowPlayer = 0;
+        for(PermissionInfoButton button:cacheList)
+        {
+            button.setX(leftPos+11);
+            button.setY(topPos+18+(nowShowPlayer-nowTopShowPlayer)*10);
+            button.setMessage(Component.literal(button.getPermissionInfo().name()));
+            nowShowPlayer++;
+            if(nowShowPlayer-nowTopShowPlayer >= maxShowPlayers)
+            {
+                break;
+            }
+        }
+        for (PermissionInfoButton button:permissionInfoButtons)
+        {
+            removeWidget(button);
+        }
+        permissionInfoButtons = cacheList;
+        nowShowPlayer = 0;
+        for (PermissionInfoButton button:permissionInfoButtons)
+        {
+            if(nowShowPlayer-nowTopShowPlayer<0)
+            {
+                nowShowPlayer++;
+                continue;
+            }
+            addRenderableWidget(button);
+            nowShowPlayer++;
+            if(nowShowPlayer-nowTopShowPlayer >= maxShowPlayers)
+            {
+                break;
+            }
+        }
     }
 
     @Override
@@ -58,10 +115,8 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
         ownerButton = Button.builder(
                 Component.literal("移交所有权"),
                 button -> {
-                    LOGGER.info("成功点击");
                     if(currentPlayerId != null)
                     {
-                        LOGGER.info("成功执行");
                         PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetOwner));
                     }
                 }
@@ -105,36 +160,30 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
     @Override
     protected void containerTick()
     {
-        ArrayList<PermissionInfoButton> cacheList = new ArrayList<>();
-        for (Map.Entry<UUID, PlayerPermissionInfo> entry : menu.playerInfo.entrySet()) {
-            UUID key = entry.getKey();
-            PlayerPermissionInfo value = entry.getValue();
+        updatePlayerWidget();
+    }
 
-            cacheList.add(new PermissionInfoButton(0,0,84,10, key, value, Component.literal("test"),button -> {
-                PermissionInfoButton permissionInfoButton = (PermissionInfoButton) button;
-                currentPlayerId = permissionInfoButton.getPlayerId();
-                currentPlayerName = permissionInfoButton.getPermissionInfo().name();
-                currentPlayerPermissionLevel = permissionInfoButton.getPermissionInfo().level();
-            }));
-        }
-        cacheList.sort(
-                Comparator.comparing((PermissionInfoButton button) -> button.getPermissionInfo().level()).thenComparing(
-                        button -> button.getPermissionInfo().name()
-                )
-        );
-        int i = 0;
-        for(PermissionInfoButton button:cacheList)
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
+    {
+        super.mouseScrolled(mouseX,mouseY,scrollX,scrollY);
+        if (scrollY > 0)
         {
-            button.setX(leftPos+11);
-            button.setY(topPos+18+i*10);
-            button.setMessage(Component.literal(button.getPermissionInfo().name()));
-            i++;
-        }
-        permissionInfoButtons = cacheList;
-        for (PermissionInfoButton button:permissionInfoButtons)
+            nowTopShowPlayer--;
+        } else if(scrollY < 0)
         {
-            addRenderableWidget(button);
+            nowTopShowPlayer++;
         }
+        if(permissionInfoButtons.size()- maxShowPlayers<=nowTopShowPlayer)
+        {
+            nowTopShowPlayer = permissionInfoButtons.size()- maxShowPlayers;
+        }
+        if(nowTopShowPlayer<0)
+        {
+            nowTopShowPlayer = 0;
+        }
+        updatePlayerWidget();
+        return true;
     }
 
     @Override
@@ -151,9 +200,20 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         this.renderTooltip(guiGraphics, mouseX, mouseY);
+        nowShowPlayer = 0;
         for (PermissionInfoButton button:permissionInfoButtons)
         {
+            if(nowShowPlayer-nowTopShowPlayer<0)
+            {
+                nowShowPlayer++;
+                continue;
+            }
             button.render(guiGraphics,mouseX,mouseY,partialTicks);
+            nowShowPlayer++;
+            if(nowShowPlayer-nowTopShowPlayer >= maxShowPlayers)
+            {
+                break;
+            }
         }
         ownerButton.render(guiGraphics,mouseX,mouseY,partialTicks);
         managerButton.render(guiGraphics,mouseX,mouseY,partialTicks);
