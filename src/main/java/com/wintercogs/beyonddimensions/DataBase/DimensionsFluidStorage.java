@@ -16,7 +16,7 @@ public class DimensionsFluidStorage implements IFluidHandler
     // 实际的存储
     private final ArrayList<FluidStack> fluidStorage;
 
-    public DimensionsFluidStorage(Set<FluidStack> fluidStackSet)
+    public DimensionsFluidStorage()
     {
         this.fluidStorage = new ArrayList<>();
     }
