@@ -14,7 +14,9 @@
 
   "block.beyonddimensions.net_control": "网络控制器",
   "block.beyonddimensions.net_interface": "网络接口",
-  "block.beyonddimensions.net_pathway": "维度网络通道",
+  "block.beyonddimensions.net_pathway": "维度网络物品通道",
+  "block.beyonddimensions.net_fluid_pathway": "维度网络流体通道",
+  "block.beyonddimensions.net_energy_pathway": "维度网络能量通道",
 
   "creativetab.beyonddimensions.items": "超越维度-物品",
   "creativetab.beyonddimensions.blocks": "超越维度-方块"

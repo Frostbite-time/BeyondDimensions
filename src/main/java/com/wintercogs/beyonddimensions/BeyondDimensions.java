@@ -1,5 +1,7 @@
 package com.wintercogs.beyonddimensions;
 
+import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetFluidPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.ModBlockEntities;
@@ -39,6 +41,8 @@ public class BeyondDimensions
         //为存储网络的接口方块注册物品交互能力
         modEventBus.addListener(NetInterfaceBlockEntity::registerCapability);
         modEventBus.addListener(NetPathwayBlockEntity::registerCapability);
+        modEventBus.addListener(NetFluidPathwayBlockEntity::registerCapability);
+        modEventBus.addListener(NetEnergyPathwayBlockEntity::registerCapability);
 
         // 注册事件
         NeoForge.EVENT_BUS.register(this);//注册this类中所有事件

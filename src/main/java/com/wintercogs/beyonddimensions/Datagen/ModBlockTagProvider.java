@@ -26,6 +26,8 @@ public class ModBlockTagProvider extends BlockTagsProvider
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
                 .add(ModBlocks.NET_CONTROL.get())
                 .add(ModBlocks.NET_INTERFACE.get())
-                .add(ModBlocks.NET_PATHWAY.get());
+                .add(ModBlocks.NET_PATHWAY.get())
+                .add(ModBlocks.NET_FLUID_PATHWAY.get())
+                .add(ModBlocks.NET_ENERGY_PATHWAY.get());
     }
 }

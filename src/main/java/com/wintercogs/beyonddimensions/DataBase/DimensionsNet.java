@@ -34,13 +34,17 @@ public class DimensionsNet extends SavedData
     // 与该网络绑定的玩家 包含网络管理者
     private final Set<UUID> players = new HashSet<>();
 
-    // 网络的物品存储空间
+    // 网络存储空间
     private DimensionsItemStorage itemStorage;
+    private DimensionsFluidStorage fluidStorage;
+    private DimensionsEnergyStorage energyStorage;
 
 
     public DimensionsNet()
     {
         itemStorage = new DimensionsItemStorage(this);
+        fluidStorage = new DimensionsFluidStorage(this);
+        energyStorage = new DimensionsEnergyStorage(this);
     }
 
     // 基本函数
@@ -115,6 +119,8 @@ public class DimensionsNet extends SavedData
 
 
         net.itemStorage.deserializeNBT(registryAccess, tag.getCompound("ItemStorage"));
+        net.fluidStorage.deserializeNBT(registryAccess,tag.getCompound("FluidStorage"));
+        net.energyStorage.deserializeNBT(registryAccess,tag.getCompound("EnergyStorage"));
 
         if (tag.contains("Managers"))
         {
@@ -158,6 +164,8 @@ public class DimensionsNet extends SavedData
 
         // 保存物品存储
         tag.put("ItemStorage", itemStorage.serializeNBT(registryAccess));
+        tag.put("FluidStorage",fluidStorage.serializeNBT(registryAccess));
+        tag.put("EnergyStorage",energyStorage.serializeNBT(registryAccess));
 
         return tag;
     }
@@ -311,6 +319,16 @@ public class DimensionsNet extends SavedData
     public DimensionsItemStorage getItemStorage()
     {
         return this.itemStorage;
+    }
+
+    public DimensionsFluidStorage getFluidStorage()
+    {
+        return this.fluidStorage;
+    }
+
+    public DimensionsEnergyStorage getEnergyStorage()
+    {
+        return this.energyStorage;
     }
 
     public void addItem(ItemStack itemStack, long count)

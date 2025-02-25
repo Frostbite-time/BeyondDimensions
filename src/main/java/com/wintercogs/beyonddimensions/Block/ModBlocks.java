@@ -1,9 +1,7 @@
 package com.wintercogs.beyonddimensions.Block;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Block.Custom.NetControlBlock;
-import com.wintercogs.beyonddimensions.Block.Custom.NetInterfaceBlock;
-import com.wintercogs.beyonddimensions.Block.Custom.NetPathwayBlock;
+import com.wintercogs.beyonddimensions.Block.Custom.*;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -29,6 +27,12 @@ public class ModBlocks
 
     public static final DeferredBlock<Block> NET_PATHWAY = registerBlock("net_pathway",
             ()-> new NetPathwayBlock(BlockBehaviour.Properties.of().strength(2f)));
+
+    public static final DeferredBlock<Block> NET_FLUID_PATHWAY = registerBlock("net_fluid_pathway",
+            ()-> new NetFluidPathwayBlock(BlockBehaviour.Properties.of().strength(2f)));
+
+    public static final DeferredBlock<Block> NET_ENERGY_PATHWAY = registerBlock("net_energy_pathway",
+            ()-> new NetEnergyPathwayBlock(BlockBehaviour.Properties.of().strength(2f)));
 
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block)

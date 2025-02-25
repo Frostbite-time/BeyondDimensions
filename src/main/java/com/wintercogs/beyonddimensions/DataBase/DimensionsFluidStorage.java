@@ -104,7 +104,7 @@ public class DimensionsFluidStorage implements IFluidHandler
     {
         if(fluidAction.simulate())
         {
-            return 0; // 我认为不会有人能装入21亿mb同种流体，如果有，我们就当它过量销毁了
+            return fluidStack.getAmount();
         }
         else if(fluidAction.execute())
         {
@@ -115,16 +115,16 @@ public class DimensionsFluidStorage implements IFluidHandler
             // 增加已有物品的数量 添加未有的物品
             for (FluidStack fluidExist : fluidStorage)
             {
-                if (fluidExist.equals(fluidStack))
+                if (FluidStack.isSameFluidSameComponents(fluidExist,fluidStack))
                 {
                     fluidExist.grow(fluidStack.getAmount());
                     OnChange();
-                    return 0;
+                    return fluidStack.getAmount();
                 }
             }
             fluidStorage.add(fluidStack.copy());
             OnChange();
-            return 0;
+            return fluidStack.getAmount();
         }
         return 0;
     }
