@@ -7,7 +7,6 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 public class DimensionsFluidStorage implements IFluidHandler
 {

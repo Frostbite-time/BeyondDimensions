@@ -1,9 +1,6 @@
 package com.wintercogs.beyonddimensions;
 
-import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetFluidPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetInterfaceBlockEntity;
-import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.*;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
@@ -11,7 +8,7 @@ import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.fml.ModList;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 import net.neoforged.api.distmarker.Dist;
@@ -30,7 +27,9 @@ import net.neoforged.neoforge.event.server.ServerStartingEvent;
 public class BeyondDimensions
 {
     public static final String MODID = "beyonddimensions";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static boolean MekLoaded = false; // 用于mek化学品存储
+    public static final String MekanismMODID = "mekanism";
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
     // FML 将识别一些参数类型，如 IEventBus 或 ModContainer 并自动传入它们。
@@ -43,6 +42,7 @@ public class BeyondDimensions
         modEventBus.addListener(NetPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetFluidPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetEnergyPathwayBlockEntity::registerCapability);
+        modEventBus.addListener(NetChemicalPathwayBlockEntity::registerCapability);
 
         // 注册事件
         NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
@@ -72,7 +72,10 @@ public class BeyondDimensions
 
     private void commonSetup(final FMLCommonSetupEvent event)
     {
-
+        if(ModList.get().isLoaded(MekanismMODID))
+        {
+            MekLoaded = true;
+        }
     }
 
     @SubscribeEvent

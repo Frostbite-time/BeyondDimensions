@@ -23,6 +23,8 @@ public class ModBlockStateProvider extends BlockStateProvider
         blockWithItem(ModBlocks.NET_PATHWAY);
         blockWithItem(ModBlocks.NET_FLUID_PATHWAY);
         blockWithItem(ModBlocks.NET_ENERGY_PATHWAY);
+        blockWithItem(ModBlocks.NET_CHEMICAL_PATHWAY);
+
     }
 
     private void blockWithItem(DeferredBlock<?> deferredBlock)

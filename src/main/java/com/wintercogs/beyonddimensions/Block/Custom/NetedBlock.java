@@ -34,7 +34,9 @@ public class NetedBlock extends Block
                     DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
                     if(net != null)
                     {
+                        // 成功设置网络id
                         blockEntity.setNetId(net.getId());
+                        level.invalidateCapabilities(pos); // 用于清除实体能力缓存
                     }
                 }
                 else
@@ -46,7 +48,9 @@ public class NetedBlock extends Block
                         {
                             if(net.isManager(player))
                             {
+                                // 成功清除网络id
                                 blockEntity.setNetId(-1);
+                                level.invalidateCapabilities(pos); // 用于清除实体能力缓存
                             }
                         }
                     }

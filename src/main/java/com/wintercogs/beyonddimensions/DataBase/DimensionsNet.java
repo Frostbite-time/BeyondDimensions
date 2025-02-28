@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -38,6 +39,9 @@ public class DimensionsNet extends SavedData
     private DimensionsItemStorage itemStorage;
     private DimensionsFluidStorage fluidStorage;
     private DimensionsEnergyStorage energyStorage;
+    // 非neoforge自带的存储系统 确保在任何调用之前检查null或者对应模组是否加载
+    private DimensionsChemicalStorage chemicalStorage;
+
 
 
     public DimensionsNet()
@@ -45,6 +49,15 @@ public class DimensionsNet extends SavedData
         itemStorage = new DimensionsItemStorage(this);
         fluidStorage = new DimensionsFluidStorage(this);
         energyStorage = new DimensionsEnergyStorage(this);
+
+        if(BeyondDimensions.MekLoaded)
+        {
+            chemicalStorage = new DimensionsChemicalStorage(this);
+        }
+        else
+        {
+            chemicalStorage = null;
+        }
     }
 
     // 基本函数
@@ -121,6 +134,10 @@ public class DimensionsNet extends SavedData
         net.itemStorage.deserializeNBT(registryAccess, tag.getCompound("ItemStorage"));
         net.fluidStorage.deserializeNBT(registryAccess,tag.getCompound("FluidStorage"));
         net.energyStorage.deserializeNBT(registryAccess,tag.getCompound("EnergyStorage"));
+        if(net.chemicalStorage != null)
+        {
+            net.chemicalStorage.deserializeNBT(registryAccess,tag.getCompound("ChemicalStorage"));
+        }
 
         if (tag.contains("Managers"))
         {
@@ -166,6 +183,10 @@ public class DimensionsNet extends SavedData
         tag.put("ItemStorage", itemStorage.serializeNBT(registryAccess));
         tag.put("FluidStorage",fluidStorage.serializeNBT(registryAccess));
         tag.put("EnergyStorage",energyStorage.serializeNBT(registryAccess));
+        if(chemicalStorage != null)
+        {
+            tag.put("ChemicalStorage",chemicalStorage.serializeNBT(registryAccess));
+        }
 
         return tag;
     }
@@ -329,6 +350,11 @@ public class DimensionsNet extends SavedData
     public DimensionsEnergyStorage getEnergyStorage()
     {
         return this.energyStorage;
+    }
+
+    public DimensionsChemicalStorage getChemicalStorage()
+    {
+        return this.chemicalStorage;
     }
 
     public void addItem(ItemStack itemStack, long count)

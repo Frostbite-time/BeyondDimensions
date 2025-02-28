@@ -19,6 +19,7 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+    maven { url 'https://modmaven.dev/' }
 }
 
 base {
@@ -126,6 +127,9 @@ dependencies {
     }
     // 必须要在此显式声明依赖，否则在运行时会找不到
     additionalRuntimeClasspath "com.belerweb:pinyin4j:2.5.1"
+
+    // 编译通用机械的api 以便使用化学品存储
+    compileOnly "mekanism:Mekanism:${mekanism_version}:api"
 
 
     // Example optional mod dependency with JEI

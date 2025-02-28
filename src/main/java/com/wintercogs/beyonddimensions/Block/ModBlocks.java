@@ -34,6 +34,9 @@ public class ModBlocks
     public static final DeferredBlock<Block> NET_ENERGY_PATHWAY = registerBlock("net_energy_pathway",
             ()-> new NetEnergyPathwayBlock(BlockBehaviour.Properties.of().strength(2f)));
 
+    public static final DeferredBlock<Block> NET_CHEMICAL_PATHWAY = registerBlock("net_chemical_pathway",
+            ()-> new NetChemicalPathwayBlock(BlockBehaviour.Properties.of().strength(2f)));
+
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block)
     {
