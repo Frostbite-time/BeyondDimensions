@@ -53,7 +53,9 @@ public class DimensionsItemStorage implements IItemHandler
                 return;
             }
         }
-        itemStorage.add(itemStack.copy());
+        ItemStack newStack = itemStack.copy();
+        newStack.setCount(count);
+        itemStorage.add(newStack);
         OnChange();
     }
 
@@ -130,18 +132,6 @@ public class DimensionsItemStorage implements IItemHandler
         return ItemStack.EMPTY;
     }
 
-//    public StoredItemStack getStoredItemStackByIndex(int index)
-//    {
-//        if (index >= 0 && index < itemStorage.size())
-//        {
-//            return itemStorage.get(index);
-//        }
-//        else
-//        {
-//            return null;
-//        }
-//    }
-
     public ItemStack getItemStackByIndex(int index)
     {
         if (index >= 0 && index < itemStorage.size())
@@ -191,8 +181,14 @@ public class DimensionsItemStorage implements IItemHandler
             {
                 return; // 在此处用于跳过空物品
             }
+
             CompoundTag itemTag = new CompoundTag();
-            itemTag.put("ItemStack", item.save(levelRegistryAccess));
+            ItemStack itemSaved = item.copy();
+            int amount = itemSaved.getCount();
+            itemSaved.setCount(1); // 物品数量必须在1~99之间才能使用原版方法编码，所以，无奈之举
+
+            itemTag.put("ItemStack", itemSaved.save(levelRegistryAccess));
+            itemTag.putInt("Amount",amount);
             itemsTag.add(itemTag);
         });
 
@@ -212,8 +208,8 @@ public class DimensionsItemStorage implements IItemHandler
             {
                 CompoundTag itemTag = itemsTag.getCompound(i);
                 ItemStack itemStack = ItemStack.parseOptional(levelRegistryAccess, itemTag.getCompound("ItemStack"));
-                long count = itemTag.getLong("Count");
-                addItem(itemStack, (int) count);
+                int count = itemTag.getInt("Amount");
+                addItem(itemStack, count);
             }
         }
     }

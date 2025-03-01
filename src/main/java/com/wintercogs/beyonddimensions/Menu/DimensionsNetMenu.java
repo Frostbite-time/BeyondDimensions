@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.DataBase.*;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.SyncItemStoragePacket;
+import com.wintercogs.beyonddimensions.Unit.ItemKeyWrapper;
 import com.wintercogs.beyonddimensions.Unit.Pinyin4jUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -339,54 +340,31 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         // 对于StoredItemStack类，equals方法可以有效比较2个物品是否为统一种类而不计较数量
         // StoredItemStack.getCount可以获取数量进行进一步比较
 
-        //为两个缓存数组分别创建Map，并检验是否有相同物品，如果有，则合并
-        Map<ItemStack, Integer> lastMap = new HashMap<>();
+        // 为两个缓存数组分别创建Map，使用自定义的包装类作为键
+        Map<ItemKeyWrapper, Integer> lastMap = new HashMap<>();
         for (ItemStack item : cacheLast) {
-            boolean found = false;
-            for (ItemStack key : lastMap.keySet()) {
-                if (ItemStack.isSameItemSameComponents(key,item)) {
-                    lastMap.put(key, (lastMap.get(key) + item.getCount()));
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                // 提前统一数量，以便后续key比较
-                ItemStack foundItem = item.copy();
-                foundItem.setCount(1);
-                lastMap.put(foundItem,item.getCount());
-            }
+            ItemKeyWrapper key = new ItemKeyWrapper(item);
+            lastMap.put(key, lastMap.getOrDefault(key, 0) + item.getCount());
         }
-        Map<ItemStack, Integer> nowMap = new HashMap<>();
+
+        Map<ItemKeyWrapper, Integer> nowMap = new HashMap<>();
         for (ItemStack item : cacheNow) {
-            boolean found = false;
-            for (ItemStack key : nowMap.keySet()) {
-                if (ItemStack.isSameItemSameComponents(key,item)) {
-                    nowMap.put(key, (nowMap.get(key) + item.getCount()));
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                ItemStack foundItem = item.copy();
-                foundItem.setCount(1);
-                nowMap.put(foundItem, item.getCount());
-            }
+            ItemKeyWrapper key = new ItemKeyWrapper(item);
+            nowMap.put(key, nowMap.getOrDefault(key, 0) + item.getCount());
         }
 
         // 比较两个Map的差异
-        Set<ItemStack> allKeys = new HashSet<>();
+        Set<ItemKeyWrapper> allKeys = new HashSet<>();
         allKeys.addAll(lastMap.keySet());
         allKeys.addAll(nowMap.keySet());
 
-        for (ItemStack key : allKeys) {
-            // 尝试通过键获取物品，如果未能找到键则返回0来说明没有此物品
+        for (ItemKeyWrapper key : allKeys) {
             int lastCount = lastMap.getOrDefault(key, 0);
             int nowCount = nowMap.getOrDefault(key, 0);
-            int delta = nowCount - lastCount; // 获取增量（变化量）
+            int delta = nowCount - lastCount;
 
-            if (delta != 0) {   // 增量不为0意味着有变化，则加入到变化列表中
-                changedItem.add(key);
+            if (delta != 0) {
+                changedItem.add(key.getItemStack().copy()); // 获取基础物品的拷贝
                 changedCount.add(delta);
             }
         }
