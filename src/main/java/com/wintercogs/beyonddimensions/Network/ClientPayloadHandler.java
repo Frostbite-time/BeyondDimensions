@@ -6,14 +6,12 @@ import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 
 public class ClientPayloadHandler

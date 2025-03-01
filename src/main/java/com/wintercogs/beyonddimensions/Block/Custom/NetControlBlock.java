@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
-import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;

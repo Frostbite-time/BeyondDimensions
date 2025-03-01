@@ -2,14 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.LongTag;
 import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 public class DimensionsEnergyStorage implements IEnergyStorage
 {

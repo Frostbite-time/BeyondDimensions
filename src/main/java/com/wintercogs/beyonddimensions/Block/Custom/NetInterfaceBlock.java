@@ -2,15 +2,12 @@ package com.wintercogs.beyonddimensions.Block.Custom;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetInterfaceBlockEntity;
-import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetedBlockEntity;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;

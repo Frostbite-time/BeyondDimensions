@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.Block.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsChemicalStorage;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import net.minecraft.core.BlockPos;

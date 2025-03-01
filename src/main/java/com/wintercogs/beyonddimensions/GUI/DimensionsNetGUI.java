@@ -3,41 +3,32 @@ package com.wintercogs.beyonddimensions.GUI;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.datafixers.util.Pair;
-import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
-import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
+import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
 import com.wintercogs.beyonddimensions.Packet.CallSeverStoragePacket;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
-import org.slf4j.Logger;
 
-import java.awt.event.KeyEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 
 
 public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>

@@ -10,8 +10,6 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.Objects;
-
 public class IconButton extends Button
 {
     protected ButtonName name;

@@ -4,7 +4,6 @@ import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
-import com.wintercogs.beyonddimensions.DataBase.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.Packet.PlayerPermissionInfoPacket;
 import net.minecraft.core.registries.Registries;

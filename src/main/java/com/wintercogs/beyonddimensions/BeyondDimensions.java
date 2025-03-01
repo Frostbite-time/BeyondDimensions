@@ -1,20 +1,19 @@
 package com.wintercogs.beyonddimensions;
 
+import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.*;
 import com.wintercogs.beyonddimensions.Block.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
-import com.wintercogs.beyonddimensions.Block.ModBlocks;
-import net.neoforged.fml.ModList;
-import org.slf4j.Logger;
-import com.mojang.logging.LogUtils;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
@@ -22,6 +21,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import org.slf4j.Logger;
 
 @Mod(BeyondDimensions.MODID)
 public class BeyondDimensions
