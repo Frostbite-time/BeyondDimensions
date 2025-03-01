@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
-import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
@@ -49,21 +48,21 @@ public class ClientPayloadHandler
                         return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                     menu = (DimensionsNetMenu) player.containerMenu;
-                    for(int i = 0;i<packet.storedItemStacks().size();i++)
+                    for(int i = 0; i<packet.itemStacks().size(); i++)
                     {
                         DimensionsItemStorage itemStorage = menu.itemStorage;
                         if (itemStorage.getItemStorage().size() > packet.indexs().get(i))
-                            itemStorage.getItemStorage().set(packet.indexs().get(i), packet.storedItemStacks().get(i));
+                            itemStorage.getItemStorage().set(packet.indexs().get(i), packet.itemStacks().get(i));
                         else if(itemStorage.getItemStorage().size() == packet.indexs().get(i))
-                            itemStorage.getItemStorage().add(packet.indexs().get(i), packet.storedItemStacks().get(i));
+                            itemStorage.getItemStorage().add(packet.indexs().get(i), packet.itemStacks().get(i));
                         else
                         {
                             //将size到Index-1之间的位置填充为空，然后填充Index位置
                             // 扩展列表直到 targetIndex - 1，并填充 null
                             while (itemStorage.getItemStorage().size() < packet.indexs().get(i)) {
-                                itemStorage.getItemStorage().add(new StoredItemStack(ItemStack.EMPTY));  // 填充空值
+                                itemStorage.getItemStorage().add(ItemStack.EMPTY);  // 填充空值
                             }
-                            itemStorage.getItemStorage().add(packet.indexs().get(i), packet.storedItemStacks().get(i));
+                            itemStorage.getItemStorage().add(packet.indexs().get(i), packet.itemStacks().get(i));
                         }
                     }
                     if(packet.end())
@@ -103,25 +102,25 @@ public class ClientPayloadHandler
                     menu = (DimensionsNetMenu) player.containerMenu;
                     DimensionsItemStorage clientStorage = menu.itemStorage;
                     int i = 0;
-                    for(StoredItemStack remoteItem : packet.storedItemStacks())
+                    for(ItemStack remoteItem : packet.itemStacks())
                     {
                         // 如果当前存储存在此物品
-                        if(clientStorage.hasStoredItemStackType(remoteItem))
+                        if(clientStorage.hasItemStackType(remoteItem))
                         {
                             if(packet.changedCounts().get(i) > 0)
                             {
-                                clientStorage.addItem(remoteItem.getItemStack(),packet.changedCounts().get(i));
+                                clientStorage.addItem(remoteItem,packet.changedCounts().get(i));
                             }
                             else // 移除操作务必调用remove方法以移除0存储
                             {
-                                clientStorage.removeItem(remoteItem.getItemStack(),-packet.changedCounts().get(i));
+                                clientStorage.removeItem(remoteItem,-packet.changedCounts().get(i));
                             }
                         }
                         else // 如果当前存储不存在此物品
                         {
                             if(packet.changedCounts().get(i) > 0)
                             {
-                                clientStorage.addItem(remoteItem.getItemStack(),packet.changedCounts().get(i));
+                                clientStorage.addItem(remoteItem,packet.changedCounts().get(i));
                             }
                         }
                         i++; // 一次遍历完毕后索引自增

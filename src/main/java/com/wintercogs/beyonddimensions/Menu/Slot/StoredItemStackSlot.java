@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
-import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.Slot;
@@ -27,16 +26,18 @@ public class StoredItemStackSlot extends Slot
     public ItemStack getVanillaActualStack()
     {
         //从当前槽索引取物品
-        StoredItemStack sItem = itemStorage.getStoredItemStackByIndex(getSlotIndex());
-        if (sItem != null)
+        ItemStack itemStack = itemStorage.getItemStackByIndex(getSlotIndex());
+        if (itemStack != null)
         {
-            if(sItem.getCount()>sItem.getItemStack().getMaxStackSize())
+            if(itemStack.getCount()>itemStack.getMaxStackSize())
             {
-                return sItem.getVanillaMaxSizeStack();
+                ItemStack itemVanillaActualStack = itemStack.copy();
+                itemVanillaActualStack.setCount(itemStack.getMaxStackSize());
+                return itemVanillaActualStack;
             }
             else
             {
-                return sItem.getActualStack();
+                return itemStack.copy();
             }
 
         }
@@ -46,10 +47,12 @@ public class StoredItemStackSlot extends Slot
     public ItemStack getVanillaMaxSizeItem()
     {
         //从当前槽索引取物品
-        StoredItemStack sItem = itemStorage.getStoredItemStackByIndex(getSlotIndex());
-        if (sItem != null)
+        ItemStack itemStack = itemStorage.getItemStackByIndex(getSlotIndex());
+        if (itemStack != null)
         {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
-            return sItem.getVanillaMaxSizeStack();
+            ItemStack itemVanillaActualStack = itemStack.copy();
+            itemVanillaActualStack.setCount(itemStack.getMaxStackSize());
+            return itemVanillaActualStack;
         }
         return ItemStack.EMPTY;
     }
@@ -64,10 +67,10 @@ public class StoredItemStackSlot extends Slot
             return ItemStack.EMPTY;
         }
         //从当前槽索引取物品
-        StoredItemStack sItem = itemStorage.getStoredItemStackByIndex(getSlotIndex());
-        if (sItem != null)
+        ItemStack itemStack = itemStorage.getItemStackByIndex(getSlotIndex());
+        if (itemStack != null)
         {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
-            return sItem.getActualStack();
+            return itemStack.copy();
         }
         return ItemStack.EMPTY;
 
@@ -77,8 +80,8 @@ public class StoredItemStackSlot extends Slot
     public boolean hasItem()
     {
         //检查当前槽是否为空
-        return itemStorage.getStoredItemStackByIndex(getSlotIndex()) != null
-                && itemStorage.getStoredItemStackByIndex(getSlotIndex()).getItemStack() != ItemStack.EMPTY;
+        return itemStorage.getItemStackByIndex(getSlotIndex()) != null
+                && itemStorage.getItemStackByIndex(getSlotIndex()) != ItemStack.EMPTY;
     }
 
     @Override
@@ -89,17 +92,17 @@ public class StoredItemStackSlot extends Slot
         // 当尝试用一个物品真正覆盖这个槽内容会发生什么
         // 如果索引不存在，使用add自增长，如果存在，直接替换
         if (itemStorage.getItemStorage().size() > getSlotIndex())
-            itemStorage.getItemStorage().set(getSlotIndex(), new StoredItemStack(stack, stack.getCount()));
+            itemStorage.getItemStorage().set(getSlotIndex(), stack.copy());
         else if(itemStorage.getItemStorage().size() == getSlotIndex())
-            itemStorage.getItemStorage().add(getSlotIndex(), new StoredItemStack(stack, stack.getCount()));
+            itemStorage.getItemStorage().add(getSlotIndex(), stack.copy());
         else
         {
             //将size到Index-1之间的位置填充为空，然后填充Index位置
             // 扩展列表直到 targetIndex - 1，并填充 null
             while (itemStorage.getItemStorage().size() < getSlotIndex()) {
-                itemStorage.getItemStorage().add(new StoredItemStack(ItemStack.EMPTY));  // 填充空值
+                itemStorage.getItemStorage().add(ItemStack.EMPTY);  // 填充空值
             }
-            itemStorage.getItemStorage().add(getSlotIndex(), new StoredItemStack(stack, stack.getCount()));
+            itemStorage.getItemStorage().add(getSlotIndex(), stack.copy());
         }
 
 
@@ -196,10 +199,10 @@ public class StoredItemStackSlot extends Slot
             return -1;
         }
         //从当前槽索引取物品
-        StoredItemStack sItem = itemStorage.getStoredItemStackByIndex(getSlotIndex());
-        if (sItem != null && sItem.getItemStack() != ItemStack.EMPTY)
+        ItemStack itemStack = itemStorage.getItemStackByIndex(getSlotIndex());
+        if (itemStack != null && itemStack != ItemStack.EMPTY)
         {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
-            return sItem.getActualStack().getCount();
+            return itemStack.getCount();
         }
         return -1;
     }

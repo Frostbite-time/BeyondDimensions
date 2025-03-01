@@ -1,16 +1,16 @@
 package com.wintercogs.beyonddimensions.Packet;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataBase.StoredItemStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 
-public record ItemStoragePacket(ArrayList<StoredItemStack> storedItemStacks,ArrayList<Integer> indexs,boolean end) implements CustomPacketPayload
+public record ItemStoragePacket(ArrayList<ItemStack> itemStacks, ArrayList<Integer> indexs, boolean end) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<ItemStoragePacket> TYPE =
@@ -23,9 +23,9 @@ public record ItemStoragePacket(ArrayList<StoredItemStack> storedItemStacks,Arra
             StreamCodec.composite(
                     ByteBufCodecs.collection(
                             ArrayList::new,
-                            StoredItemStack.STREAM_CODEC
+                            ItemStack.STREAM_CODEC
                     ),
-                    ItemStoragePacket::storedItemStacks,
+                    ItemStoragePacket::itemStacks,
                     ByteBufCodecs.collection(
                             ArrayList::new,
                             ByteBufCodecs.VAR_INT

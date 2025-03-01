@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
@@ -17,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -25,7 +23,6 @@ import java.util.function.Supplier;
 
 public class NetControlMenu extends AbstractContainerMenu
 {
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     private final Player player;
 

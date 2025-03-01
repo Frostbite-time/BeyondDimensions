@@ -137,7 +137,7 @@ public class DimensionsFluidStorage implements IFluidHandler
         {
             for (FluidStack fluidExist : fluidStorage)
             {
-                if (fluidExist.equals(fluidStack))
+                if (FluidStack.isSameFluidSameComponents(fluidExist,fluidStack))
                 {
                     if(fluidAction.simulate())
                     {

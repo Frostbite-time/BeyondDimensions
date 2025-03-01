@@ -49,7 +49,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     public boolean isHanding = false; // 用于标记当前是否向服务端发出操作请求却未得到回应 true表示无正在处理未回应，false表示空闲
     public DimensionsItemStorage viewerItemStorage; // 在客户端，用于显示物品
     /// 服务端数据
-    private ArrayList<StoredItemStack> lastItemStorage; // 记录截至上一次同步时的存储状态，用于同步数据
+    private ArrayList<ItemStack> lastItemStorage; // 记录截至上一次同步时的存储状态，用于同步数据
 
 
     // 构建注册用的信息
@@ -87,9 +87,9 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         {
             // 将lastItemStorage设置为一个深克隆，以便后续进行比较
             this.lastItemStorage = new ArrayList<>();
-            for(StoredItemStack storedItemStack : this.itemStorage.getItemStorage())
+            for(ItemStack itemStack : this.itemStorage.getItemStorage())
             {
-                this.lastItemStorage.add(new StoredItemStack(storedItemStack));
+                this.lastItemStorage.add(itemStack.copy());
             }
         }
 
@@ -132,9 +132,9 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     public void updateViewerStorage()
     {
         viewerItemStorage.getItemStorage().clear();
-        for(StoredItemStack storedItemStack : this.itemStorage.getItemStorage())
+        for(ItemStack itemStack : this.itemStorage.getItemStorage())
         {
-            this.viewerItemStorage.addItem(new StoredItemStack(storedItemStack));
+            this.viewerItemStorage.addItem(itemStack.copy(),itemStack.getCount());
         }
         buildIndexList(new ArrayList<>(viewerItemStorage.getItemStorage()));
     }
@@ -171,13 +171,12 @@ public class DimensionsNetMenu extends AbstractContainerMenu
      * @param itemStorage 要排序的存储
      * @return 完成排序的索引列表
      */
-    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<StoredItemStack> itemStorage) {
+    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<ItemStack> itemStorage) {
         // 合并过滤空气和搜索逻辑，避免遍历时删除
-        ArrayList<StoredItemStack> cache = new ArrayList<>();
+        ArrayList<ItemStack> cache = new ArrayList<>();
         ArrayList<Integer> cacheIndex = new ArrayList<>();
         for (int i = 0; i < itemStorage.size(); i++) {
-            StoredItemStack item = itemStorage.get(i);
-            ItemStack stack = item.getActualStack();
+            ItemStack stack = itemStorage.get(i).copy();
             if (stack == null || stack.isEmpty()) continue;
 
             // 提前过滤空气，并缓存名称和拼音
@@ -191,7 +190,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                     checkTooltipMatches(stack,searchText);
 
             if (matchesSearch) {
-                cache.add(item);
+                cache.add(stack);
                 cacheIndex.add(i);
             }
         }
@@ -199,12 +198,12 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         // 统一排序逻辑，避免重复代码
         ButtonState sortState = buttonStateMap.get(ButtonName.SortMethodButton);
         if (sortState != ButtonState.SORT_DEFAULT) {
-            Comparator<StoredItemStack> comparator = sortState == ButtonState.SORT_NAME ?
-                    Comparator.comparing(item -> item.getItemStack().getDisplayName().getString()) :
-                    Comparator.comparingLong(StoredItemStack::getCount);
+            Comparator<ItemStack> comparator = sortState == ButtonState.SORT_NAME ?
+                    Comparator.comparing(item -> item.getDisplayName().getString()) :
+                    Comparator.comparingInt(ItemStack::getCount);
 
             // 生成索引排序映射
-            ArrayList<StoredItemStack> finalCache = cache;
+            ArrayList<ItemStack> finalCache = cache;
             List<Integer> indices = IntStream.range(0, cache.size())
                     .boxed()
                     .sorted((a, b) -> comparator.compare(finalCache.get(a), finalCache.get(b)))
@@ -258,7 +257,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     }
 
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList(ArrayList<StoredItemStack> itemStorage)
+    public void buildIndexList(ArrayList<ItemStack> itemStorage)
     {
         if(!this.player.level().isClientSide())
         {
@@ -309,7 +308,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         this.synchronizeCarriedToRemote();
 
         for(int j = 0; j < this.dataSlots.size(); ++j) {
-            DataSlot dataslot = (DataSlot)this.dataSlots.get(j);
+            DataSlot dataslot = this.dataSlots.get(j);
             int k = dataslot.get();
             if (dataslot.checkAndClearUpdateFlag()) {
                 this.updateDataSlotListeners(j, k);
@@ -319,18 +318,18 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         }
 
         // 开始运行原子化物品比较
-        ArrayList<StoredItemStack> changedItem = new ArrayList<>();
+        ArrayList<ItemStack> changedItem = new ArrayList<>();
         ArrayList<Integer> changedCount = new ArrayList<>();
         // 深克隆2个缓存数组
-        ArrayList<StoredItemStack> cacheLast = new ArrayList<>();
-        for(StoredItemStack storedItemStack : this.lastItemStorage)
+        ArrayList<ItemStack> cacheLast = new ArrayList<>();
+        for(ItemStack itemStack : this.lastItemStorage)
         {
-            cacheLast.add(new StoredItemStack(storedItemStack));
+            cacheLast.add(itemStack.copy());
         }
-        ArrayList<StoredItemStack> cacheNow = new ArrayList<>();
-        for(StoredItemStack storedItemStack : this.itemStorage.getItemStorage())
+        ArrayList<ItemStack> cacheNow = new ArrayList<>();
+        for(ItemStack itemStack : this.itemStorage.getItemStorage())
         {
-            cacheNow.add(new StoredItemStack(storedItemStack));
+            cacheNow.add(itemStack.copy());
         }
         // 缓存结束后，立刻更新last列表
         refreshLast();
@@ -341,41 +340,46 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         // StoredItemStack.getCount可以获取数量进行进一步比较
 
         //为两个缓存数组分别创建Map，并检验是否有相同物品，如果有，则合并
-        Map<StoredItemStack, Integer> lastMap = new HashMap<>();
-        for (StoredItemStack item : cacheLast) {
+        Map<ItemStack, Integer> lastMap = new HashMap<>();
+        for (ItemStack item : cacheLast) {
             boolean found = false;
-            for (StoredItemStack key : lastMap.keySet()) {
-                if (key.equals(item)) {
-                    lastMap.put(key, (int) (lastMap.get(key) + item.getCount()));
+            for (ItemStack key : lastMap.keySet()) {
+                if (ItemStack.isSameItemSameComponents(key,item)) {
+                    lastMap.put(key, (lastMap.get(key) + item.getCount()));
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                lastMap.put(new StoredItemStack(item), (int) item.getCount());
+                // 提前统一数量，以便后续key比较
+                ItemStack foundItem = item.copy();
+                foundItem.setCount(1);
+                lastMap.put(foundItem,item.getCount());
             }
         }
-        Map<StoredItemStack, Integer> nowMap = new HashMap<>();
-        for (StoredItemStack item : cacheNow) {
+        Map<ItemStack, Integer> nowMap = new HashMap<>();
+        for (ItemStack item : cacheNow) {
             boolean found = false;
-            for (StoredItemStack key : nowMap.keySet()) {
-                if (key.equals(item)) {
-                    nowMap.put(key, (int) (nowMap.get(key) + item.getCount()));
+            for (ItemStack key : nowMap.keySet()) {
+                if (ItemStack.isSameItemSameComponents(key,item)) {
+                    nowMap.put(key, (nowMap.get(key) + item.getCount()));
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                nowMap.put(new StoredItemStack(item), (int) item.getCount());
+                ItemStack foundItem = item.copy();
+                foundItem.setCount(1);
+                nowMap.put(foundItem, item.getCount());
             }
         }
 
         // 比较两个Map的差异
-        Set<StoredItemStack> allKeys = new HashSet<>();
+        Set<ItemStack> allKeys = new HashSet<>();
         allKeys.addAll(lastMap.keySet());
         allKeys.addAll(nowMap.keySet());
 
-        for (StoredItemStack key : allKeys) {
+        for (ItemStack key : allKeys) {
             // 尝试通过键获取物品，如果未能找到键则返回0来说明没有此物品
             int lastCount = lastMap.getOrDefault(key, 0);
             int nowCount = nowMap.getOrDefault(key, 0);
@@ -397,9 +401,9 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     public void refreshLast()
     {
         this.lastItemStorage.clear();
-        for(StoredItemStack storedItemStack : this.itemStorage.getItemStorage())
+        for(ItemStack itemStack : this.itemStorage.getItemStorage())
         {
-            this.lastItemStorage.add(new StoredItemStack(storedItemStack));
+            this.lastItemStorage.add(itemStack.copy());
         }
     }
 
@@ -410,19 +414,19 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         if(player instanceof ServerPlayer)
         {
             ArrayList<ItemStoragePacket> splitPackets = new ArrayList<>(); // 用于分割包的列表
-            ArrayList<StoredItemStack> currentBatch = new ArrayList<>(); // 用于临时存储每个包的StoredItemStack
+            ArrayList<ItemStack> currentBatch = new ArrayList<>(); // 用于临时存储每个包的StoredItemStack
             ArrayList<Integer> currentIndices = new ArrayList<>(); // 用于精确记录索引，防止因网络延时导致错误
             int currentPayloadSize = 0; // 当前包大小
             final int MAX_PAYLOAD_SIZE = 900000; // 单个包最大大小  服务端发送到客户端的包不能大于1MiB 此处留下100KB冗余
-            ArrayList<StoredItemStack> storage = new ArrayList<>(this.itemStorage.getItemStorage()); // 当前存储空间的浅克隆
+            ArrayList<ItemStack> storage = new ArrayList<>(this.itemStorage.getItemStorage()); // 当前存储空间的浅克隆
 
             for(int i = 0;i<storage.size();i++)
             {
                 // 计算此次添加的字节数
-                StoredItemStack stack = storage.get(i);
+                ItemStack stack = storage.get(i);
                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer()); // 创建一个 Netty 的 ByteBuf
                 RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());
-                StoredItemStack.STREAM_CODEC.encode(registryBuf,stack);
+                ItemStack.STREAM_CODEC.encode(registryBuf,stack);
                 int entrySize = registryBuf.readableBytes() + Integer.BYTES + 1; // 物品的字节数、索引的字节数、结束标记的字节数
 
                 boolean isLastItem = (i == storage.size() - 1);
@@ -482,7 +486,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     }
 
     // 自定义点击操作
-    public ArrayList<StoredItemStack> customClickHandler(int slotIndex,ItemStack clickItem,int button,boolean shiftDown)
+    public void customClickHandler(int slotIndex,ItemStack clickItem,int button,boolean shiftDown)
     {
         // 该函数用于处理点击维度存储槽发生的事件
         // 包含shift点击和普通点击
@@ -498,7 +502,6 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         {
             clickHandle(slotIndex,clickItem,button,player,trueItemStorage);
         }
-        return null;
     }
 
     // 自定义的快速移动操作
@@ -515,7 +518,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 int moveCount = checkCanMoveStackCount(cacheStack, this.lines * 9, this.slots.size(), true);
                 moveCount = Math.min(moveCount,cacheStack.getCount());
                 int nowCount = 0;
-                StoredItemStack nowStack = itemStorage.getStoredItemStack(new StoredItemStack(cacheStack));
+                ItemStack nowStack = itemStorage.getStoredItemStack(cacheStack.copy());
                 if(nowStack != null)
                 {
                     nowCount = (int) nowStack.getCount();

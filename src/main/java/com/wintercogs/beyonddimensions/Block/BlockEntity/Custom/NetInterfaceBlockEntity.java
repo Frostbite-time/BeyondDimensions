@@ -65,7 +65,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements Contain
             for(int i=0; i<9; i++)
             {
                 ItemStack stack = itemStackHandler.getStackInSlot(i);
-                net.addItem(stack,stack.getCount());
+                net.getItemStorage().addItem(stack,stack.getCount());
                 itemStackHandler.setStackInSlot(i, ItemStack.EMPTY);
             }
         }

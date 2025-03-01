@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
 import com.wintercogs.beyonddimensions.DataBase.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
@@ -16,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,8 +23,6 @@ import java.util.UUID;
 
 public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
 {
-    private static final Logger LOGGER = LogUtils.getLogger();
-
     private ArrayList<PermissionInfoButton> permissionInfoButtons = new ArrayList<>();
     private UUID currentPlayerId = null;
     private String currentPlayerName = "";

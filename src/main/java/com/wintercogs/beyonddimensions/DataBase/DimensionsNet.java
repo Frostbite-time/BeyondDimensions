@@ -358,19 +358,5 @@ public class DimensionsNet extends SavedData
         return this.chemicalStorage;
     }
 
-    public void addItem(ItemStack itemStack, long count)
-    {
-        this.itemStorage.addItem(itemStack, count);
-        setDirty();
-    }
-
-    public ItemStack removeItem(ItemStack itemStack, long count)
-    {
-        setDirty();
-        return this.itemStorage.removeItem(itemStack, count);
-    }
-
-
-
 }
 

@@ -17,7 +17,7 @@ public class DimensionsItemStorage implements IItemHandler
 
     private DimensionsNet net; // 用于通知维度网络进行保存
     // 实际的存储
-    private final ArrayList<StoredItemStack> itemStorage;
+    private final ArrayList<ItemStack> itemStorage;
     // 用于显示存储的list，每当发生改变时候将会
 
     public DimensionsItemStorage()
@@ -31,110 +31,79 @@ public class DimensionsItemStorage implements IItemHandler
         this.itemStorage = new ArrayList<>();
     }
 
-    public List<StoredItemStack> getItemStorage()
+    public List<ItemStack> getItemStorage()
     {
         return this.itemStorage;
     }
 
     // 添加物品到存储
-    public void addItem(ItemStack itemStack, long count)
+    public void addItem(ItemStack itemStack, int count)
     {
         if (itemStack.isEmpty())
         {
             return;
         }
-        StoredItemStack sItem = new StoredItemStack(itemStack);
         // 增加已有物品的数量 添加未有的物品
-        for (StoredItemStack item : itemStorage)
+        for (ItemStack itemExist : itemStorage)
         {
-            if (item.equals(sItem))
+            if (ItemStack.isSameItemSameComponents(itemExist,itemStack))
             {
-                item.addCount(count);
+                itemExist.grow(count);
                 OnChange();
                 return;
             }
         }
-        itemStorage.add(new StoredItemStack(itemStack, count));
-        OnChange();
-    }
-
-    public void addItem(StoredItemStack storedItemStack)
-    {
-        if(storedItemStack == null)
-        {
-            return;
-        }
-        if (storedItemStack.getItemStack().isEmpty())
-        {
-            return;
-        }
-        for (StoredItemStack item : itemStorage)
-        {
-            if (item.equals(storedItemStack))
-            {
-                item.addCount(storedItemStack.getCount());
-                OnChange();
-                return;
-            }
-        }
-        itemStorage.add(new StoredItemStack(storedItemStack));
+        itemStorage.add(itemStack.copy());
         OnChange();
     }
 
     // 移除物品 并返回被移除的物品
-    public ItemStack removeItem(ItemStack itemStack, long count)
+    public ItemStack removeItem(ItemStack itemStack, int count)
     {
-        StoredItemStack sItem = new StoredItemStack(itemStack);
-        if (itemStorage.contains(sItem))
+        for (ItemStack itemExist : itemStorage)
         {
-            for (StoredItemStack item : itemStorage)
+            if (ItemStack.isSameItemSameComponents(itemExist,itemStack))
             {
-                if (item.equals(sItem))
+                ItemStack before_stack = itemExist.copy();
+                itemExist.shrink(count);
+                if (itemExist.getCount() <= 0)
                 {
-                    ItemStack before_stack = item.getActualStack();
-                    item.subCount(count); // subCount会将小于0的数变为0
-                    if (item.getCount() == 0)
-                    {
-                        itemStorage.remove(item);
-                        OnChange();
-                        return before_stack;
-                    }
-                    else
-                    {
-                        OnChange();
-                        before_stack.setCount((int) count);
-                        return before_stack;
-                    }
+                    itemStorage.remove(itemExist);
+                    OnChange();
+                    return before_stack;
+                }
+                else
+                {
+                    OnChange();
+                    before_stack.setCount(count);
+                    return before_stack;
                 }
             }
-        }
-        else
-        {
-            return ItemStack.EMPTY;
         }
         return ItemStack.EMPTY;
     }
 
-    public ItemStack removeItem(int index, long count)
+    public ItemStack removeItem(int index, int count)
     {
         // 从索引中移除物品 并返回被移除的物品堆叠
         if (index > itemStorage.size())
         {
             return ItemStack.EMPTY;
         }
-        StoredItemStack sItem = itemStorage.get(index);
+        ItemStack itemExist = itemStorage.get(index);
 
-        if (sItem != null)
+        if (itemExist != null)
         {
             //确保一次交互被移除的物品不超过该堆叠原版的最大叠加
             ItemStack before_stack;
-            if (sItem.getCount() > sItem.getItemStack().getMaxStackSize())
+            if (itemExist.getCount() > itemExist.getMaxStackSize())
             {
-                before_stack = sItem.getVanillaMaxSizeStack();
+                before_stack = itemExist.copy();
+                before_stack.setCount(itemExist.getMaxStackSize());
             }
             else
             {
-                before_stack = sItem.getActualStack();
+                before_stack = itemExist.copy();
             }
             if (count > before_stack.getMaxStackSize())
             {
@@ -142,10 +111,10 @@ public class DimensionsItemStorage implements IItemHandler
             }
 
             // 实际执行移除的逻辑
-            sItem.subCount(count); // subCount会将小于0的数变为0
-            if (sItem.getCount() == 0)
+            itemExist.shrink(count);
+            if (itemExist.getCount() <= 0)
             {
-                itemStorage.remove(sItem);
+                itemStorage.remove(itemExist);
                 OnChange();
                 return before_stack;
             }
@@ -153,7 +122,7 @@ public class DimensionsItemStorage implements IItemHandler
             {
                 // 此处没有到达要移除物品本身的阈值，且前文已经移除了数量。
                 OnChange();
-                before_stack.setCount((int) count);
+                before_stack.setCount(count);
                 return before_stack;
             }
         }
@@ -161,7 +130,19 @@ public class DimensionsItemStorage implements IItemHandler
         return ItemStack.EMPTY;
     }
 
-    public StoredItemStack getStoredItemStackByIndex(int index)
+//    public StoredItemStack getStoredItemStackByIndex(int index)
+//    {
+//        if (index >= 0 && index < itemStorage.size())
+//        {
+//            return itemStorage.get(index);
+//        }
+//        else
+//        {
+//            return null;
+//        }
+//    }
+
+    public ItemStack getItemStackByIndex(int index)
     {
         if (index >= 0 && index < itemStorage.size())
         {
@@ -174,26 +155,26 @@ public class DimensionsItemStorage implements IItemHandler
     }
 
     // 查询物品储存
-    public StoredItemStack getStoredItemStack(StoredItemStack sItemStack)
+    public ItemStack getStoredItemStack(ItemStack itemStack)
     {
-        if (itemStorage.contains(sItemStack))
+        for (ItemStack itemExist : itemStorage)
         {
-            for (StoredItemStack item : itemStorage)
+            if (ItemStack.isSameItemSameComponents(itemExist,itemStack))
             {
-                if (item.equals(sItemStack))
-                {
-                    return item;
-                }
+                return itemExist;
             }
         }
         return null;
     }
 
-    public boolean hasStoredItemStackType(StoredItemStack sItemStack)
+    public boolean hasItemStackType(ItemStack itemStack)
     {
-        if (itemStorage.contains(sItemStack))
+        for (ItemStack itemExist : itemStorage)
         {
-            return true;
+            if (ItemStack.isSameItemSameComponents(itemExist,itemStack))
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -204,15 +185,14 @@ public class DimensionsItemStorage implements IItemHandler
         CompoundTag tag = new CompoundTag();
         ListTag itemsTag = new ListTag();
 
-        itemStorage.forEach((sItem) ->
+        itemStorage.forEach((item) ->
         {
-            if (sItem.getItemStack() == null || sItem.getItemStack() == ItemStack.EMPTY)
+            if (item == null || item == ItemStack.EMPTY)
             {
                 return; // 在此处用于跳过空物品
             }
             CompoundTag itemTag = new CompoundTag();
-            itemTag.put("ItemStack", sItem.getItemStack().save(levelRegistryAccess));
-            itemTag.put("Count", LongTag.valueOf(sItem.getCount()));
+            itemTag.put("ItemStack", item.save(levelRegistryAccess));
             itemsTag.add(itemTag);
         });
 
@@ -233,7 +213,7 @@ public class DimensionsItemStorage implements IItemHandler
                 CompoundTag itemTag = itemsTag.getCompound(i);
                 ItemStack itemStack = ItemStack.parseOptional(levelRegistryAccess, itemTag.getCompound("ItemStack"));
                 long count = itemTag.getLong("Count");
-                addItem(itemStack, count);
+                addItem(itemStack, (int) count);
             }
         }
     }
@@ -250,7 +230,7 @@ public class DimensionsItemStorage implements IItemHandler
 
     @Override
     public ItemStack getStackInSlot(int slot) {
-        return itemStorage.get(slot).getActualStack();
+        return itemStorage.get(slot).copy();
     }
 
     @Override
@@ -272,19 +252,20 @@ public class DimensionsItemStorage implements IItemHandler
             {
                 return ItemStack.EMPTY;
             }
-            StoredItemStack sItem = itemStorage.get(slot);
+            ItemStack itemStack = itemStorage.get(slot);
 
-            if (sItem != null)
+            if (itemStack != null)
             {
                 //确保一次交互被移除的物品不超过该堆叠原版的最大叠加
                 ItemStack before_stack;
-                if (sItem.getCount() > sItem.getItemStack().getMaxStackSize())
+                if (itemStack.getCount() > itemStack.getMaxStackSize())
                 {
-                    before_stack = sItem.getVanillaMaxSizeStack();
+                    before_stack = itemStack.copy();
+                    before_stack.setCount(itemStack.getMaxStackSize());
                 }
                 else
                 {
-                    before_stack = sItem.getActualStack();
+                    before_stack = itemStack.copy();
                 }
                 if (count > before_stack.getMaxStackSize())
                 {
@@ -292,16 +273,16 @@ public class DimensionsItemStorage implements IItemHandler
                 }
 
                 // 实际执行移除的逻辑
-                StoredItemStack simulateItem = new StoredItemStack(sItem);
-                simulateItem.subCount(count); // subCount会将小于0的数变为0
-                if (simulateItem.getCount() == 0)
+                ItemStack simulateItem = itemStack.copy();
+                simulateItem.shrink(count);
+                if (simulateItem.getCount() <= 0)
                 {
                     return before_stack.copy();
                 }
                 else
                 {
                     ItemStack new_stack = before_stack.copy();
-                    new_stack.setCount((int) count);
+                    new_stack.setCount(count);
                     return new_stack;
                 }
             }
@@ -321,7 +302,7 @@ public class DimensionsItemStorage implements IItemHandler
     }
 
     @Override
-    public boolean isItemValid(int i, ItemStack itemStack) {
+    public boolean isItemValid(int slot, ItemStack itemStack) {
         return true;
     }
 }
