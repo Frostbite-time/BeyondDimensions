@@ -29,6 +29,8 @@ public class BeyondDimensions
     public static final String MODID = "beyonddimensions";
     public static boolean MekLoaded = false; // 用于mek化学品存储
     public static final String MekanismMODID = "mekanism";
+    public static boolean AELoaded = false;
+    public static final String AE2MODID = "ae2";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -75,6 +77,10 @@ public class BeyondDimensions
         if(ModList.get().isLoaded(MekanismMODID))
         {
             MekLoaded = true;
+        }
+        if(ModList.get().isLoaded(AE2MODID))
+        {
+            AELoaded = true;
         }
     }
 

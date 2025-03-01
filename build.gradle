@@ -18,6 +18,7 @@ version = mod_version
 group = mod_group_id
 
 repositories {
+    mavenCentral()
     mavenLocal()
     maven { url 'https://modmaven.dev/' }
 }
@@ -130,6 +131,8 @@ dependencies {
 
     // 编译通用机械的api 以便使用化学品存储
     compileOnly "mekanism:Mekanism:${mekanism_version}:api"
+    // 编译时使用ae2的api 以便使用ae的频道系统
+    compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}:api"
 
 
     // Example optional mod dependency with JEI
