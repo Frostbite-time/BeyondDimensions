@@ -2,6 +2,10 @@ package com.wintercogs.beyonddimensions.DataBase;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.Storage.ChemicalStorage;
+import com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage;
+import com.wintercogs.beyonddimensions.DataBase.Storage.FluidStorage;
+import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStorage;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -36,23 +40,23 @@ public class DimensionsNet extends SavedData
     private final Set<UUID> players = new HashSet<>();
 
     // 网络存储空间
-    private DimensionsItemStorage itemStorage;
-    private DimensionsFluidStorage fluidStorage;
-    private DimensionsEnergyStorage energyStorage;
+    private ItemStorage itemStorage;
+    private FluidStorage fluidStorage;
+    private EnergyStorage energyStorage;
     // 非neoforge自带的存储系统 确保在任何调用之前检查null或者对应模组是否加载
-    private DimensionsChemicalStorage chemicalStorage;
+    private ChemicalStorage chemicalStorage;
 
 
 
     public DimensionsNet()
     {
-        itemStorage = new DimensionsItemStorage(this);
-        fluidStorage = new DimensionsFluidStorage(this);
-        energyStorage = new DimensionsEnergyStorage(this);
+        itemStorage = new ItemStorage(this);
+        fluidStorage = new FluidStorage(this);
+        energyStorage = new EnergyStorage(this);
 
         if(BeyondDimensions.MekLoaded)
         {
-            chemicalStorage = new DimensionsChemicalStorage(this);
+            chemicalStorage = new ChemicalStorage(this);
         }
         else
         {
@@ -337,22 +341,22 @@ public class DimensionsNet extends SavedData
     }
 
     //物品存储
-    public DimensionsItemStorage getItemStorage()
+    public ItemStorage getItemStorage()
     {
         return this.itemStorage;
     }
 
-    public DimensionsFluidStorage getFluidStorage()
+    public FluidStorage getFluidStorage()
     {
         return this.fluidStorage;
     }
 
-    public DimensionsEnergyStorage getEnergyStorage()
+    public EnergyStorage getEnergyStorage()
     {
         return this.energyStorage;
     }
 
-    public DimensionsChemicalStorage getChemicalStorage()
+    public ChemicalStorage getChemicalStorage()
     {
         return this.chemicalStorage;
     }

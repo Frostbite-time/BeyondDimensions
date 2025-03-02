@@ -1,6 +1,6 @@
-package com.wintercogs.beyonddimensions.Block.BlockEntity.Custom;
+package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
-import com.wintercogs.beyonddimensions.Block.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -8,31 +8,31 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.energy.EnergyStorage;
 
-public class NetFluidPathwayBlockEntity extends NetedBlockEntity
+public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
 {
 
-    public NetFluidPathwayBlockEntity(BlockPos pos, BlockState blockState) {
-        super(ModBlockEntities.NET_FLUID_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
+    public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState) {
+        super(ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     //--- 能力注册 (通过事件) ---
     public static void registerCapability(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK, // 标准物品能力
-                ModBlockEntities.NET_FLUID_PATHWAY_BLOCK_ENTITY.get(),
+                Capabilities.EnergyStorage.BLOCK, // 标准物品能力
+                ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     if(be.getNetId()<0)
                     {
-                        return new FluidTank(0);
+                        return new EnergyStorage(0);
                     }
                     DimensionsNet net = be.getNet();
                     if(net != null)
                     {
-                        return net.getFluidStorage();
+                        return net.getEnergyStorage();
                     }
-                    return new FluidTank(0);
+                    return new EnergyStorage(0);
                 } // 根据方向返回处理器
         );
     }

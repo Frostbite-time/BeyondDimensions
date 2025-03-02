@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
-import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetedBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;

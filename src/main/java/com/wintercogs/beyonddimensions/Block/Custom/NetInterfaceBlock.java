@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetInterfaceBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;

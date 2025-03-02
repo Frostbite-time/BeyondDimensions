@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
-import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
+import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStorage;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.Slot;
@@ -10,13 +10,13 @@ public class StoredItemStackSlot extends Slot
 {
     // 一个空容器，仅用于欺骗父类构造函数，实际存储使用StoredItemStack并结合index
     private static final Container empty_inv = new SimpleContainer(0);
-    private final DimensionsItemStorage itemStorage;
+    private final ItemStorage itemStorage;
     private int theSlot;
 
     // 简介思路：构建一个slot，使用index结合DimensionsItemStorage中的列表来管理自身对应物品
     // 为此，需要重写网络沟通方案，将DimensionsItemStorage作为原inv，StoredItemStack作为原ItemStack来进行数据同步
 
-    public StoredItemStackSlot(DimensionsItemStorage itemStorage, int slotIndex, int xPosition, int yPosition)
+    public StoredItemStackSlot(ItemStorage itemStorage, int slotIndex, int xPosition, int yPosition)
     {
         super(empty_inv, slotIndex, xPosition, yPosition);
         this.theSlot = slotIndex;

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
-import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.NetFluidPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetFluidPathwayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;

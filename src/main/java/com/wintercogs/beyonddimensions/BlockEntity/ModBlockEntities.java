@@ -1,7 +1,7 @@
-package com.wintercogs.beyonddimensions.Block.BlockEntity;
+package com.wintercogs.beyonddimensions.BlockEntity;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Block.BlockEntity.Custom.*;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.*;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;

@@ -1,6 +1,7 @@
-package com.wintercogs.beyonddimensions.DataBase;
+package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 
+import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -11,14 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class DimensionsItemStorage implements IItemHandler
+public class ItemStorage implements IItemHandler
 {
 
     private DimensionsNet net; // 用于通知维度网络进行保存
     // 实际的存储
     private final ArrayList<ItemStack> itemStorage;
 
-    public DimensionsItemStorage(DimensionsNet net)
+    public ItemStorage(DimensionsNet net)
     {
         this.net = net;
         this.itemStorage = new ArrayList<>();

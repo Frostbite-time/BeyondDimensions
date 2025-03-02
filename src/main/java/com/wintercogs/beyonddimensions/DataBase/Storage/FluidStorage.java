@@ -1,5 +1,6 @@
-package com.wintercogs.beyonddimensions.DataBase;
+package com.wintercogs.beyonddimensions.DataBase.Storage;
 
+import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -8,7 +9,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import java.util.ArrayList;
 
-public class DimensionsFluidStorage implements IFluidHandler
+public class FluidStorage implements IFluidHandler
 {
 
     private DimensionsNet net; // 用于通知维度网络进行保存
@@ -16,7 +17,7 @@ public class DimensionsFluidStorage implements IFluidHandler
     private final ArrayList<FluidStack> fluidStorage;
 
 
-    public DimensionsFluidStorage(DimensionsNet net)
+    public FluidStorage(DimensionsNet net)
     {
         this.net = net;
         this.fluidStorage = new ArrayList<>();

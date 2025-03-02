@@ -1,5 +1,6 @@
-package com.wintercogs.beyonddimensions.DataBase;
+package com.wintercogs.beyonddimensions.DataBase.Storage;
 
+import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
@@ -10,13 +11,13 @@ import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 
-public class DimensionsChemicalStorage implements IChemicalHandler {
+public class ChemicalStorage implements IChemicalHandler {
 
     private DimensionsNet net;
     private final ArrayList<ChemicalStack> chemicalStorage;
 
 
-    public DimensionsChemicalStorage(DimensionsNet net) {
+    public ChemicalStorage(DimensionsNet net) {
         this.net = net;
         this.chemicalStorage = new ArrayList<>();
     }

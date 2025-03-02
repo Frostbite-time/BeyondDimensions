@@ -4,7 +4,7 @@ import com.google.common.base.Suppliers;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
+import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStorage;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
@@ -28,6 +28,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.ItemStackedOnOtherEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.connection.ConnectionType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.lwjgl.glfw.GLFW;
 
@@ -43,7 +44,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
 {
     /// 双端通用数据
     private final Player player; // 打开Menu的玩家实例
-    public final DimensionsItemStorage itemStorage; // Menu所对应的存储，服务端通过savedData获取，客户端通过网络请求获取
+    public final ItemStorage itemStorage; // Menu所对应的存储，服务端通过savedData获取，客户端通过网络请求获取
     /// 客户端数据
     private int lines = 6; //渲染的menu行数
     public int lineData = 0;//从第几行开始渲染？
@@ -51,7 +52,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
     private HashMap<ButtonName,ButtonState> buttonStateMap = new HashMap<>(); // 客户端的按钮状态
     public boolean isHanding = false; // 用于标记当前是否向服务端发出操作请求却未得到回应 true表示无正在处理未回应，false表示空闲
-    public DimensionsItemStorage viewerItemStorage; // 在客户端，用于显示物品
+    public ItemStorage viewerItemStorage; // 在客户端，用于显示物品
     /// 服务端数据
     private ArrayList<ItemStack> lastItemStorage; // 记录截至上一次同步时的存储状态，用于同步数据
 
@@ -406,7 +407,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 // 计算此次添加的字节数
                 ItemStack stack = storage.get(i);
                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer()); // 创建一个 Netty 的 ByteBuf
-                RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());
+                RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, player.level().registryAccess(), ConnectionType.OTHER);
                 ItemStack.STREAM_CODEC.encode(registryBuf,stack);
                 int entrySize = registryBuf.readableBytes() + Integer.BYTES + 1; // 物品的字节数、索引的字节数、结束标记的字节数
 
@@ -474,7 +475,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         // 同时，从用到customClickHandler的类中，移除quickMoveStack和OnItemStackedHandle对于维度槽位的操作
         // ps：其实吧。。。有维度槽位才会用到customClickHandler。。。没有维度槽位不需要customClickHandler额外处理
         // 之所以多出customClickHandler是因为维度槽位的容器本体是数组，移除会导致索引变更的闪烁
-        DimensionsItemStorage trueItemStorage = this.itemStorage;
+        ItemStorage trueItemStorage = this.itemStorage;
         if(shiftDown)
         {
             quickMoveHandle(player,slotIndex,clickItem,trueItemStorage);
@@ -486,7 +487,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     }
 
     // 自定义的快速移动操作
-    protected ItemStack quickMoveHandle(Player player,int slotIndex, ItemStack clickItem, DimensionsItemStorage itemStorage)
+    protected ItemStack quickMoveHandle(Player player,int slotIndex, ItemStack clickItem, ItemStorage itemStorage)
     {
         ItemStack cacheStack;
         Slot slot = this.slots.get(slotIndex);
@@ -533,7 +534,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     }
 
     // 自定义的非快速移动操作
-    protected void clickHandle(int slotIndex,ItemStack clickItem, int button, Player player, DimensionsItemStorage itemStorage)
+    protected void clickHandle(int slotIndex,ItemStack clickItem, int button, Player player, ItemStorage itemStorage)
     {
         ItemStack carriedItem = this.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
         StoredItemStackSlot slot = (StoredItemStackSlot) this.slots.get(slotIndex);// clickHandle仅用于处理点击维度槽位的逻辑，如果转换失败，则证明调用逻辑出错

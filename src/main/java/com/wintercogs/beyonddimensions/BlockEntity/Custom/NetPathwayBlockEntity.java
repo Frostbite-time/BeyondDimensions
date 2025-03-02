@@ -1,6 +1,6 @@
-package com.wintercogs.beyonddimensions.Block.BlockEntity.Custom;
+package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
-import com.wintercogs.beyonddimensions.Block.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;

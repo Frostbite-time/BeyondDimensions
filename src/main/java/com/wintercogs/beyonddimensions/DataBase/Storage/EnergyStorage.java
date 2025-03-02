@@ -1,10 +1,11 @@
-package com.wintercogs.beyonddimensions.DataBase;
+package com.wintercogs.beyonddimensions.DataBase.Storage;
 
+import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 
-public class DimensionsEnergyStorage implements IEnergyStorage
+public class EnergyStorage implements IEnergyStorage
 {
     private DimensionsNet net; // 用于通知维度网络进行保存
     // 实际的存储
@@ -13,7 +14,7 @@ public class DimensionsEnergyStorage implements IEnergyStorage
     private final int maxTransfer = Integer.MAX_VALUE-1;
 
 
-    public DimensionsEnergyStorage(DimensionsNet net)
+    public EnergyStorage(DimensionsNet net)
     {
         this.net = net;
         this.energyStorage = 0;

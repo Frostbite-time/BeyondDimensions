@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
+import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStorage;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
@@ -50,7 +50,7 @@ public class ClientPayloadHandler
                     menu = (DimensionsNetMenu) player.containerMenu;
                     for(int i = 0; i<packet.itemStacks().size(); i++)
                     {
-                        DimensionsItemStorage itemStorage = menu.itemStorage;
+                        ItemStorage itemStorage = menu.itemStorage;
                         if (itemStorage.getItemStorage().size() > packet.indexs().get(i))
                             itemStorage.getItemStorage().set(packet.indexs().get(i), packet.itemStacks().get(i));
                         else if(itemStorage.getItemStorage().size() == packet.indexs().get(i))
@@ -100,7 +100,7 @@ public class ClientPayloadHandler
                         return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                     menu = (DimensionsNetMenu) player.containerMenu;
-                    DimensionsItemStorage clientStorage = menu.itemStorage;
+                    ItemStorage clientStorage = menu.itemStorage;
                     int i = 0;
                     for(ItemStack remoteItem : packet.itemStacks())
                     {
