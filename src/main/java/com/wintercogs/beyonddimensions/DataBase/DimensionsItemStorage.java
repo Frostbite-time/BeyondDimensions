@@ -4,7 +4,6 @@ package com.wintercogs.beyonddimensions.DataBase;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.LongTag;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -18,12 +17,6 @@ public class DimensionsItemStorage implements IItemHandler
     private DimensionsNet net; // 用于通知维度网络进行保存
     // 实际的存储
     private final ArrayList<ItemStack> itemStorage;
-    // 用于显示存储的list，每当发生改变时候将会
-
-    public DimensionsItemStorage()
-    {
-        this.itemStorage = new ArrayList<>();
-    }
 
     public DimensionsItemStorage(DimensionsNet net)
     {

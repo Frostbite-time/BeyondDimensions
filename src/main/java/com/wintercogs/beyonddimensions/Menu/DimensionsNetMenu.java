@@ -2,7 +2,10 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.google.common.base.Suppliers;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataBase.*;
+import com.wintercogs.beyonddimensions.DataBase.ButtonName;
+import com.wintercogs.beyonddimensions.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.DataBase.DimensionsItemStorage;
+import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.SyncItemStoragePacket;

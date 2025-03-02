@@ -12,10 +12,6 @@ public class DimensionsEnergyStorage implements IEnergyStorage
     private final long capacity = Long.MAX_VALUE-1;
     private final int maxTransfer = Integer.MAX_VALUE-1;
 
-    public DimensionsEnergyStorage()
-    {
-        this.energyStorage = 0;
-    }
 
     public DimensionsEnergyStorage(DimensionsNet net)
     {

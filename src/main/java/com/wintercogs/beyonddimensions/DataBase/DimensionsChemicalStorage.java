@@ -15,9 +15,6 @@ public class DimensionsChemicalStorage implements IChemicalHandler {
     private DimensionsNet net;
     private final ArrayList<ChemicalStack> chemicalStorage;
 
-    public DimensionsChemicalStorage() {
-        this.chemicalStorage = new ArrayList<>();
-    }
 
     public DimensionsChemicalStorage(DimensionsNet net) {
         this.net = net;
