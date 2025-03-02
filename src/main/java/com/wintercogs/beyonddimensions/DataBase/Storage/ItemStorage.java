@@ -25,106 +25,14 @@ public class ItemStorage implements IItemHandler
         this.itemStorage = new ArrayList<>();
     }
 
-    public List<ItemStack> getItemStorage()
+    public List<ItemStack> getStorage()
     {
         return this.itemStorage;
     }
 
-    // 添加物品到存储
-    public void addItem(ItemStack itemStack, int count)
-    {
-        if (itemStack.isEmpty())
-        {
-            return;
-        }
-        // 增加已有物品的数量 添加未有的物品
-        for (ItemStack itemExist : itemStorage)
-        {
-            if (ItemStack.isSameItemSameComponents(itemExist,itemStack))
-            {
-                itemExist.grow(count);
-                OnChange();
-                return;
-            }
-        }
-        ItemStack newStack = itemStack.copy();
-        newStack.setCount(count);
-        itemStorage.add(newStack);
-        OnChange();
-    }
 
-    // 移除物品 并返回被移除的物品
-    public ItemStack removeItem(ItemStack itemStack, int count)
-    {
-        for (ItemStack itemExist : itemStorage)
-        {
-            if (ItemStack.isSameItemSameComponents(itemExist,itemStack))
-            {
-                ItemStack before_stack = itemExist.copy();
-                itemExist.shrink(count);
-                if (itemExist.getCount() <= 0)
-                {
-                    itemStorage.remove(itemExist);
-                    OnChange();
-                    return before_stack;
-                }
-                else
-                {
-                    OnChange();
-                    before_stack.setCount(count);
-                    return before_stack;
-                }
-            }
-        }
-        return ItemStack.EMPTY;
-    }
 
-    public ItemStack removeItem(int index, int count)
-    {
-        // 从索引中移除物品 并返回被移除的物品堆叠
-        if (index > itemStorage.size())
-        {
-            return ItemStack.EMPTY;
-        }
-        ItemStack itemExist = itemStorage.get(index);
 
-        if (itemExist != null)
-        {
-            //确保一次交互被移除的物品不超过该堆叠原版的最大叠加
-            ItemStack before_stack;
-            if (itemExist.getCount() > itemExist.getMaxStackSize())
-            {
-                before_stack = itemExist.copy();
-                before_stack.setCount(itemExist.getMaxStackSize());
-            }
-            else
-            {
-                before_stack = itemExist.copy();
-            }
-            if (count > before_stack.getMaxStackSize())
-            {
-                count = before_stack.getMaxStackSize();
-            }
-
-            // 实际执行移除的逻辑
-            itemExist.shrink(count);
-            if (itemExist.getCount() <= 0)
-            {
-                itemStorage.remove(itemExist);
-                OnChange();
-                return before_stack;
-            }
-            else
-            {
-                // 此处没有到达要移除物品本身的阈值，且前文已经移除了数量。
-                OnChange();
-                before_stack.setCount(count);
-                return before_stack;
-            }
-        }
-
-        return ItemStack.EMPTY;
-    }
 
     public ItemStack getItemStackByIndex(int index)
     {
@@ -139,7 +47,7 @@ public class ItemStorage implements IItemHandler
     }
 
     // 查询物品储存
-    public ItemStack getStoredItemStack(ItemStack itemStack)
+    public ItemStack getItemStackByType(ItemStack itemStack)
     {
         for (ItemStack itemExist : itemStorage)
         {
@@ -203,7 +111,7 @@ public class ItemStorage implements IItemHandler
                 CompoundTag itemTag = itemsTag.getCompound(i);
                 ItemStack itemStack = ItemStack.parseOptional(levelRegistryAccess, itemTag.getCompound("ItemStack"));
                 int count = itemTag.getInt("Amount");
-                addItem(itemStack, count);
+                insertItem(itemStack.copyWithCount(count), false);
             }
         }
     }
@@ -225,11 +133,58 @@ public class ItemStorage implements IItemHandler
 
     @Override
     public ItemStack insertItem(int slot, ItemStack itemStack, boolean simulate) {
+        // 存储空间应该总有足够空间，因此总是返回空
         if(simulate)
         {
             return ItemStack.EMPTY;
         }
-        addItem(itemStack,itemStack.getCount());
+
+        if (itemStack.isEmpty())
+        {
+            return ItemStack.EMPTY;
+        }
+        // 增加已有物品的数量 添加未有的物品
+        for (ItemStack itemExist : itemStorage)
+        {
+            if (ItemStack.isSameItemSameComponents(itemExist,itemStack))
+            {
+                itemExist.grow(itemStack.getCount());
+                OnChange();
+                return ItemStack.EMPTY;
+            }
+        }
+        itemStorage.add(itemStack.copy());
+        OnChange();
+
+        return ItemStack.EMPTY;
+    }
+
+    // 添加物品到存储
+    public ItemStack insertItem(ItemStack itemStack, boolean simulate)
+    {
+        // 存储空间应该总有足够空间，因此总是返回空
+        if(simulate)
+        {
+            return ItemStack.EMPTY;
+        }
+
+        if (itemStack.isEmpty())
+        {
+            return ItemStack.EMPTY;
+        }
+        // 增加已有物品的数量 添加未有的物品
+        for (ItemStack itemExist : itemStorage)
+        {
+            if (ItemStack.isSameItemSameComponents(itemExist,itemStack))
+            {
+                itemExist.grow(itemStack.getCount());
+                OnChange();
+                return ItemStack.EMPTY;
+            }
+        }
+        itemStorage.add(itemStack.copy());
+        OnChange();
+
         return ItemStack.EMPTY;
     }
 
@@ -281,9 +236,77 @@ public class ItemStorage implements IItemHandler
         }
         else
         {
-            return removeItem(slot,count);
+            // 从索引中移除物品 并返回被移除的物品堆叠
+            if (slot > itemStorage.size())
+            {
+                return ItemStack.EMPTY;
+            }
+            ItemStack itemExist = itemStorage.get(slot);
+
+            if (itemExist != null)
+            {
+                //确保一次交互被移除的物品不超过该堆叠原版的最大叠加
+                ItemStack before_stack;
+                if (itemExist.getCount() > itemExist.getMaxStackSize())
+                {
+                    before_stack = itemExist.copy();
+                    before_stack.setCount(itemExist.getMaxStackSize());
+                }
+                else
+                {
+                    before_stack = itemExist.copy();
+                }
+                if (count > before_stack.getMaxStackSize())
+                {
+                    count = before_stack.getMaxStackSize();
+                }
+
+                // 实际执行移除的逻辑
+                itemExist.shrink(count);
+                if (itemExist.getCount() <= 0)
+                {
+                    itemStorage.remove(itemExist);
+                    OnChange();
+                    return before_stack;
+                }
+                else
+                {
+                    // 此处没有到达要移除物品本身的阈值，且前文已经移除了数量。
+                    OnChange();
+                    before_stack.setCount(count);
+                    return before_stack;
+                }
+            }
+
+            return ItemStack.EMPTY;
         }
 
+    }
+
+    // 移除物品 并返回被移除的物品
+    public ItemStack extractItem(ItemStack itemStack, boolean simulate)
+    {
+        if (itemStack.isEmpty()) return itemStack;
+
+        // 精确匹配类型和标签
+        for (int i = 0; i < itemStorage.size(); i++) {
+            ItemStack existing = itemStorage.get(i);
+            if (ItemStack.isSameItemSameComponents(existing,itemStack)) {
+                int extractAmount = Math.min(existing.getCount(), itemStack.getCount());
+                ItemStack result = existing.copy().split(extractAmount);
+
+                if (!simulate) {
+                    if (existing.getCount() == extractAmount) {
+                        itemStorage.remove(i);
+                    } else {
+                        existing.shrink(extractAmount);
+                    }
+                    OnChange();
+                }
+                return result;
+            }
+        }
+        return ItemStack.EMPTY;
     }
 
     @Override

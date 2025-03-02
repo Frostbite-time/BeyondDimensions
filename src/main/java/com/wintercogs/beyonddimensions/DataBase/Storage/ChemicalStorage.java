@@ -10,6 +10,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ChemicalStorage implements IChemicalHandler {
 
@@ -24,6 +25,11 @@ public class ChemicalStorage implements IChemicalHandler {
 
     private void OnChange() {
         net.setDirty();
+    }
+
+    public List<ChemicalStack> getStorage()
+    {
+        return this.chemicalStorage;
     }
 
     // 序列化NBT（根据FluidStorage逻辑添加）

@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.*;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;

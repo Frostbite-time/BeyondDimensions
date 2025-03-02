@@ -91,18 +91,18 @@ public class StoredItemStackSlot extends Slot
             return;
         // 当尝试用一个物品真正覆盖这个槽内容会发生什么
         // 如果索引不存在，使用add自增长，如果存在，直接替换
-        if (itemStorage.getItemStorage().size() > getSlotIndex())
-            itemStorage.getItemStorage().set(getSlotIndex(), stack.copy());
-        else if(itemStorage.getItemStorage().size() == getSlotIndex())
-            itemStorage.getItemStorage().add(getSlotIndex(), stack.copy());
+        if (itemStorage.getStorage().size() > getSlotIndex())
+            itemStorage.getStorage().set(getSlotIndex(), stack.copy());
+        else if(itemStorage.getStorage().size() == getSlotIndex())
+            itemStorage.getStorage().add(getSlotIndex(), stack.copy());
         else
         {
             //将size到Index-1之间的位置填充为空，然后填充Index位置
             // 扩展列表直到 targetIndex - 1，并填充 null
-            while (itemStorage.getItemStorage().size() < getSlotIndex()) {
-                itemStorage.getItemStorage().add(ItemStack.EMPTY);  // 填充空值
+            while (itemStorage.getStorage().size() < getSlotIndex()) {
+                itemStorage.getStorage().add(ItemStack.EMPTY);  // 填充空值
             }
-            itemStorage.getItemStorage().add(getSlotIndex(), stack.copy());
+            itemStorage.getStorage().add(getSlotIndex(), stack.copy());
         }
 
 
@@ -113,7 +113,7 @@ public class StoredItemStackSlot extends Slot
     public void setByPlayer(ItemStack newStack, ItemStack oldStack)
     {
         // 当玩家拿着物品点击这个槽会发生什么
-        itemStorage.addItem(newStack, newStack.getCount());
+        itemStorage.insertItem(newStack.copy(), false);
         this.setChanged();
     }
 
@@ -147,7 +147,7 @@ public class StoredItemStackSlot extends Slot
             return ItemStack.EMPTY;
         }
         // 从当前槽位移除对应数量的物品 并返回被移除的物品总数
-        return itemStorage.removeItem(getSlotIndex(), amount);
+        return itemStorage.extractItem(getSlotIndex(), amount,false);
     }
 
     @Override

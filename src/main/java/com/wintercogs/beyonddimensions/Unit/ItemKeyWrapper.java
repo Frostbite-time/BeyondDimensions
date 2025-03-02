@@ -8,7 +8,7 @@ public class ItemKeyWrapper {
     private final ItemStack stack;
 
     public ItemKeyWrapper(ItemStack stack) {
-        this.stack = stack.copyWithCount(1); // 固定数量为1以忽略数量差异
+        this.stack = stack.copy();
     }
 
     public ItemStack getItemStack() {

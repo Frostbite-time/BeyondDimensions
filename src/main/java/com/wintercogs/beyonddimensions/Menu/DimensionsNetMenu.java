@@ -4,8 +4,8 @@ import com.google.common.base.Suppliers;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStorage;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStorage;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
 import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.SyncItemStoragePacket;
@@ -92,7 +92,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         {
             // 将lastItemStorage设置为一个深克隆，以便后续进行比较
             this.lastItemStorage = new ArrayList<>();
-            for(ItemStack itemStack : this.itemStorage.getItemStorage())
+            for(ItemStack itemStack : this.itemStorage.getStorage())
             {
                 this.lastItemStorage.add(itemStack.copy());
             }
@@ -136,12 +136,12 @@ public class DimensionsNetMenu extends AbstractContainerMenu
      */
     public void updateViewerStorage()
     {
-        viewerItemStorage.getItemStorage().clear();
-        for(ItemStack itemStack : this.itemStorage.getItemStorage())
+        viewerItemStorage.getStorage().clear();
+        for(ItemStack itemStack : this.itemStorage.getStorage())
         {
-            this.viewerItemStorage.addItem(itemStack.copy(),itemStack.getCount());
+            this.viewerItemStorage.insertItem(itemStack.copy(),false);
         }
-        buildIndexList(new ArrayList<>(viewerItemStorage.getItemStorage()));
+        buildIndexList(new ArrayList<>(viewerItemStorage.getStorage()));
     }
 
     /**
@@ -150,7 +150,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
      */
     public final void ScrollTo()
     {
-        this.buildIndexList(new ArrayList<>(this.viewerItemStorage.getItemStorage()));
+        this.buildIndexList(new ArrayList<>(this.viewerItemStorage.getStorage()));
     }
 
     /**
@@ -332,7 +332,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             cacheLast.add(itemStack.copy());
         }
         ArrayList<ItemStack> cacheNow = new ArrayList<>();
-        for(ItemStack itemStack : this.itemStorage.getItemStorage())
+        for(ItemStack itemStack : this.itemStorage.getStorage())
         {
             cacheNow.add(itemStack.copy());
         }
@@ -379,11 +379,11 @@ public class DimensionsNetMenu extends AbstractContainerMenu
 
     }
 
-    // 在手动执行物品增添后使用此函数可以阻止自动远程同步
+
     public void refreshLast()
     {
         this.lastItemStorage.clear();
-        for(ItemStack itemStack : this.itemStorage.getItemStorage())
+        for(ItemStack itemStack : this.itemStorage.getStorage())
         {
             this.lastItemStorage.add(itemStack.copy());
         }
@@ -400,7 +400,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             ArrayList<Integer> currentIndices = new ArrayList<>(); // 用于精确记录索引，防止因网络延时导致错误
             int currentPayloadSize = 0; // 当前包大小
             final int MAX_PAYLOAD_SIZE = 900000; // 单个包最大大小  服务端发送到客户端的包不能大于1MiB 此处留下100KB冗余
-            ArrayList<ItemStack> storage = new ArrayList<>(this.itemStorage.getItemStorage()); // 当前存储空间的浅克隆
+            ArrayList<ItemStack> storage = new ArrayList<>(this.itemStorage.getStorage()); // 当前存储空间的浅克隆
 
             for(int i = 0;i<storage.size();i++)
             {
@@ -500,7 +500,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 int moveCount = checkCanMoveStackCount(cacheStack, this.lines * 9, this.slots.size(), true);
                 moveCount = Math.min(moveCount,cacheStack.getCount());
                 int nowCount = 0;
-                ItemStack nowStack = itemStorage.getStoredItemStack(cacheStack.copy());
+                ItemStack nowStack = itemStorage.getItemStackByType(cacheStack.copy());
                 if(nowStack != null)
                 {
                     nowCount = (int) nowStack.getCount();
@@ -512,13 +512,13 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                     if (!this.moveItemStackTo(cacheStack, this.lines * 9, this.slots.size(), true)) {
                         return ItemStack.EMPTY;
                     }
-                    itemStorage.removeItem(clickItem,moveCount);
+                    itemStorage.extractItem(clickItem.copyWithCount(moveCount),false);
                 }
             }
             else // 物品由背包移动到存储
             {
                 cacheStack = slot.getItem().copy();
-                itemStorage.addItem(cacheStack,cacheStack.getCount());
+                itemStorage.insertItem(cacheStack.copy(),false);
                 slot.tryRemove(cacheStack.getCount(),Integer.MAX_VALUE-1,player);
             }
             if (cacheStack.isEmpty()) {
@@ -544,7 +544,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             if (!carriedItem.isEmpty())
             {   //槽位物品为空，携带物品存在，将携带物品插入槽位
                 int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                itemStorage.addItem(carriedItem,changedCount);
+                itemStorage.insertItem(carriedItem.copyWithCount(changedCount),false);
                 int newCount = carriedItem.getCount() - changedCount;
                 if(newCount <=0)
                 {
@@ -566,7 +566,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 // 确保一次取出最大不得超过原版数量
                 int woundChangeNum = Math.min(clickItem.getCount(), clickItem.getMaxStackSize());
                 int actualChangeNum = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
-                ItemStack takenItem = itemStorage.removeItem(clickItem,actualChangeNum);
+                ItemStack takenItem = itemStorage.extractItem(clickItem.copyWithCount(actualChangeNum),false);
                 if(takenItem != null)
                 {
                     setCarried(takenItem);
@@ -576,7 +576,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             else if (slot.mayPlace(carriedItem))
             {   //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
                 int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                itemStorage.addItem(carriedItem,changedCount);
+                itemStorage.insertItem(carriedItem.copyWithCount(changedCount),false);
                 int newCount = carriedItem.getCount() - changedCount;
                 if(newCount <=0)
                 {
@@ -626,7 +626,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             if(this.slots.get(i) instanceof StoredItemStackSlot)
             {
                 // 物品全部移动到存储，然后手动退出
-                itemStorage.addItem(stack,stack.getCount());
+                itemStorage.insertItem(stack.copy(),false);
                 flag = true;
                 break;
             }

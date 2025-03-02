@@ -51,25 +51,25 @@ public class ClientPayloadHandler
                     for(int i = 0; i<packet.itemStacks().size(); i++)
                     {
                         ItemStorage itemStorage = menu.itemStorage;
-                        if (itemStorage.getItemStorage().size() > packet.indexs().get(i))
-                            itemStorage.getItemStorage().set(packet.indexs().get(i), packet.itemStacks().get(i));
-                        else if(itemStorage.getItemStorage().size() == packet.indexs().get(i))
-                            itemStorage.getItemStorage().add(packet.indexs().get(i), packet.itemStacks().get(i));
+                        if (itemStorage.getStorage().size() > packet.indexs().get(i))
+                            itemStorage.getStorage().set(packet.indexs().get(i), packet.itemStacks().get(i));
+                        else if(itemStorage.getStorage().size() == packet.indexs().get(i))
+                            itemStorage.getStorage().add(packet.indexs().get(i), packet.itemStacks().get(i));
                         else
                         {
                             //将size到Index-1之间的位置填充为空，然后填充Index位置
                             // 扩展列表直到 targetIndex - 1，并填充 null
-                            while (itemStorage.getItemStorage().size() < packet.indexs().get(i)) {
-                                itemStorage.getItemStorage().add(ItemStack.EMPTY);  // 填充空值
+                            while (itemStorage.getStorage().size() < packet.indexs().get(i)) {
+                                itemStorage.getStorage().add(ItemStack.EMPTY);  // 填充空值
                             }
-                            itemStorage.getItemStorage().add(packet.indexs().get(i), packet.itemStacks().get(i));
+                            itemStorage.getStorage().add(packet.indexs().get(i), packet.itemStacks().get(i));
                         }
                     }
                     if(packet.end())
                     {
                         // 收到结束信号，更新视图，重建索引
                         menu.updateViewerStorage();
-                        menu.buildIndexList(new ArrayList<>(menu.viewerItemStorage.getItemStorage()));
+                        menu.buildIndexList(new ArrayList<>(menu.viewerItemStorage.getStorage()));
                         menu.resumeRemoteUpdates();
                     }
                 }
@@ -109,18 +109,18 @@ public class ClientPayloadHandler
                         {
                             if(packet.changedCounts().get(i) > 0)
                             {
-                                clientStorage.addItem(remoteItem,packet.changedCounts().get(i));
+                                clientStorage.insertItem(remoteItem.copyWithCount(packet.changedCounts().get(i)),false);
                             }
-                            else // 移除操作务必调用remove方法以移除0存储
+                            else
                             {
-                                clientStorage.removeItem(remoteItem,-packet.changedCounts().get(i));
+                                clientStorage.extractItem(remoteItem.copyWithCount(-packet.changedCounts().get(i)),false);
                             }
                         }
                         else // 如果当前存储不存在此物品
                         {
                             if(packet.changedCounts().get(i) > 0)
                             {
-                                clientStorage.addItem(remoteItem,packet.changedCounts().get(i));
+                                clientStorage.insertItem(remoteItem.copyWithCount(packet.changedCounts().get(i)),false);
                             }
                         }
                         i++; // 一次遍历完毕后索引自增

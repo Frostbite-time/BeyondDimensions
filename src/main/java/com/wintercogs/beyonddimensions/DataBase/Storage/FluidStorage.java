@@ -8,6 +8,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FluidStorage implements IFluidHandler
 {
@@ -26,6 +27,11 @@ public class FluidStorage implements IFluidHandler
     private void OnChange()
     {
         net.setDirty();
+    }
+
+    public List<FluidStack> getStorage()
+    {
+        return this.fluidStorage;
     }
 
     // 将物品存储转换为 NBT 数据
