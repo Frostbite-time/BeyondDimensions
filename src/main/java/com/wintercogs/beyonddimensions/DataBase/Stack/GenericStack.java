@@ -69,21 +69,13 @@ public class GenericStack {
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
-        if(obj instanceof GenericStack other)
-        {
-            if(this.typeId != other.getTypeId())
+    public boolean equals(Object obj) {
+        if (obj instanceof GenericStack other) {
+            if (!this.typeId.equals(other.typeId))
                 return false;
             IStackType type = StackTypeRegistry.getType(typeId);
-            if(type.isSameStackSameComponents(this,other))
-                return true;
-            else
-                return false;
+            return type.isSameStackSameComponents(this.stack, other.stack);
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 }
