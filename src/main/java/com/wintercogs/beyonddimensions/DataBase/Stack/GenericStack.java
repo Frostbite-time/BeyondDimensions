@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
+import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import net.minecraft.resources.ResourceLocation;
+
 
 // 存储系统中重要的部分，用于统一所有不同stack
 public class GenericStack {
@@ -13,6 +15,17 @@ public class GenericStack {
         this.typeId = typeId;
         this.stack = stack;
         this.amount = amount;
+    }
+
+    // 用于深克隆
+    public GenericStack copy()
+    {
+        return new GenericStack(ResourceLocation.parse(typeId.toString()),StackTypeRegistry.getType(typeId).copyStack(stack),this.amount);
+    }
+
+    public GenericStack copyWithCount(long amount)
+    {
+        return new GenericStack(ResourceLocation.parse(typeId.toString()),StackTypeRegistry.getType(typeId).copyStackWithCount(stack,amount),amount);
     }
 
     public <T> T getStack(IStackType<T> type) {
@@ -53,5 +66,24 @@ public class GenericStack {
     public void shrink(long amount)
     {
         this.grow(-amount);
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if(obj instanceof GenericStack other)
+        {
+            if(this.typeId != other.getTypeId())
+                return false;
+            IStackType type = StackTypeRegistry.getType(typeId);
+            if(type.isSameStackSameComponents(this,other))
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

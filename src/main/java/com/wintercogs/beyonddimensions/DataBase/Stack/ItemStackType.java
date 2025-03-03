@@ -9,9 +9,16 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.neoforge.network.connection.ConnectionType;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class ItemStackType implements IStackType<ItemStack> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
@@ -148,6 +155,18 @@ public class ItemStackType implements IStackType<ItemStack> {
     public String getCountText(long count) {
         if (count <= 0) return "";
         return StringFormat.formatCount(count);
+    }
+
+    @Override
+    public Component getDisplayName(ItemStack stack)
+    {
+        return stack.getDisplayName();
+    }
+
+    @Override
+    public List<Component> getTooltipLines(ItemStack stack, Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag)
+    {
+        return stack.getTooltipLines(tooltipContext,player,tooltipFlag);
     }
 }
 

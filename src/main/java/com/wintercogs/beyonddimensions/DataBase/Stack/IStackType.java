@@ -5,7 +5,14 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.TooltipFlag;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 // 用于定义不同stack的行为 物品 流体 以及其他模组中行为逻辑stack相似的资源
 public interface IStackType<T> {
@@ -64,5 +71,9 @@ public interface IStackType<T> {
     void render(GuiGraphics gui, T stack, int x, int y);
 
     String getCountText(long count);
+
+    Component getDisplayName(T stack);
+
+    List<Component> getTooltipLines(T stack, Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag);
 
 }

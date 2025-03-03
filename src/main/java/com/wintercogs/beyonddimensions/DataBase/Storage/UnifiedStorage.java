@@ -15,7 +15,7 @@ import java.util.List;
 
 public class UnifiedStorage {
     private DimensionsNet net;
-    private final List<GenericStack> stacks = new ArrayList<>();
+    private final ArrayList<GenericStack> stacks = new ArrayList<>();
 
     public UnifiedStorage(DimensionsNet net) {
         this.net = net;
@@ -24,6 +24,11 @@ public class UnifiedStorage {
     public void onChange()
     {
         net.setDirty();
+    }
+
+    public ArrayList<GenericStack> getStorage()
+    {
+        return this.stacks;
     }
 
 
