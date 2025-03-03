@@ -2,10 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataBase.Storage.ChemicalStorage;
-import com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage;
-import com.wintercogs.beyonddimensions.DataBase.Storage.FluidStorage;
-import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStorage;
+import com.wintercogs.beyonddimensions.DataBase.Storage.*;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -46,10 +43,14 @@ public class DimensionsNet extends SavedData
     // 非neoforge自带的存储系统 确保在任何调用之前检查null或者对应模组是否加载
     private ChemicalStorage chemicalStorage;
 
+    // 通用存储空间-测试 存储一切stack行为的资源
+    private UnifiedStorage unifiedStorage;
 
 
     public DimensionsNet()
     {
+        unifiedStorage = new UnifiedStorage(this);
+
         itemStorage = new ItemStorage(this);
         fluidStorage = new FluidStorage(this);
         energyStorage = new EnergyStorage(this);
@@ -359,6 +360,12 @@ public class DimensionsNet extends SavedData
     public ChemicalStorage getChemicalStorage()
     {
         return this.chemicalStorage;
+    }
+
+    // 统一存储空间
+    public UnifiedStorage getUnifiedStorage()
+    {
+        return this.unifiedStorage;
     }
 
 }

@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderLookup;
@@ -46,7 +47,9 @@ public class ItemStackType implements IStackType<ItemStack> {
         ItemStack copy = stack.copy();
         // 处理long到int的转换安全
         if (count > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
+            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
+            copy.setCount(Integer.MAX_VALUE);
+            return copy;
         }
         copy.setCount((int) count);
         return copy;
@@ -95,14 +98,14 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     @Override
     public long mergeStacks(ItemStack existing, ItemStack toInsert, long maxAmount) {
-        if (!isSameStack(existing, toInsert)) return maxAmount;
+        if (!isSameStackSameComponents(existing, toInsert)) return maxAmount;
 
-        int availableSpace = (int) (getMaxStackSize(existing) - existing.getCount());
-        int toTransfer = (int) Math.min(maxAmount, Math.min(availableSpace, toInsert.getCount()));
+        int availableSpace = (int) (getCustomMaxStackSize() - existing.getCount());
+        int canAccept = (int) Math.min(maxAmount, Math.min(availableSpace, toInsert.getCount()));
 
-        existing.grow(toTransfer);
-        toInsert.shrink(toTransfer);
-        return maxAmount - toTransfer;
+        existing.grow(canAccept);
+        toInsert.shrink(canAccept);
+        return maxAmount - canAccept;
     }
 
     @Override
@@ -144,8 +147,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public String getCountText(long count) {
         if (count <= 0) return "";
-        if (count > 9999) return "∞"; // 处理超大数量显示
-        return String.valueOf(count);
+        return StringFormat.formatCount(count);
     }
 }
 

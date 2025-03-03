@@ -8,6 +8,7 @@ public class GenericStack {
     private final Object stack;
     private long amount;
 
+
     public GenericStack(ResourceLocation typeId, Object stack, long amount) {
         this.typeId = typeId;
         this.stack = stack;
@@ -19,6 +20,14 @@ public class GenericStack {
             throw new IllegalArgumentException("Type mismatch");
         }
         return type.getStackClass().cast(stack);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getTypedStack(IStackType<T> type) {
+        if (!type.getTypeId().equals(this.typeId)) {
+            throw new IllegalArgumentException("Type mismatch");
+        }
+        return (T) this.stack; // 此处转换是安全的
     }
 
     public ResourceLocation getTypeId()

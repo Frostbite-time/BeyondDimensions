@@ -54,6 +54,12 @@ public interface IStackType<T> {
     CompoundTag serializeNBT(T stack, HolderLookup.Provider levelRegistryAccess);
     T deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess);
 
+    // 新增通用序列化方法
+    default void serializeNBT(CompoundTag tag, HolderLookup.Provider provider, GenericStack stack) {
+        T typedStack = stack.getTypedStack(this);
+        tag.put("Data", serializeNBT(typedStack, provider));
+    }
+
     // UI渲染（在指定位置绘制图标和数量）
     void render(GuiGraphics gui, T stack, int x, int y);
 
