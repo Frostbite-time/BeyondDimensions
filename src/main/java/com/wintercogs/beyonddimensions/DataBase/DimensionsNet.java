@@ -139,6 +139,7 @@ public class DimensionsNet extends SavedData
         net.itemStorage.deserializeNBT(registryAccess, tag.getCompound("ItemStorage"));
         net.fluidStorage.deserializeNBT(registryAccess,tag.getCompound("FluidStorage"));
         net.energyStorage.deserializeNBT(registryAccess,tag.getCompound("EnergyStorage"));
+        net.unifiedStorage.deserializeNBT(registryAccess,tag.getCompound("UnifiedStorage"));
         if(net.chemicalStorage != null)
         {
             net.chemicalStorage.deserializeNBT(registryAccess,tag.getCompound("ChemicalStorage"));
@@ -188,6 +189,7 @@ public class DimensionsNet extends SavedData
         tag.put("ItemStorage", itemStorage.serializeNBT(registryAccess));
         tag.put("FluidStorage",fluidStorage.serializeNBT(registryAccess));
         tag.put("EnergyStorage",energyStorage.serializeNBT(registryAccess));
+        tag.put("UnifiedStorage",unifiedStorage.serializeNBT(registryAccess));
         if(chemicalStorage != null)
         {
             tag.put("ChemicalStorage",chemicalStorage.serializeNBT(registryAccess));
