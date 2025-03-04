@@ -31,6 +31,14 @@ public class UnifiedStorage {
         return this.storage;
     }
 
+    public boolean hasStackType(IStackType other)
+    {
+        if(getStackByStack(other) != null)
+            return true;
+        else
+            return false;
+    }
+
     public IStackType getStackByIndex(int index)
     {
         if (index >= 0 && index < storage.size())
@@ -102,6 +110,26 @@ public class UnifiedStorage {
         }
         return stack.getEmpty();
     }
+
+    public IStackType extract(ResourceLocation typeId ,int slot,long amount, boolean simulate) {
+        IStackType existing = storage.get(slot);
+        if (existing.isEmpty()) return existing.getEmpty();
+
+        if (existing.getTypeId().equals(typeId)) {
+                long extracted = Math.min(amount, existing.getStackAmount());
+                IStackType sim = existing.copy();
+                IStackType result = sim.split(extracted);
+                if (!simulate) {
+                    existing.shrink(extracted);
+                    if (existing.getStackAmount() <= 0) {
+                        storage.remove(slot);
+                    }
+                    onChange();
+                }
+                return result;
+        }
+        return existing.getEmpty();
+    }
     // endregion
 
     // region 序列化方法
@@ -111,6 +139,8 @@ public class UnifiedStorage {
 
         for (IStackType stack : storage) {
             // 修改后的序列化代码
+            if(stack.isEmpty())
+                continue;
             CompoundTag stackTag = new CompoundTag();
             // 使用类型安全的序列化方式 将堆叠数据放入"Data"标签
             stackTag.put("TypedStack",stack.serializeNBT(provider));
@@ -129,9 +159,9 @@ public class UnifiedStorage {
         for (Tag t : stacksTag) {
             CompoundTag stackTag = (CompoundTag) t;
             ResourceLocation typeId = ResourceLocation.parse(stackTag.getString("Type"));
-            IStackType stack = StackTypeRegistry.getType(typeId).copy();
-            stack.deserializeNBT(tag,provider);
-            getStorage().add(stack);
+            IStackType stackEmpty = StackTypeRegistry.getType(typeId).copy();
+            IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"),provider);
+            getStorage().add(stackActual);
         }
     }
     // endregion

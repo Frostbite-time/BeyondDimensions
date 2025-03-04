@@ -80,9 +80,10 @@ public interface IStackType<T> {
     {
         for(IStackType stacktype : StackTypeRegistry.getAllTypes())
         {
-            if(stacktype.deserialize(buf)!=null)
+            IStackType stack = stacktype.deserialize(buf);
+            if(stack!=null)
             {
-                return stacktype.deserialize(buf);
+                return stack;
             }
         }
 

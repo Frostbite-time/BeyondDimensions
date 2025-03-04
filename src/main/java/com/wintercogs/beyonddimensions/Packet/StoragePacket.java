@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 
-public record StoragePacket(ArrayList<IStackType> stacks, ArrayList<Long> indexs, boolean end) implements CustomPacketPayload
+public record StoragePacket(ArrayList<IStackType> stacks, ArrayList<Integer> indexs, boolean end) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<StoragePacket> TYPE =
@@ -42,7 +42,7 @@ public record StoragePacket(ArrayList<IStackType> stacks, ArrayList<Long> indexs
                     StoragePacket::stacks,
                     ByteBufCodecs.collection(
                             ArrayList::new,
-                            ByteBufCodecs.VAR_LONG
+                            ByteBufCodecs.VAR_INT
                     ),
                     StoragePacket::indexs,
                     ByteBufCodecs.BOOL,

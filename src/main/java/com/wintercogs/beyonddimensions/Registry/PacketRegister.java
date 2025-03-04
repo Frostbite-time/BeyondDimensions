@@ -36,7 +36,7 @@ public class PacketRegister
                 StoragePacket.TYPE,
                 StoragePacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleItemStoragePacket,
+                        ClientPayloadHandler.getInstance()::handleStoragePacket,
                         ServerPayloadHandler.getInstance()::handleItemStoragePacket
                 )
         );

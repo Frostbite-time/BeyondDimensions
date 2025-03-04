@@ -1,7 +1,11 @@
 package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStorage;
+import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
@@ -36,11 +40,12 @@ public class ClientPayloadHandler
         );
     }
 
-    public void handleItemStoragePacket(final StoragePacket packet, final IPayloadContext context)
+    public void handleStoragePacket(final StoragePacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
                 () ->
                 {
+                    BeyondDimensions.LOGGER.info("客户端收到AA数据");
                     Player player = context.player();
                     DimensionsNetMenu menu;
                     if (!(player.containerMenu instanceof DimensionsNetMenu))
@@ -50,26 +55,26 @@ public class ClientPayloadHandler
                     menu = (DimensionsNetMenu) player.containerMenu;
                     for(int i = 0; i<packet.stacks().size(); i++)
                     {
-                        ItemStorage itemStorage = menu.itemStorage;
-                        if (itemStorage.getStorage().size() > packet.indexs().get(i))
-                            itemStorage.getStorage().set(packet.indexs().get(i), packet.stacks().get(i));
-                        else if(itemStorage.getStorage().size() == packet.indexs().get(i))
-                            itemStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
+                        UnifiedStorage unifiedStorage = menu.unifiedStorage;
+                        if (unifiedStorage.getStorage().size() > packet.indexs().get(i))
+                            unifiedStorage.getStorage().set(packet.indexs().get(i), packet.stacks().get(i));
+                        else if(unifiedStorage.getStorage().size() == packet.indexs().get(i))
+                            unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
                         else
                         {
                             //将size到Index-1之间的位置填充为空，然后填充Index位置
                             // 扩展列表直到 targetIndex - 1，并填充 null
-                            while (itemStorage.getStorage().size() < packet.indexs().get(i)) {
-                                itemStorage.getStorage().add(ItemStack.EMPTY);  // 填充空值
+                            while (unifiedStorage.getStorage().size() < packet.indexs().get(i)) {
+                                unifiedStorage.getStorage().add(new ItemStackType(ItemStack.EMPTY));  // 填充空值
                             }
-                            itemStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
+                            unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
                         }
                     }
                     if(packet.end())
                     {
                         // 收到结束信号，更新视图，重建索引
                         menu.updateViewerStorage();
-                        menu.buildIndexList(new ArrayList<>(menu.viewerItemStorage.getStorage()));
+                        menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
                         menu.resumeRemoteUpdates();
                     }
                 }
@@ -100,27 +105,27 @@ public class ClientPayloadHandler
                         return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                     menu = (DimensionsNetMenu) player.containerMenu;
-                    ItemStorage clientStorage = menu.itemStorage;
+                    UnifiedStorage clientStorage = menu.unifiedStorage;
                     int i = 0;
-                    for(ItemStack remoteItem : packet.stacks())
+                    for(IStackType remoteStack : packet.stacks())
                     {
                         // 如果当前存储存在此物品
-                        if(clientStorage.hasItemStackType(remoteItem))
+                        if(clientStorage.hasStackType(remoteStack))
                         {
                             if(packet.changedCounts().get(i) > 0)
                             {
-                                clientStorage.insertItem(remoteItem.copyWithCount(packet.changedCounts().get(i)),false);
+                                clientStorage.insert(remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
                             }
                             else
                             {
-                                clientStorage.extractItem(remoteItem.copyWithCount(-packet.changedCounts().get(i)),false);
+                                clientStorage.extract(remoteStack.copyWithCount(-packet.changedCounts().get(i)),false);
                             }
                         }
                         else // 如果当前存储不存在此物品
                         {
                             if(packet.changedCounts().get(i) > 0)
                             {
-                                clientStorage.insertItem(remoteItem.copyWithCount(packet.changedCounts().get(i)),false);
+                                clientStorage.insert(remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
                             }
                         }
                         i++; // 一次遍历完毕后索引自增

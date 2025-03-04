@@ -3,13 +3,14 @@ package com.wintercogs.beyonddimensions.GUI;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
-import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
+import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
 import com.wintercogs.beyonddimensions.Packet.CallSeverStoragePacket;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
@@ -92,8 +93,9 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         lastButtonStateMap = new HashMap<>(buttonStateMap);
         lastSearchText = searchField.getValue();
 
-        menu.itemStorage.getStorage().clear();
+        menu.unifiedStorage.getStorage().clear();
         menu.suppressRemoteUpdates();
+        BeyondDimensions.LOGGER.info("客户端发送数据请求");
         PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }
 
@@ -105,7 +107,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         {
             menu.loadSearchText(searchField.getValue());
             menu.loadButtonState(buttonStateMap);
-            menu.buildIndexList(new ArrayList<>(menu.viewerItemStorage.getStorage()));
+            menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
             lastButtonStateMap = new HashMap<>(buttonStateMap);
             lastSearchText = searchField.getValue();
         }
@@ -140,7 +142,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
 
     @Override
     protected void renderSlot(GuiGraphics guiGraphics, Slot slot) {
-        if(slot instanceof StoredItemStackSlot sSlot)
+        if(slot instanceof StoredStackSlot sSlot)
         {
             int x = slot.x;
             int y = slot.y;
@@ -156,7 +158,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
 
                 poseStack.popPose();
 
-                int count = sSlot.getItemCount();
+                long count = sSlot.getItemCount();
                 if(count<=0)
                 {
                     return;
@@ -256,7 +258,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
                 ItemStack clickItem;
                 if(hasShiftDown())
                 {
-                    if(slot instanceof StoredItemStackSlot sSlot)
+                    if(slot instanceof StoredStackSlot sSlot)
                     {
                         clickItem = sSlot.getVanillaActualStack();
                     }
@@ -269,7 +271,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
                 }
                 else
                 {
-                    if(slot instanceof StoredItemStackSlot sSlot)
+                    if(slot instanceof StoredStackSlot sSlot)
                     {
                         clickItem = sSlot.getVanillaActualStack();
                         menu.isHanding = true;

@@ -36,7 +36,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public ItemStack getStack()
     {
-        return stack;
+        return stack.copyWithCount(Math.toIntExact(getStackAmount()));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public IStackType<ItemStack> copy()
     {
-        return new ItemStackType(stack);
+        return new ItemStackType(stack.copy());
     }
 
     @Override
@@ -192,39 +192,59 @@ public class ItemStackType implements IStackType<ItemStack> {
         return ItemStack.isSameItemSameComponents(stack, other.getStack());
     }
 
-    // 网络序列化需修改，以防数量限制导致崩溃
+    // 网络序列化
     @Override
     public void serialize(RegistryFriendlyByteBuf buf) {
+        // 始终写入类型ID
         buf.writeResourceLocation(getTypeId());
-        buf.writeInt(stack.getCount());
-        stack.setCount(1);
-        ItemStack.STREAM_CODEC.encode(buf,stack);
+
+        // 写入是否存在物品的标志
+        boolean hasItem = !stack.isEmpty();
+        buf.writeBoolean(hasItem);
+
+        if (hasItem) {
+            // 写入数量
+            buf.writeVarInt(stack.getCount());
+            // 使用副本避免修改原堆栈
+            ItemStack copy = stack.copyWithCount(1);
+            // 使用OPTIONAL_CODEC处理可能为空的情况
+            ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, copy);
+        }
     }
 
     //
     public ItemStackType deserialize(RegistryFriendlyByteBuf buf) {
-        if(buf.readResourceLocation() == getTypeId())
-        {
-            int amount = buf.readInt();
-            ItemStackType stack = new ItemStackType(ItemStack.STREAM_CODEC.decode(buf));
-            stack.setStackAmount(amount);
-            return stack;
+        // 读取类型ID
+        ResourceLocation typeId = buf.readResourceLocation();
+        if (!typeId.equals(getTypeId())) {
+            return null;// 表示未能读取任何类型
         }
-        return null;
+
+        // 读取是否存在物品的标志
+        boolean hasItem = buf.readBoolean();
+        if (!hasItem) {
+            return new ItemStackType(ItemStack.EMPTY);
+        }
+
+        // 读取数量
+        int count = buf.readVarInt();
+        // 使用OPTIONAL_CODEC解码
+        ItemStack stack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf)
+                .copyWithCount(count);
+        return new ItemStackType(stack);
     }
 
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
         CompoundTag tag = new CompoundTag();
         tag.putLong("Amount", getStackAmount());
-        stack.setCount(1);
-        tag.put("Stack",stack.save(levelRegistryAccess));
+        tag.put("Stack",stack.copyWithCount(1).save(levelRegistryAccess));
         return tag;
     }
 
     @Override
     public ItemStackType deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
-        ItemStackType stack =  new ItemStackType(ItemStack.parseOptional(levelRegistryAccess,nbt));
+        ItemStackType stack =  new ItemStackType(ItemStack.parseOptional(levelRegistryAccess,nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));
         return stack;
     }
@@ -269,6 +289,15 @@ public class ItemStackType implements IStackType<ItemStack> {
             return this.isSameTypeSameComponents(otherStack);
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        // 基于物品类型和组件生成哈希码
+        int hash = stack.getItem().hashCode();
+        hash = 31 * hash + (stack.getComponents() != null ?
+                stack.getComponents().hashCode() : 0);
+        return hash;
     }
 }
 
