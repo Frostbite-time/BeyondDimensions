@@ -31,7 +31,7 @@ public interface IStackType<T> {
     Class<T> getStackClass();
 
     // 新增方法：判断堆栈是否为空（如ItemStack.isEmpty()）
-    boolean isEmpty(;
+    boolean isEmpty();
 
     // 空实例（例如：ItemStack.EMPTY）
     T getEmptyStack();
