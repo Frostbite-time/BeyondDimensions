@@ -3,7 +3,9 @@ package com.wintercogs.beyonddimensions.Registry;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class StackTypeRegistry {
@@ -24,6 +26,11 @@ public class StackTypeRegistry {
             throw new IllegalArgumentException("Unknown stack type: " + id);
         }
         return (IStackType<T>) type;
+    }
+
+    public static List<IStackType<?>> getAllTypes()
+    {
+        return List.copyOf(TYPES.values());
     }
 }
 

@@ -195,12 +195,22 @@ public class ItemStackType implements IStackType<ItemStack> {
     // 网络序列化需修改，以防数量限制导致崩溃
     @Override
     public void serialize(RegistryFriendlyByteBuf buf) {
+        buf.writeResourceLocation(getTypeId());
+        buf.writeInt(stack.getCount());
+        stack.setCount(1);
         ItemStack.STREAM_CODEC.encode(buf,stack);
     }
 
-    @Override
+    //
     public ItemStackType deserialize(RegistryFriendlyByteBuf buf) {
-        return new ItemStackType(ItemStack.STREAM_CODEC.decode(buf));
+        if(buf.readResourceLocation() == getTypeId())
+        {
+            int amount = buf.readInt();
+            ItemStackType stack = new ItemStackType(ItemStack.STREAM_CODEC.decode(buf));
+            stack.setStackAmount(amount);
+            return stack;
+        }
+        return null;
     }
 
     @Override

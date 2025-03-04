@@ -36,7 +36,7 @@ public class ClientPayloadHandler
         );
     }
 
-    public void handleItemStoragePacket(final ItemStoragePacket packet, final IPayloadContext context)
+    public void handleItemStoragePacket(final StoragePacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
                 () ->
@@ -48,13 +48,13 @@ public class ClientPayloadHandler
                         return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                     menu = (DimensionsNetMenu) player.containerMenu;
-                    for(int i = 0; i<packet.itemStacks().size(); i++)
+                    for(int i = 0; i<packet.stacks().size(); i++)
                     {
                         ItemStorage itemStorage = menu.itemStorage;
                         if (itemStorage.getStorage().size() > packet.indexs().get(i))
-                            itemStorage.getStorage().set(packet.indexs().get(i), packet.itemStacks().get(i));
+                            itemStorage.getStorage().set(packet.indexs().get(i), packet.stacks().get(i));
                         else if(itemStorage.getStorage().size() == packet.indexs().get(i))
-                            itemStorage.getStorage().add(packet.indexs().get(i), packet.itemStacks().get(i));
+                            itemStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
                         else
                         {
                             //将size到Index-1之间的位置填充为空，然后填充Index位置
@@ -62,7 +62,7 @@ public class ClientPayloadHandler
                             while (itemStorage.getStorage().size() < packet.indexs().get(i)) {
                                 itemStorage.getStorage().add(ItemStack.EMPTY);  // 填充空值
                             }
-                            itemStorage.getStorage().add(packet.indexs().get(i), packet.itemStacks().get(i));
+                            itemStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
                         }
                     }
                     if(packet.end())
@@ -88,7 +88,7 @@ public class ClientPayloadHandler
         );
     }
 
-    public void handleSyncItemStoragePacket(final SyncItemStoragePacket packet, final IPayloadContext context)
+    public void handleSyncItemStoragePacket(final SyncStoragePacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
                 () ->
@@ -102,7 +102,7 @@ public class ClientPayloadHandler
                     menu = (DimensionsNetMenu) player.containerMenu;
                     ItemStorage clientStorage = menu.itemStorage;
                     int i = 0;
-                    for(ItemStack remoteItem : packet.itemStacks())
+                    for(ItemStack remoteItem : packet.stacks())
                     {
                         // 如果当前存储存在此物品
                         if(clientStorage.hasItemStackType(remoteItem))

@@ -33,8 +33,8 @@ public class PacketRegister
 
         // 注册 ItemStoragePacket 用于同步滑动条状态
         registrar.playBidirectional(
-                ItemStoragePacket.TYPE,
-                ItemStoragePacket.STREAM_CODEC,
+                StoragePacket.TYPE,
+                StoragePacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
                         ClientPayloadHandler.getInstance()::handleItemStoragePacket,
                         ServerPayloadHandler.getInstance()::handleItemStoragePacket
@@ -53,8 +53,8 @@ public class PacketRegister
 
         // 注册 SyncItemStoragePacket 用于同步滑动条状态
         registrar.playBidirectional(
-                SyncItemStoragePacket.TYPE,
-                SyncItemStoragePacket.STREAM_CODEC,
+                SyncStoragePacket.TYPE,
+                SyncStoragePacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
                         ClientPayloadHandler.getInstance()::handleSyncItemStoragePacket,
                         ServerPayloadHandler.getInstance()::handleSyncItemStoragePacket

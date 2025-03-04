@@ -8,11 +8,10 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
-import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStorage;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredItemStackSlot;
-import com.wintercogs.beyonddimensions.Packet.ItemStoragePacket;
-import com.wintercogs.beyonddimensions.Packet.SyncItemStoragePacket;
+import com.wintercogs.beyonddimensions.Packet.StoragePacket;
+import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
 import com.wintercogs.beyonddimensions.Unit.Pinyin4jUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -375,7 +374,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         }
         if (!changedItem.isEmpty())
         {
-            PacketDistributor.sendToPlayer((ServerPlayer) player,new SyncItemStoragePacket(changedItem,changedCount));
+            PacketDistributor.sendToPlayer((ServerPlayer) player,new SyncStoragePacket(changedItem,changedCount));
         }
 
     }
@@ -396,9 +395,9 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         // 只有服务端才能发送存储数据给客户端
         if(player instanceof ServerPlayer)
         {
-            ArrayList<ItemStoragePacket> splitPackets = new ArrayList<>(); // 用于分割包的列表
+            ArrayList<StoragePacket> splitPackets = new ArrayList<>(); // 用于分割包的列表
             ArrayList<IStackType> currentBatch = new ArrayList<>(); // 用于临时存储每个包的StoredItemStack
-            ArrayList<Integer> currentIndices = new ArrayList<>(); // 用于精确记录索引，防止因网络延时导致错误
+            ArrayList<Long> currentIndices = new ArrayList<>(); // 用于精确记录索引，防止因网络延时导致错误
             int currentPayloadSize = 0; // 当前包大小
             final int MAX_PAYLOAD_SIZE = 900000; // 单个包最大大小  服务端发送到客户端的包不能大于1MiB 此处留下100KB冗余
             ArrayList<IStackType> storage = new ArrayList<>(this.unifiedStorage.getStorage()); // 当前存储空间的浅克隆
@@ -410,12 +409,12 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer()); // 创建一个 Netty 的 ByteBuf
                 RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, player.level().registryAccess(), ConnectionType.OTHER);
                 stack.serialize(registryBuf);
-                int entrySize = registryBuf.readableBytes() + Integer.BYTES + 1; // 物品的字节数、索引的字节数、结束标记的字节数
+                int entrySize = registryBuf.readableBytes() + Long.BYTES + 1; // 物品的字节数、索引的字节数、结束标记的字节数
 
                 boolean isLastItem = (i == storage.size() - 1);
                 // 如果添加之后包会比最大负载大，则分包，然后把物品添加到下一个包
                 if (currentPayloadSize + entrySize >= MAX_PAYLOAD_SIZE) {
-                    splitPackets.add(new ItemStoragePacket(
+                    splitPackets.add(new StoragePacket(
                             new ArrayList<>(currentBatch),
                             new ArrayList<>(currentIndices),
                             false
@@ -426,12 +425,12 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 }
 
                 currentBatch.add(stack);
-                currentIndices.add(i);
+                currentIndices.add((long) i);
                 currentPayloadSize += entrySize;
 
                 // 如果当前添加的是最后一个物品，则分包
                 if (isLastItem) {
-                    splitPackets.add(new ItemStoragePacket(
+                    splitPackets.add(new StoragePacket(
                             new ArrayList<>(currentBatch),
                             new ArrayList<>(currentIndices),
                             true
@@ -440,9 +439,9 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             }
             // 整理数据包，然后一次性发送
             if (!splitPackets.isEmpty()) {
-                ItemStoragePacket firstPacket = splitPackets.get(0);
-                ItemStoragePacket[] remainingPackets = splitPackets.subList(1, splitPackets.size())
-                        .toArray(new ItemStoragePacket[0]);
+                StoragePacket firstPacket = splitPackets.get(0);
+                StoragePacket[] remainingPackets = splitPackets.subList(1, splitPackets.size())
+                        .toArray(new StoragePacket[0]);
 
                 PacketDistributor.sendToPlayer(
                         (ServerPlayer) this.player,
@@ -530,7 +529,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             else // 物品由背包移动到存储
             {
                 cacheStack = slot.getItem().copy();
-                unifiedStorage.insert(StackCreater.Create(new ItemStackType().getTypeId(), cacheStack.copy(),,clickItem.getCount()),false);
+                unifiedStorage.insert(StackCreater.Create(new ItemStackType().getTypeId(), cacheStack.copy(),clickItem.getCount()),false);
                 slot.tryRemove(cacheStack.getCount(),Integer.MAX_VALUE-1,player);
             }
             if (cacheStack.isEmpty()) {

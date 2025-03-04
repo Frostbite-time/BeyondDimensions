@@ -50,7 +50,7 @@ public class ServerPayloadHandler
 
     }
 
-    public void handleItemStoragePacket(final ItemStoragePacket packet, final IPayloadContext context)
+    public void handleItemStoragePacket(final StoragePacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
                 () ->
@@ -79,7 +79,7 @@ public class ServerPayloadHandler
         );
     }
 
-    public void handleSyncItemStoragePacket(final SyncItemStoragePacket packet, final IPayloadContext context)
+    public void handleSyncItemStoragePacket(final SyncStoragePacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
                 () ->

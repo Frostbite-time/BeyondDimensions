@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
+import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
@@ -73,6 +74,20 @@ public interface IStackType<T> {
     // 序列化/反序列化（用于网络和NBT）
     void serialize(RegistryFriendlyByteBuf buf);
     IStackType<T> deserialize(RegistryFriendlyByteBuf buf);
+
+    // 传入一个buf，将会自动遍历所有可能的实现，并调用其接口，返回不为null的结果
+    static IStackType deserializeCommon(RegistryFriendlyByteBuf buf)
+    {
+        for(IStackType stacktype : StackTypeRegistry.getAllTypes())
+        {
+            if(stacktype.deserialize(buf)!=null)
+            {
+                return stacktype.deserialize(buf);
+            }
+        }
+
+        return null;
+    }
 
     // 新增方法：NBT序列化（用于磁盘存储）
     CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess);
