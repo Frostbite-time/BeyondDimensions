@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataBase.Stack.GenericStack;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -11,11 +11,10 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class UnifiedStorage {
     private DimensionsNet net;
-    private final ArrayList<GenericStack> stacks = new ArrayList<>();
+    private final ArrayList<IStackType> storage = new ArrayList<>();
 
     public UnifiedStorage(DimensionsNet net) {
         this.net = net;
@@ -26,56 +25,60 @@ public class UnifiedStorage {
         net.setDirty();
     }
 
-    public ArrayList<GenericStack> getStorage()
+    public ArrayList<IStackType> getStorage()
     {
-        return this.stacks;
+        return this.storage;
+    }
+
+    public IStackType getStackByIndex(int index)
+    {
+        if (index >= 0 && index < storage.size())
+        {
+            return storage.get(index);
+        }
+        else
+        {
+            return null;
+        }
     }
 
 
     // region 核心操作方法
-    public <T> void insert(ResourceLocation typeId, T stack, long amount, boolean simulate) {
-        IStackType<T> type = StackTypeRegistry.getType(typeId);
-        if (type.isEmpty(stack)) return;
+    public IStackType insert(IStackType stack,boolean simulate) {
+        if (stack.isEmpty()) return StackCreater.CreateEmpty(stack.getTypeId());
 
         // 尝试合并现有堆叠
-        for (GenericStack gs : stacks) {
-            if (gs.getTypeId().equals(typeId)) {
-                T existing = gs.getStack(type);
-                if (type.isSameStack(existing, stack)) {
-                    long remaining = type.mergeStacks(existing, stack, amount);
+        for (IStackType existing : storage) {
+            if (existing.getTypeId().equals(stack.getTypeId())) {
+                if (existing.isSameTypeSameComponents(stack)) {
                     if (!simulate) {
-                        gs.setAmount(gs.getAmount() + (amount - remaining));
+                        existing.grow(stack.getStackAmount());
                         onChange();
+                        return StackCreater.CreateEmpty(stack.getTypeId());
                     }
-                    return;
                 }
             }
         }
-
-        // 添加新堆叠
-        if (!simulate) {
-            T newStack = type.copyStackWithCount(stack, amount);
-            stacks.add(new GenericStack(typeId, newStack, amount));
-            onChange();
-        }
+        storage.add(stack.copy());
+        onChange();
+        return StackCreater.CreateEmpty(stack.getTypeId());
     }
 
-    public <T> T extract(ResourceLocation typeId, T stack, long amount, boolean simulate) {
-        IStackType<T> type = StackTypeRegistry.getType(typeId);
-        if (type.isEmpty(stack)) return type.getEmptyStack();
+    public IStackType extract(IStackType stack, boolean simulate) {
+        if (stack.isEmpty()) return stack.getEmpty();
 
-        for (int i = 0; i < stacks.size(); i++) {
-            GenericStack gs = stacks.get(i);
-            if (gs.getTypeId().equals(typeId)) {
-                T existing = gs.getStack(type);
-                if (type.isSameStackSameComponents(existing, stack)) {
-                    long extracted = Math.min(amount, gs.getAmount());
-                    T result = type.splitStack(existing, extracted);
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType existing = storage.get(i);
+            if (existing.getTypeId().equals(stack.getTypeId())) {
+                if (existing.isSameTypeSameComponents(stack)) {
+                    long extracted = Math.min(stack.getStackAmount(), existing.getStackAmount());
+                    IStackType sim = existing.copy();
+                    IStackType result = sim.split(extracted);
 
                     if (!simulate) {
-                        gs.setAmount(gs.getAmount() - extracted);
-                        if (gs.getAmount() <= 0) {
-                            stacks.remove(i);
+                        existing.shrink(extracted);
+                        if (existing.getStackAmount() <= 0) {
+                            storage.remove(i);
                         }
                         onChange();
                     }
@@ -83,7 +86,7 @@ public class UnifiedStorage {
                 }
             }
         }
-        return type.getEmptyStack();
+        return stack.getEmpty();
     }
     // endregion
 
@@ -92,18 +95,12 @@ public class UnifiedStorage {
         CompoundTag tag = new CompoundTag();
         ListTag stacksTag = new ListTag();
 
-        for (GenericStack gs : stacks) {
+        for (IStackType stack : storage) {
             // 修改后的序列化代码
             CompoundTag stackTag = new CompoundTag();
-            ResourceLocation typeId = gs.getTypeId();
-            IStackType<?> rawType = StackTypeRegistry.getType(typeId);
-
-            stackTag.putString("Type", typeId.toString());
-            stackTag.putLong("Amount", gs.getAmount());
-
             // 使用类型安全的序列化方式 将堆叠数据放入"Data"标签
-            rawType.serializeNBT(stackTag, provider, gs);
-
+            stackTag.put("TypedStack",stack.serializeNBT(provider));
+            stackTag.putString("Type",stack.getTypeId().toString());
             stacksTag.add(stackTag);
         }
 
@@ -112,18 +109,15 @@ public class UnifiedStorage {
     }
 
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
-        stacks.clear();
+        storage.clear();
         ListTag stacksTag = tag.getList("Stacks", Tag.TAG_COMPOUND);
 
         for (Tag t : stacksTag) {
             CompoundTag stackTag = (CompoundTag) t;
             ResourceLocation typeId = ResourceLocation.parse(stackTag.getString("Type"));
-            long amount = stackTag.getLong("Amount");
-            CompoundTag data = stackTag.getCompound("Data");
-
-            IStackType<?> type = StackTypeRegistry.getType(typeId);
-            Object stack = type.deserializeNBT(data, provider);
-            stacks.add(new GenericStack(typeId, stack, amount));
+            IStackType stack = StackTypeRegistry.getType(typeId).copy();
+            stack.deserializeNBT(tag,provider);
+            getStorage().add(stack);
         }
     }
     // endregion
