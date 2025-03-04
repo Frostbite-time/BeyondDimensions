@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 
@@ -40,6 +41,19 @@ public class UnifiedStorage {
         {
             return null;
         }
+    }
+
+    public IStackType getStackByStack(IStackType stackType)
+    {
+        for (IStackType existing : storage)
+        {
+            if (existing.getTypeId().equals(stackType.getTypeId()))
+            {
+                if(existing.isSameTypeSameComponents(stackType))
+                    return existing;
+            }
+        }
+        return null;
     }
 
 

@@ -5,9 +5,7 @@ import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +13,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.neoforged.neoforge.network.connection.ConnectionType;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -197,12 +194,12 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     // 网络序列化需修改，以防数量限制导致崩溃
     @Override
-    public void serialize(RegistryFriendlyByteBuf buf, RegistryAccess levelRegistryAccess) {
+    public void serialize(RegistryFriendlyByteBuf buf) {
         ItemStack.STREAM_CODEC.encode(buf,stack);
     }
 
     @Override
-    public ItemStackType deserialize(RegistryFriendlyByteBuf buf,RegistryAccess levelRegistryAccess) {
+    public ItemStackType deserialize(RegistryFriendlyByteBuf buf) {
         return new ItemStackType(ItemStack.STREAM_CODEC.decode(buf));
     }
 
@@ -252,6 +249,16 @@ public class ItemStackType implements IStackType<ItemStack> {
     public List<Component> getTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag)
     {
         return stack.getTooltipLines(tooltipContext,player,tooltipFlag);
+    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if(other instanceof ItemStackType otherStack)
+        {
+            return this.isSameTypeSameComponents(otherStack);
+        }
+        return false;
     }
 }
 

@@ -71,8 +71,8 @@ public interface IStackType<T> {
     boolean isSameTypeSameComponents(IStackType<T> other); // 检查两个堆叠除数量外的一切是否相同，例如如果是物品 就检查物品类型和所有组件是否相同
 
     // 序列化/反序列化（用于网络和NBT）
-    void serialize(RegistryFriendlyByteBuf buf, RegistryAccess levelRegistryAccess);
-    IStackType<T> deserialize(RegistryFriendlyByteBuf buf,RegistryAccess levelRegistryAccess);
+    void serialize(RegistryFriendlyByteBuf buf);
+    IStackType<T> deserialize(RegistryFriendlyByteBuf buf);
 
     // 新增方法：NBT序列化（用于磁盘存储）
     CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess);
