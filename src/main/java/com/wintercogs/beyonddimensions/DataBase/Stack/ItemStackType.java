@@ -1,8 +1,10 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -10,12 +12,15 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.neoforged.neoforge.client.ClientTooltipFlag;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 public class ItemStackType implements IStackType<ItemStack> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
@@ -252,15 +257,34 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public void render(GuiGraphics gui,int x, int y) {
         // 渲染物品图标
+        var poseStack = gui.pose(); // 获取渲染的变换矩阵
+        poseStack.pushPose(); // 保存矩阵状态
         gui.renderFakeItem(stack, x, y);
+        gui.renderItemDecorations(Minecraft.getInstance().font, stack, x, y, "");
+        poseStack.popPose(); // 恢复矩阵状态，结束渲染
 
         // 渲染数量文本
         String countText = getCountText(stack.getCount());
+        float scale = 0.666f; // 文本缩放因数
+        var poseStackText = gui.pose();
+        poseStackText.pushPose();
+        poseStackText.translate(0,0,200); // 确保文本在顶层
+        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
+        RenderSystem.disableBlend(); // 禁用混合渲染模式
+        final int X = (int)(
+                (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
+                        * 1.0f / 0.666f
+        );
+        final int Y = (int)(
+                (y + -1 + 16.0f - 5.0f * 0.666f)
+                        * 1.0f / 0.666f
+        );
         gui.drawString(Minecraft.getInstance().font,
                 countText,
-                x + 17 - Minecraft.getInstance().font.width(countText),
-                y + 9,
+                X,
+                Y,
                 0xFFFFFF);
+        poseStackText.popPose();
     }
 
     @Override
@@ -279,6 +303,20 @@ public class ItemStackType implements IStackType<ItemStack> {
     public List<Component> getTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag)
     {
         return stack.getTooltipLines(tooltipContext,player,tooltipFlag);
+    }
+
+    @Override
+    public Optional<TooltipComponent> getTooltipImage()
+    {
+        return stack.getTooltipImage();
+    }
+
+    @Override
+    public void renderTooltip(GuiGraphics gui,Font font, int mouseX, int mouseY)
+    {
+        var minecraft = Minecraft.getInstance();
+        gui.renderTooltip(minecraft.font, this.getTooltipLines(Item.TooltipContext.of(minecraft.level),minecraft.player, ClientTooltipFlag.of(minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL))
+                , getTooltipImage(), ItemStack.EMPTY, mouseX, mouseY);
     }
 
     @Override

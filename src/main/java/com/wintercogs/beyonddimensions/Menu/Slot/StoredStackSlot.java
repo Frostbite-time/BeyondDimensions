@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -77,6 +78,23 @@ public class StoredStackSlot extends Slot
             return itemVanillaActualStack;
         }
         return ItemStack.EMPTY;
+    }
+
+    public IStackType getStack()
+    {
+        if(getSlotIndex()<0)
+        {
+            return new ItemStackType(ItemStack.EMPTY);
+        }
+        //从当前槽索引取物品
+        IStackType stack = unifiedStorage.getStackByIndex(getSlotIndex());
+        if (stack.isEmpty())
+            return StackCreater.CreateEmpty(stack.getTypeId());
+        if (stack != null)
+        {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
+            return stack.copy();
+        }
+        return new ItemStackType(ItemStack.EMPTY);
     }
 
 

@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
@@ -125,7 +126,6 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         this.renderTooltip(guiGraphics, mouseX, mouseY);
         searchField.render(guiGraphics,mouseX,mouseY,partialTicks);
@@ -144,45 +144,14 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     protected void renderSlot(GuiGraphics guiGraphics, Slot slot) {
         if(slot instanceof StoredStackSlot sSlot)
         {
+            // 获取stack
             int x = slot.x;
             int y = slot.y;
-            ItemStack itemstack = slot.getItem();
-            if(itemstack != null)
+            IStackType stack = sSlot.getStack();
+
+            if(stack != null)
             {
-                var poseStack = guiGraphics.pose();
-                poseStack.pushPose();
-
-                var displayStack = itemstack.copy();
-                guiGraphics.renderItem(displayStack, x, y);
-                guiGraphics.renderItemDecorations(minecraft.font, displayStack, x, y, "");
-
-                poseStack.popPose();
-
-                long count = sSlot.getItemCount();
-                if(count<=0)
-                {
-                    return;
-                }
-                String countText = StringFormat.formatCount(count);
-
-                var stack = guiGraphics.pose();
-                stack.pushPose();
-                // According to ItemRenderer, text is 200 above items.
-                stack.translate(0, 0, 200);
-                stack.scale(0.666f, 0.666f, 0.666f);
-
-                RenderSystem.disableBlend();
-                final int X = (int) ((x + -1 + 16.0f + 2.0f - this.font.width(countText) * 0.666f)
-                        * 1.0f / 0.666f);
-                final int Y = (int) ((y + -1 + 16.0f - 5.0f * 0.666f) * 1.0f / 0.666f);
-                MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(512));
-                this.font.drawInBatch(countText, X + 1, Y + 1, 0x413f54, false, stack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0,
-                        15728880);
-                this.font.drawInBatch(countText, X, Y, 0xffffff, false, stack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0, 15728880);
-                buffer.endBatch();
-                RenderSystem.enableBlend();
-
-                stack.popPose();
+                stack.render(guiGraphics,x,y);
             }
 
         }
@@ -191,6 +160,23 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
             super.renderSlot(guiGraphics,slot);
         }
 
+    }
+
+    @Override
+    protected void renderTooltip(GuiGraphics guiGraphics, int x, int y)
+    {
+        if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
+            if(this.hoveredSlot instanceof StoredStackSlot sSlot)
+            {
+                IStackType stack = sSlot.getStack();
+                stack.renderTooltip(guiGraphics,minecraft.font,x,y);
+            }
+            else
+            {
+                ItemStack itemstack = this.hoveredSlot.getItem();
+                guiGraphics.renderTooltip(this.font, this.getTooltipFromContainerItem(itemstack), itemstack.getTooltipImage(), itemstack, x, y);
+            }
+        }
     }
 
     @Override
