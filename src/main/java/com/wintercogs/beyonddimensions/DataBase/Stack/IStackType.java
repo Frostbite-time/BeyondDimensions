@@ -1,8 +1,6 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -12,6 +10,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -97,7 +97,8 @@ public interface IStackType<T> {
 
 
     // UI渲染（在指定位置绘制图标和数量）
-    void render(GuiGraphics gui, int x, int y);
+    @OnlyIn(Dist.CLIENT)
+    void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y);
 
     String getCountText(long count);
 
@@ -107,6 +108,7 @@ public interface IStackType<T> {
 
     Optional<TooltipComponent> getTooltipImage();
 
-    void renderTooltip(GuiGraphics gui,Font font, int mouseX, int mouseY);
+    @OnlyIn(Dist.CLIENT)
+    void renderTooltip(net.minecraft.client.gui.GuiGraphics gui, net.minecraft.client.gui.Font font, int mouseX, int mouseY);
 
 }

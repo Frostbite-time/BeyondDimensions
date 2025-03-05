@@ -4,8 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -16,6 +14,8 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.ClientTooltipFlag;
 
 import javax.annotation.Nullable;
@@ -254,8 +254,9 @@ public class ItemStackType implements IStackType<ItemStack> {
         return stack;
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public void render(GuiGraphics gui,int x, int y) {
+    public void render(net.minecraft.client.gui.GuiGraphics gui,int x, int y) {
         // 渲染物品图标
         var poseStack = gui.pose(); // 获取渲染的变换矩阵
         poseStack.pushPose(); // 保存矩阵状态
@@ -311,8 +312,9 @@ public class ItemStackType implements IStackType<ItemStack> {
         return stack.getTooltipImage();
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public void renderTooltip(GuiGraphics gui,Font font, int mouseX, int mouseY)
+    public void renderTooltip(net.minecraft.client.gui.GuiGraphics gui,net.minecraft.client.gui.Font font, int mouseX, int mouseY)
     {
         var minecraft = Minecraft.getInstance();
         gui.renderTooltip(minecraft.font, this.getTooltipLines(Item.TooltipContext.of(minecraft.level),minecraft.player, ClientTooltipFlag.of(minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL))
