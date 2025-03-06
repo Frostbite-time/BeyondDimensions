@@ -29,4 +29,5 @@ public class StringFormat
         }
         return String.format("%.1f%s", value, UNITS[unitIndex + 1]);
     }
+
 }

@@ -301,7 +301,9 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public List<Component> getTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag)
     {
-        return stack.getTooltipLines(tooltipContext,player,tooltipFlag);
+        List<Component> tooltips = stack.getTooltipLines(tooltipContext,player,tooltipFlag);
+        tooltips.add(Component.literal("已存储:"+getStackAmount()+"个"));
+        return tooltips;
     }
 
     @Override

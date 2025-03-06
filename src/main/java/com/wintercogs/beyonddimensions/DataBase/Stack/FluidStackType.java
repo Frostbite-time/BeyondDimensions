@@ -1,20 +1,36 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.tooltip.BundleTooltip;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.BundleContents;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.client.ClientTooltipFlag;
 import net.neoforged.neoforge.fluids.FluidStack;
+import org.apache.commons.lang3.text.WordUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -268,13 +284,42 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y)
     {
+        // 渲染物品图标
+        var poseStack = gui.pose(); // 获取渲染的变换矩阵
+        poseStack.pushPose(); // 保存矩阵状态
+        //gui.renderFakeItem(stack, x, y);
+        //gui.renderItemDecorations(Minecraft.getInstance().font, stack, x, y, "");
+        poseStack.popPose(); // 恢复矩阵状态，结束渲染
 
+        // 渲染数量文本
+        String countText = getCountText(stack.getAmount());
+        float scale = 0.666f; // 文本缩放因数
+        var poseStackText = gui.pose();
+        poseStackText.pushPose();
+        poseStackText.translate(0,0,200); // 确保文本在顶层
+        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
+        RenderSystem.disableBlend(); // 禁用混合渲染模式
+        final int X = (int)(
+                (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
+                        * 1.0f / 0.666f
+        );
+        final int Y = (int)(
+                (y + -1 + 16.0f - 5.0f * 0.666f)
+                        * 1.0f / 0.666f
+        );
+        gui.drawString(Minecraft.getInstance().font,
+                countText,
+                X,
+                Y,
+                0xFFFFFF);
+        poseStackText.popPose();
     }
 
     @Override
     public String getCountText(long count)
     {
-        return "";
+        if (count <= 0) return "";
+        return StringFormat.formatCount(count);
     }
 
     @Override
@@ -286,20 +331,59 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public List<Component> getTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag)
     {
-        return List.of(Component.empty());
+        if(stack.isEmpty())
+            return List.of(Component.empty());
+
+        List<Component> tooltips = new ArrayList<>();
+        Fluid fluid = stack.getFluid();
+
+        Component displayName = getDisplayName();
+        tooltips.add(displayName);
+
+        ResourceLocation resourceLocation =  BuiltInRegistries.FLUID.getKey(fluid);
+        if (resourceLocation != null) {
+            if (tooltipFlag.isAdvanced()) {
+                MutableComponent advancedId = Component.literal(resourceLocation.toString())
+                        .withStyle(ChatFormatting.DARK_GRAY);
+                tooltips.add(advancedId);
+            }
+            Optional<? extends ModContainer> container = ModList.get().getModContainerById(resourceLocation.getNamespace());
+            Component modName;
+            if(container.isPresent())
+            {
+                modName = Component.literal(container.get().getModInfo().getDisplayName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
+            }
+            else
+            {
+                container = ModList.get().getModContainerById(resourceLocation.getNamespace().replace('_', '-'));
+                if (container.isPresent()) {
+                    modName = Component.literal(container.get().getModInfo().getDisplayName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
+                }
+                else
+                {
+                    modName = Component.literal(WordUtils.capitalizeFully(resourceLocation.getNamespace().replace('_', ' '))).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
+                }
+            }
+            tooltips.add(modName);
+        }
+
+        tooltips.add(Component.literal("已存储:"+getStackAmount()+"mB"));
+        return tooltips;
     }
 
     @Override
     public Optional<TooltipComponent> getTooltipImage()
     {
-        return null;
+        return !stack.has(DataComponents.HIDE_TOOLTIP) && !stack.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP) ? Optional.ofNullable((BundleContents)stack.get(DataComponents.BUNDLE_CONTENTS)).map(BundleTooltip::new) : Optional.empty();
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
     public void renderTooltip(net.minecraft.client.gui.GuiGraphics gui, net.minecraft.client.gui.Font font, int mouseX, int mouseY)
     {
-
+        var minecraft = Minecraft.getInstance();
+        gui.renderTooltip(minecraft.font, this.getTooltipLines(Item.TooltipContext.of(minecraft.level),minecraft.player, ClientTooltipFlag.of(minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL))
+                , getTooltipImage(), ItemStack.EMPTY, mouseX, mouseY);
     }
 
     @Override
