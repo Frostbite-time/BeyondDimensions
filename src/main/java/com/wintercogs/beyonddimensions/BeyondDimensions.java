@@ -5,7 +5,9 @@ import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.*;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.DataBase.Storage.FluidStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
@@ -91,7 +93,9 @@ public class BeyondDimensions
         }
 
         StackTypeRegistry.registerType(new ItemStackType());
+        StackTypeRegistry.registerType(new FluidStackType());
         TypedHandlerManager.register(Capabilities.ItemHandler.BLOCK, DimensionsNet.class, ItemStackTypedHandler::new);
+        TypedHandlerManager.register(Capabilities.FluidHandler.BLOCK, DimensionsNet.class, FluidStackTypedHandler::new);
     }
 
     @SubscribeEvent

@@ -65,6 +65,7 @@ public class UnifiedStorage {
 
 
     // region 核心操作方法
+    // 插入stack 返回剩余量
     public IStackType insert(IStackType stack,boolean simulate) {
         if (stack.isEmpty()) return StackCreater.CreateEmpty(stack.getTypeId());
 
@@ -89,6 +90,7 @@ public class UnifiedStorage {
         return StackCreater.CreateEmpty(stack.getTypeId());
     }
 
+    // 尝试按类型导出，返回实际导出量
     public IStackType extract(IStackType stack, boolean simulate) {
         if (stack.isEmpty()) return stack.getEmpty();
 
@@ -114,6 +116,7 @@ public class UnifiedStorage {
         return stack.getEmpty();
     }
 
+    // 尝试按槽位导出 返回实际导出量
     public IStackType extract(ResourceLocation typeId ,int slot,long amount, boolean simulate) {
         IStackType existing = storage.get(slot);
         if (existing.isEmpty()) return existing.getEmpty();
@@ -143,7 +146,7 @@ public class UnifiedStorage {
         for (IStackType stack : storage) {
             // 修改后的序列化代码
             if(stack.isEmpty())
-                continue;
+                continue; // 不序列化空物品
             CompoundTag stackTag = new CompoundTag();
             // 使用类型安全的序列化方式 将堆叠数据放入"Data"标签
             stackTag.put("TypedStack",stack.serializeNBT(provider));
@@ -164,6 +167,8 @@ public class UnifiedStorage {
             ResourceLocation typeId = ResourceLocation.parse(stackTag.getString("Type"));
             IStackType stackEmpty = StackTypeRegistry.getType(typeId).copy();
             IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"),provider);
+            if(stackActual.isEmpty())
+                continue; // 不添加空物品
             getStorage().add(stackActual);
         }
     }

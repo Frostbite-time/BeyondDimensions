@@ -217,10 +217,8 @@ public class ItemStackType implements IStackType<ItemStack> {
         }
     }
 
-    //
-    public ItemStackType deserialize(RegistryFriendlyByteBuf buf) {
-        // 读取类型ID
-        ResourceLocation typeId = buf.readResourceLocation();
+    @Override
+    public ItemStackType deserialize(RegistryFriendlyByteBuf buf,ResourceLocation typeId) {
         if (!typeId.equals(getTypeId())) {
             return null;// 表示未能读取任何类型
         }
@@ -334,10 +332,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
-        int hash = stack.getItem().hashCode();
-        hash = 31 * hash + (stack.getComponents() != null ?
-                stack.getComponents().hashCode() : 0);
-        return hash;
+        return ItemStack.hashItemAndComponents(stack.copyWithCount(1));
     }
 }
 

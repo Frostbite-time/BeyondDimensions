@@ -74,14 +74,15 @@ public interface IStackType<T> {
 
     // 序列化/反序列化（用于网络和NBT）
     void serialize(RegistryFriendlyByteBuf buf);
-    IStackType<T> deserialize(RegistryFriendlyByteBuf buf);
+    IStackType<T> deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId);
 
     // 传入一个buf，将会自动遍历所有可能的实现，并调用其接口，返回不为null的结果
     static IStackType deserializeCommon(RegistryFriendlyByteBuf buf)
     {
+        ResourceLocation typeId = buf.readResourceLocation();
         for(IStackType stacktype : StackTypeRegistry.getAllTypes())
         {
-            IStackType stack = stacktype.deserialize(buf);
+            IStackType stack = stacktype.deserialize(buf,typeId);
             if(stack!=null)
             {
                 return stack;
