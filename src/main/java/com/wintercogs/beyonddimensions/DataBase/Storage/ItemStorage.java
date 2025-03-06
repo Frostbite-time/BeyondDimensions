@@ -30,47 +30,6 @@ public class ItemStorage implements IItemHandler
         return this.itemStorage;
     }
 
-
-
-
-
-    public ItemStack getItemStackByIndex(int index)
-    {
-        if (index >= 0 && index < itemStorage.size())
-        {
-            return itemStorage.get(index);
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    // 查询物品储存
-    public ItemStack getItemStackByType(ItemStack itemStack)
-    {
-        for (ItemStack itemExist : itemStorage)
-        {
-            if (ItemStack.isSameItemSameComponents(itemExist,itemStack))
-            {
-                return itemExist;
-            }
-        }
-        return null;
-    }
-
-    public boolean hasItemStackType(ItemStack itemStack)
-    {
-        for (ItemStack itemExist : itemStorage)
-        {
-            if (ItemStack.isSameItemSameComponents(itemExist,itemStack))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
     // 将物品存储转换为 NBT 数据
     public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
     {

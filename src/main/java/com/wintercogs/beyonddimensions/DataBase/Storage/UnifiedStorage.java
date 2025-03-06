@@ -80,8 +80,12 @@ public class UnifiedStorage {
                 }
             }
         }
-        storage.add(stack.copy());
-        onChange();
+        // 现有堆叠未找到，尝试新增
+        if(!simulate)
+        {
+            storage.add(stack.copy());
+            onChange();
+        }
         return StackCreater.CreateEmpty(stack.getTypeId());
     }
 

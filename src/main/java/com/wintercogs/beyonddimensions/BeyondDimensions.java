@@ -4,7 +4,10 @@ import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.*;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
@@ -21,6 +24,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
@@ -42,6 +46,7 @@ public class BeyondDimensions
 
         modEventBus.addListener(this::commonSetup);
         //为存储网络的接口方块注册物品交互能力
+
         modEventBus.addListener(NetInterfaceBlockEntity::registerCapability);
         modEventBus.addListener(NetPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetFluidPathwayBlockEntity::registerCapability);
@@ -86,6 +91,7 @@ public class BeyondDimensions
         }
 
         StackTypeRegistry.registerType(new ItemStackType());
+        TypedHandlerManager.register(Capabilities.ItemHandler.BLOCK, DimensionsNet.class, ItemStackTypedHandler::new);
     }
 
     @SubscribeEvent
