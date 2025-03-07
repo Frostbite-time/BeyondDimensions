@@ -44,11 +44,8 @@ public class DimensionsNet extends SavedData
     private final Set<UUID> players = new HashSet<>();
 
     // 网络存储空间
-    private ItemStorage itemStorage;
-    private FluidStorage fluidStorage;
     private EnergyStorage energyStorage;
     // 非neoforge自带的存储系统 确保在任何调用之前检查null或者对应模组是否加载
-    private ChemicalStorage chemicalStorage;
 
     // 通用存储空间-测试 存储一切stack行为的资源
     private UnifiedStorage unifiedStorage;
@@ -57,19 +54,7 @@ public class DimensionsNet extends SavedData
     public DimensionsNet()
     {
         unifiedStorage = new UnifiedStorage(this);
-
-        itemStorage = new ItemStorage(this);
-        fluidStorage = new FluidStorage(this);
         energyStorage = new EnergyStorage(this);
-
-        if(BeyondDimensions.MekLoaded)
-        {
-            chemicalStorage = new ChemicalStorage(this);
-        }
-        else
-        {
-            chemicalStorage = null;
-        }
     }
 
     // 基本函数
@@ -337,25 +322,9 @@ public class DimensionsNet extends SavedData
         return infoMap;
     }
 
-    //物品存储
-    public ItemStorage getItemStorage()
-    {
-        return this.itemStorage;
-    }
-
-    public FluidStorage getFluidStorage()
-    {
-        return this.fluidStorage;
-    }
-
     public EnergyStorage getEnergyStorage()
     {
         return this.energyStorage;
-    }
-
-    public ChemicalStorage getChemicalStorage()
-    {
-        return this.chemicalStorage;
     }
 
     // 统一存储空间

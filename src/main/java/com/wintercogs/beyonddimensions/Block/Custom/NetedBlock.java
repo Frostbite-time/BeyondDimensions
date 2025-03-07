@@ -21,7 +21,7 @@ public class NetedBlock extends Block
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
     {
         // 空手右键可以设定网络接口所绑定的网络
-        if(!player.getMainHandItem().isEmpty())
+        if(!player.getMainHandItem().isEmpty()||!player.isShiftKeyDown())
         {
             return InteractionResult.PASS;
         }

@@ -146,7 +146,8 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     @Override
     public long getVanillaMaxStackSize()
     {
-        return getCustomMaxStackSize();
+        // mek化学品同流体，以64桶为原版一个槽的最大单位
+        return 64000;
     }
 
     @Override

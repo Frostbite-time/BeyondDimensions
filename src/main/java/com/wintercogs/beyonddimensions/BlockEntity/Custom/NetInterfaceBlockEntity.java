@@ -2,6 +2,8 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -65,7 +67,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements Contain
             for(int i=0; i<9; i++)
             {
                 ItemStack stack = itemStackHandler.getStackInSlot(i);
-                net.getItemStorage().insertItem(stack.copyWithCount(stack.getCount()),false);
+                net.getUnifiedStorage().insert(new ItemStackType(stack.copy()),false);
                 itemStackHandler.setStackInSlot(i, ItemStack.EMPTY);
             }
         }

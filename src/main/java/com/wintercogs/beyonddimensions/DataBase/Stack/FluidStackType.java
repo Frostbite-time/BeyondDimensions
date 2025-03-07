@@ -173,8 +173,8 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public long getVanillaMaxStackSize()
     {
-        // 流体不属于原版物品，理论上不存在单槽最大上限
-        return getCustomMaxStackSize();
+        // 流体不属于原版物品，理论上不存在单槽最大上限,此处以64桶为单槽最大单位
+        return 64000;
     }
 
     @Override
