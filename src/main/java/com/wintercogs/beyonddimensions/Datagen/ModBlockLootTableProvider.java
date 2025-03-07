@@ -23,9 +23,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider
         dropSelf(ModBlocks.NET_CONTROL.get());
         dropSelf(ModBlocks.NET_INTERFACE.get());
         dropSelf(ModBlocks.NET_PATHWAY.get());
-        dropSelf(ModBlocks.NET_FLUID_PATHWAY.get());
         dropSelf(ModBlocks.NET_ENERGY_PATHWAY.get());
-        dropSelf(ModBlocks.NET_CHEMICAL_PATHWAY.get());
     }
 
     @Override

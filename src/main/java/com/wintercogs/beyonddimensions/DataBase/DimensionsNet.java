@@ -2,15 +2,22 @@ package com.wintercogs.beyonddimensions.DataBase;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.*;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
+import mekanism.api.chemical.Chemical;
+import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
@@ -135,15 +142,8 @@ public class DimensionsNet extends SavedData
             net.owner = owner;
         }
 
-
-        net.itemStorage.deserializeNBT(registryAccess, tag.getCompound("ItemStorage"));
-        net.fluidStorage.deserializeNBT(registryAccess,tag.getCompound("FluidStorage"));
-        net.energyStorage.deserializeNBT(registryAccess,tag.getCompound("EnergyStorage"));
         net.unifiedStorage.deserializeNBT(registryAccess,tag.getCompound("UnifiedStorage"));
-        if(net.chemicalStorage != null)
-        {
-            net.chemicalStorage.deserializeNBT(registryAccess,tag.getCompound("ChemicalStorage"));
-        }
+        net.energyStorage.deserializeNBT(registryAccess,tag.getCompound("EnergyStorage"));
 
         if (tag.contains("Managers"))
         {
@@ -185,15 +185,9 @@ public class DimensionsNet extends SavedData
         }
         tag.put("Players", playerListTag);
 
-        // 保存物品存储
-        tag.put("ItemStorage", itemStorage.serializeNBT(registryAccess));
-        tag.put("FluidStorage",fluidStorage.serializeNBT(registryAccess));
+        // 保存存储
         tag.put("EnergyStorage",energyStorage.serializeNBT(registryAccess));
         tag.put("UnifiedStorage",unifiedStorage.serializeNBT(registryAccess));
-        if(chemicalStorage != null)
-        {
-            tag.put("ChemicalStorage",chemicalStorage.serializeNBT(registryAccess));
-        }
 
         return tag;
     }

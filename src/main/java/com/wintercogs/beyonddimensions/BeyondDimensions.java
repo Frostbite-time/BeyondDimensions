@@ -54,9 +54,7 @@ public class BeyondDimensions
 
         modEventBus.addListener(NetInterfaceBlockEntity::registerCapability);
         modEventBus.addListener(NetPathwayBlockEntity::registerCapability);
-        modEventBus.addListener(NetFluidPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetEnergyPathwayBlockEntity::registerCapability);
-        modEventBus.addListener(NetChemicalPathwayBlockEntity::registerCapability);
 
         // 注册事件
         NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
