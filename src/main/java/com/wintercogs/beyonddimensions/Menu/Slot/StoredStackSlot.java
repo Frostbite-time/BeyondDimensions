@@ -26,10 +26,24 @@ public class StoredStackSlot extends Slot
         this.unifiedStorage = unifiedStorage;
     }
 
+    public IStackType getTypedStackFromUnifiedStorage()
+    {
+        IStackType stackType = unifiedStorage.getStackByIndex(getSlotIndex());
+        if(stackType != null)
+            return stackType.copy();
+        else
+            return new ItemStackType();
+    }
+
     public ItemStack getItemStackFromUnifiedStorage()
     {
         //从当前槽索引取物品
         IStackType stackType = unifiedStorage.getStackByIndex(getSlotIndex());
+        if(stackType == null)
+        {
+            return ItemStack.EMPTY;
+        }
+
         if(stackType instanceof ItemStackType itemStackType)
         {
             return itemStackType.getStack();
@@ -41,43 +55,39 @@ public class StoredStackSlot extends Slot
     }
 
     // 获取不超过原版最大堆叠数的Stack，一般仅用于GUI类，可以保留Item实现
-    public ItemStack getVanillaActualStack()
+    public IStackType getVanillaActualStack()
     {
         //从当前槽索引取物品
-        ItemStack itemStack = getItemStackFromUnifiedStorage();
-        if (itemStack.isEmpty())
-            return ItemStack.EMPTY;
-        if (itemStack != null)
+        IStackType stack = getTypedStackFromUnifiedStorage();
+        if (stack.isEmpty())
+            return stack;
+        if (stack != null)
         {
-            if(itemStack.getCount()>itemStack.getMaxStackSize())
+            if(stack.getStackAmount()>stack.getVanillaMaxStackSize())
             {
-                ItemStack itemVanillaActualStack = itemStack.copy();
-                itemVanillaActualStack.setCount(itemStack.getMaxStackSize());
-                return itemVanillaActualStack;
+                return stack.copyWithCount(stack.getVanillaMaxStackSize());
             }
             else
             {
-                return itemStack.copy();
+                return stack.copy();
             }
 
         }
-        return ItemStack.EMPTY;
+        return new ItemStackType();
     }
 
     // 获取原版最大堆叠数的Stack，一般仅用于GUI类，可以保留Item实现
-    public ItemStack getVanillaMaxSizeItem()
+    public IStackType getVanillaMaxSizeStack()
     {
         //从当前槽索引取物品
-        ItemStack itemStack = getItemStackFromUnifiedStorage();
-        if (itemStack.isEmpty())
-            return ItemStack.EMPTY;
-        if (itemStack != null)
-        {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
-            ItemStack itemVanillaActualStack = itemStack.copy();
-            itemVanillaActualStack.setCount(itemStack.getMaxStackSize());
-            return itemVanillaActualStack;
+        IStackType stack = getTypedStackFromUnifiedStorage();
+        if (stack.isEmpty())
+            return stack;
+        if (stack != null)
+        {
+            return stack.copyWithCount(stack.getVanillaMaxStackSize());
         }
-        return ItemStack.EMPTY;
+        return new ItemStackType();
     }
 
     public IStackType getStack()

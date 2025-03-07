@@ -469,7 +469,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     }
 
     // 自定义点击操作
-    public void customClickHandler(int slotIndex,ItemStack clickItem,int button,boolean shiftDown)
+    public void customClickHandler(int slotIndex,IStackType clickedStack,int button,boolean shiftDown)
     {
         // 该函数用于处理点击维度存储槽发生的事件
         // 包含shift点击和普通点击
@@ -479,52 +479,59 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         UnifiedStorage trueItemStorage = this.unifiedStorage;
         if(shiftDown)
         {
-            quickMoveHandle(player,slotIndex,clickItem,trueItemStorage);
+            quickMoveHandle(player,slotIndex,clickedStack,trueItemStorage);
         }
         else
         {
-            clickHandle(slotIndex,clickItem,button,player,trueItemStorage);
+            clickHandle(slotIndex,clickedStack,button,player,trueItemStorage);
         }
     }
 
     // 自定义的快速移动操作
     // 艹，我自己忘了返回值是什么
-    // 此处涉及存储界面的操作，只有ItemStack与原版的背包系统兼容，因此无需泛型
-    protected ItemStack quickMoveHandle(Player player,int slotIndex, ItemStack clickItem, UnifiedStorage unifiedStorage)
+    // 此处涉及存储界面的操作，根据不同的物品种类尝试进行不同处理
+    protected ItemStack quickMoveHandle(Player player,int slotIndex, IStackType clickStack, UnifiedStorage unifiedStorage)
     {
         ItemStack cacheStack;
         Slot slot = this.slots.get(slotIndex);
-        if (slot != null && !clickItem.isEmpty())
+        if (slot != null && !clickStack.isEmpty())
         {
             // 物品从存储移动到背包
             if(slot instanceof StoredStackSlot)
             {
-                cacheStack = clickItem.copy();
-                int moveCount = checkCanMoveStackCount(cacheStack, this.lines * 9, this.slots.size(), true);
-                moveCount = Math.min(moveCount,cacheStack.getCount());
-                int nowCount = 0;
-                IStackType typedStack = unifiedStorage.getStackByStack(StackCreater.Create(new ItemStackType().getTypeId(),cacheStack.copy(),cacheStack.getCount()));
-                ItemStack nowStack;
-                if(typedStack != null)
+                if(clickStack instanceof ItemStackType clickedItem)
                 {
-                    nowStack = (ItemStack) typedStack.getStack();
+                    cacheStack = clickedItem.copyStack();
+                    int moveCount = checkCanMoveStackCount(cacheStack, this.lines * 9, this.slots.size(), true);
+                    moveCount = Math.min(moveCount,cacheStack.getCount()); // 首先
+                    int nowCount = 0;
+                    IStackType typedStack = unifiedStorage.getStackByStack(StackCreater.Create(new ItemStackType().getTypeId(),cacheStack.copy(),cacheStack.getCount()));
+                    ItemStack nowStack;
+                    if(typedStack != null)
+                    {
+                        nowStack = (ItemStack) typedStack.getStack();
+                    }
+                    else
+                    {
+                        return ItemStack.EMPTY;
+                    }
+                    if(nowStack != null)
+                    {
+                        nowCount = nowStack.getCount();
+                    }
+                    moveCount = Math.min(moveCount,nowCount);
+                    if(moveCount>=0)
+                    {
+                        cacheStack.setCount(moveCount);
+                        if (!this.moveItemStackTo(cacheStack, this.lines * 9, this.slots.size(), true)) {
+                            return ItemStack.EMPTY;
+                        }
+                        unifiedStorage.extract(StackCreater.Create(new ItemStackType().getTypeId(), clickStack.copyStackWithCount(moveCount),moveCount) ,false);
+                    }
                 }
                 else
                 {
-                    return ItemStack.EMPTY;
-                }
-                if(nowStack != null)
-                {
-                    nowCount = nowStack.getCount();
-                }
-                moveCount = Math.min(moveCount,nowCount);
-                if(moveCount>=0)
-                {
-                    cacheStack.setCount(moveCount);
-                    if (!this.moveItemStackTo(cacheStack, this.lines * 9, this.slots.size(), true)) {
-                        return ItemStack.EMPTY;
-                    }
-                    unifiedStorage.extract(StackCreater.Create(new ItemStackType().getTypeId(), clickItem.copyWithCount(moveCount),moveCount) ,false);
+                    cacheStack = ItemStack.EMPTY;
                 }
             }
             else // 物品由背包移动到存储
@@ -546,12 +553,12 @@ public class DimensionsNetMenu extends AbstractContainerMenu
     }
 
     // 自定义的非快速移动操作
-    protected void clickHandle(int slotIndex,ItemStack clickItem, int button, Player player, UnifiedStorage unifiedStorage)
+    protected void clickHandle(int slotIndex,IStackType clickStack, int button, Player player, UnifiedStorage unifiedStorage)
     {
         ItemStack carriedItem = this.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
         StoredStackSlot slot = (StoredStackSlot) this.slots.get(slotIndex);// clickHandle仅用于处理点击维度槽位的逻辑，如果转换失败，则证明调用逻辑出错
 
-        if (clickItem.isEmpty())
+        if (clickStack.isEmpty())
         {
             if (!carriedItem.isEmpty())
             {   //槽位物品为空，携带物品存在，将携带物品插入槽位
@@ -572,40 +579,43 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         }
         else if (slot.mayPickup(player))
         {
-            if (carriedItem.isEmpty())
-            {   //槽位物品存在，携带物品为空，尝试取出槽位物品
+            if(clickStack instanceof ItemStackType clickItem)
+            {
+                if (carriedItem.isEmpty())
+                {   //槽位物品存在，携带物品为空，尝试取出槽位物品
 
-                // 确保一次取出最大不得超过原版数量
-                int woundChangeNum = Math.min(clickItem.getCount(), clickItem.getMaxStackSize());
-                int actualChangeNum = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
-                ItemStack takenItem = ((ItemStack) unifiedStorage.extract(StackCreater.Create(new ItemStackType().getTypeId() ,clickItem.copyWithCount(actualChangeNum),actualChangeNum),false).getStack()).copy();
-                if(takenItem != null)
-                {
-                    setCarried(takenItem);
-                    unifiedStorage.onChange();
+                    // 确保一次取出最大不得超过原版数量
+                    int woundChangeNum = (int) Math.min(clickItem.getStackAmount(), clickItem.getVanillaMaxStackSize());
+                    int actualChangeNum = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
+                    ItemStack takenItem = ((ItemStack) unifiedStorage.extract(new ItemStackType(clickItem.copyStackWithCount(actualChangeNum)),false).getStack()).copy();
+                    if(takenItem != null)
+                    {
+                        setCarried(takenItem);
+                        unifiedStorage.onChange();
+                    }
                 }
-            }
-            else if (slot.mayPlace(carriedItem))
-            {   //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
-                int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                unifiedStorage.insert(StackCreater.Create(new ItemStackType().getTypeId(),carriedItem.copyWithCount(changedCount),changedCount),false);
-                int newCount = carriedItem.getCount() - changedCount;
-                if(newCount <=0)
-                {
-                    setCarried(ItemStack.EMPTY);
+                else if (slot.mayPlace(carriedItem))
+                {   //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
+                    int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
+                    unifiedStorage.insert(StackCreater.Create(new ItemStackType().getTypeId(),carriedItem.copyWithCount(changedCount),changedCount),false);
+                    int newCount = carriedItem.getCount() - changedCount;
+                    if(newCount <=0)
+                    {
+                        setCarried(ItemStack.EMPTY);
+                    }
+                    else
+                    {
+                        ItemStack newCarriedItem = carriedItem.copy();
+                        newCarriedItem.setCount(newCount);
+                        setCarried(newCarriedItem);
+                    }
                 }
-                else
-                {
-                    ItemStack newCarriedItem = carriedItem.copy();
-                    newCarriedItem.setCount(newCount);
-                    setCarried(newCarriedItem);
+                else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
+                {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
+                    // 此情况在点击维度存储槽时永远不可能发生，如果发生，无需处理
+                    // 原版逻辑为取出物品到最大上限
+                    // 保留此情况以便后续使用
                 }
-            }
-            else if (ItemStack.isSameItemSameComponents(clickItem, carriedItem))
-            {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
-                // 此情况在点击维度存储槽时永远不可能发生，如果发生，无需处理
-                // 原版逻辑为取出物品到最大上限
-                // 保留此情况以便后续使用
             }
         }
     }

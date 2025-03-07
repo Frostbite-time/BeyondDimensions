@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
@@ -238,7 +239,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
             if (!menu.isHanding)
             {
                 int slotId = slot.index;
-                ItemStack clickItem;
+                IStackType clickItem;
                 if(hasShiftDown())
                 {
                     if(slot instanceof StoredStackSlot sSlot)
@@ -247,7 +248,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
                     }
                     else
                     {
-                        clickItem = slot.getItem();
+                        clickItem = new ItemStackType(slot.getItem());
                     }
                     menu.isHanding = true;
                     PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,true));

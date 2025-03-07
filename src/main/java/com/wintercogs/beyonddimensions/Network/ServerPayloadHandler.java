@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Network;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
@@ -107,7 +108,7 @@ public class ServerPayloadHandler
                     menu.customClickHandler(packet.slotIndex(),packet.clickItem(),packet.button(),packet.shiftDown());
                     menu.broadcastChanges();
                     // 这里发包不是让客户端执行操作，而是解除锁定
-                    PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, ItemStack.EMPTY,1,false));
+                    PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, new ItemStackType(ItemStack.EMPTY),1,false));
                 }
 
         );
