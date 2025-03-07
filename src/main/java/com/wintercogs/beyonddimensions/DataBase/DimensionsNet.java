@@ -1,23 +1,15 @@
 package com.wintercogs.beyonddimensions.DataBase;
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.*;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
-import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.neoforge.fluids.FluidStack;
 import org.slf4j.Logger;
 
 import java.util.HashMap;

@@ -117,24 +117,21 @@ public class UnifiedStorage {
     }
 
     // 尝试按槽位导出 返回实际导出量
-    public IStackType extract(ResourceLocation typeId ,int slot,long amount, boolean simulate) {
+    public IStackType extract(int slot,long amount, boolean simulate) {
         IStackType existing = storage.get(slot);
         if (existing.isEmpty()) return existing.getEmpty();
 
-        if (existing.getTypeId().equals(typeId)) {
-                long extracted = Math.min(amount, existing.getStackAmount());
-                IStackType sim = existing.copy();
-                IStackType result = sim.split(extracted);
-                if (!simulate) {
-                    existing.shrink(extracted);
-                    if (existing.getStackAmount() <= 0) {
-                        storage.remove(slot);
-                    }
-                    onChange();
-                }
-                return result;
+        long extracted = Math.min(amount, existing.getStackAmount());
+        IStackType sim = existing.copy();
+        IStackType result = sim.split(extracted);
+        if (!simulate) {
+            existing.shrink(extracted);
+            if (existing.getStackAmount() <= 0) {
+                storage.remove(slot);
+            }
+            onChange();
         }
-        return existing.getEmpty();
+        return result;
     }
     // endregion
 

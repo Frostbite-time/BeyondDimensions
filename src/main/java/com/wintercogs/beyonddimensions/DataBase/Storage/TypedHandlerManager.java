@@ -26,10 +26,6 @@ public class TypedHandlerManager
     ) {
         Function<?, ?> handler = CapHandlerMap.get(capability);
         if (handler != null) {
-            // 验证参数类型兼容性
-//            if (!handler.getClass().getTypeParameters()[0].equals(argumentType)) {
-//                throw new ClassCastException("参数类型不匹配: 需要 " + argumentType.getName());
-//            }
             return (Function<A, T>) handler;
         }
         return null;

@@ -15,6 +15,7 @@ public class StoredStackSlot extends Slot
     private static final Container empty_inv = new SimpleContainer(0);
     private final UnifiedStorage unifiedStorage;
     private int theSlot;
+    private boolean fake;
 
     // 简介思路：构建一个slot，使用index结合DimensionsItemStorage中的列表来管理自身对应物品
     // 为此，需要重写网络沟通方案，将DimensionsItemStorage作为原inv，StoredItemStack作为原ItemStack来进行数据同步
@@ -199,7 +200,13 @@ public class StoredStackSlot extends Slot
             return ItemStack.EMPTY;
         }
         // 从当前槽位移除对应数量的物品 并返回被移除的物品总数
-        return (ItemStack) unifiedStorage.extract(new ItemStackType().getTypeId(),getSlotIndex(), amount,false).getStack();
+        IStackType typedStack = unifiedStorage.extract(getSlotIndex(), amount,true);
+        if (typedStack instanceof ItemStackType)
+        {
+            ItemStackType trueExtract = (ItemStackType) unifiedStorage.extract(getSlotIndex(), amount,false);
+            return trueExtract.copyStack();
+        }
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -259,4 +266,9 @@ public class StoredStackSlot extends Slot
         return -1;
     }
 
+    @Override
+    public boolean isFake()
+    {
+        return fake;
+    }
 }
