@@ -61,7 +61,7 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
     @Override
     public long getChemicalTankCapacity(int tank)
     {
-        return Long.MAX_VALUE-1;
+        return Long.MAX_VALUE;
     }
 
     @Override
@@ -76,7 +76,9 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
     {
         if(stack.isEmpty())
             return ChemicalStack.EMPTY;
-        net.getUnifiedStorage().insert(new ChemicalStackType(stack.copy()), action.simulate());
+        long remaining = net.getUnifiedStorage().insert(new ChemicalStackType(stack.copy()), action.simulate()).getStackAmount();
+        if(remaining>0)
+            return stack.copyWithAmount(remaining);
         return ChemicalStack.EMPTY;// 始终全部插入
     }
 
@@ -93,7 +95,9 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
     {
         if(stack.isEmpty())
             return ChemicalStack.EMPTY;
-        net.getUnifiedStorage().insert(new ChemicalStackType(stack.copy()), action.simulate());
+        long remaining = net.getUnifiedStorage().insert(new ChemicalStackType(stack.copy()), action.simulate()).getStackAmount();
+        if(remaining>0)
+            return stack.copyWithAmount(remaining);
         return ChemicalStack.EMPTY;// 始终全部插入
     }
 

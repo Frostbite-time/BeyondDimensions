@@ -52,8 +52,8 @@ public class ItemStackTypedHandler implements IItemHandler
     @Override
     public ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
     {
-        net.getUnifiedStorage().insert(new ItemStackType(itemStack),sim);
-        return ItemStack.EMPTY;
+        ItemStackType typedStack = (ItemStackType) net.getUnifiedStorage().insert(new ItemStackType(itemStack),sim);
+        return typedStack.getStack();
     }
 
     @Override

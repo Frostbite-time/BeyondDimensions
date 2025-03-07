@@ -51,7 +51,7 @@ public class FluidStackTypedHandler implements IFluidHandler
     @Override
     public int getTankCapacity(int i)
     {
-        return Integer.MAX_VALUE-1;
+        return Integer.MAX_VALUE;
     }
 
     @Override
@@ -66,8 +66,9 @@ public class FluidStackTypedHandler implements IFluidHandler
     {
         if(fluidStack.isEmpty())
             return 0;
-        net.getUnifiedStorage().insert(new FluidStackType(fluidStack.copy()), fluidAction.simulate());
-        return fluidStack.getAmount();// 始终全部插入
+        int allAmount = fluidStack.getAmount();
+        int remaining = (int) net.getUnifiedStorage().insert(new FluidStackType(fluidStack.copy()), fluidAction.simulate()).getStackAmount();
+        return allAmount-remaining;// 始终全部插入
     }
 
     // 返回实际导出数量

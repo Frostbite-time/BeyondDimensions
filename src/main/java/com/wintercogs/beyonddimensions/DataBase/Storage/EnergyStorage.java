@@ -10,8 +10,8 @@ public class EnergyStorage implements IEnergyStorage
     private DimensionsNet net; // 用于通知维度网络进行保存
     // 实际的存储
     private long energyStorage;
-    private final long capacity = Long.MAX_VALUE-1;
-    private final int maxTransfer = Integer.MAX_VALUE-1;
+    private final long capacity = Long.MAX_VALUE;
+    private final int maxTransfer = Integer.MAX_VALUE;
 
 
     public EnergyStorage(DimensionsNet net)
@@ -52,6 +52,7 @@ public class EnergyStorage implements IEnergyStorage
         }
     }
 
+    // 返回值为接受的能量总量
     @Override
     public int receiveEnergy(int amount, boolean simulate)
     {
@@ -63,6 +64,7 @@ public class EnergyStorage implements IEnergyStorage
         return (int) accepted; // 安全转换，因为 maxTransfer 和 maxReceive 是 int
     }
 
+    // 返回值为导出的能量总量
     @Override
     public int extractEnergy(int amount, boolean simulate)
     {

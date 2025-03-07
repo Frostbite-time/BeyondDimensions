@@ -24,7 +24,7 @@ import java.util.Optional;
 
 public class ItemStackType implements IStackType<ItemStack> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
-    private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE-1; // 自定义堆叠大小
+    private static final long CUSTOM_MAX_STACK_SIZE = Integer.MAX_VALUE; // 自定义堆叠大小
 
     private ItemStack stack;
 
@@ -161,6 +161,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     public ItemStack splitStack(long amount) {
         if (amount <= 0) return ItemStack.EMPTY;
 
+        //stack.getCount()作为min的一极，已经保证了数值范围安全，因为stack.getCount()是一个int
         // 计算可分割的数量
         int splitAmount = (int) Math.min(amount, stack.getCount());
         ItemStack split = stack.copy();
@@ -174,6 +175,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     {
         if (amount <= 0) return new ItemStackType();
 
+        //stack.getCount()作为min的一极，已经保证了数值范围安全，因为stack.getCount()是一个int
         // 计算可分割的数量
         int splitAmount = (int) Math.min(amount, stack.getCount());
         ItemStack split = stack.copy();

@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
@@ -12,7 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 
-public class UnifiedStorage {
+public class UnifiedStorage implements IStackTypedHandler
+{
     private DimensionsNet net;
     private final ArrayList<IStackType> storage = new ArrayList<>();
 
@@ -20,16 +22,31 @@ public class UnifiedStorage {
         this.net = net;
     }
 
+    @Override
     public void onChange()
     {
         net.setDirty();
     }
 
+    @Override
+    public int getSlots()
+    {
+        return storage.size();
+    }
+
+    @Override
+    public IStackType getStackInSlot(int slot)
+    {
+        return IStackTypedHandler.super.getStackInSlot(slot);
+    }
+
+    @Override
     public ArrayList<IStackType> getStorage()
     {
         return this.storage;
     }
 
+    @Override
     public boolean hasStackType(IStackType other)
     {
         if(getStackByStack(other) != null)
@@ -38,18 +55,7 @@ public class UnifiedStorage {
             return false;
     }
 
-    public IStackType getStackByIndex(int index)
-    {
-        if (index >= 0 && index < storage.size())
-        {
-            return storage.get(index);
-        }
-        else
-        {
-            return null;
-        }
-    }
-
+    @Override
     public IStackType getStackByStack(IStackType stackType)
     {
         for (IStackType existing : storage)
@@ -63,36 +69,68 @@ public class UnifiedStorage {
         return null;
     }
 
+    @Override
+    public long getSlotLimit(int slot)
+    {
+        return Long.MAX_VALUE;
+    }
+
+    @Override
+    public boolean isStackValid(int slot, IStackType stack)
+    {
+        return true;
+    }
+
 
     // region 核心操作方法
+
     // 插入stack 返回剩余量
+    @Override
+    public IStackType insert(int slot, IStackType stack, boolean simulate)
+    {
+        return insert(stack,simulate);
+    }
+
+    @Override
     public IStackType insert(IStackType stack,boolean simulate) {
         if (stack.isEmpty()) return StackCreater.CreateEmpty(stack.getTypeId());
+
+        long remaining = stack.getStackAmount(); // 剩余可被插入的量
+        long canInsert = Math.min(getSlotLimit(0),stack.getCustomMaxStackSize()); // 能被插入的空间
 
         // 尝试合并现有堆叠
         for (IStackType existing : storage) {
             if (existing.getTypeId().equals(stack.getTypeId())) {
                 if (existing.isSameTypeSameComponents(stack)) {
+                    canInsert = canInsert - existing.getStackAmount();
+                    long actualInsert = Math.min(remaining,canInsert);
+                    remaining = remaining-actualInsert;
+
                     if (!simulate) {
-                        existing.grow(stack.getStackAmount());
+                        existing.grow(actualInsert);
                         onChange();
-                        return StackCreater.CreateEmpty(stack.getTypeId());
                     }
+                    return stack.copyWithCount(remaining);
                 }
             }
         }
+
         // 现有堆叠未找到，尝试新增
+        long actualInsert = Math.min(remaining,canInsert);
+        remaining = remaining-actualInsert;
         if(!simulate)
         {
-            storage.add(stack.copy());
+            storage.add(stack.copyWithCount(actualInsert));
             onChange();
         }
-        return StackCreater.CreateEmpty(stack.getTypeId());
+        return stack.copyWithCount(remaining);
     }
 
     // 尝试按类型导出，返回实际导出量
+    @Override
     public IStackType extract(IStackType stack, boolean simulate) {
         if (stack.isEmpty()) return stack.getEmpty();
+
 
         for (int i = 0; i < storage.size(); i++) {
             IStackType existing = storage.get(i);
@@ -117,6 +155,7 @@ public class UnifiedStorage {
     }
 
     // 尝试按槽位导出 返回实际导出量
+    @Override
     public IStackType extract(int slot,long amount, boolean simulate) {
         IStackType existing = storage.get(slot);
         if (existing.isEmpty()) return existing.getEmpty();
@@ -170,5 +209,18 @@ public class UnifiedStorage {
         }
     }
     // endregion
+
+    // 辅助方法：查找已有堆叠的槽位
+    private int findExistingSlot(IStackType stack) {
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType existing = storage.get(i);
+            if (!existing.isEmpty() &&
+                    existing.getTypeId().equals(stack.getTypeId()) &&
+                    existing.isSameTypeSameComponents(stack)) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }
 

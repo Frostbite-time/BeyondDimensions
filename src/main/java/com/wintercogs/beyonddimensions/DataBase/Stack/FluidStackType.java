@@ -40,7 +40,7 @@ import java.util.Optional;
 public class FluidStackType implements IStackType<FluidStack>
 {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
-    private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE-1; // 自定义堆叠大小
+    private static final long CUSTOM_MAX_STACK_SIZE = Integer.MAX_VALUE; // 自定义堆叠大小
 
     private FluidStack stack;
 
