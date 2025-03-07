@@ -5,12 +5,15 @@ import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.*;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.DataBase.Storage.ChemicalStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.FluidStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
@@ -96,6 +99,12 @@ public class BeyondDimensions
         StackTypeRegistry.registerType(new FluidStackType());
         TypedHandlerManager.register(Capabilities.ItemHandler.BLOCK, DimensionsNet.class, ItemStackTypedHandler::new);
         TypedHandlerManager.register(Capabilities.FluidHandler.BLOCK, DimensionsNet.class, FluidStackTypedHandler::new);
+
+        if(MekLoaded)
+        {
+            StackTypeRegistry.registerType(new ChemicalStackType());
+            TypedHandlerManager.register(ChemicalCapabilityHelper.CHEMICAL, DimensionsNet.class, ChemicalStackTypedHandler::new);
+        }
     }
 
     @SubscribeEvent

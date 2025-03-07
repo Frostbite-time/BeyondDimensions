@@ -24,10 +24,7 @@ public class StringFormat
 
         // 计算值并格式化
         double value = count / (double) THRESHOLDS[unitIndex];
-        if (value % 1 == 0) {
-            return String.format("%d%s", (long) value, UNITS[unitIndex + 1]);
-        }
-        return String.format("%.1f%s", value, UNITS[unitIndex + 1]);
+        return String.format("%d%s", (long) value, UNITS[unitIndex + 1]);
     }
 
 }

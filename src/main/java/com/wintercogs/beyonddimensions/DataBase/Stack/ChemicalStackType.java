@@ -3,6 +3,9 @@ package com.wintercogs.beyonddimensions.DataBase.Stack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import mekanism.api.MekanismAPI;
+import mekanism.api.chemical.Chemical;
+import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
@@ -37,21 +40,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class FluidStackType implements IStackType<FluidStack>
+// 用于处理通用机械的化学品类
+public class ChemicalStackType implements IStackType<ChemicalStack>
 {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
+
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/chemical");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE-1; // 自定义堆叠大小
 
-    private FluidStack stack;
+    private ChemicalStack stack;
 
     // 创建空stack
-    public FluidStackType()
+    public ChemicalStackType()
     {
-        stack = FluidStack.EMPTY;
+        stack = ChemicalStack.EMPTY;
     }
 
     // 创建给定stack
-    public FluidStackType(FluidStack stack)
+    public ChemicalStackType(ChemicalStack stack)
     {
         this.stack = stack;
     }
@@ -63,27 +68,27 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public IStackType<FluidStack> getEmpty()
+    public IStackType<ChemicalStack> getEmpty()
     {
-        return new FluidStackType();
+        return new ChemicalStackType();
     }
 
     @Override
-    public FluidStack getStack()
+    public ChemicalStack getStack()
     {
-        return stack.copyWithAmount(Math.toIntExact(getStackAmount()));
+        return stack.copyWithAmount(getStackAmount());
     }
 
     @Override
-    public void setStack(FluidStack stack)
+    public void setStack(ChemicalStack stack)
     {
         this.stack = stack.copy();
     }
 
     @Override
-    public Class<FluidStack> getStackClass()
+    public Class<ChemicalStack> getStackClass()
     {
-        return FluidStack.class;
+        return ChemicalStack.class;
     }
 
     @Override
@@ -93,51 +98,33 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public FluidStack getEmptyStack()
+    public ChemicalStack getEmptyStack()
     {
-        return FluidStack.EMPTY;
+        return ChemicalStack.EMPTY;
     }
 
     @Override
-    public FluidStack copyStack()
+    public ChemicalStack copyStack()
     {
         return stack.copy();
     }
 
     @Override
-    public FluidStack copyStackWithCount(long count)
+    public ChemicalStack copyStackWithCount(long count)
     {
-        FluidStack copy = stack.copy();
-        // 处理long到int的转换安全
-        if (count > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            copy.setAmount(Integer.MAX_VALUE);
-            return copy;
-        }
-        copy.setAmount((int) count);
-        return copy;
+        return stack.copyWithAmount(count);
     }
 
     @Override
-    public IStackType<FluidStack> copy()
+    public IStackType<ChemicalStack> copy()
     {
-        return new FluidStackType(stack.copy());
+        return new ChemicalStackType(stack.copy());
     }
 
     @Override
-    public IStackType<FluidStack> copyWithCount(long count)
+    public IStackType<ChemicalStack> copyWithCount(long count)
     {
-        int copycont;
-        // 处理long到int的转换安全
-        if (count > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            copycont = Integer.MAX_VALUE;
-        }
-        else
-        {
-            copycont = (int) count;
-        }
-        return new FluidStackType(stack.copyWithAmount(copycont));
+        return new ChemicalStackType(stack.copyWithAmount(count));
     }
 
     @Override
@@ -149,13 +136,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public void setStackAmount(long amount)
     {
-        // 处理long到int的转换安全
-        if (amount > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            stack.setAmount(Integer.MAX_VALUE);
-            return;
-        }
-        stack.setAmount((int) amount);
+        stack.setAmount(amount);
     }
 
     @Override
@@ -173,7 +154,6 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public long getVanillaMaxStackSize()
     {
-        // 流体不属于原版物品，理论上不存在单槽最大上限
         return getCustomMaxStackSize();
     }
 
@@ -184,45 +164,45 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public FluidStack splitStack(long amount)
+    public ChemicalStack splitStack(long amount)
     {
-        if (amount <= 0) return FluidStack.EMPTY;
+        if (amount <= 0) return ChemicalStack.EMPTY;
 
         // 计算可分割的数量
-        int splitAmount = (int) Math.min(amount, stack.getAmount());
-        FluidStack split = stack.copy();
+        long splitAmount = Math.min(amount, stack.getAmount());
+        ChemicalStack split = stack.copy();
         split.setAmount(splitAmount);
         stack.shrink(splitAmount);
         return split;
     }
 
     @Override
-    public IStackType<FluidStack> split(long amount)
+    public IStackType<ChemicalStack> split(long amount)
     {
-        if (amount <= 0) return new FluidStackType();
+        if (amount <= 0) return new ChemicalStackType();
 
         // 计算可分割的数量
-        int splitAmount = (int) Math.min(amount, stack.getAmount());
-        FluidStack split = stack.copy();
+        long splitAmount = Math.min(amount, stack.getAmount());
+        ChemicalStack split = stack.copy();
         split.setAmount(splitAmount);
         stack.shrink(splitAmount);
-        return new FluidStackType(split);
+        return new ChemicalStackType(split);
     }
 
     @Override
-    public boolean isSame(IStackType<FluidStack> other)
+    public boolean isSame(IStackType<ChemicalStack> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return FluidStack.isSameFluid(stack, other.getStack());
+        return ChemicalStack.isSameChemical(stack, other.getStack());
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<FluidStack> other)
+    public boolean isSameTypeSameComponents(IStackType<ChemicalStack> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return FluidStack.isSameFluidSameComponents(stack, other.getStack());
+        return ChemicalStack.isSameChemical(stack, other.getStack());
     }
 
     @Override
@@ -237,16 +217,16 @@ public class FluidStackType implements IStackType<FluidStack>
 
         if (hasItem) {
             // 写入数量
-            buf.writeVarInt(stack.getAmount());
+            buf.writeVarLong(stack.getAmount());
             // 使用副本避免修改原堆栈
-            FluidStack copy = stack.copyWithAmount(1);
+            ChemicalStack copy = stack.copyWithAmount(1);
             // 使用OPTIONAL_CODEC处理可能为空的情况
-            FluidStack.OPTIONAL_STREAM_CODEC.encode(buf, copy);
+            ChemicalStack.OPTIONAL_STREAM_CODEC.encode(buf, copy);
         }
     }
 
     @Override
-    public IStackType<FluidStack> deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId)
+    public IStackType<ChemicalStack> deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId)
     {
         if (!typeId.equals(getTypeId())) {
             return null;// 表示未能读取任何类型
@@ -255,15 +235,15 @@ public class FluidStackType implements IStackType<FluidStack>
         // 读取是否存在物品的标志
         boolean hasItem = buf.readBoolean();
         if (!hasItem) {
-            return new FluidStackType(FluidStack.EMPTY);
+            return new ChemicalStackType(ChemicalStack.EMPTY);
         }
 
         // 读取数量
-        int count = buf.readVarInt();
+        long count = buf.readVarLong();
         // 使用OPTIONAL_CODEC解码
-        FluidStack stack = FluidStack.OPTIONAL_STREAM_CODEC.decode(buf)
+        ChemicalStack stack = ChemicalStack.OPTIONAL_STREAM_CODEC.decode(buf)
                 .copyWithAmount(count);
-        return new FluidStackType(stack);
+        return new ChemicalStackType(stack);
     }
 
     @Override
@@ -276,9 +256,9 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public IStackType<FluidStack> deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
+    public IStackType<ChemicalStack> deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
     {
-        FluidStackType stack =  new FluidStackType(FluidStack.parseOptional(levelRegistryAccess,nbt.getCompound("Stack")));
+        ChemicalStackType stack =  new ChemicalStackType(ChemicalStack.parseOptional(levelRegistryAccess,nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));
         return stack;
     }
@@ -291,11 +271,10 @@ public class FluidStackType implements IStackType<FluidStack>
         var poseStack = gui.pose(); // 获取渲染的变换矩阵
         poseStack.pushPose(); // 保存矩阵状态
 
-        Fluid fluid = stack.getFluid();
-        if(!fluid.isSame(Fluids.EMPTY))
+        Chemical chemical = stack.getChemical();
+        if(!chemical.isEmptyType())
         {
-            IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
-            ResourceLocation fluidStill = renderProperties.getStillTexture(stack);
+            ResourceLocation fluidStill = chemical.getIcon();
             Optional<net.minecraft.client.renderer.texture.TextureAtlasSprite> fluidStillSprite = Optional.ofNullable(fluidStill)
                     .map(f -> Minecraft.getInstance()
                             .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
@@ -304,7 +283,7 @@ public class FluidStackType implements IStackType<FluidStack>
                     .filter(s -> s.atlasLocation() != net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());
             if(fluidStillSprite.isPresent())
             {
-                int fluidColor = IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor();
+                int fluidColor = chemical.getTint();
                 com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,fluidColor,16,fluidStillSprite.get(),x,y);
             }
         }
@@ -346,7 +325,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public Component getDisplayName()
     {
-        return stack.getHoverName();
+        return stack.getTextComponent();
     }
 
     @Override
@@ -356,12 +335,12 @@ public class FluidStackType implements IStackType<FluidStack>
             return List.of(Component.empty());
 
         List<Component> tooltips = new ArrayList<>();
-        Fluid fluid = stack.getFluid();
+        Chemical chemical = stack.getChemical();
 
         Component displayName = getDisplayName();
         tooltips.add(displayName);
 
-        ResourceLocation resourceLocation =  BuiltInRegistries.FLUID.getKey(fluid);
+        ResourceLocation resourceLocation = MekanismAPI.CHEMICAL_REGISTRY.getKey(chemical);
         if (resourceLocation != null) {
             if (tooltipFlag.isAdvanced()) {
                 MutableComponent advancedId = Component.literal(resourceLocation.toString())
@@ -395,7 +374,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public Optional<TooltipComponent> getTooltipImage()
     {
-        return !stack.has(DataComponents.HIDE_TOOLTIP) && !stack.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP) ? Optional.ofNullable((BundleContents)stack.get(DataComponents.BUNDLE_CONTENTS)).map(BundleTooltip::new) : Optional.empty();
+        return Optional.empty();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -410,7 +389,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public boolean equals(Object other)
     {
-        if(other instanceof FluidStackType otherStack)
+        if(other instanceof ChemicalStackType otherStack)
         {
             return this.isSameTypeSameComponents(otherStack);
         }
@@ -420,6 +399,8 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
-        return FluidStack.hashFluidAndComponents(stack.copyWithAmount(1));
+        int code = 1;
+        code = 31 * code + stack.getChemical().hashCode();
+        return code;
     }
 }

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 // 用于定义不同stack的行为 物品 流体 以及其他模组中行为逻辑stack相似的资源
+// 实现还需重写hashcode以及equals方法，使其检测忽略数量以用于其他位置的代码
 public interface IStackType<T> {
 
     // 类型的唯一标识符 如(beyonddimension:stack_type/item) beyonddimension为本modID，提供对原版Item的支持，Item为要支持的Stack类型
