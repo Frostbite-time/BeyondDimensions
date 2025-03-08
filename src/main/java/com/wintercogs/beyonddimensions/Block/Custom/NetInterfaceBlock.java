@@ -2,11 +2,9 @@ package com.wintercogs.beyonddimensions.Block.Custom;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
-import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;

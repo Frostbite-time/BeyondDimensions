@@ -7,7 +7,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 
 public record CallSeverClickPacket(int slotIndex , IStackType clickItem, int button, boolean shiftDown) implements CustomPacketPayload
 {

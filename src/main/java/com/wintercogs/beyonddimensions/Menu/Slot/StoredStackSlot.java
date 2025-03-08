@@ -4,7 +4,6 @@ import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
-import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.Slot;

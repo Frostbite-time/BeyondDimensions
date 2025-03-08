@@ -2,7 +2,9 @@ package com.wintercogs.beyonddimensions.BlockEntity;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.*;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
