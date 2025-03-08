@@ -172,4 +172,15 @@ public class ServerPayloadHandler
 
         );
     }
+
+    public void handleSyncFlagPacket(final SyncFlagPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+
+        );
+    }
 }

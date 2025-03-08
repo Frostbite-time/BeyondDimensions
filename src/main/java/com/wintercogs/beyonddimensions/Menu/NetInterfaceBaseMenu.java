@@ -9,6 +9,7 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Packet.StoragePacket;
+import com.wintercogs.beyonddimensions.Packet.SyncFlagPacket;
 import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.registries.Registries;
@@ -49,6 +50,10 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
     /// 服务端数据
     private ArrayList<IStackType> lastItemStorage; // 记录截至上一次同步时的存储状态，用于同步数据
 
+    public final IStackTypedHandler flagStorage;
+    public IStackTypedHandler viewerFlagStorage;
+    public ArrayList<IStackType> lastFlagStorage;
+
 
     // 构建注册用的信息
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
@@ -65,7 +70,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
      */
     public NetInterfaceBaseMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, new StackTypedHandler(9),new SimpleContainerData(0));
+        this(id, playerInventory, new StackTypedHandler(9),new StackTypedHandler(9),new SimpleContainerData(0));
     }
 
     /**
@@ -73,7 +78,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
      * @param playerInventory 玩家背包
      * @param uselessContainer 此处无用，传入new SimpleContainerData(0)即可
      */
-    public NetInterfaceBaseMenu(int id, Inventory playerInventory,IStackTypedHandler storage , SimpleContainerData uselessContainer)
+    public NetInterfaceBaseMenu(int id, Inventory playerInventory,IStackTypedHandler storage , IStackTypedHandler flagStorage, SimpleContainerData uselessContainer)
     {
         super(Net_Interface_Menu.get(), id);
         // 初始化维度网络容器
@@ -90,20 +95,38 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
             }
         }
 
+        // 初始化标记容器
+        this.flagStorage = flagStorage;
+        viewerFlagStorage = new StackTypedHandler(9);
+        if(!player.level().isClientSide())
+        {
+            // 将lastItemStorage设置为一个深克隆，以便后续进行比较
+            this.lastFlagStorage = new ArrayList<>();
+            for(IStackType stack : this.flagStorage.getStorage())
+            {
+                // 将flag的last比较初始化设为空。用broadchange自动同步
+                this.lastFlagStorage.add(new ItemStackType());
+            }
+        }
+
         // 开始添加槽位，其中addSlot会为menu自带的列表slots提供slot，
         // 而给slot本身传入的索引则对应其在背包中的索引
         // 添加维度网络槽位 对应slots索引 0~53
-        for (int row = 0; row < lines; ++row)
-        {
-            for (int col = 0; col < 9; ++col)
-            {   // 添加槽而不设置数据
-                // 由于我们完全不依靠menu自带得方法来同步，所以可以传入一个和实际数据同步所用不一样的Storage
-                // 只需要保证我们能及时把数据从实际数据同步到viewerUnifiedStorage
-                // 再将slot点击操作重写的物品种类依赖
-                this.addSlot(new StoredStackSlot(viewerUnifiedStorage, -1, 8 + col * 18, 71+row * 18));
-            }
+        for (int col = 0; col < 9; ++col)
+        {   // 添加槽而不设置数据
+            // 由于我们完全不依靠menu自带得方法来同步，所以可以传入一个和实际数据同步所用不一样的Storage
+            // 只需要保证我们能及时把数据从实际数据同步到viewerUnifiedStorage
+            // 再将slot点击操作重写的物品种类依赖
+            this.addSlot(new StoredStackSlot(viewerUnifiedStorage, col, 8 + col * 18, 71));
         }
-        // 添加玩家物品栏槽位 对应slots索引 54~80
+
+        for(int i=0;i<flagStorage.getStorage().size();i++)
+        {
+            StoredStackSlot flagSlot = new StoredStackSlot(viewerFlagStorage, i, 8 + i * 18, 53);
+            flagSlot.setFake(true);
+            this.addSlot(flagSlot);
+        }
+
         for (int row = 0; row < 3; ++row)
         {
             for (int col = 0; col < 9; ++col)
@@ -111,7 +134,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
                 this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 123 + row * 18));
             }
         }
-        // 添加快捷栏槽位 对应slots索引 81~89
+
         for (int col = 0; col < 9; ++col)
         {
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 181));
@@ -134,6 +157,17 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
             this.viewerUnifiedStorage.insert(i,unifiedStorage.getStorage().get(i).copy(),false);
         }
         buildIndexList(new ArrayList<>(viewerUnifiedStorage.getStorage()));
+
+        // flag容器
+        for(IStackType stack : viewerFlagStorage.getStorage())
+        {
+            stack.setStackAmount(-1); //设为空
+        }
+        for(int i=0;i<this.flagStorage.getStorage().size();i++)
+        {
+            this.viewerFlagStorage.insert(i,flagStorage.getStorage().get(i).copy(),false);
+        }
+        buildIndexList(new ArrayList<>(viewerFlagStorage.getStorage()));
     }
 
     /**
@@ -143,6 +177,8 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
     public final void ScrollTo()
     {
         this.buildIndexList(new ArrayList<>(this.viewerUnifiedStorage.getStorage()));
+
+        this.buildIndexList(new ArrayList<>(this.viewerFlagStorage.getStorage()));
     }
 
 
@@ -209,7 +245,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
             }
         }
         // 加载索引表
-        loadIndexList(indexList);
+        //loadIndexList(indexList);
     }
 
     /**
@@ -311,6 +347,74 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
         this.lastItemStorage.addAll(currentSnapshot);
 
 
+        // 同步flag容器
+
+        // 带槽位索引的原子化物品比较
+        ArrayList<IStackType> changedFlags = new ArrayList<>();
+        ArrayList<Long> changedFlagCounts = new ArrayList<>();
+        ArrayList<Integer> changedFlagIndices = new ArrayList<>();
+
+        // 创建带索引的深拷贝缓存
+        List<@Nullable IStackType> lastFlagSnapshot = new ArrayList<>();
+        for (IStackType stack : this.lastFlagStorage) {
+            lastFlagSnapshot.add(stack != null ? stack.copy() : null);
+        }
+
+        List<@Nullable IStackType> currentFlagSnapshot = new ArrayList<>();
+        for (IStackType stack : this.flagStorage.getStorage()) {
+            currentFlagSnapshot.add(stack != null ? stack.copy() : null);
+        }
+
+        // 确保两个快照长度一致（处理动态扩容）
+        int maxFlagSlots = Math.max(lastFlagSnapshot.size(), currentFlagSnapshot.size());
+        while (lastFlagSnapshot.size() < maxFlagSlots) lastFlagSnapshot.add(null);
+        while (currentFlagSnapshot.size() < maxFlagSlots) currentFlagSnapshot.add(null);
+
+        // 逐槽位对比
+        for (int slot = 0; slot < maxFlagSlots; slot++) {
+            IStackType lastStack = lastFlagSnapshot.get(slot);
+            IStackType currentStack = currentFlagSnapshot.get(slot);
+
+            // 检查是否需要更新
+            boolean stackChanged = false;
+
+            // 情况1：槽位从非空变成空或反之
+            if ((lastStack == null) != (currentStack == null)) {
+                stackChanged = true;
+            }
+            // 情况2：两个槽位都有物品，但类型或组件不同
+            else if (lastStack != null && currentStack != null) {
+                if (!lastStack.isSameTypeSameComponents(currentStack)) {
+                    stackChanged = true;
+                }
+            }
+
+            // 情况3：数量变化（即使类型相同）
+            long delta = (currentStack != null ? currentStack.getStackAmount() : 0L)
+                    - (lastStack != null ? lastStack.getStackAmount() : 0L);
+            if (delta != 0) {
+                stackChanged = true;
+            }
+
+            // 记录变化
+            if (stackChanged) {
+                changedFlagIndices.add(slot);
+                changedFlags.add(currentStack != null ? currentStack.copy() : null);
+                changedFlagCounts.add(delta);
+            }
+        }
+
+        // 如果有变化则发送同步包
+        if (!changedFlagIndices.isEmpty()) {
+            PacketDistributor.sendToPlayer(
+                    (ServerPlayer) player,
+                    new SyncFlagPacket(changedFlags, changedFlagCounts, changedFlagIndices)
+            );
+        }
+
+        // 更新最后快照（需要保持与当前相同的槽位数量）
+        this.lastFlagStorage.clear();
+        this.lastFlagStorage.addAll(currentFlagSnapshot);
     }
 
 
@@ -320,6 +424,12 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
         for(IStackType stack : this.unifiedStorage.getStorage())
         {
             this.lastItemStorage.add(stack.copy());
+        }
+
+        this.lastFlagStorage.clear();
+        for(IStackType stack : this.flagStorage.getStorage())
+        {
+            this.lastFlagStorage.add(stack.copy());
         }
     }
 

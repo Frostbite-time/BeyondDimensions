@@ -271,4 +271,9 @@ public class StoredStackSlot extends Slot
     {
         return fake;
     }
+
+    public void setFake(boolean fake)
+    {
+        this.fake = fake;
+    }
 }

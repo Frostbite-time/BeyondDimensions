@@ -22,6 +22,16 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     public final int transHold = 20;
     public int transTime = 0;
 
+    // 用来标记物品或者流体的槽位，只由UI控制
+    private final StackTypedHandler fakeStackHandler = new StackTypedHandler(9)
+    {
+        @Override
+        public void onChange()
+        {
+            setChanged();
+        }
+    };
+
     private final StackTypedHandler stackHandler = new StackTypedHandler(9)
     {
         @Override
@@ -35,6 +45,10 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     {
         return this.stackHandler;
     }
+
+    public StackTypedHandler getFakeStackHandler(){
+        return this.fakeStackHandler;
+}
 
     public NetInterfaceBlockEntity(BlockPos pos, BlockState blockState)
     {
@@ -94,6 +108,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     {
         super.loadAdditional(tag,registries);
         this.stackHandler.deserializeNBT(registries,tag.getCompound("inventory"));
+        this.fakeStackHandler.deserializeNBT(registries,tag.getCompound("flags"));
     }
 
     @Override
@@ -101,5 +116,6 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     {
         super.saveAdditional(tag, registries);
         tag.put("inventory", stackHandler.serializeNBT(registries));
+        tag.put("flags",fakeStackHandler.serializeNBT(registries));
     }
 }

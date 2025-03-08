@@ -46,7 +46,7 @@ public class NetInterfaceBlock extends NetedBlock implements EntityBlock
         if(!level.isClientSide()&&!player.isShiftKeyDown())
         {
             player.openMenu(new SimpleMenuProvider(
-                    (containerId, playerInventory, _player) -> new NetInterfaceBaseMenu(containerId,_player.getInventory(),((NetInterfaceBlockEntity)level.getBlockEntity(pos)).getStackHandler() ,new SimpleContainerData(0)),
+                    (containerId, playerInventory, _player) -> new NetInterfaceBaseMenu(containerId,_player.getInventory(),((NetInterfaceBlockEntity)level.getBlockEntity(pos)).getStackHandler() ,((NetInterfaceBlockEntity)level.getBlockEntity(pos)).getFakeStackHandler(),new SimpleContainerData(0)),
                     Component.translatable("menu.title.beyonddimensions.net_interface_menu")
             ));
         }

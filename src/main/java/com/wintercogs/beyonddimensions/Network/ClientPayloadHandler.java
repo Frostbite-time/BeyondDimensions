@@ -240,4 +240,36 @@ public class ClientPayloadHandler
 
         );
     }
+
+    public void handleSyncFlagPacket(final SyncFlagPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                    Player player = context.player();
+                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
+                    {
+                        IStackTypedHandler clientStorage = menu.flagStorage;
+                        int i = 0;
+                        for(IStackType remoteStack : packet.flags())
+                        {
+                            if(packet.changedCounts().get(i) > 0)
+                            {
+                                clientStorage.getStorage().set(i,remoteStack.copyWithCount(1));
+                            }
+                            else
+                            {
+                                clientStorage.getStorage().set(i,new ItemStackType());
+                            }
+                            i++; // 一次遍历完毕后索引自增
+                        }
+                        menu.updateViewerStorage();
+                    }
+
+
+                }
+
+        );
+    }
 }
