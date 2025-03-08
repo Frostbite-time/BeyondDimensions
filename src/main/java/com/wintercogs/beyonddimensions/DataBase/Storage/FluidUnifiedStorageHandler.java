@@ -9,12 +9,12 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class FluidStackTypedHandler implements IFluidHandler
+public class FluidUnifiedStorageHandler implements IFluidHandler
 {
 
     private DimensionsNet net;
 
-    public FluidStackTypedHandler(DimensionsNet net) {
+    public FluidUnifiedStorageHandler(DimensionsNet net) {
         this.net = net;
     }
 

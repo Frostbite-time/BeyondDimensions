@@ -24,7 +24,7 @@ public interface IStackTypedHandler
     }
 
     // 获取对应槽位的Stack
-    default IStackType getStackInSlot(int slot)
+    default IStackType getStackBySlot(int slot)
     {
         if (slot >= 0 && slot < getStorage().size())
         {
@@ -57,6 +57,14 @@ public interface IStackTypedHandler
             return false;
     }
 
+    // 无视任何限制，直接设置指定槽位
+    // 只有你确定需要使用它再使用
+    default void setStackDirectly(int slot,IStackType stack)
+    {
+        getStorage().set(slot,stack.copy());
+        onChange();
+    }
+
     // 尝试将指定的堆叠插入指定的槽位，并返回剩余堆叠
     default IStackType insert(int slot, IStackType stack, boolean simulate)
     {
@@ -76,7 +84,7 @@ public interface IStackTypedHandler
 
         if (current == null || current.isEmpty()) {
             // 空槽位：创建新堆叠
-            maxInsert = Math.min(stack.getStackAmount(), getSlotLimit(slot));
+            maxInsert = Math.min(stack.getStackAmount(), getSlotCapacity(slot));
             maxInsert = Math.min(maxInsert,stack.getVanillaMaxStackSize()); // 如需突破堆叠上限，则需要重写并移除这条语句
             if (maxInsert <= 0) return stack.copy();
 
@@ -94,7 +102,7 @@ public interface IStackTypedHandler
             // 计算可插入量
             maxInsert = Math.min(
                     stack.getStackAmount(),
-                    getSlotLimit(slot) - current.getStackAmount()
+                    getSlotCapacity(slot) - current.getStackAmount()
             );
             maxInsert = Math.min(maxInsert,stack.getVanillaMaxStackSize()); // 如需突破堆叠上限，则需要重写并移除这条语句
             if (maxInsert <= 0) return stack.copy();
@@ -199,7 +207,7 @@ public interface IStackTypedHandler
     }
 
     // 指定的槽位的最大容量是多少？
-    long getSlotLimit(int slot);
+    long getSlotCapacity(int slot);
 
     // 指定的堆叠是否能插入指定的槽位
     // 返回值不考虑当前容器内的实际状态。

@@ -8,9 +8,9 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.Storage.ChemicalStackTypedHandler;
-import com.wintercogs.beyonddimensions.DataBase.Storage.FluidStackTypedHandler;
-import com.wintercogs.beyonddimensions.DataBase.Storage.ItemStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Storage.ChemicalUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
@@ -95,13 +95,13 @@ public class BeyondDimensions
 
         StackTypeRegistry.registerType(new ItemStackType());
         StackTypeRegistry.registerType(new FluidStackType());
-        TypedHandlerManager.register(Capabilities.ItemHandler.BLOCK, DimensionsNet.class, ItemStackTypedHandler::new);
-        TypedHandlerManager.register(Capabilities.FluidHandler.BLOCK, DimensionsNet.class, FluidStackTypedHandler::new);
+        TypedHandlerManager.register(Capabilities.ItemHandler.BLOCK, DimensionsNet.class, ItemUnifiedStorageHandler::new);
+        TypedHandlerManager.register(Capabilities.FluidHandler.BLOCK, DimensionsNet.class, FluidUnifiedStorageHandler::new);
 
         if(MekLoaded)
         {
             StackTypeRegistry.registerType(new ChemicalStackType());
-            TypedHandlerManager.register(ChemicalCapabilityHelper.CHEMICAL, DimensionsNet.class, ChemicalStackTypedHandler::new);
+            TypedHandlerManager.register(ChemicalCapabilityHelper.CHEMICAL, DimensionsNet.class, ChemicalUnifiedStorageHandler::new);
         }
     }
 

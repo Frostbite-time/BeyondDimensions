@@ -29,7 +29,7 @@ public class StoredStackSlot extends Slot
 
     public IStackType getTypedStackFromUnifiedStorage()
     {
-        IStackType stackType = unifiedStorage.getStackInSlot(getSlotIndex());
+        IStackType stackType = unifiedStorage.getStackBySlot(getSlotIndex());
         if(stackType != null)
             return stackType.copy();
         else
@@ -39,7 +39,7 @@ public class StoredStackSlot extends Slot
     public ItemStack getItemStackFromUnifiedStorage()
     {
         //从当前槽索引取物品
-        IStackType stackType = unifiedStorage.getStackInSlot(getSlotIndex());
+        IStackType stackType = unifiedStorage.getStackBySlot(getSlotIndex());
         if(stackType == null)
         {
             return ItemStack.EMPTY;
@@ -98,7 +98,7 @@ public class StoredStackSlot extends Slot
             return new ItemStackType(ItemStack.EMPTY);
         }
         //从当前槽索引取物品
-        IStackType stack = unifiedStorage.getStackInSlot(getSlotIndex());
+        IStackType stack = unifiedStorage.getStackBySlot(getSlotIndex());
         if (stack.isEmpty())
             return StackCreater.CreateEmpty(stack.getTypeId());
         if (stack != null)
@@ -133,8 +133,8 @@ public class StoredStackSlot extends Slot
     public boolean hasItem()
     {
         //检查当前槽是否为空
-        return unifiedStorage.getStackInSlot(getSlotIndex()) != null
-                && !unifiedStorage.getStackInSlot(getSlotIndex()).isEmpty();
+        return unifiedStorage.getStackBySlot(getSlotIndex()) != null
+                && !unifiedStorage.getStackBySlot(getSlotIndex()).isEmpty();
     }
 
     @Override
@@ -258,7 +258,7 @@ public class StoredStackSlot extends Slot
             return -1;
         }
         //从当前槽索引取物品
-        IStackType stack = unifiedStorage.getStackInSlot(getSlotIndex());
+        IStackType stack = unifiedStorage.getStackBySlot(getSlotIndex());
         if (stack != null && !stack.isEmpty())
         {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
             return stack.getStackAmount();

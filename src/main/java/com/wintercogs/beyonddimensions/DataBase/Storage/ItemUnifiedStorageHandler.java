@@ -10,14 +10,15 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 // 以IStackType为基础实现IItemHandler的类
-public class ItemStackTypedHandler implements IItemHandler
+public class ItemUnifiedStorageHandler implements IItemHandler
 {
     private DimensionsNet net;
 
-    public ItemStackTypedHandler(DimensionsNet net) {
+    public ItemUnifiedStorageHandler(DimensionsNet net) {
         this.net = net;
     }
 
+    // 获取所有为Item的槽位
     public ArrayList<ItemStackType> getItemOnlyStorage()
     {
         return getStorage().stream()

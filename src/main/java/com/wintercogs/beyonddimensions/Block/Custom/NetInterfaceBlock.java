@@ -60,7 +60,6 @@ public class NetInterfaceBlock extends NetedBlock implements EntityBlock
     {
         if (!state.is(newState.getBlock())) {
             if (level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity) {
-                Containers.dropContents(level, pos, blockEntity);
                 level.updateNeighbourForOutputSignal(pos, this);
             }
             super.onRemove(state, level, pos, newState, movedByPiston);

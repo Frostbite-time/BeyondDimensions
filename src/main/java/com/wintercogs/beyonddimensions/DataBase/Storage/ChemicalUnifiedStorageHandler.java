@@ -10,12 +10,12 @@ import mekanism.api.chemical.IChemicalHandler;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class ChemicalStackTypedHandler implements IChemicalHandler
+public class ChemicalUnifiedStorageHandler implements IChemicalHandler
 {
 
     private DimensionsNet net;
 
-    public ChemicalStackTypedHandler(DimensionsNet net) {
+    public ChemicalUnifiedStorageHandler(DimensionsNet net) {
         this.net = net;
     }
 

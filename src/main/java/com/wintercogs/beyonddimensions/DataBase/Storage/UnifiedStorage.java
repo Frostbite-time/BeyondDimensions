@@ -35,9 +35,9 @@ public class UnifiedStorage implements IStackTypedHandler
     }
 
     @Override
-    public IStackType getStackInSlot(int slot)
+    public IStackType getStackBySlot(int slot)
     {
-        return IStackTypedHandler.super.getStackInSlot(slot);
+        return IStackTypedHandler.super.getStackBySlot(slot);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class UnifiedStorage implements IStackTypedHandler
     }
 
     @Override
-    public long getSlotLimit(int slot)
+    public long getSlotCapacity(int slot)
     {
         return Long.MAX_VALUE;
     }
@@ -96,7 +96,7 @@ public class UnifiedStorage implements IStackTypedHandler
         if (stack.isEmpty()) return StackCreater.CreateEmpty(stack.getTypeId());
 
         long remaining = stack.getStackAmount(); // 剩余可被插入的量
-        long canInsert = Math.min(getSlotLimit(0),stack.getCustomMaxStackSize()); // 能被插入的空间
+        long canInsert = Math.min(getSlotCapacity(0),stack.getCustomMaxStackSize()); // 能被插入的空间
 
         // 尝试合并现有堆叠
         for (IStackType existing : storage) {

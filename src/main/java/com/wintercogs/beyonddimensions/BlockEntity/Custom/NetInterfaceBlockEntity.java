@@ -2,8 +2,10 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.DataBase.Handler.ItemStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -16,15 +18,15 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
-public class NetInterfaceBlockEntity extends NetedBlockEntity implements Container
+public class NetInterfaceBlockEntity extends NetedBlockEntity
 {
     public final int transHold = 20;
     public int transTime = 0;
 
-    private final ItemStackHandler itemStackHandler = new ItemStackHandler(9)
+    private final StackTypedHandler stackHandler = new StackTypedHandler(9)
     {
         @Override
-        protected void onContentsChanged(int slot)
+        public void onChange()
         {
             setChanged();
         }
@@ -40,7 +42,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements Contain
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, // 标准物品能力
                 ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
-                (be, side) -> be.itemStackHandler // 根据方向返回处理器
+                (be, side) -> new ItemStackTypedHandler(be.stackHandler) // 根据方向返回处理器
         );
     }
 
@@ -66,9 +68,12 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements Contain
         {
             for(int i=0; i<9; i++)
             {
-                ItemStack stack = itemStackHandler.getStackInSlot(i);
-                net.getUnifiedStorage().insert(new ItemStackType(stack.copy()),false);
-                itemStackHandler.setStackInSlot(i, ItemStack.EMPTY);
+                IStackType stack = stackHandler.getStackBySlot(i);
+                if(stack !=null &&!stack.isEmpty())
+                {
+                    net.getUnifiedStorage().insert(stack.copy(),false);
+                    stackHandler.setStackDirectly(i, new ItemStackType());
+                }
             }
         }
     }
@@ -77,64 +82,13 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements Contain
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag,registries);
-        this.itemStackHandler.deserializeNBT(registries,tag.getCompound("inventory"));
+        this.stackHandler.deserializeNBT(registries,tag.getCompound("inventory"));
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.saveAdditional(tag, registries);
-        tag.put("inventory",itemStackHandler.serializeNBT(registries));
-    }
-
-    @Override
-    public int getContainerSize()
-    {
-        return 9;
-    }
-
-    @Override
-    public boolean isEmpty()
-    {
-        return itemStackHandler.getSlots() == 0;
-    }
-
-    @Override
-    public ItemStack getItem(int slot)
-    {
-        return itemStackHandler.getStackInSlot(slot);
-    }
-
-    @Override
-    public ItemStack removeItem(int slot, int count)
-    {
-        return itemStackHandler.extractItem(slot,count,false);
-    }
-
-    @Override
-    public ItemStack removeItemNoUpdate(int slot)
-    {
-        return itemStackHandler.extractItem(slot, itemStackHandler.getStackInSlot(slot).getCount(), false);
-    }
-
-    @Override
-    public void setItem(int slot, ItemStack itemStack)
-    {
-        itemStackHandler.setStackInSlot(slot,itemStack);
-    }
-
-    @Override
-    public boolean stillValid(Player player)
-    {
-        return true;
-    }
-
-    @Override
-    public void clearContent()
-    {
-        for(int i=0; i<9; i++)
-        {
-            itemStackHandler.setStackInSlot(i, ItemStack.EMPTY);
-        }
+        tag.put("inventory", stackHandler.serializeNBT(registries));
     }
 }
