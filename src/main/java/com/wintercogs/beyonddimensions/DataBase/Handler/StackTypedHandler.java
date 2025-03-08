@@ -45,13 +45,8 @@ public class StackTypedHandler implements IStackTypedHandler
     @Override
     public long getSlotCapacity(int slot)
     {
-        if(slot<0||slot>=getStorage().size())
-            return 64L;
-        IStackType stack = getStorage().get(slot);
-        if(stack !=null&&!stack.isEmpty())
-            return stack.getVanillaMaxStackSize();
-        else
-            return 64L;
+        return 64000L; // 最大容量兼容流体，实际能插入多少，由接口默认方法的insert(int slot, IStackType stack, boolean simulate)决定
+                       // 默认实现会取slot容量和要插入的堆叠的原版最大容量的最小值。如需突破上限请修改实现
     }
 
     // region 序列化方法
