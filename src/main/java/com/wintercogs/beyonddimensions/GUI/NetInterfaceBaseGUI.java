@@ -187,9 +187,20 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
                 {
                     if(slot instanceof StoredStackSlot sSlot)
                     {
-                        clickItem = sSlot.getVanillaActualStack();
-                        menu.isHanding = true;
-                        PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
+                        if(sSlot.isFake())
+                        {
+                            // 对于标记槽位
+                            clickItem = sSlot.getVanillaActualStack();
+                            menu.isHanding = true;
+                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
+                        }
+                        else
+                        {
+                            clickItem = sSlot.getVanillaActualStack();
+                            menu.isHanding = true;
+                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
+                        }
+
                     }
                 }
             }

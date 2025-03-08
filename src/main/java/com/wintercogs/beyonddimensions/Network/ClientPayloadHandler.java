@@ -256,11 +256,11 @@ public class ClientPayloadHandler
                         {
                             if(packet.changedCounts().get(i) > 0)
                             {
-                                clientStorage.getStorage().set(i,remoteStack.copyWithCount(1));
+                                clientStorage.getStorage().set(packet.targetIndex().get(i),remoteStack.copyWithCount(1));
                             }
                             else
                             {
-                                clientStorage.getStorage().set(i,new ItemStackType());
+                                clientStorage.getStorage().set(packet.targetIndex().get(i),new ItemStackType());
                             }
                             i++; // 一次遍历完毕后索引自增
                         }

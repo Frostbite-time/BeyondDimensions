@@ -83,22 +83,75 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
                 blockEntity.transTime = 0;
                 blockEntity.transferToNet();
             }
+            blockEntity.transferFromNet();
         }
     }
 
     public void transferToNet()
     {
+        // 只有不被标记的槽位才会被收纳进入网络
         DimensionsNet net = getNet();
         if(net != null)
         {
             for(int i=0; i<9; i++)
             {
+                IStackType flag = fakeStackHandler.getStackBySlot(i);
+                if(flag!= null && !flag.isEmpty())
+                {
+                    if (flag.isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
+                        continue;
+                }
                 IStackType stack = stackHandler.getStackBySlot(i);
                 if(stack !=null &&!stack.isEmpty())
                 {
                     net.getUnifiedStorage().insert(stack.copy(),false);
                     stackHandler.setStackDirectly(i, new ItemStackType());
                 }
+            }
+        }
+    }
+
+    // 从网络中获取物品，然后转移到槽位
+    public void transferFromNet()
+    {
+        // 首先检测标记
+        // 然后从网络提取适当标记物
+        // 插入物品槽
+        // 将剩余插回网络
+        DimensionsNet net = getNet();
+        if(net != null)
+        {
+            for(int i=0; i<9; i++)
+            {
+                IStackType flag = fakeStackHandler.getStackBySlot(i);
+                if(flag!=null && !flag.isEmpty())
+                {
+                    // 到达数量上限或者是不同物品则不尝试插入
+                    IStackType current = stackHandler.getStorage().get(i);
+                    if(current != null &&!current.isEmpty())
+                    {
+                        if(current.getVanillaMaxStackSize() >= current.getStackAmount())
+                        {
+                            return;
+                        }
+                        if(!current.isSameTypeSameComponents(flag.copy()))
+                        {
+                            return;
+                        }
+                    }
+
+                    // 插入逻辑
+                    IStackType stack = net.getUnifiedStorage().extract(flag.copyWithCount(flag.getVanillaMaxStackSize()),false);
+                    if(stack !=null &&!stack.isEmpty())
+                    {
+                        IStackType remaining = stackHandler.insert(i,stack.copy(),false);
+                        if(remaining.getStackAmount()<stack.getStackAmount())
+                        {
+                            net.getUnifiedStorage().insert(remaining.copy(),false);
+                        }
+                    }
+                }
+
             }
         }
     }

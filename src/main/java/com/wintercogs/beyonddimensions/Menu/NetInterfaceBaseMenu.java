@@ -602,12 +602,26 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
         ItemStack carriedItem = this.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
         StoredStackSlot slot = (StoredStackSlot) this.slots.get(slotIndex);// clickHandle仅用于处理点击维度槽位的逻辑，如果转换失败，则证明调用逻辑出错
 
+        // 处理虚拟槽位
+        if(slot.isFake())
+        {
+            if(carriedItem.isEmpty())
+            {
+                flagStorage.getStorage().set(slot.getSlotIndex(),new ItemStackType());
+            }
+            else
+            {
+                flagStorage.getStorage().set(slot.getSlotIndex(),new ItemStackType(carriedItem.copyWithCount(1)));
+            }
+            return; // 结束处理
+        }
+
         if (clickStack.isEmpty())
         {
             if (!carriedItem.isEmpty())
             {   //槽位物品为空，携带物品存在，将携带物品插入槽位
                 int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                int remaining = (int)unifiedStorage.insert(slotIndex,StackCreater.Create(new ItemStackType().getTypeId(), carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
+                int remaining = (int)unifiedStorage.insert(slot.getSlotIndex(),StackCreater.Create(new ItemStackType().getTypeId(), carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
                 int actualInsert = changedCount - remaining; // 实际被插入的物品数量
 
                 int newCount = carriedItem.getCount() - actualInsert; // 实际剩余物品数
@@ -633,7 +647,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
                     // 确保一次取出最大不得超过原版数量
                     int woundChangeNum = (int) Math.min(clickItem.getStackAmount(), clickItem.getVanillaMaxStackSize());
                     int actualChangeNum = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
-                    ItemStack takenItem = ((ItemStack) unifiedStorage.extract(slotIndex,actualChangeNum,false).getStack()).copy();
+                    ItemStack takenItem = ((ItemStack) unifiedStorage.extract(slot.getSlotIndex(),actualChangeNum,false).getStack()).copy();
                     if(takenItem != null)
                     {
                         setCarried(takenItem);
@@ -645,7 +659,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
                     if(clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
                     {
                         int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                        int remaining =  (int)unifiedStorage.insert(slotIndex,StackCreater.Create(new ItemStackType().getTypeId(),carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
+                        int remaining =  (int)unifiedStorage.insert(slot.getSlotIndex(),StackCreater.Create(new ItemStackType().getTypeId(),carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
                         int actualInsert = changedCount - remaining; // 实际被插入的物品数量
 
                         int newCount = carriedItem.getCount() - actualInsert; // 实际剩余物品数
