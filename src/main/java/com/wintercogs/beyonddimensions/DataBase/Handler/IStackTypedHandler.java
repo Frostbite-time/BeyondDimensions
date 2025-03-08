@@ -77,6 +77,7 @@ public interface IStackTypedHandler
         if (current == null || current.isEmpty()) {
             // 空槽位：创建新堆叠
             maxInsert = Math.min(stack.getStackAmount(), getSlotLimit(slot));
+            maxInsert = Math.min(maxInsert,stack.getVanillaMaxStackSize()); // 如需突破堆叠上限，则需要重写并移除这条语句
             if (maxInsert <= 0) return stack.copy();
 
             remaining = stack.copyWithCount(stack.getStackAmount() - maxInsert);
@@ -95,6 +96,7 @@ public interface IStackTypedHandler
                     stack.getStackAmount(),
                     getSlotLimit(slot) - current.getStackAmount()
             );
+            maxInsert = Math.min(maxInsert,stack.getVanillaMaxStackSize()); // 如需突破堆叠上限，则需要重写并移除这条语句
             if (maxInsert <= 0) return stack.copy();
 
             remaining = stack.copyWithCount(stack.getStackAmount() - maxInsert);

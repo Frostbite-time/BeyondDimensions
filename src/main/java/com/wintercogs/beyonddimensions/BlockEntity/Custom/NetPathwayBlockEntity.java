@@ -21,7 +21,7 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
 
     //--- 能力注册 (通过事件) ---
     public static void registerCapability(RegisterCapabilitiesEvent event) {
-        TypedHandlerManager.CapHandlerMap.forEach(
+        TypedHandlerManager.BlockCapHandlerMap.forEach(
                 (cap,handlerF)->{
                     event.registerBlockEntity(
                             (BlockCapability<? super Object, ? extends Direction>) cap, // 标准物品能力

@@ -31,6 +31,12 @@ public class StackTypedHandler implements IStackTypedHandler
     @Override
     public long getSlotLimit(int slot)
     {
-        return getStorage().get(slot).getVanillaMaxStackSize();
+        if(slot<0||slot>=getStorage().size())
+            return 64L;
+        IStackType stack = getStorage().get(slot);
+        if(stack !=null)
+            return stack.getVanillaMaxStackSize();
+        else
+            return 64L;
     }
 }
