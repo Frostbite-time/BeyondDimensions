@@ -41,6 +41,8 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         }
     };
 
+    public boolean popMode = false;
+
     public StackTypedHandler getStackHandler()
     {
         return this.stackHandler;
@@ -162,6 +164,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         super.loadAdditional(tag,registries);
         this.stackHandler.deserializeNBT(registries,tag.getCompound("inventory"));
         this.fakeStackHandler.deserializeNBT(registries,tag.getCompound("flags"));
+        this.popMode = tag.getBoolean("popMode");
     }
 
     @Override
@@ -170,5 +173,6 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         super.saveAdditional(tag, registries);
         tag.put("inventory", stackHandler.serializeNBT(registries));
         tag.put("flags",fakeStackHandler.serializeNBT(registries));
+        tag.putBoolean("popMode",this.popMode);
     }
 }

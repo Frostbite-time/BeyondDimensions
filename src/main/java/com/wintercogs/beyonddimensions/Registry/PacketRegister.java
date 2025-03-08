@@ -110,5 +110,15 @@ public class PacketRegister
                         ServerPayloadHandler.getInstance()::handleSyncFlagPacket
                 )
         );
+
+        // 注册 CallSeverClickPacket 用于同步滑动条状态
+        registrar.playBidirectional(
+                PopModeButtonPacket.TYPE,
+                PopModeButtonPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handlePopModeButtonPacket,
+                        ServerPayloadHandler.getInstance()::handlePopModeButtonPacket
+                )
+        );
     }
 }

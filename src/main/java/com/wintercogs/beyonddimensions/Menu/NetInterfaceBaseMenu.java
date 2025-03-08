@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.google.common.base.Suppliers;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
@@ -20,6 +21,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.ItemStackedOnOtherEvent;
@@ -54,6 +57,9 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
     public IStackTypedHandler viewerFlagStorage;
     public ArrayList<IStackType> lastFlagStorage;
 
+    public boolean popMode;
+    public NetInterfaceBlockEntity be;
+
 
     // 构建注册用的信息
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
@@ -70,7 +76,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
      */
     public NetInterfaceBaseMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, new StackTypedHandler(9),new StackTypedHandler(9),new SimpleContainerData(0));
+        this(id, playerInventory, new StackTypedHandler(9),new StackTypedHandler(9),null,new SimpleContainerData(0));
     }
 
     /**
@@ -78,10 +84,11 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
      * @param playerInventory 玩家背包
      * @param uselessContainer 此处无用，传入new SimpleContainerData(0)即可
      */
-    public NetInterfaceBaseMenu(int id, Inventory playerInventory,IStackTypedHandler storage , IStackTypedHandler flagStorage, SimpleContainerData uselessContainer)
+    public NetInterfaceBaseMenu(int id, Inventory playerInventory, IStackTypedHandler storage , IStackTypedHandler flagStorage, NetInterfaceBlockEntity be, SimpleContainerData uselessContainer)
     {
         super(Net_Interface_Menu.get(), id);
         // 初始化维度网络容器
+        this.popMode = false;
         this.unifiedStorage = storage;
         viewerUnifiedStorage = new StackTypedHandler(9); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
         this.player = playerInventory.player;
@@ -93,6 +100,8 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
             {
                 this.lastItemStorage.add(stack.copy());
             }
+            this.popMode = be.popMode;
+            this.be = be;
         }
 
         // 初始化标记容器

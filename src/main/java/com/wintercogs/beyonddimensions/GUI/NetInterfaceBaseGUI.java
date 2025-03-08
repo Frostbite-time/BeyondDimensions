@@ -2,13 +2,16 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
 import com.wintercogs.beyonddimensions.Packet.CallSeverStoragePacket;
+import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -26,6 +29,8 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
 
     private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_interface.png");
     private BigScroller scroller;
+
+    public ReverseButton popButton; // 使用倒序按钮来临时替代弹出模式
 
     public NetInterfaceBaseGUI(NetInterfaceBaseMenu container, Inventory playerInventory, Component title)
     {
@@ -48,6 +53,14 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         this.scroller = new BigScroller(this.leftPos+175,this.topPos+23,99,0,menu.maxLineData);
         addRenderableWidget(scroller);
 
+        popButton = new ReverseButton(this.leftPos+72+18*4-5,this.topPos+6, button ->
+        {
+            popButton.toggleState();
+            menu.popMode = !menu.popMode;
+            PacketDistributor.sendToServer(new PopModeButtonPacket(menu.popMode));
+        });
+        addRenderableWidget(popButton);
+
 
         menu.unifiedStorage.getStorage().clear();
         menu.suppressRemoteUpdates();
@@ -61,6 +74,15 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         //每tick自动更新搜索方案
         menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
         scroller.updateScrollPosition(menu.lineData,menu.maxLineData);// 读取翻页数据并应用
+
+        if(menu.popMode)
+        {
+            popButton.setState(ButtonState.DISABLED);
+        }
+        else
+        {
+            popButton.setState(ButtonState.ENABLED);
+        }
     }
 
     @Override
@@ -77,6 +99,7 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         this.renderTooltip(guiGraphics, mouseX, mouseY);
         scroller.render(guiGraphics,mouseX,mouseY,partialTicks);
+        popButton.render(guiGraphics,mouseX,mouseY,partialTicks);
     }
 
     @Override
