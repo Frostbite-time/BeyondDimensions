@@ -68,7 +68,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
             return 0;
         int allAmount = fluidStack.getAmount();
         int remaining = (int) net.getUnifiedStorage().insert(new FluidStackType(fluidStack.copy()), fluidAction.simulate()).getStackAmount();
-        return allAmount-remaining;// 始终全部插入
+        return allAmount-remaining;// 实际插入量
     }
 
     // 返回实际导出数量

@@ -6,7 +6,9 @@ import com.wintercogs.beyonddimensions.DataBase.Handler.ItemStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Container;
@@ -14,9 +16,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.items.ItemStackHandler;
+
+import java.util.function.Function;
 
 public class NetInterfaceBlockEntity extends NetedBlockEntity
 {
@@ -32,6 +37,11 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         }
     };
 
+    public StackTypedHandler getStackHandler()
+    {
+        return this.stackHandler;
+    }
+
     public NetInterfaceBlockEntity(BlockPos pos, BlockState blockState)
     {
         super(ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
@@ -39,10 +49,17 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
 
     //--- 能力注册 (通过事件) ---
     public static void registerCapability(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK, // 标准物品能力
-                ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
-                (be, side) -> new ItemStackTypedHandler(be.stackHandler) // 根据方向返回处理器
+        TypedHandlerManager.BlockCommonCapHandlerMap.forEach(
+                (cap,handlerF)->{
+                    event.registerBlockEntity(
+                            (BlockCapability<? super Object, ? extends Direction>) cap, // 标准物品能力
+                            ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
+                            (be, side) -> {
+                                Function handler = TypedHandlerManager.getCommonHandler(cap,StackTypedHandler.class);
+                                return handler.apply(be.stackHandler);
+                            } // 根据方向返回处理器
+                    );
+                }
         );
     }
 

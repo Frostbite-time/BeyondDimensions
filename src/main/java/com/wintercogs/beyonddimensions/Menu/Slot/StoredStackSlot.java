@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
+import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
@@ -13,23 +14,23 @@ public class StoredStackSlot extends Slot
 {
     // 一个空容器，仅用于欺骗父类构造函数，实际存储使用StoredItemStack并结合index
     private static final Container empty_inv = new SimpleContainer(0);
-    private final UnifiedStorage unifiedStorage;
+    private final IStackTypedHandler stackTypedHandler;
     private int theSlot;
     private boolean fake;
 
     // 简介思路：构建一个slot，使用index结合DimensionsItemStorage中的列表来管理自身对应物品
     // 为此，需要重写网络沟通方案，将DimensionsItemStorage作为原inv，StoredItemStack作为原ItemStack来进行数据同步
 
-    public StoredStackSlot(UnifiedStorage unifiedStorage, int slotIndex, int xPosition, int yPosition)
+    public StoredStackSlot(IStackTypedHandler stackTypedHandler, int slotIndex, int xPosition, int yPosition)
     {
         super(empty_inv, slotIndex, xPosition, yPosition);
         this.theSlot = slotIndex;
-        this.unifiedStorage = unifiedStorage;
+        this.stackTypedHandler = stackTypedHandler;
     }
 
     public IStackType getTypedStackFromUnifiedStorage()
     {
-        IStackType stackType = unifiedStorage.getStackBySlot(getSlotIndex());
+        IStackType stackType = stackTypedHandler.getStackBySlot(getSlotIndex());
         if(stackType != null)
             return stackType.copy();
         else
@@ -39,7 +40,7 @@ public class StoredStackSlot extends Slot
     public ItemStack getItemStackFromUnifiedStorage()
     {
         //从当前槽索引取物品
-        IStackType stackType = unifiedStorage.getStackBySlot(getSlotIndex());
+        IStackType stackType = stackTypedHandler.getStackBySlot(getSlotIndex());
         if(stackType == null)
         {
             return ItemStack.EMPTY;
@@ -98,7 +99,7 @@ public class StoredStackSlot extends Slot
             return new ItemStackType(ItemStack.EMPTY);
         }
         //从当前槽索引取物品
-        IStackType stack = unifiedStorage.getStackBySlot(getSlotIndex());
+        IStackType stack = stackTypedHandler.getStackBySlot(getSlotIndex());
         if (stack.isEmpty())
             return StackCreater.CreateEmpty(stack.getTypeId());
         if (stack != null)
@@ -133,8 +134,8 @@ public class StoredStackSlot extends Slot
     public boolean hasItem()
     {
         //检查当前槽是否为空
-        return unifiedStorage.getStackBySlot(getSlotIndex()) != null
-                && !unifiedStorage.getStackBySlot(getSlotIndex()).isEmpty();
+        return stackTypedHandler.getStackBySlot(getSlotIndex()) != null
+                && !stackTypedHandler.getStackBySlot(getSlotIndex()).isEmpty();
     }
 
     @Override
@@ -144,18 +145,18 @@ public class StoredStackSlot extends Slot
             return;
         // 当尝试用一个物品真正覆盖这个槽内容会发生什么
         // 如果索引不存在，使用add自增长，如果存在，直接替换
-        if (unifiedStorage.getStorage().size() > getSlotIndex())
-            unifiedStorage.getStorage().set(getSlotIndex(), new ItemStackType(stack.copy()));
-        else if(unifiedStorage.getStorage().size() == getSlotIndex())
-            unifiedStorage.getStorage().add(getSlotIndex(), new ItemStackType(stack.copy()));
+        if (stackTypedHandler.getStorage().size() > getSlotIndex())
+            stackTypedHandler.getStorage().set(getSlotIndex(), new ItemStackType(stack.copy()));
+        else if(stackTypedHandler.getStorage().size() == getSlotIndex())
+            stackTypedHandler.getStorage().add(getSlotIndex(), new ItemStackType(stack.copy()));
         else
         {
             // 将size到Index-1之间的位置填充为空，然后填充Index位置
             // 扩展列表直到 targetIndex - 1，并填充 null
-            while (unifiedStorage.getStorage().size() < getSlotIndex()) {
-                unifiedStorage.getStorage().add(new ItemStackType(ItemStack.EMPTY));  // 填充空值
+            while (stackTypedHandler.getStorage().size() < getSlotIndex()) {
+                stackTypedHandler.getStorage().add(new ItemStackType(ItemStack.EMPTY));  // 填充空值
             }
-            unifiedStorage.getStorage().add(getSlotIndex(), new ItemStackType(stack.copy()));
+            stackTypedHandler.getStorage().add(getSlotIndex(), new ItemStackType(stack.copy()));
         }
 
 
@@ -166,7 +167,7 @@ public class StoredStackSlot extends Slot
     public void setByPlayer(ItemStack newStack, ItemStack oldStack)
     {
         // 当玩家拿着物品点击这个槽会发生什么
-        unifiedStorage.insert(new ItemStackType(newStack.copy()), false);
+        stackTypedHandler.insert(new ItemStackType(newStack.copy()), false);
         this.setChanged();
     }
 
@@ -175,7 +176,7 @@ public class StoredStackSlot extends Slot
     public void setChanged()
     {
         // 重要函数，确保存储被修改后net能被设定为脏数据保存
-        this.unifiedStorage.onChange();
+        this.stackTypedHandler.onChange();
     }
 
     @Override
@@ -200,10 +201,10 @@ public class StoredStackSlot extends Slot
             return ItemStack.EMPTY;
         }
         // 从当前槽位移除对应数量的物品 并返回被移除的物品总数
-        IStackType typedStack = unifiedStorage.extract(getSlotIndex(), amount,true);
+        IStackType typedStack = stackTypedHandler.extract(getSlotIndex(), amount,true);
         if (typedStack instanceof ItemStackType)
         {
-            ItemStackType trueExtract = (ItemStackType) unifiedStorage.extract(getSlotIndex(), amount,false);
+            ItemStackType trueExtract = (ItemStackType) stackTypedHandler.extract(getSlotIndex(), amount,false);
             return trueExtract.copyStack();
         }
         return ItemStack.EMPTY;
@@ -221,7 +222,7 @@ public class StoredStackSlot extends Slot
         if (other instanceof StoredStackSlot)
         {
             // 比较二者是否是同一个引用  或许以后可以用其他更注重数据的方式比较？
-            return this.unifiedStorage == ((StoredStackSlot) other).unifiedStorage;
+            return this.stackTypedHandler == ((StoredStackSlot) other).stackTypedHandler;
         }
         return false;
     }
@@ -258,7 +259,7 @@ public class StoredStackSlot extends Slot
             return -1;
         }
         //从当前槽索引取物品
-        IStackType stack = unifiedStorage.getStackBySlot(getSlotIndex());
+        IStackType stack = stackTypedHandler.getStackBySlot(getSlotIndex());
         if (stack != null && !stack.isEmpty())
         {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
             return stack.getStackAmount();

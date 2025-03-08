@@ -374,7 +374,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         }
         if (!changedItem.isEmpty())
         {
-            PacketDistributor.sendToPlayer((ServerPlayer) player,new SyncStoragePacket(changedItem,changedCount));
+            PacketDistributor.sendToPlayer((ServerPlayer) player,new SyncStoragePacket(changedItem,changedCount,new ArrayList<>(0)));
         }
 
     }

@@ -48,7 +48,7 @@ public class StackTypedHandler implements IStackTypedHandler
         if(slot<0||slot>=getStorage().size())
             return 64L;
         IStackType stack = getStorage().get(slot);
-        if(stack !=null)
+        if(stack !=null&&!stack.isEmpty())
             return stack.getVanillaMaxStackSize();
         else
             return 64L;

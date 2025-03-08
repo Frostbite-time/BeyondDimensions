@@ -5,6 +5,10 @@ import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.*;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.DataBase.Handler.ChemicalStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Handler.FluidStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Handler.ItemStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
@@ -95,13 +99,16 @@ public class BeyondDimensions
 
         StackTypeRegistry.registerType(new ItemStackType());
         StackTypeRegistry.registerType(new FluidStackType());
-        TypedHandlerManager.register(Capabilities.ItemHandler.BLOCK, DimensionsNet.class, ItemUnifiedStorageHandler::new);
-        TypedHandlerManager.register(Capabilities.FluidHandler.BLOCK, DimensionsNet.class, FluidUnifiedStorageHandler::new);
+        TypedHandlerManager.registerNetHandler(Capabilities.ItemHandler.BLOCK, DimensionsNet.class, ItemUnifiedStorageHandler::new);
+        TypedHandlerManager.registerCommonHandler(Capabilities.ItemHandler.BLOCK, StackTypedHandler.class, ItemStackTypedHandler::new);
+        TypedHandlerManager.registerNetHandler(Capabilities.FluidHandler.BLOCK, DimensionsNet.class, FluidUnifiedStorageHandler::new);
+        TypedHandlerManager.registerCommonHandler(Capabilities.FluidHandler.BLOCK,StackTypedHandler.class, FluidStackTypedHandler::new);
 
         if(MekLoaded)
         {
             StackTypeRegistry.registerType(new ChemicalStackType());
-            TypedHandlerManager.register(ChemicalCapabilityHelper.CHEMICAL, DimensionsNet.class, ChemicalUnifiedStorageHandler::new);
+            TypedHandlerManager.registerNetHandler(ChemicalCapabilityHelper.CHEMICAL, DimensionsNet.class, ChemicalUnifiedStorageHandler::new);
+            TypedHandlerManager.registerCommonHandler(ChemicalCapabilityHelper.CHEMICAL,StackTypedHandler.class, ChemicalStackTypedHandler::new);
         }
     }
 

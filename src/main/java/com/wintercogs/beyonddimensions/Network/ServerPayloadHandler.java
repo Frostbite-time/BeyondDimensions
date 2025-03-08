@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
+import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -69,14 +70,18 @@ public class ServerPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    DimensionsNetMenu menu;
-                    if (!(player.containerMenu instanceof DimensionsNetMenu))
+                    if (player.containerMenu instanceof DimensionsNetMenu menu)
                     {
+                        BeyondDimensions.LOGGER.info("服务端收到数据请求");
+                        menu.sendStorage();
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
-                    menu = (DimensionsNetMenu) player.containerMenu;
-                    BeyondDimensions.LOGGER.info("服务端收到数据请求");
-                    menu.sendStorage();
+                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
+                    {
+                        BeyondDimensions.LOGGER.info("服务端收到数据请求");
+                        menu.sendStorage();
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
                 }
 
         );
@@ -99,16 +104,23 @@ public class ServerPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    DimensionsNetMenu menu;
-                    if (!(player.containerMenu instanceof DimensionsNetMenu))
+                    if (player.containerMenu instanceof DimensionsNetMenu menu)
                     {
+                        menu.customClickHandler(packet.slotIndex(),packet.clickItem(),packet.button(),packet.shiftDown());
+                        menu.broadcastChanges();
+                        // 这里发包不是让客户端执行操作，而是解除锁定
+                        PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, new ItemStackType(ItemStack.EMPTY),1,false));
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
-                    menu = (DimensionsNetMenu) player.containerMenu;
-                    menu.customClickHandler(packet.slotIndex(),packet.clickItem(),packet.button(),packet.shiftDown());
-                    menu.broadcastChanges();
-                    // 这里发包不是让客户端执行操作，而是解除锁定
-                    PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, new ItemStackType(ItemStack.EMPTY),1,false));
+                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
+                    {
+                        menu.customClickHandler(packet.slotIndex(),packet.clickItem(),packet.button(),packet.shiftDown());
+                        menu.broadcastChanges();
+                        // 这里发包不是让客户端执行操作，而是解除锁定
+                        PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, new ItemStackType(ItemStack.EMPTY),1,false));
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
+
                 }
 
         );

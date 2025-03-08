@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 
-public record SyncStoragePacket(ArrayList<IStackType> stacks, ArrayList<Long> changedCounts) implements CustomPacketPayload
+public record SyncStoragePacket(ArrayList<IStackType> stacks, ArrayList<Long> changedCounts, ArrayList<Integer> targetIndex) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<SyncStoragePacket> TYPE =
@@ -45,6 +45,11 @@ public record SyncStoragePacket(ArrayList<IStackType> stacks, ArrayList<Long> ch
                             ByteBufCodecs.VAR_LONG
                     ),
                     SyncStoragePacket::changedCounts,
+                    ByteBufCodecs.collection(
+                            ArrayList::new,
+                            ByteBufCodecs.VAR_INT
+                    ),
+                    SyncStoragePacket::targetIndex,
                     SyncStoragePacket::new
             );
 

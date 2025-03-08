@@ -2,11 +2,13 @@ package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
+import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -46,36 +48,63 @@ public class ClientPayloadHandler
                 {
                     BeyondDimensions.LOGGER.info("客户端收到AA数据");
                     Player player = context.player();
-                    DimensionsNetMenu menu;
-                    if (!(player.containerMenu instanceof DimensionsNetMenu))
+                    if (player.containerMenu instanceof DimensionsNetMenu menu)
                     {
+                        for(int i = 0; i<packet.stacks().size(); i++)
+                        {
+                            UnifiedStorage unifiedStorage = menu.unifiedStorage;
+                            if (unifiedStorage.getStorage().size() > packet.indexs().get(i))
+                                unifiedStorage.getStorage().set(packet.indexs().get(i), packet.stacks().get(i));
+                            else if(unifiedStorage.getStorage().size() == packet.indexs().get(i))
+                                unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
+                            else
+                            {
+                                //将size到Index-1之间的位置填充为空，然后填充Index位置
+                                // 扩展列表直到 targetIndex - 1，并填充 null
+                                while (unifiedStorage.getStorage().size() < packet.indexs().get(i)) {
+                                    unifiedStorage.getStorage().add(new ItemStackType(ItemStack.EMPTY));  // 填充空值
+                                }
+                                unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
+                            }
+                        }
+                        if(packet.end())
+                        {
+                            // 收到结束信号，更新视图，重建索引
+                            menu.updateViewerStorage();
+                            menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
+                            menu.resumeRemoteUpdates();
+                        }
                         return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
-                    menu = (DimensionsNetMenu) player.containerMenu;
-                    for(int i = 0; i<packet.stacks().size(); i++)
+
+                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
                     {
-                        UnifiedStorage unifiedStorage = menu.unifiedStorage;
-                        if (unifiedStorage.getStorage().size() > packet.indexs().get(i))
-                            unifiedStorage.getStorage().set(packet.indexs().get(i), packet.stacks().get(i));
-                        else if(unifiedStorage.getStorage().size() == packet.indexs().get(i))
-                            unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
-                        else
+                        for(int i = 0; i<packet.stacks().size(); i++)
                         {
-                            //将size到Index-1之间的位置填充为空，然后填充Index位置
-                            // 扩展列表直到 targetIndex - 1，并填充 null
-                            while (unifiedStorage.getStorage().size() < packet.indexs().get(i)) {
-                                unifiedStorage.getStorage().add(new ItemStackType(ItemStack.EMPTY));  // 填充空值
+                            IStackTypedHandler unifiedStorage = menu.unifiedStorage;
+                            if (unifiedStorage.getStorage().size() > packet.indexs().get(i))
+                                unifiedStorage.getStorage().set(packet.indexs().get(i), packet.stacks().get(i));
+                            else if(unifiedStorage.getStorage().size() == packet.indexs().get(i))
+                                unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
+                            else
+                            {
+                                //将size到Index-1之间的位置填充为空，然后填充Index位置
+                                // 扩展列表直到 targetIndex - 1，并填充 null
+                                while (unifiedStorage.getStorage().size() < packet.indexs().get(i)) {
+                                    unifiedStorage.getStorage().add(new ItemStackType(ItemStack.EMPTY));  // 填充空值
+                                }
+                                unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
                             }
-                            unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
+                        }
+                        if(packet.end())
+                        {
+                            // 收到结束信号，更新视图，重建索引
+                            menu.updateViewerStorage();
+                            menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
+                            menu.resumeRemoteUpdates();
                         }
                     }
-                    if(packet.end())
-                    {
-                        // 收到结束信号，更新视图，重建索引
-                        menu.updateViewerStorage();
-                        menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
-                        menu.resumeRemoteUpdates();
-                    }
+
                 }
 
         );
@@ -98,38 +127,54 @@ public class ClientPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    DimensionsNetMenu menu;
-                    if (!(player.containerMenu instanceof DimensionsNetMenu))
+                    if (player.containerMenu instanceof DimensionsNetMenu menu)
                     {
-                        return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                        UnifiedStorage clientStorage = menu.unifiedStorage;
+                        int i = 0;
+                        for(IStackType remoteStack : packet.stacks())
+                        {
+                            // 如果当前存储存在此物品
+                            if(clientStorage.hasStackType(remoteStack))
+                            {
+                                if(packet.changedCounts().get(i) > 0)
+                                {
+                                    clientStorage.insert(remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
+                                }
+                                else
+                                {
+                                    clientStorage.extract(remoteStack.copyWithCount(-packet.changedCounts().get(i)),false);
+                                }
+                            }
+                            else // 如果当前存储不存在此物品
+                            {
+                                if(packet.changedCounts().get(i) > 0)
+                                {
+                                    clientStorage.insert(remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
+                                }
+                            }
+                            i++; // 一次遍历完毕后索引自增
+                        }
+                        menu.updateViewerStorage();
                     }
-                    menu = (DimensionsNetMenu) player.containerMenu;
-                    UnifiedStorage clientStorage = menu.unifiedStorage;
-                    int i = 0;
-                    for(IStackType remoteStack : packet.stacks())
+                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
                     {
-                        // 如果当前存储存在此物品
-                        if(clientStorage.hasStackType(remoteStack))
+                        IStackTypedHandler clientStorage = menu.unifiedStorage;
+                        int i = 0;
+                        for(IStackType remoteStack : packet.stacks())
                         {
                             if(packet.changedCounts().get(i) > 0)
                             {
-                                clientStorage.insert(remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
+                                clientStorage.insert(packet.targetIndex().get(i),remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
                             }
                             else
                             {
-                                clientStorage.extract(remoteStack.copyWithCount(-packet.changedCounts().get(i)),false);
+                                clientStorage.extract(packet.targetIndex().get(i),-packet.changedCounts().get(i),false);
                             }
+                            i++; // 一次遍历完毕后索引自增
                         }
-                        else // 如果当前存储不存在此物品
-                        {
-                            if(packet.changedCounts().get(i) > 0)
-                            {
-                                clientStorage.insert(remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
-                            }
-                        }
-                        i++; // 一次遍历完毕后索引自增
+                        menu.updateViewerStorage();
                     }
-                    menu.updateViewerStorage();
+
                 }
 
         );
@@ -141,13 +186,16 @@ public class ClientPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    DimensionsNetMenu menu;
-                    if (!(player.containerMenu instanceof DimensionsNetMenu))
+                    if (player.containerMenu instanceof DimensionsNetMenu menu)
                     {
+                        menu.isHanding = false;
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
-                    menu = (DimensionsNetMenu) player.containerMenu;
-                    menu.isHanding = false;
+                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
+                    {
+                        menu.isHanding = false;
+                    }
+
                 }
 
         );
