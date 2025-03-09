@@ -87,6 +87,18 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
+    public Class<?> getSourceClass()
+    {
+        return Fluid.class;
+    }
+
+    @Override
+    public Object getSource()
+    {
+        return FluidStack.EMPTY.getFluid();
+    }
+
+    @Override
     public boolean isEmpty()
     {
         return stack.isEmpty();

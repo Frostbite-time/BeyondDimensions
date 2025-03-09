@@ -84,6 +84,18 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     }
 
     @Override
+    public Class<?> getSourceClass()
+    {
+        return Chemical.class;
+    }
+
+    @Override
+    public Object getSource()
+    {
+        return ChemicalStack.EMPTY.getChemical();
+    }
+
+    @Override
     public boolean isEmpty()
     {
         return stack.isEmpty();

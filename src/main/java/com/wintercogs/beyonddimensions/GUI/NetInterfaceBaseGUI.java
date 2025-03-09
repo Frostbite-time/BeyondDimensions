@@ -3,6 +3,8 @@ package com.wintercogs.beyonddimensions.GUI;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
@@ -14,16 +16,20 @@ import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
 import com.wintercogs.beyonddimensions.Packet.CallSeverStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.FlagSlotSetPacket;
 import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
-import dev.emi.emi.api.EmiApi;
-import dev.emi.emi.api.stack.EmiIngredient;
+import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -38,7 +44,7 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
 
     private SlotDragHandler dragHandler; // 仅在emi加载时可用
 
-    private EmiIngredient dragIngredient; // 仅在emi加载时可用
+    private dev.emi.emi.api.stack.EmiIngredient dragIngredient; // 仅在emi加载时可用
     private boolean isDragging = false;
 
 
@@ -71,12 +77,34 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
                 },
 
                 (slot, ingredient) -> {
-                    ItemStack stack = ingredient.getEmiStacks().get(0).getItemStack();
+                    Object stackKey = ingredient.getEmiStacks().get(0).getKey();
+                    long stackAmount = ingredient.getEmiStacks().get(0).getAmount();
+                    DataComponentPatch dataComponentPatch = ingredient.getEmiStacks().get(0).getComponentChanges();
+
+                    IStackType dragging = new ItemStackType();
+                    for(IStackType type : StackTypeRegistry.getAllTypes())
+                    {
+                        if(type.getSourceClass().isAssignableFrom(stackKey.getClass()))
+                        {
+                            //dragging = StackCreater.Create(type.getTypeId(),stackKey,1);
+                            // 这部分暂时不能自动
+                            if(type.getTypeId() == new ItemStackType().getTypeId())
+                                dragging = new ItemStackType(new ItemStack(BuiltInRegistries.ITEM.getHolder(BuiltInRegistries.ITEM.getKey((Item) stackKey)).get(),1,dataComponentPatch));
+                            else if(type.getTypeId() == new FluidStackType().getTypeId())
+                                dragging = new FluidStackType(new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey((Fluid) stackKey)).get(),1,dataComponentPatch));
+                            else if(BeyondDimensions.MekLoaded)
+                            {
+                                if(type.getTypeId() == new ChemicalStackType().getTypeId())
+                                    dragging = new ChemicalStackType(new mekanism.api.chemical.ChemicalStack((mekanism.api.chemical.Chemical) stackKey,1));
+
+                            }
+                        }
+                    }
 
                     StoredStackSlot sSlot = (StoredStackSlot) slot;
                     IStackType clickItem = sSlot.getVanillaActualStack();
                     // button的数字0代表左键
-                    PacketDistributor.sendToServer(new FlagSlotSetPacket(sSlot.index,clickItem,new ItemStackType(stack.copy())));
+                    PacketDistributor.sendToServer(new FlagSlotSetPacket(sSlot.index,clickItem,dragging));
                 }
 
             );
@@ -205,7 +233,7 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         // 获取拖动物品
         if(BeyondDimensions.EMILoaded && !isDragging)
         {
-            dragIngredient = EmiApi.getHoveredStack((int) mouseX, (int) mouseY,true).getStack();
+            dragIngredient = dev.emi.emi.api.EmiApi.getHoveredStack((int) mouseX, (int) mouseY,true).getStack();
             if(dragIngredient != null)
                 isDragging = true;
         }

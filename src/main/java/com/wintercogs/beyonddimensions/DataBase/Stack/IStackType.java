@@ -33,6 +33,12 @@ public interface IStackType<T> {
     // 获取类型
     Class<T> getStackClass();
 
+    // 获取根类型 如ItemStack 返回Item的class
+    Class<?> getSourceClass();
+
+    // 获取根 如如ItemStack 直接返回Item 用于检查继承链
+    Object getSource();
+
     // 新增方法：判断堆栈是否为空（如ItemStack.isEmpty()）
     boolean isEmpty();
 

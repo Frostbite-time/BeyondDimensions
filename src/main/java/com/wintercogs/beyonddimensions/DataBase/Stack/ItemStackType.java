@@ -67,6 +67,18 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
+    public Class<?> getSourceClass()
+    {
+        return Item.class;
+    }
+
+    @Override
+    public Object getSource()
+    {
+        return ItemStack.EMPTY.getItem();
+    }
+
+    @Override
     public boolean isEmpty() {
         return stack.isEmpty();
     }
