@@ -100,11 +100,11 @@ public interface IStackTypedHandler
                 return stack.copy();
             }
             // 计算可插入量
+            long slotCap = Math.min(getSlotCapacity(slot),stack.getVanillaMaxStackSize());// 如需突破堆叠上限，则需要重写并移除这条语句
             maxInsert = Math.min(
                     stack.getStackAmount(),
-                    getSlotCapacity(slot) - current.getStackAmount()
+                    slotCap - current.getStackAmount()
             );
-            maxInsert = Math.min(maxInsert,stack.getVanillaMaxStackSize()); // 如需突破堆叠上限，则需要重写并移除这条语句
             if (maxInsert <= 0) return stack.copy();
 
             remaining = stack.copyWithCount(stack.getStackAmount() - maxInsert);

@@ -592,7 +592,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
                         if (!this.moveItemStackTo(cacheStack, this.lines * 9, this.slots.size(), true)) {
                             return ItemStack.EMPTY;
                         }
-                        unifiedStorage.extract(StackCreater.Create(new ItemStackType().getTypeId(), clickStack.copyStackWithCount(moveCount),moveCount) ,false);
+                        unifiedStorage.extract(slot.getSlotIndex(),moveCount,false);
                     }
                 }
                 else
