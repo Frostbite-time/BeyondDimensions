@@ -16,7 +16,7 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
 {
 
     private StackTypedHandler handlerStorage;
-    private List<Integer> chemicalStorageIndex; //存储了ItemOnlyStorage的原Index对应，每次调用getItemOnlyStorage实时更新
+    private List<Integer> chemicalStorageIndex = new ArrayList<>(); //存储了ItemOnlyStorage的原Index对应，每次调用getItemOnlyStorage实时更新
 
     public ChemicalStackTypedHandler(StackTypedHandler handlerStorage) {
         this.handlerStorage = handlerStorage;

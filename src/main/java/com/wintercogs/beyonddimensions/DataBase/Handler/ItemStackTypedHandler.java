@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 public class ItemStackTypedHandler implements IItemHandler
 {
     private StackTypedHandler handlerStorage;
-    private List<Integer> itemStorageIndex; //存储了ItemOnlyStorage的原Index对应，每次调用getItemOnlyStorage实时更新
+    private List<Integer> itemStorageIndex = new ArrayList<>(); //存储了ItemOnlyStorage的原Index对应，每次调用getItemOnlyStorage实时更新
 
     public ItemStackTypedHandler(StackTypedHandler handlerStorage) {
         this.handlerStorage = handlerStorage;

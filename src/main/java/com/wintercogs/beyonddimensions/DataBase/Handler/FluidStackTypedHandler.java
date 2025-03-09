@@ -15,7 +15,7 @@ public class FluidStackTypedHandler implements IFluidHandler
 {
 
     private StackTypedHandler handlerStorage;
-    private List<Integer> fluidStorageIndex; //存储了ItemOnlyStorage的原Index对应，每次调用getItemOnlyStorage实时更新
+    private List<Integer> fluidStorageIndex = new ArrayList<>(); //存储了ItemOnlyStorage的原Index对应，每次调用getItemOnlyStorage实时更新
 
     public FluidStackTypedHandler(StackTypedHandler handlerStorage) {
         this.handlerStorage = handlerStorage;
