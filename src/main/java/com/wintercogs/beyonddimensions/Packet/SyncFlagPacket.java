@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 
-public record SyncFlagPacket(ArrayList<IStackType> flags, ArrayList<Long> changedCounts, ArrayList<Integer> targetIndex) implements CustomPacketPayload
+public record SyncFlagPacket(ArrayList<IStackType> flags, ArrayList<Integer> targetIndex) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<SyncFlagPacket> TYPE =
@@ -40,11 +40,6 @@ public record SyncFlagPacket(ArrayList<IStackType> flags, ArrayList<Long> change
                             }
                     ),
                     SyncFlagPacket::flags,
-                    ByteBufCodecs.collection(
-                            ArrayList::new,
-                            ByteBufCodecs.VAR_LONG
-                    ),
-                    SyncFlagPacket::changedCounts,
                     ByteBufCodecs.collection(
                             ArrayList::new,
                             ByteBufCodecs.VAR_INT

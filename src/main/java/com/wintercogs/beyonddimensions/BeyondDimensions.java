@@ -48,6 +48,8 @@ public class BeyondDimensions
     public static final String MekanismMODID = "mekanism";
     public static boolean AELoaded = false;
     public static final String AE2MODID = "ae2";
+    public static boolean EMILoaded = false;
+    public static final String EMI_MODID = "emi";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -97,6 +99,10 @@ public class BeyondDimensions
         if(ModList.get().isLoaded(AE2MODID))
         {
             AELoaded = true;
+        }
+        if(ModList.get().isLoaded(EMI_MODID))
+        {
+            EMILoaded = true;
         }
 
         StackTypeRegistry.registerType(new ItemStackType());

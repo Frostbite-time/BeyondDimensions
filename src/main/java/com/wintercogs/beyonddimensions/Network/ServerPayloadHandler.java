@@ -212,4 +212,23 @@ public class ServerPayloadHandler
 
         );
     }
+
+
+    public void handleFlagSlotSetPacket(final FlagSlotSetPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+
+                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
+                    {
+                        menu.setFlagSlot(packet.index(),packet.clickStack(),packet.flagStack());
+                        menu.broadcastChanges();
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
+                }
+
+        );
+    }
 }

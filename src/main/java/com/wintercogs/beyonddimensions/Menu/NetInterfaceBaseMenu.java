@@ -356,14 +356,13 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
         this.lastItemStorage.addAll(currentSnapshot);
 
 
-        // 同步flag容器
+        // 同步flag容器（修改后版本）
 
-        // 带槽位索引的原子化物品比较
+        // 带槽位索引的物品类型变化检测
         ArrayList<IStackType> changedFlags = new ArrayList<>();
-        ArrayList<Long> changedFlagCounts = new ArrayList<>();
         ArrayList<Integer> changedFlagIndices = new ArrayList<>();
 
-        // 创建带索引的深拷贝缓存
+        // 创建带索引的深拷贝缓存（保持原逻辑）
         List<@Nullable IStackType> lastFlagSnapshot = new ArrayList<>();
         for (IStackType stack : this.lastFlagStorage) {
             lastFlagSnapshot.add(stack != null ? stack.copy() : null);
@@ -374,56 +373,50 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
             currentFlagSnapshot.add(stack != null ? stack.copy() : null);
         }
 
-        // 确保两个快照长度一致（处理动态扩容）
+        // 处理动态扩容（保持原逻辑）
         int maxFlagSlots = Math.max(lastFlagSnapshot.size(), currentFlagSnapshot.size());
         while (lastFlagSnapshot.size() < maxFlagSlots) lastFlagSnapshot.add(null);
         while (currentFlagSnapshot.size() < maxFlagSlots) currentFlagSnapshot.add(null);
 
-        // 逐槽位对比
         for (int slot = 0; slot < maxFlagSlots; slot++) {
             IStackType lastStack = lastFlagSnapshot.get(slot);
             IStackType currentStack = currentFlagSnapshot.get(slot);
 
-            // 检查是否需要更新
+            // 修改点1：只检查存在性和类型/组件变化
             boolean stackChanged = false;
 
-            // 情况1：槽位从非空变成空或反之
+            // 情况1：物品存在性变化
             if ((lastStack == null) != (currentStack == null)) {
                 stackChanged = true;
             }
-            // 情况2：两个槽位都有物品，但类型或组件不同
+            // 情况2：类型或组件变化
             else if (lastStack != null && currentStack != null) {
                 if (!lastStack.isSameTypeSameComponents(currentStack)) {
                     stackChanged = true;
                 }
             }
 
-            // 情况3：数量变化（即使类型相同）
-            long delta = (currentStack != null ? currentStack.getStackAmount() : 0L)
-                    - (lastStack != null ? lastStack.getStackAmount() : 0L);
-            if (delta != 0) {
-                stackChanged = true;
-            }
+            // 修改点2：移除数量变化的检查
 
-            // 记录变化
             if (stackChanged) {
                 changedFlagIndices.add(slot);
+                // 携带完整的当前状态（包含最新数量）
                 changedFlags.add(currentStack != null ? currentStack.copy() : null);
-                changedFlagCounts.add(delta);
             }
         }
 
-        // 如果有变化则发送同步包
         if (!changedFlagIndices.isEmpty()) {
+            // 修改点3：调整数据包结构（移除counts参数）
             PacketDistributor.sendToPlayer(
                     (ServerPlayer) player,
-                    new SyncFlagPacket(changedFlags, changedFlagCounts, changedFlagIndices)
+                    new SyncFlagPacket(changedFlags, changedFlagIndices)
             );
         }
 
-        // 更新最后快照（需要保持与当前相同的槽位数量）
+// 快照更新保持原逻辑
         this.lastFlagStorage.clear();
         this.lastFlagStorage.addAll(currentFlagSnapshot);
+
     }
 
 
@@ -537,6 +530,26 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
         else
         {
             clickHandle(slotIndex,clickedStack,button,player,trueItemStorage);
+        }
+    }
+
+    // 用于设置虚拟槽位的函数
+    public void setFlagSlot(int slotIndex, IStackType clickStack, IStackType flagStack)
+    {
+        StoredStackSlot slot = (StoredStackSlot) this.slots.get(slotIndex);// clickHandle仅用于处理点击维度槽位的逻辑，如果转换失败，则证明调用逻辑出错
+
+        // 处理虚拟槽位
+        if(slot.isFake())
+        {
+            if(flagStack.isEmpty()&&getCarried().isEmpty())
+            {
+                flagStorage.getStorage().set(slot.getSlotIndex(),new ItemStackType());
+            }
+            else
+            {
+                flagStorage.getStorage().set(slot.getSlotIndex(),flagStack);
+            }
+            return; // 结束处理
         }
     }
 

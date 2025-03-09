@@ -257,14 +257,7 @@ public class ClientPayloadHandler
                         int i = 0;
                         for(IStackType remoteStack : packet.flags())
                         {
-                            if(packet.changedCounts().get(i) > 0)
-                            {
-                                clientStorage.getStorage().set(packet.targetIndex().get(i),remoteStack.copyWithCount(1));
-                            }
-                            else
-                            {
-                                clientStorage.getStorage().set(packet.targetIndex().get(i),new ItemStackType());
-                            }
+                            clientStorage.getStorage().set(packet.targetIndex().get(i),remoteStack.copyWithCount(1));
                             i++; // 一次遍历完毕后索引自增
                         }
                         menu.updateViewerStorage();
@@ -288,6 +281,17 @@ public class ClientPayloadHandler
                         menu.popMode = packet.popMode();
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
+                }
+
+        );
+    }
+
+    public void handleFlagSlotSetPacket(final FlagSlotSetPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
                 }
 
         );

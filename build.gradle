@@ -21,6 +21,10 @@ repositories {
     mavenCentral()
     mavenLocal()
     maven { url 'https://modmaven.dev/' }
+    maven {
+        name = "TerraformersMC"
+        url = "https://maven.terraformersmc.com/"
+    }
 }
 
 base {
@@ -133,6 +137,9 @@ dependencies {
     compileOnly "mekanism:Mekanism:${mekanism_version}:api"
     // 编译时使用ae2的api 以便使用ae的频道系统
     compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}:api"
+
+    // EMI支持
+    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
 
 
     // Example optional mod dependency with JEI
