@@ -32,6 +32,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBaseMenu>
@@ -210,6 +211,7 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         }
     }
 
+
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
     {
@@ -228,7 +230,9 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
+        Slot slot = this.findSlot(mouseX, mouseY);
+        if(!(slot instanceof StoredStackSlot))
+            super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
 
         // 获取拖动物品
         if(BeyondDimensions.EMILoaded && !isDragging)

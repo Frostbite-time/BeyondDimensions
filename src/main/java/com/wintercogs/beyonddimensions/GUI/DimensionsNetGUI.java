@@ -195,7 +195,9 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
+        Slot slot = this.findSlot(mouseX, mouseY);
+        if(!(slot instanceof StoredStackSlot))
+            super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
         // 父类的覆写方法没有显式调用其被拖拽的子元素的拖拽方法，所以需要手动调用
         int scrollY =  scroller.customDragAction(mouseX,mouseY,button,dragX,dragY);
         if (scrollY > 0)

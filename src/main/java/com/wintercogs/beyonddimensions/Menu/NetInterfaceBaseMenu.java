@@ -571,7 +571,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
                     int moveCount = checkCanMoveStackCount(cacheStack, this.lines * 9, this.slots.size(), true);
                     moveCount = Math.min(moveCount,cacheStack.getCount()); // 首先
                     int nowCount = 0;
-                    IStackType typedStack = unifiedStorage.getStackByStack(StackCreater.Create(new ItemStackType().getTypeId(),cacheStack.copy(),cacheStack.getCount()));
+                    IStackType typedStack = unifiedStorage.getStackBySlot(slot.getSlotIndex());
                     ItemStack nowStack;
                     if(typedStack != null)
                     {
