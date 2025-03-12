@@ -183,7 +183,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         {
             BlockPos targetPos = this.getBlockPos().relative(dir);
             BlockEntity neighbor = level.getBlockEntity(targetPos);
-            if(neighbor != null)
+            if(neighbor != null && !(neighbor instanceof NetedBlockEntity))
             {
                 // 开始查询能力 记住，你获取你上方的方块，一定是获取其下方的能力
                 IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK,targetPos,dir.getOpposite());
