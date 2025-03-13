@@ -153,11 +153,11 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
                     {
                         if(current.getVanillaMaxStackSize() >= current.getStackAmount())
                         {
-                            return;
+                            continue;
                         }
                         if(!current.isSameTypeSameComponents(flag.copy()))
                         {
-                            return;
+                            continue;
                         }
                     }
 
