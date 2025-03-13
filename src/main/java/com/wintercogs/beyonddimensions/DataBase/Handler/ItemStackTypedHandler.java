@@ -23,20 +23,33 @@ public class ItemStackTypedHandler implements IItemHandler
 
     // 获取所有可用于插入Item的槽位
     public List<ItemStackType> getItemOnlyStorage() {
-        itemStorageIndex.clear(); // 清空索引列表
-        return IntStream.range(0, getStorage().size())
-                .mapToObj(i -> {
-                    IStackType stackType = getStorage().get(i);
-                    if (stackType.isEmpty() || stackType instanceof ItemStackType) {
-                        itemStorageIndex.add(i); // 记录符合条件的索引
-                        return stackType.isEmpty() ? new ItemStackType() : (ItemStackType) stackType;
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(ArrayList::new));
+        itemStorageIndex.clear();
+        List<IStackType> storage = getStorage();
+
+        // 第一次遍历：收集所有符合条件的索引 即空位置和符合类型的位置都可以用来插入当前类型
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType stackType = storage.get(i);
+            if (stackType.isEmpty() || stackType instanceof ItemStackType) {
+                itemStorageIndex.add(i);
+            }
+        }
+
+        // 根据已知大小初始化ArrayList，避免扩容
+        List<ItemStackType> result = new ArrayList<>(itemStorageIndex.size());
+
+        // 第二次遍历：填充结果列表
+        for (int index : itemStorageIndex) {
+            IStackType stackType = storage.get(index);
+            if (stackType.isEmpty()) {
+                result.add(new ItemStackType());
+            } else {
+                result.add((ItemStackType) stackType);
+            }
+        }
+
+        return result;
     }
+
 
 
     public List<IStackType> getStorage()

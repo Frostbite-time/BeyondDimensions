@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
@@ -25,19 +26,31 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
     // 获取所有可用于插入Item的槽位
     public List<ChemicalStackType> getChemicalOnlyStorage()
     {
-        chemicalStorageIndex.clear(); // 清空索引列表
-        return IntStream.range(0, getStorage().size())
-                .mapToObj(i -> {
-                    IStackType stackType = getStorage().get(i);
-                    if (stackType.isEmpty() || stackType instanceof ChemicalStackType) {
-                        chemicalStorageIndex.add(i); // 记录符合条件的索引
-                        return stackType.isEmpty() ? new ChemicalStackType() : (ChemicalStackType) stackType;
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(ArrayList::new));
+        chemicalStorageIndex.clear();
+        List<IStackType> storage = getStorage();
+
+        // 第一次遍历：收集所有符合条件的索引 即空位置和符合类型的位置都可以用来插入当前类型
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType stackType = storage.get(i);
+            if (stackType.isEmpty() || stackType instanceof ChemicalStackType) {
+                chemicalStorageIndex.add(i);
+            }
+        }
+
+        // 根据已知大小初始化ArrayList，避免扩容
+        List<ChemicalStackType> result = new ArrayList<>(chemicalStorageIndex.size());
+
+        // 第二次遍历：填充结果列表
+        for (int index : chemicalStorageIndex) {
+            IStackType stackType = storage.get(index);
+            if (stackType.isEmpty()) {
+                result.add(new ChemicalStackType());
+            } else {
+                result.add((ChemicalStackType) stackType);
+            }
+        }
+
+        return result;
     }
 
     public List<IStackType> getStorage()

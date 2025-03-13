@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
@@ -24,19 +25,31 @@ public class FluidStackTypedHandler implements IFluidHandler
     // 获取所有可用于插入Item的槽位
     public List<FluidStackType> getFluidOnlyStorage()
     {
-        fluidStorageIndex.clear(); // 清空索引列表
-        return IntStream.range(0, getStorage().size())
-                .mapToObj(i -> {
-                    IStackType stackType = getStorage().get(i);
-                    if (stackType.isEmpty() || stackType instanceof FluidStackType) {
-                        fluidStorageIndex.add(i); // 记录符合条件的索引
-                        return stackType.isEmpty() ? new FluidStackType() : (FluidStackType) stackType;
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(ArrayList::new));
+        fluidStorageIndex.clear();
+        List<IStackType> storage = getStorage();
+
+        // 第一次遍历：收集所有符合条件的索引 即空位置和符合类型的位置都可以用来插入当前类型
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType stackType = storage.get(i);
+            if (stackType.isEmpty() || stackType instanceof FluidStackType) {
+                fluidStorageIndex.add(i);
+            }
+        }
+
+        // 根据已知大小初始化ArrayList，避免扩容
+        List<FluidStackType> result = new ArrayList<>(fluidStorageIndex.size());
+
+        // 第二次遍历：填充结果列表
+        for (int index : fluidStorageIndex) {
+            IStackType stackType = storage.get(index);
+            if (stackType.isEmpty()) {
+                result.add(new FluidStackType());
+            } else {
+                result.add((FluidStackType) stackType);
+            }
+        }
+
+        return result;
     }
 
     public List<IStackType> getStorage()
