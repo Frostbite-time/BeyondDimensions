@@ -7,6 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 // 以IStackType为基础实现IItemHandler的类
@@ -19,13 +20,22 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     }
 
     // 获取所有为Item的槽位
-    public ArrayList<ItemStackType> getItemOnlyStorage()
-    {
-        return getStorage().stream()
-                .filter(stackType -> stackType instanceof ItemStackType)
-                .map(stackType -> (ItemStackType) stackType)  // 关键的类型转换
-                .collect(Collectors.toCollection(ArrayList::new));
+    public ArrayList<ItemStackType> getItemOnlyStorage() {
+        List<IStackType> storage = getStorage();
+        // 预分配最大可能容量，避免扩容
+        ArrayList<ItemStackType> result = new ArrayList<>(storage.size());
+
+        for (IStackType stackType : storage) {
+            if (stackType instanceof ItemStackType) {
+                // 直接类型转换，无需中间操作
+                result.add((ItemStackType) stackType);
+            }
+        }
+        // 可选：释放未使用的内存（根据场景决定是否需要）
+        result.trimToSize();
+        return result;
     }
+
 
     public void onChange()
     {

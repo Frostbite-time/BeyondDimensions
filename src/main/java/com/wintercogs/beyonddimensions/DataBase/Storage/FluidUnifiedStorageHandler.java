@@ -3,10 +3,12 @@ package com.wintercogs.beyonddimensions.DataBase.Storage;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class FluidUnifiedStorageHandler implements IFluidHandler
@@ -20,10 +22,19 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
 
     public ArrayList<FluidStackType> getFluidOnlyStorage()
     {
-        return getStorage().stream()
-                .filter(stackType -> stackType instanceof FluidStackType)
-                .map(stackType -> (FluidStackType) stackType)  // 关键的类型转换
-                .collect(Collectors.toCollection(ArrayList::new));
+        List<IStackType> storage = getStorage();
+        // 预分配最大可能容量，避免扩容
+        ArrayList<FluidStackType> result = new ArrayList<>(storage.size());
+
+        for (IStackType stackType : storage) {
+            if (stackType instanceof FluidStackType) {
+                // 直接类型转换，无需中间操作
+                result.add((FluidStackType) stackType);
+            }
+        }
+        // 可选：释放未使用的内存（根据场景决定是否需要）
+        result.trimToSize();
+        return result;
     }
 
     public void onChange()

@@ -2,12 +2,15 @@ package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ChemicalUnifiedStorageHandler implements IChemicalHandler
@@ -21,10 +24,19 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
 
     public ArrayList<ChemicalStackType> getChemicalOnlyStorage()
     {
-        return getStorage().stream()
-                .filter(stackType -> stackType instanceof ChemicalStackType)
-                .map(stackType -> (ChemicalStackType) stackType)  // 关键的类型转换
-                .collect(Collectors.toCollection(ArrayList::new));
+        List<IStackType> storage = getStorage();
+        // 预分配最大可能容量，避免扩容
+        ArrayList<ChemicalStackType> result = new ArrayList<>(storage.size());
+
+        for (IStackType stackType : storage) {
+            if (stackType instanceof ChemicalStackType) {
+                // 直接类型转换，无需中间操作
+                result.add((ChemicalStackType) stackType);
+            }
+        }
+        // 可选：释放未使用的内存（根据场景决定是否需要）
+        result.trimToSize();
+        return result;
     }
 
     public void onChange()
