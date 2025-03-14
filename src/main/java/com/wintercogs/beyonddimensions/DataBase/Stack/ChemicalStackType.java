@@ -68,7 +68,7 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     @Override
     public ChemicalStack getStack()
     {
-        return stack.copyWithAmount(getStackAmount());
+        return stack;
     }
 
     @Override

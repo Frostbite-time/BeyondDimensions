@@ -71,7 +71,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public FluidStack getStack()
     {
-        return stack.copyWithAmount(Math.toIntExact(getStackAmount()));
+        return stack;
     }
 
     @Override

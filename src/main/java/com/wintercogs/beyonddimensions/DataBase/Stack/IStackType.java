@@ -26,6 +26,7 @@ public interface IStackType<T> {
 
     IStackType<T> getEmpty();
 
+    // 返回直接引用，以降低性能开销 如果可能修改stack 使用copyStack方法
     T getStack();
 
     void setStack(T stack); // 用于适应工厂方式来新建实例

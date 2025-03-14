@@ -41,7 +41,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public ItemStack getStack()
     {
-        return stack.copyWithCount(Math.toIntExact(getStackAmount()));
+        return stack;
     }
 
     @Override
