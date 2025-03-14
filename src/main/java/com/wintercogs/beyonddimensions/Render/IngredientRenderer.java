@@ -22,7 +22,7 @@ public class IngredientRenderer
         RenderSystem.enableBlend();
 
 
-        RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+        RenderSystem.setShaderTexture(0, sprite.atlasLocation());
         Matrix4f matrix = guiGraphics.pose().last().pose();
         setGLColorFromInt(color);
 
@@ -54,10 +54,11 @@ public class IngredientRenderer
     }
 
     private static void setGLColorFromInt(int color) {
-        float red = (color >> 16 & 0xFF) / 255.0F;
-        float green = (color >> 8 & 0xFF) / 255.0F;
-        float blue = (color & 0xFF) / 255.0F;
-        float alpha = ((color >> 24) & 0xFF) / 255F;
+        float red = ((color >> 16) & 255) / 256f;
+        float green = ((color >> 8) & 255) / 256f;
+        float blue = (color & 255) / 256f;
+        //float alpha = ((color >> 24) & 0xFF) / 255F;
+        float alpha = 1;
 
         RenderSystem.setShaderColor(red, green, blue, alpha);
     }
