@@ -25,7 +25,8 @@ public class ItemUnifiedStorageHandler implements IItemHandler
         // 预分配最大可能容量，避免扩容
         ArrayList<ItemStackType> result = new ArrayList<>(storage.size());
 
-        for (IStackType stackType : storage) {
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType stackType = storage.get(i);
             if (stackType instanceof ItemStackType) {
                 // 直接类型转换，无需中间操作
                 result.add((ItemStackType) stackType);

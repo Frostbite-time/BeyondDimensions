@@ -38,7 +38,8 @@ public class ItemStackTypedHandler implements IItemHandler
         List<ItemStackType> result = new ArrayList<>(itemStorageIndex.size());
 
         // 第二次遍历：填充结果列表
-        for (int index : itemStorageIndex) {
+        for (int i = 0; i < itemStorageIndex.size(); i++) {
+            int index = itemStorageIndex.get(i);
             IStackType stackType = storage.get(index);
             if (stackType.isEmpty()) {
                 result.add(new ItemStackType());

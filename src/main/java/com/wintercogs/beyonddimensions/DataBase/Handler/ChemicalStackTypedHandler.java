@@ -41,7 +41,8 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
         List<ChemicalStackType> result = new ArrayList<>(chemicalStorageIndex.size());
 
         // 第二次遍历：填充结果列表
-        for (int index : chemicalStorageIndex) {
+        for (int i = 0; i < chemicalStorageIndex.size(); i++) {
+            int index = chemicalStorageIndex.get(i);
             IStackType stackType = storage.get(index);
             if (stackType.isEmpty()) {
                 result.add(new ChemicalStackType());

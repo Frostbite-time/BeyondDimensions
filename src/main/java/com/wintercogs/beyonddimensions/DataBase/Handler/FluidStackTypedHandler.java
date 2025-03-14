@@ -40,7 +40,8 @@ public class FluidStackTypedHandler implements IFluidHandler
         List<FluidStackType> result = new ArrayList<>(fluidStorageIndex.size());
 
         // 第二次遍历：填充结果列表
-        for (int index : fluidStorageIndex) {
+        for (int i = 0; i < fluidStorageIndex.size(); i++) {
+            int index = fluidStorageIndex.get(i);
             IStackType stackType = storage.get(index);
             if (stackType.isEmpty()) {
                 result.add(new FluidStackType());
