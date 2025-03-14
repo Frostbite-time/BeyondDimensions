@@ -7,9 +7,6 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 // 用于实现StackTypedHandler转向IItemHandler的类
 public class ItemStackTypedHandler implements IItemHandler

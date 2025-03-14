@@ -32,7 +32,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBaseMenu>
