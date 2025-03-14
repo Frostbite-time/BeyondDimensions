@@ -49,8 +49,8 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     {
         super(container, playerInventory, title);
         // 去除空白的真实部分，用于计算图片显示的最佳位置
-        this.imageWidth = 198;
-        this.imageHeight = 235;
+        this.imageWidth = 194;
+        this.imageHeight = 222;
     }
 
 
@@ -80,7 +80,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
 
         // 初始化搜索方案
-        this.searchField = new EditBox(getFont(), this.leftPos+20+26, this.topPos+4, 89, this.getFont().lineHeight+2, Component.translatable("wintercogs.BeyondDimensions.DimensionsGuiSearch"));
+        this.searchField = new EditBox(getFont(), this.leftPos+20+26, this.topPos+5, 89, this.getFont().lineHeight+2, Component.translatable("wintercogs.BeyondDimensions.DimensionsGuiSearch"));
         this.searchField.setMaxLength(100);
         this.searchField.setBordered(true);
         this.searchField.setVisible(true);
@@ -88,7 +88,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         addRenderableWidget(searchField);
 
         // 初始化滚动按钮
-        this.scroller = new BigScroller(this.leftPos+175,this.topPos+23,99,0,menu.maxLineData);
+        this.scroller = new BigScroller(this.leftPos+174,this.topPos+18,95,0,menu.maxLineData);
         addRenderableWidget(scroller);
 
         lastButtonStateMap = new HashMap<>(buttonStateMap);
@@ -127,17 +127,17 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
         searchField.render(guiGraphics,mouseX,mouseY,partialTicks);
         reverseButton.render(guiGraphics,mouseX,mouseY,partialTicks);
         scroller.render(guiGraphics,mouseX,mouseY,partialTicks);
+        this.renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+56+11, 4210752);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+57, 4210752);
     }
 
     @Override

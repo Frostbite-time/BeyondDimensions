@@ -114,7 +114,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 // 由于我们完全不依靠menu自带得方法来同步，所以可以传入一个和实际数据同步所用不一样的Storage
                 // 只需要保证我们能及时把数据从实际数据同步到viewerUnifiedStorage
                 // 再将slot点击操作重写的物品种类依赖
-                this.addSlot(new StoredStackSlot(viewerUnifiedStorage, -1, 8 + col * 18, 29+row * 18));
+                this.addSlot(new StoredStackSlot(viewerUnifiedStorage, -1, 8 + col * 18, 18+row * 18));
             }
         }
         // 添加玩家物品栏槽位 对应slots索引 54~80
@@ -122,13 +122,13 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 151 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 140 + row * 18));
             }
         }
         // 添加快捷栏槽位 对应slots索引 81~89
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 209));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 198));
         }
     }
 
