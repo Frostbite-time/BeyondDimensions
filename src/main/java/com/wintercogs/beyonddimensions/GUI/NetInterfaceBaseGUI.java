@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.GUI;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
@@ -25,6 +26,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -325,6 +327,38 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    // 父类keypressd中控制快捷栏按键移动的方法
+    @Override
+    protected boolean checkHotbarKeyPressed(int keyCode, int scanCode)
+    {
+        if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null) {
+
+            if(hoveredSlot instanceof StoredStackSlot sSlot)
+            {
+                // 留空待补
+
+            }
+            else
+            {// 副手交换仅对于非存储槽才生效
+                if (this.minecraft.options.keySwapOffhand.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
+                    this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
+                    return true;
+                }
+                for(int i = 0; i < 9; ++i) {
+                    if (this.minecraft.options.keyHotbarSlots[i].isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
+                        this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, i, ClickType.SWAP);
+                        return true;
+                    }
+                }
+            }
+
+
+
+        }
+
+        return false;
     }
 
     public Font getFont() {
