@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
@@ -19,25 +20,6 @@ public class ItemUnifiedStorageHandler implements IItemHandler
         this.net = net;
     }
 
-    // 获取所有为Item的槽位
-    public ArrayList<ItemStackType> getItemOnlyStorage() {
-        List<IStackType> storage = getStorage();
-        // 预分配最大可能容量，避免扩容
-        ArrayList<ItemStackType> result = new ArrayList<>(storage.size());
-
-        for (int i = 0; i < storage.size(); i++) {
-            IStackType stackType = storage.get(i);
-            if (stackType instanceof ItemStackType) {
-                // 直接类型转换，无需中间操作
-                result.add((ItemStackType) stackType);
-            }
-        }
-        // 可选：释放未使用的内存（根据场景决定是否需要）
-        result.trimToSize();
-        return result;
-    }
-
-
     public void onChange()
     {
         net.setDirty();
@@ -52,13 +34,36 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     @Override
     public int getSlots()
     {
-        return getItemOnlyStorage().size();
+        int size = 0;
+        List<IStackType> storage = getStorage();
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType stackType = storage.get(i);
+            if (stackType instanceof ItemStackType) {
+                size++;
+            }
+        }
+        return size;
     }
 
     @Override
     public ItemStack getStackInSlot(int slot)
     {
-        return getItemOnlyStorage().get(slot).getStack().copy();
+        int currentIndex = 0;
+        List<IStackType> storage = getStorage();
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType stackType = storage.get(i);
+            if (stackType instanceof ItemStackType) {
+                if(slot==currentIndex)
+                {
+                    return ((ItemStackType) stackType).copyStack();
+                }
+                else
+                {
+                    currentIndex++;
+                }
+            }
+        }
+        return ItemStack.EMPTY;
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,23 +23,6 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
         this.net = net;
     }
 
-    public ArrayList<ChemicalStackType> getChemicalOnlyStorage()
-    {
-        List<IStackType> storage = getStorage();
-        // 预分配最大可能容量，避免扩容
-        ArrayList<ChemicalStackType> result = new ArrayList<>(storage.size());
-
-        for (int i = 0; i < storage.size(); i++) {
-            IStackType stackType = storage.get(i);
-            if (stackType instanceof ChemicalStackType) {
-                // 直接类型转换，无需中间操作
-                result.add((ChemicalStackType) stackType);
-            }
-        }
-        // 可选：释放未使用的内存（根据场景决定是否需要）
-        result.trimToSize();
-        return result;
-    }
 
     public void onChange()
     {
@@ -53,13 +37,36 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public int getChemicalTanks()
     {
-        return getChemicalOnlyStorage().size();
+        int size = 0;
+        List<IStackType> storage = getStorage();
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType stackType = storage.get(i);
+            if (stackType instanceof ChemicalStackType) {
+                size++;
+            }
+        }
+        return size;
     }
 
     @Override
     public ChemicalStack getChemicalInTank(int tank)
     {
-        return getChemicalOnlyStorage().get(tank).getStack().copy();
+        int currentIndex = 0;
+        List<IStackType> storage = getStorage();
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType stackType = storage.get(i);
+            if (stackType instanceof ChemicalStackType) {
+                if(tank==currentIndex)
+                {
+                    return ((ChemicalStackType) stackType).copyStack();
+                }
+                else
+                {
+                    currentIndex++;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -99,7 +106,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public ChemicalStack extractChemical(int tank, long amount, Action action)
     {
-        return ((ChemicalStackType)net.getUnifiedStorage().extract(new ChemicalStackType(getChemicalOnlyStorage().get(tank).copyStackWithCount(amount)),action.simulate()))
+        return ((ChemicalStackType)net.getUnifiedStorage().extract(new ChemicalStackType(getChemicalInTank(tank).copyWithAmount(amount)),action.simulate()))
                 .copyStack();
     }
 
@@ -118,7 +125,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public ChemicalStack extractChemical(long amount, Action action)
     {
-        return ((ChemicalStackType)net.getUnifiedStorage().extract(new ChemicalStackType(getChemicalOnlyStorage().getFirst().copyStackWithCount(amount)),action.simulate()))
+        return ((ChemicalStackType)net.getUnifiedStorage().extract(new ChemicalStackType(getChemicalInTank(0).copyWithAmount(amount)),action.simulate()))
                 .copyStack();
     }
 

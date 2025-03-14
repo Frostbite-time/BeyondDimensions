@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
@@ -20,24 +21,6 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
         this.net = net;
     }
 
-    public ArrayList<FluidStackType> getFluidOnlyStorage()
-    {
-        List<IStackType> storage = getStorage();
-        // 预分配最大可能容量，避免扩容
-        ArrayList<FluidStackType> result = new ArrayList<>(storage.size());
-
-        for (int i = 0; i < storage.size(); i++) {
-            IStackType stackType = storage.get(i);
-            if (stackType instanceof FluidStackType) {
-                // 直接类型转换，无需中间操作
-                result.add((FluidStackType) stackType);
-            }
-        }
-        // 可选：释放未使用的内存（根据场景决定是否需要）
-        result.trimToSize();
-        return result;
-    }
-
     public void onChange()
     {
         net.setDirty();
@@ -51,13 +34,36 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public int getTanks()
     {
-        return getFluidOnlyStorage().size();
+        int size = 0;
+        List<IStackType> storage = getStorage();
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType stackType = storage.get(i);
+            if (stackType instanceof FluidStackType) {
+                size++;
+            }
+        }
+        return size;
     }
 
     @Override
     public FluidStack getFluidInTank(int slot)
     {
-        return getFluidOnlyStorage().get(slot).getStack().copy();
+        int currentIndex = 0;
+        List<IStackType> storage = getStorage();
+        for (int i = 0; i < storage.size(); i++) {
+            IStackType stackType = storage.get(i);
+            if (stackType instanceof FluidStackType) {
+                if(slot==currentIndex)
+                {
+                    return ((FluidStackType) stackType).copyStack();
+                }
+                else
+                {
+                    currentIndex++;
+                }
+            }
+        }
+        return FluidStack.EMPTY;
     }
 
     @Override
@@ -97,7 +103,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public FluidStack drain(int count, FluidAction fluidAction)
     {
-        return ((FluidStackType)net.getUnifiedStorage().extract(new FluidStackType(getFluidOnlyStorage().getFirst().copyStackWithCount(count)),fluidAction.simulate()))
+        return ((FluidStackType)net.getUnifiedStorage().extract(new FluidStackType(getFluidInTank(0).copyWithAmount(count)),fluidAction.simulate()))
                 .copyStack();
     }
 }
