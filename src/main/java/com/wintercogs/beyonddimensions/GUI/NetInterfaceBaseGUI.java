@@ -40,7 +40,6 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
 {
 
     private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_interface.png");
-    private BigScroller scroller;
 
     public ReverseButton popButton; // 使用倒序按钮来临时替代弹出模式
 
@@ -113,10 +112,6 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         }
 
 
-        // 初始化滚动按钮
-        this.scroller = new BigScroller(this.leftPos+175,this.topPos+23,99,0,menu.maxLineData);
-        addRenderableWidget(scroller);
-
         popButton = new ReverseButton(this.leftPos+72+18*4-5,this.topPos+6, button ->
         {
             popButton.toggleState();
@@ -137,7 +132,6 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         //父类无操作
         //每tick自动更新搜索方案
         menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
-        scroller.updateScrollPosition(menu.lineData,menu.maxLineData);// 读取翻页数据并应用
 
         if(menu.popMode)
         {
@@ -161,9 +155,8 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
-        scroller.render(guiGraphics,mouseX,mouseY,partialTicks);
         popButton.render(guiGraphics,mouseX,mouseY,partialTicks);
+        this.renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
     @Override
@@ -243,16 +236,6 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
                 isDragging = true;
         }
 
-        // 父类的覆写方法没有显式调用其被拖拽的子元素的拖拽方法，所以需要手动调用
-        int scrollY =  scroller.customDragAction(mouseX,mouseY,button,dragX,dragY);
-        if (scrollY > 0)
-        {
-            menu.lineData--;
-        } else if(scrollY < 0)
-        {
-            menu.lineData++;
-        }
-        //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
         menu.ScrollTo();
         return true;
     }
