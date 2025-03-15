@@ -84,13 +84,13 @@ public class NetEnergyMenu extends AbstractContainerMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 123 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 93 + row * 18));
             }
         }
 
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 181));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 151));
         }
     }
 

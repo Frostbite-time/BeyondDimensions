@@ -19,7 +19,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 public class NetEnergyGUI extends AbstractContainerScreen<NetEnergyMenu>
 {
-    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_interface.png");
+    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_energy_storage.png");
 
     public ReverseButton popButton; // 使用倒序按钮来临时替代弹出模式
 
@@ -29,7 +29,7 @@ public class NetEnergyGUI extends AbstractContainerScreen<NetEnergyMenu>
         super(container, playerInventory, title);
         // 去除空白的真实部分，用于计算图片显示的最佳位置
         this.imageWidth = 176;
-        this.imageHeight = 207;
+        this.imageHeight = 175;
     }
 
 
@@ -82,6 +82,7 @@ public class NetEnergyGUI extends AbstractContainerScreen<NetEnergyMenu>
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         popButton.render(guiGraphics,mouseX,mouseY,partialTicks);
         this.renderTooltip(guiGraphics, mouseX, mouseY);
+        this.renderEnergyBar(guiGraphics,this.leftPos+8,this.topPos + 35);
     }
 
     @Override
@@ -103,6 +104,36 @@ public class NetEnergyGUI extends AbstractContainerScreen<NetEnergyMenu>
     protected void renderTooltip(GuiGraphics guiGraphics, int x, int y)
     {
 
+    }
+
+    protected void renderEnergyBar(GuiGraphics guiGraphics, int xStart, int yStart)
+    {
+        int areaWidth = 160;
+        int areaHeight = 16;
+        final int stripeWidth = 1; // 单个条纹宽度
+
+        // 背景条纹绘制（低亮度版本）
+        for (int i = 0; i < areaWidth; i += stripeWidth) {
+            int color = ((i / stripeWidth) % 2 == 0) ? 0xFF400000 : 0xFF200000; // 暗红交替
+            int width = Math.min(stripeWidth, areaWidth - i);
+            guiGraphics.fill(xStart + i, yStart,
+                    xStart + i + width, yStart + areaHeight,
+                    color);
+        }
+        // 计算能量填充比例
+        float energyRatio = (float) menu.energyStored / menu.energyCapacity;
+        int filledWidth = (int)(energyRatio * areaWidth);
+
+        // 前景条纹绘制（亮色版本）
+        for (int i = 0; i < filledWidth; i += stripeWidth)
+        {
+            int color = ((i / stripeWidth) % 2 == 0) ? 0xFFFF0000 : 0xFF800000; // 红/暗红交替
+            int drawWidth = Math.min(stripeWidth, filledWidth - i);
+            guiGraphics.fill(xStart + i, yStart,
+                    xStart + i + drawWidth, yStart + areaHeight,
+                    color);
+
+        }
     }
 
     public Font getFont() {
