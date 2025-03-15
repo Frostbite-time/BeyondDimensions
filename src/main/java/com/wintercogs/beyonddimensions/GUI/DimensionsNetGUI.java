@@ -50,7 +50,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         super(container, playerInventory, title);
         // 去除空白的真实部分，用于计算图片显示的最佳位置
         this.imageWidth = 194;
-        this.imageHeight = 222;
+        this.imageHeight = 231;
     }
 
 
@@ -62,14 +62,14 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         this.topPos = (this.height - 235)/2;
 
         // 初始化按钮组件
-        sortButton = new SortMethodButton(this.leftPos+72+18*5-5,this.topPos+6,button ->
+        sortButton = new SortMethodButton(this.leftPos+72+18*6-7,this.topPos+6,button ->
         {
             sortButton.toggleState();
             buttonStateMap.put(sortButton.getName(),sortButton.currentState);
         });
         addRenderableWidget(sortButton);
 
-        reverseButton = new ReverseButton(this.leftPos+72+18*4-5,this.topPos+6,button ->
+        reverseButton = new ReverseButton(this.leftPos+72+18*5-7,this.topPos+6,button ->
         {
             reverseButton.toggleState();
             buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
@@ -80,7 +80,8 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
 
         // 初始化搜索方案
-        this.searchField = new EditBox(getFont(), this.leftPos+20+26, this.topPos+5, 89, this.getFont().lineHeight+2, Component.translatable("wintercogs.BeyondDimensions.DimensionsGuiSearch"));
+        this.searchField = new EditBox(getFont(), this.leftPos+20+26+10, this.topPos+7, 89, this.getFont().lineHeight+5, Component.translatable("wintercogs.BeyondDimensions.DimensionsGuiSearch"));
+        this.searchField.setSuggestion("输入以搜索...");
         this.searchField.setMaxLength(100);
         this.searchField.setBordered(true);
         this.searchField.setVisible(true);
@@ -88,7 +89,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         addRenderableWidget(searchField);
 
         // 初始化滚动按钮
-        this.scroller = new BigScroller(this.leftPos+174,this.topPos+18,95,0,menu.maxLineData);
+        this.scroller = new BigScroller(this.leftPos+174,this.topPos+27,95,0,menu.maxLineData);
         addRenderableWidget(scroller);
 
         lastButtonStateMap = new HashMap<>(buttonStateMap);
@@ -137,7 +138,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+57, 4210752);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+66, 4210752);
     }
 
     @Override
