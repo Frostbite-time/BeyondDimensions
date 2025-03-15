@@ -105,11 +105,16 @@ public class BeyondDimensions
             EMILoaded = true;
         }
 
+        // 注册堆叠类型，使得网络能够存储相关堆叠
         StackTypeRegistry.registerType(new ItemStackType());
         StackTypeRegistry.registerType(new FluidStackType());
+
+        // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
         TypedHandlerManager.registerNetHandler(Capabilities.ItemHandler.BLOCK, DimensionsNet.class, ItemUnifiedStorageHandler::new);
-        TypedHandlerManager.registerCommonHandler(Capabilities.ItemHandler.BLOCK, StackTypedHandler.class, ItemStackTypedHandler::new);
         TypedHandlerManager.registerNetHandler(Capabilities.FluidHandler.BLOCK, DimensionsNet.class, FluidUnifiedStorageHandler::new);
+
+        // 注册通用能力，使得诸如网络接口的方块可以暴露对应存储能力
+        TypedHandlerManager.registerCommonHandler(Capabilities.ItemHandler.BLOCK, StackTypedHandler.class, ItemStackTypedHandler::new);
         TypedHandlerManager.registerCommonHandler(Capabilities.FluidHandler.BLOCK,StackTypedHandler.class, FluidStackTypedHandler::new);
 
         if(MekLoaded)
