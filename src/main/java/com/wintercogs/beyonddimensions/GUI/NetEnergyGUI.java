@@ -106,35 +106,54 @@ public class NetEnergyGUI extends AbstractContainerScreen<NetEnergyMenu>
 
     }
 
-    protected void renderEnergyBar(GuiGraphics guiGraphics, int xStart, int yStart)
-    {
+    protected void renderEnergyBar(GuiGraphics guiGraphics, int xStart, int yStart) {
         int areaWidth = 160;
         int areaHeight = 16;
-        final int stripeWidth = 1; // 单个条纹宽度
+        final int stripeWidth = 1;
 
-        // 背景条纹绘制（低亮度版本）
+        // 预计算每行的亮度系数（使用二次曲线实现平滑衰减）
+        float[] brightnessFactors = new float[areaHeight];
+        for (int y = 0; y < areaHeight; y++) {
+            float normalizedY = (y - areaHeight / 2.0f) / (areaHeight / 2.0f);
+            brightnessFactors[y] = 1.0f - normalizedY * normalizedY;
+        }
+
+        // 背景绘制保持不变
         for (int i = 0; i < areaWidth; i += stripeWidth) {
-            int color = ((i / stripeWidth) % 2 == 0) ? 0xFF400000 : 0xFF200000; // 暗红交替
+            int color = ((i / stripeWidth) % 2 == 0) ? 0xFF400000 : 0xFF200000;
             int width = Math.min(stripeWidth, areaWidth - i);
             guiGraphics.fill(xStart + i, yStart,
                     xStart + i + width, yStart + areaHeight,
                     color);
         }
-        // 计算能量填充比例
+
         float energyRatio = (float) menu.energyStored / menu.energyCapacity;
         int filledWidth = (int)(energyRatio * areaWidth);
 
-        // 前景条纹绘制（亮色版本）
-        for (int i = 0; i < filledWidth; i += stripeWidth)
-        {
-            int color = ((i / stripeWidth) % 2 == 0) ? 0xFFFF0000 : 0xFF800000; // 红/暗红交替
+        // 前景绘制添加垂直渐变效果
+        for (int i = 0; i < filledWidth; i += stripeWidth) {
+            int baseColor = ((i / stripeWidth) % 2 == 0) ? 0xFFFF0000 : 0xFF800000;
             int drawWidth = Math.min(stripeWidth, filledWidth - i);
-            guiGraphics.fill(xStart + i, yStart,
-                    xStart + i + drawWidth, yStart + areaHeight,
-                    color);
 
+            // 分解颜色通道
+            int alpha = (baseColor >> 24) & 0xFF;
+            int red = (baseColor >> 16) & 0xFF;
+            int green = (baseColor >> 8) & 0xFF;
+            int blue = baseColor & 0xFF;
+
+            // 逐行绘制带亮度变化的条纹
+            for (int y = 0; y < areaHeight; y++) {
+                // 应用亮度系数并重新组合颜色
+                int adjustedAlpha = (int)(alpha * brightnessFactors[y]);
+                int adjustedColor = (adjustedAlpha << 24) | (red << 16) | (green << 8) | blue;
+
+                guiGraphics.fill(xStart + i, yStart + y,
+                        xStart + i + drawWidth, yStart + y + 1,
+                        adjustedColor);
+            }
         }
     }
+
 
     public Font getFont() {
         return font;
