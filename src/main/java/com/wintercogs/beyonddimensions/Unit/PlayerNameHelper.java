@@ -32,6 +32,6 @@ public class PlayerNameHelper
         }
 
         // 3. 若缓存无记录，返回 null 或特定占位符（可扩展 Mojang API 异步查询）
-        return null;
+        return "未知角色";
     }
 }
