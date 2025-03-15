@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
+import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.world.entity.player.Player;
@@ -278,6 +279,11 @@ public class ClientPayloadHandler
                         menu.popMode = packet.popMode();
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
+                    if(player.containerMenu instanceof NetEnergyMenu menu)
+                    {
+                        menu.popMode = packet.popMode();
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
                 }
 
         );
@@ -289,6 +295,24 @@ public class ClientPayloadHandler
                 () ->
                 {
 
+                }
+
+        );
+    }
+
+    public void handleEnergyStoragePacket(final EnergyStoragePacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+
+                    if(player.containerMenu instanceof NetEnergyMenu menu)
+                    {
+                        menu.resumeRemoteUpdates(); // 虽然本地端这个好像没有用处
+                        menu.loadStorage(packet.energyCap(), packet.energyStored());
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
                 }
 
         );

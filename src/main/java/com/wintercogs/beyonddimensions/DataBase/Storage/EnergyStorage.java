@@ -25,6 +25,16 @@ public class EnergyStorage implements IEnergyStorage
         return energyStorage;
     }
 
+    public long getRealEnergyCapacity()
+    {
+        return capacity;
+    }
+
+    public long getMaxTransfer()
+    {
+        return maxTransfer;
+    }
+
     public void setEnergyDirectly(long value) {
         this.energyStorage = Math.max(0, Math.min(value, capacity));
     }

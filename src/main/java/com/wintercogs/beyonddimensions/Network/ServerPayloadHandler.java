@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
+import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.network.chat.Component;
@@ -77,6 +78,16 @@ public class ServerPayloadHandler
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                     if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
+                    {
+                        BeyondDimensions.LOGGER.info("服务端收到数据请求");
+                        menu.sendStorage();
+
+                        // 临时代码，用于通知服务器发送弹出模式
+                        PacketDistributor.sendToPlayer((ServerPlayer) player,new PopModeButtonPacket(menu.popMode));
+
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
+                    if(player.containerMenu instanceof NetEnergyMenu menu)
                     {
                         BeyondDimensions.LOGGER.info("服务端收到数据请求");
                         menu.sendStorage();
@@ -208,6 +219,12 @@ public class ServerPayloadHandler
                         menu.be.popMode = packet.popMode();
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
+                    if(player.containerMenu instanceof NetEnergyMenu menu)
+                    {
+                        menu.popMode = packet.popMode();
+                        menu.be.popMode = packet.popMode();
+                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                    }
                 }
 
         );
@@ -231,4 +248,16 @@ public class ServerPayloadHandler
 
         );
     }
+
+    public void handleEnergyStoragePacket(final EnergyStoragePacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    //  服务端作为数据来源留空
+                }
+
+        );
+    }
+
 }

@@ -3,6 +3,7 @@
   "menu.title.beyonddimensions.dimensionnetmenu": "维度网络",
   "menu.title.beyonddimensions.net_control_menu": "维度网络权限控制器",
   "menu.title.beyonddimensions.net_interface_menu": "网络接口",
+  "menu.title.beyonddimensions.net_energy_menu": "能量网络",
   "beyonddimensions.scrollbar.usage.focused": "滚动条被选为焦点",
   "beyonddimensions.scrollbar.usage.hovered": "鼠标当前在滚动条上",
   "wintercogs.BeyondDimensions.DimensionsGuiSearch": "输入以搜索...",
