@@ -195,6 +195,7 @@ public class DimensionsNet extends SavedData
     public void setOwner(UUID owner)
     {
         this.owner = owner;
+        addManager(owner);
         setDirty();
     }
 
@@ -208,6 +209,7 @@ public class DimensionsNet extends SavedData
     public void addManager(UUID managerId)
     {
         managers.add(managerId);
+        addPlayer(managerId);
         setDirty();
     }
 

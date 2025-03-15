@@ -99,6 +99,24 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
                 break;
             }
         }
+
+        boolean flag = false;
+        // 更新按钮之后，从当前id中搜索对应按钮，重新读取名称
+        for (PermissionInfoButton button:permissionInfoButtons)
+        {
+            if(button.getPlayerId().equals(currentPlayerId))
+            {
+                currentPlayerName = button.getPermissionInfo().name();
+                currentPlayerPermissionLevel = button.getPermissionInfo().level();
+                flag = true;
+                break;
+            }
+        }
+        if (!flag)
+        {
+            currentPlayerName = "";
+            currentPlayerPermissionLevel = null; // 已做null处理
+        }
     }
 
     @Override

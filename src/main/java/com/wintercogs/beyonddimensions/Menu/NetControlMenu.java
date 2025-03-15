@@ -92,12 +92,16 @@ public class NetControlMenu extends AbstractContainerMenu
         }
         else if(action == NetControlAction.RemovePlayer)
         {
-            // 执行者是管理员，被执行者不是管理员，可以移除成员
+            // 管理员可以移除任何非管理员
             if(net.isManager(player)&&!net.isManager(receiver))
             {
                 net.removePlayer(receiver);
             }
-            else if(player.getUUID().equals(receiver)&&!net.isOwner(receiver)) // 否则，移除者是自己，并且自己不是所有者，可以移除
+            else if(player.getUUID().equals(receiver)&&!net.isOwner(receiver)) // 任何人都可以直接移除自己，除非是所有者
+            {
+                net.removePlayer(receiver);
+            }
+            else if(net.isOwner(player)&&!player.getUUID().equals(receiver)) // 所有者可以移除自己之外的任何人
             {
                 net.removePlayer(receiver);
             }
@@ -111,6 +115,7 @@ public class NetControlMenu extends AbstractContainerMenu
 
         if(!net.getPlayerPermissionInfoMap(player.level()).equals(this.playerInfo))
         {
+            this.playerInfo = this.net.getPlayerPermissionInfoMap(player.level());
             sendPlayerInfo();
         }
     }
