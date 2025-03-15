@@ -238,14 +238,14 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX+3, this.titleLabelY, 4210752);
-        guiGraphics.drawString(this.font, Component.literal("名称: "+currentPlayerName), 110, 25, 4210752);
+        guiGraphics.drawString(this.font, this.title, this.titleLabelX+3, this.titleLabelY, 4210752,false);
+        guiGraphics.drawString(this.font, Component.literal("名称: "+currentPlayerName), 110, 25, 4210752,false);
         if(currentPlayerPermissionLevel == null)
         {
-            guiGraphics.drawString(this.font, Component.literal("权限级别: 无"), 110, 10, 4210752);
+            guiGraphics.drawString(this.font, Component.literal("权限级别: 无"), 110, 10, 4210752,false);
         }
         else {
-            guiGraphics.drawString(this.font, Component.literal("权限级别: " + currentPlayerPermissionLevel.name()), 110, 10, 4210752);
+            guiGraphics.drawString(this.font, Component.literal("权限级别: " + currentPlayerPermissionLevel.name()), 110, 10, 4210752,false);
         }
 
 

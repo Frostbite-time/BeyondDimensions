@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.Packet.CallSeverStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -39,6 +40,7 @@ public class NetEnergyGUI extends AbstractContainerScreen<NetEnergyMenu>
         // 如果以后图片大小有变，显示中心所期望的大小仍然是x:176,y:235用于计算
         this.leftPos = (this.width - 176)/2;
         this.topPos = (this.height - 235)/2;
+        this.font = Minecraft.getInstance().font;
 
 
         popButton = new ReverseButton(this.leftPos+72+18*4-5,this.topPos+6, button ->
@@ -88,10 +90,10 @@ public class NetEnergyGUI extends AbstractContainerScreen<NetEnergyMenu>
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+20, 4210752);
+        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752,false);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+10, 4210752,false);
 
-        guiGraphics.drawString(this.font, StringFormat.formatCount(menu.energyStored)+"/"+StringFormat.formatCount(menu.energyCapacity), this.inventoryLabelX, this.inventoryLabelY-20, 4210752);
+        guiGraphics.drawString(this.font, StringFormat.formatCount(menu.energyStored)+"/"+StringFormat.formatCount(menu.energyCapacity), this.inventoryLabelX, this.inventoryLabelY-20, 4210752,false);
     }
 
     @Override

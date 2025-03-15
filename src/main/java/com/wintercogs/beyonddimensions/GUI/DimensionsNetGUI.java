@@ -137,8 +137,8 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+66, 4210752);
+        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY+2, 4210752,false);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+66, 4210752,false);
     }
 
     @Override
