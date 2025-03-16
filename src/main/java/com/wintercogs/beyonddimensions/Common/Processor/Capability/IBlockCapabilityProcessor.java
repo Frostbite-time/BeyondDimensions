@@ -17,7 +17,7 @@ public interface IBlockCapabilityProcessor<T>
     @Nullable
     T getCapability(Level level, BlockPos targetPos, Direction direction);
 
-    // 向目标插入一个堆叠，返回实际插入量
+    // 向目标插入一个堆叠，返回剩余量
     long insert(T handler, int slot, Object stack, boolean simulate);
 
     // 返回总槽位数

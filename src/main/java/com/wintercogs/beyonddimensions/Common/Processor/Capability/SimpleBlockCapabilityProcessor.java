@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -14,7 +15,7 @@ import java.util.function.Predicate;
 public class SimpleBlockCapabilityProcessor<T> implements IBlockCapabilityProcessor<T>
 {
     // 能力处理类
-    private final T capabilityHandler;
+    private final BlockCapability<T,Direction> capabilityHandler;
 
     // 判断堆叠是否属于处理器类型
     private final Predicate<IStackType> stackChecker;
@@ -29,7 +30,7 @@ public class SimpleBlockCapabilityProcessor<T> implements IBlockCapabilityProces
     private final SlotsCount<T> slotsCounter;
 
     public SimpleBlockCapabilityProcessor(
-            T capabilityHandler,
+            BlockCapability<T,Direction> capabilityHandler,
             Predicate<IStackType> stackChecker,
             BlockCapabilityFunction<T> capabilityGetter,
             InsertAction<T> insertAction,

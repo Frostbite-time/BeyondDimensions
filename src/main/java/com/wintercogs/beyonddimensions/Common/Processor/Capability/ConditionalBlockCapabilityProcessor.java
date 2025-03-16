@@ -4,6 +4,8 @@ import com.wintercogs.beyonddimensions.Common.InterfaceHelper.BlockCapabilityFun
 import com.wintercogs.beyonddimensions.Common.InterfaceHelper.InsertAction;
 import com.wintercogs.beyonddimensions.Common.InterfaceHelper.SlotsCount;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import net.minecraft.core.Direction;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
@@ -15,7 +17,7 @@ public class ConditionalBlockCapabilityProcessor<T> extends SimpleBlockCapabilit
 
     public ConditionalBlockCapabilityProcessor(
             BooleanSupplier availabilityCheck,
-            T capabilityHandler,
+            BlockCapability<T, Direction> capabilityHandler,
             Predicate<IStackType> stackChecker,
             BlockCapabilityFunction<T> capabilityGetter,
             InsertAction<T> insertAction,
