@@ -26,6 +26,11 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.NET_CREATER);
                         output.accept(ModItems.NET_MEMBER_INVITER);
                         output.accept(ModItems.NET_MANAGER_INVITER);
+                        output.accept(ModItems.UNSTABLE_SPACE_TIME_FRAGMENT);
+                        output.accept(ModItems.STABLE_SPACE_TIME_FRAGMENT);
+                        output.accept(ModItems.SPACE_TIME_STABLE_FRAME);
+                        output.accept(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION);
+                        output.accept(ModItems.SPACE_TIME_BAR);
                     })
                     .build());
 

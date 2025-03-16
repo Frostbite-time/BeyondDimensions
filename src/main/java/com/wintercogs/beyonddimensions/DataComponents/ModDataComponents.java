@@ -15,9 +15,14 @@ public class ModDataComponents {
 
     public static DeferredRegister<DataComponentType<?>> DATA_COMPONENTS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, BeyondDimensions.MODID);
 
-    // 注册一个自己的DataComponentType
+    // 存储维度id
     public static final DeferredHolder<DataComponentType<?>,DataComponentType<Integer>> NET_ID_DATA = register(
             "net_id", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT)
+    );
+
+    // 存储不稳定时空碎片的倒计时
+    public static final DeferredHolder<DataComponentType<?>,DataComponentType<Long>> LONG_DATA = register(
+            "long_data", builder -> builder.persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG)
     );
 
     private static <T> DeferredHolder<DataComponentType<?>,DataComponentType<T>> register(String name, UnaryOperator<DataComponentType.Builder<T>> builder) {

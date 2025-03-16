@@ -21,6 +21,11 @@
   "item.beyonddimensions.net_creater": "维度网络发生器",
   "item.beyonddimensions.net_member_inviter": "成员连接器",
   "item.beyonddimensions.net_manager_inviter": "管理员连接器",
+  "item.beyonddimensions.unstable_space_time_fragment": "不稳定时空碎片",
+  "item.beyonddimensions.stable_space_time_fragment": "稳态时空碎片",
+  "item.beyonddimensions.space_time_stable_frame": "稳定的时空框架",
+  "item.beyonddimensions.shattered_space_time_crystallization": "破碎的时空结晶",
+  "item.beyonddimensions.space_time_bar": "时空锭",
 
   "block.beyonddimensions.net_control": "网络控制器",
   "block.beyonddimensions.net_interface": "网络接口",

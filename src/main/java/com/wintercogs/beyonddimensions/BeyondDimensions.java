@@ -14,10 +14,7 @@ import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.Storage.ChemicalUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
+import com.wintercogs.beyonddimensions.DataBase.Storage.*;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
@@ -66,7 +63,6 @@ public class BeyondDimensions
 
         // 注册事件
         NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
-        NeoForge.EVENT_BUS.register(new DimensionsNetMenu.ItemStackedOnOtherHandler());//注册单个方法
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 

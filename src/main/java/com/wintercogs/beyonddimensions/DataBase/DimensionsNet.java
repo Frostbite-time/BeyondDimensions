@@ -1,16 +1,23 @@
 package com.wintercogs.beyonddimensions.DataBase;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
@@ -43,11 +50,14 @@ public class DimensionsNet extends SavedData
     // 通用存储空间-测试 存储一切stack行为的资源
     private UnifiedStorage unifiedStorage;
 
+    private int currentTime = 600*20;
+    private int holdTime = 600*20;
 
     public DimensionsNet()
     {
         unifiedStorage = new UnifiedStorage(this);
         energyStorage = new EnergyStorage(this);
+        NeoForge.EVENT_BUS.addListener(this::onServerTick);
     }
 
     // 基本函数
@@ -328,5 +338,19 @@ public class DimensionsNet extends SavedData
         return this.unifiedStorage;
     }
 
+    // 用于定期生成破碎时空结晶
+    @SubscribeEvent
+    public void onServerTick(ServerTickEvent.Pre event)
+    {
+        currentTime--;
+        if(currentTime <= 0)
+        {
+            ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(),1);
+            IStackType stackType = new ItemStackType(stack);
+            this.unifiedStorage.insert(stackType,false);
+            currentTime = holdTime;
+        }
+
+    }
 }
 
