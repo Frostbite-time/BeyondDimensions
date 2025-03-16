@@ -436,7 +436,6 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
     // 服务端函数，用于将存储空间完整发到客户端
     public void sendStorage()
     {
-        BeyondDimensions.LOGGER.info("服务端尝试发生AA数据");
         // 只有服务端才能发送存储数据给客户端
         if(player instanceof ServerPlayer)
         {

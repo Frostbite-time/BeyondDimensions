@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
@@ -73,13 +72,11 @@ public class ServerPayloadHandler
                     Player player = context.player();
                     if (player.containerMenu instanceof DimensionsNetMenu menu)
                     {
-                        BeyondDimensions.LOGGER.info("服务端收到数据请求");
                         menu.sendStorage();
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                     if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
                     {
-                        BeyondDimensions.LOGGER.info("服务端收到数据请求");
                         menu.sendStorage();
 
                         // 临时代码，用于通知服务器发送弹出模式
@@ -89,7 +86,6 @@ public class ServerPayloadHandler
                     }
                     if(player.containerMenu instanceof NetEnergyMenu menu)
                     {
-                        BeyondDimensions.LOGGER.info("服务端收到数据请求");
                         menu.sendStorage();
 
                         // 临时代码，用于通知服务器发送弹出模式

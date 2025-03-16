@@ -127,7 +127,7 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
         PacketDistributor.sendToServer(new CallServerPlayerInfoPacket());
 
         ownerButton = Button.builder(
-                Component.literal("移交所有权"),
+                Component.translatable("menu.button.beyonddimensions.setowner"),
                 button -> {
                     if(currentPlayerId != null)
                     {
@@ -138,7 +138,7 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
         addRenderableWidget(ownerButton);
 
         managerButton = Button.builder(
-                Component.literal("设为管理员"),
+                Component.translatable("menu.button.beyonddimensions.setmanager"),
                 button -> {
                     if(currentPlayerId != null)
                     {
@@ -149,7 +149,7 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
         addRenderableWidget(managerButton);
 
         removeManagerButton = Button.builder(
-                Component.literal("移除管理员权限"),
+                Component.translatable("menu.button.beyonddimensions.removemanager"),
                 button -> {
                     if(currentPlayerId != null)
                     {
@@ -160,7 +160,7 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
         addRenderableWidget(removeManagerButton);
 
         removeMemberButton = Button.builder(
-                Component.literal("移除成员"),
+                Component.translatable("menu.button.beyonddimensions.removemember"),
                 button -> {
                     if(currentPlayerId != null)
                     {
@@ -239,13 +239,13 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
         guiGraphics.drawString(this.font, this.title, this.titleLabelX+3, this.titleLabelY, 4210752,false);
-        guiGraphics.drawString(this.font, Component.literal("名称: "+currentPlayerName), 110, 25, 4210752,false);
+        guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.name.player",Component.literal(currentPlayerName)), 110, 25, 4210752,false);
         if(currentPlayerPermissionLevel == null)
         {
-            guiGraphics.drawString(this.font, Component.literal("权限级别: 无"), 110, 10, 4210752,false);
+            guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.permission.level.zero"), 110, 10, 4210752,false);
         }
         else {
-            guiGraphics.drawString(this.font, Component.literal("权限级别: " + currentPlayerPermissionLevel.name()), 110, 10, 4210752,false);
+            guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.permission.level.prefix" , Component.literal(currentPlayerPermissionLevel.name())), 110, 10, 4210752,false);
         }
 
 

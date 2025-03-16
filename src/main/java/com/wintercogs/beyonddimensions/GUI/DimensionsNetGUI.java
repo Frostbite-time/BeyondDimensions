@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
@@ -21,7 +20,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -80,8 +78,8 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
 
         // 初始化搜索方案
-        this.searchField = new EditBox(getFont(), this.leftPos+20+26+10, this.topPos+7, 89, this.getFont().lineHeight+5, Component.translatable("wintercogs.BeyondDimensions.DimensionsGuiSearch"));
-        this.searchField.setSuggestion("输入以搜索...");
+        this.searchField = new EditBox(getFont(), this.leftPos+20+26+10, this.topPos+7, 89, this.getFont().lineHeight+5, Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch"));
+        this.searchField.setSuggestion(Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch").getString());
         this.searchField.setMaxLength(100);
         this.searchField.setBordered(true);
         this.searchField.setVisible(true);
@@ -97,7 +95,6 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
 
         menu.unifiedStorage.getStorage().clear();
         menu.suppressRemoteUpdates();
-        BeyondDimensions.LOGGER.info("客户端发送数据请求");
         PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }
 

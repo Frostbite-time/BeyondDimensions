@@ -122,7 +122,6 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
 
         menu.unifiedStorage.getStorage().clear();
         menu.suppressRemoteUpdates();
-        BeyondDimensions.LOGGER.info("客户端发送数据请求");
         PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }
 

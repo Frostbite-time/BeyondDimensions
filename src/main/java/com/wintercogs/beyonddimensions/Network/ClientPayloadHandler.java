@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
@@ -47,7 +46,6 @@ public class ClientPayloadHandler
         context.enqueueWork(
                 () ->
                 {
-                    BeyondDimensions.LOGGER.info("客户端收到AA数据");
                     Player player = context.player();
                     if (player.containerMenu instanceof DimensionsNetMenu menu)
                     {

@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
@@ -53,7 +52,6 @@ public class NetEnergyGUI extends AbstractContainerScreen<NetEnergyMenu>
 
 
         menu.suppressRemoteUpdates();
-        BeyondDimensions.LOGGER.info("客户端发送数据请求");
         PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }
 
