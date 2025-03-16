@@ -25,6 +25,10 @@ public class ModDataComponents {
             "long_data", builder -> builder.persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG)
     );
 
+    public static final DeferredHolder<DataComponentType<?>,DataComponentType<Long>> TIME_LINE = register(
+      "time_line", builder -> builder.persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG)
+    );
+
     private static <T> DeferredHolder<DataComponentType<?>,DataComponentType<T>> register(String name, UnaryOperator<DataComponentType.Builder<T>> builder) {
         return DATA_COMPONENTS.register(name,()->  builder.apply(DataComponentType.builder()).build());
     }
