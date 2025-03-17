@@ -145,6 +145,9 @@ public class DimensionsNet extends SavedData
             playerList.forEach(player -> net.players.add(UUID.fromString(player.getAsString())));
         }
 
+        // 读取倒计时
+        net.currentTime = tag.getInt("currentTime");
+
         return net;
     }
 
@@ -176,6 +179,9 @@ public class DimensionsNet extends SavedData
         // 保存存储
         tag.put("EnergyStorage",energyStorage.serializeNBT(registryAccess));
         tag.put("UnifiedStorage",unifiedStorage.serializeNBT(registryAccess));
+
+        // 保存倒计时
+        tag.putInt("currentTime", this.currentTime);
 
         return tag;
     }
