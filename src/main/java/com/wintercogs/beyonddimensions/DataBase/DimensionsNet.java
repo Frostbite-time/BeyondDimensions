@@ -349,6 +349,7 @@ public class DimensionsNet extends SavedData
     public void onServerTick(ServerTickEvent.Pre event)
     {
         currentTime--;
+        setDirty();
         if(currentTime <= 0)
         {
             ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(),1);

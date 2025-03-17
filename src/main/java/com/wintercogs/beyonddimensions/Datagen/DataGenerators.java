@@ -46,7 +46,7 @@ public class DataGenerators
         generator.addProvider(event.includeServer(), new ModItemTagProvider(packOutput,lookupProvider,blockTagsProvider.contentsGetter(),existingFileHelper));
 
         // 生成配方表
-        //generator.addProvider(event.includeServer(),new ModRecipeProvider(packOutput,lookupProvider));
+        generator.addProvider(event.includeServer(),new ModRecipeProvider(packOutput,lookupProvider));
 
     }
 }
