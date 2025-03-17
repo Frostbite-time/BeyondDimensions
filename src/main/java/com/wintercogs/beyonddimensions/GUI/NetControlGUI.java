@@ -134,7 +134,7 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
                         PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetOwner));
                     }
                 }
-        ).pos(leftPos+110,topPos+60).size(80,15).build();
+        ).pos(leftPos+110,topPos+60).size(100,20).build();
         addRenderableWidget(ownerButton);
 
         managerButton = Button.builder(
@@ -145,7 +145,7 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
                         PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetManager));
                     }
                 }
-        ).pos(leftPos+110,topPos+60+25).size(80,15).build();
+        ).pos(leftPos+110,topPos+60+25).size(100,20).build();
         addRenderableWidget(managerButton);
 
         removeManagerButton = Button.builder(
@@ -156,7 +156,7 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
                         PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemoveManager));
                     }
                 }
-        ).pos(leftPos+110,topPos+60+50).size(80,15).build();
+        ).pos(leftPos+110,topPos+60+50).size(100,20).build();
         addRenderableWidget(removeManagerButton);
 
         removeMemberButton = Button.builder(
@@ -167,7 +167,7 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
                         PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemovePlayer));
                     }
                 }
-        ).pos(leftPos+110,topPos+60+75).size(80,15).build();
+        ).pos(leftPos+110,topPos+60+75).size(100,20).build();
         addRenderableWidget(removeMemberButton);
     }
 

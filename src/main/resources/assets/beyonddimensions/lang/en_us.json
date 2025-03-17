@@ -1,11 +1,11 @@
 {
-  "menu.title.beyonddimensions.dimensionnetmenu": "Dimensional Network",
-  "menu.title.beyonddimensions.net_control_menu": "Dimensional Network Permission Controller",
+  "menu.title.beyonddimensions.dimensionnetmenu": "Network",
+  "menu.title.beyonddimensions.net_control_menu": "Network Controller",
   "menu.title.beyonddimensions.net_interface_menu": "Network Interface",
   "menu.title.beyonddimensions.net_energy_menu": "Energy Network",
   "beyonddimensions.scrollbar.usage.focused": "Scrollbar is focused",
   "beyonddimensions.scrollbar.usage.hovered": "Mouse is currently hovering over the scrollbar",
-  "wintercogs.beyonddimensions.dimensionsguisearch": "Type to search...",
+  "wintercogs.beyonddimensions.dimensionsguisearch": "Search...",
   "menu.button.beyonddimensions.setowner": "Transfer Ownership",
   "menu.button.beyonddimensions.setmanager": "Set as Manager",
   "menu.button.beyonddimensions.removemanager": "Remove Manager Permissions",
@@ -13,6 +13,7 @@
   "menu.text.beyonddimensions.permission.level.zero": "Permission Level: None",
   "menu.text.beyonddimensions.name.player": "Name: %s",
   "menu.text.beyonddimensions.permission.level.prefix": "Permission Level: %s",
+  "menu.placeholder.beyonddimensions.unknow_player": "Unknow Player",
 
   "key.categories.beyonddimensions": "Beyond Dimensions",
   "key.beyonddimensions.open_gui": "Open Dimensional Network",

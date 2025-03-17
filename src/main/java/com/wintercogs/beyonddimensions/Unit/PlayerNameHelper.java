@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Unit;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
@@ -32,6 +33,6 @@ public class PlayerNameHelper
         }
 
         // 3. 若缓存无记录，返回 null 或特定占位符（可扩展 Mojang API 异步查询）
-        return "未知角色";
+        return "Unknown";
     }
 }
