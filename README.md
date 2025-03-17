@@ -1,25 +1,34 @@
+# 超越维度
 
-Installation information
-=======
+**超越维度** 是一个提供存储空间的模组。它引入了一个在原版游戏后期可获得的虚拟存储系统——**维度网络**。这个网络不依赖于任何方块或物品，玩家可以通过快捷键随时随地访问它。每个物品的存储容量高达 **21亿**，并且支持流体、Mekanism 的化学品以及 FE 能量存储。此外，模组还提供了简单的排序和搜索功能。
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+## 开始
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+1. 使用 **下界之星** 和一些常见材料合成 **不稳定的时空碎片**。
+2. 将不稳定的时空碎片放入背包，等待 **1小时**，它将转化为 **稳态时空碎片**。
+3. 使用稳态时空碎片合成 **维度网络发生器**，即可获得一个 **维度网络**。
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+## 基础物品与方块
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+- **破碎的时空结晶**  
+  创造维度网络后，每10分钟便会自然生成一个。是用于合成模组物品的基础材料
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+- **网络控制器**  
+  用于管理同一网络中的其他玩家。
+
+- **成员邀请器**  
+  允许你与其他玩家共享你的维度网络存储。
+
+- **维度网络通道**  
+  将存储暴露在世界中，允许通过任何模组的管道或原版漏斗访问存储。
+
+- **维度网络能量通道**  
+  允许通过任何模组的管道访问 FE 能量存储。
+
+- **网络接口**  
+  类似于 **应用能源2 (AE2)** 的 ME 接口。可以从网络中抽取标记物品，并将其他物品送回网络。此外，还支持主动向周围方块输出物品。  
+  **注意**：只有安装了 **EMI** 时，才能标记流体和 Mekanism 的化学品。
+
+## 许可证
+
+本模组采用 **MIT 许可证**。
