@@ -1,14 +1,14 @@
 package com.wintercogs.beyonddimensions.Unit;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import com.mojang.authlib.GameProfile;
-import net.minecraft.network.chat.Component;
+
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.Level;
-
-import java.util.Optional;
-import java.util.UUID;
 
 public class PlayerNameHelper
 {
