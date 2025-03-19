@@ -3,10 +3,12 @@ package com.wintercogs.beyonddimensions.DataBase.Storage;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -33,36 +35,28 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     @Override
     public int getSlots()
     {
-        int size = 0;
-        List<IStackType> storage = getStorage();
-        for (int i = 0; i < storage.size(); i++) {
-            IStackType stackType = storage.get(i);
-            if (stackType instanceof ItemStackType) {
-                size++;
-            }
-        }
-        return size;
+        List<Integer> slots = net.getUnifiedStorage().getTypeIdIndexList(ItemStackType.ID);
+        if(slots != null)
+            return slots.size();
+        else return 0;
     }
 
     @Override
     public ItemStack getStackInSlot(int slot)
     {
-        int currentIndex = 0;
-        List<IStackType> storage = getStorage();
-        for (int i = 0; i < storage.size(); i++) {
-            IStackType stackType = storage.get(i);
-            if (stackType instanceof ItemStackType) {
-                if(slot==currentIndex)
-                {
-                    return ((ItemStackType) stackType).copyStack();
-                }
-                else
-                {
-                    currentIndex++;
-                }
-            }
+        // 此处的slot参数是基于特化类型ItemStackType的索引
+        List<Integer> slots = net.getUnifiedStorage().getTypeIdIndexList(ItemStackType.ID);
+        int actualIndex = -1;
+        if(slots != null && 0<=slot && slot < slots.size())
+        {
+            actualIndex = slots.get(slot);
         }
-        return ItemStack.EMPTY;
+
+        if(actualIndex != -1)
+        {
+            return (ItemStack)net.getUnifiedStorage().getStorage().get(actualIndex).copyStack();
+        }
+        else return ItemStack.EMPTY;
     }
 
     @Override

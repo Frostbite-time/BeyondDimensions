@@ -1,11 +1,14 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,36 +36,28 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public int getChemicalTanks()
     {
-        int size = 0;
-        List<IStackType> storage = getStorage();
-        for (int i = 0; i < storage.size(); i++) {
-            IStackType stackType = storage.get(i);
-            if (stackType instanceof ChemicalStackType) {
-                size++;
-            }
-        }
-        return size;
+        List<Integer> slots = net.getUnifiedStorage().getTypeIdIndexList(ChemicalStackType.ID);
+        if(slots != null)
+            return slots.size();
+        else return 0;
     }
 
     @Override
-    public ChemicalStack getChemicalInTank(int tank)
+    public ChemicalStack getChemicalInTank(int slot)
     {
-        int currentIndex = 0;
-        List<IStackType> storage = getStorage();
-        for (int i = 0; i < storage.size(); i++) {
-            IStackType stackType = storage.get(i);
-            if (stackType instanceof ChemicalStackType) {
-                if(tank==currentIndex)
-                {
-                    return ((ChemicalStackType) stackType).copyStack();
-                }
-                else
-                {
-                    currentIndex++;
-                }
-            }
+        // 此处的slot参数是基于特化类型ItemStackType的索引
+        List<Integer> slots = net.getUnifiedStorage().getTypeIdIndexList(ChemicalStackType.ID);
+        int actualIndex = -1;
+        if(slots != null && 0<=slot && slot < slots.size())
+        {
+            actualIndex = slots.get(slot);
         }
-        return null;
+
+        if(actualIndex != -1)
+        {
+            return (ChemicalStack) net.getUnifiedStorage().getStorage().get(actualIndex).copyStack();
+        }
+        else return ChemicalStack.EMPTY;
     }
 
     @Override

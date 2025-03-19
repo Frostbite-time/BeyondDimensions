@@ -1,8 +1,11 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
@@ -31,36 +34,28 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public int getTanks()
     {
-        int size = 0;
-        List<IStackType> storage = getStorage();
-        for (int i = 0; i < storage.size(); i++) {
-            IStackType stackType = storage.get(i);
-            if (stackType instanceof FluidStackType) {
-                size++;
-            }
-        }
-        return size;
+        List<Integer> slots = net.getUnifiedStorage().getTypeIdIndexList(FluidStackType.ID);
+        if(slots != null)
+            return slots.size();
+        else return 0;
     }
 
     @Override
     public FluidStack getFluidInTank(int slot)
     {
-        int currentIndex = 0;
-        List<IStackType> storage = getStorage();
-        for (int i = 0; i < storage.size(); i++) {
-            IStackType stackType = storage.get(i);
-            if (stackType instanceof FluidStackType) {
-                if(slot==currentIndex)
-                {
-                    return ((FluidStackType) stackType).copyStack();
-                }
-                else
-                {
-                    currentIndex++;
-                }
-            }
+        // 此处的slot参数是基于特化类型ItemStackType的索引
+        List<Integer> slots = net.getUnifiedStorage().getTypeIdIndexList(FluidStackType.ID);
+        int actualIndex = -1;
+        if(slots != null && 0<=slot && slot < slots.size())
+        {
+            actualIndex = slots.get(slot);
         }
-        return FluidStack.EMPTY;
+
+        if(actualIndex != -1)
+        {
+            return (FluidStack) net.getUnifiedStorage().getStorage().get(actualIndex).copyStack();
+        }
+        else return FluidStack.EMPTY;
     }
 
     @Override
