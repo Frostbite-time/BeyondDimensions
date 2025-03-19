@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.GUI.Widget.Scroller;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.ScrollBar;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
