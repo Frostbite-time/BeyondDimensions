@@ -69,6 +69,7 @@ public class ClientPayloadHandler
                         if(packet.end())
                         {
                             // 收到结束信号，更新视图，重建索引
+                            menu.unifiedStorage.rebuildAllIndices();
                             menu.updateViewerStorage();
                             menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
                             menu.resumeRemoteUpdates();

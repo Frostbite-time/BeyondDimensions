@@ -292,6 +292,13 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
     }
 
     @Override
+    protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type)
+    {
+        if(slot != null && !(slot instanceof StoredStackSlot))
+            super.slotClicked(slot, slotId, mouseButton, type);
+    }
+
+    @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
         super.mouseReleased(mouseX, mouseY, button);

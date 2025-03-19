@@ -196,6 +196,21 @@ public class UnifiedStorage implements IStackTypedHandler
         }
     }
 
+    // 当外界对存储列表直接操作后（如用于UI界面的数据包发送）
+    public void rebuildAllIndices()
+    {
+        typeIdIndex.clear();
+        for(int i = 0; i < storage.size(); i++)
+        {
+            IStackType stack = storage.get(i);
+            if(stack != null && !stack.isEmpty())
+            {
+                ResourceLocation typeId = stack.getTypeId();
+                typeIdIndex.computeIfAbsent(typeId, k -> new ArrayList<>()).add(i);
+            }
+        }
+    }
+
     // 尝试按槽位导出 返回实际导出量
     @Override
     public IStackType extract(int slot,long amount, boolean simulate) {
