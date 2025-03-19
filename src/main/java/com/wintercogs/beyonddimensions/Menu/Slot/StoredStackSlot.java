@@ -93,7 +93,7 @@ public class StoredStackSlot extends Slot
 
     public IStackType getStack()
     {
-        if(getSlotIndex()<0)
+        if(getSlotIndex()<0||getSlotIndex()>=stackTypedHandler.getSlots())
         {
             return new ItemStackType(ItemStack.EMPTY);
         }

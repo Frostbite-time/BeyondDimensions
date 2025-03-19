@@ -294,6 +294,13 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         }
     }
 
+    @Override
+    protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type)
+    {
+        if(slot != null && !(slot instanceof StoredStackSlot))
+            super.slotClicked(slot, slotId, mouseButton, type);
+    }
+
     // 父类keypressd中控制快捷栏按键移动的方法
     @Override
     protected boolean checkHotbarKeyPressed(int keyCode, int scanCode)
