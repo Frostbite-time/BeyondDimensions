@@ -104,6 +104,12 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         //每tick自动更新搜索方案
         if(!lastButtonStateMap.equals(buttonStateMap) || !Objects.equals(lastSearchText, searchField.getValue()))
         {
+
+            if(!searchField.getValue().equals(""))
+                searchField.setSuggestion(null);
+            else
+                searchField.setSuggestion(Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch").getString());
+
             menu.loadSearchText(searchField.getValue());
             menu.loadButtonState(buttonStateMap);
             menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
