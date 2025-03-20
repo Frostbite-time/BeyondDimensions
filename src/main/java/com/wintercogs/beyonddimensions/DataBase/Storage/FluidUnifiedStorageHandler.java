@@ -2,11 +2,9 @@ package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FluidUnifiedStorageHandler implements IFluidHandler
@@ -21,11 +19,6 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     public void onChange()
     {
         net.setDirty();
-    }
-
-    public ArrayList<IStackType> getStorage()
-    {
-        return this.net.getUnifiedStorage().getStorage();
     }
 
     @Override
@@ -50,7 +43,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
 
         if(actualIndex != -1)
         {
-            return (FluidStack) net.getUnifiedStorage().getStorage().get(actualIndex).copyStack();
+            return (FluidStack) net.getUnifiedStorage().getStackBySlot(actualIndex).getStack();
         }
         else return FluidStack.EMPTY;
     }

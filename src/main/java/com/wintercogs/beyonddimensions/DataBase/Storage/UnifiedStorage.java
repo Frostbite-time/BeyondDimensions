@@ -11,10 +11,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UnifiedStorage implements IStackTypedHandler
 {
@@ -39,16 +36,24 @@ public class UnifiedStorage implements IStackTypedHandler
         return storage.size();
     }
 
+    // 返回副本
     @Override
     public IStackType getStackBySlot(int slot)
     {
         return IStackTypedHandler.super.getStackBySlot(slot);
     }
 
+    // 外部不可修改
     @Override
-    public ArrayList<IStackType> getStorage()
+    public List<IStackType> getStorage()
     {
-        return this.storage;
+        return Collections.unmodifiableList(this.storage);
+    }
+
+    // 为UI界面提供一个外部修改方案
+    public void clearStorage()
+    {
+        this.storage.clear();
     }
 
     @Override
@@ -281,7 +286,7 @@ public class UnifiedStorage implements IStackTypedHandler
             if(stackActual.isEmpty())
                 continue; // 不添加空物品
                 
-            getStorage().add(stackActual);
+            this.storage.add(stackActual);
             // 更新索引
             typeIdIndex.computeIfAbsent(typeId, k -> new ArrayList<>()).add(storage.size() - 1);
         }

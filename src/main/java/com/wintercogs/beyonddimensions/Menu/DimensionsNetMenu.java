@@ -138,7 +138,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
      */
     public void updateViewerStorage()
     {
-        viewerUnifiedStorage.getStorage().clear();
+        viewerUnifiedStorage.clearStorage();
         viewerUnifiedStorage.getTypeIdIndexMap().clear();
         for(IStackType stack : this.unifiedStorage.getStorage())
         {

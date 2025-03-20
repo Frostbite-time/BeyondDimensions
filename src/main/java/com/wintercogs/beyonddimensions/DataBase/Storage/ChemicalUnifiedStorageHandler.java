@@ -25,11 +25,6 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
         net.setDirty();
     }
 
-    public ArrayList<IStackType> getStorage()
-    {
-        return this.net.getUnifiedStorage().getStorage();
-    }
-
     @Override
     public int getChemicalTanks()
     {
@@ -52,7 +47,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
 
         if(actualIndex != -1)
         {
-            return (ChemicalStack) net.getUnifiedStorage().getStorage().get(actualIndex).copyStack();
+            return (ChemicalStack) net.getUnifiedStorage().getStackBySlot(actualIndex).getStack();
         }
         else return ChemicalStack.EMPTY;
     }

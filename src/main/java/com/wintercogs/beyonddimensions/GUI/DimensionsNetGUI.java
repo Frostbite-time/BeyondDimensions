@@ -93,7 +93,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         lastButtonStateMap = new HashMap<>(buttonStateMap);
         lastSearchText = searchField.getValue();
 
-        menu.unifiedStorage.getStorage().clear();
+        menu.unifiedStorage.clearStorage();
         menu.suppressRemoteUpdates();
         PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }

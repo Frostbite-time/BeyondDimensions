@@ -23,12 +23,6 @@ public class ItemUnifiedStorageHandler implements IItemHandler
         net.setDirty();
     }
 
-    public ArrayList<IStackType> getStorage()
-    {
-        return this.net.getUnifiedStorage().getStorage();
-    }
-
-
     @Override
     public int getSlots()
     {
@@ -51,7 +45,7 @@ public class ItemUnifiedStorageHandler implements IItemHandler
 
         if(actualIndex != -1)
         {
-            return (ItemStack)net.getUnifiedStorage().getStorage().get(actualIndex).copyStack();
+            return (ItemStack)net.getUnifiedStorage().getStackBySlot(actualIndex).getStack();
         }
         else return ItemStack.EMPTY;
     }

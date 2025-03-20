@@ -51,25 +51,13 @@ public class ClientPayloadHandler
                     {
                         for(int i = 0; i<packet.stacks().size(); i++)
                         {
+                            // unifiedStorage为基于物品的存储方案，只关心物品种类与数量。因此可以避开索引的远端同步需求
                             UnifiedStorage unifiedStorage = menu.unifiedStorage;
-                            if (unifiedStorage.getStorage().size() > packet.indexs().get(i))
-                                unifiedStorage.getStorage().set(packet.indexs().get(i), packet.stacks().get(i));
-                            else if(unifiedStorage.getStorage().size() == packet.indexs().get(i))
-                                unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
-                            else
-                            {
-                                //将size到Index-1之间的位置填充为空，然后填充Index位置
-                                // 扩展列表直到 targetIndex - 1，并填充 null
-                                while (unifiedStorage.getStorage().size() < packet.indexs().get(i)) {
-                                    unifiedStorage.getStorage().add(new ItemStackType(ItemStack.EMPTY));  // 填充空值
-                                }
-                                unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
-                            }
+                            unifiedStorage.insert(packet.stacks().get(i),false);
                         }
                         if(packet.end())
                         {
-                            // 收到结束信号，更新视图，重建索引
-                            menu.unifiedStorage.rebuildAllIndices();
+                            //viewerStorage基于unifiedStorage构建。是故其位置与unifiedStorage保持完全的正确。同样避开对索引的远端同步需求
                             menu.updateViewerStorage();
                             menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
                             menu.resumeRemoteUpdates();
