@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -74,6 +75,15 @@ public class NetInterfaceBlock extends NetedBlock implements EntityBlock
                 level.updateNeighbourForOutputSignal(pos, this);
             }
             super.onRemove(state, level, pos, newState, movedByPiston);
+        }
+    }
+
+    @Override
+    public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor)
+    {
+        super.onNeighborChange(state, level, pos, neighbor);
+        if (level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity) {
+            blockEntity.setNeedsCapabilityUpdate();
         }
     }
 

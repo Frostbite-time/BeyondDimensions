@@ -1,5 +1,9 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.function.Function;
+
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
@@ -8,6 +12,7 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -22,8 +27,6 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
-
-import java.util.function.Function;
 
 public class NetInterfaceBlockEntity extends NetedBlockEntity
 {
@@ -52,6 +55,12 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     public boolean popMode = false;
 
     private final Direction[] directions = Direction.values();
+    
+    // 缓存相邻方块的能力
+    private final Map<Direction, IItemHandler> itemHandlerCache = new EnumMap<>(Direction.class);
+    private final Map<Direction, IFluidHandler> fluidHandlerCache = new EnumMap<>(Direction.class);
+    private final Map<Direction, Object> chemicalHandlerCache = new EnumMap<>(Direction.class);
+    private boolean needsCapabilityUpdate = true;
 
     public StackTypedHandler getStackHandler()
     {
@@ -60,11 +69,60 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
 
     public StackTypedHandler getFakeStackHandler(){
         return this.fakeStackHandler;
-}
+    }
 
     public NetInterfaceBlockEntity(BlockPos pos, BlockState blockState)
     {
         super(ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
+    }
+
+    // 更新能力缓存
+    public void updateCapabilityCache() {
+        if (level == null || !needsCapabilityUpdate) return;
+        
+        itemHandlerCache.clear();
+        fluidHandlerCache.clear();
+        chemicalHandlerCache.clear();
+        
+        for (Direction dir : directions) {
+            BlockPos targetPos = this.getBlockPos().relative(dir);
+            BlockEntity neighbor = level.getBlockEntity(targetPos);
+            if (neighbor != null && !(neighbor instanceof NetedBlockEntity)) {
+                // 缓存物品能力
+                IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, targetPos, dir.getOpposite());
+                if (itemHandler != null) {
+                    itemHandlerCache.put(dir, itemHandler);
+                }
+                
+                // 缓存流体能力
+                IFluidHandler fluidHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, targetPos, dir.getOpposite());
+                if (fluidHandler != null) {
+                    fluidHandlerCache.put(dir, fluidHandler);
+                }
+                
+                // 缓存化学品能力
+                if (BeyondDimensions.MekLoaded) {
+                    Object chemicalHandler = level.getCapability(ChemicalCapabilityHelper.CHEMICAL, targetPos, dir.getOpposite());
+                    if (chemicalHandler != null) {
+                        chemicalHandlerCache.put(dir, chemicalHandler);
+                    }
+                }
+            }
+        }
+        
+        needsCapabilityUpdate = false;
+    }
+
+    public void setNeedsCapabilityUpdate()
+    {
+        needsCapabilityUpdate = true;
+    }
+
+    @Override
+    public void invalidateCapabilities()
+    {
+        super.invalidateCapabilities();
+        setNeedsCapabilityUpdate();
     }
 
     //--- 能力注册 (通过事件) ---
@@ -104,6 +162,8 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         // 尝试输出物品到周围
         if(blockEntity.popMode)
         {
+            // 在使用缓存前确保它是最新的
+            blockEntity.updateCapabilityCache();
             blockEntity.popStack();
         }
     }
@@ -181,26 +241,80 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     {
         for(Direction dir: directions)
         {
-            BlockPos targetPos = this.getBlockPos().relative(dir);
-            BlockEntity neighbor = level.getBlockEntity(targetPos);
-            if(neighbor != null && !(neighbor instanceof NetedBlockEntity))
+            // 使用缓存的物品处理器
+            IItemHandler itemHandler = itemHandlerCache.get(dir);
+            if(itemHandler != null)
             {
-                // 开始查询能力 记住，你获取你上方的方块，一定是获取其下方的能力
-                IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK,targetPos,dir.getOpposite());
-                if(itemHandler != null)
+                for(int i = 0;i<9;i++)
                 {
+                    if(fakeStackHandler.getStackBySlot(i).getStack() instanceof ItemStack)
+                    {
+                        if(fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
+                        {
+                            ItemStack current = (ItemStack) stackHandler.getStackBySlot(i).copyStack();
+
+                            for(int slot= 0;slot< itemHandler.getSlots();slot++)
+                            {
+                                ItemStack remaining = itemHandler.insertItem(slot,current.copy(),false);
+                                int extract = current.getCount() - remaining.getCount();
+                                stackHandler.extract(i,extract,false);
+                                current.shrink(extract);
+                                if(current.isEmpty())
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 使用缓存的流体处理器
+            IFluidHandler fluidHandler = fluidHandlerCache.get(dir);
+            if(fluidHandler != null)
+            {
+                for(int i = 0;i<9;i++)
+                {
+                    if(fakeStackHandler.getStackBySlot(i).getStack() instanceof FluidStack)
+                    {
+                        if(fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
+                        {
+                            FluidStack current = (FluidStack) stackHandler.getStackBySlot(i).copyStack();
+
+                            for(int slot= 0;slot< fluidHandler.getTanks();slot++)
+                            {
+                                int insert = fluidHandler.fill(current.copy(), IFluidHandler.FluidAction.EXECUTE);
+                                if(insert>0)
+                                {
+                                    stackHandler.extract(i,insert,false);
+                                    current.shrink(insert);
+                                }
+                                if(current.isEmpty())
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 使用缓存的化学品处理器
+            if(BeyondDimensions.MekLoaded)
+            {
+                Object tryChemicalHandler = chemicalHandlerCache.get(dir);
+                if(tryChemicalHandler != null)
+                {
+                    mekanism.api.chemical.IChemicalHandler chemicalHandler = (mekanism.api.chemical.IChemicalHandler) tryChemicalHandler;
+
                     for(int i = 0;i<9;i++)
                     {
-                        if(fakeStackHandler.getStackBySlot(i).getStack() instanceof ItemStack)
+                        if(fakeStackHandler.getStackBySlot(i).getStack() instanceof mekanism.api.chemical.ChemicalStack)
                         {
                             if(fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
                             {
-                                ItemStack current = (ItemStack) stackHandler.getStackBySlot(i).copyStack();
+                                mekanism.api.chemical.ChemicalStack current = (mekanism.api.chemical.ChemicalStack) stackHandler.getStackBySlot(i).copyStack();
 
-                                for(int slot= 0;slot< itemHandler.getSlots();slot++)
+                                for(int slot= 0;slot< chemicalHandler.getChemicalTanks();slot++)
                                 {
-                                    ItemStack remaining = itemHandler.insertItem(slot,current.copy(),false);
-                                    int extract = current.getCount() - remaining.getCount();
+                                    mekanism.api.chemical.ChemicalStack remaining = chemicalHandler.insertChemical(slot,current.copy(), mekanism.api.Action.EXECUTE);
+                                    long extract = current.getAmount() - remaining.getAmount();
                                     stackHandler.extract(i,extract,false);
                                     current.shrink(extract);
                                     if(current.isEmpty())
@@ -210,69 +324,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
                         }
                     }
                 }
-
-                // 流体能力
-                IFluidHandler fluidHandler = level.getCapability(Capabilities.FluidHandler.BLOCK,targetPos,dir.getOpposite());
-                if(fluidHandler != null)
-                {
-                    for(int i = 0;i<9;i++)
-                    {
-                        if(fakeStackHandler.getStackBySlot(i).getStack() instanceof FluidStack)
-                        {
-                            if(fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
-                            {
-                                FluidStack current = (FluidStack) stackHandler.getStackBySlot(i).copyStack();
-
-                                for(int slot= 0;slot< fluidHandler.getTanks();slot++)
-                                {
-                                    int insert = fluidHandler.fill(current.copy(), IFluidHandler.FluidAction.EXECUTE);
-                                    if(insert>0)
-                                    {
-                                        stackHandler.extract(i,insert,false);
-                                        current.shrink(insert);
-                                    }
-                                    if(current.isEmpty())
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // 读取化学品能力
-                if(BeyondDimensions.MekLoaded)
-                {
-                    Object tryChemicalHandler = level.getCapability(ChemicalCapabilityHelper.CHEMICAL,targetPos,dir.getOpposite());
-                    mekanism.api.chemical.IChemicalHandler chemicalHandler;
-                    if(tryChemicalHandler != null)
-                    {
-                        chemicalHandler = (mekanism.api.chemical.IChemicalHandler) tryChemicalHandler;
-
-                        for(int i = 0;i<9;i++)
-                        {
-                            if(fakeStackHandler.getStackBySlot(i).getStack() instanceof mekanism.api.chemical.ChemicalStack)
-                            {
-                                if(fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
-                                {
-                                    mekanism.api.chemical.ChemicalStack current = (mekanism.api.chemical.ChemicalStack) stackHandler.getStackBySlot(i).copyStack();
-
-                                    for(int slot= 0;slot< chemicalHandler.getChemicalTanks();slot++)
-                                    {
-                                        mekanism.api.chemical.ChemicalStack remaining = chemicalHandler.insertChemical(slot,current.copy(), mekanism.api.Action.EXECUTE);
-                                        long extract = current.getAmount() - remaining.getAmount();
-                                        stackHandler.extract(i,extract,false);
-                                        current.shrink(extract);
-                                        if(current.isEmpty())
-                                            break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
             }
-
         }
     }
 
@@ -283,6 +335,8 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         this.stackHandler.deserializeNBT(registries,tag.getCompound("inventory"));
         this.fakeStackHandler.deserializeNBT(registries,tag.getCompound("flags"));
         this.popMode = tag.getBoolean("popMode");
+        // 加载后需要更新缓存
+        setNeedsCapabilityUpdate();
     }
 
     @Override
@@ -292,5 +346,11 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         tag.put("inventory", stackHandler.serializeNBT(registries));
         tag.put("flags",fakeStackHandler.serializeNBT(registries));
         tag.putBoolean("popMode",this.popMode);
+    }
+    
+    // 在方块状态变化时重新缓存能力
+    @Override
+    public void setChanged() {
+        super.setChanged();
     }
 }
