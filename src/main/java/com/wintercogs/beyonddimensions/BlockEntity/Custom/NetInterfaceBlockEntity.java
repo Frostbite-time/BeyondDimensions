@@ -1,9 +1,5 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.function.Function;
-
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
@@ -12,7 +8,6 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -28,6 +23,10 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.function.Function;
+
 public class NetInterfaceBlockEntity extends NetedBlockEntity
 {
     public final int transHold = 20;
@@ -36,10 +35,12 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     // 用来标记物品或者流体的槽位，只由UI控制
     private final StackTypedHandler fakeStackHandler = new StackTypedHandler(9)
     {
+        // 只触发方块自身的保存，但是不向周围发信
         @Override
         public void onChange()
         {
-            setChanged();
+            if(!level.isClientSide())
+                level.blockEntityChanged(worldPosition);
         }
     };
 
@@ -48,7 +49,8 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         @Override
         public void onChange()
         {
-            setChanged();
+            if(!level.isClientSide())
+                level.blockEntityChanged(worldPosition);
         }
     };
 
@@ -252,7 +254,6 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
                         if(fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
                         {
                             ItemStack current = (ItemStack) stackHandler.getStackBySlot(i).copyStack();
-
                             for(int slot= 0;slot< itemHandler.getSlots();slot++)
                             {
                                 ItemStack remaining = itemHandler.insertItem(slot,current.copy(),false);
