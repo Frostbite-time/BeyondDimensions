@@ -1,8 +1,6 @@
 package com.wintercogs.beyonddimensions.DataBase.Handler;
 
-import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 

@@ -2,12 +2,10 @@ package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ChemicalUnifiedStorageHandler implements IChemicalHandler

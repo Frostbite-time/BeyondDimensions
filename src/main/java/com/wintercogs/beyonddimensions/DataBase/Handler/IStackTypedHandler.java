@@ -79,7 +79,7 @@ public interface IStackTypedHandler
         onChange();
     }
 
-    // 无视任何限制，在指定槽位处添加一个元素
+    // 无视任何限制，添加一个元素
     // 只有你确定需要使用它再使用
     default void addStackDirectly(IStackType stack)
     {

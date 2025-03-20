@@ -1,22 +1,17 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
-
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.*;
 
 public class UnifiedStorage implements IStackTypedHandler
 {
@@ -90,10 +85,8 @@ public class UnifiedStorage implements IStackTypedHandler
     {
         //使用add方法增加Stack，并且更新索引
         ResourceLocation newTypeId = stack.getTypeId();
-        ResourceLocation oldTypeId = getStorage().get(slot).getTypeId();
         storage.add(slot,stack.copy());
         // storage自增导致的可能的空索引位置无需管，因为那个位置是null。如果读取必然出错，这是编写时候由其他方法保证的
-        typeIdIndex.computeIfAbsent(oldTypeId, k -> new ArrayList<>()).remove(Integer.valueOf(slot));
         typeIdIndex.computeIfAbsent(newTypeId, k -> new ArrayList<>()).add(slot);
         onChange();
     }

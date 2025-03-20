@@ -1,21 +1,16 @@
 package com.wintercogs.beyonddimensions.DataBase.Handler;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
-
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.*;
 
 // 一个通用的，用于存储IStackType实例的类
 // 所有相关方法都已经在接口以默认方法，非类型化的实现

@@ -1,21 +1,5 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import org.lwjgl.glfw.GLFW;
-
 import com.google.common.base.Suppliers;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
@@ -29,7 +13,6 @@ import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Packet.StoragePacket;
 import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
 import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
-
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
@@ -39,11 +22,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.DataSlot;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.inventory.SimpleContainerData;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -53,6 +32,12 @@ import net.neoforged.neoforge.event.ItemStackedOnOtherEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * 打开维度网络时候所用到的Menu，处理了网络同步以及点击操作等问题

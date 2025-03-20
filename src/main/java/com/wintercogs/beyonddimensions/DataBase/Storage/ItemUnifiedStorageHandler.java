@@ -1,12 +1,10 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 
 // 以IStackType为基础实现IItemHandler的类
