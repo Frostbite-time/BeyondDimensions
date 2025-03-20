@@ -69,26 +69,26 @@ public class ClientPayloadHandler
                     {
                         for(int i = 0; i<packet.stacks().size(); i++)
                         {
-                            IStackTypedHandler unifiedStorage = menu.unifiedStorage;
+                            IStackTypedHandler unifiedStorage = menu.storageHandler;
                             if (unifiedStorage.getStorage().size() > packet.indexs().get(i))
-                                unifiedStorage.getStorage().set(packet.indexs().get(i), packet.stacks().get(i));
+                                unifiedStorage.setStackDirectly(packet.indexs().get(i), packet.stacks().get(i));
                             else if(unifiedStorage.getStorage().size() == packet.indexs().get(i))
-                                unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
+                                unifiedStorage.addStackToIndexDirectly(packet.indexs().get(i), packet.stacks().get(i));
                             else
                             {
                                 //将size到Index-1之间的位置填充为空，然后填充Index位置
                                 // 扩展列表直到 targetIndex - 1，并填充 null
                                 while (unifiedStorage.getStorage().size() < packet.indexs().get(i)) {
-                                    unifiedStorage.getStorage().add(new ItemStackType(ItemStack.EMPTY));  // 填充空值
+                                    unifiedStorage.addStackDirectly(new ItemStackType(ItemStack.EMPTY));  // 填充空值
                                 }
-                                unifiedStorage.getStorage().add(packet.indexs().get(i), packet.stacks().get(i));
+                                unifiedStorage.addStackToIndexDirectly(packet.indexs().get(i), packet.stacks().get(i));
                             }
                         }
                         if(packet.end())
                         {
                             // 收到结束信号，更新视图，重建索引
                             menu.updateViewerStorage();
-                            menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
+                            menu.buildIndexList(new ArrayList<>(menu.viewerStorageHandler.getStorage()));
                             menu.resumeRemoteUpdates();
                         }
                     }
@@ -146,7 +146,7 @@ public class ClientPayloadHandler
                     }
                     if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
                     {
-                        IStackTypedHandler clientStorage = menu.unifiedStorage;
+                        IStackTypedHandler clientStorage = menu.storageHandler;
                         int i = 0;
                         for(IStackType remoteStack : packet.stacks())
                         {
@@ -242,7 +242,7 @@ public class ClientPayloadHandler
                         int i = 0;
                         for(IStackType remoteStack : packet.flags())
                         {
-                            clientStorage.getStorage().set(packet.targetIndex().get(i),remoteStack.copyWithCount(1));
+                            clientStorage.setStackDirectly(packet.targetIndex().get(i),remoteStack.copyWithCount(1));
                             i++; // 一次遍历完毕后索引自增
                         }
                         menu.updateViewerStorage();

@@ -41,18 +41,18 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
 {
     /// 双端通用数据
     private final Player player; // 打开Menu的玩家实例
-    public final IStackTypedHandler unifiedStorage; // Menu所对应的存储，服务端通过savedData获取，客户端通过网络请求获取
+    public final StackTypedHandler storageHandler; // Menu所对应的存储，服务端通过savedData获取，客户端通过网络请求获取
     /// 客户端数据
     private int lines = 1; //渲染的menu行数
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     public boolean isHanding = false; // 用于标记当前是否向服务端发出操作请求却未得到回应 true表示无正在处理未回应，false表示空闲
-    public IStackTypedHandler viewerUnifiedStorage; // 在客户端，用于显示物品
+    public StackTypedHandler viewerStorageHandler; // 在客户端，用于显示物品
     /// 服务端数据
-    private ArrayList<IStackType> lastItemStorage; // 记录截至上一次同步时的存储状态，用于同步数据
+    private ArrayList<IStackType> lastStorageHandler; // 记录截至上一次同步时的存储状态，用于同步数据
 
-    public final IStackTypedHandler flagStorage;
-    public IStackTypedHandler viewerFlagStorage;
+    public final StackTypedHandler flagStorage;
+    public StackTypedHandler viewerFlagStorage;
     public ArrayList<IStackType> lastFlagStorage;
 
     public boolean popMode;
@@ -82,21 +82,21 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
      * @param playerInventory 玩家背包
      * @param uselessContainer 此处无用，传入new SimpleContainerData(0)即可
      */
-    public NetInterfaceBaseMenu(int id, Inventory playerInventory, IStackTypedHandler storage , IStackTypedHandler flagStorage, NetInterfaceBlockEntity be, SimpleContainerData uselessContainer)
+    public NetInterfaceBaseMenu(int id, Inventory playerInventory, StackTypedHandler storage , StackTypedHandler flagStorage, NetInterfaceBlockEntity be, SimpleContainerData uselessContainer)
     {
         super(Net_Interface_Menu.get(), id);
         // 初始化维度网络容器
         this.popMode = false;
-        this.unifiedStorage = storage;
-        viewerUnifiedStorage = new StackTypedHandler(9); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
+        this.storageHandler = storage;
+        viewerStorageHandler = new StackTypedHandler(9); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
         this.player = playerInventory.player;
         if(!player.level().isClientSide())
         {
             // 将lastItemStorage设置为一个深克隆，以便后续进行比较
-            this.lastItemStorage = new ArrayList<>();
-            for(IStackType stack : this.unifiedStorage.getStorage())
+            this.lastStorageHandler = new ArrayList<>();
+            for(IStackType stack : this.storageHandler.getStorage())
             {
-                this.lastItemStorage.add(stack.copy());
+                this.lastStorageHandler.add(stack.copy());
             }
             this.popMode = be.popMode;
             this.be = be;
@@ -124,7 +124,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
             // 由于我们完全不依靠menu自带得方法来同步，所以可以传入一个和实际数据同步所用不一样的Storage
             // 只需要保证我们能及时把数据从实际数据同步到viewerUnifiedStorage
             // 再将slot点击操作重写的物品种类依赖
-            this.addSlot(new StoredStackSlot(viewerUnifiedStorage, col, 8 + col * 18, 71));
+            this.addSlot(new StoredStackSlot(viewerStorageHandler, col, 8 + col * 18, 71));
         }
 
         for(int i=0;i<flagStorage.getStorage().size();i++)
@@ -155,15 +155,15 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
     public void updateViewerStorage()
     {
         // 清空容器
-        for(IStackType stack : viewerUnifiedStorage.getStorage())
+        for(IStackType stack : viewerStorageHandler.getStorage())
         {
             stack.setStackAmount(-1); //设为空
         }
-        for(int i=0;i<this.unifiedStorage.getStorage().size();i++)
+        for(int i = 0; i<this.storageHandler.getStorage().size(); i++)
         {
-            this.viewerUnifiedStorage.insert(i,unifiedStorage.getStorage().get(i).copy(),false);
+            this.viewerStorageHandler.insert(i, storageHandler.getStackBySlot(i) ,false);
         }
-        buildIndexList(new ArrayList<>(viewerUnifiedStorage.getStorage()));
+        buildIndexList(new ArrayList<>(viewerStorageHandler.getStorage()));
 
         // flag容器
         for(IStackType stack : viewerFlagStorage.getStorage())
@@ -172,7 +172,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
         }
         for(int i=0;i<this.flagStorage.getStorage().size();i++)
         {
-            this.viewerFlagStorage.insert(i,flagStorage.getStorage().get(i).copy(),false);
+            this.viewerFlagStorage.insert(i,flagStorage.getStackBySlot(i),false);
         }
         buildIndexList(new ArrayList<>(viewerFlagStorage.getStorage()));
     }
@@ -183,7 +183,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
      */
     public final void ScrollTo()
     {
-        this.buildIndexList(new ArrayList<>(this.viewerUnifiedStorage.getStorage()));
+        this.buildIndexList(new ArrayList<>(this.viewerStorageHandler.getStorage()));
 
         this.buildIndexList(new ArrayList<>(this.viewerFlagStorage.getStorage()));
     }
@@ -293,12 +293,12 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
 
         // 创建带索引的深拷贝缓存
         List<@Nullable IStackType> lastSnapshot = new ArrayList<>();
-        for (IStackType stack : this.lastItemStorage) {
+        for (IStackType stack : this.lastStorageHandler) {
             lastSnapshot.add(stack != null ? stack.copy() : null);
         }
 
         List<@Nullable IStackType> currentSnapshot = new ArrayList<>();
-        for (IStackType stack : this.unifiedStorage.getStorage()) {
+        for (IStackType stack : this.storageHandler.getStorage()) {
             currentSnapshot.add(stack != null ? stack.copy() : null);
         }
 
@@ -350,8 +350,8 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
         }
 
         // 更新最后快照（需要保持与当前相同的槽位数量）
-        this.lastItemStorage.clear();
-        this.lastItemStorage.addAll(currentSnapshot);
+        this.lastStorageHandler.clear();
+        this.lastStorageHandler.addAll(currentSnapshot);
 
 
         // 同步flag容器（修改后版本）
@@ -420,10 +420,10 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
 
     public void refreshLast()
     {
-        this.lastItemStorage.clear();
-        for(IStackType stack : this.unifiedStorage.getStorage())
+        this.lastStorageHandler.clear();
+        for(IStackType stack : this.storageHandler.getStorage())
         {
-            this.lastItemStorage.add(stack.copy());
+            this.lastStorageHandler.add(stack.copy());
         }
 
         this.lastFlagStorage.clear();
@@ -444,7 +444,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
             ArrayList<Integer> currentIndices = new ArrayList<>(); // 用于精确记录索引，防止因网络延时导致错误
             int currentPayloadSize = 0; // 当前包大小
             final int MAX_PAYLOAD_SIZE = 900000; // 单个包最大大小  服务端发送到客户端的包不能大于1MiB 此处留下100KB冗余
-            ArrayList<IStackType> storage = new ArrayList<>(this.unifiedStorage.getStorage()); // 当前存储空间的浅克隆
+            ArrayList<IStackType> storage = new ArrayList<>(this.storageHandler.getStorage()); // 当前存储空间的浅克隆
 
             for(int i = 0;i<storage.size();i++)
             {
@@ -519,7 +519,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
         // 同时，从用到customClickHandler的类中，移除quickMoveStack和OnItemStackedHandle对于维度槽位的操作
         // ps：其实吧。。。有维度槽位才会用到customClickHandler。。。没有维度槽位不需要customClickHandler额外处理
         // 之所以多出customClickHandler是因为维度槽位的容器本体是数组，移除会导致索引变更的闪烁
-        IStackTypedHandler trueItemStorage = this.unifiedStorage;
+        IStackTypedHandler trueItemStorage = this.storageHandler;
         if(shiftDown)
         {
             quickMoveHandle(player,slotIndex,clickedStack,trueItemStorage);
@@ -540,11 +540,12 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
         {
             if(flagStack.isEmpty()&&getCarried().isEmpty())
             {
-                flagStorage.getStorage().set(slot.getSlotIndex(),new ItemStackType());
+                //flagStorage.getStorage().set(slot.getSlotIndex(),new ItemStackType());
+                flagStorage.setStackDirectly(slot.getSlotIndex(), new ItemStackType());
             }
             else
             {
-                flagStorage.getStorage().set(slot.getSlotIndex(),flagStack);
+                flagStorage.setStackDirectly(slot.getSlotIndex(),flagStack);
             }
             return; // 结束处理
         }
@@ -626,11 +627,11 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
         {
             if(carriedItem.isEmpty())
             {
-                flagStorage.getStorage().set(slot.getSlotIndex(),new ItemStackType());
+                flagStorage.setStackDirectly(slot.getSlotIndex(),new ItemStackType());
             }
             else
             {
-                flagStorage.getStorage().set(slot.getSlotIndex(),new ItemStackType(carriedItem.copyWithCount(1)));
+                flagStorage.setStackDirectly(slot.getSlotIndex(),new ItemStackType(carriedItem.copyWithCount(1)));
             }
             return; // 结束处理
         }
@@ -732,7 +733,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
             if(this.slots.get(i) instanceof StoredStackSlot)
             {
                 // 物品全部移动到存储，然后手动退出
-                unifiedStorage.insert(StackCreater.Create(new ItemStackType().getTypeId(), stack.copy(),stack.getCount()),false);
+                storageHandler.insert(StackCreater.Create(new ItemStackType().getTypeId(), stack.copy(),stack.getCount()),false);
                 flag = true;
                 break;
             }

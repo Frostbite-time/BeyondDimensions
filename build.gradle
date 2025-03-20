@@ -152,8 +152,6 @@ dependencies {
 
     // 编译通用机械的api 以便使用化学品存储
     compileOnly "mekanism:Mekanism:${mekanism_version}:api"
-    // 编译时使用ae2的api 以便使用ae的频道系统
-    compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}:api"
 
     // EMI支持
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"

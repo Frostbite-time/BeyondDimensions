@@ -120,7 +120,7 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         addRenderableWidget(popButton);
 
 
-        menu.unifiedStorage.getStorage().clear();
+        menu.storageHandler.clearStorage();
         menu.suppressRemoteUpdates();
         PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }
@@ -129,7 +129,7 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
     protected void containerTick() {
         //父类无操作
         //每tick自动更新搜索方案
-        menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
+        menu.buildIndexList(new ArrayList<>(menu.viewerStorageHandler.getStorage()));
 
         if(menu.popMode)
         {

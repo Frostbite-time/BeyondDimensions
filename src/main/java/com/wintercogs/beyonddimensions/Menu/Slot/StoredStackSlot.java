@@ -145,17 +145,17 @@ public class StoredStackSlot extends Slot
         // 当尝试用一个物品真正覆盖这个槽内容会发生什么
         // 如果索引不存在，使用add自增长，如果存在，直接替换
         if (stackTypedHandler.getStorage().size() > getSlotIndex())
-            stackTypedHandler.getStorage().set(getSlotIndex(), new ItemStackType(stack.copy()));
+            stackTypedHandler.setStackDirectly(getSlotIndex(), new ItemStackType(stack.copy()));
         else if(stackTypedHandler.getStorage().size() == getSlotIndex())
-            stackTypedHandler.getStorage().add(getSlotIndex(), new ItemStackType(stack.copy()));
+            stackTypedHandler.addStackToIndexDirectly(getSlotIndex(), new ItemStackType(stack.copy()));
         else
         {
             // 将size到Index-1之间的位置填充为空，然后填充Index位置
             // 扩展列表直到 targetIndex - 1，并填充 null
             while (stackTypedHandler.getStorage().size() < getSlotIndex()) {
-                stackTypedHandler.getStorage().add(new ItemStackType(ItemStack.EMPTY));  // 填充空值
+                stackTypedHandler.addStackDirectly(new ItemStackType(ItemStack.EMPTY));  // 填充空值
             }
-            stackTypedHandler.getStorage().add(getSlotIndex(), new ItemStackType(stack.copy()));
+            stackTypedHandler.addStackToIndexDirectly(getSlotIndex(), new ItemStackType(stack.copy()));
         }
 
 

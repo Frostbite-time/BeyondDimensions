@@ -12,6 +12,7 @@ public interface IStackTypedHandler
 {
 
     // 获取用于存储的列表的直接引用
+    // 部分实现为了防止意外的外部性修改为获取只读引用，此时需要重写所有方法
     List<IStackType> getStorage();
 
     // 当存储实际变动时候执行的方法，没有特殊情况可以为空体
@@ -21,6 +22,11 @@ public interface IStackTypedHandler
     default int getSlots()
     {
         return getStorage().size();
+    }
+
+    default void clearStorage()
+    {
+        getStorage().clear();
     }
 
     // 获取对应槽位的Stack
@@ -62,6 +68,22 @@ public interface IStackTypedHandler
     default void setStackDirectly(int slot,IStackType stack)
     {
         getStorage().set(slot,stack.copy());
+        onChange();
+    }
+
+    // 无视任何限制，在指定槽位处添加一个元素
+    // 只有你确定需要使用它再使用
+    default void addStackToIndexDirectly(int slot , IStackType stack)
+    {
+        getStorage().add(slot,stack.copy());
+        onChange();
+    }
+
+    // 无视任何限制，在指定槽位处添加一个元素
+    // 只有你确定需要使用它再使用
+    default void addStackDirectly(IStackType stack)
+    {
+        getStorage().add(stack.copy());
         onChange();
     }
 

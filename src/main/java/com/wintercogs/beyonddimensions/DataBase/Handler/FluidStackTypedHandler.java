@@ -1,69 +1,49 @@
 package com.wintercogs.beyonddimensions.DataBase.Handler;
 
+import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FluidStackTypedHandler implements IFluidHandler
 {
 
     private StackTypedHandler handlerStorage;
-    private List<Integer> fluidStorageIndex = new ArrayList<>(); //存储了ItemOnlyStorage的原Index对应，每次调用getItemOnlyStorage实时更新
 
     public FluidStackTypedHandler(StackTypedHandler handlerStorage) {
         this.handlerStorage = handlerStorage;
     }
 
-    // 获取所有可用于插入Item的槽位
-    public List<FluidStackType> getFluidOnlyStorage()
-    {
-        fluidStorageIndex.clear();
-        List<IStackType> storage = getStorage();
 
-        // 第一次遍历：收集所有符合条件的索引 即空位置和符合类型的位置都可以用来插入当前类型
-        for (int i = 0; i < storage.size(); i++) {
-            IStackType stackType = storage.get(i);
-            if (stackType.isEmpty() || stackType instanceof FluidStackType) {
-                fluidStorageIndex.add(i);
-            }
-        }
-
-        // 根据已知大小初始化ArrayList，避免扩容
-        List<FluidStackType> result = new ArrayList<>(fluidStorageIndex.size());
-
-        // 第二次遍历：填充结果列表
-        for (int i = 0; i < fluidStorageIndex.size(); i++) {
-            int index = fluidStorageIndex.get(i);
-            IStackType stackType = storage.get(index);
-            if (stackType.isEmpty()) {
-                result.add(new FluidStackType());
-            } else {
-                result.add((FluidStackType) stackType);
-            }
-        }
-
-        return result;
-    }
-
-    public List<IStackType> getStorage()
-    {
-        return this.handlerStorage.getStorage();
-    }
 
     @Override
     public int getTanks()
     {
-        return getFluidOnlyStorage().size();
+        List<Integer> slots = handlerStorage.getTypeIdIndexList(FluidStackType.ID);
+        if(slots != null)
+            return slots.size();
+        else return 0;
     }
 
     @Override
     public FluidStack getFluidInTank(int tank)
     {
-        return getFluidOnlyStorage().get(tank).copyStack();
+        // 此处的slot参数是基于特化类型ItemStackType的索引
+        List<Integer> slots = handlerStorage.getTypeIdIndexList(FluidStackType.ID);
+        int actualIndex = -1;
+        if(slots != null && 0<=tank && tank < slots.size())
+        {
+            actualIndex = slots.get(tank);
+        }
+
+        if(actualIndex != -1)
+        {
+            return (FluidStack) handlerStorage.getStackBySlot(actualIndex).getStack();
+        }
+        else return FluidStack.EMPTY;
     }
 
     @Override
@@ -98,7 +78,8 @@ public class FluidStackTypedHandler implements IFluidHandler
     @Override
     public FluidStack drain(int count, FluidAction fluidAction)
     {
-        return ((FluidStackType)handlerStorage.extract(new FluidStackType(getFluidOnlyStorage().getFirst().copyStackWithCount(count)),fluidAction.simulate()))
+        int actualIndex = handlerStorage.getTypeIdIndexList(FluidStackType.ID).getFirst();
+        return ((FluidStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copy(),fluidAction.simulate()))
                 .copyStack();
     }
 }
