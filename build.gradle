@@ -25,6 +25,9 @@ repositories {
         name = "TerraformersMC"
         url = "https://maven.terraformersmc.com/"
     }
+    maven {
+        url 'https://maven.aliyun.com/repository/public'
+    }
 }
 
 base {
@@ -121,17 +124,31 @@ configurations {
 dependencies {
 
     // 引入对拼音库的依赖 并将其打包到模组
-    jarJar(implementation group: 'com.belerweb', name: 'pinyin4j', version: '2.5.1'){
+    jarJar(implementation group: 'com.github.promeg', name: 'tinypinyin', version: '2.0.3'){
         version {
             // 您的模组实际兼容的版本范围。
             // 注意，您可能会收到一个**低于您首选版本**的版本。例如，如果另一个模组只兼容到 1.7.24，
             // 那么在运行时，您的模组可能会使用 1.7.24 版本。
-            strictly '[2.5.0,)' //表示，大于等于2.5.0版本即可
-            prefer '2.5.1' // 在您的开发环境中实际使用的版本
+            strictly '[2.0.3,)' //表示，大于等于2.5.0版本即可
+            prefer '2.0.3' // 在您的开发环境中实际使用的版本
         }
     }
     // 必须要在此显式声明依赖，否则在运行时会找不到
-    additionalRuntimeClasspath "com.belerweb:pinyin4j:2.5.1"
+    additionalRuntimeClasspath "com.github.promeg:tinypinyin:2.0.3"
+
+    // 引入拼音库词典
+    jarJar(implementation group: 'com.github.promeg', name: 'tinypinyin-lexicons-java-cncity', version: '2.0.3'){
+        version {
+            // 您的模组实际兼容的版本范围。
+            // 注意，您可能会收到一个**低于您首选版本**的版本。例如，如果另一个模组只兼容到 1.7.24，
+            // 那么在运行时，您的模组可能会使用 1.7.24 版本。
+            strictly '[2.0.3,)' //表示，大于等于2.5.0版本即可
+            prefer '2.0.3' // 在您的开发环境中实际使用的版本
+        }
+    }
+    // 必须要在此显式声明依赖，否则在运行时会找不到
+    additionalRuntimeClasspath "com.github.promeg:tinypinyin-lexicons-java-cncity:2.0.3"
+
 
     // 编译通用机械的api 以便使用化学品存储
     compileOnly "mekanism:Mekanism:${mekanism_version}:api"

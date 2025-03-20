@@ -12,7 +12,7 @@ import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Packet.StoragePacket;
 import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
-import com.wintercogs.beyonddimensions.Unit.Pinyin4jUtils;
+import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
@@ -189,8 +189,8 @@ public class DimensionsNetMenu extends AbstractContainerMenu
 
             // 提前过滤空气，并缓存名称和拼音
             String displayName = stack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
-            String allPinyin = Pinyin4jUtils.getAllPinyin(displayName, false);
-            String firstPinyin = Pinyin4jUtils.getFirstPinYin(displayName);
+            String allPinyin = TinyPinyinUtils.getAllPinyin(displayName, false).toLowerCase(Locale.ENGLISH);
+            String firstPinyin = TinyPinyinUtils.getFirstPinYin(displayName).toLowerCase(Locale.ENGLISH);
             boolean matchesSearch = searchText == null || searchText.isEmpty() ||
                     displayName.contains(searchText) ||
                     allPinyin.contains(searchText) ||
