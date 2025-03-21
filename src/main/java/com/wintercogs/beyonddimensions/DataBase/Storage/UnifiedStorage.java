@@ -12,6 +12,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class UnifiedStorage implements IStackTypedHandler
 {
@@ -19,6 +20,7 @@ public class UnifiedStorage implements IStackTypedHandler
     private final ArrayList<IStackType> storage = new ArrayList<>();
     // 使用Integer索引而不是直接存储对象引用
     private final Map<ResourceLocation, List<Integer>> typeIdIndex = new HashMap<>();
+    public static final Map<ResourceLocation, Function<UnifiedStorage,Object>> typedHandlerMap = new HashMap<>();
 
     public UnifiedStorage(DimensionsNet net) {
         this.net = net;
@@ -28,6 +30,12 @@ public class UnifiedStorage implements IStackTypedHandler
     public void onChange()
     {
         net.setDirty();
+    }
+
+    @Override
+    public Object getTypedHandler(ResourceLocation typeId)
+    {
+        return typedHandlerMap.get(typeId).apply(this);
     }
 
     @Override

@@ -2,7 +2,8 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
+import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -21,10 +22,12 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
 
     //--- 能力注册 (通过事件) ---
     public static void registerCapability(RegisterCapabilitiesEvent event) {
-        TypedHandlerManager.BlockNetCapHandlerMap.forEach(
-                (cap,handlerF)->{
+
+        CapabilityHelper.BlockCapabilityMap.forEach(
+                (resourceLocation, directionBlockCapability) -> {
+                    Function handler = UnifiedStorage.typedHandlerMap.get(resourceLocation);
                     event.registerBlockEntity(
-                            (BlockCapability<? super Object, ? extends Direction>) cap, // 标准物品能力
+                            (BlockCapability<? super Object, ? extends Direction>) directionBlockCapability,
                             ModBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
                             (be, side) -> {
                                 if(be.getNetId()<0)
@@ -34,10 +37,7 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
                                 DimensionsNet net = be.getNet();
                                 if(net != null)
                                 {
-                                    // 能力系统自带缓存能力，使用new不会有多少性能损耗
-                                    //return new ItemStackTypedHandler(net);
-                                    Function handler = TypedHandlerManager.getNetHandler(cap,DimensionsNet.class);
-                                    return handler.apply(net);
+                                    return handler.apply(net.getUnifiedStorage());
                                 }
                                 return null;
                             } // 根据方向返回处理器

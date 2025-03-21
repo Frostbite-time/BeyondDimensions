@@ -6,7 +6,6 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockE
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.ChemicalStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.FluidStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.ItemStackTypedHandler;
@@ -17,13 +16,14 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.ChemicalUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
+import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
+import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -107,19 +107,29 @@ public class BeyondDimensions
         StackTypeRegistry.registerType(new ItemStackType());
         StackTypeRegistry.registerType(new FluidStackType());
 
-        // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-        TypedHandlerManager.registerNetHandler(Capabilities.ItemHandler.BLOCK, DimensionsNet.class, ItemUnifiedStorageHandler::new);
-        TypedHandlerManager.registerNetHandler(Capabilities.FluidHandler.BLOCK, DimensionsNet.class, FluidUnifiedStorageHandler::new);
+        // 注册方块能力类型，用于动态为方块注册能力
+        CapabilityHelper.BlockCapabilityMap.put(ItemStackType.ID,Capabilities.ItemHandler.BLOCK);
+        CapabilityHelper.BlockCapabilityMap.put(FluidStackType.ID,Capabilities.FluidHandler.BLOCK);
 
-        // 注册通用能力，使得诸如网络接口的方块可以暴露对应存储能力
-        TypedHandlerManager.registerCommonHandler(Capabilities.ItemHandler.BLOCK, StackTypedHandler.class, ItemStackTypedHandler::new);
-        TypedHandlerManager.registerCommonHandler(Capabilities.FluidHandler.BLOCK,StackTypedHandler.class, FluidStackTypedHandler::new);
+        // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
+        UnifiedStorage.typedHandlerMap.put(ItemStackType.ID,ItemUnifiedStorageHandler::new);
+        UnifiedStorage.typedHandlerMap.put(FluidStackType.ID,FluidUnifiedStorageHandler::new);
+
+        // 注册存储分化包装
+        StackTypedHandler.typedHandlerMap.put(ItemStackType.ID,ItemStackTypedHandler::new);
+        StackTypedHandler.typedHandlerMap.put(FluidStackType.ID,FluidStackTypedHandler::new);
 
         if(MekLoaded)
         {
+            // 注册化学品堆叠
             StackTypeRegistry.registerType(new ChemicalStackType());
-            TypedHandlerManager.registerNetHandler(ChemicalCapabilityHelper.CHEMICAL, DimensionsNet.class, ChemicalUnifiedStorageHandler::new);
-            TypedHandlerManager.registerCommonHandler(ChemicalCapabilityHelper.CHEMICAL,StackTypedHandler.class, ChemicalStackTypedHandler::new);
+            // 注册化学品方块能力
+            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackType.ID, ChemicalCapabilityHelper.CHEMICAL);
+            // 注册分化包装
+            UnifiedStorage.typedHandlerMap.put(ChemicalStackType.ID,ChemicalUnifiedStorageHandler::new);
+            StackTypedHandler.typedHandlerMap.put(ChemicalStackType.ID,ChemicalStackTypedHandler::new);
+
+
         }
     }
 

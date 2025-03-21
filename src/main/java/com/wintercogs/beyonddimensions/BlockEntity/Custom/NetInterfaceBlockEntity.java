@@ -6,8 +6,8 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
+import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -129,15 +129,16 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
 
     //--- 能力注册 (通过事件) ---
     public static void registerCapability(RegisterCapabilitiesEvent event) {
-        TypedHandlerManager.BlockCommonCapHandlerMap.forEach(
-                (cap,handlerF)->{
+
+        CapabilityHelper.BlockCapabilityMap.forEach(
+                (resourceLocation, directionBlockCapability) -> {
+                    Function handler = StackTypedHandler.typedHandlerMap.get(resourceLocation);
                     event.registerBlockEntity(
-                            (BlockCapability<? super Object, ? extends Direction>) cap, // 标准物品能力
+                            (BlockCapability<? super Object, ? extends Direction>)directionBlockCapability,
                             ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                             (be, side) -> {
-                                Function handler = TypedHandlerManager.getCommonHandler(cap,StackTypedHandler.class);
                                 return handler.apply(be.stackHandler);
-                            } // 根据方向返回处理器
+                            }
                     );
                 }
         );

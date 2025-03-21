@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -10,21 +9,16 @@ import java.util.List;
 public class FluidUnifiedStorageHandler implements IFluidHandler
 {
 
-    private DimensionsNet net;
+    private UnifiedStorage storage;
 
-    public FluidUnifiedStorageHandler(DimensionsNet net) {
-        this.net = net;
-    }
-
-    public void onChange()
-    {
-        net.setDirty();
+    public FluidUnifiedStorageHandler(UnifiedStorage storage) {
+        this.storage = storage;
     }
 
     @Override
     public int getTanks()
     {
-        List<Integer> slots = net.getUnifiedStorage().getTypeIdIndexList(FluidStackType.ID);
+        List<Integer> slots = storage.getTypeIdIndexList(FluidStackType.ID);
         if(slots != null)
             return slots.size();
         else return 0;
@@ -34,7 +28,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     public FluidStack getFluidInTank(int slot)
     {
         // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = net.getUnifiedStorage().getTypeIdIndexList(FluidStackType.ID);
+        List<Integer> slots = storage.getTypeIdIndexList(FluidStackType.ID);
         int actualIndex = -1;
         if(slots != null && 0<=slot && slot < slots.size())
         {
@@ -43,7 +37,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
 
         if(actualIndex != -1)
         {
-            return (FluidStack) net.getUnifiedStorage().getStackBySlot(actualIndex).getStack();
+            return (FluidStack) storage.getStackBySlot(actualIndex).getStack();
         }
         else return FluidStack.EMPTY;
     }
@@ -67,7 +61,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
         if(fluidStack.isEmpty())
             return 0;
         int allAmount = fluidStack.getAmount();
-        int remaining = (int) net.getUnifiedStorage().insert(new FluidStackType(fluidStack.copy()), fluidAction.simulate()).getStackAmount();
+        int remaining = (int) storage.insert(new FluidStackType(fluidStack.copy()), fluidAction.simulate()).getStackAmount();
         return allAmount-remaining;// 实际插入量
     }
 
@@ -75,7 +69,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
     {
-        return ((FluidStackType)net.getUnifiedStorage().extract(new FluidStackType(fluidStack.copy()),fluidAction.simulate()))
+        return ((FluidStackType)storage.extract(new FluidStackType(fluidStack.copy()),fluidAction.simulate()))
                 .copyStack();
     }
 
@@ -85,7 +79,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public FluidStack drain(int count, FluidAction fluidAction)
     {
-        return ((FluidStackType)net.getUnifiedStorage().extract(new FluidStackType(getFluidInTank(0).copyWithAmount(count)),fluidAction.simulate()))
+        return ((FluidStackType)storage.extract(new FluidStackType(getFluidInTank(0).copyWithAmount(count)),fluidAction.simulate()))
                 .copyStack();
     }
 }

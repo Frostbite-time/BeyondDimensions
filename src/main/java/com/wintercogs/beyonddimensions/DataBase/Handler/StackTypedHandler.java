@@ -11,6 +11,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
+import java.util.function.Function;
 
 // 一个通用的，用于存储IStackType实例的类
 // 所有相关方法都已经在接口以默认方法，非类型化的实现
@@ -20,6 +21,7 @@ public class StackTypedHandler implements IStackTypedHandler
     private List<IStackType> storage;
     // 类型化存储，为其分化包装提供良好的性能
     private final Map<ResourceLocation, List<Integer>> typeIdIndex = new HashMap<>();
+    public static final Map<ResourceLocation, Function<StackTypedHandler,Object>> typedHandlerMap = new HashMap<>();
 
     public StackTypedHandler(int size)
     {
@@ -43,6 +45,12 @@ public class StackTypedHandler implements IStackTypedHandler
     public void onChange()
     {
 
+    }
+
+    @Override
+    public Object getTypedHandler(ResourceLocation typeId)
+    {
+        return typedHandlerMap.get(typeId).apply(this);
     }
 
     @Override
