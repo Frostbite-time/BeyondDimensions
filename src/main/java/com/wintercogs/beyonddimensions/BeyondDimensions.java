@@ -13,6 +13,9 @@ import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.ChemicalHandlerWrapper;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.ItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.DataBase.Storage.ChemicalUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
@@ -24,6 +27,7 @@ import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
+import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -119,6 +123,10 @@ public class BeyondDimensions
         StackTypedHandler.typedHandlerMap.put(ItemStackType.ID,ItemStackTypedHandler::new);
         StackTypedHandler.typedHandlerMap.put(FluidStackType.ID,FluidStackTypedHandler::new);
 
+        // 注册堆叠处理包装，用于动态包装来自其他模组的handler (如原版的IItemHandler)
+        StackHandlerWrapperHelper.stackWrappers.put(ItemStackType.ID, ItemHandlerWrapper::new);
+        StackHandlerWrapperHelper.stackWrappers.put(FluidStackType.ID, FluidHandlerWrapper::new);
+
         if(MekLoaded)
         {
             // 注册化学品堆叠
@@ -129,6 +137,8 @@ public class BeyondDimensions
             UnifiedStorage.typedHandlerMap.put(ChemicalStackType.ID,ChemicalUnifiedStorageHandler::new);
             StackTypedHandler.typedHandlerMap.put(ChemicalStackType.ID,ChemicalStackTypedHandler::new);
 
+            // 注册堆叠处理包装
+            StackHandlerWrapperHelper.stackWrappers.put(ChemicalStackType.ID, ChemicalHandlerWrapper::new);
 
         }
     }
