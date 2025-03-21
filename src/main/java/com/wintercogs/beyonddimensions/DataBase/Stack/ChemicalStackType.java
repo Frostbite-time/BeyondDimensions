@@ -9,6 +9,7 @@ import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -51,6 +52,17 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     public ChemicalStackType(ChemicalStack stack)
     {
         this.stack = stack;
+    }
+
+    @Override
+    public IStackType<ChemicalStack> fromObject(Object key, long amount, DataComponentPatch dataComponentPatch)
+    {
+        if(key instanceof Chemical chemical)
+        {
+            ChemicalStack chemicalStack = new ChemicalStack(chemical, amount);
+            return new ChemicalStackType(chemicalStack);
+        }
+        return null;
     }
 
     @Override

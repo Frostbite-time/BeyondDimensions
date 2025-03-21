@@ -4,8 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
@@ -21,16 +19,12 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -77,6 +71,7 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
                 },
 
                 (slot, ingredient) -> {
+                    // stackKey 是如 Item Fluid的类
                     Object stackKey = ingredient.getEmiStacks().get(0).getKey();
                     long stackAmount = ingredient.getEmiStacks().get(0).getAmount();
                     DataComponentPatch dataComponentPatch = ingredient.getEmiStacks().get(0).getComponentChanges();
@@ -86,18 +81,10 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
                     {
                         if(type.getSourceClass().isAssignableFrom(stackKey.getClass()))
                         {
-                            //dragging = StackCreater.Create(type.getTypeId(),stackKey,1);
-                            // 这部分暂时不能自动
-                            if(type.getTypeId() == new ItemStackType().getTypeId())
-                                dragging = new ItemStackType(new ItemStack(BuiltInRegistries.ITEM.getHolder(BuiltInRegistries.ITEM.getKey((Item) stackKey)).get(),1,dataComponentPatch));
-                            else if(type.getTypeId() == new FluidStackType().getTypeId())
-                                dragging = new FluidStackType(new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey((Fluid) stackKey)).get(),1,dataComponentPatch));
-                            else if(BeyondDimensions.MekLoaded)
-                            {
-                                if(type.getTypeId() == new ChemicalStackType().getTypeId())
-                                    dragging = new ChemicalStackType(new mekanism.api.chemical.ChemicalStack((mekanism.api.chemical.Chemical) stackKey,1));
 
-                            }
+                            dragging = type.fromObject(stackKey,1,dataComponentPatch);
+                            break;
+
                         }
                     }
 

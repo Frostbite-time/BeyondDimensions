@@ -5,6 +5,8 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -36,6 +38,17 @@ public class ItemStackType implements IStackType<ItemStack> {
     public ItemStackType(ItemStack stack)
     {
         this.stack = stack;
+    }
+
+    @Override
+    public IStackType<ItemStack> fromObject(Object key, long amount, DataComponentPatch dataComponentPatch)
+    {
+        if(key instanceof Item item)
+        {
+            ItemStack itemStack = new ItemStack(BuiltInRegistries.ITEM.getHolder(BuiltInRegistries.ITEM.getKey(item)).get(), (int) amount,dataComponentPatch);
+            return new ItemStackType(itemStack);
+        }
+        return null;
     }
 
     @Override
