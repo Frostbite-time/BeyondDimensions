@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -10,21 +9,17 @@ import java.util.List;
 // 以IStackType为基础实现IItemHandler的类
 public class ItemUnifiedStorageHandler implements IItemHandler
 {
-    private DimensionsNet net;
+    private UnifiedStorage storage;
 
-    public ItemUnifiedStorageHandler(DimensionsNet net) {
-        this.net = net;
+    public ItemUnifiedStorageHandler(UnifiedStorage storage) {
+        this.storage = storage;
     }
 
-    public void onChange()
-    {
-        net.setDirty();
-    }
 
     @Override
     public int getSlots()
     {
-        List<Integer> slots = net.getUnifiedStorage().getTypeIdIndexList(ItemStackType.ID);
+        List<Integer> slots = storage.getTypeIdIndexList(ItemStackType.ID);
         if(slots != null)
             return slots.size();
         else return 0;
@@ -34,7 +29,7 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     public ItemStack getStackInSlot(int slot)
     {
         // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = net.getUnifiedStorage().getTypeIdIndexList(ItemStackType.ID);
+        List<Integer> slots = storage.getTypeIdIndexList(ItemStackType.ID);
         int actualIndex = -1;
         if(slots != null && 0<=slot && slot < slots.size())
         {
@@ -43,7 +38,7 @@ public class ItemUnifiedStorageHandler implements IItemHandler
 
         if(actualIndex != -1)
         {
-            return (ItemStack)net.getUnifiedStorage().getStackBySlot(actualIndex).getStack();
+            return (ItemStack)storage.getStackBySlot(actualIndex).getStack();
         }
         else return ItemStack.EMPTY;
     }
@@ -51,7 +46,7 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     @Override
     public ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
     {
-        ItemStackType typedStack = (ItemStackType) net.getUnifiedStorage().insert(new ItemStackType(itemStack),sim);
+        ItemStackType typedStack = (ItemStackType) storage.insert(new ItemStackType(itemStack),sim);
         return typedStack.getStack();
     }
 
@@ -62,7 +57,7 @@ public class ItemUnifiedStorageHandler implements IItemHandler
         // 1.专为物品提供的假列表中获取指定物品并转为IStackType
         // 2.使用存储器导出
         // 3.获取返回值的Stack，然后转为ItemStack再返回
-        return (ItemStack) net.getUnifiedStorage().extract(new ItemStackType(getStackInSlot(slot).copyWithCount(count)),sim)
+        return (ItemStack) storage.extract(new ItemStackType(getStackInSlot(slot).copyWithCount(count)),sim)
                 .getStack();
     }
 

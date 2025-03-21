@@ -1,30 +1,26 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.Storage.TypedHandlerManager;
-import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
+import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
+import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.items.IItemHandler;
 
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.function.Function;
 
 public class NetInterfaceBlockEntity extends NetedBlockEntity
@@ -58,10 +54,10 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
 
     private final Direction[] directions = Direction.values();
     
-    // 缓存相邻方块的能力
-    private final Map<Direction, IItemHandler> itemHandlerCache = new EnumMap<>(Direction.class);
-    private final Map<Direction, IFluidHandler> fluidHandlerCache = new EnumMap<>(Direction.class);
-    private final Map<Direction, Object> chemicalHandlerCache = new EnumMap<>(Direction.class);
+
+    // 存储相邻方块的能力
+    // 按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
+    private final Multimap<ResourceLocation,Object> handlerCache = ArrayListMultimap.create();
     private boolean needsCapabilityUpdate = true;
 
     public StackTypedHandler getStackHandler()
@@ -81,34 +77,23 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     // 更新能力缓存
     public void updateCapabilityCache() {
         if (level == null || !needsCapabilityUpdate) return;
-        
-        itemHandlerCache.clear();
-        fluidHandlerCache.clear();
-        chemicalHandlerCache.clear();
+
+        handlerCache.clear();
         
         for (Direction dir : directions) {
             BlockPos targetPos = this.getBlockPos().relative(dir);
             BlockEntity neighbor = level.getBlockEntity(targetPos);
             if (neighbor != null && !(neighbor instanceof NetedBlockEntity)) {
-                // 缓存物品能力
-                IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, targetPos, dir.getOpposite());
-                if (itemHandler != null) {
-                    itemHandlerCache.put(dir, itemHandler);
-                }
-                
-                // 缓存流体能力
-                IFluidHandler fluidHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, targetPos, dir.getOpposite());
-                if (fluidHandler != null) {
-                    fluidHandlerCache.put(dir, fluidHandler);
-                }
-                
-                // 缓存化学品能力
-                if (BeyondDimensions.MekLoaded) {
-                    Object chemicalHandler = level.getCapability(ChemicalCapabilityHelper.CHEMICAL, targetPos, dir.getOpposite());
-                    if (chemicalHandler != null) {
-                        chemicalHandlerCache.put(dir, chemicalHandler);
-                    }
-                }
+
+                CapabilityHelper.BlockCapabilityMap.forEach(
+                        (resourceLocation, cap) -> {
+                            Object handler = level.getCapability(cap,targetPos, dir.getOpposite());
+                            if (handler != null) {
+                                handlerCache.put(resourceLocation, handler);
+                            }
+                        }
+                );
+
             }
         }
         
@@ -129,15 +114,16 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
 
     //--- 能力注册 (通过事件) ---
     public static void registerCapability(RegisterCapabilitiesEvent event) {
-        TypedHandlerManager.BlockCommonCapHandlerMap.forEach(
-                (cap,handlerF)->{
+
+        CapabilityHelper.BlockCapabilityMap.forEach(
+                (resourceLocation, directionBlockCapability) -> {
+                    Function handler = StackTypedHandler.typedHandlerMap.get(resourceLocation);
                     event.registerBlockEntity(
-                            (BlockCapability<? super Object, ? extends Direction>) cap, // 标准物品能力
+                            (BlockCapability<? super Object, ? extends Direction>)directionBlockCapability,
                             ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                             (be, side) -> {
-                                Function handler = TypedHandlerManager.getCommonHandler(cap,StackTypedHandler.class);
                                 return handler.apply(be.stackHandler);
-                            } // 根据方向返回处理器
+                            }
                     );
                 }
         );
@@ -243,81 +229,24 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
 
     public void popStack()
     {
-        for(Direction dir: directions)
-        {
-            // 使用缓存的物品处理器
-            IItemHandler itemHandler = itemHandlerCache.get(dir);
-            if(itemHandler != null)
-            {
-                for(int i = 0;i<9;i++)
-                {
-                    if(fakeStackHandler.getStackBySlot(i).getStack() instanceof ItemStack)
-                    {
-                        if(fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
-                        {
-                            ItemStack current = (ItemStack) stackHandler.getStackBySlot(i).copyStack();
-                            for(int slot= 0;slot< itemHandler.getSlots();slot++)
-                            {
-                                ItemStack remaining = itemHandler.insertItem(slot,current.copy(),false);
-                                int extract = current.getCount() - remaining.getCount();
-                                stackHandler.extract(i,extract,false);
-                                current.shrink(extract);
-                                if(current.isEmpty())
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
 
-            // 使用缓存的流体处理器
-            IFluidHandler fluidHandler = fluidHandlerCache.get(dir);
-            if(fluidHandler != null)
-            {
-                for(int i = 0;i<9;i++)
-                {
-                    if(fakeStackHandler.getStackBySlot(i).getStack() instanceof FluidStack)
-                    {
-                        if(fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
-                        {
-                            FluidStack current = (FluidStack) stackHandler.getStackBySlot(i).copyStack();
+        handlerCache.forEach(
+                (typeId, handler) -> {
+                    Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
 
-                            for(int slot= 0;slot< fluidHandler.getTanks();slot++)
-                            {
-                                int insert = fluidHandler.fill(current.copy(), IFluidHandler.FluidAction.EXECUTE);
-                                if(insert>0)
-                                {
-                                    stackHandler.extract(i,insert,false);
-                                    current.shrink(insert);
-                                }
-                                if(current.isEmpty())
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 使用缓存的化学品处理器
-            if(BeyondDimensions.MekLoaded)
-            {
-                Object tryChemicalHandler = chemicalHandlerCache.get(dir);
-                if(tryChemicalHandler != null)
-                {
-                    mekanism.api.chemical.IChemicalHandler chemicalHandler = (mekanism.api.chemical.IChemicalHandler) tryChemicalHandler;
+                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper)handlerGetter.apply(handler);
 
                     for(int i = 0;i<9;i++)
                     {
-                        if(fakeStackHandler.getStackBySlot(i).getStack() instanceof mekanism.api.chemical.ChemicalStack)
+                        if(fakeStackHandler.getStackBySlot(i).getTypeId().equals(typeId))
                         {
                             if(fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
                             {
-                                mekanism.api.chemical.ChemicalStack current = (mekanism.api.chemical.ChemicalStack) stackHandler.getStackBySlot(i).copyStack();
-
-                                for(int slot= 0;slot< chemicalHandler.getChemicalTanks();slot++)
+                                IStackType current = stackHandler.getStackBySlot(i).copy();
+                                for(int slot= 0;slot< stackHandlerWrapper.getSlots();slot++)
                                 {
-                                    mekanism.api.chemical.ChemicalStack remaining = chemicalHandler.insertChemical(slot,current.copy(), mekanism.api.Action.EXECUTE);
-                                    long extract = current.getAmount() - remaining.getAmount();
+                                    long remainging = stackHandlerWrapper.insert(slot,current.copyStack(),false);
+                                    long extract = current.getStackAmount() - remainging;
                                     stackHandler.extract(i,extract,false);
                                     current.shrink(extract);
                                     if(current.isEmpty())
@@ -327,8 +256,8 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
                         }
                     }
                 }
-            }
-        }
+        );
+
     }
 
     @Override

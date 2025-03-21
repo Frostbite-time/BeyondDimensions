@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -54,6 +55,18 @@ public class FluidStackType implements IStackType<FluidStack>
     public FluidStackType(FluidStack stack)
     {
         this.stack = stack;
+    }
+
+
+    @Override
+    public IStackType<FluidStack> fromObject(Object key, long amount, DataComponentPatch dataComponentPatch)
+    {
+        if(key instanceof Fluid fluid)
+        {
+            FluidStack fluidStack = new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(fluid)).get(), (int) amount,dataComponentPatch);
+            return new FluidStackType(fluidStack);
+        }
+        return null;
     }
 
     @Override

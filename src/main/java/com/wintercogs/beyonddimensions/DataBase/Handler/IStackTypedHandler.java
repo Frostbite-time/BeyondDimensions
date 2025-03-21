@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
@@ -17,6 +18,9 @@ public interface IStackTypedHandler
 
     // 当存储实际变动时候执行的方法，没有特殊情况可以为空体
     void onChange();
+
+    // 根据资源id返回对应的分化包装 自行确保类型安全
+    Object getTypedHandler(ResourceLocation typeId);
 
     // 获取当前槽位总数
     default int getSlots()
