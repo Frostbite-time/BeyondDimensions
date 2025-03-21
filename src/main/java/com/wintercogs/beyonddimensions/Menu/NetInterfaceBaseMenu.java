@@ -601,7 +601,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
             else // 物品由背包移动到存储
             {
                 cacheStack = slot.getItem().copy();
-                int remaining = (int)unifiedStorage.insert(StackCreater.Create(new ItemStackType().getTypeId(), cacheStack.copy(),cacheStack.getCount()),false).getStackAmount();
+                int remaining = (int)unifiedStorage.insert(StackCreater.Create(ItemStackType.ID, cacheStack.copy(),cacheStack.getCount()),false).getStackAmount();
                 slot.tryRemove(cacheStack.getCount() - remaining,Integer.MAX_VALUE-1,player);
             }
             if (cacheStack.isEmpty()) {
@@ -641,7 +641,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
             if (!carriedItem.isEmpty())
             {   //槽位物品为空，携带物品存在，将携带物品插入槽位
                 int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                int remaining = (int)unifiedStorage.insert(slot.getSlotIndex(),StackCreater.Create(new ItemStackType().getTypeId(), carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
+                int remaining = (int)unifiedStorage.insert(slot.getSlotIndex(),StackCreater.Create(ItemStackType.ID, carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
                 int actualInsert = changedCount - remaining; // 实际被插入的物品数量
 
                 int newCount = carriedItem.getCount() - actualInsert; // 实际剩余物品数
@@ -679,7 +679,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
                     if(clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
                     {
                         int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                        int remaining =  (int)unifiedStorage.insert(slot.getSlotIndex(),StackCreater.Create(new ItemStackType().getTypeId(),carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
+                        int remaining =  (int)unifiedStorage.insert(slot.getSlotIndex(),StackCreater.Create(ItemStackType.ID,carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
                         int actualInsert = changedCount - remaining; // 实际被插入的物品数量
 
                         int newCount = carriedItem.getCount() - actualInsert; // 实际剩余物品数
@@ -733,7 +733,7 @@ public class NetInterfaceBaseMenu extends AbstractContainerMenu
             if(this.slots.get(i) instanceof StoredStackSlot)
             {
                 // 物品全部移动到存储，然后手动退出
-                storageHandler.insert(StackCreater.Create(new ItemStackType().getTypeId(), stack.copy(),stack.getCount()),false);
+                storageHandler.insert(StackCreater.Create(ItemStackType.ID, stack.copy(),stack.getCount()),false);
                 flag = true;
                 break;
             }

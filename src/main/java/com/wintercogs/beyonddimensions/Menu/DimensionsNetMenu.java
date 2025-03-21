@@ -504,7 +504,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                     int moveCount = checkCanMoveStackCount(cacheStack, this.lines * 9, this.slots.size(), true);
                     moveCount = Math.min(moveCount,cacheStack.getCount()); // 首先
                     int nowCount = 0;
-                    IStackType typedStack = unifiedStorage.getStackByStack(StackCreater.Create(new ItemStackType().getTypeId(),cacheStack.copy(),cacheStack.getCount()));
+                    IStackType typedStack = unifiedStorage.getStackByStack(StackCreater.Create(ItemStackType.ID,cacheStack.copy(),cacheStack.getCount()));
                     ItemStack nowStack;
                     if(typedStack != null)
                     {
@@ -525,7 +525,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                         if (!this.moveItemStackTo(cacheStack, this.lines * 9, this.slots.size(), true)) {
                             return ItemStack.EMPTY;
                         }
-                        unifiedStorage.extract(StackCreater.Create(new ItemStackType().getTypeId(), clickStack.copyStackWithCount(moveCount),moveCount) ,false);
+                        unifiedStorage.extract(StackCreater.Create(ItemStackType.ID, clickStack.copyStackWithCount(moveCount),moveCount) ,false);
                     }
                 }
                 else
@@ -536,7 +536,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             else // 物品由背包移动到存储
             {
                 cacheStack = slot.getItem().copy();
-                unifiedStorage.insert(StackCreater.Create(new ItemStackType().getTypeId(), cacheStack.copy(),cacheStack.getCount()),false);
+                unifiedStorage.insert(StackCreater.Create(ItemStackType.ID, cacheStack.copy(),cacheStack.getCount()),false);
                 slot.tryRemove(cacheStack.getCount(),Integer.MAX_VALUE-1,player);
             }
             if (cacheStack.isEmpty()) {
@@ -562,7 +562,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             if (!carriedItem.isEmpty())
             {   //槽位物品为空，携带物品存在，将携带物品插入槽位
                 int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                unifiedStorage.insert(StackCreater.Create(new ItemStackType().getTypeId(), carriedItem.copyWithCount(changedCount),changedCount),false);
+                unifiedStorage.insert(StackCreater.Create(ItemStackType.ID, carriedItem.copyWithCount(changedCount),changedCount),false);
                 int newCount = carriedItem.getCount() - changedCount;
                 if(newCount <=0)
                 {
@@ -596,7 +596,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
                 else if (slot.mayPlace(carriedItem))
                 {   //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
                     int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                    unifiedStorage.insert(StackCreater.Create(new ItemStackType().getTypeId(),carriedItem.copyWithCount(changedCount),changedCount),false);
+                    unifiedStorage.insert(StackCreater.Create(ItemStackType.ID,carriedItem.copyWithCount(changedCount),changedCount),false);
                     int newCount = carriedItem.getCount() - changedCount;
                     if(newCount <=0)
                     {
@@ -647,7 +647,7 @@ public class DimensionsNetMenu extends AbstractContainerMenu
             if(this.slots.get(i) instanceof StoredStackSlot)
             {
                 // 物品全部移动到存储，然后手动退出
-                unifiedStorage.insert(StackCreater.Create(new ItemStackType().getTypeId(), stack.copy(),stack.getCount()),false);
+                unifiedStorage.insert(StackCreater.Create(ItemStackType.ID, stack.copy(),stack.getCount()),false);
                 flag = true;
                 break;
             }
