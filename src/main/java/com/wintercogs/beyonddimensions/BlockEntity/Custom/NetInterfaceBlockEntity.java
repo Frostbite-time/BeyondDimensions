@@ -29,7 +29,7 @@ import java.util.function.Function;
 
 public class NetInterfaceBlockEntity extends NetedBlockEntity
 {
-    public final int transHold = 20;
+    public final int transHold = 9;
     public int transTime = 0;
 
     // 用来标记物品或者流体的槽位，只由UI控制
@@ -150,24 +150,26 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         if(level.isClientSide())
             return; // 客户端不执行任何操作
 
-        if(blockEntity.getNetId() != -1)
+
+        blockEntity.transTime++;
+        if(blockEntity.transTime>=blockEntity.transHold)
         {
-            blockEntity.transTime++;
-            if(blockEntity.transTime>=blockEntity.transHold)
+            if(blockEntity.getNetId() != -1)
             {
-                blockEntity.transTime = 0;
                 blockEntity.transferToNet();
+                blockEntity.transferFromNet();
             }
-            blockEntity.transferFromNet();
+            // 尝试输出物品到周围
+            if(blockEntity.popMode)
+            {
+                // 在使用缓存前确保它是最新的
+                blockEntity.updateCapabilityCache();
+                blockEntity.popStack();
+            }
+
+            blockEntity.transTime = 0;
         }
 
-        // 尝试输出物品到周围
-        if(blockEntity.popMode)
-        {
-            // 在使用缓存前确保它是最新的
-            blockEntity.updateCapabilityCache();
-            blockEntity.popStack();
-        }
     }
 
     public void transferToNet()
