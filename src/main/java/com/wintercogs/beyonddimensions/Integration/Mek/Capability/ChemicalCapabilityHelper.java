@@ -25,11 +25,6 @@ public class ChemicalCapabilityHelper
                     .getMethod("createSided", ResourceLocation.class, Class.class)
                     .invoke(null, location, mekanism.api.chemical.IChemicalHandler.class);
         }
-//        catch (ClassNotFoundException e) {
-//            // Mekanism 未加载
-//            CHEMICAL = null;
-//            //CHEMICAL_HANDLER_CLASS = null;
-//        }
         catch (Exception e) {
             throw new RuntimeException("Failed to initialize Mekanism capability", e);
         }
