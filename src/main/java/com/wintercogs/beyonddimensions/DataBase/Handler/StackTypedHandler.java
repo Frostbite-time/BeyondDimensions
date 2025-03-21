@@ -338,6 +338,7 @@ public class StackTypedHandler implements IStackTypedHandler
 
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         storage.clear();
+        typeIdIndex.clear();
         ListTag stacksTag = tag.getList("Stacks", Tag.TAG_COMPOUND);
 
         for (Tag t : stacksTag) {
