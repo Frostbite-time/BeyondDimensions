@@ -11,7 +11,6 @@ import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandl
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
-import com.wintercogs.beyonddimensions.Packet.CallSeverStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.FlagSlotSetPacket;
 import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
@@ -116,7 +115,7 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
     protected void containerTick() {
         //父类无操作
         //每tick自动更新搜索方案
-        menu.buildIndexList(new ArrayList<>(menu.viewerStorageHandler.getStorage()));
+        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
 
         if(menu.popMode)
         {

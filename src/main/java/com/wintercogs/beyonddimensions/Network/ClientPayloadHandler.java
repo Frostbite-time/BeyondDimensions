@@ -4,7 +4,6 @@ import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
@@ -52,14 +51,14 @@ public class ClientPayloadHandler
                         for(int i = 0; i<packet.stacks().size(); i++)
                         {
                             // unifiedStorage为基于物品的存储方案，只关心物品种类与数量。因此可以避开索引的远端同步需求
-                            UnifiedStorage unifiedStorage = menu.unifiedStorage;
-                            unifiedStorage.insert(packet.stacks().get(i),false);
+                            IStackTypedHandler storage = menu.storage;
+                            storage.insert(packet.stacks().get(i),false);
                         }
                         if(packet.end())
                         {
                             //viewerStorage基于unifiedStorage构建。是故其位置与unifiedStorage保持完全的正确。同样避开对索引的远端同步需求
                             menu.updateViewerStorage();
-                            menu.buildIndexList(new ArrayList<>(menu.viewerUnifiedStorage.getStorage()));
+                            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
                             menu.resumeRemoteUpdates();
                         }
                         return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
@@ -69,7 +68,7 @@ public class ClientPayloadHandler
                     {
                         for(int i = 0; i<packet.stacks().size(); i++)
                         {
-                            IStackTypedHandler unifiedStorage = menu.storageHandler;
+                            IStackTypedHandler unifiedStorage = menu.storage;
                             if (unifiedStorage.getStorage().size() > packet.indexs().get(i))
                                 unifiedStorage.setStackDirectly(packet.indexs().get(i), packet.stacks().get(i));
                             else if(unifiedStorage.getStorage().size() == packet.indexs().get(i))
@@ -88,7 +87,7 @@ public class ClientPayloadHandler
                         {
                             // 收到结束信号，更新视图，重建索引
                             menu.updateViewerStorage();
-                            menu.buildIndexList(new ArrayList<>(menu.viewerStorageHandler.getStorage()));
+                            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
                             menu.resumeRemoteUpdates();
                         }
                     }
@@ -117,7 +116,7 @@ public class ClientPayloadHandler
                     Player player = context.player();
                     if (player.containerMenu instanceof DimensionsNetMenu menu)
                     {
-                        UnifiedStorage clientStorage = menu.unifiedStorage;
+                        IStackTypedHandler clientStorage = menu.storage;
                         int i = 0;
                         for(IStackType remoteStack : packet.stacks())
                         {
@@ -146,7 +145,7 @@ public class ClientPayloadHandler
                     }
                     if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
                     {
-                        IStackTypedHandler clientStorage = menu.storageHandler;
+                        IStackTypedHandler clientStorage = menu.storage;
                         int i = 0;
                         for(IStackType remoteStack : packet.stacks())
                         {
