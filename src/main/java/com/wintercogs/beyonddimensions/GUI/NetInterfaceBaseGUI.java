@@ -26,7 +26,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-import java.util.ArrayList;
 
 public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBaseMenu>
 {
@@ -115,7 +114,6 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
     protected void containerTick() {
         //父类无操作
         //每tick自动更新搜索方案
-        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
 
         if(menu.popMode)
         {
@@ -194,15 +192,6 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
     {
         super.mouseScrolled(mouseX,mouseY,scrollX,scrollY);
-        if (scrollY > 0)
-        {
-            menu.lineData--;
-        } else if(scrollY < 0)
-        {
-            menu.lineData++;
-        }
-        //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
-        menu.ScrollTo();
         return true;
     }
 
@@ -220,7 +209,6 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
                 isDragging = true;
         }
 
-        menu.ScrollTo();
         return true;
     }
 

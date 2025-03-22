@@ -9,8 +9,9 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public record SyncFlagPacket(ArrayList<IStackType> flags, ArrayList<Integer> targetIndex) implements CustomPacketPayload
+public record SyncFlagPacket(List<IStackType> flags, List<Integer> targetIndex) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<SyncFlagPacket> TYPE =

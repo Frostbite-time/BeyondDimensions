@@ -39,8 +39,6 @@ import java.util.stream.IntStream;
  */
 public class DimensionsNetMenu extends BDDisorderedContainerMenu
 {
-    /// 双端通用数据
-    private final Player player; // 打开Menu的玩家实例
     /// 客户端数据
     private int lines = 6; //渲染的menu行数
     public int lineData = 0;//从第几行开始渲染？
@@ -82,7 +80,6 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         super(Dimensions_Net_Menu.get(), id,playerInventory,data.getUnifiedStorage());
         // 初始化维度网络容器
         viewerStorage = new DimensionsNet().getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
-        this.player = playerInventory.player;
         if(!player.level().isClientSide())
         {
             // 将lastItemStorage设置为一个深克隆，以便后续进行比较
@@ -344,6 +341,12 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         {
             PacketDistributor.sendToPlayer((ServerPlayer) player,new SyncStoragePacket(changedItem,changedCount,new ArrayList<>(0)));
         }
+    }
+
+    @Override
+    protected void initUpdate()
+    {
+
     }
 
 

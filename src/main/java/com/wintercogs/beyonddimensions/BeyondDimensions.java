@@ -24,7 +24,6 @@ import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
-import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;

@@ -30,6 +30,8 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     protected int inventoryStartIndex = -1; //索引开始位置 为54
     protected int inventoryEndIndex = -1;   //索引结束位置+1 为90
 
+    private boolean init = false; // 需要在客户端Menu完成时才能向其发送的操作是否完成的标志
+
 
 
     protected BDBaseMenu(@Nullable MenuType<?> menuType, int containerId, Inventory playerInventory,@Nullable IStackTypedHandler storage)
@@ -66,11 +68,19 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
             this.synchronizeDataSlotToRemote(j, k);
         }
 
+        if(!init)
+        {
+            initUpdate();
+            init = true;
+        }
+
         updateChange();
     }
 
     // 定义菜单如何同步更改
     protected abstract void updateChange();
+
+    protected abstract void initUpdate();
 
     // 自定义点击操作
     public void customClickHandler(int slotIndex, IStackType clickedStack, int button, boolean shiftDown)
