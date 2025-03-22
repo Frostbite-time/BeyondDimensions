@@ -736,18 +736,5 @@ public class DimensionsNetMenu extends AbstractContainerMenu
         return flag;
     }
 
-    public static class ItemStackedOnOtherHandler
-    {
-        /**
-         * 通过此事件覆写以阻止原有的点击逻辑操作StoredItemStackSlot<br>
-         * 详细逻辑见{@link net.minecraft.world.inventory.AbstractContainerMenu}的doClick方法对tryItemClickBehaviourOverride的使用
-         * @param event 传入的事件，提供一系列基本参数 包括 持有的物品 要处理的物品 正处理的槽位 点击动作 玩家 持有的物品的槽位，不过此处均未用到
-         */
-        @SubscribeEvent
-        public void OnItemStackedHandle(ItemStackedOnOtherEvent event)
-        {
-            event.setCanceled(event.getSlot() instanceof StoredStackSlot);
-        }
-    }
 }
 

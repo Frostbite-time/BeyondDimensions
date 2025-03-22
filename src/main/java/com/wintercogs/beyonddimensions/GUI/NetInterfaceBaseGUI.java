@@ -107,9 +107,9 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         addRenderableWidget(popButton);
 
 
-        menu.storageHandler.clearStorage();
-        menu.suppressRemoteUpdates();
-        PacketDistributor.sendToServer(new CallSeverStoragePacket());
+        //menu.storageHandler.clearStorage();
+        //menu.suppressRemoteUpdates();
+        //PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }
 
     @Override
