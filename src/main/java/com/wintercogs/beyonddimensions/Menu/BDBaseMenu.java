@@ -1,8 +1,11 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.google.common.base.Suppliers;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -12,6 +15,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -23,6 +27,9 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
 
     public final IStackTypedHandler storage;
     protected final Player player;
+    // 用于快速移动时标记玩家背包的槽位索引 如 索引从0开始 背包为54~89
+    protected int inventoryStartIndex = -1; //索引开始位置 为54
+    protected int inventoryEndIndex = -1;   //索引结束位置+1 为90
 
 
 
@@ -72,6 +79,9 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         if(this.storage == null)
             return;
 
+        if(inventoryStartIndex <0 || inventoryEndIndex <0)
+            BeyondDimensions.LOGGER.info("警告:背包索引设置错误！！！");
+
         if(shiftDown)
         {
             quickMoveHandle(player,slotIndex,clickedStack,this.storage);
@@ -82,9 +92,134 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         }
     }
 
-    protected abstract ItemStack quickMoveHandle(Player player,int slotIndex, IStackType clickStack, IStackTypedHandler unifiedStorage);
+    protected ItemStack quickMoveHandle(Player player,int slotIndex, IStackType clickStack, IStackTypedHandler storage)
+    {
+        ItemStack cacheStack;
+        Slot slot = this.slots.get(slotIndex);
+        if (slot != null && !clickStack.isEmpty())
+        {
+            // 物品从存储移动到背包
+            if(slot instanceof StoredStackSlot)
+            {
+                if(clickStack instanceof ItemStackType clickedItem)
+                {
+                    cacheStack = clickedItem.copyStack();
+                    int moveCount = checkCanMoveStackCount(cacheStack, inventoryStartIndex, inventoryEndIndex, true);
+                    moveCount = Math.min(moveCount,cacheStack.getCount()); // 首先
+                    int nowCount = 0;
+                    IStackType typedStack = storage.getStackByStack(StackCreater.Create(ItemStackType.ID,cacheStack.copy(),cacheStack.getCount()));
+                    ItemStack nowStack;
+                    if(typedStack != null)
+                    {
+                        nowStack = (ItemStack) typedStack.getStack();
+                    }
+                    else
+                    {
+                        return ItemStack.EMPTY;
+                    }
+                    if(nowStack != null)
+                    {
+                        nowCount = nowStack.getCount();
+                    }
+                    moveCount = Math.min(moveCount,nowCount);
+                    if(moveCount>=0)
+                    {
+                        cacheStack.setCount(moveCount);
+                        if (!this.moveItemStackTo(cacheStack, inventoryStartIndex, inventoryEndIndex, true)) {
+                            return ItemStack.EMPTY;
+                        }
+                        storage.extract(StackCreater.Create(ItemStackType.ID, clickStack.copyStackWithCount(moveCount),moveCount) ,false);
+                    }
+                }
+                else
+                {
+                    cacheStack = ItemStack.EMPTY;
+                }
+            }
+            else // 物品由背包移动到存储
+            {
+                cacheStack = slot.getItem().copy();
+                storage.insert(StackCreater.Create(ItemStackType.ID, cacheStack.copy(),cacheStack.getCount()),false);
+                slot.tryRemove(cacheStack.getCount(),Integer.MAX_VALUE-1,player);
+            }
+            if (cacheStack.isEmpty()) {
+                // 对于维度网络通过玩家设置一个EMPTY无影响
+                // 对于背包槽位可以用于清空当前槽位物品
+                // 对于双方，都可以设置脏数据请求保存
+                slot.setByPlayer(ItemStack.EMPTY);
+            } else {
+                slot.setChanged();
+            }
+        }
+        return ItemStack.EMPTY;
+    }
 
-    protected abstract void clickHandle(int slotIndex,IStackType clickStack, int button, Player player, IStackTypedHandler unifiedStorage);
+    protected void clickHandle(int slotIndex,IStackType clickStack, int button, Player player, IStackTypedHandler storage)
+    {
+        ItemStack carriedItem = this.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
+        StoredStackSlot slot = (StoredStackSlot) this.slots.get(slotIndex);// clickHandle仅用于处理点击维度槽位的逻辑，如果转换失败，则证明调用逻辑出错
+
+        if (clickStack.isEmpty())
+        {
+            if (!carriedItem.isEmpty())
+            {   //槽位物品为空，携带物品存在，将携带物品插入槽位
+                int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
+                storage.insert(StackCreater.Create(ItemStackType.ID, carriedItem.copyWithCount(changedCount),changedCount),false);
+                int newCount = carriedItem.getCount() - changedCount;
+                if(newCount <=0)
+                {
+                    setCarried(ItemStack.EMPTY);
+                }
+                else
+                {
+                    ItemStack newCarriedItem = carriedItem.copy();
+                    newCarriedItem.setCount(newCount);
+                    setCarried(newCarriedItem);
+                }
+            }
+        }
+        else if (slot.mayPickup(player))
+        {
+            if(clickStack instanceof ItemStackType clickItem)
+            {
+                if (carriedItem.isEmpty())
+                {   //槽位物品存在，携带物品为空，尝试取出槽位物品
+
+                    // 确保一次取出最大不得超过原版数量
+                    int woundChangeNum = (int) Math.min(clickItem.getStackAmount(), clickItem.getVanillaMaxStackSize());
+                    int actualChangeNum = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
+                    ItemStack takenItem = ((ItemStack) storage.extract(new ItemStackType(clickItem.copyStackWithCount(actualChangeNum)),false).getStack()).copy();
+                    if(takenItem != null)
+                    {
+                        setCarried(takenItem);
+                        storage.onChange();
+                    }
+                }
+                else if (slot.mayPlace(carriedItem))
+                {   //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
+                    int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
+                    storage.insert(StackCreater.Create(ItemStackType.ID,carriedItem.copyWithCount(changedCount),changedCount),false);
+                    int newCount = carriedItem.getCount() - changedCount;
+                    if(newCount <=0)
+                    {
+                        setCarried(ItemStack.EMPTY);
+                    }
+                    else
+                    {
+                        ItemStack newCarriedItem = carriedItem.copy();
+                        newCarriedItem.setCount(newCount);
+                        setCarried(newCarriedItem);
+                    }
+                }
+                else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
+                {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
+                    // 此情况在点击维度存储槽时永远不可能发生，如果发生，无需处理
+                    // 原版逻辑为取出物品到最大上限
+                    // 保留此情况以便后续使用
+                }
+            }
+        }
+    }
 
     // 仅标记，需要时重写
     @Override
@@ -93,17 +228,126 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         super.broadcastFullState();
     }
 
+    // 完全重写快速移动方案
     @Override
-    public ItemStack quickMoveStack(Player player, int i)
+    public ItemStack quickMoveStack(Player player, int slotIndex)
     {
-        return null;
+        return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean stillValid(Player player)
+    protected boolean moveItemStackTo(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
     {
-        return false;
+        boolean flag = false;
+        int i = startIndex;
+        if (reverseDirection) {
+            i = endIndex - 1;
+        }
+
+        while(!stack.isEmpty()) {
+            if (reverseDirection) {
+                if (i < startIndex) {
+                    break;
+                }
+            } else if (i >= endIndex) {
+                break;
+            }
+            //对普通槽位和存储槽位分开处理
+            if(this.slots.get(i) instanceof StoredStackSlot)
+            {
+                // 物品全部移动到存储，然后手动退出
+                storage.insert(StackCreater.Create(ItemStackType.ID, stack.copy(),stack.getCount()),false);
+                flag = true;
+                break;
+            }
+            else
+            {
+                Slot slot = this.slots.get(i);
+                ItemStack itemstack = slot.getItem();
+                // 填充同物品槽位
+                if (!itemstack.isEmpty() && ItemStack.isSameItemSameComponents(stack, itemstack)) {
+                    int j = itemstack.getCount() + stack.getCount();
+                    int k = slot.getMaxStackSize(itemstack);
+                    if (j <= k) {
+                        stack.setCount(0);
+                        itemstack.setCount(j);
+                        slot.setChanged();
+                        flag = true;
+                    } else if (itemstack.getCount() < k) {
+                        stack.shrink(k - itemstack.getCount());
+                        itemstack.setCount(k);
+                        slot.setChanged();
+                        flag = true;
+                    }
+                }
+                // 填充空槽位
+                if (itemstack.isEmpty() && slot.mayPlace(stack)) {
+                    int l = slot.getMaxStackSize(stack);
+                    slot.setByPlayer(stack.split(Math.min(stack.getCount(), l)));
+                    slot.setChanged();
+                    flag = true;
+                }
+            }
+            if (reverseDirection) {
+                --i;
+            } else {
+                ++i;
+            }
+        }
+        return flag;
     }
+
+    // 检测全部目标槽位，总共最多能容纳多少个给定种类的物品
+    protected int checkCanMoveStackCount(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
+    {
+        int flag = 0;
+        int i = startIndex;
+        if (reverseDirection) {
+            i = endIndex - 1;
+        }
+
+        while(!stack.isEmpty()) {
+            if (reverseDirection) {
+                if (i < startIndex) {
+                    break;
+                }
+            } else if (i >= endIndex) {
+                break;
+            }
+            //对普通槽位和存储槽位分开处理
+            if(this.slots.get(i) instanceof StoredStackSlot)
+            {
+                // 最多可以向维度存储移动多少物品？
+                flag = stack.getMaxStackSize();
+                break;
+            }
+            else
+            {
+                // 最多可以向背包填充多少？
+                Slot slot = this.slots.get(i);
+                ItemStack itemstack = slot.getItem();
+                if (!itemstack.isEmpty() && ItemStack.isSameItemSameComponents(stack, itemstack)) {
+                    int k = slot.getMaxStackSize(itemstack);    //槽位可以放入的最大数
+                    int maxCanPut = k - itemstack.getCount();
+                    flag += maxCanPut;
+                }
+                if (itemstack.isEmpty() && slot.mayPlace(stack)) {
+                    int l = slot.getMaxStackSize(stack);
+                    flag += l;
+                }
+            }
+            if (reverseDirection) {
+                --i;
+            } else {
+                ++i;
+            }
+        }
+        return flag;
+    }
+
+    // 重写
+    @Override
+    public abstract boolean stillValid(Player player);
 
 
 
