@@ -55,19 +55,6 @@ public class NetInterfaceBlock extends NetedBlock implements EntityBlock
     }
 
     @Override
-    public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity)
-    {
-        if(!level.isClientSide())
-        {
-            if(level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity)
-            {
-                LOGGER.info("目标方块的网络id为:{}",blockEntity.getNetId());
-            }
-        }
-        super.stepOn(level,pos,state,entity);
-    }
-
-    @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
     {
         if (!state.is(newState.getBlock())) {
