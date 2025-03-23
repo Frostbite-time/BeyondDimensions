@@ -93,9 +93,6 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
         lastButtonStateMap = new HashMap<>(buttonStateMap);
         lastSearchText = searchField.getValue();
 
-        menu.storage.clearStorage();
-        menu.suppressRemoteUpdates();
-        PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }
 
     @Override
@@ -195,7 +192,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
             menu.lineData++;
         }
         //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
-        menu.ScrollTo();
+        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
         return true;
     }
 
@@ -214,7 +211,7 @@ public class DimensionsNetGUI extends AbstractContainerScreen<DimensionsNetMenu>
             menu.lineData++;
         }
         //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
-        menu.ScrollTo();
+        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
         return true;
     }
 

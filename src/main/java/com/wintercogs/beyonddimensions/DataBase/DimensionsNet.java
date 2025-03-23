@@ -50,14 +50,18 @@ public class DimensionsNet extends SavedData
     // 通用存储空间-测试 存储一切stack行为的资源
     private UnifiedStorage unifiedStorage;
 
+    // 用于标记此网络是否为临时网络，如果是，则不执行倒计时或其他功能
+    private final boolean temporary;
+
     private int currentTime = 600*20;
     private int holdTime = 600*20;
 
-    public DimensionsNet()
+    public DimensionsNet(boolean temporary)
     {
         unifiedStorage = new UnifiedStorage(this);
         energyStorage = new EnergyStorage(this);
         NeoForge.EVENT_BUS.addListener(this::onServerTick);
+        this.temporary = temporary;
     }
 
     // 基本函数
@@ -65,7 +69,7 @@ public class DimensionsNet extends SavedData
     // Create函数
     public static DimensionsNet create()
     {
-        return new DimensionsNet();
+        return new DimensionsNet(false);
     }
 
     // 构建最新的网络名称
@@ -121,7 +125,7 @@ public class DimensionsNet extends SavedData
     // 从硬盘加载数据
     public static DimensionsNet load(CompoundTag tag, HolderLookup.Provider registryAccess)
     {
-        DimensionsNet net = new DimensionsNet();
+        DimensionsNet net = new DimensionsNet(false);
 
         net.id = tag.getInt("Id");
         UUID owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
@@ -348,6 +352,10 @@ public class DimensionsNet extends SavedData
     @SubscribeEvent
     public void onServerTick(ServerTickEvent.Pre event)
     {
+        // 不对临时网络执行倒计时
+        if(temporary)
+            return;
+
         currentTime--;
         setDirty();
         if(currentTime <= 0)

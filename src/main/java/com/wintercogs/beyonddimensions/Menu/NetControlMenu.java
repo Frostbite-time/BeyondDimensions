@@ -26,7 +26,8 @@ public class NetControlMenu extends AbstractContainerMenu
 
     private final Player player;
 
-    private DimensionsNet net = new DimensionsNet();
+    // 设为临时，服务端会在初始化时重设
+    private DimensionsNet net = new DimensionsNet(true);
     public HashMap<UUID, PlayerPermissionInfo> playerInfo = new HashMap<>();
 
     // 构建注册用的信息

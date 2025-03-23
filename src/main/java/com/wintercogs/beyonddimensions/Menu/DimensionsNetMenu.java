@@ -7,7 +7,6 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
-import com.wintercogs.beyonddimensions.Packet.StoragePacket;
 import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
 import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
 import io.netty.buffer.Unpooled;
@@ -66,27 +65,27 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
      */
     public DimensionsNetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, new DimensionsNet(), new SimpleContainerData(0));
+        // 客户端函数，故将Net设为临时Net
+        this(id, playerInventory, new DimensionsNet(true));
     }
 
     /**
      * 服务端构造函数
      * @param playerInventory 玩家背包
      * @param data 维度网络信息，包含了存储信息
-     * @param uselessContainer 此处无用，传入new SimpleContainerData(0)即可
      */
-    public DimensionsNetMenu(int id, Inventory playerInventory, DimensionsNet data, SimpleContainerData uselessContainer)
+    public DimensionsNetMenu(int id, Inventory playerInventory, DimensionsNet data)
     {
         super(Dimensions_Net_Menu.get(), id,playerInventory,data.getUnifiedStorage());
         // 初始化维度网络容器
-        viewerStorage = new DimensionsNet().getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
+        viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
         if(!player.level().isClientSide())
         {
             // 将lastItemStorage设置为一个深克隆，以便后续进行比较
             this.lastStorage = new ArrayList<>();
             for(IStackType stack : this.storage.getStorage())
             {
-                this.lastStorage.add(stack.copy());
+                //this.lastStorage.add(stack.copy());
             }
         }
 
@@ -94,22 +93,18 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         buttonStateMap.put(ButtonName.ReverseButton,ButtonState.DISABLED);
         buttonStateMap.put(ButtonName.SortMethodButton,ButtonState.SORT_DEFAULT);
 
-        // 开始添加槽位，其中addSlot会为menu自带的列表slots提供slot，
-        // 而给slot本身传入的索引则对应其在背包中的索引
-        // 添加维度网络槽位 对应slots索引 0~53
+
+        // 添加存储槽
         for (int row = 0; row < lines; ++row)
         {
             for (int col = 0; col < 9; ++col)
-            {   // 添加槽而不设置数据
-                // 由于我们完全不依靠menu自带得方法来同步，所以可以传入一个和实际数据同步所用不一样的Storage
-                // 只需要保证我们能及时把数据从实际数据同步到viewerUnifiedStorage
-                // 再将slot点击操作重写的物品种类依赖
+            {
                 this.addSlot(new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 27+row * 18));
             }
         }
 
+        // 添加玩家背包和快捷栏
         inventoryStartIndex = slots.size();
-        // 添加玩家物品栏槽位 对应slots索引 54~80
         for (int row = 0; row < 3; ++row)
         {
             for (int col = 0; col < 9; ++col)
@@ -117,7 +112,6 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
                 this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 149 + row * 18));
             }
         }
-        // 添加快捷栏槽位 对应slots索引 81~89
         for (int col = 0; col < 9; ++col)
         {
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 207));
@@ -128,6 +122,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     /**
      * 客户端专用函数，服务端请勿调用<br>
      * 使用当前客户端的真存储来更新视觉存储，然后重构索引以刷新显示
+     * 比起buildIndexList开销较大，仅确定真存储有变化时才调用
      */
     public void updateViewerStorage()
     {
@@ -139,13 +134,43 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         buildIndexList(new ArrayList<>(viewerStorage.getStorage()));
     }
 
-    /**
-     * 利用当前视觉存储信息重构索引
-     * 翻页操作集成在GUI部分
-     */
-    public final void ScrollTo()
+    // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
+    public void buildIndexList(ArrayList<IStackType> itemStorage)
     {
-        this.buildIndexList(new ArrayList<>(this.viewerStorage.getStorage()));
+        if(!this.player.level().isClientSide())
+        {
+            return;
+        }
+        // 1 构建正确的索引数据
+        ArrayList<Integer> cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
+        // 2 构建linedata
+        updateScrollLineData(cacheIndex.size());
+        // 3 填入索引表
+        ArrayList<Integer> indexList = new ArrayList<>();
+        for (int i = 0; i < lines * 9; i++)
+        {
+            //根据翻页数据构建索引列表
+            if (i + lineData * 9 < cacheIndex.size())
+            {
+                int index = cacheIndex.get(i + lineData * 9);
+                indexList.add(index);
+            }
+            else
+            {
+                indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
+            }
+        }
+        // 加载索引表
+        loadIndexList(indexList);
+    }
+
+    // 双端函数，根据传入列表构建索引
+    public void loadIndexList(ArrayList<Integer> list)
+    {
+        for(int i = 0; i<list.size();i++)
+        {
+            ((StoredStackSlot) slots.get(i)).setTheSlotIndex(list.get(i));
+        }
     }
 
     /**
@@ -256,35 +281,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         lineData = Math.min(lineData,maxLineData);
     }
 
-    // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList(ArrayList<IStackType> itemStorage)
-    {
-        if(!this.player.level().isClientSide())
-        {
-            return;
-        }
-        // 1 构建正确的索引数据
-        ArrayList<Integer> cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
-        // 2 构建linedata
-        updateScrollLineData(cacheIndex.size());
-        // 3 填入索引表
-        ArrayList<Integer> indexList = new ArrayList<>();
-        for (int i = 0; i < lines * 9; i++)
-        {
-            //根据翻页数据构建索引列表
-            if (i + lineData * 9 < cacheIndex.size())
-            {
-                int index = cacheIndex.get(i + lineData * 9);
-                indexList.add(index);
-            }
-            else
-            {
-                indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
-            }
-        }
-        // 加载索引表
-        loadIndexList(indexList);
-    }
+
 
     @Override
     protected void updateChange()
@@ -337,9 +334,62 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
                 changedCount.add(delta);
             }
         }
-        if (!changedItem.isEmpty())
-        {
-            PacketDistributor.sendToPlayer((ServerPlayer) player,new SyncStoragePacket(changedItem,changedCount,new ArrayList<>(0)));
+
+
+
+        // 将数据分包发送
+        if (!changedItem.isEmpty()) {
+            final int MAX_PACKET_SIZE = 900 * 1024; // 921,600 bytes
+            List<SyncStoragePacket> packets = new ArrayList<>();
+            // 预计算条目大小
+            List<Integer> entrySizes = new ArrayList<>();
+            for (int i = 0; i < changedItem.size(); i++) {
+                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+                RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(
+                        buf,
+                        player.level().registryAccess(),
+                        ConnectionType.OTHER
+                );
+
+                // 序列化物品和数量
+                IStackType stack = changedItem.get(i);
+                if (stack != null) {
+                    stack.serialize(registryBuf);
+                }
+                buf.writeLong(changedCount.get(i)); // 写入数量变化
+
+                entrySizes.add(buf.readableBytes());
+            }
+            // 动态分包
+            List<IStackType> batchItems = new ArrayList<>();
+            List<Long> batchCounts = new ArrayList<>();
+            int currentSize = 0;
+            for (int i = 0; i < changedItem.size(); i++) {
+                int entrySize = entrySizes.get(i);
+                // 分包条件判断
+                if (currentSize + entrySize > MAX_PACKET_SIZE) {
+                    packets.add(new SyncStoragePacket(
+                            new ArrayList<>(batchItems),
+                            new ArrayList<>(batchCounts),
+                            new ArrayList<>() // 空索引列表
+                    ));
+
+                    batchItems.clear();
+                    batchCounts.clear();
+                    currentSize = 0;
+                }
+                batchItems.add(changedItem.get(i));
+                batchCounts.add(changedCount.get(i));
+                currentSize += entrySize;
+            }
+            // 处理剩余数据
+            if (!batchItems.isEmpty()) {
+                packets.add(new SyncStoragePacket(batchItems, batchCounts, new ArrayList<>()));
+            }
+            // 发送所有分包
+            for (SyncStoragePacket packet : packets) {
+                PacketDistributor.sendToPlayer((ServerPlayer) player, packet);
+            }
         }
     }
 
@@ -359,77 +409,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         }
     }
 
-    // 服务端函数，用于将存储空间完整发到客户端
-    public void sendStorage()
-    {
-        // 只有服务端才能发送存储数据给客户端
-        if(player instanceof ServerPlayer)
-        {
-            ArrayList<StoragePacket> splitPackets = new ArrayList<>(); // 用于分割包的列表
-            ArrayList<IStackType> currentBatch = new ArrayList<>(); // 用于临时存储每个包的StoredItemStack
-            ArrayList<Integer> currentIndices = new ArrayList<>(); // 用于精确记录索引，防止因网络延时导致错误
-            int currentPayloadSize = 0; // 当前包大小
-            final int MAX_PAYLOAD_SIZE = 900000; // 单个包最大大小  服务端发送到客户端的包不能大于1MiB 此处留下100KB冗余
-            ArrayList<IStackType> storage = new ArrayList<>(this.storage.getStorage()); // 当前存储空间的浅克隆
 
-            for(int i = 0;i<storage.size();i++)
-            {
-                // 计算此次添加的字节数
-                IStackType stack = storage.get(i);
-                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer()); // 创建一个 Netty 的 ByteBuf
-                RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, player.level().registryAccess(), ConnectionType.OTHER);
-                stack.serialize(registryBuf);
-                int entrySize = registryBuf.readableBytes() + Integer.BYTES + 1; // 物品的字节数、索引的字节数、结束标记的字节数
-
-                boolean isLastItem = (i == storage.size() - 1);
-                // 如果添加之后包会比最大负载大，则分包，然后把物品添加到下一个包
-                if (currentPayloadSize + entrySize >= MAX_PAYLOAD_SIZE) {
-                    splitPackets.add(new StoragePacket(
-                            new ArrayList<>(currentBatch),
-                            new ArrayList<>(currentIndices),
-                            false
-                    ));
-                    currentBatch.clear();
-                    currentIndices.clear();
-                    currentPayloadSize = 0;
-                }
-
-                currentBatch.add(stack);
-                currentIndices.add(i);
-                currentPayloadSize += entrySize;
-
-                // 如果当前添加的是最后一个物品，则分包
-                if (isLastItem) {
-                    splitPackets.add(new StoragePacket(
-                            new ArrayList<>(currentBatch),
-                            new ArrayList<>(currentIndices),
-                            true
-                    ));
-                }
-            }
-            // 整理数据包，然后一次性发送
-            if (!splitPackets.isEmpty()) {
-                StoragePacket firstPacket = splitPackets.get(0);
-                StoragePacket[] remainingPackets = splitPackets.subList(1, splitPackets.size())
-                        .toArray(new StoragePacket[0]);
-
-                PacketDistributor.sendToPlayer(
-                        (ServerPlayer) this.player,
-                        firstPacket,
-                        remainingPackets
-                );
-            }
-        }
-    }
-
-    // 双端函数，根据传入列表构建索引
-    public void loadIndexList(ArrayList<Integer> list)
-    {
-        for(int i = 0; i<list.size();i++)
-        {
-            ((StoredStackSlot) slots.get(i)).setTheSlotIndex(list.get(i));
-        }
-    }
 
     @Override
     public boolean stillValid(Player player)

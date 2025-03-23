@@ -43,24 +43,7 @@ public class ClientPayloadHandler
         context.enqueueWork(
                 () ->
                 {
-                    Player player = context.player();
-                    if (player.containerMenu instanceof DimensionsNetMenu menu)
-                    {
-                        for(int i = 0; i<packet.stacks().size(); i++)
-                        {
-                            // unifiedStorage为基于物品的存储方案，只关心物品种类与数量。因此可以避开索引的远端同步需求
-                            IStackTypedHandler storage = menu.storage;
-                            storage.insert(packet.stacks().get(i),false);
-                        }
-                        if(packet.end())
-                        {
-                            //viewerStorage基于unifiedStorage构建。是故其位置与unifiedStorage保持完全的正确。同样避开对索引的远端同步需求
-                            menu.updateViewerStorage();
-                            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
-                            menu.resumeRemoteUpdates();
-                        }
-                        return; // 当接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
+
                 }
 
         );

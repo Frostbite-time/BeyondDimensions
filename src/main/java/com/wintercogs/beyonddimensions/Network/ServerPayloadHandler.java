@@ -43,7 +43,7 @@ public class ServerPayloadHandler
                     {
                         LOGGER.info("玩家存在维度空间:{}，尝试打开GUI", net.getId());
                         context.player().openMenu(new SimpleMenuProvider(
-                                (containerId, playerInventory, _player) -> new DimensionsNetMenu(containerId, playerInventory, net, new SimpleContainerData(0)),
+                                (containerId, playerInventory, _player) -> new DimensionsNetMenu(containerId, playerInventory, net),
                                 Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                         ));
                     }
@@ -70,11 +70,6 @@ public class ServerPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    if (player.containerMenu instanceof DimensionsNetMenu menu)
-                    {
-                        menu.sendStorage();
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
                     if(player.containerMenu instanceof NetEnergyMenu menu)
                     {
                         menu.sendStorage();
