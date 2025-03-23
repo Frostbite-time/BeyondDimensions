@@ -124,8 +124,6 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
         this.leftPos = (this.width - 256)/2;
         this.topPos = (this.height - 235)/2;
 
-        PacketDistributor.sendToServer(new CallServerPlayerInfoPacket());
-
         ownerButton = Button.builder(
                 Component.translatable("menu.button.beyonddimensions.setowner"),
                 button -> {

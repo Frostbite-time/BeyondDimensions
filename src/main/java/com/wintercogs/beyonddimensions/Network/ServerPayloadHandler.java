@@ -69,16 +69,7 @@ public class ServerPayloadHandler
         context.enqueueWork(
                 () ->
                 {
-                    Player player = context.player();
-                    if(player.containerMenu instanceof NetEnergyMenu menu)
-                    {
-                        menu.sendStorage();
 
-                        // 临时代码，用于通知服务器发送弹出模式
-                        PacketDistributor.sendToPlayer((ServerPlayer) player,new PopModeButtonPacket(menu.popMode));
-
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
                 }
 
         );

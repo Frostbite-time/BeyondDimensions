@@ -81,12 +81,8 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
         if(!player.level().isClientSide())
         {
-            // 将lastItemStorage设置为一个深克隆，以便后续进行比较
+            // 初始化lastStorage
             this.lastStorage = new ArrayList<>();
-            for(IStackType stack : this.storage.getStorage())
-            {
-                //this.lastStorage.add(stack.copy());
-            }
         }
 
         // 初始化搜索方案

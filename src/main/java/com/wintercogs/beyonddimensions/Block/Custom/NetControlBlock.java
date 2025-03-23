@@ -25,7 +25,7 @@ public class NetControlBlock extends Block
         if(!level.isClientSide())
         {
             player.openMenu(new SimpleMenuProvider(
-                    (containerId, playerInventory, _player) -> new NetControlMenu(containerId,_player),
+                    (containerId, playerInventory, _player) -> new NetControlMenu(containerId,playerInventory),
                     Component.translatable("menu.title.beyonddimensions.net_control_menu")
             ));
         }
