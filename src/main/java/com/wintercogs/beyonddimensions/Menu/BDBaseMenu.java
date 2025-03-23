@@ -32,6 +32,8 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
 
     private boolean init = false; // 需要在客户端Menu完成时才能向其发送的操作是否完成的标志
 
+    public boolean isHanding = false; // 用于标记当前是否向服务端发出操作请求却未得到回应 true表示无正在处理未回应，false表示空闲
+
 
 
     protected BDBaseMenu(@Nullable MenuType<?> menuType, int containerId, Inventory playerInventory,@Nullable IStackTypedHandler storage)

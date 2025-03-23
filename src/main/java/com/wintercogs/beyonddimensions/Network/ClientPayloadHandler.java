@@ -12,8 +12,6 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-
 
 public class ClientPayloadHandler
 {

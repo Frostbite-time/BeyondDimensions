@@ -36,8 +36,6 @@ import java.util.function.Supplier;
 public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
 {
 
-    public boolean isHanding = false; // 用于标记当前是否向服务端发出操作请求却未得到回应 true表示无正在处理未回应，false表示空闲
-
     public StackTypedHandler viewerStorage; // 在客户端，用于显示物品
     private ArrayList<IStackType> lastStorage; // 记录截至上一次同步时的存储状态，用于同步数据
 
