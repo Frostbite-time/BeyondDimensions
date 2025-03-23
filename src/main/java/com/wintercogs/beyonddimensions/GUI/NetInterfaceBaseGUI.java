@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.GUI;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
@@ -10,26 +9,18 @@ import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
-import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
-import com.wintercogs.beyonddimensions.Packet.CallSeverStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.FlagSlotSetPacket;
 import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-import java.util.ArrayList;
 
-public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBaseMenu>
+public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 {
 
     private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_interface.png");
@@ -106,17 +97,12 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         });
         addRenderableWidget(popButton);
 
-
-        menu.storageHandler.clearStorage();
-        menu.suppressRemoteUpdates();
-        PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }
 
     @Override
     protected void containerTick() {
         //父类无操作
         //每tick自动更新搜索方案
-        menu.buildIndexList(new ArrayList<>(menu.viewerStorageHandler.getStorage()));
 
         if(menu.popMode)
         {
@@ -141,7 +127,6 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
     {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         popButton.render(guiGraphics,mouseX,mouseY,partialTicks);
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
     @Override
@@ -151,67 +136,10 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+20, 4210752,false);
     }
 
-    @Override
-    protected void renderSlot(GuiGraphics guiGraphics, Slot slot) {
-        if(slot instanceof StoredStackSlot sSlot)
-        {
-            // 获取stack
-            int x = slot.x;
-            int y = slot.y;
-            IStackType stack = sSlot.getStack();
-
-            if(stack != null)
-            {
-                stack.render(guiGraphics,x,y);
-            }
-
-        }
-        else
-        {
-            super.renderSlot(guiGraphics,slot);
-        }
-
-    }
-
-    @Override
-    protected void renderTooltip(GuiGraphics guiGraphics, int x, int y)
-    {
-        if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
-            if(this.hoveredSlot instanceof StoredStackSlot sSlot)
-            {
-                IStackType stack = sSlot.getStack();
-                stack.renderTooltip(guiGraphics,minecraft.font,x,y);
-            }
-            else
-            {
-                ItemStack itemstack = this.hoveredSlot.getItem();
-                guiGraphics.renderTooltip(this.font, this.getTooltipFromContainerItem(itemstack), itemstack.getTooltipImage(), itemstack, x, y);
-            }
-        }
-    }
-
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
-    {
-        super.mouseScrolled(mouseX,mouseY,scrollX,scrollY);
-        if (scrollY > 0)
-        {
-            menu.lineData--;
-        } else if(scrollY < 0)
-        {
-            menu.lineData++;
-        }
-        //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
-        menu.ScrollTo();
-        return true;
-    }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        Slot slot = this.findSlot(mouseX, mouseY);
-        if(!(slot instanceof StoredStackSlot))
-            super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
+        super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
 
         // 获取拖动物品
         if(BeyondDimensions.EMILoaded && !isDragging)
@@ -221,68 +149,7 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
                 isDragging = true;
         }
 
-        menu.ScrollTo();
         return true;
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        super.mouseClicked(mouseX,mouseY,button);
-
-
-
-        // 处理点击槽位
-        Slot slot = findSlot(mouseX,mouseY);
-        if(slot != null)
-        {
-            if (!menu.isHanding)
-            {
-                int slotId = slot.index;
-                IStackType clickItem;
-                if(hasShiftDown())
-                {
-                    if(slot instanceof StoredStackSlot sSlot)
-                    {
-                        clickItem = sSlot.getVanillaActualStack();
-                    }
-                    else
-                    {
-                        clickItem = new ItemStackType(slot.getItem());
-                    }
-                    menu.isHanding = true;
-                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,true));
-                }
-                else
-                {
-                    if(slot instanceof StoredStackSlot sSlot)
-                    {
-                        if(sSlot.isFake())
-                        {
-                            // 对于标记槽位
-                            clickItem = sSlot.getVanillaActualStack();
-                            menu.isHanding = true;
-                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
-                        }
-                        else
-                        {
-                            clickItem = sSlot.getVanillaActualStack();
-                            menu.isHanding = true;
-                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
-                        }
-
-                    }
-                }
-            }
-        }
-
-        return true;
-    }
-
-    @Override
-    protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type)
-    {
-        if(slot != null && !(slot instanceof StoredStackSlot))
-            super.slotClicked(slot, slotId, mouseButton, type);
     }
 
     @Override
@@ -297,47 +164,6 @@ public class NetInterfaceBaseGUI extends AbstractContainerScreen<NetInterfaceBas
         }
         isDragging = false;
         return true;
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    // 父类keypressd中控制快捷栏按键移动的方法
-    @Override
-    protected boolean checkHotbarKeyPressed(int keyCode, int scanCode)
-    {
-        if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null) {
-
-            if(hoveredSlot instanceof StoredStackSlot sSlot)
-            {
-                // 留空待补
-
-            }
-            else
-            {// 副手交换仅对于非存储槽才生效
-                if (this.minecraft.options.keySwapOffhand.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
-                    this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
-                    return true;
-                }
-                for(int i = 0; i < 9; ++i) {
-                    if (this.minecraft.options.keyHotbarSlots[i].isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
-                        this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, i, ClickType.SWAP);
-                        return true;
-                    }
-                }
-            }
-
-
-
-        }
-
-        return false;
-    }
-
-    public Font getFont() {
-        return font;
     }
 
 }

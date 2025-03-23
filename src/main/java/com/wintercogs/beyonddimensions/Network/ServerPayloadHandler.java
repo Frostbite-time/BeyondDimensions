@@ -12,7 +12,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -43,7 +42,7 @@ public class ServerPayloadHandler
                     {
                         LOGGER.info("玩家存在维度空间:{}，尝试打开GUI", net.getId());
                         context.player().openMenu(new SimpleMenuProvider(
-                                (containerId, playerInventory, _player) -> new DimensionsNetMenu(containerId, playerInventory, net, new SimpleContainerData(0)),
+                                (containerId, playerInventory, _player) -> new DimensionsNetMenu(containerId, playerInventory, net),
                                 Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                         ));
                     }
@@ -69,30 +68,7 @@ public class ServerPayloadHandler
         context.enqueueWork(
                 () ->
                 {
-                    Player player = context.player();
-                    if (player.containerMenu instanceof DimensionsNetMenu menu)
-                    {
-                        menu.sendStorage();
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
-                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
-                    {
-                        menu.sendStorage();
 
-                        // 临时代码，用于通知服务器发送弹出模式
-                        PacketDistributor.sendToPlayer((ServerPlayer) player,new PopModeButtonPacket(menu.popMode));
-
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
-                    if(player.containerMenu instanceof NetEnergyMenu menu)
-                    {
-                        menu.sendStorage();
-
-                        // 临时代码，用于通知服务器发送弹出模式
-                        PacketDistributor.sendToPlayer((ServerPlayer) player,new PopModeButtonPacket(menu.popMode));
-
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
                 }
 
         );

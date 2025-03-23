@@ -10,9 +10,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -21,12 +19,11 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class NetControlMenu extends AbstractContainerMenu
+public class NetControlMenu extends BDOrderedContainerMenu
 {
 
-    private final Player player;
-
-    private DimensionsNet net = new DimensionsNet();
+    // 设为临时，服务端会在初始化时重设
+    private DimensionsNet net = new DimensionsNet(true);
     public HashMap<UUID, PlayerPermissionInfo> playerInfo = new HashMap<>();
 
     // 构建注册用的信息
@@ -39,29 +36,18 @@ public class NetControlMenu extends AbstractContainerMenu
      */
     public NetControlMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id,playerInventory.player);
+        this(id,playerInventory);
     }
 
-    public NetControlMenu(int containerId, Player player)
+    public NetControlMenu(int containerId, Inventory playerInventory)
     {
-        super(Net_Control_Menu.get(), containerId);
-        this.player = player;
+        super(Net_Control_Menu.get(),containerId, playerInventory,null);
 
         if(!player.level().isClientSide())
         {
             net = DimensionsNet.getNetFromPlayer(player);
             playerInfo = net.getPlayerPermissionInfoMap(player.level());
         }
-    }
-
-    public void sendPlayerInfo()
-    {
-        PacketDistributor.sendToPlayer((ServerPlayer) player,new PlayerPermissionInfoPacket(playerInfo));
-    }
-
-    public void loadPlayerInfo(HashMap<UUID, PlayerPermissionInfo> playerInfo)
-    {
-        this.playerInfo = playerInfo;
     }
 
     public void handlePlayerAction(UUID receiver, NetControlAction action)
@@ -109,10 +95,8 @@ public class NetControlMenu extends AbstractContainerMenu
     }
 
     @Override
-    public void broadcastChanges()
+    protected void updateChange()
     {
-        super.broadcastChanges();
-
         if(!net.getPlayerPermissionInfoMap(player.level()).equals(this.playerInfo))
         {
             this.playerInfo = this.net.getPlayerPermissionInfoMap(player.level());
@@ -120,10 +104,21 @@ public class NetControlMenu extends AbstractContainerMenu
         }
     }
 
+
     @Override
-    public ItemStack quickMoveStack(Player player, int i)
+    protected void initUpdate()
     {
-        return null;
+        sendPlayerInfo();
+    }
+
+    public void sendPlayerInfo()
+    {
+        PacketDistributor.sendToPlayer((ServerPlayer) player,new PlayerPermissionInfoPacket(playerInfo));
+    }
+
+    public void loadPlayerInfo(HashMap<UUID, PlayerPermissionInfo> playerInfo)
+    {
+        this.playerInfo = playerInfo;
     }
 
     @Override

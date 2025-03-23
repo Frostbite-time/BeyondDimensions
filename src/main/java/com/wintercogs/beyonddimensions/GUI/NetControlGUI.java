@@ -6,11 +6,9 @@ import com.wintercogs.beyonddimensions.DataBase.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.PermissionInfoButton;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
-import com.wintercogs.beyonddimensions.Packet.CallServerPlayerInfoPacket;
 import com.wintercogs.beyonddimensions.Packet.NetControlActionPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -21,7 +19,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.UUID;
 
-public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
+public class NetControlGUI extends BDBaseGUI<NetControlMenu>
 {
     private ArrayList<PermissionInfoButton> permissionInfoButtons = new ArrayList<>();
     private UUID currentPlayerId = null;
@@ -124,8 +122,6 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
         this.leftPos = (this.width - 256)/2;
         this.topPos = (this.height - 235)/2;
 
-        PacketDistributor.sendToServer(new CallServerPlayerInfoPacket());
-
         ownerButton = Button.builder(
                 Component.translatable("menu.button.beyonddimensions.setowner"),
                 button -> {
@@ -211,9 +207,7 @@ public class NetControlGUI extends AbstractContainerScreen<NetControlMenu>
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
         nowShowPlayer = 0;
         for (PermissionInfoButton button:permissionInfoButtons)
         {

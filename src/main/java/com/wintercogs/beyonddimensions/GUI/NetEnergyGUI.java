@@ -10,14 +10,12 @@ import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-public class NetEnergyGUI extends AbstractContainerScreen<NetEnergyMenu>
+public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
 {
     private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_energy_storage.png");
 
@@ -81,7 +79,6 @@ public class NetEnergyGUI extends AbstractContainerScreen<NetEnergyMenu>
     {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         popButton.render(guiGraphics,mouseX,mouseY,partialTicks);
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
         this.renderEnergyBar(guiGraphics,this.leftPos+8,this.topPos + 35);
     }
 
@@ -92,18 +89,6 @@ public class NetEnergyGUI extends AbstractContainerScreen<NetEnergyMenu>
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+10, 4210752,false);
 
         guiGraphics.drawString(this.font, StringFormat.formatCount(menu.energyStored)+"/"+StringFormat.formatCount(menu.energyCapacity), this.inventoryLabelX, this.inventoryLabelY-20, 4210752,false);
-    }
-
-    @Override
-    protected void renderSlot(GuiGraphics guiGraphics, Slot slot)
-    {
-        super.renderSlot(guiGraphics,slot);
-    }
-
-    @Override
-    protected void renderTooltip(GuiGraphics guiGraphics, int x, int y)
-    {
-
     }
 
     protected void renderEnergyBar(GuiGraphics guiGraphics, int xStart, int yStart) {
