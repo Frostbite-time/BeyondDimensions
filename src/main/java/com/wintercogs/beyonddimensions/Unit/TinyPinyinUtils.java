@@ -1,8 +1,6 @@
 package com.wintercogs.beyonddimensions.Unit;
 
 import com.github.promeg.pinyinhelper.Pinyin;
-import com.github.promeg.tinypinyin.lexicons.java.cncity.CnCityDict;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 
 import static com.github.promeg.pinyinhelper.Pinyin.isChinese;
 
@@ -10,11 +8,8 @@ public class TinyPinyinUtils
 {
 
     static {
-        // 初始化TinyPinyin配置，应用中国地区词典并设置拼音为小写
-        Pinyin.init(Pinyin.newConfig().with(CnCityDict.getInstance()));
-        BeyondDimensions.LOGGER.info(getFirstPinYin("西瓜"));
-        BeyondDimensions.LOGGER.info(getAllPinyin("西瓜",false));
-
+        // 初始化TinyPinyin配置
+        Pinyin.init(Pinyin.newConfig());
     }
 
     /**
