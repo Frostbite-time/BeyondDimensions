@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Packet.*;
+import com.wintercogs.beyonddimensions.Packet.toServer.OpenNetGuiPacket;
 import net.minecraft.world.entity.player.Player;
 import org.slf4j.Logger;
 
@@ -25,7 +26,7 @@ public class ClientPayloadHandler
 
 
 
-    public void handleOpenNetGuiPacket(final OpenNetGuiPacket packet,final IPayloadContext context)
+    public void handleOpenNetGuiPacket(final OpenNetGuiPacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
                 () ->
