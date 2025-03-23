@@ -6,7 +6,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 
-
 import java.util.function.UnaryOperator;
 
 public class ModDataComponents {

@@ -1,7 +1,15 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Packet.toServer.OpenNetGuiPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.EnergyStoragePacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.PlayerPermissionInfoPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncFlagPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncStoragePacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.NetControlActionPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkRegistry;
@@ -29,133 +37,69 @@ public class PacketRegister
                 OpenNetGuiPacket::decode,
                 OpenNetGuiPacket::handle
         );
-    }
 
-//    @SubscribeEvent
-//    public static void register(final RegisterPayloadHandlersEvent event)
-//    {
-//        //设置当前网络版本
-//        final PayloadRegistrar registrar = event.registrar("1");
-//
-//        // 注册OpenNetGuiPacket 用于打开当前角色绑定的维度网络GUI
-//        registrar.playBidirectional(
-//                OpenNetGuiPacket.TYPE,
-//                OpenNetGuiPacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handleOpenNetGuiPacket,
-//                        ServerPayloadHandler.getInstance()::handleOpenNetGuiPacket
-//                )
-//
-//        );
-//
-//        // 注册 ItemStoragePacket 用于同步滑动条状态
-//        registrar.playBidirectional(
-//                StoragePacket.TYPE,
-//                StoragePacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handleStoragePacket,
-//                        ServerPayloadHandler.getInstance()::handleItemStoragePacket
-//                )
-//        );
-//
-//        // 注册 CallSeverStoragePacket 用于同步滑动条状态
-//        registrar.playBidirectional(
-//                CallSeverStoragePacket.TYPE,
-//                CallSeverStoragePacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handleCallSeverStoragePacket,
-//                        ServerPayloadHandler.getInstance()::handleCallSeverStoragePacket
-//                )
-//        );
-//
-//        // 注册 SyncItemStoragePacket 用于同步滑动条状态
-//        registrar.playBidirectional(
-//                SyncStoragePacket.TYPE,
-//                SyncStoragePacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handleSyncItemStoragePacket,
-//                        ServerPayloadHandler.getInstance()::handleSyncItemStoragePacket
-//                )
-//        );
-//
-//        // 注册 CallSeverClickPacket 用于同步滑动条状态
-//        registrar.playBidirectional(
-//                CallSeverClickPacket.TYPE,
-//                CallSeverClickPacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handleCallSeverClickPacket,
-//                        ServerPayloadHandler.getInstance()::handleCallSeverClickPacket
-//                )
-//        );
-//
-//        // 注册 CallSeverClickPacket 用于同步滑动条状态
-//        registrar.playBidirectional(
-//                CallServerPlayerInfoPacket.TYPE,
-//                CallServerPlayerInfoPacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handleCallServerPlayerInfoPacket,
-//                        ServerPayloadHandler.getInstance()::handleCallServerPlayerInfoPacket
-//                )
-//        );
-//
-//        // 注册 CallSeverClickPacket 用于同步滑动条状态
-//        registrar.playBidirectional(
-//                PlayerPermissionInfoPacket.TYPE,
-//                PlayerPermissionInfoPacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handlePlayerPermissionInfoPacket,
-//                        ServerPayloadHandler.getInstance()::handlePlayerPermissionInfoPacket
-//                )
-//        );
-//
-//        // 注册 CallSeverClickPacket 用于同步滑动条状态
-//        registrar.playBidirectional(
-//                NetControlActionPacket.TYPE,
-//                NetControlActionPacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handleNetControlActionPacket,
-//                        ServerPayloadHandler.getInstance()::handleNetControlActionPacket
-//                )
-//        );
-//
-//        // 注册 CallSeverClickPacket 用于同步滑动条状态
-//        registrar.playBidirectional(
-//                SyncFlagPacket.TYPE,
-//                SyncFlagPacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handleSyncFlagPacket,
-//                        ServerPayloadHandler.getInstance()::handleSyncFlagPacket
-//                )
-//        );
-//
-//        // 注册 CallSeverClickPacket 用于同步滑动条状态
-//        registrar.playBidirectional(
-//                PopModeButtonPacket.TYPE,
-//                PopModeButtonPacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handlePopModeButtonPacket,
-//                        ServerPayloadHandler.getInstance()::handlePopModeButtonPacket
-//                )
-//        );
-//
-//        // 注册 CallSeverClickPacket 用于同步滑动条状态
-//        registrar.playBidirectional(
-//                FlagSlotSetPacket.TYPE,
-//                FlagSlotSetPacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handleFlagSlotSetPacket,
-//                        ServerPayloadHandler.getInstance()::handleFlagSlotSetPacket
-//                )
-//        );
-//
-//        // 注册 CallSeverClickPacket 用于同步滑动条状态
-//        registrar.playBidirectional(
-//                EnergyStoragePacket.TYPE,
-//                EnergyStoragePacket.STREAM_CODEC,
-//                new DirectionalPayloadHandler<>(
-//                        ClientPayloadHandler.getInstance()::handleEnergyStoragePacket,
-//                        ServerPayloadHandler.getInstance()::handleEnergyStoragePacket
-//                )
-//        );
-//    }
+        INSTANCE.registerMessage(
+                packetId++,
+                CallSeverClickPacket.class,
+                CallSeverClickPacket::encode,
+                CallSeverClickPacket::decode,
+                CallSeverClickPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                EnergyStoragePacket.class,
+                EnergyStoragePacket::encode,
+                EnergyStoragePacket::decode,
+                EnergyStoragePacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                FlagSlotSetPacket.class,
+                FlagSlotSetPacket::encode,
+                FlagSlotSetPacket::decode,
+                FlagSlotSetPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                NetControlActionPacket.class,
+                NetControlActionPacket::encode,
+                NetControlActionPacket::decode,
+                NetControlActionPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                PlayerPermissionInfoPacket.class,
+                PlayerPermissionInfoPacket::encode,
+                PlayerPermissionInfoPacket::decode,
+                PlayerPermissionInfoPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                PopModeButtonPacket.class,
+                PopModeButtonPacket::encode,
+                PopModeButtonPacket::decode,
+                PopModeButtonPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                SyncFlagPacket.class,
+                SyncFlagPacket::encode,
+                SyncFlagPacket::decode,
+                SyncFlagPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                SyncStoragePacket.class,
+                SyncStoragePacket::encode,
+                SyncStoragePacket::decode,
+                SyncStoragePacket::handle
+        );
+    }
 }

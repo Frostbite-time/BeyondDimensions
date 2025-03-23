@@ -1,21 +1,17 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
-import com.wintercogs.beyonddimensions.Packet.PlayerPermissionInfoPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.PlayerPermissionInfoPacket;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
-import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.HashMap;
 import java.util.UUID;

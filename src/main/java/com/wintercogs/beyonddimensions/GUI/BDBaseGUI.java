@@ -5,7 +5,7 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
-import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;

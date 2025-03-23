@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -84,11 +84,11 @@ public interface IStackType<T> {
     boolean isSameTypeSameComponents(IStackType<T> other); // 检查两个堆叠除数量外的一切是否相同，例如如果是物品 就检查物品类型和所有组件是否相同
 
     // 序列化/反序列化（用于网络和NBT）
-    void serialize(RegistryFriendlyByteBuf buf);
-    IStackType<T> deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId);
+    void serialize(FriendlyByteBuf buf);
+    IStackType<T> deserialize(FriendlyByteBuf buf, ResourceLocation typeId);
 
     // 传入一个buf，将会自动遍历所有可能的实现，并调用其接口，返回不为null的结果
-    static IStackType deserializeCommon(RegistryFriendlyByteBuf buf)
+    static IStackType deserializeCommon(FriendlyByteBuf buf)
     {
         ResourceLocation typeId = buf.readResourceLocation();
         for(IStackType stacktype : StackTypeRegistry.getAllTypes())

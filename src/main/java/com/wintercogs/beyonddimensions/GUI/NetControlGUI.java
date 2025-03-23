@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.DataBase.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.PermissionInfoButton;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
-import com.wintercogs.beyonddimensions.Packet.NetControlActionPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.NetControlActionPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;

@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Packet.toServer;
+package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;

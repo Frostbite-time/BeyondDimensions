@@ -1,18 +1,16 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
-import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
-import com.wintercogs.beyonddimensions.Packet.SyncFlagPacket;
-import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
+import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncFlagPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncStoragePacket;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import io.netty.buffer.Unpooled;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,10 +21,8 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.connection.ConnectionType;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
