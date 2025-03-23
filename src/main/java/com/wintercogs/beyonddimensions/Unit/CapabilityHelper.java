@@ -1,8 +1,7 @@
 package com.wintercogs.beyonddimensions.Unit;
 
-import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.minecraftforge.common.capabilities.Capability;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +10,6 @@ import java.util.Map;
 public class CapabilityHelper
 {
     // 自行保证类型安全
-    public static final Map<ResourceLocation, BlockCapability<? extends Object, Direction>> BlockCapabilityMap = new HashMap<>();
+    public static final Map<ResourceLocation, Capability<? extends Object>> BlockCapabilityMap = new HashMap<>();
 
 }

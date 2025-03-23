@@ -2,8 +2,8 @@ package com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
 {

@@ -6,9 +6,7 @@ import com.wintercogs.beyonddimensions.Item.Custom.NetManagerInviter;
 import com.wintercogs.beyonddimensions.Item.Custom.NetMemberInviter;
 import com.wintercogs.beyonddimensions.Item.Custom.UnstableSpaceTimeFragment;
 import net.minecraft.world.item.Item;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.eventbus.api.IEventBus;
 
 public class ModItems
 {

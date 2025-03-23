@@ -15,9 +15,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
@@ -60,7 +59,7 @@ public class DimensionsNet extends SavedData
     {
         unifiedStorage = new UnifiedStorage(this);
         energyStorage = new EnergyStorage(this);
-        NeoForge.EVENT_BUS.addListener(this::onServerTick);
+        MinecraftForge.EVENT_BUS.addListener(this::onServerTick);
         this.temporary = temporary;
     }
 

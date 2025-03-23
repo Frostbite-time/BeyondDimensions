@@ -2,12 +2,10 @@ package com.wintercogs.beyonddimensions.DataComponents;
 
 import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+
 
 import java.util.function.UnaryOperator;
 

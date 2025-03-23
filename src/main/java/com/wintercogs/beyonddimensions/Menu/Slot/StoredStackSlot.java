@@ -163,7 +163,7 @@ public class StoredStackSlot extends Slot
     }
 
     @Override
-    public void setByPlayer(ItemStack newStack, ItemStack oldStack)
+    public void setByPlayer(ItemStack newStack)
     {
         // 当玩家拿着物品点击这个槽会发生什么
         stackTypedHandler.insert(new ItemStackType(newStack.copy()), false);
