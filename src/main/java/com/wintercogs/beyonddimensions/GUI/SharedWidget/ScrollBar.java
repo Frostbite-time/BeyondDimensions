@@ -83,7 +83,7 @@ public class ScrollBar extends AbstractWidget
                 boolean flag = this.clicked(mouseX, mouseY);
                 if (flag) {
                     this.playDownSound(Minecraft.getInstance().getSoundManager());
-                    this.onClick(mouseX, mouseY, button);
+                    this.onClick(mouseX, mouseY);
                     //此处为自己的逻辑
                     LOGGER.info("点击事件捕获");
                     isDragging = true;
@@ -122,7 +122,7 @@ public class ScrollBar extends AbstractWidget
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
-        guiGraphics.blitSprite(SPRITE, this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        guiGraphics.blit(SPRITE, this.getX(), this.getY(),0,0, this.getWidth(), this.getHeight(),width,height);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
