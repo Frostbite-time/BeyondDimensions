@@ -6,11 +6,13 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage;
 import com.wintercogs.beyonddimensions.Packet.EnergyStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
+import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
@@ -32,9 +34,8 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
     public long energyStored = 0;
 
 
-    // 构建注册用的信息
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
-    public static final Supplier<MenuType<NetEnergyMenu>> Net_Energy_Menu = MENU_TYPES.register("net_energy_menu", () -> IMenuTypeExtension.create(NetEnergyMenu::new));
+
+    public static final Supplier<MenuType<NetEnergyMenu>> Net_Energy_Menu = UIRegister.MENU_TYPES.register("net_energy_menu", () -> new MenuType<>(NetEnergyMenu::new, FeatureFlags.DEFAULT_FLAGS));
     // 我们的辅助函数
     // 我们需要通过IMenuTypeExtension的.create方法才能返回一个menutype，
     // create方法需要传入一个IContainerFactory的内容，而正好我们的构造函数就是IContainerFactory一样的参数。
@@ -46,7 +47,7 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
      *
      * @param playerInventory 玩家背包
      */
-    public NetEnergyMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
+    public NetEnergyMenu(int id, Inventory playerInventory)
     {
         this(id, playerInventory, null, new SimpleContainerData(0));
     }

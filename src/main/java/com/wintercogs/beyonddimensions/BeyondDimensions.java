@@ -163,6 +163,7 @@ public class BeyondDimensions
         {
             // 一些客户端初始代码
             LOGGER.info("维度网络初始化完成(客户端)");
+            UIRegister.registerScreens(event);
         }
     }
 }

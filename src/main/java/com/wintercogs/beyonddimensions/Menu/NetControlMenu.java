@@ -5,11 +5,13 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.Packet.PlayerPermissionInfoPacket;
+import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -26,9 +28,8 @@ public class NetControlMenu extends BDOrderedContainerMenu
     private DimensionsNet net = new DimensionsNet(true);
     public HashMap<UUID, PlayerPermissionInfo> playerInfo = new HashMap<>();
 
-    // 构建注册用的信息
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
-    public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = MENU_TYPES.register("net_control_menu", () -> IMenuTypeExtension.create(NetControlMenu::new));
+
+    public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = UIRegister.MENU_TYPES.register("net_control_menu", () -> new MenuType<>(NetControlMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     /**
      * 客户端构造函数

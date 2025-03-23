@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
+import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -18,10 +19,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.inventory.DispenserMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.connection.ConnectionType;
@@ -49,8 +54,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
 
 
     // 构建注册用的信息
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
-    public static final Supplier<MenuType<DimensionsNetMenu>> Dimensions_Net_Menu = MENU_TYPES.register("dimensions_net_menu", () -> IMenuTypeExtension.create(DimensionsNetMenu::new));
+    public static final Supplier<MenuType<DimensionsNetMenu>> Dimensions_Net_Menu = UIRegister.MENU_TYPES.register("dimensions_net_menu", () -> new MenuType<>(DimensionsNetMenu::new, FeatureFlags.DEFAULT_FLAGS));
     // 我们的辅助函数
     // 我们需要通过IMenuTypeExtension的.create方法才能返回一个menutype，
     // create方法需要传入一个IContainerFactory的内容，而正好我们的构造函数就是IContainerFactory一样的参数。
@@ -61,7 +65,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
      * 客户端构造函数
      * @param playerInventory 玩家背包
      */
-    public DimensionsNetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
+    public DimensionsNetMenu(int id, Inventory playerInventory)
     {
         // 客户端函数，故将Net设为临时Net
         this(id, playerInventory, new DimensionsNet(true));

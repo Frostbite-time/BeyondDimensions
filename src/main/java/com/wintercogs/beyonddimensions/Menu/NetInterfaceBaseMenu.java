@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Packet.SyncFlagPacket;
 import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
+import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,6 +18,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
@@ -47,9 +49,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
     public NetInterfaceBlockEntity be;
 
 
-    // 构建注册用的信息
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
-    public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = MENU_TYPES.register("net_interface_menu", () -> IMenuTypeExtension.create(NetInterfaceBaseMenu::new));
+    public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = UIRegister.MENU_TYPES.register("net_interface_menu", () -> new MenuType<>(NetInterfaceBaseMenu::new, FeatureFlags.DEFAULT_FLAGS));
     // 我们的辅助函数
     // 我们需要通过IMenuTypeExtension的.create方法才能返回一个menutype，
     // create方法需要传入一个IContainerFactory的内容，而正好我们的构造函数就是IContainerFactory一样的参数。
@@ -60,7 +60,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
      * 客户端构造函数
      * @param playerInventory 玩家背包
      */
-    public NetInterfaceBaseMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
+    public NetInterfaceBaseMenu(int id, Inventory playerInventory)
     {
         this(id, playerInventory, new StackTypedHandler(9),new StackTypedHandler(9),null,new SimpleContainerData(0));
     }

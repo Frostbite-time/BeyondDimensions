@@ -9,29 +9,36 @@ import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.registries.DeferredRegister;
 
 
 @Mod.EventBusSubscriber(modid = BeyondDimensions.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class UIRegister
 {
+    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU,BeyondDimensions.MODID);
 
     public static void register(IEventBus eventBus)
     {
-        DimensionsNetMenu.MENU_TYPES.register(eventBus);
-        NetControlMenu.MENU_TYPES.register(eventBus);
-        NetInterfaceBaseMenu.MENU_TYPES.register(eventBus);
-        NetEnergyMenu.MENU_TYPES.register(eventBus);
+        MENU_TYPES.register(eventBus);
     }
 
-    @SubscribeEvent
-    public static void registerScreens(RegisterMenuScreensEvent event)
+
+    public static void registerScreens(FMLClientSetupEvent event)
     {
-        event.register(DimensionsNetMenu.Dimensions_Net_Menu.get(), DimensionsNetGUI::new);
-        event.register(NetControlMenu.Net_Control_Menu.get(), NetControlGUI::new);
-        event.register(NetInterfaceBaseMenu.Net_Interface_Menu.get(), NetInterfaceBaseGUI::new);
-        event.register(NetEnergyMenu.Net_Energy_Menu.get(), NetEnergyGUI::new);
+        event.enqueueWork(
+
+                () -> {
+                    MenuScreens.register(DimensionsNetMenu.Dimensions_Net_Menu.get(), DimensionsNetGUI::new);
+                    MenuScreens.register(NetControlMenu.Net_Control_Menu.get(), NetControlGUI::new);
+                    MenuScreens.register(NetInterfaceBaseMenu.Net_Interface_Menu.get(), NetInterfaceBaseGUI::new);
+                    MenuScreens.register(NetEnergyMenu.Net_Energy_Menu.get(), NetEnergyGUI::new);
+                }
+        );
     }
 }

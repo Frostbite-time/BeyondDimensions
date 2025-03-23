@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.ShortCutKey;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Packet.toServer.OpenNetGuiPacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -41,7 +42,7 @@ public class DimensionsShortKeys
                 return;
             }
 
-            PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID()));
+            PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID()));
         }
 
     }

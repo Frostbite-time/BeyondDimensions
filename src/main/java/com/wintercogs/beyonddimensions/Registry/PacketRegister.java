@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Packet.toServer.OpenNetGuiPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkRegistry;
@@ -21,7 +22,13 @@ public class PacketRegister
     private static int packetId = 1;
 
     static {
-
+        INSTANCE.registerMessage(
+                packetId++,
+                OpenNetGuiPacket.class,
+                OpenNetGuiPacket::encode,
+                OpenNetGuiPacket::decode,
+                OpenNetGuiPacket::handle
+        );
     }
 
 //    @SubscribeEvent
