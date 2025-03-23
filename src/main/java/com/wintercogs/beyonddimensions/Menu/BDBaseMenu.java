@@ -235,10 +235,15 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     @Override
     public abstract boolean stillValid(Player player);
 
+    @Override
+    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot)
+    {
+        if(!(slot instanceof StoredStackSlot))
+            return super.canTakeItemForPickAll(stack, slot);
+        return false;
+    }
 
-
-
-//    原用于取消点击实现，后发现在gui类中取消更合适，故注释备用
+    //    原用于取消点击实现，后发现在gui类中取消更合适，故注释备用
 //    public static class ItemStackedOnOtherHandler
 //    {
 //        /**

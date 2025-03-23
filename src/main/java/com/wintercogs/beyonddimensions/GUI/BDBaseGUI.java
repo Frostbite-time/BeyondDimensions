@@ -137,7 +137,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type)
     {
-        if(slot != null && !(slot instanceof StoredStackSlot))
+        if(!(slot instanceof StoredStackSlot))
             super.slotClicked(slot, slotId, mouseButton, type);
     }
 
