@@ -9,10 +9,10 @@ import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncFlagPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncStoragePacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -21,9 +21,8 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.connection.ConnectionType;
-import org.jetbrains.annotations.Nullable;
+import net.minecraftforge.network.PacketDistributor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -137,7 +136,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
     @Override
     protected void initUpdate()
     {
-        PacketDistributor.sendToPlayer((ServerPlayer) player,new PopModeButtonPacket(popMode));
+        PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()-> (ServerPlayer)player),new PopModeButtonPacket(popMode) );
     }
 
     private void updateStorage()
@@ -213,15 +212,10 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
 
                 // 创建临时缓冲区计算序列化大小
                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(
-                        buf,
-                        player.level().registryAccess(),
-                        ConnectionType.OTHER
-                );
 
                 // 序列化物品数据（包括null情况）
                 if (stack != null) {
-                    stack.serialize(registryBuf);
+                    stack.serialize(buf);
                 }
 
                 // 计算总条目大小 = 槽位索引(4) + 物品数据(n) + 元数据(1)
@@ -266,10 +260,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
 
             // 发送所有分包
             for (SyncStoragePacket packet : packets) {
-                PacketDistributor.sendToPlayer(
-                        (ServerPlayer) player,
-                        packet
-                );
+                PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()-> (ServerPlayer)player),packet);
             }
         }
 
@@ -342,18 +333,13 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
                 IStackType stack = changedFlags.get(i);
                 // 创建临时缓冲区计算序列化大小
                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(
-                        buf,
-                        player.level().registryAccess(),
-                        ConnectionType.OTHER
-                );
 
                 // 序列化物品数据（如果存在）
                 if (stack != null) {
-                    stack.serialize(registryBuf);
+                    stack.serialize(buf);
                 }
 
-                entrySizes.add(registryBuf.readableBytes()+Integer.BYTES);
+                entrySizes.add(buf.readableBytes()+Integer.BYTES);
             }
             // 阶段2：动态分包
             List<Integer> batchIndices = new ArrayList<>();
@@ -385,10 +371,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
             }
             // 发送所有分包
             for (SyncFlagPacket packet : packets) {
-                PacketDistributor.sendToPlayer(
-                        (ServerPlayer) player,
-                        packet
-                );
+                PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()-> (ServerPlayer)player),packet);
             }
         }
 

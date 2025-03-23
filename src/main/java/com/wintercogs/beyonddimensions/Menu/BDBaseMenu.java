@@ -14,7 +14,7 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -36,7 +36,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
 
 
 
-    protected BDBaseMenu(@Nullable MenuType<?> menuType, int containerId, Inventory playerInventory,@Nullable IStackTypedHandler storage)
+    protected BDBaseMenu(@Nullable MenuType<?> menuType, int containerId, Inventory playerInventory, @Nullable IStackTypedHandler storage)
     {
         super(menuType, containerId);
         this.player = playerInventory.player;
@@ -151,7 +151,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                 Slot slot = this.slots.get(i);
                 ItemStack itemstack = slot.getItem();
                 // 填充同物品槽位
-                if (!itemstack.isEmpty() && ItemStack.isSameItemSameComponents(stack, itemstack)) {
+                if (!itemstack.isEmpty() && ItemStack.isSameItemSameTags(stack, itemstack)) {
                     int j = itemstack.getCount() + stack.getCount();
                     int k = slot.getMaxStackSize(itemstack);
                     if (j <= k) {
@@ -212,7 +212,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                 // 最多可以向背包填充多少？
                 Slot slot = this.slots.get(i);
                 ItemStack itemstack = slot.getItem();
-                if (!itemstack.isEmpty() && ItemStack.isSameItemSameComponents(stack, itemstack)) {
+                if (!itemstack.isEmpty() && ItemStack.isSameItemSameTags(stack, itemstack)) {
                     int k = slot.getMaxStackSize(itemstack);    //槽位可以放入的最大数
                     int maxCanPut = k - itemstack.getCount();
                     flag += maxCanPut;
@@ -243,18 +243,5 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         return false;
     }
 
-    //    原用于取消点击实现，后发现在gui类中取消更合适，故注释备用
-//    public static class ItemStackedOnOtherHandler
-//    {
-//        /**
-//         * 通过此事件覆写以阻止原有的点击逻辑操作StoredItemStackSlot<br>
-//         * 详细逻辑见{@link net.minecraft.world.inventory.AbstractContainerMenu}的doClick方法对tryItemClickBehaviourOverride的使用
-//         * @param event 传入的事件，提供一系列基本参数 包括 持有的物品 要处理的物品 正处理的槽位 点击动作 玩家 持有的物品的槽位，不过此处均未用到
-//         */
-//        @SubscribeEvent
-//        public void OnItemStackedHandle(ItemStackedOnOtherEvent event)
-//        {
-//            event.setCanceled(event.getSlot() instanceof StoredStackSlot);
-//        }
-//    }
+
 }

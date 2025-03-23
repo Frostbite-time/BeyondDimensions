@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.EnergyStoragePacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,7 +14,7 @@ import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
@@ -98,7 +99,7 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
             {
                 this.energyCapacity = energyStorage.getRealEnergyCapacity();
                 this.energyStored = energyStorage.getRealEnergyStored();
-                PacketDistributor.sendToPlayer((ServerPlayer) player, new EnergyStoragePacket(this.energyStored, this.energyCapacity));
+                PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()-> (ServerPlayer)player),new EnergyStoragePacket(this.energyStored, this.energyCapacity));
             }
         }
     }
@@ -106,7 +107,7 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
     @Override
     protected void initUpdate()
     {
-        PacketDistributor.sendToPlayer((ServerPlayer) player,new PopModeButtonPacket(popMode));
+        PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()-> (ServerPlayer)player),new PopModeButtonPacket(popMode));
     }
 
 

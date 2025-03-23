@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.PlayerPermissionInfoPacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -11,7 +12,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -110,7 +111,7 @@ public class NetControlMenu extends BDOrderedContainerMenu
 
     public void sendPlayerInfo()
     {
-        PacketDistributor.sendToPlayer((ServerPlayer) player,new PlayerPermissionInfoPacket(playerInfo));
+        PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()-> (ServerPlayer)player) ,new PlayerPermissionInfoPacket(playerInfo));
     }
 
     public void loadPlayerInfo(HashMap<UUID, PlayerPermissionInfo> playerInfo)

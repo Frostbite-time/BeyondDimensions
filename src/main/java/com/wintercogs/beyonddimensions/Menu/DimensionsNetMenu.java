@@ -7,12 +7,12 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncStoragePacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -22,8 +22,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.connection.ConnectionType;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -250,7 +249,6 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
      */
     private boolean checkTooltipMatches(IStackType stack, String matchText) {
         List<Component> toolTips = stack.getTooltipLines(
-                Item.TooltipContext.of(player.level()),
                 player,
                 Minecraft.getInstance().options.advancedItemTooltips ?
                         TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
@@ -336,16 +334,11 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             List<Integer> entrySizes = new ArrayList<>();
             for (int i = 0; i < changedItem.size(); i++) {
                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(
-                        buf,
-                        player.level().registryAccess(),
-                        ConnectionType.OTHER
-                );
 
                 // 序列化物品和数量
                 IStackType stack = changedItem.get(i);
                 if (stack != null) {
-                    stack.serialize(registryBuf);
+                    stack.serialize(buf);
                 }
                 buf.writeLong(changedCount.get(i)); // 写入数量变化
 
@@ -379,7 +372,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             }
             // 发送所有分包
             for (SyncStoragePacket packet : packets) {
-                PacketDistributor.sendToPlayer((ServerPlayer) player, packet);
+                PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()->(ServerPlayer) player), packet);
             }
         }
     }

@@ -266,7 +266,6 @@ public class StoredStackSlot extends Slot
         return -1;
     }
 
-    @Override
     public boolean isFake()
     {
         return fake;

@@ -116,7 +116,7 @@ public interface IStackType<T> {
 
     Component getDisplayName();
 
-    List<Component> getTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag);
+    List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag);
 
     Optional<TooltipComponent> getTooltipImage();
 
