@@ -299,7 +299,7 @@ public class UnifiedStorage implements IStackTypedHandler
     // endregion
 
     // region 序列化方法
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+    public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         ListTag stacksTag = new ListTag();
 
@@ -309,7 +309,7 @@ public class UnifiedStorage implements IStackTypedHandler
                 continue; // 不序列化空物品
             CompoundTag stackTag = new CompoundTag();
             // 使用类型安全的序列化方式 将堆叠数据放入"Data"标签
-            stackTag.put("TypedStack",stack.serializeNBT(provider));
+            stackTag.put("TypedStack",stack.serializeNBT());
             stackTag.putString("Type",stack.getTypeId().toString());
             stacksTag.add(stackTag);
         }
@@ -325,9 +325,9 @@ public class UnifiedStorage implements IStackTypedHandler
 
         for (Tag t : stacksTag) {
             CompoundTag stackTag = (CompoundTag) t;
-            ResourceLocation typeId = ResourceLocation.parse(stackTag.getString("Type"));
+            ResourceLocation typeId = ResourceLocation.tryParse(stackTag.getString("Type"));
             IStackType stackEmpty = StackTypeRegistry.getType(typeId).copy();
-            IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"),provider);
+            IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"));
             if(stackActual.isEmpty())
                 continue; // 不添加空物品
                 

@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.DataBase.Storage;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.minecraftforge.energy.IEnergyStorage;
 
 public class EnergyStorage implements IEnergyStorage
 {
@@ -45,7 +45,7 @@ public class EnergyStorage implements IEnergyStorage
     }
 
     // 将物品存储转换为 NBT 数据
-    public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
+    public CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
         tag.putLong("Energy",energyStorage);

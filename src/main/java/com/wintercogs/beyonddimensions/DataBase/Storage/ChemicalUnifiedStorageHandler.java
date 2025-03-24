@@ -2,12 +2,12 @@ package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import mekanism.api.Action;
-import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.IChemicalHandler;
+import mekanism.api.chemical.gas.GasStack;
+import mekanism.api.chemical.gas.IGasHandler;
 
 import java.util.List;
 
-public class ChemicalUnifiedStorageHandler implements IChemicalHandler
+public class ChemicalUnifiedStorageHandler implements IGasHandler
 {
 
     private UnifiedStorage storage;
@@ -17,7 +17,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     }
 
     @Override
-    public int getChemicalTanks()
+    public int getTanks()
     {
         List<Integer> slots = storage.getTypeIdIndexList(ChemicalStackType.ID);
         if(slots != null)
@@ -26,7 +26,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     }
 
     @Override
-    public ChemicalStack getChemicalInTank(int slot)
+    public GasStack getChemicalInTank(int slot)
     {
         // 此处的slot参数是基于特化类型ItemStackType的索引
         List<Integer> slots = storage.getTypeIdIndexList(ChemicalStackType.ID);
@@ -38,13 +38,13 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
 
         if(actualIndex != -1)
         {
-            return (ChemicalStack) storage.getStackBySlot(actualIndex).getStack();
+            return (GasStack) storage.getStackBySlot(actualIndex).getStack();
         }
-        else return ChemicalStack.EMPTY;
+        else return GasStack.EMPTY;
     }
 
     @Override
-    public void setChemicalInTank(int tank, ChemicalStack stack)
+    public void setChemicalInTank(int tank, GasStack stack)
     {
         // 凡通过handler机械化输入的物品无论以何方法，全部为自动插入
         if(stack.isEmpty())
@@ -53,59 +53,59 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     }
 
     @Override
-    public long getChemicalTankCapacity(int tank)
+    public long getTankCapacity(int tank)
     {
         return Long.MAX_VALUE;
     }
 
     @Override
-    public boolean isValid(int tank, ChemicalStack stack)
+    public boolean isValid(int tank, GasStack stack)
     {
         return true;
     }
 
     // 返回剩余量，与Fluid的返回插入量不同
     @Override
-    public ChemicalStack insertChemical(int tank, ChemicalStack stack, Action action)
+    public GasStack insertChemical(int tank, GasStack stack, Action action)
     {
         if(stack.isEmpty())
-            return ChemicalStack.EMPTY;
+            return GasStack.EMPTY;
         long remaining = storage.insert(new ChemicalStackType(stack.copy()), action.simulate()).getStackAmount();
         if(remaining>0)
-            return stack.copyWithAmount(remaining);
-        return ChemicalStack.EMPTY;// 始终全部插入
+            return new GasStack(stack, remaining);
+        return GasStack.EMPTY;// 始终全部插入
     }
 
     // 尝试从指定槽位提取指定数量化学品
     @Override
-    public ChemicalStack extractChemical(int tank, long amount, Action action)
+    public GasStack extractChemical(int tank, long amount, Action action)
     {
-        return ((ChemicalStackType)storage.extract(new ChemicalStackType(getChemicalInTank(tank).copyWithAmount(amount)),action.simulate()))
+        return ((ChemicalStackType)storage.extract(new ChemicalStackType(new GasStack(getChemicalInTank(tank),amount)),action.simulate()))
                 .copyStack();
     }
 
     @Override
-    public ChemicalStack insertChemical(ChemicalStack stack, Action action)
+    public GasStack insertChemical(GasStack stack, Action action)
     {
         if(stack.isEmpty())
-            return ChemicalStack.EMPTY;
+            return GasStack.EMPTY;
         long remaining = storage.insert(new ChemicalStackType(stack.copy()), action.simulate()).getStackAmount();
         if(remaining>0)
-            return stack.copyWithAmount(remaining);
-        return ChemicalStack.EMPTY;// 始终全部插入
+            return new GasStack(stack, remaining);
+        return GasStack.EMPTY;// 始终全部插入
     }
 
     // 从第一个槽位提取指定化学品
     @Override
-    public ChemicalStack extractChemical(long amount, Action action)
+    public GasStack extractChemical(long amount, Action action)
     {
-        return ((ChemicalStackType)storage.extract(new ChemicalStackType(getChemicalInTank(0).copyWithAmount(amount)),action.simulate()))
+        return ((ChemicalStackType)storage.extract(new ChemicalStackType( new GasStack(getChemicalInTank(0),amount)),action.simulate()))
                 .copyStack();
     }
 
     // 按类型提取化学品
     @Override
-    public ChemicalStack extractChemical(ChemicalStack stack, Action action)
+    public GasStack extractChemical(GasStack stack, Action action)
     {
         return ((ChemicalStackType)storage.extract(new ChemicalStackType(stack.copy()),action.simulate()))
                 .copyStack();

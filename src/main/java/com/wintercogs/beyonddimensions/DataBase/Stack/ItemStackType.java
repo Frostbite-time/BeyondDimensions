@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -262,7 +261,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
+    public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putLong("Amount", getStackAmount());
         tag.put("Stack",stack.copyWithCount(1).save(new CompoundTag()));
@@ -270,7 +269,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public ItemStackType deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
+    public ItemStackType deserializeNBT(CompoundTag nbt) {
         ItemStackType stack =  new ItemStackType(ItemStack.of(nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));
         return stack;

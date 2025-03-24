@@ -62,7 +62,7 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
             insert = fluidHandler.fill(stack, IFluidHandler.FluidAction.SIMULATE);
         else
             insert = fluidHandler.fill(stack, IFluidHandler.FluidAction.EXECUTE);
-        return stack.copyWithAmount(currentNum-insert).getAmount();
+        return currentNum-insert;
     }
 
     @Override
@@ -74,9 +74,9 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
             if(!stack.isEmpty())
             {
                 if(sim)
-                    return fluidHandler.drain(stack.copyWithAmount((int)Math.min(amount,Integer.MAX_VALUE) ), IFluidHandler.FluidAction.SIMULATE).getAmount();
+                    return fluidHandler.drain(new FluidStack(stack,(int)Math.min(amount,Integer.MAX_VALUE)), IFluidHandler.FluidAction.SIMULATE).getAmount();
                 else
-                    return fluidHandler.drain(stack.copyWithAmount((int)Math.min(amount,Integer.MAX_VALUE) ), IFluidHandler.FluidAction.EXECUTE).getAmount();
+                    return fluidHandler.drain(new FluidStack(stack,(int)Math.min(amount,Integer.MAX_VALUE)), IFluidHandler.FluidAction.EXECUTE).getAmount();
             }
         }
         return 0;

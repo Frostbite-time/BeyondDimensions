@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -102,8 +101,8 @@ public interface IStackType<T> {
     }
 
     // 新增方法：NBT序列化（用于磁盘存储）
-    CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess);
-    IStackType<T> deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess);
+    CompoundTag serializeNBT();
+    IStackType<T> deserializeNBT(CompoundTag nbt);
 
 
     // UI渲染（在指定位置绘制图标和数量）

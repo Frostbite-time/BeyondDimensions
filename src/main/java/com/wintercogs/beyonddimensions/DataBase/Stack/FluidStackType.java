@@ -5,7 +5,6 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -285,7 +284,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
+    public CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
         tag.putLong("Amount", getStackAmount());
@@ -294,7 +293,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public IStackType<FluidStack> deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
+    public IStackType<FluidStack> deserializeNBT(CompoundTag nbt)
     {
         FluidStackType stack =  new FluidStackType(FluidStack.loadFluidStackFromNBT(nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));

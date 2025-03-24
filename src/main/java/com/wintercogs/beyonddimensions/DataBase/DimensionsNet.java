@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.slf4j.Logger;
 
@@ -156,7 +157,7 @@ public class DimensionsNet extends SavedData
 
     // 保存数据到硬盘
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registryAccess)
+    public CompoundTag save(CompoundTag tag)
     {
         // 保存 ID
         tag.putInt("Id", this.id);
@@ -180,8 +181,8 @@ public class DimensionsNet extends SavedData
         tag.put("Players", playerListTag);
 
         // 保存存储
-        tag.put("EnergyStorage",energyStorage.serializeNBT(registryAccess));
-        tag.put("UnifiedStorage",unifiedStorage.serializeNBT(registryAccess));
+        tag.put("EnergyStorage",energyStorage.serializeNBT());
+        tag.put("UnifiedStorage",unifiedStorage.serializeNBT());
 
         // 保存倒计时
         tag.putInt("currentTime", this.currentTime);
@@ -349,7 +350,7 @@ public class DimensionsNet extends SavedData
 
     // 用于定期生成破碎时空结晶
     @SubscribeEvent
-    public void onServerTick(ServerTickEvent.Pre event)
+    public void onServerTick(TickEvent.ServerTickEvent event)
     {
         // 不对临时网络执行倒计时
         if(temporary)

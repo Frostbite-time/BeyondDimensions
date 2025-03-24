@@ -7,7 +7,6 @@ import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -259,7 +258,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
+    public CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
         tag.putLong("Amount", getStackAmount());
@@ -268,7 +267,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     }
 
     @Override
-    public IStackType<GasStack> deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
+    public IStackType<GasStack> deserializeNBT(CompoundTag nbt)
     {
         ChemicalStackType stack =  new ChemicalStackType(GasStack.readFromNBT(nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));

@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.util.List;
 
@@ -79,7 +79,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public FluidStack drain(int count, FluidAction fluidAction)
     {
-        return ((FluidStackType)storage.extract(new FluidStackType(getFluidInTank(0).copyWithAmount(count)),fluidAction.simulate()))
+        return ((FluidStackType)storage.extract(new FluidStackType(new FluidStack(getFluidInTank(0),count)),fluidAction.simulate()))
                 .copyStack();
     }
 }

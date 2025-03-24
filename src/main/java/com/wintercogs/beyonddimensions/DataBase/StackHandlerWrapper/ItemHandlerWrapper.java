@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 public class ItemHandlerWrapper implements IStackHandlerWrapper<ItemStack>
 {
@@ -77,7 +77,7 @@ public class ItemHandlerWrapper implements IStackHandlerWrapper<ItemStack>
         //最后返回实际提取的副本
         for (int i = 0; i < getSlots(); i++)
         {
-            if(ItemStack.isSameItemSameComponents(itemHandler.getStackInSlot(i), stack))
+            if(ItemStack.isSameItemSameTags(itemHandler.getStackInSlot(i), stack))
             {
                 int extracting = itemHandler.extractItem(i,stack.getCount(),sim).getCount();
                 stack.shrink(extracting);

@@ -24,7 +24,7 @@ public class ChemicalHandlerWrapper implements IStackHandlerWrapper<ChemicalStac
     @Override
     public int getSlots()
     {
-        return chemicalHandler.getChemicalTanks();
+        return chemicalHandler.getTanks();
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ChemicalHandlerWrapper implements IStackHandlerWrapper<ChemicalStac
     @Override
     public long getCapacity(int slot)
     {
-        return chemicalHandler.getChemicalTankCapacity(slot);
+        return chemicalHandler.getTankCapacity(slot);
     }
 
     @Override
