@@ -44,7 +44,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
     public NetInterfaceBlockEntity be;
 
 
-    public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = UIRegister.MENU_TYPES.register("net_interface_menu", () -> new MenuType<>(NetInterfaceBaseMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     // 我们的辅助函数
     // 我们需要通过IMenuTypeExtension的.create方法才能返回一个menutype，
     // create方法需要传入一个IContainerFactory的内容，而正好我们的构造函数就是IContainerFactory一样的参数。
@@ -67,7 +67,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
      */
     public NetInterfaceBaseMenu(int id, Inventory playerInventory, StackTypedHandler storage , StackTypedHandler flagStorage, NetInterfaceBlockEntity be, SimpleContainerData uselessContainer)
     {
-        super(Net_Interface_Menu.get(), id,playerInventory,storage);
+        super(UIRegister.Net_Interface_Menu.get(), id,playerInventory,storage);
 
         this.popMode = false;
         // 初始化存储容器

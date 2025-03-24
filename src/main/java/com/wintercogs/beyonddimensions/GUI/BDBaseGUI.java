@@ -51,7 +51,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
     @Override
-    protected void renderSlot(GuiGraphics guiGraphics, Slot slot)
+    public void renderSlot(GuiGraphics guiGraphics, Slot slot)
     {
         if(slot instanceof StoredStackSlot sSlot)
         {

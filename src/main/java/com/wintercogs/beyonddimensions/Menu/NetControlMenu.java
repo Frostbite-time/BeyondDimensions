@@ -26,7 +26,7 @@ public class NetControlMenu extends BDOrderedContainerMenu
     public HashMap<UUID, PlayerPermissionInfo> playerInfo = new HashMap<>();
 
 
-    public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = UIRegister.MENU_TYPES.register("net_control_menu", () -> new MenuType<>(NetControlMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
 
     /**
      * 客户端构造函数
@@ -39,7 +39,7 @@ public class NetControlMenu extends BDOrderedContainerMenu
 
     public NetControlMenu(int containerId, Inventory playerInventory)
     {
-        super(Net_Control_Menu.get(),containerId, playerInventory,null);
+        super(UIRegister.Net_Control_Menu.get(),containerId, playerInventory,null);
 
         if(!player.level().isClientSide())
         {

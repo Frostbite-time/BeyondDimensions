@@ -2,9 +2,6 @@ package com.wintercogs.beyonddimensions;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.Handler.ChemicalStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.FluidStackTypedHandler;
@@ -33,7 +30,6 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -58,7 +54,7 @@ public class BeyondDimensions
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
     // FML 将识别一些参数类型，如 IEventBus 或 ModContainer 并自动传入它们。
-    public BeyondDimensions( ModContainer modContainer)
+    public BeyondDimensions()
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 

@@ -20,7 +20,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -46,7 +45,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
 
 
     // 构建注册用的信息
-    public static final Supplier<MenuType<DimensionsNetMenu>> Dimensions_Net_Menu = UIRegister.MENU_TYPES.register("dimensions_net_menu", () -> new MenuType<>(DimensionsNetMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     // 我们的辅助函数
     // 我们需要通过IMenuTypeExtension的.create方法才能返回一个menutype，
     // create方法需要传入一个IContainerFactory的内容，而正好我们的构造函数就是IContainerFactory一样的参数。
@@ -70,7 +69,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
      */
     public DimensionsNetMenu(int id, Inventory playerInventory, DimensionsNet data)
     {
-        super(Dimensions_Net_Menu.get(), id,playerInventory,data.getUnifiedStorage());
+        super(UIRegister.Dimensions_Net_Menu.get(), id,playerInventory,data.getUnifiedStorage());
         // 初始化维度网络容器
         viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
         if(!player.level().isClientSide())

@@ -31,7 +31,7 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
 
 
 
-    public static final Supplier<MenuType<NetEnergyMenu>> Net_Energy_Menu = UIRegister.MENU_TYPES.register("net_energy_menu", () -> new MenuType<>(NetEnergyMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     // 我们的辅助函数
     // 我们需要通过IMenuTypeExtension的.create方法才能返回一个menutype，
     // create方法需要传入一个IContainerFactory的内容，而正好我们的构造函数就是IContainerFactory一样的参数。
@@ -56,7 +56,7 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
      */
     public NetEnergyMenu(int id, Inventory playerInventory, NetEnergyPathwayBlockEntity be, SimpleContainerData uselessContainer)
     {
-        super(Net_Energy_Menu.get(), id,playerInventory,null);
+        super(UIRegister.Net_Energy_Menu.get(), id,playerInventory,null);
         // 初始化维度网络容器
         this.popMode = false;
         if (!player.level().isClientSide())
