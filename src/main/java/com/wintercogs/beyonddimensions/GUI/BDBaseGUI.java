@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -14,7 +15,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 
 // 更改渲染以及点击事件，以适配StoredStackSlot
@@ -107,7 +107,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                         clickItem = new ItemStackType(slot.getItem());
                     }
                     menu.isHanding = true;
-                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,true));
+                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,true));
                 }
                 else
                 {
@@ -118,13 +118,13 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                             // 对于标记槽位
                             clickItem = sSlot.getVanillaActualStack();
                             menu.isHanding = true;
-                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
+                            PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
                         }
                         else
                         {
                             clickItem = sSlot.getVanillaActualStack();
                             menu.isHanding = true;
-                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
+                            PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
                         }
                     }
                 }

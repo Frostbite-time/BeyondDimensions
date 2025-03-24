@@ -24,7 +24,7 @@ import java.util.Objects;
 public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
 {
 
-    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/dimensions_net.png");
+    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.tryParse("beyonddimensions:textures/gui/dimensions_net.png");
     private EditBox searchField;
     private HashMap<ButtonName, ButtonState> buttonStateMap = new HashMap<>();
     private HashMap<ButtonName,ButtonState> lastButtonStateMap = new HashMap<>();
@@ -131,13 +131,13 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta)
     {
-        super.mouseScrolled(mouseX,mouseY,scrollX,scrollY);
-        if (scrollY > 0)
+        super.mouseScrolled(mouseX,mouseY,delta);
+        if (delta > 0)
         {
             menu.lineData--;
-        } else if(scrollY < 0)
+        } else if(delta < 0)
         {
             menu.lineData++;
         }

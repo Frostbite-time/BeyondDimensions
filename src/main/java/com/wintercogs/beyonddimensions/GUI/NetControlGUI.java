@@ -7,12 +7,12 @@ import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.PermissionInfoButton;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.NetControlActionPacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,7 +35,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
     private int nowShowPlayer = 0;
     private int nowTopShowPlayer = 0;
 
-    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_control.png");
+    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.tryParse("beyonddimensions:textures/gui/net_control.png");
 
     public NetControlGUI(NetControlMenu menu, Inventory playerInventory, Component title)
     {
@@ -127,7 +127,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if(currentPlayerId != null)
                     {
-                        PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetOwner));
+                        PacketRegister.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetOwner));
                     }
                 }
         ).pos(leftPos+110,topPos+60).size(100,20).build();
@@ -138,7 +138,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if(currentPlayerId != null)
                     {
-                        PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetManager));
+                        PacketRegister.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetManager));
                     }
                 }
         ).pos(leftPos+110,topPos+60+25).size(100,20).build();
@@ -149,7 +149,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if(currentPlayerId != null)
                     {
-                        PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemoveManager));
+                        PacketRegister.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemoveManager));
                     }
                 }
         ).pos(leftPos+110,topPos+60+50).size(100,20).build();
@@ -160,7 +160,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if(currentPlayerId != null)
                     {
-                        PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemovePlayer));
+                        PacketRegister.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemovePlayer));
                     }
                 }
         ).pos(leftPos+110,topPos+60+75).size(100,20).build();
@@ -174,13 +174,13 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta)
     {
-        super.mouseScrolled(mouseX,mouseY,scrollX,scrollY);
-        if (scrollY > 0)
+        super.mouseScrolled(mouseX,mouseY,delta);
+        if (delta > 0)
         {
             nowTopShowPlayer--;
-        } else if(scrollY < 0)
+        } else if(delta < 0)
         {
             nowTopShowPlayer++;
         }

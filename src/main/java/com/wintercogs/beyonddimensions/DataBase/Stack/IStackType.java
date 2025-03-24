@@ -22,7 +22,7 @@ import java.util.Optional;
 // 实现还需重写hashcode以及equals方法，使其检测忽略数量以用于其他位置的代码
 public interface IStackType<T> {
 
-    IStackType<T> fromObject(Object key, long amount, DataComponentPatch dataComponentPatch);
+    IStackType<T> fromObject(Object key, long amount, CompoundTag dataComponentPatch);
 
     // 类型的唯一标识符 如(beyonddimension:stack_type/item) beyonddimension为本modID，提供对原版Item的支持，Item为要支持的Stack类型
     ResourceLocation getTypeId();

@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -12,11 +13,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
 {
-    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_energy_storage.png");
+    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.tryParse("beyonddimensions:textures/gui/net_energy_storage.png");
 
     public ReverseButton popButton; // 使用倒序按钮来临时替代弹出模式
 
@@ -43,13 +43,12 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
         {
             popButton.toggleState();
             menu.popMode = !menu.popMode;
-            PacketDistributor.sendToServer(new PopModeButtonPacket(menu.popMode));
+            PacketRegister.INSTANCE.sendToServer(new PopModeButtonPacket(menu.popMode));
         });
         addRenderableWidget(popButton);
 
 
         menu.suppressRemoteUpdates();
-        PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }
 
     @Override

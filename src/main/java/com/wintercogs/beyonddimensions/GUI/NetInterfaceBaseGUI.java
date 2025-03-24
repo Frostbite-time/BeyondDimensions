@@ -11,19 +11,19 @@ import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 
 public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 {
 
-    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_interface.png");
+    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.tryParse("beyonddimensions:textures/gui/net_interface.png");
 
     public ReverseButton popButton; // 使用倒序按钮来临时替代弹出模式
 
@@ -65,7 +65,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
                     // stackKey 是如 Item Fluid的类
                     Object stackKey = ingredient.getEmiStacks().get(0).getKey();
                     long stackAmount = ingredient.getEmiStacks().get(0).getAmount();
-                    DataComponentPatch dataComponentPatch = ingredient.getEmiStacks().get(0).getComponentChanges();
+                    CompoundTag dataComponentPatch = ingredient.getEmiStacks().get(0).getNbt();
 
                     IStackType dragging = new ItemStackType();
                     for(IStackType type : StackTypeRegistry.getAllTypes())
@@ -82,7 +82,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
                     StoredStackSlot sSlot = (StoredStackSlot) slot;
                     IStackType clickItem = sSlot.getVanillaActualStack();
                     // button的数字0代表左键
-                    PacketDistributor.sendToServer(new FlagSlotSetPacket(sSlot.index,clickItem,dragging));
+                    PacketRegister.INSTANCE.sendToServer(new FlagSlotSetPacket(sSlot.index,clickItem,dragging));
                 }
 
             );
@@ -93,7 +93,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         {
             popButton.toggleState();
             menu.popMode = !menu.popMode;
-            PacketDistributor.sendToServer(new PopModeButtonPacket(menu.popMode));
+            PacketRegister.INSTANCE.sendToServer(new PopModeButtonPacket(menu.popMode));
         });
         addRenderableWidget(popButton);
 
