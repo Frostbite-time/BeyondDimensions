@@ -4,13 +4,17 @@ import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.EnergyStorage;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 
 public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
 {
@@ -28,29 +32,53 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
         super(ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
-    //--- 能力注册 (通过事件) ---
-    public static void registerCapability(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK, // 标准物品能力
-                ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
-                (be, side) -> {
-                    if(be.popMode)
-                    {
-                        return new EnergyStorage(0);
-                    }
-                    if(be.getNetId()<0)
-                    {
-                        return new EnergyStorage(0);
-                    }
-                    DimensionsNet net = be.getNet();
-                    if(net != null)
-                    {
-                        return net.getEnergyStorage();
-                    }
-                    return new EnergyStorage(0);
-                } // 根据方向返回处理器
-        );
+//    //--- 能力注册 (通过事件) ---
+//    public static void registerCapability(AttachCapabilitiesEvent<BlockEntity> event) {
+//        if(event.getObject() instanceof NetEnergyPathwayBlockEntity be) {
+//            ICapabilityProvider provider = basic
+//            event.addCapability();
+//        }
+//        event.registerBlockEntity(
+//                Capabilities.EnergyStorage.BLOCK, // 标准物品能力
+//                ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
+//                (be, side) -> {
+//                    if(be.popMode)
+//                    {
+//                        return new EnergyStorage(0);
+//                    }
+//                    if(be.getNetId()<0)
+//                    {
+//                        return new EnergyStorage(0);
+//                    }
+//                    DimensionsNet net = be.getNet();
+//                    if(net != null)
+//                    {
+//                        return net.getEnergyStorage();
+//                    }
+//                    return new EnergyStorage(0);
+//                } // 根据方向返回处理器
+//        );
+//    }
+
+
+    @Override
+    public <T> LazyOptional<T> getCapability(Capability<T> cap,Direction side)
+    {
+        if(cap == ForgeCapabilities.ENERGY)
+        {
+            if(this.getNetId()>=0)
+            {
+                DimensionsNet net = getNet();
+                if(net != null)
+                {
+                    return LazyOptional.of(net::getEnergyStorage).cast();
+                }
+            }
+        }
+        return super.getCapability(cap);
     }
+
+
 
     // 此方法的签名与 BlockEntityTicker 函数接口的签名匹配.
     public static void tick(Level level, BlockPos pos, BlockState state, NetEnergyPathwayBlockEntity blockEntity) {
@@ -93,9 +121,10 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
             if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
             {
                 // 开始查询能力 记住，你获取你上方的方块，一定是获取其下方的能力
-                IEnergyStorage otherStorage = level.getCapability(Capabilities.EnergyStorage.BLOCK, targetPos, dir.getOpposite());
-                if (otherStorage != null)
+                LazyOptional<IEnergyStorage> otherStorageOptional = neighbor.getCapability(ForgeCapabilities.ENERGY, dir.getOpposite());
+                if (otherStorageOptional.isPresent())
                 {
+                    IEnergyStorage otherStorage = otherStorageOptional.resolve().get();
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
                     int maxExtract = (int)Math.min(energyStorage.getRealEnergyCapacity(), energyStorage.getMaxTransfer());
                     int receive = otherStorage.receiveEnergy(maxExtract, false);

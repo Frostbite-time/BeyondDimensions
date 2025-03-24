@@ -18,7 +18,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 
+import java.util.Map;
 import java.util.function.Function;
 
 public class NetInterfaceBlockEntity extends NetedBlockEntity
@@ -85,8 +88,8 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
 
                 CapabilityHelper.BlockCapabilityMap.forEach(
                         (resourceLocation, cap) -> {
-                            Object handler = level.getCapability(cap,targetPos, dir.getOpposite());
-                            if (handler != null) {
+                            LazyOptional handler = neighbor.getCapability(cap, dir.getOpposite());
+                            if (handler.isPresent()) {
                                 handlerCache.put(resourceLocation, handler);
                             }
                         }
@@ -110,21 +113,44 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         setNeedsCapabilityUpdate();
     }
 
-    //--- 能力注册 (通过事件) ---
-    public static void registerCapability(RegisterCapabilitiesEvent event) {
+//    //--- 能力注册 (通过事件) ---
+//    public static void registerCapability(RegisterCapabilitiesEvent event) {
+//
+//        CapabilityHelper.BlockCapabilityMap.forEach(
+//                (resourceLocation, directionBlockCapability) -> {
+//                    Function handler = StackTypedHandler.typedHandlerMap.get(resourceLocation);
+//                    event.registerBlockEntity(
+//                            (BlockCapability<? super Object, ? extends Direction>)directionBlockCapability,
+//                            ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
+//                            (be, side) -> {
+//                                return handler.apply(be.stackHandler);
+//                            }
+//                    );
+//                }
+//        );
+//    }
 
-        CapabilityHelper.BlockCapabilityMap.forEach(
-                (resourceLocation, directionBlockCapability) -> {
-                    Function handler = StackTypedHandler.typedHandlerMap.get(resourceLocation);
-                    event.registerBlockEntity(
-                            (BlockCapability<? super Object, ? extends Direction>)directionBlockCapability,
-                            ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
-                            (be, side) -> {
-                                return handler.apply(be.stackHandler);
-                            }
-                    );
+
+    @Override
+    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
+    {
+        // 遍历注册的能力映射表
+        for (Map.Entry<ResourceLocation, Capability<?>> entry : CapabilityHelper.BlockCapabilityMap.entrySet()) {
+            // 检查当前请求的能力是否匹配注册的能力
+            if (entry.getValue() == cap) {
+                // 从类型映射表中获取对应的处理器构造函数
+                Function<StackTypedHandler,Object> handlerConstructor = StackTypedHandler.typedHandlerMap.get(entry.getKey());
+
+                if (handlerConstructor != null) {
+                    // 创建处理器实例并转换为请求的能力类型
+                    Object handler = handlerConstructor.apply(this.stackHandler);
+                    // 安全类型转换后包装为 LazyOptional
+                    return LazyOptional.of(() -> handler).cast();
                 }
-        );
+            }
+        }
+        // 未找到匹配能力则调用父类实现
+        return super.getCapability(cap, side);
     }
 
     // 此方法的签名与 BlockEntityTicker 函数接口的签名匹配.

@@ -82,9 +82,6 @@ public class BeyondDimensions
         // 注册创造模式菜单
         ModCreativeModeTabs.register(modEventBus);
 
-        // 注册物品组件
-        ModDataComponents.register(modEventBus);
-
         // 注册物品
         ModItems.register(modEventBus);
 
