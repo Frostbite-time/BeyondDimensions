@@ -35,7 +35,7 @@ public class DataGenerators
 
         // 生成方块战利品表
         generator.addProvider(event.includeServer(),new LootTableProvider(packOutput, Collections.emptySet(),
-                List.of(new LootTableProvider.SubProviderEntry(ModBlockLootTableProvider::new, LootContextParamSets.BLOCK)),lookupProvider));
+                List.of(new LootTableProvider.SubProviderEntry(ModBlockLootTableProvider::new, LootContextParamSets.BLOCK))));
         // 生成物品和方块模型
         generator.addProvider(event.includeClient(),new ModItemModelProvider(packOutput,existingFileHelper));
         generator.addProvider(event.includeClient(),new ModBlockStateProvider(packOutput,existingFileHelper));
@@ -46,7 +46,7 @@ public class DataGenerators
         generator.addProvider(event.includeServer(), new ModItemTagProvider(packOutput,lookupProvider,blockTagsProvider.contentsGetter(),existingFileHelper));
 
         // 生成配方表
-        generator.addProvider(event.includeServer(),new ModRecipeProvider(packOutput,lookupProvider));
+        generator.addProvider(event.includeServer(),new ModRecipeProvider(packOutput));
 
     }
 }

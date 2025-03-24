@@ -37,14 +37,14 @@ public class ModCreativeModeTabs
     public static final Supplier<CreativeModeTab> BEYOND_DIMENSIONS_BLOCKS_TAB = CREATIVE_MODE_TAB.register(
             "beyond_dimensions_blocks_tab",
             ()->CreativeModeTab.builder()
-                    .icon(()->new ItemStack(ModBlocks.NET_CONTROL))
+                    .icon(()->new ItemStack(ModBlocks.NET_CONTROL.get()))
                     .withTabsBefore(ResourceLocation.tryBuild(BeyondDimensions.MODID,"beyond_dimensions_items_tab"))
                     .title(Component.translatable("creativetab.beyonddimensions.blocks"))
                     .displayItems((itemDisplayParameters, output) -> {
-                        output.accept(ModBlocks.NET_CONTROL);
-                        output.accept(ModBlocks.NET_INTERFACE);
-                        output.accept(ModBlocks.NET_PATHWAY);
-                        output.accept(ModBlocks.NET_ENERGY_PATHWAY);
+                        output.accept(ModBlocks.NET_CONTROL.get());
+                        output.accept(ModBlocks.NET_INTERFACE.get());
+                        output.accept(ModBlocks.NET_PATHWAY.get());
+                        output.accept(ModBlocks.NET_ENERGY_PATHWAY.get());
                     })
                     .build());
 

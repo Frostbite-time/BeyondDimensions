@@ -20,7 +20,6 @@ import com.wintercogs.beyonddimensions.DataBase.Storage.ChemicalUnifiedStorageHa
 import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
@@ -66,9 +65,6 @@ public class BeyondDimensions
         modEventBus.addListener(this::commonSetup);
         //为存储网络的接口方块注册物品交互能力
 
-        modEventBus.addListener(NetInterfaceBlockEntity::registerCapability);
-        modEventBus.addListener(NetPathwayBlockEntity::registerCapability);
-        modEventBus.addListener(NetEnergyPathwayBlockEntity::registerCapability);
 
         // 注册事件
         MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
