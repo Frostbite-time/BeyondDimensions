@@ -20,9 +20,9 @@ public class SortMethodButton extends StatusButton
     protected void initButton()
     {
         iconMap = new HashMap<>();
-        iconMap.put(ButtonState.SORT_DEFAULT, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_default"));
-        iconMap.put(ButtonState.SORT_QUANTITY,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_quantity"));
-        iconMap.put(ButtonState.SORT_NAME,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_name"));
+        iconMap.put(ButtonState.SORT_DEFAULT, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_default.png"));
+        iconMap.put(ButtonState.SORT_QUANTITY,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_quantity.png"));
+        iconMap.put(ButtonState.SORT_NAME,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_name.png"));
 
         this.states = new ArrayList<>();
         for(ButtonState state : iconMap.keySet())

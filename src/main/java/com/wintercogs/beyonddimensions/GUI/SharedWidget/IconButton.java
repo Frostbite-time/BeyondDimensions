@@ -15,9 +15,9 @@ public class IconButton extends Button
     protected ResourceLocation icon;
 
     protected static final WidgetSprites SPRITES = new WidgetSprites(
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/slot_button"),
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/slot_button_disabled"),
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/slot_button_hovered")
+            ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/slot_button.png"),
+            ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/slot_button_disabled.png"),
+            ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/slot_button_hovered.png")
     );
 
     // 从左到右的含义分别为
@@ -43,6 +43,7 @@ public class IconButton extends Button
             ResourceLocation texture = SPRITES.get(this.active,this.isHoveredOrFocused());
 
             st.blit(texture, x, y, 0,0,this.width,this.height ,16 ,16 );
+            drawIcon(st,mouseX,mouseY,pt);
             st.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
     }

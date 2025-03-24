@@ -21,8 +21,8 @@ public class ReverseButton extends StatusButton
     protected void initButton()
     {
         iconMap = new HashMap<>();
-        iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_asc"));
-        iconMap.put(ButtonState.ENABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_desc"));
+        iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_asc.png"));
+        iconMap.put(ButtonState.ENABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_desc.png"));
 
         this.states = new ArrayList<>();
         for(ButtonState state : iconMap.keySet())

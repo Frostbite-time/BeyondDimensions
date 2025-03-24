@@ -89,7 +89,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
                         (resourceLocation, cap) -> {
                             LazyOptional handler = neighbor.getCapability(cap, dir.getOpposite());
                             if (handler.isPresent()) {
-                                handlerCache.put(resourceLocation, handler);
+                                handlerCache.put(resourceLocation, handler.resolve().get());
                             }
                         }
                 );
