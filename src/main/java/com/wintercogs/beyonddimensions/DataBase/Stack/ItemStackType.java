@@ -359,7 +359,10 @@ public class ItemStackType implements IStackType<ItemStack> {
         // 基于物品类型和组件生成哈希码
         if (stack != null) {
             int i = 31 + stack.getItem().hashCode();
-            return 31 * i + stack.getOrCreateTag().hashCode();
+            if(stack.hasTag())
+                return i*31 + stack.getTag().hashCode();
+            else
+                return i;
         } else {
             return 0;
         }
