@@ -53,7 +53,7 @@ public class EnergyStorage implements IEnergyStorage
     }
 
     // 从 NBT 数据加载物品存储
-    public void deserializeNBT(HolderLookup.Provider levelRegistryAccess, CompoundTag tag)
+    public void deserializeNBT(CompoundTag tag)
     {
 
         if (tag.contains("Energy"))

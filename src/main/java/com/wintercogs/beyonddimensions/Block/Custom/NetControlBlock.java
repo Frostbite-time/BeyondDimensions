@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Block.Custom;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -19,9 +20,9 @@ public class NetControlBlock extends Block
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
     {
-        super.useWithoutItem(state,level,pos,player,hitResult);
+        super.use(state,level,pos,player,hand,hitResult);
         if(!level.isClientSide())
         {
             player.openMenu(new SimpleMenuProvider(
@@ -29,7 +30,7 @@ public class NetControlBlock extends Block
                     Component.translatable("menu.title.beyonddimensions.net_control_menu")
             ));
         }
-        return InteractionResult.SUCCESS_NO_ITEM_USED;
+        return InteractionResult.SUCCESS;
     }
 
 }

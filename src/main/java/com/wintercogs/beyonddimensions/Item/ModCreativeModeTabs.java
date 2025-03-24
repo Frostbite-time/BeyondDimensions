@@ -23,14 +23,14 @@ public class ModCreativeModeTabs
                     .icon(()->new ItemStack(ModItems.NET_CREATER.get()))
                     .title(Component.translatable("creativetab.beyonddimensions.items"))
                     .displayItems((itemDisplayParameters, output) -> {
-                        output.accept(ModItems.NET_CREATER);
-                        output.accept(ModItems.NET_MEMBER_INVITER);
-                        output.accept(ModItems.NET_MANAGER_INVITER);
-                        output.accept(ModItems.UNSTABLE_SPACE_TIME_FRAGMENT);
-                        output.accept(ModItems.STABLE_SPACE_TIME_FRAGMENT);
-                        output.accept(ModItems.SPACE_TIME_STABLE_FRAME);
-                        output.accept(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION);
-                        output.accept(ModItems.SPACE_TIME_BAR);
+                        output.accept(ModItems.NET_CREATER.get());
+                        output.accept(ModItems.NET_MEMBER_INVITER.get());
+                        output.accept(ModItems.NET_MANAGER_INVITER.get());
+                        output.accept(ModItems.UNSTABLE_SPACE_TIME_FRAGMENT.get());
+                        output.accept(ModItems.STABLE_SPACE_TIME_FRAGMENT.get());
+                        output.accept(ModItems.SPACE_TIME_STABLE_FRAME.get());
+                        output.accept(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
+                        output.accept(ModItems.SPACE_TIME_BAR.get());
                     })
                     .build());
 
@@ -38,7 +38,7 @@ public class ModCreativeModeTabs
             "beyond_dimensions_blocks_tab",
             ()->CreativeModeTab.builder()
                     .icon(()->new ItemStack(ModBlocks.NET_CONTROL))
-                    .withTabsBefore(ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID,"beyond_dimensions_items_tab"))
+                    .withTabsBefore(ResourceLocation.tryBuild(BeyondDimensions.MODID,"beyond_dimensions_items_tab"))
                     .title(Component.translatable("creativetab.beyonddimensions.blocks"))
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModBlocks.NET_CONTROL);

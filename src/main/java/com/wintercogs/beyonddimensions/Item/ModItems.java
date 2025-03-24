@@ -7,41 +7,44 @@ import com.wintercogs.beyonddimensions.Item.Custom.NetMemberInviter;
 import com.wintercogs.beyonddimensions.Item.Custom.UnstableSpaceTimeFragment;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 public class ModItems
 {
-    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(BeyondDimensions.MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS,BeyondDimensions.MODID);
 
     // 维度创造器
-    public static final DeferredItem<Item> NET_CREATER = ITEMS.register("net_creater",
+    public static final RegistryObject<Item> NET_CREATER = ITEMS.register("net_creater",
             () -> new NetCreater(new Item.Properties()));
 
     // 网络成员邀请器
-    public static final DeferredItem<Item> NET_MEMBER_INVITER = ITEMS.register("net_member_inviter",
+    public static final RegistryObject<Item> NET_MEMBER_INVITER = ITEMS.register("net_member_inviter",
             () -> new NetMemberInviter(new Item.Properties()));
 
     // 网络管理员邀请器
-    public static final DeferredItem<Item> NET_MANAGER_INVITER = ITEMS.register("net_manager_inviter",
+    public static final RegistryObject<Item> NET_MANAGER_INVITER = ITEMS.register("net_manager_inviter",
             () -> new NetManagerInviter(new Item.Properties()));
 
     // 不稳定时空碎片
-    public static final DeferredItem<Item> UNSTABLE_SPACE_TIME_FRAGMENT = ITEMS.register("unstable_space_time_fragment",
+    public static final RegistryObject<Item> UNSTABLE_SPACE_TIME_FRAGMENT = ITEMS.register("unstable_space_time_fragment",
             () -> new UnstableSpaceTimeFragment(new Item.Properties()));
 
     // 稳态时空碎片
-    public static final DeferredItem<Item> STABLE_SPACE_TIME_FRAGMENT = ITEMS.register("stable_space_time_fragment",
+    public static final RegistryObject<Item> STABLE_SPACE_TIME_FRAGMENT = ITEMS.register("stable_space_time_fragment",
             () -> new Item(new Item.Properties()));
 
     // 时空稳定框架
-    public static final DeferredItem<Item> SPACE_TIME_STABLE_FRAME = ITEMS.register("space_time_stable_frame",
+    public static final RegistryObject<Item> SPACE_TIME_STABLE_FRAME = ITEMS.register("space_time_stable_frame",
             () -> new Item(new Item.Properties()));
 
     // 破碎的时空结晶
-    public static final DeferredItem<Item> SHATTERED_SPACE_TIME_CRYSTALLIZATION = ITEMS.register("shattered_space_time_crystallization",
+    public static final RegistryObject<Item> SHATTERED_SPACE_TIME_CRYSTALLIZATION = ITEMS.register("shattered_space_time_crystallization",
             () -> new Item(new Item.Properties()));
 
     // 时空锭
-    public static final DeferredItem<Item> SPACE_TIME_BAR = ITEMS.register("space_time_bar",
+    public static final RegistryObject<Item> SPACE_TIME_BAR = ITEMS.register("space_time_bar",
             () -> new Item(new Item.Properties()));
 
     public static void register(IEventBus eventBus)

@@ -318,7 +318,7 @@ public class UnifiedStorage implements IStackTypedHandler
         return tag;
     }
 
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
+    public void deserializeNBT(CompoundTag tag) {
         storage.clear();
         typeIdIndex.clear();
         ListTag stacksTag = tag.getList("Stacks", Tag.TAG_COMPOUND);

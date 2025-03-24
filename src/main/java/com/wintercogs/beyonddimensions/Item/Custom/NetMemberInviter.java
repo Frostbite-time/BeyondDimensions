@@ -27,12 +27,12 @@ public class NetMemberInviter extends NetedItem implements IAddNetMemberHandler
         {
             if(DimensionsNet.getNetFromPlayer(player) == null)
             {
-                if(itemstack.get(ModDataComponents.NET_ID_DATA)>=0)
+                if(NetedItem.getNetId(itemstack)>=0)
                 {
-                    boolean flag = AddPlayerToNet(DimensionsNet.getNetFromId(itemstack.get(ModDataComponents.NET_ID_DATA),level),player);
+                    boolean flag = AddPlayerToNet(DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack),level),player);
                     if (flag)
                     {
-                        itemstack.consume(1,player);
+                        itemstack.shrink(1);
                     }
                 }
             }

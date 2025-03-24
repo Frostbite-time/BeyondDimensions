@@ -1,66 +1,55 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.slf4j.Logger;
 
 public class NetedItem extends Item
 {
     public NetedItem(Properties properties) {
-        super(properties.component(ModDataComponents.NET_ID_DATA, -1));
+        super(properties);
     }
-    public static final Logger LOGGER = LogUtils.getLogger();
-
-
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
-    {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND)
-        {
+        if (usedHand != InteractionHand.MAIN_HAND) {
             return InteractionResultHolder.fail(itemstack);
         }
-
-        if(!level.isClientSide())
-        {
+        if (!level.isClientSide()) {
             DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-            if (net != null)
-            {
-                if(validToReWrite(net,player))
-                {
-                    if(itemstack.get(ModDataComponents.NET_ID_DATA) != net.getId())
-                    {
-                        itemstack.set(ModDataComponents.NET_ID_DATA,net.getId());
+            if (net != null) {
+                if (validToReWrite(net, player)) {
+                    // 改用 NBT 标签存储数据
+                    CompoundTag tag = itemstack.getOrCreateTag();
+                    int currentNetId = tag.getInt("NetId");
+
+                    if (currentNetId != net.getId()) {
+                        tag.putInt("NetId", net.getId());
+                    } else {
+                        tag.putInt("NetId", -1);
                     }
-                    else
-                    {
-                        itemstack.set(ModDataComponents.NET_ID_DATA,-1);
-                    }
-                }
-                else
-                {
+                } else {
                     return InteractionResultHolder.fail(itemstack);
                 }
-            }
-            else
-            {
+            } else {
                 return InteractionResultHolder.fail(itemstack);
             }
         }
-
-        return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
-
-    // 覆写此方法以实现自定义网络覆写规则
-    protected boolean validToReWrite(DimensionsNet net, Player player )
-    {
+    // 可以通过这个方法获取存储的 NetId
+    public static int getNetId(ItemStack stack) {
+        if (stack.hasTag() && stack.getTag().contains("NetId")) {
+            return stack.getTag().getInt("NetId");
+        }
+        return -1;
+    }
+    protected boolean validToReWrite(DimensionsNet net, Player player) {
         return net.isManager(player);
     }
 }

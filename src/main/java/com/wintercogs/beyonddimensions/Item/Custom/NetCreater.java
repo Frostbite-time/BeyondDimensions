@@ -36,13 +36,13 @@ public class NetCreater extends Item
             }
             String netId = DimensionsNet.buildNewNetName(player);
             String numId = netId.replace("BDNet_", "");
-            DimensionsNet newNet = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), netId);
+            DimensionsNet newNet = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(DimensionsNet::load,DimensionsNet::create, netId);
             newNet.setId(Integer.parseInt(numId));
             newNet.setOwner(player.getUUID());
             newNet.addManager(player.getUUID());
             newNet.addPlayer(player.getUUID());
             newNet.setDirty();
-            itemstack.consume(1,player);
+            itemstack.shrink(1);
         }
 
         return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());

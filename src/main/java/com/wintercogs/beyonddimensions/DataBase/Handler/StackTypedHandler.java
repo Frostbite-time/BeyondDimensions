@@ -325,7 +325,7 @@ public class StackTypedHandler implements IStackTypedHandler
             else
             {
                 // 使用类型安全的序列化方式 将堆叠数据放入"Data"标签
-                stackTag.put("TypedStack",stack.serializeNBT(provider));
+                stackTag.put("TypedStack",stack.serializeNBT());
                 stackTag.putString("Type",stack.getTypeId().toString());
 
             }
@@ -353,7 +353,7 @@ public class StackTypedHandler implements IStackTypedHandler
             {
                 ResourceLocation typeId = ResourceLocation.tryParse(type);
                 IStackType stackEmpty = StackTypeRegistry.getType(typeId).copy();
-                IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"),provider);
+                IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"));
                 storage.add(stackActual); // 无论是不是空体，都添加
                 typeIdIndex.computeIfAbsent(stackActual.getTypeId(), k -> new ArrayList<>()).add(storage.size() - 1);
             }

@@ -79,7 +79,7 @@ public class DimensionsNet extends SavedData
         // 接下来按照"BDNet_" + netId从0查找网络，直到找到不存在的网络，此时netId为新网络id
         for (netId = 0; netId < 10000; netId++)
         {
-            if (player.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), "BDNet_" + netId) == null)
+            if (player.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + netId) == null)
             {
                 break;
             }
@@ -93,7 +93,7 @@ public class DimensionsNet extends SavedData
         {
             return null;
         }
-        DimensionsNet net = storageProvider.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), "BDNet_" + id);
+        DimensionsNet net = storageProvider.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + id);
         if(net !=null)
         {
             return net;
@@ -106,7 +106,7 @@ public class DimensionsNet extends SavedData
         int netId;
         for (netId = 0; netId < 10000; netId++)
         {
-            DimensionsNet net = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), "BDNet_" + netId);
+            DimensionsNet net = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + netId);
             if (net != null)
             {
                 if(net.players.contains(player.getUUID()))
@@ -123,7 +123,7 @@ public class DimensionsNet extends SavedData
     }
 
     // 从硬盘加载数据
-    public static DimensionsNet load(CompoundTag tag, HolderLookup.Provider registryAccess)
+    public static DimensionsNet load(CompoundTag tag)
     {
         DimensionsNet net = new DimensionsNet(false);
 
@@ -134,8 +134,8 @@ public class DimensionsNet extends SavedData
             net.owner = owner;
         }
 
-        net.unifiedStorage.deserializeNBT(registryAccess,tag.getCompound("UnifiedStorage"));
-        net.energyStorage.deserializeNBT(registryAccess,tag.getCompound("EnergyStorage"));
+        net.unifiedStorage.deserializeNBT(tag.getCompound("UnifiedStorage"));
+        net.energyStorage.deserializeNBT(tag.getCompound("EnergyStorage"));
 
         if (tag.contains("Managers"))
         {

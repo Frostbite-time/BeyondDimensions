@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockE
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -15,7 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class NetEnergyPathwayBlock extends NetedBlock implements EntityBlock
 {
@@ -39,9 +40,9 @@ public class NetEnergyPathwayBlock extends NetedBlock implements EntityBlock
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
     {
-        super.useWithoutItem(state,level,pos,player,hitResult);
+        super.use(state,level,pos,player,hand,hitResult);
         if(!level.isClientSide()&&!player.isShiftKeyDown())
         {
             player.openMenu(new SimpleMenuProvider(
@@ -49,6 +50,6 @@ public class NetEnergyPathwayBlock extends NetedBlock implements EntityBlock
                     Component.translatable("menu.title.beyonddimensions.net_energy_menu")
             ));
         }
-        return InteractionResult.SUCCESS_NO_ITEM_USED;
+        return InteractionResult.SUCCESS;
     }
 }
