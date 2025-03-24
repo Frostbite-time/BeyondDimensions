@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
@@ -33,16 +34,17 @@ public record PopModeButtonPacket(boolean popMode)
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     private void handleClient(NetworkEvent.Context context)
     {
         Player player = Minecraft.getInstance().player;
 
-        if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
+        if (player.containerMenu instanceof NetInterfaceBaseMenu menu)
         {
             menu.popMode = popMode();
             return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
         }
-        if(player.containerMenu instanceof NetEnergyMenu menu)
+        if (player.containerMenu instanceof NetEnergyMenu menu)
         {
             menu.popMode = popMode();
             return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会

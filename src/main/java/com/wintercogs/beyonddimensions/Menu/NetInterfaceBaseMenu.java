@@ -16,8 +16,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -26,7 +24,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 // 网络接口的UI
 // 管理一组虚拟槽、以及一组

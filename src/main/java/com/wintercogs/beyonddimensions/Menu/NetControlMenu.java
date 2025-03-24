@@ -10,13 +10,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 public class NetControlMenu extends BDOrderedContainerMenu
 {

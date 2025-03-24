@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -17,6 +18,8 @@ import java.util.function.Supplier;
 
 public record SyncStoragePacket(List<IStackType> stacks, List<Long> changedCounts, List<Integer> targetIndex)
 {
+
+    @OnlyIn(Dist.CLIENT)
     private void handle(NetworkEvent.Context context)
     {
         Player player = Minecraft.getInstance().player;
@@ -24,44 +27,44 @@ public record SyncStoragePacket(List<IStackType> stacks, List<Long> changedCount
         {
             IStackTypedHandler clientStorage = menu.storage;
             int i = 0;
-            for(IStackType remoteStack : stacks())
+            for (IStackType remoteStack : stacks())
             {
                 // 如果当前存储存在此物品
-                if(clientStorage.hasStackType(remoteStack))
+                if (clientStorage.hasStackType(remoteStack))
                 {
-                    if(changedCounts().get(i) > 0)
+                    if (changedCounts().get(i) > 0)
                     {
-                        clientStorage.insert(remoteStack.copyWithCount(changedCounts().get(i)),false);
+                        clientStorage.insert(remoteStack.copyWithCount(changedCounts().get(i)), false);
                     }
                     else
                     {
-                        clientStorage.extract(remoteStack.copyWithCount(-changedCounts().get(i)),false);
+                        clientStorage.extract(remoteStack.copyWithCount(-changedCounts().get(i)), false);
                     }
                 }
                 else // 如果当前存储不存在此物品
                 {
-                    if(changedCounts().get(i) > 0)
+                    if (changedCounts().get(i) > 0)
                     {
-                        clientStorage.insert(remoteStack.copyWithCount(changedCounts().get(i)),false);
+                        clientStorage.insert(remoteStack.copyWithCount(changedCounts().get(i)), false);
                     }
                 }
                 i++; // 一次遍历完毕后索引自增
             }
             menu.updateViewerStorage();
         }
-        if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
+        if (player.containerMenu instanceof NetInterfaceBaseMenu menu)
         {
             IStackTypedHandler clientStorage = menu.storage;
             int i = 0;
-            for(IStackType remoteStack : stacks())
+            for (IStackType remoteStack : stacks())
             {
-                if(changedCounts().get(i) > 0)
+                if (changedCounts().get(i) > 0)
                 {
-                    clientStorage.insert(targetIndex().get(i),remoteStack.copyWithCount(changedCounts().get(i)),false);
+                    clientStorage.insert(targetIndex().get(i), remoteStack.copyWithCount(changedCounts().get(i)), false);
                 }
                 else
                 {
-                    clientStorage.extract(targetIndex().get(i),-changedCounts().get(i),false);
+                    clientStorage.extract(targetIndex().get(i), -changedCounts().get(i), false);
                 }
                 i++; // 一次遍历完毕后索引自增
             }

@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -13,11 +14,13 @@ import java.util.function.Supplier;
 
 public record EnergyStoragePacket(long energyStored , long energyCap)
 {
+
+    @OnlyIn(Dist.CLIENT)
     private void handle(NetworkEvent.Context context)
     {
         Player player = Minecraft.getInstance().player;
 
-        if(player.containerMenu instanceof NetEnergyMenu menu)
+        if (player.containerMenu instanceof NetEnergyMenu menu)
         {
             menu.resumeRemoteUpdates(); // 虽然本地端这个好像没有用处
             menu.loadStorage(energyCap(), energyStored());

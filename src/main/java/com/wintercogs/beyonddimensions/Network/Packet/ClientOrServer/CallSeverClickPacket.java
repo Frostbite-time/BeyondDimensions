@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
@@ -41,6 +42,7 @@ public record CallSeverClickPacket(int slotIndex , IStackType clickItem, int but
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     private void handleClient(NetworkEvent.Context context)
     {
         Player player = Minecraft.getInstance().player;
@@ -49,7 +51,7 @@ public record CallSeverClickPacket(int slotIndex , IStackType clickItem, int but
             menu.isHanding = false;
             return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
         }
-        if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
+        if (player.containerMenu instanceof NetInterfaceBaseMenu menu)
         {
             menu.isHanding = false;
         }

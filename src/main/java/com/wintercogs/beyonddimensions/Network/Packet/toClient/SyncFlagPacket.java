@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -17,16 +18,18 @@ import java.util.function.Supplier;
 
 public record SyncFlagPacket(List<IStackType> flags, List<Integer> targetIndex)
 {
+
+    @OnlyIn(Dist.CLIENT)
     private void handle(NetworkEvent.Context context)
     {
         Player player = Minecraft.getInstance().player;
-        if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
+        if (player.containerMenu instanceof NetInterfaceBaseMenu menu)
         {
             IStackTypedHandler clientStorage = menu.flagStorage;
             int i = 0;
-            for(IStackType remoteStack : flags())
+            for (IStackType remoteStack : flags())
             {
-                clientStorage.setStackDirectly(targetIndex().get(i),remoteStack.copyWithCount(1));
+                clientStorage.setStackDirectly(targetIndex().get(i), remoteStack.copyWithCount(1));
                 i++; // 一次遍历完毕后索引自增
             }
 
