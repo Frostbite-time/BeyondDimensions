@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.util.List;
 
@@ -76,7 +76,7 @@ public class FluidStackTypedHandler implements IFluidHandler
     @Override
     public FluidStack drain(int count, FluidAction fluidAction)
     {
-        int actualIndex = handlerStorage.getTypeIdIndexList(FluidStackType.ID).getFirst();
+        int actualIndex = handlerStorage.getTypeIdIndexList(FluidStackType.ID).get(0);
         return ((FluidStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copy(),fluidAction.simulate()))
                 .copyStack();
     }

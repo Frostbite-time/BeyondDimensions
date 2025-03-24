@@ -351,7 +351,7 @@ public class StackTypedHandler implements IStackTypedHandler
             }
             else
             {
-                ResourceLocation typeId = ResourceLocation.parse(type);
+                ResourceLocation typeId = ResourceLocation.tryParse(type);
                 IStackType stackEmpty = StackTypeRegistry.getType(typeId).copy();
                 IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"),provider);
                 storage.add(stackActual); // 无论是不是空体，都添加
