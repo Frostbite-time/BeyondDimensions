@@ -72,7 +72,7 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
                 }
             }
         }
-        return super.getCapability(cap);
+        return super.getCapability(cap,side);
     }
 
 
