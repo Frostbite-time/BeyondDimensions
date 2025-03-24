@@ -309,7 +309,7 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     // region 序列化方法
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+    public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         ListTag stacksTag = new ListTag();
 
@@ -336,7 +336,7 @@ public class StackTypedHandler implements IStackTypedHandler
         return tag;
     }
 
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
+    public void deserializeNBT(CompoundTag tag) {
         storage.clear();
         typeIdIndex.clear();
         ListTag stacksTag = tag.getList("Stacks", Tag.TAG_COMPOUND);

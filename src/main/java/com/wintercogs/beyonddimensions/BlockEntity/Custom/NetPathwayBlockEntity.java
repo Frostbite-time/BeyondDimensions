@@ -46,21 +46,12 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
     }
 
     @Override
-    public void invalidateCapabilities()
+    public void invalidateCaps()
     {
-        super.invalidateCapabilities();
+        super.invalidateCaps();
+
     }
 
-    @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
-    {
-        super.loadAdditional(tag,registries);
-    }
 
-    @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
-    {
-        super.saveAdditional(tag, registries);
-    }
 
 }

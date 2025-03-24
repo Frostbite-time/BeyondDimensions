@@ -82,24 +82,24 @@ public abstract class NetedBlockEntity extends BlockEntity
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    public void load(CompoundTag tag)
     {
-        super.loadAdditional(tag,registries);
+        super.load(tag);
         this.netId = tag.getInt("netId");
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(CompoundTag tag)
     {
-        super.saveAdditional(tag, registries);
+        super.saveAdditional(tag);
         tag.putInt("netId",this.netId);
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
+    public CompoundTag getUpdateTag()
     {
         CompoundTag tag = new CompoundTag();
-        saveAdditional(tag,registries);
+        saveAdditional(tag);
         return tag;
     }
 

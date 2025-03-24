@@ -106,23 +106,23 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
     }
 
     @Override
-    public void invalidateCapabilities()
+    public void invalidateCaps()
     {
-        super.invalidateCapabilities();
+        super.invalidateCaps();
         energyStorage = null;
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    public void load(CompoundTag tag)
     {
-        super.loadAdditional(tag,registries);
+        super.load(tag);
         this.popMode = tag.getBoolean("popMode");
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(CompoundTag tag)
     {
-        super.saveAdditional(tag, registries);
+        super.saveAdditional(tag);
         tag.putBoolean("popMode",this.popMode);
     }
 

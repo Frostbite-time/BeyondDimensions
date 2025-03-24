@@ -18,8 +18,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
 import java.util.function.Function;
 
@@ -106,9 +104,9 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     }
 
     @Override
-    public void invalidateCapabilities()
+    public void invalidateCaps()
     {
-        super.invalidateCapabilities();
+        super.invalidateCaps();
         setNeedsCapabilityUpdate();
     }
 
@@ -261,22 +259,22 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    public void load(CompoundTag tag)
     {
-        super.loadAdditional(tag,registries);
-        this.stackHandler.deserializeNBT(registries,tag.getCompound("inventory"));
-        this.fakeStackHandler.deserializeNBT(registries,tag.getCompound("flags"));
+        super.load(tag);
+        this.stackHandler.deserializeNBT(tag.getCompound("inventory"));
+        this.fakeStackHandler.deserializeNBT(tag.getCompound("flags"));
         this.popMode = tag.getBoolean("popMode");
         // 加载后需要更新缓存
         setNeedsCapabilityUpdate();
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(CompoundTag tag)
     {
-        super.saveAdditional(tag, registries);
-        tag.put("inventory", stackHandler.serializeNBT(registries));
-        tag.put("flags",fakeStackHandler.serializeNBT(registries));
+        super.saveAdditional(tag);
+        tag.put("inventory", stackHandler.serializeNBT());
+        tag.put("flags",fakeStackHandler.serializeNBT());
         tag.putBoolean("popMode",this.popMode);
     }
     
