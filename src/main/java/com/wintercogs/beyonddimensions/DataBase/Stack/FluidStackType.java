@@ -6,11 +6,9 @@ import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -21,18 +19,16 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.client.ClientTooltipFlag;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
 import org.apache.commons.lang3.text.WordUtils;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +36,7 @@ import java.util.Optional;
 
 public class FluidStackType implements IStackType<FluidStack>
 {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
+    public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/fluid");
     private static final long CUSTOM_MAX_STACK_SIZE = Integer.MAX_VALUE; // 自定义堆叠大小
 
     private FluidStack stack;
@@ -59,11 +55,11 @@ public class FluidStackType implements IStackType<FluidStack>
 
 
     @Override
-    public IStackType<FluidStack> fromObject(Object key, long amount, DataComponentPatch dataComponentPatch)
+    public IStackType<FluidStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
         if(key instanceof Fluid fluid)
         {
-            FluidStack fluidStack = new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(fluid)).get(), (int) amount,dataComponentPatch);
+            FluidStack fluidStack = new FluidStack(fluid, (int) amount,dataComponentPatch);
             return new FluidStackType(fluidStack);
         }
         return null;
@@ -162,7 +158,7 @@ public class FluidStackType implements IStackType<FluidStack>
         {
             copycont = (int) count;
         }
-        return new FluidStackType(stack.copyWithAmount(copycont));
+        return new FluidStackType(new FluidStack(stack,copycont));
     }
 
     @Override
@@ -239,7 +235,7 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return FluidStack.isSameFluid(stack, other.getStack());
+        return stack.getFluid() == other.getStack().getFluid();
     }
 
     @Override
@@ -247,11 +243,11 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return FluidStack.isSameFluidSameComponents(stack, other.getStack());
+        return stack.isFluidEqual(other.getStack());
     }
 
     @Override
-    public void serialize(RegistryFriendlyByteBuf buf)
+    public void serialize(FriendlyByteBuf buf)
     {
         // 始终写入类型ID
         buf.writeResourceLocation(getTypeId());
@@ -264,14 +260,14 @@ public class FluidStackType implements IStackType<FluidStack>
             // 写入数量
             buf.writeVarInt(stack.getAmount());
             // 使用副本避免修改原堆栈
-            FluidStack copy = stack.copyWithAmount(1);
+            FluidStack copy = new FluidStack(stack,1);
             // 使用OPTIONAL_CODEC处理可能为空的情况
-            FluidStack.OPTIONAL_STREAM_CODEC.encode(buf, copy);
+            copy.writeToPacket(buf);
         }
     }
 
     @Override
-    public IStackType<FluidStack> deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId)
+    public IStackType<FluidStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
         if (!typeId.equals(getTypeId())) {
             return null;// 表示未能读取任何类型
@@ -286,8 +282,7 @@ public class FluidStackType implements IStackType<FluidStack>
         // 读取数量
         int count = buf.readVarInt();
         // 使用OPTIONAL_CODEC解码
-        FluidStack stack = FluidStack.OPTIONAL_STREAM_CODEC.decode(buf)
-                .copyWithAmount(count);
+        FluidStack stack = new FluidStack(FluidStack.readFromPacket(buf),count);
         return new FluidStackType(stack);
     }
 
@@ -296,14 +291,14 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         CompoundTag tag = new CompoundTag();
         tag.putLong("Amount", getStackAmount());
-        tag.put("Stack",stack.copyWithAmount(1).save(levelRegistryAccess));
+        tag.put("Stack",new FluidStack(stack,1).writeToNBT(new CompoundTag()));
         return tag;
     }
 
     @Override
     public IStackType<FluidStack> deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
     {
-        FluidStackType stack =  new FluidStackType(FluidStack.parseOptional(levelRegistryAccess,nbt.getCompound("Stack")));
+        FluidStackType stack =  new FluidStackType(FluidStack.loadFluidStackFromNBT(nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));
         return stack;
     }
@@ -371,11 +366,11 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public Component getDisplayName()
     {
-        return stack.getHoverName();
+        return stack.getDisplayName();
     }
 
     @Override
-    public List<Component> getTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag)
+    public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag)
     {
         if(stack.isEmpty())
             return List.of(Component.empty());
@@ -420,7 +415,8 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public Optional<TooltipComponent> getTooltipImage()
     {
-        return !stack.has(DataComponents.HIDE_TOOLTIP) && !stack.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP) ? Optional.ofNullable((BundleContents)stack.get(DataComponents.BUNDLE_CONTENTS)).map(BundleTooltip::new) : Optional.empty();
+        return Optional.empty();
+        //return !stack.has(DataComponents.HIDE_TOOLTIP) && !stack.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP) ? Optional.ofNullable((BundleContents)stack.get(DataComponents.BUNDLE_CONTENTS)).map(BundleTooltip::new) : Optional.empty();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -428,7 +424,7 @@ public class FluidStackType implements IStackType<FluidStack>
     public void renderTooltip(net.minecraft.client.gui.GuiGraphics gui, net.minecraft.client.gui.Font font, int mouseX, int mouseY)
     {
         var minecraft = Minecraft.getInstance();
-        gui.renderTooltip(minecraft.font, this.getTooltipLines(Item.TooltipContext.of(minecraft.level),minecraft.player, ClientTooltipFlag.of(minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL))
+        gui.renderTooltip(minecraft.font, this.getTooltipLines(minecraft.player, minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL)
                 , getTooltipImage(), ItemStack.EMPTY, mouseX, mouseY);
     }
 
@@ -445,6 +441,6 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
-        return FluidStack.hashFluidAndComponents(stack.copyWithAmount(1));
+        return stack.hashCode();
     }
 }
