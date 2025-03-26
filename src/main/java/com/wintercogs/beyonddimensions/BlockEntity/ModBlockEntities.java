@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
@@ -62,7 +63,7 @@ public class ModBlockEntities
     );
 
 
-    public static void register(IEventBus eventBus)
+    public static void register(EventBus eventBus)
     {
         BLOCK_ENTITY_TYPES.register(eventBus);
     }

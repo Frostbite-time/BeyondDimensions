@@ -103,9 +103,13 @@ minecraft {
 }
 
 repositories {
+    mavenCentral()
     maven {
         name 'CleanroomMC Maven'
         url 'https://maven.cleanroommc.com'
+    }
+    maven {
+        url 'https://maven.aliyun.com/repository/public'
     }
 }
 
@@ -144,6 +148,8 @@ dependencies {
         testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
+
+    embed("com.github.promeg:tinypinyin:2.0.3")
 }
 
 apply from: 'gradle/scripts/dependencies.gradle'

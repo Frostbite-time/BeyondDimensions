@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
@@ -50,7 +51,7 @@ public class ModCreativeModeTabs
 
 
 
-    public static void register(IEventBus eventBus)
+    public static void register(EventBus eventBus)
     {
         CREATIVE_MODE_TAB.register(eventBus);
     }

@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.Item.Custom.NetMemberInviter;
 import com.wintercogs.beyonddimensions.Item.Custom.UnstableSpaceTimeFragment;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -47,7 +48,7 @@ public class ModItems
     public static final RegistryObject<Item> SPACE_TIME_BAR = ITEMS.register("space_time_bar",
             () -> new Item(new Item.Properties()));
 
-    public static void register(IEventBus eventBus)
+    public static void register(EventBus eventBus)
     {
         ITEMS.register(eventBus);
     }

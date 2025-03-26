@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Unit;
 
-import net.minecraft.resources.ResourceLocation;
+
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 
 import java.util.HashMap;
