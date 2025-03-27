@@ -3,12 +3,14 @@ package com.wintercogs.beyonddimensions.DataBase.Stack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import io.netty.buffer.ByteBuf;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.ResourceLocation;
@@ -218,7 +220,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     }
 
     @Override
-    public void serialize(FriendlyByteBuf buf)
+    public void serialize(PacketBuffer buf)
     {
         // 始终写入类型ID
         buf.writeResourceLocation(getTypeId());
@@ -238,7 +240,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     }
 
     @Override
-    public IStackType<GasStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
+    public IStackType<GasStack> deserialize(PacketBuffer buf, ResourceLocation typeId)
     {
         if (!typeId.equals(getTypeId())) {
             return null;// 表示未能读取任何类型

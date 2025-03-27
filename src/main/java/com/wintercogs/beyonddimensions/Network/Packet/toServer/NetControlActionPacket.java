@@ -3,50 +3,78 @@ package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
-public record NetControlActionPacket(UUID receiver, NetControlAction action)
+
+public class NetControlActionPacket implements IMessage
 {
+    private UUID receiver;
+    private NetControlAction action;
 
-    private void handle(NetworkEvent.Context context)
+    public NetControlActionPacket()
     {
-        Player player = context.getSender();
-        NetControlMenu menu;
-        if (!(player.containerMenu instanceof NetControlMenu))
+    }
+
+    public NetControlActionPacket(UUID receiver, NetControlAction action)
+    {
+        this.receiver = receiver;
+        this.action = action;
+    }
+
+    public UUID getReceiver()
+    {
+        return receiver;
+    }
+
+    public NetControlAction getAction()
+    {
+        return action;
+    }
+
+    @Override
+    public void fromBytes(ByteBuf buf)
+    {
+        PacketBuffer packetBuffer = new PacketBuffer(buf);
+        receiver = packetBuffer.readUniqueId();
+        action = packetBuffer.readEnumValue(NetControlAction.class);
+    }
+
+    @Override
+    public void toBytes(ByteBuf buf)
+    {
+        PacketBuffer packetBuffer = new PacketBuffer(buf);
+        packetBuffer.writeUniqueId(receiver);
+        packetBuffer.writeEnumValue(action);
+    }
+
+    public static class NetControlActionPacketHandler implements IMessageHandler<NetControlActionPacket, IMessage>
+    {
+
+        @Override
+        public IMessage onMessage(NetControlActionPacket message, MessageContext ctx)
         {
-            return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+            // 这是发送到服务器的数据包发送到的玩家
+            EntityPlayerMP serverPlayer = ctx.getServerHandler().player;
+
+            // 添加为一个计划任务(Scheduled Task)，在主服务器线程上执行操作
+            serverPlayer.getServerWorld().addScheduledTask(() -> {
+                NetControlMenu menu;
+                if (!(serverPlayer.openContainer instanceof NetControlMenu))
+                {
+                    return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                }
+                menu = (NetControlMenu) serverPlayer.openContainer;
+                menu.handlePlayerAction(message.getReceiver(), message.getAction());
+            });
+            // 没有回应数据包
+            return null;
         }
-        menu = (NetControlMenu) player.containerMenu;
-        menu.handlePlayerAction(receiver(),action());
     }
-
-
-    public static void handle(NetControlActionPacket packet, Supplier<NetworkEvent.Context> cxt)
-    {
-        if (packet != null) {
-            NetworkEvent.Context context = cxt.get();
-            context.enqueueWork(() -> packet.handle(context));
-            context.setPacketHandled(true);
-        }
-    }
-
-    public static void encode(NetControlActionPacket packet, FriendlyByteBuf buf)
-    {
-        buf.writeUUID(packet.receiver());
-        buf.writeEnum(packet.action());
-    }
-
-    public static NetControlActionPacket decode(FriendlyByteBuf buf)
-    {
-        UUID uuid = buf.readUUID();
-        NetControlAction action = buf.readEnum(NetControlAction.class);
-        return new NetControlActionPacket(uuid, action);
-    }
-
-
 }

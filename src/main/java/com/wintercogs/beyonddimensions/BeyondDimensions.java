@@ -21,7 +21,6 @@ import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
-import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
 import net.minecraftforge.common.MinecraftForge;
@@ -68,9 +67,6 @@ public class BeyondDimensions
 
         // 注册事件
         MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
-
-        // 调用UIRegister的构造函数，从而注册所有UI
-        UIRegister.register(modEventBus);
 
         // 注册创造模式菜单
         ModCreativeModeTabs.register(modEventBus);
@@ -152,8 +148,6 @@ public class BeyondDimensions
         public static void onClientSetup(FMLLoadCompleteEvent event)
         {
             // 一些客户端初始代码
-            LOGGER.info("维度网络初始化完成(客户端)");
-            UIRegister.registerScreens(MinecraftForge.EVENT_BUS);
         }
     }
 }

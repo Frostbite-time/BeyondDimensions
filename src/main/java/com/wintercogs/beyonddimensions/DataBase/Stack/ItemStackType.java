@@ -3,9 +3,11 @@ package com.wintercogs.beyonddimensions.DataBase.Stack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -222,7 +224,7 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     // 网络序列化
     @Override
-    public void serialize(FriendlyByteBuf buf) {
+    public void serialize(PacketBuffer buf) {
         // 始终写入类型ID
         buf.writeResourceLocation(getTypeId());
 
@@ -241,7 +243,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public ItemStackType deserialize(FriendlyByteBuf buf,ResourceLocation typeId) {
+    public ItemStackType deserialize(PacketBuffer buf,ResourceLocation typeId) {
         if (!typeId.equals(getTypeId())) {
             return null;// 表示未能读取任何类型
         }

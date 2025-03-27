@@ -1,9 +1,13 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.NetControlActionPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 
 
 @Mod.EventBusSubscriber(modid = BeyondDimensions.MODID)
@@ -15,13 +19,31 @@ public class PacketRegister
     private static int packetId = 1;
 
     static {
+        // to server
         INSTANCE.registerMessage(
-                packetId++,
+                OpenNetGuiPacket.OpenNetGuiPacketHandler.class,
                 OpenNetGuiPacket.class,
-                OpenNetGuiPacket::encode,
-                OpenNetGuiPacket::decode,
-                OpenNetGuiPacket::handle
+                packetId++,
+                Side.SERVER
         );
+
+        INSTANCE.registerMessage(
+                NetControlActionPacket.NetControlActionPacketHandler.class,
+                NetControlActionPacket.class,
+                packetId++,
+                Side.SERVER
+        );
+
+        INSTANCE.registerMessage(
+                FlagSlotSetPacket.FlagSlotSetPacketHandler.class,
+                FlagSlotSetPacket.class,
+                packetId++,
+                Side.SERVER
+        );
+
+
+        // to client
+
 
         INSTANCE.registerMessage(
                 packetId++,
@@ -39,21 +61,9 @@ public class PacketRegister
                 EnergyStoragePacket::handle
         );
 
-        INSTANCE.registerMessage(
-                packetId++,
-                FlagSlotSetPacket.class,
-                FlagSlotSetPacket::encode,
-                FlagSlotSetPacket::decode,
-                FlagSlotSetPacket::handle
-        );
 
-        INSTANCE.registerMessage(
-                packetId++,
-                NetControlActionPacket.class,
-                NetControlActionPacket::encode,
-                NetControlActionPacket::decode,
-                NetControlActionPacket::handle
-        );
+
+
 
         INSTANCE.registerMessage(
                 packetId++,

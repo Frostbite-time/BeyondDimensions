@@ -4,6 +4,7 @@ package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
