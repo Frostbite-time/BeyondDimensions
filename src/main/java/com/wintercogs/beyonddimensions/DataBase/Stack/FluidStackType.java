@@ -1,34 +1,31 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Render.IngredientRenderer;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.client.config.GuiUtils;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.text.WordUtils;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +40,7 @@ public class FluidStackType implements IStackType<FluidStack>
     // 创建空stack
     public FluidStackType()
     {
-        stack = FluidStack.EMPTY;
+        stack = new FluidStack(FluidRegistry.WATER, 0);
     }
 
     // 创建给定stack
@@ -54,7 +51,7 @@ public class FluidStackType implements IStackType<FluidStack>
 
 
     @Override
-    public IStackType<FluidStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
+    public IStackType<FluidStack> fromObject(Object key, long amount,int meta, NBTTagCompound dataComponentPatch)
     {
         if(key instanceof Fluid fluid)
         {
@@ -103,19 +100,19 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public Object getSource()
     {
-        return FluidStack.EMPTY.getFluid();
+        return FluidRegistry.WATER;
     }
 
     @Override
     public boolean isEmpty()
     {
-        return stack.isEmpty();
+        return getStackAmount()<=0;
     }
 
     @Override
     public FluidStack getEmptyStack()
     {
-        return FluidStack.EMPTY;
+        return new FluidStack(FluidRegistry.WATER, 0);
     }
 
     @Override
@@ -131,10 +128,10 @@ public class FluidStackType implements IStackType<FluidStack>
         // 处理long到int的转换安全
         if (count > Integer.MAX_VALUE) {
             //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            copy.setAmount(Integer.MAX_VALUE);
+            copy.amount = Integer.MAX_VALUE;
             return copy;
         }
-        copy.setAmount((int) count);
+        copy.amount = (int) count;
         return copy;
     }
 
@@ -163,7 +160,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public long getStackAmount()
     {
-        return stack.getAmount();
+        return stack.amount;
     }
 
     @Override
@@ -172,10 +169,10 @@ public class FluidStackType implements IStackType<FluidStack>
         // 处理long到int的转换安全
         if (amount > Integer.MAX_VALUE) {
             //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            stack.setAmount(Integer.MAX_VALUE);
+            stack.amount = Integer.MAX_VALUE;
             return;
         }
-        stack.setAmount((int) amount);
+        stack.amount = (int) amount;
     }
 
     @Override
@@ -206,13 +203,13 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public FluidStack splitStack(long amount)
     {
-        if (amount <= 0) return FluidStack.EMPTY;
+        if (amount <= 0) return getEmptyStack();
 
         // 计算可分割的数量
-        int splitAmount = (int) Math.min(amount, stack.getAmount());
+        int splitAmount = (int) Math.min(amount, stack.amount);
         FluidStack split = stack.copy();
-        split.setAmount(splitAmount);
-        stack.shrink(splitAmount);
+        split.amount = splitAmount;
+        stack.amount -= splitAmount;
         return split;
     }
 
@@ -222,10 +219,10 @@ public class FluidStackType implements IStackType<FluidStack>
         if (amount <= 0) return new FluidStackType();
 
         // 计算可分割的数量
-        int splitAmount = (int) Math.min(amount, stack.getAmount());
+        int splitAmount = (int) Math.min(amount, stack.amount);
         FluidStack split = stack.copy();
-        split.setAmount(splitAmount);
-        stack.shrink(splitAmount);
+        split.amount = splitAmount;
+        stack.amount -= splitAmount;
         return new FluidStackType(split);
     }
 
@@ -252,16 +249,19 @@ public class FluidStackType implements IStackType<FluidStack>
         buf.writeResourceLocation(getTypeId());
 
         // 写入是否存在物品的标志
-        boolean hasItem = !stack.isEmpty();
+        boolean hasItem = !isEmpty();
         buf.writeBoolean(hasItem);
 
         if (hasItem) {
             // 写入数量
-            buf.writeVarInt(stack.getAmount());
+            buf.writeVarInt(stack.amount);
             // 使用副本避免修改原堆栈
             FluidStack copy = new FluidStack(stack,1);
-            // 使用OPTIONAL_CODEC处理可能为空的情况
-            copy.writeToPacket(buf);
+            // 创建NBT并写入
+            NBTTagCompound nbt = new NBTTagCompound();
+            copy.writeToNBT(nbt); // 调用1.12.2的NBT序列化方法
+            buf.writeCompoundTag(nbt);
+
         }
     }
 
@@ -275,84 +275,134 @@ public class FluidStackType implements IStackType<FluidStack>
         // 读取是否存在物品的标志
         boolean hasItem = buf.readBoolean();
         if (!hasItem) {
-            return new FluidStackType(FluidStack.EMPTY);
+            return new FluidStackType(getEmptyStack());
         }
 
         // 读取数量
-        int count = buf.readVarInt();
-        // 使用OPTIONAL_CODEC解码
-        FluidStack stack = new FluidStack(FluidStack.readFromPacket(buf),count);
+        int amount = buf.readVarInt();
+        // 读取NBT
+        NBTTagCompound nbt;
+        try
+        {
+            nbt = buf.readCompoundTag();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+        // 构建FluidStack（需要处理无效流体情况）
+        Fluid fluid = FluidRegistry.getFluid(nbt.getString("FluidName"));
+        if (fluid == null) return new FluidStackType(null);
+        FluidStack stack = new FluidStack(fluid, amount, nbt.getCompoundTag("Tag"));
         return new FluidStackType(stack);
+
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public NBTTagCompound serializeNBT()
     {
-        CompoundTag tag = new CompoundTag();
-        tag.putLong("Amount", getStackAmount());
-        tag.put("Stack",new FluidStack(stack,1).writeToNBT(new CompoundTag()));
+        NBTTagCompound tag = new NBTTagCompound();
+
+        // 写入数量（1.12.2 FluidStack的amount是int类型）
+        tag.setInteger("Amount", stack.amount); // 或使用 tag.setLong("Amount", ...) 如果自定义容量支持long
+
+        // 写入流体堆栈（需处理空值）
+        if (stack != null && stack.getFluid() != null) {
+            NBTTagCompound fluidTag = new NBTTagCompound();
+            stack.writeToNBT(fluidTag); // 1.12.2的writeToNBT直接修改传入的tag
+            tag.setTag("Stack", fluidTag);
+        } else {
+            tag.setTag("Stack", new NBTTagCompound()); // 防止空指针
+        }
+
         return tag;
     }
 
     @Override
-    public IStackType<FluidStack> deserializeNBT(CompoundTag nbt)
+    public IStackType<FluidStack> deserializeNBT(NBTTagCompound nbt)
     {
-        FluidStackType stack =  new FluidStackType(FluidStack.loadFluidStackFromNBT(nbt.getCompound("Stack")));
-        stack.setStackAmount(nbt.getLong("Amount"));
-        return stack;
+        // 读取流体堆栈（使用1.12.2专用方法）
+        NBTTagCompound stackTag = nbt.getCompoundTag("Stack");
+        FluidStack fluidStack = FluidStack.loadFluidStackFromNBT(stackTag);
+
+        // 读取数量（根据实际存储类型选择）
+        long amount = nbt.getLong("Amount"); // 如果支持long
+        // int amount = nbt.getInteger("Amount"); // 如果使用int
+
+        // 重建对象
+        FluidStackType result = new FluidStackType(fluidStack);
+        if (fluidStack != null) {
+            // 确保不超限（1.12.2 FluidStack的amount是int）
+            result.setStackAmount(Math.min(amount, Integer.MAX_VALUE));
+        }
+        return result;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @SideOnly(Side.CLIENT)
     @Override
-    public void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y)
+    public void render(GuiScreen gui, int x, int y)
     {
-        // 渲染图标
-        var poseStack = gui.pose(); // 获取渲染的变换矩阵
-        poseStack.pushPose(); // 保存矩阵状态
+        FluidStack fluidStack = this.stack;
+        if (fluidStack == null) return;
+        // 保存当前渲染状态
+        GlStateManager.pushMatrix();
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        // 渲染流体图标
+        Fluid fluid = fluidStack.getFluid();
+        if (fluid != null && fluid.getStill() != null) {
+            // 绑定纹理图集
+            Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
-        Fluid fluid = stack.getFluid();
-        if(!fluid.isSame(Fluids.EMPTY))
-        {
-            IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
-            ResourceLocation fluidStill = renderProperties.getStillTexture(stack);
-            Optional<net.minecraft.client.renderer.texture.TextureAtlasSprite> fluidStillSprite = Optional.ofNullable(fluidStill)
-                    .map(f -> Minecraft.getInstance()
-                            .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-                            .apply(f)
-                    )
-                    .filter(s -> s.atlasLocation() != net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());
-            if(fluidStillSprite.isPresent())
-            {
-                int fluidColor = IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor();
-                com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,fluidColor,16,fluidStillSprite.get(),x,y);
-            }
+            // 获取流体颜色（带透明度）
+            int color = fluid.getColor(fluidStack);
+            float a = (color >> 24 & 0xFF) / 255f;
+            float r = (color >> 16 & 0xFF) / 255f;
+            float g = (color >> 8 & 0xFF) / 255f;
+            float b = (color & 0xFF) / 255f;
+            GlStateManager.color(r, g, b, a);
+            // 获取流体纹理
+            TextureAtlasSprite sprite = Minecraft.getMinecraft()
+                    .getTextureMapBlocks()
+                    .getAtlasSprite(fluid.getStill().toString());
+            // 调用渲染方法（参数顺序根据签名调整）
+            IngredientRenderer.drawTiledSprite(
+                    16,                // tiledWidth
+                    16,                // tiledHeight
+                    color,             // color
+                    fluidStack.amount, // scaledAmount (可能需要调整量级)
+                    sprite,            // sprite
+                    x,                 // posX
+                    y                  // posY
+            );
+        }
+        // 恢复渲染状态
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
+        // 渲染数量文本
+        if (fluidStack.amount > 0) {
+            String countText = getCountText(fluidStack.amount);
+            float scale = 0.666f;
+
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(0, 0, 200);  // 确保文本在顶层
+            GlStateManager.scale(scale, scale, 1);
+
+            // 计算位置（根据缩放系数调整）
+            int textX = (int) ((x + 16 - 2 - Minecraft.getMinecraft().fontRenderer.getStringWidth(countText) * scale) / scale);
+            int textY = (int) ((y + 16 - 8) / scale);
+
+            Minecraft.getMinecraft().fontRenderer.drawString(
+                    countText,
+                    textX,
+                    textY,
+                    0xFFFFFF,
+                    true
+            );
+
+            GlStateManager.popMatrix();
         }
 
-
-        poseStack.popPose(); // 恢复矩阵状态，结束渲染
-
-        // 渲染数量文本
-        String countText = getCountText(stack.getAmount());
-        float scale = 0.666f; // 文本缩放因数
-        var poseStackText = gui.pose();
-        poseStackText.pushPose();
-        poseStackText.translate(0,0,200); // 确保文本在顶层
-        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
-        RenderSystem.disableBlend(); // 禁用混合渲染模式
-        final int X = (int)(
-                (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
-                        * 1.0f / 0.666f
-        );
-        final int Y = (int)(
-                (y + -1 + 16.0f - 5.0f * 0.666f)
-                        * 1.0f / 0.666f
-        );
-        gui.drawString(Minecraft.getInstance().font,
-                countText,
-                X,
-                Y,
-                0xFFFFFF);
-        poseStackText.popPose();
     }
 
     @Override
@@ -363,68 +413,77 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public Component getDisplayName()
+    public String getDisplayName()
     {
-        return stack.getDisplayName();
+        return stack.getLocalizedName();
     }
 
     @Override
-    public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag)
+    public List<String> getTooltipLines(@Nullable EntityPlayer player, ITooltipFlag tooltipFlag)
     {
-        if(stack.isEmpty())
-            return List.of(Component.empty());
-
-        List<Component> tooltips = new ArrayList<>();
+        // 直接使用全局stack
+        if (stack == null) return List.of("");
         Fluid fluid = stack.getFluid();
+        if (fluid == null) return List.of("");
 
-        Component displayName = getDisplayName();
-        tooltips.add(displayName);
-
-        ResourceLocation resourceLocation =  BuiltInRegistries.FLUID.getKey(fluid);
-        if (resourceLocation != null) {
-            if (tooltipFlag.isAdvanced()) {
-                MutableComponent advancedId = Component.literal(resourceLocation.toString())
-                        .withStyle(ChatFormatting.DARK_GRAY);
-                tooltips.add(advancedId);
+        List<String> tooltip = new ArrayList<>();
+        // 流体显示名称
+        tooltip.add(fluid.getLocalizedName(stack));
+        // 高级模式显示注册名
+        if (Minecraft.getMinecraft().gameSettings.advancedItemTooltips) {
+            String id = FluidRegistry.getFluidName(fluid);
+            if (id != null) {
+                tooltip.add(TextFormatting.DARK_GRAY + id);
             }
-            Optional<? extends ModContainer> container = ModList.get().getModContainerById(resourceLocation.getNamespace());
-            Component modName;
-            if(container.isPresent())
-            {
-                modName = Component.literal(container.get().getModInfo().getDisplayName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
-            }
-            else
-            {
-                container = ModList.get().getModContainerById(resourceLocation.getNamespace().replace('_', '-'));
-                if (container.isPresent()) {
-                    modName = Component.literal(container.get().getModInfo().getDisplayName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
-                }
-                else
-                {
-                    modName = Component.literal(WordUtils.capitalizeFully(resourceLocation.getNamespace().replace('_', ' '))).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
-                }
-            }
-            tooltips.add(modName);
         }
+        // 获取Mod信息
+        String modId = FluidRegistry.getModId(stack);
+        if (modId == null) {
+            modId = fluid.getStill().getNamespace(); // 备用获取方式
+        }
+        String modName = "";
+        if (modId != null) {
+            // 直接内联查找逻辑
+            for (ModContainer mod : Loader.instance().getModList()) {
+                if (mod.getModId().equalsIgnoreCase(modId) ||
+                        mod.getModId().replace("-", "_").equalsIgnoreCase(modId)) {
+                    modName = mod.getName();
+                    break;
+                }
+            }
+            if (modName.isEmpty()) {
+                modName = WordUtils.capitalizeFully(
+                        modId.replace('_', ' ').replace('-', ' ')
+                );
+            }
+        }
+        tooltip.add(TextFormatting.BLUE.toString() + TextFormatting.ITALIC + modName);
+        tooltip.add("已存储: " + stack.amount + "mB");
 
-        tooltips.add(Component.literal("已存储:"+getStackAmount()+"mB"));
-        return tooltips;
+        return tooltip;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
-    public Optional<TooltipComponent> getTooltipImage()
+    public void renderTooltip(GuiScreen gui, int mouseX, int mouseY)
     {
-        return Optional.empty();
-        //return !stack.has(DataComponents.HIDE_TOOLTIP) && !stack.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP) ? Optional.ofNullable((BundleContents)stack.get(DataComponents.BUNDLE_CONTENTS)).map(BundleTooltip::new) : Optional.empty();
-    }
+        Minecraft mc = Minecraft.getMinecraft();
 
-    @OnlyIn(Dist.CLIENT)
-    @Override
-    public void renderTooltip(net.minecraft.client.gui.GuiGraphics gui, net.minecraft.client.gui.Font font, int mouseX, int mouseY)
-    {
-        var minecraft = Minecraft.getInstance();
-        gui.renderTooltip(minecraft.font, this.getTooltipLines(minecraft.player, minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL)
-                , getTooltipImage(), ItemStack.EMPTY, mouseX, mouseY);
+        // 获取工具提示文本
+        List<String> tooltip = this.getTooltipLines(
+                mc.player,
+                mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL
+        );
+        // 渲染工具提示（适配1.12.2的绘制方式）
+        GuiUtils.drawHoveringText(
+                tooltip,
+                mouseX,
+                mouseY,
+                gui.width, // 使用GUI的完整宽度
+                gui.height,
+                -1, // 最大宽度（-1表示自动）
+                mc.fontRenderer
+        );
     }
 
     @Override

@@ -1,27 +1,24 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
 
 // 用于定义不同stack的行为 物品 流体 以及其他模组中行为逻辑stack相似的资源
 // 实现还需重写hashcode以及equals方法，使其检测忽略数量以用于其他位置的代码
 public interface IStackType<T> {
 
-    IStackType<T> fromObject(Object key, long amount, CompoundTag dataComponentPatch);
+    IStackType<T> fromObject(Object key, long amount, int meta,NBTTagCompound dataComponentPatch);
 
     // 类型的唯一标识符 如(beyonddimension:stack_type/item) beyonddimension为本modID，提供对原版Item的支持，Item为要支持的Stack类型
     ResourceLocation getTypeId();
@@ -103,23 +100,24 @@ public interface IStackType<T> {
     }
 
     // 新增方法：NBT序列化（用于磁盘存储）
-    CompoundTag serializeNBT();
-    IStackType<T> deserializeNBT(CompoundTag nbt);
+    NBTTagCompound serializeNBT();
+    IStackType<T> deserializeNBT(NBTTagCompound nbt);
 
 
     // UI渲染（在指定位置绘制图标和数量）
-    @OnlyIn(Dist.CLIENT)
-    void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y);
+    @SideOnly(Side.CLIENT)
+    void render(GuiScreen gui, int x, int y);
 
     String getCountText(long count);
 
-    Component getDisplayName();
+    String getDisplayName();
 
-    List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag);
+    List<String> getTooltipLines(@Nullable EntityPlayer player, ITooltipFlag advanced);
 
-    Optional<TooltipComponent> getTooltipImage();
+    // 1.12.2不支持 取消此接口
+    //Optional<TooltipComponent> getTooltipImage();
 
-    @OnlyIn(Dist.CLIENT)
-    void renderTooltip(net.minecraft.client.gui.GuiGraphics gui, net.minecraft.client.gui.Font font, int mouseX, int mouseY);
+    @SideOnly(Side.CLIENT)
+    void renderTooltip(GuiScreen gui, int mouseX, int mouseY);
 
 }
