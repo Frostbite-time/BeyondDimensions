@@ -6,12 +6,12 @@ import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod.EventBusSubscriber(modid = BeyondDimensions.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = BeyondDimensions.MODID,value = Side.CLIENT)
 public class ShortCutKeyRegister
 {
     private static final List<KeyBinding> KEY_MAPPINGS = new ArrayList<>();

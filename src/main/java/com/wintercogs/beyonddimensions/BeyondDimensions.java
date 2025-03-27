@@ -44,6 +44,10 @@ import java.util.List;
 @Mod(modid = BeyondDimensions.MODID, name = "Beyond Dimensions", version = "0.1.6")
 public class BeyondDimensions
 {
+    // 模组主类的单例
+    @Mod.Instance(BeyondDimensions.MODID)
+    public static BeyondDimensions instance;
+
     public static final String MODID = "beyonddimensions";
     public static boolean MekLoaded = false; // 用于mek化学品存储
     public static final String MekanismMODID = "mekanism";

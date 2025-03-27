@@ -9,44 +9,70 @@ import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
-import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.EventBus;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.IGuiHandler;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 
-import java.util.function.Supplier;
 
 
-@Mod.EventBusSubscriber(modid = BeyondDimensions.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = BeyondDimensions.MODID)
 public class UIRegister
 {
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU,BeyondDimensions.MODID);
-    public static final Supplier<MenuType<DimensionsNetMenu>> Dimensions_Net_Menu = UIRegister.MENU_TYPES.register("dimensions_net_menu", () -> new MenuType<>(DimensionsNetMenu::new, FeatureFlags.DEFAULT_FLAGS));
-    public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = UIRegister.MENU_TYPES.register("net_control_menu", () -> new MenuType<>(NetControlMenu::new, FeatureFlags.DEFAULT_FLAGS));
-    public static final Supplier<MenuType<NetEnergyMenu>> Net_Energy_Menu = UIRegister.MENU_TYPES.register("net_energy_menu", () -> new MenuType<>(NetEnergyMenu::new, FeatureFlags.DEFAULT_FLAGS));
-    public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = UIRegister.MENU_TYPES.register("net_interface_menu", () -> new MenuType<>(NetInterfaceBaseMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
-    public static void register(EventBus eventBus)
+    // 1.12.2 使用静态常量定义 GUI ID
+    public static final int DIMENSIONS_NET_GUI = 0;
+    public static final int NET_CONTROL_GUI = 1;
+    public static final int NET_INTERFACE_GUI = 2;
+    public static final int NET_ENERGY_GUI = 3;
+
+    // 注册 GUI Handler
+    @SubscribeEvent
+    public static void registerGuis(FMLInitializationEvent event) {
+        NetworkRegistry.INSTANCE.registerGuiHandler(BeyondDimensions.instance, new GuiHandler());
+    }
+
+    // GUI Handler 实现类
+    public static class GuiHandler implements IGuiHandler
     {
-        MENU_TYPES.register(eventBus);
+        @Override
+        public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+            switch (ID) {
+                case DIMENSIONS_NET_GUI:
+                    return new DimensionsNetMenu(player.inventory);
+                case NET_CONTROL_GUI:
+                    return new NetControlMenu(player.inventory);
+                case NET_INTERFACE_GUI:
+                    return new NetInterfaceBaseMenu(player.inventory);
+                case NET_ENERGY_GUI:
+                    return new NetEnergyMenu(player.inventory);
+            }
+            return null;
+        }
+        @Override
+        public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+            switch (ID) {
+                case DIMENSIONS_NET_GUI:
+                    return new DimensionsNetGUI(new DimensionsNetMenu(player.inventory));
+                case NET_CONTROL_GUI:
+                    return new NetControlGUI(new NetControlMenu(player.inventory));
+                case NET_INTERFACE_GUI:
+                    return new NetInterfaceBaseGUI(new NetInterfaceBaseMenu(player.inventory));
+                case NET_ENERGY_GUI:
+                    return new NetEnergyGUI(new NetEnergyMenu(player.inventory));
+            }
+            return null;
+        }
+    }
+
+    // 打开 GUI 的方法
+    public static void openGui(EntityPlayer player, int guiId) {
+        player.openGui(BeyondDimensions.instance, guiId, player.world,
+                (int) player.posX, (int) player.posY, (int) player.posZ);
     }
 
 
-    public static void registerScreens(EventBus event)
-    {
-        event.enqueueWork(
-
-                () -> {
-                    MenuScreens.register(Dimensions_Net_Menu.get(), DimensionsNetGUI::new);
-                    MenuScreens.register(Net_Control_Menu.get(), NetControlGUI::new);
-                    MenuScreens.register(Net_Interface_Menu.get(), NetInterfaceBaseGUI::new);
-                    MenuScreens.register(Net_Energy_Menu.get(), NetEnergyGUI::new);
-                }
-        );
-    }
 }

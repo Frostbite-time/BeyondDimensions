@@ -1,8 +1,7 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
+import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -11,7 +10,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 
-import java.util.function.Supplier;
+
+import static com.wintercogs.beyonddimensions.Registry.UIRegister.DIMENSIONS_NET_GUI;
 
 public class OpenNetGuiPacket implements IMessage
 {
@@ -56,7 +56,7 @@ public class OpenNetGuiPacket implements IMessage
 
             // 添加为一个计划任务(Scheduled Task)，在主服务器线程上执行操作
             serverPlayer.getServerWorld().addScheduledTask(() -> {
-                serverPlayer.openGui(); //后续记得打开UI
+                UIRegister.openGui(serverPlayer, DIMENSIONS_NET_GUI);
             });
             // 没有回应数据包
             return null;
