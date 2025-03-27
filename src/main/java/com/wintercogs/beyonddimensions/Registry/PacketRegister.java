@@ -1,32 +1,19 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toClient.EnergyStoragePacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toClient.PlayerPermissionInfoPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncFlagPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncStoragePacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.NetControlActionPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
-@Mod.EventBusSubscriber(modid = BeyondDimensions.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+
+@Mod.EventBusSubscriber(modid = BeyondDimensions.MODID)
 public class PacketRegister
 {
 
     // 定义网络通道
     private static final String PROTOCOL_VERSION = "1";
-    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(BeyondDimensions.MODID, "simple_channel"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
-    );
+    public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(BeyondDimensions.MODID);
     private static int packetId = 1;
 
     static {

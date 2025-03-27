@@ -19,6 +19,7 @@ import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
@@ -33,6 +34,7 @@ import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.items.CapabilityItemHandler;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -56,6 +58,9 @@ public class BeyondDimensions
     public BeyondDimensions()
     {
         EventBus modEventBus = MinecraftForge.EVENT_BUS;
+
+        // 1.12.2注册快捷键
+        ShortCutKeyRegister.registerKeys();
 
         // 注册事件
         MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
@@ -136,7 +141,7 @@ public class BeyondDimensions
 
 
     // 你可以使用EventBusSubscriber来自动注册类中所有标注了@SubscribeEvent的静态方法。
-    @Mod.EventBusSubscriber(modid = MODID)
+    @Mod.EventBusSubscriber(modid = MODID, value = Side.CLIENT)
     public static class ClientModEvents
     {
         @SubscribeEvent
@@ -144,7 +149,7 @@ public class BeyondDimensions
         {
             // 一些客户端初始代码
             LOGGER.info("维度网络初始化完成(客户端)");
-            UIRegister.registerScreens(event);
+            UIRegister.registerScreens(MinecraftForge.EVENT_BUS);
         }
     }
 }

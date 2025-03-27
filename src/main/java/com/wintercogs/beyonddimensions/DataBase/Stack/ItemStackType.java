@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ItemStackType implements IStackType<ItemStack> {
-    public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/item");
+    public static final ResourceLocation ID = new ResourceLocation(BeyondDimensions.MODID, "stack_type/item");
     private static final long CUSTOM_MAX_STACK_SIZE = Integer.MAX_VALUE; // 自定义堆叠大小
 
     private ItemStack stack;
