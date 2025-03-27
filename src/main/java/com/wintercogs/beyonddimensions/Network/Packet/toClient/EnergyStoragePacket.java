@@ -2,56 +2,74 @@ package com.wintercogs.beyonddimensions.Network.Packet.toClient;
 
 
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.function.Supplier;
 
-public record EnergyStoragePacket(long energyStored , long energyCap)
+public class EnergyStoragePacket implements IMessage
 {
 
-    @OnlyIn(Dist.CLIENT)
-    private void handle(NetworkEvent.Context context)
-    {
-        Player player = Minecraft.getInstance().player;
+    private long energyStored;
+    private long energyCap;
 
-        if (player.containerMenu instanceof NetEnergyMenu menu)
+    public EnergyStoragePacket(){}
+
+    public EnergyStoragePacket(long energyStored ,long energyCap)
+    {
+        this.energyStored = energyStored;
+        this.energyCap = energyCap;
+    }
+
+    public long getEnergyStored()
+    {
+        return energyStored;
+    }
+
+    public long getEnergyCap()
+    {
+        return energyCap;
+    }
+
+    @Override
+    public void fromBytes(ByteBuf buf)
+    {
+        this.energyStored = buf.readLong();
+        this.energyCap = buf.readLong();
+    }
+
+    @Override
+    public void toBytes(ByteBuf buf)
+    {
+        buf.writeLong(this.energyStored);
+        buf.writeLong(this.energyCap);
+    }
+
+    @SideOnly(value = Side.CLIENT)
+    public static class EnergyStoragePacketHandler implements IMessageHandler<EnergyStoragePacket, IMessage>
+    {
+
+        @Override
+        public IMessage onMessage(EnergyStoragePacket message, MessageContext ctx)
         {
-            menu.resumeRemoteUpdates(); // 虽然本地端这个好像没有用处
-            menu.loadStorage(energyCap(), energyStored());
-            return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+            // 确保在客户端主线程执行
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                EntityPlayer player = Minecraft.getMinecraft().player;
+
+                if (player.openContainer instanceof NetEnergyMenu) {
+                    NetEnergyMenu menu = (NetEnergyMenu) player.openContainer;
+
+                    // 使用数据包中的值更新 GUI
+                    menu.loadStorage(message.getEnergyCap(), message.getEnergyStored());
+                }
+            });
+            return null; // 不需要回复消息
         }
     }
 
-
-
-    public static void handle(EnergyStoragePacket packet, Supplier<NetworkEvent.Context> cxt)
-    {
-        if (packet != null) {
-            NetworkEvent.Context context = cxt.get();
-
-            context.enqueueWork(() ->
-                    DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> packet.handle(context))
-            );
-            context.setPacketHandled(true);
-        }
-    }
-
-    public static void encode(EnergyStoragePacket packet, FriendlyByteBuf buf)
-    {
-        buf.writeLong(packet.energyStored());
-        buf.writeLong(packet.energyCap());
-    }
-
-    public static EnergyStoragePacket decode(FriendlyByteBuf buf)
-    {
-        long energyStored = buf.readLong();
-        long energyCap = buf.readLong();
-        return new EnergyStoragePacket(energyStored, energyCap);
-    }
 }

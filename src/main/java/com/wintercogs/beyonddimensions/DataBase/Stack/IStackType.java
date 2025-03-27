@@ -83,7 +83,7 @@ public interface IStackType<T> {
     boolean isSameTypeSameComponents(IStackType<T> other); // 检查两个堆叠除数量外的一切是否相同，例如如果是物品 就检查物品类型和所有组件是否相同
 
     // 序列化/反序列化（用于网络和NBT）
-    void serialize(ByteBuf buf);
+    void serialize(PacketBuffer buf);
     IStackType<T> deserialize(PacketBuffer buf, ResourceLocation typeId);
 
     // 传入一个buf，将会自动遍历所有可能的实现，并调用其接口，返回不为null的结果

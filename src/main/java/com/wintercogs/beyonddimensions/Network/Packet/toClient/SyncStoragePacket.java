@@ -4,132 +4,157 @@ import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public record SyncStoragePacket(List<IStackType> stacks, List<Long> changedCounts, List<Integer> targetIndex)
+public class SyncStoragePacket implements IMessage
 {
+    private List<IStackType> stacks;
+    private List<Long> changedCounts;
+    private List<Integer> targetIndex;
 
-    @OnlyIn(Dist.CLIENT)
-    private void handle(NetworkEvent.Context context)
+    public SyncStoragePacket(){}
+
+    public SyncStoragePacket(List<IStackType> stacks, List<Long> changedCounts, List<Integer> targetIndex)
     {
-        Player player = Minecraft.getInstance().player;
-        if (player.containerMenu instanceof DimensionsNetMenu menu)
-        {
-            IStackTypedHandler clientStorage = menu.storage;
-            int i = 0;
-            for (IStackType remoteStack : stacks())
-            {
-                // 如果当前存储存在此物品
-                if (clientStorage.hasStackType(remoteStack))
-                {
-                    if (changedCounts().get(i) > 0)
-                    {
-                        clientStorage.insert(remoteStack.copyWithCount(changedCounts().get(i)), false);
-                    }
-                    else
-                    {
-                        clientStorage.extract(remoteStack.copyWithCount(-changedCounts().get(i)), false);
-                    }
-                }
-                else // 如果当前存储不存在此物品
-                {
-                    if (changedCounts().get(i) > 0)
-                    {
-                        clientStorage.insert(remoteStack.copyWithCount(changedCounts().get(i)), false);
-                    }
-                }
-                i++; // 一次遍历完毕后索引自增
-            }
-            menu.updateViewerStorage();
-        }
-        if (player.containerMenu instanceof NetInterfaceBaseMenu menu)
-        {
-            IStackTypedHandler clientStorage = menu.storage;
-            int i = 0;
-            for (IStackType remoteStack : stacks())
-            {
-                if (changedCounts().get(i) > 0)
-                {
-                    clientStorage.insert(targetIndex().get(i), remoteStack.copyWithCount(changedCounts().get(i)), false);
-                }
-                else
-                {
-                    clientStorage.extract(targetIndex().get(i), -changedCounts().get(i), false);
-                }
-                i++; // 一次遍历完毕后索引自增
-            }
+        this.stacks = stacks;
+        this.changedCounts = changedCounts;
+        this.targetIndex = targetIndex;
+    }
 
-            menu.updateViewerStorage();
-        }
+    public List<IStackType> getStacks()
+    {
+        return stacks;
+    }
+
+    public List<Long> getChangedCounts()
+    {
+        return changedCounts;
+    }
+
+    public List<Integer> getTargetIndex()
+    {
+        return targetIndex;
     }
 
 
-    public static void handle(SyncStoragePacket packet, Supplier<NetworkEvent.Context> cxt)
-    {
-        if (packet != null) {
-            NetworkEvent.Context context = cxt.get();
+    @Override
+    public void toBytes(ByteBuf buf) {
+        PacketBuffer buffer = new PacketBuffer(buf);
 
-            context.enqueueWork(() ->
-                    DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> packet.handle(context))
-            );
-            context.setPacketHandled(true);
-        }
-    }
-
-    public static void encode(SyncStoragePacket packet, FriendlyByteBuf buf)
-    {
         // 序列化stacks列表
-        buf.writeInt(packet.stacks().size());
-        for (IStackType stack : packet.stacks()) {
-            stack.serialize(buf);
+        buffer.writeInt(stacks.size());
+        for (IStackType stack : stacks) {
+            stack.serialize(buffer);
         }
-
-        // 序列化changedCounts列表（长整型）
-        buf.writeInt(packet.changedCounts().size());
-        for (long count : packet.changedCounts()) {
-            buf.writeLong(count);
+        // 序列化changedCounts列表
+        buffer.writeInt(changedCounts.size());
+        for (long count : changedCounts) {
+            buffer.writeLong(count);
         }
-
         // 序列化targetIndex列表
-        buf.writeInt(packet.targetIndex().size());
-        for (int index : packet.targetIndex()) {
-            buf.writeInt(index);
+        buffer.writeInt(targetIndex.size());
+        for (int index : targetIndex) {
+            buffer.writeInt(index);
         }
     }
+    @Override
+    public void fromBytes(ByteBuf buf) {
+        PacketBuffer buffer = new PacketBuffer(buf);
 
-    public static SyncStoragePacket decode(FriendlyByteBuf buf)
-    {
         // 反序列化stacks列表
-        int stacksSize = buf.readInt();
-        List<IStackType> stacks = new ArrayList<>(stacksSize);
+        int stacksSize = buffer.readInt();
+        stacks = new ArrayList<>(stacksSize);
         for (int i = 0; i < stacksSize; i++) {
-            stacks.add(IStackType.deserializeCommon(buf));
+            stacks.add(IStackType.deserializeCommon(buffer));
         }
-
         // 反序列化changedCounts列表
-        int countsSize = buf.readInt();
-        List<Long> changedCounts = new ArrayList<>(countsSize);
+        int countsSize = buffer.readInt();
+        changedCounts = new ArrayList<>(countsSize);
         for (int i = 0; i < countsSize; i++) {
-            changedCounts.add(buf.readLong());
+            changedCounts.add(buffer.readLong());
         }
-
         // 反序列化targetIndex列表
-        int indicesSize = buf.readInt();
-        List<Integer> targetIndex = new ArrayList<>(indicesSize);
+        int indicesSize = buffer.readInt();
+        targetIndex = new ArrayList<>(indicesSize);
         for (int i = 0; i < indicesSize; i++) {
-            targetIndex.add(buf.readInt());
+            targetIndex.add(buffer.readInt());
         }
-
-        return new SyncStoragePacket(stacks, changedCounts, targetIndex);
     }
+
+    @SideOnly(Side.CLIENT)
+    public static class SyncStoragePacketHandler implements IMessageHandler<SyncStoragePacket, IMessage>
+    {
+
+        @Override
+        public IMessage onMessage(SyncStoragePacket message, MessageContext ctx)
+        {
+            // 确保在客户端主线程执行
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                EntityPlayer player = Minecraft.getMinecraft().player;
+                if (player.openContainer instanceof DimensionsNetMenu menu)
+                {
+                    IStackTypedHandler clientStorage = menu.storage;
+                    int i = 0;
+                    for (IStackType remoteStack : message.stacks)
+                    {
+                        // 如果当前存储存在此物品
+                        if (clientStorage.hasStackType(remoteStack))
+                        {
+                            if (message.changedCounts.get(i) > 0)
+                            {
+                                clientStorage.insert(remoteStack.copyWithCount(message.changedCounts.get(i)), false);
+                            }
+                            else
+                            {
+                                clientStorage.extract(remoteStack.copyWithCount(-message.changedCounts.get(i)), false);
+                            }
+                        }
+                        else // 如果当前存储不存在此物品
+                        {
+                            if (message.changedCounts.get(i) > 0)
+                            {
+                                clientStorage.insert(remoteStack.copyWithCount(message.changedCounts.get(i)), false);
+                            }
+                        }
+                        i++; // 一次遍历完毕后索引自增
+                    }
+                    menu.updateViewerStorage();
+                }
+                if (player.openContainer instanceof NetInterfaceBaseMenu menu)
+                {
+                    IStackTypedHandler clientStorage = menu.storage;
+                    int i = 0;
+                    for (IStackType remoteStack : message.stacks)
+                    {
+                        if (message.changedCounts.get(i) > 0)
+                        {
+                            clientStorage.insert(message.targetIndex.get(i), remoteStack.copyWithCount(message.changedCounts.get(i)), false);
+                        }
+                        else
+                        {
+                            clientStorage.extract(message.targetIndex.get(i), -message.changedCounts.get(i), false);
+                        }
+                        i++; // 一次遍历完毕后索引自增
+                    }
+
+                    menu.updateViewerStorage();
+                }
+            });
+            return null; // 不需要回复消息
+        }
+    }
+
+
 }

@@ -3,84 +3,109 @@ package com.wintercogs.beyonddimensions.Network.Packet.toClient;
 
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public record SyncFlagPacket(List<IStackType> flags, List<Integer> targetIndex)
+public class SyncFlagPacket implements IMessage
 {
+    private List<IStackType> flags;
+    private List<Integer> targetIndex;
 
-    @OnlyIn(Dist.CLIENT)
-    private void handle(NetworkEvent.Context context)
+    public SyncFlagPacket()
     {
-        Player player = Minecraft.getInstance().player;
-        if (player.containerMenu instanceof NetInterfaceBaseMenu menu)
+    }
+
+    public SyncFlagPacket(List<IStackType> flags, List<Integer> targetIndex)
+    {
+        this.flags = flags;
+        this.targetIndex = targetIndex;
+    }
+
+    public List<IStackType> getFlags()
+    {
+        return flags;
+    }
+
+    public List<Integer> getTargetIndex()
+    {
+        return targetIndex;
+    }
+
+
+    @Override
+    public void toBytes(ByteBuf buf) {
+        // 写入flags列表
+        PacketBuffer buffer = new PacketBuffer(buf);
+
+        buffer.writeInt(flags.size());
+        for (IStackType flag : flags)
         {
-            IStackTypedHandler clientStorage = menu.flagStorage;
-            int i = 0;
-            for (IStackType remoteStack : flags())
-            {
-                clientStorage.setStackDirectly(targetIndex().get(i), remoteStack.copyWithCount(1));
-                i++; // 一次遍历完毕后索引自增
-            }
-
-            menu.updateViewerStorage();
+            flag.serialize(buffer);
         }
+        buffer.writeInt(targetIndex.size());
+        for (Integer targetIndex : targetIndex)
+        {
+            buffer.writeInt(targetIndex);
+        }
+
+    }
+    @Override
+    public void fromBytes(ByteBuf buf) {
+
+        PacketBuffer buffer = new PacketBuffer(buf);
+        int flagSize = buffer.readInt();
+        flags = new ArrayList<>(flagSize);
+        for (int i = 0; i < flagSize; i++)
+        {
+            flags.add(IStackType.deserializeCommon(buffer));
+        }
+        int indicesSize = buffer.readInt();
+        targetIndex = new ArrayList<>(indicesSize);
+        for (int i = 0; i < indicesSize; i++)
+        {
+            targetIndex.add(buffer.readInt());
+        }
+
     }
 
-
-    public static void handle(SyncFlagPacket packet, Supplier<NetworkEvent.Context> cxt)
+    @SideOnly(Side.CLIENT)
+    public static class SyncFlagPacketHandler implements IMessageHandler<SyncFlagPacket, IMessage>
     {
-        if (packet != null) {
-            NetworkEvent.Context context = cxt.get();
+        @Override
+        public IMessage onMessage(SyncFlagPacket message, MessageContext ctx)
+        {
+            // 确保在客户端主线程执行
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                EntityPlayer player = Minecraft.getMinecraft().player;
+                if (player.openContainer instanceof NetInterfaceBaseMenu menu)
+                {
+                    IStackTypedHandler clientStorage = menu.flagStorage;
+                    int i = 0;
+                    for (IStackType remoteStack : message.flags)
+                    {
+                        clientStorage.setStackDirectly(message.targetIndex.get(i), remoteStack.copyWithCount(1));
+                        i++; // 一次遍历完毕后索引自增
+                    }
 
-            context.enqueueWork(() ->
-                    DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> packet.handle(context))
-            );
-            context.setPacketHandled(true);
+                    menu.updateViewerStorage();
+                }
+            });
+            return null; // 不需要回复消息
         }
     }
 
-    public static void encode(SyncFlagPacket packet, FriendlyByteBuf buf)
-    {
-        // 序列化flags列表
-        buf.writeInt(packet.flags().size());  // 先写入列表长度
-        for (IStackType flag : packet.flags()) {
-            flag.serialize(buf);  // 逐个序列化IStackType
-        }
-
-        // 序列化targetIndex列表
-        buf.writeInt(packet.targetIndex().size());
-        for (int index : packet.targetIndex()) {
-            buf.writeInt(index);
-        }
-    }
-
-    public static SyncFlagPacket decode(FriendlyByteBuf buf)
-    {
-        // 反序列化flags列表
-        int flagsSize = buf.readInt();
-        List<IStackType> flags = new ArrayList<>(flagsSize);
-        for (int i = 0; i < flagsSize; i++) {
-            flags.add(IStackType.deserializeCommon(buf));
-        }
-
-        // 反序列化targetIndex列表
-        int indicesSize = buf.readInt();
-        List<Integer> targetIndex = new ArrayList<>(indicesSize);
-        for (int i = 0; i < indicesSize; i++) {
-            targetIndex.add(buf.readInt());
-        }
-
-        return new SyncFlagPacket(flags, targetIndex);
-    }
 }

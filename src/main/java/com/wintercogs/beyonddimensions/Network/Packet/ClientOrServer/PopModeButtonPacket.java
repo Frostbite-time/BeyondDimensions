@@ -1,85 +1,101 @@
 package com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer;
 
 
+
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.function.Supplier;
 
-public record PopModeButtonPacket(boolean popMode)
+public class PopModeButtonPacket implements IMessage
 {
-    private void handleServer(NetworkEvent.Context context)
-    {
-        Player player = context.getSender();
 
-        if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
+    private boolean popMode;
+
+    public PopModeButtonPacket(){}
+
+    public PopModeButtonPacket(boolean popMode)
+    {
+        this.popMode = popMode;
+    }
+
+    public boolean isPopMode()
+    {
+        return popMode;
+    }
+
+    @Override
+    public void fromBytes(ByteBuf buf)
+    {
+        this.popMode = buf.readBoolean();
+    }
+
+    @Override
+    public void toBytes(ByteBuf buf)
+    {
+        buf.writeBoolean(popMode);
+    }
+
+    public static class PopModeButtonPacketHandlerOnServer implements IMessageHandler<PopModeButtonPacket, IMessage>
+    {
+        @Override
+        public IMessage onMessage(PopModeButtonPacket message, MessageContext ctx)
         {
-            menu.popMode = popMode();
-            menu.be.popMode = popMode();
-            return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+            // 这是发送到服务器的数据包发送到的玩家
+            EntityPlayerMP serverPlayer = ctx.getServerHandler().player;
+
+            // 添加为一个计划任务(Scheduled Task)，在主服务器线程上执行操作
+            serverPlayer.getServerWorld().addScheduledTask(() -> {
+                if(serverPlayer.openContainer instanceof NetInterfaceBaseMenu menu)
+                {
+                    menu.popMode = message.popMode;
+                    menu.be.popMode = message.popMode;
+                    return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                }
+                if(serverPlayer.openContainer instanceof NetEnergyMenu menu)
+                {
+                    menu.popMode = message.popMode;
+                    menu.be.popMode = message.popMode;
+                    return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                }
+            });
+            return null;
         }
-        if(player.containerMenu instanceof NetEnergyMenu menu)
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static class PopModeButtonPacketHandlerOnClient implements IMessageHandler<PopModeButtonPacket, IMessage>
+    {
+
+        @Override
+        public IMessage onMessage(PopModeButtonPacket message, MessageContext ctx)
         {
-            menu.popMode = popMode();
-            menu.be.popMode = popMode();
-            return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+            // 确保在客户端主线程执行
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                EntityPlayer player = Minecraft.getMinecraft().player;
+
+
+                if (player.openContainer instanceof NetInterfaceBaseMenu menu)
+                {
+                    menu.popMode = message.popMode;
+                    return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                }
+                if (player.openContainer instanceof NetEnergyMenu menu)
+                {
+                    menu.popMode = message.popMode;
+                    return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+                }
+            });
+            return null;
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    private void handleClient(NetworkEvent.Context context)
-    {
-        Player player = Minecraft.getInstance().player;
-
-        if (player.containerMenu instanceof NetInterfaceBaseMenu menu)
-        {
-            menu.popMode = popMode();
-            return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-        }
-        if (player.containerMenu instanceof NetEnergyMenu menu)
-        {
-            menu.popMode = popMode();
-            return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-        }
-    }
-
-
-    public static void handle(PopModeButtonPacket packet, Supplier<NetworkEvent.Context> cxt)
-    {
-        if (packet != null) {
-            NetworkEvent.Context context = cxt.get();
-            NetworkDirection direction = context.getDirection();
-            if(direction == NetworkDirection.PLAY_TO_CLIENT)
-            {
-                context.enqueueWork(() ->
-                        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> packet.handleClient(context))
-                );
-                context.setPacketHandled(true);
-            }
-            else if(direction == NetworkDirection.PLAY_TO_SERVER)
-            {
-                context.enqueueWork(() -> packet.handleServer(context));
-                context.setPacketHandled(true);
-            }
-        }
-    }
-
-    public static void encode(PopModeButtonPacket packet, FriendlyByteBuf buf)
-    {
-        buf.writeBoolean(packet.popMode);
-    }
-
-    public static PopModeButtonPacket decode(FriendlyByteBuf buf)
-    {
-        boolean popMode = buf.readBoolean();
-        return new PopModeButtonPacket(popMode);
-    }
 }

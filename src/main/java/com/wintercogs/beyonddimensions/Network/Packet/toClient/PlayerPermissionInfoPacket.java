@@ -3,75 +3,83 @@ package com.wintercogs.beyonddimensions.Network.Packet.toClient;
 
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 
 import java.util.HashMap;
 import java.util.UUID;
-import java.util.function.Supplier;
 
-public record PlayerPermissionInfoPacket(HashMap<UUID, PlayerPermissionInfo> infoMap)
+public class PlayerPermissionInfoPacket implements IMessage
 {
+    private HashMap<UUID, PlayerPermissionInfo> infoMap = new HashMap<>();
 
-    @OnlyIn(Dist.CLIENT)
-    private void handle(NetworkEvent.Context context)
+    public PlayerPermissionInfoPacket()
     {
-        Player player = Minecraft.getInstance().player;
-        NetControlMenu menu;
-        if (!(player.containerMenu instanceof NetControlMenu))
-        {
-            return;
-        }
-        menu = (NetControlMenu) player.containerMenu;
-        menu.loadPlayerInfo(infoMap());
     }
 
-
-
-    public static void handle(PlayerPermissionInfoPacket packet, Supplier<NetworkEvent.Context> cxt)
+    public PlayerPermissionInfoPacket(HashMap<UUID, PlayerPermissionInfo> infoMap)
     {
-        if (packet != null) {
-            NetworkEvent.Context context = cxt.get();
-
-            context.enqueueWork(() ->
-                    DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> packet.handle(context))
-            );
-            context.setPacketHandled(true);
-        }
+        this.infoMap = infoMap;
     }
 
-    public static void encode(PlayerPermissionInfoPacket packet, FriendlyByteBuf buf)
+    public HashMap<UUID, PlayerPermissionInfo> getInfoMap()
     {
-        // 先写入Map条目数量
-        buf.writeInt(packet.infoMap().size());
+        return infoMap;
+    }
 
-        // 遍历写入每个键值对
-        packet.infoMap().forEach((uuid, info) -> {
-            buf.writeUUID(uuid); // 写入UUID
-            PlayerPermissionInfo.encode(info, buf); // 复用PlayerPermissionInfo的编码方法
+    @Override
+    public void fromBytes(ByteBuf buf) {
+        infoMap = new HashMap<>();
+        int entryCount = buf.readInt();
+        for (int i = 0; i < entryCount; i++) {
+            // 读取UUID（拆分为两个long）
+            long mostSig = buf.readLong();
+            long leastSig = buf.readLong();
+            UUID uuid = new UUID(mostSig, leastSig);
+            PlayerPermissionInfo info = PlayerPermissionInfo.decode(buf);
+            infoMap.put(uuid, info);
+        }
+    }
+    @Override
+    public void toBytes(ByteBuf buf) {
+        buf.writeInt(infoMap.size());
+        infoMap.forEach((uuid, info) -> {
+            // 写入UUID
+            buf.writeLong(uuid.getMostSignificantBits());
+            buf.writeLong(uuid.getLeastSignificantBits());
+            // 使用静态编码方法
+            PlayerPermissionInfo.encode(info, buf);
         });
     }
 
-    public static PlayerPermissionInfoPacket decode(FriendlyByteBuf buf)
+
+    @SideOnly(Side.CLIENT)
+    public static class PlayerPermissionInfoPacketHandler implements IMessageHandler<PlayerPermissionInfoPacket, IMessage>
     {
-        HashMap<UUID, PlayerPermissionInfo> map = new HashMap<>();
+        @Override
+        public IMessage onMessage(PlayerPermissionInfoPacket message, MessageContext ctx)
+        {
+            // 确保在客户端主线程执行
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                EntityPlayer player = Minecraft.getMinecraft().player;
 
-        // 读取条目数量
-        int entryCount = buf.readInt();
-
-        // 循环读取每个键值对
-        for (int i = 0; i < entryCount; i++) {
-            UUID uuid = buf.readUUID(); // 读取UUID
-            PlayerPermissionInfo info = PlayerPermissionInfo.decode(buf); // 复用PlayerPermissionInfo的解码方法
-            map.put(uuid, info);
+                NetControlMenu menu;
+                if (!(player.openContainer instanceof NetControlMenu))
+                {
+                    return;
+                }
+                menu = (NetControlMenu) player.openContainer;
+                menu.loadPlayerInfo(message.infoMap);
+            });
+            return null; // 不需要回复消息
         }
-
-        return new PlayerPermissionInfoPacket(map);
     }
 
 }

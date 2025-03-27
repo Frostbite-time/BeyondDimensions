@@ -1,6 +1,12 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.EnergyStoragePacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.PlayerPermissionInfoPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncFlagPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncStoragePacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.NetControlActionPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
@@ -43,58 +49,65 @@ public class PacketRegister
 
 
         // to client
-
-
         INSTANCE.registerMessage(
-                packetId++,
-                CallSeverClickPacket.class,
-                CallSeverClickPacket::encode,
-                CallSeverClickPacket::decode,
-                CallSeverClickPacket::handle
-        );
-
-        INSTANCE.registerMessage(
-                packetId++,
+                EnergyStoragePacket.EnergyStoragePacketHandler.class,
                 EnergyStoragePacket.class,
-                EnergyStoragePacket::encode,
-                EnergyStoragePacket::decode,
-                EnergyStoragePacket::handle
+                packetId++,
+                Side.CLIENT
         );
 
-
-
-
-
         INSTANCE.registerMessage(
-                packetId++,
+                PlayerPermissionInfoPacket.PlayerPermissionInfoPacketHandler.class,
                 PlayerPermissionInfoPacket.class,
-                PlayerPermissionInfoPacket::encode,
-                PlayerPermissionInfoPacket::decode,
-                PlayerPermissionInfoPacket::handle
+                packetId++,
+                Side.CLIENT
         );
 
         INSTANCE.registerMessage(
-                packetId++,
-                PopModeButtonPacket.class,
-                PopModeButtonPacket::encode,
-                PopModeButtonPacket::decode,
-                PopModeButtonPacket::handle
-        );
-
-        INSTANCE.registerMessage(
-                packetId++,
+                SyncFlagPacket.SyncFlagPacketHandler.class,
                 SyncFlagPacket.class,
-                SyncFlagPacket::encode,
-                SyncFlagPacket::decode,
-                SyncFlagPacket::handle
+                packetId++,
+                Side.CLIENT
         );
 
         INSTANCE.registerMessage(
-                packetId++,
+                SyncStoragePacket.SyncStoragePacketHandler.class,
                 SyncStoragePacket.class,
-                SyncStoragePacket::encode,
-                SyncStoragePacket::decode,
-                SyncStoragePacket::handle
+                packetId++,
+                Side.CLIENT
         );
+
+
+        // 双端
+        INSTANCE.registerMessage(
+                CallSeverClickPacket.CallSeverClickPacketHandlerOnServer.class,
+                CallSeverClickPacket.class,
+                packetId++,
+                Side.SERVER
+        );
+
+        INSTANCE.registerMessage(
+                CallSeverClickPacket.CallSeverClickPacketHandlerOnClient.class,
+                CallSeverClickPacket.class,
+                packetId++,
+                Side.CLIENT
+        );
+
+
+        INSTANCE.registerMessage(
+                PopModeButtonPacket.PopModeButtonPacketHandlerOnServer.class,
+                PopModeButtonPacket.class,
+                packetId++,
+                Side.SERVER
+        );
+
+        INSTANCE.registerMessage(
+                PopModeButtonPacket.PopModeButtonPacketHandlerOnClient.class,
+                PopModeButtonPacket.class,
+                packetId++,
+                Side.CLIENT
+        );
+
+
     }
 }
