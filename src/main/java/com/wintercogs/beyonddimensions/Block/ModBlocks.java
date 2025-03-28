@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.Block.Custom.NetPathwayBlock;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
@@ -71,12 +72,19 @@ public class ModBlocks
         @SubscribeEvent
         public static void registerItems(RegistryEvent.Register<Item> event) {
             event.getRegistry().registerAll(
-                    new ItemBlock(NET_CONTROL).setRegistryName(NET_CONTROL.getRegistryName()),
-                    new ItemBlock(NET_INTERFACE).setRegistryName(NET_INTERFACE.getRegistryName()),
-                    new ItemBlock(NET_PATHWAY).setRegistryName(NET_PATHWAY.getRegistryName()),
-                    new ItemBlock(NET_ENERGY_PATHWAY).setRegistryName(NET_ENERGY_PATHWAY.getRegistryName())
+                    new ItemBlock(NET_CONTROL)
+                            .setRegistryName(NET_CONTROL.getRegistryName())
+                            .setCreativeTab(ModCreativeModeTabs.BLOCKS_TAB),
+                    new ItemBlock(NET_INTERFACE)
+                            .setRegistryName(NET_INTERFACE.getRegistryName())
+                            .setCreativeTab(ModCreativeModeTabs.BLOCKS_TAB),
+                    new ItemBlock(NET_PATHWAY)
+                            .setRegistryName(NET_PATHWAY.getRegistryName())
+                            .setCreativeTab(ModCreativeModeTabs.BLOCKS_TAB),
+                    new ItemBlock(NET_ENERGY_PATHWAY)
+                            .setRegistryName(NET_ENERGY_PATHWAY.getRegistryName())
+                            .setCreativeTab(ModCreativeModeTabs.BLOCKS_TAB)
             );
         }
     }
-
 }

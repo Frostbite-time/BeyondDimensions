@@ -66,7 +66,7 @@ public class DimensionsNet extends WorldSavedData
 
 
     // 构建最新的网络名称（适配1.12.2）
-    public static String buildNewNetName(EntityPlayerMP player) {
+    public static String buildNewNetName(EntityPlayer player) {
         int netId;
         World world = player.getServer().getWorld(0); // 0是主世界维度ID
 

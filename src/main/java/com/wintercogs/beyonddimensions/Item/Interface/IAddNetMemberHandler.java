@@ -1,14 +1,14 @@
 package com.wintercogs.beyonddimensions.Item.Interface;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.player.EntityPlayer;
 
 public interface IAddNetMemberHandler {
-    default boolean AddPlayerToNet(DimensionsNet net, Player player)
+    default boolean AddPlayerToNet(DimensionsNet net, EntityPlayer player)
     {
         if(net != null)
         {
-            net.addPlayer(player.getUUID());
+            net.addPlayer(player.getUniqueID());
             return true;
         }
 

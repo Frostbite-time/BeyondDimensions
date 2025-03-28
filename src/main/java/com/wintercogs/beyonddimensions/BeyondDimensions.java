@@ -66,12 +66,6 @@ public class BeyondDimensions
         // 注册事件
         MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
 
-        // 注册创造模式菜单
-        ModCreativeModeTabs.register(modEventBus);
-
-        // 注册物品
-        ModItems.register(modEventBus);
-
     }
 
     @SubscribeEvent
