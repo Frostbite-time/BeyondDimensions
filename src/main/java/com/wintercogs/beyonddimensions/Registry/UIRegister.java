@@ -1,14 +1,14 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.GUI.DimensionsNetGUI;
-import com.wintercogs.beyonddimensions.GUI.NetControlGUI;
-import com.wintercogs.beyonddimensions.GUI.NetEnergyGUI;
-import com.wintercogs.beyonddimensions.GUI.NetInterfaceBaseGUI;
-import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
-import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
-import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
-import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
+//import com.wintercogs.beyonddimensions.GUI.DimensionsNetGUI;
+//import com.wintercogs.beyonddimensions.GUI.NetControlGUI;
+//import com.wintercogs.beyonddimensions.GUI.NetEnergyGUI;
+//import com.wintercogs.beyonddimensions.GUI.NetInterfaceBaseGUI;
+//import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
+//import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
+//import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
+//import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod;
@@ -29,44 +29,44 @@ public class UIRegister
     public static final int NET_INTERFACE_GUI = 2;
     public static final int NET_ENERGY_GUI = 3;
 
-    // 注册 GUI Handler
-    @SubscribeEvent
-    public static void registerGuis(FMLInitializationEvent event) {
-        NetworkRegistry.INSTANCE.registerGuiHandler(BeyondDimensions.instance, new GuiHandler());
-    }
+//    // 注册 GUI Handler
+//    @SubscribeEvent
+//    public static void registerGuis(FMLInitializationEvent event) {
+//        NetworkRegistry.INSTANCE.registerGuiHandler(BeyondDimensions.instance, new GuiHandler());
+//    }
 
-    // GUI Handler 实现类
-    public static class GuiHandler implements IGuiHandler
-    {
-        @Override
-        public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-            switch (ID) {
-                case DIMENSIONS_NET_GUI:
-                    return new DimensionsNetMenu(player.inventory);
-                case NET_CONTROL_GUI:
-                    return new NetControlMenu(player.inventory);
-                case NET_INTERFACE_GUI:
-                    return new NetInterfaceBaseMenu(player.inventory);
-                case NET_ENERGY_GUI:
-                    return new NetEnergyMenu(player.inventory);
-            }
-            return null;
-        }
-        @Override
-        public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-            switch (ID) {
-                case DIMENSIONS_NET_GUI:
-                    return new DimensionsNetGUI(new DimensionsNetMenu(player.inventory));
-                case NET_CONTROL_GUI:
-                    return new NetControlGUI(new NetControlMenu(player.inventory));
-                case NET_INTERFACE_GUI:
-                    return new NetInterfaceBaseGUI(new NetInterfaceBaseMenu(player.inventory));
-                case NET_ENERGY_GUI:
-                    return new NetEnergyGUI(new NetEnergyMenu(player.inventory));
-            }
-            return null;
-        }
-    }
+//    // GUI Handler 实现类
+//    public static class GuiHandler implements IGuiHandler
+//    {
+//        @Override
+//        public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+//            switch (ID) {
+//                case DIMENSIONS_NET_GUI:
+//                    return new DimensionsNetMenu(player.inventory);
+//                case NET_CONTROL_GUI:
+//                    return new NetControlMenu(player.inventory);
+//                case NET_INTERFACE_GUI:
+//                    return new NetInterfaceBaseMenu(player.inventory);
+//                case NET_ENERGY_GUI:
+//                    return new NetEnergyMenu(player.inventory);
+//            }
+//            return null;
+//        }
+//        @Override
+//        public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+//            switch (ID) {
+//                case DIMENSIONS_NET_GUI:
+//                    return new DimensionsNetGUI(new DimensionsNetMenu(player.inventory));
+//                case NET_CONTROL_GUI:
+//                    return new NetControlGUI(new NetControlMenu(player.inventory));
+//                case NET_INTERFACE_GUI:
+//                    return new NetInterfaceBaseGUI(new NetInterfaceBaseMenu(player.inventory));
+//                case NET_ENERGY_GUI:
+//                    return new NetEnergyGUI(new NetEnergyMenu(player.inventory));
+//            }
+//            return null;
+//        }
+//    }
 
     // 打开 GUI 的方法
     public static void openGui(EntityPlayer player, int guiId) {

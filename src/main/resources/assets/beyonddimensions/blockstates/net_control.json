@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "normal": {
+      "model": "beyonddimensions:net_control"
+    }
+  }
+}

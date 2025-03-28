@@ -15,8 +15,6 @@ import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandl
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
-import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
-import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
@@ -28,6 +26,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -68,8 +67,8 @@ public class BeyondDimensions
 
     }
 
-    @SubscribeEvent
-    private void commonSetup(final FMLConstructionEvent event)
+    @Mod.EventHandler
+    public void commonSetup(final FMLPostInitializationEvent event)
     {
         List<ModContainer> modList = Loader.instance().getModList();
 
@@ -79,7 +78,7 @@ public class BeyondDimensions
                 MekLoaded = true;
             if (mod.getModId().equals(AE2MODID))
                 AELoaded = true;
-            // 1.12.2版本暂无EMI,考虑替换为EMI
+            // 1.12.2版本暂无EMI,考虑替换为JEI
         }
 
 
@@ -119,7 +118,7 @@ public class BeyondDimensions
         }
     }
 
-    @SubscribeEvent
+    @Mod.EventHandler
     public void onServerStarting(FMLServerStartedEvent event)
     {
         LOGGER.info("维度网络初始化完成(服务端)");
@@ -130,7 +129,7 @@ public class BeyondDimensions
     @Mod.EventBusSubscriber(modid = MODID, value = Side.CLIENT)
     public static class ClientModEvents
     {
-        @SubscribeEvent
+        @Mod.EventHandler
         public static void onClientSetup(FMLLoadCompleteEvent event)
         {
             // 一些客户端初始代码

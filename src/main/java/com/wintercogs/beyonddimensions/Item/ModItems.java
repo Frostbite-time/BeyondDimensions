@@ -1,17 +1,24 @@
 package com.wintercogs.beyonddimensions.Item;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.Item.Custom.NetCreater;
 import com.wintercogs.beyonddimensions.Item.Custom.NetManagerInviter;
 import com.wintercogs.beyonddimensions.Item.Custom.NetMemberInviter;
 import com.wintercogs.beyonddimensions.Item.Custom.UnstableSpaceTimeFragment;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Mod.EventBusSubscriber
-public class ModItems {
+@Mod.EventBusSubscriber(modid = BeyondDimensions.MODID)
+public class ModItems
+{
 
     // 维度创造器
     public static final NetCreater NET_CREATER = (NetCreater) new NetCreater()
@@ -62,7 +69,8 @@ public class ModItems {
             .setCreativeTab(ModCreativeModeTabs.ITEMS_TAB);
 
     @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event) {
+    public static void registerItems(RegistryEvent.Register<Item> event)
+    {
         event.getRegistry().registerAll(
                 NET_CREATER,
                 NET_MEMBER_INVITER,
@@ -75,24 +83,29 @@ public class ModItems {
         );
     }
 
-    // 如果需要模型注册
-//    @SubscribeEvent
-//    public static void registerModels(ModelRegistryEvent event) {
-//        registerModel(NET_CREATER);
-//        registerModel(NET_MEMBER_INVITER);
-//        registerModel(NET_MANAGER_INVITER);
-//        registerModel(UNSTABLE_SPACE_TIME_FRAGMENT);
-//        registerModel(STABLE_SPACE_TIME_FRAGMENT);
-//        registerModel(SPACE_TIME_STABLE_FRAME);
-//        registerModel(SHATTERED_SPACE_TIME_CRYSTALLIZATION);
-//        registerModel(SPACE_TIME_BAR);
-//    }
-//
-//    private static void registerModel(Item item) {
-//        ModelLoader.setCustomModelResourceLocation(
-//                item,
-//                0,
-//                new ModelResourceLocation(item.getRegistryName(), "inventory")
-//        );
-//    }
+    // 模型注册
+    @SideOnly(Side.CLIENT)
+    @SubscribeEvent
+    public static void registerModels(ModelRegistryEvent event) {
+        registerModel(NET_CREATER);
+        registerModel(NET_MEMBER_INVITER);
+        registerModel(NET_MANAGER_INVITER);
+        registerModel(UNSTABLE_SPACE_TIME_FRAGMENT);
+        registerModel(STABLE_SPACE_TIME_FRAGMENT);
+        registerModel(SPACE_TIME_STABLE_FRAME);
+        registerModel(SHATTERED_SPACE_TIME_CRYSTALLIZATION);
+        registerModel(SPACE_TIME_BAR);
+        registerModel(ModBlocks.NET_CONTROL_BLOCK_ITEM);
+        registerModel(ModBlocks.NET_INTERFACE_BLOCK_ITEM);
+        registerModel(ModBlocks.NET_PATHWAY_BLOCK_ITEM);
+        registerModel(ModBlocks.NET_ENERGY_PATHWAY_BLOCK_ITEM);
+    }
+
+    private static void registerModel(Item item) {
+        ModelLoader.setCustomModelResourceLocation(
+                item,
+                0,
+                new ModelResourceLocation(item.getRegistryName(), "inventory")
+        );
+    }
 }

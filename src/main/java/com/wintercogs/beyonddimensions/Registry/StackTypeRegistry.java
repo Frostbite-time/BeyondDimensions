@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Registry;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import net.minecraft.util.ResourceLocation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class StackTypeRegistry {
 
     public static List<IStackType<?>> getAllTypes()
     {
-        return List.copyOf(TYPES.values());
+        return new ArrayList<>(TYPES.values());
     }
 }
 

@@ -1,0 +1,41 @@
+# 物品
+item.net_creater.name=维度网络发生器
+item.net_member_inviter.name=成员连接器
+item.net_manager_inviter.name=管理员连接器
+item.unstable_space_time_fragment.name=不稳定时空碎片
+item.stable_space_time_fragment.name=稳态时空碎片
+item.space_time_stable_frame.name=稳定的时空框架
+item.shattered_space_time_crystallization.name=破碎的时空结晶
+item.space_time_bar.name=时空锭
+
+# 方块
+tile.net_control.name=网络控制器
+tile.net_interface.name=网络接口
+tile.net_pathway.name=维度网络通道
+tile.net_energy_pathway.name=维度网络能量通道
+
+# 界面标题
+menu.title.beyonddimensions.dimensionnetmenu=维度网络
+menu.title.beyonddimensions.net_control_menu=维度网络权限控制器
+menu.title.beyonddimensions.net_interface_menu=网络接口
+menu.title.beyonddimensions.net_energy_menu=能量网络
+
+# 界面元素
+beyonddimensions.scrollbar.usage.focused=滚动条被选为焦点
+beyonddimensions.scrollbar.usage.hovered=鼠标当前在滚动条上
+wintercogs.beyonddimensions.dimensionsguisearch=输入以搜索...
+menu.button.beyonddimensions.setowner=移交所有权
+menu.button.beyonddimensions.setmanager=设为管理员
+menu.button.beyonddimensions.removemanager=移除管理员权限
+menu.button.beyonddimensions.removemember=移除成员
+menu.text.beyonddimensions.permission.level.zero=权限级别: 无
+menu.text.beyonddimensions.name.player=名称: %s
+menu.text.beyonddimensions.permission.level.prefix=权限级别: %s
+
+# 按键绑定
+key.categories.beyonddimensions=超越维度
+key.beyonddimensions.open_gui=打开维度网络
+
+# 创造模式分类
+itemGroup.beyonddimensions_items=超越维度-物品
+itemGroup.beyonddimensions_blocks=超越维度-方块

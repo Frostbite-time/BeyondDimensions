@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;

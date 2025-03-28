@@ -421,9 +421,9 @@ public class FluidStackType implements IStackType<FluidStack>
     public List<String> getTooltipLines(@Nullable EntityPlayer player, ITooltipFlag tooltipFlag)
     {
         // 直接使用全局stack
-        if (stack == null) return List.of("");
+        if (stack == null) return new ArrayList<>();
         Fluid fluid = stack.getFluid();
-        if (fluid == null) return List.of("");
+        if (fluid == null) return new ArrayList<>();
 
         List<String> tooltip = new ArrayList<>();
         // 流体显示名称

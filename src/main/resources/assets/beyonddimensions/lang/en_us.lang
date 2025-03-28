@@ -1,0 +1,41 @@
+# Items
+item.beyonddimensions.net_creater.name=Dimensional Network Generator
+item.beyonddimensions.net_member_inviter.name=Member Connector
+item.beyonddimensions.net_manager_inviter.name=Admin Connector
+item.beyonddimensions.unstable_space_time_fragment.name=Unstable Space-Time Fragment
+item.beyonddimensions.stable_space_time_fragment.name=Stable Space-Time Fragment
+item.beyonddimensions.space_time_stable_frame.name=Stable Space-Time Frame
+item.beyonddimensions.shattered_space_time_crystallization.name=Shattered Space-Time Crystal
+item.beyonddimensions.space_time_bar.name=Space-Time Ingot
+
+# Blocks
+block.beyonddimensions.net_control=Network Controller
+block.beyonddimensions.net_interface=Network Interface
+block.beyonddimensions.net_pathway=Dimensional Network Pathway
+block.beyonddimensions.net_energy_pathway=Dimensional Network Energy Pathway
+
+# GUI Titles
+menu.title.beyonddimensions.dimensionnetmenu=Dimensional Network
+menu.title.beyonddimensions.net_control_menu=Network Permission Controller
+menu.title.beyonddimensions.net_interface_menu=Network Interface
+menu.title.beyonddimensions.net_energy_menu=Energy Network
+
+# GUI Elements
+beyonddimensions.scrollbar.usage.focused=Scrollbar focused
+beyonddimensions.scrollbar.usage.hovered=Scrollbar hovered
+wintercogs.beyonddimensions.dimensionsguisearch=Type to search...
+menu.button.beyonddimensions.setowner=Transfer Ownership
+menu.button.beyonddimensions.setmanager=Set as Admin
+menu.button.beyonddimensions.removemanager=Remove Admin
+menu.button.beyonddimensions.removemember=Remove Member
+menu.text.beyonddimensions.permission.level.zero=Permission Level: None
+menu.text.beyonddimensions.name.player=Name: %s
+menu.text.beyonddimensions.permission.level.prefix=Permission Level: %s
+
+# Keybindings
+key.categories.beyonddimensions=Beyond Dimensions
+key.beyonddimensions.open_gui=Open Dimensional Network
+
+# Creative Tabs
+itemGroup.beyonddimensions_items=Beyond Dimensions - Items
+itemGroup.beyonddimensions_blocks=Beyond Dimensions - Blocks

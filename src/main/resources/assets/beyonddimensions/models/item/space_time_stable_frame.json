@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "beyonddimensions:item/space_time_stable_frame"
+  }
+}

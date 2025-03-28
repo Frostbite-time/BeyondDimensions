@@ -363,7 +363,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     public List<String> getTooltipLines(@Nullable EntityPlayer player, ITooltipFlag tooltipFlag)
     {
         if(isEmpty())
-            return List.of("");
+            return new ArrayList<>();
 
         List<String> tooltips = new ArrayList<>();
         Gas chemical = stack.getGas();
