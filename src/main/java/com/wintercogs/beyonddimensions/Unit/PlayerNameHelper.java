@@ -6,7 +6,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.world.World;
 
-
 import java.util.Optional;
 import java.util.UUID;
 

@@ -1,21 +1,8 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-//import com.wintercogs.beyonddimensions.GUI.DimensionsNetGUI;
-//import com.wintercogs.beyonddimensions.GUI.NetControlGUI;
-//import com.wintercogs.beyonddimensions.GUI.NetEnergyGUI;
-//import com.wintercogs.beyonddimensions.GUI.NetInterfaceBaseGUI;
-//import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
-//import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
-//import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
-//import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.IGuiHandler;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 
 

@@ -1,19 +1,9 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-//import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;
-//import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
-//import com.wintercogs.beyonddimensions.Network.Packet.toClient.EnergyStoragePacket;
-//import com.wintercogs.beyonddimensions.Network.Packet.toClient.PlayerPermissionInfoPacket;
-//import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncFlagPacket;
-//import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncStoragePacket;
-//import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
-//import com.wintercogs.beyonddimensions.Network.Packet.toServer.NetControlActionPacket;
-//import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.relauncher.Side;
 
 
 @Mod.EventBusSubscriber(modid = BeyondDimensions.MODID)
