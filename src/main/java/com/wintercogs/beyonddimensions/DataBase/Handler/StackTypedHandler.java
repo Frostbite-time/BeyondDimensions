@@ -251,9 +251,20 @@ public class StackTypedHandler implements IStackTypedHandler
             current.shrink(extractable);
             if (current.isEmpty()) {
                 // 更新索引，移除旧类型索引，添加到空类型索引
-                storage.set(slot, current.getEmpty());
-                typeIdIndex.computeIfAbsent(oldTypeId, k -> new ArrayList<>()).remove(Integer.valueOf(slot));
-                typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(slot);
+                // 为流体保留空索引位置
+                if(slot<storage.size()/2)
+                {
+                    storage.set(slot, new ItemStackType());
+                    typeIdIndex.computeIfAbsent(oldTypeId, k -> new ArrayList<>()).remove(Integer.valueOf(slot));
+                    typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(slot);
+                }
+                else
+                {
+                    storage.set(slot, new FluidStackType());
+                    typeIdIndex.computeIfAbsent(oldTypeId, k -> new ArrayList<>()).remove(Integer.valueOf(slot));
+                    typeIdIndex.computeIfAbsent(FluidStackType.ID, k -> new ArrayList<>()).add(slot);
+                }
+
             }
             onChange();
         }
