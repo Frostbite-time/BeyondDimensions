@@ -1,110 +1,85 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
-public abstract class NetedBlockEntity extends BlockEntity
-{
-    // 存储接口所对应的维度网络id，用于和维度网络交互
-    protected int netId = -1;// 初始化为-1，任何小于0（不包括0）的id表示未绑定网络
 
-    public NetedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
-        super(type, pos, blockState);
-    }
+public abstract class NetedBlockEntity extends TileEntity {
+    protected int netId = -1;
 
-    public int getNetId()
-    {
+    // 1.12.2 的 TileEntity 需要无参构造器
+    public NetedBlockEntity() {}
+
+    public int getNetId() {
         return netId;
     }
 
-    public void setNetId(int id)
-    {
+    public void setNetId(int id) {
         this.netId = id;
-        setChanged();
+        markDirty(); // setChanged() → markDirty()
     }
 
-    public void clearNetId()
-    {
+    public void clearNetId() {
         this.netId = -1;
-        setChanged();
+        markDirty();
     }
 
-    public void setNetIdFromPlayer(ServerPlayer player)
-    {
+    public void setNetIdFromPlayer(EntityPlayerMP player) { // ServerPlayer → EntityPlayerMP
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-        if(net != null)
-        {
-            this.netId = net.getId();
-            setChanged();
+        if (net != null) {
+            setNetId(net.getId());
         }
     }
 
-    public void setNetIdFromPlayerOrClean(ServerPlayer player)
-    {
+    public void setNetIdFromPlayerOrClean(EntityPlayerMP player) {
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-        if(net != null)
-        {
-            this.netId = net.getId();
-            setChanged();
-        }
-        else
-        {
-            this.netId = -1;
-            setChanged();
-        }
+        setNetId(net != null ? net.getId() : -1);
     }
 
-    public DimensionsNet getNet()
-    {
-        if(netId>=0)
-        {
-            if(getLevel() instanceof ServerLevel)
-            {
-                return DimensionsNet.getNetFromId(netId,getLevel());
+    public DimensionsNet getNet() {
+        if (netId >= 0) {
+            World world = getWorld(); // getLevel() → getWorld()
+            if (world instanceof WorldServer) { // ServerLevel → WorldServer
+                return DimensionsNet.getNetFromId(netId, (WorldServer) world);
             }
-        }
-        else
-        {
-            return null;
         }
         return null;
     }
 
+    // 1.12.2 的 NBT 读写方法
     @Override
-    public void load(CompoundTag tag)
-    {
-        super.load(tag);
-        this.netId = tag.getInt("netId");
+    public void readFromNBT(NBTTagCompound tag) {
+        super.readFromNBT(tag);
+        netId = tag.getInteger("netId");
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag)
-    {
-        super.saveAdditional(tag);
-        tag.putInt("netId",this.netId);
-    }
-
-    @Override
-    public CompoundTag getUpdateTag()
-    {
-        CompoundTag tag = new CompoundTag();
-        saveAdditional(tag);
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
+        super.writeToNBT(tag);
+        tag.setInteger("netId", netId);
         return tag;
     }
 
+    // 数据同步到客户端
     @Override
-    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket()
-    {
-        return ClientboundBlockEntityDataPacket.create(this);
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        return new SPacketUpdateTileEntity(pos, 0, getUpdateTag());
+    }
+
+    @Override
+    public NBTTagCompound getUpdateTag() {
+        return writeToNBT(new NBTTagCompound());
+    }
+
+    // 客户端接收更新后的处理
+    @Override
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        readFromNBT(pkt.getNbtCompound());
     }
 }

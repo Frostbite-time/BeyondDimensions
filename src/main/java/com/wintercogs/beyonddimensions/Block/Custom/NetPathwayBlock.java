@@ -1,21 +1,32 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 
-public class NetPathwayBlock extends NetedBlock implements EntityBlock {
+import javax.annotation.Nullable;
 
-    public NetPathwayBlock(Properties properties) {
-        super(properties);
+
+public class NetPathwayBlock extends NetedBlock
+{
+
+    public NetPathwayBlock(Material materialIn)
+    {
+        super(materialIn);
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new NetPathwayBlockEntity(blockPos,blockState);
+    public boolean hasTileEntity(IBlockState state)
+    {
+        return true;
     }
 
+    @Nullable
+    @Override
+    public TileEntity createTileEntity(World world, IBlockState state)
+    {
+        return new NetPathwayBlockEntity();
+    }
 }

@@ -2,33 +2,34 @@ package com.wintercogs.beyonddimensions.Block.Custom;
 
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class NetedBlock extends Block
 {
 
-    public NetedBlock(Properties properties) {
-        super(properties);
+    public NetedBlock(Material materialIn) {
+        super(materialIn);
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
+        super.onBlockActivated(worldIn, pos, state, player, hand, facing, hitX, hitY, hitZ);
         // 空手右键可以设定网络接口所绑定的网络
-        if(!player.getMainHandItem().isEmpty()||!player.isShiftKeyDown())
+        if(!player.getHeldItemMainhand().isEmpty()||!player.isSneaking())
         {
-            return InteractionResult.PASS;
+            return false;
         }
-        if(!level.isClientSide())
+        if(!worldIn.isRemote)
         {
-            if(level.getBlockEntity(pos) instanceof NetedBlockEntity blockEntity)
+            if(worldIn.getTileEntity(pos) instanceof NetedBlockEntity blockEntity)
             {
                 if(blockEntity.getNetId() == -1)
                 {
@@ -37,7 +38,6 @@ public class NetedBlock extends Block
                     {
                         // 成功设置网络id
                         blockEntity.setNetId(net.getId());
-                        blockEntity.invalidateCaps();
                     }
                 }
                 else
@@ -51,14 +51,13 @@ public class NetedBlock extends Block
                             {
                                 // 成功清除网络id
                                 blockEntity.setNetId(-1);
-                                blockEntity.invalidateCaps();
                             }
                         }
                     }
                 }
             }
         }
-        return InteractionResult.SUCCESS;
+        return true;
     }
 
 }

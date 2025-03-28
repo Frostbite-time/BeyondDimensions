@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Item.Interface.IAddNetMemberHandler;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -39,12 +40,12 @@ public class NetManagerInviter  extends NetedItem implements IAddNetMemberHandle
     }
 
     @Override
-    protected boolean validToReWrite(DimensionsNet net, Player player) {
+    protected boolean validToReWrite(DimensionsNet net, EntityPlayer player) {
         return net.isOwner(player);
     }
 
     @Override
-    public boolean AddPlayerToNet(DimensionsNet net, Player player)
+    public boolean AddPlayerToNet(DimensionsNet net, EntityPlayer player)
     {
         if(net != null)
         {

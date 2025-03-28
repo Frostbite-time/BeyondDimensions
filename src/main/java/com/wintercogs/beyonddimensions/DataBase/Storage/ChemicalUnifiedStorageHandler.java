@@ -1,10 +1,8 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
-import com.wintercogs.beyonddimensions.DataBase.Handler.ChemicalStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import mekanism.api.gas.*;
 import net.minecraft.util.EnumFacing;
-
 
 import javax.annotation.Nullable;
 import java.util.List;

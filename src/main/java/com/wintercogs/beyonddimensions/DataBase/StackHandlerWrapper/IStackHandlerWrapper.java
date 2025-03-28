@@ -4,8 +4,6 @@ package com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 
-import javax.annotation.Nullable;
-
 // 为类似IItemHandler类所做的包装，用来动态的包装来自其他模组的handler
 public interface IStackHandlerWrapper<T>
 {

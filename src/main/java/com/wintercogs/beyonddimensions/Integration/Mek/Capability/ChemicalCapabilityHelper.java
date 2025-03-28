@@ -20,7 +20,7 @@ public class ChemicalCapabilityHelper
             Class<?> capabilitiesClass = Class.forName("mekanism.common.capabilities.Capabilities");
 
             // 获取 public static final 字段
-            Field gasHandlerField = capabilitiesClass.getField("GAS_HANDLER");
+            Field gasHandlerField = capabilitiesClass.getField("GAS_HANDLER_CAPABILITY");
 
             // 通过反射调用 createSided
             CHEMICAL = (Capability<Object>) gasHandlerField.get(null);

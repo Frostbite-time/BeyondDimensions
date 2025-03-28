@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
@@ -10,20 +9,18 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class NetInterfaceBlockEntity extends NetedBlockEntity
+public class NetInterfaceBlockEntity extends NetedBlockEntity implements ITickable
 {
     public final int transHold = 9;
     public int transTime = 0;
@@ -33,27 +30,28 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     {
         // 只触发方块自身的保存，但是不向周围发信
         @Override
-        public void onChange()
-        {
-            if(!level.isClientSide())
-                level.blockEntityChanged(worldPosition);
+        public void onChange() {
+            if (!world.isRemote) {
+                //world.mark(pos); // 替代高版本的 blockEntityChanged
+            }
         }
     };
 
     private final StackTypedHandler stackHandler = new StackTypedHandler(9)
     {
         @Override
-        public void onChange()
-        {
-            if(!level.isClientSide())
-                level.blockEntityChanged(worldPosition);
+        public void onChange() {
+            if (!world.isRemote) {
+                //world.markTileEntityForUpdate(pos); // 替代高版本的 blockEntityChanged
+            }
         }
     };
 
     public boolean popMode = false;
 
-    private final Direction[] directions = Direction.values();
-    
+    // 1.12.2 使用 EnumFacing
+    private final EnumFacing[] directions = EnumFacing.values();
+
 
     // 存储相邻方块的能力
     // 按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
@@ -69,34 +67,45 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         return this.fakeStackHandler;
     }
 
-    public NetInterfaceBlockEntity(BlockPos pos, BlockState blockState)
+    public NetInterfaceBlockEntity()
     {
-        super(ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
+        super();
     }
 
-    // 更新能力缓存
-    public void updateCapabilityCache() {
-        if (level == null || !needsCapabilityUpdate) return;
-
-        handlerCache.clear();
-        
-        for (Direction dir : directions) {
-            BlockPos targetPos = this.getBlockPos().relative(dir);
-            BlockEntity neighbor = level.getBlockEntity(targetPos);
-            if (neighbor != null && !(neighbor instanceof NetedBlockEntity)) {
-
-                CapabilityHelper.BlockCapabilityMap.forEach(
-                        (resourceLocation, cap) -> {
-                            LazyOptional handler = neighbor.getCapability(cap, dir.getOpposite());
-                            if (handler.isPresent()) {
-                                handlerCache.put(resourceLocation, handler.resolve().get());
-                            }
-                        }
-                );
-
+    // 1.12.2 Tick 入口
+    @Override
+    public void update() {
+        if (world.isRemote) return;
+        transTime++;
+        if (transTime >= transHold) {
+            if (getNetId() != -1) {
+                transferToNet();
+                transferFromNet();
             }
+            if (popMode) {
+                updateCapabilityCache();
+                popStack();
+            }
+            transTime = 0;
         }
-        
+    }
+
+
+    /// 更新能力缓存
+    public void updateCapabilityCache() {
+        if (!needsCapabilityUpdate) return;
+        handlerCache.clear();
+        for (EnumFacing dir : directions) {
+            BlockPos targetPos = pos.offset(dir);
+            TileEntity neighbor = world.getTileEntity(targetPos);
+            if (neighbor == null || neighbor instanceof NetedBlockEntity) continue;
+            CapabilityHelper.BlockCapabilityMap.forEach((resLoc, cap) -> {
+                Object handler = neighbor.getCapability(cap, dir.getOpposite());
+                if (handler != null) {
+                    handlerCache.put(resLoc, handler);
+                }
+            });
+        }
         needsCapabilityUpdate = false;
     }
 
@@ -105,80 +114,18 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         needsCapabilityUpdate = true;
     }
 
-    @Override
-    public void invalidateCaps()
-    {
-        super.invalidateCaps();
-        setNeedsCapabilityUpdate();
-    }
-
-//    //--- 能力注册 (通过事件) ---
-//    public static void registerCapability(RegisterCapabilitiesEvent event) {
-//
-//        CapabilityHelper.BlockCapabilityMap.forEach(
-//                (resourceLocation, directionBlockCapability) -> {
-//                    Function handler = StackTypedHandler.typedHandlerMap.get(resourceLocation);
-//                    event.registerBlockEntity(
-//                            (BlockCapability<? super Object, ? extends Direction>)directionBlockCapability,
-//                            ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
-//                            (be, side) -> {
-//                                return handler.apply(be.stackHandler);
-//                            }
-//                    );
-//                }
-//        );
-//    }
-
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
-    {
-        // 遍历注册的能力映射表
+    public <T> T getCapability(Capability<T> cap, EnumFacing side) {
         for (Map.Entry<ResourceLocation, Capability<?>> entry : CapabilityHelper.BlockCapabilityMap.entrySet()) {
-            // 检查当前请求的能力是否匹配注册的能力
             if (entry.getValue() == cap) {
-                // 从类型映射表中获取对应的处理器构造函数
-                Function<StackTypedHandler,Object> handlerConstructor = StackTypedHandler.typedHandlerMap.get(entry.getKey());
-
-                if (handlerConstructor != null) {
-                    // 创建处理器实例并转换为请求的能力类型
-                    Object handler = handlerConstructor.apply(this.stackHandler);
-                    // 安全类型转换后包装为 LazyOptional
-                    return LazyOptional.of(() -> handler).cast();
+                Function<StackTypedHandler, Object> constructor = StackTypedHandler.typedHandlerMap.get(entry.getKey());
+                if (constructor != null) {
+                    return (T) constructor.apply(stackHandler);
                 }
             }
         }
-        // 未找到匹配能力则调用父类实现
         return super.getCapability(cap, side);
-    }
-
-    // 此方法的签名与 BlockEntityTicker 函数接口的签名匹配.
-    public static void tick(Level level, BlockPos pos, BlockState state, NetInterfaceBlockEntity blockEntity) {
-        // 你希望在计时期间执行的任何操作.
-        // 例如，你可以在这里更改一个制作进度值或消耗能量.
-        if(level.isClientSide())
-            return; // 客户端不执行任何操作
-
-
-        blockEntity.transTime++;
-        if(blockEntity.transTime>=blockEntity.transHold)
-        {
-            if(blockEntity.getNetId() != -1)
-            {
-                blockEntity.transferToNet();
-                blockEntity.transferFromNet();
-            }
-            // 尝试输出物品到周围
-            if(blockEntity.popMode)
-            {
-                // 在使用缓存前确保它是最新的
-                blockEntity.updateCapabilityCache();
-                blockEntity.popStack();
-            }
-
-            blockEntity.transTime = 0;
-        }
-
     }
 
     public void transferToNet()
@@ -268,7 +215,9 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
                                 IStackType current = stackHandler.getStackBySlot(i).copy();
                                 for(int slot= 0;slot< stackHandlerWrapper.getSlots();slot++)
                                 {
-                                    long remainging = stackHandlerWrapper.insert(slot,current.copyStack(),false);
+                                    // 未完全移植警告！！！！！！
+                                    // 说明:旧版mek接口需求一个方向，此处硬编码
+                                    long remainging = stackHandlerWrapper.insert(EnumFacing.NORTH,slot,current.copyStack(),false);
                                     long extract = current.getStackAmount() - remainging;
                                     stackHandler.extract(i,extract,false);
                                     current.shrink(extract);
@@ -284,28 +233,20 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     }
 
     @Override
-    public void load(CompoundTag tag)
-    {
-        super.load(tag);
-        this.stackHandler.deserializeNBT(tag.getCompound("inventory"));
-        this.fakeStackHandler.deserializeNBT(tag.getCompound("flags"));
-        this.popMode = tag.getBoolean("popMode");
-        // 加载后需要更新缓存
+    public void readFromNBT(NBTTagCompound compound) {
+        super.readFromNBT(compound);
+        stackHandler.deserializeNBT(compound.getCompoundTag("inventory"));
+        fakeStackHandler.deserializeNBT(compound.getCompoundTag("flags"));
+        popMode = compound.getBoolean("popMode");
         setNeedsCapabilityUpdate();
     }
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        super.writeToNBT(compound);
+        compound.setTag("inventory", stackHandler.serializeNBT());
+        compound.setTag("flags", fakeStackHandler.serializeNBT());
+        compound.setBoolean("popMode", popMode);
+        return compound;
+    }
 
-    @Override
-    protected void saveAdditional(CompoundTag tag)
-    {
-        super.saveAdditional(tag);
-        tag.put("inventory", stackHandler.serializeNBT());
-        tag.put("flags",fakeStackHandler.serializeNBT());
-        tag.putBoolean("popMode",this.popMode);
-    }
-    
-    // 在方块状态变化时重新缓存能力
-    @Override
-    public void setChanged() {
-        super.setChanged();
-    }
 }

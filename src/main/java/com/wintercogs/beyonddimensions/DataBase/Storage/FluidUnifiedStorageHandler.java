@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
-import com.wintercogs.beyonddimensions.DataBase.Handler.FluidStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;

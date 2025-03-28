@@ -2,54 +2,52 @@ package com.wintercogs.beyonddimensions.Block.Custom;
 
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.SimpleContainerData;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
-public class NetEnergyPathwayBlock extends NetedBlock implements EntityBlock
+import javax.annotation.Nullable;
+
+
+public class NetEnergyPathwayBlock extends NetedBlock
 {
 
-    public NetEnergyPathwayBlock(Properties properties) {
-        super(properties);
+    public NetEnergyPathwayBlock(Material materialIn) {
+        super(materialIn);
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new NetEnergyPathwayBlockEntity(blockPos,blockState);
+    public boolean hasTileEntity(IBlockState state)
+    {
+        return true;
     }
 
-    // 启用方块实体计时器
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null :
-                (level1, pos, state1, blockEntity) ->
-                        NetEnergyPathwayBlockEntity.tick(level1, pos, state1, (NetEnergyPathwayBlockEntity) blockEntity);
+    public TileEntity createTileEntity(World world, IBlockState state)
+    {
+        return new NetEnergyPathwayBlockEntity();
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        super.use(state,level,pos,player,hand,hitResult);
-        if(!level.isClientSide()&&!player.isShiftKeyDown())
+        super.onBlockActivated(worldIn, pos, state, player, hand, facing, hitX, hitY, hitZ);
+        if(!worldIn.isRemote&&!player.isSneaking())
         {
-            player.openMenu(new SimpleMenuProvider(
-                    (containerId, playerInventory, _player) -> new NetEnergyMenu(containerId, _player.getInventory(), ((NetEnergyPathwayBlockEntity) level.getBlockEntity(pos)),new SimpleContainerData(0)),
-                    Component.translatable("menu.title.beyonddimensions.net_energy_menu")
-            ));
+            // 打开ui的函数 暂时注释
+//            player.openMenu(new SimpleMenuProvider(
+//                    (containerId, playerInventory, _player) -> new NetEnergyMenu(containerId, _player.getInventory(), ((NetEnergyPathwayBlockEntity) level.getBlockEntity(pos)),new SimpleContainerData(0)),
+//                    Component.translatable("menu.title.beyonddimensions.net_energy_menu")
+//            ));
         }
-        return InteractionResult.SUCCESS;
+        return true;
     }
+
+
 }

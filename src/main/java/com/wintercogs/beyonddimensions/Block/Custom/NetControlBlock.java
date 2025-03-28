@@ -1,36 +1,35 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
-import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
 
 public class NetControlBlock extends Block
 {
-    public NetControlBlock(Properties properties)
+    public NetControlBlock(Material materialIn)
     {
-        super(properties);
+        super(materialIn);
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        super.use(state,level,pos,player,hand,hitResult);
-        if(!level.isClientSide())
+        super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+        if(!worldIn.isRemote)
         {
-            player.openMenu(new SimpleMenuProvider(
-                    (containerId, playerInventory, _player) -> new NetControlMenu(containerId,playerInventory),
-                    Component.translatable("menu.title.beyonddimensions.net_control_menu")
-            ));
+            // 打开ui逻辑 暂时注释
+//            player.openMenu(new SimpleMenuProvider(
+//                    (containerId, playerInventory, _player) -> new NetControlMenu(containerId,playerInventory),
+//                    Component.translatable("menu.title.beyonddimensions.net_control_menu")
+//            ));
         }
-        return InteractionResult.SUCCESS;
+        return true;
     }
 
 }

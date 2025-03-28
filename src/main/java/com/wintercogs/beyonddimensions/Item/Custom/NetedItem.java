@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -49,7 +50,7 @@ public class NetedItem extends Item
         }
         return -1;
     }
-    protected boolean validToReWrite(DimensionsNet net, Player player) {
+    protected boolean validToReWrite(DimensionsNet net, EntityPlayer player) {
         return net.isManager(player);
     }
 }

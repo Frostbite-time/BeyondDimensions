@@ -10,6 +10,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldSavedData;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -322,7 +323,7 @@ public class DimensionsNet extends WorldSavedData
         setDirty(true);
     }
 
-    public boolean isOwner(EntityPlayerMP player)
+    public boolean isOwner(EntityPlayer player)
     {
         if(player.getUniqueID().equals(getOwner()))
         {
@@ -346,7 +347,7 @@ public class DimensionsNet extends WorldSavedData
         }
     }
 
-    public boolean isManager(EntityPlayerMP player)
+    public boolean isManager(EntityPlayer player)
     {
         boolean flag = false;
         if(managers.contains(player.getUniqueID()))

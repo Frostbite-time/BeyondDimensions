@@ -113,6 +113,13 @@ repositories {
         url 'https://maven.aliyun.com/repository/public'
     }
     maven { url 'https://modmaven.dev/' }
+    maven {
+        name 'CurseMaven'
+        url 'https://cursemaven.com'
+        content {
+            includeGroup 'curse.maven'
+        }
+    }
 }
 
 dependencies {
@@ -151,9 +158,12 @@ dependencies {
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
 
+    // 引入拼音库
     embed("com.github.promeg:tinypinyin:2.0.3")
-
+    // 引入mek api
     compileOnly("mekanism:mekanism:1.12.2-9.8.3.390")
+    // 引入modularUI作为依赖
+    implementation 'curse.maven:modularui-624243:5153413-sources-5153413'
 }
 
 apply from: 'gradle/scripts/dependencies.gradle'

@@ -1,7 +1,5 @@
 package com.wintercogs.beyonddimensions;
 
-import com.wintercogs.beyonddimensions.Block.ModBlocks;
-import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.Handler.ChemicalStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.FluidStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.ItemStackTypedHandler;
@@ -73,12 +71,6 @@ public class BeyondDimensions
 
         // 注册物品
         ModItems.register(modEventBus);
-
-        // 注册方块
-        ModBlocks.register(modEventBus);
-
-        // 注册方块实体
-        ModBlockEntities.register(modEventBus);
 
     }
 

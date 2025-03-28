@@ -1,155 +1,102 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
-import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
+import com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
-public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
+
+public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements ITickable
 {
 
+    // 配置参数
     public final int transHold = 20;
     public int transTime = 0;
-
     public boolean popMode = false;
+    // 方向缓存 (1.12.2 使用 EnumFacing)
+    private final EnumFacing[] directions = EnumFacing.values();
 
-    private final Direction[] directions = Direction.values();
-    private com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage energyStorage = null; // 仅用于作为缓存，不长期存储
-
-
-    public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState) {
-        super(ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
+    // 能量存储缓存
+    private EnergyStorage energyStorageCache;
+    public NetEnergyPathwayBlockEntity() {
+        super();
     }
-
-//    //--- 能力注册 (通过事件) ---
-//    public static void registerCapability(AttachCapabilitiesEvent<BlockEntity> event) {
-//        if(event.getObject() instanceof NetEnergyPathwayBlockEntity be) {
-//            ICapabilityProvider provider = basic
-//            event.addCapability();
-//        }
-//        event.registerBlockEntity(
-//                Capabilities.EnergyStorage.BLOCK, // 标准物品能力
-//                ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
-//                (be, side) -> {
-//                    if(be.popMode)
-//                    {
-//                        return new EnergyStorage(0);
-//                    }
-//                    if(be.getNetId()<0)
-//                    {
-//                        return new EnergyStorage(0);
-//                    }
-//                    DimensionsNet net = be.getNet();
-//                    if(net != null)
-//                    {
-//                        return net.getEnergyStorage();
-//                    }
-//                    return new EnergyStorage(0);
-//                } // 根据方向返回处理器
-//        );
-//    }
-
-
+    // 1.12.2 Tick 方法
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap,Direction side)
-    {
-        if(cap == ForgeCapabilities.ENERGY)
-        {
-            if(this.getNetId()>=0)
-            {
-                DimensionsNet net = getNet();
-                if(net != null)
-                {
-                    return LazyOptional.of(net::getEnergyStorage).cast();
-                }
-            }
+    public void update() {
+        if (world.isRemote) return; // 客户端不执行
+        // 网络状态检查
+        if (getNetId() == -1) return;
+        transTime++;
+        if (transTime >= transHold) {
+            transTime = 0;
+            // 执行周期性操作
         }
-        return super.getCapability(cap,side);
+        // 能量输出模式
+        if (popMode) {
+            popEnergy();
+        }
     }
-
-
-
-    // 此方法的签名与 BlockEntityTicker 函数接口的签名匹配.
-    public static void tick(Level level, BlockPos pos, BlockState state, NetEnergyPathwayBlockEntity blockEntity) {
-        // 你希望在计时期间执行的任何操作.
-        // 例如，你可以在这里更改一个制作进度值或消耗能量.
-        if(level.isClientSide())
-            return; // 客户端不执行任何操作
-
-        if(blockEntity.getNetId() != -1)
-        {
-            blockEntity.transTime++;
-            if(blockEntity.transTime>=blockEntity.transHold)
-            {
-                blockEntity.transTime = 0;
-                // 定时计划写在这里
-            }
+    // 能量输出逻辑
+    private void popEnergy() {
+        if (energyStorageCache == null) {
+            DimensionsNet net = getNet();
+            if (net == null) return;
+            energyStorageCache = net.getEnergyStorage();
         }
-
-        // 尝试输出物品到周围
-        if(blockEntity.popMode)
-        {
-            if(!(blockEntity.getNetId()<0))
-            {
-                blockEntity.popEnergy();
+        for (EnumFacing dir : directions) {
+            BlockPos targetPos = getPos().offset(dir);
+            TileEntity neighbor = world.getTileEntity(targetPos);
+            if (neighbor == null || neighbor instanceof NetedBlockEntity) continue;
+            // 获取相邻方块能力 (1.12.2 无 LazyOptional)
+            IEnergyStorage otherStorage = neighbor.getCapability(
+                    CapabilityEnergy.ENERGY,
+                    dir.getOpposite()
+            );
+            if (otherStorage != null) {
+                int maxExtract = (int) Math.min(
+                        energyStorageCache.getEnergyStored(),
+                        energyStorageCache.getMaxTransfer()
+                );
+                int received = otherStorage.receiveEnergy(maxExtract, false);
+                energyStorageCache.extractEnergy(received, false);
             }
         }
     }
-
-    private void popEnergy()
-    {
-        if(energyStorage==null)
-        {
-            energyStorage = getNet().getEnergyStorage();
-        }
-
-        for(Direction dir: directions)
-        {
-            BlockPos targetPos = this.getBlockPos().relative(dir);
-            BlockEntity neighbor = level.getBlockEntity(targetPos);
-            if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
-            {
-                // 开始查询能力 记住，你获取你上方的方块，一定是获取其下方的能力
-                LazyOptional<IEnergyStorage> otherStorageOptional = neighbor.getCapability(ForgeCapabilities.ENERGY, dir.getOpposite());
-                if (otherStorageOptional.isPresent())
-                {
-                    IEnergyStorage otherStorage = otherStorageOptional.resolve().get();
-                    //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
-                    int maxExtract = (int)Math.min(energyStorage.getRealEnergyCapacity(), energyStorage.getMaxTransfer());
-                    int receive = otherStorage.receiveEnergy(maxExtract, false);
-                    energyStorage.extractEnergy(receive, false);
-                }
+    // 能力提供 (1.12.2 直接返回实例)
+    @Override
+    public <T> T getCapability(Capability<T> cap, EnumFacing side) {
+        if (cap == CapabilityEnergy.ENERGY) {
+            DimensionsNet net = getNet();
+            if (net != null) {
+                return CapabilityEnergy.ENERGY.cast(net.getEnergyStorage());
             }
         }
+        return super.getCapability(cap, side);
     }
-
+    // 数据保存
     @Override
-    public void invalidateCaps()
-    {
-        super.invalidateCaps();
-        energyStorage = null;
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        super.writeToNBT(compound);
+        compound.setBoolean("popMode", popMode);
+        return compound;
     }
-
+    // 数据加载
     @Override
-    public void load(CompoundTag tag)
-    {
-        super.load(tag);
-        this.popMode = tag.getBoolean("popMode");
+    public void readFromNBT(NBTTagCompound compound) {
+        super.readFromNBT(compound);
+        popMode = compound.getBoolean("popMode");
     }
-
+    // 区块卸载时清理缓存
     @Override
-    protected void saveAdditional(CompoundTag tag)
-    {
-        super.saveAdditional(tag);
-        tag.putBoolean("popMode",this.popMode);
+    public void onChunkUnload() {
+        energyStorageCache = null;
     }
 
 }

@@ -4,10 +4,9 @@ import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
-import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
+
 
 public class StoredStackSlot extends Slot
 {

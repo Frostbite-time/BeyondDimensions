@@ -7,15 +7,10 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.DataSlot;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.entity.player.EntityPlayer;
 
+
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -25,7 +20,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
 {
 
     public final IStackTypedHandler storage;
-    protected final Player player;
+    protected final EntityPlayer player;
     // 用于快速移动时标记玩家背包的槽位索引 如 索引从0开始 背包为54~89
     protected int inventoryStartIndex = -1; //索引开始位置 为54
     protected int inventoryEndIndex = -1;   //索引结束位置+1 为90

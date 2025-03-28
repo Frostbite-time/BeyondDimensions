@@ -51,7 +51,7 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
     {
         // neoforge对流体没有按槽位插入的方案
         // 故直接调用无槽位方案
-        return insert(stack, sim);
+        return insert(null,stack, sim);
     }
 
     @Override

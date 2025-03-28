@@ -1,82 +1,75 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
-import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
-import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.SimpleContainerData;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
 
-public class NetInterfaceBlock extends NetedBlock implements EntityBlock
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+
+import javax.annotation.Nullable;
+
+public class NetInterfaceBlock extends NetedBlock
 {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
 
-    public NetInterfaceBlock(Properties properties)
+    public NetInterfaceBlock(Material materialIn)
     {
-        super(properties);
+        super(materialIn);
     }
 
-    // 启用方块实体计时器
+    @Override
+    public boolean hasTileEntity(IBlockState state)
+    {
+        return true;
+    }
+
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null :
-                (level1, pos, state1, blockEntity) ->
-                        NetInterfaceBlockEntity.tick(level1, pos, state1, (NetInterfaceBlockEntity) blockEntity);
+    public TileEntity createTileEntity(World world, IBlockState state)
+    {
+        return new NetInterfaceBlockEntity();
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        super.use(state,level,pos,player,hand,hitResult);
-        if(!level.isClientSide()&&!player.isShiftKeyDown())
+        super.onBlockActivated(worldIn, pos, state, player, hand, facing, hitX, hitY, hitZ);
+        if(!worldIn.isRemote&&!player.isSneaking())
         {
-            player.openMenu(new SimpleMenuProvider(
-                    (containerId, playerInventory, _player) -> new NetInterfaceBaseMenu(containerId,_player.getInventory(),((NetInterfaceBlockEntity)level.getBlockEntity(pos)).getStackHandler() ,((NetInterfaceBlockEntity)level.getBlockEntity(pos)).getFakeStackHandler(),((NetInterfaceBlockEntity)level.getBlockEntity(pos)),new SimpleContainerData(0)),
-                    Component.translatable("menu.title.beyonddimensions.net_interface_menu")
-            ));
+//            player.openMenu(new SimpleMenuProvider(
+//                    (containerId, playerInventory, _player) -> new NetInterfaceBaseMenu(containerId,_player.getInventory(),((NetInterfaceBlockEntity)level.getBlockEntity(pos)).getStackHandler() ,((NetInterfaceBlockEntity)level.getBlockEntity(pos)).getFakeStackHandler(),((NetInterfaceBlockEntity)level.getBlockEntity(pos)),new SimpleContainerData(0)),
+//                    Component.translatable("menu.title.beyonddimensions.net_interface_menu")
+//            ));
         }
-        return InteractionResult.SUCCESS;
+        return true;
     }
 
+
+
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
-    {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity) {
-                level.updateNeighbourForOutputSignal(pos, this);
-            }
-            super.onRemove(state, level, pos, newState, movedByPiston);
+    public void breakBlock(World world, BlockPos pos, IBlockState state) {
+        // 触发红石信号更新
+        world.notifyNeighborsOfStateChange(pos, this, false);
+
+        // 调用父类逻辑（例如清理 TileEntity）
+        super.breakBlock(world, pos, state);
+    }
+
+
+    @Override
+    public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor) {
+        super.onNeighborChange(world, pos, neighbor);
+        if (world.getTileEntity(pos) instanceof NetInterfaceBlockEntity) {
+            NetInterfaceBlockEntity blockEntity = (NetInterfaceBlockEntity) world.getTileEntity(pos);
+            blockEntity.markDirty(); // 或自定义标记更新方法
         }
     }
 
-    @Override
-    public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor)
-    {
-        super.onNeighborChange(state, level, pos, neighbor);
-        if (level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity) {
-            blockEntity.setNeedsCapabilityUpdate();
-        }
-    }
 
-    @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
-    {
-        return new NetInterfaceBlockEntity(blockPos,blockState);
-    }
 }
