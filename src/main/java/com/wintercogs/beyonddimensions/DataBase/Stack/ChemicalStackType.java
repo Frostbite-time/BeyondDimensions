@@ -1,34 +1,30 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Render.IngredientRenderer;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
-import io.netty.buffer.ByteBuf;
-import mekanism.api.chemical.gas.Gas;
-import mekanism.api.chemical.gas.GasStack;
-import net.minecraft.ChatFormatting;
+import mekanism.api.gas.Gas;
+import mekanism.api.gas.GasRegistry;
+import mekanism.api.gas.GasStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import org.apache.commons.lang3.text.WordUtils;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.client.config.GuiUtils;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 // 用于处理通用机械的化学品类
 public class ChemicalStackType implements IStackType<GasStack>
@@ -42,7 +38,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     // 创建空stack
     public ChemicalStackType()
     {
-        stack = GasStack.EMPTY;
+        stack = new GasStack(GasRegistry.getGas(0),0);
     }
 
     // 创建给定stack
@@ -52,11 +48,11 @@ public class ChemicalStackType implements IStackType<GasStack>
     }
 
     @Override
-    public IStackType<GasStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
+    public IStackType<GasStack> fromObject(Object key, long amount,int meta, NBTTagCompound dataComponentPatch)
     {
         if(key instanceof Gas chemical)
         {
-            GasStack chemicalStack = new GasStack(chemical, amount);
+            GasStack chemicalStack = new GasStack(chemical, (int) amount);
             return new ChemicalStackType(chemicalStack);
         }
         return null;
@@ -101,19 +97,19 @@ public class ChemicalStackType implements IStackType<GasStack>
     @Override
     public Object getSource()
     {
-        return GasStack.EMPTY.getType();
+        return GasRegistry.getGas(0);
     }
 
     @Override
     public boolean isEmpty()
     {
-        return stack.isEmpty();
+        return stack.amount <= 0 || stack.getGas() == null;
     }
 
     @Override
     public GasStack getEmptyStack()
     {
-        return GasStack.EMPTY;
+        return new GasStack(GasRegistry.getGas(0),0);
     }
 
     @Override
@@ -125,7 +121,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     @Override
     public GasStack copyStackWithCount(long count)
     {
-        return new GasStack(stack, count);
+        return new GasStack(stack.getGas(), (int)count);
     }
 
     @Override
@@ -137,19 +133,19 @@ public class ChemicalStackType implements IStackType<GasStack>
     @Override
     public IStackType<GasStack> copyWithCount(long count)
     {
-        return new ChemicalStackType(new GasStack(stack, count));
+        return new ChemicalStackType(new GasStack(stack.getGas(), (int)count));
     }
 
     @Override
     public long getStackAmount()
     {
-        return stack.getAmount();
+        return stack.amount;
     }
 
     @Override
     public void setStackAmount(long amount)
     {
-        stack.setAmount(amount);
+        stack.amount = (int) amount;
     }
 
     @Override
@@ -180,13 +176,13 @@ public class ChemicalStackType implements IStackType<GasStack>
     @Override
     public GasStack splitStack(long amount)
     {
-        if (amount <= 0) return GasStack.EMPTY;
+        if (amount <= 0) return getEmptyStack();
 
         // 计算可分割的数量
-        long splitAmount = Math.min(amount, stack.getAmount());
+        long splitAmount = Math.min(amount, stack.amount);
         GasStack split = stack.copy();
-        split.setAmount(splitAmount);
-        stack.shrink(splitAmount);
+        split.amount = (int) splitAmount;
+        stack.amount -= (int)splitAmount;
         return split;
     }
 
@@ -196,10 +192,10 @@ public class ChemicalStackType implements IStackType<GasStack>
         if (amount <= 0) return new ChemicalStackType();
 
         // 计算可分割的数量
-        long splitAmount = Math.min(amount, stack.getAmount());
+        long splitAmount = Math.min(amount, stack.amount);
         GasStack split = stack.copy();
-        split.setAmount(splitAmount);
-        stack.shrink(splitAmount);
+        split.amount = (int) splitAmount;
+        stack.amount -= (int)splitAmount;
         return new ChemicalStackType(split);
     }
 
@@ -208,7 +204,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual(other.getStack());
+        return stack.isGasEqual(other.getStack());
     }
 
     @Override
@@ -216,7 +212,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual(other.getStack());
+        return stack.isGasEqual(other.getStack());
     }
 
     @Override
@@ -226,16 +222,16 @@ public class ChemicalStackType implements IStackType<GasStack>
         buf.writeResourceLocation(getTypeId());
 
         // 写入是否存在物品的标志
-        boolean hasItem = !stack.isEmpty();
+        boolean hasItem = !isEmpty();
         buf.writeBoolean(hasItem);
 
         if (hasItem) {
             // 写入数量
-            buf.writeVarLong(stack.getAmount());
+            buf.writeVarLong(stack.amount);
             // 使用副本避免修改原堆栈
-            GasStack copy = new GasStack(stack,1);
-            // 使用OPTIONAL_CODEC处理可能为空的情况
-            copy.writeToPacket(buf);
+            GasStack copy = new GasStack(stack.getGas(),1);
+            NBTTagCompound tag = copy.write(new NBTTagCompound());
+            buf.writeCompoundTag(tag);
         }
     }
 
@@ -249,83 +245,105 @@ public class ChemicalStackType implements IStackType<GasStack>
         // 读取是否存在物品的标志
         boolean hasItem = buf.readBoolean();
         if (!hasItem) {
-            return new ChemicalStackType(GasStack.EMPTY);
+            return new ChemicalStackType(getEmptyStack());
         }
 
         // 读取数量
         long count = buf.readVarLong();
-        // 使用OPTIONAL_CODEC解码
-        GasStack stack = new GasStack(GasStack.readFromPacket(buf),count);
+        NBTTagCompound stackNBT;
+        try
+        {
+            stackNBT = buf.readCompoundTag();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+        GasStack stack = GasStack.readFromNBT(stackNBT);
+        stack.amount = (int)count;
         return new ChemicalStackType(stack);
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public NBTTagCompound serializeNBT()
     {
-        CompoundTag tag = new CompoundTag();
-        tag.putLong("Amount", getStackAmount());
-        tag.put("Stack",new GasStack(stack,1).write(new CompoundTag()));
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setLong("Amount", getStackAmount());
+        tag.setTag("Stack",new GasStack(stack.getGas(),1).write(new NBTTagCompound()));
         return tag;
     }
 
     @Override
-    public IStackType<GasStack> deserializeNBT(CompoundTag nbt)
+    public IStackType<GasStack> deserializeNBT(NBTTagCompound nbt)
     {
-        ChemicalStackType stack =  new ChemicalStackType(GasStack.readFromNBT(nbt.getCompound("Stack")));
+        ChemicalStackType stack =  new ChemicalStackType(GasStack.readFromNBT(nbt.getCompoundTag("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));
         return stack;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @SideOnly(Side.CLIENT)
     @Override
-    public void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y)
+    public void render(GuiScreen gui, int x, int y)
     {
-        // 渲染图标
-        var poseStack = gui.pose(); // 获取渲染的变换矩阵
-        poseStack.pushPose(); // 保存矩阵状态
 
-        Gas chemical = stack.getType();
-        if(!chemical.isEmptyType())
-        {
-            ResourceLocation fluidStill = chemical.getIcon();
-            Optional<net.minecraft.client.renderer.texture.TextureAtlasSprite> fluidStillSprite = Optional.ofNullable(fluidStill)
-                    .map(f -> Minecraft.getInstance()
-                            .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-                            .apply(f)
-                    )
-                    .filter(s -> s.atlasLocation() != net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());
-            if(fluidStillSprite.isPresent())
-            {
-                int fluidColor = chemical.getTint();
-                com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,fluidColor,16,fluidStillSprite.get(),x,y);
-            }
+        GasStack gasStack = this.stack;
+        if (gasStack == null) return;
+        // 保存当前渲染状态
+        GlStateManager.pushMatrix();
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        // 渲染流体图标
+        Gas gas = gasStack.getGas();
+        if (gas != null && gas.getIcon() != null) {
+            // 绑定纹理图集
+            Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+
+            // 获取流体颜色（带透明度）
+            int color = gas.getTint();
+            float a = 1;
+            float r = (color >> 16 & 0xFF) / 255f;
+            float g = (color >> 8 & 0xFF) / 255f;
+            float b = (color & 0xFF) / 255f;
+            GlStateManager.color(r, g, b, a);
+            // 获取流体纹理
+            TextureAtlasSprite sprite = gas.getSprite();
+            // 调用渲染方法（参数顺序根据签名调整）
+            IngredientRenderer.drawTiledSprite(
+                    16,                // tiledWidth
+                    16,                // tiledHeight
+                    color,             // color
+                    gasStack.amount, // scaledAmount (可能需要调整量级)
+                    sprite,            // sprite
+                    x,                 // posX
+                    y                  // posY
+            );
         }
-
-
-        poseStack.popPose(); // 恢复矩阵状态，结束渲染
-
+        // 恢复渲染状态
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
         // 渲染数量文本
-        String countText = getCountText(stack.getAmount());
-        float scale = 0.666f; // 文本缩放因数
-        var poseStackText = gui.pose();
-        poseStackText.pushPose();
-        poseStackText.translate(0,0,200); // 确保文本在顶层
-        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
-        RenderSystem.disableBlend(); // 禁用混合渲染模式
-        final int X = (int)(
-                (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
-                        * 1.0f / 0.666f
-        );
-        final int Y = (int)(
-                (y + -1 + 16.0f - 5.0f * 0.666f)
-                        * 1.0f / 0.666f
-        );
-        gui.drawString(Minecraft.getInstance().font,
-                countText,
-                X,
-                Y,
-                0xFFFFFF);
-        poseStackText.popPose();
+        if (gasStack.amount > 0) {
+            String countText = getCountText(gasStack.amount);
+            float scale = 0.666f;
+
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(0, 0, 200);  // 确保文本在顶层
+            GlStateManager.scale(scale, scale, 1);
+
+            // 计算位置（根据缩放系数调整）
+            int textX = (int) ((x + 16 - 2 - Minecraft.getMinecraft().fontRenderer.getStringWidth(countText) * scale) / scale);
+            int textY = (int) ((y + 16 - 8) / scale);
+
+            Minecraft.getMinecraft().fontRenderer.drawString(
+                    countText,
+                    textX,
+                    textY,
+                    0xFFFFFF,
+                    true
+            );
+
+            GlStateManager.popMatrix();
+        }
     }
 
     @Override
@@ -336,67 +354,59 @@ public class ChemicalStackType implements IStackType<GasStack>
     }
 
     @Override
-    public Component getDisplayName()
+    public String getDisplayName()
     {
-        return stack.getTextComponent();
+        return stack.getGas().getLocalizedName();
     }
 
     @Override
-    public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag)
+    public List<String> getTooltipLines(@Nullable EntityPlayer player, ITooltipFlag tooltipFlag)
     {
-        if(stack.isEmpty())
-            return List.of(Component.empty());
+        if(isEmpty())
+            return List.of("");
 
-        List<Component> tooltips = new ArrayList<>();
-        Gas chemical = stack.getType();
+        List<String> tooltips = new ArrayList<>();
+        Gas chemical = stack.getGas();
 
-        Component displayName = getDisplayName();
+        String displayName = getDisplayName();
         tooltips.add(displayName);
 
-        ResourceLocation resourceLocation = chemical.getRegistryName();
-        if (resourceLocation != null) {
-            if (tooltipFlag.isAdvanced()) {
-                MutableComponent advancedId = Component.literal(resourceLocation.toString())
-                        .withStyle(ChatFormatting.DARK_GRAY);
-                tooltips.add(advancedId);
+
+        if (Minecraft.getMinecraft().gameSettings.advancedItemTooltips) {
+            String id = chemical.getName();
+            if (id != null) {
+                tooltips.add(TextFormatting.DARK_GRAY + id);
             }
-            Optional<? extends ModContainer> container = ModList.get().getModContainerById(resourceLocation.getNamespace());
-            Component modName;
-            if(container.isPresent())
-            {
-                modName = Component.literal(container.get().getModInfo().getDisplayName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
-            }
-            else
-            {
-                container = ModList.get().getModContainerById(resourceLocation.getNamespace().replace('_', '-'));
-                if (container.isPresent()) {
-                    modName = Component.literal(container.get().getModInfo().getDisplayName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
-                }
-                else
-                {
-                    modName = Component.literal(WordUtils.capitalizeFully(resourceLocation.getNamespace().replace('_', ' '))).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
-                }
-            }
-            tooltips.add(modName);
         }
 
-        tooltips.add(Component.literal("已存储:"+getStackAmount()+"mB"));
+        tooltips.add("Mekanism");
+
+        tooltips.add("已存储:"+getStackAmount()+"mB");
         return tooltips;
     }
 
-    @Override
-    public Optional<TooltipComponent> getTooltipImage()
-    {
-        return Optional.empty();
-    }
 
-    @OnlyIn(Dist.CLIENT)
+    @SideOnly(Side.CLIENT)
     @Override
-    public void renderTooltip(net.minecraft.client.gui.GuiGraphics gui, net.minecraft.client.gui.Font font, int mouseX, int mouseY)
+    public void renderTooltip(GuiScreen gui, int mouseX, int mouseY)
     {
-        var minecraft = Minecraft.getInstance();
-        gui.renderTooltip(minecraft.font, this.getTooltipLines(minecraft.player, minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL)
-                , getTooltipImage(), ItemStack.EMPTY, mouseX, mouseY);
+        Minecraft mc = Minecraft.getMinecraft();
+
+        // 获取工具提示文本
+        List<String> tooltip = this.getTooltipLines(
+                mc.player,
+                mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL
+        );
+        // 渲染工具提示（适配1.12.2的绘制方式）
+        GuiUtils.drawHoveringText(
+                tooltip,
+                mouseX,
+                mouseY,
+                gui.width, // 使用GUI的完整宽度
+                gui.height,
+                -1, // 最大宽度（-1表示自动）
+                mc.fontRenderer
+        );
     }
 
     @Override
@@ -413,7 +423,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
         int code = 1;
-        code = 31 * code + stack.getType().hashCode();
+        code = 31 * code + stack.hashCode();
         return code;
     }
 }

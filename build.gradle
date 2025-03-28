@@ -103,6 +103,7 @@ minecraft {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         name 'CleanroomMC Maven'
@@ -111,6 +112,7 @@ repositories {
     maven {
         url 'https://maven.aliyun.com/repository/public'
     }
+    maven { url 'https://modmaven.dev/' }
 }
 
 dependencies {
@@ -150,6 +152,8 @@ dependencies {
     }
 
     embed("com.github.promeg:tinypinyin:2.0.3")
+
+    compileOnly("mekanism:mekanism:1.12.2-9.8.3.390")
 }
 
 apply from: 'gradle/scripts/dependencies.gradle'
