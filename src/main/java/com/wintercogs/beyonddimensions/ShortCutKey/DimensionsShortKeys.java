@@ -1,8 +1,6 @@
 package com.wintercogs.beyonddimensions.ShortCutKey;
 
-import com.cleanroommc.modularui.factory.ClientGUI;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Gui.BDBaseGUI;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;

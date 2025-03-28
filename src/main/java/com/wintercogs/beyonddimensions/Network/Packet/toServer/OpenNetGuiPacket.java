@@ -64,19 +64,8 @@ public class OpenNetGuiPacket implements IMessage
 
             // 添加为一个计划任务(Scheduled Task)，在主服务器线程上执行操作
             serverPlayer.getServerWorld().addScheduledTask(() -> {
-                //UIRegister.openGui(serverPlayer, DIMENSIONS_NET_GUI);
-                SimpleGuiFactory factory =  new SimpleGuiFactory("test",() ->{
-                    return new IGuiHolder<GuiData>()
-                    {
-                        @Override
-                        public ModularPanel buildUI(GuiData guiData, GuiSyncManager guiSyncManager)
-                        {
-                            return BDBaseGUI.createPanel(guiData, guiSyncManager);
-                        }
-                    };
-                });
 
-                factory.open(serverPlayer);
+                BDBaseGUI.factory.open(serverPlayer);
             });
             // 没有回应数据包
             return null;
