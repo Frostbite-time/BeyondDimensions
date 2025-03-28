@@ -1,6 +1,10 @@
 package com.wintercogs.beyonddimensions.ShortCutKey;
 
+import com.cleanroommc.modularui.factory.ClientGUI;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Gui.BDBaseGUI;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
@@ -42,7 +46,7 @@ public class DimensionsShortKeys
                 return;
             }
 
-            //PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getUniqueID().toString()));
+            PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getUniqueID().toString()));
         }
 
     }

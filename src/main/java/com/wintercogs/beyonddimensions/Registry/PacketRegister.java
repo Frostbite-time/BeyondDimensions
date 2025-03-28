@@ -1,9 +1,11 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 
 
 @Mod.EventBusSubscriber(modid = BeyondDimensions.MODID)
@@ -15,13 +17,13 @@ public class PacketRegister
     private static int packetId = 1;
 
     static {
-//        // to server
-//        INSTANCE.registerMessage(
-//                OpenNetGuiPacket.OpenNetGuiPacketHandler.class,
-//                OpenNetGuiPacket.class,
-//                packetId++,
-//                Side.SERVER
-//        );
+        // to server
+        INSTANCE.registerMessage(
+                OpenNetGuiPacket.OpenNetGuiPacketHandler.class,
+                OpenNetGuiPacket.class,
+                packetId++,
+                Side.SERVER
+        );
 //
 //        INSTANCE.registerMessage(
 //                NetControlActionPacket.NetControlActionPacketHandler.class,
