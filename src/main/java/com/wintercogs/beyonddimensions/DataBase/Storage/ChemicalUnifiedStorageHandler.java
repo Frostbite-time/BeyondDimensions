@@ -1,10 +1,12 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
+import com.wintercogs.beyonddimensions.DataBase.Handler.ChemicalStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
-import mekanism.api.Action;
-import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasHandler;
+import mekanism.api.gas.*;
+import net.minecraft.util.EnumFacing;
 
+
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class ChemicalUnifiedStorageHandler implements IGasHandler
@@ -16,98 +18,100 @@ public class ChemicalUnifiedStorageHandler implements IGasHandler
         this.storage = storage;
     }
 
-    @Override
-    public int getTanks()
+    public static class GasTankInfoWarrper implements GasTankInfo
+    {
+        int tank;
+        ChemicalUnifiedStorageHandler handler;
+
+        public GasTankInfoWarrper(int tank, ChemicalUnifiedStorageHandler handler)
+        {
+            this.tank = tank;
+            this.handler = handler;
+        }
+
+
+        @Nullable
+        @Override
+        public GasStack getGas()
+        {
+            // 此处的slot参数是基于特化类型ItemStackType的索引
+            List<Integer> slots = handler.storage.getTypeIdIndexList(ChemicalStackType.ID);
+            int actualIndex = -1;
+            if(slots != null && 0<=tank && tank < slots.size())
+            {
+                actualIndex = slots.get(tank);
+            }
+
+            if(actualIndex != -1)
+            {
+                return (GasStack) handler.storage.getStackBySlot(actualIndex).getStack();
+            }
+            else return new GasStack(GasRegistry.getGas(0),0);
+        }
+
+        @Override
+        public int getStored()
+        {
+            return getGas().amount;
+        }
+
+        @Override
+        public int getMaxGas()
+        {
+            return Integer.MAX_VALUE;
+        }
+    }
+
+
+    public GasTankInfo[] getTankInfo()
     {
         List<Integer> slots = storage.getTypeIdIndexList(ChemicalStackType.ID);
         if(slots != null)
-            return slots.size();
-        else return 0;
-    }
-
-    @Override
-    public GasStack getChemicalInTank(int slot)
-    {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = storage.getTypeIdIndexList(ChemicalStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=slot && slot < slots.size())
         {
-            actualIndex = slots.get(slot);
+            GasTankInfo[] TankProperties = new GasTankInfo[slots.size()];
+
+            for(int i = 0; i < slots.size(); i++)
+            {
+                TankProperties[i] = new ChemicalUnifiedStorageHandler.GasTankInfoWarrper(i,this);
+            }
+
+            return TankProperties;
         }
 
-        if(actualIndex != -1)
-        {
-            return (GasStack) storage.getStackBySlot(actualIndex).getStack();
-        }
-        else return GasStack.EMPTY;
+        return new GasTankInfo[0];
     }
 
+
     @Override
-    public void setChemicalInTank(int tank, GasStack stack)
+    public int receiveGas(EnumFacing enumFacing, GasStack stack, boolean sim)
     {
-        // 凡通过handler机械化输入的物品无论以何方法，全部为自动插入
-        if(stack.isEmpty())
-            return ;
-        storage.insert(new ChemicalStackType(stack.copy()), false);
+        if(stack.amount <= 0)
+            return 0;
+        long remaining = storage.insert(new ChemicalStackType(stack.copy()), sim).getStackAmount();
+        if(remaining>0)
+            return (int) (stack.amount-remaining);
+        return 0;// 全部插入
     }
 
     @Override
-    public long getTankCapacity(int tank)
+    public GasStack drawGas(EnumFacing enumFacing, int amount, boolean sim)
     {
-        return Long.MAX_VALUE;
+
+        int actualIndex = storage.getTypeIdIndexList(ChemicalStackType.ID).get(0);
+        return ((ChemicalStackType)storage.extract(storage.getStackBySlot(actualIndex).copyWithCount(amount),sim))
+                .copyStack();
     }
 
     @Override
-    public boolean isValid(int tank, GasStack stack)
+    public boolean canReceiveGas(EnumFacing enumFacing, Gas gas)
     {
         return true;
     }
 
-    // 返回剩余量，与Fluid的返回插入量不同
     @Override
-    public GasStack insertChemical(int tank, GasStack stack, Action action)
+    public boolean canDrawGas(EnumFacing enumFacing, Gas gas)
     {
-        if(stack.isEmpty())
-            return GasStack.EMPTY;
-        long remaining = storage.insert(new ChemicalStackType(stack.copy()), action.simulate()).getStackAmount();
-        if(remaining>0)
-            return new GasStack(stack, remaining);
-        return GasStack.EMPTY;// 始终全部插入
+        return true;
     }
 
-    // 尝试从指定槽位提取指定数量化学品
-    @Override
-    public GasStack extractChemical(int tank, long amount, Action action)
-    {
-        return ((ChemicalStackType)storage.extract(new ChemicalStackType(new GasStack(getChemicalInTank(tank),amount)),action.simulate()))
-                .copyStack();
-    }
-
-    @Override
-    public GasStack insertChemical(GasStack stack, Action action)
-    {
-        if(stack.isEmpty())
-            return GasStack.EMPTY;
-        long remaining = storage.insert(new ChemicalStackType(stack.copy()), action.simulate()).getStackAmount();
-        if(remaining>0)
-            return new GasStack(stack, remaining);
-        return GasStack.EMPTY;// 始终全部插入
-    }
-
-    // 从第一个槽位提取指定化学品
-    @Override
-    public GasStack extractChemical(long amount, Action action)
-    {
-        return ((ChemicalStackType)storage.extract(new ChemicalStackType( new GasStack(getChemicalInTank(0),amount)),action.simulate()))
-                .copyStack();
-    }
-
-    // 按类型提取化学品
-    @Override
-    public GasStack extractChemical(GasStack stack, Action action)
-    {
-        return ((ChemicalStackType)storage.extract(new ChemicalStackType(stack.copy()),action.simulate()))
-                .copyStack();
-    }
 }

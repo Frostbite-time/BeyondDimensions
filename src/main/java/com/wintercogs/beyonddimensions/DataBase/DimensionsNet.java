@@ -1,34 +1,24 @@
 package com.wintercogs.beyonddimensions.DataBase;
 
-import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.slf4j.Logger;
-
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraft.world.World;
+import net.minecraft.world.storage.WorldSavedData;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 
-public class DimensionsNet extends SavedData
+public class DimensionsNet extends WorldSavedData
 {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     // 每个维度网络具有一个唯一标识符
     private int id;
@@ -55,139 +45,201 @@ public class DimensionsNet extends SavedData
     private int currentTime = 600*20;
     private int holdTime = 600*20;
 
-    public DimensionsNet(boolean temporary)
+    public DimensionsNet()
     {
+        super("BDNet_temporary");
         unifiedStorage = new UnifiedStorage(this);
         energyStorage = new EnergyStorage(this);
-        MinecraftForge.EVENT_BUS.addListener(this::onServerTick);
-        this.temporary = temporary;
+        //MinecraftForge.EVENT_BUS.addListener(this::onServerTick);
+        this.temporary = true;
     }
 
-    // 基本函数
-
-    // Create函数
-    public static DimensionsNet create()
+    public DimensionsNet(String mapName)
     {
-        return new DimensionsNet(false);
+        super(mapName);
+        unifiedStorage = new UnifiedStorage(this);
+        energyStorage = new EnergyStorage(this);
+        //MinecraftForge.EVENT_BUS.addListener(this::onServerTick);
+        this.temporary = false;
     }
 
-    // 构建最新的网络名称
-    public static String buildNewNetName(Player player)
-    {
+
+    // 构建最新的网络名称（适配1.12.2）
+    public static String buildNewNetName(EntityPlayerMP player) {
         int netId;
-        // 接下来按照"BDNet_" + netId从0查找网络，直到找到不存在的网络，此时netId为新网络id
-        for (netId = 0; netId < 10000; netId++)
-        {
-            if (player.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + netId) == null)
-            {
+        World world = player.getServer().getWorld(0); // 0是主世界维度ID
+
+        for (netId = 0; netId < 10000; netId++) {
+            // 1.12.2通过WorldSavedData的方式获取
+            if (world.getPerWorldStorage().getOrLoadData(DimensionsNet.class, "BDNet_" + netId) == null) {
                 break;
             }
         }
         return "BDNet_" + netId;
     }
 
-    public static DimensionsNet getNetFromId(int id, Level storageProvider)
-    {
-        if(id<0)
-        {
+    public static DimensionsNet getNetFromId(int id, World world) {
+        if (id < 0) {
             return null;
         }
-        DimensionsNet net = storageProvider.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + id);
-        if(net !=null)
-        {
-            return net;
-        }
-        return null;
+        // 通过世界存储获取数据
+        return (DimensionsNet) world.getPerWorldStorage().getOrLoadData(DimensionsNet.class, "BDNet_" + id);
     }
 
-    public static DimensionsNet getNetFromPlayer(Player player)
-    {
-        int netId;
-        for (netId = 0; netId < 10000; netId++)
-        {
-            DimensionsNet net = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + netId);
-            if (net != null)
-            {
-                if(net.players.contains(player.getUUID()))
-                {
+    public static DimensionsNet getNetFromPlayer(EntityPlayer player) {
+        World world = player.getEntityWorld().getMinecraftServer().getWorld(0); // 获取主世界
+
+        for (int netId = 0; netId < 10000; netId++) {
+            DimensionsNet net = (DimensionsNet) world.getPerWorldStorage().getOrLoadData(DimensionsNet.class, "BDNet_" + netId);
+            if (net != null) {
+                if (net.players.contains(player.getUniqueID())) { // 1.12.2使用getUniqueID()
                     return net;
                 }
-            }
-            else
-            {
-                return null;
+            } else {
+                // 如果找不到数据则提前终止循环
+                break;
             }
         }
         return null;
     }
 
-    // 从硬盘加载数据
-    public static DimensionsNet load(CompoundTag tag)
-    {
-        DimensionsNet net = new DimensionsNet(false);
 
-        net.id = tag.getInt("Id");
-        UUID owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
-        if (owner != null)
-        {
-            net.owner = owner;
+
+
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        // 读取基础数据
+        this.id = nbt.getInteger("Id");
+
+        // 读取UUID需要转换字符串
+        if (nbt.hasKey("Owner")) {
+            this.owner = UUID.fromString(nbt.getString("Owner"));
         }
 
-        net.unifiedStorage.deserializeNBT(tag.getCompound("UnifiedStorage"));
-        net.energyStorage.deserializeNBT(tag.getCompound("EnergyStorage"));
+        // 读取存储
+        this.energyStorage.deserializeNBT(nbt.getCompoundTag("EnergyStorage"));
+        this.unifiedStorage.deserializeNBT(nbt.getCompoundTag("UnifiedStorage"));
 
-        if (tag.contains("Managers"))
-        {
-            ListTag managerList = tag.getList("Managers",8);
-            managerList.forEach(manager -> net.managers.add(UUID.fromString(manager.getAsString())));
+        // 读取管理者列表
+        this.managers.clear();
+        NBTTagList managerList = nbt.getTagList("Managers", 8); // 8表示字符串类型
+        for (int i = 0; i < managerList.tagCount(); i++) {
+            managers.add(UUID.fromString(managerList.getStringTagAt(i)));
         }
 
-        if (tag.contains("Players"))
-        {
-            ListTag playerList = tag.getList("Players", 8); // 8 表示 StringTag
-            playerList.forEach(player -> net.players.add(UUID.fromString(player.getAsString())));
+        // 读取玩家列表
+        this.players.clear();
+        NBTTagList playerList = nbt.getTagList("Players", 8);
+        for (int i = 0; i < playerList.tagCount(); i++) {
+            players.add(UUID.fromString(playerList.getStringTagAt(i)));
         }
 
         // 读取倒计时
-        net.currentTime = tag.getInt("currentTime");
-
-        return net;
+        this.currentTime = nbt.getInteger("currentTime");
     }
 
-    // 保存数据到硬盘
     @Override
-    public CompoundTag save(CompoundTag tag)
-    {
-        // 保存 ID
-        tag.putInt("Id", this.id);
-        // 保存网络所有者 UUID
-        tag.putUUID("Owner", this.owner);
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        // 保存基础数据
+        compound.setInteger("Id", this.id);
 
-        // 保存网络管理者
-        ListTag managerListTag = new ListTag();
-        for (UUID manager : managers)
-        {
-            managerListTag.add(StringTag.valueOf(manager.toString()));
+        // 保存UUID为字符串
+        if (this.owner != null) {
+            compound.setString("Owner", this.owner.toString());
         }
-        tag.put("Managers",managerListTag);
-
-        // 保存绑定的玩家列表
-        ListTag playerListTag = new ListTag();
-        for (UUID player : players)
-        {
-            playerListTag.add(StringTag.valueOf(player.toString()));
-        }
-        tag.put("Players", playerListTag);
 
         // 保存存储
-        tag.put("EnergyStorage",energyStorage.serializeNBT());
-        tag.put("UnifiedStorage",unifiedStorage.serializeNBT());
+        compound.setTag("EnergyStorage", this.energyStorage.serializeNBT());
+        compound.setTag("UnifiedStorage", this.unifiedStorage.serializeNBT());
+
+        // 保存管理者列表
+        NBTTagList managerList = new NBTTagList();
+        for (UUID manager : managers) {
+            managerList.appendTag(new NBTTagString(manager.toString()));
+        }
+        compound.setTag("Managers", managerList);
+
+        // 保存玩家列表
+        NBTTagList playerList = new NBTTagList();
+        for (UUID player : players) {
+            playerList.appendTag(new NBTTagString(player.toString()));
+        }
+        compound.setTag("Players", playerList);
 
         // 保存倒计时
-        tag.putInt("currentTime", this.currentTime);
+        compound.setInteger("currentTime", this.currentTime);
 
-        return tag;
+        return compound;
     }
+
+
+//    // 从硬盘加载数据
+//    public static DimensionsNet load(CompoundTag tag)
+//    {
+//        DimensionsNet net = new DimensionsNet(false);
+//
+//        net.id = tag.getInt("Id");
+//        UUID owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
+//        if (owner != null)
+//        {
+//            net.owner = owner;
+//        }
+//
+//        net.unifiedStorage.deserializeNBT(tag.getCompound("UnifiedStorage"));
+//        net.energyStorage.deserializeNBT(tag.getCompound("EnergyStorage"));
+//
+//        if (tag.contains("Managers"))
+//        {
+//            ListTag managerList = tag.getList("Managers",8);
+//            managerList.forEach(manager -> net.managers.add(UUID.fromString(manager.getAsString())));
+//        }
+//
+//        if (tag.contains("Players"))
+//        {
+//            ListTag playerList = tag.getList("Players", 8); // 8 表示 StringTag
+//            playerList.forEach(player -> net.players.add(UUID.fromString(player.getAsString())));
+//        }
+//
+//        // 读取倒计时
+//        net.currentTime = tag.getInt("currentTime");
+//
+//        return net;
+//    }
+//
+//    // 保存数据到硬盘
+//    @Override
+//    public CompoundTag save(CompoundTag tag)
+//    {
+//        // 保存 ID
+//        tag.putInt("Id", this.id);
+//        // 保存网络所有者 UUID
+//        tag.putUUID("Owner", this.owner);
+//
+//        // 保存网络管理者
+//        ListTag managerListTag = new ListTag();
+//        for (UUID manager : managers)
+//        {
+//            managerListTag.add(StringTag.valueOf(manager.toString()));
+//        }
+//        tag.put("Managers",managerListTag);
+//
+//        // 保存绑定的玩家列表
+//        ListTag playerListTag = new ListTag();
+//        for (UUID player : players)
+//        {
+//            playerListTag.add(StringTag.valueOf(player.toString()));
+//        }
+//        tag.put("Players", playerListTag);
+//
+//        // 保存存储
+//        tag.put("EnergyStorage",energyStorage.serializeNBT());
+//        tag.put("UnifiedStorage",unifiedStorage.serializeNBT());
+//
+//        // 保存倒计时
+//        tag.putInt("currentTime", this.currentTime);
+//
+//        return tag;
+//    }
 
 
     // 功能函数
@@ -201,7 +253,7 @@ public class DimensionsNet extends SavedData
     public void setId(int Id)
     {
         this.id = Id;
-        setDirty();
+        setDirty(true);
     }
 
     // 获取网络拥有者ID
@@ -215,7 +267,7 @@ public class DimensionsNet extends SavedData
     {
         this.owner = owner;
         addManager(owner);
-        setDirty();
+        setDirty(true);
     }
 
     // 获取所有管理员
@@ -229,7 +281,7 @@ public class DimensionsNet extends SavedData
     {
         managers.add(managerId);
         addPlayer(managerId);
-        setDirty();
+        setDirty(true);
     }
 
     public void removeManager(UUID managerId)
@@ -239,7 +291,7 @@ public class DimensionsNet extends SavedData
             return;
         }
         managers.remove(managerId);
-        setDirty();
+        setDirty(true);
     }
 
     // 获取所有绑定的玩家
@@ -252,7 +304,7 @@ public class DimensionsNet extends SavedData
     public void addPlayer(UUID playerId)
     {
         players.add(playerId);
-        setDirty();
+        setDirty(true);
     }
 
     // 移除玩家
@@ -267,12 +319,12 @@ public class DimensionsNet extends SavedData
         {
             managers.remove(playerId);
         }
-        setDirty();
+        setDirty(true);
     }
 
-    public boolean isOwner(Player player)
+    public boolean isOwner(EntityPlayerMP player)
     {
-        if(player.getUUID().equals(getOwner()))
+        if(player.getUniqueID().equals(getOwner()))
         {
             return true;
         }
@@ -294,10 +346,10 @@ public class DimensionsNet extends SavedData
         }
     }
 
-    public boolean isManager(Player player)
+    public boolean isManager(EntityPlayerMP player)
     {
         boolean flag = false;
-        if(managers.contains(player.getUUID()))
+        if(managers.contains(player.getUniqueID()))
         {
             flag = true;
         }
@@ -314,7 +366,7 @@ public class DimensionsNet extends SavedData
         return flag;
     }
 
-    public HashMap<UUID,PlayerPermissionInfo> getPlayerPermissionInfoMap(Level playerInfoProvider)
+    public HashMap<UUID,PlayerPermissionInfo> getPlayerPermissionInfoMap(World playerInfoProvider)
     {
 
         HashMap<UUID,PlayerPermissionInfo> infoMap = new HashMap<>();
@@ -348,23 +400,23 @@ public class DimensionsNet extends SavedData
     }
 
     // 用于定期生成破碎时空结晶
-    @SubscribeEvent
-    public void onServerTick(TickEvent.ServerTickEvent event)
-    {
-        // 不对临时网络执行倒计时
-        if(temporary)
-            return;
-
-        currentTime--;
-        setDirty();
-        if(currentTime <= 0)
-        {
-            ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(),1);
-            IStackType stackType = new ItemStackType(stack);
-            this.unifiedStorage.insert(stackType,false);
-            currentTime = holdTime;
-        }
-
-    }
+//    @SubscribeEvent
+//    public void onServerTick(TickEvent.ServerTickEvent event)
+//    {
+//        // 不对临时网络执行倒计时
+//        if(temporary)
+//            return;
+//
+//        currentTime--;
+//        setDirty();
+//        if(currentTime <= 0)
+//        {
+//            ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(),1);
+//            IStackType stackType = new ItemStackType(stack);
+//            this.unifiedStorage.insert(stackType,false);
+//            currentTime = holdTime;
+//        }
+//
+//    }
 }
 

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 
 import java.util.List;
@@ -57,7 +57,9 @@ public class ItemUnifiedStorageHandler implements IItemHandler
         // 1.专为物品提供的假列表中获取指定物品并转为IStackType
         // 2.使用存储器导出
         // 3.获取返回值的Stack，然后转为ItemStack再返回
-        return (ItemStack) storage.extract(new ItemStackType(getStackInSlot(slot).copyWithCount(count)),sim)
+        ItemStack copy = getStackInSlot(slot).copy();
+        copy.setCount(count);
+        return (ItemStack) storage.extract(new ItemStackType(copy),sim)
                 .getStack();
     }
 

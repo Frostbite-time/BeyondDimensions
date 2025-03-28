@@ -4,7 +4,6 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import mekanism.api.gas.*;
 import net.minecraft.util.EnumFacing;
 
-
 import javax.annotation.Nullable;
 import java.util.List;
 
@@ -98,7 +97,7 @@ public class ChemicalStackTypedHandler implements IGasHandler
     public GasStack drawGas(EnumFacing enumFacing, int amount, boolean sim)
     {
         int actualIndex = handlerStorage.getTypeIdIndexList(ChemicalStackType.ID).get(0);
-        return ((ChemicalStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copy(),sim))
+        return ((ChemicalStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copyWithCount(amount),sim))
                 .copyStack();
     }
 
