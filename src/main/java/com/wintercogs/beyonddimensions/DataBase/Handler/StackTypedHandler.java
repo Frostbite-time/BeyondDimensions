@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.DataBase.Handler;
 
+import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
@@ -27,10 +28,16 @@ public class StackTypedHandler implements IStackTypedHandler
     {
         storage = new ArrayList<>(size);
         // 保证非空
-        for(int i=0;i<size;i++)
+        for(int i=0;i<size/2;i++)
         {
             storage.add(new ItemStackType());
             typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(storage.size() - 1);
+        }
+        // 粗暴一点，防止某些模组因其检测机制使得流体槽无法被检测
+        for(int i=size/2;i<size;i++)
+        {
+            storage.add(new FluidStackType());
+            typeIdIndex.computeIfAbsent(FluidStackType.ID, k -> new ArrayList<>()).add(storage.size() - 1);
         }
     }
 

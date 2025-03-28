@@ -17,6 +17,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -114,6 +115,16 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements ITickab
         needsCapabilityUpdate = true;
     }
 
+    @Override
+    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+    {
+        for (Map.Entry<ResourceLocation, Capability<?>> entry : CapabilityHelper.BlockCapabilityMap.entrySet()) {
+            if (entry.getValue() == capability) {
+                return true;
+            }
+        }
+        return super.hasCapability(capability, facing);
+    }
 
     @Override
     public <T> T getCapability(Capability<T> cap, EnumFacing side) {

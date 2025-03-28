@@ -20,8 +20,14 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
     @Override
     public boolean hasCapability(Capability<?> cap, EnumFacing side) {
         // 先检查是否支持该能力
-        if (isCapabilitySupported(cap)) {
-            return true;
+        DimensionsNet net = this.getNet();
+        if(net != null)
+        {
+            for (Map.Entry<ResourceLocation, Capability<?>> entry : CapabilityHelper.BlockCapabilityMap.entrySet()) {
+                if (entry.getValue() == cap) {
+                    return true;
+                }
+            }
         }
         return super.hasCapability(cap, side);
     }

@@ -11,6 +11,8 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
+import javax.annotation.Nullable;
+
 
 public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements ITickable
 {
@@ -69,13 +71,26 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements ITi
             }
         }
     }
+
+    @Override
+    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+    {
+        DimensionsNet net = getNet();
+        if(net != null)
+        {
+            if(capability == CapabilityEnergy.ENERGY)
+                return true;
+        }
+        return super.hasCapability(capability, facing);
+    }
+
     // 能力提供 (1.12.2 直接返回实例)
     @Override
     public <T> T getCapability(Capability<T> cap, EnumFacing side) {
         if (cap == CapabilityEnergy.ENERGY) {
             DimensionsNet net = getNet();
             if (net != null) {
-                return CapabilityEnergy.ENERGY.cast(net.getEnergyStorage());
+                return (T) net.getEnergyStorage();
             }
         }
         return super.getCapability(cap, side);
