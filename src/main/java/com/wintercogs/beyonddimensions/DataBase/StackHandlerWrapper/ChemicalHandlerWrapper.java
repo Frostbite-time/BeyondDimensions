@@ -1,18 +1,18 @@
 package com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
-import mekanism.api.Action;
-import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.IChemicalHandler;
-import net.minecraft.resources.ResourceLocation;
+import mekanism.api.gas.GasStack;
+import mekanism.api.gas.IGasHandler;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 
-public class ChemicalHandlerWrapper implements IStackHandlerWrapper<ChemicalStack>
+public class ChemicalHandlerWrapper implements IStackHandlerWrapper<GasStack>
 {
-    private final IChemicalHandler chemicalHandler;
+    private final IGasHandler chemicalHandler;
 
     public ChemicalHandlerWrapper(Object chemicalHandler)
     {
-        this.chemicalHandler = (IChemicalHandler) chemicalHandler;
+        this.chemicalHandler = (IGasHandler) chemicalHandler;
     }
 
     @Override
@@ -24,60 +24,51 @@ public class ChemicalHandlerWrapper implements IStackHandlerWrapper<ChemicalStac
     @Override
     public int getSlots()
     {
-        return chemicalHandler.getTanks();
+        return chemicalHandler.getTankInfo().length;
     }
 
     @Override
-    public ChemicalStack getStackInSlot(int slot)
+    public GasStack getStackInSlot(int slot)
     {
-        return chemicalHandler.getChemicalInTank(slot);
+        return chemicalHandler.getTankInfo()[slot].getGas();
     }
 
     @Override
     public long getCapacity(int slot)
     {
-        return chemicalHandler.getTankCapacity(slot);
+        return chemicalHandler.getTankInfo()[slot].getMaxGas();
     }
 
     @Override
-    public boolean isStackValid(int slot, ChemicalStack stack)
+    public boolean isStackValid(EnumFacing facing,int slot, GasStack stack)
     {
-        return chemicalHandler.isValid(slot, stack);
+        chemicalHandler.canReceiveGas(facing,stack.getGas());
+        return true;
     }
 
     @Override
-    public long insert(int slot, ChemicalStack Stack, boolean sim)
+    public long insert(EnumFacing facing,int slot, GasStack Stack, boolean sim)
     {
-        if(sim)
-            return chemicalHandler.insertChemical(slot,Stack, Action.SIMULATE).getAmount();
-        else
-            return chemicalHandler.insertChemical(slot,Stack, Action.EXECUTE).getAmount();
+        return chemicalHandler.receiveGas(facing,Stack, sim);
     }
 
     @Override
-    public long insert(ChemicalStack stack, boolean sim)
+    public long insert(EnumFacing facing,GasStack stack, boolean sim)
     {
-        if(sim)
-            return chemicalHandler.insertChemical(stack, Action.SIMULATE).getAmount();
-        else
-            return chemicalHandler.insertChemical(stack, Action.EXECUTE).getAmount();
+        return chemicalHandler.receiveGas(facing,stack, sim);
     }
 
+    // 警告，不应调用此函数，因为此函数与实际接口不一致
     @Override
-    public long extract(int slot, long amount, boolean sim)
+    public long extract(EnumFacing facing,int slot, long amount, boolean sim)
     {
-        if(sim)
-            return chemicalHandler.extractChemical(slot, amount, Action.SIMULATE).getAmount();
-        else
-            return chemicalHandler.extractChemical(slot, amount, Action.EXECUTE).getAmount();
+        return chemicalHandler.drawGas(facing, (int) amount,sim).amount;
     }
 
+    // 警告，不应调用此函数，因为此函数与实际接口不一致
     @Override
-    public long extract(ChemicalStack stack, boolean sim)
+    public long extract(EnumFacing facing,GasStack stack, boolean sim)
     {
-        if(sim)
-            return chemicalHandler.extractChemical(stack, Action.SIMULATE).getAmount();
-        else
-            return chemicalHandler.extractChemical(stack, Action.EXECUTE).getAmount();
+        return chemicalHandler.drawGas(facing, stack.amount,sim).amount;
     }
 }

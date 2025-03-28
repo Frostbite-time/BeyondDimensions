@@ -1,7 +1,8 @@
 package com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
@@ -24,29 +25,29 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
     @Override
     public int getSlots()
     {
-        return fluidHandler.getTanks();
+        return fluidHandler.getTankProperties().length;
     }
 
     @Override
     public FluidStack getStackInSlot(int slot)
     {
-        return fluidHandler.getFluidInTank(slot);
+        return fluidHandler.getTankProperties()[slot].getContents();
     }
 
     @Override
     public long getCapacity(int slot)
     {
-        return fluidHandler.getTankCapacity(slot);
+        return fluidHandler.getTankProperties()[slot].getCapacity();
     }
 
     @Override
-    public boolean isStackValid(int slot, FluidStack stack)
+    public boolean isStackValid(EnumFacing facing,int slot, FluidStack stack)
     {
-        return fluidHandler.isFluidValid(slot, stack);
+        return fluidHandler.getTankProperties()[slot].canFillFluidType(stack);
     }
 
     @Override
-    public long insert(int slot, FluidStack stack, boolean sim)
+    public long insert(EnumFacing facing, int slot, FluidStack stack, boolean sim)
     {
         // neoforge对流体没有按槽位插入的方案
         // 故直接调用无槽位方案
@@ -54,40 +55,31 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
     }
 
     @Override
-    public long insert(FluidStack stack, boolean sim)
+    public long insert(EnumFacing facing,FluidStack stack, boolean sim)
     {
-        int currentNum = stack.getAmount();
+        int currentNum = stack.amount;
         int insert;
-        if(sim)
-            insert = fluidHandler.fill(stack, IFluidHandler.FluidAction.SIMULATE);
-        else
-            insert = fluidHandler.fill(stack, IFluidHandler.FluidAction.EXECUTE);
+        insert = fluidHandler.fill(stack, sim);
         return currentNum-insert;
     }
 
     @Override
-    public long extract(int slot, long amount, boolean sim)
+    public long extract(EnumFacing facing,int slot, long amount, boolean sim)
     {
         for(int i = 0; i < getSlots(); i++)
         {
             FluidStack stack = getStackInSlot(i);
-            if(!stack.isEmpty())
+            if(!(stack.amount <=0))
             {
-                if(sim)
-                    return fluidHandler.drain(new FluidStack(stack,(int)Math.min(amount,Integer.MAX_VALUE)), IFluidHandler.FluidAction.SIMULATE).getAmount();
-                else
-                    return fluidHandler.drain(new FluidStack(stack,(int)Math.min(amount,Integer.MAX_VALUE)), IFluidHandler.FluidAction.EXECUTE).getAmount();
+                return fluidHandler.drain(new FluidStack(stack,(int)Math.min(amount,Integer.MAX_VALUE)), sim).amount;
             }
         }
         return 0;
     }
 
     @Override
-    public long extract(FluidStack stack, boolean sim)
+    public long extract(EnumFacing facing,FluidStack stack, boolean sim)
     {
-        if(sim)
-            return fluidHandler.drain(stack, IFluidHandler.FluidAction.SIMULATE).getAmount();
-        else
-            return fluidHandler.drain(stack, IFluidHandler.FluidAction.EXECUTE).getAmount();
+        return fluidHandler.drain(stack, sim).amount;
     }
 }

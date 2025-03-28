@@ -1,6 +1,10 @@
 package com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper;
 
-import net.minecraft.resources.ResourceLocation;
+
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
+
+import javax.annotation.Nullable;
 
 // 为类似IItemHandler类所做的包装，用来动态的包装来自其他模组的handler
 public interface IStackHandlerWrapper<T>
@@ -15,19 +19,19 @@ public interface IStackHandlerWrapper<T>
 
     public long getCapacity(int slot);
 
-    public boolean isStackValid(int slot, T stack);
+    public boolean isStackValid(EnumFacing facing,int slot, T stack);
 
     // 返回剩余量
-    public long insert(int slot, T Stack, boolean sim);
+    public long insert(EnumFacing facing, int slot, T Stack, boolean sim);
 
     // 返回剩余量
-    public long insert(T stack, boolean sim);
+    public long insert(EnumFacing facing,T stack, boolean sim);
 
     // 返回插提取量
-    public long extract(int slot, long amount, boolean sim);
+    public long extract(EnumFacing facing,int slot, long amount, boolean sim);
 
     // 返回提取量
-    public long extract(T stack, boolean sim);
+    public long extract(EnumFacing facing,T stack, boolean sim);
 
 
 }
