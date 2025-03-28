@@ -1,10 +1,11 @@
 package com.wintercogs.beyonddimensions.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
-import mekanism.api.Action;
-import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasHandler;
+import mekanism.api.gas.*;
+import net.minecraft.util.EnumFacing;
 
+
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class ChemicalStackTypedHandler implements IGasHandler
@@ -16,102 +17,101 @@ public class ChemicalStackTypedHandler implements IGasHandler
         this.handlerStorage = handlerStorage;
     }
 
-    @Override
-    public int getTanks()
+    public static class GasTankInfoWarrper implements GasTankInfo
+    {
+        int tank;
+        ChemicalStackTypedHandler handler;
+
+        public GasTankInfoWarrper(int tank, ChemicalStackTypedHandler handler)
+        {
+            this.tank = tank;
+            this.handler = handler;
+        }
+
+
+        @Nullable
+        @Override
+        public GasStack getGas()
+        {
+            // 此处的slot参数是基于特化类型ItemStackType的索引
+            List<Integer> slots = handler.handlerStorage.getTypeIdIndexList(ChemicalStackType.ID);
+            int actualIndex = -1;
+            if(slots != null && 0<=tank && tank < slots.size())
+            {
+                actualIndex = slots.get(tank);
+            }
+
+            if(actualIndex != -1)
+            {
+                return (GasStack) handler.handlerStorage.getStackBySlot(actualIndex).getStack();
+            }
+            else return new GasStack(GasRegistry.getGas(0),0);
+        }
+
+        @Override
+        public int getStored()
+        {
+            return getGas().amount;
+        }
+
+        @Override
+        public int getMaxGas()
+        {
+            return 64000;
+        }
+    }
+
+
+
+    public GasTankInfo[] getTankInfo()
     {
         List<Integer> slots = handlerStorage.getTypeIdIndexList(ChemicalStackType.ID);
         if(slots != null)
-            return slots.size();
-        else return 0;
-    }
-
-    @Override
-    public GasStack getChemicalInTank(int tank)
-    {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(ChemicalStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=tank && tank < slots.size())
         {
-            actualIndex = slots.get(tank);
+            GasTankInfo[] TankProperties = new GasTankInfo[slots.size()];
+
+            for(int i = 0; i < slots.size(); i++)
+            {
+                TankProperties[i] = new GasTankInfoWarrper(i,this);
+            }
+
+            return TankProperties;
         }
 
-        if(actualIndex != -1)
-        {
-            return (GasStack) handlerStorage.getStackBySlot(actualIndex).getStack();
-        }
-        else return GasStack.EMPTY;
+        return new GasTankInfo[0];
     }
 
-    // 直接设置指定槽位化学品
+
+    // 返回插入量
     @Override
-    public void setChemicalInTank(int tank, GasStack stack)
+    public int receiveGas(EnumFacing enumFacing, GasStack stack, boolean sim)
     {
-        int actualIndex = -1;
-        actualIndex = handlerStorage.getTypeIdIndexList(ChemicalStackType.ID).get(tank);
-        if(actualIndex >= 0)
-            handlerStorage.setStackDirectly(actualIndex,new ChemicalStackType(stack.copy()));
+        if(stack.amount <=0)
+            return 0;
+        long remaining = handlerStorage.insert(new ChemicalStackType(stack.copy()), sim).getStackAmount();
+        if(remaining>0)
+            return (int) (stack.amount-remaining);
+        return stack.amount;// 全部插入
     }
 
     @Override
-    public long getTankCapacity(int tank)
+    public GasStack drawGas(EnumFacing enumFacing, int amount, boolean sim)
     {
-        return 64000L;
+        int actualIndex = handlerStorage.getTypeIdIndexList(ChemicalStackType.ID).get(0);
+        return ((ChemicalStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copy(),sim))
+                .copyStack();
     }
 
     @Override
-    public boolean isValid(int tank, GasStack stack)
+    public boolean canReceiveGas(EnumFacing enumFacing, Gas gas)
     {
         return true;
     }
 
     @Override
-    public GasStack insertChemical(int tank, GasStack stack, Action action)
+    public boolean canDrawGas(EnumFacing enumFacing, Gas gas)
     {
-        if(stack.isEmpty())
-            return GasStack.EMPTY;
-        long remaining = handlerStorage.insert(handlerStorage.getTypeIdIndexList(ChemicalStackType.ID).get(tank),new ChemicalStackType(stack.copy()), action.simulate()).getStackAmount();
-        if(remaining>0)
-            return new GasStack(stack, remaining);
-        return GasStack.EMPTY;
+        return true;
     }
 
-    @Override
-    public GasStack extractChemical(int tank, long amount, Action action)
-    {
-        return ((ChemicalStackType)handlerStorage.extract(handlerStorage.getTypeIdIndexList(ChemicalStackType.ID).get(tank),amount,action.simulate()))
-                .copyStack();
-    }
-
-    @Override
-    public GasStack insertChemical(GasStack stack, Action action)
-    {
-        if(stack.isEmpty())
-            return GasStack.EMPTY;
-        long remaining = handlerStorage.insert(new ChemicalStackType(stack.copy()), action.simulate()).getStackAmount();
-        if(remaining>0)
-            return new GasStack(stack, remaining);
-        return GasStack.EMPTY;// 始终全部插入
-    }
-
-    @Override
-    public GasStack extractChemical(long amount, Action action)
-    {
-        int actualIndex = handlerStorage.getTypeIdIndexList(ChemicalStackType.ID).get(0);
-        return ((ChemicalStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copy(),action.simulate()))
-                .copyStack();
-    }
-
-    @Override
-    public GasStack extractChemical(GasStack stack, Action action)
-    {
-        return ((ChemicalStackType)handlerStorage.extract(new ChemicalStackType(stack.copy()),action.simulate()))
-                .copyStack();
-    }
-
-    @Override
-    public GasStack getEmptyStack()
-    {
-        return GasStack.EMPTY;
-    }
 }

@@ -3,11 +3,12 @@ package com.wintercogs.beyonddimensions.DataBase.Handler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.util.Constants;
 
 import java.util.*;
 import java.util.function.Function;
@@ -308,40 +309,40 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     // region 序列化方法
-    public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-        ListTag stacksTag = new ListTag();
+    public NBTTagCompound serializeNBT() {
+        NBTTagCompound tag = new NBTTagCompound();
+        NBTTagList stacksTag = new NBTTagList();
 
         for (int i = 0; i< getStorage().size() ;i++) {
             IStackType stack = getStorage().get(i);
 
-            CompoundTag stackTag = new CompoundTag();
+            NBTTagCompound stackTag = new NBTTagCompound();
             if(stack.isEmpty()) // 为空物品执行占位机制
             {
-                stackTag.put("TypedStack",IntTag.valueOf(1));
-                stackTag.putString("Type","Empty");
+                stackTag.setTag("TypedStack",new NBTTagInt(1));
+                stackTag.setString("Type","Empty");
             }
             else
             {
                 // 使用类型安全的序列化方式 将堆叠数据放入"Data"标签
-                stackTag.put("TypedStack",stack.serializeNBT());
-                stackTag.putString("Type",stack.getTypeId().toString());
+                stackTag.setTag("TypedStack",stack.serializeNBT());
+                stackTag.setString("Type",stack.getTypeId().toString());
 
             }
-            stacksTag.add(stackTag);
+            stacksTag.appendTag(stackTag);
         }
 
-        tag.put("Stacks", stacksTag);
+        tag.setTag("Stacks", stacksTag);
         return tag;
     }
 
-    public void deserializeNBT(CompoundTag tag) {
+    public void deserializeNBT(NBTTagCompound tag) {
         storage.clear();
         typeIdIndex.clear();
-        ListTag stacksTag = tag.getList("Stacks", Tag.TAG_COMPOUND);
+        NBTTagList stacksTag = tag.getTagList("Stacks", Constants.NBT.TAG_COMPOUND);
 
-        for (Tag t : stacksTag) {
-            CompoundTag stackTag = (CompoundTag) t;
+        for (NBTBase t : stacksTag) {
+            NBTTagCompound stackTag = (NBTTagCompound) t;
             String type = stackTag.getString("Type");
             if(type.equals("Empty"))
             {
@@ -350,9 +351,9 @@ public class StackTypedHandler implements IStackTypedHandler
             }
             else
             {
-                ResourceLocation typeId = ResourceLocation.tryParse(type);
+                ResourceLocation typeId = new ResourceLocation(type);
                 IStackType stackEmpty = StackTypeRegistry.getType(typeId).copy();
-                IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"));
+                IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompoundTag("TypedStack"));
                 storage.add(stackActual); // 无论是不是空体，都添加
                 typeIdIndex.computeIfAbsent(stackActual.getTypeId(), k -> new ArrayList<>()).add(storage.size() - 1);
             }
