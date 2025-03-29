@@ -1,21 +1,33 @@
 package com.wintercogs.beyonddimensions.Gui;
 
 import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.drawable.keys.StringKey;
 import com.cleanroommc.modularui.factory.GuiData;
 import com.cleanroommc.modularui.factory.SimpleGuiFactory;
 import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.ModularScreen;
 import com.cleanroommc.modularui.value.sync.GuiSyncManager;
 import com.cleanroommc.modularui.value.sync.ValueSyncHandler;
+import com.cleanroommc.modularui.widget.ScrollWidget;
+import com.cleanroommc.modularui.widget.scroll.VerticalScrollData;
 import com.cleanroommc.modularui.widget.sizer.Flex;
+import com.cleanroommc.modularui.widgets.CycleButtonWidget;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
+import com.cleanroommc.modularui.widgets.TextWidget;
+import com.cleanroommc.modularui.widgets.textfield.TextEditorWidget;
+import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
+import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Gui.Slots.StackTypedSlot;
+import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 public class BDBaseGUI implements IGuiHolder<GuiData>
@@ -27,6 +39,12 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
 
     private IStackTypedHandler stackTypedHandler;
     private IStackTypedHandler viewerStackTypedHandler;
+    private int lines = 6; //渲染的menu行数
+    public int lineData = 0;//从第几行开始渲染？
+    public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
+    private String searchText = "";
+    private ButtonState reverseState = ButtonState.DISABLED;
+    private ButtonState sortState = ButtonState.SORT_DEFAULT;
 
     private GuiData guiData;
     private List<StackTypedSlot> slots = new ArrayList<>(); // 直接引用，用于设置索引数据
@@ -46,19 +64,102 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
 
 
         if(!guiData.isClient())
+            // 在服务端传入真实存储
             stackTypedHandler = DimensionsNet.getNetFromPlayer(guiData.getPlayer()).getUnifiedStorage();
+
+        // 添加滚动区域
+        // 这个泛型是为了什么？
+        ScrollWidget scrollWidget = new ScrollWidget(new VerticalScrollData()){
+            @Override
+            public boolean onMouseScroll(ModularScreen.UpOrDown scrollDirection, int amount)
+            {
+                super.onMouseScroll(scrollDirection, amount);
+                if (scrollDirection.isUp())
+                {
+                    lineData--;
+                } else if(scrollDirection.isDown())
+                {
+                    lineData++;
+                }
+                //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
+                buildIndexList(new ArrayList<>(viewerStackTypedHandler.getStorage()));
+                return true;
+            }
+        };
+        ((Flex)scrollWidget.flex().coverChildren()).startDefaultMode().leftRel(0.5F);
+        scrollWidget.flex().bottom(95);
+        scrollWidget.flex().endDefaultMode();
+        scrollWidget.debugName("ScrollWidget");
+
+        // 搜索输入区域
+        TextFieldWidget textFieldWidget = new TextFieldWidget(){
+
+            @Override
+            public void onUpdate()
+            {
+                super.onUpdate();
+                searchText = this.getText();
+            }
+        };
+        textFieldWidget.top(5).leftRel(0.5f).width(85);
+
+        // 倒序按钮
+        CycleButtonWidget reverseButton = new CycleButtonWidget()
+        {
+            @Override
+            public void next()
+            {
+                super.next();
+                if(reverseState == ButtonState.DISABLED)
+                    reverseState = ButtonState.ENABLED;
+                else
+                    reverseState = ButtonState.DISABLED;
+            }
+        };
+        reverseButton.length(2)
+                .addTooltip(0,"顺序")
+                .addTooltip(1,"倒序");
+
+        // 排序方式按钮
+        CycleButtonWidget sortMethodButton = new CycleButtonWidget()
+        {
+            @Override
+            public void next()
+            {
+                super.next();
+                if(sortState==ButtonState.SORT_DEFAULT)
+                    sortState = ButtonState.SORT_NAME;
+                else if(sortState==ButtonState.SORT_NAME)
+                    sortState = ButtonState.SORT_QUANTITY;
+                else
+                    sortState = ButtonState.SORT_DEFAULT;
+            }
+        };
+        sortMethodButton.left(18)
+                .length(3)
+                .addTooltip(0,"默认")
+                .addTooltip(1,"名称")
+                .addTooltip(2,"数量");
+
+        //添加玩家仓库和存储面板
         ModularPanel panel = ModularPanel.defaultPanel("test")
+                .height(230)
                 .bindPlayerInventory()
-                .child(buildStackTypedSlots(stackTypedHandler));
+                .child(scrollWidget.child(buildStackTypedSlots(stackTypedHandler)))
+                .child(textFieldWidget)
+                .child(reverseButton)
+                .child(sortMethodButton);
+
+
         return panel;
     }
+
+
 
     public SlotGroupWidget buildStackTypedSlots(IStackTypedHandler stackTypedHandler)
     {
         SlotGroupWidget slotGroupWidget = new SlotGroupWidget();
-        ((Flex)slotGroupWidget.flex().coverChildren()).startDefaultMode().leftRel(0.5F);
-        slotGroupWidget.flex().bottom(95);
-        slotGroupWidget.flex().endDefaultMode();
+        slotGroupWidget.flex().coverChildren();
         slotGroupWidget.debugName("StackTypedSlots");
 
         String key = "StackTypedSlots";
@@ -122,32 +223,20 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
         // 1 构建正确的索引数据
         ArrayList<Integer> cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
         // 2 构建linedata
-        //updateScrollLineData(cacheIndex.size());
+        updateScrollLineData(cacheIndex.size());
         // 3 填入索引表
         ArrayList<Integer> indexList = new ArrayList<>();
-//        for (int i = 0; i < lines * 9; i++)
-//        {
-//            //根据翻页数据构建索引列表
-//            if (i + lineData * 9 < cacheIndex.size())
-//            {
-//                int index = cacheIndex.get(i + lineData * 9);
-//                indexList.add(index);
-//            }
-//            else
-//            {
-//                indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
-//            }
-//        }
-        for(int i = 0; i < cacheIndex.size(); i++)
+        for (int i = 0; i < lines * 9; i++)
         {
-            if(i < cacheIndex.size())
+            //根据翻页数据构建索引列表
+            if (i + lineData * 9 < cacheIndex.size())
             {
-                int index = cacheIndex.get(i);
+                int index = cacheIndex.get(i + lineData * 9);
                 indexList.add(index);
             }
             else
             {
-                indexList.add(-1);
+                indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
             }
         }
         // 加载索引表
@@ -163,23 +252,6 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
         }
     }
 
-//    /**
-//     * 设置当前菜单searchText，过程中会将其按照英文本地化惯例进行小写化处理
-//     * @param text 传入的文本
-//     */
-//    public void loadSearchText(String text)
-//    {
-//        this.searchText = text.toLowerCase(Locale.ENGLISH);
-//    }
-//
-//    /**
-//     * 设置当前菜单的buttonStateMap
-//     * @param buttonStateMap 传入的Map
-//     */
-//    public void loadButtonState(HashMap<ButtonName,ButtonState> buttonStateMap)
-//    {
-//        this.buttonStateMap = buttonStateMap;
-//    }
 
     /**
      * 根据当前的搜索状态、按钮状态对存储进行排序
@@ -195,49 +267,48 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
             if (stack == null || stack.isEmpty()) continue;
 
             // 提前过滤空气，并缓存名称和拼音
-//            String displayName = stack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
-//            String allPinyin = TinyPinyinUtils.getAllPinyin(displayName, false).toLowerCase(Locale.ENGLISH);
-//            String firstPinyin = TinyPinyinUtils.getFirstPinYin(displayName).toLowerCase(Locale.ENGLISH);
-//            boolean matchesSearch = searchText == null || searchText.isEmpty() ||
-//                    displayName.contains(searchText) ||
-//                    allPinyin.contains(searchText) ||
-//                    firstPinyin.contains(searchText) ||
-//                    checkTooltipMatches(stack,searchText);
+            String displayName = stack.getDisplayName().toLowerCase(Locale.ENGLISH);
+            String allPinyin = TinyPinyinUtils.getAllPinyin(displayName, false).toLowerCase(Locale.ENGLISH);
+            String firstPinyin = TinyPinyinUtils.getFirstPinYin(displayName).toLowerCase(Locale.ENGLISH);
+            boolean matchesSearch = searchText == null || searchText.isEmpty() ||
+                    displayName.contains(searchText) ||
+                    allPinyin.contains(searchText) ||
+                    firstPinyin.contains(searchText) ||
+                    checkTooltipMatches(stack,searchText);
 
-            boolean matchesSearch = true;
             if (matchesSearch) {
                 cache.add(stack);
                 cacheIndex.add(i);
             }
         }
 
-//        // 统一排序逻辑，避免重复代码
-//        ButtonState sortState = buttonStateMap.get(ButtonName.SortMethodButton);
-//        if (sortState != ButtonState.SORT_DEFAULT) {
-//            Comparator<IStackType> comparator = sortState == ButtonState.SORT_NAME ?
-//                    Comparator.comparing(item -> item.getDisplayName().getString()) :
-//                    Comparator.comparingLong(IStackType::getStackAmount);
-//
-//            // 生成索引排序映射
-//            ArrayList<IStackType> finalCache = cache;
-//            List<Integer> indices = IntStream.range(0, cache.size())
-//                    .boxed()
-//                    .sorted((a, b) -> comparator.compare(finalCache.get(a), finalCache.get(b)))
-//                    .collect(Collectors.toList());
-//
-//            // 这一步排序完成后不再需要缓存
-//            // 根据排序结果重组索引
-//            ArrayList<Integer> sortedIndices = new ArrayList<>(cacheIndex.size());
-//            for (int index : indices) {
-//                sortedIndices.add(cacheIndex.get(index));
-//            }
-//            cacheIndex = sortedIndices;
-//        }
-//
-//        // 直接通过排序器处理倒序，避免反转操作
-//        if (buttonStateMap.get(ButtonName.ReverseButton) == ButtonState.ENABLED) {
-//            Collections.reverse(cacheIndex);
-//        }
+        // 统一排序逻辑，避免重复代码
+        ButtonState sortState = this.sortState;
+        if (sortState != ButtonState.SORT_DEFAULT) {
+            Comparator<IStackType> comparator = sortState == ButtonState.SORT_NAME ?
+                    Comparator.comparing(item -> item.getDisplayName()) :
+                    Comparator.comparingLong(IStackType::getStackAmount);
+
+            // 生成索引排序映射
+            ArrayList<IStackType> finalCache = cache;
+            List<Integer> indices = IntStream.range(0, cache.size())
+                    .boxed()
+                    .sorted((a, b) -> comparator.compare(finalCache.get(a), finalCache.get(b)))
+                    .collect(Collectors.toList());
+
+            // 这一步排序完成后不再需要缓存
+            // 根据排序结果重组索引
+            ArrayList<Integer> sortedIndices = new ArrayList<>(cacheIndex.size());
+            for (int index : indices) {
+                sortedIndices.add(cacheIndex.get(index));
+            }
+            cacheIndex = sortedIndices;
+        }
+
+        // 直接通过排序器处理倒序，避免反转操作
+        if (reverseState == ButtonState.ENABLED) {
+            Collections.reverse(cacheIndex);
+        }
 
         return cacheIndex;
     }
@@ -257,18 +328,18 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
                 .anyMatch(tooltip -> tooltip.toLowerCase(Locale.ENGLISH).contains(matchText));
     }
 
-//    public void updateScrollLineData(int dataSize)
-//    {
-//        maxLineData = dataSize / 9 ;
-//        if(dataSize % 9 !=0) //如果余数不为0，说明还有一行，加1
-//        {
-//            maxLineData++;
-//        }
-//        maxLineData -= lines;
-//        maxLineData = Math.max(maxLineData,0);
-//        lineData = Math.max(lineData,0);
-//        lineData = Math.min(lineData,maxLineData);
-//    }
+    public void updateScrollLineData(int dataSize)
+    {
+        maxLineData = dataSize / 9 ;
+        if(dataSize % 9 !=0) //如果余数不为0，说明还有一行，加1
+        {
+            maxLineData++;
+        }
+        maxLineData -= lines;
+        maxLineData = Math.max(maxLineData,0);
+        lineData = Math.max(lineData,0);
+        lineData = Math.min(lineData,maxLineData);
+    }
 
 
 
