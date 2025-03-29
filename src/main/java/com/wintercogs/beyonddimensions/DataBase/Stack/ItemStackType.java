@@ -290,11 +290,12 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     @SideOnly(Side.CLIENT)
     @Override
-    public void render(GuiScreen gui, int x, int y) {
+    public void render(int x, int y) {
         // 渲染物品图标
+        Minecraft mc = Minecraft.getMinecraft();
         RenderHelper.enableGUIStandardItemLighting();
-        gui.mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x, y); // 使用RenderItem渲染物品
-        gui.mc.getRenderItem().renderItemOverlayIntoGUI(gui.mc.fontRenderer, stack, x, y, ""); // 渲染默认覆盖层（数量/耐久）
+        mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x, y); // 使用RenderItem渲染物品
+        mc.getRenderItem().renderItemOverlayIntoGUI(mc.fontRenderer, stack, x, y, ""); // 渲染默认覆盖层（数量/耐久）
         RenderHelper.disableStandardItemLighting();
 
         String countText = getCountText(getStackAmount());
@@ -303,11 +304,11 @@ public class ItemStackType implements IStackType<ItemStack> {
         GlStateManager.translate(0, 0, 200);
         GlStateManager.scale(scale, scale, 1.0f);
         // 计算缩放后的坐标（1.12.2的坐标系缩放逻辑）
-        int textWidth = gui.mc.fontRenderer.getStringWidth(countText);
+        int textWidth = mc.fontRenderer.getStringWidth(countText);
         int scaledX = (int)((x + 16 - textWidth * scale + 2) / scale);
         int scaledY = (int)((y + 16 - 5 * scale) / scale);
         // 直接绘制带阴影的文本（对应原版样式）
-        gui.mc.fontRenderer.drawStringWithShadow(
+        mc.fontRenderer.drawStringWithShadow(
                 countText,
                 scaledX,
                 scaledY,
@@ -341,7 +342,7 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     @SideOnly(Side.CLIENT)
     @Override
-    public void renderTooltip(GuiScreen gui,int mouseX, int mouseY)
+    public void renderTooltip(int mouseX, int mouseY)
     {
         Minecraft mc = Minecraft.getMinecraft();
 
@@ -355,8 +356,8 @@ public class ItemStackType implements IStackType<ItemStack> {
                 tooltip,
                 mouseX,
                 mouseY,
-                gui.width, // 使用GUI的完整宽度
-                gui.height,
+                mc.displayWidth,
+                mc.displayHeight,
                 -1, // 最大宽度（-1表示自动）
                 mc.fontRenderer
         );

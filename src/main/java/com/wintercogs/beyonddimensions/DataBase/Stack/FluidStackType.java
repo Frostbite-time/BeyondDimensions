@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
+import com.cleanroommc.modularui.utils.Color;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Render.IngredientRenderer;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
@@ -339,45 +340,27 @@ public class FluidStackType implements IStackType<FluidStack>
 
     @SideOnly(Side.CLIENT)
     @Override
-    public void render(GuiScreen gui, int x, int y)
+    public void render(int x, int y)
     {
         FluidStack fluidStack = this.stack;
-        if (fluidStack == null) return;
-        // 保存当前渲染状态
-        GlStateManager.pushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        // 渲染流体图标
-        Fluid fluid = fluidStack.getFluid();
-        if (fluid != null && fluid.getStill() != null) {
-            // 绑定纹理图集
-            Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        if (fluidStack == null || isEmpty()) return;
 
-            // 获取流体颜色（带透明度）
-            int color = fluid.getColor(fluidStack);
-            float a = (color >> 24 & 0xFF) / 255f;
-            float r = (color >> 16 & 0xFF) / 255f;
-            float g = (color >> 8 & 0xFF) / 255f;
-            float b = (color & 0xFF) / 255f;
-            GlStateManager.color(r, g, b, a);
-            // 获取流体纹理
-            TextureAtlasSprite sprite = Minecraft.getMinecraft()
-                    .getTextureMapBlocks()
-                    .getAtlasSprite(fluid.getStill().toString());
-            // 调用渲染方法（参数顺序根据签名调整）
-            IngredientRenderer.drawTiledSprite(
-                    16,                // tiledWidth
-                    16,                // tiledHeight
-                    color,             // color
-                    fluidStack.amount, // scaledAmount (可能需要调整量级)
-                    sprite,            // sprite
-                    x,                 // posX
-                    y                  // posY
-            );
-        }
-        // 恢复渲染状态
-        GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
+        // 渲染图标
+        Fluid fluid = fluidStack.getFluid();
+        ResourceLocation fluidStill = fluid.getStill(fluidStack);
+        TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(fluidStill.toString());
+        int fluidColor = fluid.getColor(fluidStack);
+        IngredientRenderer.drawTiledSprite(
+                16,
+                16,
+                fluidColor,
+                16,
+                sprite,
+                x,
+                y
+        );
+
+
         // 渲染数量文本
         if (fluidStack.amount > 0) {
             String countText = getCountText(fluidStack.amount);
@@ -464,7 +447,7 @@ public class FluidStackType implements IStackType<FluidStack>
 
     @SideOnly(Side.CLIENT)
     @Override
-    public void renderTooltip(GuiScreen gui, int mouseX, int mouseY)
+    public void renderTooltip(int mouseX, int mouseY)
     {
         Minecraft mc = Minecraft.getMinecraft();
 
@@ -478,8 +461,8 @@ public class FluidStackType implements IStackType<FluidStack>
                 tooltip,
                 mouseX,
                 mouseY,
-                gui.width, // 使用GUI的完整宽度
-                gui.height,
+                mc.displayWidth,
+                mc.displayHeight,
                 -1, // 最大宽度（-1表示自动）
                 mc.fontRenderer
         );

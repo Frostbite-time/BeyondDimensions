@@ -17,6 +17,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -283,44 +284,26 @@ public class ChemicalStackType implements IStackType<GasStack>
 
     @SideOnly(Side.CLIENT)
     @Override
-    public void render(GuiScreen gui, int x, int y)
+    public void render(int x, int y)
     {
 
         GasStack gasStack = this.stack;
-        if (gasStack == null) return;
-        // 保存当前渲染状态
-        GlStateManager.pushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        // 渲染流体图标
-        Gas gas = gasStack.getGas();
-        if (gas != null && gas.getIcon() != null) {
-            // 绑定纹理图集
-            Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        if (gasStack == null&& !isEmpty()) return;
 
-            // 获取流体颜色（带透明度）
-            int color = gas.getTint();
-            float a = 1;
-            float r = (color >> 16 & 0xFF) / 255f;
-            float g = (color >> 8 & 0xFF) / 255f;
-            float b = (color & 0xFF) / 255f;
-            GlStateManager.color(r, g, b, a);
-            // 获取流体纹理
-            TextureAtlasSprite sprite = gas.getSprite();
-            // 调用渲染方法（参数顺序根据签名调整）
-            IngredientRenderer.drawTiledSprite(
-                    16,                // tiledWidth
-                    16,                // tiledHeight
-                    color,             // color
-                    gasStack.amount, // scaledAmount (可能需要调整量级)
-                    sprite,            // sprite
-                    x,                 // posX
-                    y                  // posY
-            );
-        }
-        // 恢复渲染状态
-        GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
+        // 渲染图标
+        Gas gas = gasStack.getGas();
+        TextureAtlasSprite sprite = gas.getSprite();
+        int gasColor = gas.getTint();
+        IngredientRenderer.drawTiledSprite(
+                16,
+                16,
+                gasColor,
+                16,
+                sprite,
+                x,
+                y
+        );
+
         // 渲染数量文本
         if (gasStack.amount > 0) {
             String countText = getCountText(gasStack.amount);
@@ -388,7 +371,7 @@ public class ChemicalStackType implements IStackType<GasStack>
 
     @SideOnly(Side.CLIENT)
     @Override
-    public void renderTooltip(GuiScreen gui, int mouseX, int mouseY)
+    public void renderTooltip(int mouseX, int mouseY)
     {
         Minecraft mc = Minecraft.getMinecraft();
 
@@ -402,8 +385,8 @@ public class ChemicalStackType implements IStackType<GasStack>
                 tooltip,
                 mouseX,
                 mouseY,
-                gui.width, // 使用GUI的完整宽度
-                gui.height,
+                mc.displayWidth,
+                mc.displayHeight,
                 -1, // 最大宽度（-1表示自动）
                 mc.fontRenderer
         );

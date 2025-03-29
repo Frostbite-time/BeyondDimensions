@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
@@ -157,7 +158,10 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements ITickab
                 if(stack !=null &&!stack.isEmpty())
                 {
                     net.getUnifiedStorage().insert(stack.copy(),false);
-                    stackHandler.setStackDirectly(i, new ItemStackType());
+                    if(i<stackHandler.getSlots()/2)
+                        stackHandler.setStackDirectly(i, new ItemStackType());
+                    else
+                        stackHandler.setStackDirectly(i, new FluidStackType());
                 }
             }
         }

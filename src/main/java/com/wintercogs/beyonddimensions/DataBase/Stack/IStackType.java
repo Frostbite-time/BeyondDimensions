@@ -105,7 +105,7 @@ public interface IStackType<T> {
 
     // UI渲染（在指定位置绘制图标和数量）
     @SideOnly(Side.CLIENT)
-    void render(GuiScreen gui, int x, int y);
+    void render(int x, int y);
 
     String getCountText(long count);
 
@@ -117,6 +117,6 @@ public interface IStackType<T> {
     //Optional<TooltipComponent> getTooltipImage();
 
     @SideOnly(Side.CLIENT)
-    void renderTooltip(GuiScreen gui, int mouseX, int mouseY);
+    void renderTooltip(int mouseX, int mouseY);
 
 }
