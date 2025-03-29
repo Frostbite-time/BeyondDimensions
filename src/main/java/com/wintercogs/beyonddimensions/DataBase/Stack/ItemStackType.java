@@ -305,13 +305,19 @@ public class ItemStackType implements IStackType<ItemStack> {
         GlStateManager.scale(scale, scale, 1.0f);
         // 计算缩放后的坐标（1.12.2的坐标系缩放逻辑）
         int textWidth = mc.fontRenderer.getStringWidth(countText);
-        int scaledX = (int)((x + 16 - textWidth * scale + 2) / scale);
-        int scaledY = (int)((y + 16 - 5 * scale) / scale);
+        final int X = (int)(
+                (x + -2 + 16.0f + 2.0f - textWidth * 0.666f)
+                        * 1.0f / 0.666f
+        );
+        final int Y = (int)(
+                (y + -1 + 16.0f - 5.0f * 0.666f)
+                        * 1.0f / 0.666f
+        );
         // 直接绘制带阴影的文本（对应原版样式）
         mc.fontRenderer.drawStringWithShadow(
                 countText,
-                scaledX,
-                scaledY,
+                X,
+                Y,
                 0xFFFFFF
         );
         GlStateManager.popMatrix();

@@ -314,13 +314,19 @@ public class ChemicalStackType implements IStackType<GasStack>
             GlStateManager.scale(scale, scale, 1);
 
             // 计算位置（根据缩放系数调整）
-            int textX = (int) ((x + 16 - 2 - Minecraft.getMinecraft().fontRenderer.getStringWidth(countText) * scale) / scale);
-            int textY = (int) ((y + 16 - 8) / scale);
+            final int X = (int)(
+                    (x + -2 + 16.0f + 2.0f - Minecraft.getMinecraft().fontRenderer.getStringWidth(countText) * 0.666f)
+                            * 1.0f / 0.666f
+            );
+            final int Y = (int)(
+                    (y + -1 + 16.0f - 5.0f * 0.666f)
+                            * 1.0f / 0.666f
+            );
 
             Minecraft.getMinecraft().fontRenderer.drawString(
                     countText,
-                    textX,
-                    textY,
+                    X,
+                    Y,
                     0xFFFFFF,
                     true
             );

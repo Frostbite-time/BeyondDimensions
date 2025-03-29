@@ -184,8 +184,10 @@ public class UnorderdStackTypedHandlerSync extends ValueSyncHandler<IStackTypedH
             i++; // 一次遍历完毕后索引自增
         }
 
-
+        // 调用change
+        onValueChanged();
     }
+
 
 
 
