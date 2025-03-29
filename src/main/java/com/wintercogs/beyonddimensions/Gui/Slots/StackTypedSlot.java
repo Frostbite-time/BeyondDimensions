@@ -5,6 +5,7 @@ import com.cleanroommc.modularui.api.widget.Interactable;
 import com.cleanroommc.modularui.drawable.GuiDraw;
 import com.cleanroommc.modularui.integration.jei.JeiGhostIngredientSlot;
 import com.cleanroommc.modularui.integration.jei.JeiIngredientProvider;
+import com.cleanroommc.modularui.screen.Tooltip;
 import com.cleanroommc.modularui.screen.viewport.GuiContext;
 import com.cleanroommc.modularui.theme.WidgetSlotTheme;
 import com.cleanroommc.modularui.theme.WidgetTheme;
@@ -14,9 +15,12 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Gui.Sync.UnorderdStackTypedHandlerSync;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.util.ITooltipFlag;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactable, JeiGhostIngredientSlot<IStackType<?>>, JeiIngredientProvider
 {
@@ -105,11 +109,10 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
         // 渲染成分
         IStackType stackType = stackTypedHandler.getStackBySlot(getSlotIndex());
         if(stackType != null && !stackType.isEmpty())
+        {
+            // 图片以及数量
             stackType.render(1, 1);
-
-        // 渲染成分文本
-
-        // 渲染提示词
+        }
 
         // 渲染覆盖层
         if (this.isHovering()) {
@@ -118,6 +121,22 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
             GlStateManager.colorMask(true, true, true, true);
         }
 
+    }
+
+    @Override
+    public Tooltip getTooltip()
+    {
+        IStackType stackType = stackTypedHandler.getStackBySlot(getSlotIndex());
+        Tooltip tooltip = (new Tooltip()).excludeArea(this.getArea());
+        if (stackType != null && !stackType.isEmpty())
+        {
+
+            for (String line : (List<String>) stackType.getTooltipLines(Minecraft.getMinecraft().player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL))
+            {
+                tooltip.addLine(line);
+            }
+        }
+        return tooltip;
     }
 
     @Override

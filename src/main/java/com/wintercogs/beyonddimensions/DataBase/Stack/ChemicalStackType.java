@@ -368,7 +368,7 @@ public class ChemicalStackType implements IStackType<GasStack>
             }
         }
 
-        tooltips.add("Mekanism");
+        tooltips.add(TextFormatting.BLUE.toString() + TextFormatting.ITALIC + "Mekanism");
 
         tooltips.add("已存储:"+getStackAmount()+"mB");
         return tooltips;
