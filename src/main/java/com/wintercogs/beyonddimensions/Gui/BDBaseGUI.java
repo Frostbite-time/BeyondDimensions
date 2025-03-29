@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Gui;
 
 import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.drawable.UITexture;
 import com.cleanroommc.modularui.drawable.keys.StringKey;
 import com.cleanroommc.modularui.factory.GuiData;
 import com.cleanroommc.modularui.factory.SimpleGuiFactory;
@@ -16,6 +17,7 @@ import com.cleanroommc.modularui.widgets.SlotGroupWidget;
 import com.cleanroommc.modularui.widgets.TextWidget;
 import com.cleanroommc.modularui.widgets.textfield.TextEditorWidget;
 import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
@@ -117,6 +119,7 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
             }
         };
         reverseButton.length(2)
+                .texture(UITexture.fullImage(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_reverse.png"))
                 .addTooltip(0,"顺序")
                 .addTooltip(1,"倒序");
 
@@ -137,6 +140,7 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
         };
         sortMethodButton.left(18)
                 .length(3)
+                .texture(UITexture.fullImage(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_group.png"))
                 .addTooltip(0,"默认")
                 .addTooltip(1,"名称")
                 .addTooltip(2,"数量");
