@@ -83,8 +83,9 @@ public class ChemicalStackTypedHandler implements IGasHandler
 
     // 返回插入量
     @Override
-    public int receiveGas(EnumFacing enumFacing, GasStack stack, boolean sim)
+    public int receiveGas(EnumFacing enumFacing, GasStack stack, boolean doAction)
     {
+        boolean sim = !doAction;
         if(stack.amount <=0)
             return 0;
         long remaining = handlerStorage.insert(new ChemicalStackType(stack.copy()), sim).getStackAmount();
@@ -93,9 +94,11 @@ public class ChemicalStackTypedHandler implements IGasHandler
         return stack.amount;// 全部插入
     }
 
+
     @Override
-    public GasStack drawGas(EnumFacing enumFacing, int amount, boolean sim)
+    public GasStack drawGas(EnumFacing enumFacing, int amount, boolean doAction)
     {
+        boolean sim = !doAction;
         int actualIndex = handlerStorage.getTypeIdIndexList(ChemicalStackType.ID).get(0);
         return ((ChemicalStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copyWithCount(amount),sim))
                 .copyStack();

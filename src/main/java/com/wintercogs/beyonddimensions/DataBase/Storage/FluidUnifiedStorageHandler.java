@@ -101,8 +101,9 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
 
     // 返回实际插入数量
     @Override
-    public int fill(FluidStack fluidStack, boolean sim)
+    public int fill(FluidStack fluidStack, boolean doAction)
     {
+        boolean sim = !doAction;
         if(fluidStack.amount <=0)
             return 0;
         int allAmount = fluidStack.amount;
@@ -112,8 +113,9 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
 
     // 返回实际导出数量
     @Override
-    public FluidStack drain(FluidStack fluidStack, boolean sim)
+    public FluidStack drain(FluidStack fluidStack, boolean doAction)
     {
+        boolean sim = !doAction;
         return ((FluidStackType)storage.extract(new FluidStackType(fluidStack.copy()),sim))
                 .copyStack();
     }
@@ -122,8 +124,9 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     // 此处处理为，尝试按数量导出第一个槽位的流体
     // 返回实际导出数量
     @Override
-    public FluidStack drain(int count, boolean sim)
+    public FluidStack drain(int count, boolean doAction)
     {
+        boolean sim = !doAction;
         int actualIndex = storage.getTypeIdIndexList(FluidStackType.ID).get(0);
         return ((FluidStackType)storage.extract(storage.getStackBySlot(actualIndex).copy(),sim))
                 .copyStack();

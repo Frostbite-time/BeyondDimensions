@@ -101,8 +101,9 @@ public class FluidStackTypedHandler implements IFluidHandler
 
 
     @Override
-    public int fill(FluidStack fluidStack, boolean sim)
+    public int fill(FluidStack fluidStack, boolean doAction)
     {
+        boolean sim = !doAction;
         if(fluidStack.amount <= 0)
             return 0;
         int allAmount = fluidStack.amount;
@@ -111,15 +112,17 @@ public class FluidStackTypedHandler implements IFluidHandler
     }
 
     @Override
-    public FluidStack drain(FluidStack fluidStack, boolean sim)
+    public FluidStack drain(FluidStack fluidStack, boolean doAction)
     {
+        boolean sim = !doAction;
         return ((FluidStackType)handlerStorage.extract(new FluidStackType(fluidStack.copy()),sim))
                 .copyStack();
     }
 
     @Override
-    public FluidStack drain(int count, boolean sim)
+    public FluidStack drain(int count, boolean doAction)
     {
+        boolean sim = !doAction;
         int actualIndex = handlerStorage.getTypeIdIndexList(FluidStackType.ID).get(0);
         return ((FluidStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copy(),sim))
                 .copyStack();
