@@ -31,12 +31,8 @@ import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.client.model.b3d.B3DModel;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
@@ -194,6 +190,7 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
                             clickActionSync.clickStack = new ItemStackType((ItemStack) slot.getIngredient());
                             clickActionSync.isShiftDown = true;
                             clickActionSync.button = mouseButton;
+                            // 此为此槽在库存(玩家背包中的索引)
                             clickActionSync.slotIndex = slot.getSlot().getSlotIndex();
                             clickActionSync.syncToServer(0,clickActionSync::write);
                         }
@@ -386,6 +383,7 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
         {
             if(clickStack instanceof ItemStackType)
             {
+                // 根据库存中索引获取对应物品
                 ItemStackType clickedItem = new ItemStackType(this.guiSyncManager.getPlayerInventory().getStackInSlot(slotIndex));
                 if(clickedItem != null&&!clickedItem.isEmpty())
                 {
@@ -393,15 +391,12 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
                     long maxMoveCount = Math.min(clickedItem.getStackAmount(),clickedItem.getVanillaMaxStackSize());
                     if(button==1) //如果鼠标是右键 最大传输数量再减半
                         maxMoveCount = maxMoveCount/2;
-                    ItemStack moveIn = clickedItem.copyStackWithCount(maxMoveCount);
-                    IStackType remainStack = stackTypedHandler.insert(clickedItem,false);
+                    IStackType moveIn = clickedItem.copyWithCount(maxMoveCount);
+                    IStackType remainStack = stackTypedHandler.insert(moveIn,false);
                     int needToRemove = (int) (maxMoveCount - remainStack.getStackAmount());
                     if(needToRemove > 0)
                         guiSyncManager.getPlayerInventory().extractItem(slotIndex, needToRemove, false);
-//                    int remaining = moveIn.getCount(); //addItemStackToInventory会修改原物品堆的数量
-//                    int needToRemove = (int) (maxMoveCount - remaining);
-//                    if(needToRemove > 0)
-//                        storage.extract(clickedItem.copyWithCount(needToRemove),false);
+
                 }
 
             }

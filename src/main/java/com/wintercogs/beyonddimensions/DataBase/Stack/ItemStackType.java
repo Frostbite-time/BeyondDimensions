@@ -275,8 +275,9 @@ public class ItemStackType implements IStackType<ItemStack> {
     public NBTTagCompound serializeNBT() {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setLong("Amount", getStackAmount());
-        stack.setCount(1);
-        tag.setTag("Stack",stack.writeToNBT(new NBTTagCompound()));
+        ItemStack copy = stack.copy();
+        copy.setCount(1);
+        tag.setTag("Stack",copy.writeToNBT(new NBTTagCompound()));
         return tag;
     }
 
