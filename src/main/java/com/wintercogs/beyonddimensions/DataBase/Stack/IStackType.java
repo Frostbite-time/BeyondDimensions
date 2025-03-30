@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;

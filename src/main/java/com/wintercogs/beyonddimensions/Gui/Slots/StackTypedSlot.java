@@ -9,12 +9,12 @@ import com.cleanroommc.modularui.screen.Tooltip;
 import com.cleanroommc.modularui.screen.viewport.GuiContext;
 import com.cleanroommc.modularui.theme.WidgetSlotTheme;
 import com.cleanroommc.modularui.theme.WidgetTheme;
+import com.cleanroommc.modularui.value.sync.SyncHandler;
 import com.cleanroommc.modularui.widget.Widget;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Gui.Sync.UnorderdStackTypedHandlerSync;
+import com.wintercogs.beyonddimensions.Gui.Sync.ClickActionSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.util.ITooltipFlag;
@@ -76,38 +76,26 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
         this.fake = fake;
     }
 
-    public StackTypedSlot syncHandler(IStackTypedHandler stackTypedHandler)
+    // 用于设置同步器
+    public StackTypedSlot syncHandler(SyncHandler syncHandler)
     {
-        this.setSyncHandler(new UnorderdStackTypedHandlerSync(stackTypedHandler));
+        this.setSyncHandler(syncHandler);
         return this;
     }
 
-    @Override
-    public void draw(GuiContext context, WidgetTheme widgetTheme) {
-//        IFluidTank fluidTank = this.getFluidTank();
-//        FluidStack content = this.syncHandler.getValue();
-//        if (content != null) {
-//            int y = this.contentOffsetY;
-//            float height = (float)(this.getArea().height - y * 2);
-//            if (!this.alwaysShowFull) {
-//                float newHeight = height * (float)content.amount * 1.0F / (float)fluidTank.getCapacity();
-//                y += (int)(height - newHeight);
-//                height = newHeight;
-//            }
-//
-//            GuiDraw.drawFluidTexture(content, (float)this.contentOffsetX, (float)y, (float)(this.getArea().width - this.contentOffsetX * 2), height, 0.0F);
-//        }
-//
-//        if (content != null && this.syncHandler.controlsAmount()) {
-//            String s = NumberFormat.formatWithMaxDigits(this.getBaseUnitAmount((double)content.amount)) + this.getBaseUnit();
-//            this.textRenderer.setAlignment(Alignment.CenterRight, (float)(this.getArea().width - this.contentOffsetX) - 1.0F);
-//            this.textRenderer.setPos((int)((float)this.contentOffsetX + 0.5F), (int)((float)this.getArea().height - 5.5F));
-//            this.textRenderer.draw(s);
-//        }
+    public ClickActionSync getClickActionSync()
+    {
+        if(getSyncHandler() instanceof ClickActionSync sync)
+            return sync;
+        return null;
+    }
 
+    @Override
+    public void draw(GuiContext context, WidgetTheme widgetTheme)
+    {
 
         // 渲染成分
-        IStackType stackType = stackTypedHandler.getStackBySlot(getSlotIndex());
+        IStackType stackType = getTypedStackFromUnifiedStorage();
         if(stackType != null && !stackType.isEmpty())
         {
             // 图片以及数量
@@ -145,6 +133,27 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
         return theme.getFluidSlotTheme();
     }
 
+
+
+    // 鼠标事件处理
+    @Override
+    public Result onMouseTapped(int mouseButton)
+    {
+        Interactable.super.onMouseTapped(mouseButton);
+        if(getClickActionSync() != null)
+        {
+            ClickActionSync clickActionSync = getClickActionSync();
+            clickActionSync.isSlotFake = isFake();
+            clickActionSync.clickStack = getTypedStackFromUnifiedStorage();
+            clickActionSync.button = mouseButton;
+            clickActionSync.syncToServer(0,clickActionSync::write);
+            return Result.SUCCESS;
+        }
+        return Result.IGNORE;
+    }
+
+
+    // JEI幽灵槽位处理
     @Override
     public void setGhostIngredient(IStackType<?> iStackType)
     {
@@ -153,7 +162,7 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
 
     @Nullable
     @Override
-    public IStackType<?> castGhostIngredientIfValid( Object o)
+    public IStackType<?> castGhostIngredientIfValid(Object o)
     {
         return null;
     }
@@ -162,6 +171,10 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
     @Override
     public Object getIngredient()
     {
-        return null;
+        IStackType stackType = getTypedStackFromUnifiedStorage();
+        if(stackType != null&& !stackType.isEmpty())
+            return stackType;
+        else
+            return null;
     }
 }

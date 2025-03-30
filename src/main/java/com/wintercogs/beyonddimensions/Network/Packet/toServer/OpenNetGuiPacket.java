@@ -1,25 +1,13 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 
-import com.cleanroommc.modularui.api.IGuiHolder;
-import com.cleanroommc.modularui.factory.GuiData;
-import com.cleanroommc.modularui.factory.SimpleGuiFactory;
-import com.cleanroommc.modularui.screen.ModularPanel;
-import com.cleanroommc.modularui.screen.viewport.GuiContext;
-import com.cleanroommc.modularui.screen.viewport.GuiViewportStack;
-import com.cleanroommc.modularui.value.sync.GuiSyncManager;
 import com.wintercogs.beyonddimensions.Gui.BDBaseGUI;
-import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-
-
-
-import static com.wintercogs.beyonddimensions.Registry.UIRegister.DIMENSIONS_NET_GUI;
 
 public class OpenNetGuiPacket implements IMessage
 {

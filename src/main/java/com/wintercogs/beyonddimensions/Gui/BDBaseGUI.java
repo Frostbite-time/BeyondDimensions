@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.Gui;
 
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.drawable.UITexture;
-import com.cleanroommc.modularui.drawable.keys.StringKey;
 import com.cleanroommc.modularui.factory.GuiData;
 import com.cleanroommc.modularui.factory.SimpleGuiFactory;
 import com.cleanroommc.modularui.screen.ModularPanel;
@@ -14,19 +13,25 @@ import com.cleanroommc.modularui.widget.scroll.VerticalScrollData;
 import com.cleanroommc.modularui.widget.sizer.Flex;
 import com.cleanroommc.modularui.widgets.CycleButtonWidget;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
-import com.cleanroommc.modularui.widgets.TextWidget;
-import com.cleanroommc.modularui.widgets.textfield.TextEditorWidget;
 import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Gui.Slots.StackTypedSlot;
+import com.wintercogs.beyonddimensions.Gui.Sync.ClickActionSync;
+import com.wintercogs.beyonddimensions.Gui.Sync.UnorderdStackTypedHandlerSync;
 import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -48,13 +53,16 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
     private ButtonState reverseState = ButtonState.DISABLED;
     private ButtonState sortState = ButtonState.SORT_DEFAULT;
 
+    // UI信息
     private GuiData guiData;
+    private GuiSyncManager guiSyncManager;
     private List<StackTypedSlot> slots = new ArrayList<>(); // 直接引用，用于设置索引数据
 
     @Override
     public ModularPanel buildUI(GuiData guiData, GuiSyncManager guiSyncManager)
     {
         this.guiData = guiData; // 获取引用
+        this.guiSyncManager = guiSyncManager;
 
         // 真实存储
         stackTypedHandler = new DimensionsNet().getUnifiedStorage();
@@ -162,38 +170,118 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
 
     public SlotGroupWidget buildStackTypedSlots(IStackTypedHandler stackTypedHandler)
     {
-        SlotGroupWidget slotGroupWidget = new SlotGroupWidget();
+        SyncAbleSlotGroupWidget slotGroupWidget = new SyncAbleSlotGroupWidget();
         slotGroupWidget.flex().coverChildren();
         slotGroupWidget.debugName("StackTypedSlots");
 
+        // 设置存储同步器
+        slotGroupWidget.syncHandler(new UnorderdStackTypedHandlerSync(stackTypedHandler));
+        ((ValueSyncHandler)slotGroupWidget.getSyncHandler()).setChangeListener(
+                ()->{
+                    updateViewerStorage();
+                }
+        );
+
         String key = "StackTypedSlots";
 
-        // 为其第一个slot添加自定义同步器同步所有slot，其余空置同步器
         for(int i = 0; i < 54; ++i) {
-            if(i ==0 )
+            // 设置鼠标事件同步器
+            ClickActionSync sync = new ClickActionSync()
             {
-                StackTypedSlot slot = new StackTypedSlot(-1,viewerStackTypedHandler);
-                slotGroupWidget.child(slot.pos(i%9 *18,i/9 *18).syncHandler(stackTypedHandler).debugName("StackTypedSlot_"+i));
-                ((ValueSyncHandler)slot.getSyncHandler()).setChangeListener(
-                        ()->{
-                            updateViewerStorage();
-                        }
-                );
-                slots.add(slot);
-            }
-            else
-            {
-                StackTypedSlot slot = new StackTypedSlot(-1,viewerStackTypedHandler);
-                slotGroupWidget.child(slot.pos(i%9 *18,i/9 *18).debugName("StackTypedSlot_"+i));
-                slots.add(slot);
-            }
+                // 重写read函数，进行读取操作
+                @Override
+                public void read(PacketBuffer packetBuffer) throws IOException
+                {
+                    super.read(packetBuffer);//读取值
+                    if(!guiData.isClient())
+                    {
 
+                        clickHandle(this.clickStack,this.button,isSlotFake, guiData.getPlayer(), stackTypedHandler);
+                        // 完成处理之后主动要求存储同步到客户端
+                        ((ValueSyncHandler<?>) slotGroupWidget.getSyncHandler()).updateCacheFromSource(false);
+                    }
+                }
+            };
+
+            StackTypedSlot slot = new StackTypedSlot(-1,viewerStackTypedHandler).syncHandler(sync);
+            slotGroupWidget.child(slot.pos(i%9 *18,i/9 *18).debugName("StackTypedSlot_"+i));
+            slots.add(slot);
         }
-
 
         return slotGroupWidget;
     }
 
+
+
+
+    // 用于处理鼠标事件的函数
+    protected void clickHandle(IStackType clickStack, int button, boolean isFakeSlot, EntityPlayer player, IStackTypedHandler storage)
+    {
+        // 获取光标物品
+        ItemStack carriedItem = guiSyncManager.getCursorItem();
+
+        if (clickStack.isEmpty())
+        {
+            if (!carriedItem.isEmpty())
+            {   //槽位物品为空，携带物品存在，将携带物品插入槽位
+                int changedCount = button == 0 ? carriedItem.getCount() : 1;
+                storage.insert(StackCreater.Create(ItemStackType.ID, carriedItem.copy(),changedCount),false);
+                int newCount = carriedItem.getCount() - changedCount;
+                if(newCount <=0)
+                {
+                    guiSyncManager.setCursorItem(ItemStack.EMPTY);
+                }
+                else
+                {
+                    ItemStack newCarriedItem = carriedItem.copy();
+                    newCarriedItem.setCount(newCount);
+                    guiSyncManager.setCursorItem(newCarriedItem);
+                }
+            }
+        }
+        else
+        {
+            if(clickStack instanceof ItemStackType clickItem)
+            {
+                if (carriedItem.isEmpty())
+                {   //槽位物品存在，携带物品为空，尝试取出槽位物品
+
+                    // 确保一次取出最大不得超过原版数量
+                    int woundChangeNum = (int) Math.min(clickItem.getStackAmount(), clickItem.getVanillaMaxStackSize());
+                    int actualChangeNum = button == 0 ? woundChangeNum : (woundChangeNum + 1) / 2;
+                    ItemStack takenItem = ((ItemStack) storage.extract(new ItemStackType(clickItem.copyStackWithCount(actualChangeNum)),false).getStack()).copy();
+                    if(takenItem != null)
+                    {
+                        guiSyncManager.setCursorItem(takenItem);
+                        storage.onChange();
+                    }
+                }
+                else if (true)
+                {   //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
+                    int changedCount = button == 0 ? carriedItem.getCount() : 1;
+                    storage.insert(StackCreater.Create(ItemStackType.ID,carriedItem,changedCount),false);
+                    int newCount = carriedItem.getCount() - changedCount;
+                    if(newCount <=0)
+                    {
+                        guiSyncManager.setCursorItem(ItemStack.EMPTY);
+                    }
+                    else
+                    {
+                        ItemStack newCarriedItem = carriedItem.copy();
+                        newCarriedItem.setCount(newCount);
+                        guiSyncManager.setCursorItem(newCarriedItem);
+                    }
+                }
+                else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
+                {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
+                    // 此情况在点击维度存储槽时永远不可能发生，如果发生，无需处理
+                    // 原版逻辑为取出物品到最大上限
+                    // 保留此情况以便后续使用
+                }
+            }
+        }
+
+    }
 
 
 
