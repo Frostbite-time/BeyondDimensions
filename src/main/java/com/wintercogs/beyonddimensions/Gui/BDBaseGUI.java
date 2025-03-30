@@ -6,12 +6,15 @@ import com.cleanroommc.modularui.factory.GuiData;
 import com.cleanroommc.modularui.factory.SimpleGuiFactory;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.ModularScreen;
+import com.cleanroommc.modularui.screen.viewport.LocatedWidget;
+import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.sync.GuiSyncManager;
 import com.cleanroommc.modularui.value.sync.ValueSyncHandler;
 import com.cleanroommc.modularui.widget.ScrollWidget;
 import com.cleanroommc.modularui.widget.scroll.VerticalScrollData;
 import com.cleanroommc.modularui.widget.sizer.Flex;
 import com.cleanroommc.modularui.widgets.CycleButtonWidget;
+import com.cleanroommc.modularui.widgets.ItemSlot;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
 import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
@@ -28,8 +31,13 @@ import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.client.model.b3d.B3DModel;
+import net.minecraftforge.items.ItemHandlerHelper;
+import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
 import java.util.*;
@@ -153,10 +161,54 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
                 .addTooltip(1,"名称")
                 .addTooltip(2,"数量");
 
+
+
+        // 用于监听shift点击玩家背包事件
+        ClickActionSync clickActionSync = new ClickActionSync(){
+            @Override
+            public void read(PacketBuffer packetBuffer) throws IOException
+            {
+                super.read(packetBuffer);
+
+                if(!guiSyncManager.isClient())
+                {
+                    quickMoveHandleInventory(this.slotIndex,this.clickStack,this.button,this.isSlotFake,this.getSyncManager().getPlayer(), stackTypedHandler);
+                }
+            }
+        };
+
+        guiSyncManager.syncValue("inventory_listener",clickActionSync);
+
+        ModularPanel panel = new ModularPanel("test"){
+            @Override
+            public boolean onMousePressed(int mouseButton)
+            {
+                boolean result = super.onMousePressed(mouseButton);
+                if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)||Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))
+                {
+                    for(LocatedWidget widget : getHovering())
+                    {
+                        if(widget.getElement() instanceof ItemSlot slot)
+                        {
+                            clickActionSync.isSlotFake = slot.getSyncHandler().isPhantom();
+                            clickActionSync.clickStack = new ItemStackType((ItemStack) slot.getIngredient());
+                            clickActionSync.isShiftDown = true;
+                            clickActionSync.button = mouseButton;
+                            clickActionSync.slotIndex = slot.getSlot().getSlotIndex();
+                            clickActionSync.syncToServer(0,clickActionSync::write);
+                        }
+                    }
+                }
+                return result;
+            }
+        };
+
         //添加玩家仓库和存储面板
-        ModularPanel panel = ModularPanel.defaultPanel("test")
-                .height(230)
-                .bindPlayerInventory()
+        panel.flex().startDefaultMode();
+        panel.flex().size(176, 230).align(Alignment.Center);
+        panel.flex().endDefaultMode();
+
+        panel.bindPlayerInventory()
                 .child(scrollWidget.child(buildStackTypedSlots(stackTypedHandler)))
                 .child(textFieldWidget)
                 .child(reverseButton)
@@ -196,7 +248,7 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
                     if(!guiData.isClient())
                     {
 
-                        clickHandle(this.clickStack,this.button,isSlotFake, guiData.getPlayer(), stackTypedHandler);
+                        customClickHandler(this.clickStack,this.button,isSlotFake, guiData.getPlayer(), this.isShiftDown,stackTypedHandler);
                         // 完成处理之后主动要求存储同步到客户端
                         ((ValueSyncHandler<?>) slotGroupWidget.getSyncHandler()).updateCacheFromSource(false);
                     }
@@ -212,6 +264,48 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
     }
 
 
+    // 自定义点击操作
+    public void customClickHandler(IStackType clickedStack, int button,boolean isFake, EntityPlayer player, boolean shiftDown, IStackTypedHandler storage)
+    {
+        if(storage == null)
+            return;
+
+        if(shiftDown)
+        {
+            quickMoveHandle(clickedStack,button,isFake,player,storage);
+        }
+        else
+        {
+            clickHandle(clickedStack,button,isFake,player,storage);
+        }
+    }
+
+    protected void quickMoveHandle(IStackType clickStack, int button, boolean isFakeSlot, EntityPlayer player, IStackTypedHandler storage)
+    {
+        // 目前仅从存储到背包
+        if(!clickStack.isEmpty())
+        {
+            if(clickStack instanceof ItemStackType)
+            {
+                // 验证存储是否拥有对应物品
+                ItemStackType clickedItem = (ItemStackType) storage.getStackByStack(clickStack);
+                if(clickedItem != null&&!clickedItem.isEmpty())
+                {
+                    // 首先获取原版最大数值和存储量的最小值
+                    long maxMoveCount = Math.min(clickedItem.getStackAmount(),clickedItem.getVanillaMaxStackSize());
+                    if(button==1) //如果鼠标是右键 最大传输数量再减半
+                        maxMoveCount = maxMoveCount/2;
+                    ItemStack moveIn = clickedItem.copyStackWithCount(maxMoveCount);
+                    player.inventory.addItemStackToInventory(moveIn);
+                    int remaining = moveIn.getCount(); //addItemStackToInventory会修改原物品堆的数量
+                    int needToRemove = (int) (maxMoveCount - remaining);
+                    if(needToRemove > 0)
+                        storage.extract(clickedItem.copyWithCount(needToRemove),false);
+                }
+
+            }
+        }
+    }
 
 
     // 用于处理鼠标事件的函数
@@ -281,6 +375,37 @@ public class BDBaseGUI implements IGuiHolder<GuiData>
             }
         }
 
+    }
+
+
+    // 处理背包到存储的快速移动
+    protected void quickMoveHandleInventory(int slotIndex,IStackType clickStack, int button, boolean isFakeSlot, EntityPlayer player, IStackTypedHandler storage)
+    {
+        // 目前仅从存储到背包
+        if(!clickStack.isEmpty())
+        {
+            if(clickStack instanceof ItemStackType)
+            {
+                ItemStackType clickedItem = new ItemStackType(this.guiSyncManager.getPlayerInventory().getStackInSlot(slotIndex));
+                if(clickedItem != null&&!clickedItem.isEmpty())
+                {
+                    // 首先获取原版最大数值和存储量的最小值
+                    long maxMoveCount = Math.min(clickedItem.getStackAmount(),clickedItem.getVanillaMaxStackSize());
+                    if(button==1) //如果鼠标是右键 最大传输数量再减半
+                        maxMoveCount = maxMoveCount/2;
+                    ItemStack moveIn = clickedItem.copyStackWithCount(maxMoveCount);
+                    IStackType remainStack = stackTypedHandler.insert(clickedItem,false);
+                    int needToRemove = (int) (maxMoveCount - remainStack.getStackAmount());
+                    if(needToRemove > 0)
+                        guiSyncManager.getPlayerInventory().extractItem(slotIndex, needToRemove, false);
+//                    int remaining = moveIn.getCount(); //addItemStackToInventory会修改原物品堆的数量
+//                    int needToRemove = (int) (maxMoveCount - remaining);
+//                    if(needToRemove > 0)
+//                        storage.extract(clickedItem.copyWithCount(needToRemove),false);
+                }
+
+            }
+        }
     }
 
 

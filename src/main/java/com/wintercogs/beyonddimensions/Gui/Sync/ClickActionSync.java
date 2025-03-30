@@ -13,6 +13,9 @@ public class ClickActionSync extends ValueSyncHandler<Object>
     public boolean isSlotFake;
     public IStackType clickStack;
     public int button;
+    public boolean isShiftDown;
+
+    public int slotIndex = -1; //可选项。 主动初始化为-1。 只有是需要使用时才自行初始化
 
 
     @Override
@@ -36,7 +39,9 @@ public class ClickActionSync extends ValueSyncHandler<Object>
         // 点击操作可以用信道分离
         // 玩家信息由传输器提供
         packetBuffer.writeBoolean(isSlotFake);
+        packetBuffer.writeBoolean(isShiftDown);
         packetBuffer.writeVarInt(button);
+        packetBuffer.writeVarInt(slotIndex);
         clickStack.serialize(packetBuffer);
     }
 
@@ -44,7 +49,9 @@ public class ClickActionSync extends ValueSyncHandler<Object>
     public void read(PacketBuffer packetBuffer) throws IOException
     {
         this.isSlotFake = packetBuffer.readBoolean();
+        this.isShiftDown = packetBuffer.readBoolean();
         this.button = packetBuffer.readVarInt();
+        this.slotIndex = packetBuffer.readVarInt();
         this.clickStack = IStackType.deserializeCommon(packetBuffer);
     }
 

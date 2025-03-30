@@ -18,6 +18,7 @@ import com.wintercogs.beyonddimensions.Gui.Sync.ClickActionSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.util.ITooltipFlag;
+import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -134,24 +135,22 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
     }
 
 
-
-    // 鼠标事件处理
     @Override
-    public Result onMouseTapped(int mouseButton)
+    public Result onMousePressed(int mouseButton)
     {
-        Interactable.super.onMouseTapped(mouseButton);
+        Interactable.super.onMousePressed(mouseButton);
         if(getClickActionSync() != null)
         {
             ClickActionSync clickActionSync = getClickActionSync();
             clickActionSync.isSlotFake = isFake();
+            clickActionSync.isShiftDown = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)||Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
             clickActionSync.clickStack = getTypedStackFromUnifiedStorage();
             clickActionSync.button = mouseButton;
             clickActionSync.syncToServer(0,clickActionSync::write);
-            return Result.SUCCESS;
+            return Result.ACCEPT;
         }
-        return Result.IGNORE;
+        return Result.ACCEPT;
     }
-
 
     // JEI幽灵槽位处理
     @Override
