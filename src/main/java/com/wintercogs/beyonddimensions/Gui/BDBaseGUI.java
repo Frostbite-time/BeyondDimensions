@@ -134,6 +134,12 @@ public abstract class BDBaseGUI implements IGuiHolder<GuiData>
         if(storage == null)
             return;
 
+        if(isFake)
+        {
+            FakeClickHandle(slotIndex,clickedStack,button,isFake,player,storage);
+            return;
+        }
+
         if(shiftDown)
         {
             quickMoveHandle(slotIndex,clickedStack,button,isFake,player,storage);
@@ -149,6 +155,8 @@ public abstract class BDBaseGUI implements IGuiHolder<GuiData>
 
     // 用于处理鼠标事件的函数
     protected abstract void clickHandle(int slotIndex,IStackType clickStack, int button, boolean isFakeSlot, EntityPlayer player, IStackTypedHandler storage);
+
+    protected abstract void FakeClickHandle(int slotIndex,IStackType clickStack, int button, boolean isFakeSlot, EntityPlayer player, IStackTypedHandler storage);
 
 
     // 处理背包到存储的快速移动

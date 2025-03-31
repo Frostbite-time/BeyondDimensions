@@ -46,7 +46,7 @@ public class NetInterfaceBlock extends NetedBlock
         super.onBlockActivated(worldIn, pos, state, player, hand, facing, hitX, hitY, hitZ);
         if(!worldIn.isRemote&&!player.isSneaking())
         {
-            GuiManager.open(NetInterfaceGUI.factory,new PosGuiData(player,pos.getX(),pos.getY(),pos.getZ()),(EntityPlayerMP) player);
+            NetInterfaceGUI.factory.open((EntityPlayerMP) player,pos.getX(),pos.getY(),pos.getZ());
         }
         return true;
     }

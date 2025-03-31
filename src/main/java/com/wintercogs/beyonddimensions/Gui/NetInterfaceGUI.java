@@ -1,16 +1,22 @@
 package com.wintercogs.beyonddimensions.Gui;
 
+import com.cleanroommc.modularui.drawable.UITexture;
 import com.cleanroommc.modularui.factory.GuiData;
 import com.cleanroommc.modularui.factory.PosGuiData;
 import com.cleanroommc.modularui.factory.SimpleGuiFactory;
 import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.value.sync.BooleanSyncValue;
 import com.cleanroommc.modularui.value.sync.GuiSyncManager;
 import com.cleanroommc.modularui.value.sync.ValueSyncHandler;
+import com.cleanroommc.modularui.widgets.CycleButtonWidget;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
+import com.cleanroommc.modularui.widgets.ToggleButton;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Gui.Factory.PosGuiFactory;
 import com.wintercogs.beyonddimensions.Gui.Slots.StackTypedSlot;
 import com.wintercogs.beyonddimensions.Gui.Sync.ClickActionSync;
 import com.wintercogs.beyonddimensions.Gui.Sync.OrderedStackTypedHandlerSync;
@@ -18,7 +24,6 @@ import com.wintercogs.beyonddimensions.Gui.Widgets.SyncAbleSlotGroupWidget;
 import net.minecraft.network.PacketBuffer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class NetInterfaceGUI extends BDOrderedContainerGUI
@@ -27,7 +32,7 @@ public class NetInterfaceGUI extends BDOrderedContainerGUI
     private StackTypedHandler flagStorage;
     private StackTypedHandler flagViewStorage;
 
-    public static SimpleGuiFactory factory =  new SimpleGuiFactory("net_interface_gui",() ->{
+    public static PosGuiFactory factory =  new PosGuiFactory("net_interface_gui",() ->{
         return new NetInterfaceGUI();
     });
 
@@ -42,6 +47,8 @@ public class NetInterfaceGUI extends BDOrderedContainerGUI
 
         lines = 1;
 
+        NetInterfaceBlockEntity BE;
+
         if(!guiData.isClient())
         {
             if(guiData instanceof PosGuiData posGuiData)
@@ -55,8 +62,22 @@ public class NetInterfaceGUI extends BDOrderedContainerGUI
             }
         }
 
+        BE = (NetInterfaceBlockEntity) ((PosGuiData)guiData).getTileEntity();
+
+        // 突然发现CycleButtonWidget这么好用，自动按图片分割 还同时支持int 枚举 布尔类型进行选择
+        CycleButtonWidget popButton = new CycleButtonWidget().value(
+                new BooleanSyncValue(
+                        () -> BE.popMode,
+                        var -> {
+                            BE.popMode = var;
+                        }
+                )
+        );
+        popButton.texture(UITexture.fullImage(BeyondDimensions.MODID,"textures/gui/sprites/widget/pop_mode.png"));
+
         panel.child(buildStackTypedSlots(stackTypedHandler))
-                .child(buildFlagStackSlots());
+                .child(buildFlagStackSlots())
+                .child(popButton);
         return panel;
     }
 
@@ -131,7 +152,7 @@ public class NetInterfaceGUI extends BDOrderedContainerGUI
                     int index = 0;
                     for (IStackType stack : this.flagStorage.getStorage())
                     {
-                        this.flagStorage.setStackDirectly(index,stack.copyWithCount(1));
+                        this.flagViewStorage.setStackDirectly(index,stack.copy());
                         index++;
                     }
                 }
@@ -158,7 +179,7 @@ public class NetInterfaceGUI extends BDOrderedContainerGUI
                 }
             };
 
-            StackTypedSlot slot = new StackTypedSlot(-1,flagViewStorage).syncHandler(sync);
+            StackTypedSlot slot = new StackTypedSlot(i,flagViewStorage).syncHandler(sync);
             slot.setFake(true);
             slotGroupWidget.child(slot.pos(i%9 *18,i/9 *18).debugName("FlagSlot_"+i));
         }

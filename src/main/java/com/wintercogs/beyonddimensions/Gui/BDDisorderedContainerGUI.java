@@ -146,4 +146,37 @@ public abstract class BDDisorderedContainerGUI extends BDBaseGUI
         }
     }
 
+    @Override
+    protected void FakeClickHandle(int slotIndex, IStackType clickStack, int button, boolean isFakeSlot, EntityPlayer player, IStackTypedHandler storage)
+    {
+        // 获取光标物品
+        ItemStack carriedItem = guiSyncManager.getCursorItem();
+
+        if (clickStack.isEmpty())
+        {
+            if (!carriedItem.isEmpty())
+            {   //槽位物品为空，携带物品存在，将携带物品插入标记
+                ItemStack copy = carriedItem.copy();
+                copy.setCount(1);
+                storage.insert(new ItemStackType(copy),false);
+            }
+        }
+        else
+        {
+            if (carriedItem.isEmpty())
+            {
+                //槽位物品存在，携带物品为空，尝试清空标记
+                storage.extract(clickStack.copy(),false);
+            }
+            else if (true)
+            {   //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
+
+            }
+            else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
+            {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
+
+            }
+
+        }
+    }
 }

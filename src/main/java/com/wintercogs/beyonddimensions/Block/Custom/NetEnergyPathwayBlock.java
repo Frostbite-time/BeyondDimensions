@@ -1,9 +1,11 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.Gui.NetEnergyGUI;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -39,11 +41,7 @@ public class NetEnergyPathwayBlock extends NetedBlock
         super.onBlockActivated(worldIn, pos, state, player, hand, facing, hitX, hitY, hitZ);
         if(!worldIn.isRemote&&!player.isSneaking())
         {
-            // 打开ui的函数 暂时注释
-//            player.openMenu(new SimpleMenuProvider(
-//                    (containerId, playerInventory, _player) -> new NetEnergyMenu(containerId, _player.getInventory(), ((NetEnergyPathwayBlockEntity) level.getBlockEntity(pos)),new SimpleContainerData(0)),
-//                    Component.translatable("menu.title.beyonddimensions.net_energy_menu")
-//            ));
+            NetEnergyGUI.factory.open((EntityPlayerMP)player, pos.getX(), pos.getY(), pos.getZ());
         }
         return true;
     }
