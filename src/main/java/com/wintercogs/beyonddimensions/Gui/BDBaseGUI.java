@@ -168,10 +168,7 @@ public abstract class BDBaseGUI implements IGuiHolder<GuiData>
      */
     public void updateViewerStorage()
     {
-        for(IStackType stack: this.viewerStackTypedHandler.getStorage())
-        {
-            stack.setStackAmount(-1);
-        }
+        viewerStackTypedHandler.clearStorage();
 
         for(IStackType stack : this.stackTypedHandler.getStorage())
         {
