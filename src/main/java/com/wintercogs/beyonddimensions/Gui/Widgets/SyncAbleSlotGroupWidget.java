@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Gui;
+package com.wintercogs.beyonddimensions.Gui.Widgets;
 
 import com.cleanroommc.modularui.value.sync.SyncHandler;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
@@ -8,7 +8,7 @@ import com.cleanroommc.modularui.widgets.SlotGroupWidget;
 // 从而将槽位本身的同步器空出，用于点击事件的同步
 public class SyncAbleSlotGroupWidget extends SlotGroupWidget
 {
-    SyncAbleSlotGroupWidget()
+    public SyncAbleSlotGroupWidget()
     {
         super();
     }

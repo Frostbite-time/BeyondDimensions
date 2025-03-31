@@ -219,7 +219,8 @@ public class ItemStackType implements IStackType<ItemStack> {
     public boolean isSameTypeSameComponents(IStackType<ItemStack> other) {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return ItemStack.areItemsEqual(stack, other.getStack()) && ItemStack.areItemStackTagsEqual(stack, other.getStack());
+        return (ItemStack.areItemsEqual(stack, other.getStack()) && ItemStack.areItemStackTagsEqual(stack, other.getStack())
+                ||isEmpty() && other.isEmpty());
     }
 
     // 网络序列化

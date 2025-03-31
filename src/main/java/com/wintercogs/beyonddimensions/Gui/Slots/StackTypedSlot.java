@@ -146,6 +146,7 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
             clickActionSync.isShiftDown = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)||Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
             clickActionSync.clickStack = getTypedStackFromUnifiedStorage();
             clickActionSync.button = mouseButton;
+            clickActionSync.slotIndex = getSlotIndex(); //获取在仓储中的索引
             clickActionSync.syncToServer(0,clickActionSync::write);
             return Result.ACCEPT;
         }

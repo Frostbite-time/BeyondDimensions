@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 
-import com.wintercogs.beyonddimensions.Gui.BDBaseGUI;
+import com.wintercogs.beyonddimensions.Gui.DimensionsNetGUI;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -53,7 +53,7 @@ public class OpenNetGuiPacket implements IMessage
             // 添加为一个计划任务(Scheduled Task)，在主服务器线程上执行操作
             serverPlayer.getServerWorld().addScheduledTask(() -> {
 
-                BDBaseGUI.factory.open(serverPlayer);
+                DimensionsNetGUI.factory.open(serverPlayer);
             });
             // 没有回应数据包
             return null;

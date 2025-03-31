@@ -1,10 +1,14 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
 
+import com.cleanroommc.modularui.factory.GuiManager;
+import com.cleanroommc.modularui.factory.PosGuiData;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
+import com.wintercogs.beyonddimensions.Gui.NetInterfaceGUI;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -42,10 +46,7 @@ public class NetInterfaceBlock extends NetedBlock
         super.onBlockActivated(worldIn, pos, state, player, hand, facing, hitX, hitY, hitZ);
         if(!worldIn.isRemote&&!player.isSneaking())
         {
-//            player.openMenu(new SimpleMenuProvider(
-//                    (containerId, playerInventory, _player) -> new NetInterfaceBaseMenu(containerId,_player.getInventory(),((NetInterfaceBlockEntity)level.getBlockEntity(pos)).getStackHandler() ,((NetInterfaceBlockEntity)level.getBlockEntity(pos)).getFakeStackHandler(),((NetInterfaceBlockEntity)level.getBlockEntity(pos)),new SimpleContainerData(0)),
-//                    Component.translatable("menu.title.beyonddimensions.net_interface_menu")
-//            ));
+            GuiManager.open(NetInterfaceGUI.factory,new PosGuiData(player,pos.getX(),pos.getY(),pos.getZ()),(EntityPlayerMP) player);
         }
         return true;
     }
