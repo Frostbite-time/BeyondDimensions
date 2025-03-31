@@ -114,4 +114,31 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements ITi
         energyStorageCache = null;
     }
 
+    public double getEnergyProgress()
+    {
+        DimensionsNet net = getNet();
+        if(net != null)
+            return ((double)net.getEnergyStorage().getRealEnergyStored())/net.getEnergyStorage().getRealEnergyCapacity();
+        else
+            return 0;
+    }
+
+    public long getEnergyStored()
+    {
+        DimensionsNet net = getNet();
+        if(net != null)
+            return net.getEnergyStorage().getRealEnergyStored();
+        else
+            return 0;
+    }
+
+    public long getEnergyCapacity()
+    {
+        DimensionsNet net = getNet();
+        if (net != null)
+            return net.getEnergyStorage().getRealEnergyCapacity();
+        else
+            return 0;
+    }
+
 }
