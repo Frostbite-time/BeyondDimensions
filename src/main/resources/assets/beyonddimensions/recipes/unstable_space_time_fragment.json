@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABA",
+    "BCB",
+    "ABA"
+  ],
+  "key": {
+    "A": {"item": "minecraft:diamond"},
+    "B": {"item": "minecraft:tnt"},
+    "C": {"item": "minecraft:nether_star"}
+  },
+  "result": {"item": "beyonddimensions:unstable_space_time_fragment","count": 1}
+}

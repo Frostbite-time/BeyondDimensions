@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABA",
+    "CDC",
+    "ABA"
+  ],
+  "key": {
+    "A": {"item": "minecraft:iron_ingot"},
+    "B": {"item": "minecraft:comparator"},
+    "C": {"item": "minecraft:repeater"},
+    "D": {"item": "beyonddimensions:space_time_stable_frame"}
+  },
+  "result": {"item": "beyonddimensions:net_control","count": 1}
+}

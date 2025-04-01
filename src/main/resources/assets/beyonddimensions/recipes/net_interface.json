@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABA",
+    "CDE",
+    "ABA"
+  ],
+  "key": {
+    "A": {"item": "minecraft:iron_ingot"},
+    "B": {"item": "beyonddimensions:space_time_stable_frame"},
+    "C": {"item": "minecraft:piston"},
+    "D": {"item": "minecraft:redstone_torch"},
+    "E": {"item": "minecraft:sticky_piston"}
+  },
+  "result": {"item": "beyonddimensions:net_interface","count": 1}
+}

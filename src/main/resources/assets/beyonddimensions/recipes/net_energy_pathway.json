@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABA",
+    "CDC",
+    "ACA"
+  ],
+  "key": {
+    "A": {"item": "beyonddimensions:space_time_bar"},
+    "B": {"item": "beyonddimensions:space_time_stable_frame"},
+    "C": {"item": "minecraft:gold_ingot"},
+    "D": {"item": "minecraft:ender_eye"}
+  },
+  "result": {"item": "beyonddimensions:net_energy_pathway","count": 1}
+}

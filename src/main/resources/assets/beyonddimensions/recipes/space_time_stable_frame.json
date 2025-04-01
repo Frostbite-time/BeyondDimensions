@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABA",
+    "BCB",
+    "ABA"
+  ],
+  "key": {
+    "A": {"item": "beyonddimensions:space_time_bar"},
+    "B": {"item": "minecraft:redstone"},
+    "C": {"item": "minecraft:ender_eye"}
+  },
+  "result": {"item": "beyonddimensions:space_time_stable_frame","count": 1}
+}
