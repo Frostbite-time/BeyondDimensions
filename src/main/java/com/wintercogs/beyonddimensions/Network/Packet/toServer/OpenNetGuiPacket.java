@@ -50,6 +50,7 @@ public class OpenNetGuiPacket implements IMessage
             // 这是发送到服务器的数据包发送到的玩家
             EntityPlayerMP serverPlayer = ctx.getServerHandler().player;
 
+
             // 添加为一个计划任务(Scheduled Task)，在主服务器线程上执行操作
             serverPlayer.getServerWorld().addScheduledTask(() -> {
 

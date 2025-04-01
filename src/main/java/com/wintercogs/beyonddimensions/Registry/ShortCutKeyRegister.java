@@ -1,33 +1,32 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod.EventBusSubscriber(modid = BeyondDimensions.MODID,value = Side.CLIENT)
+@SideOnly(Side.CLIENT)
 public class ShortCutKeyRegister
 {
-    private static final List<KeyBinding> KEY_MAPPINGS = new ArrayList<>();
+    public static final List<KeyBinding> KEY_MAPPINGS = new ArrayList<>();
 
     public static void registerKey(KeyBinding keyMapping)
     {
         KEY_MAPPINGS.add(keyMapping);
     }
 
-
     public static void registerKeys()
     {
+
         DimensionsShortKeys.register();
-        for (KeyBinding key : KEY_MAPPINGS)
-        {
-            ClientRegistry.registerKeyBinding(key);
-        }
+        // 批量注册所有按键
+        ShortCutKeyRegister.KEY_MAPPINGS.forEach(ClientRegistry::registerKeyBinding);
     }
+
+
 }

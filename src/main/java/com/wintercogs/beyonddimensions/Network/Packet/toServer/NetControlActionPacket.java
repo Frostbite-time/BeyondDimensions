@@ -2,12 +2,10 @@ package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
-import com.wintercogs.beyonddimensions.Gui.DimensionsNetGUI;
 import com.wintercogs.beyonddimensions.Gui.NetControlGUI;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;

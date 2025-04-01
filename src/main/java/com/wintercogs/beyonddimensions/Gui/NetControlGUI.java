@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.Gui;
 
-import com.cleanroommc.modularui.api.widget.IGuiAction;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.keys.StringKey;
 import com.cleanroommc.modularui.factory.GuiData;
@@ -8,14 +7,12 @@ import com.cleanroommc.modularui.network.NetworkUtils;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.value.sync.GuiSyncManager;
 import com.cleanroommc.modularui.widget.WidgetTree;
-import com.cleanroommc.modularui.widgets.ButtonWidget;
 import com.cleanroommc.modularui.widgets.ListWidget;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
 import com.cleanroommc.modularui.widgets.TextWidget;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
-import com.wintercogs.beyonddimensions.DataBase.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Gui.Factory.PosGuiFactory;

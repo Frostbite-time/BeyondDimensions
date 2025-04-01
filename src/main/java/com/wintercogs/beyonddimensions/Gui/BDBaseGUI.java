@@ -15,10 +15,12 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Gui.Slots.StackTypedSlot;
 import com.wintercogs.beyonddimensions.Gui.Sync.ClickActionSync;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.ITooltipFlag;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
@@ -85,7 +87,7 @@ public abstract class BDBaseGUI implements IGuiHolder<GuiData>
 
         guiSyncManager.syncValue("inventory_listener",clickActionSync);
 
-        ModularPanel panel = new ModularPanel("test"){
+        ModularPanel panel = new ModularPanel("net_base"){
             @Override
             public boolean onMousePressed(int mouseButton)
             {
@@ -259,10 +261,11 @@ public abstract class BDBaseGUI implements IGuiHolder<GuiData>
      * @param matchText 文本
      * @return 结果为真则意味存在
      */
+    @SideOnly(Side.CLIENT)
     protected boolean checkTooltipMatches(IStackType stack, String matchText) {
         List<String> toolTips = stack.getTooltipLines(
                 Minecraft.getMinecraft().player,
-                Minecraft.getMinecraft().gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL
+                Minecraft.getMinecraft().gameSettings.advancedItemTooltips ? net.minecraft.client.util.ITooltipFlag.TooltipFlags.ADVANCED : net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL
         );
         return toolTips.stream()
                 .anyMatch(tooltip -> tooltip.toLowerCase(Locale.ENGLISH).contains(matchText));

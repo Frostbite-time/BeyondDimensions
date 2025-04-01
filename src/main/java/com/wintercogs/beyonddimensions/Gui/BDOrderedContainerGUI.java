@@ -9,7 +9,6 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
-import mekanism.api.gas.GasStack;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -191,7 +190,7 @@ public abstract class BDOrderedContainerGUI extends BDBaseGUI
                         }
                     });
 
-                    // 我不知道为什么Mek在1.12.2时不为他们的物品注册能力系统
+                    // 我不知道为什么Mek在1.12.2时不为他们的气体储罐注册物品能力？毕竟这是唯一能存储气体的容器
                     if(BeyondDimensions.MekLoaded)
                     {
                         if(carriedItem.getItem() instanceof mekanism.common.item.ItemBlockGasTank tank)

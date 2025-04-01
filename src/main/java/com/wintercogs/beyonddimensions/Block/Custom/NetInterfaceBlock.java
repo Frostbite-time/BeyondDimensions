@@ -1,8 +1,6 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
 
-import com.cleanroommc.modularui.factory.GuiManager;
-import com.cleanroommc.modularui.factory.PosGuiData;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.Gui.NetInterfaceGUI;
 import net.minecraft.block.material.Material;

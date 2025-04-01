@@ -16,8 +16,8 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Gui.Sync.ClickActionSync;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.util.ITooltipFlag;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
@@ -91,6 +91,7 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
         return null;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void draw(GuiContext context, WidgetTheme widgetTheme)
     {
@@ -105,13 +106,14 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
 
         // 渲染覆盖层
         if (this.isHovering()) {
-            GlStateManager.colorMask(true, true, true, false);
+            net.minecraft.client.renderer.GlStateManager.colorMask(true, true, true, false);
             GuiDraw.drawRect(1.0F, 1.0F, (float)(this.getArea().w() - 2), (float)(this.getArea().h() - 2), ((WidgetSlotTheme)this.getWidgetTheme(context.getTheme())).getSlotHoverColor());
-            GlStateManager.colorMask(true, true, true, true);
+            net.minecraft.client.renderer.GlStateManager.colorMask(true, true, true, true);
         }
 
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public Tooltip getTooltip()
     {
@@ -120,7 +122,7 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
         if (stackType != null && !stackType.isEmpty())
         {
 
-            for (String line : (List<String>) stackType.getTooltipLines(Minecraft.getMinecraft().player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL))
+            for (String line : (List<String>) stackType.getTooltipLines(Minecraft.getMinecraft().player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips ? net.minecraft.client.util.ITooltipFlag.TooltipFlags.ADVANCED : net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL))
             {
                 tooltip.addLine(line);
             }
@@ -131,7 +133,7 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
     @Override
     public WidgetTheme getWidgetTheme(ITheme theme)
     {
-        return theme.getFluidSlotTheme();
+        return theme.getItemSlotTheme();
     }
 
 

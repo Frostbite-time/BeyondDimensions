@@ -15,6 +15,7 @@ import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandl
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
@@ -24,8 +25,9 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.fml.relauncher.Side;
@@ -57,8 +59,7 @@ public class BeyondDimensions
     {
         EventBus modEventBus = MinecraftForge.EVENT_BUS;
 
-        // 1.12.2注册快捷键
-        ShortCutKeyRegister.registerKeys();
+
 
         // 注册事件
         MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
@@ -66,8 +67,18 @@ public class BeyondDimensions
     }
 
     @Mod.EventHandler
+    public void preSetup(FMLPreInitializationEvent event)
+    {
+        PacketRegister.registerPackets();
+    }
+
+    @Mod.EventHandler
     public void commonSetup(final FMLPostInitializationEvent event)
     {
+        if(event.getSide() == Side.CLIENT)
+            ShortCutKeyRegister.registerKeys();
+
+
         List<ModContainer> modList = Loader.instance().getModList();
 
         for (ModContainer mod : modList)
@@ -134,9 +145,9 @@ public class BeyondDimensions
     public static class ClientModEvents
     {
         @Mod.EventHandler
-        public static void onClientSetup(FMLLoadCompleteEvent event)
+        public static void onClientSetup(FMLInitializationEvent event)
         {
-            // 一些客户端初始代码
+
         }
     }
 }
