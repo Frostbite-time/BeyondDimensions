@@ -1,21 +1,30 @@
 package com.wintercogs.beyonddimensions.DataBase;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldSavedData;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-
+@Mod.EventBusSubscriber(modid = BeyondDimensions.MODID)
 public class DimensionsNet extends WorldSavedData
 {
 
@@ -40,7 +49,7 @@ public class DimensionsNet extends WorldSavedData
     private UnifiedStorage unifiedStorage;
 
     // 用于标记此网络是否为临时网络，如果是，则不执行倒计时或其他功能
-    private final boolean temporary;
+    private boolean temporary;
 
     private int currentTime = 600*20;
     private int holdTime = 600*20;
@@ -50,7 +59,7 @@ public class DimensionsNet extends WorldSavedData
         super("BDNet_temporary");
         unifiedStorage = new UnifiedStorage(this);
         energyStorage = new EnergyStorage(this);
-        //MinecraftForge.EVENT_BUS.addListener(this::onServerTick);
+        MinecraftForge.EVENT_BUS.register(this);
         this.temporary = true;
     }
 
@@ -59,7 +68,7 @@ public class DimensionsNet extends WorldSavedData
         super(mapName);
         unifiedStorage = new UnifiedStorage(this);
         energyStorage = new EnergyStorage(this);
-        //MinecraftForge.EVENT_BUS.addListener(this::onServerTick);
+        MinecraftForge.EVENT_BUS.register(this);
         this.temporary = false;
     }
 
@@ -136,6 +145,8 @@ public class DimensionsNet extends WorldSavedData
 
         // 读取倒计时
         this.currentTime = nbt.getInteger("currentTime");
+
+        this.temporary = false; // 从NBT读取的Net不可能为临时
     }
 
     @Override
@@ -400,23 +411,25 @@ public class DimensionsNet extends WorldSavedData
     }
 
     // 用于定期生成破碎时空结晶
-//    @SubscribeEvent
-//    public void onServerTick(TickEvent.ServerTickEvent event)
-//    {
-//        // 不对临时网络执行倒计时
-//        if(temporary)
-//            return;
-//
-//        currentTime--;
-//        setDirty();
-//        if(currentTime <= 0)
-//        {
-//            ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(),1);
-//            IStackType stackType = new ItemStackType(stack);
-//            this.unifiedStorage.insert(stackType,false);
-//            currentTime = holdTime;
-//        }
-//
-//    }
+    @SubscribeEvent
+    public void onServerTick(TickEvent.ServerTickEvent event)
+    {
+        // 不对临时网络执行倒计时
+        if(temporary)
+            return;
+
+        currentTime--;
+        markDirty();
+        if(currentTime <= 0)
+        {
+            ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION,1);
+            IStackType stackType = new ItemStackType(stack);
+            this.unifiedStorage.insert(stackType,false);
+            currentTime = holdTime;
+        }
+
+    }
+
+
 }
 

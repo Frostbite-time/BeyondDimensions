@@ -15,7 +15,6 @@ import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Gui.Factory.PosGuiFactory;
 import com.wintercogs.beyonddimensions.Gui.Sync.PlayerPermissionsSync;
 import com.wintercogs.beyonddimensions.Gui.Widgets.ClickAbleButton;
 import com.wintercogs.beyonddimensions.Gui.Widgets.PermissionsButton;
@@ -29,9 +28,8 @@ import java.util.UUID;
 
 public class NetControlGUI extends BDOrderedContainerGUI
 {
-    public static PosGuiFactory factory =  new PosGuiFactory("net_control_gui",() ->{
-        return new NetControlGUI();
-    });
+
+
 
 
     public List<PlayerPermissionInfo> permissions = new ArrayList<>(); // 每个按钮对应一个
@@ -135,7 +133,10 @@ public class NetControlGUI extends BDOrderedContainerGUI
         {
             DimensionsNet net = DimensionsNet.getNetFromPlayer(guiData.getPlayer());
             if(net != null)
+            {
                 sync.setNet(net);
+                sync.setPlayerMP((EntityPlayerMP) guiData.getPlayer());
+            }
         }
 
         guiSyncManager.syncValue("permissions_sync",sync);

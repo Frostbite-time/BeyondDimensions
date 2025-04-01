@@ -18,6 +18,7 @@ import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabi
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
+import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
 import net.minecraftforge.common.MinecraftForge;
@@ -60,7 +61,6 @@ public class BeyondDimensions
         EventBus modEventBus = MinecraftForge.EVENT_BUS;
 
 
-
         // 注册事件
         MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
 
@@ -77,6 +77,8 @@ public class BeyondDimensions
     {
         if(event.getSide() == Side.CLIENT)
             ShortCutKeyRegister.registerKeys();
+
+        new UIRegister();
 
 
         List<ModContainer> modList = Loader.instance().getModList();

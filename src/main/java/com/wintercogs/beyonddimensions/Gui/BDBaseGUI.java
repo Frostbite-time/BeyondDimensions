@@ -15,7 +15,6 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Gui.Slots.StackTypedSlot;
 import com.wintercogs.beyonddimensions.Gui.Sync.ClickActionSync;
 import net.minecraft.client.Minecraft;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;

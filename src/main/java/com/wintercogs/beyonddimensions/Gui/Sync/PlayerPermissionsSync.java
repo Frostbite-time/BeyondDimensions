@@ -4,9 +4,9 @@ import com.cleanroommc.modularui.network.NetworkUtils;
 import com.cleanroommc.modularui.value.sync.ValueSyncHandler;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
-import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 import java.io.IOException;
 import java.util.*;
@@ -17,6 +17,7 @@ public class PlayerPermissionsSync extends ValueSyncHandler<List<PlayerPermissio
     List<PlayerPermissionInfo> cache;
 
     DimensionsNet net;
+    EntityPlayerMP player;
 
     public PlayerPermissionsSync(List<PlayerPermissionInfo> permissions)
     {
@@ -28,6 +29,10 @@ public class PlayerPermissionsSync extends ValueSyncHandler<List<PlayerPermissio
     public void setNet(DimensionsNet net)
     {
         this.net = net;
+    }
+    public void setPlayerMP(EntityPlayerMP player)
+    {
+        this.player = player;
     }
 
 
@@ -53,12 +58,7 @@ public class PlayerPermissionsSync extends ValueSyncHandler<List<PlayerPermissio
 
         if(!NetworkUtils.isClient()&& net != null)
         {
-            World world;
-//            if(FMLServerHandler.instance()!= null
-//                    &&FMLServerHandler.instance().getServer() != null)
-//                world = FMLServerHandler.instance().getServer().getEntityWorld();
-//            else
-            world = Minecraft.getMinecraft().getIntegratedServer().getEntityWorld();
+            WorldServer world = player.getServerWorld();
             this.permissions = new ArrayList<>(net.getPlayerPermissionInfoMap(world).values());
         }
 

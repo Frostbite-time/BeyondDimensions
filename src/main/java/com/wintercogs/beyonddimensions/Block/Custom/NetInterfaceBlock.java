@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Block.Custom;
 
 
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
-import com.wintercogs.beyonddimensions.Gui.NetInterfaceGUI;
+import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -44,7 +44,7 @@ public class NetInterfaceBlock extends NetedBlock
         super.onBlockActivated(worldIn, pos, state, player, hand, facing, hitX, hitY, hitZ);
         if(!worldIn.isRemote&&!player.isSneaking())
         {
-            NetInterfaceGUI.factory.open((EntityPlayerMP) player,pos.getX(),pos.getY(),pos.getZ());
+            UIRegister.Factory_NetInterfaceGUI.open((EntityPlayerMP) player,pos.getX(),pos.getY(),pos.getZ());
         }
         return true;
     }

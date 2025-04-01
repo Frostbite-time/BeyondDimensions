@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.Gui;
 
 import com.cleanroommc.modularui.drawable.UITexture;
 import com.cleanroommc.modularui.factory.GuiData;
-import com.cleanroommc.modularui.factory.SimpleGuiFactory;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.ModularScreen;
 import com.cleanroommc.modularui.value.sync.GuiSyncManager;
@@ -31,9 +30,6 @@ import java.util.stream.IntStream;
 
 public class DimensionsNetGUI extends BDDisorderedContainerGUI
 {
-    public static SimpleGuiFactory factory =  new SimpleGuiFactory("dimensions_net_gui",() ->{
-        return new DimensionsNetGUI();
-    });
 
     private String searchText = "";
     private ButtonState reverseState = ButtonState.DISABLED;

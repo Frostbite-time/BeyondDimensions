@@ -16,7 +16,6 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Gui.Factory.PosGuiFactory;
 
 import java.util.List;
 
@@ -25,9 +24,8 @@ public class NetEnergyGUI extends BDOrderedContainerGUI
 
 
 
-    public static PosGuiFactory factory =  new PosGuiFactory("net_energy_gui",() ->{
-        return new NetEnergyGUI();
-    });
+
+
 
     private double energyProcess = 0;
     private long energyStored = 0;

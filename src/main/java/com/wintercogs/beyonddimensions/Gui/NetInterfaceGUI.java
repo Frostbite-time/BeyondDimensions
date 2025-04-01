@@ -14,7 +14,6 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntit
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Gui.Factory.PosGuiFactory;
 import com.wintercogs.beyonddimensions.Gui.Slots.StackTypedSlot;
 import com.wintercogs.beyonddimensions.Gui.Sync.ClickActionSync;
 import com.wintercogs.beyonddimensions.Gui.Sync.OrderedStackTypedHandlerSync;
@@ -30,9 +29,7 @@ public class NetInterfaceGUI extends BDOrderedContainerGUI
     private StackTypedHandler flagStorage;
     private StackTypedHandler flagViewStorage;
 
-    public static PosGuiFactory factory =  new PosGuiFactory("net_interface_gui",() ->{
-        return new NetInterfaceGUI();
-    });
+
 
     @Override
     public ModularPanel buildUI(GuiData guiData, GuiSyncManager guiSyncManager)

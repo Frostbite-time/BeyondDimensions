@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
-import com.wintercogs.beyonddimensions.Gui.NetControlGUI;
+import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -25,7 +25,7 @@ public class NetControlBlock extends Block
         super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
         if(!worldIn.isRemote)
         {
-            NetControlGUI.factory.open((EntityPlayerMP)playerIn, pos.getX(), pos.getY(), pos.getZ());
+            UIRegister.Factory_NetControlGUI.open((EntityPlayerMP)playerIn, pos.getX(), pos.getY(), pos.getZ());
         }
         return true;
     }
