@@ -1,15 +1,18 @@
 package com.wintercogs.beyonddimensions.DataBase;
 
 
-import io.netty.buffer.ByteBuf;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraft.network.PacketBuffer;
+
+import java.util.UUID;
 
 public class PlayerPermissionInfo {
+    private final UUID playerId;
     private final String name;
     private final NetPermissionlevel level;
-    public PlayerPermissionInfo(String name, NetPermissionlevel level) {
+    public PlayerPermissionInfo(String name, NetPermissionlevel level, UUID playerId) {
         this.name = name;
         this.level = level;
+        this.playerId = playerId;
     }
     // 需要添加getter方法
     public String getName() {
@@ -18,15 +21,23 @@ public class PlayerPermissionInfo {
     public NetPermissionlevel getLevel() {
         return level;
     }
-    // 改为使用ByteBuf的静态方法
-    public static void encode(PlayerPermissionInfo info, ByteBuf buf) {
-        ByteBufUtils.writeUTF8String(buf, info.name); // 1.12.2字符串写入方式
-        buf.writeInt(info.level.ordinal()); // 通过枚举序数存储
+
+    public UUID getPlayerId()
+    {
+        return playerId;
     }
-    public static PlayerPermissionInfo decode(ByteBuf buf) {
-        String name = ByteBufUtils.readUTF8String(buf);
-        NetPermissionlevel level = NetPermissionlevel.values()[buf.readInt()];
-        return new PlayerPermissionInfo(name, level);
+
+    // 改为使用ByteBuf的静态方法
+    public static void encode(PlayerPermissionInfo info, PacketBuffer buf) {
+        buf.writeString(info.getName());
+        buf.writeEnumValue(info.getLevel());
+        buf.writeUniqueId(info.playerId);
+    }
+    public static PlayerPermissionInfo decode(PacketBuffer buf) {
+        String name = buf.readString(3000);
+        NetPermissionlevel level = buf.readEnumValue(NetPermissionlevel.class);
+        UUID playerId = buf.readUniqueId();
+        return new PlayerPermissionInfo(name, level, playerId);
     }
 }
 

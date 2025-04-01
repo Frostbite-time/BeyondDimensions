@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.NetControlActionPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -21,6 +22,13 @@ public class PacketRegister
         INSTANCE.registerMessage(
                 OpenNetGuiPacket.OpenNetGuiPacketHandler.class,
                 OpenNetGuiPacket.class,
+                packetId++,
+                Side.SERVER
+        );
+
+        INSTANCE.registerMessage(
+                NetControlActionPacket.NetControlActionPacketHandler.class,
+                NetControlActionPacket.class,
                 packetId++,
                 Side.SERVER
         );

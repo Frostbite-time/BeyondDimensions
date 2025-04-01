@@ -116,7 +116,9 @@ public abstract class BDOrderedContainerGUI extends BDBaseGUI
     // 处理背包到存储的快速移动
     protected void quickMoveHandleInventory(int slotIndex,IStackType clickStack, int button, boolean isFakeSlot, EntityPlayer player, IStackTypedHandler storage)
     {
-        // 目前仅从存储到背包
+        if(storage== null)
+            return;
+
         if(!clickStack.isEmpty())
         {
             if(clickStack instanceof ItemStackType)
@@ -130,7 +132,7 @@ public abstract class BDOrderedContainerGUI extends BDBaseGUI
                     if(button==1) //如果鼠标是右键 最大传输数量再减半
                         maxMoveCount = maxMoveCount/2;
                     IStackType moveIn = clickedItem.copyWithCount(maxMoveCount);
-                    IStackType remainStack = stackTypedHandler.insert(moveIn,false);
+                    IStackType remainStack = storage.insert(moveIn,false);
                     int needToRemove = (int) (maxMoveCount - remainStack.getStackAmount());
                     if(needToRemove > 0)
                         guiSyncManager.getPlayerInventory().extractItem(slotIndex, needToRemove, false);

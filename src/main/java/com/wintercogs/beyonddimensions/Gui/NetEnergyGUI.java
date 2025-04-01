@@ -34,6 +34,9 @@ public class NetEnergyGUI extends BDOrderedContainerGUI
     {
         ModularPanel panel = super.buildUI(guiData, guiSyncManager);
 
+        stackTypedHandler = null;
+        viewerStackTypedHandler = null;
+
         NetEnergyPathwayBlockEntity BE;
 
         BE = (NetEnergyPathwayBlockEntity) ((PosGuiData)guiData).getTileEntity();
