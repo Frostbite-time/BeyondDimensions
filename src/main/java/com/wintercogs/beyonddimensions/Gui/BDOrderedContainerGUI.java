@@ -1,14 +1,23 @@
 package com.wintercogs.beyonddimensions.Gui;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
+import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
+import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
+import mekanism.api.gas.GasStack;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public abstract class BDOrderedContainerGUI extends BDBaseGUI
 {
@@ -154,9 +163,54 @@ public abstract class BDOrderedContainerGUI extends BDBaseGUI
         {
             if (!carriedItem.isEmpty())
             {   //槽位物品为空，携带物品存在，将携带物品插入标记
-                ItemStack copy = carriedItem.copy();
-                copy.setCount(1);
-                storage.insert(slotIndex,new ItemStackType(copy),false);
+
+                if(button==0)
+                {
+                    ItemStack copy = carriedItem.copy();
+                    copy.setCount(1);
+                    storage.insert(slotIndex,new ItemStackType(copy),false);
+                }
+                else if(button==1)
+                {
+                    // 获取能力
+                    CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap) -> {
+                        Object handler = carriedItem.getCapability(cap, EnumFacing.DOWN);
+                        if(handler != null)
+                        {
+                            Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
+                            IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper)handlerGetter.apply(handler);
+
+                            if(stackHandlerWrapper.getSlots()>0)
+                            {
+                                IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(0),1);
+                                if(stack !=null&& !stack.isEmpty())
+                                {
+                                    storage.insert(slotIndex,stack,false);
+                                }
+                            }
+                        }
+                    });
+
+                    // 我不知道为什么Mek在1.12.2时不为他们的物品注册能力系统
+                    if(BeyondDimensions.MekLoaded)
+                    {
+                        if(carriedItem.getItem() instanceof mekanism.common.item.ItemBlockGasTank tank)
+                        {
+                            NBTTagCompound gasTag = carriedItem.getTagCompound().getCompoundTag("mekData").getCompoundTag("stored");
+                            mekanism.api.gas.GasStack gasStack = mekanism.api.gas.GasStack.readFromNBT(gasTag);
+                            if(gasStack!=null)
+                            {
+                                ChemicalStackType stackTyped = new ChemicalStackType(gasStack);
+                                if(!stackTyped.isEmpty())
+                                {
+                                    stackTyped.setStackAmount(1);
+                                    storage.insert(slotIndex,stackTyped,false);
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
         else
@@ -167,11 +221,10 @@ public abstract class BDOrderedContainerGUI extends BDBaseGUI
                 storage.extract(slotIndex,clickStack.getStackAmount(),false);
             }
             else if (true)
-            {   //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
+            {   //槽位物品存在，携带物品存在，物品可以放置，取消标记
+
                 storage.extract(slotIndex,clickStack.getStackAmount(),false);
-                ItemStack copy = carriedItem.copy();
-                copy.setCount(1);
-                storage.insert(slotIndex,new ItemStackType(copy),false);
+
             }
             else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
             {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品

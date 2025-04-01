@@ -164,6 +164,8 @@ public class StackTypedSlot extends Widget<StackTypedSlot> implements Interactab
     @Override
     public IStackType<?> castGhostIngredientIfValid(Object o)
     {
+        if(isFake() && o instanceof IStackType<?>)
+            return (IStackType<?>)o;
         return null;
     }
 

@@ -13,4 +13,6 @@ public class CapabilityHelper
     // 自行保证类型安全
     public static final Map<ResourceLocation, Capability<? extends Object>> BlockCapabilityMap = new HashMap<>();
 
+    public static final Map<ResourceLocation, Capability<? extends Object>> ItemCapabilityMap = new HashMap<>();
+
 }
