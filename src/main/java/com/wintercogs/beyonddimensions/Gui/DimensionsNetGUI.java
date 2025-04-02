@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Gui;
 
 import com.cleanroommc.modularui.drawable.UITexture;
+import com.cleanroommc.modularui.drawable.keys.LangKey;
 import com.cleanroommc.modularui.factory.GuiData;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.ModularScreen;
@@ -67,8 +68,8 @@ public class DimensionsNetGUI extends BDDisorderedContainerGUI
         };
         reverseButton.length(2)
                 .texture(UITexture.fullImage(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_reverse.png"))
-                .addTooltip(0,"顺序")
-                .addTooltip(1,"倒序");
+                .addTooltip(0, new LangKey("tooltip.beyonddimensions.sort.order"))
+                .addTooltip(1,new LangKey("tooltip.beyonddimensions.sort.reverse"));
 
         // 排序方式按钮
         CycleButtonWidget sortMethodButton = new CycleButtonWidget()
@@ -88,9 +89,9 @@ public class DimensionsNetGUI extends BDDisorderedContainerGUI
         sortMethodButton.left(18)
                 .length(3)
                 .texture(UITexture.fullImage(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_group.png"))
-                .addTooltip(0,"默认")
-                .addTooltip(1,"名称")
-                .addTooltip(2,"数量");
+                .addTooltip(0,new LangKey("tooltip.beyonddimensions.sort.default"))
+                .addTooltip(1,new LangKey("tooltip.beyonddimensions.sort.name"))
+                .addTooltip(2,new LangKey("tooltip.beyonddimensions.sort.number"));
 
         // 添加滚动区域
         // 这个泛型是为了什么？

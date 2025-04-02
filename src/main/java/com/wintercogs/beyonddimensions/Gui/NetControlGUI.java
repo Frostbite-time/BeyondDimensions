@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Gui;
 
 import com.cleanroommc.modularui.api.widget.IWidget;
+import com.cleanroommc.modularui.drawable.keys.LangKey;
 import com.cleanroommc.modularui.drawable.keys.StringKey;
 import com.cleanroommc.modularui.factory.GuiData;
 import com.cleanroommc.modularui.network.NetworkUtils;
@@ -141,13 +142,13 @@ public class NetControlGUI extends BDOrderedContainerGUI
 
         guiSyncManager.syncValue("permissions_sync",sync);
 
-        TextWidget nameText = new TextWidget(new StringKey("名称:") );
-        TextWidget levelText = new TextWidget(new StringKey("权限:"));
+        TextWidget nameText = new TextWidget(new LangKey("text.beyonddimensions.level.name.empty") );
+        TextWidget levelText = new TextWidget(new LangKey("text.beyonddimensions.level.level.empty"));
         needUpdateWidgets.add(nameText);
         needUpdateWidgets.add(levelText);
 
-        nameText.leftRel(0.5f).topRel(0.1f);
-        levelText.leftRel(0.5f).topRel(0.2f);
+        nameText.leftRelAnchor(0.3f,0).topRel(0.1f);
+        levelText.leftRelAnchor(0.3f,0).topRel(0.2f);
 
 
         ClickAbleButton ownerButton = new ClickAbleButton()
@@ -196,17 +197,17 @@ public class NetControlGUI extends BDOrderedContainerGUI
             }
         };
 
-        ownerButton.leftRel(0.5f).topRel(0.3f);
-        managerButton.leftRel(0.5f).topRel(0.45f);
-        removeManagerButton.leftRel(0.65f).topRel(0.3f);
-        removeMemberButton.leftRel(0.65f).topRel(0.45f);
+        ownerButton.leftRel(0.5f).topRel(0.3f).width(40).height(32);
+        managerButton.leftRel(0.5f).topRel(0.5f).width(40).height(32);
+        removeManagerButton.leftRel(0.82f).topRel(0.3f).width(40).height(32);
+        removeMemberButton.leftRel(0.82f).topRel(0.5f).width(40).height(32);
 
-        ownerButton.overlay(new StringKey("移交所有权"));
-        managerButton.overlay(new StringKey("设为管理"));
-        removeManagerButton.overlay(new StringKey("取消管理"));
-        removeMemberButton.overlay(new StringKey("移除成员"));
+        ownerButton.overlay(new LangKey("button.beyonddimensions.level.setowner"));
+        managerButton.overlay(new LangKey("button.beyonddimensions.level.setmanager"));
+        removeManagerButton.overlay(new LangKey("button.beyonddimensions.level.removemanager"));
+        removeMemberButton.overlay(new LangKey("button.beyonddimensions.level.removemember"));
 
-        listWidget.size(32,143).top(4).left(7);
+        listWidget.size(32,142).top(4).left(7);
 
 
         return panel.child(listWidget).child(nameText).child(levelText)
@@ -220,8 +221,8 @@ public class NetControlGUI extends BDOrderedContainerGUI
 
         if(this.currentPermission != null)
         {
-            TextWidget nameText = new TextWidget(new StringKey("名称:"+ currentPermission.getName()) );
-            TextWidget levelText = new TextWidget(new StringKey("权限:"+ currentPermission.getLevel().toString()));
+            TextWidget nameText = new TextWidget(new LangKey("text.beyonddimensions.level.name",new Object[]{currentPermission.getName()}));
+            TextWidget levelText = new TextWidget(new LangKey("text.beyonddimensions.level.level",new Object[]{currentPermission.getLevel().toString()}));
 
             for(IWidget widget : needUpdateWidgets)
             {
@@ -232,8 +233,8 @@ public class NetControlGUI extends BDOrderedContainerGUI
             needUpdateWidgets.add(nameText);
             needUpdateWidgets.add(levelText);
 
-            nameText.leftRel(0.5f).topRel(0.1f);
-            levelText.leftRel(0.5f).topRel(0.2f);
+            nameText.leftRelAnchor(0.3f,0).topRel(0.1f);
+            levelText.leftRelAnchor(0.3f,0).topRel(0.2f);
 
             panel.child(nameText);
             panel.child(levelText);
@@ -241,8 +242,8 @@ public class NetControlGUI extends BDOrderedContainerGUI
         }
         else
         {
-            TextWidget nameText = new TextWidget(new StringKey("名称:") );
-            TextWidget levelText = new TextWidget(new StringKey("权限:"));
+            TextWidget nameText = new TextWidget(new LangKey("text.beyonddimensions.level.name.empty") );
+            TextWidget levelText = new TextWidget(new LangKey("text.beyonddimensions.level.level.empty"));
 
             for(IWidget widget : needUpdateWidgets)
             {
@@ -253,8 +254,8 @@ public class NetControlGUI extends BDOrderedContainerGUI
             needUpdateWidgets.add(nameText);
             needUpdateWidgets.add(levelText);
 
-            nameText.leftRel(0.5f).topRel(0.1f);
-            levelText.leftRel(0.5f).topRel(0.2f);
+            nameText.leftRelAnchor(0.3f,0).topRel(0.1f);
+            levelText.leftRelAnchor(0.3f,0).topRel(0.2f);
 
             panel.child(nameText);
             panel.child(levelText);

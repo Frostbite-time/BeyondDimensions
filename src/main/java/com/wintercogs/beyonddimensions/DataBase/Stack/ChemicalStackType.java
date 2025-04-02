@@ -9,6 +9,7 @@ import mekanism.api.gas.GasStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -367,7 +368,7 @@ public class ChemicalStackType implements IStackType<GasStack>
 
         tooltips.add(TextFormatting.BLUE.toString() + TextFormatting.ITALIC + "Mekanism");
 
-        tooltips.add("已存储:"+getStackAmount()+"mB");
+        tooltips.add(I18n.format("stack.beyonddimensions.stored.mb",stack.amount));
         return tooltips;
     }
 

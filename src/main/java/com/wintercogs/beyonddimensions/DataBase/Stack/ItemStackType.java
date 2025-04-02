@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -339,11 +340,12 @@ public class ItemStackType implements IStackType<ItemStack> {
         return stack.getDisplayName();
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public List<String> getTooltipLines(@Nullable EntityPlayer player, ITooltipFlag tooltipFlag)
     {
         List<String> tooltips = stack.getTooltip(player, tooltipFlag);
-        tooltips.add("已存储:"+getStackAmount()+"个");
+        tooltips.add(I18n.format("stack.beyonddimensions.stored",getStackAmount()));
         return tooltips;
     }
 
