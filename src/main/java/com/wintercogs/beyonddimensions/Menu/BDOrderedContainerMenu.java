@@ -148,16 +148,19 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
 
                                 if(stackHandlerWrapper.getSlots()>0)
                                 {
-                                    IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(0));
-                                    if(stack !=null&& !stack.isEmpty())
+                                    for(int index=0;index<stackHandlerWrapper.getSlots();index++)
                                     {
-                                        int changedCount = (int) Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize());
-                                        int remaining = (int)storage.insert(slot.getSlotIndex(),stack.copyWithCount(changedCount),false).getStackAmount();
-                                        int actualInsert = changedCount - remaining;
+                                        IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(index));
+                                        if(stack !=null&& !stack.isEmpty())
+                                        {
+                                            int changedCount = (int) Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize());
+                                            int remaining = (int)storage.insert(slot.getSlotIndex(),stack.copyWithCount(changedCount),false).getStackAmount();
+                                            int actualInsert = changedCount - remaining;
 
-                                        stackHandlerWrapper.extract(0,actualInsert,false);
-                                        setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
-                                        handled.set(true);
+                                            stackHandlerWrapper.extract(index,actualInsert,false);
+                                            setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                            handled.set(true);
+                                        }
                                     }
                                 }
                             }
