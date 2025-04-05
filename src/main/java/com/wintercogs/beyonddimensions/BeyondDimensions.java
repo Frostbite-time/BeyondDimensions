@@ -114,6 +114,9 @@ public class BeyondDimensions
         // 注册方块能力类型，用于动态为方块注册能力
         CapabilityHelper.BlockCapabilityMap.put(ItemStackType.ID,Capabilities.ItemHandler.BLOCK);
         CapabilityHelper.BlockCapabilityMap.put(FluidStackType.ID,Capabilities.FluidHandler.BLOCK);
+        // 注册物品能力，用于动态操作
+        CapabilityHelper.ItemCapabilityMap.put(ItemStackType.ID,Capabilities.ItemHandler.ITEM);
+        CapabilityHelper.ItemCapabilityMap.put(FluidStackType.ID,Capabilities.FluidHandler.ITEM);
 
         // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
         UnifiedStorage.typedHandlerMap.put(ItemStackType.ID,ItemUnifiedStorageHandler::new);
@@ -132,7 +135,9 @@ public class BeyondDimensions
             // 注册化学品堆叠
             StackTypeRegistry.registerType(new ChemicalStackType());
             // 注册化学品方块能力
-            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackType.ID, ChemicalCapabilityHelper.CHEMICAL);
+            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackType.ID, ChemicalCapabilityHelper.CHEMICAL_BLOCK);
+            // 注册化学品物品能力
+            CapabilityHelper.ItemCapabilityMap.put(ChemicalStackType.ID, ChemicalCapabilityHelper.CHEMICAL_ITEM);
             // 注册分化包装
             UnifiedStorage.typedHandlerMap.put(ChemicalStackType.ID,ChemicalUnifiedStorageHandler::new);
             StackTypedHandler.typedHandlerMap.put(ChemicalStackType.ID,ChemicalStackTypedHandler::new);
