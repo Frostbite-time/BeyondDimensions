@@ -5,8 +5,6 @@ import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
 
-import java.util.List;
-
 public class ChemicalUnifiedStorageHandler implements IChemicalHandler
 {
 
@@ -20,8 +18,8 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     public int getChemicalTanks()
     {
         return storage.getTypeIdIndexList(ChemicalStackType.ID)
-                .map(List::size)
-                .orElse(0);
+                .map(list -> list.size()+1)
+                .orElse(1);
     }
 
     @Override

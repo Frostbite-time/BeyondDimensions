@@ -4,8 +4,6 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
-import java.util.List;
-
 public class FluidUnifiedStorageHandler implements IFluidHandler
 {
 
@@ -19,8 +17,8 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     public int getTanks()
     {
         return storage.getTypeIdIndexList(FluidStackType.ID)
-                .map(List::size)
-                .orElse(0);
+                .map(list -> list.size()+1)
+                .orElse(1);
     }
 
     @Override

@@ -4,8 +4,6 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
-import java.util.List;
-
 // 以IStackType为基础实现IItemHandler的类
 public class ItemUnifiedStorageHandler implements IItemHandler
 {
@@ -19,9 +17,13 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     @Override
     public int getSlots()
     {
+        // 默认返回长度比实际大1，可以让其他模组不因为存储长度而无法插入物品
+        // 此类封装性良好，只需内部方法对使用的索引进行二次检查，即可避免NPE问题
+        // 最后，UnifiedStorage实际并无槽位数限制且自动合并同类物品，除了读取信息和提取指定槽位物品都无需索引参与，对于超出索引的读取返回EMPTY即可
+        // 所以，这样做是安全的
         return storage.getTypeIdIndexList(ItemStackType.ID)
-                .map(List::size)
-                .orElse(0);
+                .map(list -> list.size()+1)
+                .orElse(1);
     }
 
     @Override
