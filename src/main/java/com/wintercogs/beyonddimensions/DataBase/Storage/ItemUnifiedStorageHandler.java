@@ -19,28 +19,22 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     @Override
     public int getSlots()
     {
-        List<Integer> slots = storage.getTypeIdIndexList(ItemStackType.ID);
-        if(slots != null)
-            return slots.size();
-        else return 0;
+        return storage.getTypeIdIndexList(ItemStackType.ID)
+                .map(List::size)
+                .orElse(0);
     }
 
     @Override
     public ItemStack getStackInSlot(int slot)
     {
         // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = storage.getTypeIdIndexList(ItemStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=slot && slot < slots.size())
-        {
-            actualIndex = slots.get(slot);
-        }
-
-        if(actualIndex != -1)
-        {
-            return (ItemStack)storage.getStackBySlot(actualIndex).getStack();
-        }
-        else return ItemStack.EMPTY;
+        return storage.getTypeIdIndexList(ItemStackType.ID)
+                .filter(slots -> slot>=0 && slot<slots.size())
+                .map(slots -> slots.get(slot))
+                .filter(actualIndex -> actualIndex>=0)
+                .map(actualIndex -> (ItemStackType)storage.getStackBySlot(actualIndex))
+                .map(ItemStackType::getStack)
+                .orElse(ItemStack.EMPTY);
     }
 
     @Override

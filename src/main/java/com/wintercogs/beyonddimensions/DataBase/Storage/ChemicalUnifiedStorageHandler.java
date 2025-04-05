@@ -1,9 +1,12 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.List;
 
@@ -19,28 +22,21 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public int getChemicalTanks()
     {
-        List<Integer> slots = storage.getTypeIdIndexList(ChemicalStackType.ID);
-        if(slots != null)
-            return slots.size();
-        else return 0;
+        return storage.getTypeIdIndexList(ChemicalStackType.ID)
+                .map(List::size)
+                .orElse(0);
     }
 
     @Override
     public ChemicalStack getChemicalInTank(int slot)
     {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = storage.getTypeIdIndexList(ChemicalStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=slot && slot < slots.size())
-        {
-            actualIndex = slots.get(slot);
-        }
-
-        if(actualIndex != -1)
-        {
-            return (ChemicalStack) storage.getStackBySlot(actualIndex).getStack();
-        }
-        else return ChemicalStack.EMPTY;
+        return storage.getTypeIdIndexList(ChemicalStackType.ID)
+                .filter(slots -> slot>=0 && slot<slots.size())
+                .map(slots -> slots.get(slot))
+                .filter(actualIndex -> actualIndex>=0)
+                .map(actualIndex -> (ChemicalStackType)storage.getStackBySlot(actualIndex))
+                .map(ChemicalStackType::getStack)
+                .orElse(ChemicalStack.EMPTY);
     }
 
     @Override
