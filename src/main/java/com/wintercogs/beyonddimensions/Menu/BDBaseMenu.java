@@ -93,6 +93,17 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         if(inventoryStartIndex <0 || inventoryEndIndex <0)
             BeyondDimensions.LOGGER.info("警告:背包索引设置错误！！！");
 
+        if(slots.get(slotIndex) instanceof StoredStackSlot sSlot)
+        {
+            if(sSlot.isFake())
+            {
+                FakeClickHandle(slotIndex,clickedStack,button,player,this.storage); // this.storage不应使用，而是在实际执行时自行确定
+                return;
+            }
+
+        }
+
+
         if(shiftDown)
         {
             quickMoveHandle(player,slotIndex,clickedStack,this.storage);
@@ -101,6 +112,11 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         {
             clickHandle(slotIndex,clickedStack,button,player,this.storage);
         }
+    }
+
+    protected void FakeClickHandle(int slotIndex,IStackType clickStack, int button, Player player, IStackTypedHandler storage)
+    {
+        // 空体，仅有需要执行假点击的菜单才重写
     }
 
     protected abstract ItemStack quickMoveHandle(Player player,int slotIndex, IStackType clickStack, IStackTypedHandler storage);
@@ -243,18 +259,4 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         return false;
     }
 
-    //    原用于取消点击实现，后发现在gui类中取消更合适，故注释备用
-//    public static class ItemStackedOnOtherHandler
-//    {
-//        /**
-//         * 通过此事件覆写以阻止原有的点击逻辑操作StoredItemStackSlot<br>
-//         * 详细逻辑见{@link net.minecraft.world.inventory.AbstractContainerMenu}的doClick方法对tryItemClickBehaviourOverride的使用
-//         * @param event 传入的事件，提供一系列基本参数 包括 持有的物品 要处理的物品 正处理的槽位 点击动作 玩家 持有的物品的槽位，不过此处均未用到
-//         */
-//        @SubscribeEvent
-//        public void OnItemStackedHandle(ItemStackedOnOtherEvent event)
-//        {
-//            event.setCanceled(event.getSlot() instanceof StoredStackSlot);
-//        }
-//    }
 }

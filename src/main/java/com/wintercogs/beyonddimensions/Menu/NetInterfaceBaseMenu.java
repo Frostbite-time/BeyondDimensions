@@ -6,10 +6,14 @@ import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Packet.SyncFlagPacket;
 import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
+import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
+import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -29,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 // 网络接口的UI
@@ -456,30 +461,70 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
         }
     }
 
-    // 自定义的非快速移动操作
-    protected void clickHandle(int slotIndex,IStackType clickStack, int button, Player player, IStackTypedHandler storage)
+    @Override
+    protected void FakeClickHandle(int slotIndex, IStackType clickStack, int button, Player player, IStackTypedHandler storage)
     {
-        ItemStack carriedItem = this.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
-        StoredStackSlot slot = (StoredStackSlot) this.slots.get(slotIndex);// clickHandle仅用于处理点击维度槽位的逻辑，如果转换失败，则证明调用逻辑出错
+        // 获取光标物品
+        ItemStack carriedItem = getCarried().copy();
+        StoredStackSlot slot = (StoredStackSlot) this.slots.get(slotIndex);
 
-        // 处理虚拟槽位
-        if(slot.isFake())
+        if (clickStack.isEmpty())
         {
-            if(carriedItem.isEmpty())
-            {
-                flagStorage.setStackDirectly(slot.getSlotIndex(),new ItemStackType());
+            if (!carriedItem.isEmpty())
+            {   //槽位物品为空，携带物品存在，将携带物品插入标记
+
+                if(button==0)
+                {
+                    ItemStack copy = carriedItem.copy();
+                    copy.setCount(1);
+                    flagStorage.setStackDirectly(slot.getSlotIndex(), new ItemStackType(copy));
+                }
+                else if(button==1)
+                {
+                    ItemStack copy = carriedItem.copy();
+                    copy.setCount(1);
+                    // 注: 通用机械物品必须在堆叠数量为1时才暴露能力。
+                    // 这种做法看起来是很有益的。可以防止其他模组错误消耗过多的存储资源
+                    CapabilityHelper.ItemCapabilityMap.forEach((typeId,cap)->{
+                        Object handler = copy.getCapability(cap);
+                        if(handler != null)
+                        {
+                            Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
+                            IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+
+                            if(stackHandlerWrapper.getSlots()>0)
+                            {
+                                IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(0),1);
+                                if(stack !=null&& !stack.isEmpty())
+                                {
+                                    flagStorage.setStackDirectly(slot.getSlotIndex(),stack);
+                                }
+                            }
+                        }
+                    });
+
+                }
+
             }
-            else
-            {
-                flagStorage.setStackDirectly(slot.getSlotIndex(),new ItemStackType(carriedItem.copyWithCount(1)));
-            }
-            return; // 结束处理
         }
         else
         {
-            super.clickHandle(slotIndex,clickStack,button,player,storage);
+            if (carriedItem.isEmpty())
+            {
+                //槽位物品存在，携带物品为空，尝试清空标记
+                flagStorage.setStackDirectly(slot.getSlotIndex(), new ItemStackType());
+            }
+            else if (true)
+            {   //槽位物品存在，携带物品存在，物品可以放置，取消标记
+
+                flagStorage.setStackDirectly(slot.getSlotIndex(), new ItemStackType());
+
+            }
+            else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
+            {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
+
+            }
+
         }
-
     }
-
 }
