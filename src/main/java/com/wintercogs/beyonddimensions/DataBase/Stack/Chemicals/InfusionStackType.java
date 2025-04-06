@@ -1,10 +1,11 @@
-package com.wintercogs.beyonddimensions.DataBase.Stack;
+package com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
-import mekanism.api.chemical.gas.Gas;
-import mekanism.api.chemical.gas.GasStack;
+import mekanism.api.chemical.infuse.InfuseType;
+import mekanism.api.chemical.infuse.InfusionStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -29,33 +30,33 @@ import java.util.List;
 import java.util.Optional;
 
 // 用于处理通用机械的化学品类
-public class ChemicalStackType implements IStackType<GasStack>
+public class InfusionStackType implements IStackType<InfusionStack>
 {
 
-    public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemical");
+    public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemicals/infuse");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
-    private GasStack stack;
+    private InfusionStack stack;
 
     // 创建空stack
-    public ChemicalStackType()
+    public InfusionStackType()
     {
-        stack = GasStack.EMPTY;
+        stack = InfusionStack.EMPTY;
     }
 
     // 创建给定stack
-    public ChemicalStackType(GasStack stack)
+    public InfusionStackType(InfusionStack stack)
     {
         this.stack = stack;
     }
 
     @Override
-    public IStackType<GasStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
+    public IStackType<InfusionStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
-        if(key instanceof Gas chemical)
+        if(key instanceof InfuseType chemical)
         {
-            GasStack chemicalStack = new GasStack(chemical, amount);
-            return new ChemicalStackType(chemicalStack);
+            InfusionStack chemicalStack = new InfusionStack(chemical, amount);
+            return new InfusionStackType(chemicalStack);
         }
         return null;
     }
@@ -67,39 +68,39 @@ public class ChemicalStackType implements IStackType<GasStack>
     }
 
     @Override
-    public IStackType<GasStack> getEmpty()
+    public IStackType<InfusionStack> getEmpty()
     {
-        return new ChemicalStackType();
+        return new InfusionStackType();
     }
 
     @Override
-    public GasStack getStack()
+    public InfusionStack getStack()
     {
         return stack;
     }
 
     @Override
-    public void setStack(GasStack stack)
+    public void setStack(InfusionStack stack)
     {
         this.stack = stack.copy();
     }
 
     @Override
-    public Class<GasStack> getStackClass()
+    public Class<InfusionStack> getStackClass()
     {
-        return GasStack.class;
+        return InfusionStack.class;
     }
 
     @Override
     public Class<?> getSourceClass()
     {
-        return Gas.class;
+        return InfuseType.class;
     }
 
     @Override
     public Object getSource()
     {
-        return GasStack.EMPTY.getType();
+        return InfusionStack.EMPTY.getType();
     }
 
     @Override
@@ -109,33 +110,33 @@ public class ChemicalStackType implements IStackType<GasStack>
     }
 
     @Override
-    public GasStack getEmptyStack()
+    public InfusionStack getEmptyStack()
     {
-        return GasStack.EMPTY;
+        return InfusionStack.EMPTY;
     }
 
     @Override
-    public GasStack copyStack()
+    public InfusionStack copyStack()
     {
         return stack.copy();
     }
 
     @Override
-    public GasStack copyStackWithCount(long count)
+    public InfusionStack copyStackWithCount(long count)
     {
-        return new GasStack(stack, count);
+        return new InfusionStack(stack, count);
     }
 
     @Override
-    public IStackType<GasStack> copy()
+    public IStackType<InfusionStack> copy()
     {
-        return new ChemicalStackType(stack.copy());
+        return new InfusionStackType(stack.copy());
     }
 
     @Override
-    public IStackType<GasStack> copyWithCount(long count)
+    public IStackType<InfusionStack> copyWithCount(long count)
     {
-        return new ChemicalStackType(new GasStack(stack, count));
+        return new InfusionStackType(new InfusionStack(stack, count));
     }
 
     @Override
@@ -176,33 +177,33 @@ public class ChemicalStackType implements IStackType<GasStack>
     }
 
     @Override
-    public GasStack splitStack(long amount)
+    public InfusionStack splitStack(long amount)
     {
-        if (amount <= 0) return GasStack.EMPTY;
+        if (amount <= 0) return InfusionStack.EMPTY;
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stack.getAmount());
-        GasStack split = stack.copy();
+        InfusionStack split = stack.copy();
         split.setAmount(splitAmount);
         stack.shrink(splitAmount);
         return split;
     }
 
     @Override
-    public IStackType<GasStack> split(long amount)
+    public IStackType<InfusionStack> split(long amount)
     {
-        if (amount <= 0) return new ChemicalStackType();
+        if (amount <= 0) return new InfusionStackType();
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stack.getAmount());
-        GasStack split = stack.copy();
+        InfusionStack split = stack.copy();
         split.setAmount(splitAmount);
         stack.shrink(splitAmount);
-        return new ChemicalStackType(split);
+        return new InfusionStackType(split);
     }
 
     @Override
-    public boolean isSame(IStackType<GasStack> other)
+    public boolean isSame(IStackType<InfusionStack> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
@@ -210,7 +211,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<GasStack> other)
+    public boolean isSameTypeSameComponents(IStackType<InfusionStack> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
@@ -231,14 +232,14 @@ public class ChemicalStackType implements IStackType<GasStack>
             // 写入数量
             buf.writeVarLong(stack.getAmount());
             // 使用副本避免修改原堆栈
-            GasStack copy = new GasStack(stack,1);
+            InfusionStack copy = new InfusionStack(stack,1);
             // 使用OPTIONAL_CODEC处理可能为空的情况
             copy.writeToPacket(buf);
         }
     }
 
     @Override
-    public IStackType<GasStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
+    public IStackType<InfusionStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
         if (!typeId.equals(getTypeId())) {
             return null;// 表示未能读取任何类型
@@ -247,14 +248,14 @@ public class ChemicalStackType implements IStackType<GasStack>
         // 读取是否存在物品的标志
         boolean hasItem = buf.readBoolean();
         if (!hasItem) {
-            return new ChemicalStackType(GasStack.EMPTY);
+            return new InfusionStackType(InfusionStack.EMPTY);
         }
 
         // 读取数量
         long count = buf.readVarLong();
         // 使用OPTIONAL_CODEC解码
-        GasStack stack = new GasStack(GasStack.readFromPacket(buf),count);
-        return new ChemicalStackType(stack);
+        InfusionStack stack = new InfusionStack(InfusionStack.readFromPacket(buf),count);
+        return new InfusionStackType(stack);
     }
 
     @Override
@@ -262,14 +263,14 @@ public class ChemicalStackType implements IStackType<GasStack>
     {
         CompoundTag tag = new CompoundTag();
         tag.putLong("Amount", getStackAmount());
-        tag.put("Stack",new GasStack(stack,1).write(new CompoundTag()));
+        tag.put("Stack",new InfusionStack(stack,1).write(new CompoundTag()));
         return tag;
     }
 
     @Override
-    public IStackType<GasStack> deserializeNBT(CompoundTag nbt)
+    public IStackType<InfusionStack> deserializeNBT(CompoundTag nbt)
     {
-        ChemicalStackType stack =  new ChemicalStackType(GasStack.readFromNBT(nbt.getCompound("Stack")));
+        InfusionStackType stack =  new InfusionStackType(InfusionStack.readFromNBT(nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));
         return stack;
     }
@@ -282,7 +283,7 @@ public class ChemicalStackType implements IStackType<GasStack>
         var poseStack = gui.pose(); // 获取渲染的变换矩阵
         poseStack.pushPose(); // 保存矩阵状态
 
-        Gas chemical = stack.getType();
+        InfuseType chemical = stack.getType();
         if(!chemical.isEmptyType())
         {
             ResourceLocation fluidStill = chemical.getIcon();
@@ -346,7 +347,7 @@ public class ChemicalStackType implements IStackType<GasStack>
             return List.of(Component.empty());
 
         List<Component> tooltips = new ArrayList<>();
-        Gas chemical = stack.getType();
+        InfuseType chemical = stack.getType();
 
         Component displayName = getDisplayName();
         tooltips.add(displayName);
@@ -400,7 +401,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     @Override
     public boolean equals(Object other)
     {
-        if(other instanceof ChemicalStackType otherStack)
+        if(other instanceof InfusionStackType otherStack)
         {
             return this.isSameTypeSameComponents(otherStack);
         }

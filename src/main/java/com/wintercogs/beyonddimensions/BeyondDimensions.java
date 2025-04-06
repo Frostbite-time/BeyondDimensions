@@ -3,17 +3,29 @@ package com.wintercogs.beyonddimensions;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.DataBase.Handler.ChemicalStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Handler.Chemicals.GasStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Handler.Chemicals.InfusionStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Handler.Chemicals.PigmentStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Handler.Chemicals.SlurryStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.FluidStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.ItemStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.GasStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.InfusionStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.PigmentStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.SlurryStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.ChemicalHandlerWrapper;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.Chemicals.GasHandlerWrapper;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.Chemicals.InfusionHandlerWrapper;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.Chemicals.PigmentHandlerWrapper;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.Chemicals.SlurryHandlerWrapper;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.ItemHandlerWrapper;
-import com.wintercogs.beyonddimensions.DataBase.Storage.ChemicalUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.DataBase.Storage.Chemicals.GasUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.DataBase.Storage.Chemicals.InfusionUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.DataBase.Storage.Chemicals.PigmentUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.DataBase.Storage.Chemicals.SlurryUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
@@ -123,15 +135,31 @@ public class BeyondDimensions
         if(MekLoaded)
         {
             // 注册化学品堆叠
-            StackTypeRegistry.registerType(new ChemicalStackType());
+            StackTypeRegistry.registerType(new GasStackType());
+            StackTypeRegistry.registerType(new InfusionStackType());
+            StackTypeRegistry.registerType(new PigmentStackType());
+            StackTypeRegistry.registerType(new SlurryStackType());
             // 注册化学品方块能力
-            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackType.ID, ChemicalCapabilityHelper.CHEMICAL);
+            CapabilityHelper.BlockCapabilityMap.put(GasStackType.ID, ChemicalCapabilityHelper.GAS);
+            CapabilityHelper.BlockCapabilityMap.put(InfusionStackType.ID, ChemicalCapabilityHelper.INFUSION);
+            CapabilityHelper.BlockCapabilityMap.put(PigmentStackType.ID,ChemicalCapabilityHelper.PIGMENT);
+            CapabilityHelper.BlockCapabilityMap.put(SlurryStackType.ID, ChemicalCapabilityHelper.SLURRY);
             // 注册分化包装
-            UnifiedStorage.typedHandlerMap.put(ChemicalStackType.ID,ChemicalUnifiedStorageHandler::new);
-            StackTypedHandler.typedHandlerMap.put(ChemicalStackType.ID,ChemicalStackTypedHandler::new);
+            UnifiedStorage.typedHandlerMap.put(GasStackType.ID, GasUnifiedStorageHandler::new);
+            UnifiedStorage.typedHandlerMap.put(InfusionStackType.ID, InfusionUnifiedStorageHandler::new);
+            UnifiedStorage.typedHandlerMap.put(PigmentStackType.ID, PigmentUnifiedStorageHandler::new);
+            UnifiedStorage.typedHandlerMap.put(SlurryStackType.ID, SlurryUnifiedStorageHandler::new);
+
+            StackTypedHandler.typedHandlerMap.put(GasStackType.ID, GasStackTypedHandler::new);
+            StackTypedHandler.typedHandlerMap.put(InfusionStackType.ID, InfusionStackTypedHandler::new);
+            StackTypedHandler.typedHandlerMap.put(PigmentStackType.ID, PigmentStackTypedHandler::new);
+            StackTypedHandler.typedHandlerMap.put(SlurryStackType.ID, SlurryStackTypedHandler::new);
 
             // 注册堆叠处理包装
-            StackHandlerWrapperHelper.stackWrappers.put(ChemicalStackType.ID, ChemicalHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(GasStackType.ID, GasHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(InfusionStackType.ID, InfusionHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(PigmentStackType.ID, PigmentHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(SlurryStackType.ID, SlurryHandlerWrapper::new);
 
         }
     }
