@@ -266,9 +266,12 @@ public class StackTypedHandler implements IStackTypedHandler
         if (matchingSlots == null || matchingSlots.isEmpty()) {
             return result; // 没有此类型的槽位
         }
-        
+
+        // 创建副本避免修改异常
+        List<Integer> slotsToIterate = new ArrayList<>(matchingSlots);
+
         // 只遍历匹配类型的槽位
-        for (Integer slot : matchingSlots) {
+        for (Integer slot : slotsToIterate) {
             IStackType current = storage.get(slot);
             if (current.isEmpty() || !current.isSameTypeSameComponents(stack)) {
                 continue;

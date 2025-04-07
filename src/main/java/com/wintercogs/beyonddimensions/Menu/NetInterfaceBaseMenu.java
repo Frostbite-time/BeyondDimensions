@@ -494,10 +494,14 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
 
                             if(stackHandlerWrapper.getSlots()>0)
                             {
-                                IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(0),1);
-                                if(stack !=null&& !stack.isEmpty())
+                                for(int index=0;index<stackHandlerWrapper.getSlots();index++)
                                 {
-                                    flagStorage.setStackDirectly(slot.getSlotIndex(),stack);
+                                    IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(0),1);
+                                    if(stack!=null&& !stack.isEmpty())
+                                    {
+                                        flagStorage.setStackDirectly(slot.getSlotIndex(),stack);
+                                        break;
+                                    }
                                 }
                             }
                         }
