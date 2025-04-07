@@ -1,7 +1,9 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.GasStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
@@ -325,6 +327,11 @@ public class UnifiedStorage implements IStackTypedHandler
         for (Tag t : stacksTag) {
             CompoundTag stackTag = (CompoundTag) t;
             ResourceLocation typeId = ResourceLocation.tryParse(stackTag.getString("Type"));
+
+            // 旧版本兼容
+            if(typeId.equals(ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemical")))
+                typeId = GasStackType.ID;
+
             IStackType stackEmpty = StackTypeRegistry.getType(typeId).copy();
             IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"));
             if(stackActual.isEmpty())

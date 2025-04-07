@@ -1,5 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.Handler;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.GasStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
@@ -354,6 +356,11 @@ public class StackTypedHandler implements IStackTypedHandler
             else
             {
                 ResourceLocation typeId = ResourceLocation.tryParse(type);
+
+                // 旧版本兼容
+                if(typeId.equals(ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemical")))
+                    typeId = GasStackType.ID;
+
                 IStackType stackEmpty = StackTypeRegistry.getType(typeId).copy();
                 IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"));
                 storage.add(stackActual); // 无论是不是空体，都添加
