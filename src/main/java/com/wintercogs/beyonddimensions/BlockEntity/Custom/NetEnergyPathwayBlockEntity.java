@@ -99,7 +99,7 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
                 if (otherStorage != null)
                 {
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
-                    int maxExtract = (int)Math.min(energyStorage.getRealEnergyCapacity(), energyStorage.getMaxTransfer());
+                    int maxExtract = (int)Math.min(energyStorage.getRealEnergyStored(), energyStorage.getMaxTransfer());
                     int receive = otherStorage.receiveEnergy(maxExtract, false);
                     energyStorage.extractEnergy(receive, false);
                 }
