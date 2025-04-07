@@ -120,6 +120,10 @@ public class BeyondDimensions
         CapabilityHelper.BlockCapabilityMap.put(ItemStackType.ID, ForgeCapabilities.ITEM_HANDLER);
         CapabilityHelper.BlockCapabilityMap.put(FluidStackType.ID,ForgeCapabilities.FLUID_HANDLER);
 
+        // 注册物品能力类型
+        CapabilityHelper.ItemCapabilityMap.put(ItemStackType.ID, ForgeCapabilities.ITEM_HANDLER);
+        CapabilityHelper.ItemCapabilityMap.put(FluidStackType.ID, ForgeCapabilities.FLUID_HANDLER_ITEM);
+
         // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
         UnifiedStorage.typedHandlerMap.put(ItemStackType.ID,ItemUnifiedStorageHandler::new);
         UnifiedStorage.typedHandlerMap.put(FluidStackType.ID,FluidUnifiedStorageHandler::new);
@@ -144,6 +148,12 @@ public class BeyondDimensions
             CapabilityHelper.BlockCapabilityMap.put(InfusionStackType.ID, ChemicalCapabilityHelper.INFUSION);
             CapabilityHelper.BlockCapabilityMap.put(PigmentStackType.ID,ChemicalCapabilityHelper.PIGMENT);
             CapabilityHelper.BlockCapabilityMap.put(SlurryStackType.ID, ChemicalCapabilityHelper.SLURRY);
+            // 注册化学品物品能力
+            CapabilityHelper.ItemCapabilityMap.put(GasStackType.ID, ChemicalCapabilityHelper.GAS);
+            CapabilityHelper.ItemCapabilityMap.put(InfusionStackType.ID, ChemicalCapabilityHelper.INFUSION);
+            CapabilityHelper.ItemCapabilityMap.put(PigmentStackType.ID, ChemicalCapabilityHelper.PIGMENT);
+            CapabilityHelper.ItemCapabilityMap.put(SlurryStackType.ID, ChemicalCapabilityHelper.SLURRY);
+
             // 注册分化包装
             UnifiedStorage.typedHandlerMap.put(GasStackType.ID, GasUnifiedStorageHandler::new);
             UnifiedStorage.typedHandlerMap.put(InfusionStackType.ID, InfusionUnifiedStorageHandler::new);

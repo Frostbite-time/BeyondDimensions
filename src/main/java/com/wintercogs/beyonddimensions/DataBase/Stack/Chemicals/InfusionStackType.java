@@ -148,6 +148,8 @@ public class InfusionStackType implements IStackType<InfusionStack>
     @Override
     public void setStackAmount(long amount)
     {
+        if(stack.isEmpty())
+            return;
         stack.setAmount(amount);
     }
 

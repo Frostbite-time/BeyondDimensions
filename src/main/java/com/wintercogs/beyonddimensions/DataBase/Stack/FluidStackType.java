@@ -173,6 +173,8 @@ public class FluidStackType implements IStackType<FluidStack>
             stack.setAmount(Integer.MAX_VALUE);
             return;
         }
+        if(stack.isEmpty())
+            return;
         stack.setAmount((int) amount);
     }
 

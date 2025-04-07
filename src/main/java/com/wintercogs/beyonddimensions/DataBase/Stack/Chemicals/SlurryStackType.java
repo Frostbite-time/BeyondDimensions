@@ -148,6 +148,8 @@ public class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public void setStackAmount(long amount)
     {
+        if(stack.isEmpty())
+            return;
         stack.setAmount(amount);
     }
 

@@ -93,6 +93,16 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         if(inventoryStartIndex <0 || inventoryEndIndex <0)
             BeyondDimensions.LOGGER.info("警告:背包索引设置错误！！！");
 
+        if(slots.get(slotIndex) instanceof StoredStackSlot sSlot)
+        {
+            if(sSlot.isFake())
+            {
+                FakeClickHandle(slotIndex,clickedStack,button,player,this.storage); // this.storage不应使用，而是在实际执行时自行确定
+                return;
+            }
+
+        }
+
         if(shiftDown)
         {
             quickMoveHandle(player,slotIndex,clickedStack,this.storage);
@@ -101,6 +111,12 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         {
             clickHandle(slotIndex,clickedStack,button,player,this.storage);
         }
+    }
+
+
+    protected void FakeClickHandle(int slotIndex,IStackType clickStack, int button, Player player, IStackTypedHandler storage)
+    {
+        // 空体，仅有需要执行假点击的菜单才重写
     }
 
     protected abstract ItemStack quickMoveHandle(Player player,int slotIndex, IStackType clickStack, IStackTypedHandler storage);

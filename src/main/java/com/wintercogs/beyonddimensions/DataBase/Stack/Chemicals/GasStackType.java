@@ -148,6 +148,8 @@ public class GasStackType implements IStackType<GasStack>
     @Override
     public void setStackAmount(long amount)
     {
+        if(stack.isEmpty())
+            return;
         stack.setAmount(amount);
     }
 

@@ -148,6 +148,8 @@ public class PigmentStackType implements IStackType<PigmentStack>
     @Override
     public void setStackAmount(long amount)
     {
+        if(stack.isEmpty())
+            return;
         stack.setAmount(amount);
     }
 
