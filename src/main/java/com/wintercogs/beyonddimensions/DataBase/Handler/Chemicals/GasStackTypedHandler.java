@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.GasStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
@@ -20,38 +21,34 @@ public class GasStackTypedHandler implements IGasHandler
     @Override
     public int getTanks()
     {
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(GasStackType.ID);
-        if(slots != null)
-            return slots.size();
-        else return 0;
+        return handlerStorage.getTypeIdIndexList(GasStackType.ID)
+                .map(List::size)
+                .orElse(0);
     }
 
     @Override
     public GasStack getChemicalInTank(int tank)
     {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(GasStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=tank && tank < slots.size())
-        {
-            actualIndex = slots.get(tank);
-        }
-
-        if(actualIndex != -1)
-        {
-            return (GasStack) handlerStorage.getStackBySlot(actualIndex).getStack();
-        }
-        else return GasStack.EMPTY;
+        return handlerStorage.getTypeIdIndexList(GasStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(handlerStorage::getStackBySlot)
+                .map(obj -> (GasStack) obj.getStack())
+                .orElse(GasStack.EMPTY);
     }
 
     // 直接设置指定槽位化学品
     @Override
     public void setChemicalInTank(int tank, GasStack stack)
     {
-        int actualIndex = -1;
-        actualIndex = handlerStorage.getTypeIdIndexList(GasStackType.ID).get(tank);
-        if(actualIndex >= 0)
-            handlerStorage.setStackDirectly(actualIndex,new GasStackType(stack.copy()));
+        handlerStorage.getTypeIdIndexList(GasStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .ifPresent(actualIndex ->
+                        handlerStorage.setStackDirectly(actualIndex, new GasStackType(stack.copy()))
+                );
     }
 
     @Override
@@ -69,19 +66,33 @@ public class GasStackTypedHandler implements IGasHandler
     @Override
     public GasStack insertChemical(int tank, GasStack stack, Action action)
     {
-        if(stack.isEmpty())
-            return GasStack.EMPTY;
-        long remaining = handlerStorage.insert(handlerStorage.getTypeIdIndexList(GasStackType.ID).get(tank),new GasStackType(stack.copy()), action.simulate()).getStackAmount();
-        if(remaining>0)
-            return new GasStack(stack, remaining);
-        return GasStack.EMPTY;
+        if (stack.isEmpty()) return GasStack.EMPTY;
+        return handlerStorage.getTypeIdIndexList(GasStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> {
+                    IStackType remainingStack = handlerStorage.insert(
+                            actualIndex,
+                            new GasStackType(stack.copy()),
+                            action.simulate()
+                    );
+                    long remaining = remainingStack.getStackAmount();
+                    return (remaining > 0) ? new GasStack(stack,remaining): GasStack.EMPTY;
+                })
+                .orElse(stack.copy());
     }
 
     @Override
     public GasStack extractChemical(int tank, long amount, Action action)
     {
-        return ((GasStackType)handlerStorage.extract(handlerStorage.getTypeIdIndexList(GasStackType.ID).get(tank),amount,action.simulate()))
-                .copyStack();
+        return handlerStorage.getTypeIdIndexList(GasStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> handlerStorage.extract(actualIndex, amount, action.simulate()))
+                .map(extracts -> ((GasStackType)extracts).copyStack())
+                .orElse(GasStack.EMPTY);
     }
 
     @Override
@@ -98,9 +109,14 @@ public class GasStackTypedHandler implements IGasHandler
     @Override
     public GasStack extractChemical(long amount, Action action)
     {
-        int actualIndex = handlerStorage.getTypeIdIndexList(GasStackType.ID).get(0);
-        return ((GasStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copy(),action.simulate()))
-                .copyStack();
+        return handlerStorage.getTypeIdIndexList(GasStackType.ID)
+                .map(slots -> slots.get(0))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(handlerStorage::getStackBySlot)
+                .map(stack -> stack.copy())
+                .map(stack -> handlerStorage.extract(stack, action.simulate()))
+                .map(extracts -> ((GasStackType)extracts).copyStack())
+                .orElse(GasStack.EMPTY);
     }
 
     @Override

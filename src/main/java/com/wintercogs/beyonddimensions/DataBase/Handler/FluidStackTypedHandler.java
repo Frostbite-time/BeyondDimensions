@@ -20,28 +20,21 @@ public class FluidStackTypedHandler implements IFluidHandler
     @Override
     public int getTanks()
     {
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(FluidStackType.ID);
-        if(slots != null)
-            return slots.size();
-        else return 0;
+        return handlerStorage.getTypeIdIndexList(FluidStackType.ID)
+                .map(List::size)
+                .orElse(0);
     }
 
     @Override
     public FluidStack getFluidInTank(int tank)
     {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(FluidStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=tank && tank < slots.size())
-        {
-            actualIndex = slots.get(tank);
-        }
-
-        if(actualIndex != -1)
-        {
-            return (FluidStack) handlerStorage.getStackBySlot(actualIndex).getStack();
-        }
-        else return FluidStack.EMPTY;
+        return handlerStorage.getTypeIdIndexList(FluidStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())  // 检查 tank 范围
+                .map(slots -> slots.get(tank))                      // 提取 actualIndex
+                .filter(actualIndex -> actualIndex >= 0)           // 过滤无效索引（如果实际索引可能为负）
+                .map(handlerStorage::getStackBySlot)                // 获取存储对象（自动处理 null）
+                .map(obj -> (FluidStack) obj.getStack())            // 直接转换，null 会被跳过
+                .orElse(FluidStack.EMPTY);                          // 兜底返回空
     }
 
     @Override
@@ -76,8 +69,13 @@ public class FluidStackTypedHandler implements IFluidHandler
     @Override
     public FluidStack drain(int count, FluidAction fluidAction)
     {
-        int actualIndex = handlerStorage.getTypeIdIndexList(FluidStackType.ID).get(0);
-        return ((FluidStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copy(),fluidAction.simulate()))
-                .copyStack();
+        return handlerStorage.getTypeIdIndexList(FluidStackType.ID)
+                .map(slots -> slots.get(0))                     // 提取第一个索引
+                .filter(actualIndex -> actualIndex >= 0)            // 过滤无效索引
+                .map(handlerStorage::getStackBySlot)                // 获取存储对象（自动处理 null）
+                .map(stack -> stack.copy())                         // 复制对象（若 stack 为 null，此步自动跳过）
+                .map(stack -> handlerStorage.extract(stack, fluidAction.simulate()))
+                .map(extracts -> ((FluidStackType)extracts).copyStack())                     // 生成 FluidStack
+                .orElse(FluidStack.EMPTY);                          // 兜底返回空
     }
 }

@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.InfusionStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.infuse.IInfusionHandler;
 import mekanism.api.chemical.infuse.InfusionStack;
@@ -20,38 +21,34 @@ public class InfusionStackTypedHandler implements IInfusionHandler
     @Override
     public int getTanks()
     {
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(InfusionStackType.ID);
-        if(slots != null)
-            return slots.size();
-        else return 0;
+        return handlerStorage.getTypeIdIndexList(InfusionStackType.ID)
+                .map(List::size)
+                .orElse(0);
     }
 
     @Override
     public InfusionStack getChemicalInTank(int tank)
     {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(InfusionStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=tank && tank < slots.size())
-        {
-            actualIndex = slots.get(tank);
-        }
-
-        if(actualIndex != -1)
-        {
-            return (InfusionStack) handlerStorage.getStackBySlot(actualIndex).getStack();
-        }
-        else return InfusionStack.EMPTY;
+        return handlerStorage.getTypeIdIndexList(InfusionStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(handlerStorage::getStackBySlot)
+                .map(obj -> (InfusionStack) obj.getStack())
+                .orElse(InfusionStack.EMPTY);
     }
 
     // 直接设置指定槽位化学品
     @Override
     public void setChemicalInTank(int tank, InfusionStack stack)
     {
-        int actualIndex = -1;
-        actualIndex = handlerStorage.getTypeIdIndexList(InfusionStackType.ID).get(tank);
-        if(actualIndex >= 0)
-            handlerStorage.setStackDirectly(actualIndex,new InfusionStackType(stack.copy()));
+        handlerStorage.getTypeIdIndexList(InfusionStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .ifPresent(actualIndex ->
+                        handlerStorage.setStackDirectly(actualIndex, new InfusionStackType(stack.copy()))
+                );
     }
 
     @Override
@@ -69,19 +66,33 @@ public class InfusionStackTypedHandler implements IInfusionHandler
     @Override
     public InfusionStack insertChemical(int tank, InfusionStack stack, Action action)
     {
-        if(stack.isEmpty())
-            return InfusionStack.EMPTY;
-        long remaining = handlerStorage.insert(handlerStorage.getTypeIdIndexList(InfusionStackType.ID).get(tank),new InfusionStackType(stack.copy()), action.simulate()).getStackAmount();
-        if(remaining>0)
-            return new InfusionStack(stack, remaining);
-        return InfusionStack.EMPTY;
+        if (stack.isEmpty()) return InfusionStack.EMPTY;
+        return handlerStorage.getTypeIdIndexList(InfusionStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> {
+                    IStackType remainingStack = handlerStorage.insert(
+                            actualIndex,
+                            new InfusionStackType(stack.copy()),
+                            action.simulate()
+                    );
+                    long remaining = remainingStack.getStackAmount();
+                    return (remaining > 0) ? new InfusionStack(stack,remaining): InfusionStack.EMPTY;
+                })
+                .orElse(stack.copy());
     }
 
     @Override
     public InfusionStack extractChemical(int tank, long amount, Action action)
     {
-        return ((InfusionStackType)handlerStorage.extract(handlerStorage.getTypeIdIndexList(InfusionStackType.ID).get(tank),amount,action.simulate()))
-                .copyStack();
+        return handlerStorage.getTypeIdIndexList(InfusionStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> handlerStorage.extract(actualIndex, amount, action.simulate()))
+                .map(extracts -> ((InfusionStackType)extracts).copyStack())
+                .orElse(InfusionStack.EMPTY);
     }
 
     @Override
@@ -98,9 +109,14 @@ public class InfusionStackTypedHandler implements IInfusionHandler
     @Override
     public InfusionStack extractChemical(long amount, Action action)
     {
-        int actualIndex = handlerStorage.getTypeIdIndexList(InfusionStackType.ID).get(0);
-        return ((InfusionStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copy(),action.simulate()))
-                .copyStack();
+        return handlerStorage.getTypeIdIndexList(InfusionStackType.ID)
+                .map(slots -> slots.get(0))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(handlerStorage::getStackBySlot)
+                .map(stack -> stack.copy())
+                .map(stack -> handlerStorage.extract(stack, action.simulate()))
+                .map(extracts -> ((InfusionStackType)extracts).copyStack())
+                .orElse(InfusionStack.EMPTY);
     }
 
     @Override

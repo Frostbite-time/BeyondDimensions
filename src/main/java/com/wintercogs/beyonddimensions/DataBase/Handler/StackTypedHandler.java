@@ -367,8 +367,9 @@ public class StackTypedHandler implements IStackTypedHandler
         return this.typeIdIndex;
     }
 
-    public List<Integer> getTypeIdIndexList(ResourceLocation typeId)
+    public Optional<List<Integer>> getTypeIdIndexList(ResourceLocation typeId)
     {
-        return this.typeIdIndex.get(typeId);
+        return Optional.ofNullable(this.typeIdIndex.get(typeId))
+                .filter(list ->!list.isEmpty());
     }
 }

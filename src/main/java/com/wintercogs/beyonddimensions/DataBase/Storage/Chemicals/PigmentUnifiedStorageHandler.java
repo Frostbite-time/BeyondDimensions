@@ -6,8 +6,6 @@ import mekanism.api.Action;
 import mekanism.api.chemical.pigment.IPigmentHandler;
 import mekanism.api.chemical.pigment.PigmentStack;
 
-import java.util.List;
-
 public class PigmentUnifiedStorageHandler implements IPigmentHandler
 {
 
@@ -20,28 +18,21 @@ public class PigmentUnifiedStorageHandler implements IPigmentHandler
     @Override
     public int getTanks()
     {
-        List<Integer> slots = storage.getTypeIdIndexList(PigmentStackType.ID);
-        if(slots != null)
-            return slots.size();
-        else return 0;
+        return storage.getTypeIdIndexList(PigmentStackType.ID)
+                .map(list -> list.size()+1)
+                .orElse(1);
     }
 
     @Override
     public PigmentStack getChemicalInTank(int slot)
     {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = storage.getTypeIdIndexList(PigmentStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=slot && slot < slots.size())
-        {
-            actualIndex = slots.get(slot);
-        }
-
-        if(actualIndex != -1)
-        {
-            return (PigmentStack) storage.getStackBySlot(actualIndex).getStack();
-        }
-        else return PigmentStack.EMPTY;
+        return storage.getTypeIdIndexList(PigmentStackType.ID)
+                .filter(slots -> slot>=0 && slot<slots.size())
+                .map(slots -> slots.get(slot))
+                .filter(actualIndex -> actualIndex>=0)
+                .map(actualIndex -> (PigmentStackType)storage.getStackBySlot(actualIndex))
+                .map(PigmentStackType::getStack)
+                .orElse(PigmentStack.EMPTY);
     }
 
     @Override

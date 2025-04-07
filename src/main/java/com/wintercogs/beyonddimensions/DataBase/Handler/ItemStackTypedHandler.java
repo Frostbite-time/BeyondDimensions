@@ -18,28 +18,20 @@ public class ItemStackTypedHandler implements IItemHandler
     @Override
     public int getSlots()
     {
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(ItemStackType.ID);
-        if(slots != null)
-            return slots.size();
-        else return 0;
+        return handlerStorage.getTypeIdIndexList(ItemStackType.ID)
+                .map(List::size)
+                .orElse(0);
     }
 
     @Override
     public ItemStack getStackInSlot(int slot)
     {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(ItemStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=slot && slot < slots.size())
-        {
-            actualIndex = slots.get(slot);
-        }
-
-        if(actualIndex != -1)
-        {
-            return (ItemStack) handlerStorage.getStackBySlot(actualIndex).getStack();
-        }
-        else return ItemStack.EMPTY;
+        return handlerStorage.getTypeIdIndexList(ItemStackType.ID)
+                .filter(slots -> slot>=0 && slot<slots.size())
+                .map(slots -> slots.get(slot))
+                .map(handlerStorage::getStackBySlot)
+                .map(stackType -> (ItemStack)stackType.getStack())
+                .orElse(ItemStack.EMPTY);
     }
 
     // 这里函数的slot，是外界根据getItemOnlyStorage所认为的我们的slot
@@ -47,32 +39,34 @@ public class ItemStackTypedHandler implements IItemHandler
     @Override
     public ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
     {
-        int actualIndex = handlerStorage.getTypeIdIndexList(ItemStackType.ID).get(slot);
-        ItemStackType remaining = (ItemStackType) handlerStorage.insert(actualIndex,new ItemStackType(itemStack.copy()),sim);
-        return remaining.copyStack();
+        return handlerStorage.getTypeIdIndexList(ItemStackType.ID)
+                .filter(slots -> slot>=0 && slot<slots.size())
+                .map(slots -> slots.get(slot))
+                .map(actualIndex -> (ItemStack) handlerStorage.insert(actualIndex,new ItemStackType(itemStack.copy()),sim).copyStack())
+                .orElse(itemStack.copy());
     }
 
     @Override
     public ItemStack extractItem(int slot, int count, boolean sim)
     {
-        int actualIndex = handlerStorage.getTypeIdIndexList(ItemStackType.ID).get(slot);
-        ItemStackType extracts = (ItemStackType) handlerStorage.extract(actualIndex,count,sim);
-        return extracts.copyStack();
+        return handlerStorage.getTypeIdIndexList(ItemStackType.ID)
+                .filter(slots -> slot>=0 && slot<slots.size())
+                .map(slots -> slots.get(slot))
+                .filter(actualIndex -> actualIndex>=0)
+                .map(actualIndex -> (ItemStack) handlerStorage.extract(actualIndex,count,sim).copyStack())
+                .orElse(ItemStack.EMPTY);
     }
 
     @Override
     public int getSlotLimit(int slot)
     {
-        int actualIndex = handlerStorage.getTypeIdIndexList(ItemStackType.ID).get(slot);
-        ItemStackType stackType = (ItemStackType)handlerStorage.getStackBySlot(actualIndex);
-        if(!stackType.isEmpty())
-        {
-            return (int) stackType.getVanillaMaxStackSize();
-        }
-        else
-        {
-            return 99;
-        }
+        return handlerStorage.getTypeIdIndexList(ItemStackType.ID)
+                .filter(slots -> slot>=0 && slot<slots.size())
+                .map(slots -> slots.get(slot))
+                .filter(actualIndex -> actualIndex>=0)
+                .map(actualIndex -> (ItemStackType) handlerStorage.getStackBySlot(actualIndex))
+                .map(stack -> (int)stack.getVanillaMaxStackSize())
+                .orElse(99);
     }
 
     @Override

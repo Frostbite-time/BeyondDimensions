@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.SlurryStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.SlurryStack;
@@ -20,38 +21,34 @@ public class SlurryStackTypedHandler implements ISlurryHandler
     @Override
     public int getTanks()
     {
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(SlurryStackType.ID);
-        if(slots != null)
-            return slots.size();
-        else return 0;
+        return handlerStorage.getTypeIdIndexList(SlurryStackType.ID)
+                .map(List::size)
+                .orElse(0);
     }
 
     @Override
     public SlurryStack getChemicalInTank(int tank)
     {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(SlurryStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=tank && tank < slots.size())
-        {
-            actualIndex = slots.get(tank);
-        }
-
-        if(actualIndex != -1)
-        {
-            return (SlurryStack) handlerStorage.getStackBySlot(actualIndex).getStack();
-        }
-        else return SlurryStack.EMPTY;
+        return handlerStorage.getTypeIdIndexList(SlurryStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(handlerStorage::getStackBySlot)
+                .map(obj -> (SlurryStack) obj.getStack())
+                .orElse(SlurryStack.EMPTY);
     }
 
     // 直接设置指定槽位化学品
     @Override
     public void setChemicalInTank(int tank, SlurryStack stack)
     {
-        int actualIndex = -1;
-        actualIndex = handlerStorage.getTypeIdIndexList(SlurryStackType.ID).get(tank);
-        if(actualIndex >= 0)
-            handlerStorage.setStackDirectly(actualIndex,new SlurryStackType(stack.copy()));
+        handlerStorage.getTypeIdIndexList(SlurryStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .ifPresent(actualIndex ->
+                        handlerStorage.setStackDirectly(actualIndex, new SlurryStackType(stack.copy()))
+                );
     }
 
     @Override
@@ -69,19 +66,33 @@ public class SlurryStackTypedHandler implements ISlurryHandler
     @Override
     public SlurryStack insertChemical(int tank, SlurryStack stack, Action action)
     {
-        if(stack.isEmpty())
-            return SlurryStack.EMPTY;
-        long remaining = handlerStorage.insert(handlerStorage.getTypeIdIndexList(SlurryStackType.ID).get(tank),new SlurryStackType(stack.copy()), action.simulate()).getStackAmount();
-        if(remaining>0)
-            return new SlurryStack(stack, remaining);
-        return SlurryStack.EMPTY;
+        if (stack.isEmpty()) return SlurryStack.EMPTY;
+        return handlerStorage.getTypeIdIndexList(SlurryStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> {
+                    IStackType remainingStack = handlerStorage.insert(
+                            actualIndex,
+                            new SlurryStackType(stack.copy()),
+                            action.simulate()
+                    );
+                    long remaining = remainingStack.getStackAmount();
+                    return (remaining > 0) ? new SlurryStack(stack,remaining): SlurryStack.EMPTY;
+                })
+                .orElse(stack.copy());
     }
 
     @Override
     public SlurryStack extractChemical(int tank, long amount, Action action)
     {
-        return ((SlurryStackType)handlerStorage.extract(handlerStorage.getTypeIdIndexList(SlurryStackType.ID).get(tank),amount,action.simulate()))
-                .copyStack();
+        return handlerStorage.getTypeIdIndexList(SlurryStackType.ID)
+                .filter(slots -> tank >= 0 && tank < slots.size())
+                .map(slots -> slots.get(tank))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> handlerStorage.extract(actualIndex, amount, action.simulate()))
+                .map(extracts -> ((SlurryStackType)extracts).copyStack())
+                .orElse(SlurryStack.EMPTY);
     }
 
     @Override
@@ -98,9 +109,14 @@ public class SlurryStackTypedHandler implements ISlurryHandler
     @Override
     public SlurryStack extractChemical(long amount, Action action)
     {
-        int actualIndex = handlerStorage.getTypeIdIndexList(SlurryStackType.ID).get(0);
-        return ((SlurryStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copy(),action.simulate()))
-                .copyStack();
+        return handlerStorage.getTypeIdIndexList(SlurryStackType.ID)
+                .map(slots -> slots.get(0))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(handlerStorage::getStackBySlot)
+                .map(stack -> stack.copy())
+                .map(stack -> handlerStorage.extract(stack, action.simulate()))
+                .map(extracts -> ((SlurryStackType)extracts).copyStack())
+                .orElse(SlurryStack.EMPTY);
     }
 
     @Override

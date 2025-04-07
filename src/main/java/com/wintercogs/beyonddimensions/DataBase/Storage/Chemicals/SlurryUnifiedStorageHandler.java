@@ -6,8 +6,6 @@ import mekanism.api.Action;
 import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.SlurryStack;
 
-import java.util.List;
-
 public class SlurryUnifiedStorageHandler implements ISlurryHandler
 {
 
@@ -20,28 +18,21 @@ public class SlurryUnifiedStorageHandler implements ISlurryHandler
     @Override
     public int getTanks()
     {
-        List<Integer> slots = storage.getTypeIdIndexList(SlurryStackType.ID);
-        if(slots != null)
-            return slots.size();
-        else return 0;
+        return storage.getTypeIdIndexList(SlurryStackType.ID)
+                .map(list -> list.size()+1)
+                .orElse(1);
     }
 
     @Override
     public SlurryStack getChemicalInTank(int slot)
     {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = storage.getTypeIdIndexList(SlurryStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=slot && slot < slots.size())
-        {
-            actualIndex = slots.get(slot);
-        }
-
-        if(actualIndex != -1)
-        {
-            return (SlurryStack) storage.getStackBySlot(actualIndex).getStack();
-        }
-        else return SlurryStack.EMPTY;
+        return storage.getTypeIdIndexList(SlurryStackType.ID)
+                .filter(slots -> slot>=0 && slot<slots.size())
+                .map(slots -> slots.get(slot))
+                .filter(actualIndex -> actualIndex>=0)
+                .map(actualIndex -> (SlurryStackType)storage.getStackBySlot(actualIndex))
+                .map(SlurryStackType::getStack)
+                .orElse(SlurryStack.EMPTY);
     }
 
     @Override

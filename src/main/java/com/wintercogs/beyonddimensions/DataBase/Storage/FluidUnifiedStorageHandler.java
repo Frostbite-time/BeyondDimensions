@@ -4,8 +4,6 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-import java.util.List;
-
 public class FluidUnifiedStorageHandler implements IFluidHandler
 {
 
@@ -18,28 +16,21 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public int getTanks()
     {
-        List<Integer> slots = storage.getTypeIdIndexList(FluidStackType.ID);
-        if(slots != null)
-            return slots.size();
-        else return 0;
+        return storage.getTypeIdIndexList(FluidStackType.ID)
+                .map(list -> list.size()+1)
+                .orElse(1);
     }
 
     @Override
     public FluidStack getFluidInTank(int slot)
     {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = storage.getTypeIdIndexList(FluidStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=slot && slot < slots.size())
-        {
-            actualIndex = slots.get(slot);
-        }
-
-        if(actualIndex != -1)
-        {
-            return (FluidStack) storage.getStackBySlot(actualIndex).getStack();
-        }
-        else return FluidStack.EMPTY;
+        return storage.getTypeIdIndexList(FluidStackType.ID)
+                .filter(slots -> slot>=0 && slot<slots.size())
+                .map(slots -> slots.get(slot))
+                .filter(actualIndex -> actualIndex>=0)
+                .map(actualIndex -> (FluidStackType)storage.getStackBySlot(actualIndex))
+                .map(FluidStackType::getStack)
+                .orElse(FluidStack.EMPTY);
     }
 
     @Override

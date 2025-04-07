@@ -6,8 +6,6 @@ import mekanism.api.Action;
 import mekanism.api.chemical.infuse.IInfusionHandler;
 import mekanism.api.chemical.infuse.InfusionStack;
 
-import java.util.List;
-
 public class InfusionUnifiedStorageHandler implements IInfusionHandler
 {
 
@@ -20,28 +18,21 @@ public class InfusionUnifiedStorageHandler implements IInfusionHandler
     @Override
     public int getTanks()
     {
-        List<Integer> slots = storage.getTypeIdIndexList(InfusionStackType.ID);
-        if(slots != null)
-            return slots.size();
-        else return 0;
+        return storage.getTypeIdIndexList(InfusionStackType.ID)
+                .map(list -> list.size()+1)
+                .orElse(1);
     }
 
     @Override
     public InfusionStack getChemicalInTank(int slot)
     {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        List<Integer> slots = storage.getTypeIdIndexList(InfusionStackType.ID);
-        int actualIndex = -1;
-        if(slots != null && 0<=slot && slot < slots.size())
-        {
-            actualIndex = slots.get(slot);
-        }
-
-        if(actualIndex != -1)
-        {
-            return (InfusionStack) storage.getStackBySlot(actualIndex).getStack();
-        }
-        else return InfusionStack.EMPTY;
+        return storage.getTypeIdIndexList(InfusionStackType.ID)
+                .filter(slots -> slot>=0 && slot<slots.size())
+                .map(slots -> slots.get(slot))
+                .filter(actualIndex -> actualIndex>=0)
+                .map(actualIndex -> (InfusionStackType)storage.getStackBySlot(actualIndex))
+                .map(InfusionStackType::getStack)
+                .orElse(InfusionStack.EMPTY);
     }
 
     @Override
