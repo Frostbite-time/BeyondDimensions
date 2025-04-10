@@ -56,6 +56,7 @@ public class NetCreater extends Item {
             newNet.addManager(player.getUniqueID());
             newNet.addPlayer(player.getUniqueID());
             newNet.markDirty(); // 1.12.2 标记数据需要保存
+            world.getMapStorage().saveAllData(); // 创建后立刻保存
 
             // 消耗物品
             itemstack.shrink(1); // 1.12.2 支持 shrink 方法
