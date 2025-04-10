@@ -4,8 +4,6 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 
-import java.util.List;
-
 // 以IStackType为基础实现IItemHandler的类
 public class ItemUnifiedStorageHandler implements IItemHandler
 {

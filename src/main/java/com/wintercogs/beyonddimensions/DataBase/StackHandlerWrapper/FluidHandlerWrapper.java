@@ -59,7 +59,7 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
     {
         int currentNum = stack.amount;
         int insert;
-        insert = fluidHandler.fill(stack, sim);
+        insert = fluidHandler.fill(stack, !sim);
         return currentNum-insert;
     }
 
@@ -71,7 +71,7 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
             FluidStack stack = getStackInSlot(i);
             if(!(stack.amount <=0))
             {
-                return fluidHandler.drain(new FluidStack(stack,(int)Math.min(amount,Integer.MAX_VALUE)), sim).amount;
+                return fluidHandler.drain(new FluidStack(stack,(int)Math.min(amount,Integer.MAX_VALUE)), !sim).amount;
             }
         }
         return 0;
@@ -80,6 +80,6 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
     @Override
     public long extract(EnumFacing facing,FluidStack stack, boolean sim)
     {
-        return fluidHandler.drain(stack, sim).amount;
+        return fluidHandler.drain(stack, !sim).amount;
     }
 }

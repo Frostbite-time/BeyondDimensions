@@ -1,13 +1,13 @@
 package com.wintercogs.beyonddimensions.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
-import mekanism.api.gas.*;
+import mekanism.api.gas.Gas;
+import mekanism.api.gas.GasStack;
+import mekanism.api.gas.GasTankInfo;
+import mekanism.api.gas.IGasHandler;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 public class ChemicalStackTypedHandler implements IGasHandler
 {

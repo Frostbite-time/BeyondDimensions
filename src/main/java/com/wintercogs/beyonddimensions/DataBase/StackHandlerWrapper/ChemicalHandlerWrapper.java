@@ -50,27 +50,27 @@ public class ChemicalHandlerWrapper implements IStackHandlerWrapper<GasStack>
     public long insert(EnumFacing facing,int slot, GasStack stack, boolean sim)
     {
         long current = stack.amount;
-        return current - chemicalHandler.receiveGas(facing,stack, sim);
+        return current - chemicalHandler.receiveGas(facing,stack, !sim);
     }
 
     @Override
     public long insert(EnumFacing facing,GasStack stack, boolean sim)
     {
         long current = stack.amount;
-        return current - chemicalHandler.receiveGas(facing,stack, sim);
+        return current - chemicalHandler.receiveGas(facing,stack, !sim);
     }
 
     // 警告，不应调用此函数，因为此函数与实际接口不一致
     @Override
     public long extract(EnumFacing facing,int slot, long amount, boolean sim)
     {
-        return chemicalHandler.drawGas(facing, (int) amount,sim).amount;
+        return chemicalHandler.drawGas(facing, (int) amount,!sim).amount;
     }
 
     // 警告，不应调用此函数，因为此函数与实际接口不一致
     @Override
     public long extract(EnumFacing facing,GasStack stack, boolean sim)
     {
-        return chemicalHandler.drawGas(facing, stack.amount,sim).amount;
+        return chemicalHandler.drawGas(facing, stack.amount,!sim).amount;
     }
 }

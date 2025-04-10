@@ -9,8 +9,21 @@ public class StackCreater
     public static <T> IStackType<T> Create(ResourceLocation typeId, T stack, long amount)
     {
         IStackType<T> stackType = (IStackType<T>) StackTypeRegistry.getType(typeId).copy();
+        if(stack==null)
+            return stackType;
+
         stackType.setStack(stack);
         stackType.setStackAmount(amount);
+        return stackType;
+    }
+
+    public static <T> IStackType<T> Create(ResourceLocation typeId, T stack)
+    {
+        IStackType<T> stackType = (IStackType<T>) StackTypeRegistry.getType(typeId).copy();
+        if(stack==null)
+            return stackType;
+
+        stackType.setStack(stack); // 这样做，amount是stack本身数量
         return stackType;
     }
 

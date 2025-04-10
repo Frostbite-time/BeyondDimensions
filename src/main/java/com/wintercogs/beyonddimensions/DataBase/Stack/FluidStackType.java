@@ -104,7 +104,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public boolean isEmpty()
     {
-        return getStackAmount()<=0;
+        return stack == null || getStackAmount()<=0;
     }
 
     @Override
@@ -290,8 +290,12 @@ public class FluidStackType implements IStackType<FluidStack>
         }
         // 构建FluidStack（需要处理无效流体情况）
         Fluid fluid = FluidRegistry.getFluid(nbt.getString("FluidName"));
-        if (fluid == null) return new FluidStackType(null);
-        FluidStack stack = new FluidStack(fluid, amount, nbt.getCompoundTag("Tag"));
+        if (fluid == null) return new FluidStackType();
+        FluidStack stack;
+        if(nbt.hasKey("Tag"))
+            stack = new FluidStack(fluid, amount, nbt.getCompoundTag("Tag"));
+        else
+            stack = new FluidStack(fluid, amount);
         return new FluidStackType(stack);
 
     }

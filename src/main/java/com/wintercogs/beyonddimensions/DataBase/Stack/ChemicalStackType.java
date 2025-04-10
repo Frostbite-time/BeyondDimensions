@@ -102,7 +102,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     @Override
     public boolean isEmpty()
     {
-        return stack.amount <= 0 || stack.getGas() == null;
+        return stack == null || stack.amount <= 0 || stack.getGas() == null;
     }
 
     @Override
