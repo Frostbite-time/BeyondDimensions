@@ -135,9 +135,18 @@ public abstract class BDOrderedContainerGUI extends BDBaseGUI
                                             int remaining = (int)storage.insert(slotIndex,stack.copyWithCount(changedCount),false).getStackAmount();
                                             int actualInsert = changedCount - remaining;
 
-                                            stackHandlerWrapper.extract(EnumFacing.DOWN,index,actualInsert,false);
-                                            guiSyncManager.setCursorItem(carriedItem.copy()); // 重设持有物以应用修改后的handler
-                                            handled.set(true);
+                                            if(actualInsert>0)
+                                            {
+                                                long actualExtracts = stackHandlerWrapper.extract(EnumFacing.DOWN,index,actualInsert,false);
+                                                if(actualExtracts<actualInsert)
+                                                {
+                                                    // 如果实际消耗量与插入存储的量不符合，进行一次回调
+                                                    storage.extract(slotIndex,actualInsert - actualExtracts,false);
+                                                }
+                                                guiSyncManager.setCursorItem(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                handled.set(true);
+                                                break;
+                                            }
                                         }
                                     }
                                 }

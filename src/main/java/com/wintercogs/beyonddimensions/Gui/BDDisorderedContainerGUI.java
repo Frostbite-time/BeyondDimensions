@@ -146,10 +146,18 @@ public abstract class BDDisorderedContainerGUI extends BDBaseGUI
                                             int remaining = (int)storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
                                             int actualInsert = changedCount - remaining;
 
-                                            stackHandlerWrapper.extract(EnumFacing.DOWN, index,actualInsert,false);
-                                            guiSyncManager.setCursorItem(carriedItem.copy()); // 重设持有物以应用修改后的handler
-                                            handled.set(true);
-                                            break;
+                                            if(actualInsert>0)
+                                            {
+                                                long actualExtracts = stackHandlerWrapper.extract(EnumFacing.DOWN,index,actualInsert,false);
+                                                if(actualExtracts<actualInsert)
+                                                {
+                                                    // 如果实际消耗量与插入存储的量不符合，进行一次回调
+                                                    storage.extract(stack.copyWithCount(actualInsert - actualExtracts),false);
+                                                }
+                                                guiSyncManager.setCursorItem(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                handled.set(true);
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -365,7 +373,12 @@ public abstract class BDDisorderedContainerGUI extends BDBaseGUI
 
                                                 if(actualInsert>0)
                                                 {
-                                                    stackHandlerWrapper.extract(EnumFacing.DOWN,index,actualInsert,false);
+                                                    long actualExtracts = stackHandlerWrapper.extract(EnumFacing.DOWN,index,actualInsert,false);
+                                                    if(actualExtracts<actualInsert)
+                                                    {
+                                                        // 如果实际消耗量与插入存储的量不符合，进行一次回调
+                                                        storage.extract(stack.copyWithCount(actualInsert - actualExtracts),false);
+                                                    }
                                                     guiSyncManager.setCursorItem(carriedItem.copy()); // 重设持有物以应用修改后的handler
                                                     handled.set(true);
                                                     break;
