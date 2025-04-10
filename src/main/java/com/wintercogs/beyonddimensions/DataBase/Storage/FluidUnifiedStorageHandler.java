@@ -83,12 +83,12 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
         return storage.getTypeIdIndexList(FluidStackType.ID)
                 .map(slots -> {
                     IFluidTankProperties[] tankProperties = new IFluidTankProperties[slots.size()];
-                    for (int i = 0; i < slots.size(); i++) {
+                    for (int i = 0; i < slots.size() + 1; i++) {
                         tankProperties[i] = new FluidUnifiedStorageHandler.TankProperties(i, this);
                     }
                     return tankProperties;
                 })
-                .orElse(new IFluidTankProperties[0]);
+                .orElse(new IFluidTankProperties[]{new FluidUnifiedStorageHandler.TankProperties(0, this)});
     }
 
     // 返回实际插入数量

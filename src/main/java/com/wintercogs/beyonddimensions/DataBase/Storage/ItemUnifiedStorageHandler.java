@@ -20,8 +20,8 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     public int getSlots()
     {
         return storage.getTypeIdIndexList(ItemStackType.ID)
-                .map(list -> list.size())
-                .orElse(0);
+                .map(list -> list.size()+1)
+                .orElse(1);
     }
 
     @Override

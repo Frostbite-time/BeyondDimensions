@@ -64,12 +64,12 @@ public class ChemicalUnifiedStorageHandler implements IGasHandler
         return storage.getTypeIdIndexList(ChemicalStackType.ID)
                 .map(slots -> {
                     GasTankInfo[] tankProperties = new GasTankInfo[slots.size()];
-                    for (int i = 0; i < slots.size(); i++) {
+                    for (int i = 0; i < slots.size() + 1; i++) {
                         tankProperties[i] = new ChemicalUnifiedStorageHandler.GasTankInfoWarrper(i, this);
                     }
                     return tankProperties;
                 })
-                .orElse(new GasTankInfo[0]);
+                .orElse(new GasTankInfo[] {new ChemicalUnifiedStorageHandler.GasTankInfoWarrper(0, this)});
     }
 
 
