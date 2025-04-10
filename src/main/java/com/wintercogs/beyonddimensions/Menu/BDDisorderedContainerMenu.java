@@ -158,11 +158,18 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                                             int changedCount = (int) Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize());
                                             int remaining = (int)storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
                                             int actualInsert = changedCount - remaining;
-
-                                            stackHandlerWrapper.extract(index,actualInsert,false);
-                                            setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
-                                            handled.set(true);
-                                            break;
+                                            if(actualInsert>0)
+                                            {
+                                                long actualExtracts = stackHandlerWrapper.extract(index,actualInsert,false);
+                                                if(actualExtracts< actualInsert)
+                                                {
+                                                    // 对此进行一个回调
+                                                    storage.extract(stack.copyWithCount(actualInsert-actualExtracts),false);
+                                                }
+                                                setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                handled.set(true);
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -326,7 +333,12 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
 
                                                 if(actualInsert>0)
                                                 {
-                                                    stackHandlerWrapper.extract(index,actualInsert,false);
+                                                    long actualExtracts = stackHandlerWrapper.extract(index,actualInsert,false);
+                                                    if(actualExtracts< actualInsert)
+                                                    {
+                                                        // 对此进行一个回调
+                                                        storage.extract(stack.copyWithCount(actualInsert-actualExtracts),false);
+                                                    }
                                                     setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
                                                     handled.set(true);
                                                     break;

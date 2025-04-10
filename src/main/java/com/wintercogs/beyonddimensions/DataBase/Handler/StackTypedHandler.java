@@ -284,6 +284,9 @@ public class StackTypedHandler implements IStackTypedHandler
 
             // 执行提取操作
             IStackType extracted = extract(slot, toExtract, simulate);
+            // 提取之后对matchingSlots的删除没有问题。下一次循环不会再使用同一个slot
+            // 而下一个slot也不会与这一个slot相同指向
+
             if (!extracted.isEmpty()) {
                 if (result.isEmpty()) {
                     result = extracted;
