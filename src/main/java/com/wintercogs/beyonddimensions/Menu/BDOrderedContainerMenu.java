@@ -157,9 +157,18 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                             int remaining = (int)storage.insert(slot.getSlotIndex(),stack.copyWithCount(changedCount),false).getStackAmount();
                                             int actualInsert = changedCount - remaining;
 
-                                            stackHandlerWrapper.extract(index,actualInsert,false);
-                                            setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
-                                            handled.set(true);
+                                            if(actualInsert>0)
+                                            {
+                                                long actualExtracts = stackHandlerWrapper.extract(index,actualInsert,false);
+                                                if(actualExtracts< actualInsert)
+                                                {
+                                                    // 对此进行一个回调
+                                                    storage.extract(slot.getSlotIndex(), actualInsert-actualExtracts,false);
+                                                }
+                                                setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                handled.set(true);
+                                                break;
+                                            }
                                         }
                                     }
                                 }
