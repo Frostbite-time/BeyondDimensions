@@ -34,19 +34,13 @@ public class FluidStackTypedHandler implements IFluidHandler
         @Override
         public FluidStack getContents()
         {
-            // 此处的slot参数是基于特化类型ItemStackType的索引
-            List<Integer> slots = handler.handlerStorage.getTypeIdIndexList(FluidStackType.ID);
-            int actualIndex = -1;
-            if(slots != null && 0<=tank && tank < slots.size())
-            {
-                actualIndex = slots.get(tank);
-            }
-
-            if(actualIndex != -1)
-            {
-                return (FluidStack) handler.handlerStorage.getStackBySlot(actualIndex).getStack();
-            }
-            else return new FluidStack(FluidRegistry.WATER,0);
+            return handler.handlerStorage.getTypeIdIndexList(FluidStackType.ID)
+                    .filter(slots -> tank >= 0 && tank < slots.size())  // 检查 tank 范围
+                    .map(slots -> slots.get(tank))                      // 提取 actualIndex
+                    .filter(actualIndex -> actualIndex >= 0)           // 过滤无效索引（如果实际索引可能为负）
+                    .map(handler.handlerStorage::getStackBySlot)                // 获取存储对象（自动处理 null）
+                    .map(obj -> (FluidStack) obj.getStack())            // 直接转换，null 会被跳过
+                    .orElse(new FluidStackType().getStack());                          // 兜底返回空
         }
 
         @Override
@@ -83,20 +77,15 @@ public class FluidStackTypedHandler implements IFluidHandler
     @Override
     public IFluidTankProperties[] getTankProperties()
     {
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(FluidStackType.ID);
-        if(slots != null)
-        {
-            IFluidTankProperties[] TankProperties = new IFluidTankProperties[slots.size()];
-
-            for(int i = 0; i < slots.size(); i++)
-            {
-                TankProperties[i] = new TankProperties(i,this);
-            }
-
-            return TankProperties;
-        }
-
-        return new IFluidTankProperties[0];
+        return handlerStorage.getTypeIdIndexList(FluidStackType.ID)
+                .map(slots -> {
+                    IFluidTankProperties[] tankProperties = new IFluidTankProperties[slots.size()];
+                    for (int i = 0; i < slots.size(); i++) {
+                        tankProperties[i] = new TankProperties(i, this);
+                    }
+                    return tankProperties;
+                })
+                .orElse(new IFluidTankProperties[0]);
     }
 
 
@@ -122,10 +111,14 @@ public class FluidStackTypedHandler implements IFluidHandler
     @Override
     public FluidStack drain(int count, boolean doAction)
     {
-        boolean sim = !doAction;
-        int actualIndex = handlerStorage.getTypeIdIndexList(FluidStackType.ID).get(0);
-        return ((FluidStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copy(),sim))
-                .copyStack();
+        return handlerStorage.getTypeIdIndexList(FluidStackType.ID)
+                .map(slots -> slots.get(0))                     // 提取第一个索引
+                .filter(actualIndex -> actualIndex >= 0)            // 过滤无效索引
+                .map(handlerStorage::getStackBySlot)                // 获取存储对象（自动处理 null）
+                .map(stack -> stack.copy())                         // 复制对象（若 stack 为 null，此步自动跳过）
+                .map(stack -> handlerStorage.extract(stack, !doAction))
+                .map(extracts -> ((FluidStackType)extracts).copyStack())                     // 生成 FluidStack
+                .orElse(new FluidStackType().getStack());                          // 兜底返回空
     }
 
 

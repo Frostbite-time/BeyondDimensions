@@ -1,11 +1,14 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import mekanism.api.gas.*;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 public class ChemicalUnifiedStorageHandler implements IGasHandler
 {
@@ -33,18 +36,13 @@ public class ChemicalUnifiedStorageHandler implements IGasHandler
         public GasStack getGas()
         {
             // 此处的slot参数是基于特化类型ItemStackType的索引
-            List<Integer> slots = handler.storage.getTypeIdIndexList(ChemicalStackType.ID);
-            int actualIndex = -1;
-            if(slots != null && 0<=tank && tank < slots.size())
-            {
-                actualIndex = slots.get(tank);
-            }
-
-            if(actualIndex != -1)
-            {
-                return (GasStack) handler.storage.getStackBySlot(actualIndex).getStack();
-            }
-            else return new GasStack(GasRegistry.getGas(0),0);
+            return handler.storage.getTypeIdIndexList(ChemicalStackType.ID)
+                    .filter(slots -> tank>=0 && tank<slots.size())
+                    .map(slots -> slots.get(tank))
+                    .filter(actualIndex -> actualIndex>=0)
+                    .map(actualIndex -> (ChemicalStackType)handler.storage.getStackBySlot(actualIndex))
+                    .map(ChemicalStackType::getStack)
+                    .orElse(new ChemicalStackType().getStack());
         }
 
         @Override
@@ -63,20 +61,15 @@ public class ChemicalUnifiedStorageHandler implements IGasHandler
 
     public GasTankInfo[] getTankInfo()
     {
-        List<Integer> slots = storage.getTypeIdIndexList(ChemicalStackType.ID);
-        if(slots != null)
-        {
-            GasTankInfo[] TankProperties = new GasTankInfo[slots.size()];
-
-            for(int i = 0; i < slots.size(); i++)
-            {
-                TankProperties[i] = new ChemicalUnifiedStorageHandler.GasTankInfoWarrper(i,this);
-            }
-
-            return TankProperties;
-        }
-
-        return new GasTankInfo[0];
+        return storage.getTypeIdIndexList(ChemicalStackType.ID)
+                .map(slots -> {
+                    GasTankInfo[] tankProperties = new GasTankInfo[slots.size()];
+                    for (int i = 0; i < slots.size(); i++) {
+                        tankProperties[i] = new ChemicalUnifiedStorageHandler.GasTankInfoWarrper(i, this);
+                    }
+                    return tankProperties;
+                })
+                .orElse(new GasTankInfo[0]);
     }
 
 
@@ -96,9 +89,20 @@ public class ChemicalUnifiedStorageHandler implements IGasHandler
     public GasStack drawGas(EnumFacing enumFacing, int amount, boolean doAction)
     {
         boolean sim = !doAction;
-        int actualIndex = storage.getTypeIdIndexList(ChemicalStackType.ID).get(0);
-        return ((ChemicalStackType)storage.extract(storage.getStackBySlot(actualIndex).copyWithCount(amount),sim))
-                .copyStack();
+        return storage.getTypeIdIndexList(ChemicalStackType.ID)
+                // 获取第一个有效槽位索引的Optional
+                .flatMap(list -> list.stream().findFirst())
+                // 获取槽位中的堆栈对象（自动处理null）
+                .flatMap(actualIndex -> Optional.ofNullable(storage.getStackBySlot(actualIndex)))
+                // 复制堆栈内容（假设copy()不会返回null）
+                .map(stack -> stack.copyWithCount(amount))
+                // 执行提取操作并类型转换（假设extract返回非null）
+                .flatMap(copiedStack ->
+                        Optional.ofNullable((ChemicalStackType) storage.extract(copiedStack, sim)))
+                // 最终复制堆栈数据
+                .map(ChemicalStackType::copyStack)
+                // 无有效结果时返回null（可替换为.orElseThrow()）
+                .orElse(new ChemicalStackType().getStack());
     }
 
     @Override

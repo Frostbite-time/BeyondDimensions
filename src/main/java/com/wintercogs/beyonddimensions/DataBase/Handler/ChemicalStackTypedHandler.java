@@ -1,8 +1,10 @@
 package com.wintercogs.beyonddimensions.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import mekanism.api.gas.*;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -32,19 +34,13 @@ public class ChemicalStackTypedHandler implements IGasHandler
         @Override
         public GasStack getGas()
         {
-            // 此处的slot参数是基于特化类型ItemStackType的索引
-            List<Integer> slots = handler.handlerStorage.getTypeIdIndexList(ChemicalStackType.ID);
-            int actualIndex = -1;
-            if(slots != null && 0<=tank && tank < slots.size())
-            {
-                actualIndex = slots.get(tank);
-            }
-
-            if(actualIndex != -1)
-            {
-                return (GasStack) handler.handlerStorage.getStackBySlot(actualIndex).getStack();
-            }
-            else return new GasStack(GasRegistry.getGas(0),0);
+            return handler.handlerStorage.getTypeIdIndexList(ChemicalStackType.ID)
+                    .filter(slots -> tank >= 0 && tank < slots.size())
+                    .map(slots -> slots.get(tank))
+                    .filter(actualIndex -> actualIndex >= 0)
+                    .map(handler.handlerStorage::getStackBySlot)
+                    .map(obj -> (GasStack) obj.getStack())
+                    .orElse(new ChemicalStackType().getStack());
         }
 
         @Override
@@ -64,20 +60,15 @@ public class ChemicalStackTypedHandler implements IGasHandler
 
     public GasTankInfo[] getTankInfo()
     {
-        List<Integer> slots = handlerStorage.getTypeIdIndexList(ChemicalStackType.ID);
-        if(slots != null)
-        {
-            GasTankInfo[] TankProperties = new GasTankInfo[slots.size()];
-
-            for(int i = 0; i < slots.size(); i++)
-            {
-                TankProperties[i] = new GasTankInfoWarrper(i,this);
-            }
-
-            return TankProperties;
-        }
-
-        return new GasTankInfo[0];
+        return handlerStorage.getTypeIdIndexList(ChemicalStackType.ID)
+                .map(slots -> {
+                    GasTankInfo[] tankProperties = new GasTankInfo[slots.size()];
+                    for (int i = 0; i < slots.size(); i++) {
+                        tankProperties[i] = new ChemicalStackTypedHandler.GasTankInfoWarrper(i, this);
+                    }
+                    return tankProperties;
+                })
+                .orElse(new GasTankInfo[0]);
     }
 
 
@@ -98,10 +89,14 @@ public class ChemicalStackTypedHandler implements IGasHandler
     @Override
     public GasStack drawGas(EnumFacing enumFacing, int amount, boolean doAction)
     {
-        boolean sim = !doAction;
-        int actualIndex = handlerStorage.getTypeIdIndexList(ChemicalStackType.ID).get(0);
-        return ((ChemicalStackType)handlerStorage.extract(handlerStorage.getStackBySlot(actualIndex).copyWithCount(amount),sim))
-                .copyStack();
+        return handlerStorage.getTypeIdIndexList(ChemicalStackType.ID)
+                .map(slots -> slots.get(0))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(handlerStorage::getStackBySlot)
+                .map(stack -> stack.copy())
+                .map(stack -> handlerStorage.extract(stack, !doAction))
+                .map(extracts -> ((ChemicalStackType)extracts).copyStack())
+                .orElse(new ChemicalStackType().getStack());
     }
 
     @Override
