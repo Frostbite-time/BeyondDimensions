@@ -2,20 +2,23 @@ package com.wintercogs.beyonddimensions.Gui;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
+import com.wintercogs.beyonddimensions.DataBase.Stack.*;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public abstract class BDOrderedContainerGUI extends BDBaseGUI
@@ -59,45 +62,99 @@ public abstract class BDOrderedContainerGUI extends BDBaseGUI
         {
             if (!carriedItem.isEmpty())
             {   //槽位物品为空，携带物品存在，将携带物品插入槽位
-                int changedCount = button == 0 ? carriedItem.getCount() : 1;
-                int remaining = (int)storage.insert(slotIndex,StackCreater.Create(ItemStackType.ID, carriedItem.copy(),changedCount),false).getStackAmount();
-                int needRemove = changedCount - remaining;
-                int newCount = carriedItem.getCount() - needRemove;
-                if(newCount <=0)
+                AtomicBoolean handled = new AtomicBoolean(false);
+                // 堆叠数量为1 右键点击 尝试取出内容物并插入
+                if(carriedItem.getCount()==1 && button== 1)
                 {
-                    guiSyncManager.setCursorItem(ItemStack.EMPTY);
-                }
-                else
-                {
-                    ItemStack newCarriedItem = carriedItem.copy();
-                    newCarriedItem.setCount(newCount);
-                    guiSyncManager.setCursorItem(newCarriedItem);
-                }
-            }
-        }
-        else
-        {
-            if(clickStack instanceof ItemStackType clickItem)
-            {
-                if (carriedItem.isEmpty())
-                {   //槽位物品存在，携带物品为空，尝试取出槽位物品
-
-                    // 确保一次取出最大不得超过原版数量
-                    int woundChangeNum = (int) Math.min(clickItem.getStackAmount(), clickItem.getVanillaMaxStackSize());
-                    int actualChangeNum = button == 0 ? woundChangeNum : (woundChangeNum + 1) / 2;
-                    ItemStack takenItem = ((ItemStack) storage.extract(slotIndex,actualChangeNum,false).getStack()).copy();
-                    if(takenItem != null)
+                    if(carriedItem.getItem() instanceof ItemBucket bucketItem)
                     {
-                        guiSyncManager.setCursorItem(takenItem);
-                        storage.onChange();
+                        Object handler = carriedItem.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, EnumFacing.DOWN);
+                        if(handler != null)
+                        {
+                            FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
+
+                            if(stackHandlerWrapper.getSlots()>0)
+                            {
+                                FluidStackType stack = new FluidStackType(stackHandlerWrapper.getStackInSlot(0));
+                                if(stack != null && !stack.isEmpty())
+                                {
+                                    int changedCount = (int) Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize());
+                                    // 进行模拟，桶必须完全清空才被允许操作
+                                    int remaining = (int)storage.insert(slotIndex,stack.copyWithCount(changedCount),true).getStackAmount();
+                                    if(remaining<=0)
+                                    {
+                                        // 执行实际逻辑
+                                        storage.insert(slotIndex,stack.copyWithCount(changedCount),false).getStackAmount();
+                                        guiSyncManager.setCursorItem(new ItemStack(Items.BUCKET));
+                                        handled.set(true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if(BeyondDimensions.MekLoaded && carriedItem.getItem() instanceof mekanism.common.item.ItemBlockGasTank tank)
+                    {
+                        NBTTagCompound gasTag = carriedItem.getTagCompound().getCompoundTag("mekData").getCompoundTag("stored");
+                        mekanism.api.gas.GasStack gasStack = mekanism.api.gas.GasStack.readFromNBT(gasTag);
+                        if(gasStack!=null)
+                        {
+                            ChemicalStackType stackTyped = new ChemicalStackType(gasStack);
+                            if(!stackTyped.isEmpty())
+                            {
+                                int changedCount = (int) Math.min(stackTyped.getStackAmount(),stackTyped.getVanillaMaxStackSize());
+                                int remaining = (int)storage.insert(slotIndex,stackTyped.copyWithCount(changedCount),false).getStackAmount();
+                                int actualInsert = changedCount - remaining;
+                                if(actualInsert>0)
+                                {
+                                    stackTyped.shrink(actualInsert);
+                                    ItemStack newCarried = carriedItem.copy();
+                                    tank.setGas(newCarried, stackTyped.getStack());
+                                    guiSyncManager.setCursorItem(newCarried);
+                                    handled.set(true);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        CapabilityHelper.ItemCapabilityMap.forEach((typeId,cap)->{
+                            Object handler = carriedItem.getCapability(cap, EnumFacing.DOWN);
+                            if(handler != null)
+                            {
+                                Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
+                                IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+
+                                if(stackHandlerWrapper.getSlots()>0)
+                                {
+                                    for(int index=0;index<stackHandlerWrapper.getSlots();index++)
+                                    {
+                                        IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(index));
+                                        if(stack !=null&& !stack.isEmpty())
+                                        {
+                                            int changedCount = (int) Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize());
+                                            int remaining = (int)storage.insert(slotIndex,stack.copyWithCount(changedCount),false).getStackAmount();
+                                            int actualInsert = changedCount - remaining;
+
+                                            stackHandlerWrapper.extract(EnumFacing.DOWN,index,actualInsert,false);
+                                            guiSyncManager.setCursorItem(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                            handled.set(true);
+                                        }
+                                    }
+                                }
+                            }
+                        });
                     }
                 }
-                else if (true)
-                {   //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
+
+                if(!handled.get())
+                {
                     int changedCount = button == 0 ? carriedItem.getCount() : 1;
-                    int remaining = (int)storage.insert(slotIndex,StackCreater.Create(ItemStackType.ID,carriedItem,changedCount),false).getStackAmount();
-                    int needRemove = changedCount - remaining;
-                    int newCount = carriedItem.getCount() - needRemove;
+                    ItemStack copy = carriedItem.copy();
+                    copy.setCount(changedCount);
+                    int remaining = (int)storage.insert(slotIndex,StackCreater.Create(ItemStackType.ID, copy,changedCount),false).getStackAmount();
+                    int actualInsert = changedCount - remaining; // 实际被插入的物品数量
+
+                    int newCount = carriedItem.getCount() - actualInsert; // 实际剩余物品数
                     if(newCount <=0)
                     {
                         guiSyncManager.setCursorItem(ItemStack.EMPTY);
@@ -109,12 +166,181 @@ public abstract class BDOrderedContainerGUI extends BDBaseGUI
                         guiSyncManager.setCursorItem(newCarriedItem);
                     }
                 }
-                else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
-                {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
-                    // 此情况在点击维度存储槽时永远不可能发生，如果发生，无需处理
-                    // 原版逻辑为取出物品到最大上限
-                    // 保留此情况以便后续使用
+            }
+        }
+        else
+        {
+            if (carriedItem.isEmpty())
+            {   //槽位物品存在，携带物品为空，尝试取出槽位物品
+                if(clickStack instanceof ItemStackType clickItem)
+                {
+                    // 确保一次取出最大不得超过原版数量
+                    int woundChangeNum = (int) Math.min(clickItem.getStackAmount(), clickItem.getVanillaMaxStackSize());
+                    int actualChangeNum = button == 0 ? woundChangeNum : (woundChangeNum + 1) / 2;
+                    ItemStack takenItem = ((ItemStack) storage.extract(slotIndex,actualChangeNum,false).getStack()).copy();
+                    if(takenItem != null)
+                    {
+                        guiSyncManager.setCursorItem(takenItem);
+                        storage.onChange();
+                    }
                 }
+            }
+            else if (true)
+            {
+                // 槽位物品存在，携带物品存在，当物品为相同类型，尝试插入物品
+                if(clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
+                {
+                    int changedCount = button == 0 ? carriedItem.getCount() : 1;
+                    ItemStack copy = carriedItem.copy();
+                    copy.setCount(changedCount);
+                    int remaining =  (int)storage.insert(slotIndex,StackCreater.Create(ItemStackType.ID,copy,changedCount),false).getStackAmount();
+                    int actualInsert = changedCount - remaining; // 实际被插入的物品数量
+                    int newCount = carriedItem.getCount() - actualInsert; // 实际剩余物品数
+                    if(newCount <=0)
+                    {
+                        guiSyncManager.setCursorItem(ItemStack.EMPTY);
+                    }
+                    else
+                    {
+                        ItemStack newCarriedItem = carriedItem.copy();
+                        newCarriedItem.setCount(newCount);
+                        guiSyncManager.setCursorItem(newCarriedItem);
+                    }
+                }
+                else
+                {
+                    // 槽位物品存在，携带物品存在，不为相同类型
+                    // 尝试遍历能力，将槽位物品送入携带物品的存储
+                    if(carriedItem.getCount() == 1 && button == 1)
+                    {
+                        if(carriedItem.getItem() instanceof ItemBucket bucket)
+                        {
+                            // 需要分开处理，分别处理
+                            // 1.空桶接受
+                            // 2.桶向原有区域继续投放
+                            if(bucket == Items.BUCKET) // 空桶接受
+                            {
+                                if(clickStack instanceof FluidStackType fluidStackType)
+                                {
+                                    ItemStack filledBucket = FluidUtil.getFilledBucket(fluidStackType.getStack());
+
+                                    if(filledBucket != null && filledBucket != ItemStack.EMPTY
+                                            && storage.getStackBySlot(slotIndex).getStackAmount()>=1000
+                                            && storage.getStackBySlot(slotIndex) instanceof FluidStackType)
+                                    {
+                                        // 执行操作
+                                        storage.extract(slotIndex,1000,false);
+                                        guiSyncManager.setCursorItem(filledBucket.copy());
+                                    }
+                                }
+                            }
+                            else // 继续投放 insert模拟会自动解决类型不匹配等问题
+                            {
+                                Object handler = carriedItem.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, EnumFacing.DOWN);
+                                if(handler != null)
+                                {
+                                    FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
+
+                                    if(stackHandlerWrapper.getSlots()>0)
+                                    {
+                                        FluidStackType stack = new FluidStackType(stackHandlerWrapper.getStackInSlot(0));
+                                        if(stack != null && !stack.isEmpty())
+                                        {
+                                            int changedCount = (int) Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize());
+                                            // 进行模拟，桶必须完全清空才被允许操作
+                                            int remaining = (int)storage.insert(slotIndex,stack.copyWithCount(changedCount),true).getStackAmount();
+                                            if(remaining<=0)
+                                            {
+                                                // 执行实际逻辑
+                                                storage.insert(slotIndex,stack.copyWithCount(changedCount),false).getStackAmount();
+                                                guiSyncManager.setCursorItem(new ItemStack(Items.BUCKET));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if(BeyondDimensions.MekLoaded && carriedItem.getItem() instanceof mekanism.common.item.ItemBlockGasTank tank)
+                        {
+
+                            // 对化学品储罐的特殊处理
+
+                            NBTTagCompound gasTag = carriedItem.getTagCompound().getCompoundTag("mekData").getCompoundTag("stored");
+                            mekanism.api.gas.GasStack gasStack = mekanism.api.gas.GasStack.readFromNBT(gasTag);
+                            // 抽入
+                            if(gasStack == null || (clickStack instanceof ChemicalStackType clickChemical && gasStack.isGasEqual(clickChemical.getStack())))
+                            {
+                                ChemicalStackType chemicalStackType = (ChemicalStackType)storage.getStackBySlot(slotIndex); // 获取真实存储
+                                if(chemicalStackType != null && !chemicalStackType.isEmpty())
+                                {
+                                    int changedCount = (int) Math.min(chemicalStackType.getStackAmount(),chemicalStackType.getVanillaMaxStackSize());
+                                    int sourceAmount = 0;
+                                    if(gasStack != null)
+                                        sourceAmount = gasStack.amount;
+                                    changedCount = Math.min(changedCount, tank.getMaxGas(carriedItem) - sourceAmount);
+                                    // 此时changedCount已经变为最大可插入量，并能作为实际插入量使用
+                                    ItemStack newCarried = carriedItem.copy();
+                                    int newAmount = sourceAmount + changedCount;
+                                    tank.setGas(newCarried, chemicalStackType.copyStackWithCount(newAmount));
+                                    if(changedCount>0)
+                                    {
+                                        storage.extract(slotIndex, changedCount,false);
+                                        guiSyncManager.setCursorItem(newCarried);
+                                    }
+                                }
+                            }
+                            // 存入
+                            else if(gasStack != null)
+                            {
+                                ChemicalStackType stackTyped = new ChemicalStackType(gasStack);
+                                if(!stackTyped.isEmpty())
+                                {
+                                    int changedCount = (int) Math.min(stackTyped.getStackAmount(),stackTyped.getVanillaMaxStackSize());
+                                    int remaining = (int)storage.insert(slotIndex,stackTyped.copyWithCount(changedCount),false).getStackAmount();
+                                    int actualInsert = changedCount - remaining;
+                                    if(actualInsert>0)
+                                    {
+                                        stackTyped.shrink(actualInsert);
+                                        ItemStack newCarried = carriedItem.copy();
+                                        tank.setGas(newCarried, stackTyped.getStack());
+                                        guiSyncManager.setCursorItem(newCarried);
+                                    }
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            CapabilityHelper.ItemCapabilityMap.forEach((typeId,cap) -> {
+                                // 先查看被点击物品的种类和对应能力种类
+                                if(clickStack.getTypeId().equals(typeId))
+                                {
+                                    // 尝试获取对应能力
+                                    Object handler = carriedItem.getCapability(cap,EnumFacing.DOWN);
+                                    if(handler != null)
+                                    {
+                                        Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
+                                        IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                                        if(stackHandlerWrapper.getSlots()>0)
+                                        {
+                                            int changedCount = (int) Math.min(clickStack.getStackAmount(),clickStack.getVanillaMaxStackSize());
+                                            int remaining = (int)stackHandlerWrapper.insert(EnumFacing.DOWN,clickStack.copyStack(),false);
+                                            int actualInsert = changedCount - remaining;
+                                            storage.extract(slotIndex,actualInsert,false);
+                                            guiSyncManager.setCursorItem(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
+            {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
+                // 此情况在点击维度存储槽时永远不可能发生，如果发生，无需处理
+                // 原版逻辑为取出物品到最大上限
+                // 保留此情况以便后续使用
             }
         }
 
