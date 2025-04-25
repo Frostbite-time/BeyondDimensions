@@ -33,5 +33,7 @@
   "block.beyonddimensions.net_energy_pathway": "维度网络能量通道",
 
   "creativetab.beyonddimensions.items": "超越维度-物品",
-  "creativetab.beyonddimensions.blocks": "超越维度-方块"
+  "creativetab.beyonddimensions.blocks": "超越维度-方块",
+
+  "key.beyonddimensions.open_craft_gui": "打开维度网络合成界面"
 }

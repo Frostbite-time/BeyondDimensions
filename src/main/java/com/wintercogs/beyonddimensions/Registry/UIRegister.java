@@ -1,14 +1,8 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.GUI.DimensionsNetGUI;
-import com.wintercogs.beyonddimensions.GUI.NetControlGUI;
-import com.wintercogs.beyonddimensions.GUI.NetEnergyGUI;
-import com.wintercogs.beyonddimensions.GUI.NetInterfaceBaseGUI;
-import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
-import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
-import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
-import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
+import com.wintercogs.beyonddimensions.GUI.*;
+import com.wintercogs.beyonddimensions.Menu.*;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -24,6 +18,7 @@ public class UIRegister
         NetControlMenu.MENU_TYPES.register(eventBus);
         NetInterfaceBaseMenu.MENU_TYPES.register(eventBus);
         NetEnergyMenu.MENU_TYPES.register(eventBus);
+        DimensionsCraftMenu.MENU_TYPES.register(eventBus);
     }
 
     @SubscribeEvent
@@ -33,5 +28,6 @@ public class UIRegister
         event.register(NetControlMenu.Net_Control_Menu.get(), NetControlGUI::new);
         event.register(NetInterfaceBaseMenu.Net_Interface_Menu.get(), NetInterfaceBaseGUI::new);
         event.register(NetEnergyMenu.Net_Energy_Menu.get(), NetEnergyGUI::new);
+        event.register(DimensionsCraftMenu.Dimensions_Craft_Menu.get(), DimensionsCraftGUI::new);
     }
 }

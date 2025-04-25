@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public record OpenNetGuiPacket(String uuid) implements CustomPacketPayload
+public record OpenNetGuiPacket(String uuid,boolean isCraft) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<OpenNetGuiPacket> TYPE =
@@ -20,6 +20,8 @@ public record OpenNetGuiPacket(String uuid) implements CustomPacketPayload
             StreamCodec.composite(
                     ByteBufCodecs.STRING_UTF8,
                     OpenNetGuiPacket::uuid,
+                    ByteBufCodecs.BOOL,
+                    OpenNetGuiPacket::isCraft,
                     OpenNetGuiPacket::new
             );
 

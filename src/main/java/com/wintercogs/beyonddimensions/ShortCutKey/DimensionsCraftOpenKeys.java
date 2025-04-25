@@ -13,27 +13,25 @@ import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
-
 @EventBusSubscriber(modid = BeyondDimensions.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
-public class DimensionsShortKeys
+public class DimensionsCraftOpenKeys
 {
-
-    private static final KeyMapping OPEN_GUI_KEY = new KeyMapping(
-            "key.beyonddimensions.open_gui", // 键位描述
-            GLFW.GLFW_KEY_O,                 // 默认按键 "O"
+    private static final KeyMapping OPEN_CRAFT_GUI_KEY = new KeyMapping(
+            "key.beyonddimensions.open_craft_gui", // 键位描述
+            GLFW.GLFW_KEY_P,                 // 默认按键 "O"
             "key.categories.beyonddimensions" // 键位分类
     );
 
     public static void register()
     {
-        ShortCutKeyRegister.registerKey(OPEN_GUI_KEY);
+        ShortCutKeyRegister.registerKey(OPEN_CRAFT_GUI_KEY);
     }
 
     @SubscribeEvent
     public static void onKeyInput(InputEvent.Key event)
     {
         // 用if或者switch，随便什么，反正检查按键就行
-        if (OPEN_GUI_KEY.isDown())
+        if (OPEN_CRAFT_GUI_KEY.isDown())
         {
             LocalPlayer player = Minecraft.getInstance().player;
 
@@ -42,9 +40,8 @@ public class DimensionsShortKeys
                 return;
             }
 
-            PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),false));
+            PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),true));
         }
 
     }
-
 }

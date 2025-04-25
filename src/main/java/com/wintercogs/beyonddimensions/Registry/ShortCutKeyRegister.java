@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Registry;
 
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsCraftOpenKeys;
 import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
 import net.minecraft.client.KeyMapping;
 import net.neoforged.api.distmarker.Dist;
@@ -26,6 +27,7 @@ public class ShortCutKeyRegister
     public static void registerKeys(RegisterKeyMappingsEvent event)
     {
         DimensionsShortKeys.register();
+        DimensionsCraftOpenKeys.register();
         for (KeyMapping keyMapping : KEY_MAPPINGS)
         {
             event.register(keyMapping);

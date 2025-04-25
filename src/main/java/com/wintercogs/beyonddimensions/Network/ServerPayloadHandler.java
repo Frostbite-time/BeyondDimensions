@@ -3,10 +3,7 @@ package com.wintercogs.beyonddimensions.Network;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
-import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
-import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
-import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
+import com.wintercogs.beyonddimensions.Menu.*;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,10 +38,20 @@ public class ServerPayloadHandler
                     if (net != null)
                     {
                         LOGGER.info("玩家存在维度空间:{}，尝试打开GUI", net.getId());
-                        context.player().openMenu(new SimpleMenuProvider(
-                                (containerId, playerInventory, _player) -> new DimensionsNetMenu(containerId, playerInventory, net),
-                                Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
-                        ));
+                        if(packet.isCraft())
+                        {
+                            context.player().openMenu(new SimpleMenuProvider(
+                                    (containerId, playerInventory, _player) -> new DimensionsCraftMenu(containerId, playerInventory, net),
+                                    Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
+                            ));
+                        }
+                        else
+                        {
+                            context.player().openMenu(new SimpleMenuProvider(
+                                    (containerId, playerInventory, _player) -> new DimensionsNetMenu(DimensionsNetMenu.Dimensions_Net_Menu.get(),containerId, playerInventory, net),
+                                    Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
+                            ));
+                        }
                     }
 
                 }

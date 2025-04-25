@@ -38,7 +38,6 @@ import java.util.stream.IntStream;
 public class DimensionsNetMenu extends BDDisorderedContainerMenu
 {
     /// 客户端数据
-    private int lines = 6; //渲染的menu行数
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
@@ -64,7 +63,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     public DimensionsNetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
-        this(id, playerInventory, new DimensionsNet(true));
+        this(Dimensions_Net_Menu.get(),id, playerInventory, new DimensionsNet(true));
     }
 
     /**
@@ -72,9 +71,9 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
      * @param playerInventory 玩家背包
      * @param data 维度网络信息，包含了存储信息
      */
-    public DimensionsNetMenu(int id, Inventory playerInventory, DimensionsNet data)
+    public DimensionsNetMenu(MenuType<?> menuType,int id, Inventory playerInventory, DimensionsNet data)
     {
-        super(Dimensions_Net_Menu.get(), id,playerInventory,data.getUnifiedStorage());
+        super(menuType, id,playerInventory,data.getUnifiedStorage());
         // 初始化维度网络容器
         viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
         if(!player.level().isClientSide())
@@ -89,15 +88,27 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
 
 
         // 添加存储槽
-        for (int row = 0; row < lines; ++row)
+        addStorageSlots();
+
+        // 添加玩家背包和快捷栏
+        addPlayerInv(playerInventory);
+    }
+
+    // 添加存储槽位
+    protected void addStorageSlots()
+    {
+        for (int row = 0; row < getLines(); ++row)
         {
             for (int col = 0; col < 9; ++col)
             {
                 this.addSlot(new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 27+row * 18));
             }
         }
+    }
 
-        // 添加玩家背包和快捷栏
+    // 添加玩家背包
+    protected void addPlayerInv(Inventory playerInventory)
+    {
         inventoryStartIndex = slots.size();
         for (int row = 0; row < 3; ++row)
         {
@@ -111,6 +122,14 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 207));
         }
         inventoryEndIndex = slots.size();
+    }
+
+
+    // 指示可渲染的最大行数
+    // 便于子类重写
+    protected int getLines()
+    {
+        return 6;
     }
 
     /**
@@ -141,7 +160,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         updateScrollLineData(cacheIndex.size());
         // 3 填入索引表
         ArrayList<Integer> indexList = new ArrayList<>();
-        for (int i = 0; i < lines * 9; i++)
+        for (int i = 0; i < getLines() * 9; i++)
         {
             //根据翻页数据构建索引列表
             if (i + lineData * 9 < cacheIndex.size())
@@ -269,7 +288,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         {
             maxLineData++;
         }
-        maxLineData -= lines;
+        maxLineData -= getLines();
         maxLineData = Math.max(maxLineData,0);
         lineData = Math.max(lineData,0);
         lineData = Math.min(lineData,maxLineData);
