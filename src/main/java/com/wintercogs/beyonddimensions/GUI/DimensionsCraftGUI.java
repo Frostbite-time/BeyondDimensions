@@ -75,7 +75,7 @@ public class DimensionsCraftGUI extends BDBaseGUI<DimensionsCraftMenu>
         addRenderableWidget(searchField);
 
         // 初始化滚动按钮
-        this.scroller = new BigScroller(this.leftPos+174,this.topPos+27,95,0,menu.maxLineData);
+        this.scroller = new BigScroller(this.leftPos+174,this.topPos+20,95,0,menu.maxLineData);
         addRenderableWidget(scroller);
 
         lastButtonStateMap = new HashMap<>(buttonStateMap);

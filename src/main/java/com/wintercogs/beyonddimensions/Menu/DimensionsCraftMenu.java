@@ -5,11 +5,25 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 // 自带合成台的DimensionsNetMenu
@@ -18,6 +32,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
     private CraftingContainer craftSlots;
     private ResultContainer resultSlots;
+    private int resultSlotIndex;
 
 
 
@@ -50,13 +65,47 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         this.resultSlots = new ResultContainer();
 
         // 为其添加工艺槽
-        this.addSlot(new ResultSlot(playerInventory.player, this.craftSlots, this.resultSlots, 0, 116, 127));
+        this.addSlot(new ResultSlot(playerInventory.player, this.craftSlots, this.resultSlots, 0, 116+4, 127+4));
+        resultSlotIndex = slots.size()-1;
 
         for(int i = 0; i < 3; ++i) {
             for(int j = 0; j < 3; ++j) {
                 this.addSlot(new Slot(this.craftSlots, j + i * 3, 26 + j * 18, 113 + i * 18));
             }
         }
+    }
+
+
+    // 工艺槽实现
+    protected static void slotChangedCraftingGrid(AbstractContainerMenu menu, Level level, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, @Nullable RecipeHolder<CraftingRecipe> recipe, int resultSlotIndex) {
+        if (!level.isClientSide) {
+            CraftingInput craftinginput = craftSlots.asCraftInput();
+            ServerPlayer serverplayer = (ServerPlayer)player;
+            ItemStack itemstack = ItemStack.EMPTY;
+            Optional<RecipeHolder<CraftingRecipe>> optional = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftinginput, level, recipe);
+            if (optional.isPresent()) {
+                RecipeHolder<CraftingRecipe> recipeholder = (RecipeHolder)optional.get();
+                CraftingRecipe craftingrecipe = (CraftingRecipe)recipeholder.value();
+                if (resultSlots.setRecipeUsed(level, serverplayer, recipeholder)) {
+                    ItemStack itemstack1 = craftingrecipe.assemble(craftinginput, level.registryAccess());
+                    if (itemstack1.isItemEnabled(level.enabledFeatures())) {
+                        itemstack = itemstack1;
+                    }
+                }
+            }
+
+            resultSlots.setItem(0, itemstack);
+            menu.setRemoteSlot(resultSlotIndex, itemstack);
+            serverplayer.connection.send(new ClientboundContainerSetSlotPacket(menu.containerId, menu.incrementStateId(), resultSlotIndex, itemstack));
+        }
+
+    }
+
+    @Override
+    public void slotsChanged(Container container)
+    {
+        super.slotsChanged(container);
+        slotChangedCraftingGrid(this,player.level(),player,craftSlots,resultSlots,null,resultSlotIndex);
     }
 
     @Override
@@ -94,5 +143,28 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 233));
         }
         inventoryEndIndex = slots.size();
+    }
+
+
+    @Override
+    public void removed(Player player)
+    {
+        super.removed(player);
+        // 将合成槽物品优先放入玩家背包 否则掉落
+        if (player instanceof ServerPlayer) {
+            List<ItemStack> stacks = craftSlots.getItems();
+            for(ItemStack stack : stacks) {
+                if(!stack.isEmpty())
+                {
+                    if (player.isAlive() && !((ServerPlayer)player).hasDisconnected()) {
+                        player.getInventory().placeItemBackInInventory(stack);
+                    } else {
+                        player.drop(stack, false);
+                    }
+                }
+            }
+            craftSlots.clearContent();
+            resultSlots.clearContent();
+        }
     }
 }
