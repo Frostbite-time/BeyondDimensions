@@ -239,4 +239,25 @@ public class ServerPayloadHandler
         );
     }
 
+    public void handleRecipeFillC2SPacket(final RecipeFillC2SPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+
+                    if(player.containerMenu instanceof DimensionsCraftMenu menu)
+                    {
+                        //服务端处理示意
+                        //1.解析数组
+                        //2.为每一个槽位在背包和存储中寻找资源填入
+
+
+
+                    }
+                }
+
+        );
+    }
+
 }

@@ -255,4 +255,16 @@ public class ClientPayloadHandler
 
         );
     }
+
+
+    public void handleRecipeFillC2SPacket(final RecipeFillC2SPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+
+        );
+    }
 }

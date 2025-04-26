@@ -140,5 +140,14 @@ public class PacketRegister
                         ServerPayloadHandler.getInstance()::handleEnergyStoragePacket
                 )
         );
+
+        registrar.playBidirectional(
+                RecipeFillC2SPacket.TYPE,
+                RecipeFillC2SPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleRecipeFillC2SPacket,
+                        ServerPayloadHandler.getInstance()::handleRecipeFillC2SPacket
+                )
+        );
     }
 }
