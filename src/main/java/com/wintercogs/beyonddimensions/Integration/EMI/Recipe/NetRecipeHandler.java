@@ -152,7 +152,7 @@ public class NetRecipeHandler implements StandardRecipeHandler<DimensionsCraftMe
             } else {
                 // 材料不足，提前返回
                 Minecraft.getInstance().player.displayClientMessage(
-                        Component.translatable("message.insufficient_materials"), true);
+                        Component.translatable("beyonddimensions.message.insufficient_materials"), true);
                 return true;
             }
         }

@@ -16,7 +16,8 @@
   "menu.placeholder.beyonddimensions.unknow_player": "Unknow Player",
 
   "key.categories.beyonddimensions": "Beyond Dimensions",
-  "key.beyonddimensions.open_gui": "Open Dimensional Network",
+  "key.beyonddimensions.open_gui": "Open Dimensional Network UI",
+  "key.beyonddimensions.open_craft_gui": "Open Dimensional Crafting UI",
 
   "item.beyonddimensions.net_creater": "Dimensional Network Generator",
   "item.beyonddimensions.net_member_inviter": "Member Connector",
@@ -26,6 +27,7 @@
   "item.beyonddimensions.space_time_stable_frame": "Stable Space-Time Frame",
   "item.beyonddimensions.shattered_space_time_crystallization": "Shattered Space-Time Crystallization",
   "item.beyonddimensions.space_time_bar": "Space-Time Ingot",
+  "item.beyonddimensions.test_item_generate": "Test-itemGenerator",
 
   "block.beyonddimensions.net_control": "Network Controller",
   "block.beyonddimensions.net_interface": "Network Interface",
@@ -33,5 +35,7 @@
   "block.beyonddimensions.net_energy_pathway": "Dimensional Network Energy Pathway",
 
   "creativetab.beyonddimensions.items": "Beyond Dimensions - Items",
-  "creativetab.beyonddimensions.blocks": "Beyond Dimensions - Blocks"
+  "creativetab.beyonddimensions.blocks": "Beyond Dimensions - Blocks",
+
+  "beyonddimensions.message.insufficient_materials": "Lack of sufficient materials"
 }
