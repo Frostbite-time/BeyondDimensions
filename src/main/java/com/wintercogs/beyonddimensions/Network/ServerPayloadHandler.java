@@ -251,7 +251,7 @@ public class ServerPayloadHandler
                         //服务端处理示意
                         //1.解析数组
                         //2.为每一个槽位在背包和存储中寻找资源填入
-
+                        menu.transferRecipe(packet.inputs());
 
 
                     }
