@@ -143,6 +143,7 @@ dependencies {
 
     // EMI支持
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
+    runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
 
 
     // Example optional mod dependency with JEI
