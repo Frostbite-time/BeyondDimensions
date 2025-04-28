@@ -70,13 +70,16 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
             this.synchronizeDataSlotToRemote(j, k);
         }
 
-        if(!init)
+        if(!player.level().isClientSide())
         {
-            initUpdate();
-            init = true;
-        }
+            if(!init)
+            {
+                initUpdate();
+                init = true;
+            }
 
-        updateChange();
+            updateChange();
+        }
     }
 
     // 定义菜单如何同步更改

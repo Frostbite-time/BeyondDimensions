@@ -31,6 +31,7 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.SPACE_TIME_STABLE_FRAME.get());
                         output.accept(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
                         output.accept(ModItems.SPACE_TIME_BAR.get());
+                        output.accept(ModItems.TEST_ITEM_GENERATE.get());
                     })
                     .build());
 

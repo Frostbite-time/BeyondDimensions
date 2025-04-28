@@ -2,7 +2,9 @@ package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
+import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleMenuProvider;
@@ -11,7 +13,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record OpenNetGuiPacket(String uuid)
+public record OpenNetGuiPacket(String uuid, boolean isCraft)
 {
 
     private void handle(NetworkEvent.Context context)
@@ -22,10 +24,21 @@ public record OpenNetGuiPacket(String uuid)
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
         if (net != null)
         {
-            player.openMenu(new SimpleMenuProvider(
-                    (containerId, playerInventory, _player) -> new DimensionsNetMenu(containerId, playerInventory, net),
-                    Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
-            ));
+            if(isCraft())
+            {
+                player.openMenu(new SimpleMenuProvider(
+                        (containerId, playerInventory, _player) -> new DimensionsCraftMenu(containerId, playerInventory, net),
+                        Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
+                ));
+            }
+            else
+            {
+                player.openMenu(new SimpleMenuProvider(
+                        (containerId, playerInventory, _player) -> new DimensionsNetMenu(UIRegister.Dimensions_Net_Menu.get(),containerId, playerInventory, net),
+                        Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
+                ));
+            }
+
         }
     }
 
@@ -42,10 +55,11 @@ public record OpenNetGuiPacket(String uuid)
     public static void encode(OpenNetGuiPacket packet, FriendlyByteBuf buf)
     {
         buf.writeUtf(packet.uuid);
+        buf.writeBoolean(packet.isCraft);
     }
 
     public static OpenNetGuiPacket decode(FriendlyByteBuf buf)
     {
-        return new OpenNetGuiPacket(buf.readUtf());
+        return new OpenNetGuiPacket(buf.readUtf(),buf.readBoolean());
     }
 }

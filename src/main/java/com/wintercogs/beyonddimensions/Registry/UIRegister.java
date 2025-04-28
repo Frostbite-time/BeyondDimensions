@@ -1,14 +1,8 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.GUI.DimensionsNetGUI;
-import com.wintercogs.beyonddimensions.GUI.NetControlGUI;
-import com.wintercogs.beyonddimensions.GUI.NetEnergyGUI;
-import com.wintercogs.beyonddimensions.GUI.NetInterfaceBaseGUI;
-import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
-import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
-import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
-import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
+import com.wintercogs.beyonddimensions.GUI.*;
+import com.wintercogs.beyonddimensions.Menu.*;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlags;
@@ -26,6 +20,7 @@ public class UIRegister
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU,BeyondDimensions.MODID);
     public static final Supplier<MenuType<DimensionsNetMenu>> Dimensions_Net_Menu = UIRegister.MENU_TYPES.register("dimensions_net_menu", () -> new MenuType<>(DimensionsNetMenu::new, FeatureFlags.DEFAULT_FLAGS));
+    public static final Supplier<MenuType<DimensionsCraftMenu>> Dimensions_Craft_Menu = UIRegister.MENU_TYPES.register("dimensions_craft_menu", () -> new MenuType<>(DimensionsCraftMenu::new, FeatureFlags.DEFAULT_FLAGS));
     public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = UIRegister.MENU_TYPES.register("net_control_menu", () -> new MenuType<>(NetControlMenu::new, FeatureFlags.DEFAULT_FLAGS));
     public static final Supplier<MenuType<NetEnergyMenu>> Net_Energy_Menu = UIRegister.MENU_TYPES.register("net_energy_menu", () -> new MenuType<>(NetEnergyMenu::new, FeatureFlags.DEFAULT_FLAGS));
     public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = UIRegister.MENU_TYPES.register("net_interface_menu", () -> new MenuType<>(NetInterfaceBaseMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -42,6 +37,7 @@ public class UIRegister
 
                 () -> {
                     MenuScreens.register(Dimensions_Net_Menu.get(), DimensionsNetGUI::new);
+                    MenuScreens.register(Dimensions_Craft_Menu.get(), DimensionsCraftGUI::new);
                     MenuScreens.register(Net_Control_Menu.get(), NetControlGUI::new);
                     MenuScreens.register(Net_Interface_Menu.get(), NetInterfaceBaseGUI::new);
                     MenuScreens.register(Net_Energy_Menu.get(), NetEnergyGUI::new);

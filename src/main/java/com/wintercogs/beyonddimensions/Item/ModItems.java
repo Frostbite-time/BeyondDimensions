@@ -1,10 +1,7 @@
 package com.wintercogs.beyonddimensions.Item;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Item.Custom.NetCreater;
-import com.wintercogs.beyonddimensions.Item.Custom.NetManagerInviter;
-import com.wintercogs.beyonddimensions.Item.Custom.NetMemberInviter;
-import com.wintercogs.beyonddimensions.Item.Custom.UnstableSpaceTimeFragment;
+import com.wintercogs.beyonddimensions.Item.Custom.*;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -46,6 +43,11 @@ public class ModItems
     // 时空锭
     public static final RegistryObject<Item> SPACE_TIME_BAR = ITEMS.register("space_time_bar",
             () -> new Item(new Item.Properties()));
+
+    // 测试物品 -----------------------
+    // 随机物品生成器
+    public static final RegistryObject<Item> TEST_ITEM_GENERATE = ITEMS.register("test_item_generate",
+            () -> new TestItem_ItemGenerate(new Item.Properties()));
 
     public static void register(IEventBus eventBus)
     {

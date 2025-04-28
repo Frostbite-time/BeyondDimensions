@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncStoragePacket
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.NetControlActionPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.RecipeFillC2SPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkRegistry;
@@ -100,6 +101,14 @@ public class PacketRegister
                 SyncStoragePacket::encode,
                 SyncStoragePacket::decode,
                 SyncStoragePacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                RecipeFillC2SPacket.class,
+                RecipeFillC2SPacket::encode,
+                RecipeFillC2SPacket::decode,
+                RecipeFillC2SPacket::handle
         );
     }
 }
