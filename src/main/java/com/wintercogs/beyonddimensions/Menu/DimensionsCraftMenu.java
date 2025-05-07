@@ -186,7 +186,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     }
 
     @Override
-    protected int getLines()
+    public int getLines()
     {
         return 5;
     }

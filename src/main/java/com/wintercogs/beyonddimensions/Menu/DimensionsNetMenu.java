@@ -101,7 +101,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 27+row * 18));
+                this.addSlot(new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 25+row * 18));
             }
         }
     }
@@ -114,12 +114,12 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 149 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 25+ (getLines()-1)*18 + 26 + 6 + row * 18));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 207));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 25+ (getLines()-1)*18 + 26 + 6 + 3 * 18+ 4));
         }
         inventoryEndIndex = slots.size();
     }
@@ -127,7 +127,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
 
     // 指示可渲染的最大行数
     // 便于子类重写
-    protected int getLines()
+    public int getLines()
     {
         return 6;
     }

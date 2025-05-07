@@ -24,7 +24,22 @@ import java.util.Objects;
 public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
 {
 
-    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/dimensions_net.png");
+    private static final ResourceLocation GUI_TEXTURE_TOP_BASE = ResourceLocation.parse("beyonddimensions:textures/gui/top_base.png");
+    private static final int TOP_BASE_WIDTH = 194;
+    private static final int TOP_BASE_HEIGHT = 24;
+    private static final ResourceLocation GUI_TEXTURE_TOP_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/top_slots.png");
+    private static final int TOP_SLOTS_WIDTH = 194;
+    private static final int TOP_SLOTS_HEIGHT = 18;
+    private static final ResourceLocation GUI_TEXTURE_MID_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/mid_slots.png");
+    private static final int MID_SLOTS_WIDTH = 194;
+    private static final int MID_SLOTS_HEIGHT = 18;
+    private static final ResourceLocation GUI_TEXTURE_BOTTOM_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/bottom_slots.png");
+    private static final int BOTTOM_SLOTS_WIDTH = 194;
+    private static final int BOTTOM_SLOTS_HEIGHT = 26;
+    private static final ResourceLocation GUI_TEXTURE_PLAYER_INV = ResourceLocation.parse("beyonddimensions:textures/gui/player_inv.png");
+    private static final int PLAYER_INV_WIDTH = 176;
+    private static final int PLAYER_INV_HEIGHT = 89;
+
     private EditBox searchField;
     private HashMap<ButtonName, ButtonState> buttonStateMap = new HashMap<>();
     private HashMap<ButtonName,ButtonState> lastButtonStateMap = new HashMap<>();
@@ -38,26 +53,33 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
         super(container, playerInventory, title);
         // 去除空白的真实部分，用于计算图片显示的最佳位置
         this.imageWidth = 194;
-        this.imageHeight = 231;
+
+        // 计算真实高度
+        this.imageHeight = TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (container.getLines()-2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
     }
 
 
 
     @Override
     protected void init() {
-        // 如果以后图片大小有变，显示中心所期望的大小仍然是x:176,y:235用于计算
+        // 用于计算期望的起点位置
+        // 宽按176 高按235可以得到一个较好的效果
         this.leftPos = (this.width - 176)/2;
-        this.topPos = (this.height - 235)/2;
+        this.topPos = (this.height - imageHeight)/2;
+
+        // Label的渲染函数使用drawString，默认以topPos为起点
+        this.titleLabelY = 8;
+        this.inventoryLabelY = TOP_BASE_HEIGHT + menu.getLines()*18+5;
 
         // 初始化按钮组件
-        sortButton = new SortMethodButton(this.leftPos+72+18*6-7,this.topPos+6,button ->
+        sortButton = new SortMethodButton(this.leftPos-18,this.topPos+6,button ->
         {
             sortButton.toggleState();
             buttonStateMap.put(sortButton.getName(),sortButton.currentState);
         });
         addRenderableWidget(sortButton);
 
-        reverseButton = new ReverseButton(this.leftPos+72+18*5-7,this.topPos+6,button ->
+        reverseButton = new ReverseButton(this.leftPos-18,this.topPos+6+18,button ->
         {
             reverseButton.toggleState();
             buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
@@ -68,7 +90,7 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
         buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
 
         // 初始化搜索方案
-        this.searchField = new EditBox(getFont(), this.leftPos+20+26+10, this.topPos+7, 89, this.getFont().lineHeight+5, Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch"));
+        this.searchField = new EditBox(getFont(), this.leftPos+60, this.topPos+7, 120, this.getFont().lineHeight+5, Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch"));
         this.searchField.setSuggestion(Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch").getString());
         this.searchField.setMaxLength(100);
         this.searchField.setBordered(true);
@@ -77,7 +99,7 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
         addRenderableWidget(searchField);
 
         // 初始化滚动按钮
-        this.scroller = new BigScroller(this.leftPos+174,this.topPos+27,95,0,menu.maxLineData);
+        this.scroller = new BigScroller(this.leftPos+174,this.topPos+TOP_BASE_HEIGHT+1,18*menu.getLines() - 15 -2,0,menu.maxLineData);
         addRenderableWidget(scroller);
 
         lastButtonStateMap = new HashMap<>(buttonStateMap);
@@ -109,9 +131,31 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
+        int drawY = this.topPos; // 用于动态控制绘制
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, GUI_TEXTURE);
-        guiGraphics.blit(GUI_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+
+        RenderSystem.setShaderTexture(0, GUI_TEXTURE_TOP_BASE);
+        guiGraphics.blit(GUI_TEXTURE_TOP_BASE, this.leftPos, drawY, 0, 0, TOP_BASE_WIDTH, TOP_BASE_HEIGHT, TOP_BASE_WIDTH, TOP_BASE_HEIGHT);
+        drawY += TOP_BASE_HEIGHT;
+
+        RenderSystem.setShaderTexture(0, GUI_TEXTURE_TOP_SLOTS);
+        guiGraphics.blit(GUI_TEXTURE_TOP_SLOTS, this.leftPos, drawY, 0, 0, TOP_SLOTS_WIDTH, TOP_SLOTS_HEIGHT, TOP_SLOTS_WIDTH, TOP_SLOTS_HEIGHT);
+        drawY += TOP_SLOTS_HEIGHT;
+
+        RenderSystem.setShaderTexture(0, GUI_TEXTURE_MID_SLOTS);
+        for(int i = 0;i<menu.getLines()-2;i++)
+        {
+            guiGraphics.blit(GUI_TEXTURE_MID_SLOTS, this.leftPos, drawY, 0, 0, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT);
+            drawY += MID_SLOTS_HEIGHT;
+        }
+
+        RenderSystem.setShaderTexture(0, GUI_TEXTURE_BOTTOM_SLOTS);
+        guiGraphics.blit(GUI_TEXTURE_BOTTOM_SLOTS, this.leftPos, drawY, 0, 0, BOTTOM_SLOTS_WIDTH, BOTTOM_SLOTS_HEIGHT, BOTTOM_SLOTS_WIDTH, BOTTOM_SLOTS_HEIGHT);
+        drawY += BOTTOM_SLOTS_HEIGHT;
+
+        RenderSystem.setShaderTexture(0, GUI_TEXTURE_PLAYER_INV);
+        guiGraphics.blit(GUI_TEXTURE_PLAYER_INV, this.leftPos, drawY, 0, 0, PLAYER_INV_WIDTH, PLAYER_INV_HEIGHT, PLAYER_INV_WIDTH, PLAYER_INV_HEIGHT);
+        //drawY += PLAYER_INV_HEIGHT;
     }
 
     @Override
@@ -126,8 +170,8 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY+2, 4210752,false);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+66, 4210752,false);
+        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752,false);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752,false);
     }
 
     @Override
