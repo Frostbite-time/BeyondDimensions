@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
@@ -15,6 +16,7 @@ import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Packet.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.Unit.UIDataHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -78,7 +80,15 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         if(UIDataHelper.isTransfer)
         {
             menu.lineData = UIDataHelper.currentPage;
-            //minecraft.mouseHandler.
+            if(UIDataHelper.lastMousePos != null)
+            {
+                Window window = Minecraft.getInstance().getWindow();
+                GLFW.glfwSetCursorPos(
+                        window.getWindow(),
+                        UIDataHelper.lastMousePos.x,
+                        UIDataHelper.lastMousePos.y
+                );
+            }
 
             UIDataHelper.isTransfer = false;
         }
@@ -184,11 +194,17 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*5,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/craft_button"),ButtonName.CraftButton , button ->
         {
             UIDataHelper.currentPage = menu.lineData;
+
+            double xpos[] = new double[1];
+            double ypos[] = new double[1];
+            GLFW.glfwGetCursorPos(Minecraft.getInstance().getWindow().getWindow(), xpos, ypos);
             UIDataHelper.lastMousePos = new Vec2(
-                    (float) minecraft.mouseHandler.xpos(),
-                    (float) minecraft.mouseHandler.ypos()
+                    (float) xpos[0],
+                    (float) ypos[0]
             );
+
             UIDataHelper.isTransfer = true;
+
             if(menu instanceof DimensionsCraftMenu)
             {
                 Config.uiCraftButton = ButtonState.DISABLED;
