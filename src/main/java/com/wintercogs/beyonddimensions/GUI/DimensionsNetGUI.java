@@ -25,44 +25,39 @@ import java.util.HashMap;
 import java.util.Objects;
 
 
-public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
+public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 {
 
-    private static final ResourceLocation GUI_TEXTURE_TOP_BASE = ResourceLocation.parse("beyonddimensions:textures/gui/top_base.png");
-    private static final int TOP_BASE_WIDTH = 194;
-    private static final int TOP_BASE_HEIGHT = 24;
-    private static final ResourceLocation GUI_TEXTURE_TOP_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/top_slots.png");
-    private static final int TOP_SLOTS_WIDTH = 194;
-    private static final int TOP_SLOTS_HEIGHT = 18;
-    private static final ResourceLocation GUI_TEXTURE_MID_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/mid_slots.png");
-    private static final int MID_SLOTS_WIDTH = 194;
-    private static final int MID_SLOTS_HEIGHT = 18;
-    private static final ResourceLocation GUI_TEXTURE_BOTTOM_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/bottom_slots.png");
-    private static final int BOTTOM_SLOTS_WIDTH = 194;
-    private static final int BOTTOM_SLOTS_HEIGHT = 26;
-    private static final ResourceLocation GUI_TEXTURE_PLAYER_INV = ResourceLocation.parse("beyonddimensions:textures/gui/player_inv.png");
-    private static final int PLAYER_INV_WIDTH = 176;
-    private static final int PLAYER_INV_HEIGHT = 89;
+    protected static final ResourceLocation GUI_TEXTURE_TOP_BASE = ResourceLocation.parse("beyonddimensions:textures/gui/top_base.png");
+    protected static final int TOP_BASE_WIDTH = 194;
+    protected static final int TOP_BASE_HEIGHT = 24;
+    protected static final ResourceLocation GUI_TEXTURE_TOP_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/top_slots.png");
+    protected static final int TOP_SLOTS_WIDTH = 194;
+    protected static final int TOP_SLOTS_HEIGHT = 18;
+    protected static final ResourceLocation GUI_TEXTURE_MID_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/mid_slots.png");
+    protected static final int MID_SLOTS_WIDTH = 194;
+    protected static final int MID_SLOTS_HEIGHT = 18;
+    protected static final ResourceLocation GUI_TEXTURE_BOTTOM_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/bottom_slots.png");
+    protected static final int BOTTOM_SLOTS_WIDTH = 194;
+    protected static final int BOTTOM_SLOTS_HEIGHT = 26;
+    protected static final ResourceLocation GUI_TEXTURE_PLAYER_INV = ResourceLocation.parse("beyonddimensions:textures/gui/player_inv.png");
+    protected static final int PLAYER_INV_WIDTH = 176;
+    protected static final int PLAYER_INV_HEIGHT = 89;
 
-    private EditBox searchField;
-    private HashMap<ButtonName, ButtonState> buttonStateMap = new HashMap<>();
-    private HashMap<ButtonName,ButtonState> lastButtonStateMap = new HashMap<>();
-    private String lastSearchText = "";
-    private ReverseButton reverseButton;
-    private SortMethodButton sortButton;
-    private SearchToggleButton searchToggleButton;
-    private IconButton addPageButton;
-    private IconButton removePageButton;
-    private BigScroller scroller;
+    protected EditBox searchField;
+    protected HashMap<ButtonName, ButtonState> buttonStateMap = new HashMap<>();
+    protected HashMap<ButtonName,ButtonState> lastButtonStateMap = new HashMap<>();
+    protected String lastSearchText = "";
+    protected ReverseButton reverseButton;
+    protected SortMethodButton sortButton;
+    protected SearchToggleButton searchToggleButton;
+    protected IconButton addPageButton;
+    protected IconButton removePageButton;
+    protected BigScroller scroller;
 
-    public DimensionsNetGUI(DimensionsNetMenu container, Inventory playerInventory, Component title)
+    public DimensionsNetGUI(T container, Inventory playerInventory, Component title)
     {
         super(container, playerInventory, title);
-        // 去除空白的真实部分，用于计算图片显示的最佳位置
-        this.imageWidth = 194;
-
-        // 计算真实高度
-        this.imageHeight = TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (container.getLines()-2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
     }
 
 
@@ -71,14 +66,29 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
     protected void init() {
 
         clearWidgets();
+
+        // 计算最大行数
+        int maxLines = calMaxLines();
+        if(maxLines < menu.getLines())
+        {
+            // 自动计算不主动持久化参数
+            menu.setLines(maxLines);
+            menu.rebuildSlots();
+        }
+
+        // 去除空白的真实部分，用于计算图片显示的最佳位置
+        this.imageWidth = 194;
+        // 计算真实高度
+        this.imageHeight = rebuildImageHeight();
+
         // 用于计算期望的起点位置
         // 宽按176 高按235可以得到一个较好的效果
         this.leftPos = (this.width - 176)/2;
         this.topPos = (this.height - imageHeight)/2;
 
         // Label的渲染函数使用drawString，默认以topPos为起点
-        this.titleLabelY = 8;
-        this.inventoryLabelY = TOP_BASE_HEIGHT + menu.getLines()*18+5;
+        rebuildLabelHeight();
+
 
         // 初始化按钮组件
         //排序按钮
@@ -118,7 +128,7 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
         //页面增减按钮
         addPageButton = new IconButton(this.leftPos-18,this.topPos+6+18*3,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/up_arrow"),ButtonName.AddPageButton , button ->
         {
-            if(this.height - 36 <= (TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-1) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT)
+            if(this.height - 36 <= (rebuildImageHeight()+MID_SLOTS_HEIGHT)
                 || menu.getLines()>=99)
             {
                 return;
@@ -128,7 +138,7 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
             Config.UI_PAGE_NUM.set(menu.getLines());
             Config.UI_PAGE_NUM.save();
             Config.uiSearch = searchField.getValue();
-            this.imageHeight = TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
+            this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
             init();
@@ -144,7 +154,7 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
             Config.UI_PAGE_NUM.set(menu.getLines());
             Config.UI_PAGE_NUM.save();
             Config.uiSearch = searchField.getValue();
-            this.imageHeight = TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
+            this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
             init();
@@ -154,7 +164,7 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
 
         // 初始化搜索方案
         this.searchField = new EditBox(getFont(), this.leftPos+60, this.topPos+7, 120, this.getFont().lineHeight+5, Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch"));
-        this.searchField.setMaxLength(100);
+        this.searchField.setMaxLength(200);
         this.searchField.setBordered(true);
         this.searchField.setVisible(true);
         this.searchField.setTextColor(16777215);
@@ -198,6 +208,22 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
             lastSearchText = searchField.getValue();
         }
         scroller.updateScrollPosition(menu.lineData,menu.maxLineData);// 读取翻页数据并应用
+    }
+
+    protected int rebuildImageHeight()
+    {
+        return TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
+    }
+
+    protected void rebuildLabelHeight()
+    {
+        this.titleLabelY = 8;
+        this.inventoryLabelY = TOP_BASE_HEIGHT + menu.getLines()*18+5;
+    }
+
+    protected int calMaxLines()
+    {
+        return (int)((this.height -36 - (TOP_BASE_HEIGHT+TOP_SLOTS_HEIGHT+BOTTOM_SLOTS_HEIGHT+PLAYER_INV_HEIGHT))/(float)MID_SLOTS_HEIGHT +2);
     }
 
     @Override

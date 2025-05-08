@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
@@ -35,6 +36,8 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     private CraftingContainer craftSlots;
     private ResultContainer resultSlots;
     private int resultSlotIndex;
+    private int craftSlotStartIndex;
+    private int craftSlotEndIndex;
 
 
 
@@ -67,14 +70,16 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         this.resultSlots = new ResultContainer();
 
         // 为其添加工艺槽
-        this.addSlot(new ResultSlot(playerInventory.player, this.craftSlots, this.resultSlots, 0, 116+4, 127+4));
+        this.addSlot(new ResultSlot(playerInventory.player, this.craftSlots, this.resultSlots, 0, 116+4, 24+ (getLines()-1)*18 + 26 +21));
         resultSlotIndex = slots.size()-1;
 
+        craftSlotStartIndex = slots.size();
         for(int i = 0; i < 3; ++i) {
             for(int j = 0; j < 3; ++j) {
-                this.addSlot(new Slot(this.craftSlots, j + i * 3, 26 + j * 18, 113 + i * 18));
+                this.addSlot(new Slot(this.craftSlots, j + i * 3, 26 + j * 18, 24+ (getLines()-1)*18 + 26 +3 + i * 18));
             }
         }
+        craftSlotEndIndex = slots.size();// 调用时需要减一
     }
 
 
@@ -185,20 +190,19 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         slotChangedCraftingGrid(this,player.level(),player,craftSlots,resultSlots,null,resultSlotIndex);
     }
 
-    @Override
-    public int getLines()
-    {
-        return 5;
-    }
 
     @Override
     protected void addStorageSlots()
     {
-        for (int row = 0; row < getLines(); ++row)
+        // 默认添加99行，但将99之外的行全部设置为不激活状态，以实现动态增加和减少行数
+        for (int row = 0; row < 99; ++row)
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 20+row * 18));
+                StoredStackSlot newSlot = new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 25+row * 18);
+                if(row >= getLines())
+                    newSlot.setActive(false);
+                this.addSlot(newSlot);
             }
         }
     }
@@ -212,14 +216,65 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 175 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 25+62+ (getLines()-1)*18 + 26 + 6 + row * 18));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 233));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 25+62+ (getLines()-1)*18 + 26 + 6 + 3 * 18+ 4));
         }
         inventoryEndIndex = slots.size();
+    }
+
+    // 放大和缩小UI所使用的函数，用于重新确定槽位的激活状态以及槽位的位置
+    public void rebuildSlots()
+    {
+        int sSlotNum = 0;
+        for(Slot slot : slots)
+        {
+            if(slot instanceof StoredStackSlot sSlot)
+            {
+                if(sSlotNum/9 < getLines())
+                    sSlot.setActive(true);
+                else
+                    sSlot.setActive(false);
+                sSlotNum++; // 先处理再加数，可以防止最后一个槽位出现问题
+            }
+        }
+
+        int slotNum = 0;
+        for(int i = inventoryStartIndex; i < inventoryEndIndex; ++i)
+        {
+            Slot slot = slots.get(i);
+            if(slot != null)
+            {
+                if(slotNum/9<3)
+                {
+                    slot.y = 25+62+ (getLines()-1)*18 + 26 + 6 + slotNum/9 * 18;
+                }
+                else
+                {
+                    slot.y = 25+62+ (getLines()-1)*18 + 26 + 6 + 3 * 18+ 4;
+                }
+
+
+                slotNum++;
+            }
+        }
+
+        Slot resultSlot = slots.get(resultSlotIndex);
+        resultSlot.y = 24+ (getLines()-1)*18 + 26 +21;
+
+        slotNum = 0;
+        for(int i = craftSlotStartIndex; i < craftSlotEndIndex; ++i)
+        {
+            Slot slot = slots.get(i);
+            if(slot != null)
+            {
+                slot.y = 24+ (getLines()-1)*18 + 26 +3 + slotNum/3 * 18;
+                slotNum++;
+            }
+        }
     }
 
 

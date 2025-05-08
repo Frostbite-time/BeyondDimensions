@@ -43,7 +43,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
-    private HashMap<ButtonName,ButtonState> buttonStateMap = new HashMap<>(); // 客户端的按钮状态
+    private HashMap<ButtonName, ButtonState> buttonStateMap = new HashMap<>(); // 客户端的按钮状态
     public UnifiedStorage viewerStorage; // 在客户端，用于显示物品
     /// 服务端数据
     private ArrayList<IStackType> lastStorage; // 记录截至上一次同步时的存储状态，用于同步数据
@@ -60,35 +60,37 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
 
     /**
      * 客户端构造函数
+     *
      * @param playerInventory 玩家背包
      */
     public DimensionsNetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
-        this(Dimensions_Net_Menu.get(),id, playerInventory, new DimensionsNet(true));
+        this(Dimensions_Net_Menu.get(), id, playerInventory, new DimensionsNet(true));
     }
 
     /**
      * 服务端构造函数
+     *
      * @param playerInventory 玩家背包
-     * @param data 维度网络信息，包含了存储信息
+     * @param data            维度网络信息，包含了存储信息
      */
-    public DimensionsNetMenu(MenuType<?> menuType,int id, Inventory playerInventory, DimensionsNet data)
+    public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, DimensionsNet data)
     {
-        super(menuType, id,playerInventory,data.getUnifiedStorage());
+        super(menuType, id, playerInventory, data.getUnifiedStorage());
 
         // 初始化搜索方案
-        if(player.level().isClientSide())
+        if (player.level().isClientSide())
         {
             this.maxLines = Config.uiPageNum;
             this.searchText = Config.uiSearch;
-            buttonStateMap.put(ButtonName.ReverseButton,Config.uiReverseButton);
-            buttonStateMap.put(ButtonName.SortMethodButton,Config.uiSortButton);
+            buttonStateMap.put(ButtonName.ReverseButton, Config.uiReverseButton);
+            buttonStateMap.put(ButtonName.SortMethodButton, Config.uiSortButton);
         }
 
         // 初始化维度网络容器
         viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
-        if(!player.level().isClientSide())
+        if (!player.level().isClientSide())
         {
             // 初始化lastStorage
             this.lastStorage = new ArrayList<>();
@@ -110,8 +112,8 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                StoredStackSlot newSlot = new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 25+row * 18);
-                if(row >= getLines())
+                StoredStackSlot newSlot = new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 25 + row * 18);
+                if (row >= getLines())
                     newSlot.setActive(false);
                 this.addSlot(newSlot);
             }
@@ -126,12 +128,12 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 25+ (getLines()-1)*18 + 26 + 6 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 25 + (getLines() - 1) * 18 + 26 + 6 + row * 18));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 25+ (getLines()-1)*18 + 26 + 6 + 3 * 18+ 4));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 25 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4));
         }
         inventoryEndIndex = slots.size();
     }
@@ -140,11 +142,11 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     public void rebuildSlots()
     {
         int sSlotNum = 0;
-        for(Slot slot : slots)
+        for (Slot slot : slots)
         {
-            if(slot instanceof StoredStackSlot sSlot)
+            if (slot instanceof StoredStackSlot sSlot)
             {
-                if(sSlotNum/9 < getLines())
+                if (sSlotNum / 9 < getLines())
                     sSlot.setActive(true);
                 else
                     sSlot.setActive(false);
@@ -153,18 +155,18 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         }
 
         int slotNum = 0;
-        for(int i = inventoryStartIndex; i < inventoryEndIndex; ++i)
+        for (int i = inventoryStartIndex; i < inventoryEndIndex; ++i)
         {
             Slot slot = slots.get(i);
-            if(slot != null)
+            if (slot != null)
             {
-                if(slotNum/9<3)
+                if (slotNum / 9 < 3)
                 {
-                    slot.y = 25+ (getLines()-1)*18 + 26 + 6 + slotNum/9 * 18;
+                    slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + slotNum / 9 * 18;
                 }
                 else
                 {
-                    slot.y = 25+ (getLines()-1)*18 + 26 + 6 + 3 * 18+ 4;
+                    slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4;
                 }
 
 
@@ -189,6 +191,11 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     public void addLines()
     {
         maxLines++;
+    }
+
+    public void setLines(int lines)
+    {
+        this.maxLines = lines;
     }
 
     /**

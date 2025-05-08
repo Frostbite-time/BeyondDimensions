@@ -7,6 +7,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.minecraft.world.inventory.MenuType;
 
 @EventBusSubscriber(modid = BeyondDimensions.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class UIRegister
@@ -24,7 +25,8 @@ public class UIRegister
     @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event)
     {
-        event.register(DimensionsNetMenu.Dimensions_Net_Menu.get(), DimensionsNetGUI::new);
+        // 显式说明类型，防止gradle无法识别泛型
+        event.<DimensionsNetMenu, DimensionsNetGUI<DimensionsNetMenu>>register(DimensionsNetMenu.Dimensions_Net_Menu.get(), DimensionsNetGUI::new);
         event.register(NetControlMenu.Net_Control_Menu.get(), NetControlGUI::new);
         event.register(NetInterfaceBaseMenu.Net_Interface_Menu.get(), NetInterfaceBaseGUI::new);
         event.register(NetEnergyMenu.Net_Energy_Menu.get(), NetEnergyGUI::new);
