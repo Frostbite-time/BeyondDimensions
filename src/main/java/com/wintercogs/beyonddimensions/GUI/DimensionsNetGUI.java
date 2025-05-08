@@ -2,8 +2,11 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.GUI.SharedWidget.IconButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
@@ -46,6 +49,8 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
     private String lastSearchText = "";
     private ReverseButton reverseButton;
     private SortMethodButton sortButton;
+    private IconButton addPageButton;
+    private IconButton removePageButton;
     private BigScroller scroller;
 
     public DimensionsNetGUI(DimensionsNetMenu container, Inventory playerInventory, Component title)
@@ -62,6 +67,8 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
 
     @Override
     protected void init() {
+
+        clearWidgets();
         // 用于计算期望的起点位置
         // 宽按176 高按235可以得到一个较好的效果
         this.leftPos = (this.width - 176)/2;
@@ -72,22 +79,64 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
         this.inventoryLabelY = TOP_BASE_HEIGHT + menu.getLines()*18+5;
 
         // 初始化按钮组件
+        //排序按钮
         sortButton = new SortMethodButton(this.leftPos-18,this.topPos+6,button ->
         {
             sortButton.toggleState();
             buttonStateMap.put(sortButton.getName(),sortButton.currentState);
+            Config.uiSortButton = sortButton.currentState;
+            Config.UI_SORT_BUTTON.set(sortButton.currentState);
+            Config.UI_SORT_BUTTON.save();
         });
         addRenderableWidget(sortButton);
-
+        // 倒序切换按钮
         reverseButton = new ReverseButton(this.leftPos-18,this.topPos+6+18,button ->
         {
             reverseButton.toggleState();
             buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
+            Config.uiReverseButton = reverseButton.currentState;
+            Config.UI_REVERSE_BUTTON.set(reverseButton.currentState);
+            Config.UI_REVERSE_BUTTON.save();
         });
         addRenderableWidget(reverseButton);
 
         buttonStateMap.put(sortButton.getName(),sortButton.currentState);
         buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
+
+        //页面增减按钮
+        addPageButton = new IconButton(this.leftPos-18,this.topPos+6+18*2,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_asc"),ButtonName.AddPageButton , button ->
+        {
+            if(this.height - 36 <= (TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-1) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT)
+                || menu.getLines()>=99)
+            {
+                return;
+            }
+            menu.addLines();
+            Config.uiPageNum = menu.getLines();
+            Config.UI_PAGE_NUM.set(menu.getLines());
+            Config.UI_PAGE_NUM.save();
+            this.imageHeight = TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
+            menu.rebuildSlots();
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
+            init();
+        });
+        addRenderableWidget(addPageButton);
+
+        removePageButton = new IconButton(this.leftPos-18,this.topPos+6+18*3,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_desc"),ButtonName.RemovePageButton , button ->
+        {
+            if(menu.getLines()<=2)
+                return;
+            menu.reduceLines();
+            Config.uiPageNum = menu.getLines();
+            Config.UI_PAGE_NUM.set(menu.getLines());
+            Config.UI_PAGE_NUM.save();
+            this.imageHeight = TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
+            menu.rebuildSlots();
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
+            init();
+        });
+        addRenderableWidget(removePageButton);
+
 
         // 初始化搜索方案
         this.searchField = new EditBox(getFont(), this.leftPos+60, this.topPos+7, 120, this.getFont().lineHeight+5, Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch"));
@@ -162,9 +211,6 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        searchField.render(guiGraphics,mouseX,mouseY,partialTicks);
-        reverseButton.render(guiGraphics,mouseX,mouseY,partialTicks);
-        scroller.render(guiGraphics,mouseX,mouseY,partialTicks);
     }
 
     @Override

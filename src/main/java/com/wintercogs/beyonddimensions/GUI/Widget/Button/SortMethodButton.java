@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.GUI.Widget.Button;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
@@ -29,6 +30,6 @@ public class SortMethodButton extends StatusButton
         {
             this.states.add(state);
         }
-        this.currentState = ButtonState.SORT_DEFAULT;
+        this.currentState = Config.uiSortButton;
     }
 }
