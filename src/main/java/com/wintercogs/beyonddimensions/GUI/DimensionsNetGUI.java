@@ -11,13 +11,18 @@ import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SearchToggleButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
+import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
+import com.wintercogs.beyonddimensions.Packet.OpenNetGuiPacket;
+import com.wintercogs.beyonddimensions.Unit.UIDataHelper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.phys.Vec2;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -53,7 +58,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     protected SearchToggleButton searchToggleButton;
     protected IconButton addPageButton;
     protected IconButton removePageButton;
+    protected IconButton craftButton;
     protected BigScroller scroller;
+
+    private boolean isTransferMode = false;
 
     public DimensionsNetGUI(T container, Inventory playerInventory, Component title)
     {
@@ -67,11 +75,23 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         clearWidgets();
 
+        if(UIDataHelper.isTransfer)
+        {
+            menu.lineData = UIDataHelper.currentPage;
+            //minecraft.mouseHandler.
+
+            UIDataHelper.isTransfer = false;
+        }
+
+
+
         // 计算最大行数
         int maxLines = calMaxLines();
         if(maxLines < menu.getLines())
         {
             // 自动计算不主动持久化参数
+            if(maxLines<2)
+                maxLines = 2;
             menu.setLines(maxLines);
             menu.rebuildSlots();
         }
@@ -160,6 +180,32 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             init();
         });
         addRenderableWidget(removePageButton);
+
+        craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*5,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/craft_button"),ButtonName.CraftButton , button ->
+        {
+            UIDataHelper.currentPage = menu.lineData;
+            UIDataHelper.lastMousePos = new Vec2(
+                    (float) minecraft.mouseHandler.xpos(),
+                    (float) minecraft.mouseHandler.ypos()
+            );
+            UIDataHelper.isTransfer = true;
+            if(menu instanceof DimensionsCraftMenu)
+            {
+                Config.uiCraftButton = ButtonState.DISABLED;
+                Config.UI_CRAFT_BUTTON.set(ButtonState.DISABLED);
+                Config.UI_CRAFT_BUTTON.save();
+                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),false));
+            }
+            else
+            {
+                Config.uiCraftButton = ButtonState.ENABLED;
+                Config.UI_CRAFT_BUTTON.set(ButtonState.ENABLED);
+                Config.UI_CRAFT_BUTTON.save();
+                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),true));
+            }
+        });
+        addRenderableWidget(craftButton);
+
 
 
         // 初始化搜索方案

@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.ShortCutKey;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Config;
+import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Packet.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;
 import net.minecraft.client.KeyMapping;
@@ -42,7 +44,16 @@ public class DimensionsShortKeys
                 return;
             }
 
-            PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),false));
+            if(Config.uiCraftButton == ButtonState.ENABLED)
+            {
+                PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),true));
+            }
+            else if(Config.uiCraftButton == ButtonState.DISABLED)
+            {
+                PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),false));
+            }
+
+
         }
 
     }

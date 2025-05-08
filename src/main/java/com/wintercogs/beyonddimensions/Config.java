@@ -36,6 +36,10 @@ public class Config
             .comment("存储UI搜索按钮值 (除非你知道你在做什么，否则不要手动修改)")
             .defineEnum("ui_search_button", ButtonState.DISABLED);
 
+    public static final ModConfigSpec.EnumValue<ButtonState> UI_CRAFT_BUTTON = BUILDER
+            .comment("决定打开菜单时是否显示合成槽")
+            .defineEnum("ui_craft_button", ButtonState.DISABLED);
+
     public static final ModConfigSpec.IntValue UI_PAGE_NUM = BUILDER
             .comment("存储UI当前显示的总页数 (除非你知道你在做什么，否则不要手动修改)")
             .defineInRange("ui_page_num", 5, 2, 99);
@@ -48,6 +52,7 @@ public class Config
     public static ButtonState uiSortButton;
     public static ButtonState uiReverseButton;
     public static ButtonState uiSearchButton;
+    public static ButtonState uiCraftButton;
     public static int uiPageNum;
     public static String uiSearch;
 
@@ -64,6 +69,7 @@ public class Config
         uiSearchButton = UI_SEARCH_BUTTON.get();
         uiPageNum = UI_PAGE_NUM.get();
         uiSearch = UI_SEARCH.get();
+        uiCraftButton = UI_CRAFT_BUTTON.get();
 
     }
 }

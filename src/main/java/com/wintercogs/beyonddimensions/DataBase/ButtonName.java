@@ -6,5 +6,6 @@ public enum ButtonName
     SortMethodButton,
     AddPageButton,
     RemovePageButton,
-    SearchButton
+    SearchButton,
+    CraftButton,
 }
