@@ -1,11 +1,11 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -25,6 +25,7 @@ import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -38,6 +39,8 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     private int resultSlotIndex;
     private int craftSlotStartIndex;
     private int craftSlotEndIndex;
+
+    public List<ItemStack> lastCraftSlotItems = null;
 
 
 
@@ -70,7 +73,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         this.resultSlots = new ResultContainer();
 
         // 为其添加工艺槽
-        this.addSlot(new ResultSlot(playerInventory.player, this.craftSlots, this.resultSlots, 0, 116+4, 24+ (getLines()-1)*18 + 26 +21));
+        this.addSlot(new AutoRefillResultSlot(this,playerInventory.player, this.craftSlots, this.resultSlots, 0, 116+4, 24+ (getLines()-1)*18 + 26 +21));
         resultSlotIndex = slots.size()-1;
 
         craftSlotStartIndex = slots.size();
@@ -84,13 +87,22 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
 
     // 工艺槽实现
-    protected static void slotChangedCraftingGrid(AbstractContainerMenu menu, Level level, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, @Nullable RecipeHolder<CraftingRecipe> recipe, int resultSlotIndex) {
+    public static void slotChangedCraftingGrid(AbstractContainerMenu menu, Level level, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, @Nullable RecipeHolder<CraftingRecipe> recipe, int resultSlotIndex) {
         if (!level.isClientSide) {
             CraftingInput craftinginput = craftSlots.asCraftInput();
             ServerPlayer serverplayer = (ServerPlayer)player;
             ItemStack itemstack = ItemStack.EMPTY;
             Optional<RecipeHolder<CraftingRecipe>> optional = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftinginput, level, recipe);
             if (optional.isPresent()) {
+                // 记录使用的配方物品
+                ((DimensionsCraftMenu)menu).lastCraftSlotItems = new ArrayList<>();
+                for(ItemStack stack : craftSlots.getItems())
+                {
+                    ((DimensionsCraftMenu)menu).lastCraftSlotItems.add(stack.copy());
+                }
+
+
+                // 原版过程
                 RecipeHolder<CraftingRecipe> recipeholder = (RecipeHolder)optional.get();
                 CraftingRecipe craftingrecipe = (CraftingRecipe)recipeholder.value();
                 if (resultSlots.setRecipeUsed(level, serverplayer, recipeholder)) {

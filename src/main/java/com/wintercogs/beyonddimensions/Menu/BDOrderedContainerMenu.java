@@ -13,6 +13,7 @@ import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
@@ -24,6 +25,8 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+
+import static com.wintercogs.beyonddimensions.Unit.InventoryHelper.transferToPlayerInventory;
 
 public abstract class BDOrderedContainerMenu extends BDBaseMenu
 {
@@ -80,9 +83,35 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
             }
             else // 物品由背包移动到存储
             {
+                // 快速合成
+                if(slot instanceof ResultSlot resultSlot)
+                {
+                    cacheStack = slot.getItem().copy();
+
+                    // 如果背包放不下再存入存储系统
+                    ItemStack remaining = transferToPlayerInventory(player, cacheStack);
+
+                    // 处理剩余物品
+                    if (!remaining.isEmpty()) {
+                        remaining = (ItemStack) storage.insert(StackCreater.Create(ItemStackType.ID, remaining, remaining.getCount()), false).copyStack();
+                    }
+                    cacheStack = slot.getItem().copy();
+
+                    if(remaining.isEmpty())
+                    {
+                        resultSlot.onTake(player, cacheStack);
+                    }
+
+
+                }
+                else
+                {
+                    cacheStack = slot.getItem().copy();
+                    int remaining = (int)storage.insert(StackCreater.Create(ItemStackType.ID, cacheStack.copy(),cacheStack.getCount()),false).getStackAmount();
+                    slot.tryRemove(cacheStack.getCount() - remaining,Integer.MAX_VALUE,player);
+                }
                 cacheStack = slot.getItem().copy();
-                int remaining = (int)storage.insert(StackCreater.Create(ItemStackType.ID, cacheStack.copy(),cacheStack.getCount()),false).getStackAmount();
-                slot.tryRemove(cacheStack.getCount() - remaining,Integer.MAX_VALUE-1,player);
+
             }
             if (cacheStack.isEmpty()) {
                 // 对于维度网络通过玩家设置一个EMPTY无影响

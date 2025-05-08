@@ -1,0 +1,40 @@
+package com.wintercogs.beyonddimensions.Unit;
+
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+
+public class InventoryHelper
+{
+    public static ItemStack transferToPlayerInventory(Player player, ItemStack stack) {
+        Inventory inventory = player.getInventory();
+        int maxStackSize = stack.getMaxStackSize();
+
+        // 第一阶段：合并已有堆叠
+        for (int i = 0; i < 36 && !stack.isEmpty(); i++) {
+            ItemStack slotStack = inventory.getItem(i);
+            if (ItemStack.isSameItemSameComponents(slotStack, stack)) {
+                int transferable = Math.min(maxStackSize - slotStack.getCount(), stack.getCount());
+                if (transferable > 0) {
+                    slotStack.grow(transferable);
+                    stack.shrink(transferable);
+                    inventory.setItem(i, slotStack); // 更新槽位
+                }
+            }
+        }
+
+        // 第二阶段：填充空槽
+        if (!stack.isEmpty()) {
+            for (int i = 0; i < 36 && !stack.isEmpty(); i++) {
+                if (inventory.getItem(i).isEmpty()) {
+                    ItemStack cloned = stack.copy();
+                    cloned.setCount(Math.min(stack.getCount(), maxStackSize));
+                    inventory.setItem(i, cloned);
+                    stack.shrink(cloned.getCount());
+                }
+            }
+        }
+
+        return stack;
+    }
+}

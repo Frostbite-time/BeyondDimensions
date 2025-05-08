@@ -26,8 +26,6 @@ public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
     @Override
     protected void init() {
         super.init();
-
-
     }
 
     @Override
