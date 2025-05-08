@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.IconButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
+import com.wintercogs.beyonddimensions.GUI.Widget.Button.SearchToggleButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
@@ -49,6 +50,7 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
     private String lastSearchText = "";
     private ReverseButton reverseButton;
     private SortMethodButton sortButton;
+    private SearchToggleButton searchToggleButton;
     private IconButton addPageButton;
     private IconButton removePageButton;
     private BigScroller scroller;
@@ -99,12 +101,22 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
             Config.UI_REVERSE_BUTTON.save();
         });
         addRenderableWidget(reverseButton);
+        // 搜索切换按钮
+        searchToggleButton = new SearchToggleButton(this.leftPos-18,this.topPos+6+18*2,button ->{
+            searchToggleButton.toggleState();
+            buttonStateMap.put(searchToggleButton.getName(),searchToggleButton.currentState);
+            Config.uiSearchButton = searchToggleButton.currentState;
+            Config.UI_SEARCH_BUTTON.set(searchToggleButton.currentState);
+            Config.UI_SEARCH_BUTTON.save();
+        });
+        addRenderableWidget(searchToggleButton);
 
         buttonStateMap.put(sortButton.getName(),sortButton.currentState);
         buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
+        buttonStateMap.put(searchToggleButton.getName(),searchToggleButton.currentState);
 
         //页面增减按钮
-        addPageButton = new IconButton(this.leftPos-18,this.topPos+6+18*2,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_asc"),ButtonName.AddPageButton , button ->
+        addPageButton = new IconButton(this.leftPos-18,this.topPos+6+18*3,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/up_arrow"),ButtonName.AddPageButton , button ->
         {
             if(this.height - 36 <= (TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-1) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT)
                 || menu.getLines()>=99)
@@ -115,6 +127,7 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
             Config.uiPageNum = menu.getLines();
             Config.UI_PAGE_NUM.set(menu.getLines());
             Config.UI_PAGE_NUM.save();
+            Config.uiSearch = searchField.getValue();
             this.imageHeight = TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
             menu.rebuildSlots();
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
@@ -122,7 +135,7 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
         });
         addRenderableWidget(addPageButton);
 
-        removePageButton = new IconButton(this.leftPos-18,this.topPos+6+18*3,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_desc"),ButtonName.RemovePageButton , button ->
+        removePageButton = new IconButton(this.leftPos-18,this.topPos+6+18*4,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/down_arrow"),ButtonName.RemovePageButton , button ->
         {
             if(menu.getLines()<=2)
                 return;
@@ -130,6 +143,7 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
             Config.uiPageNum = menu.getLines();
             Config.UI_PAGE_NUM.set(menu.getLines());
             Config.UI_PAGE_NUM.save();
+            Config.uiSearch = searchField.getValue();
             this.imageHeight = TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
             menu.rebuildSlots();
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
@@ -140,11 +154,19 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
 
         // 初始化搜索方案
         this.searchField = new EditBox(getFont(), this.leftPos+60, this.topPos+7, 120, this.getFont().lineHeight+5, Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch"));
-        this.searchField.setSuggestion(Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch").getString());
         this.searchField.setMaxLength(100);
         this.searchField.setBordered(true);
         this.searchField.setVisible(true);
         this.searchField.setTextColor(16777215);
+        this.searchField.setValue(Config.uiSearch);
+        if(!this.searchField.getValue().equals(""))
+        {
+            this.searchField.setSuggestion(null);
+        }
+        else
+        {
+            searchField.setSuggestion(Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch").getString());
+        }
         addRenderableWidget(searchField);
 
         // 初始化滚动按钮
@@ -169,6 +191,7 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
                 searchField.setSuggestion(Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch").getString());
 
             menu.loadSearchText(searchField.getValue());
+            Config.uiSearch = searchField.getValue();
             menu.loadButtonState(buttonStateMap);
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
             lastButtonStateMap = new HashMap<>(buttonStateMap);
@@ -299,6 +322,24 @@ public class DimensionsNetGUI extends BDBaseGUI<DimensionsNetMenu>
         else
         {
             return super.keyPressed(keyCode, scanCode, modifiers);
+        }
+    }
+
+    @Override
+    public void removed()
+    {
+        super.removed();
+        if(searchField.getValue().length() > 0 && Config.uiSearchButton == ButtonState.ENABLED)
+        {
+            Config.uiSearch = searchField.getValue();
+            Config.UI_SEARCH.set(searchField.getValue());
+            Config.UI_SEARCH.save();
+        }
+        else
+        {
+            Config.uiSearch = "";
+            Config.UI_SEARCH.set("");
+            Config.UI_SEARCH.save();
         }
     }
 

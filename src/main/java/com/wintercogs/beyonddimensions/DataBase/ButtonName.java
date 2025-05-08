@@ -5,5 +5,6 @@ public enum ButtonName
     ReverseButton,
     SortMethodButton,
     AddPageButton,
-    RemovePageButton
+    RemovePageButton,
+    SearchButton
 }

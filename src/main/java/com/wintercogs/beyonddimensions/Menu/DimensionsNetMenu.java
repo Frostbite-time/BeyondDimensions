@@ -81,6 +81,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         if(player.level().isClientSide())
         {
             this.maxLines = Config.uiPageNum;
+            this.searchText = Config.uiSearch;
             buttonStateMap.put(ButtonName.ReverseButton,Config.uiReverseButton);
             buttonStateMap.put(ButtonName.SortMethodButton,Config.uiSortButton);
         }
