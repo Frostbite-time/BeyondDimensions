@@ -1,24 +1,11 @@
 package com.wintercogs.beyonddimensions.GUI;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.DataBase.ButtonName;
-import com.wintercogs.beyonddimensions.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
-import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
-import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import org.lwjgl.glfw.GLFW;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
 
 public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
 {
