@@ -6,6 +6,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -94,7 +95,7 @@ public class AutoRefillResultSlot extends ResultSlot
         }
 
         // 触发合成网格更新
-        menu.slotChangedCraftingGrid(menu,player.level(),player,craftSlots,this.container, this.index);
+        menu.slotChangedCraftingGrid(menu,player.level(),player,craftSlots,(ResultContainer) this.container, this.index);
     }
 
 }

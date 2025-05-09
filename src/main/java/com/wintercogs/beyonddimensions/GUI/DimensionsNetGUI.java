@@ -160,7 +160,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         buttonStateMap.put(searchToggleButton.getName(),searchToggleButton.currentState);
 
         //页面增减按钮
-        addPageButton = new IconButton(this.leftPos-18,this.topPos+6+18*3,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/up_arrow"),ButtonName.AddPageButton , button ->
+        addPageButton = new IconButton(this.leftPos-18,this.topPos+6+18*3,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/up_arrow.png"),ButtonName.AddPageButton , button ->
         {
             if(this.height - 36 <= (rebuildImageHeight()+MID_SLOTS_HEIGHT)
                     || menu.getLines()>=99)
@@ -179,7 +179,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         });
         addRenderableWidget(addPageButton);
 
-        removePageButton = new IconButton(this.leftPos-18,this.topPos+6+18*4,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/down_arrow"),ButtonName.RemovePageButton , button ->
+        removePageButton = new IconButton(this.leftPos-18,this.topPos+6+18*4,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/down_arrow.png"),ButtonName.RemovePageButton , button ->
         {
             if(menu.getLines()<=2)
                 return;
@@ -195,7 +195,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         });
         addRenderableWidget(removePageButton);
 
-        craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*5,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/craft_button"),ButtonName.CraftButton , button ->
+        craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*5,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/craft_button.png"),ButtonName.CraftButton , button ->
         {
             UIDataHelper.currentPage = menu.lineData;
 

@@ -21,8 +21,8 @@ public class SearchToggleButton extends StatusButton
     protected void initButton()
     {
         iconMap = new HashMap<>();
-        iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/search_disable"));
-        iconMap.put(ButtonState.ENABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/search_enable"));
+        iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/search_disable.png"));
+        iconMap.put(ButtonState.ENABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/search_enable.png"));
 
         this.states = new ArrayList<>();
         for(ButtonState state : iconMap.keySet())
