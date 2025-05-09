@@ -95,6 +95,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                     if (!remaining.isEmpty()) {
                         remaining = (ItemStack) storage.insert(StackCreater.Create(ItemStackType.ID, remaining, remaining.getCount()), false).copyStack();
                     }
+                    // 恢复cacheStack防止后面检测导致resultSlot被设为空
                     cacheStack = slot.getItem().copy();
 
                     if(remaining.isEmpty())

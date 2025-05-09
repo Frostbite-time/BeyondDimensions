@@ -110,7 +110,6 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                     int remaining = (int)storage.insert(StackCreater.Create(ItemStackType.ID, cacheStack.copy(),cacheStack.getCount()),false).getStackAmount();
                     slot.tryRemove(cacheStack.getCount() - remaining,Integer.MAX_VALUE,player);
                 }
-                cacheStack = slot.getItem().copy();
 
             }
             if (cacheStack.isEmpty()) {
