@@ -10,26 +10,25 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SortMethodButton extends StatusButton
+public class SearchToggleButton extends StatusButton
 {
-    public SortMethodButton(int x, int y, OnPress onPress)
+    public SearchToggleButton(int x, int y, OnPress onPress)
     {
-        super(x, y, 16, 16, ButtonName.SortMethodButton, onPress);
+        super(x, y, 16, 16, ButtonName.SearchButton, onPress);
     }
 
     @Override
     protected void initButton()
     {
         iconMap = new HashMap<>();
-        iconMap.put(ButtonState.SORT_DEFAULT, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_default.png"));
-        iconMap.put(ButtonState.SORT_QUANTITY,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_quantity.png"));
-        iconMap.put(ButtonState.SORT_NAME,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_name.png"));
+        iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/search_disable"));
+        iconMap.put(ButtonState.ENABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/search_enable"));
 
         this.states = new ArrayList<>();
         for(ButtonState state : iconMap.keySet())
         {
             this.states.add(state);
         }
-        this.currentState = Config.uiSortButton;
+        this.currentState = Config.uiSearchButton;
     }
 }

@@ -36,7 +36,8 @@ public class UIRegister
         event.enqueueWork(
 
                 () -> {
-                    MenuScreens.register(Dimensions_Net_Menu.get(), DimensionsNetGUI::new);
+                    //显示指定泛型类型
+                    MenuScreens.<DimensionsNetMenu, DimensionsNetGUI<DimensionsNetMenu>>register(Dimensions_Net_Menu.get(), DimensionsNetGUI::new);
                     MenuScreens.register(Dimensions_Craft_Menu.get(), DimensionsCraftGUI::new);
                     MenuScreens.register(Net_Control_Menu.get(), NetControlGUI::new);
                     MenuScreens.register(Net_Interface_Menu.get(), NetInterfaceBaseGUI::new);

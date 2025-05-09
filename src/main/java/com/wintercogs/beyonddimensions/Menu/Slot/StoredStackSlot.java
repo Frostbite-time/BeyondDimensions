@@ -16,6 +16,7 @@ public class StoredStackSlot extends Slot
     private final IStackTypedHandler stackTypedHandler;
     private int theSlot;
     private boolean fake;
+    private boolean active = true;
 
     // 简介思路：构建一个slot，使用index结合DimensionsItemStorage中的列表来管理自身对应物品
     // 为此，需要重写网络沟通方案，将DimensionsItemStorage作为原inv，StoredItemStack作为原ItemStack来进行数据同步
@@ -274,5 +275,16 @@ public class StoredStackSlot extends Slot
     public void setFake(boolean fake)
     {
         this.fake = fake;
+    }
+
+    @Override
+    public boolean isActive()
+    {
+        return active;
+    }
+
+    public void setActive(boolean active)
+    {
+        this.active = active;
     }
 }

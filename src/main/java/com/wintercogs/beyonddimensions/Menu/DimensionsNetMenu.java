@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu;
 
+import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
@@ -32,6 +33,7 @@ import java.util.stream.IntStream;
 public class DimensionsNetMenu extends BDDisorderedContainerMenu
 {
     /// 客户端数据
+    public int maxLines = 6; //默认大小
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
@@ -67,6 +69,16 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, DimensionsNet data)
     {
         super(menuType, id,playerInventory,data.getUnifiedStorage());
+
+        // 初始化搜索方案
+        if(player.level().isClientSide())
+        {
+            this.maxLines = Config.uiPageNum;
+            this.searchText = Config.uiSearch;
+            buttonStateMap.put(ButtonName.ReverseButton,Config.uiReverseButton);
+            buttonStateMap.put(ButtonName.SortMethodButton,Config.uiSortButton);
+        }
+
         // 初始化维度网络容器
         viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
         if(!player.level().isClientSide())
@@ -75,9 +87,6 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             this.lastStorage = new ArrayList<>();
         }
 
-        // 初始化搜索方案
-        buttonStateMap.put(ButtonName.ReverseButton,ButtonState.DISABLED);
-        buttonStateMap.put(ButtonName.SortMethodButton,ButtonState.SORT_DEFAULT);
 
 
         // 添加存储槽
@@ -88,18 +97,37 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     }
 
 
-    protected int getLines()
+    public int getLines()
     {
-        return 6;
+        return maxLines;
+    }
+
+    public void reduceLines()
+    {
+        maxLines--;
+    }
+
+    public void addLines()
+    {
+        maxLines++;
+    }
+
+    public void setLines(int lines)
+    {
+        this.maxLines = lines;
     }
 
     protected void addStorageSlots()
     {
-        for (int row = 0; row < getLines(); ++row)
+        // 默认添加99行，但将99之外的行全部设置为不激活状态，以实现动态增加和减少行数
+        for (int row = 0; row < 99; ++row)
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 27+row * 18));
+                StoredStackSlot newSlot = new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 25+row * 18);
+                if(row >= getLines())
+                    newSlot.setActive(false);
+                this.addSlot(newSlot);
             }
         }
     }
@@ -111,14 +139,52 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 149 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 25+ (getLines()-1)*18 + 26 + 6 + row * 18));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 207));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 25+ (getLines()-1)*18 + 26 + 6 + 3 * 18+ 4));
         }
         inventoryEndIndex = slots.size();
+    }
+
+
+    // 放大和缩小UI所使用的函数，用于重新确定槽位的激活状态以及槽位的位置
+    public void rebuildSlots()
+    {
+        int sSlotNum = 0;
+        for(Slot slot : slots)
+        {
+            if(slot instanceof StoredStackSlot sSlot)
+            {
+                if(sSlotNum/9 < getLines())
+                    sSlot.setActive(true);
+                else
+                    sSlot.setActive(false);
+                sSlotNum++; // 先处理再加数，可以防止最后一个槽位出现问题
+            }
+        }
+
+        int slotNum = 0;
+        for(int i = inventoryStartIndex; i < inventoryEndIndex; ++i)
+        {
+            Slot slot = slots.get(i);
+            if(slot != null)
+            {
+                if(slotNum/9<3)
+                {
+                    slot.y = 25+ (getLines()-1)*18 + 26 + 6 + slotNum/9 * 18;
+                }
+                else
+                {
+                    slot.y = 25+ (getLines()-1)*18 + 26 + 6 + 3 * 18+ 4;
+                }
+
+
+                slotNum++;
+            }
+        }
     }
 
 

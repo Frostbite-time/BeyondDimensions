@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.ShortCutKey;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Config;
+import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;
@@ -24,16 +26,9 @@ public class DimensionsShortKeys
             "key.categories.beyonddimensions" // 键位分类
     );
 
-    private static final KeyMapping OPEN_CRAFT_GUI_KEY = new KeyMapping(
-            "key.beyonddimensions.open_craft_gui", // 键位描述
-            GLFW.GLFW_KEY_P,                 // 默认按键 "P"
-            "key.categories.beyonddimensions" // 键位分类
-    );
-
     public static void register()
     {
         ShortCutKeyRegister.registerKey(OPEN_GUI_KEY);
-        ShortCutKeyRegister.registerKey(OPEN_CRAFT_GUI_KEY);
     }
 
     @SubscribeEvent
@@ -49,20 +44,15 @@ public class DimensionsShortKeys
                 return;
             }
 
-            PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),false));
-        }
-
-        // 用if或者switch，随便什么，反正检查按键就行
-        if (OPEN_CRAFT_GUI_KEY.isDown())
-        {
-            LocalPlayer player = Minecraft.getInstance().player;
-
-            if (player == null)
+            if(Config.uiCraftButton == ButtonState.ENABLED)
             {
-                return;
+                PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),true));
+            }
+            else if(Config.uiCraftButton == ButtonState.DISABLED)
+            {
+                PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),false));
             }
 
-            PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),true));
         }
 
     }
