@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
+import com.wintercogs.beyonddimensions.Unit.InventoryHelper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
@@ -289,31 +290,61 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         }
     }
 
+    public void cleanCraftSlots(boolean toStorageFirst)
+    {
+        if (player instanceof ServerPlayer) {
+            List<ItemStack> stacks = craftSlots.getItems();
+            for(ItemStack stack : stacks) {
+                if(!stack.isEmpty())
+                {
+                    long remaining;
+                    if(toStorageFirst)
+                    {
+                        remaining = storage.insert(new ItemStackType(stack.copy()),false).getStackAmount();
+                        if(remaining>0)
+                        {
+                            stack.setCount((int)remaining);
+                            remaining = InventoryHelper.transferToPlayerInventory(player,stack.copy()).getCount();
+                            if(remaining>0)
+                            {
+                                stack.setCount((int)remaining);
+                                player.drop(stack, false);
+                            }
+                        }
+                    }
+                    else if(player.isAlive() && !((ServerPlayer)player).hasDisconnected())
+                    {
+                        remaining = InventoryHelper.transferToPlayerInventory(player,stack.copy()).getCount();
+
+                        if(remaining>0)
+                        {
+                            stack.setCount((int)remaining);
+                            remaining = storage.insert(new ItemStackType(stack.copy()),false).getStackAmount();
+                            if(remaining>0)
+                            {
+                                stack.setCount((int)remaining);
+                                player.drop(stack, false);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        player.drop(stack, false);
+                    }
+
+                }
+            }
+            craftSlots.clearContent();
+            resultSlots.clearContent();
+        }
+    }
+
 
     @Override
     public void removed(Player player)
     {
         super.removed(player);
         // 将合成槽物品优先放入玩家背包 否则掉落
-        if (player instanceof ServerPlayer) {
-            List<ItemStack> stacks = craftSlots.getItems();
-            for(ItemStack stack : stacks) {
-                if(!stack.isEmpty())
-                {
-                    if (player.isAlive() && !((ServerPlayer)player).hasDisconnected()) {
-                        player.getInventory().placeItemBackInInventory(stack);
-                    } else {
-                        long remaining = storage.insert(new ItemStackType(stack),false).getStackAmount();
-                        if(remaining > 0)
-                        {
-                            stack.setCount((int)remaining);
-                            player.drop(stack, false);
-                        }
-                    }
-                }
-            }
-            craftSlots.clearContent();
-            resultSlots.clearContent();
-        }
+        cleanCraftSlots(false);
     }
 }

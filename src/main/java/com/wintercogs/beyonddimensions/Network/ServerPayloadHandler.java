@@ -260,4 +260,25 @@ public class ServerPayloadHandler
         );
     }
 
+    public void handleClickTransferCraftButtonPacket(final ClickTransferCraftButtonPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+
+                    if(player.containerMenu instanceof DimensionsCraftMenu menu)
+                    {
+                        //服务端处理示意
+                        //1.解析数组
+                        //2.为每一个槽位在背包和存储中寻找资源填入
+                        menu.cleanCraftSlots(packet.toStorage());
+
+
+                    }
+                }
+
+        );
+    }
+
 }

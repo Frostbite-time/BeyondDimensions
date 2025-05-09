@@ -1,12 +1,16 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.ButtonName;
+import com.wintercogs.beyonddimensions.GUI.SharedWidget.IconButton;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
+import com.wintercogs.beyonddimensions.Packet.ClickTransferCraftButtonPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-
+import net.neoforged.neoforge.network.PacketDistributor;
 
 
 public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
@@ -15,6 +19,9 @@ public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
     private static final ResourceLocation GUI_TEXTURE_CRAFT_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/craft_slots.png");
     private static final int CRAFT_SLOTS_WIDTH = 176;
     private static final int CRAFT_SLOTS_HEIGHT = 62;
+
+    private IconButton transferCraftToInvButton;
+    private IconButton transferCraftToStorageButton;
 
     public DimensionsCraftGUI(DimensionsCraftMenu container, Inventory playerInventory, Component title)
     {
@@ -26,6 +33,20 @@ public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
     @Override
     protected void init() {
         super.init();
+
+        //页面增减按钮
+        transferCraftToInvButton = new IconButton(this.leftPos+90, this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/down_arrow"), ButtonName.TransferCraftButton , button ->
+        {
+            PacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(false));
+        });
+        addRenderableWidget(transferCraftToInvButton);
+
+
+        transferCraftToStorageButton = new IconButton(this.leftPos+81,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/up_arrow"), ButtonName.TransferCraftButton , button ->
+        {
+            PacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(true));
+        });
+        addRenderableWidget(transferCraftToStorageButton);
     }
 
     @Override

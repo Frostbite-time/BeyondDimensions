@@ -267,4 +267,15 @@ public class ClientPayloadHandler
 
         );
     }
+
+    public void handleClickTransferCraftButtonPacket(final ClickTransferCraftButtonPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+
+        );
+    }
 }

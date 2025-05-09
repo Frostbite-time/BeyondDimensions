@@ -89,7 +89,61 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         super.mouseClicked(mouseX,mouseY,button);
 
         // 处理点击槽位
-        Slot slot = findSlot(mouseX,mouseY);
+//        Slot slot = findSlot(mouseX,mouseY);
+//        if(slot != null)
+//        {
+//            if (!menu.isHanding)
+//            {
+//                int slotId = slot.index;
+//                IStackType clickItem;
+//                if(hasShiftDown())
+//                {
+//                    if(slot instanceof StoredStackSlot sSlot)
+//                    {
+//                        clickItem = sSlot.getVanillaActualStack();
+//                    }
+//                    else
+//                    {
+//                        clickItem = new ItemStackType(slot.getItem());
+//                    }
+//                    menu.isHanding = true;
+//                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,true));
+//                }
+//                else
+//                {
+//                    if(slot instanceof StoredStackSlot sSlot)
+//                    {
+//                        if(sSlot.isFake())
+//                        {
+//                            // 对于标记槽位
+//                            clickItem = sSlot.getVanillaActualStack();
+//                            menu.isHanding = true;
+//                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
+//                        }
+//                        else
+//                        {
+//                            clickItem = sSlot.getVanillaActualStack();
+//                            menu.isHanding = true;
+//                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
+//                        }
+//                    }
+//                }
+//            }
+//        }
+
+        return true;
+    }
+
+    @Override
+    protected void slotClicked(Slot slot, int slotIndex, int mouseButton, ClickType type)
+    {
+        if(!(slot instanceof StoredStackSlot))
+            super.slotClicked(slot, slotIndex, mouseButton, type);
+
+
+        // 十分奇怪 为什么我以前不用slotClicked而是使用了mouseClicked手动处理
+        // 我记得我明明考虑过的
+        // 我会把这段代码作为测试版推出一段时间，以防止这里潜藏着被我遗忘的虫子
         if(slot != null)
         {
             if (!menu.isHanding)
@@ -107,7 +161,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                         clickItem = new ItemStackType(slot.getItem());
                     }
                     menu.isHanding = true;
-                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,true));
+                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,true));
                 }
                 else
                 {
@@ -118,27 +172,21 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                             // 对于标记槽位
                             clickItem = sSlot.getVanillaActualStack();
                             menu.isHanding = true;
-                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
+                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
                         }
                         else
                         {
                             clickItem = sSlot.getVanillaActualStack();
                             menu.isHanding = true;
-                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
+                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
                         }
                     }
                 }
             }
         }
+        // 至此
 
-        return true;
-    }
 
-    @Override
-    protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type)
-    {
-        if(!(slot instanceof StoredStackSlot))
-            super.slotClicked(slot, slotId, mouseButton, type);
     }
 
 
