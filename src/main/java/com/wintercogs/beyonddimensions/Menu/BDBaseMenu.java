@@ -27,8 +27,8 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     public final IStackTypedHandler storage;
     public final Player player;
     // 用于快速移动时标记玩家背包的槽位索引 如 索引从0开始 背包为54~89
-    protected int inventoryStartIndex = -1; //索引开始位置 为54
-    protected int inventoryEndIndex = -1;   //索引结束位置+1 为90
+    public int inventoryStartIndex = -1; //索引开始位置 为54
+    public int inventoryEndIndex = -1;   //索引结束位置+1 为90
 
     private boolean init = false; // 需要在客户端Menu完成时才能向其发送的操作是否完成的标志
 

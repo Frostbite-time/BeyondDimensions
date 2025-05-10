@@ -21,6 +21,11 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerScreen<T>
 {
 
+    // 用于 shift双击加左键的效果
+    ItemStack lastInvClickedStack = ItemStack.EMPTY;
+    int lastInvClickedSlot = -1;
+    int cleanHold = 10; // 给予半秒时间
+
     public BDBaseGUI(T menu, Inventory playerInventory, Component title)
     {
         super(menu, playerInventory, title);
@@ -73,7 +78,23 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
 
+    @Override
+    protected void containerTick()
+    {
+        super.containerTick();
 
+        if(cleanHold > 0)
+        {
+            cleanHold--;
+        }
+        else
+        {
+            lastInvClickedStack = ItemStack.EMPTY;
+            lastInvClickedSlot = -1;
+            cleanHold = 10;
+        }
+
+    }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
@@ -88,49 +109,6 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         super.mouseClicked(mouseX,mouseY,button);
 
-        // 处理点击槽位
-//        Slot slot = findSlot(mouseX,mouseY);
-//        if(slot != null)
-//        {
-//            if (!menu.isHanding)
-//            {
-//                int slotId = slot.index;
-//                IStackType clickItem;
-//                if(hasShiftDown())
-//                {
-//                    if(slot instanceof StoredStackSlot sSlot)
-//                    {
-//                        clickItem = sSlot.getVanillaActualStack();
-//                    }
-//                    else
-//                    {
-//                        clickItem = new ItemStackType(slot.getItem());
-//                    }
-//                    menu.isHanding = true;
-//                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,true));
-//                }
-//                else
-//                {
-//                    if(slot instanceof StoredStackSlot sSlot)
-//                    {
-//                        if(sSlot.isFake())
-//                        {
-//                            // 对于标记槽位
-//                            clickItem = sSlot.getVanillaActualStack();
-//                            menu.isHanding = true;
-//                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
-//                        }
-//                        else
-//                        {
-//                            clickItem = sSlot.getVanillaActualStack();
-//                            menu.isHanding = true;
-//                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,button,false));
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
         return true;
     }
 
@@ -143,7 +121,6 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
 
         // 十分奇怪 为什么我以前不用slotClicked而是使用了mouseClicked手动处理
         // 我记得我明明考虑过的
-        // 我会把这段代码作为测试版推出一段时间，以防止这里潜藏着被我遗忘的虫子
         if(slot != null)
         {
             if (!menu.isHanding)
@@ -159,6 +136,25 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                     else
                     {
                         clickItem = new ItemStackType(slot.getItem());
+
+                        if(lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
+                        {
+                            for(Slot invSlot : menu.slots)
+                            {
+                                if(menu.inventoryStartIndex<=invSlot.index&& invSlot.index<menu.inventoryEndIndex)
+                                {
+                                    if(ItemStack.isSameItemSameComponents(lastInvClickedStack, invSlot.getItem()))
+                                        PacketDistributor.sendToServer(new CallSeverClickPacket(invSlot.index,new ItemStackType(invSlot.getItem()),0,true));
+                                }
+                            }
+                            menu.isHanding = true;
+                        }
+                        else if(menu.inventoryStartIndex<=slotId&& slotId<menu.inventoryEndIndex)
+                        {
+                            lastInvClickedStack = slot.getItem();
+                            lastInvClickedSlot = slotId;
+                        }
+
                     }
                     menu.isHanding = true;
                     PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,true));

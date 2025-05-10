@@ -100,7 +100,9 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     }
 
     @Override
-    protected void containerTick() {
+    protected void containerTick()
+    {
+        super.containerTick();
         //父类无操作
         //每tick自动更新搜索方案
 
