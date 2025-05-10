@@ -42,7 +42,7 @@ public class IconButton extends Button
             this.isHovered = mouseX >= x && mouseY >= y && mouseX < x + this.width && mouseY < y + this.height;
             ResourceLocation texture = SPRITES.get(this.active,this.isHoveredOrFocused());
 
-            st.blit(texture, x, y, 0,0,this.width,this.height ,16 ,16 );
+            st.blit(texture, x, y, 0,0,this.width,this.height ,this.width ,this.height );
             drawIcon(st,mouseX,mouseY,pt);
             st.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
@@ -55,7 +55,7 @@ public class IconButton extends Button
     }
 
     protected void drawIcon(GuiGraphics st, int mouseX, int mouseY, float pt) {
-        st.blit(getIcon(), this.getX(), this.getY(), 0,0,this.getWidth(), this.getHeight(),16,16);
+        st.blit(getIcon(), this.getX(), this.getY(), 0,0,this.getWidth(), this.getHeight(),this.getWidth(),this.getHeight());
     }
 
     public ResourceLocation getIcon() {

@@ -35,14 +35,14 @@ public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
         super.init();
 
         //页面增减按钮
-        transferCraftToInvButton = new IconButton(this.leftPos+90, this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/down_arrow"), ButtonName.TransferCraftButton , button ->
+        transferCraftToInvButton = new IconButton(this.leftPos+90, this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/down_arrow.png"), ButtonName.TransferCraftButton , button ->
         {
             PacketRegister.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(false));
         });
         addRenderableWidget(transferCraftToInvButton);
 
 
-        transferCraftToStorageButton = new IconButton(this.leftPos+81,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/up_arrow"), ButtonName.TransferCraftButton , button ->
+        transferCraftToStorageButton = new IconButton(this.leftPos+81,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/up_arrow.png"), ButtonName.TransferCraftButton , button ->
         {
             PacketRegister.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(true));
         });
