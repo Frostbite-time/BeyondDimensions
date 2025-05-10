@@ -7,10 +7,7 @@ import com.wintercogs.beyonddimensions.Network.Packet.toClient.EnergyStoragePack
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.PlayerPermissionInfoPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncFlagPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncStoragePacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.NetControlActionPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.RecipeFillC2SPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkRegistry;
@@ -109,6 +106,14 @@ public class PacketRegister
                 RecipeFillC2SPacket::encode,
                 RecipeFillC2SPacket::decode,
                 RecipeFillC2SPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                ClickTransferCraftButtonPacket.class,
+                ClickTransferCraftButtonPacket::encode,
+                ClickTransferCraftButtonPacket::decode,
+                ClickTransferCraftButtonPacket::handle
         );
     }
 }

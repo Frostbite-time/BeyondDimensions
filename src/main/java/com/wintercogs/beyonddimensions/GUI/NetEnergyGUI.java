@@ -52,7 +52,9 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
     }
 
     @Override
-    protected void containerTick() {
+    protected void containerTick()
+    {
+        super.containerTick();
 
         if(menu.popMode)
         {

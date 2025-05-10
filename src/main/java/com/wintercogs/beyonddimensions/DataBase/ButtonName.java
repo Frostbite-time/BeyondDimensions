@@ -7,5 +7,6 @@ public enum ButtonName
     AddPageButton,
     RemovePageButton,
     SearchButton,
-    CraftButton
+    CraftButton,
+    TransferCraftButton
 }

@@ -170,6 +170,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
     @Override
     protected void containerTick()
     {
+        super.containerTick();
         updatePlayerWidget();
     }
 

@@ -253,7 +253,9 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    protected void containerTick() {
+    protected void containerTick()
+    {
+        super.containerTick();
         //父类无操作
         //每tick自动更新搜索方案
         if(!lastButtonStateMap.equals(buttonStateMap) || !Objects.equals(lastSearchText, searchField.getValue()))
