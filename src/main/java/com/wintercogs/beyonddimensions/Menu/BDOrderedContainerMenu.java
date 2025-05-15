@@ -87,19 +87,27 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                 if(slot instanceof ResultSlot resultSlot)
                 {
                     cacheStack = slot.getItem().copy();
-
-                    // 如果背包放不下再存入存储系统
-                    ItemStack remaining = transferToPlayerInventory(player, cacheStack);
-
-                    // 处理剩余物品
-                    if (!remaining.isEmpty()) {
-                        remaining = (ItemStack) storage.insert(StackCreater.Create(ItemStackType.ID, remaining, remaining.getCount()), false).copyStack();
-                    }
-                    cacheStack = slot.getItem().copy();
-
-                    if(remaining.isEmpty())
+                    for(int i = 0;  i< slot.getItem().getMaxStackSize()/slot.getItem().getCount(); i++)
                     {
-                        resultSlot.onTake(player, cacheStack);
+                        ItemStack craftStack = slot.getItem().copy();
+                        if(!ItemStack.isSameItemSameTags(cacheStack, craftStack))
+                            break;
+
+                        // 如果背包放不下再存入存储系统
+                        ItemStack remaining = transferToPlayerInventory(player, craftStack);
+
+                        // 处理剩余物品
+                        if (!remaining.isEmpty()) {
+                            remaining = (ItemStack) storage.insert(StackCreater.Create(ItemStackType.ID, remaining, remaining.getCount()), false).copyStack();
+                        }
+                        // 恢复cacheStack防止后面检测导致resultSlot被设为空
+                        craftStack = slot.getItem().copy();
+
+                        if(remaining.isEmpty())
+                        {
+                            resultSlot.onTake(player, craftStack);
+                        }
+
                     }
 
 
@@ -328,7 +336,14 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                         IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
                                         if(stackHandlerWrapper.getSlots()>0)
                                         {
-                                            int changedCount = (int) Math.min(clickStack.getStackAmount(),clickStack.getVanillaMaxStackSize());
+                                            IStackType trueStack = storage.getStackBySlot(slot.getSlotIndex());
+                                            long trueCount = 0;
+                                            if(trueStack.isSameTypeSameComponents(clickStack))
+                                            {
+                                                trueCount = trueStack.getStackAmount();
+                                            }
+
+                                            int changedCount = (int) Math.min(trueCount,clickStack.getVanillaMaxStackSize());
                                             int remaining = (int)stackHandlerWrapper.insert(clickStack.copyStack(),false);
                                             int actualInsert = changedCount - remaining;
                                             storage.extract(slot.getSlotIndex(),actualInsert,false);

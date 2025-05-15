@@ -124,7 +124,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         // 我会把这段代码作为测试版推出一段时间，以防止这里潜藏着被我遗忘的虫子
         if(slot != null)
         {
-            if (!menu.isHanding)
+            if (true)
             {
                 int slotId = slot.index;
                 IStackType clickItem;

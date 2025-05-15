@@ -356,6 +356,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
         // 父类的覆写方法没有显式调用其被拖拽的子元素的拖拽方法，所以需要手动调用
         int scrollY =  scroller.customDragAction(mouseX,mouseY,button,dragX,dragY);
+        int lastLine = menu.lineData;
         if (scrollY > 0)
         {
             menu.lineData--;
@@ -364,7 +365,8 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             menu.lineData++;
         }
         //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
-        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
+        if(lastLine != menu.lineData)
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
         return true;
     }
 
@@ -395,6 +397,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+
+        if(keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
+            menu.hasShiftDown = true;
+
         InputConstants.Key mouseKey = InputConstants.getKey(keyCode, scanCode);
         if(this.searchField.isFocused())
         {
@@ -415,6 +421,20 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         {
             return super.keyPressed(keyCode, scanCode, modifiers);
         }
+    }
+
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers)
+    {
+        boolean result = super.keyReleased(keyCode, scanCode, modifiers);
+
+        if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
+        {
+            menu.updateViewerStorage();
+            menu.hasShiftDown = false;
+        }
+
+        return result;
     }
 
     @Override

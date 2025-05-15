@@ -50,7 +50,11 @@ public record SyncStoragePacket(List<IStackType> stacks, List<Long> changedCount
                 }
                 i++; // 一次遍历完毕后索引自增
             }
-            menu.updateViewerStorage();
+            // 按住shift时锁定排序
+            if(!menu.hasShiftDown)
+                menu.updateViewerStorage();
+            else
+                menu.updateOnlyCountViewer();
         }
         if (player.containerMenu instanceof NetInterfaceBaseMenu menu)
         {
