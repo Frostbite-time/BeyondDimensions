@@ -48,6 +48,8 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     /// 服务端数据
     private ArrayList<IStackType> lastStorage; // 记录截至上一次同步时的存储状态，用于同步数据
 
+    public boolean hasShiftDown = false;
+
 
     // 构建注册用的信息
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
@@ -212,6 +214,30 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         }
         buildIndexList(new ArrayList<>(viewerStorage.getStorage()));
     }
+
+    // 仅仅更新视觉存储的数量信息
+    public void updateOnlyCountViewer() {
+        // 遍历viewerStorage中的所有物品
+        for (IStackType viewerStack : viewerStorage.getStorage()) {
+            boolean foundInStorage = false;
+
+            // 在storage.getStorage()中寻找类型和组件相同的物品
+            for (IStackType storageStack : storage.getStorage()) {
+                if (storageStack.isSameTypeSameComponents(viewerStack)) {
+                    // 找到匹配时设置viewer的数量为storage的数量
+                    viewerStack.setStackAmount(storageStack.getStackAmount());
+                    foundInStorage = true;
+                    break;
+                }
+            }
+
+            // 如果没有在storage中找到对应的物品，将数量设为0
+            if (!foundInStorage) {
+                viewerStack.setStackAmount(0);
+            }
+        }
+    }
+
 
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
     public void buildIndexList(ArrayList<IStackType> itemStorage)
