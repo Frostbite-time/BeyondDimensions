@@ -329,7 +329,14 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                         IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
                                         if(stackHandlerWrapper.getSlots()>0)
                                         {
-                                            int changedCount = (int) Math.min(clickStack.getStackAmount(),clickStack.getVanillaMaxStackSize());
+                                            // 获取真实最大值 防止数据包伪造
+                                            IStackType trueStack = storage.getStackBySlot(slot.getSlotIndex());
+                                            long tureCount = 0;
+                                            if(trueStack.isSameTypeSameComponents(clickStack))
+                                            {
+                                                tureCount = trueStack.getStackAmount();
+                                            }
+                                            int changedCount = (int) Math.min(tureCount,clickStack.getVanillaMaxStackSize());
                                             int remaining = (int)stackHandlerWrapper.insert(clickStack.copyStack(),false);
                                             int actualInsert = changedCount - remaining;
                                             storage.extract(slot.getSlotIndex(),actualInsert,false);

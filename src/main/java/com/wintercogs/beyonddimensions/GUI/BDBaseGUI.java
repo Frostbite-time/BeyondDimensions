@@ -123,7 +123,10 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         // 我记得我明明考虑过的
         if(slot != null)
         {
-            if (!menu.isHanding)
+            // 数据伪造以及重复修改已经在服务端阻止
+            // 将menu.isHanding检测暂时移除，增强原版兼容性
+            // 如果一段时间后没有问题则移除
+            if (true)
             {
                 int slotId = slot.index;
                 IStackType clickItem;
@@ -137,6 +140,10 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                     {
                         clickItem = new ItemStackType(slot.getItem());
 
+                        // 快速移动仓库物品
+                        // 原版会处理一部分快速移动 此处处理原版未能正常处理的部分
+                        // 理论上说，这俩者即使同时操作一个槽位也不会导致物品复制等bug
+                        // 因为操作基本全由服务端处理
                         if(lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
                         {
                             for(Slot invSlot : menu.slots)

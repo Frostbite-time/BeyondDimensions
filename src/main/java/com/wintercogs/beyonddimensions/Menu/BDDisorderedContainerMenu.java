@@ -52,6 +52,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                     int moveCount = checkCanMoveStackCount(cacheStack, inventoryStartIndex, inventoryEndIndex, true);
                     moveCount = Math.min(moveCount,cacheStack.getCount()); // 首先
                     int nowCount = 0;
+                    // 数据验证，防止网络包伪造
                     IStackType typedStack = storage.getStackByStack(StackCreater.Create(ItemStackType.ID,cacheStack.copy(),cacheStack.getCount()));
                     ItemStack nowStack;
                     if(typedStack != null)
@@ -106,6 +107,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                 }
                 else
                 {
+                    // 从槽位获取物品实体 防止网络包伪造
                     cacheStack = slot.getItem().copy();
                     int remaining = (int)storage.insert(StackCreater.Create(ItemStackType.ID, cacheStack.copy(),cacheStack.getCount()),false).getStackAmount();
                     slot.tryRemove(cacheStack.getCount() - remaining,Integer.MAX_VALUE,player);
@@ -127,6 +129,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
     @Override
     protected void clickHandle(int slotIndex, IStackType clickStack, int button, Player player, IStackTypedHandler storage)
     {
+        // 获取slot以及获取携带物品 防止网络包伪造
         ItemStack carriedItem = this.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
         StoredStackSlot slot = (StoredStackSlot) this.slots.get(slotIndex);// clickHandle仅用于处理点击维度槽位的逻辑，如果转换失败，则证明调用逻辑出错
 
