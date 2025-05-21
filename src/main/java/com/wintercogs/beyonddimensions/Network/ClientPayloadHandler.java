@@ -96,7 +96,7 @@ public class ClientPayloadHandler
                         if(!menu.hasShiftDown)
                             menu.updateViewerStorage();
                         else
-                            menu.updateOnlyCountViewer();
+                            menu.updateOnlyCountAndNewViewer();
                     }
                     if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
                     {

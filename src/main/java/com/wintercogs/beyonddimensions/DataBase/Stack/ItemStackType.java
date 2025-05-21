@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
@@ -26,18 +27,27 @@ import java.util.Optional;
 
 public class ItemStackType implements IStackType<ItemStack> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
-    private static final long CUSTOM_MAX_STACK_SIZE = Integer.MAX_VALUE; // 自定义堆叠大小
+    private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
-    private ItemStack stack;
+    private ItemStack stack; // 物品stack信息，数量最好时刻保持为1
+    private long stackSize; // 扩容，需要确保所有存入取出的终点在此
 
     public ItemStackType()
     {
         stack = ItemStack.EMPTY;
+        stackSize = 0;
     }
 
     public ItemStackType(ItemStack stack)
     {
         this.stack = stack;
+        stackSize = stack.getCount();
+    }
+
+    public ItemStackType(ItemStack stack, long stackSize)
+    {
+        this.stack = stack;
+        this.stackSize = stackSize;
     }
 
     @Override
@@ -45,8 +55,8 @@ public class ItemStackType implements IStackType<ItemStack> {
     {
         if(key instanceof Item item)
         {
-            ItemStack itemStack = new ItemStack(BuiltInRegistries.ITEM.getHolder(BuiltInRegistries.ITEM.getKey(item)).get(), (int) amount,dataComponentPatch);
-            return new ItemStackType(itemStack);
+            ItemStack itemStack = new ItemStack(BuiltInRegistries.ITEM.getHolder(BuiltInRegistries.ITEM.getKey(item)).get(), 1,dataComponentPatch);
+            return new ItemStackType(itemStack,amount);
         }
         return null;
     }
@@ -54,6 +64,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public ItemStack getStack()
     {
+        stack.setCount(BDMath.clampLongToInt(stackSize));
         return stack;
     }
 
@@ -61,6 +72,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     public void setStack(ItemStack stack)
     {
         this.stack = stack.copy();
+        this.stackSize = stack.getCount();
     }
 
     @Override
@@ -92,70 +104,49 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmpty()
+    {
         return stack.isEmpty();
     }
 
     @Override
-    public ItemStack getEmptyStack() {
+    public ItemStack getEmptyStack()
+    {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public ItemStack copyStack() {
-        return stack.copy();
+    public ItemStack copyStack()
+    {
+        return stack.copyWithCount(BDMath.clampLongToInt(stackSize));
     }
 
     @Override
     public ItemStack copyStackWithCount(long count) {
-        ItemStack copy = stack.copy();
-        // 处理long到int的转换安全
-        if (count > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            copy.setCount(Integer.MAX_VALUE);
-            return copy;
-        }
-        copy.setCount((int) count);
-        return copy;
+        return stack.copyWithCount(BDMath.clampLongToInt(count));
     }
 
     @Override
     public IStackType<ItemStack> copy()
     {
-        return new ItemStackType(stack.copy());
+        return new ItemStackType(stack.copy(),stackSize);
     }
 
     @Override
     public IStackType<ItemStack> copyWithCount(long count)
     {
-        int copycont;
-        // 处理long到int的转换安全
-        if (count > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            copycont = Integer.MAX_VALUE;
-        }
-        else
-        {
-            copycont = (int) count;
-        }
-        return new ItemStackType(stack.copyWithCount(copycont));
+        return new ItemStackType(stack.copy(),count);
     }
 
     @Override
     public long getStackAmount() {
-        return stack.getCount();
+        return stackSize;
     }
 
     @Override
     public void setStackAmount(long amount)
     {
-        // 处理long到int的转换安全
-        if (amount > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            stack.setCount(Integer.MAX_VALUE);
-            return;
-        }
-        stack.setCount((int) amount);
+        stackSize = amount;
     }
 
     @Override
@@ -186,12 +177,10 @@ public class ItemStackType implements IStackType<ItemStack> {
     public ItemStack splitStack(long amount) {
         if (amount <= 0) return ItemStack.EMPTY;
 
-        //stack.getCount()作为min的一极，已经保证了数值范围安全，因为stack.getCount()是一个int
-        // 计算可分割的数量
-        int splitAmount = (int) Math.min(amount, stack.getCount());
+        int splitAmount = BDMath.clampLongToInt(Math.min(amount, stackSize));
         ItemStack split = stack.copy();
         split.setCount(splitAmount);
-        stack.shrink(splitAmount);
+        shrink(splitAmount);
         return split;
     }
 
@@ -200,13 +189,10 @@ public class ItemStackType implements IStackType<ItemStack> {
     {
         if (amount <= 0) return new ItemStackType();
 
-        //stack.getCount()作为min的一极，已经保证了数值范围安全，因为stack.getCount()是一个int
-        // 计算可分割的数量
-        int splitAmount = (int) Math.min(amount, stack.getCount());
+        long splitAmount = Math.min(amount, stackSize);
         ItemStack split = stack.copy();
-        split.setCount(splitAmount);
-        stack.shrink(splitAmount);
-        return new ItemStackType(split);
+        shrink(splitAmount);
+        return new ItemStackType(split,splitAmount);
     }
 
     @Override
@@ -221,7 +207,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     public boolean isSameTypeSameComponents(IStackType<ItemStack> other) {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return ItemStack.isSameItemSameComponents(stack, other.getStack());
+        return ItemStack.isSameItemSameComponents(stack, other.copyStackWithCount(1));
     }
 
     // 网络序列化
@@ -236,7 +222,7 @@ public class ItemStackType implements IStackType<ItemStack> {
 
         if (hasItem) {
             // 写入数量
-            buf.writeVarInt(stack.getCount());
+            buf.writeVarLong(stackSize);
             // 使用副本避免修改原堆栈
             ItemStack copy = stack.copyWithCount(1);
             // 使用OPTIONAL_CODEC处理可能为空的情况
@@ -257,11 +243,10 @@ public class ItemStackType implements IStackType<ItemStack> {
         }
 
         // 读取数量
-        int count = buf.readVarInt();
+        long count = buf.readVarLong();
         // 使用OPTIONAL_CODEC解码
-        ItemStack stack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf)
-                .copyWithCount(count);
-        return new ItemStackType(stack);
+        ItemStack stack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
+        return new ItemStackType(stack,count);
     }
 
     @Override
@@ -285,12 +270,13 @@ public class ItemStackType implements IStackType<ItemStack> {
         // 渲染物品图标
         var poseStack = gui.pose(); // 获取渲染的变换矩阵
         poseStack.pushPose(); // 保存矩阵状态
+        stack.setCount(1); // 设置stack数量，而非实际用于操作的stackSize变量
         gui.renderFakeItem(stack, x, y);
         gui.renderItemDecorations(Minecraft.getInstance().font, stack, x, y, "");
         poseStack.popPose(); // 恢复矩阵状态，结束渲染
 
         // 渲染数量文本
-        String countText = getCountText(stack.getCount());
+        String countText = getCountText(getStackAmount());
         float scale = 0.666f; // 文本缩放因数
         var poseStackText = gui.pose();
         poseStackText.pushPose();
@@ -305,17 +291,14 @@ public class ItemStackType implements IStackType<ItemStack> {
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
-        gui.drawString(Minecraft.getInstance().font,
-                countText,
-                X,
-                Y,
-                0xFFFFFF);
+        if(!stack.isEmpty())
+            gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
         poseStackText.popPose();
     }
 
     @Override
     public String getCountText(long count) {
-        if (count <= 0) return "";
+        if (count < 0) return "";
         return StringFormat.formatCount(count);
     }
 

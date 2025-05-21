@@ -215,27 +215,43 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         buildIndexList(new ArrayList<>(viewerStorage.getStorage()));
     }
 
+    public static int BREAKPOINT_COUNTER = 0;
+
     // 仅仅更新视觉存储的数量信息
-    public void updateOnlyCountViewer() {
-        // 遍历viewerStorage中的所有物品
+    public void updateOnlyCountAndNewViewer()
+    {
+
+        // 插入storage中存在但viewer中没有的物品
+//        for (IStackType storageStack : storage.getStorage()) {
+//            boolean foundInViewer = false;
+//            for (IStackType viewerStack : viewerStorage.getStorage()) {
+//                if (viewerStack.isSameTypeSameComponents(storageStack)) {
+//                    foundInViewer = true;
+//                    break;
+//                }
+//            }
+//            if (!foundInViewer) {
+//                viewerStorage.insert(storageStack.copy(), false);
+//            }
+//        }
+
+        // 同步现有物品的数量
         for (IStackType viewerStack : viewerStorage.getStorage()) {
             boolean foundInStorage = false;
-
-            // 在storage.getStorage()中寻找类型和组件相同的物品
             for (IStackType storageStack : storage.getStorage()) {
                 if (storageStack.isSameTypeSameComponents(viewerStack)) {
-                    // 找到匹配时设置viewer的数量为storage的数量
                     viewerStack.setStackAmount(storageStack.getStackAmount());
                     foundInStorage = true;
                     break;
                 }
             }
-
-            // 如果没有在storage中找到对应的物品，将数量设为0
             if (!foundInStorage) {
                 viewerStack.setStackAmount(0);
             }
         }
+
+        //buildIndexList(new ArrayList<>(viewerStorage.getStorage()));
+
     }
 
 
