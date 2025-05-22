@@ -106,7 +106,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public boolean isEmpty()
     {
-        return stack.isEmpty();
+        return stack.isEmpty() || stackSize <=0;
     }
 
     @Override
@@ -200,7 +200,7 @@ public class ItemStackType implements IStackType<ItemStack> {
         // 比较物品类型和基础NBT（如盔甲耐久等）
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return ItemStack.isSameItem(stack, other.getStack());
+        return ItemStack.isSameItem(stack, other.copyStackWithCount(1));
     }
 
     @Override

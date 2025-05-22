@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -41,20 +42,29 @@ import java.util.Optional;
 public class FluidStackType implements IStackType<FluidStack>
 {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
-    private static final long CUSTOM_MAX_STACK_SIZE = Integer.MAX_VALUE; // 自定义堆叠大小
+    private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
     private FluidStack stack;
+    private long stackSize;
 
     // 创建空stack
     public FluidStackType()
     {
         stack = FluidStack.EMPTY;
+        stackSize = 0;
     }
 
     // 创建给定stack
     public FluidStackType(FluidStack stack)
     {
         this.stack = stack;
+        stackSize = stack.getAmount();
+    }
+
+    public FluidStackType(FluidStack stack, long stackSize)
+    {
+        this.stack = stack;
+        this.stackSize = stackSize;
     }
 
 
@@ -63,8 +73,8 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         if(key instanceof Fluid fluid)
         {
-            FluidStack fluidStack = new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(fluid)).get(), (int) amount,dataComponentPatch);
-            return new FluidStackType(fluidStack);
+            FluidStack fluidStack = new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(fluid)).get(), 1,dataComponentPatch);
+            return new FluidStackType(fluidStack,amount);
         }
         return null;
     }
@@ -84,6 +94,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public FluidStack getStack()
     {
+        stack.setAmount(BDMath.clampLongToInt(stackSize));
         return stack;
     }
 
@@ -91,6 +102,7 @@ public class FluidStackType implements IStackType<FluidStack>
     public void setStack(FluidStack stack)
     {
         this.stack = stack.copy();
+        stackSize = stack.getAmount();
     }
 
     @Override
@@ -114,7 +126,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public boolean isEmpty()
     {
-        return stack.isEmpty();
+        return stack.isEmpty() || stackSize<=0;
     }
 
     @Override
@@ -126,61 +138,37 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public FluidStack copyStack()
     {
-        return stack.copy();
+        return stack.copyWithAmount(BDMath.clampLongToInt(stackSize));
     }
 
     @Override
     public FluidStack copyStackWithCount(long count)
     {
-        FluidStack copy = stack.copy();
-        // 处理long到int的转换安全
-        if (count > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            copy.setAmount(Integer.MAX_VALUE);
-            return copy;
-        }
-        copy.setAmount((int) count);
-        return copy;
+        return stack.copyWithAmount(BDMath.clampLongToInt(count));
     }
 
     @Override
     public IStackType<FluidStack> copy()
     {
-        return new FluidStackType(stack.copy());
+        return new FluidStackType(stack.copy(), stackSize);
     }
 
     @Override
     public IStackType<FluidStack> copyWithCount(long count)
     {
-        int copycont;
-        // 处理long到int的转换安全
-        if (count > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            copycont = Integer.MAX_VALUE;
-        }
-        else
-        {
-            copycont = (int) count;
-        }
-        return new FluidStackType(stack.copyWithAmount(copycont));
+        return new FluidStackType(stack.copy(), count);
     }
 
     @Override
     public long getStackAmount()
     {
-        return stack.getAmount();
+        return stackSize;
     }
 
     @Override
     public void setStackAmount(long amount)
     {
-        // 处理long到int的转换安全
-        if (amount > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            stack.setAmount(Integer.MAX_VALUE);
-            return;
-        }
-        stack.setAmount((int) amount);
+        stackSize = amount;
     }
 
     @Override
@@ -199,7 +187,7 @@ public class FluidStackType implements IStackType<FluidStack>
     public long getVanillaMaxStackSize()
     {
         // 流体不属于原版物品，理论上不存在单槽最大上限,此处以64桶为单槽最大单位
-        return 64000;
+        return Math.min(64000L, getCustomMaxStackSize());
     }
 
     @Override
@@ -213,11 +201,10 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         if (amount <= 0) return FluidStack.EMPTY;
 
-        // 计算可分割的数量
-        int splitAmount = (int) Math.min(amount, stack.getAmount());
+        int splitAmount = BDMath.clampLongToInt(Math.min(amount, stackSize));
         FluidStack split = stack.copy();
         split.setAmount(splitAmount);
-        stack.shrink(splitAmount);
+        shrink(splitAmount);
         return split;
     }
 
@@ -226,12 +213,10 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         if (amount <= 0) return new FluidStackType();
 
-        // 计算可分割的数量
-        int splitAmount = (int) Math.min(amount, stack.getAmount());
+        long splitAmount = Math.min(amount, stackSize);
         FluidStack split = stack.copy();
-        split.setAmount(splitAmount);
-        stack.shrink(splitAmount);
-        return new FluidStackType(split);
+        shrink(splitAmount);
+        return new FluidStackType(split,splitAmount);
     }
 
     @Override
@@ -239,7 +224,7 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return FluidStack.isSameFluid(stack, other.getStack());
+        return FluidStack.isSameFluid(stack, other.copyStackWithCount(1));
     }
 
     @Override
@@ -247,7 +232,7 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return FluidStack.isSameFluidSameComponents(stack, other.getStack());
+        return FluidStack.isSameFluidSameComponents(stack, other.copyStackWithCount(1));
     }
 
     @Override
@@ -262,7 +247,7 @@ public class FluidStackType implements IStackType<FluidStack>
 
         if (hasItem) {
             // 写入数量
-            buf.writeVarInt(stack.getAmount());
+            buf.writeVarLong(stackSize);
             // 使用副本避免修改原堆栈
             FluidStack copy = stack.copyWithAmount(1);
             // 使用OPTIONAL_CODEC处理可能为空的情况
@@ -284,11 +269,10 @@ public class FluidStackType implements IStackType<FluidStack>
         }
 
         // 读取数量
-        int count = buf.readVarInt();
+        long count = buf.readVarLong();
         // 使用OPTIONAL_CODEC解码
-        FluidStack stack = FluidStack.OPTIONAL_STREAM_CODEC.decode(buf)
-                .copyWithAmount(count);
-        return new FluidStackType(stack);
+        FluidStack stack = FluidStack.OPTIONAL_STREAM_CODEC.decode(buf);
+        return new FluidStackType(stack, count);
     }
 
     @Override
@@ -338,7 +322,7 @@ public class FluidStackType implements IStackType<FluidStack>
         poseStack.popPose(); // 恢复矩阵状态，结束渲染
 
         // 渲染数量文本
-        String countText = getCountText(stack.getAmount());
+        String countText = getCountText(stackSize);
         float scale = 0.666f; // 文本缩放因数
         var poseStackText = gui.pose();
         poseStackText.pushPose();
@@ -353,18 +337,15 @@ public class FluidStackType implements IStackType<FluidStack>
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
-        gui.drawString(Minecraft.getInstance().font,
-                countText,
-                X,
-                Y,
-                0xFFFFFF);
+        if(!stack.isEmpty())
+            gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
         poseStackText.popPose();
     }
 
     @Override
     public String getCountText(long count)
     {
-        if (count <= 0) return "";
+        if (count < 0) return "";
         return StringFormat.formatCount(count);
     }
 
