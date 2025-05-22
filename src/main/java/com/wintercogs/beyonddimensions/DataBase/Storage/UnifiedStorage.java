@@ -244,6 +244,13 @@ public class UnifiedStorage implements IStackTypedHandler
                 }
             }
         }
+        for (Map.Entry<IStackType, Integer> entry : stackIndex.entrySet()) {
+            int currentIndex = entry.getValue();
+            if (currentIndex > removedIndex) {
+                // 直接通过 Entry 对象修改值（无需重新 put）
+                entry.setValue(currentIndex - 1);
+            }
+        }
     }
 
     // 当外界对存储列表直接操作后（如用于UI界面的数据包发送）

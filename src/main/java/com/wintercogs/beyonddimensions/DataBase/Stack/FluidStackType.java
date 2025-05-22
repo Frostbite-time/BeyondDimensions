@@ -126,7 +126,12 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public boolean isEmpty()
     {
-        return stack.isEmpty() || stackSize<=0;
+        return stack.isEmpty() || stackSize <= 0;
+    }
+
+    @Override
+    public boolean isEmptyStack() {
+        return stack.isEmpty();
     }
 
     @Override

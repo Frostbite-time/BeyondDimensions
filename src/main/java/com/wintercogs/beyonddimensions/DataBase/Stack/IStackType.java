@@ -43,8 +43,11 @@ public interface IStackType<T> {
     // 获取根 如如ItemStack 直接返回Item 用于检查继承链
     Object getSource();
 
-    // 新增方法：判断堆栈是否为空（如ItemStack.isEmpty()）
+    // 新增方法：判断堆栈是否为空，且对于自定义数据上限的，自定义数据为0时也返回假（如ItemStack.isEmpty()）
     boolean isEmpty();
+
+    // 仅判断堆叠是否为空堆叠类型，不管数量
+    boolean isEmptyStack();
 
     // 空实例（例如：ItemStack.EMPTY）
     T getEmptyStack();

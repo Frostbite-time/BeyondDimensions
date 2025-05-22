@@ -415,7 +415,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
         // 清空容器
         for(IStackType stack : viewerStorage.getStorage())
         {
-            stack.setStackAmount(-1); //设为空
+            stack.setStack(stack.getEmptyStack()); //设为空
         }
         for(int i = 0; i<this.storage.getStorage().size(); i++)
         {
@@ -425,7 +425,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
         // flag容器
         for(IStackType stack : viewerFlagStorage.getStorage())
         {
-            stack.setStackAmount(-1); //设为空
+            stack.setStack(stack.getEmptyStack()); //设为空
         }
         for(int i=0;i<this.flagStorage.getStorage().size();i++)
         {

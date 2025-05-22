@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -106,7 +107,12 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public boolean isEmpty()
     {
-        return stack.isEmpty() || stackSize <=0;
+        return stack.isEmpty() || stackSize <= 0;
+    }
+
+    @Override
+    public boolean isEmptyStack() {
+        return stack.isEmpty(); // 这就是为什么要保证stack自身存储数为1。因为我没有办法绕过stack的isEmpty检测获得其item
     }
 
     @Override

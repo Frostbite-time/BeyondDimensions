@@ -100,7 +100,7 @@ public class StoredStackSlot extends Slot
         }
         //从当前槽索引取物品
         IStackType stack = stackTypedHandler.getStackBySlot(getSlotIndex());
-        if (stack.isEmpty())
+        if (stack.isEmptyStack())
             return StackCreater.CreateEmpty(stack.getTypeId());
         if (stack != null)
         {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
