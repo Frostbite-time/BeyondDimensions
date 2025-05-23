@@ -20,6 +20,10 @@ group = mod_group_id
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com"
+    }
     maven { url 'https://modmaven.dev/' }
     maven {
         name = "TerraformersMC"
@@ -31,6 +35,7 @@ repositories {
     maven {
         url "https://cursemaven.com"
     }
+
 
 }
 
@@ -147,6 +152,9 @@ dependencies {
     // EMI支持
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
     // runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+
+    // JEI支持
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
 
 
     // Example optional mod dependency with JEI

@@ -45,7 +45,7 @@ public class NetRecipeHandler implements StandardRecipeHandler<DimensionsCraftMe
     public List<Slot> getCraftingSlots(DimensionsCraftMenu handler)
     {
         List<Slot> craftingSlots = new ArrayList<>();
-        for(int i = handler.slots.size() - 9; i <= handler.slots.size() - 1; ++i)
+        for(int i = handler.craftSlotStartIndex; i < handler.craftSlotEndIndex; ++i)
         {
             craftingSlots.add(handler.slots.get(i));
         }

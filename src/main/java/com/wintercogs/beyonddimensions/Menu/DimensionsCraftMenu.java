@@ -38,8 +38,8 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     private CraftingContainer craftSlots;
     private ResultContainer resultSlots;
     private int resultSlotIndex;
-    private int craftSlotStartIndex;
-    private int craftSlotEndIndex;
+    public int craftSlotStartIndex;
+    public int craftSlotEndIndex;
 
     public List<ItemStack> lastCraftSlotItems = null;
 
@@ -83,7 +83,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                 this.addSlot(new Slot(this.craftSlots, j + i * 3, 26 + j * 18, 24+ (getLines()-1)*18 + 26 +3 + i * 18));
             }
         }
-        craftSlotEndIndex = slots.size();// 调用时需要减一
+        craftSlotEndIndex = slots.size();
     }
 
 
