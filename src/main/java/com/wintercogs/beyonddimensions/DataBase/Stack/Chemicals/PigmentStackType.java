@@ -110,6 +110,12 @@ public class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
+    public boolean isEmptyStack()
+    {
+        return stack.isEmpty();
+    }
+
+    @Override
     public PigmentStack getEmptyStack()
     {
         return PigmentStack.EMPTY;

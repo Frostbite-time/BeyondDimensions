@@ -36,5 +36,11 @@
   "creativetab.beyonddimensions.items": "Beyond Dimensions - Items",
   "creativetab.beyonddimensions.blocks": "Beyond Dimensions - Blocks",
 
-  "beyonddimensions.message.insufficient_materials": "Lack of sufficient materials"
+  "beyonddimensions.message.insufficient_materials": "Lack of sufficient materials",
+
+  "msg.beyonddimensions.network_created": "You ripped a rift through the cosmos...",
+  "msg.beyonddimensions.item_net_bound": "Item bound to network #%d",
+  "msg.beyonddimensions.item_net_unbound": "Item unbound from network #%d",
+  "msg.beyonddimensions.block_net_bound": "Block bound to network #%d",
+  "msg.beyonddimensions.block_net_unbound": "Block unbound from network #%d"
 }

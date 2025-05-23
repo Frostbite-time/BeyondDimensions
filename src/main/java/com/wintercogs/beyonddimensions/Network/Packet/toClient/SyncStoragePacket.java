@@ -54,7 +54,7 @@ public record SyncStoragePacket(List<IStackType> stacks, List<Long> changedCount
             if(!menu.hasShiftDown)
                 menu.updateViewerStorage();
             else
-                menu.updateOnlyCountViewer();
+                menu.updateOnlyCountAndNewViewer();
         }
         if (player.containerMenu instanceof NetInterfaceBaseMenu menu)
         {

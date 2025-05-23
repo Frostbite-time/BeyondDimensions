@@ -100,7 +100,7 @@ public class StoredStackSlot extends Slot
         }
         //从当前槽索引取物品
         IStackType stack = stackTypedHandler.getStackBySlot(getSlotIndex());
-        if (stack.isEmpty())
+        if (stack.isEmptyStack())
             return StackCreater.CreateEmpty(stack.getTypeId());
         if (stack != null)
         {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
@@ -183,14 +183,14 @@ public class StoredStackSlot extends Slot
     public int getMaxStackSize()
     {
         // 获取槽位可存储物品的最大值
-        return Integer.MAX_VALUE - 1;
+        return Integer.MAX_VALUE;
     }
 
     @Override
     public int getMaxStackSize(ItemStack stack)
     {
         // 获取槽位可存储物品的最大值
-        return Integer.MAX_VALUE - 1;
+        return Integer.MAX_VALUE;
     }
 
     @Override

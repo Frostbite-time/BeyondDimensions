@@ -36,5 +36,12 @@
   "creativetab.beyonddimensions.items": "超越维度-物品",
   "creativetab.beyonddimensions.blocks": "超越维度-方块",
 
-  "beyonddimensions.message.insufficient_materials": "缺少足够材料"
+  "beyonddimensions.message.insufficient_materials": "缺少足够材料",
+
+  "msg.beyonddimensions.network_created": "你从宇宙中撕开了一个裂隙...",
+  "msg.beyonddimensions.item_net_bound": "物品被绑定到%d号网络",
+  "msg.beyonddimensions.item_net_unbound": "物品从%d号网络解绑",
+  "msg.beyonddimensions.block_net_bound": "方块被绑定到%d号网络",
+  "msg.beyonddimensions.block_net_unbound": "方块从%d号网络解绑"
+
 }

@@ -115,7 +115,7 @@ public class DimensionsNet extends SavedData
             }
             else
             {
-                return null;
+                continue; // 给予10000次查找机会，防止乱删乱改导致id轮空
             }
         }
         return null;

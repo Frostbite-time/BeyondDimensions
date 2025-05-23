@@ -207,7 +207,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     }
 
     // 仅仅更新视觉存储的数量信息
-    public void updateOnlyCountViewer() {
+    public void updateOnlyCountAndNewViewer() {
         // 遍历viewerStorage中的所有物品
         for (IStackType viewerStack : viewerStorage.getStorage()) {
             boolean foundInStorage = false;

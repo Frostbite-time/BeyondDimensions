@@ -110,6 +110,12 @@ public class GasStackType implements IStackType<GasStack>
     }
 
     @Override
+    public boolean isEmptyStack()
+    {
+        return stack.isEmpty();
+    }
+
+    @Override
     public GasStack getEmptyStack()
     {
         return GasStack.EMPTY;

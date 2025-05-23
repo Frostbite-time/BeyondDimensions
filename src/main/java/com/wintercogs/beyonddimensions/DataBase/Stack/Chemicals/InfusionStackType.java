@@ -110,6 +110,12 @@ public class InfusionStackType implements IStackType<InfusionStack>
     }
 
     @Override
+    public boolean isEmptyStack()
+    {
+        return stack.isEmpty();
+    }
+
+    @Override
     public InfusionStack getEmptyStack()
     {
         return InfusionStack.EMPTY;

@@ -3,6 +3,9 @@ package com.wintercogs.beyonddimensions.Block.Custom;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -35,9 +38,15 @@ public class NetedBlock extends Block
                     DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
                     if(net != null)
                     {
-                        // 成功设置网络id
-                        blockEntity.setNetId(net.getId());
-                        blockEntity.invalidateCaps();
+                        if(net.isManager(player))
+                        {
+                            // 成功设置网络id
+                            blockEntity.setNetId(net.getId());
+                            blockEntity.invalidateCaps();
+                            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,0.5F,1.0F);
+                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_bound",net.getId()));
+                        }
+
                     }
                 }
                 else
@@ -52,6 +61,8 @@ public class NetedBlock extends Block
                                 // 成功清除网络id
                                 blockEntity.setNetId(-1);
                                 blockEntity.invalidateCaps();
+                                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,0.5F,1.0F);
+                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_unbound",net.getId()));
                             }
                         }
                     }

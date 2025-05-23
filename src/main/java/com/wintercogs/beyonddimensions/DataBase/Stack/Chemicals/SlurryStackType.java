@@ -110,6 +110,12 @@ public class SlurryStackType implements IStackType<SlurryStack>
     }
 
     @Override
+    public boolean isEmptyStack()
+    {
+        return stack.isEmpty();
+    }
+
+    @Override
     public SlurryStack getEmptyStack()
     {
         return SlurryStack.EMPTY;

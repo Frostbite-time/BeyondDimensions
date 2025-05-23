@@ -29,8 +29,8 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     private CraftingContainer craftSlots;
     private ResultContainer resultSlots;
     private int resultSlotIndex;
-    private int craftSlotStartIndex;
-    private int craftSlotEndIndex;
+    public int craftSlotStartIndex;
+    public int craftSlotEndIndex;
 
 
     /**
