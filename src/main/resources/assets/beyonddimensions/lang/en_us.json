@@ -13,7 +13,6 @@
   "menu.text.beyonddimensions.permission.level.zero": "Permission Level: None",
   "menu.text.beyonddimensions.name.player": "Name: %s",
   "menu.text.beyonddimensions.permission.level.prefix": "Permission Level: %s",
-  "menu.placeholder.beyonddimensions.unknow_player": "Unknow Player",
 
   "key.categories.beyonddimensions": "Beyond Dimensions",
   "key.beyonddimensions.open_gui": "Open Dimensional Network UI",
@@ -36,5 +35,11 @@
   "creativetab.beyonddimensions.items": "Beyond Dimensions - Items",
   "creativetab.beyonddimensions.blocks": "Beyond Dimensions - Blocks",
 
-  "beyonddimensions.message.insufficient_materials": "Lack of sufficient materials"
+  "beyonddimensions.message.insufficient_materials": "Lack of sufficient materials",
+
+  "msg.beyonddimensions.network_created": "You ripped a rift through the cosmos...",
+  "msg.beyonddimensions.item_net_bound": "Item bound to network #%d",
+  "msg.beyonddimensions.item_net_unbound": "Item unbound from network #%d",
+  "msg.beyonddimensions.block_net_bound": "Block bound to network #%d",
+  "msg.beyonddimensions.block_net_unbound": "Block unbound from network #%d"
 }

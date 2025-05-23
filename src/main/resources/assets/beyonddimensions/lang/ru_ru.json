@@ -1,0 +1,45 @@
+{
+  "menu.title.beyonddimensions.dimensionnetmenu": "Измеренческая Сеть",
+  "menu.title.beyonddimensions.net_control_menu": "Контроллер Доступа",
+  "menu.title.beyonddimensions.net_interface_menu": "Сетевой Интерфейс",
+  "menu.title.beyonddimensions.net_energy_menu": "Энергетическая Сеть",
+  "beyonddimensions.scrollbar.usage.focused": "Ползунок в фокусе",
+  "beyonddimensions.scrollbar.usage.hovered": "Наведение курсора",
+  "wintercogs.beyonddimensions.dimensionsguisearch": "Поиск...",
+  "menu.button.beyonddimensions.setowner": "Передать владение",
+  "menu.button.beyonddimensions.setmanager": "Назначить админом",
+  "menu.button.beyonddimensions.removemanager": "Снять админа",
+  "menu.button.beyonddimensions.removemember": "Исключить участника",
+  "menu.text.beyonddimensions.permission.level.zero": "Уровень прав: Нет",
+  "menu.text.beyonddimensions.name.player": "Имя: %s",
+  "menu.text.beyonddimensions.permission.level.prefix": "Уровень прав: %s",
+
+  "key.categories.beyonddimensions": "За Гранью Измерений",
+  "key.beyonddimensions.open_gui": "Открыть сеть",
+
+  "item.beyonddimensions.net_creater": "Генератор Измерений",
+  "item.beyonddimensions.net_member_inviter": "Пригласитель участников",
+  "item.beyonddimensions.net_manager_inviter": "Пригласитель админов",
+  "item.beyonddimensions.unstable_space_time_fragment": "Нестабильный Кристалл Пространства-Времени",
+  "item.beyonddimensions.stable_space_time_fragment": "Стабильный Кристалл Пространства-Времени",
+  "item.beyonddimensions.space_time_stable_frame": "Стабилизирующая Рама",
+  "item.beyonddimensions.shattered_space_time_crystallization": "Расколотая Пространственно-Временная Кристаллизация",
+  "item.beyonddimensions.space_time_bar": "Слиток Пространства-Времени",
+  "item.beyonddimensions.test_item_generate": "Генератор тестовых предметов",
+
+  "block.beyonddimensions.net_control": "Контроллер Сети",
+  "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
+  "block.beyonddimensions.net_pathway": "Измеренческий Канал",
+  "block.beyonddimensions.net_energy_pathway": "Энергетический Канал",
+
+  "creativetab.beyonddimensions.items": "За Гранью - Предметы",
+  "creativetab.beyonddimensions.blocks": "За Гранью - Блоки",
+
+  "beyonddimensions.message.insufficient_materials": "Недостаточно материалов",
+
+  "msg.beyonddimensions.network_created": "Вы разорвали ткань реальности...",
+  "msg.beyonddimensions.item_net_bound": "Предмет привязан к сети №%d",
+  "msg.beyonddimensions.item_net_unbound": "Предмет отвязан от сети №%d",
+  "msg.beyonddimensions.block_net_bound": "Блок привязан к сети №%d",
+  "msg.beyonddimensions.block_net_unbound": "Блок отвязан от сети №%d"
+}

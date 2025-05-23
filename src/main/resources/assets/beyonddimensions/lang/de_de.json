@@ -1,0 +1,45 @@
+{
+  "menu.title.beyonddimensions.dimensionnetmenu": "Dimensionsnetzwerk",
+  "menu.title.beyonddimensions.net_control_menu": "Berechtigungssteuerung",
+  "menu.title.beyonddimensions.net_interface_menu": "Netzwerkschnittstelle",
+  "menu.title.beyonddimensions.net_energy_menu": "Energienetz",
+  "beyonddimensions.scrollbar.usage.focused": "Scrollleiste fokussiert",
+  "beyonddimensions.scrollbar.usage.hovered": "Scrollleiste gehovered",
+  "wintercogs.beyonddimensions.dimensionsguisearch": "Suchen...",
+  "menu.button.beyonddimensions.setowner": "Besitz übertragen",
+  "menu.button.beyonddimensions.setmanager": "Zum Admin ernennen",
+  "menu.button.beyonddimensions.removemanager": "Admin entfernen",
+  "menu.button.beyonddimensions.removemember": "Mitglied entfernen",
+  "menu.text.beyonddimensions.permission.level.zero": "Berechtigungsstufe: Keine",
+  "menu.text.beyonddimensions.name.player": "Name: %s",
+  "menu.text.beyonddimensions.permission.level.prefix": "Berechtigungsstufe: %s",
+
+  "key.categories.beyonddimensions": "Jenseits der Dimensionen",
+  "key.beyonddimensions.open_gui": "Netzwerk öffnen",
+
+  "item.beyonddimensions.net_creater": "Dimensionsgenerator",
+  "item.beyonddimensions.net_member_inviter": "Mitgliederverbinder",
+  "item.beyonddimensions.net_manager_inviter": "Admin-Verbinder",
+  "item.beyonddimensions.unstable_space_time_fragment": "Instabiles Raum-Zeit-Fragment",
+  "item.beyonddimensions.stable_space_time_fragment": "Stabiles Raum-Zeit-Fragment",
+  "item.beyonddimensions.space_time_stable_frame": "Stabilisierungsrahmen",
+  "item.beyonddimensions.shattered_space_time_crystallization": "Zersplitterte Raum-Zeit-Kristallisation",
+  "item.beyonddimensions.space_time_bar": "Raum-Zeit-Barren",
+  "item.beyonddimensions.test_item_generate": "Testgegenstand-Generator",
+
+  "block.beyonddimensions.net_control": "Netzwerkcontroller",
+  "block.beyonddimensions.net_interface": "Netzwerkschnittstelle",
+  "block.beyonddimensions.net_pathway": "Dimensionskanal",
+  "block.beyonddimensions.net_energy_pathway": "Energiekanal",
+
+  "creativetab.beyonddimensions.items": "Jenseits - Gegenstände",
+  "creativetab.beyonddimensions.blocks": "Jenseits - Blöcke",
+
+  "beyonddimensions.message.insufficient_materials": "Nicht genug Materialien",
+
+  "msg.beyonddimensions.network_created": "Du hast einen Riss im Kosmos erschaffen...",
+  "msg.beyonddimensions.item_net_bound": "Gegenstand an Netzwerk %d gebunden",
+  "msg.beyonddimensions.item_net_unbound": "Gegenstand von Netzwerk %d entbunden",
+  "msg.beyonddimensions.block_net_bound": "Block an Netzwerk %d gebunden",
+  "msg.beyonddimensions.block_net_unbound": "Block von Netzwerk %d entbunden"
+}

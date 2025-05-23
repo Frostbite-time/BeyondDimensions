@@ -1,0 +1,45 @@
+{
+  "menu.title.beyonddimensions.dimensionnetmenu": "Réseau Dimensionnel",
+  "menu.title.beyonddimensions.net_control_menu": "Contrôle d'Accès",
+  "menu.title.beyonddimensions.net_interface_menu": "Interface Réseau",
+  "menu.title.beyonddimensions.net_energy_menu": "Réseau Énergétique",
+  "beyonddimensions.scrollbar.usage.focused": "Barre de défilement sélectionnée",
+  "beyonddimensions.scrollbar.usage.hovered": "Survol de la barre",
+  "wintercogs.beyonddimensions.dimensionsguisearch": "Rechercher...",
+  "menu.button.beyonddimensions.setowner": "Transférer la propriété",
+  "menu.button.beyonddimensions.setmanager": "Nommer administrateur",
+  "menu.button.beyonddimensions.removemanager": "Révoquer admin",
+  "menu.button.beyonddimensions.removemember": "Exclure membre",
+  "menu.text.beyonddimensions.permission.level.zero": "Niveau de permission : Aucun",
+  "menu.text.beyonddimensions.name.player": "Nom : %s",
+  "menu.text.beyonddimensions.permission.level.prefix": "Niveau de permission : %s",
+
+  "key.categories.beyonddimensions": "Au-delà des Dimensions",
+  "key.beyonddimensions.open_gui": "Ouvrir le réseau",
+
+  "item.beyonddimensions.net_creater": "Générateur Dimensionnel",
+  "item.beyonddimensions.net_member_inviter": "Connecteur de Membres",
+  "item.beyonddimensions.net_manager_inviter": "Connecteur d'Admins",
+  "item.beyonddimensions.unstable_space_time_fragment": "Fragment Spatio-Temporel Instable",
+  "item.beyonddimensions.stable_space_time_fragment": "Fragment Spatio-Temporel Stable",
+  "item.beyonddimensions.space_time_stable_frame": "Cadre Stabilisateur",
+  "item.beyonddimensions.shattered_space_time_crystallization": "Cristal Spatio-Temporel Brisé",
+  "item.beyonddimensions.space_time_bar": "Lingot Spatio-Temporel",
+  "item.beyonddimensions.test_item_generate": "Générateur d'Objets Test",
+
+  "block.beyonddimensions.net_control": "Contrôleur Réseau",
+  "block.beyonddimensions.net_interface": "Interface Réseau",
+  "block.beyonddimensions.net_pathway": "Conduit Dimensionnel",
+  "block.beyonddimensions.net_energy_pathway": "Conduit Énergétique",
+
+  "creativetab.beyonddimensions.items": "Au-delà - Objets",
+  "creativetab.beyonddimensions.blocks": "Au-delà - Blocs",
+
+  "beyonddimensions.message.insufficient_materials": "Matériaux insuffisants",
+
+  "msg.beyonddimensions.network_created": "Vous avez déchiré le tissu cosmique...",
+  "msg.beyonddimensions.item_net_bound": "Objet lié au réseau n°%d",
+  "msg.beyonddimensions.item_net_unbound": "Objet délié du réseau n°%d",
+  "msg.beyonddimensions.block_net_bound": "Bloc lié au réseau n°%d",
+  "msg.beyonddimensions.block_net_unbound": "Bloc délié du réseau n°%d"
+}

@@ -1,0 +1,45 @@
+{
+  "menu.title.beyonddimensions.dimensionnetmenu": "Rede Dimensional",
+  "menu.title.beyonddimensions.net_control_menu": "Controlador de Permissões",
+  "menu.title.beyonddimensions.net_interface_menu": "Interface de Rede",
+  "menu.title.beyonddimensions.net_energy_menu": "Rede de Energia",
+  "beyonddimensions.scrollbar.usage.focused": "Barra de rolagem focada",
+  "beyonddimensions.scrollbar.usage.hovered": "Cursor sobre a barra",
+  "wintercogs.beyonddimensions.dimensionsguisearch": "Pesquisar...",
+  "menu.button.beyonddimensions.setowner": "Transferir dono",
+  "menu.button.beyonddimensions.setmanager": "Tornar administrador",
+  "menu.button.beyonddimensions.removemanager": "Remover admin",
+  "menu.button.beyonddimensions.removemember": "Remover membro",
+  "menu.text.beyonddimensions.permission.level.zero": "Nível de permissão: Nenhum",
+  "menu.text.beyonddimensions.name.player": "Nome: %s",
+  "menu.text.beyonddimensions.permission.level.prefix": "Nível de permissão: %s",
+
+  "key.categories.beyonddimensions": "Além das Dimensões",
+  "key.beyonddimensions.open_gui": "Abrir rede",
+
+  "item.beyonddimensions.net_creater": "Gerador Dimensional",
+  "item.beyonddimensions.net_member_inviter": "Conector de Membros",
+  "item.beyonddimensions.net_manager_inviter": "Conector de Admins",
+  "item.beyonddimensions.unstable_space_time_fragment": "Fragmento Espaço-Temporal Instável",
+  "item.beyonddimensions.stable_space_time_fragment": "Fragmento Espaço-Temporal Estável",
+  "item.beyonddimensions.space_time_stable_frame": "Estrutura Estabilizadora",
+  "item.beyonddimensions.shattered_space_time_crystallization": "Cristal Espaço-Temporal Quebrado",
+  "item.beyonddimensions.space_time_bar": "Barra Espaço-Temporal",
+  "item.beyonddimensions.test_item_generate": "Gerador de Itens (Teste)",
+
+  "block.beyonddimensions.net_control": "Controlador de Rede",
+  "block.beyonddimensions.net_interface": "Interface de Rede",
+  "block.beyonddimensions.net_pathway": "Caminho Dimensional",
+  "block.beyonddimensions.net_energy_pathway": "Canal de Energia",
+
+  "creativetab.beyonddimensions.items": "Além das Dimensões - Itens",
+  "creativetab.beyonddimensions.blocks": "Além das Dimensões - Blocos",
+
+  "beyonddimensions.message.insufficient_materials": "Materiais insuficientes",
+
+  "msg.beyonddimensions.network_created": "Você rasgou uma fenda na realidade...",
+  "msg.beyonddimensions.item_net_bound": "Item vinculado à rede nº%d",
+  "msg.beyonddimensions.item_net_unbound": "Item desvinculado da rede nº%d",
+  "msg.beyonddimensions.block_net_bound": "Bloco vinculado à rede nº%d",
+  "msg.beyonddimensions.block_net_unbound": "Bloco desvinculado da rede nº%d"
+}

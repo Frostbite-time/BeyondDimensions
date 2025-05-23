@@ -1,5 +1,4 @@
 {
-
   "menu.title.beyonddimensions.dimensionnetmenu": "维度网络",
   "menu.title.beyonddimensions.net_control_menu": "维度网络权限控制器",
   "menu.title.beyonddimensions.net_interface_menu": "网络接口",
@@ -43,5 +42,4 @@
   "msg.beyonddimensions.item_net_unbound": "物品从%d号网络解绑",
   "msg.beyonddimensions.block_net_bound": "方块被绑定到%d号网络",
   "msg.beyonddimensions.block_net_unbound": "方块从%d号网络解绑"
-
 }

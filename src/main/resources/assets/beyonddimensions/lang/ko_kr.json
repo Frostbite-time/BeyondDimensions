@@ -1,0 +1,45 @@
+{
+  "menu.title.beyonddimensions.dimensionnetmenu": "차원 네트워크",
+  "menu.title.beyonddimensions.net_control_menu": "권한 제어기",
+  "menu.title.beyonddimensions.net_interface_menu": "네트워크 인터페이스",
+  "menu.title.beyonddimensions.net_energy_menu": "에너지 망",
+  "beyonddimensions.scrollbar.usage.focused": "스크롤바 포커스됨",
+  "beyonddimensions.scrollbar.usage.hovered": "스크롤바 호버링 중",
+  "wintercogs.beyonddimensions.dimensionsguisearch": "검색...",
+  "menu.button.beyonddimensions.setowner": "소유권 이전",
+  "menu.button.beyonddimensions.setmanager": "관리자 지정",
+  "menu.button.beyonddimensions.removemanager": "관리자 해제",
+  "menu.button.beyonddimensions.removemember": "멤버 제거",
+  "menu.text.beyonddimensions.permission.level.zero": "권한 레벨: 없음",
+  "menu.text.beyonddimensions.name.player": "이름: %s",
+  "menu.text.beyonddimensions.permission.level.prefix": "권한 레벨: %s",
+
+  "key.categories.beyonddimensions": "차원을 넘어",
+  "key.beyonddimensions.open_gui": "네트워크 열기",
+
+  "item.beyonddimensions.net_creater": "차원 네트워크 생성기",
+  "item.beyonddimensions.net_member_inviter": "멤버 연결기",
+  "item.beyonddimensions.net_manager_inviter": "관리자 연결기",
+  "item.beyonddimensions.unstable_space_time_fragment": "불안정 시공간 조각",
+  "item.beyonddimensions.stable_space_time_fragment": "안정화 시공간 조각",
+  "item.beyonddimensions.space_time_stable_frame": "시공간 안정 프레임",
+  "item.beyonddimensions.shattered_space_time_crystallization": "파편화 시공간 결정체",
+  "item.beyonddimensions.space_time_bar": "시공간 주괴",
+  "item.beyonddimensions.test_item_generate": "테스트 아이템 생성기",
+
+  "block.beyonddimensions.net_control": "네트워크 제어기",
+  "block.beyonddimensions.net_interface": "네트워크 인터페이스",
+  "block.beyonddimensions.net_pathway": "차원 통신로",
+  "block.beyonddimensions.net_energy_pathway": "차원 에너지로",
+
+  "creativetab.beyonddimensions.items": "초차원 - 아이템",
+  "creativetab.beyonddimensions.blocks": "초차원 - 블록",
+
+  "beyonddimensions.message.insufficient_materials": "재료가 부족합니다",
+
+  "msg.beyonddimensions.network_created": "당신은 우주에 균열을 만들었습니다...",
+  "msg.beyonddimensions.item_net_bound": "%d번 네트워크에 아이템 연결됨",
+  "msg.beyonddimensions.item_net_unbound": "%d번 네트워크에서 아이템 연결 해제",
+  "msg.beyonddimensions.block_net_bound": "%d번 네트워크에 블록 연결됨",
+  "msg.beyonddimensions.block_net_unbound": "%d번 네트워크에서 블록 연결 해제"
+}

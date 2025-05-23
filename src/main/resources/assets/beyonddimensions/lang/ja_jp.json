@@ -1,0 +1,45 @@
+{
+  "menu.title.beyonddimensions.dimensionnetmenu": "ディメンションネットワーク",
+  "menu.title.beyonddimensions.net_control_menu": "ネットワーク権限制御",
+  "menu.title.beyonddimensions.net_interface_menu": "ネットワークインタフェース",
+  "menu.title.beyonddimensions.net_energy_menu": "エネルギー網",
+  "beyonddimensions.scrollbar.usage.focused": "スクロールバーにフォーカス中",
+  "beyonddimensions.scrollbar.usage.hovered": "スクロールバーにホバー中",
+  "wintercogs.beyonddimensions.dimensionsguisearch": "検索...",
+  "menu.button.beyonddimensions.setowner": "所有権譲渡",
+  "menu.button.beyonddimensions.setmanager": "管理者に設定",
+  "menu.button.beyonddimensions.removemanager": "管理者権限解除",
+  "menu.button.beyonddimensions.removemember": "メンバー削除",
+  "menu.text.beyonddimensions.permission.level.zero": "権限レベル：なし",
+  "menu.text.beyonddimensions.name.player": "名前：%s",
+  "menu.text.beyonddimensions.permission.level.prefix": "権限レベル：%s",
+
+  "key.categories.beyonddimensions": "次元を超えて",
+  "key.beyonddimensions.open_gui": "ネットワークを開く",
+
+  "item.beyonddimensions.net_creater": "次元ネットワーク生成器",
+  "item.beyonddimensions.net_member_inviter": "メンバー接続器",
+  "item.beyonddimensions.net_manager_inviter": "管理者接続器",
+  "item.beyonddimensions.unstable_space_time_fragment": "不安定時空フラグメント",
+  "item.beyonddimensions.stable_space_time_fragment": "安定時空フラグメント",
+  "item.beyonddimensions.space_time_stable_frame": "時空安定枠",
+  "item.beyonddimensions.shattered_space_time_crystallization": "崩壊時空結晶",
+  "item.beyonddimensions.space_time_bar": "時空インゴット",
+  "item.beyonddimensions.test_item_generate": "テスト用アイテム生成器",
+
+  "block.beyonddimensions.net_control": "ネットワーク制御装置",
+  "block.beyonddimensions.net_interface": "ネットワークインタフェース",
+  "block.beyonddimensions.net_pathway": "次元通信路",
+  "block.beyonddimensions.net_energy_pathway": "次元エネルギー路",
+
+  "creativetab.beyonddimensions.items": "超次元 - アイテム",
+  "creativetab.beyonddimensions.blocks": "超次元 - ブロック",
+
+  "beyonddimensions.message.insufficient_materials": "材料が不足しています",
+
+  "msg.beyonddimensions.network_created": "あなたは宇宙に裂け目を生み出した...",
+  "msg.beyonddimensions.item_net_bound": "アイテムを%d番ネットワークに接続しました",
+  "msg.beyonddimensions.item_net_unbound": "アイテムを%d番ネットワークから切断しました",
+  "msg.beyonddimensions.block_net_bound": "ブロックを%d番ネットワークに接続しました",
+  "msg.beyonddimensions.block_net_unbound": "ブロックを%d番ネットワークから切断しました"
+}
