@@ -3,6 +3,9 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -38,10 +41,14 @@ public class NetedItem extends Item
                     if(itemstack.get(ModDataComponents.NET_ID_DATA) != net.getId())
                     {
                         itemstack.set(ModDataComponents.NET_ID_DATA,net.getId());
+                        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound",net.getId()));
                     }
                     else
                     {
                         itemstack.set(ModDataComponents.NET_ID_DATA,-1);
+                        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound",net.getId()));
                     }
                 }
                 else

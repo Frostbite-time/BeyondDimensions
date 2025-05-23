@@ -2,6 +2,9 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -43,6 +46,19 @@ public class NetCreater extends Item
             newNet.addPlayer(player.getUUID());
             newNet.setDirty();
             itemstack.consume(1,player);
+
+            // 在成功创建网络后添加
+            level.playSound(null,
+                    player.getX(),
+                    player.getY(),
+                    player.getZ(),
+                    SoundEvents.BEACON_ACTIVATE, // 信标音效
+                    SoundSource.PLAYERS,
+                    0.8F,
+                    1.0F);
+
+            // 发送文字提示
+            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.network_created"));
         }
 
         return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
