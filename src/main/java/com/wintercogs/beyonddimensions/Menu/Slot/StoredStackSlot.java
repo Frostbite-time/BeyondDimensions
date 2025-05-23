@@ -183,14 +183,14 @@ public class StoredStackSlot extends Slot
     public int getMaxStackSize()
     {
         // 获取槽位可存储物品的最大值
-        return Integer.MAX_VALUE - 1;
+        return Integer.MAX_VALUE;
     }
 
     @Override
     public int getMaxStackSize(ItemStack stack)
     {
         // 获取槽位可存储物品的最大值
-        return Integer.MAX_VALUE - 1;
+        return Integer.MAX_VALUE;
     }
 
     @Override

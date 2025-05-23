@@ -244,7 +244,7 @@ public class StackTypedHandler implements IStackTypedHandler
             current.shrink(extractable);
             if (current.isEmpty()) {
                 // 更新索引，移除旧类型索引，添加到空类型索引
-                storage.set(slot, current.getEmpty());
+                storage.set(slot, new ItemStackType());
                 typeIdIndex.computeIfAbsent(oldTypeId, k -> new ArrayList<>()).remove(Integer.valueOf(slot));
                 typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(slot);
             }
