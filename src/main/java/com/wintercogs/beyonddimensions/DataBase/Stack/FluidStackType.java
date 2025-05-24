@@ -97,7 +97,8 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         this.stack = stack.copy();
         stackSize = stack.getAmount();
-        this.stack.setAmount(1);
+        if(!(this.stack.getRawFluid() == Fluids.EMPTY))
+            this.stack.setAmount(1);
     }
 
     @Override
