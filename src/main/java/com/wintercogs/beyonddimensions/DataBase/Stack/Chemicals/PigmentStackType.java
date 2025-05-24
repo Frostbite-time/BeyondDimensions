@@ -154,7 +154,7 @@ public class PigmentStackType implements IStackType<PigmentStack>
     @Override
     public void setStackAmount(long amount)
     {
-        if(stack.isEmpty())
+        if(stack.getRaw().isEmptyType())
             return;
         stack.setAmount(amount);
     }
@@ -187,7 +187,7 @@ public class PigmentStackType implements IStackType<PigmentStack>
     @Override
     public PigmentStack splitStack(long amount)
     {
-        if (amount <= 0) return PigmentStack.EMPTY;
+        if (amount <= 0 || isEmpty()) return PigmentStack.EMPTY;
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stack.getAmount());
@@ -200,7 +200,7 @@ public class PigmentStackType implements IStackType<PigmentStack>
     @Override
     public IStackType<PigmentStack> split(long amount)
     {
-        if (amount <= 0) return new PigmentStackType();
+        if (amount <= 0 || isEmpty()) return new PigmentStackType();
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stack.getAmount());

@@ -154,7 +154,7 @@ public class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public void setStackAmount(long amount)
     {
-        if(stack.isEmpty())
+        if(stack.getRaw().isEmptyType())
             return;
         stack.setAmount(amount);
     }
@@ -187,7 +187,7 @@ public class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public SlurryStack splitStack(long amount)
     {
-        if (amount <= 0) return SlurryStack.EMPTY;
+        if (amount <= 0 || isEmpty()) return SlurryStack.EMPTY;
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stack.getAmount());
@@ -200,7 +200,7 @@ public class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public IStackType<SlurryStack> split(long amount)
     {
-        if (amount <= 0) return new SlurryStackType();
+        if (amount <= 0 || isEmpty()) return new SlurryStackType();
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stack.getAmount());

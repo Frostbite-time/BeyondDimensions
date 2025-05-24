@@ -154,7 +154,7 @@ public class InfusionStackType implements IStackType<InfusionStack>
     @Override
     public void setStackAmount(long amount)
     {
-        if(stack.isEmpty())
+        if(stack.getRaw().isEmptyType())
             return;
         stack.setAmount(amount);
     }
@@ -187,7 +187,7 @@ public class InfusionStackType implements IStackType<InfusionStack>
     @Override
     public InfusionStack splitStack(long amount)
     {
-        if (amount <= 0) return InfusionStack.EMPTY;
+        if (amount <= 0 || isEmpty()) return InfusionStack.EMPTY;
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stack.getAmount());
@@ -200,7 +200,7 @@ public class InfusionStackType implements IStackType<InfusionStack>
     @Override
     public IStackType<InfusionStack> split(long amount)
     {
-        if (amount <= 0) return new InfusionStackType();
+        if (amount <= 0 || isEmpty()) return new InfusionStackType();
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stack.getAmount());

@@ -154,7 +154,7 @@ public class GasStackType implements IStackType<GasStack>
     @Override
     public void setStackAmount(long amount)
     {
-        if(stack.isEmpty())
+        if(stack.getRaw().isEmptyType())
             return;
         stack.setAmount(amount);
     }
@@ -187,7 +187,7 @@ public class GasStackType implements IStackType<GasStack>
     @Override
     public GasStack splitStack(long amount)
     {
-        if (amount <= 0) return GasStack.EMPTY;
+        if (amount <= 0 || isEmpty()) return GasStack.EMPTY;
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stack.getAmount());
@@ -200,7 +200,7 @@ public class GasStackType implements IStackType<GasStack>
     @Override
     public IStackType<GasStack> split(long amount)
     {
-        if (amount <= 0) return new GasStackType();
+        if (amount <= 0 || isEmpty()) return new GasStackType();
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stack.getAmount());

@@ -87,7 +87,8 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public FluidStack getStack()
     {
-        stack.setAmount(BDMath.clampLongToInt(stackSize));
+        if(!(stack.getRawFluid() == Fluids.EMPTY))
+            stack.setAmount(BDMath.clampLongToInt(stackSize));
         return stack;
     }
 
@@ -138,7 +139,8 @@ public class FluidStackType implements IStackType<FluidStack>
     public FluidStack copyStack()
     {
         FluidStack copy = stack.copy();
-        copy.setAmount(BDMath.clampLongToInt(stackSize));
+        if(!(stack.getRawFluid() == Fluids.EMPTY))
+            copy.setAmount(BDMath.clampLongToInt(stackSize));
         return copy;
     }
 
@@ -146,7 +148,8 @@ public class FluidStackType implements IStackType<FluidStack>
     public FluidStack copyStackWithCount(long count)
     {
         FluidStack copy = stack.copy();
-        copy.setAmount(BDMath.clampLongToInt(count));
+        if(!(stack.getRawFluid() == Fluids.EMPTY))
+            copy.setAmount(BDMath.clampLongToInt(count));
         return copy;
     }
 
@@ -202,7 +205,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public FluidStack splitStack(long amount)
     {
-        if (amount <= 0) return FluidStack.EMPTY;
+        if (amount <= 0 || isEmpty()) return FluidStack.EMPTY;
 
         // 计算可分割的数量
         int splitAmount = BDMath.clampLongToInt(Math.min(amount, stackSize));
@@ -215,7 +218,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public IStackType<FluidStack> split(long amount)
     {
-        if (amount <= 0) return new FluidStackType();
+        if (amount <= 0 || isEmpty()) return new FluidStackType();
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stackSize);
