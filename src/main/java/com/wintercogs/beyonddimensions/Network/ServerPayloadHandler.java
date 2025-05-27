@@ -37,7 +37,6 @@ public class ServerPayloadHandler
                     DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
                     if (net != null)
                     {
-                        LOGGER.info("玩家存在维度空间:{}，尝试打开GUI", net.getId());
                         if(packet.isCraft())
                         {
                             context.player().openMenu(new SimpleMenuProvider(
