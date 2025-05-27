@@ -14,6 +14,9 @@
   "menu.text.beyonddimensions.name.player": "名前：%s",
   "menu.text.beyonddimensions.permission.level.prefix": "権限レベル：%s",
 
+  "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
+  "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",
+
   "key.categories.beyonddimensions": "次元を超えて",
   "key.beyonddimensions.open_gui": "ネットワークを開く",
 

@@ -14,6 +14,9 @@
   "menu.text.beyonddimensions.name.player": "Name: %s",
   "menu.text.beyonddimensions.permission.level.prefix": "Berechtigungsstufe: %s",
 
+  "istack.beyonddimensions.storage_num.item": "Gespeichert: %s Stück",
+  "istack.beyonddimensions.storage_num.fluid": "Gespeichert: %s mB",
+
   "key.categories.beyonddimensions": "Jenseits der Dimensionen",
   "key.beyonddimensions.open_gui": "Netzwerk öffnen",
 

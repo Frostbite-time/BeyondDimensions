@@ -14,6 +14,9 @@
   "menu.text.beyonddimensions.name.player": "이름: %s",
   "menu.text.beyonddimensions.permission.level.prefix": "권한 레벨: %s",
 
+  "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
+  "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",
+
   "key.categories.beyonddimensions": "차원을 넘어",
   "key.beyonddimensions.open_gui": "네트워크 열기",
 

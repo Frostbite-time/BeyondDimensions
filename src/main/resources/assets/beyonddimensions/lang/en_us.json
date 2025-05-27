@@ -14,6 +14,9 @@
   "menu.text.beyonddimensions.name.player": "Name: %s",
   "menu.text.beyonddimensions.permission.level.prefix": "Permission Level: %s",
 
+  "istack.beyonddimensions.storage_num.item": "Stored: %s Items",
+  "istack.beyonddimensions.storage_num.fluid": "Stored: %s mB",
+
   "key.categories.beyonddimensions": "Beyond Dimensions",
   "key.beyonddimensions.open_gui": "Open Dimensional Network UI",
 

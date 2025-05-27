@@ -405,7 +405,7 @@ public class FluidStackType implements IStackType<FluidStack>
             tooltips.add(modName);
         }
 
-        tooltips.add(Component.literal("已存储:"+getStackAmount()+"mB"));
+        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.fluid",getStackAmount()));
         return tooltips;
     }
 

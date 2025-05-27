@@ -323,7 +323,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     public List<Component> getTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag)
     {
         List<Component> tooltips = stack.getTooltipLines(tooltipContext,player,tooltipFlag);
-        tooltips.add(Component.literal("已存储:"+getStackAmount()+"个"));
+        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.item", getStackAmount()));
         return tooltips;
     }
 
