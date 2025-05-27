@@ -15,6 +15,7 @@ import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Packet.OpenNetGuiPacket;
+import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
 import com.wintercogs.beyonddimensions.Unit.UIDataHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -401,8 +402,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 return true;
             }
         }
-        if(this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey))
+        if(this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey) ||
+                DimensionsShortKeys.OPEN_GUI_KEY.getKey() == mouseKey)
         {
+            onClose();
             return true;
         }
         else

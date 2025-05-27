@@ -20,7 +20,7 @@ import org.lwjgl.glfw.GLFW;
 public class DimensionsShortKeys
 {
 
-    private static final KeyMapping OPEN_GUI_KEY = new KeyMapping(
+    public static final KeyMapping OPEN_GUI_KEY = new KeyMapping(
             "key.beyonddimensions.open_gui", // 键位描述
             GLFW.GLFW_KEY_O,                 // 默认按键 "O"
             "key.categories.beyonddimensions" // 键位分类
