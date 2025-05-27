@@ -108,6 +108,12 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     }
 
     @Override
+    public String getModId()
+    {
+        return MekanismAPI.CHEMICAL_REGISTRY.getKey(stack.getChemical()).getNamespace();
+    }
+
+    @Override
     public boolean isEmpty()
     {
         return stack.isEmpty();

@@ -124,6 +124,12 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
+    public String getModId()
+    {
+        return BuiltInRegistries.FLUID.getKey(stack.getFluid()).getNamespace();
+    }
+
+    @Override
     public boolean isEmpty()
     {
         return stack.isEmpty() || stackSize <= 0;

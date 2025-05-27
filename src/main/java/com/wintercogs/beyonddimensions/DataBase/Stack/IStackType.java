@@ -43,6 +43,9 @@ public interface IStackType<T> {
     // 获取根 如如ItemStack 直接返回Item 用于检查继承链
     Object getSource();
 
+    // 获取该物品所属的模组id 用于UI的排序
+    String getModId();
+
     // 新增方法：判断堆栈是否为空，且对于自定义数据上限的，自定义数据为0时也返回假（如ItemStack.isEmpty()）
     boolean isEmpty();
 

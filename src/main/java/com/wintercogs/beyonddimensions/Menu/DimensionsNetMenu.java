@@ -219,20 +219,6 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     public void updateOnlyCountAndNewViewer()
     {
 
-        // 插入storage中存在但viewer中没有的物品
-//        for (IStackType storageStack : storage.getStorage()) {
-//            boolean foundInViewer = false;
-//            for (IStackType viewerStack : viewerStorage.getStorage()) {
-//                if (viewerStack.isSameTypeSameComponents(storageStack)) {
-//                    foundInViewer = true;
-//                    break;
-//                }
-//            }
-//            if (!foundInViewer) {
-//                viewerStorage.insert(storageStack.copy(), false);
-//            }
-//        }
-
         // 同步现有物品的数量
         for (IStackType viewerStack : viewerStorage.getStorage()) {
             boolean foundInStorage = false;
@@ -247,8 +233,6 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
                 viewerStack.setStackAmount(0);
             }
         }
-
-        //buildIndexList(new ArrayList<>(viewerStorage.getStorage()));
 
     }
 
@@ -333,9 +317,16 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         // 统一排序逻辑，避免重复代码
         ButtonState sortState = Config.uiSortButton;
         if (sortState != ButtonState.SORT_DEFAULT) {
-            Comparator<IStackType> comparator = sortState == ButtonState.SORT_NAME ?
-                    Comparator.comparing(item -> item.getDisplayName().getString()) :
-                    Comparator.comparingLong(IStackType::getStackAmount);
+            Comparator<IStackType> comparator;
+            if(sortState == ButtonState.SORT_NAME)
+                comparator = Comparator.comparing(item -> item.getDisplayName().getString());
+            else if(sortState == ButtonState.SORT_QUANTITY)
+                comparator = Comparator.comparingLong(IStackType::getStackAmount);
+            else if(sortState == ButtonState.SORT_MODID)
+                comparator = Comparator.comparing(IStackType::getModId);
+            else // 保底条件
+                comparator = Comparator.comparing(item -> item.getDisplayName().getString());
+
 
             // 生成索引排序映射
             ArrayList<IStackType> finalCache = cache;

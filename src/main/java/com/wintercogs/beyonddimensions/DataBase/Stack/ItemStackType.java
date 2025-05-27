@@ -104,6 +104,12 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
+    public String getModId()
+    {
+        return BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace();
+    }
+
+    @Override
     public boolean isEmpty()
     {
         return stack.isEmpty() || stackSize <= 0;
