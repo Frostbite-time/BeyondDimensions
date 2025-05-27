@@ -341,7 +341,7 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     public String getCountText(long count)
     {
         if (count <= 0) return "";
-        return StringFormat.formatCount(count);
+        return StringFormat.formatBucket(count);
     }
 
     @Override

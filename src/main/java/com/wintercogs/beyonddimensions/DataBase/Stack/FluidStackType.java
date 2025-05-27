@@ -351,7 +351,7 @@ public class FluidStackType implements IStackType<FluidStack>
     public String getCountText(long count)
     {
         if (count < 0) return "";
-        return StringFormat.formatCount(count);
+        return StringFormat.formatBucket(count);
     }
 
     @Override

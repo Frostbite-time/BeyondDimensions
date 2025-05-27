@@ -13,6 +13,7 @@ public class StringFormat
             1_000_000_000_000_000_000L  // E (10^18)
     };
 
+    // 单位格式化
     public static String formatCount(long count) {
         if (count < 1000) return String.valueOf(count);
 
@@ -26,5 +27,25 @@ public class StringFormat
         double value = count / (double) THRESHOLDS[unitIndex];
         return String.format("%d%s", (long) value, UNITS[unitIndex + 1]);
     }
+
+    // 单位格式化 以1000为计量
+    public static String formatBucket(long count) {
+        if (count < 1000) return String.valueOf(count/1000f);
+
+        count = count / 1000;
+
+        if (count < 1000) return String.valueOf(count);
+
+        // 寻找最大单位
+        int unitIndex = 0;
+        while (unitIndex < THRESHOLDS.length - 1 && count >= THRESHOLDS[unitIndex + 1]) {
+            unitIndex++;
+        }
+
+        // 计算值并格式化
+        double value = count / (double) THRESHOLDS[unitIndex];
+        return String.format("%d%s", (long) value, UNITS[unitIndex + 1]);
+    }
+
 
 }
