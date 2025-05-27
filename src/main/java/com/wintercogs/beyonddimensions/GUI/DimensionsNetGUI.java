@@ -28,7 +28,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Objects;
 
 
@@ -52,8 +51,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     protected static final int PLAYER_INV_HEIGHT = 89;
 
     protected EditBox searchField;
-    protected HashMap<ButtonName, ButtonState> buttonStateMap = new HashMap<>();
-    protected HashMap<ButtonName,ButtonState> lastButtonStateMap = new HashMap<>();
     protected String lastSearchText = "";
     protected ReverseButton reverseButton;
     protected SortMethodButton sortButton;
@@ -125,35 +122,30 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         sortButton = new SortMethodButton(this.leftPos-18,this.topPos+6,button ->
         {
             sortButton.toggleState();
-            buttonStateMap.put(sortButton.getName(),sortButton.currentState);
             Config.uiSortButton = sortButton.currentState;
             Config.UI_SORT_BUTTON.set(sortButton.currentState);
             Config.UI_SORT_BUTTON.save();
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
         });
         addRenderableWidget(sortButton);
         // 倒序切换按钮
         reverseButton = new ReverseButton(this.leftPos-18,this.topPos+6+18,button ->
         {
             reverseButton.toggleState();
-            buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
             Config.uiReverseButton = reverseButton.currentState;
             Config.UI_REVERSE_BUTTON.set(reverseButton.currentState);
             Config.UI_REVERSE_BUTTON.save();
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
         });
         addRenderableWidget(reverseButton);
         // 搜索切换按钮
         searchToggleButton = new SearchToggleButton(this.leftPos-18,this.topPos+6+18*2,button ->{
             searchToggleButton.toggleState();
-            buttonStateMap.put(searchToggleButton.getName(),searchToggleButton.currentState);
             Config.uiSearchButton = searchToggleButton.currentState;
             Config.UI_SEARCH_BUTTON.set(searchToggleButton.currentState);
             Config.UI_SEARCH_BUTTON.save();
         });
         addRenderableWidget(searchToggleButton);
-
-        buttonStateMap.put(sortButton.getName(),sortButton.currentState);
-        buttonStateMap.put(reverseButton.getName(),reverseButton.currentState);
-        buttonStateMap.put(searchToggleButton.getName(),searchToggleButton.currentState);
 
         //页面增减按钮
         addPageButton = new IconButton(this.leftPos-18,this.topPos+6+18*3,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/up_arrow"),ButtonName.AddPageButton , button ->
@@ -245,7 +237,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         this.scroller = new BigScroller(this.leftPos+174,this.topPos+TOP_BASE_HEIGHT+1,18*menu.getLines() - 15 -2,0,menu.maxLineData);
         addRenderableWidget(scroller);
 
-        lastButtonStateMap = new HashMap<>(buttonStateMap);
         lastSearchText = searchField.getValue();
 
     }
@@ -256,7 +247,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         super.containerTick();
         //父类无操作
         //每tick自动更新搜索方案
-        if(!lastButtonStateMap.equals(buttonStateMap) || !Objects.equals(lastSearchText, searchField.getValue()))
+        if(!Objects.equals(lastSearchText, searchField.getValue()))
         {
 
             if(!searchField.getValue().equals(""))
@@ -266,9 +257,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
             menu.loadSearchText(searchField.getValue());
             Config.uiSearch = searchField.getValue();
-            menu.loadButtonState(buttonStateMap);
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
-            lastButtonStateMap = new HashMap<>(buttonStateMap);
             lastSearchText = searchField.getValue();
         }
         scroller.updateScrollPosition(menu.lineData,menu.maxLineData);// 读取翻页数据并应用
