@@ -21,6 +21,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -166,6 +167,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
             init();
         });
+        addPageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.add_page")));
         addRenderableWidget(addPageButton);
 
         removePageButton = new IconButton(this.leftPos-18,this.topPos+6+18*4,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/down_arrow"),ButtonName.RemovePageButton , button ->
@@ -182,6 +184,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
             init();
         });
+        removePageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.remove_page")));
         addRenderableWidget(removePageButton);
 
         craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*5,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/craft_button"),ButtonName.CraftButton , button ->
@@ -213,6 +216,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),true));
             }
         });
+        craftButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.craft_toggle")));
         addRenderableWidget(craftButton);
 
 

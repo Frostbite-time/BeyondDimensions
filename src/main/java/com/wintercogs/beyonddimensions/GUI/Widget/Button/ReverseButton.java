@@ -5,10 +5,9 @@ import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class ReverseButton extends StatusButton
 {
@@ -21,15 +20,16 @@ public class ReverseButton extends StatusButton
     @Override
     protected void initButton()
     {
-        iconMap = new HashMap<>();
         iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_asc"));
         iconMap.put(ButtonState.ENABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_desc"));
 
-        this.states = new ArrayList<>();
+        tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_asc")));
+        tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_desc")));
+
         for(ButtonState state : iconMap.keySet())
         {
             this.states.add(state);
         }
-        this.currentState = Config.uiReverseButton;
+        setState(Config.uiReverseButton);
     }
 }

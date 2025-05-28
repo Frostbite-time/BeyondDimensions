@@ -5,10 +5,9 @@ import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class SearchToggleButton extends StatusButton
 {
@@ -20,15 +19,16 @@ public class SearchToggleButton extends StatusButton
     @Override
     protected void initButton()
     {
-        iconMap = new HashMap<>();
         iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/search_disable"));
         iconMap.put(ButtonState.ENABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/search_enable"));
 
-        this.states = new ArrayList<>();
+        tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.search_disable")));
+        tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.search_enable")));
+
         for(ButtonState state : iconMap.keySet())
         {
             this.states.add(state);
         }
-        this.currentState = Config.uiSearchButton;
+        setState(Config.uiSearchButton);
     }
 }

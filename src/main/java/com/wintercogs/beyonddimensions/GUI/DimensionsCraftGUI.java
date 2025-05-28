@@ -11,13 +11,11 @@ import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Packet.ClickTransferCraftButtonPacket;
 import com.wintercogs.beyonddimensions.Packet.CraftReturnPacket;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 
 public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
@@ -47,6 +45,7 @@ public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
         {
             PacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(false));
         });
+        transferCraftToInvButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.transfer_to_inv")));
         addRenderableWidget(transferCraftToInvButton);
 
 
@@ -54,6 +53,7 @@ public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
         {
             PacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(true));
         });
+        transferCraftToStorageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.transfer_to_storage")));
         addRenderableWidget(transferCraftToStorageButton);
 
         // 槽位优先转移切换按钮
@@ -70,16 +70,17 @@ public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
             @Override
             protected void initButton()
             {
-                iconMap = new HashMap<>();
                 iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_asc"));
                 iconMap.put(ButtonState.DISABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_desc"));
 
-                this.states = new ArrayList<>();
+                tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_storage")));
+                tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_inv")));
+
                 for(ButtonState state : iconMap.keySet())
                 {
                     this.states.add(state);
                 }
-                this.currentState = Config.uiCraftReturnButton;
+                setState(Config.uiCraftReturnButton);
             }
         };
         addRenderableWidget(craftReturnButton);
