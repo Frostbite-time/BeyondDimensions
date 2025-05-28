@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Unit.InventoryHelper;
@@ -26,7 +27,6 @@ import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -37,12 +37,10 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
     private CraftingContainer craftSlots;
     private ResultContainer resultSlots;
-    private int resultSlotIndex;
+    public int resultSlotIndex;
     public int craftSlotStartIndex;
     public int craftSlotEndIndex;
     public boolean firstCraftReturnDir = false; // 决定关闭菜单时工艺槽的优先转移方向，true向存储 false背包
-
-    public List<ItemStack> lastCraftSlotItems = null;
 
 
 
@@ -89,20 +87,14 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
 
     // 工艺槽实现
-    public static void slotChangedCraftingGrid(AbstractContainerMenu menu, Level level, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, @Nullable RecipeHolder<CraftingRecipe> recipe, int resultSlotIndex) {
+    public static void slotChangedCraftingGrid(AbstractContainerMenu menu, Level level, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, @Nullable RecipeHolder<CraftingRecipe> recipe, int resultSlotIndex)
+    {
         if (!level.isClientSide) {
             CraftingInput craftinginput = craftSlots.asCraftInput();
             ServerPlayer serverplayer = (ServerPlayer)player;
             ItemStack itemstack = ItemStack.EMPTY;
-            Optional<RecipeHolder<CraftingRecipe>> optional = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftinginput, level, recipe);
+            Optional<RecipeHolder<CraftingRecipe>> optional = getRecipe(player,craftinginput, level);
             if (optional.isPresent()) {
-                // 记录使用的配方物品
-                ((DimensionsCraftMenu)menu).lastCraftSlotItems = new ArrayList<>();
-                for(ItemStack stack : craftSlots.getItems())
-                {
-                    ((DimensionsCraftMenu)menu).lastCraftSlotItems.add(stack.copy());
-                }
-
 
                 // 原版过程
                 RecipeHolder<CraftingRecipe> recipeholder = (RecipeHolder)optional.get();
@@ -121,6 +113,15 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         }
 
     }
+
+    public static Optional<RecipeHolder<CraftingRecipe>> getRecipe(Player player,CraftingInput input, Level level)
+    {
+        if (BeyondDimensions.PolymorphLoaded && player != null) {
+            return PolymorphHelper.getRecipe(player, RecipeType.CRAFTING, input, level);
+        }
+        return level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
+    }
+
 
     public void transferRecipe(List<ItemStack> inputs)
     {

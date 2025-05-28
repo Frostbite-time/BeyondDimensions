@@ -156,6 +156,9 @@ dependencies {
     // JEI支持
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
 
+    // 多态合成支持
+    compileOnly "curse.maven:polymorph-388800:6451024"
+
 
 }
 

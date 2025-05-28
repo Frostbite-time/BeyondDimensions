@@ -22,6 +22,7 @@ import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandle
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
+import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
@@ -55,6 +56,8 @@ public class BeyondDimensions
     public static final String EMI_MODID = "emi";
     public static boolean JEILoaded = false; // 用于JEI兼容
     public static final String JEI2MODID = "jei";
+    public static boolean PolymorphLoaded = false;
+    public static final String PolymorphModId = "polymorph";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -111,6 +114,15 @@ public class BeyondDimensions
         if(ModList.get().isLoaded(JEI2MODID))
         {
             JEILoaded = true;
+        }
+        if(ModList.get().isLoaded(PolymorphModId))
+        {
+            PolymorphLoaded = true;
+        }
+
+        if(PolymorphLoaded)
+        {
+            PolymorphPlug.register();
         }
 
         // 注册堆叠类型，使得网络能够存储相关堆叠
