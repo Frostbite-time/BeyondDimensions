@@ -280,4 +280,19 @@ public class ServerPayloadHandler
         );
     }
 
+    public void handleCraftReturnPacket(final CraftReturnPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+
+                    if(player.containerMenu instanceof DimensionsCraftMenu menu)
+                    {
+                        menu.firstCraftReturnDir = packet.dir();
+                    }
+                }
+        );
+    }
+
 }

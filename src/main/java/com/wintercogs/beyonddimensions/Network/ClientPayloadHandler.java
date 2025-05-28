@@ -3,10 +3,7 @@ package com.wintercogs.beyonddimensions.Network;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
-import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
-import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
-import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
+import com.wintercogs.beyonddimensions.Menu.*;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -281,6 +278,22 @@ public class ClientPayloadHandler
 
                 }
 
+        );
+    }
+
+
+    public void handleCraftReturnPacket(final CraftReturnPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+
+                    if(player.containerMenu instanceof DimensionsCraftMenu menu)
+                    {
+                        menu.firstCraftReturnDir = packet.dir();
+                    }
+                }
         );
     }
 }
