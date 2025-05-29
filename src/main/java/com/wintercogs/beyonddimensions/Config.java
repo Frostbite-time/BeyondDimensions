@@ -18,7 +18,7 @@ public class Config
 
     public static final ForgeConfigSpec.EnumValue<ButtonState> UI_SORT_BUTTON = BUILDER
             .comment("存储UI搜索按钮值 (除非你知道你在做什么，否则不要手动修改)")
-            .defineEnum("ui_sort_button", ButtonState.SORT_DEFAULT);
+            .defineEnum("ui_sort_button", ButtonState.SORT_NAME);
 
     public static final ForgeConfigSpec.EnumValue<ButtonState> UI_REVERSE_BUTTON = BUILDER
             .comment("存储UI倒序按钮值 (除非你知道你在做什么，否则不要手动修改)")

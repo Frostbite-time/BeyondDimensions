@@ -6,5 +6,6 @@ public enum ButtonState {
     //-------------------------------------------------------------------
     SORT_DEFAULT,   // 默认排序-即不修改排序，按ItemStroage本身的存储顺序
     SORT_QUANTITY,  // 数量排序
-    SORT_NAME       // 名称排序
+    SORT_NAME,       // 名称排序
+    SORT_MODID      // 按模组ID排序
 }

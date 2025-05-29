@@ -25,6 +25,7 @@ import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.text.WordUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -117,6 +118,13 @@ public class FluidStackType implements IStackType<FluidStack>
     public Object getSource()
     {
         return FluidStack.EMPTY.getFluid();
+    }
+
+    @Override
+    public String getModId()
+    {
+        ResourceLocation key = ForgeRegistries.FLUIDS.getKey(stack.getFluid());
+        return key != null ? key.getNamespace() : "unknown";
     }
 
     @Override
@@ -356,7 +364,7 @@ public class FluidStackType implements IStackType<FluidStack>
     public String getCountText(long count)
     {
         if (count < 0) return "";
-        return StringFormat.formatCount(count);
+        return StringFormat.formatBucket(count);
     }
 
     @Override
@@ -404,7 +412,7 @@ public class FluidStackType implements IStackType<FluidStack>
             tooltips.add(modName);
         }
 
-        tooltips.add(Component.literal("已存储:"+getStackAmount()+"mB"));
+        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.fluid",getStackAmount()));
         return tooltips;
     }
 

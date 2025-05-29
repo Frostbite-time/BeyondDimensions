@@ -24,6 +24,7 @@ public class SortMethodButton extends StatusButton
         iconMap.put(ButtonState.SORT_DEFAULT, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_default.png"));
         iconMap.put(ButtonState.SORT_QUANTITY,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_quantity.png"));
         iconMap.put(ButtonState.SORT_NAME,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_name.png"));
+        iconMap.put(ButtonState.SORT_MODID, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_modid.png"));
 
         this.states = new ArrayList<>();
         for(ButtonState state : iconMap.keySet())

@@ -77,8 +77,6 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         {
             this.maxLines = Config.uiPageNum;
             this.searchText = Config.uiSearch;
-            buttonStateMap.put(ButtonName.ReverseButton,Config.uiReverseButton);
-            buttonStateMap.put(ButtonName.SortMethodButton,Config.uiSortButton);
         }
 
         // 初始化维度网络容器
@@ -277,14 +275,6 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         this.searchText = text.toLowerCase(Locale.ENGLISH);
     }
 
-    /**
-     * 设置当前菜单的buttonStateMap
-     * @param buttonStateMap 传入的Map
-     */
-    public void loadButtonState(HashMap<ButtonName,ButtonState> buttonStateMap)
-    {
-        this.buttonStateMap = buttonStateMap;
-    }
 
     /**
      * 根据当前的搜索状态、按钮状态对存储进行排序
@@ -316,11 +306,18 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         }
 
         // 统一排序逻辑，避免重复代码
-        ButtonState sortState = buttonStateMap.get(ButtonName.SortMethodButton);
+        ButtonState sortState = Config.uiSortButton;
         if (sortState != ButtonState.SORT_DEFAULT) {
-            Comparator<IStackType> comparator = sortState == ButtonState.SORT_NAME ?
-                    Comparator.comparing(item -> item.getDisplayName().getString()) :
-                    Comparator.comparingLong(IStackType::getStackAmount);
+            Comparator<IStackType> comparator;
+            if(sortState == ButtonState.SORT_NAME)
+                comparator = Comparator.comparing(item -> item.getDisplayName().getString());
+            else if(sortState == ButtonState.SORT_QUANTITY)
+                comparator = Comparator.comparingLong(IStackType::getStackAmount);
+            else if(sortState == ButtonState.SORT_MODID)
+                comparator = Comparator.comparing(IStackType::getModId);
+            else // 保底条件
+                comparator = Comparator.comparing(item -> item.getDisplayName().getString());
+
 
             // 生成索引排序映射
             ArrayList<IStackType> finalCache = cache;
@@ -339,7 +336,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         }
 
         // 直接通过排序器处理倒序，避免反转操作
-        if (buttonStateMap.get(ButtonName.ReverseButton) == ButtonState.ENABLED) {
+        if (Config.uiReverseButton == ButtonState.ENABLED) {
             Collections.reverse(cacheIndex);
         }
 

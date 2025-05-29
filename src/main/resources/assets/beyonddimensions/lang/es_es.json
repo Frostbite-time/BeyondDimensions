@@ -14,6 +14,9 @@
   "menu.text.beyonddimensions.name.player": "Nombre: %s",
   "menu.text.beyonddimensions.permission.level.prefix": "Nivel de permiso: %s",
 
+  "istack.beyonddimensions.storage_num.item": "Almacenado: %s unidades",
+  "istack.beyonddimensions.storage_num.fluid": "Almacenado: %s mB",
+
   "key.categories.beyonddimensions": "Más Allá de las Dimensiones",
   "key.beyonddimensions.open_gui": "Abrir Red Dimensional",
 

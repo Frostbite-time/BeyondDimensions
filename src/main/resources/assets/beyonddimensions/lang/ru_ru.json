@@ -14,6 +14,9 @@
   "menu.text.beyonddimensions.name.player": "Имя: %s",
   "menu.text.beyonddimensions.permission.level.prefix": "Уровень прав: %s",
 
+  "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
+  "istack.beyonddimensions.storage_num.fluid": "Сохранено: %s мБ",
+
   "key.categories.beyonddimensions": "За Гранью Измерений",
   "key.beyonddimensions.open_gui": "Открыть сеть",
 

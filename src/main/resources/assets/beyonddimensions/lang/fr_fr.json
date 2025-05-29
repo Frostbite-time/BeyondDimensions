@@ -27,6 +27,9 @@
   "item.beyonddimensions.space_time_bar": "Lingot Spatio-Temporel",
   "item.beyonddimensions.test_item_generate": "Générateur d'Objets Test",
 
+  "istack.beyonddimensions.storage_num.item": "Stocké : %s unités",
+  "istack.beyonddimensions.storage_num.fluid": "Stocké : %s mB",
+
   "block.beyonddimensions.net_control": "Contrôleur Réseau",
   "block.beyonddimensions.net_interface": "Interface Réseau",
   "block.beyonddimensions.net_pathway": "Conduit Dimensionnel",

@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -97,6 +98,13 @@ public class ItemStackType implements IStackType<ItemStack> {
     public Object getSource()
     {
         return ItemStack.EMPTY.getItem();
+    }
+
+    @Override
+    public String getModId()
+    {
+        ResourceLocation key = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        return key != null ? key.getNamespace() : "unknown";
     }
 
     @Override
@@ -316,7 +324,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag)
     {
         List<Component> tooltips = stack.getTooltipLines(player,tooltipFlag);
-        tooltips.add(Component.literal("已存储:"+getStackAmount()+"个"));
+        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.item", getStackAmount()));
         return tooltips;
     }
 

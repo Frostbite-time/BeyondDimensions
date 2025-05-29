@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.pigment.PigmentStack;
 import net.minecraft.ChatFormatting;
@@ -101,6 +102,13 @@ public class PigmentStackType implements IStackType<PigmentStack>
     public Object getSource()
     {
         return PigmentStack.EMPTY.getType();
+    }
+
+    @Override
+    public String getModId()
+    {
+        ResourceLocation key = MekanismAPI.pigmentRegistry().getKey(stack.getRaw());
+        return key != null ? key.getNamespace() : "unknown";
     }
 
     @Override
@@ -339,7 +347,7 @@ public class PigmentStackType implements IStackType<PigmentStack>
     public String getCountText(long count)
     {
         if (count <= 0) return "";
-        return StringFormat.formatCount(count);
+        return StringFormat.formatBucket(count);
     }
 
     @Override
@@ -387,7 +395,7 @@ public class PigmentStackType implements IStackType<PigmentStack>
             tooltips.add(modName);
         }
 
-        tooltips.add(Component.literal("已存储:"+getStackAmount()+"mB"));
+        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.fluid",getStackAmount()));
         return tooltips;
     }
 

@@ -14,6 +14,9 @@
   "menu.text.beyonddimensions.name.player": "名称: %s",
   "menu.text.beyonddimensions.permission.level.prefix": "权限级别: %s",
 
+  "istack.beyonddimensions.storage_num.item": "已存储：%s个",
+  "istack.beyonddimensions.storage_num.fluid": "已存储：%smB",
+
   "key.categories.beyonddimensions": "超越维度",
   "key.beyonddimensions.open_gui": "打开维度网络",
 

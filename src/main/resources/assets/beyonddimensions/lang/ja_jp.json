@@ -27,6 +27,9 @@
   "item.beyonddimensions.space_time_bar": "時空インゴット",
   "item.beyonddimensions.test_item_generate": "テスト用アイテム生成器",
 
+  "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
+  "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",
+
   "block.beyonddimensions.net_control": "ネットワーク制御装置",
   "block.beyonddimensions.net_interface": "ネットワークインタフェース",
   "block.beyonddimensions.net_pathway": "次元通信路",

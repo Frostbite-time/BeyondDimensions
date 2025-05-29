@@ -87,7 +87,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                 if(slot instanceof ResultSlot resultSlot)
                 {
                     cacheStack = slot.getItem().copy();
-                    for(int i = 0;  i< slot.getItem().getMaxStackSize()/slot.getItem().getCount(); i++)
+                    for(int i = 0; !slot.getItem().isEmpty() && i< slot.getItem().getMaxStackSize()/slot.getItem().getCount(); i++)
                     {
                         ItemStack craftStack = slot.getItem().copy();
                         if(!ItemStack.isSameItemSameTags(cacheStack, craftStack))

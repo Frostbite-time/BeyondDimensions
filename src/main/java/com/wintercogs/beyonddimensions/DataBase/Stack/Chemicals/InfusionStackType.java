@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.infuse.InfusionStack;
 import net.minecraft.ChatFormatting;
@@ -101,6 +102,13 @@ public class InfusionStackType implements IStackType<InfusionStack>
     public Object getSource()
     {
         return InfusionStack.EMPTY.getType();
+    }
+
+    @Override
+    public String getModId()
+    {
+        ResourceLocation key = MekanismAPI.infuseTypeRegistry().getKey(stack.getRaw());
+        return key != null ? key.getNamespace() : "unknown";
     }
 
     @Override
@@ -339,7 +347,7 @@ public class InfusionStackType implements IStackType<InfusionStack>
     public String getCountText(long count)
     {
         if (count <= 0) return "";
-        return StringFormat.formatCount(count);
+        return StringFormat.formatBucket(count);
     }
 
     @Override
@@ -387,7 +395,7 @@ public class InfusionStackType implements IStackType<InfusionStack>
             tooltips.add(modName);
         }
 
-        tooltips.add(Component.literal("已存储:"+getStackAmount()+"mB"));
+        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.fluid",getStackAmount()));
         return tooltips;
     }
 
