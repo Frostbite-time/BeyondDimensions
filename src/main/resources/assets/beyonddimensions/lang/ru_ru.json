@@ -47,12 +47,13 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "Расколотая Пространственно-Временная Кристаллизация",
   "item.beyonddimensions.space_time_bar": "Слиток Пространства-Времени",
   "item.beyonddimensions.test_item_generate": "Генератор тестовых предметов",
-  "item.beyonddimensions.net_terminal_item": "Сетевой терминал",
+  "item.beyonddimensions.net_terminal_item": "Портативный сетевой терминал",
 
   "block.beyonddimensions.net_control": "Контроллер Сети",
   "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
   "block.beyonddimensions.net_pathway": "Измеренческий Канал",
   "block.beyonddimensions.net_energy_pathway": "Энергетический Канал",
+  "block.beyonddimensions.net_terminal_block": "Сетевой терминал",
 
   "creativetab.beyonddimensions.items": "За Гранью - Предметы",
   "creativetab.beyonddimensions.blocks": "За Гранью - Блоки",

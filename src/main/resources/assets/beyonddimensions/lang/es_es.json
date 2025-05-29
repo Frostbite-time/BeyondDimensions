@@ -31,7 +31,6 @@
   "tooltip.button.beyonddimensions.craft_toggle": "Alternar slot de fabricación",
   "tooltip.button.beyonddimensions.popmode_off": "Actual: Modo emergente desactivado",
   "tooltip.button.beyonddimensions.popmode_on": "Actual: Modo emergente activado",
-  "item.beyonddimensions.net_terminal_item": "Terminal de Red",
 
   "istack.beyonddimensions.storage_num.item": "Almacenado: %s unidades",
   "istack.beyonddimensions.storage_num.fluid": "Almacenado: %s mB",
@@ -48,11 +47,13 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "Cristalización Espaciotemporal Fracturada",
   "item.beyonddimensions.space_time_bar": "Lingote Espaciotemporal",
   "item.beyonddimensions.test_item_generate": "Generador de Objetos de Prueba",
+  "item.beyonddimensions.net_terminal_item": "Terminal de red portátil",
 
   "block.beyonddimensions.net_control": "Controlador de Red",
   "block.beyonddimensions.net_interface": "Interfaz de Red",
   "block.beyonddimensions.net_pathway": "Canal Dimensional",
   "block.beyonddimensions.net_energy_pathway": "Canal de Energía Dimensional",
+  "block.beyonddimensions.net_terminal_block": "Terminal de red",
 
   "creativetab.beyonddimensions.items": "Más Allá de las Dimensiones - Objetos",
   "creativetab.beyonddimensions.blocks": "Más Allá de las Dimensiones - Bloques",

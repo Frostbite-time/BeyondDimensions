@@ -47,12 +47,13 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "Shattered Space-Time Crystallization",
   "item.beyonddimensions.space_time_bar": "Space-Time Ingot",
   "item.beyonddimensions.test_item_generate": "Test-itemGenerator",
-  "item.beyonddimensions.net_terminal_item": "Network Terminal",
+  "item.beyonddimensions.net_terminal_item": "Portable Network Terminal",
 
   "block.beyonddimensions.net_control": "Network Controller",
   "block.beyonddimensions.net_interface": "Network Interface",
   "block.beyonddimensions.net_pathway": "Dimensional Network Pathway",
   "block.beyonddimensions.net_energy_pathway": "Dimensional Network Energy Pathway",
+  "block.beyonddimensions.net_terminal_block": "Network Terminal",
 
   "creativetab.beyonddimensions.items": "Beyond Dimensions - Items",
   "creativetab.beyonddimensions.blocks": "Beyond Dimensions - Blocks",

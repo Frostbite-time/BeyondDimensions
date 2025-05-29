@@ -47,12 +47,13 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "Zersplitterte Raum-Zeit-Kristallisation",
   "item.beyonddimensions.space_time_bar": "Raum-Zeit-Barren",
   "item.beyonddimensions.test_item_generate": "Testgegenstand-Generator",
-  "item.beyonddimensions.net_terminal_item": "Netzwerkterminal",
+  "item.beyonddimensions.net_terminal_item": "Tragbares Netzwerkterminal",
 
   "block.beyonddimensions.net_control": "Netzwerkcontroller",
   "block.beyonddimensions.net_interface": "Netzwerkschnittstelle",
   "block.beyonddimensions.net_pathway": "Dimensionskanal",
   "block.beyonddimensions.net_energy_pathway": "Energiekanal",
+  "block.beyonddimensions.net_terminal_block": "Netzwerkterminal",
 
   "creativetab.beyonddimensions.items": "Jenseits - Gegenstände",
   "creativetab.beyonddimensions.blocks": "Jenseits - Blöcke",

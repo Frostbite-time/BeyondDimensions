@@ -47,12 +47,13 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "Cristal Espaço-Temporal Quebrado",
   "item.beyonddimensions.space_time_bar": "Barra Espaço-Temporal",
   "item.beyonddimensions.test_item_generate": "Gerador de Itens (Teste)",
-  "item.beyonddimensions.net_terminal_item": "Terminal de Rede",
+  "item.beyonddimensions.net_terminal_item": "Terminal de Rede Portátil",
 
   "block.beyonddimensions.net_control": "Controlador de Rede",
   "block.beyonddimensions.net_interface": "Interface de Rede",
   "block.beyonddimensions.net_pathway": "Caminho Dimensional",
   "block.beyonddimensions.net_energy_pathway": "Canal de Energia",
+  "block.beyonddimensions.net_terminal_block": "Terminal de Rede",
 
   "creativetab.beyonddimensions.items": "Além das Dimensões - Itens",
   "creativetab.beyonddimensions.blocks": "Além das Dimensões - Blocos",

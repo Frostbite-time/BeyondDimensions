@@ -137,6 +137,17 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("unlock_net_terminal_item", has(ModItems.NET_MEMBER_INVITER.get()))
                 .save(recipeOutput);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.NET_TERMINAL_BLOCK.get())
+                .pattern("ACA")
+                .pattern("BDB")
+                .pattern("ABA")
+                .define('A', Items.IRON_INGOT)
+                .define('B', Items.GOLD_INGOT)
+                .define('C', Items.CRAFTING_TABLE)
+                .define('D', ModItems.NET_MEMBER_INVITER.get())
+                .unlockedBy("unlock_net_terminal_item", has(ModItems.NET_MEMBER_INVITER.get()))
+                .save(recipeOutput);
+
 
 
     }
