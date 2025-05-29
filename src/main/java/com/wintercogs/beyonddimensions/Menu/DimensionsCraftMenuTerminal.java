@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Menu;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -28,14 +29,16 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory,  new DimensionsNet(true), null, null);
+        this(id, playerInventory,  new DimensionsNet(true), null, null, null);
     }
 
-    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, DimensionsNet data, NonNullList<ItemStack> craftItems, ItemStack terminalItem)
+    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, DimensionsNet data, NonNullList<ItemStack> craftItems, @Nullable ItemStack terminalItem, @Nullable BlockPos entityPos)
     {
-        super(Dimensions_Craft_Menu_Terminal.get(), id,playerInventory,data, craftItems);
+        super(Dimensions_Craft_Menu_Terminal.get(), id,playerInventory,data, craftItems, entityPos);
         if(!player.level().isClientSide)
+        {
             this.terminalStack = terminalItem;
+        }
     }
 
     @Override
@@ -71,7 +74,8 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
                 ItemStack stack = craftSlots.getItems().get(i);
                 nonNullList.set(i, stack);
             }
-            terminalStack.set(ModDataComponents.CRAFT_SLOTS, nonNullList);
+            if(terminalStack != null)
+                terminalStack.set(ModDataComponents.CRAFT_SLOTS, nonNullList);
         }
 
     }

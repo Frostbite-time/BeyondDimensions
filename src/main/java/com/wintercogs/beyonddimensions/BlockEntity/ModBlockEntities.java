@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetTerminalBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -59,6 +60,14 @@ public class ModBlockEntities
                     )
                     // 使用 null 构建；原版对参数进行了一些数据修复操作，我们不需要.
                     .build(null)
+    );
+
+    public static final Supplier<BlockEntityType<NetTerminalBlockEntity>> NET_TERMINAL_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+      "net_terminal_block_entity",
+            () -> BlockEntityType.Builder.of(
+                    NetTerminalBlockEntity::new,
+                    ModBlocks.NET_TERMINAL_BLOCK.get()
+            ).build(null)
     );
 
 

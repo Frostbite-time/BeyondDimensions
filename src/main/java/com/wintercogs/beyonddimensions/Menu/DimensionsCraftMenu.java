@@ -9,6 +9,7 @@ import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Unit.InventoryHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -58,7 +59,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     public DimensionsCraftMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
-        this(Dimensions_Craft_Menu.get(),id, playerInventory, new DimensionsNet(true), null);
+        this(Dimensions_Craft_Menu.get(),id, playerInventory, new DimensionsNet(true), null, null);
     }
 
     /**
@@ -66,16 +67,38 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
      * @param playerInventory 玩家背包
      * @param data 维度网络信息，包含了存储信息
      */
-    public DimensionsCraftMenu(MenuType<?> type ,int id, Inventory playerInventory, DimensionsNet data , @Nullable NonNullList<ItemStack> craftItems)
+    public DimensionsCraftMenu(MenuType<?> type , int id, Inventory playerInventory, DimensionsNet data , @Nullable NonNullList<ItemStack> craftItems, @Nullable BlockPos entityPos)
     {
         // 利用父类函数处理存储槽位 玩家背包 和一些其他数据添加处理
         super(type, id,playerInventory,data);
 
         TransientCraftingContainer craftContainer;
         if(craftItems != null)
-            craftContainer = new TransientCraftingContainer(this,3,3,craftItems);
+            craftContainer = new TransientCraftingContainer(this,3,3,craftItems)
+            {
+                @Override
+                public void setChanged()
+                {
+                    super.setChanged();
+                    if(entityPos != null && !player.level().isClientSide())
+                    {
+                        player.level().blockEntityChanged(entityPos);
+                    }
+                }
+            };
         else
-            craftContainer = new TransientCraftingContainer(this,3,3);
+            craftContainer = new TransientCraftingContainer(this,3,3)
+            {
+                @Override
+                public void setChanged()
+                {
+                    super.setChanged();
+                    if(entityPos != null && !player.level().isClientSide())
+                    {
+                        player.level().blockEntityChanged(entityPos);
+                    }
+                }
+            };
         initCraftSlots(playerInventory, craftContainer);
     }
 

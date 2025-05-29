@@ -27,7 +27,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
 
     private IconButton transferCraftToInvButton;
     private IconButton transferCraftToStorageButton;
-    private StatusButton craftReturnButton;
+    protected StatusButton craftReturnButton;
 
     public DimensionsCraftGUI(T container, Inventory playerInventory, Component title)
     {

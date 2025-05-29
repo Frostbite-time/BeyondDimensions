@@ -44,7 +44,7 @@ public class ServerPayloadHandler
                         if(targetMenu == NetMenuType.NET_CRAFT_MENU)
                         {
                             player.openMenu(new SimpleMenuProvider(
-                                    (containerId, playerInventory, _player) -> new DimensionsCraftMenu(DimensionsCraftMenu.Dimensions_Craft_Menu.get(),containerId, playerInventory, net,null),
+                                    (containerId, playerInventory, _player) -> new DimensionsCraftMenu(DimensionsCraftMenu.Dimensions_Craft_Menu.get(),containerId, playerInventory, net,null,null),
                                     Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                             ));
                         }

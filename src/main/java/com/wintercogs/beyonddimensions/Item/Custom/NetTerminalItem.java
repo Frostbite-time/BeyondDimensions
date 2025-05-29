@@ -64,6 +64,6 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
     {
         ItemStack itemstack = player.getItemInHand(player.getUsedItemHand());
         DimensionsNet net = DimensionsNet.getNetFromId(itemstack.get(ModDataComponents.NET_ID_DATA),player.level());
-        return new DimensionsCraftMenuTerminal(containerId,inventory,net, (NonNullList<ItemStack>) itemstack.get(ModDataComponents.CRAFT_SLOTS), itemstack);
+        return new DimensionsCraftMenuTerminal(containerId,inventory,net, (NonNullList<ItemStack>) itemstack.get(ModDataComponents.CRAFT_SLOTS), itemstack, null);
     }
 }
