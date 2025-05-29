@@ -187,37 +187,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         removePageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.remove_page")));
         addRenderableWidget(removePageButton);
 
-        craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*5,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/craft_button"),ButtonName.CraftButton , button ->
-        {
-            UIDataHelper.currentPage = menu.lineData;
-
-            double xpos[] = new double[1];
-            double ypos[] = new double[1];
-            GLFW.glfwGetCursorPos(Minecraft.getInstance().getWindow().getWindow(), xpos, ypos);
-            UIDataHelper.lastMousePos = new Vec2(
-                    (float) xpos[0],
-                    (float) ypos[0]
-            );
-
-            UIDataHelper.isTransfer = true;
-
-            if(menu instanceof DimensionsCraftMenu)
-            {
-                Config.uiCraftButton = ButtonState.DISABLED;
-                Config.UI_CRAFT_BUTTON.set(ButtonState.DISABLED);
-                Config.UI_CRAFT_BUTTON.save();
-                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),false));
-            }
-            else
-            {
-                Config.uiCraftButton = ButtonState.ENABLED;
-                Config.UI_CRAFT_BUTTON.set(ButtonState.ENABLED);
-                Config.UI_CRAFT_BUTTON.save();
-                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),true));
-            }
-        });
-        craftButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.craft_toggle")));
-        addRenderableWidget(craftButton);
+        addCraftButton();
 
 
 
@@ -266,6 +236,42 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             lastSearchText = searchField.getValue();
         }
         scroller.updateScrollPosition(menu.lineData,menu.maxLineData);// 读取翻页数据并应用
+    }
+
+    // 用于让子类重写工艺槽位按钮的函数
+    protected void addCraftButton()
+    {
+        craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*5,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/craft_button"),ButtonName.CraftButton , button ->
+        {
+            UIDataHelper.currentPage = menu.lineData;
+
+            double xpos[] = new double[1];
+            double ypos[] = new double[1];
+            GLFW.glfwGetCursorPos(Minecraft.getInstance().getWindow().getWindow(), xpos, ypos);
+            UIDataHelper.lastMousePos = new Vec2(
+                    (float) xpos[0],
+                    (float) ypos[0]
+            );
+
+            UIDataHelper.isTransfer = true;
+
+            if(menu instanceof DimensionsCraftMenu)
+            {
+                Config.uiCraftButton = ButtonState.DISABLED;
+                Config.UI_CRAFT_BUTTON.set(ButtonState.DISABLED);
+                Config.UI_CRAFT_BUTTON.save();
+                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),NetMenuType.NET_MENU));
+            }
+            else
+            {
+                Config.uiCraftButton = ButtonState.ENABLED;
+                Config.UI_CRAFT_BUTTON.set(ButtonState.ENABLED);
+                Config.UI_CRAFT_BUTTON.save();
+                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),NetMenuType.NET_CRAFT_MENU));
+            }
+        });
+        craftButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.craft_toggle")));
+        addRenderableWidget(craftButton);
     }
 
     protected int rebuildImageHeight()

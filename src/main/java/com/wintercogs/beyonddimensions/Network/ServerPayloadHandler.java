@@ -3,10 +3,13 @@ package com.wintercogs.beyonddimensions.Network;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.GUI.NetMenuType;
+import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
 import com.wintercogs.beyonddimensions.Menu.*;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -37,19 +40,33 @@ public class ServerPayloadHandler
                     DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
                     if (net != null)
                     {
-                        if(packet.isCraft())
+                        NetMenuType targetMenu = packet.target();
+                        if(targetMenu == NetMenuType.NET_CRAFT_MENU)
                         {
-                            context.player().openMenu(new SimpleMenuProvider(
-                                    (containerId, playerInventory, _player) -> new DimensionsCraftMenu(containerId, playerInventory, net),
+                            player.openMenu(new SimpleMenuProvider(
+                                    (containerId, playerInventory, _player) -> new DimensionsCraftMenu(DimensionsCraftMenu.Dimensions_Craft_Menu.get(),containerId, playerInventory, net,null),
                                     Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                             ));
                         }
-                        else
+                        else if(targetMenu == NetMenuType.NET_MENU)
                         {
-                            context.player().openMenu(new SimpleMenuProvider(
+                            player.openMenu(new SimpleMenuProvider(
                                     (containerId, playerInventory, _player) -> new DimensionsNetMenu(DimensionsNetMenu.Dimensions_Net_Menu.get(),containerId, playerInventory, net),
                                     Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                             ));
+                        }
+                        else if(targetMenu == NetMenuType.NET_CRAFT_TERMINAL)
+                        {
+                            ItemStack terminalStack = null;
+                            if(player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof NetTerminalItem)
+                                terminalStack = player.getItemInHand(InteractionHand.MAIN_HAND);
+                            else if(player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof NetTerminalItem)
+                                terminalStack = player.getItemInHand(InteractionHand.OFF_HAND);
+
+                            if(terminalStack != null)
+                            {
+                                player.openMenu((NetTerminalItem)terminalStack.getItem());
+                            }
                         }
                     }
 

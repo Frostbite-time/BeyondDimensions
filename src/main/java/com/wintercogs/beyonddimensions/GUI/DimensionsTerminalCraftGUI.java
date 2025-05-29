@@ -1,0 +1,20 @@
+package com.wintercogs.beyonddimensions.GUI;
+
+import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenuTerminal;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+
+public class DimensionsTerminalCraftGUI extends DimensionsCraftGUI<DimensionsCraftMenuTerminal>
+{
+
+    public DimensionsTerminalCraftGUI(DimensionsCraftMenuTerminal container, Inventory playerInventory, Component title)
+    {
+        super(container, playerInventory, title);
+    }
+
+    @Override
+    protected void addCraftButton()
+    {
+        // 清空
+    }
+}

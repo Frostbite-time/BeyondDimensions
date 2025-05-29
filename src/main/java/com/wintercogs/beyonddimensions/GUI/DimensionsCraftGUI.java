@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 
-public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
+public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends DimensionsNetGUI<T>
 {
 
     private static final ResourceLocation GUI_TEXTURE_CRAFT_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/craft_slots.png");
@@ -29,7 +29,7 @@ public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
     private IconButton transferCraftToStorageButton;
     private StatusButton craftReturnButton;
 
-    public DimensionsCraftGUI(DimensionsCraftMenu container, Inventory playerInventory, Component title)
+    public DimensionsCraftGUI(T container, Inventory playerInventory, Component title)
     {
         super(container, playerInventory, title);
     }

@@ -47,6 +47,7 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "Расколотая Пространственно-Временная Кристаллизация",
   "item.beyonddimensions.space_time_bar": "Слиток Пространства-Времени",
   "item.beyonddimensions.test_item_generate": "Генератор тестовых предметов",
+  "item.beyonddimensions.net_terminal_item": "Сетевой терминал",
 
   "block.beyonddimensions.net_control": "Контроллер Сети",
   "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
@@ -62,5 +63,6 @@
   "msg.beyonddimensions.item_net_bound": "Предмет привязан к сети №%d",
   "msg.beyonddimensions.item_net_unbound": "Предмет отвязан от сети №%d",
   "msg.beyonddimensions.block_net_bound": "Блок привязан к сети №%d",
-  "msg.beyonddimensions.block_net_unbound": "Блок отвязан от сети №%d"
+  "msg.beyonddimensions.block_net_unbound": "Блок отвязан от сети №%d",
+  "msg.beyonddimensions.item_need_bound": "Предмет должен быть привязан перед использованием"
 }

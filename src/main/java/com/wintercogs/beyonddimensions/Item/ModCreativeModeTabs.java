@@ -32,6 +32,7 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION);
                         output.accept(ModItems.SPACE_TIME_BAR);
                         output.accept(ModItems.TEST_ITEM_GENERATE);
+                        output.accept(ModItems.NET_TERMINAL_ITEM);
                     })
                     .build());
 

@@ -102,7 +102,7 @@ public class AutoRefillResultSlot extends ResultSlot
                 }
             }
         }
-        menu.slotChangedCraftingGrid(menu, player.level(), player, craftSlots, (ResultContainer) this.container, null, this.index);
+        menu.slotChangedCraftingGrid(menu, player.level(), player, craftSlots, (ResultContainer) this.container,  this.index);
 
 
 

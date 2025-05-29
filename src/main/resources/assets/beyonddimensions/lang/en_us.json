@@ -47,6 +47,7 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "Shattered Space-Time Crystallization",
   "item.beyonddimensions.space_time_bar": "Space-Time Ingot",
   "item.beyonddimensions.test_item_generate": "Test-itemGenerator",
+  "item.beyonddimensions.net_terminal_item": "Network Terminal",
 
   "block.beyonddimensions.net_control": "Network Controller",
   "block.beyonddimensions.net_interface": "Network Interface",
@@ -62,5 +63,6 @@
   "msg.beyonddimensions.item_net_bound": "Item bound to network #%d",
   "msg.beyonddimensions.item_net_unbound": "Item unbound from network #%d",
   "msg.beyonddimensions.block_net_bound": "Block bound to network #%d",
-  "msg.beyonddimensions.block_net_unbound": "Block unbound from network #%d"
+  "msg.beyonddimensions.block_net_unbound": "Block unbound from network #%d",
+  "msg.beyonddimensions.item_need_bound": "Item must be bound before use"
 }

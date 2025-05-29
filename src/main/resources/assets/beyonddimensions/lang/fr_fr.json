@@ -47,6 +47,7 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "Cristal Spatio-Temporel Brisé",
   "item.beyonddimensions.space_time_bar": "Lingot Spatio-Temporel",
   "item.beyonddimensions.test_item_generate": "Générateur d'Objets Test",
+  "item.beyonddimensions.net_terminal_item": "Terminal Réseau",
 
   "block.beyonddimensions.net_control": "Contrôleur Réseau",
   "block.beyonddimensions.net_interface": "Interface Réseau",
@@ -62,5 +63,6 @@
   "msg.beyonddimensions.item_net_bound": "Objet lié au réseau n°%d",
   "msg.beyonddimensions.item_net_unbound": "Objet délié du réseau n°%d",
   "msg.beyonddimensions.block_net_bound": "Bloc lié au réseau n°%d",
-  "msg.beyonddimensions.block_net_unbound": "Bloc délié du réseau n°%d"
+  "msg.beyonddimensions.block_net_unbound": "Bloc délié du réseau n°%d",
+  "msg.beyonddimensions.item_need_bound": "L'objet doit être lié avant utilisation"
 }

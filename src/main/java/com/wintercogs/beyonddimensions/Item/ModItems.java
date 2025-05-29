@@ -43,6 +43,10 @@ public class ModItems
     public static final DeferredItem<Item> SPACE_TIME_BAR = ITEMS.register("space_time_bar",
             () -> new Item(new Item.Properties()));
 
+    // 物品终端
+    public static final DeferredItem<Item> NET_TERMINAL_ITEM = ITEMS.register("net_terminal_item",
+            () -> new NetTerminalItem(new Item.Properties()));
+
 
     // 测试物品 -----------------------
     // 随机物品生成器

@@ -47,6 +47,7 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "崩壊時空結晶",
   "item.beyonddimensions.space_time_bar": "時空インゴット",
   "item.beyonddimensions.test_item_generate": "テスト用アイテム生成器",
+  "item.beyonddimensions.net_terminal_item": "ネットワークターミナル",
 
   "block.beyonddimensions.net_control": "ネットワーク制御装置",
   "block.beyonddimensions.net_interface": "ネットワークインタフェース",
@@ -62,5 +63,6 @@
   "msg.beyonddimensions.item_net_bound": "アイテムを%d番ネットワークに接続しました",
   "msg.beyonddimensions.item_net_unbound": "アイテムを%d番ネットワークから切断しました",
   "msg.beyonddimensions.block_net_bound": "ブロックを%d番ネットワークに接続しました",
-  "msg.beyonddimensions.block_net_unbound": "ブロックを%d番ネットワークから切断しました"
+  "msg.beyonddimensions.block_net_unbound": "ブロックを%d番ネットワークから切断しました",
+  "msg.beyonddimensions.item_need_bound": "使用する前にアイテムをバインドする必要があります"
 }

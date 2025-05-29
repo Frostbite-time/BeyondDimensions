@@ -1,13 +1,15 @@
 package com.wintercogs.beyonddimensions.Packet;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.GUI.NetMenuType;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.network.Utf8String;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public record OpenNetGuiPacket(String uuid,boolean isCraft) implements CustomPacketPayload
+public record OpenNetGuiPacket(String uuid, NetMenuType target) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<OpenNetGuiPacket> TYPE =
@@ -20,8 +22,21 @@ public record OpenNetGuiPacket(String uuid,boolean isCraft) implements CustomPac
             StreamCodec.composite(
                     ByteBufCodecs.STRING_UTF8,
                     OpenNetGuiPacket::uuid,
-                    ByteBufCodecs.BOOL,
-                    OpenNetGuiPacket::isCraft,
+                    new StreamCodec<ByteBuf,NetMenuType>()
+                    {
+                        @Override
+                        public void encode(ByteBuf buf, NetMenuType netMenuType)
+                        {
+                            Utf8String.write(buf,netMenuType.toString(),32000);
+                        }
+
+                        @Override
+                        public NetMenuType decode(ByteBuf buf)
+                        {
+                            return NetMenuType.valueOf(Utf8String.read(buf,32000));
+                        }
+                    },
+                    OpenNetGuiPacket::target,
                     OpenNetGuiPacket::new
             );
 

@@ -5,10 +5,13 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.UnaryOperator;
 
 public class ModDataComponents {
@@ -29,9 +32,21 @@ public class ModDataComponents {
       "time_line", builder -> builder.persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG)
     );
 
+    public static final DeferredHolder<DataComponentType<?>,DataComponentType<List<ItemStack>>> CRAFT_SLOTS = register(
+      "craft_slots", builder -> builder.persistent(
+                    ItemStack.CODEC.listOf()
+            ).networkSynchronized(
+                    ByteBufCodecs.collection(
+                            ArrayList::new,
+                            ItemStack.OPTIONAL_STREAM_CODEC
+                    )
+            )
+    );
+
     private static <T> DeferredHolder<DataComponentType<?>,DataComponentType<T>> register(String name, UnaryOperator<DataComponentType.Builder<T>> builder) {
         return DATA_COMPONENTS.register(name,()->  builder.apply(DataComponentType.builder()).build());
     }
+
 
     public static void register(IEventBus eventBus){
         DATA_COMPONENTS.register(eventBus);
