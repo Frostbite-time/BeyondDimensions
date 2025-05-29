@@ -31,6 +31,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     private int resultSlotIndex;
     public int craftSlotStartIndex;
     public int craftSlotEndIndex;
+    public boolean firstCraftReturnDir = false; // 决定关闭菜单时工艺槽的优先转移方向，true向存储 false背包
 
 
     /**

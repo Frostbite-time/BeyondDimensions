@@ -2,15 +2,23 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
+import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.IconButton;
+import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.ClickTransferCraftButtonPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.CraftReturnPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
 {
@@ -21,6 +29,7 @@ public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
 
     private IconButton transferCraftToInvButton;
     private IconButton transferCraftToStorageButton;
+    private StatusButton craftReturnButton;
 
     public DimensionsCraftGUI(DimensionsCraftMenu container, Inventory playerInventory, Component title)
     {
@@ -34,11 +43,12 @@ public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
     {
         super.init();
 
-        //页面增减按钮
+        //槽位转移按钮
         transferCraftToInvButton = new IconButton(this.leftPos+90, this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/down_arrow.png"), ButtonName.TransferCraftButton , button ->
         {
             PacketRegister.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(false));
         });
+        transferCraftToInvButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.transfer_to_inv")));
         addRenderableWidget(transferCraftToInvButton);
 
 
@@ -46,7 +56,37 @@ public class DimensionsCraftGUI extends DimensionsNetGUI<DimensionsCraftMenu>
         {
             PacketRegister.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(true));
         });
+        transferCraftToStorageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.transfer_to_storage")));
         addRenderableWidget(transferCraftToStorageButton);
+
+        // 槽位优先转移切换按钮
+        PacketRegister.INSTANCE.sendToServer(new CraftReturnPacket(Config.uiCraftReturnButton == ButtonState.ENABLED));
+        craftReturnButton = new StatusButton(this.leftPos+99,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8,ButtonName.TransferCraftButton, button -> {
+            craftReturnButton.toggleState();
+            Config.uiCraftReturnButton = craftReturnButton.currentState;
+            Config.UI_CRAFT_RETURN_BUTTON.set(craftReturnButton.currentState);
+            Config.UI_CRAFT_RETURN_BUTTON.save();
+            PacketRegister.INSTANCE.sendToServer(new CraftReturnPacket(Config.uiCraftReturnButton == ButtonState.ENABLED));
+        })
+        {
+
+            @Override
+            protected void initButton()
+            {
+                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_asc"));
+                iconMap.put(ButtonState.DISABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_desc"));
+
+                tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_storage")));
+                tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_inv")));
+
+                for(ButtonState state : iconMap.keySet())
+                {
+                    this.states.add(state);
+                }
+                setState(Config.uiCraftReturnButton);
+            }
+        };
+        addRenderableWidget(craftReturnButton);
     }
 
 

@@ -115,5 +115,13 @@ public class PacketRegister
                 ClickTransferCraftButtonPacket::decode,
                 ClickTransferCraftButtonPacket::handle
         );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                CraftReturnPacket.class,
+                CraftReturnPacket::encode,
+                CraftReturnPacket::decode,
+                CraftReturnPacket::handle
+        );
     }
 }

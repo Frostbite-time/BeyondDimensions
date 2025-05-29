@@ -2,9 +2,12 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Config;
+import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
@@ -14,6 +17,7 @@ import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +29,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 
     private static final ResourceLocation GUI_TEXTURE = ResourceLocation.tryParse("beyonddimensions:textures/gui/net_interface.png");
 
-    public ReverseButton popButton; // 使用倒序按钮来临时替代弹出模式
+    public StatusButton popButton; // 使用倒序按钮来临时替代弹出模式
 
     private SlotDragHandler dragHandler; // 仅在emi加载时可用
 
@@ -89,12 +93,30 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         }
 
 
-        popButton = new ReverseButton(this.leftPos+72+18*4-5,this.topPos+6, button ->
+        popButton = new StatusButton(this.leftPos+72+18*4-5,this.topPos+6,16,16, ButtonName.ReverseButton, button ->
         {
             popButton.toggleState();
             menu.popMode = !menu.popMode;
             PacketRegister.INSTANCE.sendToServer(new PopModeButtonPacket(menu.popMode));
-        });
+        })
+        {
+            @Override
+            protected void initButton()
+            {
+                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_asc"));
+                iconMap.put(ButtonState.DISABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_desc"));
+
+                tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
+                tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
+
+
+                for(ButtonState state : iconMap.keySet())
+                {
+                    this.states.add(state);
+                }
+                setState(Config.uiReverseButton);
+            }
+        };
         addRenderableWidget(popButton);
 
     }
@@ -107,11 +129,11 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 
         if(menu.popMode)
         {
-            popButton.setState(ButtonState.DISABLED);
+            popButton.setState(ButtonState.ENABLED);
         }
         else
         {
-            popButton.setState(ButtonState.ENABLED);
+            popButton.setState(ButtonState.DISABLED);
         }
     }
 
