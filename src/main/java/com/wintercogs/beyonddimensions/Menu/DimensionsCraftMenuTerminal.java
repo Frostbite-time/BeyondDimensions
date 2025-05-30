@@ -25,7 +25,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, DimensionsNet data, NonNullList<ItemStack> craftItems, ItemStack terminalItem, BlockPos entityPos)
     {
-        super(UIRegister.Dimensions_Craft_Menu_Terminal.get(), id,playerInventory,data, craftItems);
+        super(UIRegister.Dimensions_Craft_Menu_Terminal.get(), id,playerInventory,data, craftItems,entityPos);
         if(!player.level().isClientSide)
             this.terminalStack = terminalItem;
     }
