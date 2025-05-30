@@ -2,8 +2,11 @@ package com.wintercogs.beyonddimensions.Integration.Polymorph;
 
 import com.illusivesoulworks.polymorph.api.client.PolymorphWidgets;
 import com.wintercogs.beyonddimensions.GUI.DimensionsCraftGUI;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 // 用于实现对多态合成的支持
+@OnlyIn(Dist.CLIENT)
 public class PolymorphPlug
 {
     public static void register()
