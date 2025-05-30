@@ -46,7 +46,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
                 DimensionsNet net = DimensionsNet.getNetFromId(itemstack.get(ModDataComponents.NET_ID_DATA),level);
                 if (net != null)
                 {
-                    contextMap.put(player, new MenuTriggerContext(usedHand, itemstack.copy()));
+                    contextMap.put(player, new MenuTriggerContext(usedHand, itemstack));
                     player.openMenu(this);
                 }
             }
