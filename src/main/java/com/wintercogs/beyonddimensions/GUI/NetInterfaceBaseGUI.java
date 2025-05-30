@@ -103,8 +103,8 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_asc"));
-                iconMap.put(ButtonState.DISABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_desc"));
+                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_asc.png"));
+                iconMap.put(ButtonState.DISABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_desc.png"));
 
                 tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
                 tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
