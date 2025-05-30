@@ -40,7 +40,7 @@ vn 0 0 1
 vn -1 0 0
 vn 0 1 0
 vn 0 -1 0
-usemtl m_0d4aede9-a711-f460-dc5b-79e304f8afe5
+usemtl net_terminal_texture
 f 4/4/1 7/3/1 5/2/1 2/1/1
 f 3/8/2 4/7/2 2/6/2 1/5/2
 f 8/12/3 3/11/3 1/10/3 6/9/3
