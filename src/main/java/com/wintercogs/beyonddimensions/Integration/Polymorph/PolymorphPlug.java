@@ -9,7 +9,7 @@ public class PolymorphPlug
     {
 
         PolymorphApi.client().registerWidget(screen ->{
-            if(screen instanceof DimensionsCraftGUI gui)
+            if(screen instanceof DimensionsCraftGUI<?> gui)
                 return new RecipeWidget(gui, gui.getMenu().getSlot(gui.getMenu().resultSlotIndex));
 
             return null;

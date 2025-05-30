@@ -47,6 +47,7 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "Cristal Espaço-Temporal Quebrado",
   "item.beyonddimensions.space_time_bar": "Barra Espaço-Temporal",
   "item.beyonddimensions.test_item_generate": "Gerador de Itens (Teste)",
+  "item.beyonddimensions.net_terminal_item": "Terminal de Rede",
 
   "block.beyonddimensions.net_control": "Controlador de Rede",
   "block.beyonddimensions.net_interface": "Interface de Rede",
@@ -62,5 +63,6 @@
   "msg.beyonddimensions.item_net_bound": "Item vinculado à rede nº%d",
   "msg.beyonddimensions.item_net_unbound": "Item desvinculado da rede nº%d",
   "msg.beyonddimensions.block_net_bound": "Bloco vinculado à rede nº%d",
-  "msg.beyonddimensions.block_net_unbound": "Bloco desvinculado da rede nº%d"
+  "msg.beyonddimensions.block_net_unbound": "Bloco desvinculado da rede nº%d",
+  "msg.beyonddimensions.item_need_bound": "O item precisa ser vinculado antes de ser usado"
 }

@@ -47,6 +47,7 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "Zersplitterte Raum-Zeit-Kristallisation",
   "item.beyonddimensions.space_time_bar": "Raum-Zeit-Barren",
   "item.beyonddimensions.test_item_generate": "Testgegenstand-Generator",
+  "item.beyonddimensions.net_terminal_item": "Netzwerkterminal",
 
   "block.beyonddimensions.net_control": "Netzwerkcontroller",
   "block.beyonddimensions.net_interface": "Netzwerkschnittstelle",
@@ -62,5 +63,6 @@
   "msg.beyonddimensions.item_net_bound": "Gegenstand an Netzwerk %d gebunden",
   "msg.beyonddimensions.item_net_unbound": "Gegenstand von Netzwerk %d entbunden",
   "msg.beyonddimensions.block_net_bound": "Block an Netzwerk %d gebunden",
-  "msg.beyonddimensions.block_net_unbound": "Block von Netzwerk %d entbunden"
+  "msg.beyonddimensions.block_net_unbound": "Block von Netzwerk %d entbunden",
+  "msg.beyonddimensions.item_need_bound": "Gegenstand muss gebunden werden, bevor er verwendet werden kann"
 }

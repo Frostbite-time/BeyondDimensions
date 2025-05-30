@@ -25,5 +25,6 @@ public class ModItemModelProvider extends ItemModelProvider
         basicItem(ModItems.SPACE_TIME_STABLE_FRAME.get());
         basicItem(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
         basicItem(ModItems.SPACE_TIME_BAR.get());
+        basicItem(ModItems.NET_TERMINAL_ITEM.get());
     }
 }

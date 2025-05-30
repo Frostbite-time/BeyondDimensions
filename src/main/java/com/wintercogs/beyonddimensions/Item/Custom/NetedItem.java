@@ -20,7 +20,7 @@ public class NetedItem extends Item
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if (usedHand != InteractionHand.MAIN_HAND) {
+        if (usedHand != InteractionHand.MAIN_HAND || !player.isShiftKeyDown()) {
             return InteractionResultHolder.fail(itemstack);
         }
         if (!level.isClientSide()) {

@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.InventoryHelper;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -21,15 +22,17 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 // 自带合成台的DimensionsNetMenu
 public class DimensionsCraftMenu extends DimensionsNetMenu
 {
 
-    private CraftingContainer craftSlots;
-    private ResultContainer resultSlots;
+    protected CraftingContainer craftSlots;
+    protected ResultContainer resultSlots;
     public int resultSlotIndex;
     public int craftSlotStartIndex;
     public int craftSlotEndIndex;
@@ -43,7 +46,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     public DimensionsCraftMenu(int id, Inventory playerInventory)
     {
         // 客户端函数，故将Net设为临时Net
-        this(id, playerInventory, new DimensionsNet(true));
+        this(UIRegister.Dimensions_Craft_Menu.get(),id, playerInventory, new DimensionsNet(true), null);
     }
 
     /**
@@ -51,16 +54,26 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
      * @param playerInventory 玩家背包
      * @param data 维度网络信息，包含了存储信息
      */
-    public DimensionsCraftMenu(int id, Inventory playerInventory, DimensionsNet data)
+    public DimensionsCraftMenu(MenuType<?> type ,int id, Inventory playerInventory, DimensionsNet data, @Nullable NonNullList<ItemStack> craftItems)
     {
         // 利用父类函数处理存储槽位 玩家背包 和一些其他数据添加处理
-        super(UIRegister.Dimensions_Craft_Menu.get(), id,playerInventory,data);
+        super(type, id,playerInventory,data);
 
-        this.craftSlots = new TransientCraftingContainer(this, 3, 3);
+        TransientCraftingContainer craftContainer;
+        if(craftItems != null)
+            craftContainer = new TransientCraftingContainer(this,3,3,craftItems);
+        else
+            craftContainer = new TransientCraftingContainer(this,3,3);
+        initCraftSlots(playerInventory, craftContainer);
+    }
+
+    protected void initCraftSlots(Inventory playerInventory,@Nullable TransientCraftingContainer craftSlots)
+    {
+        this.craftSlots = Objects.requireNonNullElseGet(craftSlots, () -> new TransientCraftingContainer(this, 3, 3));
         this.resultSlots = new ResultContainer();
 
         // 为其添加工艺槽
-        this.addSlot(new AutoRefillResultSlot(this, playerInventory.player, this.craftSlots, this.resultSlots, 0, 116+4, 24+ (getLines()-1)*18 + 26 +21));
+        this.addSlot(new AutoRefillResultSlot(this,playerInventory.player, this.craftSlots, this.resultSlots, 0, 116+4, 24+ (getLines()-1)*18 + 26 +21));
         resultSlotIndex = slots.size()-1;
 
         craftSlotStartIndex = slots.size();
@@ -69,7 +82,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                 this.addSlot(new Slot(this.craftSlots, j + i * 3, 26 + j * 18, 24+ (getLines()-1)*18 + 26 +3 + i * 18));
             }
         }
-        craftSlotEndIndex = slots.size();// 调用时需要减一
+        craftSlotEndIndex = slots.size();
     }
 
 

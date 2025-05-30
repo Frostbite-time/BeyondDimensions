@@ -24,6 +24,7 @@ public class UIRegister
     public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = UIRegister.MENU_TYPES.register("net_control_menu", () -> new MenuType<>(NetControlMenu::new, FeatureFlags.DEFAULT_FLAGS));
     public static final Supplier<MenuType<NetEnergyMenu>> Net_Energy_Menu = UIRegister.MENU_TYPES.register("net_energy_menu", () -> new MenuType<>(NetEnergyMenu::new, FeatureFlags.DEFAULT_FLAGS));
     public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = UIRegister.MENU_TYPES.register("net_interface_menu", () -> new MenuType<>(NetInterfaceBaseMenu::new, FeatureFlags.DEFAULT_FLAGS));
+    public static final Supplier<MenuType<DimensionsCraftMenuTerminal>> Dimensions_Craft_Menu_Terminal = UIRegister.MENU_TYPES.register("dimensions_craft_menu_terminal", () -> new MenuType<>(DimensionsCraftMenuTerminal::new , FeatureFlags.DEFAULT_FLAGS));
 
     public static void register(IEventBus eventBus)
     {
@@ -38,10 +39,11 @@ public class UIRegister
                 () -> {
                     //显示指定泛型类型
                     MenuScreens.<DimensionsNetMenu, DimensionsNetGUI<DimensionsNetMenu>>register(Dimensions_Net_Menu.get(), DimensionsNetGUI::new);
-                    MenuScreens.register(Dimensions_Craft_Menu.get(), DimensionsCraftGUI::new);
+                    MenuScreens.<DimensionsCraftMenu, DimensionsCraftGUI<DimensionsCraftMenu>>register(Dimensions_Craft_Menu.get(), DimensionsCraftGUI::new);
                     MenuScreens.register(Net_Control_Menu.get(), NetControlGUI::new);
                     MenuScreens.register(Net_Interface_Menu.get(), NetInterfaceBaseGUI::new);
                     MenuScreens.register(Net_Energy_Menu.get(), NetEnergyGUI::new);
+                    MenuScreens.<DimensionsCraftMenuTerminal, DimensionsTerminalCraftGUI>register(Dimensions_Craft_Menu_Terminal.get(), DimensionsTerminalCraftGUI::new);
                 }
         );
     }

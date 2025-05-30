@@ -47,6 +47,7 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "파편화 시공간 결정체",
   "item.beyonddimensions.space_time_bar": "시공간 주괴",
   "item.beyonddimensions.test_item_generate": "테스트 아이템 생성기",
+  "item.beyonddimensions.net_terminal_item": "네트워크 터미널",
 
   "block.beyonddimensions.net_control": "네트워크 제어기",
   "block.beyonddimensions.net_interface": "네트워크 인터페이스",
@@ -62,5 +63,6 @@
   "msg.beyonddimensions.item_net_bound": "%d번 네트워크에 아이템 연결됨",
   "msg.beyonddimensions.item_net_unbound": "%d번 네트워크에서 아이템 연결 해제",
   "msg.beyonddimensions.block_net_bound": "%d번 네트워크에 블록 연결됨",
-  "msg.beyonddimensions.block_net_unbound": "%d번 네트워크에서 블록 연결 해제"
+  "msg.beyonddimensions.block_net_unbound": "%d번 네트워크에서 블록 연결 해제",
+  "msg.beyonddimensions.item_need_bound": "아이템을 사용하기 전에 바인딩해야 합니다"
 }

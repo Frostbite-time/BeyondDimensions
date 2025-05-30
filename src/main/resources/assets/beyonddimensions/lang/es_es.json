@@ -47,6 +47,7 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "Cristalización Espaciotemporal Fracturada",
   "item.beyonddimensions.space_time_bar": "Lingote Espaciotemporal",
   "item.beyonddimensions.test_item_generate": "Generador de Objetos de Prueba",
+  "item.beyonddimensions.net_terminal_item": "Terminal de Red",
 
   "block.beyonddimensions.net_control": "Controlador de Red",
   "block.beyonddimensions.net_interface": "Interfaz de Red",
@@ -62,5 +63,6 @@
   "msg.beyonddimensions.item_net_bound": "Objeto vinculado a la red nº%d",
   "msg.beyonddimensions.item_net_unbound": "Objeto desvinculado de la red nº%d",
   "msg.beyonddimensions.block_net_bound": "Bloque vinculado a la red nº%d",
-  "msg.beyonddimensions.block_net_unbound": "Bloque desvinculado de la red nº%d"
+  "msg.beyonddimensions.block_net_unbound": "Bloque desvinculado de la red nº%d",
+  "msg.beyonddimensions.item_need_bound": "El objeto debe vincularse antes de poder usarse"
 }

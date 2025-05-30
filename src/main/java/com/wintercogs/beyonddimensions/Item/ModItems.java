@@ -44,6 +44,10 @@ public class ModItems
     public static final RegistryObject<Item> SPACE_TIME_BAR = ITEMS.register("space_time_bar",
             () -> new Item(new Item.Properties()));
 
+    // 物品终端
+    public static final RegistryObject<Item> NET_TERMINAL_ITEM = ITEMS.register("net_terminal_item",
+            () -> new NetTerminalItem(new Item.Properties()));
+
     // 测试物品 -----------------------
     // 随机物品生成器
     public static final RegistryObject<Item> TEST_ITEM_GENERATE = ITEMS.register("test_item_generate",
