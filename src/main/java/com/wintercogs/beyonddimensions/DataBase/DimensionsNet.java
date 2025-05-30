@@ -164,6 +164,11 @@ public class DimensionsNet extends SavedData
         // 保存网络所有者 UUID
         tag.putUUID("Owner", this.owner);
 
+        if(!tag.contains("OldDataTag"))
+        {
+            tag.putBoolean("OldDataTag", true);
+        }
+
         // 保存网络管理者
         ListTag managerListTag = new ListTag();
         for (UUID manager : managers)
