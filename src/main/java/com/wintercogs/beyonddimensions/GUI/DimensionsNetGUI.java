@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.DataBase.NetMenuType;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.IconButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SearchToggleButton;
@@ -263,14 +264,14 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 Config.uiCraftButton = ButtonState.DISABLED;
                 Config.UI_CRAFT_BUTTON.set(ButtonState.DISABLED);
                 Config.UI_CRAFT_BUTTON.save();
-                PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),false));
+                PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_MENU));
             }
             else
             {
                 Config.uiCraftButton = ButtonState.ENABLED;
                 Config.UI_CRAFT_BUTTON.set(ButtonState.ENABLED);
                 Config.UI_CRAFT_BUTTON.save();
-                PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),true));
+                PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),NetMenuType.NET_CRAFT_MENU));
             }
         });
         craftButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.craft_toggle")));

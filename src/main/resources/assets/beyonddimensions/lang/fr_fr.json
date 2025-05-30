@@ -46,12 +46,13 @@
   "item.beyonddimensions.space_time_stable_frame": "Cadre Stabilisateur",
   "item.beyonddimensions.shattered_space_time_crystallization": "Cristal Spatio-Temporel Brisé",
   "item.beyonddimensions.space_time_bar": "Lingot Spatio-Temporel",
-  "item.beyonddimensions.net_terminal_item": "Terminal Réseau",
+  "item.beyonddimensions.net_terminal_item": "Terminal réseau portable",
 
   "block.beyonddimensions.net_control": "Contrôleur Réseau",
   "block.beyonddimensions.net_interface": "Interface Réseau",
   "block.beyonddimensions.net_pathway": "Conduit Dimensionnel",
   "block.beyonddimensions.net_energy_pathway": "Conduit Énergétique",
+  "block.beyonddimensions.net_terminal_block": "Terminal réseau",
 
   "creativetab.beyonddimensions.items": "Au-delà - Objets",
   "creativetab.beyonddimensions.blocks": "Au-delà - Blocs",

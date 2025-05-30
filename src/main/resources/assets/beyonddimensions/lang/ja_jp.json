@@ -47,12 +47,13 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "崩壊時空結晶",
   "item.beyonddimensions.space_time_bar": "時空インゴット",
   "item.beyonddimensions.test_item_generate": "テスト用アイテム生成器",
-  "item.beyonddimensions.net_terminal_item": "ネットワークターミナル",
+  "item.beyonddimensions.net_terminal_item": "ポータブルネットワークターミナル",
 
   "block.beyonddimensions.net_control": "ネットワーク制御装置",
   "block.beyonddimensions.net_interface": "ネットワークインタフェース",
   "block.beyonddimensions.net_pathway": "次元通信路",
   "block.beyonddimensions.net_energy_pathway": "次元エネルギー路",
+  "block.beyonddimensions.net_terminal_block": "ネットワークターミナル",
 
   "creativetab.beyonddimensions.items": "超次元 - アイテム",
   "creativetab.beyonddimensions.blocks": "超次元 - ブロック",

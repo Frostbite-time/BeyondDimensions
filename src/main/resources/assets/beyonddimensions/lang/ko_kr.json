@@ -47,12 +47,13 @@
   "item.beyonddimensions.shattered_space_time_crystallization": "파편화 시공간 결정체",
   "item.beyonddimensions.space_time_bar": "시공간 주괴",
   "item.beyonddimensions.test_item_generate": "테스트 아이템 생성기",
-  "item.beyonddimensions.net_terminal_item": "네트워크 터미널",
+  "item.beyonddimensions.net_terminal_item": "휴대용 네트워크 터미널",
 
   "block.beyonddimensions.net_control": "네트워크 제어기",
   "block.beyonddimensions.net_interface": "네트워크 인터페이스",
   "block.beyonddimensions.net_pathway": "차원 통신로",
   "block.beyonddimensions.net_energy_pathway": "차원 에너지로",
+  "block.beyonddimensions.net_terminal_block": "네트워크 터미널",
 
   "creativetab.beyonddimensions.items": "초차원 - 아이템",
   "creativetab.beyonddimensions.blocks": "초차원 - 블록",

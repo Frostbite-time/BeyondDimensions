@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Datagen;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -23,7 +24,8 @@ public class ModBlockStateProvider extends BlockStateProvider
         blockWithItem(ModBlocks.NET_INTERFACE);
         blockWithItem(ModBlocks.NET_PATHWAY);
         blockWithItem(ModBlocks.NET_ENERGY_PATHWAY);
-
+        // obj方块 自编写json，仅注册物品
+        simpleBlockItem(ModBlocks.NET_TERMINAL_BLOCK.get(),models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID,"net_terminal_block")));
     }
 
     private void blockWithItem(RegistryObject<Block> deferredBlock)

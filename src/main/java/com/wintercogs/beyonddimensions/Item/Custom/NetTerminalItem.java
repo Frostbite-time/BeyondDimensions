@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenuTerminal;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -82,6 +83,6 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
         for (int i = 0; i < slotsTag.size() && i < 9; i++) {
             craftSlots.set(i, ItemStack.of(slotsTag.getCompound(i)));
         }
-        return new DimensionsCraftMenuTerminal(containerId, inventory, net, craftSlots, itemstack);
+        return new DimensionsCraftMenuTerminal(containerId, inventory, net, craftSlots, itemstack, null);
     }
 }

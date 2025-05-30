@@ -32,7 +32,7 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target)
             if(targetMenu == NetMenuType.NET_CRAFT_MENU)
             {
                 player.openMenu(new SimpleMenuProvider(
-                        (containerId, playerInventory, _player) -> new DimensionsCraftMenu(UIRegister.Dimensions_Craft_Menu.get(),containerId, playerInventory, net,null),
+                        (containerId, playerInventory, _player) -> new DimensionsCraftMenu(UIRegister.Dimensions_Craft_Menu.get(),containerId, playerInventory, net,null, null),
                         Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                 ));
             }

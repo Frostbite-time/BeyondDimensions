@@ -27,7 +27,7 @@ public class ModBlockTagProvider extends BlockTagsProvider
                 .add(ModBlocks.NET_CONTROL.get())
                 .add(ModBlocks.NET_INTERFACE.get())
                 .add(ModBlocks.NET_PATHWAY.get())
-                .add(ModBlocks.NET_ENERGY_PATHWAY.get());
-
+                .add(ModBlocks.NET_ENERGY_PATHWAY.get())
+                .add(ModBlocks.NET_TERMINAL_BLOCK.get());
     }
 }

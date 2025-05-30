@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -17,12 +18,12 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     private ItemStack terminalStack = null;
 
 
-    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, FriendlyByteBuf data)
+    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory)
     {
-        this(id, playerInventory,  new DimensionsNet(true), null, null);
+        this(id, playerInventory,  new DimensionsNet(true), null, null, null);
     }
 
-    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, DimensionsNet data, NonNullList<ItemStack> craftItems, ItemStack terminalItem)
+    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, DimensionsNet data, NonNullList<ItemStack> craftItems, ItemStack terminalItem, BlockPos entityPos)
     {
         super(UIRegister.Dimensions_Craft_Menu_Terminal.get(), id,playerInventory,data, craftItems);
         if(!player.level().isClientSide)
@@ -62,21 +63,25 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
                 ItemStack stack = craftSlots.getItems().get(i);
                 nonNullList.set(i, stack);
             }
-
-            // 将数据写入物品的 NBT
-            CompoundTag tag = terminalStack.getOrCreateTag();
-            ListTag slotsTag = new ListTag();
-            for (ItemStack stack : nonNullList) {
-                CompoundTag itemTag = new CompoundTag();
-                if (!stack.isEmpty()) {
-                    stack.save(itemTag); // 非空物品序列化为 CompoundTag
+            if(terminalStack != null)
+            {
+                // 将数据写入物品的 NBT
+                CompoundTag tag = terminalStack.getOrCreateTag();
+                ListTag slotsTag = new ListTag();
+                for (ItemStack stack : nonNullList) {
+                    CompoundTag itemTag = new CompoundTag();
+                    if (!stack.isEmpty()) {
+                        stack.save(itemTag); // 非空物品序列化为 CompoundTag
+                    }
+                    slotsTag.add(itemTag); // 空物品也会保存为空的 CompoundTag
                 }
-                slotsTag.add(itemTag); // 空物品也会保存为空的 CompoundTag
+                tag.put("craft_slots", slotsTag); // 存储到 NBT
+                terminalStack.setTag(tag); // 回写至 ItemStack
+                // 同步更新玩家手中的物品
+                player.getInventory().setChanged();
             }
-            tag.put("craft_slots", slotsTag); // 存储到 NBT
-            terminalStack.setTag(tag); // 回写至 ItemStack
-            // 同步更新玩家手中的物品
-            player.getInventory().setChanged();
+
+
         }
 
     }
