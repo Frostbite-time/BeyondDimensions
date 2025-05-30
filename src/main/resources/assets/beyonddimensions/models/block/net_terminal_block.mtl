@@ -1,4 +1,3 @@
 # Made in Blockbench 4.12.4
-newmtl m_0d4aede9-a711-f460-dc5b-79e304f8afe5
+newmtl net_terminal_texture
 map_Kd beyonddimensions:block/net_terminal_block_texture
-newmtl none
