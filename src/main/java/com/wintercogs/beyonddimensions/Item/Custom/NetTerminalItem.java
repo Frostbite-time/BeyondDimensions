@@ -16,6 +16,9 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 public class NetTerminalItem extends NetedItem implements MenuProvider
 {
 
@@ -23,6 +26,8 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
     {
         super(properties);
     }
+
+    private static final Map<Player, MenuTriggerContext> contextMap = new WeakHashMap<>();
 
 
 
@@ -44,6 +49,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
                 DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack),level);
                 if (net != null)
                 {
+                    contextMap.put(player, new MenuTriggerContext(usedHand, itemstack));
                     player.openMenu(this);
                 }
             }
@@ -65,11 +71,23 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
-        ItemStack itemstack = player.getItemInHand(player.getUsedItemHand());
-        int netId = NetedItem.getNetId(itemstack);
-        DimensionsNet net = DimensionsNet.getNetFromId(netId, player.level());
+
+        // 从上下文映射中获取触发时的物品
+        MenuTriggerContext ctx = contextMap.remove(player);
+        if (ctx == null) {
+            // 没有上下文记录，则退回到原始方法
+            ctx = new MenuTriggerContext(player.getUsedItemHand(), player.getItemInHand(player.getUsedItemHand()));
+        }
+        // 验证物品是否仍是有效的NetTerminalItem
+        if (ctx.stack.getItem() != this) {
+            return null;
+        }
+        // 使用上下文中的物品栈
+        DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(ctx.stack), player.level());
+
+
         // 从NBT获取合成槽位
-        CompoundTag tag = itemstack.getOrCreateTag();
+        CompoundTag tag = ctx.stack.getOrCreateTag();
         if (!tag.contains("craft_slots", Tag.TAG_LIST)) {
             // 初始化默认的9个空槽位
             ListTag slots = new ListTag();
@@ -83,6 +101,17 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
         for (int i = 0; i < slotsTag.size() && i < 9; i++) {
             craftSlots.set(i, ItemStack.of(slotsTag.getCompound(i)));
         }
-        return new DimensionsCraftMenuTerminal(containerId, inventory, net, craftSlots, itemstack, null);
+        return new DimensionsCraftMenuTerminal(containerId, inventory, net, craftSlots, ctx.stack, null);
+    }
+
+
+    // 创建一个内部类来存储触发时的上下文
+    private static class MenuTriggerContext {
+        public final InteractionHand hand;
+        public final ItemStack stack;
+        public MenuTriggerContext(InteractionHand hand, ItemStack stack) {
+            this.hand = hand;
+            this.stack = stack;
+        }
     }
 }
