@@ -29,9 +29,8 @@ public class NetedItem extends Item
                 if (validToReWrite(net, player)) {
                     // 改用 NBT 标签存储数据
                     CompoundTag tag = itemstack.getOrCreateTag();
-                    int currentNetId = tag.getInt("NetId");
 
-                    if (currentNetId != net.getId()) {
+                    if (getNetId(itemstack) != net.getId()) {
                         tag.putInt("NetId", net.getId());
                         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound",net.getId()));

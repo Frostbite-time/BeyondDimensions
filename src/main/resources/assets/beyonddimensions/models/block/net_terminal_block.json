@@ -1,5 +1,5 @@
 {
-  "loader": "neoforge:obj",
+  "loader": "forge:obj",
   "model": "beyonddimensions:models/block/net_terminal_block.obj",
   "flip_v": true,
   "textures": {

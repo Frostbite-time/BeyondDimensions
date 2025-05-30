@@ -364,6 +364,6 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     public void removed(Player player)
     {
         super.removed(player);
-        cleanCraftSlots(false);
+        cleanCraftSlots(firstCraftReturnDir);
     }
 }
