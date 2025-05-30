@@ -32,6 +32,9 @@ repositories {
     maven {
         url 'https://maven.aliyun.com/repository/public'
     }
+    maven {
+        url "https://cursemaven.com"
+    }
 }
 
 base {
@@ -152,6 +155,9 @@ dependencies {
 
     // JEI支持
     compileOnly "mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"
+
+    // 多态合成支持
+    compileOnly "curse.maven:polymorph-388800:4928442"
 
 
 

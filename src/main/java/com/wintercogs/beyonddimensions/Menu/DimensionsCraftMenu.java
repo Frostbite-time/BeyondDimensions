@@ -1,9 +1,11 @@
 package com.wintercogs.beyonddimensions.Menu;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
@@ -28,7 +30,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
     private CraftingContainer craftSlots;
     private ResultContainer resultSlots;
-    private int resultSlotIndex;
+    public int resultSlotIndex;
     public int craftSlotStartIndex;
     public int craftSlotEndIndex;
     public boolean firstCraftReturnDir = false; // 决定关闭菜单时工艺槽的优先转移方向，true向存储 false背包
@@ -76,7 +78,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         if (!level.isClientSide) {
             ServerPlayer serverplayer = (ServerPlayer)player;
             ItemStack itemstack = ItemStack.EMPTY;
-            Optional<CraftingRecipe> optional = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, container, level);
+            Optional<CraftingRecipe> optional = getRecipe(player, container, level);
             if (optional.isPresent()) {
                 // 原版过程
                 CraftingRecipe craftingrecipe = (CraftingRecipe)optional.get();
@@ -93,6 +95,15 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
             serverplayer.connection.send(new ClientboundContainerSetSlotPacket(menu.containerId, menu.incrementStateId(), resultSlotIndex, itemstack));
         }
 
+    }
+
+
+    public static Optional<CraftingRecipe> getRecipe(Player player, CraftingContainer input, Level level)
+    {
+        if (BeyondDimensions.PolymorphLoaded && player != null) {
+            return PolymorphHelper.getRecipe(player, RecipeType.CRAFTING, input, level);
+        }
+        return level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
     }
 
     public void transferRecipe(List<ItemStack> inputs)

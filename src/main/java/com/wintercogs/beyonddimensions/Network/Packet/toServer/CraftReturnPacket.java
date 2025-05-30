@@ -16,7 +16,7 @@ public record CraftReturnPacket(boolean dir)
 
         if(player.containerMenu instanceof DimensionsCraftMenu menu)
         {
-            menu.firstCraftReturnDir = packet.dir();
+            menu.firstCraftReturnDir = dir();
         }
     }
 
