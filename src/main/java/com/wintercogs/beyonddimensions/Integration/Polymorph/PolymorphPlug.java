@@ -2,7 +2,10 @@ package com.wintercogs.beyonddimensions.Integration.Polymorph;
 
 import com.illusivesoulworks.polymorph.api.PolymorphApi;
 import com.wintercogs.beyonddimensions.GUI.DimensionsCraftGUI;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+@OnlyIn(Dist.CLIENT)
 public class PolymorphPlug
 {
     public static void register()

@@ -125,10 +125,6 @@ public class BeyondDimensions
             PolymorphLoaded = true;
         }
 
-        if(PolymorphLoaded)
-        {
-            PolymorphPlug.register();
-        }
 
         // 注册堆叠类型，使得网络能够存储相关堆叠
         StackTypeRegistry.registerType(new ItemStackType());
@@ -209,6 +205,11 @@ public class BeyondDimensions
             // 一些客户端初始代码
             LOGGER.info("维度网络初始化完成(客户端)");
             UIRegister.registerScreens(event);
+
+            if(PolymorphLoaded)
+            {
+                PolymorphPlug.register();
+            }
         }
     }
 }
