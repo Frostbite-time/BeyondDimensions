@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 public class NetCreater extends Item {
@@ -57,6 +58,7 @@ public class NetCreater extends Item {
             newNet.addPlayer(player.getUniqueID());
             newNet.markDirty(); // 1.12.2 标记数据需要保存
             world.getMapStorage().saveAllData(); // 创建后立刻保存
+            player.sendMessage(new TextComponentTranslation("msg.beyonddimensions.network_created"));
 
             // 消耗物品
             itemstack.shrink(1); // 1.12.2 支持 shrink 方法

@@ -98,15 +98,15 @@ public class DimensionsNet extends WorldSavedData
     public static DimensionsNet getNetFromPlayer(EntityPlayer player) {
         World world = player.getEntityWorld().getMinecraftServer().getWorld(0); // 获取主世界
 
-        for (int netId = 0; netId < 10000; netId++) {
+        for (int netId = 0; netId < 3000; netId++) { // 不会遍历超过5000个网络 其实也许后面还可以把数据直接放到玩家身上 但现在我懒得这么做了
             DimensionsNet net = (DimensionsNet) world.getPerWorldStorage().getOrLoadData(DimensionsNet.class, "BDNet_" + netId);
             if (net != null) {
                 if (net.players.contains(player.getUniqueID())) { // 1.12.2使用getUniqueID()
                     return net;
                 }
             } else {
-                // 如果找不到数据则提前终止循环
-                break;
+                // 给予容错
+                continue;
             }
         }
         return null;

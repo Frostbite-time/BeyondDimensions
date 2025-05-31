@@ -18,6 +18,7 @@ msg.beyonddimensions.block_net_bound=Block bound to network #%s
 msg.beyonddimensions.block_net_unbound=Block unbound from network
 msg.beyonddimensions.item_net_bound=Item bound to network #%s
 msg.beyonddimensions.item_net_unbound=Item unbound from network
+msg.beyonddimensions.network_created=You ripped a rift through the cosmos...
 
 # 按键绑定 (Keybindings)
 key.categories.beyonddimensions=Beyond Dimensions
