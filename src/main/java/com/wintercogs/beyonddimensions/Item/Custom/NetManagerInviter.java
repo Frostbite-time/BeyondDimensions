@@ -24,7 +24,7 @@ public class NetManagerInviter extends NetedItem implements IAddNetMemberHandler
         ItemStack itemstack = player.getHeldItem(hand);
 
         // 只响应主手操作
-        if (hand != EnumHand.MAIN_HAND) {
+        if (hand != EnumHand.MAIN_HAND || player.isSneaking()) {
             return new ActionResult<>(EnumActionResult.FAIL, itemstack);
         }
 
@@ -50,7 +50,7 @@ public class NetManagerInviter extends NetedItem implements IAddNetMemberHandler
                 }
             }
         }
-        return new ActionResult<>(EnumActionResult.PASS, itemstack);
+        return new ActionResult<>(EnumActionResult.SUCCESS, itemstack);
     }
 
     // 权限验证方法
@@ -62,7 +62,7 @@ public class NetManagerInviter extends NetedItem implements IAddNetMemberHandler
     // 添加成员实现
     @Override
     public boolean AddPlayerToNet(DimensionsNet net, EntityPlayer player) {
-        if (net != null && validToReWrite(net, player)) {
+        if (net != null && player != null) {
             // 1.12.2 需要验证玩家UUID有效性
             if (!net.getManagers().contains(player.getUniqueID())) {
                 net.addManager(player.getUniqueID());

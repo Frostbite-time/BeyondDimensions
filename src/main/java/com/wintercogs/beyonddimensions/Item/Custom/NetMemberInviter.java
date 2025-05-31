@@ -21,10 +21,11 @@ public class NetMemberInviter extends NetedItem implements IAddNetMemberHandler 
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+        super.onItemRightClick(world, player, hand);
         ItemStack itemstack = player.getHeldItem(hand);
 
         // 仅响应主手操作
-        if (hand != EnumHand.MAIN_HAND) {
+        if (hand != EnumHand.MAIN_HAND || player.isSneaking()) {
             return new ActionResult<>(EnumActionResult.FAIL, itemstack);
         }
 
@@ -47,7 +48,7 @@ public class NetMemberInviter extends NetedItem implements IAddNetMemberHandler 
             }
         }
 
-        return new ActionResult<>(EnumActionResult.PASS, itemstack);
+        return new ActionResult<>(EnumActionResult.SUCCESS, itemstack);
     }
 
     @Override

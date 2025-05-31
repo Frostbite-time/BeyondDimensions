@@ -24,7 +24,7 @@ public class NetedItem extends Item {
         ItemStack itemstack = player.getHeldItem(hand);
 
         // 1.12.2 使用 EnumHand 判断手持位置
-        if (hand != EnumHand.MAIN_HAND) {
+        if (hand != EnumHand.MAIN_HAND || !player.isSneaking()) {
             return new ActionResult<>(EnumActionResult.FAIL, itemstack);
         }
 
