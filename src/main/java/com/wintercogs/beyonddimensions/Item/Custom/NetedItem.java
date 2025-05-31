@@ -8,6 +8,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 public class NetedItem extends Item {
@@ -44,8 +45,10 @@ public class NetedItem extends Item {
 
                     if (currentNetId != net.getId()) {
                         tag.setInteger("NetId", net.getId());
+                        player.sendMessage(new TextComponentTranslation("msg.beyonddimensions.item_net_bound", net.getId()));
                     } else {
                         tag.setInteger("NetId", -1);
+                        player.sendMessage(new TextComponentTranslation("msg.beyonddimensions.item_net_unbound"));
                     }
                 } else {
                     return new ActionResult<>(EnumActionResult.FAIL, itemstack);

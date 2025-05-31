@@ -14,6 +14,11 @@ tile.net_interface.name=网络接口
 tile.net_pathway.name=维度网络通道
 tile.net_energy_pathway.name=维度网络能量通道
 
+msg.beyonddimensions.block_net_bound=方块被绑定到%s号网络
+msg.beyonddimensions.block_net_unbound=方块从网络解绑
+msg.beyonddimensions.item_net_bound=物品被绑定到%d号网络
+msg.beyonddimensions.item_net_unbound=物品从网络解绑
+
 # 按键绑定
 key.categories.beyonddimensions=超越维度
 key.beyonddimensions.open_gui=打开维度网络

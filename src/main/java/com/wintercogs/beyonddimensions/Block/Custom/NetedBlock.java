@@ -5,10 +5,13 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 public class NetedBlock extends Block
@@ -16,6 +19,34 @@ public class NetedBlock extends Block
 
     public NetedBlock(Material materialIn) {
         super(materialIn);
+    }
+
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    {
+        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+        if(placer instanceof EntityPlayer player)
+        {
+            if(!worldIn.isRemote)
+            {
+                if(worldIn.getTileEntity(pos) instanceof NetedBlockEntity blockEntity)
+                {
+                    if(blockEntity.getNetId() == -1)
+                    {
+                        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+                        if(net != null)
+                        {
+                            if(net.isManager(player))
+                            {
+                                // 成功设置网络id
+                                blockEntity.setNetId(net.getId());
+                                player.sendMessage(new TextComponentTranslation("msg.beyonddimensions.block_net_bound", net.getId()));
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -38,6 +69,7 @@ public class NetedBlock extends Block
                     {
                         // 成功设置网络id
                         blockEntity.setNetId(net.getId());
+                        player.sendMessage(new TextComponentTranslation("msg.beyonddimensions.block_net_bound", net.getId()));
                     }
                 }
                 else
@@ -51,6 +83,7 @@ public class NetedBlock extends Block
                             {
                                 // 成功清除网络id
                                 blockEntity.setNetId(-1);
+                                player.sendMessage(new TextComponentTranslation("msg.beyonddimensions.block_net_unbound"));
                             }
                         }
                     }

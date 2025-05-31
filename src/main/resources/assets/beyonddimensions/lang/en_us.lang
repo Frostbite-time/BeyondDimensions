@@ -14,6 +14,11 @@ tile.net_interface.name=Network Interface
 tile.net_pathway.name=Dimensional Network Pathway
 tile.net_energy_pathway.name=Dimensional Network Energy Pathway
 
+msg.beyonddimensions.block_net_bound=Block bound to network #%s
+msg.beyonddimensions.block_net_unbound=Block unbound from network
+msg.beyonddimensions.item_net_bound=Item bound to network #%s
+msg.beyonddimensions.item_net_unbound=Item unbound from network
+
 # 按键绑定 (Keybindings)
 key.categories.beyonddimensions=Beyond Dimensions
 key.beyonddimensions.open_gui=Open Dimensional Network
