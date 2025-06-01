@@ -39,6 +39,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -65,6 +66,7 @@ public class BeyondDimensions
     public BeyondDimensions(IEventBus modEventBus, ModContainer modContainer)
     {
 
+        modEventBus.addListener(this::constructMod);
         modEventBus.addListener(this::commonSetup);
         //为存储网络的接口方块注册物品交互能力
 
@@ -97,7 +99,8 @@ public class BeyondDimensions
 
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event)
+    // 在此阶段检测模组列表
+    private void constructMod(final FMLConstructModEvent event)
     {
         if(ModList.get().isLoaded(MekanismMODID))
         {
@@ -119,7 +122,10 @@ public class BeyondDimensions
         {
             PolymorphLoaded = true;
         }
+    }
 
+    private void commonSetup(final FMLCommonSetupEvent event)
+    {
 
         // 注册堆叠类型，使得网络能够存储相关堆叠
         StackTypeRegistry.registerType(new ItemStackType());

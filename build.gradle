@@ -159,6 +159,9 @@ dependencies {
     // 多态合成支持
     compileOnly "curse.maven:polymorph-388800:6451024"
 
+    // AE支持
+    compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}:api"
+
 
 }
 
