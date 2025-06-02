@@ -218,20 +218,21 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     // 仅仅更新视觉存储的数量信息
     public void updateOnlyCountAndNewViewer()
     {
+        // 利用hashMap进行包装
+        // 由于viewerStorage的对象来自storage。而storage不会被随意清空
+        // hashCode将能被自定义的copy函数一并传递，无需过多性能
 
-        // 同步现有物品的数量
+        Map<IStackType, Long> storageMap = new HashMap<>();
+
+        // 填充主存储物品数量 (O(n))
+        for (IStackType stack : storage.getStorage()) {
+            storageMap.put(stack, stack.getStackAmount());
+        }
+        // 更新查看者存储的数量 (O(m))
         for (IStackType viewerStack : viewerStorage.getStorage()) {
-            boolean foundInStorage = false;
-            for (IStackType storageStack : storage.getStorage()) {
-                if (storageStack.isSameTypeSameComponents(viewerStack)) {
-                    viewerStack.setStackAmount(storageStack.getStackAmount());
-                    foundInStorage = true;
-                    break;
-                }
-            }
-            if (!foundInStorage) {
-                viewerStack.setStackAmount(0);
-            }
+            // 使用哈希表直接查找数量，不存在时默认为0
+            long amount = storageMap.getOrDefault(viewerStack, 0L);
+            viewerStack.setStackAmount(amount);
         }
 
     }
@@ -268,6 +269,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     }
 
     // 双端函数，根据传入列表构建索引
+    // 此函数实际并不安全，其生效的重要条件是 存储槽位必须首先完全添加
     public void loadIndexList(ArrayList<Integer> list)
     {
         for(int i = 0; i<list.size();i++)
