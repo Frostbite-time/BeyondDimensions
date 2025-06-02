@@ -58,7 +58,11 @@ public class ItemStackType implements IStackType<ItemStack> {
     {
         if(key instanceof Item item)
         {
-            ItemStack itemStack = new ItemStack(BuiltInRegistries.ITEM.getHolder(BuiltInRegistries.ITEM.getKey(item)).get(), 1,dataComponentPatch);
+            ItemStack itemStack;
+            if(dataComponentPatch != null)
+                itemStack = new ItemStack(BuiltInRegistries.ITEM.getHolder(BuiltInRegistries.ITEM.getKey(item)).get(), 1,dataComponentPatch);
+            else
+                itemStack = new ItemStack(BuiltInRegistries.ITEM.getHolder(BuiltInRegistries.ITEM.getKey(item)).get(), 1);
             return new ItemStackType(itemStack,amount);
         }
         return null;

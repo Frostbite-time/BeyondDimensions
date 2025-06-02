@@ -76,7 +76,11 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         if(key instanceof Fluid fluid)
         {
-            FluidStack fluidStack = new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(fluid)).get(), 1,dataComponentPatch);
+            FluidStack fluidStack;
+            if(dataComponentPatch != null)
+                fluidStack = new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(fluid)).get(), 1,dataComponentPatch);
+            else
+                fluidStack = new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(fluid)).get(), 1);
             return new FluidStackType(fluidStack,amount);
         }
         return null;

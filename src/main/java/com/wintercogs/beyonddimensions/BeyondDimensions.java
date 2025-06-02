@@ -21,6 +21,7 @@ import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandl
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
@@ -165,6 +166,11 @@ public class BeyondDimensions
             // 注册堆叠处理包装
             StackHandlerWrapperHelper.stackWrappers.put(ChemicalStackType.ID, ChemicalHandlerWrapper::new);
 
+        }
+
+        if(AELoaded)
+        {
+            BD_AEPlugin.register();
         }
     }
 

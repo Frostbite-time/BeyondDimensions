@@ -47,6 +47,10 @@ public class ModItems
     public static final DeferredItem<Item> NET_TERMINAL_ITEM = ITEMS.register("net_terminal_item",
             () -> new NetTerminalItem(new Item.Properties()));
 
+    // AE存储磁盘
+    public static final DeferredItem<Item> NET_AE_STORAGE_CELL = ITEMS.register("net_ae_storage_cell",
+            () -> new NetAEStorageCell(new Item.Properties()));
+
 
     // 测试物品 -----------------------
     // 随机物品生成器
