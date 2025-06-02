@@ -47,7 +47,7 @@ public class ModItems
     public static final DeferredItem<Item> NET_TERMINAL_ITEM = ITEMS.register("net_terminal_item",
             () -> new NetTerminalItem(new Item.Properties()));
 
-    // AE存储磁盘
+    // AE存储磁盘 对于一个没有安装AE的游戏，这个物品没有任何效果。你可以单方面禁用它。
     public static final DeferredItem<Item> NET_AE_STORAGE_CELL = ITEMS.register("net_ae_storage_cell",
             () -> new NetAEStorageCell(new Item.Properties()));
 

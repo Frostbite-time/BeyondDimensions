@@ -22,6 +22,7 @@ import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandle
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
+import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
@@ -52,7 +53,7 @@ public class BeyondDimensions
     public static final String MODID = "beyonddimensions";
     public static boolean MekLoaded = false; // 用于mek化学品存储
     public static final String MekanismMODID = "mekanism";
-    public static boolean AELoaded = false; // 暂时未使用
+    public static boolean AELoaded = false; // 用于添加存储元件
     public static final String AE2MODID = "ae2";
     public static boolean EMILoaded = false; // 用于EMI兼容
     public static final String EMI_MODID = "emi";
@@ -60,6 +61,8 @@ public class BeyondDimensions
     public static final String JEI2MODID = "jei";
     public static boolean PolymorphLoaded = false;
     public static final String PolymorphModId = "polymorph";
+    public static boolean AEMEKLoaded = false;
+    public static final String AEMEK2MODID = "appmek";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -123,6 +126,10 @@ public class BeyondDimensions
         {
             PolymorphLoaded = true;
         }
+        if(ModList.get().isLoaded(AEMEK2MODID))
+        {
+            AEMEKLoaded = true;
+        }
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -171,6 +178,10 @@ public class BeyondDimensions
         if(AELoaded)
         {
             BD_AEPlugin.register();
+        }
+        if(AEMEKLoaded)
+        {
+            BD_AEMEKPlugin.register();
         }
     }
 

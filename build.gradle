@@ -161,6 +161,7 @@ dependencies {
 
     // AE支持
     compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}:api"
+    compileOnly "curse.maven:applied-mekanistics-574300:5978711" // AE的通用机械附属
 
 
 }
