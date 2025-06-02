@@ -20,6 +20,7 @@ import java.util.Optional;
 
 // 用于定义不同stack的行为 物品 流体 以及其他模组中行为逻辑stack相似的资源
 // 实现还需重写hashcode以及equals方法，使其检测忽略数量以用于其他位置的代码
+// 由于hashcode的大量依赖，强烈建议在具体实现中缓存hashcode以降低开销
 public interface IStackType<T> {
 
     IStackType<T> fromObject(Object key, long amount, DataComponentPatch dataComponentPatch);

@@ -32,6 +32,9 @@ public class ItemStackType implements IStackType<ItemStack> {
     private ItemStack stack; // 物品stack信息，数量最好时刻保持为1
     private long stackSize; // 扩容，需要确保所有存入取出的终点在此
 
+    private int hashCodeCache = 0; // 哈希码缓存
+    private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
+
     public ItemStackType()
     {
         stack = ItemStack.EMPTY;
@@ -73,6 +76,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     {
         this.stack = stack.copy();
         this.stackSize = stack.getCount();
+        NeedRecalHash = true;
     }
 
     @Override
@@ -140,7 +144,11 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public IStackType<ItemStack> copy()
     {
-        return new ItemStackType(stack.copy(),stackSize);
+        // copy时将哈希码状态一起带上，最大程度降低hash计算负担
+        ItemStackType copy = new ItemStackType(stack.copy(),stackSize);
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
@@ -355,7 +363,12 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
-        return ItemStack.hashItemAndComponents(stack.copyWithCount(1));
+        if(NeedRecalHash)
+        {
+            hashCodeCache = ItemStack.hashItemAndComponents(stack);
+            NeedRecalHash = false;
+        }
+        return hashCodeCache;
     }
 }
 

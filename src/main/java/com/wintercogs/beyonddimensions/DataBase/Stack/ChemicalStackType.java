@@ -42,6 +42,9 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
 
     private ChemicalStack stack;
 
+    private int hashCodeCache = 0; // 哈希码缓存
+    private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
+
     // 创建空stack
     public ChemicalStackType()
     {
@@ -87,6 +90,7 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     public void setStack(ChemicalStack stack)
     {
         this.stack = stack.copy();
+        NeedRecalHash = true;
     }
 
     @Override
@@ -145,7 +149,10 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     @Override
     public IStackType<ChemicalStack> copy()
     {
-        return new ChemicalStackType(stack.copy());
+        ChemicalStackType copy = new ChemicalStackType(stack.copy());
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
@@ -427,8 +434,13 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     @Override
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
-        int code = 1;
-        code = 31 * code + stack.getChemical().hashCode();
-        return code;
+        if(NeedRecalHash)
+        {
+            int code = 1;
+            code = 31 * code + stack.getChemical().hashCode();
+            hashCodeCache = code;
+            NeedRecalHash = false;
+        }
+        return hashCodeCache;
     }
 }

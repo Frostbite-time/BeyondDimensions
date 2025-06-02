@@ -47,6 +47,9 @@ public class FluidStackType implements IStackType<FluidStack>
     private FluidStack stack;
     private long stackSize;
 
+    private int hashCodeCache = 0; // 哈希码缓存
+    private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
+
     // 创建空stack
     public FluidStackType()
     {
@@ -103,6 +106,7 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         this.stack = stack.copy();
         stackSize = stack.getAmount();
+        NeedRecalHash = true;
     }
 
     @Override
@@ -161,7 +165,10 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public IStackType<FluidStack> copy()
     {
-        return new FluidStackType(stack.copy(), stackSize);
+        FluidStackType copy = new FluidStackType(stack.copy(), stackSize);
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
@@ -436,7 +443,11 @@ public class FluidStackType implements IStackType<FluidStack>
 
     @Override
     public int hashCode() {
-        // 基于物品类型和组件生成哈希码
-        return FluidStack.hashFluidAndComponents(stack.copyWithAmount(1));
+        if(NeedRecalHash)
+        {
+            hashCodeCache = FluidStack.hashFluidAndComponents(stack);
+            NeedRecalHash = false;
+        }
+        return hashCodeCache;
     }
 }
