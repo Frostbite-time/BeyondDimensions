@@ -41,7 +41,8 @@ public class NetStorageCell implements StorageCell
     @Override
     public void persist()
     {
-
+        // UnifiedStorage在内部操作完成后会自行通知保存
+        // 此处无需处理
     }
 
     @Override
