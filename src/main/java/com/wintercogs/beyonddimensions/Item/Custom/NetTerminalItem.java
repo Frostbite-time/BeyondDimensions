@@ -22,7 +22,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 {
     public NetTerminalItem(Properties properties)
     {
-        super(properties.component(ModDataComponents.CRAFT_SLOTS, NonNullList.withSize(9,ItemStack.EMPTY)));
+        super(properties.stacksTo(1).component(ModDataComponents.CRAFT_SLOTS, NonNullList.withSize(9,ItemStack.EMPTY)));
     }
 
     private static final Map<Player, MenuTriggerContext> contextMap = new WeakHashMap<>();

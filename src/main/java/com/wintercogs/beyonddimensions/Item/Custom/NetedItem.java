@@ -53,6 +53,7 @@ public class NetedItem extends Item
                 }
                 else
                 {
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"));
                     return InteractionResultHolder.fail(itemstack);
                 }
             }

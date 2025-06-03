@@ -48,6 +48,8 @@
   "item.beyonddimensions.space_time_bar": "Слиток Пространства-Времени",
   "item.beyonddimensions.test_item_generate": "Генератор тестовых предметов",
   "item.beyonddimensions.net_terminal_item": "Портативный сетевой терминал",
+  "item.beyonddimensions.net_ae_storage_cell": "Размерностная ячейка хранения ME",
+  "item.beyonddimensions.net_gifter": "Сетевой даритель",
 
   "block.beyonddimensions.net_control": "Контроллер Сети",
   "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
@@ -65,5 +67,9 @@
   "msg.beyonddimensions.item_net_unbound": "Предмет отвязан от сети №%d",
   "msg.beyonddimensions.block_net_bound": "Блок привязан к сети №%d",
   "msg.beyonddimensions.block_net_unbound": "Блок отвязан от сети №%d",
-  "msg.beyonddimensions.item_need_bound": "Предмет должен быть привязан перед использованием"
+  "msg.beyonddimensions.item_need_bound": "Предмет должен быть привязан перед использованием",
+  "msg.beyonddimensions.error_item_net": "Сеть, связанная с этим предметом, недоступна",
+  "msg.beyonddimensions.cant_merge_net": "Невозможно объединить целевую сеть. Вы должны быть владельцем сети, чтобы объединять другие сети",
+  "msg.beyonddimensions.no_right_to_bound_item": "У вас нет прав для изменения привязки сети к этому предмету",
+  "msg.beyonddimensions.no_right_to_bound_block": "У вас нет прав для изменения привязки сети к этому блоку"
 }

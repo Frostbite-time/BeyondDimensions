@@ -85,7 +85,11 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
     {
         if(energyStorage==null)
         {
-            energyStorage = getNet().getEnergyStorage();
+            DimensionsNet net = getNet();
+            if(net != null)
+                energyStorage = getNet().getEnergyStorage();
+            else
+                return;
         }
 
         for(Direction dir: directions)

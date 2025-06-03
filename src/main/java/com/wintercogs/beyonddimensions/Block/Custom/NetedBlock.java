@@ -78,6 +78,8 @@ public class NetedBlock extends Block
                             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,0.5F,1.0F);
                             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_bound",net.getId()));
                         }
+                        else
+                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_block"));
                     }
                 }
                 else
@@ -85,7 +87,7 @@ public class NetedBlock extends Block
                     DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
                     if(net != null)
                     {
-                        if(net.getId() == blockEntity.getNetId())
+                        if(net.getId() == blockEntity.getNetId() || DimensionsNet.getNetFromId(blockEntity.getNetId(),player.level()) == null)
                         {
                             if(net.isManager(player))
                             {
@@ -95,6 +97,8 @@ public class NetedBlock extends Block
                                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,0.5F,1.0F);
                                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_unbound",net.getId()));
                             }
+                            else
+                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_block"));
                         }
                     }
                 }

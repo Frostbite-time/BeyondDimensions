@@ -27,6 +27,9 @@ public class EnergyStorage implements IEnergyStorage
 
     public long getRealEnergyCapacity()
     {
+        if(net.deleted)
+            return 0;
+
         return capacity;
     }
 
@@ -95,7 +98,9 @@ public class EnergyStorage implements IEnergyStorage
     @Override
     public int getMaxEnergyStored()
     {
-        return Integer.MAX_VALUE-1;
+        if (net.deleted)
+            return 0;
+        return Integer.MAX_VALUE;
     }
 
     @Override

@@ -133,6 +133,9 @@ public class UnifiedStorage implements IStackTypedHandler
     @Override
     public long getSlotCapacity(int slot)
     {
+        if (net.deleted)
+            return 0;
+
         return Long.MAX_VALUE;
     }
 

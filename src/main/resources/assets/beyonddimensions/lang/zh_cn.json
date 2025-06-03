@@ -39,8 +39,8 @@
   "key.beyonddimensions.open_gui": "打开维度网络",
 
   "item.beyonddimensions.net_creater": "维度网络发生器",
-  "item.beyonddimensions.net_member_inviter": "成员连接器",
-  "item.beyonddimensions.net_manager_inviter": "管理员连接器",
+  "item.beyonddimensions.net_member_inviter": "成员连接符",
+  "item.beyonddimensions.net_manager_inviter": "管理员连接符",
   "item.beyonddimensions.unstable_space_time_fragment": "不稳定时空碎片",
   "item.beyonddimensions.stable_space_time_fragment": "稳态时空碎片",
   "item.beyonddimensions.space_time_stable_frame": "稳定的时空框架",
@@ -49,6 +49,7 @@
   "item.beyonddimensions.test_item_generate": "测试-物品生成器",
   "item.beyonddimensions.net_terminal_item": "便携网络终端",
   "item.beyonddimensions.net_ae_storage_cell": "维度ME磁盘",
+  "item.beyonddimensions.net_gifter": "网络赠送符",
 
   "block.beyonddimensions.net_control": "网络控制器",
   "block.beyonddimensions.net_interface": "网络接口",
@@ -66,5 +67,9 @@
   "msg.beyonddimensions.item_net_unbound": "物品从%d号网络解绑",
   "msg.beyonddimensions.block_net_bound": "方块被绑定到%d号网络",
   "msg.beyonddimensions.block_net_unbound": "方块从%d号网络解绑",
-  "msg.beyonddimensions.item_need_bound": "物品需要被绑定后才能使用"
+  "msg.beyonddimensions.item_need_bound": "物品需要被绑定后才能使用",
+  "msg.beyonddimensions.error_item_net": "物品绑定的网络已不可用",
+  "msg.beyonddimensions.cant_merge_net": "无法合并目标网络，你必须是网络所有者才能合并其他网络",
+  "msg.beyonddimensions.no_right_to_bound_item": "你无权更改此物品的网络绑定",
+  "msg.beyonddimensions.no_right_to_bound_block": "你无权更改此方块的网络绑定"
 }

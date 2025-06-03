@@ -48,6 +48,8 @@
   "item.beyonddimensions.space_time_bar": "Lingote Espaciotemporal",
   "item.beyonddimensions.test_item_generate": "Generador de Objetos de Prueba",
   "item.beyonddimensions.net_terminal_item": "Terminal de red portátil",
+  "item.beyonddimensions.net_ae_storage_cell": "Celda de almacenamiento ME dimensional",
+  "item.beyonddimensions.net_gifter": "Objeto de regalo de red",
 
   "block.beyonddimensions.net_control": "Controlador de Red",
   "block.beyonddimensions.net_interface": "Interfaz de Red",
@@ -65,5 +67,9 @@
   "msg.beyonddimensions.item_net_unbound": "Objeto desvinculado de la red nº%d",
   "msg.beyonddimensions.block_net_bound": "Bloque vinculado a la red nº%d",
   "msg.beyonddimensions.block_net_unbound": "Bloque desvinculado de la red nº%d",
-  "msg.beyonddimensions.item_need_bound": "El objeto debe vincularse antes de poder usarse"
+  "msg.beyonddimensions.item_need_bound": "El objeto debe vincularse antes de poder usarse",
+  "msg.beyonddimensions.error_item_net": "La red vinculada a este objeto no está disponible",
+  "msg.beyonddimensions.cant_merge_net": "No se puede fusionar la red objetivo. Debes ser el propietario de la red para fusionar otras redes",
+  "msg.beyonddimensions.no_right_to_bound_item": "No tienes permiso para cambiar el vínculo de red de este objeto",
+  "msg.beyonddimensions.no_right_to_bound_block": "No tienes permiso para cambiar el vínculo de red de este bloque"
 }

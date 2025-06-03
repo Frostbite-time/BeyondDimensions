@@ -48,6 +48,8 @@
   "item.beyonddimensions.space_time_bar": "Lingot Spatio-Temporel",
   "item.beyonddimensions.test_item_generate": "Générateur d'Objets Test",
   "item.beyonddimensions.net_terminal_item": "Terminal réseau portable",
+  "item.beyonddimensions.net_ae_storage_cell": "Cellule de stockage ME dimensionnelle",
+  "item.beyonddimensions.net_gifter": "Donateur de réseau",
 
   "block.beyonddimensions.net_control": "Contrôleur Réseau",
   "block.beyonddimensions.net_interface": "Interface Réseau",
@@ -65,5 +67,9 @@
   "msg.beyonddimensions.item_net_unbound": "Objet délié du réseau n°%d",
   "msg.beyonddimensions.block_net_bound": "Bloc lié au réseau n°%d",
   "msg.beyonddimensions.block_net_unbound": "Bloc délié du réseau n°%d",
-  "msg.beyonddimensions.item_need_bound": "L'objet doit être lié avant utilisation"
+  "msg.beyonddimensions.item_need_bound": "L'objet doit être lié avant utilisation",
+  "msg.beyonddimensions.error_item_net": "Le réseau lié à cet objet n'est pas disponible",
+  "msg.beyonddimensions.cant_merge_net": "Impossible de fusionner le réseau cible. Vous devez être propriétaire du réseau pour fusionner d'autres réseaux",
+  "msg.beyonddimensions.no_right_to_bound_item": "Vous n'avez pas la permission de modifier la liaison réseau de cet objet",
+  "msg.beyonddimensions.no_right_to_bound_block": "Vous n'avez pas la permission de modifier la liaison réseau de ce bloc"
 }
