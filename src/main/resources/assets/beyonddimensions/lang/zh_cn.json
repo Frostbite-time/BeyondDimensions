@@ -50,6 +50,7 @@
   "item.beyonddimensions.net_terminal_item": "便携网络终端",
   "item.beyonddimensions.net_ae_storage_cell": "维度ME磁盘",
   "item.beyonddimensions.net_gifter": "网络赠送符",
+  "item.beyonddimensions.net_destroyer": "网络自毁符",
 
   "block.beyonddimensions.net_control": "网络控制器",
   "block.beyonddimensions.net_interface": "网络接口",
@@ -71,5 +72,8 @@
   "msg.beyonddimensions.error_item_net": "物品绑定的网络已不可用",
   "msg.beyonddimensions.cant_merge_net": "无法合并目标网络，你必须是网络所有者才能合并其他网络",
   "msg.beyonddimensions.no_right_to_bound_item": "你无权更改此物品的网络绑定",
-  "msg.beyonddimensions.no_right_to_bound_block": "你无权更改此方块的网络绑定"
+  "msg.beyonddimensions.no_right_to_bound_block": "你无权更改此方块的网络绑定",
+  "msg.beyonddimensions.cant_delete_net": "无法删除网络，你必须是网络主人才能执行此操作",
+  "msg.beyonddimensions.item_net_destroyed": "你已经删除自身所在的网络",
+  "msg.beyonddimensions.net_gift_done": "成功合并%s号网络"
 }

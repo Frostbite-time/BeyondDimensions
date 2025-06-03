@@ -35,6 +35,7 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.NET_TERMINAL_ITEM);
                         output.accept(ModItems.NET_AE_STORAGE_CELL);
                         output.accept(ModItems.NET_GIFTER);
+                        output.accept(ModItems.NET_DESTROYER);
                     })
                     .build());
 

@@ -57,6 +57,10 @@ public class ModItems
     public static final DeferredItem<Item> NET_GIFTER = ITEMS.register("net_gifter",
             () -> new NetGifter(new Item.Properties()));
 
+    // 网络摧毁符
+    public static final DeferredItem<Item> NET_DESTROYER = ITEMS.register("net_destroyer",
+            () -> new NetDestroyer(new Item.Properties()));
+
 
     // 测试物品 -----------------------
     // 随机物品生成器

@@ -40,8 +40,10 @@ public class NetGifter extends NetedItem
                     // 只有网络主人能合并其他人的网络
                     if(playerNet != null && playerNet.getId() != itemNet.getId() && playerNet.isOwner(player))
                     {
+                        int id = itemNet.getId();
                         playerNet.mergeOtherNet(itemNet);
                         itemstack.consume(1,player);
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.net_gift_done",id));
                     }
                     else
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.cant_merge_net"));

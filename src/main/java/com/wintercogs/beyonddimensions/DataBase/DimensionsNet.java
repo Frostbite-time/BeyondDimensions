@@ -33,7 +33,8 @@ public class DimensionsNet extends SavedData
     // 被删除的网络id会被标记为-99
     private int id;
 
-    public boolean deleted = false; // 正常被初始化的为false，该数据持久化
+    public boolean deleted = false; // 正常被初始化的为false，该数据持久化，用以记录被删除的网络
+                                    // 直到功能测试稳定，被删除的网络可以重新分配给其他玩家
 
     // 网络持有者
     private UUID owner;

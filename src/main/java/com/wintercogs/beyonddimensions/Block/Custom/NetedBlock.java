@@ -65,7 +65,7 @@ public class NetedBlock extends Block
         {
             if(level.getBlockEntity(pos) instanceof NetedBlockEntity blockEntity)
             {
-                if(blockEntity.getNetId() == -1)
+                if(blockEntity.getNetId() < 0)
                 {
                     DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
                     if(net != null)
@@ -92,10 +92,10 @@ public class NetedBlock extends Block
                             if(net.isManager(player))
                             {
                                 // 成功清除网络id
+                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_unbound",blockEntity.getNetId()));
                                 blockEntity.setNetId(-1);
                                 level.invalidateCapabilities(pos); // 用于清除实体能力缓存
                                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,0.5F,1.0F);
-                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_unbound",net.getId()));
                             }
                             else
                                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_block"));
