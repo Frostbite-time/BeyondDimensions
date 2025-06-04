@@ -6,7 +6,6 @@ import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
-import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;

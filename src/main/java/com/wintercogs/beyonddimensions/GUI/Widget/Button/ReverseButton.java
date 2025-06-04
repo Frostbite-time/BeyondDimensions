@@ -9,9 +9,6 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class ReverseButton extends StatusButton
 {
 

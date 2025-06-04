@@ -8,7 +8,6 @@ import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
-import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;

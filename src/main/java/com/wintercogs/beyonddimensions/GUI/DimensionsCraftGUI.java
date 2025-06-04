@@ -17,9 +17,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends DimensionsNetGUI<T>
 {
 

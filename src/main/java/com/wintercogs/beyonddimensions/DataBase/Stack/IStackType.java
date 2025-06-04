@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
