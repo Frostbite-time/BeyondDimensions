@@ -1,0 +1,36 @@
+package com.wintercogs.beyonddimensions.Integration.Curios;
+
+import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
+import com.wintercogs.beyonddimensions.Item.ModItems;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.CuriosCapability;
+import top.theillusivec4.curios.api.SlotContext;
+import top.theillusivec4.curios.api.type.capability.ICurio;
+
+public class BD_CuriosPlugin
+{
+    // 动态附加物品为饰品
+    public static void registerCapabilities(final AttachCapabilitiesEvent<ItemStack> evt)
+    {
+        ItemStack stack = evt.getObject();
+        Item item = stack.getItem();
+        if(item instanceof NetTerminalItem)
+        {
+            evt.addCapability(CuriosCapability.ID_ITEM, CuriosApi.createCurioProvider(new ICurio() {
+
+                @Override
+                public ItemStack getStack() {
+                    return stack;
+                }
+
+                @Override
+                public void curioTick(SlotContext slotContext) {
+                    // 在此处添加tick逻辑
+                }
+            }));
+        }
+    }
+}

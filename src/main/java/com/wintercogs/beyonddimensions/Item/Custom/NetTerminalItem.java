@@ -27,7 +27,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
         super(properties.stacksTo(1));
     }
 
-    private static final Map<Player, MenuTriggerContext> contextMap = new WeakHashMap<>();
+    public static final Map<Player, MenuTriggerContext> contextMap = new WeakHashMap<>();
 
 
 
@@ -106,7 +106,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
 
     // 创建一个内部类来存储触发时的上下文
-    private static class MenuTriggerContext {
+    public static class MenuTriggerContext {
         public final InteractionHand hand;
         public final ItemStack stack;
         public MenuTriggerContext(InteractionHand hand, ItemStack stack) {

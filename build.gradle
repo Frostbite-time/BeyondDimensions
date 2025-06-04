@@ -39,6 +39,10 @@ repositories {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
     }
+    maven {
+        name = "Curios"
+        url = uri("https://maven.theillusivec4.top/")
+    }
 }
 
 base {
@@ -166,6 +170,9 @@ dependencies {
     // AE支持
     compileOnly "maven.modrinth:ae2:${ae_version}"
     compileOnly "curse.maven:applied-mekanistics-574300:4842281" // AE的通用机械附属
+
+    // Curios支持
+    compileOnly "top.theillusivec4.curios:curios-forge:${curios_version}+${minecraft_version}:api"
 
 
 

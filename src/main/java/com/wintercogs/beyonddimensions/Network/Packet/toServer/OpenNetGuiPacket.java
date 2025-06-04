@@ -1,9 +1,11 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.NetMenuType;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
+import com.wintercogs.beyonddimensions.Item.Custom.NetedItem;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
@@ -50,9 +52,33 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target)
                     terminalStack = player.getItemInHand(InteractionHand.MAIN_HAND);
                 else if(player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof NetTerminalItem)
                     terminalStack = player.getItemInHand(InteractionHand.OFF_HAND);
+                else
+                {
+                    for(ItemStack itemStack : player.getInventory().items)
+                    {
+                        if(itemStack.getItem() instanceof NetTerminalItem)
+                        {
+                            terminalStack = itemStack;
+                            break;
+                        }
+
+                    }
+
+                    if(terminalStack == null && BeyondDimensions.CuriosLoaded)
+                    {
+                        terminalStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
+                                .resolve()
+                                .flatMap(iCuriosItemHandler ->
+                                        iCuriosItemHandler.findFirstCurio(itemStack -> itemStack.getItem() instanceof NetTerminalItem && NetedItem.getNetId(itemStack) >= 0)
+                                )
+                                .map(slotResult -> slotResult.stack())
+                                .orElse(null);
+                    }
+                }
 
                 if(terminalStack != null)
                 {
+                    NetTerminalItem.contextMap.put(player, new NetTerminalItem.MenuTriggerContext(InteractionHand.MAIN_HAND, terminalStack));
                     player.openMenu((NetTerminalItem)terminalStack.getItem());
                 }
             }
