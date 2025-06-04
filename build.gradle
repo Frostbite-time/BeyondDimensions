@@ -35,6 +35,10 @@ repositories {
     maven {
         url "https://cursemaven.com"
     }
+    maven {
+        name = "Curios"
+        url = uri("https://maven.theillusivec4.top/")
+    }
 
 
 }
@@ -163,6 +167,8 @@ dependencies {
     compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}:api"
     compileOnly "curse.maven:applied-mekanistics-574300:5978711" // AE的通用机械附属
 
+    // 饰品栏支持
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}:api"
 
 }
 

@@ -1,8 +1,10 @@
 package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.GUI.NetMenuType;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
 import com.wintercogs.beyonddimensions.Menu.*;
@@ -62,9 +64,36 @@ public class ServerPayloadHandler
                                 terminalStack = player.getItemInHand(InteractionHand.MAIN_HAND);
                             else if(player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof NetTerminalItem)
                                 terminalStack = player.getItemInHand(InteractionHand.OFF_HAND);
+                            else
+                            {
+                                for(ItemStack itemStack : player.getInventory().items)
+                                {
+                                    if(itemStack.getItem() instanceof NetTerminalItem)
+                                    {
+                                        terminalStack = itemStack;
+                                        break;
+                                    }
+
+                                }
+
+                                if(terminalStack == null && BeyondDimensions.CuriosLoaded)
+                                {
+                                    terminalStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
+                                            .flatMap(iCuriosItemHandler ->
+                                                    iCuriosItemHandler.findFirstCurio(itemStack ->
+                                                            itemStack.getItem() instanceof NetTerminalItem &&
+                                                                    itemStack.has(ModDataComponents.NET_ID_DATA) &&
+                                                                    itemStack.get(ModDataComponents.NET_ID_DATA) >= 0
+                                                    )
+                                            )
+                                            .map(slotResult -> slotResult.stack())
+                                            .orElse(null);
+                                }
+                            }
 
                             if(terminalStack != null)
                             {
+                                NetTerminalItem.contextMap.put(player, new NetTerminalItem.MenuTriggerContext(InteractionHand.MAIN_HAND, terminalStack));
                                 player.openMenu((NetTerminalItem)terminalStack.getItem());
                             }
                         }

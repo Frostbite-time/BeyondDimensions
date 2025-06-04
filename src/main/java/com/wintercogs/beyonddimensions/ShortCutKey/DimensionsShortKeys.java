@@ -27,9 +27,16 @@ public class DimensionsShortKeys
             "key.categories.beyonddimensions" // 键位分类
     );
 
+    public static final KeyMapping OPEN_TERMINAL_QUICK_KEY = new KeyMapping(
+      "key.beyonddimensions.open_terminal_quick_key",
+      GLFW.GLFW_KEY_P,
+      "key.categories.beyonddimensions"
+    );
+
     public static void register()
     {
         ShortCutKeyRegister.registerKey(OPEN_GUI_KEY);
+        ShortCutKeyRegister.registerKey(OPEN_TERMINAL_QUICK_KEY);
     }
 
     @SubscribeEvent
@@ -55,6 +62,17 @@ public class DimensionsShortKeys
             }
 
 
+        }
+        else if(OPEN_TERMINAL_QUICK_KEY.isDown())
+        {
+            LocalPlayer player = Minecraft.getInstance().player;
+
+            if (player == null)
+            {
+                return;
+            }
+
+            PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),NetMenuType.NET_CRAFT_TERMINAL));
         }
 
     }

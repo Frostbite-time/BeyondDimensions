@@ -25,7 +25,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
         super(properties.stacksTo(1).component(ModDataComponents.CRAFT_SLOTS, NonNullList.withSize(9,ItemStack.EMPTY)));
     }
 
-    private static final Map<Player, MenuTriggerContext> contextMap = new WeakHashMap<>();
+    public static final Map<Player, MenuTriggerContext> contextMap = new WeakHashMap<>();
 
 
     @Override
@@ -91,9 +91,14 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
         );
     }
 
+    @Override
+    public boolean shouldTriggerClientSideContainerClosingOnOpen()
+    {
+        return MenuProvider.super.shouldTriggerClientSideContainerClosingOnOpen();
+    }
 
     // 创建一个内部类来存储触发时的上下文
-    private static class MenuTriggerContext {
+    public static class MenuTriggerContext {
         public final InteractionHand hand;
         public final ItemStack stack;
         public MenuTriggerContext(InteractionHand hand, ItemStack stack) {

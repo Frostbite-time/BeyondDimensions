@@ -37,6 +37,7 @@
 
   "key.categories.beyonddimensions": "Beyond Dimensions",
   "key.beyonddimensions.open_gui": "Open Dimensional Network UI",
+  "key.beyonddimensions.open_terminal_quick_key": "Quickly open the terminal in the inventory",
 
   "item.beyonddimensions.net_creater": "Dimensional Network Generator",
   "item.beyonddimensions.net_member_inviter": "Member Connector",

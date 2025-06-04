@@ -23,6 +23,7 @@ import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
+import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
@@ -51,6 +52,8 @@ import org.slf4j.Logger;
 public class BeyondDimensions
 {
     public static final String MODID = "beyonddimensions";
+    public static IEventBus MOD_EVENT_BUS;
+
     public static boolean MekLoaded = false; // 用于mek化学品存储
     public static final String MekanismMODID = "mekanism";
     public static boolean AELoaded = false; // 用于添加存储元件
@@ -63,12 +66,15 @@ public class BeyondDimensions
     public static final String PolymorphModId = "polymorph";
     public static boolean AEMEKLoaded = false;
     public static final String AEMEK2MODID = "appmek";
+    public static boolean CuriosLoaded = false;
+    public static final String CuriosModId = "curios";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
     // FML 将识别一些参数类型，如 IEventBus 或 ModContainer 并自动传入它们。
     public BeyondDimensions(IEventBus modEventBus, ModContainer modContainer)
     {
+        MOD_EVENT_BUS = modEventBus;
 
         modEventBus.addListener(this::constructMod);
         modEventBus.addListener(this::commonSetup);
@@ -129,6 +135,11 @@ public class BeyondDimensions
         if(ModList.get().isLoaded(AEMEK2MODID))
         {
             AEMEKLoaded = true;
+        }
+        if(ModList.get().isLoaded(CuriosModId))
+        {
+            CuriosLoaded = true;
+            MOD_EVENT_BUS.addListener(BD_CuriosPlugin::registerCapabilities);
         }
     }
 
