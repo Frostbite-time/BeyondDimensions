@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.Integration.Curios;
 
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
-import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
