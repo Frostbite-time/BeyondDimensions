@@ -26,5 +26,9 @@ public class ModItemModelProvider extends ItemModelProvider
         basicItem(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
         basicItem(ModItems.SPACE_TIME_BAR.get());
         basicItem(ModItems.NET_TERMINAL_ITEM.get());
+        basicItem(ModItems.NET_GIFTER.get());
+        basicItem(ModItems.NET_DESTROYER.get());
+        basicItem(ModItems.NET_AE_STORAGE_CELL.get());
+        basicItem(ModItems.MATTER_COMPRESS_BALL.get());
     }
 }
