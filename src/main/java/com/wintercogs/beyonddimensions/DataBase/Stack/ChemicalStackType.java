@@ -158,7 +158,10 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     @Override
     public IStackType<ChemicalStack> copyWithCount(long count)
     {
-        return new ChemicalStackType(stack.copyWithAmount(count));
+        ChemicalStackType copy = new ChemicalStackType(stack.copyWithAmount(count));
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
