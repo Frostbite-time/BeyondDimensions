@@ -24,7 +24,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
     public NetTerminalItem(Properties properties)
     {
-        super(properties);
+        super(properties.stacksTo(1));
     }
 
     private static final Map<Player, MenuTriggerContext> contextMap = new WeakHashMap<>();

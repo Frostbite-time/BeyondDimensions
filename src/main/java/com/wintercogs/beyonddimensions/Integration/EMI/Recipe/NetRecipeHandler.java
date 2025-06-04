@@ -114,6 +114,12 @@ public class NetRecipeHandler implements StandardRecipeHandler<DimensionsCraftMe
                 }
             }
         }
+        // 收集背包物品
+        for(ItemStack itemStack : menu.player.getInventory().items)
+        {
+            if(!itemStack.isEmpty())
+                availableItems.add(itemStack.copy());
+        }
         // 匹配配方输入需求
         for (EmiIngredient ingredient : inputs) {
 

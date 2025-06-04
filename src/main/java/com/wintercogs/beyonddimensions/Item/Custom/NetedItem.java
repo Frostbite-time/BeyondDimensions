@@ -40,6 +40,7 @@ public class NetedItem extends Item
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound",net.getId()));
                     }
                 } else {
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"));
                     return InteractionResultHolder.fail(itemstack);
                 }
             } else {

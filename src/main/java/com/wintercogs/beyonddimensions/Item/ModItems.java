@@ -48,6 +48,25 @@ public class ModItems
     public static final RegistryObject<Item> NET_TERMINAL_ITEM = ITEMS.register("net_terminal_item",
             () -> new NetTerminalItem(new Item.Properties()));
 
+    // AE存储磁盘 对于一个没有安装AE的游戏，这个物品没有任何效果。你可以单方面禁用它。
+    public static final RegistryObject<Item> NET_AE_STORAGE_CELL = ITEMS.register("net_ae_storage_cell",
+            () -> new NetAEStorageCell(new Item.Properties()));
+
+    // 网络赠送符
+    public static final RegistryObject<Item> NET_GIFTER = ITEMS.register("net_gifter",
+            () -> new NetGifter(new Item.Properties()));
+
+    // 网络摧毁符
+    public static final RegistryObject<Item> NET_DESTROYER = ITEMS.register("net_destroyer",
+            () -> new NetDestroyer(new Item.Properties()));
+
+    // 物质压缩球
+    public static final RegistryObject<Item> MATTER_COMPRESS_BALL = ITEMS.register("matter_compress_ball",
+            () -> new MatterCompressionBall(new Item.Properties()));
+
+
+
+
     // 测试物品 -----------------------
     // 随机物品生成器
     public static final RegistryObject<Item> TEST_ITEM_GENERATE = ITEMS.register("test_item_generate",

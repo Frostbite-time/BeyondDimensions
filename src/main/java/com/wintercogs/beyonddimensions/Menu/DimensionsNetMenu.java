@@ -205,25 +205,23 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     }
 
     // 仅仅更新视觉存储的数量信息
-    public void updateOnlyCountAndNewViewer() {
-        // 遍历viewerStorage中的所有物品
+    public void updateOnlyCountAndNewViewer()
+    {
+        // 利用hashMap进行包装
+        // 由于viewerStorage的对象来自storage。而storage不会被随意清空
+        // hashCode将能被自定义的copy函数一并传递，无需过多性能
+
+        Map<IStackType, Long> storageMap = new HashMap<>();
+
+        // 填充主存储物品数量 (O(n))
+        for (IStackType stack : storage.getStorage()) {
+            storageMap.put(stack, stack.getStackAmount());
+        }
+        // 更新查看者存储的数量 (O(m))
         for (IStackType viewerStack : viewerStorage.getStorage()) {
-            boolean foundInStorage = false;
-
-            // 在storage.getStorage()中寻找类型和组件相同的物品
-            for (IStackType storageStack : storage.getStorage()) {
-                if (storageStack.isSameTypeSameComponents(viewerStack)) {
-                    // 找到匹配时设置viewer的数量为storage的数量
-                    viewerStack.setStackAmount(storageStack.getStackAmount());
-                    foundInStorage = true;
-                    break;
-                }
-            }
-
-            // 如果没有在storage中找到对应的物品，将数量设为0
-            if (!foundInStorage) {
-                viewerStack.setStackAmount(0);
-            }
+            // 使用哈希表直接查找数量，不存在时默认为0
+            long amount = storageMap.getOrDefault(viewerStack, 0L);
+            viewerStack.setStackAmount(amount);
         }
     }
 
@@ -380,35 +378,20 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         // 开始运行原子化物品比较
         ArrayList<IStackType> changedItem = new ArrayList<>();
         ArrayList<Long> changedCount = new ArrayList<>();
-        // 深克隆2个缓存数组
-        ArrayList<IStackType> cacheLast = new ArrayList<>();
-        for(IStackType stack : this.lastStorage)
-        {
-            cacheLast.add(stack.copy());
-        }
-        ArrayList<IStackType> cacheNow = new ArrayList<>();
-        for(IStackType stack : this.storage.getStorage())
-        {
-            cacheNow.add(stack.copy());
-        }
-        // 缓存结束后，立刻更新last列表
-        refreshLast();
 
-        // 接下来进行根据物品种类进行比较（即将List使用近似Map的比较方法），种类变化加入changedItem，数量变化加入changedCount，数量变化使用Now-Last
-        // 注意要处理last和now中可能导致的由于种类变化不同而改变了索引总数。对于Last有，而Now没有的种类意味着种类加入changedItem，数量为0-Last。反之则为种类加入changedItem，数量为Now-0
-        // 对于StoredItemStack类，equals方法可以有效比较2个物品是否为统一种类而不计较数量
-        // StoredItemStack.getCount可以获取数量进行进一步比较
-
-        // 为两个缓存数组分别创建Map，使用自定义的包装类作为键
+        // 为两个缓存数组分别创建Map
         Map<IStackType, Long> lastMap = new HashMap<>();
-        for (IStackType stack : cacheLast) {
+        for (IStackType stack : this.lastStorage) {
             lastMap.put(stack, lastMap.getOrDefault(stack, (long) 0) + stack.getStackAmount());
         }
 
         Map<IStackType, Long> nowMap = new HashMap<>();
-        for (IStackType stack : cacheNow) {
+        for (IStackType stack : this.storage.getStorage()) {
             nowMap.put(stack, nowMap.getOrDefault(stack, (long) 0) + stack.getStackAmount());
         }
+        // 缓存结束后，立刻更新last列表
+        refreshLast();
+
 
         // 比较两个Map的差异
         Set<IStackType> allKeys = new HashSet<>();

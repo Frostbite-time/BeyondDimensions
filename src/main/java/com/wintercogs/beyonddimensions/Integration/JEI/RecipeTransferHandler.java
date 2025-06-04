@@ -88,6 +88,13 @@ public class RecipeTransferHandler implements IRecipeTransferHandler<DimensionsC
             }
         }
 
+        // 收集背包物品
+        for(ItemStack itemStack : container.player.getInventory().items)
+        {
+            if(!itemStack.isEmpty())
+                availableItems.add(itemStack.copy());
+        }
+
         // 3. 创建虚拟库存用于模拟扣除
         List<ItemStack> virtualInventory = new ArrayList<>();
         for (ItemStack stack : availableItems) {

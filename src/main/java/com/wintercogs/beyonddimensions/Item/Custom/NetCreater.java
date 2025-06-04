@@ -17,7 +17,7 @@ public class NetCreater extends Item
 
     public NetCreater(Properties properties)
     {
-        super(properties);
+        super(properties.stacksTo(1));
     }
 
     @Override

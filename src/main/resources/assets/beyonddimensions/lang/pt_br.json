@@ -48,6 +48,10 @@
   "item.beyonddimensions.space_time_bar": "Barra Espaço-Temporal",
   "item.beyonddimensions.test_item_generate": "Gerador de Itens (Teste)",
   "item.beyonddimensions.net_terminal_item": "Terminal de Rede Portátil",
+  "item.beyonddimensions.net_ae_storage_cell": "Célula de armazenamento ME dimensional",
+  "item.beyonddimensions.net_gifter": "Item de presente de rede",
+  "item.beyonddimensions.net_destroyer": "Amuleto Destruidor de Rede",
+  "item.beyonddimensions.matter_compress_ball": "Esfera de Matéria Comprimida",
 
   "block.beyonddimensions.net_control": "Controlador de Rede",
   "block.beyonddimensions.net_interface": "Interface de Rede",
@@ -65,5 +69,12 @@
   "msg.beyonddimensions.item_net_unbound": "Item desvinculado da rede nº%d",
   "msg.beyonddimensions.block_net_bound": "Bloco vinculado à rede nº%d",
   "msg.beyonddimensions.block_net_unbound": "Bloco desvinculado da rede nº%d",
-  "msg.beyonddimensions.item_need_bound": "O item precisa ser vinculado antes de ser usado"
+  "msg.beyonddimensions.item_need_bound": "O item precisa ser vinculado antes de ser usado",
+  "msg.beyonddimensions.error_item_net": "A rede vinculada a este item não está disponível",
+  "msg.beyonddimensions.cant_merge_net": "Não é possível mesclar a rede alvo. Você deve ser o proprietário da rede para mesclar outras redes",
+  "msg.beyonddimensions.no_right_to_bound_item": "Você não tem permissão para alterar o vínculo de rede deste item",
+  "msg.beyonddimensions.no_right_to_bound_block": "Você não tem permissão para alterar o vínculo de rede deste bloco",
+  "msg.beyonddimensions.cant_delete_net": "Não é possível deletar a rede – Apenas o dono pode fazer isso",
+  "msg.beyonddimensions.item_net_destroyed": "Você destruiu a rede em que estava",
+  "msg.beyonddimensions.net_gift_done": "Rede %s fundida com sucesso"
 }

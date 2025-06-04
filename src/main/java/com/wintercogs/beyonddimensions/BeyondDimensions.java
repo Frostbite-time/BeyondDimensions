@@ -29,6 +29,8 @@ import com.wintercogs.beyonddimensions.DataBase.Storage.Chemicals.SlurryUnifiedS
 import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
+import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
@@ -49,6 +51,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
@@ -67,6 +70,8 @@ public class BeyondDimensions
     public static final String JEI2MODID = "jei";
     public static boolean PolymorphLoaded = false;
     public static final String PolymorphModId = "polymorph";
+    public static boolean AEMEKLoaded = false;
+    public static final String AEMEK2MODID = "appmek";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -75,6 +80,7 @@ public class BeyondDimensions
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
+        modEventBus.addListener(this::constructMod);
         modEventBus.addListener(this::commonSetup);
         //为存储网络的接口方块注册物品交互能力
 
@@ -102,7 +108,7 @@ public class BeyondDimensions
 
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event)
+    private void constructMod(final FMLConstructModEvent event)
     {
         if(ModList.get().isLoaded(MekanismMODID))
         {
@@ -124,7 +130,14 @@ public class BeyondDimensions
         {
             PolymorphLoaded = true;
         }
+        if(ModList.get().isLoaded(AEMEK2MODID))
+        {
+            AEMEKLoaded = true;
+        }
+    }
 
+    private void commonSetup(final FMLCommonSetupEvent event)
+    {
 
         // 注册堆叠类型，使得网络能够存储相关堆叠
         StackTypeRegistry.registerType(new ItemStackType());
@@ -185,6 +198,15 @@ public class BeyondDimensions
             StackHandlerWrapperHelper.stackWrappers.put(PigmentStackType.ID, PigmentHandlerWrapper::new);
             StackHandlerWrapperHelper.stackWrappers.put(SlurryStackType.ID, SlurryHandlerWrapper::new);
 
+        }
+
+        if(AELoaded)
+        {
+            BD_AEPlugin.register();
+        }
+        if(AEMEKLoaded)
+        {
+            BD_AEMEKPlugin.register();
         }
     }
 

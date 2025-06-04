@@ -41,6 +41,9 @@ public class FluidStackType implements IStackType<FluidStack>
     private FluidStack stack;
     private long stackSize;
 
+    private int hashCodeCache = 0; // 哈希码缓存
+    private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
+
     // 创建空stack
     public FluidStackType()
     {
@@ -67,7 +70,11 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         if(key instanceof Fluid fluid)
         {
-            FluidStack fluidStack = new FluidStack(fluid, 1,dataComponentPatch);
+            FluidStack fluidStack;
+            if(dataComponentPatch != null)
+                fluidStack = new FluidStack(fluid, 1,dataComponentPatch);
+            else
+                fluidStack = new FluidStack(fluid, 1);
             return new FluidStackType(fluidStack,amount);
         }
         return null;
@@ -100,6 +107,7 @@ public class FluidStackType implements IStackType<FluidStack>
         stackSize = stack.getAmount();
         if(!(this.stack.getRawFluid() == Fluids.EMPTY))
             this.stack.setAmount(1);
+        NeedRecalHash = true;
     }
 
     @Override
@@ -166,13 +174,19 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public IStackType<FluidStack> copy()
     {
-        return new FluidStackType(stack.copy(), stackSize);
+        FluidStackType copy = new FluidStackType(stack.copy(), stackSize);
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
     public IStackType<FluidStack> copyWithCount(long count)
     {
-        return new FluidStackType(stack.copy(),count);
+        FluidStackType copy = new FluidStackType(stack.copy(),count);
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
@@ -297,6 +311,7 @@ public class FluidStackType implements IStackType<FluidStack>
     public CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
+        tag.putString("Type", ID.toString());
         tag.putLong("Amount", getStackAmount());
         tag.put("Stack",new FluidStack(stack,1).writeToNBT(new CompoundTag()));
         return tag;
@@ -445,6 +460,11 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
-        return stack.hashCode();
+        if(NeedRecalHash)
+        {
+            hashCodeCache = stack.hashCode();
+            NeedRecalHash = false;
+        }
+        return hashCodeCache;
     }
 }

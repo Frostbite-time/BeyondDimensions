@@ -17,12 +17,10 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import org.slf4j.Logger;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 
 public class DimensionsNet extends SavedData
@@ -31,7 +29,11 @@ public class DimensionsNet extends SavedData
     private static final Logger LOGGER = LogUtils.getLogger();
 
     // 每个维度网络具有一个唯一标识符
+    // 被删除的网络id会被标记为-99
     private int id;
+
+    public boolean deleted = false; // 正常被初始化的为false，该数据持久化，用以记录被删除的网络
+                                    // 直到功能测试稳定，被删除的网络可以重新分配给其他玩家
 
     // 网络持有者
     private UUID owner;
@@ -46,7 +48,7 @@ public class DimensionsNet extends SavedData
     private EnergyStorage energyStorage;
     // 非neoforge自带的存储系统 确保在任何调用之前检查null或者对应模组是否加载
 
-    // 通用存储空间-测试 存储一切stack行为的资源
+    // 通用存储空间 存储一切stack行为的资源
     private UnifiedStorage unifiedStorage;
 
     // 用于标记此网络是否为临时网络，如果是，则不执行倒计时或其他功能
@@ -71,11 +73,12 @@ public class DimensionsNet extends SavedData
         return new DimensionsNet(false);
     }
 
-    // 构建最新的网络名称
+    // 构建最新可用的网络名称
     public static String buildNewNetName(Player player)
     {
         int netId;
         // 接下来按照"BDNet_" + netId从0查找网络，直到找到不存在的网络，此时netId为新网络id
+        // 后续可以做一个废弃网络回收处理，但是暂时不着急
         for (netId = 0; netId < 10000; netId++)
         {
             if (player.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + netId) == null)
@@ -93,7 +96,7 @@ public class DimensionsNet extends SavedData
             return null;
         }
         DimensionsNet net = storageProvider.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + id);
-        if(net !=null)
+        if(net !=null && !net.deleted)
         {
             return net;
         }
@@ -106,7 +109,7 @@ public class DimensionsNet extends SavedData
         for (netId = 0; netId < 10000; netId++)
         {
             DimensionsNet net = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + netId);
-            if (net != null)
+            if (net != null && !net.deleted)
             {
                 if(net.players.contains(player.getUUID()))
                 {
@@ -151,6 +154,9 @@ public class DimensionsNet extends SavedData
         // 读取倒计时
         net.currentTime = tag.getInt("currentTime");
 
+        if(tag.contains("Deleted"))
+            net.deleted = tag.getBoolean("Deleted");
+
         return net;
     }
 
@@ -161,7 +167,8 @@ public class DimensionsNet extends SavedData
         // 保存 ID
         tag.putInt("Id", this.id);
         // 保存网络所有者 UUID
-        tag.putUUID("Owner", this.owner);
+        if(this.owner != null)
+            tag.putUUID("Owner", this.owner);
 
         if(!tag.contains("OldDataTag"))
         {
@@ -190,6 +197,9 @@ public class DimensionsNet extends SavedData
 
         // 保存倒计时
         tag.putInt("currentTime", this.currentTime);
+
+        // 保存删除状态
+        tag.putBoolean("Deleted", this.deleted);
 
         return tag;
     }
@@ -317,6 +327,53 @@ public class DimensionsNet extends SavedData
             flag = true;
         }
         return flag;
+    }
+
+
+    public void mergeOtherNet(DimensionsNet otherNet)
+    {
+        Level provider = ServerLifecycleHooks.getCurrentServer().overworld();
+        // 合并玩家和管理员
+        for(Map.Entry<UUID,PlayerPermissionInfo> entry: otherNet.getPlayerPermissionInfoMap(provider).entrySet())
+        {
+            if(entry.getValue().level() == NetPermissionlevel.Owner ||entry.getValue().level() == NetPermissionlevel.Manager)
+                addManager(entry.getKey());
+            else if(entry.getValue().level() == NetPermissionlevel.Member)
+                addPlayer(entry.getKey());
+        }
+        // 合并统一存储系统
+        for(IStackType stack : otherNet.getUnifiedStorage().getStorage())
+        {
+            unifiedStorage.insert(stack,false);
+        }
+        // 合并能量存储
+        long capacity1 = energyStorage.getRealEnergyStored();
+        long capacity2 = otherNet.energyStorage.getRealEnergyStored();
+        long total;
+        // 仅处理正数溢出
+        if (capacity1 > Long.MAX_VALUE - capacity2) {
+            total = Long.MAX_VALUE;
+        } else {
+            total = capacity1 + capacity2;
+        }
+        energyStorage.setEnergyDirectly(total);
+
+        // 销毁另一个网络
+        otherNet.destroySelf();
+    }
+
+    public void destroySelf()
+    {
+        // 这里有一些问题。即我们实际上无法删除已经存在的SaveData。
+        // 所以我们要做的是巧妙地将此SaveData有关数据指向移除。
+        // 然后将所有对应的存储容量设置为0
+        this.owner = null;
+        this.managers.clear();
+        this.players.clear();
+        this.id = -99; // 用-99作为被删除的特殊标记
+        this.unifiedStorage.clearStorage();
+        this.energyStorage.setEnergyDirectly(0);
+        this.deleted = true;
     }
 
     public HashMap<UUID,PlayerPermissionInfo> getPlayerPermissionInfoMap(Level playerInfoProvider)

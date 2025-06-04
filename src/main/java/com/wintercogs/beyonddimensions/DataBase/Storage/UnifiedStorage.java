@@ -5,12 +5,15 @@ import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.GasStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
+import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
 import java.util.function.Function;
@@ -157,6 +160,17 @@ public class UnifiedStorage implements IStackTypedHandler
     public IStackType insert(IStackType stack,boolean simulate) {
         if (stack.isEmpty()) return StackCreater.CreateEmpty(stack.getTypeId());
 
+        // 对物质压缩球的特殊处理
+        if(stack instanceof ItemStackType itemStackType)
+        {
+            if(itemStackType.getStack().getItem() instanceof MatterCompressionBall)
+            {
+                return unzipMatterBall(itemStackType, simulate);
+            }
+        }
+
+        // 正常处理
+
         long remaining = stack.getStackAmount(); // 剩余可被插入的量
         long canInsert = Math.min(getSlotCapacity(0),stack.getCustomMaxStackSize()); // 能被插入的空间
 
@@ -191,6 +205,65 @@ public class UnifiedStorage implements IStackTypedHandler
             onChange();
         }
         return stack.copyWithCount(remaining);
+    }
+
+    // 解压物质球的函数 函数处理应当相当稳定，即使是物质球内有其他物质球也应能正常解压（不过应当尽量避免这种操作）
+    // 输入一个物质球堆叠 输入后，模拟是否能完全插入，如果可以，就插入，否则就完全不操作
+    // 输出一个物质球堆叠 输出的目的是，如果能完全解压，返回空，否则返回原本
+    protected IStackType unzipMatterBall(ItemStackType stack, boolean simulate)
+    {
+        ItemStack ballStack = stack.copyStack();
+        List<IStackType> ballStorage;
+
+        // 再次检测，如果不是物质球则不处理
+        if(!(stack.getStack().getItem() instanceof MatterCompressionBall))
+            return stack;
+
+        if(MatterCompressionBall.hasIStackList(ballStack))
+        {
+            long ballNum = stack.getStackAmount(); // 乘数，防止未知情况下，多个相同nbt的物质球同时被插入。 虽然一般不可能
+
+            List<IStackType> newBallStorage = new ArrayList<>();
+            ballStorage = MatterCompressionBall.getIStackList(ballStack);
+
+            // 首先模拟物质插入
+            for(IStackType stackType: ballStorage)
+            {
+                stackType.setStackAmount(stackType.getStackAmount()*ballNum);
+                newBallStorage.add(insert(stackType,true));
+            }
+            // 假设剩余为空，然后遍历newBallStorage，如果遇见不为空的堆叠，则设置球不为空
+            boolean newBallStorageIsEmpty = true;
+            for(IStackType stackType: newBallStorage)
+            {
+                if(!stackType.isEmpty())
+                {
+                    newBallStorageIsEmpty = false;
+                }
+            }
+
+            // 如果球为空，则执行insert操作
+            if(newBallStorageIsEmpty)
+            {
+                if(simulate)
+                    return new ItemStackType();
+                else
+                {
+                    for(IStackType stackType: ballStorage)
+                    {
+                        stackType.setStackAmount(stackType.getStackAmount()*ballNum);
+                        insert(stackType, false);
+                    }
+                    return new ItemStackType();
+                }
+            }
+            else //如果球不为空，则不进行插入操作，原路返回
+            {
+                return stack;
+            }
+        }
+        // 如果物质球内未存储堆叠，则直接消耗球
+        return new ItemStackType();
     }
 
     // 尝试按类型导出，返回实际导出量

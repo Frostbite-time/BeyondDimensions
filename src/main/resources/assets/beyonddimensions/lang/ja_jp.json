@@ -48,6 +48,10 @@
   "item.beyonddimensions.space_time_bar": "時空インゴット",
   "item.beyonddimensions.test_item_generate": "テスト用アイテム生成器",
   "item.beyonddimensions.net_terminal_item": "ポータブルネットワークターミナル",
+  "item.beyonddimensions.net_ae_storage_cell": "ディメンションMEストレージセル",
+  "item.beyonddimensions.net_gifter": "ネットワークギフトアイテム",
+  "item.beyonddimensions.net_destroyer": "ネットワーク破壊の護符",
+  "item.beyonddimensions.matter_compress_ball": "圧縮物質球",
 
   "block.beyonddimensions.net_control": "ネットワーク制御装置",
   "block.beyonddimensions.net_interface": "ネットワークインタフェース",
@@ -65,5 +69,12 @@
   "msg.beyonddimensions.item_net_unbound": "アイテムを%d番ネットワークから切断しました",
   "msg.beyonddimensions.block_net_bound": "ブロックを%d番ネットワークに接続しました",
   "msg.beyonddimensions.block_net_unbound": "ブロックを%d番ネットワークから切断しました",
-  "msg.beyonddimensions.item_need_bound": "使用する前にアイテムをバインドする必要があります"
+  "msg.beyonddimensions.item_need_bound": "使用する前にアイテムをバインドする必要があります",
+  "msg.beyonddimensions.error_item_net": "このアイテムにバインドされたネットワークは利用できません",
+  "msg.beyonddimensions.cant_merge_net": "対象ネットワークをマージできません。他のネットワークをマージするには、ネットワークの所有者である必要があります",
+  "msg.beyonddimensions.no_right_to_bound_item": "このアイテムのネットワークバインドを変更する権限がありません",
+  "msg.beyonddimensions.no_right_to_bound_block": "このブロックのネットワークバインドを変更する権限がありません",
+  "msg.beyonddimensions.cant_delete_net": "ネットワークを削除できません―所有者のみが実行可能です",
+  "msg.beyonddimensions.item_net_destroyed": "自身が属するネットワークを削除しました",
+  "msg.beyonddimensions.net_gift_done": "ネットワーク番号%sの統合に成功"
 }

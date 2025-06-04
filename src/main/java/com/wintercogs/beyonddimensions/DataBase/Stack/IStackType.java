@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 // 用于定义不同stack的行为 物品 流体 以及其他模组中行为逻辑stack相似的资源
 // 实现还需重写hashcode以及equals方法，使其检测忽略数量以用于其他位置的代码
+// 由于hashcode的大量依赖，强烈建议在具体实现中缓存hashcode以降低开销
 public interface IStackType<T> {
 
     IStackType<T> fromObject(Object key, long amount, CompoundTag dataComponentPatch);
@@ -109,6 +111,24 @@ public interface IStackType<T> {
     // 新增方法：NBT序列化（用于磁盘存储）
     CompoundTag serializeNBT();
     IStackType<T> deserializeNBT(CompoundTag nbt);
+
+    static IStackType deserializeNBTCommon(CompoundTag nbt)
+    {
+        ResourceLocation typeId = ResourceLocation.tryParse(nbt.getString("Type"));
+        for(IStackType stacktype : StackTypeRegistry.getAllTypes())
+        {
+            if(stacktype.getTypeId().equals(typeId))
+            {
+                IStackType stack = stacktype.deserializeNBT(nbt);
+                if(stack!=null)
+                {
+                    return stack;
+                }
+            }
+        }
+
+        return null;
+    }
 
 
     // UI渲染（在指定位置绘制图标和数量）

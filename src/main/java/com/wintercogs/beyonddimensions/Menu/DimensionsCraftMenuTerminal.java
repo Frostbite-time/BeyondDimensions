@@ -12,10 +12,12 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 {
     private ItemStack terminalStack = null;
+    private BlockPos entityPos = null;
 
 
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory)
@@ -27,7 +29,10 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     {
         super(UIRegister.Dimensions_Craft_Menu_Terminal.get(), id,playerInventory,data, craftItems,entityPos);
         if(!player.level().isClientSide)
+        {
             this.terminalStack = terminalItem;
+            this.entityPos = entityPos;
+        }
     }
 
     @Override
@@ -84,5 +89,17 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 
         }
 
+    }
+
+    @Override
+    public boolean stillValid(Player player)
+    {
+        if(entityPos != null)
+        {
+            BlockEntity be = player.level().getBlockEntity(entityPos);
+            return be != null && !be.isRemoved();
+        }
+        else
+            return super.stillValid(player);
     }
 }

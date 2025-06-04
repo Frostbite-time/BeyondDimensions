@@ -147,6 +147,36 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("unlock_net_terminal_item", has(ModItems.NET_MEMBER_INVITER.get()))
                 .save(recipeOutput);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_GIFTER.get())
+                .pattern(" A ")
+                .pattern("BCB")
+                .pattern(" B ")
+                .define('A', Items.DIAMOND)
+                .define('B', Items.GOLD_INGOT)
+                .define('C', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                .unlockedBy("unlock_net_gifter", has(ModItems.SPACE_TIME_STABLE_FRAME.get()))
+                .save(recipeOutput);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_DESTROYER.get())
+                .pattern(" A ")
+                .pattern("BCB")
+                .pattern(" B ")
+                .define('A', Items.TNT)
+                .define('B', Items.GOLD_INGOT)
+                .define('C', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                .unlockedBy("unlock_net_destroyer", has(ModItems.SPACE_TIME_STABLE_FRAME.get()))
+                .save(recipeOutput);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_AE_STORAGE_CELL.get())
+                .pattern("ABA")
+                .pattern("BDB")
+                .pattern("CCC")
+                .define('A', Items.GLASS)
+                .define('B', Items.DIAMOND)
+                .define('C', ModItems.SPACE_TIME_BAR.get())
+                .define('D', ModItems.NET_MANAGER_INVITER.get())
+                .unlockedBy("unlock_net_ae_storage_cell", has(ModItems.SPACE_TIME_BAR.get()))
+                .save(recipeOutput);
 
 
 

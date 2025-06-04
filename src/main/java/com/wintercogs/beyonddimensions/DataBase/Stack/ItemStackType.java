@@ -29,6 +29,9 @@ public class ItemStackType implements IStackType<ItemStack> {
     private ItemStack stack;
     private long stackSize;
 
+    private int hashCodeCache = 0; // 哈希码缓存
+    private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
+
     public ItemStackType()
     {
         stack = ItemStack.EMPTY;
@@ -52,7 +55,11 @@ public class ItemStackType implements IStackType<ItemStack> {
     {
         if(key instanceof Item item)
         {
-            ItemStack itemStack = new ItemStack(item, 1,dataComponentPatch);
+            ItemStack itemStack;
+            if(dataComponentPatch != null)
+                itemStack = new ItemStack(item, 1,dataComponentPatch);
+            else
+                itemStack = new ItemStack(item,1);
             return new ItemStackType(itemStack,amount);
         }
         return null;
@@ -70,6 +77,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     {
         this.stack = stack.copy();
         this.stackSize = stack.getCount();
+        NeedRecalHash = true;
     }
 
     @Override
@@ -140,13 +148,19 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public IStackType<ItemStack> copy()
     {
-        return new ItemStackType(stack.copy(),stackSize);
+        ItemStackType copy = new ItemStackType(stack.copy(),stackSize);
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
     public IStackType<ItemStack> copyWithCount(long count)
     {
-        return new ItemStackType(stack.copy(),count);
+        ItemStackType copy = new ItemStackType(stack.copy(),count);
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
@@ -264,6 +278,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
+        tag.putString("Type", ID.toString());
         tag.putLong("Amount", getStackAmount());
         tag.put("Stack",stack.copyWithCount(1).save(new CompoundTag()));
         return tag;
@@ -356,15 +371,21 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
-        if (stack != null) {
-            int i = 31 + stack.getItem().hashCode();
-            if(stack.hasTag())
-                return i*31 + stack.getTag().hashCode();
-            else
-                return i;
-        } else {
-            return 0;
+        if(NeedRecalHash)
+        {
+            if (stack != null) {
+                int i = 31 + stack.getItem().hashCode();
+                if(stack.hasTag())
+                    hashCodeCache = i*31 + stack.getTag().hashCode();
+                else
+                    hashCodeCache =  i;
+            } else {
+                hashCodeCache = 0;
+            }
+            NeedRecalHash = false;
         }
+        return hashCodeCache;
+
     }
 }
 

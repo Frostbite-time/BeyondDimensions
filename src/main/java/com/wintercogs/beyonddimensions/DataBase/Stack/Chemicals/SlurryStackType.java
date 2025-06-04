@@ -39,6 +39,9 @@ public class SlurryStackType implements IStackType<SlurryStack>
 
     private SlurryStack stack;
 
+    private int hashCodeCache = 0; // 哈希码缓存
+    private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
+
     // 创建空stack
     public SlurryStackType()
     {
@@ -84,6 +87,7 @@ public class SlurryStackType implements IStackType<SlurryStack>
     public void setStack(SlurryStack stack)
     {
         this.stack = stack.copy();
+        this.NeedRecalHash = true;
     }
 
     @Override
@@ -144,13 +148,19 @@ public class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public IStackType<SlurryStack> copy()
     {
-        return new SlurryStackType(stack.copy());
+        SlurryStackType copy = new SlurryStackType(stack.copy());
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
     public IStackType<SlurryStack> copyWithCount(long count)
     {
-        return new SlurryStackType(new SlurryStack(stack, count));
+        SlurryStackType copy = new SlurryStackType(new SlurryStack(stack, count));
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
@@ -278,6 +288,7 @@ public class SlurryStackType implements IStackType<SlurryStack>
     public CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
+        tag.putString("Type", ID.toString());
         tag.putLong("Amount", getStackAmount());
         tag.put("Stack",new SlurryStack(stack,1).write(new CompoundTag()));
         return tag;
@@ -427,8 +438,13 @@ public class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
-        int code = 1;
-        code = 31 * code + stack.getType().hashCode();
-        return code;
+        if(NeedRecalHash)
+        {
+            int code = 1;
+            code = 31 * code + stack.getType().hashCode();
+            hashCodeCache = code;
+            NeedRecalHash = false;
+        }
+        return hashCodeCache;
     }
 }

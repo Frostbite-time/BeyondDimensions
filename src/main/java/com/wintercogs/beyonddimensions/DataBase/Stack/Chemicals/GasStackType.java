@@ -39,6 +39,9 @@ public class GasStackType implements IStackType<GasStack>
 
     private GasStack stack;
 
+    private int hashCodeCache = 0; // 哈希码缓存
+    private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
+
     // 创建空stack
     public GasStackType()
     {
@@ -84,6 +87,7 @@ public class GasStackType implements IStackType<GasStack>
     public void setStack(GasStack stack)
     {
         this.stack = stack.copy();
+        NeedRecalHash = true;
     }
 
     @Override
@@ -144,13 +148,19 @@ public class GasStackType implements IStackType<GasStack>
     @Override
     public IStackType<GasStack> copy()
     {
-        return new GasStackType(stack.copy());
+        GasStackType copy = new GasStackType(stack.copy());
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
     public IStackType<GasStack> copyWithCount(long count)
     {
-        return new GasStackType(new GasStack(stack, count));
+        GasStackType copy = new GasStackType(new GasStack(stack, count));
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
@@ -278,6 +288,7 @@ public class GasStackType implements IStackType<GasStack>
     public CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
+        tag.putString("Type", ID.toString());
         tag.putLong("Amount", getStackAmount());
         tag.put("Stack",new GasStack(stack,1).write(new CompoundTag()));
         return tag;
@@ -427,8 +438,13 @@ public class GasStackType implements IStackType<GasStack>
     @Override
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
-        int code = 1;
-        code = 31 * code + stack.getType().hashCode();
-        return code;
+        if(NeedRecalHash)
+        {
+            int code = 1;
+            code = 31 * code + stack.getType().hashCode();
+            hashCodeCache = code;
+            NeedRecalHash = false;
+        }
+        return hashCodeCache;
     }
 }

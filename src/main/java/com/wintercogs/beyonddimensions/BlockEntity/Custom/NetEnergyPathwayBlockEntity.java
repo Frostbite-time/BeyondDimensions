@@ -29,34 +29,6 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
         super(ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
-//    //--- 能力注册 (通过事件) ---
-//    public static void registerCapability(AttachCapabilitiesEvent<BlockEntity> event) {
-//        if(event.getObject() instanceof NetEnergyPathwayBlockEntity be) {
-//            ICapabilityProvider provider = basic
-//            event.addCapability();
-//        }
-//        event.registerBlockEntity(
-//                Capabilities.EnergyStorage.BLOCK, // 标准物品能力
-//                ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
-//                (be, side) -> {
-//                    if(be.popMode)
-//                    {
-//                        return new EnergyStorage(0);
-//                    }
-//                    if(be.getNetId()<0)
-//                    {
-//                        return new EnergyStorage(0);
-//                    }
-//                    DimensionsNet net = be.getNet();
-//                    if(net != null)
-//                    {
-//                        return net.getEnergyStorage();
-//                    }
-//                    return new EnergyStorage(0);
-//                } // 根据方向返回处理器
-//        );
-//    }
-
 
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap,Direction side)
@@ -108,7 +80,11 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
     {
         if(energyStorage==null)
         {
-            energyStorage = getNet().getEnergyStorage();
+            DimensionsNet net = getNet();
+            if(net != null)
+                energyStorage = getNet().getEnergyStorage();
+            else
+                return;
         }
 
         for(Direction dir: directions)

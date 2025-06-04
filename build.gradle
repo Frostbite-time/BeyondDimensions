@@ -35,6 +35,10 @@ repositories {
     maven {
         url "https://cursemaven.com"
     }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
 }
 
 base {
@@ -158,6 +162,10 @@ dependencies {
 
     // 多态合成支持
     compileOnly "curse.maven:polymorph-388800:4928442"
+
+    // AE支持
+    compileOnly "maven.modrinth:ae2:${ae_version}"
+    compileOnly "curse.maven:applied-mekanistics-574300:4842281" // AE的通用机械附属
 
 
 

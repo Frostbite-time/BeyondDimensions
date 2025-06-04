@@ -39,6 +39,9 @@ public class PigmentStackType implements IStackType<PigmentStack>
 
     private PigmentStack stack;
 
+    private int hashCodeCache = 0; // 哈希码缓存
+    private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
+
     // 创建空stack
     public PigmentStackType()
     {
@@ -84,6 +87,7 @@ public class PigmentStackType implements IStackType<PigmentStack>
     public void setStack(PigmentStack stack)
     {
         this.stack = stack.copy();
+        this.NeedRecalHash = true;
     }
 
     @Override
@@ -144,13 +148,19 @@ public class PigmentStackType implements IStackType<PigmentStack>
     @Override
     public IStackType<PigmentStack> copy()
     {
-        return new PigmentStackType(stack.copy());
+        PigmentStackType copy = new PigmentStackType(stack.copy());
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
     public IStackType<PigmentStack> copyWithCount(long count)
     {
-        return new PigmentStackType(new PigmentStack(stack, count));
+        PigmentStackType copy = new PigmentStackType(new PigmentStack(stack, count));
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
@@ -278,6 +288,7 @@ public class PigmentStackType implements IStackType<PigmentStack>
     public CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
+        tag.putString("Type", ID.toString());
         tag.putLong("Amount", getStackAmount());
         tag.put("Stack",new PigmentStack(stack,1).write(new CompoundTag()));
         return tag;
@@ -427,8 +438,13 @@ public class PigmentStackType implements IStackType<PigmentStack>
     @Override
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
-        int code = 1;
-        code = 31 * code + stack.getType().hashCode();
-        return code;
+        if(NeedRecalHash)
+        {
+            int code = 1;
+            code = 31 * code + stack.getType().hashCode();
+            hashCodeCache = code;
+            NeedRecalHash = false;
+        }
+        return hashCodeCache;
     }
 }
