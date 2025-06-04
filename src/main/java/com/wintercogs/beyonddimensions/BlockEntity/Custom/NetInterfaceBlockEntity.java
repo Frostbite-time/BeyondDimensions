@@ -9,6 +9,7 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
@@ -272,7 +273,20 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         for(IStackType stack : stackHandler.getStorage())
         {
             if(!stack.isEmpty())
-                dropList.add(stack.copy());
+            {
+                // 如果内含物质球，直接弹出，防止NBT套娃
+                if(stack instanceof ItemStackType itemStackType)
+                {
+                    if(itemStackType.getStack().getItem() instanceof MatterCompressionBall)
+                        Block.popResource(level,getBlockPos(),itemStackType.copyStack());
+                    else
+                        dropList.add(stack.copy());
+                }
+                else
+                {
+                    dropList.add(stack.copy());
+                }
+            }
         }
         ItemStack ball = new ItemStack(ModItems.MATTER_COMPRESS_BALL.get(), 1);
         if(!dropList.isEmpty())
