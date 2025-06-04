@@ -99,6 +99,8 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
             return be != null && !be.isRemoved();
         }
         else
-            return super.stillValid(player);
+        {
+            return terminalStack != null && !terminalStack.isEmpty();
+        }
     }
 }

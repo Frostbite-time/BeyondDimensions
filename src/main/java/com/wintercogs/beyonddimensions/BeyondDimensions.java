@@ -40,6 +40,7 @@ import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -143,7 +144,7 @@ public class BeyondDimensions
         if(ModList.get().isLoaded(CuriosModId))
         {
             CuriosLoaded = true;
-            MOD_EVENT_BUS.addListener(BD_CuriosPlugin::registerCapabilities);
+            MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, BD_CuriosPlugin::registerCapabilities);
         }
     }
 
