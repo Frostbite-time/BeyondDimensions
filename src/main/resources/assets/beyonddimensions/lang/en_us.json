@@ -50,6 +50,8 @@
   "item.beyonddimensions.net_terminal_item": "Portable Network Terminal",
   "item.beyonddimensions.net_ae_storage_cell": "Dimensional ME Storage Cell",
   "item.beyonddimensions.net_gifter": "Network Gifter",
+  "item.beyonddimensions.net_destroyer": "Network Destructor Charm",
+  "item.beyonddimensions.matter_compress_ball": "Compressed Matter Orb",
 
   "block.beyonddimensions.net_control": "Network Controller",
   "block.beyonddimensions.net_interface": "Network Interface",
@@ -71,5 +73,8 @@
   "msg.beyonddimensions.error_item_net": "Das mit diesem Gegenstand verbundene Netzwerk ist nicht verfügbar",
   "msg.beyonddimensions.cant_merge_net": "Das Zielnetzwerk kann nicht zusammengeführt werden. Sie müssen der Netzwerkbesitzer sein, um andere Netzwerke zusammenzuführen",
   "msg.beyonddimensions.no_right_to_bound_item": "Sie sind nicht berechtigt, die Netzwerkbindung dieses Gegenstands zu ändern",
-  "msg.beyonddimensions.no_right_to_bound_block": "Sie sind nicht berechtigt, die Netzwerkbindung dieses Blocks zu ändern"
+  "msg.beyonddimensions.no_right_to_bound_block": "Sie sind nicht berechtigt, die Netzwerkbindung dieses Blocks zu ändern",
+  "msg.beyonddimensions.cant_delete_net": "Cannot delete network – You must be the owner",
+  "msg.beyonddimensions.item_net_destroyed": "You destroyed the network you were in",
+  "msg.beyonddimensions.net_gift_done": "Merged Network #%s"
 }

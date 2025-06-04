@@ -8,6 +8,8 @@ import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
+import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
 import net.minecraft.core.BlockPos;
@@ -15,12 +17,16 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 public class NetInterfaceBlockEntity extends NetedBlockEntity
@@ -258,6 +264,22 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
                 }
         );
 
+    }
+
+    public void dropContent()
+    {
+        List<IStackType> dropList = new ArrayList<>();
+        for(IStackType stack : stackHandler.getStorage())
+        {
+            if(!stack.isEmpty())
+                dropList.add(stack.copy());
+        }
+        ItemStack ball = new ItemStack(ModItems.MATTER_COMPRESS_BALL.get(), 1);
+        if(!dropList.isEmpty())
+        {
+            ball.set(ModDataComponents.ISTACK_SLOTS, dropList);
+            Block.popResource(level,getBlockPos(),ball);
+        }
     }
 
     @Override

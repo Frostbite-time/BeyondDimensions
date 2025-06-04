@@ -7,8 +7,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-import java.util.Locale;
-
 public class ModItems
 {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(BeyondDimensions.MODID);
@@ -60,6 +58,10 @@ public class ModItems
     // 网络摧毁符
     public static final DeferredItem<Item> NET_DESTROYER = ITEMS.register("net_destroyer",
             () -> new NetDestroyer(new Item.Properties()));
+
+    // 物质压缩球
+    public static final DeferredItem<Item> MATTER_COMPRESS_BALL = ITEMS.register("matter_compress_ball",
+            () -> new MatterCompressionBall(new Item.Properties()));
 
 
     // 测试物品 -----------------------

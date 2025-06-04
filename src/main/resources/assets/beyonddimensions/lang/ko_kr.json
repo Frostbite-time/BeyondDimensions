@@ -50,6 +50,8 @@
   "item.beyonddimensions.net_terminal_item": "휴대용 네트워크 터미널",
   "item.beyonddimensions.net_ae_storage_cell": "차원 ME 저장 셀",
   "item.beyonddimensions.net_gifter": "네트워크 선물 아이템",
+  "item.beyonddimensions.net_destroyer": "네트워크 자파 부적",
+  "item.beyonddimensions.matter_compress_ball": "압축 물질 구체",
 
   "block.beyonddimensions.net_control": "네트워크 제어기",
   "block.beyonddimensions.net_interface": "네트워크 인터페이스",
@@ -71,5 +73,8 @@
   "msg.beyonddimensions.error_item_net": "이 아이템에 바인딩된 네트워크를 사용할 수 없습니다",
   "msg.beyonddimensions.cant_merge_net": "대상 네트워크를 병합할 수 없습니다. 다른 네트워크를 병합하려면 네트워크 소유자여야 합니다",
   "msg.beyonddimensions.no_right_to_bound_item": "이 아이템의 네트워크 바인딩을 변경할 권한이 없습니다",
-  "msg.beyonddimensions.no_right_to_bound_block": "이 블록의 네트워크 바인딩을 변경할 권한이 없습니다"
+  "msg.beyonddimensions.no_right_to_bound_block": "이 블록의 네트워크 바인딩을 변경할 권한이 없습니다",
+  "msg.beyonddimensions.cant_delete_net": "네트워크 삭제 불가 – 소유자만 가능합니다",
+  "msg.beyonddimensions.item_net_destroyed": "소속된 네트워크를 삭제했습니다",
+  "msg.beyonddimensions.net_gift_done": "%s번 네트워크 통합 성공"
 }

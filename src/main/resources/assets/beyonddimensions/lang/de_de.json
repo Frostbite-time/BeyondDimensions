@@ -50,6 +50,8 @@
   "item.beyonddimensions.net_terminal_item": "Tragbares Netzwerkterminal",
   "item.beyonddimensions.net_ae_storage_cell": "Dimensions-ME-Speicherzelle",
   "item.beyonddimensions.net_gifter": "Netzwerk-Geschenkgeber",
+  "item.beyonddimensions.net_destroyer": "Netzzersörer-Amulett",
+  "item.beyonddimensions.matter_compress_ball": "Komprimierte Materiekugel",
 
   "block.beyonddimensions.net_control": "Netzwerkcontroller",
   "block.beyonddimensions.net_interface": "Netzwerkschnittstelle",
@@ -71,5 +73,8 @@
   "msg.beyonddimensions.error_item_net": "Das mit diesem Gegenstand verbundene Netzwerk ist nicht verfügbar",
   "msg.beyonddimensions.cant_merge_net": "Das Zielnetzwerk kann nicht zusammengeführt werden. Sie müssen der Netzwerkbesitzer sein, um andere Netzwerke zusammenzuführen",
   "msg.beyonddimensions.no_right_to_bound_item": "Sie sind nicht berechtigt, die Netzwerkbindung dieses Gegenstands zu ändern",
-  "msg.beyonddimensions.no_right_to_bound_block": "Sie sind nicht berechtigt, die Netzwerkbindung dieses Blocks zu ändern"
+  "msg.beyonddimensions.no_right_to_bound_block": "Sie sind nicht berechtigt, die Netzwerkbindung dieses Blocks zu ändern",
+  "msg.beyonddimensions.cant_delete_net": "Netz kann nicht gelöscht werden – Nur der Besitzer kann dies tun",
+  "msg.beyonddimensions.item_net_destroyed": "Du hast dein eigenes Netz gelöscht",
+  "msg.beyonddimensions.net_gift_done": "Netz %s erfolgreich fusioniert"
 }

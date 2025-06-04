@@ -437,7 +437,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
     @Override
     public boolean stillValid(Player player)
     {
-        return true; // 可根据需求修改条件
+        return be != null && !be.isRemoved();
     }
 
 

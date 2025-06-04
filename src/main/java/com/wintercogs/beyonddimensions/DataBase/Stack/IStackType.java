@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
+import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
@@ -13,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -22,6 +24,16 @@ import java.util.Optional;
 // 实现还需重写hashcode以及equals方法，使其检测忽略数量以用于其他位置的代码
 // 由于hashcode的大量依赖，强烈建议在具体实现中缓存hashcode以降低开销
 public interface IStackType<T> {
+
+    public static final Codec<IStackType> CODEC = CompoundTag.CODEC.xmap(
+            compoundTag -> {
+                return IStackType.deserializeNBTCommon(compoundTag, ServerLifecycleHooks.getCurrentServer().registryAccess());
+            },
+            iStackType -> {
+                return iStackType.serializeNBT(ServerLifecycleHooks.getCurrentServer().registryAccess());
+            }
+    );
+
 
     IStackType<T> fromObject(Object key, long amount, DataComponentPatch dataComponentPatch);
 
@@ -114,6 +126,23 @@ public interface IStackType<T> {
     CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess);
     IStackType<T> deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess);
 
+    static IStackType deserializeNBTCommon(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
+    {
+        ResourceLocation typeId = ResourceLocation.tryParse(nbt.getString("Type"));
+        for(IStackType stacktype : StackTypeRegistry.getAllTypes())
+        {
+            if(stacktype.getTypeId().equals(typeId))
+            {
+                IStackType stack = stacktype.deserializeNBT(nbt,levelRegistryAccess);
+                if(stack!=null)
+                {
+                    return stack;
+                }
+            }
+        }
+
+        return null;
+    }
 
     // UI渲染（在指定位置绘制图标和数量）
     @OnlyIn(Dist.CLIENT)

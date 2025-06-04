@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +23,7 @@ import java.util.function.Supplier;
 public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 {
     private ItemStack terminalStack = null;
+    private BlockPos entityPos = null;
 
     // 构建注册用的信息
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
@@ -38,6 +40,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
         if(!player.level().isClientSide)
         {
             this.terminalStack = terminalItem;
+            this.entityPos = entityPos;
         }
     }
 
@@ -78,5 +81,17 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
                 terminalStack.set(ModDataComponents.CRAFT_SLOTS, nonNullList);
         }
 
+    }
+
+    @Override
+    public boolean stillValid(Player player)
+    {
+        if(entityPos != null)
+        {
+            BlockEntity be = player.level().getBlockEntity(entityPos);
+            return be != null && !be.isRemoved();
+        }
+        else
+            return super.stillValid(player);
     }
 }

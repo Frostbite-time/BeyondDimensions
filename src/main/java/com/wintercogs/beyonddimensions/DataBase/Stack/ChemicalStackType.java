@@ -285,8 +285,9 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
     {
         CompoundTag tag = new CompoundTag();
+        tag.putString("Type", ID.toString());
         tag.putLong("Amount", getStackAmount());
-        tag.put("Stack",stack.copyWithAmount(1).save(levelRegistryAccess));
+        tag.put("Stack",stack.copyWithAmount(1).saveOptional(levelRegistryAccess));
         return tag;
     }
 

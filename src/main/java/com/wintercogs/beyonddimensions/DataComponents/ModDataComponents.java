@@ -2,9 +2,12 @@ package com.wintercogs.beyonddimensions.DataComponents;
 
 import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -39,6 +42,30 @@ public class ModDataComponents {
                     ByteBufCodecs.collection(
                             ArrayList::new,
                             ItemStack.OPTIONAL_STREAM_CODEC
+                    )
+            )
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<IStackType>>> ISTACK_SLOTS = register(
+      "istack_slots", builder -> builder.persistent(
+                IStackType.CODEC.listOf()
+            ).networkSynchronized(
+                    ByteBufCodecs.collection(
+                            ArrayList::new,
+                            new StreamCodec<RegistryFriendlyByteBuf, IStackType>()
+                            {
+                                @Override
+                                public void encode(RegistryFriendlyByteBuf buf, IStackType stackType)
+                                {
+                                    stackType.serialize(buf);
+                                }
+
+                                @Override
+                                public IStackType decode(RegistryFriendlyByteBuf byteBuf)
+                                {
+                                    return IStackType.deserializeCommon(byteBuf);
+                                }
+                            }
                     )
             )
     );

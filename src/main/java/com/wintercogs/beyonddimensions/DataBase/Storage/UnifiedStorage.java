@@ -3,13 +3,17 @@ package com.wintercogs.beyonddimensions.DataBase.Storage;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
+import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
 import java.util.function.Function;
@@ -159,6 +163,44 @@ public class UnifiedStorage implements IStackTypedHandler
     public IStackType insert(IStackType stack,boolean simulate) {
         if (stack.isEmpty()) return StackCreater.CreateEmpty(stack.getTypeId());
 
+        // 对物质压缩球的特殊处理
+        if(stack instanceof ItemStackType itemStackType)
+        {
+            if(itemStackType.getStack().getItem() instanceof MatterCompressionBall)
+            {
+                ItemStack ballStack = itemStackType.copyStack();
+                List<IStackType> ballStorage;
+                if(ballStack.has(ModDataComponents.ISTACK_SLOTS))
+                {
+                    List<IStackType> newBallStorage = new ArrayList<>();
+                    ballStorage = ballStack.get(ModDataComponents.ISTACK_SLOTS);
+                    for(IStackType stackType: ballStorage)
+                    {
+                        newBallStorage.add(insert(stackType,simulate));
+                    }
+                    boolean newBallStorageIsEmpty = newBallStorage.isEmpty();
+                    for(IStackType stackType: newBallStorage)
+                    {
+                        if(!stackType.isEmpty())
+                        {
+                            newBallStorageIsEmpty = false;
+                        }
+                    }
+                    if(newBallStorageIsEmpty)
+                    {
+                        return new ItemStackType();
+                    }
+                    else
+                    {
+                        ItemStack newBallStack = itemStackType.copyStack();
+                        newBallStack.set(ModDataComponents.ISTACK_SLOTS, newBallStorage);
+                        return new ItemStackType(newBallStack);
+                    }
+                }
+            }
+        }
+
+        // 正常处理
         long remaining = stack.getStackAmount(); // 剩余可被插入的量
         long canInsert = Math.min(getSlotCapacity(0),stack.getCustomMaxStackSize()); // 能被插入的空间
 

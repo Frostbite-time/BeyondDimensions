@@ -275,8 +275,9 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
         CompoundTag tag = new CompoundTag();
+        tag.putString("Type", ID.toString());
         tag.putLong("Amount", getStackAmount());
-        tag.put("Stack",stack.copyWithCount(1).save(levelRegistryAccess));
+        tag.put("Stack",stack.copyWithCount(1).saveOptional(levelRegistryAccess));
         return tag;
     }
 
