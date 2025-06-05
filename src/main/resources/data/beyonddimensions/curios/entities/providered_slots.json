@@ -1,4 +1,4 @@
 {
   "entities": ["player", "minecraft:zombie"],
-  "slots": ["curio"]
+  "slots": ["charm"]
 }
