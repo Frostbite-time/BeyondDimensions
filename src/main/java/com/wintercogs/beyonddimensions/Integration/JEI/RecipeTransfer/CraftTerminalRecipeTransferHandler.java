@@ -1,8 +1,8 @@
-package com.wintercogs.beyonddimensions.Integration.JEI;
+package com.wintercogs.beyonddimensions.Integration.JEI.RecipeTransfer;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
+import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenuTerminal;
 import com.wintercogs.beyonddimensions.Packet.RecipeFillC2SPacket;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.constants.VanillaTypes;
@@ -27,24 +27,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class RecipeTransferHandler implements IRecipeTransferHandler<DimensionsCraftMenu, RecipeHolder<CraftingRecipe>>
+public class CraftTerminalRecipeTransferHandler implements IRecipeTransferHandler<DimensionsCraftMenuTerminal, RecipeHolder<CraftingRecipe>>
 {
 
 
-    public RecipeTransferHandler()
+    public CraftTerminalRecipeTransferHandler()
     {
     }
 
     @Override
-    public Class<? extends DimensionsCraftMenu> getContainerClass()
+    public Class<? extends DimensionsCraftMenuTerminal> getContainerClass()
     {
-        return DimensionsCraftMenu.class;
+        return DimensionsCraftMenuTerminal.class;
     }
 
     @Override
-    public Optional<MenuType<DimensionsCraftMenu>> getMenuType()
+    public Optional<MenuType<DimensionsCraftMenuTerminal>> getMenuType()
     {
-        return Optional.of(DimensionsCraftMenu.Dimensions_Craft_Menu.get());
+        return Optional.of(DimensionsCraftMenuTerminal.Dimensions_Craft_Menu_Terminal.get());
     }
 
     @Override
@@ -54,7 +54,7 @@ public class RecipeTransferHandler implements IRecipeTransferHandler<DimensionsC
     }
 
     @Override
-    public @Nullable IRecipeTransferError transferRecipe(DimensionsCraftMenu container, RecipeHolder<CraftingRecipe> recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer)
+    public @Nullable IRecipeTransferError transferRecipe(DimensionsCraftMenuTerminal container, RecipeHolder<CraftingRecipe> recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer)
     {
         // 1. 获取配方输入信息
         // 1. 从JEI的视图获取完整配方输入（保留空位）
@@ -170,7 +170,7 @@ public class RecipeTransferHandler implements IRecipeTransferHandler<DimensionsC
     }
 
     // 获取合成输入槽位（需根据实际容器实现）
-    private List<Slot> getInputSources(DimensionsCraftMenu menu) {
+    private List<Slot> getInputSources(DimensionsCraftMenuTerminal menu) {
         List<Slot> slots = new ArrayList<>();
         for (int i = menu.craftSlotStartIndex; i < menu.craftSlotEndIndex; i++) {
             slots.add(menu.getSlot(i));

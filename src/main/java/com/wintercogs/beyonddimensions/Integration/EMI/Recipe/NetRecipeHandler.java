@@ -24,11 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NetRecipeHandler implements StandardRecipeHandler<DimensionsCraftMenu>
+public class NetRecipeHandler<T extends DimensionsCraftMenu> implements StandardRecipeHandler<T>
 {
 
     @Override
-    public List<Slot> getInputSources(DimensionsCraftMenu handler)
+    public List<Slot> getInputSources(T handler)
     {
         List<Slot> inputSlots = new ArrayList<>();
         for(Slot slot : handler.slots)
@@ -42,7 +42,7 @@ public class NetRecipeHandler implements StandardRecipeHandler<DimensionsCraftMe
     }
 
     @Override
-    public List<Slot> getCraftingSlots(DimensionsCraftMenu handler)
+    public List<Slot> getCraftingSlots(T handler)
     {
         List<Slot> craftingSlots = new ArrayList<>();
         for(int i = handler.craftSlotStartIndex; i < handler.craftSlotEndIndex; ++i)
@@ -59,7 +59,7 @@ public class NetRecipeHandler implements StandardRecipeHandler<DimensionsCraftMe
     }
 
     @Override
-    public EmiPlayerInventory getInventory(AbstractContainerScreen<DimensionsCraftMenu> screen)
+    public EmiPlayerInventory getInventory(AbstractContainerScreen<T> screen)
     {
         //return new EmiPlayerInventory(getInputSources(screen.getMenu()).stream().map(Slot::getItem).map(EmiStack::of).toList());
         List<EmiStack> stacks = getInputSources(screen.getMenu()).stream().map(Slot::getItem).map(EmiStack::of).collect(Collectors.toCollection(ArrayList::new));
@@ -78,7 +78,7 @@ public class NetRecipeHandler implements StandardRecipeHandler<DimensionsCraftMe
     }
 
     @Override
-    public boolean craft(EmiRecipe recipe, EmiCraftContext<DimensionsCraftMenu> context)
+    public boolean craft(EmiRecipe recipe, EmiCraftContext<T> context)
     {
         //return StandardRecipeHandler.super.craft(recipe, context);
         // 对处理逻辑进行修改，将配方数据以及上下文发送到服务端，在服务端将物品转移到合成栏，然后等待broadcastchange同步
@@ -91,7 +91,7 @@ public class NetRecipeHandler implements StandardRecipeHandler<DimensionsCraftMe
         //3.将ItemStack整合为数组，发送到服务器端进行处理 其数组排列即为顺序本身
         List<EmiIngredient> inputs = recipe.getInputs();
         List<ItemStack> inputElements = new ArrayList<>(); // 每一个位置放置一个确定的ItemStack
-        DimensionsCraftMenu menu = context.getScreen().getMenu();
+        T menu = context.getScreen().getMenu();
 
         // 获取所有可能的物品来源（常规合成槽+存储槽）
         List<Slot> craftingSlots = getInputSources(menu);
