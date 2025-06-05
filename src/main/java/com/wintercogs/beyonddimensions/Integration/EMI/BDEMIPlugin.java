@@ -13,5 +13,6 @@ public class BDEMIPlugin implements EmiPlugin
     public void register(EmiRegistry registry)
     {
         registry.addRecipeHandler(UIRegister.Dimensions_Craft_Menu.get(), new NetRecipeHandler());
+        registry.addRecipeHandler(UIRegister.Dimensions_Craft_Menu_Terminal.get(), new NetRecipeHandler());
     }
 }

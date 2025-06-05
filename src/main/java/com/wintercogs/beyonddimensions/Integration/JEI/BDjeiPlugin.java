@@ -2,6 +2,8 @@ package com.wintercogs.beyonddimensions.Integration.JEI;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.NetInterfaceBaseGUI;
+import com.wintercogs.beyonddimensions.Integration.JEI.RecipeTransfer.CraftMenuRecipeTransferHandler;
+import com.wintercogs.beyonddimensions.Integration.JEI.RecipeTransfer.CraftTerminalRecipeTransferHandler;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
@@ -21,7 +23,8 @@ public class BDjeiPlugin implements IModPlugin
     @Override
     public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration)
     {
-        registration.addRecipeTransferHandler(new RecipeTransferHandler(),RecipeTypes.CRAFTING);
+        registration.addRecipeTransferHandler(new CraftMenuRecipeTransferHandler(),RecipeTypes.CRAFTING);
+        registration.addRecipeTransferHandler(new CraftTerminalRecipeTransferHandler(), RecipeTypes.CRAFTING);
     }
 
     @Override
