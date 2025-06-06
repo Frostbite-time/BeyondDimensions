@@ -75,30 +75,19 @@ public class UnorderdStackTypedHandlerSync extends ValueSyncHandler<IStackTypedH
         // 开始运行原子化物品比较
         ArrayList<IStackType> changedItem = new ArrayList<>();
         ArrayList<Long> changedCount = new ArrayList<>();
-        // 深克隆2个缓存数组
-        ArrayList<IStackType> cacheLast = new ArrayList<>();
-        for(IStackType stack : this.lastStacks)
-        {
-            cacheLast.add(stack.copy());
-        }
-        ArrayList<IStackType> cacheNow = new ArrayList<>();
-        for(IStackType stack : this.stacks.getStorage())
-        {
-            cacheNow.add(stack.copy());
-        }
-        // 缓存结束后，立刻更新last列表
-        refreshLast();
 
-        // 为两个缓存数组分别创建Map，使用自定义的包装类作为键
+        // 为两个缓存数组分别创建Map
         Map<IStackType, Long> lastMap = new HashMap<>();
-        for (IStackType stack : cacheLast) {
+        for (IStackType stack : this.lastStacks) {
             lastMap.put(stack, lastMap.getOrDefault(stack, (long) 0) + stack.getStackAmount());
         }
 
         Map<IStackType, Long> nowMap = new HashMap<>();
-        for (IStackType stack : cacheNow) {
+        for (IStackType stack : this.stacks.getStorage()) {
             nowMap.put(stack, nowMap.getOrDefault(stack, (long) 0) + stack.getStackAmount());
         }
+        // 缓存结束后，立刻更新last列表
+        refreshLast();
 
         // 比较两个Map的差异
         Set<IStackType> allKeys = new HashSet<>();

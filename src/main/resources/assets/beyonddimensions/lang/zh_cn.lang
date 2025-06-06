@@ -42,5 +42,5 @@ text.beyonddimensions.level.level=权限:%s
 text.beyonddimensions.level.name.empty=名称:无
 text.beyonddimensions.level.level.empty=权限:无
 
-stack.beyonddimensions.stored=已存储:%d个
-stack.beyonddimensions.stored.mb=已存储:%dmb
+stack.beyonddimensions.stored=已存储:%s个
+stack.beyonddimensions.stored.mb=已存储:%smb

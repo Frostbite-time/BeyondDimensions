@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -23,18 +24,29 @@ import java.util.List;
 
 public class ItemStackType implements IStackType<ItemStack> {
     public static final ResourceLocation ID = new ResourceLocation(BeyondDimensions.MODID, "stack_type/item");
-    private static final long CUSTOM_MAX_STACK_SIZE = Integer.MAX_VALUE; // 自定义堆叠大小
+    private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
-    private ItemStack stack;
+    private ItemStack stack; // 物品stack信息，数量最好时刻保持为1
+    private long stackSize; // 扩容，需要确保所有存入取出的终点在此
+
+    private int hashCodeCache = 0; // 哈希码缓存
+    private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
 
     public ItemStackType()
     {
         stack = ItemStack.EMPTY;
+        stackSize = 0;
     }
 
     public ItemStackType(ItemStack stack)
     {
+        this.stack = stack;stackSize = stack.getCount();
+    }
+
+    public ItemStackType(ItemStack stack, long stackSize)
+    {
         this.stack = stack;
+        this.stackSize = stackSize;
     }
 
     @Override
@@ -42,8 +54,8 @@ public class ItemStackType implements IStackType<ItemStack> {
     {
         if(key instanceof Item item)
         {
-            ItemStack itemStack = new ItemStack(item, (int) amount,meta,dataComponentPatch);
-            return new ItemStackType(itemStack);
+            ItemStack itemStack = new ItemStack(item, 1,meta,dataComponentPatch);
+            return new ItemStackType(itemStack, amount);
         }
         return null;
     }
@@ -51,6 +63,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public ItemStack getStack()
     {
+        stack.setCount(BDMath.clampLongToInt(stackSize));
         return stack;
     }
 
@@ -58,6 +71,8 @@ public class ItemStackType implements IStackType<ItemStack> {
     public void setStack(ItemStack stack)
     {
         this.stack = stack.copy();
+        this.stackSize = stack.getCount();
+        NeedRecalHash = true;
     }
 
     @Override
@@ -89,72 +104,66 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public boolean isEmpty() {
-        return stack.isEmpty();
+    public boolean isEmpty()
+    {
+        return stack.isEmpty() || stackSize <= 0;
     }
 
     @Override
-    public ItemStack getEmptyStack() {
+    public boolean isEmptyStack() {
+        return stack.isEmpty(); // 这就是为什么要保证stack自身存储数为1。因为我没有办法绕过stack的isEmpty检测获得其item
+    }
+
+    @Override
+    public ItemStack getEmptyStack()
+    {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public ItemStack copyStack() {
-        return stack.copy();
+    public ItemStack copyStack()
+    {
+        ItemStack copy = stack.copy();
+        copy.setCount(BDMath.clampLongToInt(stackSize));
+        return copy;
     }
 
     @Override
     public ItemStack copyStackWithCount(long count) {
         ItemStack copy = stack.copy();
-        // 处理long到int的转换安全
-        if (count > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            copy.setCount(Integer.MAX_VALUE);
-            return copy;
-        }
-        copy.setCount((int) count);
+        copy.setCount(BDMath.clampLongToInt(count));
         return copy;
     }
 
     @Override
     public IStackType<ItemStack> copy()
     {
-        return new ItemStackType(stack.copy());
+        // copy时将哈希码状态一起带上，最大程度降低hash计算负担
+        ItemStackType copy = new ItemStackType(stack.copy(), stackSize);
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
     public IStackType<ItemStack> copyWithCount(long count)
     {
-        int copycont;
-        // 处理long到int的转换安全
-        if (count > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            copycont = Integer.MAX_VALUE;
-        }
-        else
-        {
-            copycont = (int) count;
-        }
-        ItemStack copy = stack.copy();
-        copy.setCount(copycont);
-        return new ItemStackType(copy);
+        // copy时将哈希码状态一起带上，最大程度降低hash计算负担
+        ItemStackType copy = new ItemStackType(stack.copy(),count);
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
     public long getStackAmount() {
-        return stack.getCount();
+        return stackSize;
     }
 
     @Override
     public void setStackAmount(long amount)
     {
-        // 处理long到int的转换安全
-        if (amount > Integer.MAX_VALUE) {
-            //throw new IllegalArgumentException("ItemStack count exceeds maximum value: " + count);
-            stack.setCount(Integer.MAX_VALUE);
-            return;
-        }
-        stack.setCount((int) amount);
+        stackSize = amount;
     }
 
     @Override
@@ -185,12 +194,10 @@ public class ItemStackType implements IStackType<ItemStack> {
     public ItemStack splitStack(long amount) {
         if (amount <= 0) return ItemStack.EMPTY;
 
-        //stack.getCount()作为min的一极，已经保证了数值范围安全，因为stack.getCount()是一个int
-        // 计算可分割的数量
-        int splitAmount = (int) Math.min(amount, stack.getCount());
+        int splitAmount = BDMath.clampLongToInt(Math.min(amount, stackSize));
         ItemStack split = stack.copy();
         split.setCount(splitAmount);
-        stack.shrink(splitAmount);
+        shrink(splitAmount);
         return split;
     }
 
@@ -199,13 +206,10 @@ public class ItemStackType implements IStackType<ItemStack> {
     {
         if (amount <= 0) return new ItemStackType();
 
-        //stack.getCount()作为min的一极，已经保证了数值范围安全，因为stack.getCount()是一个int
-        // 计算可分割的数量
-        int splitAmount = (int) Math.min(amount, stack.getCount());
+        long splitAmount = Math.min(amount, stackSize);
         ItemStack split = stack.copy();
-        split.setCount(splitAmount);
-        stack.shrink(splitAmount);
-        return new ItemStackType(split);
+        shrink(splitAmount);
+        return new ItemStackType(split, splitAmount);
     }
 
     @Override
@@ -236,7 +240,7 @@ public class ItemStackType implements IStackType<ItemStack> {
 
         if (hasItem) {
             // 写入数量
-            buf.writeVarInt(stack.getCount());
+            buf.writeVarLong(stackSize);
             // 使用副本避免修改原堆栈
             ItemStack copy = stack.copy();
             copy.setCount(1);
@@ -258,7 +262,7 @@ public class ItemStackType implements IStackType<ItemStack> {
         }
 
         // 读取数量
-        int count = buf.readVarInt();
+        long count = buf.readVarLong();
         // 使用OPTIONAL_CODEC解码
         ItemStack stack = null;
         try
@@ -269,8 +273,7 @@ public class ItemStackType implements IStackType<ItemStack> {
         {
             throw new RuntimeException(e);
         }
-        stack.setCount(count);
-        return new ItemStackType(stack);
+        return new ItemStackType(stack, count);
     }
 
     @Override
@@ -296,6 +299,7 @@ public class ItemStackType implements IStackType<ItemStack> {
         // 渲染物品图标
         Minecraft mc = Minecraft.getMinecraft();
         RenderHelper.enableGUIStandardItemLighting();
+        stack.setCount(1);
         mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x, y); // 使用RenderItem渲染物品
         mc.getRenderItem().renderItemOverlayIntoGUI(mc.fontRenderer, stack, x, y, ""); // 渲染默认覆盖层（数量/耐久）
         RenderHelper.disableStandardItemLighting();
@@ -316,12 +320,8 @@ public class ItemStackType implements IStackType<ItemStack> {
                         * 1.0f / 0.666f
         );
         // 直接绘制带阴影的文本（对应原版样式）
-        mc.fontRenderer.drawStringWithShadow(
-                countText,
-                X,
-                Y,
-                0xFFFFFF
-        );
+        if(!stack.isEmpty())
+            mc.fontRenderer.drawStringWithShadow(countText, X, Y, 0xFFFFFF);
         GlStateManager.popMatrix();
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -330,7 +330,7 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     @Override
     public String getCountText(long count) {
-        if (count <= 0) return "";
+        if (count < 0) return "";
         return StringFormat.formatCount(count);
     }
 
@@ -385,16 +385,22 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     @Override
     public int hashCode() {
+
         // 基于物品类型和组件生成哈希码
-        if (stack != null) {
-            int i = 31 + stack.getItem().hashCode();
-            if(stack.hasTagCompound())
-                return i*31 + stack.getTagCompound().hashCode();
-            else
-                return i;
-        } else {
-            return 0;
+        if(NeedRecalHash)
+        {
+            if (stack != null) {
+                int i = 31 + stack.getItem().hashCode();
+                if(stack.hasTagCompound())
+                    hashCodeCache = i*31 + stack.getTagCompound().hashCode();
+                else
+                    hashCodeCache = i;
+            } else {
+                hashCodeCache = 0;
+            }
+            NeedRecalHash = false;
         }
+        return hashCodeCache;
     }
 }
 

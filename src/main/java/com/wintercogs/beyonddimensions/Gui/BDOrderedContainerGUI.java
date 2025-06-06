@@ -494,7 +494,7 @@ public abstract class BDOrderedContainerGUI extends BDBaseGUI
     {
         for (IStackType stack : this.viewerStackTypedHandler.getStorage())
         {
-            stack.setStackAmount(-1);
+            stack.setStack(stack.getEmptyStack());
         }
 
         int index = 0;

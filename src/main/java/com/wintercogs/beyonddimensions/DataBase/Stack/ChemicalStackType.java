@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Render.IngredientRenderer;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import mekanism.api.gas.Gas;
 import mekanism.api.gas.GasRegistry;
@@ -33,17 +34,29 @@ public class ChemicalStackType implements IStackType<GasStack>
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
     private GasStack stack;
+    private long stackSize;
+
+    private int hashCodeCache = 0; // 哈希码缓存
+    private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
 
     // 创建空stack
     public ChemicalStackType()
     {
         stack = new GasStack(GasRegistry.getGas(0),0);
+        stackSize = 0;
     }
 
     // 创建给定stack
     public ChemicalStackType(GasStack stack)
     {
         this.stack = stack;
+        stackSize = stack.amount;
+    }
+
+    public ChemicalStackType(GasStack stack, long stackSize)
+    {
+        this.stack = stack;
+        this.stackSize = stackSize;
     }
 
     @Override
@@ -51,8 +64,8 @@ public class ChemicalStackType implements IStackType<GasStack>
     {
         if(key instanceof Gas chemical)
         {
-            GasStack chemicalStack = new GasStack(chemical, (int) amount);
-            return new ChemicalStackType(chemicalStack);
+            GasStack chemicalStack = new GasStack(chemical, 1);
+            return new ChemicalStackType(chemicalStack, amount);
         }
         return null;
     }
@@ -72,6 +85,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     @Override
     public GasStack getStack()
     {
+        stack.amount = BDMath.clampLongToInt(stackSize);
         return stack;
     }
 
@@ -79,6 +93,8 @@ public class ChemicalStackType implements IStackType<GasStack>
     public void setStack(GasStack stack)
     {
         this.stack = stack.copy();
+        stackSize = stack.amount;
+        NeedRecalHash = true;
     }
 
     @Override
@@ -102,7 +118,13 @@ public class ChemicalStackType implements IStackType<GasStack>
     @Override
     public boolean isEmpty()
     {
-        return stack == null || stack.amount <= 0 || stack.getGas() == null;
+        return stack == null || stack.getGas() == null || stackSize<=0;
+    }
+
+    @Override
+    public boolean isEmptyStack()
+    {
+        return stack == null || stack.getGas() == null;
     }
 
     @Override
@@ -114,37 +136,47 @@ public class ChemicalStackType implements IStackType<GasStack>
     @Override
     public GasStack copyStack()
     {
-        return stack.copy();
+        GasStack copy = stack.copy();
+        copy.amount = BDMath.clampLongToInt(stackSize);
+        return copy;
     }
 
     @Override
     public GasStack copyStackWithCount(long count)
     {
-        return new GasStack(stack.getGas(), (int)count);
+        GasStack copy = stack.copy();
+        copy.amount = BDMath.clampLongToInt(count);
+        return copy;
     }
 
     @Override
     public IStackType<GasStack> copy()
     {
-        return new ChemicalStackType(stack.copy());
+        ChemicalStackType copy = new ChemicalStackType(stack.copy(), stackSize);
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
     public IStackType<GasStack> copyWithCount(long count)
     {
-        return new ChemicalStackType(new GasStack(stack.getGas(), (int)count));
+        ChemicalStackType copy = new ChemicalStackType(stack.copy(), count);
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
+        return copy;
     }
 
     @Override
     public long getStackAmount()
     {
-        return stack.amount;
+        return stackSize;
     }
 
     @Override
     public void setStackAmount(long amount)
     {
-        stack.amount = (int) amount;
+        stackSize = amount;
     }
 
     @Override
@@ -163,7 +195,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     public long getVanillaMaxStackSize()
     {
         // mek化学品同流体，以64桶为原版一个槽的最大单位
-        return 64000;
+        return Math.min(64000L, getCustomMaxStackSize());
     }
 
     @Override
@@ -178,10 +210,10 @@ public class ChemicalStackType implements IStackType<GasStack>
         if (amount <= 0) return getEmptyStack();
 
         // 计算可分割的数量
-        long splitAmount = Math.min(amount, stack.amount);
+        long splitAmount = BDMath.clampLongToInt(Math.min(amount, stackSize));
         GasStack split = stack.copy();
         split.amount = (int) splitAmount;
-        stack.amount -= (int)splitAmount;
+        shrink(splitAmount);
         return split;
     }
 
@@ -190,12 +222,10 @@ public class ChemicalStackType implements IStackType<GasStack>
     {
         if (amount <= 0) return new ChemicalStackType();
 
-        // 计算可分割的数量
-        long splitAmount = Math.min(amount, stack.amount);
+        long splitAmount = Math.min(amount, stackSize);
         GasStack split = stack.copy();
-        split.amount = (int) splitAmount;
-        stack.amount -= (int)splitAmount;
-        return new ChemicalStackType(split);
+        shrink(splitAmount);
+        return new ChemicalStackType(split, splitAmount);
     }
 
     @Override
@@ -259,8 +289,7 @@ public class ChemicalStackType implements IStackType<GasStack>
             throw new RuntimeException(e);
         }
         GasStack stack = GasStack.readFromNBT(stackNBT);
-        stack.amount = (int)count;
-        return new ChemicalStackType(stack);
+        return new ChemicalStackType(stack, count);
     }
 
     @Override
@@ -304,7 +333,7 @@ public class ChemicalStackType implements IStackType<GasStack>
 
         // 渲染数量文本
         if (gasStack.amount > 0) {
-            String countText = getCountText(gasStack.amount);
+            String countText = getCountText(stackSize);
             float scale = 0.666f;
 
             GlStateManager.pushMatrix();
@@ -321,13 +350,8 @@ public class ChemicalStackType implements IStackType<GasStack>
                             * 1.0f / 0.666f
             );
 
-            Minecraft.getMinecraft().fontRenderer.drawString(
-                    countText,
-                    X,
-                    Y,
-                    0xFFFFFF,
-                    true
-            );
+            if(!isEmpty())
+                Minecraft.getMinecraft().fontRenderer.drawString(countText, X, Y, 0xFFFFFF, true);
 
             GlStateManager.popMatrix();
         }
@@ -336,7 +360,7 @@ public class ChemicalStackType implements IStackType<GasStack>
     @Override
     public String getCountText(long count)
     {
-        if (count <= 0) return "";
+        if (count < 0) return "";
         return StringFormat.formatCount(count);
     }
 
@@ -408,9 +432,15 @@ public class ChemicalStackType implements IStackType<GasStack>
 
     @Override
     public int hashCode() {
+
         // 基于物品类型和组件生成哈希码
-        int code = 1;
-        code = 31 * code + stack.hashCode();
-        return code;
+        if(NeedRecalHash)
+        {
+            int code = 1;
+            code = 31 * code + stack.hashCode();
+            hashCodeCache = code;
+            NeedRecalHash = false;
+        }
+        return hashCodeCache;
     }
 }

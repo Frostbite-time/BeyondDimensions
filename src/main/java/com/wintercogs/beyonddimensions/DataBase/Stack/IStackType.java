@@ -14,6 +14,7 @@ import java.util.List;
 
 // 用于定义不同stack的行为 物品 流体 以及其他模组中行为逻辑stack相似的资源
 // 实现还需重写hashcode以及equals方法，使其检测忽略数量以用于其他位置的代码
+// 由于hashcode的大量依赖，强烈建议在具体实现中缓存hashcode以降低开销
 public interface IStackType<T> {
 
     IStackType<T> fromObject(Object key, long amount, int meta,NBTTagCompound dataComponentPatch);
@@ -39,6 +40,9 @@ public interface IStackType<T> {
 
     // 新增方法：判断堆栈是否为空（如ItemStack.isEmpty()）
     boolean isEmpty();
+
+    // 仅判断堆叠是否为空堆叠类型，不管数量
+    boolean isEmptyStack();
 
     // 空实例（例如：ItemStack.EMPTY）
     T getEmptyStack();

@@ -47,6 +47,6 @@ text.beyonddimensions.level.level=Permission: %s
 text.beyonddimensions.level.name.empty=Name: None
 text.beyonddimensions.level.level.empty=Permission: None
 
-stack.beyonddimensions.stored=Stored:%d
-stack.beyonddimensions.stored.mb=Stored:%dmb
+stack.beyonddimensions.stored=Stored:%s
+stack.beyonddimensions.stored.mb=Stored:%smb
 
