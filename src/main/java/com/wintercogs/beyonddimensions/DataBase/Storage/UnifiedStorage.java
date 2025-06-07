@@ -202,30 +202,28 @@ public class UnifiedStorage implements IStackTypedHandler
         {
             int storageIndex = stackIndex.get(stack);
             IStackType existing = storage.get(storageIndex);
-            if (existing.isSameTypeSameComponents(stack))
-            {
-                long extracted = Math.min(stack.getStackAmount(), existing.getStackAmount());
-                IStackType sim = existing.copy();
-                IStackType result = sim.split(extracted);
 
-                if (!simulate) {
-                    existing.shrink(extracted);
-                    if (existing.getStackAmount() <= 0) {
-                        storage.remove(storageIndex);
-                        indices.remove(Integer.valueOf(storageIndex));
-                        stackIndex.remove(stack);
+            long extracted = Math.min(stack.getStackAmount(), existing.getStackAmount());
+            IStackType sim = existing.copy();
+            IStackType result = sim.split(extracted);
 
-                        // 更新受影响的索引
-                        updateIndicesAfterRemoval(storageIndex);
+            if (!simulate) {
+                existing.shrink(extracted);
+                if (existing.getStackAmount() <= 0) {
+                    storage.remove(storageIndex);
+                    indices.remove(Integer.valueOf(storageIndex));
+                    stackIndex.remove(stack);
 
-                        if (indices.isEmpty()) {
-                            typeIdIndex.remove(stack.getTypeId());
-                        }
+                    // 更新受影响的索引
+                    updateIndicesAfterRemoval(storageIndex);
+
+                    if (indices.isEmpty()) {
+                        typeIdIndex.remove(stack.getTypeId());
                     }
-                    onChange();
                 }
-                return result;
+                onChange();
             }
+            return result;
         }
 
 

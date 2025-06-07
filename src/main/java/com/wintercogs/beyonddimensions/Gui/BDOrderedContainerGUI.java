@@ -503,7 +503,7 @@ public abstract class BDOrderedContainerGUI extends BDBaseGUI
             this.viewerStackTypedHandler.insert(index,stack.copy(), false);
             index++;
         }
-        buildIndexList(new ArrayList<>(viewerStackTypedHandler.getStorage()));
+        buildIndexList(new ArrayList<>(viewerStackTypedHandler.getStorage()),true);
     }
 
 }

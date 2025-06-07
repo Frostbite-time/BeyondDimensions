@@ -47,6 +47,7 @@ public abstract class BDBaseGUI implements IGuiHolder<GuiData>
     protected GuiData guiData;
     protected GuiSyncManager guiSyncManager;
     protected List<StackTypedSlot> slots = new ArrayList<>(); // 直接引用，用于设置索引数据
+    private List<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
 
     @Override
     public ModularPanel buildUI(GuiData guiData, GuiSyncManager guiSyncManager)
@@ -183,18 +184,21 @@ public abstract class BDBaseGUI implements IGuiHolder<GuiData>
         {
             this.viewerStackTypedHandler.insert(stack.copy(),false);
         }
-        buildIndexList(new ArrayList<>(viewerStackTypedHandler.getStorage()));
+        buildIndexList(new ArrayList<>(viewerStackTypedHandler.getStorage()), true);
     }
 
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList(ArrayList<IStackType> itemStorage)
+    public void buildIndexList(ArrayList<IStackType> itemStorage, boolean needsUpdateCacheIndex)
     {
         if(!guiData.isClient())
         {
             return;
         }
         // 1 构建正确的索引数据
-        List<Integer> cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
+        if(needsUpdateCacheIndex || cacheIndex == null)
+        {
+            cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
+        }
         // 2 构建linedata
         updateScrollLineData(cacheIndex.size());
         // 3 填入索引表
