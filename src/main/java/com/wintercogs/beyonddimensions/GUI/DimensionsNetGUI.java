@@ -131,7 +131,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             Config.uiSortButton = sortButton.currentState;
             Config.UI_SORT_BUTTON.set(sortButton.currentState);
             Config.UI_SORT_BUTTON.save();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
         });
         addRenderableWidget(sortButton);
         //倒序按钮
@@ -141,7 +141,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             Config.uiReverseButton = reverseButton.currentState;
             Config.UI_REVERSE_BUTTON.set(reverseButton.currentState);
             Config.UI_REVERSE_BUTTON.save();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
         });
         addRenderableWidget(reverseButton);
 
@@ -170,7 +170,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             Config.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
             init();
         });
         addPageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.add_page")));
@@ -187,7 +187,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             Config.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
             init();
         });
         removePageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.remove_page")));
@@ -236,7 +236,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
             menu.loadSearchText(searchField.getValue());
             Config.uiSearch = searchField.getValue();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
             lastSearchText = searchField.getValue();
         }
         scroller.updateScrollPosition(menu.lineData,menu.maxLineData);// 读取翻页数据并应用
@@ -349,7 +349,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             menu.lineData++;
         }
         //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
-        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
+        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),false);
         return true;
     }
 
@@ -368,7 +368,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         }
         //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
         if(lastLine != menu.lineData)
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()));
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),false);
         return true;
     }
 

@@ -39,6 +39,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
     private HashMap<ButtonName,ButtonState> buttonStateMap = new HashMap<>(); // 客户端的按钮状态
     public UnifiedStorage viewerStorage; // 在客户端，用于显示物品
+    private ArrayList<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
     /// 服务端数据
     private ArrayList<IStackType> lastStorage; // 记录截至上一次同步时的存储状态，用于同步数据
 
@@ -201,7 +202,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         {
             this.viewerStorage.insert(stack.copy(),false);
         }
-        buildIndexList(new ArrayList<>(viewerStorage.getStorage()));
+        buildIndexList(new ArrayList<>(viewerStorage.getStorage()), true);
     }
 
     // 仅仅更新视觉存储的数量信息
@@ -226,14 +227,17 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     }
 
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList(ArrayList<IStackType> itemStorage)
+    public void buildIndexList(ArrayList<IStackType> itemStorage, boolean needsUpdateCacheIndex)
     {
         if(!this.player.level().isClientSide())
         {
             return;
         }
         // 1 构建正确的索引数据
-        ArrayList<Integer> cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
+        if(needsUpdateCacheIndex)
+        {
+            cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
+        }
         // 2 构建linedata
         updateScrollLineData(cacheIndex.size());
         // 3 填入索引表
@@ -350,6 +354,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             // 生成索引排序映射
             ArrayList<IStackType> finalCache = cache;
             List<Integer> indices = IntStream.range(0, cache.size())
+                    .parallel()
                     .boxed()
                     .sorted((a, b) -> comparator.compare(finalCache.get(a), finalCache.get(b)))
                     .collect(Collectors.toList());
