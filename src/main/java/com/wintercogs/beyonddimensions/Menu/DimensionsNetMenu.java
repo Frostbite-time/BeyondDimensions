@@ -45,6 +45,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
     private HashMap<ButtonName, ButtonState> buttonStateMap = new HashMap<>(); // 客户端的按钮状态
     public UnifiedStorage viewerStorage; // 在客户端，用于显示物品
+    private ArrayList<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
     /// 服务端数据
     private ArrayList<IStackType> lastStorage; // 记录截至上一次同步时的存储状态，用于同步数据
 
@@ -210,7 +211,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         {
             this.viewerStorage.insert(stack.copy(),false);
         }
-        buildIndexList(new ArrayList<>(viewerStorage.getStorage()));
+        buildIndexList(new ArrayList<>(viewerStorage.getStorage()),true);
     }
 
     public static int BREAKPOINT_COUNTER = 0;
@@ -239,14 +240,17 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
 
 
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList(ArrayList<IStackType> itemStorage)
+    public void buildIndexList(ArrayList<IStackType> itemStorage, boolean needsUpdateCacheIndex)
     {
         if(!this.player.level().isClientSide())
         {
             return;
         }
         // 1 构建正确的索引数据
-        ArrayList<Integer> cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
+        if(needsUpdateCacheIndex)
+        {
+            cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
+        }
         // 2 构建linedata
         updateScrollLineData(cacheIndex.size());
         // 3 填入索引表
@@ -292,7 +296,8 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
      * @param unifiedStorage 要排序的存储
      * @return 完成排序的索引列表
      */
-    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackType> unifiedStorage) {
+    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackType> unifiedStorage)
+    {
         // 合并过滤空气和搜索逻辑，避免遍历时删除
         ArrayList<IStackType> cache = new ArrayList<>();
         ArrayList<Integer> cacheIndex = new ArrayList<>();
@@ -304,11 +309,40 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             String displayName = stack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
             String allPinyin = TinyPinyinUtils.getAllPinyin(displayName, false).toLowerCase(Locale.ENGLISH);
             String firstPinyin = TinyPinyinUtils.getFirstPinYin(displayName).toLowerCase(Locale.ENGLISH);
-            boolean matchesSearch = searchText == null || searchText.isEmpty() ||
-                    displayName.contains(searchText) ||
-                    allPinyin.contains(searchText) ||
-                    firstPinyin.contains(searchText) ||
-                    checkTooltipMatches(stack,searchText);
+            boolean matchesSearch;
+
+            // 处理搜索逻辑的新规则
+            if (searchText == null || searchText.isEmpty()) {
+                matchesSearch = true; // 空搜索时默认匹配所有
+            } else {
+                // 搜索文本转小写保证大小写不敏感
+                String lowerSearch = searchText.toLowerCase(Locale.ENGLISH);
+                int atIndex = lowerSearch.indexOf('@');
+
+                if (atIndex >= 0) { // 当包含@符号时的处理逻辑
+                    // 拆分@前后的部分（不包括@符号）
+                    String mainPart = atIndex > 0 ? lowerSearch.substring(0, atIndex) : "";
+                    String tooltipPart = (atIndex + 1 < lowerSearch.length()) ?
+                            lowerSearch.substring(atIndex + 1) : "";
+
+                    // 主部分匹配逻辑
+                    boolean matchesMain = mainPart.isEmpty() || // 主部分为空时视为匹配
+                            displayName.contains(mainPart) ||
+                            allPinyin.contains(mainPart) ||
+                            firstPinyin.contains(mainPart);
+
+                    // 工具提示匹配逻辑
+                    boolean matchesTooltip = tooltipPart.isEmpty() || // 工具提示部分为空时视为匹配
+                            checkTooltipMatches(stack, tooltipPart);
+
+                    matchesSearch = matchesMain && matchesTooltip;
+                } else {
+                    // 不含@时的常规匹配逻辑（不检查tooltip）
+                    matchesSearch = displayName.contains(lowerSearch) ||
+                            allPinyin.contains(lowerSearch) ||
+                            firstPinyin.contains(lowerSearch);
+                }
+            }
 
             if (matchesSearch) {
                 cache.add(stack);
@@ -333,6 +367,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             // 生成索引排序映射
             ArrayList<IStackType> finalCache = cache;
             List<Integer> indices = IntStream.range(0, cache.size())
+                    .parallel()
                     .boxed()
                     .sorted((a, b) -> comparator.compare(finalCache.get(a), finalCache.get(b)))
                     .collect(Collectors.toList());
