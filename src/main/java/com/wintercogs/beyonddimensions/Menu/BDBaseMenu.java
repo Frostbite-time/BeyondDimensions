@@ -14,6 +14,7 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.anti_ad.mc.ipn.api.IPNIgnore;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -21,6 +22,7 @@ import java.util.function.Supplier;
 
 // 定义一些用于 超越维度 模组的ui界面的基本方法。
 // 主要是重写网络同步和点击事件，确保父类机制不处理StoredStackSlot的相关内容
+@IPNIgnore
 public abstract class BDBaseMenu extends AbstractContainerMenu
 {
 

@@ -39,6 +39,10 @@ repositories {
         name = "Curios"
         url = uri("https://maven.theillusivec4.top/")
     }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
 
 
 }
@@ -169,6 +173,9 @@ dependencies {
 
     // 饰品栏支持
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}:api"
+
+    // 在本模组的UI禁用IPN
+    compileOnly "maven.modrinth:inventory-profiles-next:neoforge-1.21.1-2.1.9"
 
 }
 
