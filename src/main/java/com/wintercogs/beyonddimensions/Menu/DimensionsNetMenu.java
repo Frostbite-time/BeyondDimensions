@@ -279,7 +279,8 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
      * @param unifiedStorage 要排序的存储
      * @return 完成排序的索引列表
      */
-    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackType> unifiedStorage) {
+    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackType> unifiedStorage)
+    {
         // 合并过滤空气和搜索逻辑，避免遍历时删除
         ArrayList<IStackType> cache = new ArrayList<>();
         ArrayList<Integer> cacheIndex = new ArrayList<>();
@@ -291,11 +292,40 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             String displayName = stack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
             String allPinyin = TinyPinyinUtils.getAllPinyin(displayName, false).toLowerCase(Locale.ENGLISH);
             String firstPinyin = TinyPinyinUtils.getFirstPinYin(displayName).toLowerCase(Locale.ENGLISH);
-            boolean matchesSearch = searchText == null || searchText.isEmpty() ||
-                    displayName.contains(searchText) ||
-                    allPinyin.contains(searchText) ||
-                    firstPinyin.contains(searchText) ||
-                    checkTooltipMatches(stack,searchText);
+            boolean matchesSearch;
+
+            // 处理搜索逻辑的新规则
+            if (searchText == null || searchText.isEmpty()) {
+                matchesSearch = true; // 空搜索时默认匹配所有
+            } else {
+                // 搜索文本转小写保证大小写不敏感
+                String lowerSearch = searchText.toLowerCase(Locale.ENGLISH);
+                int atIndex = lowerSearch.indexOf('@');
+
+                if (atIndex >= 0) { // 当包含@符号时的处理逻辑
+                    // 拆分@前后的部分（不包括@符号）
+                    String mainPart = atIndex > 0 ? lowerSearch.substring(0, atIndex) : "";
+                    String tooltipPart = (atIndex + 1 < lowerSearch.length()) ?
+                            lowerSearch.substring(atIndex + 1) : "";
+
+                    // 主部分匹配逻辑
+                    boolean matchesMain = mainPart.isEmpty() || // 主部分为空时视为匹配
+                            displayName.contains(mainPart) ||
+                            allPinyin.contains(mainPart) ||
+                            firstPinyin.contains(mainPart);
+
+                    // 工具提示匹配逻辑
+                    boolean matchesTooltip = tooltipPart.isEmpty() || // 工具提示部分为空时视为匹配
+                            checkTooltipMatches(stack, tooltipPart);
+
+                    matchesSearch = matchesMain && matchesTooltip;
+                } else {
+                    // 不含@时的常规匹配逻辑（不检查tooltip）
+                    matchesSearch = displayName.contains(lowerSearch) ||
+                            allPinyin.contains(lowerSearch) ||
+                            firstPinyin.contains(lowerSearch);
+                }
+            }
 
             if (matchesSearch) {
                 cache.add(stack);
@@ -348,8 +378,6 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
      * @return 结果为真则意味存在
      */
     private boolean checkTooltipMatches(IStackType stack, String matchText) {
-        if(!matchText.contains("@"))
-            return false; // 如果不存在Tooltip标识，取消搜索
         List<Component> toolTips = stack.getTooltipLines(
                 player,
                 Minecraft.getInstance().options.advancedItemTooltips ?
