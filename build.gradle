@@ -43,6 +43,17 @@ repositories {
         name = "Curios"
         url = uri("https://maven.theillusivec4.top/")
     }
+    maven {
+        name = "IPN-Releases"
+        mavenContent {
+            releasesOnly()
+        }
+        content {
+            includeGroup("org.anti_ad.mc")
+            includeGroup("ca.solo-studios")
+        }
+        url = uri("https://maven.ipn-mod.org/releases")
+    }
 }
 
 base {
@@ -156,27 +167,31 @@ dependencies {
 
 
     // 编译通用机械的api 以便使用化学品存储
-    compileOnly "mekanism:Mekanism:${mekanism_version}:api"
+    modCompileOnly "mekanism:Mekanism:${mekanism_version}:api"
 
     // EMI支持
-    compileOnly "dev.emi:emi-forge:${emi_version}:api"
+    modCompileOnly "dev.emi:emi-forge:${emi_version}:api"
 
     // JEI支持
-    compileOnly "mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"
+    modCompileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
+    modCompileOnly "mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"
 
     // 多态合成支持
-    compileOnly "curse.maven:polymorph-388800:4928442"
+    modCompileOnly "curse.maven:polymorph-388800:4928442"
 
     // AE支持
-    compileOnly "maven.modrinth:ae2:${ae_version}"
-    compileOnly "curse.maven:applied-mekanistics-574300:4842281" // AE的通用机械附属
+    modCompileOnly "maven.modrinth:ae2:${ae_version}"
+    modCompileOnly "curse.maven:applied-mekanistics-574300:4842281" // AE的通用机械附属
 
     // Curios支持
-    compileOnly "top.theillusivec4.curios:curios-forge:${curios_version}+${minecraft_version}:api"
+    modCompileOnly "top.theillusivec4.curios:curios-forge:${curios_version}+${minecraft_version}:api"
 
-    modImplementation "curse.maven:elemental-combat-397825:5475396"
-    modImplementation "curse.maven:sophisticated-core-618298:6596375"
-    modImplementation "curse.maven:sophisticated-backpacks-422301:6587116"
+    // 在模组界面禁用IPN的功能
+    modCompileOnly "org.anti_ad.mc:InventoryProfilesNext-forge-1.20:1.10.7"
+
+    modRuntimeOnly "curse.maven:elemental-combat-397825:5475396"
+    modRuntimeOnly "curse.maven:sophisticated-core-618298:6596375"
+    modRuntimeOnly "curse.maven:sophisticated-backpacks-422301:6587116"
 
 
     // Example optional mod dependency with JEI
