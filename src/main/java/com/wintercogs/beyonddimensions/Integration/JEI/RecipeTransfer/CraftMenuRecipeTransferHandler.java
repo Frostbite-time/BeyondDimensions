@@ -14,7 +14,6 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
@@ -54,19 +53,9 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
     @Override
     public IRecipeTransferError transferRecipe(DimensionsCraftMenu container, CraftingRecipe recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer)
     {
-        // 1. 获取配方输入信息
-        // 1. 从JEI的视图获取完整配方输入（保留空位）
-        List<Ingredient> ingredients = new ArrayList<>();
-        for (IRecipeSlotView slotView : recipeSlots.getSlotViews(RecipeIngredientRole.INPUT)) {
-            if (slotView.getRole() == RecipeIngredientRole.INPUT) {
-                // 将槽位中的多个选项合并成一个复合Ingredient
-                Ingredient merged = Ingredient.of(slotView.getIngredients(VanillaTypes.ITEM_STACK));
-                ingredients.add(merged != null ? merged : Ingredient.EMPTY);
-            }
-        }
-        List<ItemStack> inputElements = new ArrayList<>();
+        // 首先收集所有物品信息-------------------------------------------------------------------------------------------------
 
-        // 2. 收集所有可用物品来源（合成槽+存储槽）
+        // 收集所有可用物品来源（合成槽+存储槽）
         List<Slot> craftingSlots = getInputSources(container);
         List<IStackType> storageSlots = container.storage.getStorage();
         List<ItemStack> availableItems = new ArrayList<>();
@@ -95,76 +84,68 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
                 availableItems.add(itemStack.copy());
         }
 
-        // 3. 创建虚拟库存用于模拟扣除
-        List<ItemStack> virtualInventory = new ArrayList<>();
-        for (ItemStack stack : availableItems) {
-            virtualInventory.add(stack.copy());
-        }
 
-        // 4. 匹配配方需求
-        boolean hasEnoughMaterials = true;
-        for (Ingredient ingredient : ingredients) {
-            if (ingredient.isEmpty()) {
-                inputElements.add(ItemStack.EMPTY);
-                continue;
-            }
+        // 匹配配方需求并构建列表------------------------------------------------------------------------------------------------------
+        List<IRecipeSlotView> missingSlots = new ArrayList<>(); // 记录缺失材料的槽位，仅记录缺失部分
+        List<ItemStack> inputElements = new ArrayList<>(); // 记录输入的原料，包括空气
 
-            int required = 1; // 原版合成配方每个原料需要1个
-            List<ItemStack> matching = new ArrayList<>();
-
-            // 在虚拟库存中寻找匹配项
-            for (ItemStack stack : virtualInventory) {
-                if (!stack.isEmpty() && ingredient.test(stack)) {
-                    matching.add(stack);
-                }
-            }
-
-            // 计算可用数量
-            int available = matching.stream().mapToInt(ItemStack::getCount).sum();
-            if (available >= required) {
-                // 创建合并堆栈并扣除库存
-                ItemStack merged = matching.isEmpty() ? ItemStack.EMPTY :
-                        new ItemStack(matching.get(0).getItem(), required);
-                inputElements.add(merged);
-
-                int remaining = required;
-                for (ItemStack stack : matching) {
-                    int deduct = Math.min(remaining, stack.getCount());
-                    stack.shrink(deduct);
-                    remaining -= deduct;
-                    if (remaining <= 0) break;
-                }
-            } else {
-                hasEnoughMaterials = false;
-                break;
-            }
-        }
-
-        // 5. 处理材料不足情况
-        if (!hasEnoughMaterials) {
-            if (doTransfer) {
-                player.displayClientMessage(
-                        Component.translatable("beyonddimensions.message.insufficient_materials"),
-                        true
-                );
-            }
-            return new IRecipeTransferError()
+        for(IRecipeSlotView slotView: recipeSlots.getSlotViews(RecipeIngredientRole.INPUT))
+        {
+            if(slotView.getRole() == RecipeIngredientRole.INPUT)
             {
-                @Override
-                public Type getType()
+                // 将多个选项合并为一个复合Ingredient
+                Ingredient mergedIngredient = Ingredient.of(slotView.getIngredients(VanillaTypes.ITEM_STACK));
+
+                // 实际检测
+
+                // 空位处理
+                if(mergedIngredient.isEmpty())
                 {
-                    return Type.USER_FACING;
+                    inputElements.add(ItemStack.EMPTY);
+                    continue;
                 }
-            };
+                // 检查仓库物品
+                int required = 1; // 原版材料在每个合成槽需要一个
+                List<ItemStack> matching = new ArrayList<>();
+                for (ItemStack stack : availableItems) { // 统计全部可用物
+                    if (!stack.isEmpty() && mergedIngredient.test(stack)) {
+                        matching.add(stack);
+                    }
+                }
+
+                // 计算可用数量
+                int available = matching.stream().mapToInt(ItemStack::getCount).sum();
+                if (available >= required) {
+                    // 创建合并堆栈并扣除库存
+                    ItemStack merged = matching.isEmpty() ? ItemStack.EMPTY :
+                            new ItemStack(matching.get(0).getItem(), required); //因为仅需要一个，所以使用第一个即可
+                    inputElements.add(merged);
+
+                    int remaining = required;
+                    for (ItemStack stack : matching) {
+                        int deduct = Math.min(remaining, stack.getCount());
+                        stack.shrink(deduct);
+                        remaining -= deduct;
+                        if (remaining <= 0) break;
+                    }
+                } else {
+                    missingSlots.add(slotView);
+                }
+
+            }
         }
 
-        // 6. 执行实际转移
-        if (doTransfer) {
-            // 发送网络包到服务端处理物品移动
+        // 处理结果----------------------------------------------------------------------------------------------------------
+        if(doTransfer) //无论如何，允许执行转移操作，即使材料不足
+        {
             PacketRegister.INSTANCE.sendToServer(new RecipeFillC2SPacket(inputElements));
         }
+        if(!missingSlots.isEmpty())
+        {
+            return new MissStackError(missingSlots);
+        }
+        return null;
 
-        return null; // 返回null表示无错误
     }
 
     // 获取合成输入槽位（需根据实际容器实现）

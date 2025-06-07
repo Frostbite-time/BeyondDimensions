@@ -176,6 +176,8 @@ dependencies {
     modCompileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
     modCompileOnly "mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"
 
+    modRuntimeOnly "mezz.jei:jei-${minecraft_version}-forge:${jei_version}"
+
     // 多态合成支持
     modCompileOnly "curse.maven:polymorph-388800:4928442"
 
@@ -189,7 +191,6 @@ dependencies {
     // 在模组界面禁用IPN的功能
     modCompileOnly "org.anti_ad.mc:InventoryProfilesNext-forge-1.20:1.10.7"
 
-    modRuntimeOnly "curse.maven:elemental-combat-397825:5475396"
     modRuntimeOnly "curse.maven:sophisticated-core-618298:6596375"
     modRuntimeOnly "curse.maven:sophisticated-backpacks-422301:6587116"
 
