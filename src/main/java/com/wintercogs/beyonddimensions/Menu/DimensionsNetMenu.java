@@ -348,6 +348,8 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
      * @return 结果为真则意味存在
      */
     private boolean checkTooltipMatches(IStackType stack, String matchText) {
+        if(!matchText.contains("@"))
+            return false; // 如果不存在Tooltip标识，取消搜索
         List<Component> toolTips = stack.getTooltipLines(
                 player,
                 Minecraft.getInstance().options.advancedItemTooltips ?

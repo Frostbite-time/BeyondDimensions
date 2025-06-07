@@ -16,10 +16,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class ItemStackType implements IStackType<ItemStack> {
@@ -31,6 +35,51 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     private int hashCodeCache = 0; // 哈希码缓存
     private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
+
+    // 这里借用了AE2 api的代码用来加速能力比较
+    // https://github.com/AppliedEnergistics/Applied-Energistics-2/blob/forge/1.20.1/src/main/java/appeng/api/stacks/AEItemKey.java
+    private static final MethodHandle SERIALIZE_CAPS_HANDLE;
+    private static final MethodHandle DESERIALIZE_CAPS_HANDLE;
+    static {
+        try {
+            var method = CapabilityProvider.class.getDeclaredMethod("serializeCaps");
+            method.setAccessible(true);
+            SERIALIZE_CAPS_HANDLE = MethodHandles.lookup().unreflect(method);
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to create serializeCaps method handle", exception);
+        }
+        try {
+            var method = CapabilityProvider.class.getDeclaredMethod("deserializeCaps",CompoundTag.class);
+            method.setAccessible(true);
+            DESERIALIZE_CAPS_HANDLE = MethodHandles.lookup().unreflect(method);
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to create deserializeCaps method handle", exception);
+        }
+    }
+
+    @Nullable
+    private static CompoundTag serializeStackCaps(ItemStack stack) {
+        try {
+            var caps = (CompoundTag) SERIALIZE_CAPS_HANDLE.invokeExact((CapabilityProvider) stack);
+            // Ensure stacks with no serializable cap providers are treated the same as stacks with no caps!
+            return caps == null || caps.isEmpty() ? null : caps;
+        } catch (Throwable ex) {
+            throw new RuntimeException("Failed to call serializeCaps", ex);
+        }
+    }
+
+    @Nullable
+    private static void deserializeStackCaps(ItemStack stack, CompoundTag caps) {
+        try {
+            if(caps != null && !caps.isEmpty())
+            {
+                DESERIALIZE_CAPS_HANDLE.invokeExact((CapabilityProvider) stack, caps);
+            }
+            return ;
+        } catch (Throwable ex) {
+            throw new RuntimeException("Failed to call serializeCaps", ex);
+        }
+    }
 
     public ItemStackType()
     {
@@ -233,7 +282,14 @@ public class ItemStackType implements IStackType<ItemStack> {
     public boolean isSameTypeSameComponents(IStackType<ItemStack> other) {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return ItemStack.isSameItemSameTags(stack, other.copyStackWithCount(1));
+        ItemStack copyOther = other.copyStackWithCount(1);
+        boolean result;
+        if (!stack.is(copyOther.getItem())) {
+            result = false;
+        } else {    // 替换掉对能力的比较
+            result = stack.isEmpty() && copyOther.isEmpty() ? true : Objects.equals(stack.getTag(), copyOther.getTag()) && Objects.equals(serializeStackCaps(stack), serializeStackCaps(copyOther));
+        }
+        return result;
     }
 
     // 网络序列化
@@ -253,6 +309,7 @@ public class ItemStackType implements IStackType<ItemStack> {
             ItemStack copy = stack.copyWithCount(1);
             // 使用OPTIONAL_CODEC处理可能为空的情况
             buf.writeItem(copy);
+            buf.writeNbt(serializeStackCaps(copy));
         }
     }
 
@@ -272,6 +329,8 @@ public class ItemStackType implements IStackType<ItemStack> {
         long count = buf.readVarLong();
         // 使用OPTIONAL_CODEC解码
         ItemStack stack = buf.readItem();
+        CompoundTag capNBTTag = buf.readNbt();
+        deserializeStackCaps(stack, capNBTTag); // 内部检查null和空
         return new ItemStackType(stack,count);
     }
 
