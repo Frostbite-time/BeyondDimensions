@@ -234,7 +234,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             return;
         }
         // 1 构建正确的索引数据
-        if(needsUpdateCacheIndex)
+        if(needsUpdateCacheIndex || cacheIndex == null)
         {
             cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
         }
