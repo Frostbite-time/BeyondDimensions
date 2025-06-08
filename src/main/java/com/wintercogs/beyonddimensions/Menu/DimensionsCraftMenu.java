@@ -148,26 +148,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         // 先尝试放入玩家背包 这个过程中多出来的会掉落
         // 然后尝试放入存储
         // 最后尝试掉落
-        if (player instanceof ServerPlayer) {
-            List<ItemStack> stacks = craftSlots.getItems();
-            for(ItemStack stack : stacks) {
-                if(!stack.isEmpty())
-                {
-                    if (player.isAlive() && !((ServerPlayer)player).hasDisconnected()) {
-                        player.getInventory().placeItemBackInInventory(stack);
-                    } else {
-                        long remaining = storage.insert(new ItemStackType(stack),false).getStackAmount();
-                        if(remaining > 0)
-                        {
-                            stack.setCount((int)remaining);
-                            player.drop(stack, false);
-                        }
-                    }
-                }
-            }
-            craftSlots.clearContent();
-            resultSlots.clearContent();
-        }
+        cleanCraftSlots(firstCraftReturnDir);
 
 
         // 物品转移逻辑
