@@ -7,37 +7,43 @@
 
 你需要击败凋灵，或者用任何其他方法得到一个**下界之星**，用它合成一个**不稳定时空碎片**，放在背包中一个小时，你将获得一个**稳态时空碎片**。使用它合成一个**维度网络发生器**，使用以创建一个**维度网络**。
 
-你可以使用快捷键(打开维度网络：默认O)打开模组提供的界面来进行交互。模组提供的界面与AE和RS等主流模组的交互逻辑基本一致。在此基础上，手持容器右键在模组提供的界面中可以快速存入或取出容器的内容物，只要是模组支持的资源种类都有效(不包括FE能量)。
+你可以使用快捷键（打开维度网络：默认O）打开模组提供的界面来进行交互。模组提供的界面与AE和RS等主流模组的交互逻辑基本一致。在此基础上，手持容器右键在模组提供的界面中可以快速存入或取出容器的内容物，只要是模组支持的资源种类都有效（不包括FE能量）。
 
 ## 自动化功能和联机支持
 
 要进行这一步，你必须先获得一些**破碎的时空结晶**，这种物品在你创建维度网络之后每10分钟都会自然生成一个，直接存入你的维度网络中。随着时间的推移，它们将在维度网络中变得越来越多。
 
-要和你的朋友共享同一个网络，只需合成一个**成员邀请器**，右键将其绑定到你的网络，然后丢给你的朋友使用。这样你的朋友可以访问你的维度网络，但是没有权限将你的网络绑定到其他物品或者方块。你也可以制作一个**网络控制器**为他提升权限，或者使用**管理员成员邀请器**进行邀请。
+要和你的朋友共享同一个网络，只需合成一个**成员邀请器**，右键将其绑定到你的网络，然后丢给你的朋友使用。这样你的朋友可以访问你的维度网络，但是没有权限将你的网络绑定到其他物品或者方块。你也可以制作一个**网络控制器**为他提升权限，或者使用**管理员成员邀请器**进行邀请。如果你希望共享库存，而不与其使用一个网络，你可以给他一个绑定后的**网络终端**。
 
 模组提供目前仅提供了一个简单但有效自动化方块——**网络接口**，它类似于 **应用能源2 (AE2)** 的 ME 接口。只需空手shift右键绑定，你就可以标记资源，使其不断从网络中抽取，也可以向内输入资源，让其送回网络。**网络接口**提供了一个弹出模式，可以主动向外输出资源，而无需额外使用管道。同时，你也可以不绑定任何网络，将其当一个箱子使用，其可以存储任何模组支持的资源，但是破坏后不会有任何掉落物。
 
 如果你是重度模组玩家，那么你还需要**维度网络通道**，将任何物流或存储模组的存储总线接入，就能够读取维度网络内的所有资源。以进行更精细的自动化。它同样可以被接入AE、RS或者汤姆的简易存储这类模组。
 
 
+## 对其他模组的支持
+
+* 支持JEI和EMI的拖拽标记和快速配方转移；
+* 为AE2添加了专用的存储元件，用于读取绑定的网络内容。其性能比使用存储总线高10倍以上；
+* Mek的化学品存储支持；
+* 合成界面支持多态合成（Polymorph）；
+* 物品终端可以放入Curios的护符槽中，且同时安装本模组和Curios后，将额外提供一个护符槽；
+* 模组的UI界面禁用了一键背包整理Next（IPN）的功能，模组的UI界面经过大量修改，无法与其一起使用。如需快速转移物品请使用鼠标手势。
+
 ## 更新计划
 
-* 添加发展流程，而非一开始给予无上限的存储
-* 将原版物品和流体存储最大上限更改为64位整型
-* 更多的原生自动化工具
-* 其他实用工具和装备
+* 添加发展流程，而非一开始给予无上限的存储；
+* 更多的原生自动化工具；
+* 其他实用工具和装备。
 
 ## 其他
 
-目前的所有可存储的资源类型，目前其存储上限取决于资源自身所使用的整型上限。物品和流体为int，Mek的气体在1.20.1以上为long，1.12.2为int。
-
 可存储资源类型在代码上相当容易拓展，只需实现以下接口并注册资源类型和对应的操作方法
-* [IStackType](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/src/main/java/com/wintercogs/beyonddimensions/DataBase/Stack/IStackType.java) 使模组可以识别和存储此资源类型
-* [IStackHandlerWrapper](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/src/main/java/com/wintercogs/beyonddimensions/DataBase/StackHandlerWrapper/IStackHandlerWrapper.java) 使模组可以主动操作存储了此资源的其他模组容器
-* CapabilityHelper.BlockCapabilityMap 使对应资源种类能被其他模组的管道和存储总线获取
-* CapabilityHelper.ItemCapabilityMap 使UI右键快速可以容器中存取此资源
-* UnifiedStorage.typedHandlerMap 使得维度网络能操作对应资源
-* StackTypedHandler.typedHandlerMap 使得网络接口等方块所用的存储空间能操作对应资源
+* [IStackType](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/src/main/java/com/wintercogs/beyonddimensions/DataBase/Stack/IStackType.java) 使模组可以识别和存储此资源类型；
+* [IStackHandlerWrapper](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/src/main/java/com/wintercogs/beyonddimensions/DataBase/StackHandlerWrapper/IStackHandlerWrapper.java) 使模组可以主动操作存储了此资源的其他模组容器；
+* CapabilityHelper.BlockCapabilityMap 使对应资源种类能被其他模组的管道和存储总线获取；
+* CapabilityHelper.ItemCapabilityMap 使UI右键快速可以容器中存取此资源；
+* UnifiedStorage.typedHandlerMap 使得维度网络能操作对应资源；
+* StackTypedHandler.typedHandlerMap 使得网络接口等方块所用的存储空间能操作对应资源。
 
 注册方式可参考[此处](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/src/main/java/com/wintercogs/beyonddimensions/BeyondDimensions.java)，注册方式可能会在未来变动。
 
