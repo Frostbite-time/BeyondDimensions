@@ -131,6 +131,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
                         if (remaining <= 0) break;
                     }
                 } else {
+                    inputElements.add(ItemStack.EMPTY); // 材料不足的时候添加空位
                     missingSlots.add(slotView);
                 }
 
