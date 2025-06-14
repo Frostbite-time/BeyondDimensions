@@ -35,6 +35,7 @@
 
   "istack.beyonddimensions.storage_num.item": "已存储：%s个",
   "istack.beyonddimensions.storage_num.fluid": "已存储：%smB",
+  "istack.beyonddimensions.storage_num.long_type": "已存储：%s",
 
   "key.categories.beyonddimensions": "超越维度",
   "key.beyonddimensions.open_gui": "打开维度网络",
@@ -78,5 +79,7 @@
   "msg.beyonddimensions.no_right_to_bound_block": "你无权更改此方块的网络绑定",
   "msg.beyonddimensions.cant_delete_net": "无法删除网络，你必须是网络主人才能执行此操作",
   "msg.beyonddimensions.item_net_destroyed": "你已经删除自身所在的网络",
-  "msg.beyonddimensions.net_gift_done": "成功合并%s号网络"
+  "msg.beyonddimensions.net_gift_done": "成功合并%s号网络",
+
+  "types.beyonddimensions.energyType.name": "FE能量"
 }

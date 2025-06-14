@@ -1,5 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.LongType;
 
+import net.minecraft.network.chat.Component;
+
 public abstract class LongType<T>
 {
     protected long stackCount;
@@ -29,6 +31,10 @@ public abstract class LongType<T>
         return stackCount <= 0;
     }
 
+    public abstract Component getName();
+
+    public abstract LongType<T> getEmpty();
+
     public abstract LongType<T> copy();
 
     public abstract LongType<T> copyWithAmount(long amount);
@@ -38,22 +44,19 @@ public abstract class LongType<T>
         if (other == null) {
             return false;
         }
-        return getClass() == other.getClass()
-                && this.stackCount == other.stackCount;
+        return getClass() == other.getClass();
     }
 
     @Override
     public boolean equals(Object obj)
     {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        LongType other = (LongType) obj;
-        return stackCount == other.stackCount;
+        return obj != null && getClass() == obj.getClass();
     }
 
     @Override
     public int hashCode()
     {
-        return Long.hashCode(stackCount);
+        return this.getClass().hashCode();
     }
 }

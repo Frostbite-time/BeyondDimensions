@@ -6,20 +6,16 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockE
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.DataBase.Handler.ChemicalStackTypedHandler;
-import com.wintercogs.beyonddimensions.DataBase.Handler.FluidStackTypedHandler;
-import com.wintercogs.beyonddimensions.DataBase.Handler.ItemStackTypedHandler;
-import com.wintercogs.beyonddimensions.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.DataBase.Handler.*;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.ChemicalHandlerWrapper;
+import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.EnergyHandlerWrapper;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.ItemHandlerWrapper;
-import com.wintercogs.beyonddimensions.DataBase.Storage.ChemicalUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.DataBase.Storage.*;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
@@ -149,25 +145,31 @@ public class BeyondDimensions
         // 注册堆叠类型，使得网络能够存储相关堆叠
         StackTypeRegistry.registerType(new ItemStackType());
         StackTypeRegistry.registerType(new FluidStackType());
+        StackTypeRegistry.registerType(new EnergyStackType());
 
         // 注册方块能力类型，用于动态为方块注册能力
         CapabilityHelper.BlockCapabilityMap.put(ItemStackType.ID,Capabilities.ItemHandler.BLOCK);
         CapabilityHelper.BlockCapabilityMap.put(FluidStackType.ID,Capabilities.FluidHandler.BLOCK);
+        CapabilityHelper.BlockCapabilityMap.put(EnergyStackType.ID, Capabilities.EnergyStorage.BLOCK);
         // 注册物品能力，用于动态操作
         CapabilityHelper.ItemCapabilityMap.put(ItemStackType.ID,Capabilities.ItemHandler.ITEM);
         CapabilityHelper.ItemCapabilityMap.put(FluidStackType.ID,Capabilities.FluidHandler.ITEM);
+        CapabilityHelper.ItemCapabilityMap.put(EnergyStackType.ID, Capabilities.EnergyStorage.ITEM);
 
         // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
         UnifiedStorage.typedHandlerMap.put(ItemStackType.ID,ItemUnifiedStorageHandler::new);
         UnifiedStorage.typedHandlerMap.put(FluidStackType.ID,FluidUnifiedStorageHandler::new);
+        UnifiedStorage.typedHandlerMap.put(EnergyStackType.ID, EnergyUnifiedStorageHandler::new);
 
         // 注册存储分化包装
         StackTypedHandler.typedHandlerMap.put(ItemStackType.ID,ItemStackTypedHandler::new);
         StackTypedHandler.typedHandlerMap.put(FluidStackType.ID,FluidStackTypedHandler::new);
+        StackTypedHandler.typedHandlerMap.put(EnergyStackType.ID, EnergyStackTypedHandler::new);
 
         // 注册堆叠处理包装，用于动态包装来自其他模组的handler (如原版的IItemHandler)
         StackHandlerWrapperHelper.stackWrappers.put(ItemStackType.ID, ItemHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackType.ID, FluidHandlerWrapper::new);
+        StackHandlerWrapperHelper.stackWrappers.put(EnergyStackType.ID, EnergyHandlerWrapper::new);
 
         if(MekLoaded)
         {
