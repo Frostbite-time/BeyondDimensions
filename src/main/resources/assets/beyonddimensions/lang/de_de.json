@@ -31,6 +31,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "Crafting-Slot ein/ausblenden",
   "tooltip.button.beyonddimensions.popmode_off": "Aktuell: Pop-up-Modus deaktiviert",
   "tooltip.button.beyonddimensions.popmode_on": "Aktuell: Pop-up-Modus aktiviert",
+  "tooltip.item.unstable_space_time.long_data": "Raumzeit stabilisiert sich noch, %s Stabilisierungszyklen benötigt. Bitte stets bei sich tragen.",
 
   "istack.beyonddimensions.storage_num.item": "Gespeichert: %s Stück",
   "istack.beyonddimensions.storage_num.fluid": "Gespeichert: %s mB",

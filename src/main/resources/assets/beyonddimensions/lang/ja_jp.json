@@ -31,6 +31,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "クラフトスロット表示切替",
   "tooltip.button.beyonddimensions.popmode_off": "現在：ポップアップ無効",
   "tooltip.button.beyonddimensions.popmode_on": "現在：ポップアップ有効",
+  "tooltip.item.unstable_space_time.long_data": "時空は安定化中、残り%s回の安定化サイクルが必要です。常に携帯してください。",
 
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
   "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",

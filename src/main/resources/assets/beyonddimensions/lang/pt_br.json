@@ -31,6 +31,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "Alternar slot de crafting",
   "tooltip.button.beyonddimensions.popmode_off": "Atual: Modo popup desativado",
   "tooltip.button.beyonddimensions.popmode_on": "Atual: Modo popup ativado",
+  "tooltip.item.unstable_space_time.long_data": "O espaço-tempo está estabilizando, faltam %s ciclos. Mantenha-o sempre com você.",
 
   "istack.beyonddimensions.storage_num.item": "Armazenado: %s itens",
   "istack.beyonddimensions.storage_num.fluid": "Armazenado: %s mB",

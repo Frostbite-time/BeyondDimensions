@@ -2,17 +2,32 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.ModItems;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+
+import java.util.List;
 
 public class UnstableSpaceTimeFragment extends Item
 {
     public UnstableSpaceTimeFragment(Properties properties)
     {
         super(properties.component(ModDataComponents.LONG_DATA,3600L).component(ModDataComponents.TIME_LINE,0L));
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag)
+    {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+
+        if (stack.has(ModDataComponents.LONG_DATA)) {
+            long timeData = stack.get(ModDataComponents.LONG_DATA);
+            tooltipComponents.add(Component.translatable("tooltip.item.unstable_space_time.long_data", timeData/10));
+        }
     }
 
     @Override
