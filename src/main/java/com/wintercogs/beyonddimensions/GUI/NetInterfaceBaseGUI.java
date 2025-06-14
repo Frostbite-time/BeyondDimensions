@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
+import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
 import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
@@ -67,7 +68,6 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
                 (slot, ingredient) -> {
                     // stackKey 是如 Item Fluid的类
                     Object stackKey = ingredient.getEmiStacks().get(0).getKey();
-                    long stackAmount = ingredient.getEmiStacks().get(0).getAmount();
                     DataComponentPatch dataComponentPatch = ingredient.getEmiStacks().get(0).getComponentChanges();
 
                     IStackType dragging = new ItemStackType();
@@ -81,6 +81,22 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 
                         }
                     }
+
+                    // AE2通用包裹支持
+                    if(BeyondDimensions.AELoaded)
+                    {
+                        if(dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
+                        {
+                            appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
+
+                            if(genericContent != null)
+                            {
+                                dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
+                            }
+
+                        }
+                    }
+
 
                     StoredStackSlot sSlot = (StoredStackSlot) slot;
                     IStackType clickItem = sSlot.getVanillaActualStack();
