@@ -179,8 +179,11 @@ public class FluidStackType implements IStackType<FluidStack>
     public IStackType<FluidStack> copyWithCount(long count)
     {
         FluidStackType copy = new FluidStackType(stack.copy(), count);
-        copy.NeedRecalHash = this.NeedRecalHash;
-        copy.hashCodeCache = this.hashCodeCache;
+        if(count == stackSize)
+        {
+            copy.NeedRecalHash = this.NeedRecalHash;
+            copy.hashCodeCache = this.hashCodeCache;
+        }
         return copy;
     }
 
