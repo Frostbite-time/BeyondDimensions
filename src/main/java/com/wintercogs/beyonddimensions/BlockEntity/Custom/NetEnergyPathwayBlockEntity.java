@@ -2,6 +2,8 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.DataBase.Stack.EnergyStackType;
+import com.wintercogs.beyonddimensions.DataBase.Storage.EnergyUnifiedStorageHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -23,7 +25,8 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
     public boolean popMode = false;
 
     private final Direction[] directions = Direction.values();
-    private com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage energyStorage = null; // 仅用于作为缓存，不长期存储
+
+    private DimensionsNet net = null; //用于缓存
 
 
     public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState) {
@@ -47,7 +50,7 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
                     DimensionsNet net = be.getNet();
                     if(net != null)
                     {
-                        return net.getEnergyStorage();
+                        return new EnergyUnifiedStorageHandler(net.getUnifiedStorage());
                     }
                     return new EnergyStorage(0);
                 } // 根据方向返回处理器
@@ -83,14 +86,15 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
 
     private void popEnergy()
     {
-        if(energyStorage==null)
+        if(net==null)
         {
             DimensionsNet net = getNet();
             if(net != null)
-                energyStorage = getNet().getEnergyStorage();
+                this.net = net;
             else
                 return;
         }
+
 
         for(Direction dir: directions)
         {
@@ -103,9 +107,9 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
                 if (otherStorage != null)
                 {
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
-                    int maxExtract = (int)Math.min(energyStorage.getRealEnergyStored(), energyStorage.getMaxTransfer());
+                    int maxExtract = (int)Math.min(net.getUnifiedStorage().getEnergyStored(), Integer.MAX_VALUE);
                     int receive = otherStorage.receiveEnergy(maxExtract, false);
-                    energyStorage.extractEnergy(receive, false);
+                    net.getUnifiedStorage().extract(new EnergyStackType(receive),false);
                 }
             }
         }
@@ -115,7 +119,7 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity
     public void invalidateCapabilities()
     {
         super.invalidateCapabilities();
-        energyStorage = null;
+        net = null;
     }
 
     @Override

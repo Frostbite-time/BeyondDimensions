@@ -187,7 +187,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
                     .filter(s -> s.atlasLocation() != net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());
             if(fluidStillSprite.isPresent())
             {
-                int fluidColor = IClientFluidTypeExtensions.of(Fluids.WATER).getTintColor();
+                int fluidColor =  0xFF00FF00; // 绿色
                 com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,fluidColor,16,fluidStillSprite.get(),x,y);
             }
         }

@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.DataBase;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
@@ -45,10 +45,6 @@ public class DimensionsNet extends SavedData
     // 与该网络绑定的玩家 包含网络管理者
     private final Set<UUID> players = new HashSet<>();
 
-    // 网络存储空间
-    private EnergyStorage energyStorage;
-    // 非neoforge自带的存储系统 确保在任何调用之前检查null或者对应模组是否加载
-
     // 通用存储空间 存储一切stack行为的资源
     private UnifiedStorage unifiedStorage;
 
@@ -61,7 +57,6 @@ public class DimensionsNet extends SavedData
     public DimensionsNet(boolean temporary)
     {
         unifiedStorage = new UnifiedStorage(this);
-        energyStorage = new EnergyStorage(this);
         NeoForge.EVENT_BUS.addListener(this::onServerTick);
         this.temporary = temporary;
     }
@@ -138,7 +133,15 @@ public class DimensionsNet extends SavedData
         }
 
         net.unifiedStorage.deserializeNBT(registryAccess,tag.getCompound("UnifiedStorage"));
-        net.energyStorage.deserializeNBT(registryAccess,tag.getCompound("EnergyStorage"));
+        // 旧数据兼容
+        if(tag.contains("EnergyStorage"))
+        {
+            CompoundTag energyTag = tag.getCompound("EnergyStorage");
+            if (energyTag.contains("Energy"))
+            {
+                net.unifiedStorage.insert(new EnergyStackType(energyTag.getLong("Energy")),false);
+            }
+        }
 
         if (tag.contains("Managers"))
         {
@@ -193,7 +196,6 @@ public class DimensionsNet extends SavedData
         tag.put("Players", playerListTag);
 
         // 保存存储
-        tag.put("EnergyStorage",energyStorage.serializeNBT(registryAccess));
         tag.put("UnifiedStorage",unifiedStorage.serializeNBT(registryAccess));
 
         // 保存倒计时
@@ -346,17 +348,6 @@ public class DimensionsNet extends SavedData
         {
             unifiedStorage.insert(stack,false);
         }
-        // 合并能量存储
-        long capacity1 = energyStorage.getRealEnergyStored();
-        long capacity2 = otherNet.energyStorage.getRealEnergyStored();
-        long total;
-        // 仅处理正数溢出
-        if (capacity1 > Long.MAX_VALUE - capacity2) {
-            total = Long.MAX_VALUE;
-        } else {
-            total = capacity1 + capacity2;
-        }
-        energyStorage.setEnergyDirectly(total);
 
         // 销毁另一个网络
         otherNet.destroySelf();
@@ -372,7 +363,6 @@ public class DimensionsNet extends SavedData
         this.players.clear();
         this.id = -99; // 用-99作为被删除的特殊标记
         this.unifiedStorage.clearStorage();
-        this.energyStorage.setEnergyDirectly(0);
         this.deleted = true;
     }
 
@@ -397,11 +387,6 @@ public class DimensionsNet extends SavedData
             }
         }
         return infoMap;
-    }
-
-    public EnergyStorage getEnergyStorage()
-    {
-        return this.energyStorage;
     }
 
     // 统一存储空间

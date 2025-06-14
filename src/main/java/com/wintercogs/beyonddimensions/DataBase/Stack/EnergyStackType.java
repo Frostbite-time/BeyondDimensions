@@ -1,16 +1,27 @@
 package com.wintercogs.beyonddimensions.DataBase.Stack;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.LongType.EnergyType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+
+import java.util.Optional;
 
 public class EnergyStackType extends LongStackType<EnergyType>
 {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/energy");
+    public static final EnergyStackType EMPTY = new EnergyStackType(); // 空定义
 
     public EnergyStackType()
     {
@@ -126,5 +137,57 @@ public class EnergyStackType extends LongStackType<EnergyType>
     public IStackType<EnergyType> deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
     {
         return new EnergyStackType(nbt.getLong("Amount"));
+    }
+
+    @Override
+    public void render(GuiGraphics gui, int x, int y)
+    {
+        if(stack.isEmpty())
+            return;
+
+        // 渲染图标
+        var poseStack = gui.pose(); // 获取渲染的变换矩阵
+        poseStack.pushPose(); // 保存矩阵状态
+
+        Fluid fluid = Fluids.WATER;
+        if(!fluid.isSame(Fluids.EMPTY))
+        {
+            IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
+            ResourceLocation fluidStill = renderProperties.getStillTexture();
+            Optional<TextureAtlasSprite> fluidStillSprite = Optional.ofNullable(fluidStill)
+                    .map(f -> Minecraft.getInstance()
+                            .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
+                            .apply(f)
+                    )
+                    .filter(s -> s.atlasLocation() != net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());
+            if(fluidStillSprite.isPresent())
+            {
+                int fluidColor =  0x50F18E; // 绿色
+                com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,fluidColor,16,fluidStillSprite.get(),x,y);
+            }
+        }
+
+
+        poseStack.popPose(); // 恢复矩阵状态，结束渲染
+
+        // 渲染数量文本
+        String countText = getCountText(getStackAmount());
+        float scale = 0.666f; // 文本缩放因数
+        var poseStackText = gui.pose();
+        poseStackText.pushPose();
+        poseStackText.translate(0,0,200); // 确保文本在顶层
+        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
+        RenderSystem.disableBlend(); // 禁用混合渲染模式
+        final int X = (int)(
+                (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
+                        * 1.0f / 0.666f
+        );
+        final int Y = (int)(
+                (y + -1 + 16.0f - 5.0f * 0.666f)
+                        * 1.0f / 0.666f
+        );
+        if(!stack.isEmpty())
+            gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
+        poseStackText.popPose();
     }
 }

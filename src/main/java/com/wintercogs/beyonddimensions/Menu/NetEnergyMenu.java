@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.Menu;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataBase.Storage.EnergyStorage;
 import com.wintercogs.beyonddimensions.Packet.EnergyStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import net.minecraft.core.registries.Registries;
@@ -26,7 +25,7 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
     public boolean popMode;
     public NetEnergyPathwayBlockEntity be;
 
-    private EnergyStorage energyStorage = null; // 注意判断
+    private DimensionsNet net = null; // 注意判断
 
     public long energyCapacity = 0;
     public long energyStored = 0;
@@ -68,11 +67,11 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
             this.be = be;
             DimensionsNet net = be.getNet();
             if (net != null)
-                this.energyStorage = be.getNet().getEnergyStorage();
-            if (energyStorage != null)
+                this.net = be.getNet();
+            if (net != null)
             {
-                this.energyCapacity = energyStorage.getRealEnergyCapacity();
-                this.energyStored = energyStorage.getRealEnergyStored();
+                this.energyCapacity = net.getUnifiedStorage().getSlotCapacity(0);
+                this.energyStored = net.getUnifiedStorage().getEnergyStored();
             }
 
         }
@@ -96,12 +95,12 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
     @Override
     protected void updateChange()
     {
-        if (energyStorage != null)
+        if (net != null)
         {
-            if (energyStorage.getRealEnergyCapacity() != energyCapacity || energyStored != energyCapacity)
+            if (Long.MAX_VALUE != energyCapacity || energyStored != energyCapacity)
             {
-                this.energyCapacity = energyStorage.getRealEnergyCapacity();
-                this.energyStored = energyStorage.getRealEnergyStored();
+                this.energyCapacity = Long.MAX_VALUE;
+                this.energyStored = net.getUnifiedStorage().getSlotCapacity(0);
                 PacketDistributor.sendToPlayer((ServerPlayer) player, new EnergyStoragePacket(this.energyStored, this.energyCapacity));
             }
         }
