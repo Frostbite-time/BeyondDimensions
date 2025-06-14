@@ -31,6 +31,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "Toggle crafting slot visibility",
   "tooltip.button.beyonddimensions.popmode_off": "Current: Popup mode disabled",
   "tooltip.button.beyonddimensions.popmode_on": "Current: Popup mode enabled",
+  "tooltip.item.unstable_space_time.long_data": "Spacetime is stabilizing, requires %s more stabilization cycles. Please keep it on your person.",
 
   "istack.beyonddimensions.storage_num.item": "Stored: %s Items",
   "istack.beyonddimensions.storage_num.fluid": "Stored: %s mB",
