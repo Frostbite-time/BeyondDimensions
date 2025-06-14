@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
 import net.minecraft.world.entity.player.Inventory;
@@ -159,7 +160,7 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                 FluidStackType stack = new FluidStackType(stackHandlerWrapper.getStackInSlot(0));
                                 if(stack != null && !stack.isEmpty())
                                 {
-                                    int changedCount = (int) Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize());
+                                    int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
                                     // 进行模拟，桶必须完全清空才被允许操作
                                     int remaining = (int)storage.insert(slot.getSlotIndex(),stack.copyWithCount(changedCount),true).getStackAmount();
                                     if(remaining<=0)
@@ -189,7 +190,7 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                         IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(index));
                                         if(stack !=null&& !stack.isEmpty())
                                         {
-                                            int changedCount = (int) Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize());
+                                            int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
                                             int remaining = (int)storage.insert(slot.getSlotIndex(),stack.copyWithCount(changedCount),false).getStackAmount();
                                             int actualInsert = changedCount - remaining;
 
@@ -241,7 +242,7 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                 if(clickStack instanceof ItemStackType clickItem)
                 {
                     // 确保一次取出最大不得超过原版数量
-                    int woundChangeNum = (int) Math.min(clickItem.getStackAmount(), clickItem.getVanillaMaxStackSize());
+                    int woundChangeNum = BDMath.clampLongToInt(Math.min(clickItem.getStackAmount(), clickItem.getVanillaMaxStackSize()));
                     int actualChangeNum = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
                     ItemStack takenItem = ((ItemStack) storage.extract(slot.getSlotIndex(),actualChangeNum,false).getStack()).copy();
                     if(takenItem != null)
@@ -309,7 +310,7 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                         FluidStackType stack = new FluidStackType(stackHandlerWrapper.getStackInSlot(0));
                                         if(stack != null && !stack.isEmpty())
                                         {
-                                            int changedCount = (int) Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize());
+                                            int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
                                             // 进行模拟，桶必须完全清空才被允许操作
                                             int remaining = (int)storage.insert(slot.getSlotIndex(),stack.copyWithCount(changedCount),true).getStackAmount();
                                             if(remaining<=0)
@@ -344,7 +345,7 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                             {
                                                 tureCount = trueStack.getStackAmount();
                                             }
-                                            int changedCount = (int) Math.min(tureCount,clickStack.getVanillaMaxStackSize());
+                                            int changedCount = BDMath.clampLongToInt(Math.min(tureCount,clickStack.getVanillaMaxStackSize()));
                                             int remaining = (int)stackHandlerWrapper.insert(clickStack.copyStack(),false);
                                             int actualInsert = changedCount - remaining;
                                             storage.extract(slot.getSlotIndex(),actualInsert,false);

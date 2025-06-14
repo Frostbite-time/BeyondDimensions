@@ -99,8 +99,8 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
         {
             if (Long.MAX_VALUE != energyCapacity || energyStored != energyCapacity)
             {
-                this.energyCapacity = Long.MAX_VALUE;
-                this.energyStored = net.getUnifiedStorage().getSlotCapacity(0);
+                this.energyCapacity = net.getUnifiedStorage().getSlotCapacity(0);
+                this.energyStored = net.getUnifiedStorage().getEnergyStored();
                 PacketDistributor.sendToPlayer((ServerPlayer) player, new EnergyStoragePacket(this.energyStored, this.energyCapacity));
             }
         }
