@@ -13,16 +13,31 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.*;
 import java.util.function.Function;
 
-// 一个通用的，用于存储IStackType实例的类
-// 所有相关方法都已经在接口以默认方法，非类型化的实现
+/**
+ * 一个通用的，用于存储IStackType实例的类，通过这个类可以快速实现类似原版箱子的容器。
+ */
 public class StackTypedHandler implements IStackTypedHandler
 {
-    // 存储
+
+    /**
+     * 实际存储的数据结构
+     */
     private List<IStackType> storage;
-    // 类型化存储，为其分化包装提供良好的性能
+
+    /**
+     * 为构建分化包装提供良好的性能，其结构为 [资源种类id：对应资源类型的索引列表]
+     */
     private final Map<ResourceLocation, List<Integer>> typeIdIndex = new HashMap<>();
+
+    /**
+     * 用于存储创建分化包装的函数
+     */
     public static final Map<ResourceLocation, Function<StackTypedHandler,Object>> typedHandlerMap = new HashMap<>();
 
+    /**
+     * 构造函数
+     * @param size 容器槽位数量
+     */
     public StackTypedHandler(int size)
     {
         storage = new ArrayList<>(size);
@@ -40,7 +55,7 @@ public class StackTypedHandler implements IStackTypedHandler
         return Collections.unmodifiableList(this.storage);
     }
 
-    // 可以在构造时候再重写，根据需求传入实现
+    // 在需要时重写，根据需求传入实现
     @Override
     public void onChange()
     {
@@ -304,8 +319,8 @@ public class StackTypedHandler implements IStackTypedHandler
     @Override
     public long getSlotCapacity(int slot)
     {
-        return 6400000L; // 最大容量兼容流体，实际能插入多少，由接口默认方法的insert(int slot, IStackType stack, boolean simulate)决定
-                       // 默认实现会取slot容量和要插入的堆叠的原版最大容量的最小值。如需突破上限请修改实现
+        return 6400000L; // 最大容量，实际能插入多少，由insert方法决定
+                         // insert的默认实现会取slot容量和要插入的堆叠的原版最大容量的最小值。如需突破上限请修改实现
     }
 
     @Override

@@ -19,17 +19,52 @@ import net.minecraft.world.item.ItemStack;
 import java.util.*;
 import java.util.function.Function;
 
+
+/**
+ * 基于{@link IStackTypedHandler}接口的无序存储实现。
+ * <p>
+ * 具有以下特点：
+ * <ul>
+ *     <li>每种精确匹配的堆叠类型仅允许占用一个槽位</li>
+ *     <li>插入的堆叠会自动分配槽位</li>
+ *     <li>实际用来存储的列表大小不实际反映最大槽位数量</li>
+ * </ul>
+ * <p>
+ * 虽然需要一个DimensionsNet作为参数进行构造，但仅用于onChange方法通知数据保存。你可以复制代码，移除DimensionsNet参数，以获得一个可以自定义的无序存储实现
+ */
 public class UnifiedStorage implements IStackTypedHandler
 {
+
+    /**
+     * 对应的维度网络
+     */
     private DimensionsNet net;
+
+    /**
+     * 存储的数据结构
+     */
     private final ArrayList<IStackType> storage = new ArrayList<>();
-    // 使用Integer索引而不是直接存储对象引用
-    private final Map<IStackType, Integer> stackIndex = new HashMap<>(); // 直接定位堆叠的索引表
-    private final Map<ResourceLocation, List<Integer>> typeIdIndex = new HashMap<>(); // 用于分类不同类型资源索引的表
+
+    /**
+     * 类型与索引的映射，用于优化大规模存储的性能，大部分操作可以降低到O(1)。
+     */
+    private final Map<IStackType, Integer> stackIndex = new HashMap<>();
+
+    /**
+     * 为构建分化包装提供良好的性能，其结构为 [资源种类id：对应资源类型的索引列表]
+     */
+    private final Map<ResourceLocation, List<Integer>> typeIdIndex = new HashMap<>();
+
+    /**
+     * 用于存储创建分化包装的函数
+     */
     public static final Map<ResourceLocation, Function<UnifiedStorage,Object>> typedHandlerMap = new HashMap<>();
 
-    // 统一存储的属性 对于真正执行存储实例，在序列化和反序列化的时候确定
-    // 对于临时数据，给予最大值
+    /**
+     * 统一存储的属性 对于真正的存储实例，在序列化和反序列化的时候通过持久化和再赋值确定。
+     * <p>
+     * 对于临时数据，默认给予最大值
+     */
     public long slotCapacity = Long.MAX_VALUE;
     public int slotMaxSize = Integer.MAX_VALUE;
 
@@ -218,9 +253,13 @@ public class UnifiedStorage implements IStackTypedHandler
         return stack.copyWithCount(remaining);
     }
 
-    // 解压物质球的函数 函数处理应当相当稳定，即使是物质球内有其他物质球也应能正常解压（不过应当尽量避免这种操作）
-    // 输入一个物质球堆叠 输入后，模拟是否能完全插入，如果可以，就插入，否则就完全不操作
-    // 输出一个物质球堆叠 输出的目的是，如果能完全解压，返回空，否则返回原本
+    /**
+     * 解压物质球的函数 函数处理应当相当稳定，即使是物质球内有其他物质球也应能正常解压（不过应当尽量避免这种操作）
+     * <p>
+     * 输入一个物质球堆叠 输入后，模拟是否能完全插入，如果可以，就插入，否则就完全不操作
+     * <p>
+     * 输出一个物质球堆叠 输出的目的是，如果能完全解压，返回空，否则返回物质球堆叠本身
+     */
     protected IStackType unzipMatterBall(ItemStackType stack, boolean simulate)
     {
         ItemStack ballStack = stack.copyStack();
@@ -317,7 +356,10 @@ public class UnifiedStorage implements IStackTypedHandler
         return stack.getEmpty();
     }
 
-    // 当从storage中移除一个元素后，更新所有受影响的索引值
+    /**
+     * 当从storage中移除一个堆叠后，更新所有受影响的索引值
+     * @param removedIndex 被移除堆叠的索引值
+     */
     private void updateIndicesAfterRemoval(int removedIndex) {
         for (List<Integer> indexList : typeIdIndex.values()) {
             for (int i = 0; i < indexList.size(); i++) {
@@ -336,7 +378,9 @@ public class UnifiedStorage implements IStackTypedHandler
         }
     }
 
-    // 当外界对存储列表直接操作后（如用于UI界面的数据包发送）
+    /**
+     * 当外界对存储列表直接操作后调用（如用于UI界面的数据包发送）
+     */
     public void rebuildAllIndices()
     {
         typeIdIndex.clear();
@@ -456,13 +500,19 @@ public class UnifiedStorage implements IStackTypedHandler
         return this.typeIdIndex;
     }
 
+    /**
+     * 获取资源类型对应的索引列表
+     */
     public Optional<List<Integer>> getTypeIdIndexList(ResourceLocation typeId)
     {
         return Optional.ofNullable(this.typeIdIndex.get(typeId))
                 .filter(list -> !list.isEmpty());
     }
 
-    // 辅助方法，快速获取当前存储的能量数量
+
+    /**
+     * 快速获取当前网络存储的FE能量总量，辅助方法
+     */
     public long getEnergyStored()
     {
         IStackType stack = getStackByStack(EnergyStackType.EMPTY);
@@ -471,9 +521,9 @@ public class UnifiedStorage implements IStackTypedHandler
         return 0;
     }
 
-    // 自身属性管理
-
-    // 检查当前存储是否已经到达槽位最大上限
+    /**
+     * 检查当前存储是否已经到达槽位数量的最大上限
+     */
     public boolean isFullSlotsSize()
     {
         return storage.size() >= slotMaxSize;
@@ -481,13 +531,17 @@ public class UnifiedStorage implements IStackTypedHandler
 
     // 理论上来说，以下两个数即使是负数，逻辑也能正常运行，所以没必要再额外检查了
 
-    // 增加单槽最大上限
+    /**
+     * 设置单个槽位可存储容量的上限
+     */
     public void setSlotCapacity(long capacity)
     {
         this.slotCapacity = capacity;
     }
 
-    // 增加槽位数量
+    /**
+     * 设置槽位数量的上限
+     */
     public void setSlotMaxSize(int maxSize)
     {
         this.slotMaxSize = maxSize;
