@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
-import net.minecraft.world.level.Level;
 
 import java.util.Optional;
 import java.util.UUID;

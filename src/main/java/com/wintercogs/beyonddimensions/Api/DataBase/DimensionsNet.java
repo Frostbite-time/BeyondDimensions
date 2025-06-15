@@ -436,13 +436,14 @@ public class DimensionsNet extends SavedData
 
     /**
      * 合并另一个网络，其所有资源，玩家均被合并，但其绑定的方块会自动解绑（通过标记另一个网络为被删除实现）
+     * <p>
+     * 仅在服务端使用
      * @param otherNet 被合并的网络
      */
     public void mergeOtherNet(DimensionsNet otherNet)
     {
-        Level provider = ServerLifecycleHooks.getCurrentServer().overworld();
         // 合并玩家和管理员
-        for(Map.Entry<UUID,PlayerPermissionInfo> entry: otherNet.getPlayerPermissionInfoMap(provider).entrySet())
+        for(Map.Entry<UUID,PlayerPermissionInfo> entry: otherNet.getPlayerPermissionInfoMap(ServerLifecycleHooks.getCurrentServer()).entrySet())
         {
             if(entry.getValue().level() == NetPermissionlevel.Owner ||entry.getValue().level() == NetPermissionlevel.Manager)
                 addManager(entry.getKey());
