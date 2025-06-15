@@ -32,6 +32,7 @@
   "tooltip.button.beyonddimensions.popmode_off": "当前：弹出模式关闭",
   "tooltip.button.beyonddimensions.popmode_on": "当前：弹出模式启用",
   "tooltip.item.unstable_space_time.long_data": "时空仍在稳定中，仍需%s个稳定周期，请保持随身携带",
+  "tooltip.editbox.beyonddimensions.search": "输入'#'以搜索提示框内容",
 
   "istack.beyonddimensions.storage_num.item": "已存储：%s个",
   "istack.beyonddimensions.storage_num.fluid": "已存储：%smB",
