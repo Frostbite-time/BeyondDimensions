@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Interface.IAddNetMemberHandler;
 import net.minecraft.world.InteractionHand;

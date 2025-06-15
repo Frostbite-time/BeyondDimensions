@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Integration.JEI.RecipeTransfer;
 
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Packet.RecipeFillC2SPacket;
 import mezz.jei.api.constants.RecipeTypes;

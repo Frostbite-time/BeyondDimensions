@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Menu.*;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.world.entity.player.Player;

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Integration.AEMEK;
 
-import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
 import me.ramidzkh.mekae2.ae2.MekanismKey;
 import me.ramidzkh.mekae2.ae2.MekanismKeyType;

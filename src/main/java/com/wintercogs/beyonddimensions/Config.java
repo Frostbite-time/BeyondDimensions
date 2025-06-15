@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions;
 
-import com.wintercogs.beyonddimensions.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;

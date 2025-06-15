@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.ShortCutKey;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
-import com.wintercogs.beyonddimensions.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.NetMenuType;
 import com.wintercogs.beyonddimensions.Packet.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;

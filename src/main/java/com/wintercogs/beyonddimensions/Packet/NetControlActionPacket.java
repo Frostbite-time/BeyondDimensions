@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Packet;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
+import com.wintercogs.beyonddimensions.Api.DataBase.NetControlAction;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Utf8String;

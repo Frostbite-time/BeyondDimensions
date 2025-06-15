@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
-import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;

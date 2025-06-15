@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;

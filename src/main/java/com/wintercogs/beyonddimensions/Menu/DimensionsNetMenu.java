@@ -2,11 +2,11 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
-import com.wintercogs.beyonddimensions.DataBase.ButtonName;
-import com.wintercogs.beyonddimensions.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
+import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
 import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;

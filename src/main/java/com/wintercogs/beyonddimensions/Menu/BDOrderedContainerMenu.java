@@ -1,16 +1,16 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
-import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
-import com.wintercogs.beyonddimensions.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
+import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
+import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
-import com.wintercogs.beyonddimensions.Unit.CapabilityHelper;
-import com.wintercogs.beyonddimensions.Unit.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
+import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
