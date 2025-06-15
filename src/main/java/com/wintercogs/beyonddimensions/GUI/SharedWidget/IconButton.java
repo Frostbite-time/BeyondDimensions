@@ -2,8 +2,8 @@ package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;

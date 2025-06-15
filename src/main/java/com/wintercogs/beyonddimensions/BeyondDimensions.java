@@ -1,11 +1,6 @@
 package com.wintercogs.beyonddimensions;
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.Block.ModBlocks;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ChemicalStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
@@ -16,6 +11,14 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.EnergyHa
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.ItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.*;
+import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
+import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
+import com.wintercogs.beyonddimensions.Block.ModBlocks;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEFlux.BD_AEFluxPlugin;
@@ -25,10 +28,7 @@ import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabi
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
-import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
-import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
-import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;

@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Menu;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Packet.EnergyStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import net.minecraft.core.registries.Registries;
