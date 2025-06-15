@@ -102,7 +102,7 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
         long remaining = handlerStorage.insert(new ChemicalStackType(stack.copy()), action.simulate()).getStackAmount();
         if(remaining>0)
             return stack.copyWithAmount(remaining);
-        return ChemicalStack.EMPTY;// 始终全部插入
+        return ChemicalStack.EMPTY;
     }
 
     @Override
