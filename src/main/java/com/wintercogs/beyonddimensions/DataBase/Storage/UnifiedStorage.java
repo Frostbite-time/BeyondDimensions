@@ -471,10 +471,26 @@ public class UnifiedStorage implements IStackTypedHandler
         return 0;
     }
 
+    // 自身属性管理
+
     // 检查当前存储是否已经到达槽位最大上限
     public boolean isFullSlotsSize()
     {
         return storage.size() >= slotMaxSize;
+    }
+
+    // 理论上来说，以下两个数即使是负数，逻辑也能正常运行，所以没必要再额外检查了
+
+    // 增加单槽最大上限
+    public void setSlotCapacity(long capacity)
+    {
+        this.slotCapacity = capacity;
+    }
+
+    // 增加槽位数量
+    public void setSlotMaxSize(int maxSize)
+    {
+        this.slotMaxSize = maxSize;
     }
 }
 
