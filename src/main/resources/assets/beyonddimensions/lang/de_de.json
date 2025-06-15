@@ -35,6 +35,7 @@
 
   "istack.beyonddimensions.storage_num.item": "Gespeichert: %s Stück",
   "istack.beyonddimensions.storage_num.fluid": "Gespeichert: %s mB",
+  "istack.beyonddimensions.storage_num.long_type": "Gespeichert: %s",
 
   "key.categories.beyonddimensions": "Jenseits der Dimensionen",
   "key.beyonddimensions.open_gui": "Netzwerk öffnen",
@@ -78,5 +79,7 @@
   "msg.beyonddimensions.no_right_to_bound_block": "Sie sind nicht berechtigt, die Netzwerkbindung dieses Blocks zu ändern",
   "msg.beyonddimensions.cant_delete_net": "Netz kann nicht gelöscht werden – Nur der Besitzer kann dies tun",
   "msg.beyonddimensions.item_net_destroyed": "Du hast dein eigenes Netz gelöscht",
-  "msg.beyonddimensions.net_gift_done": "Netz %s erfolgreich fusioniert"
+  "msg.beyonddimensions.net_gift_done": "Netz %s erfolgreich fusioniert",
+
+  "types.beyonddimensions.energyType.name": "FE"
 }

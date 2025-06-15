@@ -35,6 +35,7 @@
 
   "istack.beyonddimensions.storage_num.item": "Almacenado: %s unidades",
   "istack.beyonddimensions.storage_num.fluid": "Almacenado: %s mB",
+  "istack.beyonddimensions.storage_num.long_type": "Almacenado: %s",
 
   "key.categories.beyonddimensions": "Más Allá de las Dimensiones",
   "key.beyonddimensions.open_gui": "Abrir Red Dimensional",
@@ -78,5 +79,7 @@
   "msg.beyonddimensions.no_right_to_bound_block": "No tienes permiso para cambiar el vínculo de red de este bloque",
   "msg.beyonddimensions.cant_delete_net": "No puedes eliminar la red – Solo el propietario puede hacerlo",
   "msg.beyonddimensions.item_net_destroyed": "Destruiste la red en la que estabas",
-  "msg.beyonddimensions.net_gift_done": "Red %s fusionada con éxito"
+  "msg.beyonddimensions.net_gift_done": "Red %s fusionada con éxito",
+
+  "types.beyonddimensions.energyType.name": "FE"
 }

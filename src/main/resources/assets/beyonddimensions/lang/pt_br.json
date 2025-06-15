@@ -35,6 +35,7 @@
 
   "istack.beyonddimensions.storage_num.item": "Armazenado: %s itens",
   "istack.beyonddimensions.storage_num.fluid": "Armazenado: %s mB",
+  "istack.beyonddimensions.storage_num.long_type": "Armazenado: %s",
 
   "key.categories.beyonddimensions": "Além das Dimensões",
   "key.beyonddimensions.open_gui": "Abrir rede",
@@ -78,5 +79,7 @@
   "msg.beyonddimensions.no_right_to_bound_block": "Você não tem permissão para alterar o vínculo de rede deste bloco",
   "msg.beyonddimensions.cant_delete_net": "Não é possível deletar a rede – Apenas o dono pode fazer isso",
   "msg.beyonddimensions.item_net_destroyed": "Você destruiu a rede em que estava",
-  "msg.beyonddimensions.net_gift_done": "Rede %s fundida com sucesso"
+  "msg.beyonddimensions.net_gift_done": "Rede %s fundida com sucesso",
+
+  "types.beyonddimensions.energyType.name": "FE"
 }
