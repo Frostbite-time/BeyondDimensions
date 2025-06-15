@@ -38,7 +38,7 @@ public class EnergyUnifiedStorageHandler implements IEnergyStorage
     @Override
     public int getMaxEnergyStored()
     {
-        return Integer.MAX_VALUE;
+        return BDMath.clampLongToInt(storage.getSlotCapacity(0));
     }
 
     @Override

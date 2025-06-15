@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -60,7 +61,7 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     @Override
     public int getSlotLimit(int slot)
     {
-        return Integer.MAX_VALUE-1;
+        return BDMath.clampLongToInt(storage.getSlotCapacity(0));
     }
 
     @Override

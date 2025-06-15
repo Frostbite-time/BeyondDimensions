@@ -28,6 +28,11 @@ public class UnifiedStorage implements IStackTypedHandler
     private final Map<ResourceLocation, List<Integer>> typeIdIndex = new HashMap<>(); // 用于分类不同类型资源索引的表
     public static final Map<ResourceLocation, Function<UnifiedStorage,Object>> typedHandlerMap = new HashMap<>();
 
+    // 统一存储的属性 对于真正执行存储实例，在序列化和反序列化的时候确定
+    // 对于临时数据，给予最大值
+    public long slotCapacity = Long.MAX_VALUE;
+    public int slotMaxSize = Integer.MAX_VALUE;
+
     public UnifiedStorage(DimensionsNet net)
     {
         this.net = net;
@@ -141,7 +146,7 @@ public class UnifiedStorage implements IStackTypedHandler
         if (net.deleted)
             return 0;
 
-        return Long.MAX_VALUE;
+        return slotCapacity;
     }
 
     @Override
@@ -387,6 +392,10 @@ public class UnifiedStorage implements IStackTypedHandler
     // region 序列化方法
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
+
+        tag.putLong("slotCapacity", this.slotCapacity);
+        tag.putInt("slotMaxSize", this.slotMaxSize);
+
         ListTag stacksTag = new ListTag();
 
         for (IStackType stack : storage) {
@@ -401,12 +410,24 @@ public class UnifiedStorage implements IStackTypedHandler
         }
 
         tag.put("Stacks", stacksTag);
+
         return tag;
     }
 
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         storage.clear();
         typeIdIndex.clear();
+
+        // 旧数据兼容
+        if(tag.contains("slotCapacity"))
+            slotCapacity = tag.getLong("slotCapacity");
+        else
+            slotCapacity = Long.MAX_VALUE;
+        if(tag.contains("slotMaxSize"))
+            slotMaxSize = tag.getInt("slotMaxSize");
+        else
+            slotMaxSize = Integer.MAX_VALUE;
+
         ListTag stacksTag = tag.getList("Stacks", Tag.TAG_COMPOUND);
 
         for (Tag t : stacksTag) {

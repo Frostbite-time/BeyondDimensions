@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
@@ -34,9 +35,9 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     }
 
     @Override
-    public int getTankCapacity(int i)
+    public int getTankCapacity(int tank)
     {
-        return Integer.MAX_VALUE;
+        return BDMath.clampLongToInt(storage.getSlotCapacity(0));
     }
 
     @Override

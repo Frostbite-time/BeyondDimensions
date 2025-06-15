@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
@@ -46,7 +47,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public long getChemicalTankCapacity(int tank)
     {
-        return Long.MAX_VALUE;
+        return storage.getSlotCapacity(0);
     }
 
     @Override
