@@ -53,7 +53,7 @@ public class NetDestroyer extends NetedItem
 
         if (!level.isClientSide()) {
             if (stack.get(ModDataComponents.NET_ID_DATA) >= 0) {
-                DimensionsNet itemNet = DimensionsNet.getNetFromId(stack.get(ModDataComponents.NET_ID_DATA), level);
+                DimensionsNet itemNet = DimensionsNet.getNetFromId(stack.get(ModDataComponents.NET_ID_DATA), level.getServer());
                 if (itemNet != null) {
                     DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
                     // 只有网络主人能删除自己的网络

@@ -12,9 +12,9 @@ import java.util.UUID;
 public class PlayerNameHelper
 {
     // 在线/离线玩家均可查询（优先返回缓存名称）
-    public static String getPlayerNameByUUID(UUID uuid, Level infoProvider) {
+    public static String getPlayerNameByUUID(UUID uuid, MinecraftServer infoProvider) {
 
-        MinecraftServer server = infoProvider.getServer();
+        MinecraftServer server = infoProvider;
         // 1. 优先检查在线玩家（即时获取）
         ServerPlayer onlinePlayer = server.getPlayerList().getPlayer(uuid);
         if (onlinePlayer != null) {

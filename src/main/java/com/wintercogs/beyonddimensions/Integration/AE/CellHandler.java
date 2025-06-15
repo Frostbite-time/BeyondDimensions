@@ -29,7 +29,7 @@ public class CellHandler implements ICellHandler
         int netId = itemstack.get(ModDataComponents.NET_ID_DATA);
         if(netId >=0)
         {
-            DimensionsNet net = DimensionsNet.getNetFromId(netId, ServerLifecycleHooks.getCurrentServer().overworld());
+            DimensionsNet net = DimensionsNet.getNetFromId(netId, ServerLifecycleHooks.getCurrentServer());
             if(net != null)
             {
                 return new NetStorageCell(net.getUnifiedStorage());
