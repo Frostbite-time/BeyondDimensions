@@ -11,7 +11,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.SavedData;
 
 public class NetCreater extends Item
 {
@@ -37,14 +36,9 @@ public class NetCreater extends Item
             {
                 return InteractionResultHolder.fail(itemstack);
             }
-            String netId = DimensionsNet.buildNewNetName(player);
-            String numId = netId.replace("BDNet_", "");
-            DimensionsNet newNet = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), netId);
-            newNet.setId(Integer.parseInt(numId));
-            newNet.setOwner(player.getUUID());
-            newNet.addManager(player.getUUID());
-            newNet.addPlayer(player.getUUID());
-            newNet.setDirty();
+
+            DimensionsNet.createNewNetForPlayer(player,Long.MAX_VALUE, Integer.MAX_VALUE);
+
             itemstack.consume(1,player);
 
             // 在成功创建网络后添加
@@ -56,7 +50,6 @@ public class NetCreater extends Item
                     SoundSource.PLAYERS,
                     0.8F,
                     1.0F);
-
             // 发送文字提示
             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.network_created"));
         }
