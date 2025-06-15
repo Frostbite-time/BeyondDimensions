@@ -198,19 +198,22 @@ public class UnifiedStorage implements IStackTypedHandler
         }
 
         // 现有堆叠未找到，尝试新增
-        long actualInsert = Math.min(remaining,canInsert);
-        remaining = remaining-actualInsert;
-        if(!simulate)
+        if(storage.size() < slotMaxSize)
         {
-            IStackType newStack = stack.copyWithCount(actualInsert);
-            storage.add(newStack);
-            
-            // 更新索引
-            int newIndex = storage.size() - 1;
-            typeIdIndex.computeIfAbsent(stack.getTypeId(), k -> new ArrayList<>()).add(newIndex);
-            stackIndex.put(stack.copyWithCount(1), newIndex);
-            
-            onChange();
+            long actualInsert = Math.min(remaining,canInsert);
+            remaining = remaining-actualInsert;
+            if(!simulate)
+            {
+                IStackType newStack = stack.copyWithCount(actualInsert);
+                storage.add(newStack);
+
+                // 更新索引
+                int newIndex = storage.size() - 1;
+                typeIdIndex.computeIfAbsent(stack.getTypeId(), k -> new ArrayList<>()).add(newIndex);
+                stackIndex.put(stack.copyWithCount(1), newIndex);
+
+                onChange();
+            }
         }
         return stack.copyWithCount(remaining);
     }
@@ -466,6 +469,12 @@ public class UnifiedStorage implements IStackTypedHandler
         if(stack != null)
             return stack.getStackAmount();
         return 0;
+    }
+
+    // 检查当前存储是否已经到达槽位最大上限
+    public boolean isFullSlotsSize()
+    {
+        return storage.size() >= slotMaxSize;
     }
 }
 

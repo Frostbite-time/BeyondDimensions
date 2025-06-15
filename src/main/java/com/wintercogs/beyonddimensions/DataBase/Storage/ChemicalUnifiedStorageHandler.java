@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
@@ -19,8 +20,8 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     public int getChemicalTanks()
     {
         return storage.getTypeIdIndexList(ChemicalStackType.ID)
-                .map(list -> list.size()+1)
-                .orElse(1);
+                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size()+1)
+                .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
     @Override

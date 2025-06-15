@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -18,8 +19,8 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     public int getTanks()
     {
         return storage.getTypeIdIndexList(FluidStackType.ID)
-                .map(list -> list.size()+1)
-                .orElse(1);
+                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size()+1)
+                .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
     @Override

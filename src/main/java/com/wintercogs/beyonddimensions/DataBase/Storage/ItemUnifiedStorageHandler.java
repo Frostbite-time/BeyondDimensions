@@ -23,8 +23,8 @@ public class ItemUnifiedStorageHandler implements IItemHandler
         // 最后，UnifiedStorage实际并无槽位数限制且自动合并同类物品，除了读取信息和提取指定槽位物品都无需索引参与，对于超出索引的读取返回EMPTY即可
         // 所以，这样做是安全的
         return storage.getTypeIdIndexList(ItemStackType.ID)
-                .map(list -> list.size()+1)
-                .orElse(1);
+                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size()+1)
+                .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
     @Override
