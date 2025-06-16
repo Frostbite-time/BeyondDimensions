@@ -195,6 +195,9 @@ public class BeyondDimensions
 
         }
 
+        // 为维度ME硬盘注册，其中BD_AEPlugin用于注册存储元件
+        // BD_AEMEKPlugin与BD_AEFluxPlugin分别注册IStackType与AEKey之间的转换。
+        // 物品、流体的转换由AEHelper的静态块负责
         if(AELoaded)
         {
             BD_AEPlugin.register();
