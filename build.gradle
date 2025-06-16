@@ -44,6 +44,21 @@ repositories {
         url = "https://api.modrinth.com/maven"
     }
 
+    // kubejs
+    maven {
+        url "https://maven.latvian.dev/releases"
+        content {
+            includeGroup "dev.latvian.mods"
+            includeGroup "dev.latvian.apps"
+        }
+    }
+
+    maven {
+        url 'https://jitpack.io'
+        content {
+            includeGroup "com.github.rtyley"
+        }
+    }
 
 }
 
@@ -178,6 +193,10 @@ dependencies {
 
     // 在本模组的UI禁用IPN
     compileOnly "maven.modrinth:inventory-profiles-next:neoforge-1.21.1-2.1.9"
+
+    // kubejs
+    api("dev.latvian.mods:kubejs-neoforge:$kubejs_version")
+    interfaceInjectionData("dev.latvian.mods:kubejs-neoforge:$kubejs_version") // optional
 
 }
 

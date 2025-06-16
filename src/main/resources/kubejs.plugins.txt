@@ -1,0 +1,1 @@
+com.wintercogs.beyonddimensions.Integration.KubeJS.BD_KubeJSPlugin beyonddimensions
