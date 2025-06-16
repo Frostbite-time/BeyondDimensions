@@ -4,8 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.EnergyType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
@@ -14,7 +12,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.Optional;
 
@@ -139,8 +138,9 @@ public class EnergyStackType extends LongStackType<EnergyType>
         return new EnergyStackType(nbt.getLong("Amount"));
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public void render(GuiGraphics gui, int x, int y)
+    public void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y)
     {
         if(stack.isEmpty())
             return;
@@ -152,9 +152,9 @@ public class EnergyStackType extends LongStackType<EnergyType>
         Fluid fluid = Fluids.WATER;
         if(!fluid.isSame(Fluids.EMPTY))
         {
-            IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
+            net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions renderProperties = net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions.of(fluid);
             ResourceLocation fluidStill = renderProperties.getStillTexture();
-            Optional<TextureAtlasSprite> fluidStillSprite = Optional.ofNullable(fluidStill)
+            Optional<net.minecraft.client.renderer.texture.TextureAtlasSprite> fluidStillSprite = Optional.ofNullable(fluidStill)
                     .map(f -> Minecraft.getInstance()
                             .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
                             .apply(f)
