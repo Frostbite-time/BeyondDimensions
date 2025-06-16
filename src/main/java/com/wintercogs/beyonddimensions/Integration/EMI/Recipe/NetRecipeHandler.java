@@ -145,7 +145,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
             if (available >= required) {
                 // 创建合并后的堆栈
                 ItemStack merged = matching.isEmpty() ? ItemStack.EMPTY :
-                        matching.get(0).copyWithCount(1);
+                        matching.get(0).copyWithCount(required);
                 inputElements.add(merged);
 
                 // 从虚拟库存中扣除（仅客户端模拟）
