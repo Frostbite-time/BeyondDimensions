@@ -159,11 +159,8 @@ public class ItemStackType implements IStackType<ItemStack> {
     public IStackType<ItemStack> copyWithCount(long count)
     {
         ItemStackType copy = new ItemStackType(stack.copy(),count);
-        if(count == stackSize)
-        {
-            copy.NeedRecalHash = this.NeedRecalHash;
-            copy.hashCodeCache = this.hashCodeCache;
-        }
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
         return copy;
     }
 

@@ -85,11 +85,8 @@ public class EnergyStackType extends LongStackType<EnergyType>
     public IStackType<EnergyType> copyWithCount(long count)
     {
         EnergyStackType copy = new EnergyStackType(count);
-        if(count == stack.getStackCount())
-        {
-            copy.NeedRecalHash = this.NeedRecalHash;
-            copy.hashCodeCache = this.hashCodeCache;
-        }
+        copy.NeedRecalHash = this.NeedRecalHash;
+        copy.hashCodeCache = this.hashCodeCache;
         return copy;
     }
 
