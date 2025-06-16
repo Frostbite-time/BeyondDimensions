@@ -120,7 +120,7 @@ public class CraftTerminalRecipeTransferHandler implements IRecipeTransferHandle
                 if (available >= required) {
                     // 创建合并堆栈并扣除库存
                     ItemStack merged = matching.isEmpty() ? ItemStack.EMPTY :
-                            new ItemStack(matching.get(0).getItem(), required); //因为仅需要一个，所以使用第一个即可
+                            matching.get(0).copyWithCount(1); //因为仅需要一个，所以使用第一个即可
                     inputElements.add(merged);
 
                     int remaining = required;
