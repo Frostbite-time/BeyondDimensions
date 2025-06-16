@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Menu;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
@@ -77,7 +78,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
                 ItemStack stack = craftSlots.getItems().get(i);
                 nonNullList.set(i, stack);
             }
-            if(terminalStack != null)
+            if(terminalStack != null && terminalStack.getItem() instanceof NetTerminalItem)
                 terminalStack.set(ModDataComponents.CRAFT_SLOTS, nonNullList);
         }
 

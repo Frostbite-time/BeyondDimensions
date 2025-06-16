@@ -37,7 +37,7 @@ public class ModDataComponents {
 
     public static final DeferredHolder<DataComponentType<?>,DataComponentType<List<ItemStack>>> CRAFT_SLOTS = register(
       "craft_slots", builder -> builder.persistent(
-                    ItemStack.CODEC.listOf()
+                    ItemStack.OPTIONAL_CODEC.listOf()
             ).networkSynchronized(
                     ByteBufCodecs.collection(
                             ArrayList::new,
