@@ -58,7 +58,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Nullable
-    private static CompoundTag serializeStackCaps(ItemStack stack) {
+    public static CompoundTag serializeStackCaps(ItemStack stack) {
         try {
             var caps = (CompoundTag) SERIALIZE_CAPS_HANDLE.invokeExact((CapabilityProvider) stack);
             // Ensure stacks with no serializable cap providers are treated the same as stacks with no caps!
@@ -69,7 +69,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Nullable
-    private static void deserializeStackCaps(ItemStack stack, CompoundTag caps) {
+    public static void deserializeStackCaps(ItemStack stack, CompoundTag caps) {
         try {
             if(caps != null && !caps.isEmpty())
             {

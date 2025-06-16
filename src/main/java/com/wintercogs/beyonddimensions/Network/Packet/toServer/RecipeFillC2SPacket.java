@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -9,6 +10,9 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+
+import static com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType.deserializeStackCaps;
+import static com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType.serializeStackCaps;
 
 public record RecipeFillC2SPacket(List<ItemStack> inputs)
 {
@@ -43,6 +47,7 @@ public record RecipeFillC2SPacket(List<ItemStack> inputs)
         buf.writeInt(packet.inputs().size());  // 先写入列表长度
         for (ItemStack stack : packet.inputs()) {
             buf.writeItem(stack);
+            buf.writeNbt(serializeStackCaps(stack));
         }
     }
 
@@ -51,7 +56,10 @@ public record RecipeFillC2SPacket(List<ItemStack> inputs)
         int size = buf.readInt();
         List<ItemStack> stacks = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            stacks.add(buf.readItem());
+            ItemStack stack = buf.readItem();
+            CompoundTag capNBTTag = buf.readNbt();
+            deserializeStackCaps(stack, capNBTTag); // 内部检查null和空
+            stacks.add(stack);
         }
         return new RecipeFillC2SPacket(stacks);
     }

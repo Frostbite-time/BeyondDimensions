@@ -193,6 +193,7 @@ dependencies {
 
     modRuntimeOnly "curse.maven:sophisticated-core-618298:6596375"
     modRuntimeOnly "curse.maven:sophisticated-backpacks-422301:6587116"
+    modRuntimeOnly "curse.maven:elemental-combat-397825:5475396"
 
 
     // Example optional mod dependency with JEI
