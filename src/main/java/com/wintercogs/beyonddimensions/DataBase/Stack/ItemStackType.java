@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -328,10 +329,24 @@ public class ItemStackType implements IStackType<ItemStack> {
         // 读取数量
         long count = buf.readVarLong();
         // 使用OPTIONAL_CODEC解码
-        ItemStack stack = buf.readItem();
+        ItemStack stack = readItemBuf(buf);
         CompoundTag capNBTTag = buf.readNbt();
         deserializeStackCaps(stack, capNBTTag); // 内部检查null和空
         return new ItemStackType(stack,count);
+    }
+
+    // 用于FriendlyByteBuf读取物品，同时防止自动添加damage等耐久值
+    // 比起buf自带的函数，这取消了nbt验证以及耐久度验证，以确保网络传输时的数据本身的完整
+    private ItemStack readItemBuf(FriendlyByteBuf buf) {
+        if (!buf.readBoolean()) {
+            return ItemStack.EMPTY;
+        } else {
+            Item item = (Item)buf.readById(BuiltInRegistries.ITEM);
+            int num = buf.readByte();
+            ItemStack itemstack = new ItemStack(item, num);
+            itemstack.tag = buf.readNbt();
+            return itemstack;
+        }
     }
 
     @Override

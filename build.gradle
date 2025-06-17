@@ -193,7 +193,9 @@ dependencies {
 
     modRuntimeOnly "curse.maven:sophisticated-core-618298:6596375"
     modRuntimeOnly "curse.maven:sophisticated-backpacks-422301:6587116"
-    modRuntimeOnly "curse.maven:elemental-combat-397825:5475396"
+
+    modRuntimeOnly "maven.modrinth:unbreakable-enchantment:2.0.1-1.20.1"
+    modRuntimeOnly "maven.modrinth:toms-storage:1.20-1.7.1"
 
 
     // Example optional mod dependency with JEI
