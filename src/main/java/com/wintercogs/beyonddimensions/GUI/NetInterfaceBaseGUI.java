@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
+import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
 import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
@@ -78,6 +79,21 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 
                             dragging = type.fromObject(stackKey,1,dataComponentPatch);
                             break;
+
+                        }
+                    }
+
+                    // AE2通用包裹支持
+                    if(BeyondDimensions.AELoaded)
+                    {
+                        if(dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
+                        {
+                            appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
+
+                            if(genericContent != null)
+                            {
+                                dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
+                            }
 
                         }
                     }

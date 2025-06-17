@@ -217,8 +217,8 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                 if(!handled.get())
                 {
                     int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                    storage.insert(StackCreater.Create(ItemStackType.ID, carriedItem.copyWithCount(changedCount), changedCount), false);
-                    int newCount = carriedItem.getCount() - changedCount;
+                    int actualInsert = (int) (changedCount - storage.insert(StackCreater.Create(ItemStackType.ID, carriedItem.copyWithCount(changedCount), changedCount), false).getStackAmount());
+                    int newCount = carriedItem.getCount() - actualInsert;
                     if (newCount <= 0)
                     {
                         setCarried(ItemStack.EMPTY);

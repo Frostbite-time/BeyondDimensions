@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.DataBase.Storage.Chemicals;
 
 import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.GasStackType;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import mekanism.api.Action;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
@@ -19,8 +20,8 @@ public class GasUnifiedStorageHandler implements IGasHandler
     public int getTanks()
     {
         return storage.getTypeIdIndexList(GasStackType.ID)
-                .map(list -> list.size()+1)
-                .orElse(1);
+                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size()+1)
+                .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
     @Override
@@ -47,7 +48,7 @@ public class GasUnifiedStorageHandler implements IGasHandler
     @Override
     public long getTankCapacity(int tank)
     {
-        return Long.MAX_VALUE;
+        return storage.getSlotCapacity(0);
     }
 
     @Override

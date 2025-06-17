@@ -19,8 +19,8 @@ public class SlurryUnifiedStorageHandler implements ISlurryHandler
     public int getTanks()
     {
         return storage.getTypeIdIndexList(SlurryStackType.ID)
-                .map(list -> list.size()+1)
-                .orElse(1);
+                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size()+1)
+                .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class SlurryUnifiedStorageHandler implements ISlurryHandler
     @Override
     public long getTankCapacity(int tank)
     {
-        return Long.MAX_VALUE;
+        return storage.getSlotCapacity(0);
     }
 
     @Override

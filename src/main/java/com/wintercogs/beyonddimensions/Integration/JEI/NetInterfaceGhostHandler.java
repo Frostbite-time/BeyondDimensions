@@ -1,7 +1,10 @@
 package com.wintercogs.beyonddimensions.Integration.JEI;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.GUI.NetInterfaceBaseGUI;
+import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
@@ -61,7 +64,7 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<NetInte
         public void accept(I ingredient)
         {
             Object stackKey = ingredient;
-            IStackType dragging;
+            IStackType dragging = new ItemStackType();
             for(IStackType type : StackTypeRegistry.getAllTypes())
             {
                 if(type.getStackClass().isAssignableFrom(stackKey.getClass()))
@@ -69,12 +72,28 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<NetInte
 
                     dragging = type.getEmpty();
                     dragging.setStack(ingredient);
-                    IStackType clickItem = slot.getVanillaActualStack();
-                    // button的数字0代表左键
-                    PacketRegister.INSTANCE.sendToServer(new FlagSlotSetPacket(slot.index,clickItem,dragging));
                     break;
                 }
             }
+
+            // AE2通用包裹支持
+            if(BeyondDimensions.AELoaded)
+            {
+                if(dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
+                {
+                    appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
+
+                    if(genericContent != null)
+                    {
+                        dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
+                    }
+
+                }
+            }
+
+            IStackType clickItem = slot.getVanillaActualStack();
+            // button的数字0代表左键
+            PacketRegister.INSTANCE.sendToServer(new FlagSlotSetPacket(slot.index,clickItem,dragging));
 
         }
     }

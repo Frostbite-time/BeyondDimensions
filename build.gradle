@@ -184,6 +184,7 @@ dependencies {
     // AE支持
     modCompileOnly "maven.modrinth:ae2:${ae_version}"
     modCompileOnly "curse.maven:applied-mekanistics-574300:4842281" // AE的通用机械附属
+    modCompileOnly "curse.maven:applied-flux-965012:6649403" // 应用通量
 
     // Curios支持
     modCompileOnly "top.theillusivec4.curios:curios-forge:${curios_version}+${minecraft_version}:api"
@@ -194,7 +195,6 @@ dependencies {
     modRuntimeOnly "curse.maven:sophisticated-core-618298:6596375"
     modRuntimeOnly "curse.maven:sophisticated-backpacks-422301:6587116"
 
-    modRuntimeOnly "maven.modrinth:unbreakable-enchantment:2.0.1-1.20.1"
     modRuntimeOnly "maven.modrinth:toms-storage:1.20-1.7.1"
 
 

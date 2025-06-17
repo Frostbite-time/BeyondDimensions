@@ -32,9 +32,11 @@
   "tooltip.button.beyonddimensions.popmode_off": "Actuel : Mode popup désactivé",
   "tooltip.button.beyonddimensions.popmode_on": "Actuel : Mode popup activé",
   "tooltip.item.unstable_space_time.long_data": "L'espace-temps se stabilise encore, %s cycles requis. Gardez-le sur vous en permanence.",
+  "tooltip.editbox.beyonddimensions.search": "Tapez '#' pour rechercher dans les infobulles",
 
   "istack.beyonddimensions.storage_num.item": "Stocké : %s unités",
   "istack.beyonddimensions.storage_num.fluid": "Stocké : %s mB",
+  "istack.beyonddimensions.storage_num.long_type": "Stocké : %s",
 
   "key.categories.beyonddimensions": "Au-delà des Dimensions",
   "key.beyonddimensions.open_gui": "Ouvrir le réseau",

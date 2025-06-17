@@ -32,9 +32,11 @@
   "tooltip.button.beyonddimensions.popmode_off": "現在：ポップアップ無効",
   "tooltip.button.beyonddimensions.popmode_on": "現在：ポップアップ有効",
   "tooltip.item.unstable_space_time.long_data": "時空は安定化中、残り%s回の安定化サイクルが必要です。常に携帯してください。",
+  "tooltip.editbox.beyonddimensions.search": "「#」を入力してツールチップを検索",
 
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
   "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",
+  "istack.beyonddimensions.storage_num.long_type": "保存済み：%s",
 
   "key.categories.beyonddimensions": "次元を超えて",
   "key.beyonddimensions.open_gui": "ネットワークを開く",

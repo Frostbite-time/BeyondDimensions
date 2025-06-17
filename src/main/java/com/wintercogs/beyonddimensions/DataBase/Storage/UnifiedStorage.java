@@ -28,6 +28,11 @@ public class UnifiedStorage implements IStackTypedHandler
     private final Map<ResourceLocation, List<Integer>> typeIdIndex = new HashMap<>(); // 用于分类不同类型资源索引的表
     public static final Map<ResourceLocation, Function<UnifiedStorage,Object>> typedHandlerMap = new HashMap<>();
 
+    // 统一存储的属性 对于真正执行存储实例，在序列化和反序列化的时候确定
+    // 对于临时数据，给予最大值
+    public long slotCapacity = Long.MAX_VALUE;
+    public int slotMaxSize = Integer.MAX_VALUE;
+
     public UnifiedStorage(DimensionsNet net)
     {
         this.net = net;
@@ -138,7 +143,10 @@ public class UnifiedStorage implements IStackTypedHandler
     @Override
     public long getSlotCapacity(int slot)
     {
-        return Long.MAX_VALUE;
+        if (net.deleted)
+            return 0;
+
+        return slotCapacity;
     }
 
     @Override
@@ -191,19 +199,22 @@ public class UnifiedStorage implements IStackTypedHandler
         }
 
         // 现有堆叠未找到，尝试新增
-        long actualInsert = Math.min(remaining,canInsert);
-        remaining = remaining-actualInsert;
-        if(!simulate)
+        if(storage.size() < slotMaxSize)
         {
-            IStackType newStack = stack.copyWithCount(actualInsert);
-            storage.add(newStack);
-            
-            // 更新索引
-            int newIndex = storage.size() - 1;
-            typeIdIndex.computeIfAbsent(stack.getTypeId(), k -> new ArrayList<>()).add(newIndex);
-            stackIndex.put(stack.copyWithCount(1), newIndex);
+            long actualInsert = Math.min(remaining,canInsert);
+            remaining = remaining-actualInsert;
+            if(!simulate)
+            {
+                IStackType newStack = stack.copyWithCount(actualInsert);
+                storage.add(newStack);
 
-            onChange();
+                // 更新索引
+                int newIndex = storage.size() - 1;
+                typeIdIndex.computeIfAbsent(stack.getTypeId(), k -> new ArrayList<>()).add(newIndex);
+                stackIndex.put(stack.copyWithCount(1), newIndex);
+
+                onChange();
+            }
         }
         return stack.copyWithCount(remaining);
     }
@@ -384,6 +395,10 @@ public class UnifiedStorage implements IStackTypedHandler
     // region 序列化方法
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
+
+        tag.putLong("slotCapacity", this.slotCapacity);
+        tag.putInt("slotMaxSize", this.slotMaxSize);
+
         ListTag stacksTag = new ListTag();
 
         for (IStackType stack : storage) {
@@ -404,6 +419,17 @@ public class UnifiedStorage implements IStackTypedHandler
     public void deserializeNBT(CompoundTag tag) {
         storage.clear();
         typeIdIndex.clear();
+
+        // 旧数据兼容
+        if(tag.contains("slotCapacity"))
+            slotCapacity = tag.getLong("slotCapacity");
+        else
+            slotCapacity = Long.MAX_VALUE;
+        if(tag.contains("slotMaxSize"))
+            slotMaxSize = tag.getInt("slotMaxSize");
+        else
+            slotMaxSize = Integer.MAX_VALUE;
+
         ListTag stacksTag = tag.getList("Stacks", Tag.TAG_COMPOUND);
 
         for (Tag t : stacksTag) {
@@ -446,6 +472,28 @@ public class UnifiedStorage implements IStackTypedHandler
         if(stack != null)
             return stack.getStackAmount();
         return 0;
+    }
+
+    // 自身属性管理
+
+    // 检查当前存储是否已经到达槽位最大上限
+    public boolean isFullSlotsSize()
+    {
+        return storage.size() >= slotMaxSize;
+    }
+
+    // 理论上来说，以下两个数即使是负数，逻辑也能正常运行，所以没必要再额外检查了
+
+    // 增加单槽最大上限
+    public void setSlotCapacity(long capacity)
+    {
+        this.slotCapacity = capacity;
+    }
+
+    // 增加槽位数量
+    public void setSlotMaxSize(int maxSize)
+    {
+        this.slotMaxSize = maxSize;
     }
 }
 

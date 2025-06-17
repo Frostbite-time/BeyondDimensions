@@ -304,10 +304,10 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             } else {
                 // 搜索文本转小写保证大小写不敏感
                 String lowerSearch = searchText.toLowerCase(Locale.ENGLISH);
-                int atIndex = lowerSearch.indexOf('@');
+                int atIndex = lowerSearch.indexOf('#');
 
-                if (atIndex >= 0) { // 当包含@符号时的处理逻辑
-                    // 拆分@前后的部分（不包括@符号）
+                if (atIndex >= 0) { // 当包含#符号时的处理逻辑
+                    // 拆分#前后的部分（不包括#符号）
                     String mainPart = atIndex > 0 ? lowerSearch.substring(0, atIndex) : "";
                     String tooltipPart = (atIndex + 1 < lowerSearch.length()) ?
                             lowerSearch.substring(atIndex + 1) : "";
@@ -389,7 +389,19 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
                         TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
         );
         return toolTips.stream()
-                .anyMatch(tooltip -> tooltip.getString().toLowerCase(Locale.ENGLISH).contains(matchText));
+                .anyMatch(tooltip -> {
+                    // 获取原始tooltip文本（小写）
+                    String tooltipText = tooltip.getString().toLowerCase(Locale.ENGLISH);
+
+                    // 生成拼音变体
+                    String allPinyin = TinyPinyinUtils.getAllPinyin(tooltipText, false).toLowerCase(Locale.ENGLISH);
+                    String firstPinyin = TinyPinyinUtils.getFirstPinYin(tooltipText).toLowerCase(Locale.ENGLISH);
+
+                    // 三重匹配检查
+                    return tooltipText.contains(matchText) ||
+                            allPinyin.contains(matchText) ||
+                            firstPinyin.contains(matchText);
+                });
     }
 
     public void updateScrollLineData(int dataSize)

@@ -32,9 +32,11 @@
   "tooltip.button.beyonddimensions.popmode_off": "현재: 팝업 모드 비활성",
   "tooltip.button.beyonddimensions.popmode_on": "현재: 팝업 모드 활성",
   "tooltip.item.unstable_space_time.long_data": "시공간 안정화 중, %s회의 안정화 주기 남음. 항상 휴대하십시오.",
+  "tooltip.editbox.beyonddimensions.search": "도구 설명 검색: '#' 입력",
 
   "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
   "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",
+  "istack.beyonddimensions.storage_num.long_type": "저장됨: %s",
 
   "key.categories.beyonddimensions": "차원을 넘어",
   "key.beyonddimensions.open_gui": "네트워크 열기",

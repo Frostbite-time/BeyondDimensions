@@ -32,9 +32,11 @@
   "tooltip.button.beyonddimensions.popmode_off": "Режим всплывающих окон выключен",
   "tooltip.button.beyonddimensions.popmode_on": "Режим всплывающих окон включен",
   "tooltip.item.unstable_space_time.long_data": "Пространство-время стабилизируется, осталось %s циклов. Носите с собой постоянно.",
+  "tooltip.editbox.beyonddimensions.search": "Введите '#', чтобы искать в подсказках",
 
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
   "istack.beyonddimensions.storage_num.fluid": "Сохранено: %s мБ",
+  "istack.beyonddimensions.storage_num.long_type": "Хранится: %s",
 
   "key.categories.beyonddimensions": "За Гранью Измерений",
   "key.beyonddimensions.open_gui": "Открыть сеть",

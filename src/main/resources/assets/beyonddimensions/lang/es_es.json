@@ -32,9 +32,11 @@
   "tooltip.button.beyonddimensions.popmode_off": "Actual: Modo emergente desactivado",
   "tooltip.button.beyonddimensions.popmode_on": "Actual: Modo emergente activado",
   "tooltip.item.unstable_space_time.long_data": "El espacio-tiempo aún se estabiliza, faltan %s ciclos. Por favor, llévalo siempre contigo.",
+  "tooltip.editbox.beyonddimensions.search": "Introduce '#' para buscar contenido de tooltips",
 
   "istack.beyonddimensions.storage_num.item": "Almacenado: %s unidades",
   "istack.beyonddimensions.storage_num.fluid": "Almacenado: %s mB",
+  "istack.beyonddimensions.storage_num.long_type": "Almacenado: %s",
 
   "key.categories.beyonddimensions": "Más Allá de las Dimensiones",
   "key.beyonddimensions.open_gui": "Abrir Red Dimensional",

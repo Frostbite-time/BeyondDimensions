@@ -34,6 +34,7 @@ import com.wintercogs.beyonddimensions.DataBase.Storage.FluidUnifiedStorageHandl
 import com.wintercogs.beyonddimensions.DataBase.Storage.ItemUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
+import com.wintercogs.beyonddimensions.Integration.AEFlux.BD_AEFluxPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
@@ -80,6 +81,8 @@ public class BeyondDimensions
     public static final String PolymorphModId = "polymorph";
     public static boolean AEMEKLoaded = false;
     public static final String AEMEK2MODID = "appmek";
+    public static boolean AEFluxLoaded = false;
+    public static final String AEFlux2MODID = "appflux";
     public static boolean CuriosLoaded = false;
     public static final String CuriosModId = "curios";
     public static final Logger LOGGER = LogUtils.getLogger();
@@ -144,6 +147,10 @@ public class BeyondDimensions
         if(ModList.get().isLoaded(AEMEK2MODID))
         {
             AEMEKLoaded = true;
+        }
+        if(ModList.get().isLoaded(AEFlux2MODID))
+        {
+            AEFluxLoaded = true;
         }
         if(ModList.get().isLoaded(CuriosModId))
         {
@@ -229,6 +236,10 @@ public class BeyondDimensions
         if(AEMEKLoaded)
         {
             BD_AEMEKPlugin.register();
+        }
+        if(AEFluxLoaded)
+        {
+            BD_AEFluxPlugin.register();
         }
     }
 
