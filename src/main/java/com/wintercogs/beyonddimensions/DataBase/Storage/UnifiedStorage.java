@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.GasStackType;
+import com.wintercogs.beyonddimensions.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
@@ -436,6 +437,15 @@ public class UnifiedStorage implements IStackTypedHandler
     {
         return Optional.ofNullable(this.typeIdIndex.get(typeId))
                 .filter(list -> !list.isEmpty());
+    }
+
+    // 辅助方法，快速获取当前存储的能量数量
+    public long getEnergyStored()
+    {
+        IStackType stack = getStackByStack(EnergyStackType.EMPTY);
+        if(stack != null)
+            return stack.getStackAmount();
+        return 0;
     }
 }
 
