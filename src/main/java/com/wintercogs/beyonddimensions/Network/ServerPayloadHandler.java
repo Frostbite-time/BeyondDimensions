@@ -9,6 +9,7 @@ import com.wintercogs.beyonddimensions.GUI.NetMenuType;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
 import com.wintercogs.beyonddimensions.Menu.*;
 import com.wintercogs.beyonddimensions.Packet.*;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -93,6 +94,9 @@ public class ServerPayloadHandler
 
                             if(terminalStack != null)
                             {
+                                if(terminalStack.get(ModDataComponents.CRAFT_SLOTS)==null)
+                                    terminalStack.set(ModDataComponents.CRAFT_SLOTS, NonNullList.withSize(9,ItemStack.EMPTY));
+
                                 NetTerminalItem.contextMap.put(player, new NetTerminalItem.MenuTriggerContext(InteractionHand.MAIN_HAND, terminalStack));
                                 player.openMenu((NetTerminalItem)terminalStack.getItem());
                             }
