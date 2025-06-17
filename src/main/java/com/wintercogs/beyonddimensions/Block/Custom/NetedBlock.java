@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;

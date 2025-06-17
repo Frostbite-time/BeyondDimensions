@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;

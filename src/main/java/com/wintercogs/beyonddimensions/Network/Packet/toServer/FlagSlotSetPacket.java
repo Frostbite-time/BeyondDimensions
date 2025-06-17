@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;

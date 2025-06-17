@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
+import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
-import com.wintercogs.beyonddimensions.DataBase.ButtonName;
-import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.IconButton;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;

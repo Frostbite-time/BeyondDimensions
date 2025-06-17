@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenuTerminal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;

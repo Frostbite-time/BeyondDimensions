@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.Integration.AEMEK;
 
-import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.GasStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.InfusionStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.PigmentStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.Chemicals.SlurryStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackType;
 import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
 import me.ramidzkh.mekae2.ae2.MekanismKey;
 import me.ramidzkh.mekae2.ae2.MekanismKeyType;

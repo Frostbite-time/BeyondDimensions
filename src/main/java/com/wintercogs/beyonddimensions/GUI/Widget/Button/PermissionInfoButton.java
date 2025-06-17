@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.GUI.Widget.Button;
 
-import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
+import com.wintercogs.beyonddimensions.Api.DataBase.PlayerPermissionInfo;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 

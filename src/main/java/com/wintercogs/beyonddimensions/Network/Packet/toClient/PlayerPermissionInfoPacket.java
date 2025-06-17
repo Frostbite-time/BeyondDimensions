@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toClient;
 
 
-import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
+import com.wintercogs.beyonddimensions.Api.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;

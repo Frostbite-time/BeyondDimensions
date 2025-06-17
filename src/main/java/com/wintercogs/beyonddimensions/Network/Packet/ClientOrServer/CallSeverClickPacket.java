@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer;
 
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;

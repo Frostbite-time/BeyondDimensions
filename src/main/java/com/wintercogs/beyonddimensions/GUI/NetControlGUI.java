@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
-import com.wintercogs.beyonddimensions.DataBase.NetPermissionlevel;
-import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
+import com.wintercogs.beyonddimensions.Api.DataBase.NetControlAction;
+import com.wintercogs.beyonddimensions.Api.DataBase.NetPermissionlevel;
+import com.wintercogs.beyonddimensions.Api.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.PermissionInfoButton;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.NetControlActionPacket;

@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataBase.NetControlAction;
-import com.wintercogs.beyonddimensions.DataBase.PlayerPermissionInfo;
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.NetControlAction;
+import com.wintercogs.beyonddimensions.Api.DataBase.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.PlayerPermissionInfoPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;

@@ -1,14 +1,14 @@
 package com.wintercogs.beyonddimensions.Integration.JEI;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.GUI.NetInterfaceBaseGUI;
 import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
-import com.wintercogs.beyonddimensions.Registry.StackTypeRegistry;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.client.renderer.Rect2i;

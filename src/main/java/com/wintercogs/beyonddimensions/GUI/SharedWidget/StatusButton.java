@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
+import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataBase.ButtonName;
-import com.wintercogs.beyonddimensions.DataBase.ButtonState;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.resources.ResourceLocation;
 

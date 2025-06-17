@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
-import com.wintercogs.beyonddimensions.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.StackCreater;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.Slot;

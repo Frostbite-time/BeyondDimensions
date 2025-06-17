@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;

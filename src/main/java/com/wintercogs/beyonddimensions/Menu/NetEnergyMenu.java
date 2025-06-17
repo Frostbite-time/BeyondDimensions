@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.EnergyStoragePacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;

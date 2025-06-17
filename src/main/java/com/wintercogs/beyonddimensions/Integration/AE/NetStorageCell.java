@@ -6,8 +6,8 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.cells.CellState;
 import appeng.api.storage.cells.StorageCell;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import net.minecraft.network.chat.Component;
 
 public class NetStorageCell implements StorageCell

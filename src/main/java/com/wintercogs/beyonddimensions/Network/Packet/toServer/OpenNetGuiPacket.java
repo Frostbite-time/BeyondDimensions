@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.NetMenuType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataBase.NetMenuType;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
 import com.wintercogs.beyonddimensions.Item.Custom.NetedItem;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;

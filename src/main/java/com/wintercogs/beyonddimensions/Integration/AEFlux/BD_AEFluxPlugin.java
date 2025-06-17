@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Integration.AEFlux;
 import com.glodblock.github.appflux.common.me.key.FluxKey;
 import com.glodblock.github.appflux.common.me.key.type.EnergyType;
 import com.glodblock.github.appflux.common.me.key.type.FluxKeyType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.EnergyStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
 
 import java.util.Optional;

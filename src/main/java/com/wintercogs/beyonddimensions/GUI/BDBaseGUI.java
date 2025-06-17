@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;

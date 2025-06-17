@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions;
 
-import com.wintercogs.beyonddimensions.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;

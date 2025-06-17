@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.wintercogs.beyonddimensions.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
