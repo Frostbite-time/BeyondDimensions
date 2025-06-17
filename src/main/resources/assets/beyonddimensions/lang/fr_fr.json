@@ -80,5 +80,7 @@
   "msg.beyonddimensions.no_right_to_bound_block": "Vous n'avez pas la permission de modifier la liaison réseau de ce bloc",
   "msg.beyonddimensions.cant_delete_net": "Impossible de supprimer le réseau – Vous devez en être le propriétaire",
   "msg.beyonddimensions.item_net_destroyed": "Vous avez détruit votre réseau actuel",
-  "msg.beyonddimensions.net_gift_done": "Fusion réussie du réseau %s"
+  "msg.beyonddimensions.net_gift_done": "Fusion réussie du réseau %s",
+
+  "types.beyonddimensions.energyType.name": "FE"
 }

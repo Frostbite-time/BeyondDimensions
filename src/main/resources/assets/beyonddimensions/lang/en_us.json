@@ -80,5 +80,7 @@
   "msg.beyonddimensions.no_right_to_bound_block": "Sie sind nicht berechtigt, die Netzwerkbindung dieses Blocks zu ändern",
   "msg.beyonddimensions.cant_delete_net": "Cannot delete network – You must be the owner",
   "msg.beyonddimensions.item_net_destroyed": "You destroyed the network you were in",
-  "msg.beyonddimensions.net_gift_done": "Merged Network #%s"
+  "msg.beyonddimensions.net_gift_done": "Merged Network #%s",
+
+  "types.beyonddimensions.energyType.name": "FE"
 }

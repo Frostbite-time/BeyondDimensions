@@ -80,5 +80,7 @@
   "msg.beyonddimensions.no_right_to_bound_block": "У вас нет прав для изменения привязки сети к этому блоку",
   "msg.beyonddimensions.cant_delete_net": "Не удалить сеть – Только владелец может это сделать",
   "msg.beyonddimensions.item_net_destroyed": "Вы уничтожили свою текущую сеть",
-  "msg.beyonddimensions.net_gift_done": "Сеть %s успешно объединена"
+  "msg.beyonddimensions.net_gift_done": "Сеть %s успешно объединена",
+
+  "types.beyonddimensions.energyType.name": "FE"
 }

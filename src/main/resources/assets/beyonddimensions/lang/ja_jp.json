@@ -80,5 +80,7 @@
   "msg.beyonddimensions.no_right_to_bound_block": "このブロックのネットワークバインドを変更する権限がありません",
   "msg.beyonddimensions.cant_delete_net": "ネットワークを削除できません―所有者のみが実行可能です",
   "msg.beyonddimensions.item_net_destroyed": "自身が属するネットワークを削除しました",
-  "msg.beyonddimensions.net_gift_done": "ネットワーク番号%sの統合に成功"
+  "msg.beyonddimensions.net_gift_done": "ネットワーク番号%sの統合に成功",
+
+  "types.beyonddimensions.energyType.name": "FE"
 }

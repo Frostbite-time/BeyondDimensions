@@ -80,5 +80,7 @@
   "msg.beyonddimensions.no_right_to_bound_block": "No tienes permiso para cambiar el vínculo de red de este bloque",
   "msg.beyonddimensions.cant_delete_net": "No puedes eliminar la red – Solo el propietario puede hacerlo",
   "msg.beyonddimensions.item_net_destroyed": "Destruiste la red en la que estabas",
-  "msg.beyonddimensions.net_gift_done": "Red %s fusionada con éxito"
+  "msg.beyonddimensions.net_gift_done": "Red %s fusionada con éxito",
+
+  "types.beyonddimensions.energyType.name": "FE"
 }

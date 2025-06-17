@@ -47,23 +47,20 @@ public abstract class LongType<T>
         if (other == null) {
             return false;
         }
-        return getClass() == other.getClass()
-                && this.stackCount == other.stackCount;
+        return getClass() == other.getClass();
     }
 
     @Override
     public boolean equals(Object obj)
     {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        LongType other = (LongType) obj;
-        return stackCount == other.stackCount;
+        return obj != null && getClass() == obj.getClass();
     }
 
     @Override
     public int hashCode()
     {
-        return Long.hashCode(stackCount);
+        return this.getClass().hashCode();
     }
 }
 

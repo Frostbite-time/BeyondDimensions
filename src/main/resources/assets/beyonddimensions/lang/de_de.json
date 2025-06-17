@@ -80,5 +80,7 @@
   "msg.beyonddimensions.no_right_to_bound_block": "Sie sind nicht berechtigt, die Netzwerkbindung dieses Blocks zu ändern",
   "msg.beyonddimensions.cant_delete_net": "Netz kann nicht gelöscht werden – Nur der Besitzer kann dies tun",
   "msg.beyonddimensions.item_net_destroyed": "Du hast dein eigenes Netz gelöscht",
-  "msg.beyonddimensions.net_gift_done": "Netz %s erfolgreich fusioniert"
+  "msg.beyonddimensions.net_gift_done": "Netz %s erfolgreich fusioniert",
+
+  "types.beyonddimensions.energyType.name": "FE"
 }
