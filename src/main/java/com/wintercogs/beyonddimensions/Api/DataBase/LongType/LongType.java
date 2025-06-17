@@ -2,6 +2,9 @@ package com.wintercogs.beyonddimensions.Api.DataBase.LongType;
 
 import net.minecraft.network.chat.Component;
 
+/**
+ * 任何纯数值型堆叠的包装类
+ */
 public abstract class LongType<T>
 {
     protected long stackCount;

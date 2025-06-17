@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -67,7 +68,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
                 ItemStack stack = craftSlots.getItems().get(i);
                 nonNullList.set(i, stack);
             }
-            if(terminalStack != null)
+            if(terminalStack != null && terminalStack.getItem() instanceof NetTerminalItem)
             {
                 // 将数据写入物品的 NBT
                 CompoundTag tag = terminalStack.getOrCreateTag();

@@ -103,7 +103,7 @@ public class GasStackTypedHandler implements IGasHandler
         long remaining = handlerStorage.insert(new GasStackType(stack.copy()), action.simulate()).getStackAmount();
         if(remaining>0)
             return new GasStack(stack, remaining);
-        return GasStack.EMPTY;// 始终全部插入
+        return GasStack.EMPTY;
     }
 
     @Override

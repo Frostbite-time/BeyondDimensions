@@ -41,7 +41,7 @@ public class NetControlMenu extends BDOrderedContainerMenu
         if(!player.level().isClientSide())
         {
             net = DimensionsNet.getNetFromPlayer(player);
-            playerInfo = net.getPlayerPermissionInfoMap(player.level());
+            playerInfo = net.getPlayerPermissionInfoMap(player.getServer());
         }
     }
 
@@ -92,9 +92,9 @@ public class NetControlMenu extends BDOrderedContainerMenu
     @Override
     protected void updateChange()
     {
-        if(!net.getPlayerPermissionInfoMap(player.level()).equals(this.playerInfo))
+        if(!net.getPlayerPermissionInfoMap(player.getServer()).equals(this.playerInfo))
         {
-            this.playerInfo = this.net.getPlayerPermissionInfoMap(player.level());
+            this.playerInfo = this.net.getPlayerPermissionInfoMap(player.getServer());
             sendPlayerInfo();
         }
     }

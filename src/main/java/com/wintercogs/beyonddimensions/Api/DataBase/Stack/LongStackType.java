@@ -7,9 +7,6 @@ import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -19,7 +16,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.text.WordUtils;
 
 import javax.annotation.Nullable;
@@ -163,8 +161,9 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
         return stack.isSame(other.getStack());
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public void render(GuiGraphics gui, int x, int y)
+    public void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y)
     {
         if(stack.isEmpty())
             return;
@@ -176,9 +175,9 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
         Fluid fluid = Fluids.WATER;
         if(!fluid.isSame(Fluids.EMPTY))
         {
-            IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
+            net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions renderProperties = net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions.of(fluid);
             ResourceLocation fluidStill = renderProperties.getStillTexture();
-            Optional<TextureAtlasSprite> fluidStillSprite = Optional.ofNullable(fluidStill)
+            Optional<net.minecraft.client.renderer.texture.TextureAtlasSprite> fluidStillSprite = Optional.ofNullable(fluidStill)
                     .map(f -> Minecraft.getInstance()
                             .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
                             .apply(f)
@@ -253,8 +252,9 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
         return Optional.empty();
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public void renderTooltip(GuiGraphics gui, Font font, int mouseX, int mouseY)
+    public void renderTooltip(net.minecraft.client.gui.GuiGraphics gui, net.minecraft.client.gui.Font font, int mouseX, int mouseY)
     {
         var minecraft = Minecraft.getInstance();
         gui.renderTooltip(minecraft.font, this.getTooltipLines(minecraft.player, minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL)

@@ -46,7 +46,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
             if(NetedItem.getNetId(itemstack)>=0)
             {
-                DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack),level);
+                DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack),level.getServer());
                 if (net != null)
                 {
                     contextMap.put(player, new MenuTriggerContext(usedHand, itemstack));
@@ -83,7 +83,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
             return null;
         }
         // 使用上下文中的物品栈
-        DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(ctx.stack), player.level());
+        DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(ctx.stack), player.getServer());
 
 
         // 从NBT获取合成槽位

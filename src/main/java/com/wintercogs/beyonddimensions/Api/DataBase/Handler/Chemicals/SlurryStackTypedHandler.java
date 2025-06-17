@@ -103,7 +103,7 @@ public class SlurryStackTypedHandler implements ISlurryHandler
         long remaining = handlerStorage.insert(new SlurryStackType(stack.copy()), action.simulate()).getStackAmount();
         if(remaining>0)
             return new SlurryStack(stack, remaining);
-        return SlurryStack.EMPTY;// 始终全部插入
+        return SlurryStack.EMPTY;
     }
 
     @Override

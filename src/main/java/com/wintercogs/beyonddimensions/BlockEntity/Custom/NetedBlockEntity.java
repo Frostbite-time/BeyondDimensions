@@ -70,7 +70,7 @@ public abstract class NetedBlockEntity extends BlockEntity
         {
             if(getLevel() instanceof ServerLevel)
             {
-                return DimensionsNet.getNetFromId(netId,getLevel());
+                return DimensionsNet.getNetFromId(netId,getLevel().getServer());
             }
         }
         else

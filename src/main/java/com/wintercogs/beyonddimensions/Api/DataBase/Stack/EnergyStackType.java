@@ -4,15 +4,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.EnergyType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Optional;
 
@@ -137,8 +136,9 @@ public class EnergyStackType extends LongStackType<EnergyType>
         return new EnergyStackType(nbt.getLong("Amount"));
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public void render(GuiGraphics gui, int x, int y)
+    public void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y)
     {
         if(stack.isEmpty())
             return;
@@ -150,9 +150,9 @@ public class EnergyStackType extends LongStackType<EnergyType>
         Fluid fluid = Fluids.WATER;
         if(!fluid.isSame(Fluids.EMPTY))
         {
-            IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
+            net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions renderProperties = net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions.of(fluid);
             ResourceLocation fluidStill = renderProperties.getStillTexture();
-            Optional<TextureAtlasSprite> fluidStillSprite = Optional.ofNullable(fluidStill)
+            Optional<net.minecraft.client.renderer.texture.TextureAtlasSprite> fluidStillSprite = Optional.ofNullable(fluidStill)
                     .map(f -> Minecraft.getInstance()
                             .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
                             .apply(f)

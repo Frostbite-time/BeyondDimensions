@@ -103,7 +103,7 @@ public class InfusionStackTypedHandler implements IInfusionHandler
         long remaining = handlerStorage.insert(new InfusionStackType(stack.copy()), action.simulate()).getStackAmount();
         if(remaining>0)
             return new InfusionStack(stack, remaining);
-        return InfusionStack.EMPTY;// 始终全部插入
+        return InfusionStack.EMPTY;
     }
 
     @Override

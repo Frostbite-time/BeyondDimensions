@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProvider
@@ -69,5 +70,16 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
             itemsList.add(itemTag);
         }
         tag.put("CraftItems", itemsList);
+    }
+
+    public void dropContent()
+    {
+        for(ItemStack stack : craftItems)
+        {
+            if(!stack.isEmpty())
+            {
+                Block.popResource(level,getBlockPos(),stack.copy());
+            }
+        }
     }
 }

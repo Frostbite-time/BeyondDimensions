@@ -103,7 +103,7 @@ public class PigmentStackTypedHandler implements IPigmentHandler
         long remaining = handlerStorage.insert(new PigmentStackType(stack.copy()), action.simulate()).getStackAmount();
         if(remaining>0)
             return new PigmentStack(stack, remaining);
-        return PigmentStack.EMPTY;// 始终全部插入
+        return PigmentStack.EMPTY;
     }
 
     @Override

@@ -96,4 +96,16 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
     {
         return new NetTerminalBlockEntity(blockPos, blockState);
     }
+
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
+    {
+        if (!state.is(newState.getBlock())) {
+            if (level.getBlockEntity(pos) instanceof NetTerminalBlockEntity blockEntity) {
+                level.updateNeighbourForOutputSignal(pos, this);
+                blockEntity.dropContent();
+            }
+            super.onRemove(state, level, pos, newState, movedByPiston);
+        }
+    }
 }
