@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.Api.DataBase;
 
-import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
@@ -18,15 +17,12 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
-import org.slf4j.Logger;
 
 import java.util.*;
 
 
 public class DimensionsNet extends SavedData
 {
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     // 每个维度网络具有一个唯一标识符
     // 被删除的网络id会被标记为-99
@@ -66,6 +62,28 @@ public class DimensionsNet extends SavedData
     public static DimensionsNet create()
     {
         return new DimensionsNet(false);
+    }
+
+    // 用于创建一个被持久化保存的网络，传入的Player将成为所有者
+    public static DimensionsNet createNewNetForPlayer(Player player, long defaultSlotCapability, int defaultSlotMaxSize)
+    {
+        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        if (net == null)    // 提前检查
+        {
+            String netId = DimensionsNet.buildNewNetName(player);
+            String numId = netId.replace("BDNet_", "");
+            DimensionsNet newNet = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(DimensionsNet::load, DimensionsNet::create, netId);
+            newNet.setId(Integer.parseInt(numId));
+            newNet.setOwner(player.getUUID());
+            newNet.addManager(player.getUUID());
+            newNet.addPlayer(player.getUUID());
+            newNet.setDirty();
+            newNet.unifiedStorage.setSlotCapacity(defaultSlotCapability);
+            newNet.unifiedStorage.setSlotMaxSize(defaultSlotMaxSize);
+
+            return newNet;
+        }
+        return net;
     }
 
     // 构建最新可用的网络名称
