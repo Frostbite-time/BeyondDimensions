@@ -443,18 +443,23 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     public void removed()
     {
         super.removed();
-        if(searchField.getValue().length() > 0 && Config.uiSearchButton == ButtonState.ENABLED)
+
+        if(searchField != null)
         {
-            Config.uiSearch = searchField.getValue();
-            Config.UI_SEARCH.set(searchField.getValue());
-            Config.UI_SEARCH.save();
+            if(searchField.getValue().length() > 0 && Config.uiSearchButton == ButtonState.ENABLED)
+            {
+                Config.uiSearch = searchField.getValue();
+                Config.UI_SEARCH.set(searchField.getValue());
+                Config.UI_SEARCH.save();
+            }
+            else
+            {
+                Config.uiSearch = "";
+                Config.UI_SEARCH.set("");
+                Config.UI_SEARCH.save();
+            }
         }
-        else
-        {
-            Config.uiSearch = "";
-            Config.UI_SEARCH.set("");
-            Config.UI_SEARCH.save();
-        }
+
     }
 
     public Font getFont()
