@@ -123,5 +123,13 @@ public class PacketRegister
                 CraftReturnPacket::decode,
                 CraftReturnPacket::handle
         );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                BatchTransferPacket.class,
+                BatchTransferPacket::encode,
+                BatchTransferPacket::decode,
+                BatchTransferPacket::handle
+        );
     }
 }
