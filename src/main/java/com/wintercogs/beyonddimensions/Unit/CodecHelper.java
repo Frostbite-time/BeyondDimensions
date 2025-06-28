@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.Unit;
 
 import com.mojang.serialization.Codec;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.core.NonNullList;
 
 import java.util.function.Function;
