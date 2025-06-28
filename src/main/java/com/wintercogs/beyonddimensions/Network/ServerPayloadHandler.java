@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -340,6 +341,42 @@ public class ServerPayloadHandler
                     if(player.containerMenu instanceof DimensionsCraftMenu menu)
                     {
                         menu.firstCraftReturnDir = packet.dir();
+                    }
+                }
+        );
+    }
+
+    public void handleBatchTransferPacket(final BatchTransferPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    if(packet.clickStack() instanceof ItemStackType clickItem)
+                    {
+                        Player player = context.player();
+
+                        if(player.containerMenu instanceof DimensionsNetMenu menu)
+                        {
+                            // 批量转移到存储
+                            if(packet.dirToStorage())
+                            {
+                                for(Slot invSlot : menu.slots)
+                                {
+                                    if(menu.inventoryStartIndex<=invSlot.index&& invSlot.index<menu.inventoryEndIndex)
+                                    {
+                                        if(ItemStack.isSameItemSameComponents(clickItem.getStack(), invSlot.getItem()))
+                                            menu.customClickHandler(invSlot.index, new ItemStackType(invSlot.getItem()), 0, true);
+                                    }
+                                }
+                            }
+                            //到背包 暂时留空，以后如果需要再写
+                            else
+                            {
+
+                            }
+
+                            menu.broadcastChanges();
+                        }
                     }
                 }
         );

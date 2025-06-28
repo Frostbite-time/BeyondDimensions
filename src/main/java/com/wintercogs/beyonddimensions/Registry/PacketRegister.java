@@ -167,5 +167,14 @@ public class PacketRegister
                         ServerPayloadHandler.getInstance()::handleCraftReturnPacket
                 )
         );
+
+        registrar.playBidirectional(
+                BatchTransferPacket.TYPE,
+                BatchTransferPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleBatchTransferPacket,
+                        ServerPayloadHandler.getInstance()::handleBatchTransferPacket
+                )
+        );
     }
 }

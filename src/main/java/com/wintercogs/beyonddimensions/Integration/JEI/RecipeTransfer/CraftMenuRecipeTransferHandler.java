@@ -65,7 +65,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
         // 收集合成槽物品
         for (Slot slot : craftingSlots) {
             if (slot.hasItem()) {
-                availableItems.add(slot.getItem().copy());
+                availableItems.add(slot.getItem());
             }
         }
 
@@ -74,7 +74,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
             if (stackType instanceof ItemStackType itemStackType) {
                 ItemStack stack = itemStackType.getStack();
                 if (!stack.isEmpty()) {
-                    availableItems.add(stack.copy());
+                    availableItems.add(stack);
                 }
             }
         }
@@ -83,7 +83,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
         for(ItemStack itemStack : container.player.getInventory().items)
         {
             if(!itemStack.isEmpty())
-                availableItems.add(itemStack.copy());
+                availableItems.add(itemStack);
         }
 
 
@@ -111,7 +111,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
                 List<ItemStack> matching = new ArrayList<>();
                 for (ItemStack stack : availableItems) { // 统计全部可用物
                     if (!stack.isEmpty() && mergedIngredient.test(stack)) {
-                        matching.add(stack);
+                        matching.add(stack.copy());
                     }
                 }
 

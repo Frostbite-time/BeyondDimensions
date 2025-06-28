@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
+import com.wintercogs.beyonddimensions.Packet.BatchTransferPacket;
 import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -146,14 +147,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                         // 因为操作基本全由服务端处理
                         if(lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
                         {
-                            for(Slot invSlot : menu.slots)
-                            {
-                                if(menu.inventoryStartIndex<=invSlot.index&& invSlot.index<menu.inventoryEndIndex)
-                                {
-                                    if(ItemStack.isSameItemSameComponents(lastInvClickedStack, invSlot.getItem()))
-                                        PacketDistributor.sendToServer(new CallSeverClickPacket(invSlot.index,new ItemStackType(invSlot.getItem()),0,true));
-                                }
-                            }
+                            PacketDistributor.sendToServer(new BatchTransferPacket(new ItemStackType(lastInvClickedStack),true));
                             menu.isHanding = true;
                         }
                         else if(menu.inventoryStartIndex<=slotId&& slotId<menu.inventoryEndIndex)

@@ -296,4 +296,14 @@ public class ClientPayloadHandler
                 }
         );
     }
+
+    public void handleBatchTransferPacket(final BatchTransferPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+        );
+    }
 }

@@ -102,7 +102,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         // 收集常规合成槽物品（假设是输入槽位）
         for (Slot slot : craftingSlots) {
             if (slot.hasItem()) {
-                availableItems.add(slot.getItem().copy());
+                availableItems.add(slot.getItem());
             }
         }
         // 收集存储槽物品
@@ -110,7 +110,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
             if (stackType instanceof ItemStackType itemStackType) {
                 ItemStack stack = itemStackType.getStack();
                 if (!stack.isEmpty()) {
-                    availableItems.add(stack.copy());
+                    availableItems.add(stack);
                 }
             }
         }
@@ -118,7 +118,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         for(ItemStack itemStack : menu.player.getInventory().items)
         {
             if(!itemStack.isEmpty())
-                availableItems.add(itemStack.copy());
+                availableItems.add(itemStack);
         }
         // 匹配配方输入需求
         for (EmiIngredient ingredient : inputs) {
@@ -135,7 +135,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
             for (ItemStack stack : availableItems) {
                 if (!stack.isEmpty() && ingredient.getEmiStacks().stream()
                         .anyMatch(emiStack -> emiStack.getItemStack().getItem() == stack.getItem())) {
-                    matching.add(stack);
+                    matching.add(stack.copy());
                 }
             }
             // 计算总数量
