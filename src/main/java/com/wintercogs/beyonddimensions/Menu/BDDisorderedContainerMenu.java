@@ -122,14 +122,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                 }
 
             }
-            if (cacheStack.isEmpty()) {
-                // 对于维度网络通过玩家设置一个EMPTY无影响
-                // 对于背包槽位可以用于清空当前槽位物品
-                // 对于双方，都可以设置脏数据请求保存
-                slot.setByPlayer(ItemStack.EMPTY);
-            } else {
-                slot.setChanged();
-            }
+            slot.setChanged();
         }
         return ItemStack.EMPTY;
     }
