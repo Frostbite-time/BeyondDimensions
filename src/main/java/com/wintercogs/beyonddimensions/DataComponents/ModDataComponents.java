@@ -39,7 +39,7 @@ public class ModDataComponents {
 
     public static final DeferredHolder<DataComponentType<?>,DataComponentType<NonNullList<ItemStack>>> CRAFT_SLOTS = register(
       "craft_slots", builder -> builder.persistent(
-                    CodecHelper.nonNullListMutableCodecOf(ItemStack.OPTIONAL_CODEC)
+                    CodecHelper.nonNullListMutableCodecOf(ItemStack.OPTIONAL_CODEC, ItemStack.EMPTY)
             ).networkSynchronized(
                     ByteBufCodecs.collection(
                             NonNullList::createWithCapacity,
