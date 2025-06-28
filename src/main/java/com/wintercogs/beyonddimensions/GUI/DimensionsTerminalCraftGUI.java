@@ -16,7 +16,6 @@ public class DimensionsTerminalCraftGUI extends DimensionsCraftGUI<DimensionsCra
     protected void init()
     {
         super.init();
-        craftReturnButton.visible = false;
     }
 
     @Override

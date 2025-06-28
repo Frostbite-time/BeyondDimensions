@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.DataComponents;
 import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Unit.CodecHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -38,7 +39,7 @@ public class ModDataComponents {
 
     public static final DeferredHolder<DataComponentType<?>,DataComponentType<NonNullList<ItemStack>>> CRAFT_SLOTS = register(
       "craft_slots", builder -> builder.persistent(
-                    NonNullList.codecOf(ItemStack.OPTIONAL_CODEC)
+                    CodecHelper.nonNullListMutableCodecOf(ItemStack.OPTIONAL_CODEC)
             ).networkSynchronized(
                     ByteBufCodecs.collection(
                             NonNullList::createWithCapacity,
