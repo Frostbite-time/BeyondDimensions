@@ -196,7 +196,10 @@ dependencies {
 
     // kubejs
     api("dev.latvian.mods:kubejs-neoforge:$kubejs_version")
-    interfaceInjectionData("dev.latvian.mods:kubejs-neoforge:$kubejs_version") // optional
+
+    // 精妙背包调试
+    runtimeOnly "curse.maven:sophisticated-backpacks-422301:6679417"
+    runtimeOnly "curse.maven:sophisticated-core-618298:6680823"
 
 }
 
