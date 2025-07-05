@@ -44,7 +44,7 @@ public class UnifiedStorage implements IStackTypedHandler
     /**
      * 存储的数据结构
      */
-    private final HashBPlusList<IStackType> storage = new HashBPlusList<>();
+    private final HashBPlusList<IStackType> storage = new HashBPlusList<>(90,90);
 
     /**
      * 为构建分化包装提供良好的性能，其结构为 [资源种类id：对应资源类型的索引列表]

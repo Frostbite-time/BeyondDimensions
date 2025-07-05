@@ -10,10 +10,10 @@ import java.util.RandomAccess;
 public class HashBPlusList<E> extends AbstractList<E>
         implements RandomAccess, Serializable {
 
-    private static final int LEAF_CAPACITY = 256;    // 每片叶子最大元素数量
-    private static final int BRANCH_FACTOR = 128;    // 每个分支最大子节点数量
-    private static final int MIN_LEAF_OCCUPANCY = LEAF_CAPACITY/2;
-    private static final int MIN_BRANCH_CHILDREN  = Math.max(2, (BRANCH_FACTOR + 1) / 2);
+    private final int LEAF_CAPACITY;    // 每片叶子最大元素数量
+    private final int BRANCH_FACTOR;    // 每个分支最大子节点数量
+    private final int MIN_LEAF_OCCUPANCY;
+    private final int MIN_BRANCH_CHILDREN;
 
     private interface Node<E> {
         boolean isLeaf();
@@ -29,8 +29,9 @@ public class HashBPlusList<E> extends AbstractList<E>
         LeafNode<E> next, prev;
         BranchNode<E> parent;
         @SuppressWarnings("unchecked")
-        LeafNode() {
-            elements = (E[]) new Object[LEAF_CAPACITY];
+        LeafNode(int leafCapacity)
+        {
+            elements = (E[]) new Object[leafCapacity];
         }
         public boolean isLeaf() { return true; }
         public int size()       { return count; }
@@ -45,10 +46,11 @@ public class HashBPlusList<E> extends AbstractList<E>
         int childCount;
         BranchNode<E> parent;
         @SuppressWarnings("unchecked")
-        BranchNode() {
+        BranchNode(int branchFactor)
+        {
             // 为方便分裂操作，额外分配一个槽位
-            children = (Node<E>[]) new Node[BRANCH_FACTOR + 1];
-            subSizes = new int[BRANCH_FACTOR + 1];
+            children = (Node<E>[]) new Node[branchFactor + 1];
+            subSizes = new int[branchFactor + 1];
         }
         public boolean isLeaf() { return false; }
         public int size() {
@@ -75,8 +77,12 @@ public class HashBPlusList<E> extends AbstractList<E>
     // 全树元素总数
     private int size;
 
-    public HashBPlusList() {
-        this.root = new LeafNode<>();
+    public HashBPlusList(int leafCapacity, int branchFactor) {
+        this.LEAF_CAPACITY = leafCapacity;
+        this.BRANCH_FACTOR = branchFactor;
+        this.MIN_LEAF_OCCUPANCY = LEAF_CAPACITY/2;
+        this.MIN_BRANCH_CHILDREN  = Math.max(2, (BRANCH_FACTOR + 1) / 2);
+        this.root = new LeafNode<>(LEAF_CAPACITY);
         this.firstLeaf = (LeafNode<E>) root;
         this.index = new HashMap<>();
         this.size = 0;
@@ -329,7 +335,7 @@ public class HashBPlusList<E> extends AbstractList<E>
     private void splitLeaf(LeafNode<E> leaf) {
         int total = leaf.count;
         int mid = total / 2;  // 大致对半拆分（向下取整）
-        LeafNode<E> rightLeaf = new LeafNode<>();
+        LeafNode<E> rightLeaf = new LeafNode<>(LEAF_CAPACITY);
         // 将后半部分元素移动到右侧叶节点
         int rightCount = total - mid;
         System.arraycopy(leaf.elements, mid, rightLeaf.elements, 0, rightCount);
@@ -354,7 +360,7 @@ public class HashBPlusList<E> extends AbstractList<E>
         BranchNode<E> parent = leaf.parent();
         if (parent == null) {
             // 如果分裂根叶子节点则创建新的根分支
-            parent = new BranchNode<>();
+            parent = new BranchNode<>(BRANCH_FACTOR);
             root = parent;
             parent.children[0] = leaf;
             parent.childCount = 1;
@@ -406,7 +412,7 @@ public class HashBPlusList<E> extends AbstractList<E>
     private void splitBranch(BranchNode<E> branch) {
         int totalChildren = branch.childCount;
         int mid = totalChildren / 2;
-        BranchNode<E> rightBranch = new BranchNode<>();
+        BranchNode<E> rightBranch = new BranchNode<>(BRANCH_FACTOR);
         int rightChildCount = totalChildren - mid;
         // 将一半的子节点移动到右分支
         System.arraycopy(branch.children, mid, rightBranch.children, 0, rightChildCount);
@@ -425,7 +431,7 @@ public class HashBPlusList<E> extends AbstractList<E>
         BranchNode<E> parent = branch.parent();
         if (parent == null) {
             // 如果分裂根分支，则创建新的根节点
-            parent = new BranchNode<>();
+            parent = new BranchNode<>(BRANCH_FACTOR);
             root = parent;
             parent.children[0] = branch;
             parent.childCount = 1;
