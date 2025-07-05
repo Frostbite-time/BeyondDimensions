@@ -32,7 +32,7 @@ public class GameTester
 
         long totalStartTime = System.nanoTime();
         long tenStartTime = System.nanoTime();
-        int totalTestTimes = 2000;
+        int totalTestTimes = 1000;
 
         for(int times = 0;times < totalTestTimes;times++)
         {

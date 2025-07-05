@@ -29,7 +29,6 @@ import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
-import com.wintercogs.beyonddimensions.Tester.GameTester;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -217,7 +216,7 @@ public class BeyondDimensions
     public void onServerStarting(ServerStartingEvent event)
     {
         LOGGER.info("维度网络初始化完成(服务端)");
-        GameTester.OnSeverStartTester(event.getServer());
+        //GameTester.OnSeverStartTester(event.getServer());
     }
 
 

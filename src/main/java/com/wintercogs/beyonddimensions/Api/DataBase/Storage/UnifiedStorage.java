@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
+import com.wintercogs.beyonddimensions.Api.Util.HashBPlusList;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import net.minecraft.core.HolderLookup;
@@ -43,12 +44,7 @@ public class UnifiedStorage implements IStackTypedHandler
     /**
      * 存储的数据结构
      */
-    private final ArrayList<IStackType> storage = new ArrayList<>();
-
-    /**
-     * 类型与索引的映射，用于优化大规模存储的性能，大部分操作可以降低到O(1)。
-     */
-    private final Map<IStackType, Integer> stackIndex = new HashMap<>();
+    private final HashBPlusList<IStackType> storage = new HashBPlusList<>();
 
     /**
      * 为构建分化包装提供良好的性能，其结构为 [资源种类id：对应资源类型的索引列表]
@@ -111,14 +107,13 @@ public class UnifiedStorage implements IStackTypedHandler
     {
         this.storage.clear();
         typeIdIndex.clear();
-        stackIndex.clear();
         onChange();
     }
 
     @Override
     public boolean hasStackType(IStackType other)
     {
-        return stackIndex.containsKey(other);
+        return storage.contains(other);
     }
 
     @Override
@@ -130,11 +125,6 @@ public class UnifiedStorage implements IStackTypedHandler
         // 更新索引
         typeIdIndex.computeIfAbsent(oldTypeId, k -> new ArrayList<>()).remove(Integer.valueOf(slot));
         typeIdIndex.computeIfAbsent(newTypeId, k -> new ArrayList<>()).add(slot);
-        if(!stackIndex.containsKey(stack))
-        {
-            stackIndex.remove(getStackBySlot(slot));
-            stackIndex.put(stack.copyWithCount(1), slot);
-        }
 
         onChange();
     }
@@ -147,10 +137,6 @@ public class UnifiedStorage implements IStackTypedHandler
         storage.add(slot,stack.copy());
         // storage自增导致的可能的空索引位置无需管，因为那个位置是null。如果读取必然出错，这是编写时候由其他方法保证的
         typeIdIndex.computeIfAbsent(newTypeId, k -> new ArrayList<>()).add(slot);
-        if(!stackIndex.containsKey(stack))
-        {
-            stackIndex.put(stack.copyWithCount(1), slot);
-        }
         onChange();
     }
 
@@ -162,17 +148,13 @@ public class UnifiedStorage implements IStackTypedHandler
         int slot = storage.size();
         storage.add(stack.copy());
         typeIdIndex.computeIfAbsent(newTypeId, k -> new ArrayList<>()).add(slot);
-        if(!stackIndex.containsKey(stack))
-            stackIndex.put(stack.copyWithCount(1), slot);
         onChange();
     }
 
     @Override
     public IStackType getStackByStack(IStackType stackType)
     {
-        if(stackIndex.containsKey(stackType))
-            return getStackBySlot(stackIndex.get(stackType));
-        return null;
+        return storage.get(stackType); // 对于不存在的，会返回null
     }
 
     @Override
@@ -218,9 +200,9 @@ public class UnifiedStorage implements IStackTypedHandler
         long canInsert = Math.min(getSlotCapacity(0),stack.getCustomMaxStackSize()); // 能被插入的空间
 
         // 尝试合并现有堆叠
-        if(stackIndex.containsKey(stack))
+        if(storage.contains(stack))
         {
-            IStackType existing = storage.get(stackIndex.get(stack));
+            IStackType existing = storage.get(stack);
             canInsert = canInsert - existing.getStackAmount();
             long actualInsert = Math.min(remaining,canInsert);
             remaining = remaining-actualInsert;
@@ -245,7 +227,6 @@ public class UnifiedStorage implements IStackTypedHandler
                 // 更新索引
                 int newIndex = storage.size() - 1;
                 typeIdIndex.computeIfAbsent(stack.getTypeId(), k -> new ArrayList<>()).add(newIndex);
-                stackIndex.put(stack.copyWithCount(1), newIndex);
 
                 onChange();
             }
@@ -323,10 +304,10 @@ public class UnifiedStorage implements IStackTypedHandler
 
         List<Integer> indices = typeIdIndex.get(stack.getTypeId());
 
-        if (stackIndex.containsKey(stack))
+        if (storage.contains(stack))
         {
-            int storageIndex = stackIndex.get(stack);
-            IStackType existing = storage.get(storageIndex);
+            int storageIndex = storage.indexOf(stack);
+            IStackType existing = storage.get(stack);
 
             long extracted = Math.min(stack.getStackAmount(), existing.getStackAmount());
             IStackType sim = existing.copy();
@@ -337,7 +318,6 @@ public class UnifiedStorage implements IStackTypedHandler
                 if (existing.getStackAmount() <= 0) {
                     storage.remove(storageIndex);
                     indices.remove(Integer.valueOf(storageIndex));
-                    stackIndex.remove(stack);
 
                     // 更新受影响的索引
                     updateIndicesAfterRemoval(storageIndex);
@@ -369,13 +349,6 @@ public class UnifiedStorage implements IStackTypedHandler
                 }
             }
         }
-        for (Map.Entry<IStackType, Integer> entry : stackIndex.entrySet()) {
-            int currentIndex = entry.getValue();
-            if (currentIndex > removedIndex) {
-                // 直接通过 Entry 对象修改值（无需重新 put）
-                entry.setValue(currentIndex - 1);
-            }
-        }
     }
 
     /**
@@ -384,7 +357,6 @@ public class UnifiedStorage implements IStackTypedHandler
     public void rebuildAllIndices()
     {
         typeIdIndex.clear();
-        stackIndex.clear();
         for(int i = 0; i < storage.size(); i++)
         {
             IStackType stack = storage.get(i);
@@ -392,7 +364,6 @@ public class UnifiedStorage implements IStackTypedHandler
             {
                 ResourceLocation typeId = stack.getTypeId();
                 typeIdIndex.computeIfAbsent(typeId, k -> new ArrayList<>()).add(i);
-                stackIndex.put(stack.copyWithCount(1), i);
             }
         }
     }
@@ -415,7 +386,6 @@ public class UnifiedStorage implements IStackTypedHandler
             if (existing.getStackAmount() <= 0) {
                 ResourceLocation typeId = existing.getTypeId();
                 storage.remove(slot);
-                stackIndex.remove(existing);
                 
                 // 更新索引
                 List<Integer> indices = typeIdIndex.get(typeId);
@@ -488,7 +458,6 @@ public class UnifiedStorage implements IStackTypedHandler
             this.storage.add(stackActual);
             // 更新索引
             typeIdIndex.computeIfAbsent(typeId, k -> new ArrayList<>()).add(storage.size() - 1);
-            stackIndex.put(stackActual,storage.size() - 1);
         }
     }
     // endregion
