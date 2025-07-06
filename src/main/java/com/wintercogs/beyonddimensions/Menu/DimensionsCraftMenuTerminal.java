@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
 import net.minecraft.core.BlockPos;
@@ -79,7 +80,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
                 nonNullList.set(i, stack);
             }
             if(terminalStack != null && terminalStack.getItem() instanceof NetTerminalItem)
-                terminalStack.set(ModDataComponents.CRAFT_SLOTS, nonNullList);
+                terminalStack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(nonNullList));
         }
 
     }

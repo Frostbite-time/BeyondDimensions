@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenuTerminal;
 import net.minecraft.core.NonNullList;
@@ -41,7 +42,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
         if(!level.isClientSide())
         {
             if(itemstack.get(ModDataComponents.CRAFT_SLOTS)==null)
-                itemstack.set(ModDataComponents.CRAFT_SLOTS, NonNullList.withSize(9,ItemStack.EMPTY));
+                itemstack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9,ItemStack.EMPTY)));
 
             if(itemstack.get(ModDataComponents.NET_ID_DATA)>=0)
             {
@@ -87,7 +88,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
                 containerId,
                 inventory,
                 net,
-                (NonNullList<ItemStack>)ctx.stack.get(ModDataComponents.CRAFT_SLOTS),
+                ctx.stack.get(ModDataComponents.CRAFT_SLOTS).contents(),
                 ctx.stack,
                 null
         );

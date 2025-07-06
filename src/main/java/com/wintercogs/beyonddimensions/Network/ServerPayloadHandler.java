@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.GUI.NetMenuType;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
@@ -96,7 +97,7 @@ public class ServerPayloadHandler
                             if(terminalStack != null)
                             {
                                 if(terminalStack.get(ModDataComponents.CRAFT_SLOTS)==null)
-                                    terminalStack.set(ModDataComponents.CRAFT_SLOTS, NonNullList.withSize(9,ItemStack.EMPTY));
+                                    terminalStack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9,ItemStack.EMPTY)));
 
                                 NetTerminalItem.contextMap.put(player, new NetTerminalItem.MenuTriggerContext(InteractionHand.MAIN_HAND, terminalStack));
                                 player.openMenu((NetTerminalItem)terminalStack.getItem());

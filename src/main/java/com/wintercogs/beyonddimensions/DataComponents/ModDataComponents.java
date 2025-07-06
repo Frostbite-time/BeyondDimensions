@@ -3,14 +3,12 @@ package com.wintercogs.beyonddimensions.DataComponents;
 import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Unit.CodecHelper;
-import net.minecraft.core.NonNullList;
+import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -37,17 +35,15 @@ public class ModDataComponents {
       "time_line", builder -> builder.persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG)
     );
 
-    public static final DeferredHolder<DataComponentType<?>,DataComponentType<NonNullList<ItemStack>>> CRAFT_SLOTS = register(
+    public static final DeferredHolder<DataComponentType<?>,DataComponentType<ItemStackContents>> CRAFT_SLOTS = register(
       "craft_slots", builder -> builder.persistent(
-                    CodecHelper.nonNullListMutableCodecOf(ItemStack.OPTIONAL_CODEC, ItemStack.EMPTY)
+                    ItemStackContents.CODEC
             ).networkSynchronized(
-                    ByteBufCodecs.collection(
-                            NonNullList::createWithCapacity,
-                            ItemStack.OPTIONAL_STREAM_CODEC
-                    )
+                    ItemStackContents.STREAM_CODEC
             )
     );
 
+    // IStackType类已经实现了hashCode和equals，直接使用即可
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<IStackType>>> ISTACK_SLOTS = register(
       "istack_slots", builder -> builder.persistent(
                 IStackType.CODEC.listOf()

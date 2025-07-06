@@ -198,8 +198,9 @@ dependencies {
     // kubejs
     api("dev.latvian.mods:kubejs-neoforge:$kubejs_version")
 
-    // 精妙背包调试
+    // 精妙背包以及精妙存储调试
     runtimeOnly "curse.maven:sophisticated-backpacks-422301:6679417"
+    runtimeOnly "curse.maven:sophisticated-storage-619320:6712033"
     runtimeOnly "curse.maven:sophisticated-core-618298:6680823"
 
 }
