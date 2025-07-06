@@ -309,7 +309,7 @@ public class ItemStackType implements IStackType<ItemStack> {
             // 使用副本避免修改原堆栈
             ItemStack copy = stack.copyWithCount(1);
             // 使用OPTIONAL_CODEC处理可能为空的情况
-            buf.writeItem(copy);
+            writeItemBuf(buf,copy);
             buf.writeNbt(serializeStackCaps(copy));
         }
     }
@@ -333,6 +333,26 @@ public class ItemStackType implements IStackType<ItemStack> {
         CompoundTag capNBTTag = buf.readNbt();
         deserializeStackCaps(stack, capNBTTag); // 内部检查null和空
         return new ItemStackType(stack,count);
+    }
+
+    // 向FriendlyByteBuf写入物品信息
+    // 用于避开某些模组对网络读写的注入-这真的让人头疼
+    private void writeItemBuf(FriendlyByteBuf buf, ItemStack stack)
+    {
+        if (stack.isEmpty()) {
+            buf.writeBoolean(false);
+        } else {
+            buf.writeBoolean(true);
+            Item item = stack.getItem();
+            buf.writeId(BuiltInRegistries.ITEM, item);
+            buf.writeByte(stack.getCount());
+            CompoundTag compoundtag = null;
+            if (item.isDamageable(stack) || item.shouldOverrideMultiplayerNbt()) {
+                compoundtag = stack.tag;
+            }
+
+            buf.writeNbt(compoundtag);
+        }
     }
 
     // 用于FriendlyByteBuf读取物品，同时防止自动添加damage等耐久值
