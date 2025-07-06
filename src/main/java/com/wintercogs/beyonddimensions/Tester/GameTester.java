@@ -10,6 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -20,74 +21,112 @@ public class GameTester
 {
     public static void OnSeverStartTester(MinecraftServer server)
     {
-        // 必要准备，以便测试目标性能而不过多掺杂其他因素
-
-        // 从注册表获取所有非空气物品
+        // 必要准备
         List<Item> allItems = BuiltInRegistries.ITEM.stream()
                 .filter(item -> item != Items.AIR)
                 .collect(Collectors.toList());
-
-
         BeyondDimensions.LOGGER.info("============= 存储系统性能测试报告 =============");
+        // 预先生成所有测试数据（2000组）
+        final int totalTestTimes = 2000;
+        List<List<ItemStackType>> allInsertData = new ArrayList<>(totalTestTimes);
+        List<int[]> allExtractData = new ArrayList<>(totalTestTimes);
+        Random masterRandom = new Random(42); // 固定种子保证可重复性
+        for (int i = 0; i < totalTestTimes; i++) {
+            // 打乱物品顺序
+            List<Item> shuffledItems = new ArrayList<>(allItems);
+            Collections.shuffle(shuffledItems, new Random(masterRandom.nextLong()));
 
-        long totalStartTime = System.nanoTime();
-        long tenStartTime = System.nanoTime();
-        int totalTestTimes = 1000;
+            // 生成插入数据
+            List<ItemStackType> insertData = new ArrayList<>();
+            for (Item item : shuffledItems) {
+                int amount = 100 + masterRandom.nextInt(201);
+                insertData.add(new ItemStackType(new ItemStack(item, amount)));
+            }
+            allInsertData.add(insertData);
 
-        for(int times = 0;times < totalTestTimes;times++)
-        {
-            long timesStartTime = System.nanoTime();
-
-
-            // 创建新存储
+            // 生成提取数据（每个槽位提取量）
+            int[] extractData = new int[allItems.size()];
+            for (int j = 0; j < extractData.length; j++) {
+                extractData[j] = masterRandom.nextInt(400);
+            }
+            allExtractData.add(extractData);
+        }
+        // 预热阶段（不记录结果）
+        UnifiedStorage warmupStorage = new UnifiedStorage(new DimensionsNet(true));
+        for (int i = 0; i < 50; i++) {
+            List<ItemStackType> data = allInsertData.get(0);
+            for (ItemStackType stack : data) {
+                warmupStorage.insert(stack, false);
+            }
+            int[] extData = allExtractData.get(0);
+            for (int j = warmupStorage.getSlots() - 1; j >= 0; j--) {
+                warmupStorage.extract(j, extData[j], false);
+            }
+            warmupStorage.clearStorage(); // 假设有清空方法
+        }
+        // 正式测试
+        long[] insertTimes = new long[totalTestTimes];
+        long[] extractTimes = new long[totalTestTimes];
+        long[] combinedTimes = new long[totalTestTimes];
+        for (int times = 0; times < totalTestTimes; times++) {
             UnifiedStorage storage = new UnifiedStorage(new DimensionsNet(true));
-            // 创建随机数生成器
-            Random random = new Random();
-            // 打乱物品列表保证随机性
-            Collections.shuffle(allItems, random);
-            // 生成随机物品
-            int count = allItems.size();
-            for (int i = 0; i < count; i++) {
-                Item item = allItems.get(i);
-                int amount = 100 + random.nextInt(201); // 生成100-300之间的随机数量
-
-                ItemStackType stack = new ItemStackType(new ItemStack(item, amount));
-
-                storage.insert(stack,false);
+            List<ItemStackType> insertData = allInsertData.get(times);
+            int[] extractData = allExtractData.get(times);
+            // 纯插入测试
+            long insertStart = System.nanoTime();
+            for (ItemStackType stack : insertData) {
+                storage.insert(stack, false);
             }
-            for(int i = storage.getSlots() - 1; i >=0 ; i--)
-            {
-                storage.extract(i,1,false);
-                storage.extract(storage.getStackBySlot(i),false);
+            insertTimes[times] = System.nanoTime() - insertStart;
+            // 纯提取测试（重置存储状态）
+            storage.clearStorage();
+            for (ItemStackType stack : insertData) {
+                storage.insert(stack, false); // 重新填充
             }
 
-
-
-            long timesUseTime = System.nanoTime() - timesStartTime;
-            double timesMS = Math.round(timesUseTime / 100000.0) / 10.0;
-            BeyondDimensions.LOGGER.info("第 {}次 执行时间: {} ms",times, timesMS);
-            if(times == 9)
-            {
-                tenStartTime = System.nanoTime();
+            long extractStart = System.nanoTime();
+            for (int i = storage.getSlots() - 1; i >= 0; i--) {
+                storage.extract(i, extractData[i], false);
             }
+            extractTimes[times] = System.nanoTime() - extractStart;
+            // 综合测试（新建存储）
+            UnifiedStorage combinedStorage = new UnifiedStorage(new DimensionsNet(true));
+            long combinedStart = System.nanoTime();
+            for (ItemStackType stack : insertData) {
+                combinedStorage.insert(stack, false);
+            }
+            for (int i = combinedStorage.getSlots() - 1; i >= 0; i--) {
+                combinedStorage.extract(i, extractData[i], false);
+            }
+            combinedTimes[times] = System.nanoTime() - combinedStart;
+        }
+        // 结果计算与报告（示例）
+        reportPerformance("插入操作", insertTimes);
+        reportPerformance("提取操作", extractTimes);
+        reportPerformance("插入+提取操作", combinedTimes);
+
+
+
+    }
+
+    // 结果报告方法
+    private static void reportPerformance(String name, long[] timings) {
+        long total = 0;
+        for (long t : timings) {
+            total += t;
         }
 
-        long totalEndTime = System.nanoTime();
+        // 排除前10%的测试结果（消除预热影响）
+        long filteredTotal = 0;
+        int excludeCount = timings.length / 10;
+        for (int i = excludeCount; i < timings.length; i++) {
+            filteredTotal += timings[i];
+        }
 
-        long totalElapsed = totalEndTime - totalStartTime;
-        double totalMs = Math.round(totalElapsed / 100000.0) / 10.0;
+        double avgTotal = total / 1_000_000.0 / timings.length;
+        double avgFiltered = filteredTotal / 1_000_000.0 / (timings.length - excludeCount);
 
-        BeyondDimensions.LOGGER.info("总结报告：");
-        BeyondDimensions.LOGGER.info("本次测试物品种类为：{}",allItems.size());
-
-        BeyondDimensions.LOGGER.info("✅ 总执行时间: {} ms", totalMs);
-        BeyondDimensions.LOGGER.info("平均每次执行时间: {} ms", totalMs/totalTestTimes);
-
-        double tenElseMS = Math.round((totalEndTime - tenStartTime)/100000.0) / 10.0;
-        BeyondDimensions.LOGGER.info("除去前10次：");
-        BeyondDimensions.LOGGER.info("总执行时间: {} ms", tenElseMS);
-        BeyondDimensions.LOGGER.info("平均每次执行时间: {} ms", tenElseMS/(totalTestTimes-10));
-
-
+        BeyondDimensions.LOGGER.info("{} 平均耗时: {} ms (排除前{}次后: {} ms)",
+                name, avgTotal, excludeCount, avgFiltered);
     }
 }
