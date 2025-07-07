@@ -42,6 +42,16 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/chemical");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
+    public static final Codec<ChemicalStackType> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    ChemicalStack.OPTIONAL_CODEC.fieldOf("internal_stack")
+                            .forGetter(ChemicalStackType::getStack)
+            ).apply(instance, ChemicalStackType::new)
+    );
+
+    public static final Codec<IStackType<ChemicalStack>> TYPE_CODEC = CODEC
+            .xmap(stackType -> stackType, interfaceType -> (ChemicalStackType) interfaceType);
+
     private ChemicalStack stack;
 
     private int hashCodeCache = 0; // 哈希码缓存
@@ -62,18 +72,7 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     @Override
     public Codec<IStackType<ChemicalStack>> getCodec()
     {
-        // 创建具体类型的 Codec 实例
-        Codec<ChemicalStackType> typeCodec = RecordCodecBuilder.create(instance ->
-                instance.group(
-                        ChemicalStack.OPTIONAL_CODEC.fieldOf("internal_stack")
-                                .forGetter(ChemicalStackType::getStack)
-                ).apply(instance, ChemicalStackType::new)
-        );
-        // 转换为接口类型
-        return typeCodec.xmap(
-                stackType -> stackType,                 // 具体类型转接口类型
-                interfaceType -> (ChemicalStackType) interfaceType // 接口类型转具体类型
-        );
+        return TYPE_CODEC;
     }
 
     @Override

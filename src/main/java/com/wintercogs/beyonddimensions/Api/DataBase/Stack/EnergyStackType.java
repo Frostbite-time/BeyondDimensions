@@ -24,6 +24,16 @@ public class EnergyStackType extends LongStackType<EnergyType>
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/energy");
     public static final EnergyStackType EMPTY = new EnergyStackType(); // 空定义
 
+    public static final Codec<EnergyStackType> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    EnergyType.CODEC.fieldOf("internal_stack")
+                            .forGetter(EnergyStackType::getStack)
+            ).apply(instance, EnergyStackType::new)
+    );
+
+    public static final Codec<IStackType<EnergyType>> TYPE_CODEC = CODEC
+            .xmap(stackType -> stackType, interfaceType -> (EnergyStackType) interfaceType);
+
     public EnergyStackType()
     {
         stack = new EnergyType(0);
@@ -42,18 +52,7 @@ public class EnergyStackType extends LongStackType<EnergyType>
     @Override
     public Codec<IStackType<EnergyType>> getCodec()
     {
-        // 创建具体类型的 Codec 实例
-        Codec<EnergyStackType> typeCodec = RecordCodecBuilder.create(instance ->
-                instance.group(
-                        EnergyType.CODEC.fieldOf("internal_stack")
-                                .forGetter(EnergyStackType::getStack)
-                ).apply(instance, EnergyStackType::new)
-        );
-        // 转换为接口类型
-        return typeCodec.xmap(
-                stackType -> stackType,                 // 具体类型转接口类型
-                interfaceType -> (EnergyStackType) interfaceType // 接口类型转具体类型
-        );
+        return TYPE_CODEC;
     }
 
     @Override

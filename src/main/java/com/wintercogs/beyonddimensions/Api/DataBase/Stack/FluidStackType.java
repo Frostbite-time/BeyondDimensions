@@ -46,6 +46,18 @@ public final class FluidStackType implements IStackType<FluidStack>
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
+    public static final Codec<FluidStackType> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    FluidStack.OPTIONAL_CODEC.fieldOf("internal_stack")
+                            .forGetter(FluidStackType::getStack),
+                    Codec.LONG.fieldOf("amount")
+                            .forGetter(FluidStackType::getStackAmount)
+            ).apply(instance, FluidStackType::new)
+    );
+
+    public static final Codec<IStackType<FluidStack>> TYPE_CODEC = CODEC
+            .xmap(stackType -> stackType, interfaceType -> (FluidStackType) interfaceType);
+
     private FluidStack stack;
     private long stackSize;
 
@@ -75,20 +87,7 @@ public final class FluidStackType implements IStackType<FluidStack>
     @Override
     public Codec<IStackType<FluidStack>> getCodec()
     {
-        // 创建具体类型的 Codec 实例
-        Codec<FluidStackType> typeCodec = RecordCodecBuilder.create(instance ->
-                instance.group(
-                        FluidStack.OPTIONAL_CODEC.fieldOf("internal_stack")
-                                .forGetter(FluidStackType::getStack),
-                        Codec.LONG.fieldOf("amount")
-                                .forGetter(FluidStackType::getStackAmount)
-                ).apply(instance, FluidStackType::new)
-        );
-        // 转换为接口类型
-        return typeCodec.xmap(
-                stackType -> stackType,                 // 具体类型转接口类型
-                interfaceType -> (FluidStackType) interfaceType // 接口类型转具体类型
-        );
+        return TYPE_CODEC;
     }
 
 

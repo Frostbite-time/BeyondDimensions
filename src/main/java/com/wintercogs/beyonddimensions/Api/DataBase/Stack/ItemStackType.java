@@ -31,6 +31,18 @@ public final class ItemStackType implements IStackType<ItemStack> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
+    public static final Codec<ItemStackType> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    ItemStack.OPTIONAL_CODEC.fieldOf("internal_stack")
+                            .forGetter(ItemStackType::getStack),
+                    Codec.LONG.fieldOf("amount")
+                            .forGetter(ItemStackType::getStackAmount)
+            ).apply(instance, ItemStackType::new)
+    );
+
+    public static final Codec<IStackType<ItemStack>> TYPE_CODEC = CODEC
+            .xmap(stackType -> stackType, interfaceType -> (ItemStackType) interfaceType);
+
     private ItemStack stack; // 物品stack信息，数量最好时刻保持为1
     private long stackSize; // 扩容，需要确保所有存入取出的终点在此
 
@@ -58,20 +70,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
     @Override
     public Codec<IStackType<ItemStack>> getCodec()
     {
-        // 创建具体类型的 Codec 实例
-        Codec<ItemStackType> typeCodec = RecordCodecBuilder.create(instance ->
-                instance.group(
-                        ItemStack.OPTIONAL_CODEC.fieldOf("internal_stack")
-                                .forGetter(ItemStackType::getStack),
-                        Codec.LONG.fieldOf("amount")
-                                .forGetter(ItemStackType::getStackAmount)
-                ).apply(instance, ItemStackType::new)
-        );
-        // 转换为接口类型
-        return typeCodec.xmap(
-                stackType -> stackType,                 // 具体类型转接口类型
-                interfaceType -> (ItemStackType) interfaceType // 接口类型转具体类型
-        );
+        return TYPE_CODEC;
     }
 
     @Override
