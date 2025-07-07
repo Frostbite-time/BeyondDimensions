@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.EnergyType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.client.Minecraft;
@@ -35,6 +37,23 @@ public class EnergyStackType extends LongStackType<EnergyType>
     public EnergyStackType(long stackSize)
     {
         this.stack = new EnergyType(stackSize);
+    }
+
+    @Override
+    public Codec<IStackType<EnergyType>> getCodec()
+    {
+        // 创建具体类型的 Codec 实例
+        Codec<EnergyStackType> typeCodec = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        EnergyType.CODEC.fieldOf("internal_stack")
+                                .forGetter(EnergyStackType::getStack)
+                ).apply(instance, EnergyStackType::new)
+        );
+        // 转换为接口类型
+        return typeCodec.xmap(
+                stackType -> stackType,                 // 具体类型转接口类型
+                interfaceType -> (EnergyStackType) interfaceType // 接口类型转具体类型
+        );
     }
 
     @Override

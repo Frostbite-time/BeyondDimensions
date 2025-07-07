@@ -1,12 +1,19 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.LongType;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.network.chat.Component;
+
+import java.util.function.Function;
 
 /**
  * 任何纯数值型堆叠的包装类
  */
 public abstract class LongType<T>
 {
+    protected static <C extends LongType<C>> Codec<C> createCodec(Function<Long, C> constructor) {
+        return Codec.LONG.xmap(constructor, LongType::getStackCount);
+    }
+
     protected long stackCount;
 
     public long getStackCount()

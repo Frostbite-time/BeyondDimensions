@@ -1,9 +1,11 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.LongType;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.network.chat.Component;
 
 public class EnergyType extends LongType<EnergyType>
 {
+    public static final Codec<EnergyType> CODEC = createCodec(EnergyType::new);
 
     public EnergyType(long amount)
     {

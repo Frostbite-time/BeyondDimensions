@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import mekanism.api.MekanismAPI;
@@ -55,6 +57,23 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     public ChemicalStackType(ChemicalStack stack)
     {
         this.stack = stack;
+    }
+
+    @Override
+    public Codec<IStackType<ChemicalStack>> getCodec()
+    {
+        // 创建具体类型的 Codec 实例
+        Codec<ChemicalStackType> typeCodec = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        ChemicalStack.OPTIONAL_CODEC.fieldOf("internal_stack")
+                                .forGetter(ChemicalStackType::getStack)
+                ).apply(instance, ChemicalStackType::new)
+        );
+        // 转换为接口类型
+        return typeCodec.xmap(
+                stackType -> stackType,                 // 具体类型转接口类型
+                interfaceType -> (ChemicalStackType) interfaceType // 接口类型转具体类型
+        );
     }
 
     @Override

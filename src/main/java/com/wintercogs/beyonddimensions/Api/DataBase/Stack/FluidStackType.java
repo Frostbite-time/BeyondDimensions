@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
@@ -39,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class FluidStackType implements IStackType<FluidStack>
+public final class FluidStackType implements IStackType<FluidStack>
 {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
@@ -68,6 +70,25 @@ public class FluidStackType implements IStackType<FluidStack>
     {
         this.stack = stack;
         this.stackSize = stackSize;
+    }
+
+    @Override
+    public Codec<IStackType<FluidStack>> getCodec()
+    {
+        // 创建具体类型的 Codec 实例
+        Codec<FluidStackType> typeCodec = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        FluidStack.OPTIONAL_CODEC.fieldOf("internal_stack")
+                                .forGetter(FluidStackType::getStack),
+                        Codec.LONG.fieldOf("amount")
+                                .forGetter(FluidStackType::getStackAmount)
+                ).apply(instance, FluidStackType::new)
+        );
+        // 转换为接口类型
+        return typeCodec.xmap(
+                stackType -> stackType,                 // 具体类型转接口类型
+                interfaceType -> (FluidStackType) interfaceType // 接口类型转具体类型
+        );
     }
 
 

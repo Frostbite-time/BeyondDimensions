@@ -7,6 +7,7 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -14,7 +15,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -36,14 +36,41 @@ public interface IStackType<T> {
     /**
      * CODEC定义
      */
-    public static final Codec<IStackType> CODEC = CompoundTag.CODEC.xmap(
-            compoundTag -> {
-                return IStackType.deserializeNBTCommon(compoundTag, ServerLifecycleHooks.getCurrentServer().registryAccess());
-            },
-            iStackType -> {
-                return iStackType.serializeNBT(ServerLifecycleHooks.getCurrentServer().registryAccess());
+    public static final Codec<IStackType> CODEC = ResourceLocation.CODEC
+            .dispatch(
+                    "type",
+                    IStackType::getTypeId,  // 分发到具体实现的编解码器
+                    id -> {
+                        IStackType<?> type = StackTypeRegistry.getType(id);
+                        return type.getCodec().fieldOf("type"); // A → MapCodec
+                    }
+            );
+
+    /*
+     * 流编码器定义
+     */
+    public static final StreamCodec<RegistryFriendlyByteBuf, IStackType> STREAM_CODEC =
+        new StreamCodec<>()
+        {
+            @Override
+            public void encode(RegistryFriendlyByteBuf buf, IStackType stackType)
+            {
+                stackType.serialize(buf);
             }
-    );
+
+            @Override
+            public IStackType decode(RegistryFriendlyByteBuf byteBuf)
+            {
+                return IStackType.deserializeCommon(byteBuf);
+            }
+        };
+
+
+    /*
+     * 定义实现的编解码器 需要注册表信息，在接口实现实在太复杂了，分开到每个具体实现就会简单很多
+     */
+    Codec<IStackType<T>> getCodec();
+
 
     /**
      * 从未知Object构建实例

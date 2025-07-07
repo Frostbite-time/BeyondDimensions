@@ -6,9 +6,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -46,24 +44,11 @@ public class ModDataComponents {
     // IStackType类已经实现了hashCode和equals，直接使用即可
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<IStackType>>> ISTACK_SLOTS = register(
       "istack_slots", builder -> builder.persistent(
-                IStackType.CODEC.listOf()
+                    IStackType.CODEC.listOf()
             ).networkSynchronized(
                     ByteBufCodecs.collection(
                             ArrayList::new,
-                            new StreamCodec<RegistryFriendlyByteBuf, IStackType>()
-                            {
-                                @Override
-                                public void encode(RegistryFriendlyByteBuf buf, IStackType stackType)
-                                {
-                                    stackType.serialize(buf);
-                                }
-
-                                @Override
-                                public IStackType decode(RegistryFriendlyByteBuf byteBuf)
-                                {
-                                    return IStackType.deserializeCommon(byteBuf);
-                                }
-                            }
+                            IStackType.STREAM_CODEC
                     )
             )
     );

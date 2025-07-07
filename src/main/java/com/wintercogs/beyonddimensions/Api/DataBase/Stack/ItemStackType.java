@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
@@ -25,7 +27,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemStackType implements IStackType<ItemStack> {
+public final class ItemStackType implements IStackType<ItemStack> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
@@ -51,6 +53,25 @@ public class ItemStackType implements IStackType<ItemStack> {
     {
         this.stack = stack;
         this.stackSize = stackSize;
+    }
+
+    @Override
+    public Codec<IStackType<ItemStack>> getCodec()
+    {
+        // 创建具体类型的 Codec 实例
+        Codec<ItemStackType> typeCodec = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        ItemStack.OPTIONAL_CODEC.fieldOf("internal_stack")
+                                .forGetter(ItemStackType::getStack),
+                        Codec.LONG.fieldOf("amount")
+                                .forGetter(ItemStackType::getStackAmount)
+                ).apply(instance, ItemStackType::new)
+        );
+        // 转换为接口类型
+        return typeCodec.xmap(
+                stackType -> stackType,                 // 具体类型转接口类型
+                interfaceType -> (ItemStackType) interfaceType // 接口类型转具体类型
+        );
     }
 
     @Override
