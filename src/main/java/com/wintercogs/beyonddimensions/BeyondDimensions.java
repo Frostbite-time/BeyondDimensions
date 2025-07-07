@@ -67,6 +67,8 @@ public class BeyondDimensions
     public static final String AEFlux2MODID = "appflux";
     public static boolean CuriosLoaded = false;
     public static final String CuriosModId = "curios";
+    public static boolean JECharactersLoaded = false;
+    public static final String JECharactersModId = "jecharacters";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -143,6 +145,10 @@ public class BeyondDimensions
         {
             CuriosLoaded = true;
             MOD_EVENT_BUS.addListener(BD_CuriosPlugin::registerCapabilities);
+        }
+        if (ModList.get().isLoaded(JECharactersModId))
+        {
+            JECharactersLoaded = true;
         }
     }
 

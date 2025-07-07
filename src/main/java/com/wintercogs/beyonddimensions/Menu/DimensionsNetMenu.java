@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
+import com.wintercogs.beyonddimensions.Integration.JECharacters.PinInMatches;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
 import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
@@ -305,10 +306,9 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             IStackType stack = unifiedStorage.get(i).copy();
             if (stack == null || stack.isEmpty()) continue;
 
-            // 提前过滤空气，并缓存名称和拼音
+            // 提前过滤空气，并缓存名称
             String displayName = stack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
-            String allPinyin = TinyPinyinUtils.getAllPinyin(displayName, false).toLowerCase(Locale.ENGLISH);
-            String firstPinyin = TinyPinyinUtils.getFirstPinYin(displayName).toLowerCase(Locale.ENGLISH);
+
             boolean matchesSearch;
 
             // 处理搜索逻辑的新规则
@@ -326,10 +326,8 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
                             lowerSearch.substring(atIndex + 1) : "";
 
                     // 主部分匹配逻辑
-                    boolean matchesMain = mainPart.isEmpty() || // 主部分为空时视为匹配
-                            displayName.contains(mainPart) ||
-                            allPinyin.contains(mainPart) ||
-                            firstPinyin.contains(mainPart);
+                    boolean matchesMain = mainPart.isEmpty() ||
+                            checkTextMatches(displayName,mainPart); // 主部分为空时视为匹配
 
                     // 工具提示匹配逻辑
                     boolean matchesTooltip = tooltipPart.isEmpty() || // 工具提示部分为空时视为匹配
@@ -337,10 +335,8 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
 
                     matchesSearch = matchesMain && matchesTooltip;
                 } else {
-                    // 不含@时的常规匹配逻辑（不检查tooltip）
-                    matchesSearch = displayName.contains(lowerSearch) ||
-                            allPinyin.contains(lowerSearch) ||
-                            firstPinyin.contains(lowerSearch);
+                    // 不含#时的常规匹配逻辑（不检查tooltip）
+                    matchesSearch = checkTextMatches(displayName,lowerSearch);
                 }
             }
 
@@ -390,6 +386,36 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     }
 
     /**
+     * 检查文本是否匹配名称（同时检查拼音以及原文本）
+     * 内部自动统一为小写
+     */
+    private boolean checkTextMatches(String srcText, String inputText)
+    {
+        srcText = srcText.toLowerCase(Locale.ENGLISH);
+        inputText = inputText.toLowerCase(Locale.ENGLISH);
+
+        boolean matchText = srcText.contains(inputText);
+
+        boolean matchPinyin;
+
+        if(!Minecraft.getInstance().options.languageCode.startsWith("zh"))
+        {
+            matchPinyin = false; // 非中文地区默认不匹配
+        }
+        else if(BeyondDimensions.JECharactersLoaded)
+        {
+            matchPinyin = PinInMatches.contains(srcText, inputText);
+        }
+        else
+        {
+            String allPinyin = TinyPinyinUtils.getAllPinyin(srcText, false).toLowerCase(Locale.ENGLISH);
+            String firstPinyin = TinyPinyinUtils.getFirstPinYin(srcText).toLowerCase(Locale.ENGLISH);
+            matchPinyin = allPinyin.contains(inputText) || firstPinyin.contains(inputText);
+        }
+        return matchText||matchPinyin;
+    }
+
+    /**
      * 检查文本是否存在于目标物品堆叠
      * @param stack 目标物品堆叠
      * @param matchText 文本
@@ -404,17 +430,11 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         );
         return toolTips.stream()
                 .anyMatch(tooltip -> {
+
                     // 获取原始tooltip文本（小写）
                     String tooltipText = tooltip.getString().toLowerCase(Locale.ENGLISH);
+                    return checkTextMatches(tooltipText, matchText);
 
-                    // 生成拼音变体
-                    String allPinyin = TinyPinyinUtils.getAllPinyin(tooltipText, false).toLowerCase(Locale.ENGLISH);
-                    String firstPinyin = TinyPinyinUtils.getFirstPinYin(tooltipText).toLowerCase(Locale.ENGLISH);
-
-                    // 三重匹配检查
-                    return tooltipText.contains(matchText) ||
-                            allPinyin.contains(matchText) ||
-                            firstPinyin.contains(matchText);
                 });
     }
 
