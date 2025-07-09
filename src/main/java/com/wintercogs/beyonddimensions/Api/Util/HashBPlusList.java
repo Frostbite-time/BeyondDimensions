@@ -272,22 +272,26 @@ public class HashBPlusList<E> extends AbstractList<E>
 
     /** 在给定的偏移位置向叶子节点插入一个新元素。处理元素移位和索引映射的更新 */
     private void insertIntoLeaf(LeafNode<E> leaf, int offset, E element) {
-        // 1. 将元素向右移动以腾出空间
-        if (offset < leaf.count) {
-            System.arraycopy(leaf.elements, offset, leaf.elements, offset + 1, leaf.count - offset);
-            // 更新映射表中被移动元素的位置偏移量
-            for (int j = offset; j < leaf.count; j++) {
-                E shiftedElem = leaf.elements[j];
-                if (shiftedElem != null) {  // 在活动范围内不应为空
-                    index.get(shiftedElem).offset = j + 1;
-                }
+        int toMove = leaf.count - offset;
+        if (toMove > 0) {
+            // ① 先整体右移
+            System.arraycopy(leaf.elements, offset, leaf.elements, offset + 1, toMove);
+
+            // ② 先扩容，再“倒着”更新偏移，保证不会被覆盖
+            leaf.count++;
+            for (int j = leaf.count - 1; j >= offset + 1; j--) {
+                E shifted = leaf.elements[j];
+                if (shifted != null) index.get(shifted).offset = j;
             }
+        } else {
+            leaf.count++;   // 追加到尾部的简单情形
         }
-        // 2. 插入新元素
+
+        // ③ 放入新元素并写入索引
         leaf.elements[offset] = element;
-        leaf.count++;
         index.put(element, new Pos<>(leaf, offset));
-        // 3. 增加祖先分支节点的计数
+
+        // ④ 向上递增 size
         updateSizesUpward(leaf, +1);
     }
 
@@ -490,6 +494,9 @@ public class HashBPlusList<E> extends AbstractList<E>
         insertIntoLeaf(underflow, underflow.count, moved);       // 在尾部追加；内部 +1
     }
 
+    /**
+     * 合并两个叶片，调用函数时，需要保证两个叶片属于同一个父分支
+     */
     private void mergeLeaves(LeafNode<E> left, LeafNode<E> right) {
         // 把 right 整个拼接到 left 后
         System.arraycopy(right.elements, 0, left.elements, left.count, right.count);
@@ -498,10 +505,12 @@ public class HashBPlusList<E> extends AbstractList<E>
         }
         left.count += right.count;
         left.next = right.next; if (right.next != null) right.next.prev = left;
-        updateSizesUpward(right, -right.count);      // 已经把元素数减去
+
         BranchNode<E> par = right.parent();
         int idx = findChildIndex(par, right);
-        removeChild(par, idx);                       // 递归会继续再平衡分支
+        // 不需要updateSizesUpward向上传递变化，因为实际上，父分支元素总数不变
+        // removeChild本身也会调用函数重算父节点Subsize，递归也会继续再平衡分支
+        removeChild(par, idx);
     }
 
     // ------------------- 再平衡：分支节点 -------------------
