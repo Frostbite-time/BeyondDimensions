@@ -1,0 +1,23 @@
+package com.wintercogs.beyonddimensions.GUI;
+
+import net.minecraft.resources.ResourceLocation;
+
+// 存放一些通用的纹理路径和宽高
+public class CommonTextures
+{
+    public static final ResourceLocation TOP_BASE_COMMON = ResourceLocation.parse("beyonddimensions:textures/gui/top_base_common.png");
+    public static final int TOP_BASE_COMMON_WIDTH = 176;
+    public static final int TOP_BASE_COMMON_HEIGHT = 24;
+    public static final ResourceLocation COMMON_CONNECTION = ResourceLocation.parse("beyonddimensions:textures/gui/common_connection.png");
+    public static final int COMMON_CONNECTION_WIDTH = 176;
+    public static final int COMMON_CONNECTION_HEIGHT = 8;
+    public static final ResourceLocation COMMON_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/common_slots.png");
+    public static final int COMMON_SLOTS_WIDTH = 176;
+    public static final int COMMON_SLOTS_HEIGHT = 18;
+    public static final ResourceLocation FILTER_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/filter_slots.png");
+    public static final int FILTER_SLOTS_WIDTH = 176;
+    public static final int FILTER_SLOTS_HEIGHT = 18;
+    public static final ResourceLocation GUI_TEXTURE_PLAYER_INV = ResourceLocation.parse("beyonddimensions:textures/gui/player_inv.png");
+    public static final int PLAYER_INV_WIDTH = 176;
+    public static final int PLAYER_INV_HEIGHT = 89;
+}

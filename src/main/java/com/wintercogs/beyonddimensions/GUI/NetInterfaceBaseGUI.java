@@ -27,8 +27,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 {
 
-    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_interface.png");
-
     public StatusButton popButton; // 使用倒序按钮来临时替代弹出模式
 
     private SlotDragHandler dragHandler; // 仅在emi加载时可用
@@ -41,8 +39,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     {
         super(container, playerInventory, title);
         // 去除空白的真实部分，用于计算图片显示的最佳位置
-        this.imageWidth = 176;
-        this.imageHeight = 207;
+
     }
 
 
@@ -50,8 +47,11 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     @Override
     protected void init() {
         // 如果以后图片大小有变，显示中心所期望的大小仍然是x:176,y:235用于计算
-        this.leftPos = (this.width - 176)/2;
-        this.topPos = (this.height - 235)/2;
+        this.imageWidth = 176;
+        this.imageHeight = rebuildImageHeight();
+        rebuildLabelHeight();
+        this.leftPos = (this.width - imageWidth)/2;
+        this.topPos = (this.height - imageHeight)/2;
 
         // 初始化emi dragHandler
         if(BeyondDimensions.EMILoaded)
@@ -136,6 +136,17 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 
     }
 
+    protected int rebuildImageHeight()
+    {
+        return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_SLOTS_HEIGHT*3 + CommonTextures.FILTER_SLOTS_HEIGHT*3+CommonTextures.COMMON_CONNECTION_HEIGHT + CommonTextures.PLAYER_INV_HEIGHT;
+    }
+
+    protected void rebuildLabelHeight()
+    {
+        this.titleLabelY = 8;
+        this.inventoryLabelY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_SLOTS_HEIGHT*3 + CommonTextures.FILTER_SLOTS_HEIGHT*3+4;
+    }
+
     @Override
     protected void containerTick()
     {
@@ -156,9 +167,18 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
+        int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, GUI_TEXTURE);
-        guiGraphics.blit(GUI_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+
+        CommonTexturesRender.renderTopBaseCommon(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderFilterSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderCommonSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderFilterSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderCommonSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderFilterSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderCommonSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderCommonConnection(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderPlayerInv(guiGraphics,this.leftPos,drawY);
     }
 
     @Override
@@ -172,7 +192,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752,false);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+20, 4210752,false);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752,false);
     }
 
 
