@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.ShortCutKey;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
@@ -12,7 +13,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
@@ -33,17 +34,25 @@ public class DimensionsShortKeys
       "key.categories.beyonddimensions"
     );
 
+    public static final KeyMapping MAIN_HAND_ITEM_TRANSFER_KEY = new KeyMapping(
+            "key.beyonddimensions.main_hand_item_transfer_key",
+            InputConstants.Type.MOUSE,
+            GLFW.GLFW_MOUSE_BUTTON_MIDDLE,
+            "key.categories.beyonddimensions"
+    );
+
     public static void register()
     {
         ShortCutKeyRegister.registerKey(OPEN_GUI_KEY);
         ShortCutKeyRegister.registerKey(OPEN_TERMINAL_QUICK_KEY);
+        ShortCutKeyRegister.registerKey(MAIN_HAND_ITEM_TRANSFER_KEY);
     }
 
     @SubscribeEvent
-    public static void onKeyInput(InputEvent.Key event)
+    public static void onKeyInput(ClientTickEvent.Post event)
     {
         // 用if或者switch，随便什么，反正检查按键就行
-        if (OPEN_GUI_KEY.isDown())
+        while (OPEN_GUI_KEY.consumeClick())
         {
             LocalPlayer player = Minecraft.getInstance().player;
 
@@ -63,7 +72,8 @@ public class DimensionsShortKeys
 
 
         }
-        else if(OPEN_TERMINAL_QUICK_KEY.isDown())
+
+        while (OPEN_TERMINAL_QUICK_KEY.consumeClick())
         {
             LocalPlayer player = Minecraft.getInstance().player;
 

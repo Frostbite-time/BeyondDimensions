@@ -41,6 +41,7 @@
   "key.categories.beyonddimensions": "차원을 넘어",
   "key.beyonddimensions.open_gui": "네트워크 열기",
   "key.beyonddimensions.open_terminal_quick_key": "인벤토리에서 터미널 빠르게 열기",
+  "key.beyonddimensions.main_hand_item_transfer_key": "주 손 아이템 빠른 이동",
 
   "item.beyonddimensions.net_creater": "차원 네트워크 생성기",
   "item.beyonddimensions.net_member_inviter": "멤버 연결기",

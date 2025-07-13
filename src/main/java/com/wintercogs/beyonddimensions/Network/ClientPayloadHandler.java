@@ -306,4 +306,24 @@ public class ClientPayloadHandler
                 }
         );
     }
+
+    public void handlePickBlockFromNetPacket(final PickBlockFromNetPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+        );
+    }
+
+    public void handlePutHandItemToNetPacket(final PutHandItemToNetPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+        );
+    }
 }

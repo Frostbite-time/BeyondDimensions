@@ -2,7 +2,9 @@ package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
@@ -10,6 +12,7 @@ import com.wintercogs.beyonddimensions.GUI.NetMenuType;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
 import com.wintercogs.beyonddimensions.Menu.*;
 import com.wintercogs.beyonddimensions.Packet.*;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -379,6 +382,55 @@ public class ServerPayloadHandler
                             menu.broadcastChanges();
                         }
                     }
+                }
+        );
+    }
+
+    public void handlePickBlockFromNetPacket(final PickBlockFromNetPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    if(!player.getMainHandItem().isEmpty()) return;
+                    DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+                    if(net == null) return;
+                    UnifiedStorage storage = net.getUnifiedStorage();
+
+                    ItemStackType target = null;
+                    for(IStackType stack : storage.getStorage())
+                    {
+                        if(stack instanceof ItemStackType itemStackType)
+                        {
+                            if(itemStackType.getStack().getItem() == packet.targetStack().getItem())
+                            {
+                                target = (ItemStackType) itemStackType.copyWithCount(itemStackType.getVanillaMaxStackSize());
+                                break;
+                            }
+                        }
+                    }
+
+                    if(target != null)
+                    {
+                        ItemStack extract = ((ItemStackType) storage.extract(target,false)).copyStack();
+                        player.setItemInHand(InteractionHand.MAIN_HAND,extract);
+                    }
+                }
+        );
+    }
+
+    public void handlePutHandItemToNetPacket(final PutHandItemToNetPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    if(player.getMainHandItem().isEmpty()) return;
+                    DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+                    if(net == null) return;
+                    UnifiedStorage storage = net.getUnifiedStorage();
+                    IStackType remaining = storage.insert(new ItemStackType(player.getMainHandItem()),false);
+                    player.getMainHandItem().setCount((BDMath.clampLongToInt(remaining.getStackAmount())));
                 }
         );
     }

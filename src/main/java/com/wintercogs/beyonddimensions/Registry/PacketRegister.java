@@ -176,5 +176,23 @@ public class PacketRegister
                         ServerPayloadHandler.getInstance()::handleBatchTransferPacket
                 )
         );
+
+        registrar.playBidirectional(
+                PickBlockFromNetPacket.TYPE,
+                PickBlockFromNetPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handlePickBlockFromNetPacket,
+                        ServerPayloadHandler.getInstance()::handlePickBlockFromNetPacket
+                )
+        );
+
+        registrar.playBidirectional(
+                PutHandItemToNetPacket.TYPE,
+                PutHandItemToNetPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handlePutHandItemToNetPacket,
+                        ServerPayloadHandler.getInstance()::handlePutHandItemToNetPacket
+                )
+        );
     }
 }
