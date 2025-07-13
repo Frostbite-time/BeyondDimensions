@@ -250,7 +250,7 @@ public class ClientPayloadHandler
                     if(player.containerMenu instanceof NetEnergyMenu menu)
                     {
                         menu.resumeRemoteUpdates(); // 虽然本地端这个好像没有用处
-                        menu.loadStorage(packet.energyCap(), packet.energyStored());
+                        menu.loadStorage(packet.energyCap(), packet.energyStored(),packet.energySpeedState());
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                 }

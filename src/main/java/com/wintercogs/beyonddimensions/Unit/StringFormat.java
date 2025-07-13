@@ -47,5 +47,29 @@ public class StringFormat
         return String.format("%d%s", (long) value, UNITS[unitIndex + 1]);
     }
 
+    public static String formatChange(long change) {
+        if (change == 0) {
+            return "0";
+        }
+
+        String sign = change > 0 ? "+" : "-";
+        long absValue = Math.abs(change);
+
+        // 特殊处理小于1000的值（直接显示原始值）
+        if (absValue < 1000) {
+            return sign + String.format("%d", absValue);
+        }
+
+        // 寻找匹配的单位
+        int unitIndex = 0;
+        while (unitIndex < THRESHOLDS.length - 1 && absValue >= THRESHOLDS[unitIndex + 1]) {
+            unitIndex++;
+        }
+
+        // 计算带单位的值并格式化
+        double value = absValue / (double) THRESHOLDS[unitIndex];
+        return sign + String.format("%.2f%s", value, UNITS[unitIndex + 1]);
+    }
+
 
 }

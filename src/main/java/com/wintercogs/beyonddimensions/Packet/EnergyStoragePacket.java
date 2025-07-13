@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public record EnergyStoragePacket(long energyStored ,long energyCap) implements CustomPacketPayload
+public record EnergyStoragePacket(long energyStored ,long energyCap, long energySpeedState) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<EnergyStoragePacket> TYPE =
@@ -22,6 +22,8 @@ public record EnergyStoragePacket(long energyStored ,long energyCap) implements 
                     EnergyStoragePacket::energyStored,
                     ByteBufCodecs.VAR_LONG,
                     EnergyStoragePacket::energyCap,
+                    ByteBufCodecs.VAR_LONG,
+                    EnergyStoragePacket::energySpeedState,
                     EnergyStoragePacket::new
             );
 

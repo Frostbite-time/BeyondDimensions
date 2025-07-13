@@ -29,6 +29,7 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
 
     public long energyCapacity = 0;
     public long energyStored = 0;
+    public long energySpeedState = 0;
 
 
     // 构建注册用的信息
@@ -99,9 +100,10 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
         {
             if (Long.MAX_VALUE != energyCapacity || energyStored != energyCapacity)
             {
+                this.energySpeedState = net.getUnifiedStorage().getEnergyStored() - this.energyStored;
                 this.energyCapacity = net.getUnifiedStorage().getSlotCapacity(0);
                 this.energyStored = net.getUnifiedStorage().getEnergyStored();
-                PacketDistributor.sendToPlayer((ServerPlayer) player, new EnergyStoragePacket(this.energyStored, this.energyCapacity));
+                PacketDistributor.sendToPlayer((ServerPlayer) player, new EnergyStoragePacket(this.energyStored, this.energyCapacity,this.energySpeedState));
             }
         }
     }
@@ -113,12 +115,12 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
     }
 
 
-    public void loadStorage(long energyCapacity, long energyStored)
+    public void loadStorage(long energyCapacity, long energyStored, long energySpeedState)
     {
         this.energyCapacity = energyCapacity;
         this.energyStored = energyStored;
+        this.energySpeedState = energySpeedState;
     }
-
 
     @Override
     public boolean stillValid(Player player)
