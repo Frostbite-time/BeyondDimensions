@@ -123,16 +123,6 @@ public class PacketRegister
 
         // 注册 CallSeverClickPacket 用于同步滑动条状态
         registrar.playBidirectional(
-                FlagSlotSetPacket.TYPE,
-                FlagSlotSetPacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleFlagSlotSetPacket,
-                        ServerPayloadHandler.getInstance()::handleFlagSlotSetPacket
-                )
-        );
-
-        // 注册 CallSeverClickPacket 用于同步滑动条状态
-        registrar.playBidirectional(
                 EnergyStoragePacket.TYPE,
                 EnergyStoragePacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
@@ -192,6 +182,33 @@ public class PacketRegister
                 new DirectionalPayloadHandler<>(
                         ClientPayloadHandler.getInstance()::handlePutHandItemToNetPacket,
                         ServerPayloadHandler.getInstance()::handlePutHandItemToNetPacket
+                )
+        );
+
+        registrar.playBidirectional(
+                OrderedStackTypedSlotPacket.TYPE,
+                OrderedStackTypedSlotPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleOrderedStackTypedSlotPacket,
+                        ServerPayloadHandler.getInstance()::handleOrderedStackTypedSlotPacket
+                )
+        );
+
+        registrar.playBidirectional(
+                SetSlotDirectlyPacket.TYPE,
+                SetSlotDirectlyPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleSetSlotDirectlyPacket,
+                        ServerPayloadHandler.getInstance()::handleSetSlotDirectlyPacket
+                )
+        );
+
+        registrar.playBidirectional(
+                DisorderedSlotGroupSyncPacket.TYPE,
+                DisorderedSlotGroupSyncPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleDisorderedSlotGroupSyncPacket,
+                        ServerPayloadHandler.getInstance()::handleDisorderedSlotGroupSyncPacket
                 )
         );
     }

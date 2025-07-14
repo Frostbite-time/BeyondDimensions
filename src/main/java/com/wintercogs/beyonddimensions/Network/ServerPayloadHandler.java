@@ -11,6 +11,7 @@ import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.GUI.NetMenuType;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
 import com.wintercogs.beyonddimensions.Menu.*;
+import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Packet.*;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.core.NonNullList;
@@ -19,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -152,23 +154,13 @@ public class ServerPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    if (player.containerMenu instanceof DimensionsNetMenu menu)
+                    if (player.containerMenu instanceof BDBaseMenu menu)
                     {
                         menu.customClickHandler(packet.slotIndex(),packet.clickItem(),packet.button(),packet.shiftDown());
                         menu.broadcastChanges();
                         // 这里发包不是让客户端执行操作，而是解除锁定
                         PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, new ItemStackType(ItemStack.EMPTY),1,false));
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
-                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
-                    {
-                        menu.customClickHandler(packet.slotIndex(),packet.clickItem(),packet.button(),packet.shiftDown());
-                        menu.broadcastChanges();
-                        // 这里发包不是让客户端执行操作，而是解除锁定
-                        PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, new ItemStackType(ItemStack.EMPTY),1,false));
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
-
                 }
 
         );
@@ -226,14 +218,7 @@ public class ServerPayloadHandler
         context.enqueueWork(
                 () ->
                 {
-                    Player player = context.player();
-                    NetInterfaceBaseMenu menu;
-                    if (!(player.containerMenu instanceof NetInterfaceBaseMenu))
-                    {
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
-                    menu = (NetInterfaceBaseMenu) player.containerMenu;
-                    //menu.handlePlayerAction(packet.receiver(),packet.action());
+
                 }
 
         );
@@ -256,25 +241,6 @@ public class ServerPayloadHandler
                     {
                         menu.popMode = packet.popMode();
                         menu.be.popMode = packet.popMode();
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
-                }
-
-        );
-    }
-
-
-    public void handleFlagSlotSetPacket(final FlagSlotSetPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-                    Player player = context.player();
-
-                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
-                    {
-                        menu.setFlagSlot(packet.index(),packet.clickStack(),packet.flagStack());
-                        menu.broadcastChanges();
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                 }
@@ -306,8 +272,6 @@ public class ServerPayloadHandler
                         //1.解析数组
                         //2.为每一个槽位在背包和存储中寻找资源填入
                         menu.transferRecipe(packet.inputs());
-
-
                     }
                 }
 
@@ -327,8 +291,6 @@ public class ServerPayloadHandler
                         //1.解析数组
                         //2.为每一个槽位在背包和存储中寻找资源填入
                         menu.cleanCraftSlots(packet.toStorage());
-
-
                     }
                 }
 
@@ -359,7 +321,7 @@ public class ServerPayloadHandler
                     {
                         Player player = context.player();
 
-                        if(player.containerMenu instanceof DimensionsNetMenu menu)
+                        if(player.containerMenu instanceof BDBaseMenu menu)
                         {
                             // 批量转移到存储
                             if(packet.dirToStorage())
@@ -431,6 +393,43 @@ public class ServerPayloadHandler
                     UnifiedStorage storage = net.getUnifiedStorage();
                     IStackType remaining = storage.insert(new ItemStackType(player.getMainHandItem()),false);
                     player.getMainHandItem().setCount((BDMath.clampLongToInt(remaining.getStackAmount())));
+                }
+        );
+    }
+
+    public void handleOrderedStackTypedSlotPacket(final OrderedStackTypedSlotPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+        );
+    }
+
+    public void handleSetSlotDirectlyPacket(final SetSlotDirectlyPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    if(player.containerMenu instanceof AbstractContainerMenu menu)
+                    {
+                        if(menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
+                        {
+                            slot.setStackDirectly(packet.stack());
+                        }
+                    }
+                }
+        );
+    }
+
+    public void handleDisorderedSlotGroupSyncPacket(final DisorderedSlotGroupSyncPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
                 }
         );
     }

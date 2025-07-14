@@ -6,8 +6,8 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
+import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
-import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Unit.InventoryHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -221,49 +221,13 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         slotChangedCraftingGrid(this,player.level(),player,craftSlots,resultSlots,resultSlotIndex);
     }
 
-
-    @Override
-    protected void addStorageSlots()
-    {
-        // 默认添加99行，但将99之外的行全部设置为不激活状态，以实现动态增加和减少行数
-        for (int row = 0; row < 99; ++row)
-        {
-            for (int col = 0; col < 9; ++col)
-            {
-                StoredStackSlot newSlot = new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 25+row * 18);
-                if(row >= getLines())
-                    newSlot.setActive(false);
-                this.addSlot(newSlot);
-            }
-        }
-    }
-
-
-    @Override
-    protected void addPlayerInv(Inventory playerInventory)
-    {
-        inventoryStartIndex = slots.size();
-        for (int row = 0; row < 3; ++row)
-        {
-            for (int col = 0; col < 9; ++col)
-            {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 25+62+ (getLines()-1)*18 + 26 + 6 + row * 18));
-            }
-        }
-        for (int col = 0; col < 9; ++col)
-        {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 25+62+ (getLines()-1)*18 + 26 + 6 + 3 * 18+ 4));
-        }
-        inventoryEndIndex = slots.size();
-    }
-
     // 放大和缩小UI所使用的函数，用于重新确定槽位的激活状态以及槽位的位置
     public void rebuildSlots()
     {
         int sSlotNum = 0;
         for(Slot slot : slots)
         {
-            if(slot instanceof StoredStackSlot sSlot)
+            if(slot instanceof AbstractStackTypedSlot sSlot)
             {
                 if(sSlotNum/9 < getLines())
                     sSlot.setActive(true);

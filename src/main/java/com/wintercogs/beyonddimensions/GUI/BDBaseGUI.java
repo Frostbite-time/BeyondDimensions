@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
-import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
+import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Packet.BatchTransferPacket;
 import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
 import net.minecraft.client.gui.Font;
@@ -43,7 +43,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     protected void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
         if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
-            if(this.hoveredSlot instanceof StoredStackSlot sSlot)
+            if(this.hoveredSlot instanceof AbstractStackTypedSlot sSlot)
             {
                 IStackType stack = sSlot.getStack();
                 stack.renderTooltip(guiGraphics,minecraft.font,mouseX,mouseY);
@@ -59,7 +59,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     protected void renderSlot(GuiGraphics guiGraphics, Slot slot)
     {
-        if(slot instanceof StoredStackSlot sSlot)
+        if(slot instanceof AbstractStackTypedSlot sSlot)
         {
             // 获取stack
             int x = slot.x;
@@ -100,7 +100,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         Slot slot = this.findSlot(mouseX, mouseY);
-        if(!(slot instanceof StoredStackSlot))
+        if(!(slot instanceof AbstractStackTypedSlot))
             super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
 
         return true;
@@ -116,7 +116,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     protected void slotClicked(Slot slot, int slotIndex, int mouseButton, ClickType type)
     {
-        if(!(slot instanceof StoredStackSlot))
+        if(!(slot instanceof AbstractStackTypedSlot))
             super.slotClicked(slot, slotIndex, mouseButton, type);
 
 
@@ -133,7 +133,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 IStackType clickItem;
                 if(hasShiftDown())
                 {
-                    if(slot instanceof StoredStackSlot sSlot)
+                    if(slot instanceof AbstractStackTypedSlot sSlot)
                     {
                         clickItem = sSlot.getVanillaActualStack();
                     }
@@ -162,7 +162,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 }
                 else
                 {
-                    if(slot instanceof StoredStackSlot sSlot)
+                    if(slot instanceof AbstractStackTypedSlot sSlot)
                     {
                         if(sSlot.isFake())
                         {
@@ -192,7 +192,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     {
         if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null) {
 
-            if(hoveredSlot instanceof StoredStackSlot sSlot)
+            if(hoveredSlot instanceof AbstractStackTypedSlot sSlot)
             {
 
             }

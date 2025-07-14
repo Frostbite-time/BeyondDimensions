@@ -8,16 +8,14 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Integration.JECharacters.PinInMatches;
-import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
-import com.wintercogs.beyonddimensions.Packet.SyncStoragePacket;
+import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedSlotGroupSync;
+import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
-import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
@@ -25,8 +23,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.connection.ConnectionType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.*;
@@ -51,6 +47,9 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     private ArrayList<IStackType> lastStorage; // 记录截至上一次同步时的存储状态，用于同步数据
 
     public boolean hasShiftDown = false;
+
+    protected int storageStartIndex;
+    protected int storageEndIndex;
 
 
     // 构建注册用的信息
@@ -90,6 +89,18 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             this.searchText = Config.uiSearch;
         }
 
+        addSlotGroupSync(new DisorderedSlotGroupSync(this,slotGroupSyncs.size(),storage) {
+            @Override
+            public void afterLoadChange()
+            {
+                // 按住shift时锁定排序
+                if(!hasShiftDown)
+                    updateViewerStorage();
+                else
+                    updateOnlyCountAndNewViewer();
+            }
+        });
+
         // 初始化维度网络容器
         viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
         if (!player.level().isClientSide())
@@ -98,28 +109,49 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             this.lastStorage = new ArrayList<>();
         }
 
+        // 添加玩家背包和快捷栏
+        addPlayerInv(playerInventory);
 
         // 添加存储槽
         addStorageSlots();
 
-        // 添加玩家背包和快捷栏
-        addPlayerInv(playerInventory);
+
     }
 
     // 添加存储槽位
     protected void addStorageSlots()
     {
         // 默认添加99行，但将99之外的行全部设置为不激活状态，以实现动态增加和减少行数
-        for (int row = 0; row < 99; ++row)
+        storageStartIndex = slots.size();
+        if(player.level().isClientSide())
         {
-            for (int col = 0; col < 9; ++col)
+            for (int row = 0; row < 99; ++row)
             {
-                StoredStackSlot newSlot = new StoredStackSlot(viewerStorage, -1, 8 + col * 18, 25 + row * 18);
-                if (row >= getLines())
-                    newSlot.setActive(false);
-                this.addSlot(newSlot);
+                for (int col = 0; col < 9; ++col)
+                {
+                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this,viewerStorage,-1,inventoryStartIndex,inventoryEndIndex,  8 + col * 18, 25 + row * 18);
+                    if (row >= getLines())
+                        newSlot.setActive(false);
+                    this.addSlot(newSlot);
+                }
             }
         }
+        else
+        {
+            for (int row = 0; row < 99; ++row)
+            {
+                for (int col = 0; col < 9; ++col)
+                {
+                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this,storage,-1,inventoryStartIndex,inventoryEndIndex, 8 + col * 18, 25 + row * 18);
+                    if (row >= getLines())
+                        newSlot.setActive(false);
+                    this.addSlot(newSlot);
+                }
+            }
+        }
+        storageEndIndex = slots.size();
+
+
     }
 
     // 添加玩家背包
@@ -146,7 +178,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         int sSlotNum = 0;
         for (Slot slot : slots)
         {
-            if (slot instanceof StoredStackSlot sSlot)
+            if (slot instanceof AbstractStackTypedSlot sSlot)
             {
                 if (sSlotNum / 9 < getLines())
                     sSlot.setActive(true);
@@ -277,9 +309,11 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     // 此函数实际并不安全，其生效的重要条件是 存储槽位必须首先完全添加
     public void loadIndexList(ArrayList<Integer> list)
     {
-        for(int i = 0; i<list.size();i++)
+        int listIndex = 0;
+        for(int slotIndex = storageStartIndex;listIndex<list.size() && slotIndex<storageEndIndex;slotIndex++)
         {
-            ((StoredStackSlot) slots.get(i)).setTheSlotIndex(list.get(i));
+            ((AbstractStackTypedSlot) slots.get(slotIndex)).setTheSlotIndex(list.get(listIndex));
+            listIndex++;
         }
     }
 
@@ -452,99 +486,10 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     }
 
 
-
     @Override
     protected void updateChange()
     {
-        // 开始运行原子化物品比较
-        ArrayList<IStackType> changedItem = new ArrayList<>();
-        ArrayList<Long> changedCount = new ArrayList<>();
 
-        // 为两个缓存数组分别创建Map
-        Map<IStackType, Long> lastMap = new HashMap<>();
-        for (IStackType stack : this.lastStorage) {
-            lastMap.put(stack, lastMap.getOrDefault(stack, (long) 0) + stack.getStackAmount());
-        }
-
-        Map<IStackType, Long> nowMap = new HashMap<>();
-        for (IStackType stack : this.storage.getStorage()) {
-            nowMap.put(stack, nowMap.getOrDefault(stack, (long) 0) + stack.getStackAmount());
-        }
-        // 缓存结束后，立刻更新last列表
-        refreshLast();
-
-        // 比较两个Map的差异
-        Set<IStackType> allKeys = new HashSet<>();
-        allKeys.addAll(lastMap.keySet());
-        allKeys.addAll(nowMap.keySet());
-
-        for (IStackType key : allKeys) {
-            long lastCount = lastMap.getOrDefault(key, (long) 0);
-            long nowCount = nowMap.getOrDefault(key, (long) 0);
-            long delta = nowCount - lastCount;
-
-            if (delta != 0) {
-                changedItem.add(key.copy()); // 获取基础物品的拷贝
-                changedCount.add(delta);
-            }
-        }
-
-
-
-        // 将数据分包发送
-        if (!changedItem.isEmpty()) {
-            final int MAX_PACKET_SIZE = 900 * 1024; // 921,600 bytes
-            List<SyncStoragePacket> packets = new ArrayList<>();
-            // 预计算条目大小
-            List<Integer> entrySizes = new ArrayList<>();
-            for (int i = 0; i < changedItem.size(); i++) {
-                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(
-                        buf,
-                        player.level().registryAccess(),
-                        ConnectionType.OTHER
-                );
-
-                // 序列化物品和数量
-                IStackType stack = changedItem.get(i);
-                if (stack != null) {
-                    stack.serialize(registryBuf);
-                }
-                buf.writeLong(changedCount.get(i)); // 写入数量变化
-
-                entrySizes.add(buf.readableBytes());
-            }
-            // 动态分包
-            List<IStackType> batchItems = new ArrayList<>();
-            List<Long> batchCounts = new ArrayList<>();
-            int currentSize = 0;
-            for (int i = 0; i < changedItem.size(); i++) {
-                int entrySize = entrySizes.get(i);
-                // 分包条件判断
-                if (currentSize + entrySize > MAX_PACKET_SIZE) {
-                    packets.add(new SyncStoragePacket(
-                            new ArrayList<>(batchItems),
-                            new ArrayList<>(batchCounts),
-                            new ArrayList<>() // 空索引列表
-                    ));
-
-                    batchItems.clear();
-                    batchCounts.clear();
-                    currentSize = 0;
-                }
-                batchItems.add(changedItem.get(i));
-                batchCounts.add(changedCount.get(i));
-                currentSize += entrySize;
-            }
-            // 处理剩余数据
-            if (!batchItems.isEmpty()) {
-                packets.add(new SyncStoragePacket(batchItems, batchCounts, new ArrayList<>()));
-            }
-            // 发送所有分包
-            for (SyncStoragePacket packet : packets) {
-                PacketDistributor.sendToPlayer((ServerPlayer) player, packet);
-            }
-        }
     }
 
     @Override
@@ -552,18 +497,6 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     {
 
     }
-
-
-    public void refreshLast()
-    {
-        this.lastStorage.clear();
-        for(IStackType stack : this.storage.getStorage())
-        {
-            this.lastStorage.add(stack.copy());
-        }
-    }
-
-
 
     @Override
     public boolean stillValid(Player player)

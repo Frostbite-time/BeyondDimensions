@@ -6,7 +6,8 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
+import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.Menu.Slot.SlotGroupSync;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -17,6 +18,8 @@ import net.minecraft.world.item.ItemStack;
 import org.anti_ad.mc.ipn.api.IPNIgnore;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -33,6 +36,8 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     public int inventoryEndIndex = -1;   //索引结束位置+1 为90
 
     private boolean init = false; // 需要在客户端Menu完成时才能向其发送的操作是否完成的标志
+    protected List<AbstractStackTypedSlot> updatedSlots = new ArrayList<>(); // 用于槽位更新
+    public List<SlotGroupSync> slotGroupSyncs = new ArrayList<>();
 
     public boolean isHanding = false; // 用于标记当前是否向服务端发出操作请求却未得到回应 true表示无正在处理未回应，false表示空闲
 
@@ -45,13 +50,26 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         this.storage = storage;
     }
 
+    protected void addSlotGroupSync(SlotGroupSync slotGroupSync)
+    {
+        slotGroupSyncs.add(slotGroupSync);
+    }
+
+    @Override
+    protected Slot addSlot(Slot slot)
+    {
+        if(slot instanceof AbstractStackTypedSlot sSlot)
+            updatedSlots.add(sSlot);
+        return super.addSlot(slot);
+    }
+
     @Override
     public void broadcastChanges()
     {
         // 在原版方法上剔除了对StoredStackSlot的处理
         for(int i = 0; i < this.slots.size(); ++i) {
             Slot slot = this.slots.get(i);
-            if(slot instanceof StoredStackSlot)
+            if(slot instanceof AbstractStackTypedSlot)
                 continue; // 不允许broadcastChanges自动同步StoredItemStackSlot以便自定义处理
             ItemStack itemstack = slot.getItem();
             Objects.requireNonNull(itemstack);
@@ -81,7 +99,25 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                 init = true;
             }
 
+            setSlotGroupSyncsUpdate();
+            abstractSlotsUpdate();
             updateChange();
+        }
+    }
+
+    protected void abstractSlotsUpdate()
+    {
+        for(AbstractStackTypedSlot slot : updatedSlots)
+        {
+            slot.updateChange();
+        }
+    }
+
+    protected void setSlotGroupSyncsUpdate()
+    {
+        for(SlotGroupSync slotGroupSync : slotGroupSyncs)
+        {
+            slotGroupSync.updateChange();
         }
     }
 
@@ -99,35 +135,25 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         if(inventoryStartIndex <0 || inventoryEndIndex <0)
             BeyondDimensions.LOGGER.info("警告:背包索引设置错误！！！");
 
-        if(slots.get(slotIndex) instanceof StoredStackSlot sSlot)
+        if(slots.get(slotIndex) instanceof AbstractStackTypedSlot slot)
         {
-            if(sSlot.isFake())
-            {
-                FakeClickHandle(slotIndex,clickedStack,button,player,this.storage); // this.storage不应使用，而是在实际执行时自行确定
-                return;
-            }
-
-        }
-
-
-        if(shiftDown)
-        {
-            quickMoveHandle(player,slotIndex,clickedStack,this.storage);
+            if(shiftDown)
+                slot.quickMove(clickedStack,button,player);
+            else
+                slot.click(clickedStack,button,player);
         }
         else
         {
-            clickHandle(slotIndex,clickedStack,button,player,this.storage);
+            // 用于处理原版槽位的快速转移，后续再移除
+            if(shiftDown)
+            {
+                quickMoveHandle(player,slotIndex,clickedStack,this.storage);
+            }
         }
-    }
-
-    protected void FakeClickHandle(int slotIndex,IStackType clickStack, int button, Player player, IStackTypedHandler storage)
-    {
-        // 空体，仅有需要执行假点击的菜单才重写
     }
 
     protected abstract ItemStack quickMoveHandle(Player player,int slotIndex, IStackType clickStack, IStackTypedHandler storage);
 
-    protected abstract void clickHandle(int slotIndex,IStackType clickStack, int button, Player player, IStackTypedHandler storage);
 
     // 仅标记，需要时重写
     @Override
@@ -144,7 +170,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     @Override
-    protected boolean moveItemStackTo(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
+    public boolean moveItemStackTo(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
     {
         boolean flag = false;
         int i = startIndex;
@@ -161,7 +187,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                 break;
             }
             //对普通槽位和存储槽位分开处理
-            if(this.slots.get(i) instanceof StoredStackSlot)
+            if(this.slots.get(i) instanceof AbstractStackTypedSlot)
             {
                 // 物品全部移动到存储，然后手动退出
                 storage.insert(StackCreater.Create(ItemStackType.ID, stack.copy(),stack.getCount()),false);
@@ -206,7 +232,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     // 检测全部目标槽位，总共最多能容纳多少个给定种类的物品
-    protected int checkCanMoveStackCount(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
+    public int checkCanMoveStackCount(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
     {
         int flag = 0;
         int i = startIndex;
@@ -223,7 +249,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                 break;
             }
             //对普通槽位和存储槽位分开处理
-            if(this.slots.get(i) instanceof StoredStackSlot)
+            if(this.slots.get(i) instanceof AbstractStackTypedSlot)
             {
                 // 最多可以向维度存储移动多少物品？
                 flag = stack.getMaxStackSize();
@@ -260,7 +286,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     @Override
     public boolean canTakeItemForPickAll(ItemStack stack, Slot slot)
     {
-        if(!(slot instanceof StoredStackSlot))
+        if(!(slot instanceof AbstractStackTypedSlot))
             return super.canTakeItemForPickAll(stack, slot);
         return false;
     }

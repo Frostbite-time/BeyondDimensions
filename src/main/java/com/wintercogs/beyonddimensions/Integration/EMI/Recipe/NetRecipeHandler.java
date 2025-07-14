@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Integration.EMI.Recipe;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
-import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
+import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Packet.RecipeFillC2SPacket;
 import dev.emi.emi.api.recipe.EmiPlayerInventory;
 import dev.emi.emi.api.recipe.EmiRecipe;
@@ -33,7 +33,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         List<Slot> inputSlots = new ArrayList<>();
         for(Slot slot : handler.slots)
         {
-            if(!(slot instanceof ResultSlot) && !(slot instanceof StoredStackSlot))
+            if(!(slot instanceof ResultSlot) && !(slot instanceof AbstractStackTypedSlot))
             {
                 inputSlots.add(slot);
             }
