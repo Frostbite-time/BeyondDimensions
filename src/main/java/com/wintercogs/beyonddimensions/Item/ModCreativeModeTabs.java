@@ -52,6 +52,7 @@ public class ModCreativeModeTabs
                         output.accept(ModBlocks.NET_PATHWAY);
                         output.accept(ModBlocks.NET_ENERGY_PATHWAY);
                         output.accept(ModBlocks.NET_TERMINAL_BLOCK);
+                        output.accept(ModBlocks.NET_PUMP_BLOCK);
                     })
                     .build());
 

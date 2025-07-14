@@ -19,7 +19,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.Optional;
 
-public class EnergyStackType extends LongStackType<EnergyType>
+public final class EnergyStackType extends LongStackType<EnergyType>
 {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/energy");
     public static final EnergyStackType EMPTY = new EnergyStackType(); // 空定义
