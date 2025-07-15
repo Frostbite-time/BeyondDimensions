@@ -129,6 +129,6 @@ public class NetEnergyMenu extends BDBaseMenu
     @Override
     public boolean stillValid(Player player)
     {
-        return true;
+        return be != null && !be.isRemoved();
     }
 }

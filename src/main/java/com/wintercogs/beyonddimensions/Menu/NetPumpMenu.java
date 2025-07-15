@@ -3,9 +3,13 @@ package com.wintercogs.beyonddimensions.Menu;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPumpBlockEntity;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
+import com.wintercogs.beyonddimensions.Machine.FilterMode;
+import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.Slot.FlagStackTypedSlot;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -28,14 +32,18 @@ public class NetPumpMenu extends BDBaseMenu
 
     private final IStackTypedHandler storage;
 
+    public final NetPumpBlockEntity be;
+
     public NetPumpMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, new StackTypedHandler(36));
+        this(id, playerInventory, new StackTypedHandler(36), (NetPumpBlockEntity) playerInventory.player.level().getBlockEntity(data.readBlockPos()));
     }
 
-    public NetPumpMenu(int containerId, Inventory playerInventory, @Nullable IStackTypedHandler storage)
+    public NetPumpMenu(int containerId, Inventory playerInventory, @Nullable IStackTypedHandler storage, NetPumpBlockEntity be)
     {
         super(Net_Pump_Menu.get(), containerId, playerInventory);
+
+        this.be = be;
 
         this.storage = storage;
 
@@ -77,6 +85,32 @@ public class NetPumpMenu extends BDBaseMenu
     @Override
     public boolean stillValid(Player player)
     {
-        return true;
+        return be != null && !be.isRemoved();
+    }
+
+    @Override
+    protected boolean shouldSendQuickData()
+    {
+        return false;
+    }
+
+    @Override
+    protected void writeQuickDataTag(CompoundTag tag)
+    {
+        super.writeQuickDataTag(tag);
+        tag.putString("filter_type",be.filterMode.name());
+        tag.putString("control_mode",be.controlMode.name());
+    }
+
+    @Override
+    public void readQuickDataTag(CompoundTag tag)
+    {
+        super.readQuickDataTag(tag);
+        be.filterMode = FilterMode.valueOf(tag.getString("filter_type"));
+        be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
+        if(!player.level().isClientSide())
+        {
+            player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
+        }
     }
 }

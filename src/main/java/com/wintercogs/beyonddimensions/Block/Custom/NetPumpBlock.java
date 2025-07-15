@@ -39,7 +39,7 @@ public class NetPumpBlock extends NetedBlock implements EntityBlock
         if(!level.isClientSide()&&!player.isShiftKeyDown())
         {
             NetPumpBlockEntity blockEntity = (NetPumpBlockEntity) level.getBlockEntity(pos);
-            player.openMenu(blockEntity);
+            player.openMenu(blockEntity,pos);
         }
         return InteractionResult.SUCCESS_NO_ITEM_USED;
     }

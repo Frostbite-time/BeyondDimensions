@@ -51,8 +51,8 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
         }
     };
 
-    private FilterMode filterMode = FilterMode.BLACK;
-    private RedStoneControlMode controlMode = RedStoneControlMode.IGNORE;
+    public FilterMode filterMode = FilterMode.BLACK;
+    public RedStoneControlMode controlMode = RedStoneControlMode.IGNORE;
 
     public NetPumpBlockEntity(BlockPos pos, BlockState blockState)
     {
@@ -223,6 +223,6 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
-        return new NetPumpMenu(containerId,inventory, filterSlots);
+        return new NetPumpMenu(containerId,inventory, filterSlots, this);
     }
 }

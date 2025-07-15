@@ -14,6 +14,7 @@
   "menu.text.beyonddimensions.permission.level.zero": "权限级别: 无",
   "menu.text.beyonddimensions.name.player": "名称: %s",
   "menu.text.beyonddimensions.permission.level.prefix": "权限级别: %s",
+  "menu.label.beyonddimensions.filter_slots": "过滤槽位",
 
   "tooltip.button.beyonddimensions.sort_asc": "当前：顺序排序",
   "tooltip.button.beyonddimensions.sort_desc": "当前：倒序排序",
@@ -32,6 +33,13 @@
   "tooltip.button.beyonddimensions.craft_toggle": "切换合成槽 显示/隐藏",
   "tooltip.button.beyonddimensions.popmode_off": "当前：弹出模式关闭",
   "tooltip.button.beyonddimensions.popmode_on": "当前：弹出模式启用",
+  "tooltip.button.beyonddimensions.filter_mode_ignore": "当前：忽略过滤",
+  "tooltip.button.beyonddimensions.filter_mode_white": "当前：白名单模式",
+  "tooltip.button.beyonddimensions.filter_mode_black": "当前：黑名单模式",
+  "tooltip.button.beyonddimensions.control_mode_ignore": "当前：始终工作",
+  "tooltip.button.beyonddimensions.control_mode_powered": "当前：收到红石信号时工作",
+  "tooltip.button.beyonddimensions.control_mode_unpowered": "当前：收到红石信号时停止工作",
+  "tooltip.button.beyonddimensions.control_mode_not_working": "当前：停止工作",
   "tooltip.item.unstable_space_time.long_data": "时空仍在稳定中，仍需%s个稳定周期，请保持随身携带",
   "tooltip.editbox.beyonddimensions.search": "输入'#'以搜索提示框内容",
 

@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
@@ -44,7 +43,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         this.topPos = (this.height - imageHeight)/2;
 
 
-        popButton = new StatusButton(this.leftPos+72+18*4-5,this.topPos+6,16,16, ButtonName.ReverseButton, button ->
+        popButton = new StatusButton(this.leftPos+72+18*4-5,this.topPos+6,16,16, button ->
         {
             popButton.toggleState();
             menu.be.popMode = !menu.be.popMode;
@@ -61,7 +60,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
                 tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
 
 
-                for(ButtonState state : iconMap.keySet())
+                for(Enum<?> state : iconMap.keySet())
                 {
                     this.states.add(state);
                 }

@@ -20,4 +20,9 @@ public class CommonTextures
     public static final ResourceLocation GUI_TEXTURE_PLAYER_INV = ResourceLocation.parse("beyonddimensions:textures/gui/player_inv.png");
     public static final int PLAYER_INV_WIDTH = 176;
     public static final int PLAYER_INV_HEIGHT = 89;
+
+    // 右标签页
+    public static final ResourceLocation RIGHT_TAB = ResourceLocation.parse("beyonddimensions:widget/right_tab");
+    public static final int RIGHT_TAB_WIDTH = 26;
+    public static final int RIGHT_TAB_HEIGHT = 12;
 }
