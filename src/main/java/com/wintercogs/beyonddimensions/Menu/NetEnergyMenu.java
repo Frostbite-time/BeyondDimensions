@@ -19,7 +19,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
 
-public class NetEnergyMenu extends BDOrderedContainerMenu
+public class NetEnergyMenu extends BDBaseMenu
 {
 
     public boolean popMode;
@@ -59,7 +59,7 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
      */
     public NetEnergyMenu(int id, Inventory playerInventory, NetEnergyPathwayBlockEntity be, SimpleContainerData uselessContainer)
     {
-        super(Net_Energy_Menu.get(), id,playerInventory,null);
+        super(Net_Energy_Menu.get(), id,playerInventory);
         // 初始化维度网络容器
         this.popMode = false;
         if (!player.level().isClientSide())

@@ -1,11 +1,12 @@
 package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Menu.*;
+import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.Menu.Slot.SlotGroupSync;
 import com.wintercogs.beyonddimensions.Packet.*;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
 
@@ -33,115 +34,7 @@ public class ClientPayloadHandler
         );
     }
 
-    public void handleStoragePacket(final StoragePacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                }
-
-        );
-    }
-
-    public void handleCallSeverStoragePacket(final CallSeverStoragePacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                }
-
-        );
-    }
-
-    public void handleSyncItemStoragePacket(final SyncStoragePacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-                    Player player = context.player();
-                    if (player.containerMenu instanceof DimensionsNetMenu menu)
-                    {
-                        IStackTypedHandler clientStorage = menu.storage;
-                        int i = 0;
-                        for(IStackType remoteStack : packet.stacks())
-                        {
-                            // 如果当前存储存在此物品
-                            if(clientStorage.hasStackType(remoteStack))
-                            {
-                                if(packet.changedCounts().get(i) > 0)
-                                {
-                                    clientStorage.insert(remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
-                                }
-                                else
-                                {
-                                    clientStorage.extract(remoteStack.copyWithCount(-packet.changedCounts().get(i)),false);
-                                }
-                            }
-                            else // 如果当前存储不存在此物品
-                            {
-                                if(packet.changedCounts().get(i) > 0)
-                                {
-                                    clientStorage.insert(remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
-                                }
-                            }
-                            i++; // 一次遍历完毕后索引自增
-                        }
-
-                        // 按住shift时锁定排序
-                        if(!menu.hasShiftDown)
-                            menu.updateViewerStorage();
-                        else
-                            menu.updateOnlyCountAndNewViewer();
-                    }
-                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
-                    {
-                        IStackTypedHandler clientStorage = menu.storage;
-                        int i = 0;
-                        for(IStackType remoteStack : packet.stacks())
-                        {
-                            if(packet.changedCounts().get(i) > 0)
-                            {
-                                clientStorage.insert(packet.targetIndex().get(i),remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
-                            }
-                            else
-                            {
-                                clientStorage.extract(packet.targetIndex().get(i),-packet.changedCounts().get(i),false);
-                            }
-                            i++; // 一次遍历完毕后索引自增
-                        }
-
-                        menu.updateViewerStorage();
-                    }
-
-                }
-
-        );
-    }
-
     public void handleCallSeverClickPacket(final CallSeverClickPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-                    Player player = context.player();
-                    if (player.containerMenu instanceof DimensionsNetMenu menu)
-                    {
-                        menu.isHanding = false;
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
-                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
-                    {
-                        menu.isHanding = false;
-                    }
-
-                }
-
-        );
-    }
-
-    public void handleCallServerPlayerInfoPacket(final CallServerPlayerInfoPacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
                 () ->
@@ -181,32 +74,6 @@ public class ClientPayloadHandler
         );
     }
 
-    public void handleSyncFlagPacket(final SyncFlagPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                    Player player = context.player();
-                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
-                    {
-                        IStackTypedHandler clientStorage = menu.flagStorage;
-                        int i = 0;
-                        for(IStackType remoteStack : packet.flags())
-                        {
-                            clientStorage.setStackDirectly(packet.targetIndex().get(i),remoteStack.copyWithCount(1));
-                            i++; // 一次遍历完毕后索引自增
-                        }
-
-                        menu.updateViewerStorage();
-                    }
-
-
-                }
-
-        );
-    }
-
     public void handlePopModeButtonPacket(final PopModeButtonPacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
@@ -224,17 +91,6 @@ public class ClientPayloadHandler
                         menu.popMode = packet.popMode();
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
-                }
-
-        );
-    }
-
-    public void handleFlagSlotSetPacket(final FlagSlotSetPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
                 }
 
         );
@@ -323,6 +179,60 @@ public class ClientPayloadHandler
                 () ->
                 {
 
+                }
+        );
+    }
+
+    public void handleOrderedStackTypedSlotPacket(final OrderedStackTypedSlotPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    if(player.containerMenu instanceof AbstractContainerMenu menu)
+                    {
+                        if(menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
+                        {
+                            slot.loadChange(packet.slotIndex(), packet.stack(), packet.newAmount());
+                        }
+                    }
+                }
+        );
+    }
+
+    public void handleSetSlotDirectlyPacket(final SetSlotDirectlyPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    if(player.containerMenu instanceof AbstractContainerMenu menu)
+                    {
+                        if(menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
+                        {
+                            slot.setStackDirectly(packet.stack());
+                        }
+                    }
+                }
+        );
+    }
+
+    public void handleDisorderedSlotGroupSyncPacket(final DisorderedSlotGroupSyncPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    if(player.containerMenu instanceof BDBaseMenu menu)
+                    {
+                        SlotGroupSync sync = menu.slotGroupSyncs.get(packet.groupId());
+                        if(sync != null)
+                        {
+                            sync.loadChange(packet.stacks(),packet.changedCounts());
+                            sync.afterLoadChange();
+
+                        }
+                    }
                 }
         );
     }

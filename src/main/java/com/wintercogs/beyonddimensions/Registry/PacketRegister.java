@@ -31,36 +31,6 @@ public class PacketRegister
 
         );
 
-        // 注册 ItemStoragePacket 用于同步滑动条状态
-        registrar.playBidirectional(
-                StoragePacket.TYPE,
-                StoragePacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleStoragePacket,
-                        ServerPayloadHandler.getInstance()::handleItemStoragePacket
-                )
-        );
-
-        // 注册 CallSeverStoragePacket 用于同步滑动条状态
-        registrar.playBidirectional(
-                CallSeverStoragePacket.TYPE,
-                CallSeverStoragePacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleCallSeverStoragePacket,
-                        ServerPayloadHandler.getInstance()::handleCallSeverStoragePacket
-                )
-        );
-
-        // 注册 SyncItemStoragePacket 用于同步滑动条状态
-        registrar.playBidirectional(
-                SyncStoragePacket.TYPE,
-                SyncStoragePacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleSyncItemStoragePacket,
-                        ServerPayloadHandler.getInstance()::handleSyncItemStoragePacket
-                )
-        );
-
         // 注册 CallSeverClickPacket 用于同步滑动条状态
         registrar.playBidirectional(
                 CallSeverClickPacket.TYPE,
@@ -68,16 +38,6 @@ public class PacketRegister
                 new DirectionalPayloadHandler<>(
                         ClientPayloadHandler.getInstance()::handleCallSeverClickPacket,
                         ServerPayloadHandler.getInstance()::handleCallSeverClickPacket
-                )
-        );
-
-        // 注册 CallSeverClickPacket 用于同步滑动条状态
-        registrar.playBidirectional(
-                CallServerPlayerInfoPacket.TYPE,
-                CallServerPlayerInfoPacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleCallServerPlayerInfoPacket,
-                        ServerPayloadHandler.getInstance()::handleCallServerPlayerInfoPacket
                 )
         );
 
@@ -103,31 +63,11 @@ public class PacketRegister
 
         // 注册 CallSeverClickPacket 用于同步滑动条状态
         registrar.playBidirectional(
-                SyncFlagPacket.TYPE,
-                SyncFlagPacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleSyncFlagPacket,
-                        ServerPayloadHandler.getInstance()::handleSyncFlagPacket
-                )
-        );
-
-        // 注册 CallSeverClickPacket 用于同步滑动条状态
-        registrar.playBidirectional(
                 PopModeButtonPacket.TYPE,
                 PopModeButtonPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
                         ClientPayloadHandler.getInstance()::handlePopModeButtonPacket,
                         ServerPayloadHandler.getInstance()::handlePopModeButtonPacket
-                )
-        );
-
-        // 注册 CallSeverClickPacket 用于同步滑动条状态
-        registrar.playBidirectional(
-                FlagSlotSetPacket.TYPE,
-                FlagSlotSetPacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleFlagSlotSetPacket,
-                        ServerPayloadHandler.getInstance()::handleFlagSlotSetPacket
                 )
         );
 
@@ -192,6 +132,33 @@ public class PacketRegister
                 new DirectionalPayloadHandler<>(
                         ClientPayloadHandler.getInstance()::handlePutHandItemToNetPacket,
                         ServerPayloadHandler.getInstance()::handlePutHandItemToNetPacket
+                )
+        );
+
+        registrar.playBidirectional(
+                OrderedStackTypedSlotPacket.TYPE,
+                OrderedStackTypedSlotPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleOrderedStackTypedSlotPacket,
+                        ServerPayloadHandler.getInstance()::handleOrderedStackTypedSlotPacket
+                )
+        );
+
+        registrar.playBidirectional(
+                SetSlotDirectlyPacket.TYPE,
+                SetSlotDirectlyPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleSetSlotDirectlyPacket,
+                        ServerPayloadHandler.getInstance()::handleSetSlotDirectlyPacket
+                )
+        );
+
+        registrar.playBidirectional(
+                DisorderedSlotGroupSyncPacket.TYPE,
+                DisorderedSlotGroupSyncPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleDisorderedSlotGroupSyncPacket,
+                        ServerPayloadHandler.getInstance()::handleDisorderedSlotGroupSyncPacket
                 )
         );
     }

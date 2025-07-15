@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Menu;
+package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
@@ -9,128 +9,47 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHan
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
-import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
+import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
+import com.wintercogs.beyonddimensions.Packet.OrderedStackTypedSlotPacket;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-import static com.wintercogs.beyonddimensions.Unit.InventoryHelper.transferToPlayerInventory;
-
-public abstract class BDOrderedContainerMenu extends BDBaseMenu
+public class OrderedStackTypedSlot extends AbstractStackTypedSlot
 {
+    private IStackType lastStack = new ItemStackType();
 
-    protected BDOrderedContainerMenu(@Nullable MenuType<?> menuType, int containerId, Inventory playerInventory, @Nullable IStackTypedHandler storage)
+    public OrderedStackTypedSlot(BDBaseMenu menu, IStackTypedHandler stackTypedHandler, int slotIndex, int xPosition, int yPosition)
     {
-        super(menuType, containerId, playerInventory, storage);
+        super(menu, stackTypedHandler, slotIndex, xPosition, yPosition);
+    }
+
+    public OrderedStackTypedSlot(BDBaseMenu menu, IStackTypedHandler stackTypedHandler, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
+    {
+        super(menu, stackTypedHandler, slotIndex, quickMoveSlotStartIndex, quickMoveSlotEndIndex, xPosition, yPosition);
     }
 
     @Override
-    protected ItemStack quickMoveHandle(Player player, int slotIndex, IStackType clickStack, IStackTypedHandler storage)
+    public boolean isOrdered()
     {
-        ItemStack cacheStack;
-        Slot slot = this.slots.get(slotIndex);
-        if (slot != null && !clickStack.isEmpty())
-        {
-            // 物品从存储移动到背包
-            if(slot instanceof StoredStackSlot)
-            {
-                if(clickStack instanceof ItemStackType clickedItem)
-                {
-                    cacheStack = clickedItem.copyStack();
-                    int moveCount = checkCanMoveStackCount(cacheStack, inventoryStartIndex, inventoryEndIndex, true);
-                    moveCount = Math.min(moveCount,cacheStack.getCount()); // 首先
-                    int nowCount = 0;
-                    IStackType typedStack = storage.getStackBySlot(slot.getSlotIndex());
-                    ItemStack nowStack;
-                    if(typedStack != null)
-                    {
-                        nowStack = (ItemStack) typedStack.getStack();
-                    }
-                    else
-                    {
-                        return ItemStack.EMPTY;
-                    }
-                    if(nowStack != null)
-                    {
-                        nowCount = nowStack.getCount();
-                    }
-                    moveCount = Math.min(moveCount,nowCount);
-                    if(moveCount>=0)
-                    {
-                        cacheStack.setCount(moveCount);
-                        if (!this.moveItemStackTo(cacheStack, inventoryStartIndex, inventoryEndIndex, true)) {
-                            return ItemStack.EMPTY;
-                        }
-                        storage.extract(slot.getSlotIndex(),moveCount,false);
-                    }
-                }
-                else
-                {
-                    cacheStack = ItemStack.EMPTY;
-                }
-            }
-            else // 物品由背包移动到存储
-            {
-                // 快速合成
-                if(slot instanceof ResultSlot resultSlot)
-                {
-                    cacheStack = slot.getItem().copy();
-                    for(int i = 0; !slot.getItem().isEmpty() && i< slot.getItem().getMaxStackSize()/slot.getItem().getCount(); i++)
-                    {
-                        ItemStack craftStack = slot.getItem().copy();
-                        if(!ItemStack.isSameItemSameComponents(cacheStack, craftStack))
-                            break;
-
-                        // 如果背包放不下再存入存储系统
-                        ItemStack remaining = transferToPlayerInventory(player, craftStack);
-
-                        // 处理剩余物品
-                        if (!remaining.isEmpty()) {
-                            remaining = (ItemStack) storage.insert(StackCreater.Create(ItemStackType.ID, remaining, remaining.getCount()), false).copyStack();
-                        }
-                        // 恢复cacheStack防止后面检测导致resultSlot被设为空
-                        craftStack = slot.getItem().copy();
-
-                        if(remaining.isEmpty())
-                        {
-                            resultSlot.onTake(player, craftStack);
-                        }
-
-                    }
-
-
-                }
-                else
-                {
-                    cacheStack = slot.getItem().copy();
-                    int remaining = (int)storage.insert(StackCreater.Create(ItemStackType.ID, cacheStack.copy(),cacheStack.getCount()),false).getStackAmount();
-                    slot.tryRemove(cacheStack.getCount() - remaining,Integer.MAX_VALUE,player);
-                }
-
-            }
-            slot.setChanged();
-        }
-        return ItemStack.EMPTY;
+        return true;
     }
 
     @Override
-    protected void clickHandle(int slotIndex, IStackType clickStack, int button, Player player, IStackTypedHandler storage)
+    public void click(IStackType clickStack, int button, Player player)
     {
-        ItemStack carriedItem = this.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
-        StoredStackSlot slot = (StoredStackSlot) this.slots.get(slotIndex);// clickHandle仅用于处理点击维度槽位的逻辑，如果转换失败，则证明调用逻辑出错
+        ItemStack carriedItem = menu.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
 
         if (clickStack.isEmpty())
         {
@@ -155,12 +74,12 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                 {
                                     int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
                                     // 进行模拟，桶必须完全清空才被允许操作
-                                    int remaining = (int)storage.insert(slot.getSlotIndex(),stack.copyWithCount(changedCount),true).getStackAmount();
+                                    int remaining = (int)storage.insert(getSlotIndex(),stack.copyWithCount(changedCount),true).getStackAmount();
                                     if(remaining<=0)
                                     {
                                         // 执行实际逻辑
-                                        storage.insert(slot.getSlotIndex(),stack.copyWithCount(changedCount),false).getStackAmount();
-                                        setCarried(new ItemStack(Items.BUCKET));
+                                        storage.insert(getSlotIndex(),stack.copyWithCount(changedCount),false).getStackAmount();
+                                        menu.setCarried(new ItemStack(Items.BUCKET));
                                         handled.set(true);
                                     }
                                 }
@@ -169,7 +88,7 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                     }
                     else
                     {
-                        CapabilityHelper.ItemCapabilityMap.forEach((typeId,cap)->{
+                        CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap)->{
                             Object handler = carriedItem.getCapability(cap);
                             if(handler != null)
                             {
@@ -184,7 +103,7 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                         if(stack !=null&& !stack.isEmpty())
                                         {
                                             int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
-                                            int remaining = (int)storage.insert(slot.getSlotIndex(),stack.copyWithCount(changedCount),false).getStackAmount();
+                                            int remaining = (int)storage.insert(getSlotIndex(),stack.copyWithCount(changedCount),false).getStackAmount();
                                             int actualInsert = changedCount - remaining;
 
                                             if(actualInsert>0)
@@ -193,9 +112,9 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                                 if(actualExtracts< actualInsert)
                                                 {
                                                     // 对此进行一个回调
-                                                    storage.extract(slot.getSlotIndex(), actualInsert-actualExtracts,false);
+                                                    storage.extract(getSlotIndex(), actualInsert-actualExtracts,false);
                                                 }
-                                                setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
                                                 handled.set(true);
                                                 break;
                                             }
@@ -210,25 +129,25 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                 if(!handled.get())
                 {
                     int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                    int remaining = (int)storage.insert(slot.getSlotIndex(),StackCreater.Create(ItemStackType.ID, carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
+                    int remaining = (int)storage.insert(getSlotIndex(),StackCreater.Create(ItemStackType.ID, carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
                     int actualInsert = changedCount - remaining; // 实际被插入的物品数量
 
                     int newCount = carriedItem.getCount() - actualInsert; // 实际剩余物品数
                     if(newCount <=0)
                     {
-                        setCarried(ItemStack.EMPTY);
+                        menu.setCarried(ItemStack.EMPTY);
                     }
                     else
                     {
                         ItemStack newCarriedItem = carriedItem.copy();
                         newCarriedItem.setCount(newCount);
-                        setCarried(newCarriedItem);
+                        menu.setCarried(newCarriedItem);
                     }
                 }
 
             }
         }
-        else if (slot.mayPickup(player))
+        else if (mayPickup(player))
         {
             if (carriedItem.isEmpty())
             {   //槽位物品存在，携带物品为空，尝试取出槽位物品
@@ -237,32 +156,32 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                     // 确保一次取出最大不得超过原版数量
                     int woundChangeNum = BDMath.clampLongToInt(Math.min(clickItem.getStackAmount(), clickItem.getVanillaMaxStackSize()));
                     int actualChangeNum = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
-                    ItemStack takenItem = ((ItemStack) storage.extract(slot.getSlotIndex(),actualChangeNum,false).getStack()).copy();
+                    ItemStack takenItem = ((ItemStack) storage.extract(getSlotIndex(),actualChangeNum,false).getStack()).copy();
                     if(takenItem != null)
                     {
-                        setCarried(takenItem);
+                        menu.setCarried(takenItem);
                         storage.onChange();
                     }
                 }
             }
-            else if (slot.mayPlace(carriedItem))
+            else if (mayPlace(carriedItem))
             {
                 // 槽位物品存在，携带物品存在，当物品为相同类型，尝试插入物品
                 if(clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
                 {
                     int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                    int remaining =  (int)storage.insert(slot.getSlotIndex(),StackCreater.Create(ItemStackType.ID,carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
+                    int remaining =  (int)storage.insert(getSlotIndex(),StackCreater.Create(ItemStackType.ID,carriedItem.copyWithCount(changedCount),changedCount),false).getStackAmount();
                     int actualInsert = changedCount - remaining; // 实际被插入的物品数量
                     int newCount = carriedItem.getCount() - actualInsert; // 实际剩余物品数
                     if(newCount <=0)
                     {
-                        setCarried(ItemStack.EMPTY);
+                        menu.setCarried(ItemStack.EMPTY);
                     }
                     else
                     {
                         ItemStack newCarriedItem = carriedItem.copy();
                         newCarriedItem.setCount(newCount);
-                        setCarried(newCarriedItem);
+                        menu.setCarried(newCarriedItem);
                     }
                 }
                 else
@@ -283,11 +202,11 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                     Item filledBucket = fluidStackType.getStack().getFluid().getBucket();
 
                                     if(filledBucket != null && filledBucket != Items.AIR
-                                        && fluidStackType.getStackAmount()>=1000)
+                                            && fluidStackType.getStackAmount()>=1000)
                                     {
                                         // 执行操作
-                                        storage.extract(slot.getSlotIndex(),1000,false);
-                                        setCarried(new ItemStack(filledBucket));
+                                        storage.extract(getSlotIndex(),1000,false);
+                                        menu.setCarried(new ItemStack(filledBucket));
                                     }
                                 }
                             }
@@ -305,12 +224,12 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                         {
                                             int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
                                             // 进行模拟，桶必须完全清空才被允许操作
-                                            int remaining = (int)storage.insert(slot.getSlotIndex(),stack.copyWithCount(changedCount),true).getStackAmount();
+                                            int remaining = (int)storage.insert(getSlotIndex(),stack.copyWithCount(changedCount),true).getStackAmount();
                                             if(remaining<=0)
                                             {
                                                 // 执行实际逻辑
-                                                storage.insert(slot.getSlotIndex(),stack.copyWithCount(changedCount),false).getStackAmount();
-                                                setCarried(new ItemStack(Items.BUCKET));
+                                                storage.insert(getSlotIndex(),stack.copyWithCount(changedCount),false).getStackAmount();
+                                                menu.setCarried(new ItemStack(Items.BUCKET));
                                             }
                                         }
                                     }
@@ -332,7 +251,7 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                         if(stackHandlerWrapper.getSlots()>0)
                                         {
                                             // 获取真实最大值 防止数据包伪造
-                                            IStackType trueStack = storage.getStackBySlot(slot.getSlotIndex());
+                                            IStackType trueStack = storage.getStackBySlot(getSlotIndex());
                                             long tureCount = 0;
                                             if(trueStack.isSameTypeSameComponents(clickStack))
                                             {
@@ -341,8 +260,8 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                                             int changedCount = BDMath.clampLongToInt(Math.min(tureCount,clickStack.getVanillaMaxStackSize()));
                                             int remaining = (int)stackHandlerWrapper.insert(clickStack.copyStack(),false);
                                             int actualInsert = changedCount - remaining;
-                                            storage.extract(slot.getSlotIndex(),actualInsert,false);
-                                            setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                            storage.extract(getSlotIndex(),actualInsert,false);
+                                            menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
                                         }
                                     }
                                 }
@@ -358,5 +277,95 @@ public abstract class BDOrderedContainerMenu extends BDBaseMenu
                 // 保留此情况以便后续使用
             }
         }
+    }
+
+    @Override
+    public void quickMove(IStackType clickStack, int button, Player player)
+    {
+        if (!clickStack.isEmpty())
+        {
+            // 防止数据包伪造，然后赋予trueStack需要提取的数量
+            IStackType trueStack = storage.getStackBySlot(theSlot).copyWithCount(clickStack.getStackAmount());
+
+            // 遍历目标槽位
+            for(int targetSlotIndex=quickMoveSlotStartIndex;targetSlotIndex<quickMoveSlotEndIndex && !trueStack.isEmpty();targetSlotIndex++)
+            {
+                Slot slot = menu.slots.get(targetSlotIndex);
+                if(slot instanceof AbstractStackTypedSlot aSlot)
+                {
+                    // aSlot处理任何情况
+
+                    //首先尝试从存储提取指定堆叠
+                    IStackType extract = safeExtract(trueStack);
+                    IStackType remaining = aSlot.safeInsert(extract); // 然后插入到其他堆叠并获取余量
+                    if(!remaining.isEmpty())
+                        safeInsert(remaining); // 最后将余量返回
+                    trueStack = remaining.copy();
+
+                }
+                else
+                {
+                    // 普通Slot将只处理物品转移
+                    if(trueStack instanceof ItemStackType trueItemTypedStack)
+                    {
+                        ItemStack extract = (ItemStack) safeExtract(trueItemTypedStack).getStack();
+                        ItemStack remaining = slot.safeInsert(extract);
+                        if(!remaining.isEmpty())
+                            safeInsert(new ItemStackType(remaining));
+                        trueStack = new ItemStackType(remaining.copy());
+                    }
+                }
+
+            }
+            setChanged();
+        }
+    }
+
+    @Override
+    public IStackType safeInsert(IStackType stack)
+    {
+        if(stack != null)
+        {
+            // storage的insert应当考虑到一切情况
+            return storage.insert(theSlot,stack,false);
+        }
+        return new ItemStackType();
+    }
+
+    @Override
+    public IStackType safeExtract(IStackType stack)
+    {
+        if(stack != null && getStack() != null && stack.getTypeId().equals(getStack().getTypeId()) &&  stack.isSameTypeSameComponents(getStack()))
+        {
+            return storage.extract(theSlot,stack.getStackAmount(),false);
+        }
+        return stack;
+    }
+
+    @Override
+    public void updateChange()
+    {
+        IStackType currentStack = storage.getStackBySlot(this.getSlotIndex());
+        if(currentStack == null)
+        {
+            lastStack = new ItemStackType();
+            PacketDistributor.sendToPlayer((ServerPlayer) menu.player,new OrderedStackTypedSlotPacket(index,theSlot,lastStack,0));
+        }
+        else if(currentStack.isEmpty() && lastStack.isEmpty())
+        {
+        }
+        else if(lastStack.getStackAmount() != currentStack.getStackAmount()
+                ||!lastStack.getTypeId().equals(currentStack.getTypeId())
+                ||!lastStack.isSameTypeSameComponents(currentStack))
+        {
+            lastStack = currentStack;
+            PacketDistributor.sendToPlayer((ServerPlayer) menu.player,new OrderedStackTypedSlotPacket(index,theSlot,lastStack,lastStack.getStackAmount()));
+        }
+    }
+
+    @Override
+    public void loadChange(int where ,IStackType newStack, long newAmount)
+    {
+        storage.setStackDirectly(where, newStack);
     }
 }
