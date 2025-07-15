@@ -479,19 +479,6 @@ public class DimensionsNetMenu extends BDBaseMenu
 
 
     @Override
-    protected void updateChange()
-    {
-
-    }
-
-
-    @Override
-    protected void initUpdate()
-    {
-
-    }
-
-    @Override
     public boolean stillValid(Player player)
     {
         return true; // 可根据需求修改条件

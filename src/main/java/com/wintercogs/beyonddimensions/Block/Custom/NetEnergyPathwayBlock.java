@@ -1,13 +1,9 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -44,10 +40,7 @@ public class NetEnergyPathwayBlock extends NetedBlock implements EntityBlock
         super.useWithoutItem(state,level,pos,player,hitResult);
         if(!level.isClientSide()&&!player.isShiftKeyDown())
         {
-            player.openMenu(new SimpleMenuProvider(
-                    (containerId, playerInventory, _player) -> new NetEnergyMenu(containerId, _player.getInventory(), ((NetEnergyPathwayBlockEntity) level.getBlockEntity(pos)),new SimpleContainerData(0)),
-                    Component.translatable("menu.title.beyonddimensions.net_energy_menu")
-            ));
+            player.openMenu((NetEnergyPathwayBlockEntity)level.getBlockEntity(pos),pos);
         }
         return InteractionResult.SUCCESS_NO_ITEM_USED;
     }

@@ -1,35 +1,30 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Packet.EnergyStoragePacket;
-import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
-import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
 
 public class NetEnergyMenu extends BDBaseMenu
 {
-
-    public boolean popMode;
     public NetEnergyPathwayBlockEntity be;
 
     private DimensionsNet net = null; // 注意判断
 
-    public long energyCapacity = 0;
-    public long energyStored = 0;
-    public long energySpeedState = 0;
+    public long lastEnergyCapacity = 0;
+    public long lastEnergyStored = 0;
+    public long lastEnergySpeedState = 0;
 
 
     // 构建注册用的信息
@@ -48,33 +43,25 @@ public class NetEnergyMenu extends BDBaseMenu
      */
     public NetEnergyMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, null, new SimpleContainerData(0));
+        this(id, playerInventory, (NetEnergyPathwayBlockEntity) playerInventory.player.level().getBlockEntity(data.readBlockPos()));
     }
 
     /**
      * 服务端构造函数
      *
      * @param playerInventory  玩家背包
-     * @param uselessContainer 此处无用，传入new SimpleContainerData(0)即可
      */
-    public NetEnergyMenu(int id, Inventory playerInventory, NetEnergyPathwayBlockEntity be, SimpleContainerData uselessContainer)
+    public NetEnergyMenu(int id, Inventory playerInventory, NetEnergyPathwayBlockEntity be)
     {
         super(Net_Energy_Menu.get(), id,playerInventory);
-        // 初始化维度网络容器
-        this.popMode = false;
+
+        this.be = be;
+
         if (!player.level().isClientSide())
         {
-            this.popMode = be.popMode;
-            this.be = be;
             DimensionsNet net = be.getNet();
             if (net != null)
-                this.net = be.getNet();
-            if (net != null)
-            {
-                this.energyCapacity = net.getUnifiedStorage().getSlotCapacity(0);
-                this.energyStored = net.getUnifiedStorage().getEnergyStored();
-            }
-
+                this.net = net;
         }
 
         inventoryStartIndex = slots.size();
@@ -94,32 +81,49 @@ public class NetEnergyMenu extends BDBaseMenu
     }
 
     @Override
-    protected void updateChange()
+    protected boolean shouldSendQuickData()
     {
-        if (net != null)
+        if(net != null)
         {
-            if (Long.MAX_VALUE != energyCapacity || energyStored != energyCapacity)
+            UnifiedStorage storage = net.getUnifiedStorage();
+            if(lastEnergyStored != storage.getEnergyStored()
+                || lastEnergyCapacity != storage.getSlotCapacity(0)
+                || lastEnergySpeedState != storage.getEnergyStored() - lastEnergyStored)
             {
-                this.energySpeedState = net.getUnifiedStorage().getEnergyStored() - this.energyStored;
-                this.energyCapacity = net.getUnifiedStorage().getSlotCapacity(0);
-                this.energyStored = net.getUnifiedStorage().getEnergyStored();
-                PacketDistributor.sendToPlayer((ServerPlayer) player, new EnergyStoragePacket(this.energyStored, this.energyCapacity,this.energySpeedState));
+                lastEnergySpeedState = storage.getEnergyStored() - lastEnergyStored;
+                lastEnergyStored = storage.getEnergyStored();
+                lastEnergyCapacity = storage.getSlotCapacity(0);
+                return true;
             }
         }
+        return false;
     }
 
     @Override
-    protected void initUpdate()
+    protected void writeQuickDataTag(CompoundTag tag)
     {
-        PacketDistributor.sendToPlayer((ServerPlayer) player,new PopModeButtonPacket(popMode));
+        super.writeQuickDataTag(tag);
+        tag.putBoolean("popMode", be.popMode);
+        tag.putLong("lastEnergyCapacity", lastEnergyCapacity);
+        tag.putLong("lastEnergySpeedState", lastEnergySpeedState);
+        tag.putLong("lastEnergyStored", lastEnergyStored);
     }
 
-
-    public void loadStorage(long energyCapacity, long energyStored, long energySpeedState)
+    @Override
+    public void readQuickDataTag(CompoundTag tag)
     {
-        this.energyCapacity = energyCapacity;
-        this.energyStored = energyStored;
-        this.energySpeedState = energySpeedState;
+        super.readQuickDataTag(tag);
+        if(player.level().isClientSide())
+        {
+            this.lastEnergyStored = tag.getLong("lastEnergyStored");
+            this.lastEnergyCapacity = tag.getLong("lastEnergyCapacity");
+            this.lastEnergySpeedState = tag.getLong("lastEnergySpeedState");
+        }
+        else
+        {
+            be.popMode = tag.getBoolean("popMode");
+            player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
+        }
     }
 
     @Override

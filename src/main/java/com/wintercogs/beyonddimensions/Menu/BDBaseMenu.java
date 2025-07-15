@@ -6,10 +6,14 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.SlotGroupSync;
+import com.wintercogs.beyonddimensions.Packet.QuickDataTagPacket;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.anti_ad.mc.ipn.api.IPNIgnore;
 import org.jetbrains.annotations.Nullable;
 
@@ -94,12 +98,53 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                 init = true;
             }
 
+            if(shouldSendQuickData())
+            {
+                CompoundTag updateTag = new CompoundTag();
+                writeQuickDataTag(updateTag);
+                PacketDistributor.sendToPlayer((ServerPlayer) player,new QuickDataTagPacket(updateTag));
+            }
+
             setSlotGroupSyncsUpdate();
             abstractSlotsUpdate();
             updateChange();
         }
     }
 
+    // 什么时候应该发送快速更新
+    // 你也可以用这个来阻止某一端发送更新
+    protected boolean shouldSendQuickData()
+    {
+        return false;
+    }
+
+    // 双端可用的快速更新
+    protected void writeQuickDataTag(CompoundTag tag)
+    {
+
+    }
+
+    // 双端可用的快速读取
+    public void readQuickDataTag(CompoundTag tag)
+    {
+
+    }
+
+    public void writeAndSendQuickData()
+    {
+        CompoundTag updateTag = new CompoundTag();
+        writeQuickDataTag(updateTag);
+        if(player.level().isClientSide())
+        {
+            PacketDistributor.sendToServer(new QuickDataTagPacket(updateTag));
+        }
+        else
+        {
+            PacketDistributor.sendToPlayer((ServerPlayer)player, new QuickDataTagPacket(updateTag));
+        }
+    }
+
+    // 槽位更新
     protected void abstractSlotsUpdate()
     {
         for(AbstractStackTypedSlot slot : updatedSlots)
@@ -108,6 +153,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         }
     }
 
+    // 槽位组更新
     protected void setSlotGroupSyncsUpdate()
     {
         for(SlotGroupSync slotGroupSync : slotGroupSyncs)
@@ -116,10 +162,17 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         }
     }
 
-    // 定义菜单如何同步更改
-    protected abstract void updateChange();
+    // 仅由服务端发送的更新
+    protected void updateChange()
+    {
 
-    protected abstract void initUpdate();
+    }
+
+    // 仅由服务端发送一次的更新
+    protected void initUpdate()
+    {
+
+    }
 
     // 自定义点击操作
     public void customClickHandler(int slotIndex, IStackType clickedStack, int button, boolean shiftDown)

@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Optional;
 
 // 用于处理通用机械的化学品类
-public class ChemicalStackType implements IStackType<ChemicalStack>
+public final class ChemicalStackType implements IStackType<ChemicalStack>
 {
 
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/chemical");
@@ -246,11 +246,11 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     }
 
     @Override
-    public boolean isSame(IStackType<ChemicalStack> other)
+    public boolean isSame(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return ChemicalStack.isSameChemical(stack, other.getStack());
+        return ChemicalStack.isSameChemical(stack, (ChemicalStack)other.getStack());
     }
 
     @Override

@@ -9,7 +9,6 @@ import com.wintercogs.beyonddimensions.GUI.SharedWidget.IconButton;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Packet.ClickTransferCraftButtonPacket;
-import com.wintercogs.beyonddimensions.Packet.CraftReturnPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -57,13 +56,13 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         addRenderableWidget(transferCraftToStorageButton);
 
         // 槽位优先转移切换按钮
-        PacketDistributor.sendToServer(new CraftReturnPacket(Config.uiCraftReturnButton == ButtonState.ENABLED));
+        menu.writeAndSendQuickData();
         craftReturnButton = new StatusButton(this.leftPos+99,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8,ButtonName.TransferCraftButton, button -> {
             craftReturnButton.toggleState();
             Config.uiCraftReturnButton = craftReturnButton.currentState;
             Config.UI_CRAFT_RETURN_BUTTON.set(craftReturnButton.currentState);
             Config.UI_CRAFT_RETURN_BUTTON.save();
-            PacketDistributor.sendToServer(new CraftReturnPacket(Config.uiCraftReturnButton == ButtonState.ENABLED));
+            menu.writeAndSendQuickData();
         })
         {
 

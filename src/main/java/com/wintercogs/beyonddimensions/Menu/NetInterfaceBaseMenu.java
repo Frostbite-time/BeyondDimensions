@@ -6,17 +6,14 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntit
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Menu.Slot.FlagStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.OrderedStackTypedSlot;
-import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
-import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
@@ -32,17 +29,11 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
     public final StackTypedHandler storage;
     public final StackTypedHandler flagStorage;
 
-    public boolean popMode;
     public NetInterfaceBlockEntity be;
-
 
     // 构建注册用的信息
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
     public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = MENU_TYPES.register("net_interface_menu", () -> IMenuTypeExtension.create(NetInterfaceBaseMenu::new));
-    // 我们的辅助函数
-    // 我们需要通过IMenuTypeExtension的.create方法才能返回一个menutype，
-    // create方法需要传入一个IContainerFactory的内容，而正好我们的构造函数就是IContainerFactory一样的参数。
-    // 因为就是这样设计的， 所以传入new就可以了。
 
 
     /**
@@ -51,27 +42,22 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
      */
     public NetInterfaceBaseMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, new StackTypedHandler(27),new StackTypedHandler(27),null,new SimpleContainerData(0));
+        this(id, playerInventory, new StackTypedHandler(27),new StackTypedHandler(27), (NetInterfaceBlockEntity) playerInventory.player.level().getBlockEntity(data.readBlockPos()));
     }
 
     /**
      * 服务端构造函数
      * @param playerInventory 玩家背包
-     * @param uselessContainer 此处无用，传入new SimpleContainerData(0)即可
      */
-    public NetInterfaceBaseMenu(int id, Inventory playerInventory, StackTypedHandler storage , StackTypedHandler flagStorage, NetInterfaceBlockEntity be, SimpleContainerData uselessContainer)
+    public NetInterfaceBaseMenu(int id, Inventory playerInventory, StackTypedHandler storage , StackTypedHandler flagStorage, NetInterfaceBlockEntity be)
     {
         super(Net_Interface_Menu.get(), id,playerInventory);
 
-        this.popMode = false;
-        // 初始化标记容器
+        // 初始化标记容器（slot负责同步）
         this.storage = storage;
         this.flagStorage = flagStorage;
-        if(!player.level().isClientSide())
-        {
-            this.popMode = be.popMode;
-            this.be = be;
-        }
+
+        this.be = be;
 
         addPlayerInv(playerInventory);
         addStorageSlots();
@@ -125,18 +111,32 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         inventoryEndIndex = slots.size();
     }
 
-
     @Override
-    protected void updateChange()
+    protected boolean shouldSendQuickData()
     {
-
+        // 阻止服务端主动同步，将同步权交给sendBlockUpdated
+        return false;
     }
 
     @Override
-    protected void initUpdate()
+    protected void writeQuickDataTag(CompoundTag tag)
     {
-        PacketDistributor.sendToPlayer((ServerPlayer) player,new PopModeButtonPacket(popMode));
+        super.writeQuickDataTag(tag);
+        tag.putBoolean("popMode", be.popMode);
     }
+
+    @Override
+    public void readQuickDataTag(CompoundTag tag)
+    {
+        super.readQuickDataTag(tag);
+        be.popMode = tag.getBoolean("popMode");
+        // 服务端读取新数据之后利用sendBlockUpdated将数据发送给附近所有玩家
+        if(!player.level().isClientSide())
+        {
+            player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
+        }
+    }
+
 
 
     @Override

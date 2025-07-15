@@ -4,17 +4,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
 import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
-import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 
 public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
@@ -50,8 +47,8 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         popButton = new StatusButton(this.leftPos+72+18*4-5,this.topPos+6,16,16, ButtonName.ReverseButton, button ->
         {
             popButton.toggleState();
-            menu.popMode = !menu.popMode;
-            PacketDistributor.sendToServer(new PopModeButtonPacket(menu.popMode));
+            menu.be.popMode = !menu.be.popMode;
+            menu.writeAndSendQuickData();
         })
         {
             @Override
@@ -68,7 +65,14 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
                 {
                     this.states.add(state);
                 }
-                setState(Config.uiReverseButton);
+                if(menu.be.popMode)
+                {
+                    setState(ButtonState.ENABLED);
+                }
+                else
+                {
+                    setState(ButtonState.DISABLED);
+                }
             }
         };
         addRenderableWidget(popButton);
@@ -93,7 +97,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         //父类无操作
         //每tick自动更新搜索方案
 
-        if(menu.popMode)
+        if(menu.be.popMode)
         {
             popButton.setState(ButtonState.ENABLED);
         }

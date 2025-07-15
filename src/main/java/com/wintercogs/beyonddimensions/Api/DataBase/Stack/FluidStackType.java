@@ -265,11 +265,11 @@ public final class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public boolean isSame(IStackType<FluidStack> other)
+    public boolean isSame(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return FluidStack.isSameFluid(stack, other.copyStackWithCount(1));
+        return FluidStack.isSameFluid(stack, (FluidStack)other.copyStackWithCount(1));
     }
 
     @Override

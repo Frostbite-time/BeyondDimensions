@@ -206,7 +206,7 @@ public interface IStackType<T> {
     /**
      * 检查2个实例是否能模糊匹配，即：2个物品，是否为同一种物品，不管NBT等数据
      */
-    boolean isSame(IStackType<T> other);
+    boolean isSame(IStackType<?> other);
 
     /**
      * 检查2个实例是否能精确匹配，即：2个物品，种类、NBT等数据是否一致。但是不考虑存储数量

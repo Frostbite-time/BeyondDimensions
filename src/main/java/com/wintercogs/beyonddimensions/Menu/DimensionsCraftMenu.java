@@ -1,10 +1,12 @@
 package com.wintercogs.beyonddimensions.Menu;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
@@ -13,6 +15,7 @@ import com.wintercogs.beyonddimensions.Unit.InventoryHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -378,6 +381,32 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         }
     }
 
+    @Override
+    protected boolean shouldSendQuickData()
+    {
+        return super.shouldSendQuickData();
+    }
+
+    @Override
+    protected void writeQuickDataTag(CompoundTag tag)
+    {
+        super.writeQuickDataTag(tag);
+        if(player.level().isClientSide())
+            firstCraftReturnDir = Config.uiCraftReturnButton == ButtonState.ENABLED;
+        tag.putBoolean("firstCraftReturnDir", firstCraftReturnDir);
+    }
+
+    @Override
+    public void readQuickDataTag(CompoundTag tag)
+    {
+        super.readQuickDataTag(tag);
+        if(player.level().isClientSide())
+        {}
+        else
+        {
+            firstCraftReturnDir = tag.getBoolean("firstCraftReturnDir");
+        }
+    }
 
     @Override
     public void removed(Player player)

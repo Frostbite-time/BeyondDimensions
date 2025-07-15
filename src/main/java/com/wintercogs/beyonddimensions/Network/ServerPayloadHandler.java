@@ -10,7 +10,10 @@ import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.GUI.NetMenuType;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
-import com.wintercogs.beyonddimensions.Menu.*;
+import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
+import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
+import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
+import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Packet.*;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
@@ -162,41 +165,6 @@ public class ServerPayloadHandler
         );
     }
 
-    public void handlePopModeButtonPacket(final PopModeButtonPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-                    Player player = context.player();
-
-                    if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
-                    {
-                        menu.popMode = packet.popMode();
-                        menu.be.popMode = packet.popMode();
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
-                    if(player.containerMenu instanceof NetEnergyMenu menu)
-                    {
-                        menu.popMode = packet.popMode();
-                        menu.be.popMode = packet.popMode();
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
-                }
-
-        );
-    }
-
-    public void handleEnergyStoragePacket(final EnergyStoragePacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-                    //  服务端作为数据来源留空
-                }
-
-        );
-    }
-
     public void handleRecipeFillC2SPacket(final RecipeFillC2SPacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
@@ -232,21 +200,6 @@ public class ServerPayloadHandler
                     }
                 }
 
-        );
-    }
-
-    public void handleCraftReturnPacket(final CraftReturnPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-                    Player player = context.player();
-
-                    if(player.containerMenu instanceof DimensionsCraftMenu menu)
-                    {
-                        menu.firstCraftReturnDir = packet.dir();
-                    }
-                }
         );
     }
 
@@ -368,6 +321,20 @@ public class ServerPayloadHandler
                 () ->
                 {
 
+                }
+        );
+    }
+
+    public void handleQuickDataTagPacket(final QuickDataTagPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+                    if(player.containerMenu instanceof BDBaseMenu menu)
+                    {
+                        menu.readQuickDataTag(packet.tag());
+                    }
                 }
         );
     }

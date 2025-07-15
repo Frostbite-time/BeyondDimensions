@@ -75,18 +75,6 @@ public class NetPumpMenu extends BDBaseMenu
     }
 
     @Override
-    protected void initUpdate()
-    {
-
-    }
-
-    @Override
-    protected void updateChange()
-    {
-
-    }
-
-    @Override
     public boolean stillValid(Player player)
     {
         return true;
