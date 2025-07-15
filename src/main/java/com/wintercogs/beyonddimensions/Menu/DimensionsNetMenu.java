@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
@@ -33,18 +32,17 @@ import java.util.stream.IntStream;
 /**
  * 打开维度网络时候所用到的Menu，处理了网络同步以及点击操作等问题
  */
-public class DimensionsNetMenu extends BDDisorderedContainerMenu
+public class DimensionsNetMenu extends BDBaseMenu
 {
     /// 客户端数据
     public int maxLines = 6; //默认大小
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
-    private HashMap<ButtonName, ButtonState> buttonStateMap = new HashMap<>(); // 客户端的按钮状态
+    public UnifiedStorage storage;
     public UnifiedStorage viewerStorage; // 在客户端，用于显示物品
     private ArrayList<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
-    /// 服务端数据
-    private ArrayList<IStackType> lastStorage; // 记录截至上一次同步时的存储状态，用于同步数据
+
 
     public boolean hasShiftDown = false;
 
@@ -80,7 +78,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
      */
     public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, DimensionsNet data)
     {
-        super(menuType, id, playerInventory, data.getUnifiedStorage());
+        super(menuType, id, playerInventory);
 
         // 初始化搜索方案
         if (player.level().isClientSide())
@@ -88,6 +86,10 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             this.maxLines = Config.uiPageNum;
             this.searchText = Config.uiSearch;
         }
+
+        // 初始化维度网络容器
+        storage = data.getUnifiedStorage();
+        viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
 
         addSlotGroupSync(new DisorderedSlotGroupSync(this,slotGroupSyncs.size(),storage) {
             @Override
@@ -101,21 +103,11 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             }
         });
 
-        // 初始化维度网络容器
-        viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
-        if (!player.level().isClientSide())
-        {
-            // 初始化lastStorage
-            this.lastStorage = new ArrayList<>();
-        }
-
         // 添加玩家背包和快捷栏
         addPlayerInv(playerInventory);
 
         // 添加存储槽
         addStorageSlots();
-
-
     }
 
     // 添加存储槽位
@@ -123,6 +115,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     {
         // 默认添加99行，但将99之外的行全部设置为不激活状态，以实现动态增加和减少行数
         storageStartIndex = slots.size();
+        vanillaQuickMoveStartIndex = storageStartIndex;
         if(player.level().isClientSide())
         {
             for (int row = 0; row < 99; ++row)
@@ -150,6 +143,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
             }
         }
         storageEndIndex = slots.size();
+        vanillaQuickMoveEndIndex = storageEndIndex;
 
 
     }
@@ -246,8 +240,6 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
         }
         buildIndexList(new ArrayList<>(viewerStorage.getStorage()),true);
     }
-
-    public static int BREAKPOINT_COUNTER = 0;
 
     // 仅仅更新视觉存储的数量信息
     public void updateOnlyCountAndNewViewer()
@@ -491,6 +483,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
     {
 
     }
+
 
     @Override
     protected void initUpdate()

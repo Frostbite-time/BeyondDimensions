@@ -1,8 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
@@ -25,12 +23,13 @@ import java.util.function.Supplier;
 
 // 网络接口的UI
 // 管理一组虚拟槽、以及一组
-public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
+public class NetInterfaceBaseMenu extends BDBaseMenu
 {
     private static final int slotStartY = 1 + CommonTextures.TOP_BASE_COMMON_HEIGHT;
     private static final int invSlotStartY = 6 + slotStartY + CommonTextures.COMMON_SLOTS_HEIGHT*3 + CommonTextures.FILTER_SLOTS_HEIGHT*3 + CommonTextures.COMMON_CONNECTION_HEIGHT;
 
 
+    public final StackTypedHandler storage;
     public final StackTypedHandler flagStorage;
 
     public boolean popMode;
@@ -62,10 +61,11 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
      */
     public NetInterfaceBaseMenu(int id, Inventory playerInventory, StackTypedHandler storage , StackTypedHandler flagStorage, NetInterfaceBlockEntity be, SimpleContainerData uselessContainer)
     {
-        super(Net_Interface_Menu.get(), id,playerInventory,storage);
+        super(Net_Interface_Menu.get(), id,playerInventory);
 
         this.popMode = false;
         // 初始化标记容器
+        this.storage = storage;
         this.flagStorage = flagStorage;
         if(!player.level().isClientSide())
         {
@@ -82,6 +82,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
     private void addStorageSlots()
     {
         // 添加存储槽
+        vanillaQuickMoveStartIndex = slots.size();
         for(int row = 0; row < 3; row++)
         {
             for (int col = 0; col < 9; col++)
@@ -89,6 +90,7 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
                 this.addSlot(new OrderedStackTypedSlot(this,storage, row*9+col,inventoryStartIndex,inventoryEndIndex, 8 + col * 18, slotStartY + 18 + row * 36));
             }
         }
+        vanillaQuickMoveEndIndex = slots.size();
 
     }
 
@@ -141,27 +143,6 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
     public boolean stillValid(Player player)
     {
         return be != null && !be.isRemoved();
-    }
-
-
-    // 用于设置虚拟槽位的函数
-    public void setFlagSlot(int slotIndex, IStackType clickStack, IStackType flagStack)
-    {
-        FlagStackTypedSlot slot = (FlagStackTypedSlot) this.slots.get(slotIndex);// clickHandle仅用于处理点击维度槽位的逻辑，如果转换失败，则证明调用逻辑出错
-
-        // 处理虚拟槽位
-        if(slot.isFake())
-        {
-            if(flagStack.isEmpty()&&getCarried().isEmpty())
-            {
-                flagStorage.setStackDirectly(slot.getSlotIndex(), new ItemStackType());
-            }
-            else
-            {
-                flagStorage.setStackDirectly(slot.getSlotIndex(),flagStack);
-            }
-            return; // 结束处理
-        }
     }
 
 }

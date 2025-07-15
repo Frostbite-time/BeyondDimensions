@@ -7,7 +7,6 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
-import com.wintercogs.beyonddimensions.Packet.CallSeverStoragePacket;
 import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
@@ -68,10 +67,6 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
             }
         };
         addRenderableWidget(popButton);
-
-
-        menu.suppressRemoteUpdates();
-        PacketDistributor.sendToServer(new CallSeverStoragePacket());
     }
 
     @Override

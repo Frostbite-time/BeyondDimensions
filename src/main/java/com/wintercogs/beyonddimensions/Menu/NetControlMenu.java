@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class NetControlMenu extends BDOrderedContainerMenu
+public class NetControlMenu extends BDBaseMenu
 {
 
     // 设为临时，服务端会在初始化时重设
@@ -41,7 +41,7 @@ public class NetControlMenu extends BDOrderedContainerMenu
 
     public NetControlMenu(int containerId, Inventory playerInventory)
     {
-        super(Net_Control_Menu.get(),containerId, playerInventory,null);
+        super(Net_Control_Menu.get(),containerId, playerInventory);
 
         if(!player.level().isClientSide())
         {

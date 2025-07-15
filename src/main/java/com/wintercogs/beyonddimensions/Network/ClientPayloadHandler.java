@@ -1,8 +1,6 @@
 package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Menu.*;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.SlotGroupSync;
@@ -36,86 +34,7 @@ public class ClientPayloadHandler
         );
     }
 
-    public void handleStoragePacket(final StoragePacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                }
-
-        );
-    }
-
-    public void handleCallSeverStoragePacket(final CallSeverStoragePacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                }
-
-        );
-    }
-
-    public void handleSyncItemStoragePacket(final SyncStoragePacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-                    Player player = context.player();
-                    if (player.containerMenu instanceof DimensionsNetMenu menu)
-                    {
-                        IStackTypedHandler clientStorage = menu.storage;
-                        int i = 0;
-                        for(IStackType remoteStack : packet.stacks())
-                        {
-                            // 如果当前存储存在此物品
-                            if(clientStorage.hasStackType(remoteStack))
-                            {
-                                if(packet.changedCounts().get(i) > 0)
-                                {
-                                    clientStorage.insert(remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
-                                }
-                                else
-                                {
-                                    clientStorage.extract(remoteStack.copyWithCount(-packet.changedCounts().get(i)),false);
-                                }
-                            }
-                            else // 如果当前存储不存在此物品
-                            {
-                                if(packet.changedCounts().get(i) > 0)
-                                {
-                                    clientStorage.insert(remoteStack.copyWithCount(packet.changedCounts().get(i)),false);
-                                }
-                            }
-                            i++; // 一次遍历完毕后索引自增
-                        }
-
-                        // 按住shift时锁定排序
-                        if(!menu.hasShiftDown)
-                            menu.updateViewerStorage();
-                        else
-                            menu.updateOnlyCountAndNewViewer();
-                    }
-
-                }
-
-        );
-    }
-
     public void handleCallSeverClickPacket(final CallSeverClickPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                }
-
-        );
-    }
-
-    public void handleCallServerPlayerInfoPacket(final CallServerPlayerInfoPacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
                 () ->
@@ -149,21 +68,6 @@ public class ClientPayloadHandler
         context.enqueueWork(
                 () ->
                 {
-
-                }
-
-        );
-    }
-
-    public void handleSyncFlagPacket(final SyncFlagPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                    Player player = context.player();
-
-
 
                 }
 

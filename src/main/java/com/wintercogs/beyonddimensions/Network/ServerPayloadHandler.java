@@ -115,39 +115,6 @@ public class ServerPayloadHandler
 
     }
 
-    public void handleItemStoragePacket(final StoragePacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                }
-
-        );
-    }
-
-    public void handleCallSeverStoragePacket(final CallSeverStoragePacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                }
-
-        );
-    }
-
-    public void handleSyncItemStoragePacket(final SyncStoragePacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
-                }
-
-        );
-    }
-
     public void handleCallSeverClickPacket(final CallSeverClickPacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
@@ -161,24 +128,6 @@ public class ServerPayloadHandler
                         // 这里发包不是让客户端执行操作，而是解除锁定
                         PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, new ItemStackType(ItemStack.EMPTY),1,false));
                     }
-                }
-
-        );
-    }
-
-    public void handleCallServerPlayerInfoPacket(final CallServerPlayerInfoPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-                    Player player = context.player();
-                    NetControlMenu menu;
-                    if (!(player.containerMenu instanceof NetControlMenu))
-                    {
-                        return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-                    }
-                    menu = (NetControlMenu) player.containerMenu;
-                    menu.sendPlayerInfo();
                 }
 
         );
@@ -208,17 +157,6 @@ public class ServerPayloadHandler
                     }
                     menu = (NetControlMenu) player.containerMenu;
                     menu.handlePlayerAction(packet.receiver(),packet.action());
-                }
-
-        );
-    }
-
-    public void handleSyncFlagPacket(final SyncFlagPacket packet, final IPayloadContext context)
-    {
-        context.enqueueWork(
-                () ->
-                {
-
                 }
 
         );

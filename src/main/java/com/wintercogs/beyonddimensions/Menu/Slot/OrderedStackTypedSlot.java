@@ -14,6 +14,7 @@ import com.wintercogs.beyonddimensions.Packet.OrderedStackTypedSlotPacket;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -37,6 +38,12 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     public OrderedStackTypedSlot(BDBaseMenu menu, IStackTypedHandler stackTypedHandler, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
     {
         super(menu, stackTypedHandler, slotIndex, quickMoveSlotStartIndex, quickMoveSlotEndIndex, xPosition, yPosition);
+    }
+
+    @Override
+    public boolean isOrdered()
+    {
+        return true;
     }
 
     @Override
@@ -275,46 +282,64 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public void quickMove(IStackType clickStack, int button, Player player)
     {
-        ItemStack cacheStack;
         if (!clickStack.isEmpty())
         {
-            // 物品从存储移动到背包
-            if(clickStack instanceof ItemStackType clickedItem)
+            // 防止数据包伪造，然后赋予trueStack需要提取的数量
+            IStackType trueStack = storage.getStackBySlot(theSlot).copyWithCount(clickStack.getStackAmount());
+
+            // 遍历目标槽位
+            for(int targetSlotIndex=quickMoveSlotStartIndex;targetSlotIndex<quickMoveSlotEndIndex && !trueStack.isEmpty();targetSlotIndex++)
             {
-                cacheStack = clickedItem.copyStack();
-                int moveCount = menu.checkCanMoveStackCount(cacheStack, quickMoveSlotStartIndex, quickMoveSlotEndIndex, true);
-                moveCount = Math.min(moveCount,cacheStack.getCount()); // 首先
-                int nowCount = 0;
-                IStackType typedStack = storage.getStackBySlot(this.getSlotIndex());
-                ItemStack nowStack;
-                if(typedStack != null)
+                Slot slot = menu.slots.get(targetSlotIndex);
+                if(slot instanceof AbstractStackTypedSlot aSlot)
                 {
-                    nowStack = (ItemStack) typedStack.getStack();
+                    // aSlot处理任何情况
+
+                    //首先尝试从存储提取指定堆叠
+                    IStackType extract = safeExtract(trueStack);
+                    IStackType remaining = aSlot.safeInsert(extract); // 然后插入到其他堆叠并获取余量
+                    if(!remaining.isEmpty())
+                        safeInsert(remaining); // 最后将余量返回
+                    trueStack = remaining.copy();
+
                 }
                 else
                 {
-                    return ;
-                }
-                if(nowStack != null)
-                {
-                    nowCount = nowStack.getCount();
-                }
-                moveCount = Math.min(moveCount,nowCount);
-                if(moveCount>=0)
-                {
-                    cacheStack.setCount(moveCount);
-                    if (!menu.moveItemStackTo(cacheStack, quickMoveSlotStartIndex, quickMoveSlotEndIndex, true)) {
-                        return ;
+                    // 普通Slot将只处理物品转移
+                    if(trueStack instanceof ItemStackType trueItemTypedStack)
+                    {
+                        ItemStack extract = (ItemStack) safeExtract(trueItemTypedStack).getStack();
+                        ItemStack remaining = slot.safeInsert(extract);
+                        if(!remaining.isEmpty())
+                            safeInsert(new ItemStackType(remaining));
+                        trueStack = new ItemStackType(remaining.copy());
                     }
-                    storage.extract(this.getSlotIndex(),moveCount,false);
                 }
+
             }
-            else
-            {
-                cacheStack = ItemStack.EMPTY;
-            }
+            setChanged();
         }
-        return;
+    }
+
+    @Override
+    public IStackType safeInsert(IStackType stack)
+    {
+        if(stack != null)
+        {
+            // storage的insert应当考虑到一切情况
+            return storage.insert(theSlot,stack,false);
+        }
+        return new ItemStackType();
+    }
+
+    @Override
+    public IStackType safeExtract(IStackType stack)
+    {
+        if(stack != null && getStack() != null && stack.getTypeId().equals(getStack().getTypeId()) &&  stack.isSameTypeSameComponents(getStack()))
+        {
+            return storage.extract(theSlot,stack.getStackAmount(),false);
+        }
+        return stack;
     }
 
     @Override

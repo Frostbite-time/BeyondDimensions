@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-public class NetPumpMenu extends BDOrderedContainerMenu
+public class NetPumpMenu extends BDBaseMenu
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
     public static final Supplier<MenuType<NetPumpMenu>> Net_Pump_Menu = MENU_TYPES.register("net_pump_menu", () -> IMenuTypeExtension.create(NetPumpMenu::new));
@@ -26,6 +26,8 @@ public class NetPumpMenu extends BDOrderedContainerMenu
     private static final int slotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + 1;
     private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT*4 + CommonTextures.COMMON_CONNECTION_HEIGHT +7;
 
+    private final IStackTypedHandler storage;
+
     public NetPumpMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         this(id, playerInventory, new StackTypedHandler(36));
@@ -33,7 +35,9 @@ public class NetPumpMenu extends BDOrderedContainerMenu
 
     public NetPumpMenu(int containerId, Inventory playerInventory, @Nullable IStackTypedHandler storage)
     {
-        super(Net_Pump_Menu.get(), containerId, playerInventory, storage);
+        super(Net_Pump_Menu.get(), containerId, playerInventory);
+
+        this.storage = storage;
 
         addPlayerInv(playerInventory);
         addFlagSlots();

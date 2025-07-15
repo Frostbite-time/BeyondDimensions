@@ -30,9 +30,33 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
+    public boolean isOrdered()
+    {
+        return true;
+    }
+
+    // 内部会copy这个stack，因此无需再次操作
+    @Override
     public void setStackDirectly(IStackType stack)
     {
         storage.setStackDirectly(theSlot, stack);
+    }
+
+    @Override
+    public IStackType safeInsert(IStackType stack)
+    {
+        if(stack != null)
+        {
+            setStackDirectly(stack);
+        }
+        return stack;
+    }
+
+    @Override
+    public IStackType safeExtract(IStackType stack)
+    {
+        setStackDirectly(new ItemStackType());
+        return stack;
     }
 
     @Override

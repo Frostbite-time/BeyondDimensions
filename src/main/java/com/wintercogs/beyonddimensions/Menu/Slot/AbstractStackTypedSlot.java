@@ -58,6 +58,13 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 注意，此处的函数除loadChange外请仅在服务端调用，重写时也只考虑服务端逻辑
     // 客户端请通过loadChange从服务端接收数据，然后处理
 
+    public IStackTypedHandler getStorage()
+    {
+        return storage;
+    }
+
+    public abstract boolean isOrdered();
+
     // 当鼠标直接点击此槽位会发生什么
     // IStackType为客户端所认为的，自己所点击的物品，用于无序容器处理
     public abstract void click(IStackType clickStack, int button, Player player);
@@ -76,6 +83,12 @@ public abstract class AbstractStackTypedSlot extends Slot
 
 
     // 其他有用的slot方法或者为slot运行所用的方法-------------------------------------------------------------------------------
+
+    // 获取槽位容量
+    public long getSlotCap()
+    {
+        return storage.getSlotCapacity(theSlot);
+    }
 
     public IStackType getTypedStackFromUnifiedStorage()
     {
@@ -168,6 +181,17 @@ public abstract class AbstractStackTypedSlot extends Slot
         // 不建议对于非标记槽进行重写，可能导致数据包漏洞
         // 涉及非标记槽的直接设置建议从服务端获取storage进行，而不是通过slot进行
     }
+
+    // 有序槽位只取出当前槽中数量，无序槽位从整个存储中取出
+    // 另一种类型的safeInsert，专用于此种槽位
+    // 返回余量
+    public abstract IStackType safeInsert(IStackType stack);
+
+    // 对于有序槽位，应当从当前槽位中取出对应种类stack的对应数量
+    // 对于无序槽位，应当从整个存储中取出对应种类stack的对应数量
+    // 返回取出量
+    public abstract IStackType safeExtract(IStackType stack);
+
 
     @Override
     public ItemStack getItem()
