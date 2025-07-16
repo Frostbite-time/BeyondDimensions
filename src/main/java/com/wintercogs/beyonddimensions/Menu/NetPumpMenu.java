@@ -110,6 +110,8 @@ public class NetPumpMenu extends BDBaseMenu
         be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
         if(!player.level().isClientSide())
         {
+            // 服务端接收到更新信息后立刻通知保存
+            player.level().blockEntityChanged(be.getBlockPos());
             player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
         }
     }

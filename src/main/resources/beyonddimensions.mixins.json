@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "com.wintercogs.beyonddimensions.Mixin",
+  "mixins": [
+  ],
+  "client": [
+    "blitSpriteMixin"
+  ],
+  "server": [
+  ],
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

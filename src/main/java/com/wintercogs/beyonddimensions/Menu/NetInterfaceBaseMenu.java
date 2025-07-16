@@ -133,6 +133,7 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         // 服务端读取新数据之后利用sendBlockUpdated将数据发送给附近所有玩家
         if(!player.level().isClientSide())
         {
+            player.level().blockEntityChanged(be.getBlockPos());
             player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
         }
     }

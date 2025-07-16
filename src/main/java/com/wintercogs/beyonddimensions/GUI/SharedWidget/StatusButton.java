@@ -16,12 +16,21 @@ public abstract class StatusButton extends IconButton
     public Enum<?> currentState;
 
 
-    protected StatusButton(int x, int y, int width, int height, OnPress onPress)
+    protected StatusButton(int x, int y, int width, int height,
+                           int iconX, int iconY, int iconWidth, int iconHeight,
+                           OnPress onPress)
     {
         // 给予一个默认图片用于构造父类
-        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/unkonw_thing"), onPress);
+        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/unkonw_thing"),iconX,iconY,iconWidth,iconHeight, onPress);
         initButton();
         setIcon(iconMap.get(currentState));
+    }
+
+    protected StatusButton(int x, int y, int width, int height,
+                           OnPress onPress)
+    {
+        // 给予一个默认图片用于构造父类
+        this(x, y, width, height, x,y,width,height, onPress);
     }
 
     // 用于子类初始化状态、状态图片映射表、当前状态

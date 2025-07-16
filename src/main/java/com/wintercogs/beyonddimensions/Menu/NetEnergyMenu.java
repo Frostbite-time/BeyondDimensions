@@ -122,6 +122,7 @@ public class NetEnergyMenu extends BDBaseMenu
         else
         {
             be.popMode = tag.getBoolean("popMode");
+            player.level().blockEntityChanged(be.getBlockPos());
             player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
         }
     }
