@@ -1,11 +1,13 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
+import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
 import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
+import com.wintercogs.beyonddimensions.Machine.PopMode;
+import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
+import com.wintercogs.beyonddimensions.Render.GuiRenderHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -16,7 +18,8 @@ import net.minecraft.world.entity.player.Inventory;
 public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 {
 
-    public StatusButton popButton; // 使用倒序按钮来临时替代弹出模式
+    public RightTabButton popButton; // 弹出模式
+    public RightTabButton controlModeButton; // 红石控制模式按钮
 
     private SlotDragHandler dragHandler; // 仅在emi加载时可用
 
@@ -43,38 +46,63 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         this.topPos = (this.height - imageHeight)/2;
 
 
-        popButton = new StatusButton(this.leftPos+72+18*4-5,this.topPos+6,16,16, button ->
+        popButton = new RightTabButton(this.leftPos+176,this.topPos+6,23,26,
+                this.leftPos+176 +2,this.topPos+6+5,16,16,button ->
         {
             popButton.toggleState();
-            menu.be.popMode = !menu.be.popMode;
+            menu.be.popMode = (PopMode) popButton.currentState;
             menu.writeAndSendQuickData();
         })
         {
             @Override
             protected void initButton()
             {
-                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_asc"));
-                iconMap.put(ButtonState.DISABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_desc"));
+                iconMap.put(PopMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/popmode_up"));
+                iconMap.put(PopMode.STOP,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/popmode_down"));
 
-                tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
-                tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
+                tooltipMap.put(PopMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
+                tooltipMap.put(PopMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
 
 
                 for(Enum<?> state : iconMap.keySet())
                 {
                     this.states.add(state);
                 }
-                if(menu.be.popMode)
-                {
-                    setState(ButtonState.ENABLED);
-                }
-                else
-                {
-                    setState(ButtonState.DISABLED);
-                }
+
+                setState(menu.be.popMode);
             }
         };
         addRenderableWidget(popButton);
+
+        controlModeButton = new RightTabButton(leftPos + 176, topPos +36, 23,26 ,
+                leftPos + 176 +2 , topPos +36 +5, 16,16,button -> {
+            controlModeButton.toggleState();
+            menu.be.controlMode = (RedStoneControlMode) controlModeButton.currentState;
+            menu.writeAndSendQuickData();
+        })
+        {
+            @Override
+            protected void initButton()
+            {
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_powered"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_unpowered"));
+
+                tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
+                tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
+                tooltipMap.put(RedStoneControlMode.POWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_powered")));
+                tooltipMap.put(RedStoneControlMode.UNPOWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_unpowered")));
+
+                for(Enum<?> state : iconMap.keySet())
+                {
+                    this.states.add(state);
+                }
+
+                setState(menu.be.controlMode);
+            }
+        };
+        addRenderableWidget(controlModeButton);
 
     }
 
@@ -96,14 +124,10 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         //父类无操作
         //每tick自动更新搜索方案
 
-        if(menu.be.popMode)
-        {
-            popButton.setState(ButtonState.ENABLED);
-        }
-        else
-        {
-            popButton.setState(ButtonState.DISABLED);
-        }
+        if(popButton.currentState != menu.be.popMode)
+            popButton.setState(menu.be.popMode);
+        if(controlModeButton.currentState != menu.be.controlMode)
+            controlModeButton.setState(menu.be.controlMode);
     }
 
     @Override
@@ -134,6 +158,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752,false);
+        GuiRenderHelper.drawRightAnchoredText(guiGraphics,this.font, Component.translatable("menu.label.beyonddimensions.tag_and_stored_slots"), imageWidth-6, this.titleLabelY+3, 4210752,false);
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752,false);
     }
 

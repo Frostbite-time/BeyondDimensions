@@ -15,6 +15,7 @@
   "menu.text.beyonddimensions.name.player": "名称: %s",
   "menu.text.beyonddimensions.permission.level.prefix": "权限级别: %s",
   "menu.label.beyonddimensions.filter_slots": "过滤槽位",
+  "menu.label.beyonddimensions.tag_and_stored_slots": "标记与存储槽位",
 
   "tooltip.button.beyonddimensions.sort_asc": "当前：顺序排序",
   "tooltip.button.beyonddimensions.sort_desc": "当前：倒序排序",

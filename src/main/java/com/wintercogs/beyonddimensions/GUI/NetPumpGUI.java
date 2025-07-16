@@ -71,14 +71,16 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
             protected void initButton()
             {
                 iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_not_working"));
                 iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_powered"));
                 iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_unpowered"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_not_working"));
+
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
+                tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
                 tooltipMap.put(RedStoneControlMode.POWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_powered")));
                 tooltipMap.put(RedStoneControlMode.UNPOWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_unpowered")));
-                tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
+
 
                 for(Enum<?> state : iconMap.keySet())
                 {

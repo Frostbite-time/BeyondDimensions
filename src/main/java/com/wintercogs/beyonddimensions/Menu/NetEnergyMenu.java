@@ -4,6 +4,8 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.Machine.PopMode;
+import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -19,8 +21,6 @@ import java.util.function.Supplier;
 public class NetEnergyMenu extends BDBaseMenu
 {
     public NetEnergyPathwayBlockEntity be;
-
-    private DimensionsNet net = null; // 注意判断
 
     public long lastEnergyCapacity = 0;
     public long lastEnergyStored = 0;
@@ -57,13 +57,6 @@ public class NetEnergyMenu extends BDBaseMenu
 
         this.be = be;
 
-        if (!player.level().isClientSide())
-        {
-            DimensionsNet net = be.getNet();
-            if (net != null)
-                this.net = net;
-        }
-
         inventoryStartIndex = slots.size();
         for (int row = 0; row < 3; ++row)
         {
@@ -83,9 +76,10 @@ public class NetEnergyMenu extends BDBaseMenu
     @Override
     protected boolean shouldSendQuickData()
     {
-        if(net != null)
+        DimensionsNet netCache = be.getNet();
+        if(netCache != null)
         {
-            UnifiedStorage storage = net.getUnifiedStorage();
+            UnifiedStorage storage = netCache.getUnifiedStorage();
             if(lastEnergyStored != storage.getEnergyStored()
                 || lastEnergyCapacity != storage.getSlotCapacity(0)
                 || lastEnergySpeedState != storage.getEnergyStored() - lastEnergyStored)
@@ -96,6 +90,18 @@ public class NetEnergyMenu extends BDBaseMenu
                 return true;
             }
         }
+        else
+        {
+            if(lastEnergyStored != 0
+                    || lastEnergyCapacity != 0
+                    || lastEnergySpeedState != 0)
+            {
+                lastEnergySpeedState = 0;
+                lastEnergyStored = 0;
+                lastEnergyCapacity = 0;
+                return true;
+            }
+        }
         return false;
     }
 
@@ -103,7 +109,8 @@ public class NetEnergyMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putBoolean("popMode", be.popMode);
+        tag.putString("popMode", be.popMode.name());
+        tag.putString("controlMode", be.controlMode.name());
         tag.putLong("lastEnergyCapacity", lastEnergyCapacity);
         tag.putLong("lastEnergySpeedState", lastEnergySpeedState);
         tag.putLong("lastEnergyStored", lastEnergyStored);
@@ -121,8 +128,10 @@ public class NetEnergyMenu extends BDBaseMenu
         }
         else
         {
-            be.popMode = tag.getBoolean("popMode");
+            be.popMode = PopMode.valueOf(tag.getString("popMode"));
+            be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
             player.level().blockEntityChanged(be.getBlockPos());
+            player.level().invalidateCapabilities(be.getBlockPos()); // 改变弹出模式后重新确定是否暴露内部能量存储
             player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
         }
     }

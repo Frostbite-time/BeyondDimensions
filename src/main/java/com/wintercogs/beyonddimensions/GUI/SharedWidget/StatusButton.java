@@ -5,14 +5,15 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class StatusButton extends IconButton
 {
     protected ArrayList<Enum<?>> states = new ArrayList<>();
-    protected Map<Enum<?>,ResourceLocation> iconMap = new HashMap<>();
-    protected Map<Enum<?>, Tooltip> tooltipMap = new HashMap<>(); // 需要添加可变工具提示则添加 需要固定工具提示则直接setTooltip，此处留空
+    // 保证按钮切换顺序按照插入顺序
+    protected Map<Enum<?>,ResourceLocation> iconMap = new LinkedHashMap<>();
+    protected Map<Enum<?>, Tooltip> tooltipMap = new LinkedHashMap<>(); // 需要添加可变工具提示则添加 需要固定工具提示则直接setTooltip，此处留空
     public Enum<?> currentState;
 
 

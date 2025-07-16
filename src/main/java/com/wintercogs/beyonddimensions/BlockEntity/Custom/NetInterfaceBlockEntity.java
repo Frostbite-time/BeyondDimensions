@@ -13,6 +13,9 @@ import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.Machine.BaseMachine;
+import com.wintercogs.beyonddimensions.Machine.PopMode;
+import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -37,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuProvider
+public class NetInterfaceBlockEntity extends NetedBlockEntity implements BaseMachine,MenuProvider
 {
     public final int transHold = 9;
     public int transTime = 0;
@@ -66,7 +69,8 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
         }
     };
 
-    public boolean popMode = false;
+    public PopMode popMode = PopMode.STOP;
+    public RedStoneControlMode controlMode = RedStoneControlMode.IGNORE;
 
     private final Direction[] directions = Direction.values();
     
@@ -88,6 +92,47 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
     public NetInterfaceBlockEntity(BlockPos pos, BlockState blockState)
     {
         super(ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
+    }
+
+    // 此方法的签名与 BlockEntityTicker 函数接口的签名匹配.
+    public static void tick(Level level, BlockPos pos, BlockState state, NetInterfaceBlockEntity blockEntity) {
+        // 你希望在计时期间执行的任何操作.
+        // 例如，你可以在这里更改一个制作进度值或消耗能量.
+        if(level.isClientSide())
+            return; // 客户端不执行任何操作
+
+
+        blockEntity.transTime++;
+        if(blockEntity.transTime>=blockEntity.transHold)
+        {
+            blockEntity.working();
+            blockEntity.transTime = 0;
+        }
+
+    }
+
+    @Override
+    public boolean shouldWork()
+    {
+        return BaseMachine.super.shouldWork();
+    }
+
+    @Override
+    public void workContent()
+    {
+        BaseMachine.super.workContent();
+        if(getNetId() != -1)
+        {
+            transferToNet();
+            transferFromNet();
+        }
+        // 尝试输出物品到周围
+        if(popMode == PopMode.OPEN)
+        {
+            // 在使用缓存前确保它是最新的
+            updateCapabilityCache();
+            popStack();
+        }
     }
 
     // 更新能力缓存
@@ -145,34 +190,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
         );
     }
 
-    // 此方法的签名与 BlockEntityTicker 函数接口的签名匹配.
-    public static void tick(Level level, BlockPos pos, BlockState state, NetInterfaceBlockEntity blockEntity) {
-        // 你希望在计时期间执行的任何操作.
-        // 例如，你可以在这里更改一个制作进度值或消耗能量.
-        if(level.isClientSide())
-            return; // 客户端不执行任何操作
 
-
-        blockEntity.transTime++;
-        if(blockEntity.transTime>=blockEntity.transHold)
-        {
-            if(blockEntity.getNetId() != -1)
-            {
-                blockEntity.transferToNet();
-                blockEntity.transferFromNet();
-            }
-            // 尝试输出物品到周围
-            if(blockEntity.popMode)
-            {
-                // 在使用缓存前确保它是最新的
-                blockEntity.updateCapabilityCache();
-                blockEntity.popStack();
-            }
-
-            blockEntity.transTime = 0;
-        }
-
-    }
 
     public void transferToNet()
     {
@@ -311,7 +329,23 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
         super.loadAdditional(tag,registries);
         this.stackHandler.deserializeNBT(registries,tag.getCompound("inventory"));
         this.fakeStackHandler.deserializeNBT(registries,tag.getCompound("flags"));
-        this.popMode = tag.getBoolean("popMode");
+
+        this.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
+
+        // 旧数据兼容
+        String popModeNew = tag.getString("popMode");
+        if(!popModeNew.isEmpty())
+        {
+            this.popMode = PopMode.valueOf(popModeNew);
+        }
+        else if(tag.getBoolean("popMode"))
+        {
+            this.popMode = PopMode.OPEN;
+        }
+        else
+        {
+            this.popMode = PopMode.STOP;
+        }
         // 加载后需要更新缓存
         setNeedsCapabilityUpdate();
     }
@@ -322,7 +356,8 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
         super.saveAdditional(tag, registries);
         tag.put("inventory", stackHandler.serializeNBT(registries));
         tag.put("flags",fakeStackHandler.serializeNBT(registries));
-        tag.putBoolean("popMode",this.popMode);
+        tag.putString("popMode",this.popMode.name());
+        tag.putString("controlMode",this.controlMode.name());
     }
     
     // 在方块状态变化时重新缓存能力
@@ -341,5 +376,17 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
         return new NetInterfaceBaseMenu(containerId,player.getInventory(),this.getStackHandler() ,this.getFakeStackHandler(),this);
+    }
+
+    @Override
+    public RedStoneControlMode getControlMode()
+    {
+        return controlMode;
+    }
+
+    @Override
+    public boolean hasRedStoneSignal()
+    {
+        return level.getBestNeighborSignal(worldPosition) > 0;
     }
 }
