@@ -37,6 +37,9 @@ public class ModBlocks
     public static final DeferredBlock<Block> NET_PUMP_BLOCK = registerBlock("net_pump_block",
             ()-> new NetPumpBlock(BlockBehaviour.Properties.of().strength(2f)));
 
+    public static final DeferredBlock<Block> NET_HOPPER_BLOCK = registerBlock("net_hopper_block",
+            ()-> new NetHopperBlock(BlockBehaviour.Properties.of().strength(2f)));
+
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block)
     {

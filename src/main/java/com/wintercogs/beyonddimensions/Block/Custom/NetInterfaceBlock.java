@@ -9,14 +9,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-public class NetInterfaceBlock extends NetedBlock implements EntityBlock
+public class NetInterfaceBlock extends BaseMachineBlock implements EntityBlock
 {
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -24,15 +22,6 @@ public class NetInterfaceBlock extends NetedBlock implements EntityBlock
     public NetInterfaceBlock(Properties properties)
     {
         super(properties);
-    }
-
-    // 启用方块实体计时器
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null :
-                (level1, pos, state1, blockEntity) ->
-                        NetInterfaceBlockEntity.tick(level1, pos, state1, (NetInterfaceBlockEntity) blockEntity);
     }
 
     @Override

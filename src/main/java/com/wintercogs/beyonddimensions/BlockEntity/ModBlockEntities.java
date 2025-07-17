@@ -75,6 +75,14 @@ public class ModBlockEntities
             ).build(null)
     );
 
+    public static final Supplier<BlockEntityType<NetHopperBlockEntity>> NET_HOPPER_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+            "net_hopper_block_entity",
+            () -> BlockEntityType.Builder.of(
+                    NetHopperBlockEntity::new,
+                    ModBlocks.NET_HOPPER_BLOCK.get()
+            ).build(null)
+    );
+
 
     public static void register(IEventBus eventBus)
     {

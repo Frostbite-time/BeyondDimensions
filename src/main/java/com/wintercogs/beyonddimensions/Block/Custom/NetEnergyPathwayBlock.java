@@ -7,13 +7,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class NetEnergyPathwayBlock extends NetedBlock implements EntityBlock
+public class NetEnergyPathwayBlock extends BaseMachineBlock implements EntityBlock
 {
 
     public NetEnergyPathwayBlock(Properties properties) {
@@ -23,15 +21,6 @@ public class NetEnergyPathwayBlock extends NetedBlock implements EntityBlock
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
         return new NetEnergyPathwayBlockEntity(blockPos,blockState);
-    }
-
-    // 启用方块实体计时器
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null :
-                (level1, pos, state1, blockEntity) ->
-                        NetEnergyPathwayBlockEntity.tick(level1, pos, state1, (NetEnergyPathwayBlockEntity) blockEntity);
     }
 
     @Override

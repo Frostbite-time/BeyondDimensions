@@ -15,7 +15,6 @@ import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Machine.BaseMachine;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
-import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,7 +27,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -40,10 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class NetInterfaceBlockEntity extends NetedBlockEntity implements BaseMachine,MenuProvider
+public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements BaseMachine,MenuProvider
 {
-    public final int transHold = 9;
-    public int transTime = 0;
 
     private static final int capacity = 27;
 
@@ -70,7 +66,6 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements BaseMac
     };
 
     public PopMode popMode = PopMode.STOP;
-    public RedStoneControlMode controlMode = RedStoneControlMode.IGNORE;
 
     private final Direction[] directions = Direction.values();
     
@@ -94,34 +89,17 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements BaseMac
         super(ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
     }
 
-    // 此方法的签名与 BlockEntityTicker 函数接口的签名匹配.
-    public static void tick(Level level, BlockPos pos, BlockState state, NetInterfaceBlockEntity blockEntity) {
-        // 你希望在计时期间执行的任何操作.
-        // 例如，你可以在这里更改一个制作进度值或消耗能量.
-        if(level.isClientSide())
-            return; // 客户端不执行任何操作
-
-
-        blockEntity.transTime++;
-        if(blockEntity.transTime>=blockEntity.transHold)
-        {
-            blockEntity.working();
-            blockEntity.transTime = 0;
-        }
-
-    }
-
     @Override
     public boolean shouldWork()
     {
-        return BaseMachine.super.shouldWork();
+        return super.shouldWork(); // 接口方块使用内部缓存进行弹出，因此不需要检测getNet
     }
 
     @Override
     public void workContent()
     {
-        BaseMachine.super.workContent();
-        if(getNetId() != -1)
+        super.workContent();
+        if(getNet() != null)
         {
             transferToNet();
             transferFromNet();
@@ -330,8 +308,6 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements BaseMac
         this.stackHandler.deserializeNBT(registries,tag.getCompound("inventory"));
         this.fakeStackHandler.deserializeNBT(registries,tag.getCompound("flags"));
 
-        this.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
-
         // 旧数据兼容
         String popModeNew = tag.getString("popMode");
         if(!popModeNew.isEmpty())
@@ -357,13 +333,6 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements BaseMac
         tag.put("inventory", stackHandler.serializeNBT(registries));
         tag.put("flags",fakeStackHandler.serializeNBT(registries));
         tag.putString("popMode",this.popMode.name());
-        tag.putString("controlMode",this.controlMode.name());
-    }
-    
-    // 在方块状态变化时重新缓存能力
-    @Override
-    public void setChanged() {
-        super.setChanged();
     }
 
     @Override
@@ -379,14 +348,8 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements BaseMac
     }
 
     @Override
-    public RedStoneControlMode getControlMode()
+    public int getTicksPerWork()
     {
-        return controlMode;
-    }
-
-    @Override
-    public boolean hasRedStoneSignal()
-    {
-        return level.getBestNeighborSignal(worldPosition) > 0;
+        return 9;
     }
 }

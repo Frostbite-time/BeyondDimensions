@@ -6,7 +6,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Storage.EnergyUnifiedStorage
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Machine.BaseMachine;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
-import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,7 +16,6 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -26,44 +24,15 @@ import net.neoforged.neoforge.energy.EnergyStorage;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.Nullable;
 
-public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements BaseMachine, MenuProvider
+public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implements BaseMachine, MenuProvider
 {
 
-    public final int transHold = 20;
-    public int transTime = 0;
-
     public PopMode popMode = PopMode.STOP;
-    public RedStoneControlMode controlMode = RedStoneControlMode.IGNORE;
-
     private final Direction[] directions = Direction.values();
-
 
     public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
-
-    // 此方法的签名与 BlockEntityTicker 函数接口的签名匹配.
-    public static void tick(Level level, BlockPos pos, BlockState state, NetEnergyPathwayBlockEntity blockEntity) {
-        // 你希望在计时期间执行的任何操作.
-        // 例如，你可以在这里更改一个制作进度值或消耗能量.
-        if(level.isClientSide())
-            return; // 客户端不执行任何操作
-
-        if(blockEntity.getNetId() != -1)
-        {
-            blockEntity.transTime++;
-            if(blockEntity.transTime>=blockEntity.transHold)
-            {
-                blockEntity.transTime = 0;
-                // 定时计划写在这里
-                // 暂时没有
-            }
-        }
-
-        // 实际工作
-        blockEntity.working();
-    }
-
 
     //--- 能力注册 (通过事件) ---
     public static void registerCapability(RegisterCapabilitiesEvent event) {
@@ -92,20 +61,22 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements Bas
     @Override
     public boolean shouldWork()
     {
-        return BaseMachine.super.shouldWork();
+        return super.shouldWork() && getNet() != null;
+    }
+
+    @Override
+    public int getTicksPerWork()
+    {
+        return 1;
     }
 
     @Override
     public void workContent()
     {
-        BaseMachine.super.workContent();
-
+        super.workContent();
         if(popMode == PopMode.OPEN)
         {
-            if(!(getNetId()<0))
-            {
-                popEnergy();
-            }
+            popEnergy();
         }
     }
 
@@ -115,7 +86,7 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements Bas
 
         if(net==null)
         {
-            return;
+            return; //虽然getNet已经被shouldWork检查过，但是此处仍然进行防御性编程
         }
 
 
@@ -139,17 +110,9 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements Bas
     }
 
     @Override
-    public void invalidateCapabilities()
-    {
-        super.invalidateCapabilities();
-    }
-
-    @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag,registries);
-
-        this.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
 
         // 旧数据兼容
         String popModeNew = tag.getString("popMode");
@@ -172,7 +135,6 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements Bas
     {
         super.saveAdditional(tag, registries);
         tag.putString("popMode",this.popMode.name());
-        tag.putString("controlMode",this.controlMode.name());
     }
 
     @Override
@@ -187,15 +149,4 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements Bas
         return new NetEnergyMenu(containerId, player.getInventory(), this);
     }
 
-    @Override
-    public RedStoneControlMode getControlMode()
-    {
-        return controlMode;
-    }
-
-    @Override
-    public boolean hasRedStoneSignal()
-    {
-        return level.getBestNeighborSignal(worldPosition) > 0;
-    }
 }

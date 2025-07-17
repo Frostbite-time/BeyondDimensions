@@ -1,26 +1,25 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPumpBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetHopperBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class NetPumpBlock extends BaseMachineBlock implements EntityBlock
+public class NetHopperBlock extends BaseMachineBlock implements EntityBlock
 {
-    public NetPumpBlock(Properties properties) {
+    public NetHopperBlock(Properties properties) {
         super(properties);
     }
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new NetPumpBlockEntity(blockPos,blockState);
+        return new NetHopperBlockEntity(blockPos,blockState);
     }
 
     @Override
@@ -29,18 +28,10 @@ public class NetPumpBlock extends BaseMachineBlock implements EntityBlock
         super.useWithoutItem(state,level,pos,player,hitResult);
         if(!level.isClientSide()&&!player.isShiftKeyDown())
         {
-            NetPumpBlockEntity blockEntity = (NetPumpBlockEntity) level.getBlockEntity(pos);
+            NetHopperBlockEntity blockEntity = (NetHopperBlockEntity) level.getBlockEntity(pos);
             player.openMenu(blockEntity,pos);
         }
         return InteractionResult.SUCCESS_NO_ITEM_USED;
     }
 
-    @Override
-    public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor)
-    {
-        super.onNeighborChange(state, level, pos, neighbor);
-        if (level.getBlockEntity(pos) instanceof NetPumpBlockEntity blockEntity) {
-            blockEntity.setNeedsCapabilityUpdate();
-        }
-    }
 }

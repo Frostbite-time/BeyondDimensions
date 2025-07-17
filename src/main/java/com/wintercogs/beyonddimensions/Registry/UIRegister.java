@@ -21,6 +21,7 @@ public class UIRegister
         DimensionsCraftMenu.MENU_TYPES.register(eventBus);
         DimensionsCraftMenuTerminal.MENU_TYPES.register(eventBus);
         NetPumpMenu.MENU_TYPES.register(eventBus);
+        NetHopperMenu.MENU_TYPES.register(eventBus);
     }
 
     @SubscribeEvent
@@ -34,5 +35,6 @@ public class UIRegister
         event.<DimensionsCraftMenu,DimensionsCraftGUI<DimensionsCraftMenu>>register(DimensionsCraftMenu.Dimensions_Craft_Menu.get(), DimensionsCraftGUI::new);
         event.register(DimensionsCraftMenuTerminal.Dimensions_Craft_Menu_Terminal.get(), DimensionsTerminalCraftGUI::new);
         event.register(NetPumpMenu.Net_Pump_Menu.get(), NetPumpGUI::new);
+        event.register(NetHopperMenu.Net_Hopper_Menu.get(), NetHopperGUI::new);
     }
 }
