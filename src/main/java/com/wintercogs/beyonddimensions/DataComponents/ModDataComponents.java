@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
+import com.wintercogs.beyonddimensions.Machine.*;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -49,6 +50,76 @@ public class ModDataComponents {
                     ByteBufCodecs.collection(
                             ArrayList::new,
                             IStackType.STREAM_CODEC
+                    )
+            )
+    );
+
+    public static final DeferredHolder<DataComponentType<?>,DataComponentType<RedStoneControlMode>> CONTROL_MODE = register(
+            "control_mode", builder -> builder.persistent(
+                    Codec.STRING.xmap(
+                            RedStoneControlMode::valueOf,
+                            RedStoneControlMode::name
+                    )
+            ).networkSynchronized(
+                    ByteBufCodecs.STRING_UTF8.map(
+                            RedStoneControlMode::valueOf,
+                            RedStoneControlMode::name
+                    )
+            )
+    );
+
+    public static final DeferredHolder<DataComponentType<?>,DataComponentType<FilterMode>> FILTER_MODE = register(
+            "filter_mode", builder -> builder.persistent(
+                    Codec.STRING.xmap(
+                            FilterMode::valueOf,
+                            FilterMode::name
+                    )
+            ).networkSynchronized(
+                    ByteBufCodecs.STRING_UTF8.map(
+                            FilterMode::valueOf,
+                            FilterMode::name
+                    )
+            )
+    );
+
+    public static final DeferredHolder<DataComponentType<?>,DataComponentType<HopperNBTMode>> HOPPER_NBT_MODE = register(
+            "hopper_nbt_mode", builder -> builder.persistent(
+                    Codec.STRING.xmap(
+                            HopperNBTMode::valueOf,
+                            HopperNBTMode::name
+                    )
+            ).networkSynchronized(
+                    ByteBufCodecs.STRING_UTF8.map(
+                            HopperNBTMode::valueOf,
+                            HopperNBTMode::name
+                    )
+            )
+    );
+
+    public static final DeferredHolder<DataComponentType<?>,DataComponentType<HopperFluidMode>> HOPPER_FLUID_MODE = register(
+            "hopper_fluid_mode", builder -> builder.persistent(
+                    Codec.STRING.xmap(
+                            HopperFluidMode::valueOf,
+                            HopperFluidMode::name
+                    )
+            ).networkSynchronized(
+                    ByteBufCodecs.STRING_UTF8.map(
+                            HopperFluidMode::valueOf,
+                            HopperFluidMode::name
+                    )
+            )
+    );
+
+    public static final DeferredHolder<DataComponentType<?>,DataComponentType<HopperRangeMode>> HOPPER_RANGE_MODE = register(
+            "hopper_range_mode", builder -> builder.persistent(
+                    Codec.STRING.xmap(
+                            HopperRangeMode::valueOf,
+                            HopperRangeMode::name
+                    )
+            ).networkSynchronized(
+                    ByteBufCodecs.STRING_UTF8.map(
+                            HopperRangeMode::valueOf,
+                            HopperRangeMode::name
                     )
             )
     );

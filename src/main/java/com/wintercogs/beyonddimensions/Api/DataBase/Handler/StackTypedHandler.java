@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
+import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
@@ -8,6 +9,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
@@ -18,6 +21,35 @@ import java.util.function.Function;
  */
 public class StackTypedHandler implements IStackTypedHandler
 {
+    public static final Codec<StackTypedHandler> CODEC = IStackType.CODEC.listOf().xmap(
+            StackTypedHandler::new,
+            stackTypedHandler -> stackTypedHandler.storage
+    );
+
+    public static final StreamCodec<RegistryFriendlyByteBuf,StackTypedHandler> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, StackTypedHandler>()
+    {
+        @Override
+        public StackTypedHandler decode(RegistryFriendlyByteBuf buf)
+        {
+            int size = buf.readVarInt();
+            StackTypedHandler handler = new StackTypedHandler(size);
+            for(int i = 0; i < size; i++)
+            {
+                handler.setStackDirectly(i,IStackType.deserializeCommon(buf));
+            }
+            return handler;
+        }
+
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, StackTypedHandler stackTypedHandler)
+        {
+            buf.writeVarInt(stackTypedHandler.storage.size());
+            for(IStackType stackType : stackTypedHandler.storage)
+            {
+                stackType.serialize(buf);
+            }
+        }
+    };
 
     /**
      * 实际存储的数据结构
@@ -35,7 +67,7 @@ public class StackTypedHandler implements IStackTypedHandler
     public static final Map<ResourceLocation, Function<StackTypedHandler,Object>> typedHandlerMap = new HashMap<>();
 
     /**
-     * 容量大小，不持久化保存，但是反序列化时以此为准，容量不足则主动扩容以实现对部分旧数据进行兼容
+     * 容量大小，不持久化保存，用于主动扩容以实现对部分旧数据进行兼容
      */
     private final int size;
 
@@ -52,6 +84,27 @@ public class StackTypedHandler implements IStackTypedHandler
         {
             storage.add(new ItemStackType());
             typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(storage.size() - 1);
+        }
+    }
+
+    public StackTypedHandler(List<IStackType> other)
+    {
+        this.storage = new ArrayList<>(other.size());
+        this.size = other.size();
+
+        for(int i=0;i<size;i++)
+        {
+            IStackType stack = other.get(i);
+            if(stack != null)
+            {
+                storage.add(stack.copy());
+                typeIdIndex.computeIfAbsent(stack.getTypeId(), k -> new ArrayList<>()).add(i);
+            }
+            else
+            {
+                storage.set(i, new ItemStackType());
+                typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(i);
+            }
         }
     }
 
@@ -419,5 +472,41 @@ public class StackTypedHandler implements IStackTypedHandler
     {
         return Optional.ofNullable(this.typeIdIndex.get(typeId))
                 .filter(list ->!list.isEmpty());
+    }
+
+    // 对存储的列表元素进行hashcode
+    // 注：由于IStackType的hashcode本身违反了定义，所以这会导致哈希冲突
+    // 但是这里我们可以允许一些哈希冲突，毕竟存储数十个物品且顺序组件一模一样的概率已经非常小了
+    // 剩下的可以交给equals进行真正的比较
+    @Override
+    public int hashCode()
+    {
+        return storage.hashCode(); // 直接用列表哈希即可
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if(obj == this) return true;
+
+        if(obj instanceof StackTypedHandler otherHandler)
+        {
+            if(otherHandler.storage.equals(storage))
+            {
+                // 这表示物品的 种类 组件 顺序都一一相同
+                // 接下来比较数量
+                boolean equals = true;
+                for(int i = 0; i < storage.size(); i++)
+                {
+                    if(storage.get(i).getStackAmount() != otherHandler.storage.get(i).getStackAmount())
+                    {
+                        equals = false;
+                        return equals;
+                    }
+                }
+                return equals;
+            }
+        }
+        return false; // 走到这一步则必然不等
     }
 }

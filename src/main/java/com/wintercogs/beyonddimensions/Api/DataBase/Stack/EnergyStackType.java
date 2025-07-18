@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.EnergyType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
@@ -24,15 +25,12 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/energy");
     public static final EnergyStackType EMPTY = new EnergyStackType(); // 空定义
 
-    public static final Codec<EnergyStackType> CODEC = RecordCodecBuilder.create(instance ->
+    public static final MapCodec<EnergyStackType> TYPE_CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
-                    EnergyType.CODEC.fieldOf("internal_stack")
-                            .forGetter(EnergyStackType::getStack)
-            ).apply(instance, EnergyStackType::new)
-    );
+                    EnergyType.CODEC.fieldOf("internal_stack").forGetter(EnergyStackType::getStack)
+            ).apply(instance, EnergyStackType::new));
 
-    public static final Codec<IStackType<EnergyType>> TYPE_CODEC = CODEC
-            .xmap(stackType -> stackType, interfaceType -> (EnergyStackType) interfaceType);
+    public static final Codec<EnergyStackType> CODEC = TYPE_CODEC.codec();
 
     public EnergyStackType()
     {
@@ -50,7 +48,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     }
 
     @Override
-    public Codec<IStackType<EnergyType>> getCodec()
+    public MapCodec<EnergyStackType> codec()
     {
         return TYPE_CODEC;
     }

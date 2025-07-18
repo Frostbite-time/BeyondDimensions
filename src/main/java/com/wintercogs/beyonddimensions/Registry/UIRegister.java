@@ -23,6 +23,7 @@ public class UIRegister
         NetPumpMenu.MENU_TYPES.register(eventBus);
         NetHopperMenu.MENU_TYPES.register(eventBus);
         NetFurnaceMenu.MENU_TYPES.register(eventBus);
+        NetMagnetMenu.MENU_TYPES.register(eventBus);
     }
 
     @SubscribeEvent
@@ -38,5 +39,6 @@ public class UIRegister
         event.register(NetPumpMenu.Net_Pump_Menu.get(), NetPumpGUI::new);
         event.register(NetHopperMenu.Net_Hopper_Menu.get(), NetHopperGUI::new);
         event.register(NetFurnaceMenu.Net_Furnace_Menu.get(), NetFurnaceGUI::new);
+        event.register(NetMagnetMenu.Net_Magnet_Menu.get(), NetMagnetGUI::new);
     }
 }

@@ -1,5 +1,11 @@
 package com.wintercogs.beyonddimensions.Machine;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+
+// 物品机器的重写是可选的
+// 方块机器相关的必须重写
 public interface BaseMachine extends IMachine
 {
     // working应当每tick调用一次
@@ -11,6 +17,17 @@ public interface BaseMachine extends IMachine
             workStart();
             workContent();
             workEnd();
+        }
+    }
+
+    @Override
+    default void working(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    {
+        if(shouldWork(stack, level, holder, slotId, isSelected))
+        {
+            workStart(stack, level, holder, slotId, isSelected);
+            workContent(stack, level, holder, slotId, isSelected);
+            workEnd(stack, level, holder, slotId, isSelected);
         }
     }
 
@@ -52,7 +69,41 @@ public interface BaseMachine extends IMachine
         return false;
     }
 
+    // 物品的shouldWork需要自行处理步进时间
+    @Override
+    default boolean shouldWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    {
+        RedStoneControlMode controlMode = getControlMode(stack);
+        if(controlMode == null) // 防止初始状态出错
+            return true;
+        switch(controlMode)
+        {
+            case IGNORE ->
+            {
+                return true;
+            }
+            case NOT_WORKING ->
+            {
+                return false;
+            }
+            case POWERED ->
+            {
+                return false;
+            }
+            case UNPOWERED ->
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     RedStoneControlMode getControlMode();
+
+    default RedStoneControlMode getControlMode(ItemStack stack)
+    {
+        return RedStoneControlMode.IGNORE;
+    }
 
     boolean hasRedStoneSignal();
 
@@ -65,4 +116,9 @@ public interface BaseMachine extends IMachine
     default void workStart(){}
     default void workContent(){}
     default void workEnd(){}
+
+    // workStart应该始终检查
+    default void workStart(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected){}
+    default void workContent(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected){}
+    default void workEnd(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected){}
 }

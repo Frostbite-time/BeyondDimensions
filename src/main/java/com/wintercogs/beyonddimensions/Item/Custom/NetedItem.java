@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -64,6 +65,16 @@ public class NetedItem extends Item
         }
 
         return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+    }
+
+    public static DimensionsNet getNet(ItemStack stack, MinecraftServer dataProvider)
+    {
+        int netId = stack.getOrDefault(ModDataComponents.NET_ID_DATA,-1);
+        if(netId >= 0)
+        {
+            return DimensionsNet.getNetFromId(netId,dataProvider);
+        }
+        return null;
     }
 
     // 覆写此方法以实现自定义网络覆写规则

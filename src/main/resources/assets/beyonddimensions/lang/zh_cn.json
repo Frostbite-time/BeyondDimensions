@@ -6,6 +6,7 @@
   "menu.title.beyonddimensions.pump_menu": "网络泵",
   "menu.title.beyonddimensions.hopper_menu": "网络漏斗",
   "menu.title.beyonddimensions.furnace_menu": "网络熔炉",
+  "menu.title.beyonddimensions.magnet_menu": "网络磁铁",
   "beyonddimensions.scrollbar.usage.focused": "滚动条被选为焦点",
   "beyonddimensions.scrollbar.usage.hovered": "鼠标当前在滚动条上",
   "wintercogs.beyonddimensions.dimensionsguisearch": "输入以搜索...",
@@ -83,6 +84,7 @@
   "item.beyonddimensions.net_gifter": "网络赠送符",
   "item.beyonddimensions.net_destroyer": "网络自毁符",
   "item.beyonddimensions.matter_compress_ball": "压缩物质球",
+  "item.beyonddimensions.net_magnet_item": "网络磁铁",
 
   "block.beyonddimensions.net_control": "网络控制器",
   "block.beyonddimensions.net_interface": "网络接口",
