@@ -4,7 +4,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.EnergyUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.Machine.BaseMachine;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import net.minecraft.core.BlockPos;
@@ -24,7 +23,7 @@ import net.neoforged.neoforge.energy.EnergyStorage;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.Nullable;
 
-public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implements BaseMachine, MenuProvider
+public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
 
     public PopMode popMode = PopMode.STOP;

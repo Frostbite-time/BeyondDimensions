@@ -335,6 +335,17 @@ public class StackTypedHandler implements IStackTypedHandler
         return true;
     }
 
+    @Override
+    public boolean isEmpty()
+    {
+        for (IStackType stack : storage) {
+            if (stack != null && !stack.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // region 序列化方法
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();

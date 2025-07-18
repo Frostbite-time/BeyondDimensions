@@ -5,6 +5,7 @@
   "menu.title.beyonddimensions.net_energy_menu": "能量网络",
   "menu.title.beyonddimensions.pump_menu": "网络泵",
   "menu.title.beyonddimensions.hopper_menu": "网络漏斗",
+  "menu.title.beyonddimensions.furnace_menu": "网络熔炉",
   "beyonddimensions.scrollbar.usage.focused": "滚动条被选为焦点",
   "beyonddimensions.scrollbar.usage.hovered": "鼠标当前在滚动条上",
   "wintercogs.beyonddimensions.dimensionsguisearch": "输入以搜索...",
@@ -17,6 +18,8 @@
   "menu.text.beyonddimensions.permission.level.prefix": "权限级别: %s",
   "menu.label.beyonddimensions.filter_slots": "过滤槽位",
   "menu.label.beyonddimensions.tag_and_stored_slots": "标记与存储槽位",
+  "menu.label.beyonddimensions.input_filter_slots": "输入",
+  "menu.label.beyonddimensions.fuel_filter_slots": "燃料",
 
   "tooltip.button.beyonddimensions.sort_asc": "当前：顺序排序",
   "tooltip.button.beyonddimensions.sort_desc": "当前：倒序排序",
@@ -52,6 +55,8 @@
   "tooltip.button.beyonddimensions.hopper_range_mode_high": "当前：收集半径7格",
   "tooltip.button.beyonddimensions.hopper_range_mode_highest": "当前：收集半径10格",
   "tooltip.button.beyonddimensions.hopper_range_mode_chunk": "当前：收集整个区块，但极大降低频率",
+  "tooltip.button.beyonddimensions.receive_mode_stop": "当前：停止收入维度网络",
+  "tooltip.button.beyonddimensions.receive_mode_open": "当前：将资源收入维度网络",
   "tooltip.item.unstable_space_time.long_data": "时空仍在稳定中，仍需%s个稳定周期，请保持随身携带",
   "tooltip.editbox.beyonddimensions.search": "输入'#'以搜索提示框内容",
 
@@ -86,6 +91,7 @@
   "block.beyonddimensions.net_terminal_block": "网络终端",
   "block.beyonddimensions.net_pump_block": "网络泵",
   "block.beyonddimensions.net_hopper_block": "网络漏斗",
+  "block.beyonddimensions.net_furnace_block": "网络熔炉",
 
   "creativetab.beyonddimensions.items": "超越维度-物品",
   "creativetab.beyonddimensions.blocks": "超越维度-方块",

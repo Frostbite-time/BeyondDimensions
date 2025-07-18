@@ -105,7 +105,7 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float v, int i, int i1)
+    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);

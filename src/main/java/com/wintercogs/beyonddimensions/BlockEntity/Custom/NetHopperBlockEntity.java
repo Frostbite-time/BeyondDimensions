@@ -6,8 +6,12 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.Machine.*;
+import com.wintercogs.beyonddimensions.Machine.FilterMode;
+import com.wintercogs.beyonddimensions.Machine.HopperFluidMode;
+import com.wintercogs.beyonddimensions.Machine.HopperNBTMode;
+import com.wintercogs.beyonddimensions.Machine.HopperRangeMode;
 import com.wintercogs.beyonddimensions.Menu.NetHopperMenu;
+import com.wintercogs.beyonddimensions.Unit.ItemStackHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.SectionPos;
@@ -32,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NetHopperBlockEntity extends BaseMachineBlockEntity implements BaseMachine, MenuProvider
+public class NetHopperBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
     private static final int capacity = 36;
     private final StackTypedHandler filterSlots = new StackTypedHandler(capacity)
@@ -160,8 +164,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Base
                     // NBT过滤
                     if(hopperNBTMode == HopperNBTMode.DENY)
                     {
-                        // 这个检测似乎有很大问题，即使是item带来的静态组件也会被认为是有组件从而拒绝
-                        return itemEntity.getItem().getComponents().isEmpty();
+                        return !ItemStackHelper.hasExtraComponents(itemEntity.getItem());
                     }
                     else
                     {

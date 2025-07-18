@@ -13,7 +13,6 @@ import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
-import com.wintercogs.beyonddimensions.Machine.BaseMachine;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import net.minecraft.core.BlockPos;
@@ -38,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements BaseMachine,MenuProvider
+public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
 
     private static final int capacity = 27;

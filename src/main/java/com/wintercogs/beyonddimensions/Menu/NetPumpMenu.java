@@ -45,7 +45,14 @@ public class NetPumpMenu extends BDBaseMenu
 
         this.be = be;
 
-        this.storage = storage;
+        if(playerInventory.player.level().isClientSide())
+        {
+            this.storage = new StackTypedHandler(36);
+        }
+        else
+        {
+            this.storage = storage;
+        }
 
         addPlayerInv(playerInventory);
         addFlagSlots();

@@ -16,6 +16,7 @@ import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
@@ -84,6 +85,7 @@ public class BeyondDimensions
         modEventBus.addListener(NetInterfaceBlockEntity::registerCapability);
         modEventBus.addListener(NetPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetEnergyPathwayBlockEntity::registerCapability);
+        modEventBus.addListener(NetFurnaceBlockEntity::registerCapability);
 
         // 注册事件
         NeoForge.EVENT_BUS.register(this);//注册this类中所有事件

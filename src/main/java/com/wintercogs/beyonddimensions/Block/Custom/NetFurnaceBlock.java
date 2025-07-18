@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetFurnaceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -10,16 +10,18 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class NetEnergyPathwayBlock extends BaseMachineBlock
+// 网络熔炉
+public class NetFurnaceBlock extends BaseMachineBlock
 {
 
-    public NetEnergyPathwayBlock(Properties properties) {
+    public NetFurnaceBlock(Properties properties)
+    {
         super(properties);
     }
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new NetEnergyPathwayBlockEntity(blockPos,blockState);
+        return new NetFurnaceBlockEntity(blockPos,blockState);
     }
 
     @Override
@@ -28,8 +30,21 @@ public class NetEnergyPathwayBlock extends BaseMachineBlock
         super.useWithoutItem(state,level,pos,player,hitResult);
         if(!level.isClientSide()&&!player.isShiftKeyDown())
         {
-            player.openMenu((NetEnergyPathwayBlockEntity)level.getBlockEntity(pos),pos);
+            player.openMenu((NetFurnaceBlockEntity)level.getBlockEntity(pos),pos);
         }
         return InteractionResult.SUCCESS_NO_ITEM_USED;
+    }
+
+    // 处理掉落物
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
+    {
+        if (!state.is(newState.getBlock())) {
+            if (level.getBlockEntity(pos) instanceof NetFurnaceBlockEntity blockEntity) {
+                level.updateNeighbourForOutputSignal(pos, this);
+                blockEntity.dropContent();
+            }
+            super.onRemove(state, level, pos, newState, movedByPiston);
+        }
     }
 }

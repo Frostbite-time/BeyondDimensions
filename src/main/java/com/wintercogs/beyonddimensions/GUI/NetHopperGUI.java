@@ -194,10 +194,20 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
 
         if(controlModeButton.currentState != menu.be.controlMode)
             controlModeButton.setState(menu.be.controlMode);
+
+        if(hopperNBTModeButton.currentState != menu.be.hopperNBTMode)
+            hopperNBTModeButton.setState(menu.be.hopperNBTMode);
+
+        if(hopperFluidModeButton.currentState != menu.be.hopperFluidMode)
+            hopperFluidModeButton.setState(menu.be.hopperFluidMode);
+
+        if(hopperRangeModeButton.currentState != menu.be.hopperRangeMode)
+            hopperRangeModeButton.setState(menu.be.hopperRangeMode);
+
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float v, int i, int i1)
+    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);

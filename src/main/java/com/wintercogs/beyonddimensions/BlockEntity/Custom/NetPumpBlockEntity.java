@@ -11,7 +11,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.Machine.BaseMachine;
 import com.wintercogs.beyonddimensions.Machine.FilterMode;
 import com.wintercogs.beyonddimensions.Menu.NetPumpMenu;
 import net.minecraft.core.BlockPos;
@@ -30,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public class NetPumpBlockEntity extends BaseMachineBlockEntity implements BaseMachine , MenuProvider
+public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
     // 存储相邻方块的能力
     // 按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器

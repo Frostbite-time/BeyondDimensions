@@ -36,10 +36,12 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     }
 
     // 内部会copy这个stack，因此无需再次操作
+    // Flag实际上会通过insert插入，这样能考虑内部的isStackValid，从而限制标记类型
     @Override
     public void setStackDirectly(IStackType stack)
     {
-        storage.setStackDirectly(theSlot, stack);
+        storage.setStackDirectly(theSlot, new ItemStackType());
+        storage.insert(theSlot,stack,false);
     }
 
     @Override
@@ -74,7 +76,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                 {
                     ItemStack copy = carriedItem.copy();
                     copy.setCount(1);
-                    storage.setStackDirectly(getSlotIndex(), new ItemStackType(copy));
+                    setStackDirectly(new ItemStackType(copy));
                 }
                 else if(button==1)
                 {
@@ -96,7 +98,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                                     IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(0),1);
                                     if(stack!=null&& !stack.isEmpty())
                                     {
-                                        storage.setStackDirectly(getSlotIndex(),stack);
+                                        setStackDirectly(stack);
                                         break;
                                     }
                                 }
@@ -113,13 +115,12 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
             if (carriedItem.isEmpty())
             {
                 //槽位物品存在，携带物品为空，尝试清空标记
-                storage.setStackDirectly(getSlotIndex(), new ItemStackType());
+                setStackDirectly(new ItemStackType());
             }
             else if (true)
             {   //槽位物品存在，携带物品存在，物品可以放置，取消标记
 
-                storage.setStackDirectly(getSlotIndex(), new ItemStackType());
-
+                setStackDirectly(new ItemStackType());
             }
             else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
             {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
@@ -161,6 +162,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public void loadChange(int where ,IStackType newStack, long newAmount)
     {
+        // 同步读取仍直接操作storage
         storage.setStackDirectly(where, newStack);
     }
 }

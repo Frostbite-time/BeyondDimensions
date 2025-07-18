@@ -25,4 +25,19 @@ public class CommonTextures
     public static final ResourceLocation RIGHT_TAB = ResourceLocation.parse("beyonddimensions:widget/right_tab");
     public static final int RIGHT_TAB_WIDTH = 26;
     public static final int RIGHT_TAB_HEIGHT = 12;
+
+    // 网络熔炉背景图
+    public static final ResourceLocation NET_FURNACE_BACKGROUND = ResourceLocation.parse("beyonddimensions:textures/gui/net_furnace.png");
+    public static final int NET_FURNACE_BACKGROUND_WIDTH = 230;
+    public static final int NET_FURNACE_BACKGROUND_HEIGHT = 210;
+
+    // 进度条箭头-完成填充
+    public static final ResourceLocation WORK_DONE_V = ResourceLocation.parse("beyonddimensions:widget/work_done_v");
+    public static final int WORK_DONE_V_WIDTH = 14;
+    public static final int WORK_DONE_V_HEIGHT = 19;
+
+    // 原版火焰贴图
+    public static final ResourceLocation FURNACE_WORK_V = ResourceLocation.parse("beyonddimensions:widget/furnace_work_v");
+    public static final int FURNACE_WORK_V_WIDTH = 12;
+    public static final int FURNACE_WORK_V_HEIGHT = 12;
 }
