@@ -38,6 +38,7 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.NET_DESTROYER);
                         output.accept(ModItems.MATTER_COMPRESS_BALL);
                         output.accept(ModItems.NET_MAGNET_ITEM);
+                        output.accept(ModItems.NET_FEEDER_ITEM);
                     })
                     .build());
 

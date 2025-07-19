@@ -124,6 +124,20 @@ public class ModDataComponents {
             )
     );
 
+    public static final DeferredHolder<DataComponentType<?>,DataComponentType<FeederMode>> FEEDER_MODE = register(
+            "feeder_mode", builder -> builder.persistent(
+                    Codec.STRING.xmap(
+                            FeederMode::valueOf,
+                            FeederMode::name
+                    )
+            ).networkSynchronized(
+                    ByteBufCodecs.STRING_UTF8.map(
+                            FeederMode::valueOf,
+                            FeederMode::name
+                    )
+            )
+    );
+
     private static <T> DeferredHolder<DataComponentType<?>,DataComponentType<T>> register(String name, UnaryOperator<DataComponentType.Builder<T>> builder) {
         return DATA_COMPONENTS.register(name,()->  builder.apply(DataComponentType.builder()).build());
     }

@@ -7,6 +7,7 @@
   "menu.title.beyonddimensions.hopper_menu": "网络漏斗",
   "menu.title.beyonddimensions.furnace_menu": "网络熔炉",
   "menu.title.beyonddimensions.magnet_menu": "网络磁铁",
+  "menu.title.beyonddimensions.feeder_menu": "网络喂食器",
   "beyonddimensions.scrollbar.usage.focused": "滚动条被选为焦点",
   "beyonddimensions.scrollbar.usage.hovered": "鼠标当前在滚动条上",
   "wintercogs.beyonddimensions.dimensionsguisearch": "输入以搜索...",
@@ -58,6 +59,10 @@
   "tooltip.button.beyonddimensions.hopper_range_mode_chunk": "当前：收集整个区块，但极大降低频率",
   "tooltip.button.beyonddimensions.receive_mode_stop": "当前：停止收入维度网络",
   "tooltip.button.beyonddimensions.receive_mode_open": "当前：将资源收入维度网络",
+  "tooltip.button.beyonddimensions.feeder_mode_hunger_to_eat": "当前：饱食度低于10%再喂食",
+  "tooltip.button.beyonddimensions.feeder_mode_normal": "当前：饱食度低于一半时喂食",
+  "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "当前：时刻保证玩家的饱和度高于0",
+  "tooltip.button.beyonddimensions.feeder_mode_crazy": "当前：始终填满饱食度",
   "tooltip.item.unstable_space_time.long_data": "时空仍在稳定中，仍需%s个稳定周期，请保持随身携带",
   "tooltip.editbox.beyonddimensions.search": "输入'#'以搜索提示框内容",
 
@@ -85,6 +90,7 @@
   "item.beyonddimensions.net_destroyer": "网络自毁符",
   "item.beyonddimensions.matter_compress_ball": "压缩物质球",
   "item.beyonddimensions.net_magnet_item": "网络磁铁",
+  "item.beyonddimensions.net_feeder_item": "网络喂食器",
 
   "block.beyonddimensions.net_control": "网络控制器",
   "block.beyonddimensions.net_interface": "网络接口",
