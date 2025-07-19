@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.ItemStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
@@ -28,6 +29,8 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -139,6 +142,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         {
             // 能量或者可以燃烧的物品能作为燃料标记
             return (stack instanceof EnergyStackType)
+                    || (stack instanceof FluidStackType fluidStack && fluidStack.copyStack().getFluid() == Fluids.LAVA)
                     || (stack instanceof ItemStackType itemFuel && itemFuel.getStack().getBurnTime(RecipeType.SMELTING) >0);
         }
 
@@ -202,6 +206,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         {
             // 能量或者可以燃烧的物品能作为燃料标记
             return (stack instanceof EnergyStackType)
+                    || (stack instanceof FluidStackType fluidStack && fluidStack.copyStack().getFluid() == Fluids.LAVA)
                     || (stack instanceof ItemStackType itemFuel && itemFuel.getStack().getBurnTime(RecipeType.SMELTING) >0);
         }
     };
@@ -292,7 +297,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
 
         // 输入槽为空 并且 标记槽无物品，可以判为无工作意图
         // 再加上output和fuelreturn，可以正确执行弹出和收纳设置
-        return super.shouldWork() && (!inputStorageSlots.isEmpty() || !inputFilterSlots.isEmpty() || !outputStorageSlots.isEmpty() || !fuelReturnSlots.isEmpty());
+        return super.shouldWork() &&
+                (!inputStorageSlots.isEmpty() || !inputFilterSlots.isEmpty() || !outputStorageSlots.isEmpty() || !fuelReturnSlots.isEmpty() || !fuelStorageSlots.isEmpty() || !fuelFilterSlots.isEmpty());
     }
 
     @Override
@@ -359,7 +365,30 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                 {
                     if(!fuelStack.isEmpty())
                     {
-                        if(fuelStack instanceof ItemStackType fuelItem)
+                        if(fuelStack instanceof EnergyStackType fuelEnergy)
+                        {
+                            // 每个fe对应1tick燃烧时间
+                            int burnTime = (int)Math.min(fuelEnergy.getStackAmount(),20000);
+                            if(burnTime > 0)
+                            {
+                                fuelStorageSlots.extract(fuelEnergy.copyWithCount(burnTime),false);
+                                litTime.set(litSlot,burnTime);
+                                litDuration.set(litSlot,burnTime);
+                            }
+                        }
+                        else if(fuelStack instanceof FluidStackType fuelFluid && fuelFluid.copyStack().getFluid() == Fluids.LAVA)
+                        {
+                            // 每mb熔岩对应20tick燃烧时间
+                            int burnNum = (int)Math.min(fuelFluid.getStackAmount(),1000);
+                            int burnTime = burnNum * 20;
+                            if(burnTime > 0)
+                            {
+                                fuelStorageSlots.extract(fuelFluid.copyWithCount(burnNum),false);
+                                litTime.set(litSlot,burnTime);
+                                litDuration.set(litSlot,burnTime);
+                            }
+                        }
+                        else if(fuelStack instanceof ItemStackType fuelItem)
                         {
                             int burnTime = fuelItem.getStack().getBurnTime(RecipeType.SMELTING);
                             if(burnTime > 0)
@@ -390,17 +419,6 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
 
                             }
 
-                        }
-                        else if(fuelStack instanceof EnergyStackType fuelEnergy)
-                        {
-                            // 每个fe对应1tick燃烧时间
-                            int burnTime = (int)Math.min(fuelEnergy.getStackAmount(),20000);
-                            if(burnTime > 0)
-                            {
-                                fuelStorageSlots.extract(fuelEnergy.copyWithCount(burnTime),false);
-                                litTime.set(litSlot,burnTime);
-                                litDuration.set(litSlot,burnTime);
-                            }
                         }
                     }
                 }
@@ -564,12 +582,13 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             }
         }
 
-        // 燃料槽处理-如果开始接收模式，在不标记能量时，将能量收回网络
+        // 燃料槽处理-如果开始接收模式，在不标记能量时，将能量或流体等不方便存取的堆叠收回网络
         // 这会防止能量堵塞在燃料口
         for(int fuelSlot = 0; fuelSlot < fuelCapacity; fuelSlot++)
         {
             IStackType fuelStack = fuelStorageSlots.getStackBySlot(fuelSlot);
-            if(fuelStack != null && !fuelStack.isEmpty() && fuelStack instanceof EnergyStackType)
+            if(fuelStack != null && !fuelStack.isEmpty()
+                    && (fuelStack instanceof EnergyStackType || fuelStack instanceof FluidStackType))
             {
                 // 转移至网络
                 if(receiveMode == ReceiveMode.OPEN)
