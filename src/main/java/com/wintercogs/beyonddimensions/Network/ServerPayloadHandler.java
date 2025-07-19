@@ -9,7 +9,9 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.GUI.NetMenuType;
+import com.wintercogs.beyonddimensions.Item.Custom.NetMagnetItem;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
+import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
@@ -25,10 +27,14 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
+import top.theillusivec4.curios.api.SlotResult;
+
+import java.util.List;
 
 public class ServerPayloadHandler
 {
@@ -335,6 +341,50 @@ public class ServerPayloadHandler
                     {
                         menu.readQuickDataTag(packet.tag());
                     }
+                }
+        );
+    }
+
+    public void handleToggleMagnetPacket(final ToggleMagnetPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+                    Player player = context.player();
+
+                    for(ItemStack stack: player.getInventory().items)
+                    {
+                        if(stack.getItem() instanceof NetMagnetItem)
+                        {
+                            if(stack.has(ModDataComponents.CONTROL_MODE))
+                            {
+                                if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                                    stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                                else if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                                    stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                            }
+                        }
+                    }
+                    top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler ->{
+                        List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
+                                .stream()
+                                .map(SlotResult::stack)
+                                .toList();
+
+                        for(ItemStack stack: curios)
+                        {
+                            if(stack.getItem() instanceof NetMagnetItem)
+                            {
+                                if(stack.has(ModDataComponents.CONTROL_MODE))
+                                {
+                                    if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                                        stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                                    else if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                                        stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                                }
+                            }
+                        }
+                    });
                 }
         );
     }

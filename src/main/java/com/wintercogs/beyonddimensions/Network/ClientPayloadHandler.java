@@ -196,4 +196,14 @@ public class ClientPayloadHandler
                 }
         );
     }
+
+    public void handleToggleMagnetPacket(final ToggleMagnetPacket packet, final IPayloadContext context)
+    {
+        context.enqueueWork(
+                () ->
+                {
+
+                }
+        );
+    }
 }

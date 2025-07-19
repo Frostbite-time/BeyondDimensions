@@ -74,6 +74,7 @@
   "key.beyonddimensions.open_gui": "ネットワークを開く",
   "key.beyonddimensions.open_terminal_quick_key": "インベントリー内のターミナルをすばやく開く",
   "key.beyonddimensions.main_hand_item_transfer_key": "メインハンドのアイテムをクイック転送",
+  "key.beyonddimensions.toggle_magnet_key": "マグネット切り替え",
 
   "item.beyonddimensions.net_creater": "次元ネットワーク生成器",
   "item.beyonddimensions.net_member_inviter": "メンバー接続器",

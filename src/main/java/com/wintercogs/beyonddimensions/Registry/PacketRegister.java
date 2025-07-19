@@ -141,5 +141,14 @@ public class PacketRegister
                         ServerPayloadHandler.getInstance()::handleQuickDataTagPacket
                 )
         );
+
+        registrar.playBidirectional(
+                ToggleMagnetPacket.TYPE,
+                ToggleMagnetPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler.getInstance()::handleToggleMagnetPacket,
+                        ServerPayloadHandler.getInstance()::handleToggleMagnetPacket
+                )
+        );
     }
 }

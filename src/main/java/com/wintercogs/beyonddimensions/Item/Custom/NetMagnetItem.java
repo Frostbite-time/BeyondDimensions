@@ -41,7 +41,7 @@ public class NetMagnetItem extends BaseMachineItem
 
     public NetMagnetItem(Properties properties)
     {
-        super(properties);
+        super(properties.stacksTo(1));
     }
 
     @Override

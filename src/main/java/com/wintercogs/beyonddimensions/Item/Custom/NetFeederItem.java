@@ -28,7 +28,7 @@ public class NetFeederItem extends BaseMachineItem
 
     public NetFeederItem(Properties properties)
     {
-        super(properties);
+        super(properties.stacksTo(1));
     }
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
