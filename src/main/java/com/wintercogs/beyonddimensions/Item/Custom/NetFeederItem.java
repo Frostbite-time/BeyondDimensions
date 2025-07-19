@@ -80,6 +80,7 @@ public class NetFeederItem extends BaseMachineItem
 
             FoodData playerFoodState = player.getFoodData();
 
+            // feederModeMatch会进行一次饥饿值判定，决定要不要实际执行
             if(feederModeMatch(playerFoodState,feederMode))
             {
                 UnifiedStorage storage = NetedItem.getNet(stack,level.getServer()).getUnifiedStorage();
@@ -165,6 +166,6 @@ public class NetFeederItem extends BaseMachineItem
     @Override
     public int getTicksPerWork()
     {
-        return 0;
+        return 10; //每10tick检测一次
     }
 }

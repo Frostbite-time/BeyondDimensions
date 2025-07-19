@@ -24,9 +24,9 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
         if (level.isClientSide()) return;
 
         // 同时确保getTicksPerWork为0时可以每tick触发
-        if(getTicksPerWork() <= 0)
+        if(getTicksPerWork(stack,level,entity,slotId,isSelected) <= 0)
             working(stack, level, entity, slotId, isSelected);
-        else if(level.getGameTime() % getTicksPerWork() == 0)
+        else if(level.getGameTime() % getTicksPerWork(stack,level,entity,slotId,isSelected) == 0)
             working(stack, level, entity, slotId, isSelected);
     }
 

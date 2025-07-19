@@ -107,7 +107,8 @@ public interface BaseMachine extends IMachine
 
     boolean hasRedStoneSignal();
 
-    int getTicksPerWork();
+    default int getTicksPerWork(){ return 0; }
+    default int getTicksPerWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected){ return 0; }
 
     int getStepTick();
 

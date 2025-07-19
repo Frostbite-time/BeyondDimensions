@@ -64,7 +64,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     @Override
     public int getTicksPerWork()
     {
-        return 1;
+        return 10;
     }
 
     @Override

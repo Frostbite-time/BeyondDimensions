@@ -71,7 +71,15 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     @Override
     public int getTicksPerWork()
     {
-        return 1;
+        return switch (hopperRangeMode)
+        {
+            case RADIUS_LOWEST -> 5;
+            case RADIUS_LOW -> 10;
+            case RADIUS_MID -> 20;
+            case RADIUS_HIGH -> 60;
+            case RADIUS_HIGHEST -> 100;
+            case CHUNK_MODE -> 1200;
+        };
     }
 
     @Override
@@ -117,7 +125,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
             //更正半径
             int radius = switch (hopperRangeMode)
             {
-                case RADIUS_LOWEST -> 1;
+                case RADIUS_LOWEST -> 2;
                 case RADIUS_LOW -> 3;
                 case RADIUS_MID -> 5;
                 case RADIUS_HIGH -> 7;
