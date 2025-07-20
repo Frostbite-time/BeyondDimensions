@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public class NetPumpBlock extends BaseMachineBlock
 {
     public NetPumpBlock(Properties properties) {
-        super(properties);
+        super(properties.noOcclusion());
     }
 
     @Override

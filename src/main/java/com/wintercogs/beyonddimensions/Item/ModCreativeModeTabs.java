@@ -57,6 +57,7 @@ public class ModCreativeModeTabs
                         output.accept(ModBlocks.NET_PUMP_BLOCK);
                         output.accept(ModBlocks.NET_HOPPER_BLOCK);
                         output.accept(ModBlocks.NET_FURNACE_BLOCK);
+                        output.accept(ModBlocks.DIMENSIONAL_CONNECT_BLOCK);
                     })
                     .build());
 

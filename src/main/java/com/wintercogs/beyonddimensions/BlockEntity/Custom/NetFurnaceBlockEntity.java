@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Util.CombinedItemHandlerWrapper;
+import com.wintercogs.beyonddimensions.Block.Custom.NetFurnaceBlock;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
@@ -293,6 +294,16 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
     {
         // 无论是否工作，总是先降低燃料持续时间
         litTime.replaceAll(i -> Math.max(0, i - 1));
+        // 更新方块状态
+        if (litTime.stream().allMatch(t -> t <= 0))
+        {
+            setLit(false);
+        }
+        else
+        {
+            setLit(true);
+        }
+
         level.blockEntityChanged(worldPosition); //熔炉所在的区块总是需要保存的（比起为每个熔炉都判断燃烧时间，显然让区块始终保存性能更好，毕竟设为需要保存只是一个布尔值设置）
 
         // 输入槽为空 并且 标记槽无物品，可以判为无工作意图
@@ -731,6 +742,22 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         tag.putString("pop_mode",this.popMode.name());
         tag.putString("receive_mode",this.receiveMode.name());
     }
+
+    public void setLit(boolean lit) {
+        if (level == null || level.isClientSide()) return;
+
+        BlockState state = this.getBlockState();
+        if (state.getValue(NetFurnaceBlock.LIT) != lit) {
+            level.setBlock(
+                    worldPosition,
+                    state.setValue(NetFurnaceBlock.LIT, lit),
+                    Block.UPDATE_CLIENTS        // 仅通知客户端 + 保存到区块
+            );
+            // 如果方块附带其他 NBT 数据，也别忘了：
+            setChanged(level, worldPosition, state);
+        }
+    }
+
 
     @Override
     public Component getDisplayName()

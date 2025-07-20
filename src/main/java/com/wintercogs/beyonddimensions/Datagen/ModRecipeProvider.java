@@ -179,5 +179,67 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("unlock_net_ae_storage_cell", has(ModItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .pattern("ABA")
+                .pattern("BCB")
+                .pattern("ABA")
+                .define('A', ModItems.SPACE_TIME_BAR.get())
+                .define('B', Items.IRON_INGOT)
+                .define('C', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                .unlockedBy("unlock_dimensionsal_connect_block", has(ModItems.SPACE_TIME_BAR.get()))
+                .save(recipeOutput);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.NET_FURNACE_BLOCK.get())
+                .pattern("AAA")
+                .pattern("BCB")
+                .pattern("ADA")
+                .define('A', Items.COBBLESTONE)
+                .define('B', Items.PISTON)
+                .define('C', ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .define('D', Items.REDSTONE_TORCH)
+                .unlockedBy("unlock_net_furnace_block", has(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
+                .save(recipeOutput);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.NET_PUMP_BLOCK.get())
+                .pattern("ABA")
+                .pattern("BCB")
+                .pattern("ABA")
+                .define('A', Items.COBBLESTONE)
+                .define('B', Items.STICKY_PISTON)
+                .define('C', ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .unlockedBy("unlock_net_pump_block", has(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
+                .save(recipeOutput);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.NET_HOPPER_BLOCK.get())
+                .pattern("   ")
+                .pattern("ABC")
+                .pattern("DDD")
+                .define('A', Items.BUCKET)
+                .define('B', ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .define('C', Items.HOPPER)
+                .define('D', Items.COBBLESTONE)
+                .unlockedBy("unlock_net_hopper_block", has(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
+                .save(recipeOutput);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_MAGNET_ITEM.get())
+                .pattern(" AB")
+                .pattern("A C")
+                .pattern(" AB")
+                .define('A', ModItems.SPACE_TIME_BAR.get())
+                .define('B', Items.IRON_INGOT)
+                .define('C', ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get())
+                .unlockedBy("unlock_net_magnet_item", has(ModItems.SPACE_TIME_BAR.get()))
+                .save(recipeOutput);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_FEEDER_ITEM.get())
+                .pattern(" AA")
+                .pattern("ABC")
+                .pattern(" AA")
+                .define('A', ModItems.SPACE_TIME_BAR.get())
+                .define('B', Items.APPLE)
+                .define('C', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                .unlockedBy("unlock_net_feeder_item", has(ModItems.SPACE_TIME_BAR.get()))
+                .save(recipeOutput);
+
     }
 }
