@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Api.Util.HashBPlusList;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import net.minecraft.core.HolderLookup;
@@ -45,6 +46,13 @@ public class UnifiedStorage implements IStackTypedHandler
      * 存储的数据结构
      */
     private final HashBPlusList<IStackType> storage = new HashBPlusList<>(64,128);
+
+    /**
+     * 存储的错误备份结构
+     * 每次保存或者读取时，将其设为storage的深克隆
+     * 如果在保存时出现错误，则利用其进行一个最近回退处理
+     */
+    private HashBPlusList<IStackType> backupStorage = new HashBPlusList<>(64,128);
 
     /**
      * 为构建分化包装提供良好的性能，其结构为 [资源种类id：对应资源类型的索引列表]
@@ -413,28 +421,65 @@ public class UnifiedStorage implements IStackTypedHandler
     // endregion
 
     // region 序列化方法
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        CompoundTag tag = new CompoundTag();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider)
+    {
+        try { // 尝试保存
+            CompoundTag tag = new CompoundTag();
 
-        tag.putLong("slotCapacity", this.slotCapacity);
-        tag.putInt("slotMaxSize", this.slotMaxSize);
+            tag.putLong("slotCapacity", this.slotCapacity);
+            tag.putInt("slotMaxSize", this.slotMaxSize);
 
-        ListTag stacksTag = new ListTag();
+            ListTag stacksTag = new ListTag();
 
-        for (IStackType stack : storage) {
-            // 修改后的序列化代码
-            if(stack.isEmpty())
-                continue; // 不序列化空物品
-            CompoundTag stackTag = new CompoundTag();
-            // 使用类型安全的序列化方式 将堆叠数据放入"Data"标签
-            stackTag.put("TypedStack",stack.serializeNBT(provider));
-            stackTag.putString("Type",stack.getTypeId().toString());
-            stacksTag.add(stackTag);
+            for (IStackType stack : storage) {
+                // 修改后的序列化代码
+                if(stack.isEmpty())
+                    continue; // 不序列化空物品
+                CompoundTag stackTag = new CompoundTag();
+                // 使用类型安全的序列化方式 将堆叠数据放入"Data"标签
+                stackTag.put("TypedStack",stack.serializeNBT(provider));
+                stackTag.putString("Type",stack.getTypeId().toString());
+                stacksTag.add(stackTag);
+            }
+
+            tag.put("Stacks", stacksTag);
+
+            // 保存成功，刷新备份并返回
+            backupStorage = deepClone(storage);
+            return tag;
+
+        } catch (Exception ex) {
+            BeyondDimensions.LOGGER.error("{}号维度网络保存失败，尝试使用最近的备份并打印错误信息",net.getId(), ex);
+
+            // === 回滚：用备份替换当前内存状态 ===
+            storage.clear();
+            if (backupStorage != null) {
+                for (IStackType s : backupStorage) storage.add(s.copy());
+            }
+
+            CompoundTag tag = new CompoundTag();
+
+            tag.putLong("slotCapacity", this.slotCapacity);
+            tag.putInt("slotMaxSize", this.slotMaxSize);
+
+            ListTag stacksTag = new ListTag();
+
+            for (IStackType stack : storage) {
+                // 修改后的序列化代码
+                if(stack.isEmpty())
+                    continue; // 不序列化空物品
+                CompoundTag stackTag = new CompoundTag();
+                // 使用类型安全的序列化方式 将堆叠数据放入"Data"标签
+                stackTag.put("TypedStack",stack.serializeNBT(provider));
+                stackTag.putString("Type",stack.getTypeId().toString());
+                stacksTag.add(stackTag);
+            }
+
+            tag.put("Stacks", stacksTag);
+
+            // 保存成功
+            return tag;
         }
-
-        tag.put("Stacks", stacksTag);
-
-        return tag;
     }
 
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
@@ -465,6 +510,7 @@ public class UnifiedStorage implements IStackTypedHandler
             // 更新索引
             typeIdIndex.computeIfAbsent(typeId, k -> new ArrayList<>()).add(storage.size() - 1);
         }
+        backupStorage = deepClone(storage); // 对内容进行备份
     }
     // endregion
 
@@ -521,5 +567,17 @@ public class UnifiedStorage implements IStackTypedHandler
     {
         this.slotMaxSize = maxSize;
     }
+
+
+    /** 把 origin 深克隆到一个新的 HashBPlusList */
+    private static HashBPlusList<IStackType> deepClone(HashBPlusList<IStackType> origin) {
+        // ⚠️ 直接用与原始列表相同的构造参数。若以后改参数，就改这里。
+        HashBPlusList<IStackType> clone = new HashBPlusList<>(64, 128);
+        for (IStackType s : origin) {
+            clone.add(s.copy());   // IStackType.copy() = 深克隆
+        }
+        return clone;
+    }
+
 }
 

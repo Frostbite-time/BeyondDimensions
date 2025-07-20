@@ -36,20 +36,17 @@ public class NetFurnaceBlock extends BaseMachineBlock
                         .setValue(LIT, false));
     }
 
-    // === 3. 把属性加入状态容器 ===
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, LIT);
     }
 
-    // === 4. 放置时决定朝向 ===
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         return this.defaultBlockState().setValue(
                 FACING, ctx.getHorizontalDirection().getOpposite());
     }
 
-    // === 5. 随结构块旋转 / 镜像时自动更新 Facing ===
     @Override
     public BlockState rotate(BlockState state, Rotation rot) {
         return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
