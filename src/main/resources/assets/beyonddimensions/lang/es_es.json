@@ -64,7 +64,7 @@
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Actual: Mantener >0 saturación",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Actual: Saciedad siempre llena",
   "tooltip.item.unstable_space_time.long_data": "El espacio-tiempo aún se estabiliza, faltan %s ciclos. Por favor, llévalo siempre contigo.",
-  "tooltip.editbox.beyonddimensions.search": "Introduce '#' para buscar contenido de tooltips",
+  "tooltip.editbox.beyonddimensions.search": "Escribe '#' para filtrar el contenido de los tooltips\nEscribe '@' para filtrar los ID de mods",
 
   "istack.beyonddimensions.storage_num.item": "Almacenado: %s unidades",
   "istack.beyonddimensions.storage_num.fluid": "Almacenado: %s mB",

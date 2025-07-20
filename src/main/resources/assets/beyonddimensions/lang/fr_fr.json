@@ -64,7 +64,7 @@
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Actuel : Maintenir >0 saturation",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Actuel : Saturation toujours pleine",
   "tooltip.item.unstable_space_time.long_data": "L'espace-temps se stabilise encore, %s cycles requis. Gardez-le sur vous en permanence.",
-  "tooltip.editbox.beyonddimensions.search": "Tapez '#' pour rechercher dans les infobulles",
+  "tooltip.editbox.beyonddimensions.search": "Saisissez '#' pour filtrer le contenu des infobulles\nSaisissez '@' pour filtrer les ID de mods",
 
   "istack.beyonddimensions.storage_num.item": "Stocké : %s unités",
   "istack.beyonddimensions.storage_num.fluid": "Stocké : %s mB",

@@ -64,7 +64,7 @@
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "当前：时刻保证玩家的饱和度高于0",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "当前：始终填满饱食度",
   "tooltip.item.unstable_space_time.long_data": "时空仍在稳定中，仍需%s个稳定周期，请保持随身携带",
-  "tooltip.editbox.beyonddimensions.search": "输入'#'以搜索提示框内容",
+  "tooltip.editbox.beyonddimensions.search": "输入'#'以筛选提示框内容\n输入'@'以筛选模组ID",
 
   "istack.beyonddimensions.storage_num.item": "已存储：%s个",
   "istack.beyonddimensions.storage_num.fluid": "已存储：%smB",

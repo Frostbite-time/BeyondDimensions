@@ -64,7 +64,7 @@
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "現在：飽和度0以上を維持",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "現在：常時満腹状態",
   "tooltip.item.unstable_space_time.long_data": "時空は安定化中、残り%s回の安定化サイクルが必要です。常に携帯してください。",
-  "tooltip.editbox.beyonddimensions.search": "「#」を入力してツールチップを検索",
+  "tooltip.editbox.beyonddimensions.search": "「#」を入力してツールチップの内容をフィルタリング\n「@」を入力してMod IDをフィルタリング",
 
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
   "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",

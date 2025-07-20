@@ -64,7 +64,7 @@
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "현재: 포화도 0 이상 유지",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "현재: 항상 완전 포만 상태",
   "tooltip.item.unstable_space_time.long_data": "시공간 안정화 중, %s회의 안정화 주기 남음. 항상 휴대하십시오.",
-  "tooltip.editbox.beyonddimensions.search": "도구 설명 검색: '#' 입력",
+  "tooltip.editbox.beyonddimensions.search": "'#' 입력 시 툴팁 내용 필터링\n'@' 입력 시 모드 ID 필터링",
 
   "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
   "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",

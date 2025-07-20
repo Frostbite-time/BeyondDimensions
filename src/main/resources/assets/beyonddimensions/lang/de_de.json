@@ -64,7 +64,7 @@
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Aktuell: Sättigung immer >0 halten",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Aktuell: Immer volle Sättigung",
   "tooltip.item.unstable_space_time.long_data": "Raumzeit stabilisiert sich noch, %s Stabilisierungszyklen benötigt. Bitte stets bei sich tragen.",
-  "tooltip.editbox.beyonddimensions.search": "Gib '#' ein, um Tooltip-Inhalte zu suchen",
+  "tooltip.editbox.beyonddimensions.search": "Geben Sie '#' ein, um die Tooltip-Inhalte zu filtern\nGeben Sie '@' ein, um die Mod-IDs zu filtern",
 
   "istack.beyonddimensions.storage_num.item": "Gespeichert: %s Stück",
   "istack.beyonddimensions.storage_num.fluid": "Gespeichert: %s mB",

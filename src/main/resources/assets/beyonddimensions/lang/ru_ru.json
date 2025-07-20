@@ -64,7 +64,7 @@
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Текущий: Поддерживать >0 насыщения",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Текущий: Полная сытость всегда",
   "tooltip.item.unstable_space_time.long_data": "Пространство-время стабилизируется, осталось %s циклов. Носите с собой постоянно.",
-  "tooltip.editbox.beyonddimensions.search": "Введите '#', чтобы искать в подсказках",
+  "tooltip.editbox.beyonddimensions.search": "Введите '#', чтобы фильтровать содержимое подсказок\nВведите '@', чтобы фильтровать ID модов",
 
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
   "istack.beyonddimensions.storage_num.fluid": "Сохранено: %s мБ",
