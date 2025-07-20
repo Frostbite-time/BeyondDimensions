@@ -37,6 +37,8 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.NET_GIFTER);
                         output.accept(ModItems.NET_DESTROYER);
                         output.accept(ModItems.MATTER_COMPRESS_BALL);
+                        output.accept(ModItems.NET_MAGNET_ITEM);
+                        output.accept(ModItems.NET_FEEDER_ITEM);
                     })
                     .build());
 
@@ -52,6 +54,10 @@ public class ModCreativeModeTabs
                         output.accept(ModBlocks.NET_PATHWAY);
                         output.accept(ModBlocks.NET_ENERGY_PATHWAY);
                         output.accept(ModBlocks.NET_TERMINAL_BLOCK);
+                        output.accept(ModBlocks.NET_PUMP_BLOCK);
+                        output.accept(ModBlocks.NET_HOPPER_BLOCK);
+                        output.accept(ModBlocks.NET_FURNACE_BLOCK);
+                        output.accept(ModBlocks.DIMENSIONAL_CONNECT_BLOCK);
                     })
                     .build());
 

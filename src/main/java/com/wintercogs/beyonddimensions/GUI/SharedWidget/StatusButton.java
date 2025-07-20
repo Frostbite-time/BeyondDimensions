@@ -1,29 +1,37 @@
 package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class StatusButton extends IconButton
 {
-    protected ArrayList<ButtonState> states = new ArrayList<>();
-    protected Map<ButtonState,ResourceLocation> iconMap = new HashMap<>();
-    protected Map<ButtonState, Tooltip> tooltipMap = new HashMap<>(); // 需要添加可变工具提示则添加 需要固定工具提示则直接setTooltip，此处留空
-    public ButtonState currentState;
+    protected ArrayList<Enum<?>> states = new ArrayList<>();
+    // 保证按钮切换顺序按照插入顺序
+    protected Map<Enum<?>,ResourceLocation> iconMap = new LinkedHashMap<>();
+    protected Map<Enum<?>, Tooltip> tooltipMap = new LinkedHashMap<>(); // 需要添加可变工具提示则添加 需要固定工具提示则直接setTooltip，此处留空
+    public Enum<?> currentState;
 
 
-    protected StatusButton(int x, int y, int width, int height, ButtonName name, OnPress onPress)
+    protected StatusButton(int x, int y, int width, int height,
+                           int iconX, int iconY, int iconWidth, int iconHeight,
+                           OnPress onPress)
     {
         // 给予一个默认图片用于构造父类
-        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/unkonw_thing"), name, onPress);
+        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/unkonw_thing"),iconX,iconY,iconWidth,iconHeight, onPress);
         initButton();
         setIcon(iconMap.get(currentState));
+    }
+
+    protected StatusButton(int x, int y, int width, int height,
+                           OnPress onPress)
+    {
+        // 给予一个默认图片用于构造父类
+        this(x, y, width, height, x,y,width,height, onPress);
     }
 
     // 用于子类初始化状态、状态图片映射表、当前状态
@@ -65,7 +73,7 @@ public abstract class StatusButton extends IconButton
     }
 
     // 用于手动设置当前状态
-    public void setState(ButtonState state)
+    public void setState(Enum<?> state)
     {
         currentState = state;
         setIcon(iconMap.get(currentState));

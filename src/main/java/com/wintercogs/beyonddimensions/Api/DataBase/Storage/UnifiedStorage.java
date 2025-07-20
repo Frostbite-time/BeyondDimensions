@@ -172,6 +172,12 @@ public class UnifiedStorage implements IStackTypedHandler
         return true;
     }
 
+    @Override
+    public boolean isEmpty()
+    {
+        return storage.isEmpty(); // 由于此结构特殊性质，实际上只看列表长度即可
+    }
+
 
     // region 核心操作方法
 

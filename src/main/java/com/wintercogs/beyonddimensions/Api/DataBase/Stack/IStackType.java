@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
@@ -12,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * 用于定义不同stack的行为 物品 流体 以及其他模组中行为逻辑与{@link net.minecraft.world.item.ItemStack}相似的资源。
+ * 用于定义不同stack的行为 物品 流体 以及其他模组中行为逻辑与{@link ItemStack}相似的资源。
  * <p>
  * 此外，如果你想定义类似能量这种行为逻辑的资源，只需继承并实现抽象类{@link LongStackType}。
  * <p>
@@ -42,7 +44,7 @@ public interface IStackType<T> {
                     IStackType::getTypeId,  // 分发到具体实现的编解码器
                     id -> {
                         IStackType<?> type = StackTypeRegistry.getType(id);
-                        return type.getCodec().fieldOf("type"); // A → MapCodec
+                        return type.codec(); // A → MapCodec
                     }
             );
 
@@ -69,7 +71,7 @@ public interface IStackType<T> {
     /*
      * 定义实现的编解码器 需要注册表信息，在接口实现实在太复杂了，分开到每个具体实现就会简单很多
      */
-    Codec<IStackType<T>> getCodec();
+    MapCodec<? extends IStackType<T>> codec();
 
 
     /**
@@ -206,7 +208,7 @@ public interface IStackType<T> {
     /**
      * 检查2个实例是否能模糊匹配，即：2个物品，是否为同一种物品，不管NBT等数据
      */
-    boolean isSame(IStackType<T> other);
+    boolean isSame(IStackType<?> other);
 
     /**
      * 检查2个实例是否能精确匹配，即：2个物品，种类、NBT等数据是否一致。但是不考虑存储数量

@@ -2,10 +2,7 @@ package com.wintercogs.beyonddimensions.BlockEntity;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetTerminalBlockEntity;
+import com.wintercogs.beyonddimensions.BlockEntity.Custom.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -70,6 +67,29 @@ public class ModBlockEntities
             ).build(null)
     );
 
+    public static final Supplier<BlockEntityType<NetPumpBlockEntity>> NET_PUMP_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+            "net_pump_block_entity",
+            () -> BlockEntityType.Builder.of(
+                    NetPumpBlockEntity::new,
+                    ModBlocks.NET_PUMP_BLOCK.get()
+            ).build(null)
+    );
+
+    public static final Supplier<BlockEntityType<NetHopperBlockEntity>> NET_HOPPER_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+            "net_hopper_block_entity",
+            () -> BlockEntityType.Builder.of(
+                    NetHopperBlockEntity::new,
+                    ModBlocks.NET_HOPPER_BLOCK.get()
+            ).build(null)
+    );
+
+    public static final Supplier<BlockEntityType<NetFurnaceBlockEntity>> NET_FURNACE_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+            "net_furnace_block_entity",
+            () -> BlockEntityType.Builder.of(
+                    NetFurnaceBlockEntity::new,
+                    ModBlocks.NET_FURNACE_BLOCK.get()
+            ).build(null)
+    );
 
     public static void register(IEventBus eventBus)
     {

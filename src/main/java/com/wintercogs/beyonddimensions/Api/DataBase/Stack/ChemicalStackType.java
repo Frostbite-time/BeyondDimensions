@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
@@ -36,21 +37,20 @@ import java.util.List;
 import java.util.Optional;
 
 // 用于处理通用机械的化学品类
-public class ChemicalStackType implements IStackType<ChemicalStack>
+public final class ChemicalStackType implements IStackType<ChemicalStack>
 {
 
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/chemical");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
-    public static final Codec<ChemicalStackType> CODEC = RecordCodecBuilder.create(instance ->
+    public static final MapCodec<ChemicalStackType> TYPE_CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     ChemicalStack.OPTIONAL_CODEC.fieldOf("internal_stack")
                             .forGetter(ChemicalStackType::getStack)
             ).apply(instance, ChemicalStackType::new)
     );
 
-    public static final Codec<IStackType<ChemicalStack>> TYPE_CODEC = CODEC
-            .xmap(stackType -> stackType, interfaceType -> (ChemicalStackType) interfaceType);
+    public static final Codec<ChemicalStackType> CODEC = TYPE_CODEC.codec();
 
     private ChemicalStack stack;
 
@@ -70,7 +70,7 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     }
 
     @Override
-    public Codec<IStackType<ChemicalStack>> getCodec()
+    public MapCodec<ChemicalStackType> codec()
     {
         return TYPE_CODEC;
     }
@@ -246,11 +246,11 @@ public class ChemicalStackType implements IStackType<ChemicalStack>
     }
 
     @Override
-    public boolean isSame(IStackType<ChemicalStack> other)
+    public boolean isSame(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return ChemicalStack.isSameChemical(stack, other.getStack());
+        return ChemicalStack.isSameChemical(stack, (ChemicalStack)other.getStack());
     }
 
     @Override

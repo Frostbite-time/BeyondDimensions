@@ -63,6 +63,13 @@ public class ModItems
     public static final DeferredItem<Item> MATTER_COMPRESS_BALL = ITEMS.register("matter_compress_ball",
             () -> new MatterCompressionBall(new Item.Properties()));
 
+    // 网络磁铁
+    public static final DeferredItem<Item> NET_MAGNET_ITEM = ITEMS.register("net_magnet_item",
+            () -> new NetMagnetItem(new Item.Properties()));
+
+    public static final DeferredItem<Item> NET_FEEDER_ITEM = ITEMS.register("net_feeder_item",
+            () -> new NetFeederItem(new Item.Properties()));
+
 
     // 测试物品 -----------------------
     // 随机物品生成器

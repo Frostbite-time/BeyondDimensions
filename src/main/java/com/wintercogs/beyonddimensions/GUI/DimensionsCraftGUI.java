@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
@@ -9,7 +8,6 @@ import com.wintercogs.beyonddimensions.GUI.SharedWidget.IconButton;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Packet.ClickTransferCraftButtonPacket;
-import com.wintercogs.beyonddimensions.Packet.CraftReturnPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -41,7 +39,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         super.init();
 
         //槽位转移按钮
-        transferCraftToInvButton = new IconButton(this.leftPos+90, this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/down_arrow"), ButtonName.TransferCraftButton , button ->
+        transferCraftToInvButton = new IconButton(this.leftPos+90, this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/down_arrow"), button ->
         {
             PacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(false));
         });
@@ -49,7 +47,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         addRenderableWidget(transferCraftToInvButton);
 
 
-        transferCraftToStorageButton = new IconButton(this.leftPos+81,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/up_arrow"), ButtonName.TransferCraftButton , button ->
+        transferCraftToStorageButton = new IconButton(this.leftPos+81,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/up_arrow"),  button ->
         {
             PacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(true));
         });
@@ -57,13 +55,13 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         addRenderableWidget(transferCraftToStorageButton);
 
         // 槽位优先转移切换按钮
-        PacketDistributor.sendToServer(new CraftReturnPacket(Config.uiCraftReturnButton == ButtonState.ENABLED));
-        craftReturnButton = new StatusButton(this.leftPos+99,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8,ButtonName.TransferCraftButton, button -> {
+        menu.writeAndSendQuickData();
+        craftReturnButton = new StatusButton(this.leftPos+99,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8, button -> {
             craftReturnButton.toggleState();
-            Config.uiCraftReturnButton = craftReturnButton.currentState;
-            Config.UI_CRAFT_RETURN_BUTTON.set(craftReturnButton.currentState);
+            Config.uiCraftReturnButton = (ButtonState) craftReturnButton.currentState;
+            Config.UI_CRAFT_RETURN_BUTTON.set((ButtonState) craftReturnButton.currentState);
             Config.UI_CRAFT_RETURN_BUTTON.save();
-            PacketDistributor.sendToServer(new CraftReturnPacket(Config.uiCraftReturnButton == ButtonState.ENABLED));
+            menu.writeAndSendQuickData();
         })
         {
 
@@ -76,7 +74,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
                 tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_storage")));
                 tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_inv")));
 
-                for(ButtonState state : iconMap.keySet())
+                for(Enum<?> state : iconMap.keySet())
                 {
                     this.states.add(state);
                 }

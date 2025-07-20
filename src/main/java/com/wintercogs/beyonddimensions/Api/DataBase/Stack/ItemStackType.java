@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
@@ -31,17 +32,14 @@ public final class ItemStackType implements IStackType<ItemStack> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
-    public static final Codec<ItemStackType> CODEC = RecordCodecBuilder.create(instance ->
+    public static final MapCodec<ItemStackType> TYPE_CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
-                    ItemStack.OPTIONAL_CODEC.fieldOf("internal_stack")
-                            .forGetter(ItemStackType::getStack),
-                    Codec.LONG.fieldOf("amount")
-                            .forGetter(ItemStackType::getStackAmount)
+                    ItemStack.OPTIONAL_CODEC.fieldOf("internal_stack").forGetter(ItemStackType::getStack),
+                    Codec.LONG.fieldOf("amount").forGetter(ItemStackType::getStackAmount)
             ).apply(instance, ItemStackType::new)
     );
 
-    public static final Codec<IStackType<ItemStack>> TYPE_CODEC = CODEC
-            .xmap(stackType -> stackType, interfaceType -> (ItemStackType) interfaceType);
+    public static final Codec<ItemStackType> CODEC = TYPE_CODEC.codec();
 
     private ItemStack stack; // 物品stack信息，数量最好时刻保持为1
     private long stackSize; // 扩容，需要确保所有存入取出的终点在此
@@ -68,7 +66,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public Codec<IStackType<ItemStack>> getCodec()
+    public MapCodec<ItemStackType> codec()
     {
         return TYPE_CODEC;
     }
@@ -242,11 +240,11 @@ public final class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public boolean isSame(IStackType<ItemStack> other) {
+    public boolean isSame(IStackType<?> other) {
         // 比较物品类型和基础NBT（如盔甲耐久等）
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return ItemStack.isSameItem(stack, other.copyStackWithCount(1));
+        return ItemStack.isSameItem(stack, (ItemStack)other.copyStackWithCount(1));
     }
 
     @Override

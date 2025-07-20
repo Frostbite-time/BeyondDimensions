@@ -51,7 +51,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     @Override
     public void setStack(T stack)
     {
-        this.stack = stack;
+        this.stack = (T)stack.copy();
         NeedRecalHash = true;
     }
 
@@ -147,11 +147,11 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     }
 
     @Override
-    public boolean isSame(IStackType<T> other)
+    public boolean isSame(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isSame(other.getStack());
+        return stack.isSame((LongType<?>) other.getStack());
     }
 
     @Override

@@ -11,7 +11,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class NetPathwayBlock extends NetedBlock implements EntityBlock {
+public class NetPathwayBlock extends NetedBlock implements EntityBlock
+{
 
     public NetPathwayBlock(Properties properties) {
         super(properties);

@@ -1,35 +1,25 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Config;
-import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
-import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
+import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
 import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
+import com.wintercogs.beyonddimensions.Machine.PopMode;
+import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
-import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
-import com.wintercogs.beyonddimensions.Packet.FlagSlotSetPacket;
-import com.wintercogs.beyonddimensions.Packet.PopModeButtonPacket;
+import com.wintercogs.beyonddimensions.Render.GuiRenderHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 
 public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 {
 
-    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_interface.png");
-
-    public StatusButton popButton; // 使用倒序按钮来临时替代弹出模式
+    public RightTabButton popButton; // 弹出模式
+    public RightTabButton controlModeButton; // 红石控制模式按钮
 
     private SlotDragHandler dragHandler; // 仅在emi加载时可用
 
@@ -41,8 +31,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     {
         super(container, playerInventory, title);
         // 去除空白的真实部分，用于计算图片显示的最佳位置
-        this.imageWidth = 176;
-        this.imageHeight = 207;
+
     }
 
 
@@ -50,90 +39,82 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     @Override
     protected void init() {
         // 如果以后图片大小有变，显示中心所期望的大小仍然是x:176,y:235用于计算
-        this.leftPos = (this.width - 176)/2;
-        this.topPos = (this.height - 235)/2;
-
-        // 初始化emi dragHandler
-        if(BeyondDimensions.EMILoaded)
-        {
-            dragHandler = new SlotDragHandler(
-                slot -> {
-                    if(slot instanceof StoredStackSlot sSlot)
-                    {
-                        return sSlot.isFake();
-                    }
-                    return false;
-                },
-
-                (slot, ingredient) -> {
-                    // stackKey 是如 Item Fluid的类
-                    Object stackKey = ingredient.getEmiStacks().get(0).getKey();
-                    DataComponentPatch dataComponentPatch = ingredient.getEmiStacks().get(0).getComponentChanges();
-
-                    IStackType dragging = new ItemStackType();
-                    for(IStackType type : StackTypeRegistry.getAllTypes())
-                    {
-                        if(type.getSourceClass().isAssignableFrom(stackKey.getClass()))
-                        {
-
-                            dragging = type.fromObject(stackKey,1,dataComponentPatch);
-                            break;
-
-                        }
-                    }
-
-                    // AE2通用包裹支持
-                    if(BeyondDimensions.AELoaded)
-                    {
-                        if(dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
-                        {
-                            appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
-
-                            if(genericContent != null)
-                            {
-                                dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
-                            }
-
-                        }
-                    }
+        this.imageWidth = 176;
+        this.imageHeight = rebuildImageHeight();
+        rebuildLabelHeight();
+        this.leftPos = (this.width - imageWidth)/2;
+        this.topPos = (this.height - imageHeight)/2;
 
 
-                    StoredStackSlot sSlot = (StoredStackSlot) slot;
-                    IStackType clickItem = sSlot.getVanillaActualStack();
-                    // button的数字0代表左键
-                    PacketDistributor.sendToServer(new FlagSlotSetPacket(sSlot.index,clickItem,dragging));
-                }
-
-            );
-        }
-
-
-        popButton = new StatusButton(this.leftPos+72+18*4-5,this.topPos+6,16,16, ButtonName.ReverseButton, button ->
+        popButton = new RightTabButton(this.leftPos+176,this.topPos+6,23,26,
+                this.leftPos+176 +2,this.topPos+6+5,16,16,button ->
         {
             popButton.toggleState();
-            menu.popMode = !menu.popMode;
-            PacketDistributor.sendToServer(new PopModeButtonPacket(menu.popMode));
+            menu.be.popMode = (PopMode) popButton.currentState;
+            menu.writeAndSendQuickData();
         })
         {
             @Override
             protected void initButton()
             {
-                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_asc"));
-                iconMap.put(ButtonState.DISABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_desc"));
+                iconMap.put(PopMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/popmode_up"));
+                iconMap.put(PopMode.STOP,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/popmode_down"));
 
-                tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
-                tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
+                tooltipMap.put(PopMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
+                tooltipMap.put(PopMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
 
 
-                for(ButtonState state : iconMap.keySet())
+                for(Enum<?> state : iconMap.keySet())
                 {
                     this.states.add(state);
                 }
-                setState(Config.uiReverseButton);
+
+                setState(menu.be.popMode);
             }
         };
         addRenderableWidget(popButton);
 
+        controlModeButton = new RightTabButton(leftPos + 176, topPos +36, 23,26 ,
+                leftPos + 176 +2 , topPos +36 +5, 16,16,button -> {
+            controlModeButton.toggleState();
+            menu.be.controlMode = (RedStoneControlMode) controlModeButton.currentState;
+            menu.writeAndSendQuickData();
+        })
+        {
+            @Override
+            protected void initButton()
+            {
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_powered"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_unpowered"));
+
+                tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
+                tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
+                tooltipMap.put(RedStoneControlMode.POWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_powered")));
+                tooltipMap.put(RedStoneControlMode.UNPOWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_unpowered")));
+
+                for(Enum<?> state : iconMap.keySet())
+                {
+                    this.states.add(state);
+                }
+
+                setState(menu.be.controlMode);
+            }
+        };
+        addRenderableWidget(controlModeButton);
+
+    }
+
+    protected int rebuildImageHeight()
+    {
+        return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_SLOTS_HEIGHT*3 + CommonTextures.FILTER_SLOTS_HEIGHT*3+CommonTextures.COMMON_CONNECTION_HEIGHT + CommonTextures.PLAYER_INV_HEIGHT;
+    }
+
+    protected void rebuildLabelHeight()
+    {
+        this.titleLabelY = 8;
+        this.inventoryLabelY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_SLOTS_HEIGHT*3 + CommonTextures.FILTER_SLOTS_HEIGHT*3+4;
     }
 
     @Override
@@ -143,22 +124,27 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         //父类无操作
         //每tick自动更新搜索方案
 
-        if(menu.popMode)
-        {
-            popButton.setState(ButtonState.ENABLED);
-        }
-        else
-        {
-            popButton.setState(ButtonState.DISABLED);
-        }
+        if(popButton.currentState != menu.be.popMode)
+            popButton.setState(menu.be.popMode);
+        if(controlModeButton.currentState != menu.be.controlMode)
+            controlModeButton.setState(menu.be.controlMode);
     }
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
+        int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, GUI_TEXTURE);
-        guiGraphics.blit(GUI_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+
+        CommonTexturesRender.renderTopBaseCommon(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderFilterSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderCommonSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderFilterSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderCommonSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderFilterSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderCommonSlots(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderCommonConnection(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderPlayerInv(guiGraphics,this.leftPos,drawY);
     }
 
     @Override
@@ -172,7 +158,8 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752,false);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+20, 4210752,false);
+        GuiRenderHelper.drawRightAnchoredText(guiGraphics,this.font, Component.translatable("menu.label.beyonddimensions.tag_and_stored_slots"), imageWidth-6, this.titleLabelY+3, 4210752,false);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752,false);
     }
 
 

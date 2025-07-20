@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "beyonddimensions:block/net_furnace_front",
+    "side" : "minecraft:block/furnace_side",
+    "top"  : "minecraft:block/furnace_top",
+    "particle": "minecraft:block/net_furnace_front"
+  }
+}

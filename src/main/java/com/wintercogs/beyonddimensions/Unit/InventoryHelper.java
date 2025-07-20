@@ -37,4 +37,24 @@ public class InventoryHelper
 
         return stack;
     }
+
+    // 返回取出量
+    public static ItemStack extractFromPlayerInventory(Player player, ItemStack stack)
+    {
+        int extract = 0;
+        int aim = stack.getCount();
+        Inventory inventory = player.getInventory();
+
+        // 遍历背包主槽位（0-35）
+        for (int i = 0; i < 36 && extract < aim; i++) {
+            ItemStack invStack = inventory.getItem(i);
+            if (ItemStack.isSameItemSameComponents(invStack, stack)) {
+                int tryExtract = Math.min(aim - extract, invStack.getCount());
+                invStack.shrink(tryExtract);
+                extract += tryExtract;
+                inventory.setItem(i, invStack.isEmpty() ? ItemStack.EMPTY : invStack);
+            }
+        }
+        return stack.copyWithCount(extract);
+    }
 }

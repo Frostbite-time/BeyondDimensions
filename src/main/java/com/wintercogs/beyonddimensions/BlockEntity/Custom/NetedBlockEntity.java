@@ -18,6 +18,7 @@ public abstract class NetedBlockEntity extends BlockEntity
 {
     // 存储接口所对应的维度网络id，用于和维度网络交互
     protected int netId = -1;// 初始化为-1，任何小于0（不包括0）的id表示未绑定网络
+    private DimensionsNet net = null; //缓存net
 
     public NetedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
@@ -30,13 +31,20 @@ public abstract class NetedBlockEntity extends BlockEntity
 
     public void setNetId(int id)
     {
+        boolean needsUpdate = this.netId != id;
         this.netId = id;
+
+        // 标识符变化时更新缓存
+        if(needsUpdate)
+            refreshNetCache();
+
         setChanged();
     }
 
     public void clearNetId()
     {
         this.netId = -1;
+        net = null; // 清空缓存
         setChanged();
     }
 
@@ -45,8 +53,7 @@ public abstract class NetedBlockEntity extends BlockEntity
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
         if(net != null)
         {
-            this.netId = net.getId();
-            setChanged();
+            setNetId(net.getId());
         }
     }
 
@@ -55,37 +62,53 @@ public abstract class NetedBlockEntity extends BlockEntity
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
         if(net != null)
         {
-            this.netId = net.getId();
-            setChanged();
+            setNetId(net.getId());
         }
         else
         {
-            this.netId = -1;
-            setChanged();
+            clearNetId();
         }
     }
 
     public DimensionsNet getNet()
     {
-        if(netId>=0)
+        if(netId >= 0) // netId作为方块网络的第一标识符高于缓存
         {
-            if(getLevel() instanceof ServerLevel)
+            if(net == null || net.deleted)
             {
-                return DimensionsNet.getNetFromId(netId,getLevel().getServer());
+                // 当缓存无效时尝试更正
+                refreshNetCache();
             }
+            return net; // 返回最终缓存
         }
         else
         {
             return null;
         }
-        return null;
+    }
+
+    // 更新网络缓存
+    protected void refreshNetCache()
+    {
+        if(getLevel() instanceof ServerLevel)
+        {
+            DimensionsNet netCache = DimensionsNet.getNetFromId(netId,getLevel().getServer());
+            if(netCache!=null && !netCache.deleted)
+            {
+                net = netCache;
+            }
+            else
+            {
+                net = null;
+            }
+        }
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag,registries);
-        this.netId = tag.getInt("netId");
+        setNetId(tag.getInt("netId"));
     }
 
     @Override
@@ -95,6 +118,7 @@ public abstract class NetedBlockEntity extends BlockEntity
         tag.putInt("netId",this.netId);
     }
 
+    // 为子类提供基础的网络同步，需要正确实现loadAdditional和saveAdditional
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries)
     {

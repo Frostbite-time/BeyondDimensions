@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
@@ -46,17 +47,13 @@ public final class FluidStackType implements IStackType<FluidStack>
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
-    public static final Codec<FluidStackType> CODEC = RecordCodecBuilder.create(instance ->
+    public static final MapCodec<FluidStackType> TYPE_CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
-                    FluidStack.OPTIONAL_CODEC.fieldOf("internal_stack")
-                            .forGetter(FluidStackType::getStack),
-                    Codec.LONG.fieldOf("amount")
-                            .forGetter(FluidStackType::getStackAmount)
-            ).apply(instance, FluidStackType::new)
-    );
+                    FluidStack.OPTIONAL_CODEC.fieldOf("internal_stack").forGetter(FluidStackType::getStack),
+                    Codec.LONG.fieldOf("amount").forGetter(FluidStackType::getStackAmount)
+            ).apply(instance, FluidStackType::new));
 
-    public static final Codec<IStackType<FluidStack>> TYPE_CODEC = CODEC
-            .xmap(stackType -> stackType, interfaceType -> (FluidStackType) interfaceType);
+    public static final Codec<FluidStackType> CODEC = TYPE_CODEC.codec();
 
     private FluidStack stack;
     private long stackSize;
@@ -85,7 +82,7 @@ public final class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public Codec<IStackType<FluidStack>> getCodec()
+    public MapCodec<FluidStackType> codec()
     {
         return TYPE_CODEC;
     }
@@ -265,11 +262,11 @@ public final class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public boolean isSame(IStackType<FluidStack> other)
+    public boolean isSame(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return FluidStack.isSameFluid(stack, other.copyStackWithCount(1));
+        return FluidStack.isSameFluid(stack, (FluidStack)other.copyStackWithCount(1));
     }
 
     @Override
