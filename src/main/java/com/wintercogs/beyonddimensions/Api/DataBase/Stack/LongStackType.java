@@ -50,7 +50,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     @Override
     public void setStack(T stack)
     {
-        this.stack = stack;
+        this.stack = (T)stack.copy();
         NeedRecalHash = true;
     }
 

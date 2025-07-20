@@ -1,11 +1,11 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.wintercogs.beyonddimensions.Api.Util.BytebufHelper;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -309,7 +309,7 @@ public class ItemStackType implements IStackType<ItemStack> {
             // 使用副本避免修改原堆栈
             ItemStack copy = stack.copyWithCount(1);
             // 使用OPTIONAL_CODEC处理可能为空的情况
-            writeItemBuf(buf,copy);
+            BytebufHelper.writeItemBuf(buf,copy);
             buf.writeNbt(serializeStackCaps(copy));
         }
     }
@@ -329,44 +329,10 @@ public class ItemStackType implements IStackType<ItemStack> {
         // 读取数量
         long count = buf.readVarLong();
         // 使用OPTIONAL_CODEC解码
-        ItemStack stack = readItemBuf(buf);
+        ItemStack stack = BytebufHelper.readItemBuf(buf);
         CompoundTag capNBTTag = buf.readNbt();
         deserializeStackCaps(stack, capNBTTag); // 内部检查null和空
         return new ItemStackType(stack,count);
-    }
-
-    // 向FriendlyByteBuf写入物品信息
-    // 用于避开某些模组对网络读写的注入-这真的让人头疼
-    private void writeItemBuf(FriendlyByteBuf buf, ItemStack stack)
-    {
-        if (stack.isEmpty()) {
-            buf.writeBoolean(false);
-        } else {
-            buf.writeBoolean(true);
-            Item item = stack.getItem();
-            buf.writeId(BuiltInRegistries.ITEM, item);
-            buf.writeByte(stack.getCount());
-            CompoundTag compoundtag = null;
-            if (item.isDamageable(stack) || item.shouldOverrideMultiplayerNbt()) {
-                compoundtag = stack.tag;
-            }
-
-            buf.writeNbt(compoundtag);
-        }
-    }
-
-    // 用于FriendlyByteBuf读取物品，同时防止自动添加damage等耐久值
-    // 比起buf自带的函数，这取消了nbt验证以及耐久度验证，以确保网络传输时的数据本身的完整
-    private ItemStack readItemBuf(FriendlyByteBuf buf) {
-        if (!buf.readBoolean()) {
-            return ItemStack.EMPTY;
-        } else {
-            Item item = (Item)buf.readById(BuiltInRegistries.ITEM);
-            int num = buf.readByte();
-            ItemStack itemstack = new ItemStack(item, num);
-            itemstack.tag = buf.readNbt();
-            return itemstack;
-        }
     }
 
     @Override

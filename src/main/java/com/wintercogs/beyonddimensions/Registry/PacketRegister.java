@@ -131,5 +131,21 @@ public class PacketRegister
                 BatchTransferPacket::decode,
                 BatchTransferPacket::handle
         );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                PickBlockFromNetPacket.class,
+                PickBlockFromNetPacket::encode,
+                PickBlockFromNetPacket::decode,
+                PickBlockFromNetPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                PutHandItemToNetPacket.class,
+                PutHandItemToNetPacket::encode,
+                PutHandItemToNetPacket::decode,
+                PutHandItemToNetPacket::handle
+        );
     }
 }

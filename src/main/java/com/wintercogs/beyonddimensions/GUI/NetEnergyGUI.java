@@ -110,6 +110,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+10, 4210752,false);
 
         guiGraphics.drawString(this.font, StringFormat.formatCount(menu.energyStored)+"/"+StringFormat.formatCount(menu.energyCapacity), this.inventoryLabelX, this.inventoryLabelY-20, 4210752,false);
+        guiGraphics.drawString(this.font, StringFormat.formatChange(menu.energySpeedState)+" FE/t", this.inventoryLabelX, this.inventoryLabelY-10, 4210752,false);
     }
 
     protected void renderEnergyBar(GuiGraphics guiGraphics, int xStart, int yStart) {

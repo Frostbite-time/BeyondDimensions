@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButt
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.EnergyStoragePacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -23,6 +24,7 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
 
     public long energyCapacity = 0;
     public long energyStored = 0;
+    public long energySpeedState = 0;
 
 
 
@@ -38,7 +40,7 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
      *
      * @param playerInventory 玩家背包
      */
-    public NetEnergyMenu(int id, Inventory playerInventory)
+    public NetEnergyMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         this(id, playerInventory, null, new SimpleContainerData(0));
     }
@@ -92,9 +94,10 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
         {
             if (Long.MAX_VALUE != energyCapacity || energyStored != energyCapacity)
             {
+                this.energySpeedState = net.getUnifiedStorage().getEnergyStored() - this.energyStored;
                 this.energyCapacity = net.getUnifiedStorage().getSlotCapacity(0);
                 this.energyStored = net.getUnifiedStorage().getEnergyStored();
-                PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()-> (ServerPlayer)player),new EnergyStoragePacket(this.energyStored, this.energyCapacity));
+                PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new EnergyStoragePacket(this.energyStored, this.energyCapacity,this.energySpeedState));
             }
         }
     }
@@ -106,11 +109,13 @@ public class NetEnergyMenu extends BDOrderedContainerMenu
     }
 
 
-    public void loadStorage(long energyCapacity, long energyStored)
+    public void loadStorage(long energyCapacity, long energyStored, long energySpeedState)
     {
         this.energyCapacity = energyCapacity;
         this.energyStored = energyStored;
+        this.energySpeedState = energySpeedState;
     }
+
 
 
     @Override

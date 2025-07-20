@@ -34,8 +34,10 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
     public final int transHold = 9;
     public int transTime = 0;
 
+    private static final int capacity = 27;
+
     // 用来标记物品或者流体的槽位，只由UI控制
-    private final StackTypedHandler fakeStackHandler = new StackTypedHandler(9)
+    private final StackTypedHandler fakeStackHandler = new StackTypedHandler(capacity)
     {
         // 只触发方块自身的保存，但是不向周围发信
         @Override
@@ -46,7 +48,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         }
     };
 
-    private final StackTypedHandler stackHandler = new StackTypedHandler(9)
+    private final StackTypedHandler stackHandler = new StackTypedHandler(capacity)
     {
         @Override
         public void onChange()
@@ -118,23 +120,6 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         setNeedsCapabilityUpdate();
     }
 
-//    //--- 能力注册 (通过事件) ---
-//    public static void registerCapability(RegisterCapabilitiesEvent event) {
-//
-//        CapabilityHelper.BlockCapabilityMap.forEach(
-//                (resourceLocation, directionBlockCapability) -> {
-//                    Function handler = StackTypedHandler.typedHandlerMap.get(resourceLocation);
-//                    event.registerBlockEntity(
-//                            (BlockCapability<? super Object, ? extends Direction>)directionBlockCapability,
-//                            ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
-//                            (be, side) -> {
-//                                return handler.apply(be.stackHandler);
-//                            }
-//                    );
-//                }
-//        );
-//    }
-
 
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
@@ -193,7 +178,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         DimensionsNet net = getNet();
         if(net != null)
         {
-            for(int i=0; i<9; i++)
+            for(int i=0; i<capacity; i++)
             {
                 IStackType flag = fakeStackHandler.getStackBySlot(i);
                 if(flag!= null && !flag.isEmpty())
@@ -221,7 +206,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
         DimensionsNet net = getNet();
         if(net != null)
         {
-            for(int i=0; i<9; i++)
+            for(int i=0; i<capacity; i++)
             {
                 IStackType flag = fakeStackHandler.getStackBySlot(i);
                 if(flag!=null && !flag.isEmpty())
@@ -265,7 +250,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity
 
                     IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper)handlerGetter.apply(handler);
 
-                    for(int i = 0;i<9;i++)
+                    for(int i = 0;i<capacity;i++)
                     {
                         if(fakeStackHandler.getStackBySlot(i).getTypeId().equals(typeId))
                         {

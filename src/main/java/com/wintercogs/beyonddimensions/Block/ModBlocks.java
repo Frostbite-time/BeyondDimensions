@@ -34,6 +34,9 @@ public class ModBlocks
     public static final RegistryObject<Block> NET_TERMINAL_BLOCK = registerBlock("net_terminal_block",
             ()-> new NetTerminalBlock(BlockBehaviour.Properties.of().strength(2f)));
 
+    public static final RegistryObject<Block> NET_PUMP_BLOCK = registerBlock("net_pump_block",
+            ()-> new NetPumpBlock(BlockBehaviour.Properties.of().strength(2f)));
+
 
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block)

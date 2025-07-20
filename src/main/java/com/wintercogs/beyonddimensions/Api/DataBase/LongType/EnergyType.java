@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.LongType;
 
 import net.minecraft.network.chat.Component;
 
-public class EnergyType extends LongType<EnergyType>
+public final class EnergyType extends LongType<EnergyType>
 {
 
     public EnergyType(long amount)

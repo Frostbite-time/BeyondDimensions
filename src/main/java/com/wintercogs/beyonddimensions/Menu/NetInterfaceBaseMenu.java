@@ -9,6 +9,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHa
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
+import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncFlagPacket;
@@ -34,6 +35,8 @@ import java.util.function.Function;
 // 管理一组虚拟槽、以及一组
 public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
 {
+    private static final int slotStartY = 1 + CommonTextures.TOP_BASE_COMMON_HEIGHT;
+    private static final int invSlotStartY = 6 + slotStartY + CommonTextures.COMMON_SLOTS_HEIGHT*3 + CommonTextures.FILTER_SLOTS_HEIGHT*3 + CommonTextures.COMMON_CONNECTION_HEIGHT;
 
     public StackTypedHandler viewerStorage; // 在客户端，用于显示物品
     private ArrayList<IStackType> lastStorage; // 记录截至上一次同步时的存储状态，用于同步数据
@@ -57,9 +60,9 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
      * 客户端构造函数
      * @param playerInventory 玩家背包
      */
-    public NetInterfaceBaseMenu(int id, Inventory playerInventory)
+    public NetInterfaceBaseMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, new StackTypedHandler(9),new StackTypedHandler(9),null,new SimpleContainerData(0));
+        this(id, playerInventory, new StackTypedHandler(27),new StackTypedHandler(27),null,new SimpleContainerData(0));
     }
 
     /**
@@ -73,10 +76,10 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
 
         this.popMode = false;
         // 初始化存储容器
-        viewerStorage = new StackTypedHandler(9); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
+        viewerStorage = new StackTypedHandler(27); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
         // 初始化标记容器
         this.flagStorage = flagStorage;
-        viewerFlagStorage = new StackTypedHandler(9);
+        viewerFlagStorage = new StackTypedHandler(27);
         if(!player.level().isClientSide())
         {
             // 初始化lastStorage为全空，以便broadcastChange自动发送初始值
@@ -98,17 +101,24 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
         }
 
         // 添加存储槽
-        for (int i = 0; i < 9; ++i)
+        for(int row = 0; row < 3; row++)
         {
-            this.addSlot(new StoredStackSlot(viewerStorage, i, 8 + i * 18, 71));
+            for (int col = 0; col < 9; col++)
+            {
+                this.addSlot(new StoredStackSlot(viewerStorage, row*9+col, 8 + col * 18, slotStartY + 18 + row * 36));
+            }
         }
 
+
         // 添加标记槽
-        for(int i=0;i<flagStorage.getStorage().size();i++)
+        for(int row = 0; row < 3; row++)
         {
-            StoredStackSlot flagSlot = new StoredStackSlot(viewerFlagStorage, i, 8 + i * 18, 53);
-            flagSlot.setFake(true);
-            this.addSlot(flagSlot);
+            for (int col = 0; col < 9; col++)
+            {
+                StoredStackSlot flagSlot = new StoredStackSlot(viewerFlagStorage, row*9+col, 8 + col * 18, slotStartY + row * 36);
+                flagSlot.setFake(true);
+                this.addSlot(flagSlot);
+            }
         }
 
         // 添加背包以及快捷栏
@@ -117,12 +127,12 @@ public class NetInterfaceBaseMenu extends BDOrderedContainerMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 123 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, invSlotStartY + row * 18));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 181));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18,  4+invSlotStartY + 3 * 18));
         }
         inventoryEndIndex = slots.size();
     }

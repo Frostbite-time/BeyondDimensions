@@ -17,6 +17,7 @@ public abstract class NetedBlockEntity extends BlockEntity
 {
     // 存储接口所对应的维度网络id，用于和维度网络交互
     protected int netId = -1;// 初始化为-1，任何小于0（不包括0）的id表示未绑定网络
+    private DimensionsNet net = null; //缓存net
 
     public NetedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
@@ -66,18 +67,24 @@ public abstract class NetedBlockEntity extends BlockEntity
 
     public DimensionsNet getNet()
     {
-        if(netId>=0)
+        if(net == null || net.deleted)
         {
-            if(getLevel() instanceof ServerLevel)
+            if(netId>=0)
             {
-                return DimensionsNet.getNetFromId(netId,getLevel().getServer());
+                if(getLevel() instanceof ServerLevel)
+                {
+                    DimensionsNet netCache = DimensionsNet.getNetFromId(netId,getLevel().getServer());
+                    if(netCache!=null && !netCache.deleted)
+                    {
+                        net = netCache;
+                        return net;
+                    }
+                    return null;
+                }
             }
-        }
-        else
-        {
             return null;
         }
-        return null;
+        return net; // net正常，直接返回net
     }
 
     @Override

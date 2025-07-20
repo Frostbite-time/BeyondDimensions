@@ -5,8 +5,8 @@ import com.wintercogs.beyonddimensions.GUI.*;
 import com.wintercogs.beyonddimensions.Menu.*;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -19,12 +19,13 @@ import java.util.function.Supplier;
 public class UIRegister
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU,BeyondDimensions.MODID);
-    public static final Supplier<MenuType<DimensionsNetMenu>> Dimensions_Net_Menu = UIRegister.MENU_TYPES.register("dimensions_net_menu", () -> new MenuType<>(DimensionsNetMenu::new, FeatureFlags.DEFAULT_FLAGS));
-    public static final Supplier<MenuType<DimensionsCraftMenu>> Dimensions_Craft_Menu = UIRegister.MENU_TYPES.register("dimensions_craft_menu", () -> new MenuType<>(DimensionsCraftMenu::new, FeatureFlags.DEFAULT_FLAGS));
-    public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = UIRegister.MENU_TYPES.register("net_control_menu", () -> new MenuType<>(NetControlMenu::new, FeatureFlags.DEFAULT_FLAGS));
-    public static final Supplier<MenuType<NetEnergyMenu>> Net_Energy_Menu = UIRegister.MENU_TYPES.register("net_energy_menu", () -> new MenuType<>(NetEnergyMenu::new, FeatureFlags.DEFAULT_FLAGS));
-    public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = UIRegister.MENU_TYPES.register("net_interface_menu", () -> new MenuType<>(NetInterfaceBaseMenu::new, FeatureFlags.DEFAULT_FLAGS));
-    public static final Supplier<MenuType<DimensionsCraftMenuTerminal>> Dimensions_Craft_Menu_Terminal = UIRegister.MENU_TYPES.register("dimensions_craft_menu_terminal", () -> new MenuType<>(DimensionsCraftMenuTerminal::new , FeatureFlags.DEFAULT_FLAGS));
+    public static final Supplier<MenuType<DimensionsNetMenu>> Dimensions_Net_Menu = UIRegister.MENU_TYPES.register("dimensions_net_menu", ()-> IForgeMenuType.create(DimensionsNetMenu::new));
+    public static final Supplier<MenuType<DimensionsCraftMenu>> Dimensions_Craft_Menu = UIRegister.MENU_TYPES.register("dimensions_craft_menu", ()-> IForgeMenuType.create(DimensionsCraftMenu::new));
+    public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = UIRegister.MENU_TYPES.register("net_control_menu", ()-> IForgeMenuType.create(NetControlMenu::new));
+    public static final Supplier<MenuType<NetEnergyMenu>> Net_Energy_Menu = UIRegister.MENU_TYPES.register("net_energy_menu", ()-> IForgeMenuType.create(NetEnergyMenu::new));
+    public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = UIRegister.MENU_TYPES.register("net_interface_menu", ()-> IForgeMenuType.create(NetInterfaceBaseMenu::new));
+    public static final Supplier<MenuType<DimensionsCraftMenuTerminal>> Dimensions_Craft_Menu_Terminal = UIRegister.MENU_TYPES.register("dimensions_craft_menu_terminal", ()-> IForgeMenuType.create(DimensionsCraftMenuTerminal::new));
+    public static final Supplier<MenuType<NetPumpMenu>> Net_Pump_Menu = UIRegister.MENU_TYPES.register("net_pump_menu", ()-> IForgeMenuType.create(NetPumpMenu::new));
 
     public static void register(IEventBus eventBus)
     {
@@ -44,6 +45,7 @@ public class UIRegister
                     MenuScreens.register(Net_Interface_Menu.get(), NetInterfaceBaseGUI::new);
                     MenuScreens.register(Net_Energy_Menu.get(), NetEnergyGUI::new);
                     MenuScreens.<DimensionsCraftMenuTerminal, DimensionsTerminalCraftGUI>register(Dimensions_Craft_Menu_Terminal.get(), DimensionsTerminalCraftGUI::new);
+                    MenuScreens.register(Net_Pump_Menu.get(), NetPumpGUI::new);
                 }
         );
     }

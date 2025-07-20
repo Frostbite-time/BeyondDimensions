@@ -60,7 +60,7 @@ public class DimensionsNetMenu extends BDDisorderedContainerMenu
      * 客户端构造函数
      * @param playerInventory 玩家背包
      */
-    public DimensionsNetMenu(int id, Inventory playerInventory)
+    public DimensionsNetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
         this(UIRegister.Dimensions_Net_Menu.get(),id, playerInventory, new DimensionsNet(true));

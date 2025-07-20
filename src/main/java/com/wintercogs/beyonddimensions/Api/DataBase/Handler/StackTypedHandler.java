@@ -1,10 +1,8 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
@@ -36,11 +34,17 @@ public class StackTypedHandler implements IStackTypedHandler
     public static final Map<ResourceLocation, Function<StackTypedHandler,Object>> typedHandlerMap = new HashMap<>();
 
     /**
+     * 容量大小，不持久化保存，但是反序列化时以此为准，容量不足则主动扩容以实现对部分旧数据进行兼容
+     */
+    private final int size;
+
+    /**
      * 构造函数
      * @param size 容器槽位数量
      */
     public StackTypedHandler(int size)
     {
+        this.size = size;
         storage = new ArrayList<>(size);
         // 保证非空
         for(int i=0;i<size;i++)
@@ -72,7 +76,7 @@ public class StackTypedHandler implements IStackTypedHandler
     @Override
     public int getSlots()
     {
-        return storage.size();
+        return this.size;
     }
 
     @Override
@@ -358,30 +362,34 @@ public class StackTypedHandler implements IStackTypedHandler
     public void deserializeNBT(CompoundTag tag) {
         storage.clear();
         typeIdIndex.clear();
+        ((ArrayList<?>)storage).ensureCapacity(size);
         ListTag stacksTag = tag.getList("Stacks", Tag.TAG_COMPOUND);
 
-        for (Tag t : stacksTag) {
-            CompoundTag stackTag = (CompoundTag) t;
-            String type = stackTag.getString("Type");
-            if(type.equals("Empty"))
+        for (int i = 0; i < size; i++)
+        {
+            if(i<stacksTag.size())
             {
-                storage.add(new ItemStackType()); // 为空体添加空体占位
+                CompoundTag stackTag = (CompoundTag)stacksTag.get(i);
+                String type = stackTag.getString("Type");
+                if(type.equals("Empty"))
+                {
+                    storage.add(new ItemStackType()); // 为空体添加空体占位
+                    typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(storage.size() - 1);
+                }
+                else
+                {
+                    ResourceLocation typeId = new ResourceLocation(type);
+                    IStackType stackEmpty = StackTypeRegistry.getType(typeId).copy();
+                    IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"));
+                    storage.add(stackActual); // 无论是不是空体，都添加
+                    typeIdIndex.computeIfAbsent(stackActual.getTypeId(), k -> new ArrayList<>()).add(storage.size() - 1);
+                }
+            }
+            else // 兼容旧数据的扩容处理
+            {
+                storage.add(new ItemStackType());
                 typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(storage.size() - 1);
             }
-            else
-            {
-                ResourceLocation typeId = ResourceLocation.tryParse(type);
-
-                // 旧版本兼容
-                if(typeId.equals(ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemical")))
-                    typeId = GasStackType.ID;
-
-                IStackType stackEmpty = StackTypeRegistry.getType(typeId).copy();
-                IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"));
-                storage.add(stackActual); // 无论是不是空体，都添加
-                typeIdIndex.computeIfAbsent(stackActual.getTypeId(), k -> new ArrayList<>()).add(storage.size() - 1);
-            }
-
         }
     }
     // endregion

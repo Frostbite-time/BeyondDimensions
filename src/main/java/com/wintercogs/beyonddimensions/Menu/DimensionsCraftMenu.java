@@ -12,6 +12,7 @@ import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.InventoryHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -44,7 +45,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
      * 客户端构造函数
      * @param playerInventory 玩家背包
      */
-    public DimensionsCraftMenu(int id, Inventory playerInventory)
+    public DimensionsCraftMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
         this(UIRegister.Dimensions_Craft_Menu.get(),id, playerInventory, new DimensionsNet(true), null, null);

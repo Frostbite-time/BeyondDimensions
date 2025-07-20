@@ -12,7 +12,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record EnergyStoragePacket(long energyStored , long energyCap)
+public record EnergyStoragePacket(long energyStored , long energyCap, long energySpeedState)
 {
 
     @OnlyIn(Dist.CLIENT)
@@ -23,7 +23,7 @@ public record EnergyStoragePacket(long energyStored , long energyCap)
         if (player.containerMenu instanceof NetEnergyMenu menu)
         {
             menu.resumeRemoteUpdates(); // 虽然本地端这个好像没有用处
-            menu.loadStorage(energyCap(), energyStored());
+            menu.loadStorage(energyCap(), energyStored(), energySpeedState());
             return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
         }
     }
@@ -46,12 +46,14 @@ public record EnergyStoragePacket(long energyStored , long energyCap)
     {
         buf.writeLong(packet.energyStored());
         buf.writeLong(packet.energyCap());
+        buf.writeLong(packet.energySpeedState());
     }
 
     public static EnergyStoragePacket decode(FriendlyByteBuf buf)
     {
         long energyStored = buf.readLong();
         long energyCap = buf.readLong();
-        return new EnergyStoragePacket(energyStored, energyCap);
+        long energySpeedState = buf.readLong();
+        return new EnergyStoragePacket(energyStored, energyCap, energySpeedState);
     }
 }
