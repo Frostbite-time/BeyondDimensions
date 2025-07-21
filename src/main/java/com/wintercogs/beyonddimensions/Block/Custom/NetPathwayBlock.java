@@ -7,7 +7,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class NetPathwayBlock extends NetedBlock implements EntityBlock {
+public class NetPathwayBlock extends NetedBlock implements EntityBlock
+{
 
     public NetPathwayBlock(Properties properties) {
         super(properties);

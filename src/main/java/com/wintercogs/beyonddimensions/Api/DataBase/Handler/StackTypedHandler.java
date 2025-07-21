@@ -54,6 +54,27 @@ public class StackTypedHandler implements IStackTypedHandler
         }
     }
 
+    public StackTypedHandler(List<IStackType> other)
+    {
+        this.storage = new ArrayList<>(other.size());
+        this.size = other.size();
+
+        for(int i=0;i<size;i++)
+        {
+            IStackType stack = other.get(i);
+            if(stack != null)
+            {
+                storage.add(stack.copy());
+                typeIdIndex.computeIfAbsent(stack.getTypeId(), k -> new ArrayList<>()).add(i);
+            }
+            else
+            {
+                storage.set(i, new ItemStackType());
+                typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(i);
+            }
+        }
+    }
+
     @Override
     public List<IStackType> getStorage()
     {
@@ -331,6 +352,17 @@ public class StackTypedHandler implements IStackTypedHandler
         return true;
     }
 
+    @Override
+    public boolean isEmpty()
+    {
+        for (IStackType stack : storage) {
+            if (stack != null && !stack.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // region 序列化方法
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
@@ -404,5 +436,41 @@ public class StackTypedHandler implements IStackTypedHandler
     {
         return Optional.ofNullable(this.typeIdIndex.get(typeId))
                 .filter(list ->!list.isEmpty());
+    }
+
+    // 对存储的列表元素进行hashcode
+    // 注：由于IStackType的hashcode本身违反了定义，所以这会导致哈希冲突
+    // 但是这里我们可以允许一些哈希冲突，毕竟存储数十个物品且顺序组件一模一样的概率已经非常小了
+    // 剩下的可以交给equals进行真正的比较
+    @Override
+    public int hashCode()
+    {
+        return storage.hashCode(); // 直接用列表哈希即可
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if(obj == this) return true;
+
+        if(obj instanceof StackTypedHandler otherHandler)
+        {
+            if(otherHandler.storage.equals(storage))
+            {
+                // 这表示物品的 种类 组件 顺序都一一相同
+                // 接下来比较数量
+                boolean equals = true;
+                for(int i = 0; i < storage.size(); i++)
+                {
+                    if(storage.get(i).getStackAmount() != otherHandler.storage.get(i).getStackAmount())
+                    {
+                        equals = false;
+                        return equals;
+                    }
+                }
+                return equals;
+            }
+        }
+        return false; // 走到这一步则必然不等
     }
 }

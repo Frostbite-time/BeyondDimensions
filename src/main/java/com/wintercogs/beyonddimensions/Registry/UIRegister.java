@@ -26,6 +26,10 @@ public class UIRegister
     public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = UIRegister.MENU_TYPES.register("net_interface_menu", ()-> IForgeMenuType.create(NetInterfaceBaseMenu::new));
     public static final Supplier<MenuType<DimensionsCraftMenuTerminal>> Dimensions_Craft_Menu_Terminal = UIRegister.MENU_TYPES.register("dimensions_craft_menu_terminal", ()-> IForgeMenuType.create(DimensionsCraftMenuTerminal::new));
     public static final Supplier<MenuType<NetPumpMenu>> Net_Pump_Menu = UIRegister.MENU_TYPES.register("net_pump_menu", ()-> IForgeMenuType.create(NetPumpMenu::new));
+    public static final Supplier<MenuType<NetHopperMenu>> Net_Hopper_Menu = UIRegister.MENU_TYPES.register("net_hopper_menu", ()-> IForgeMenuType.create(NetHopperMenu::new));
+    public static final Supplier<MenuType<NetFurnaceMenu>> Net_Furnace_Menu = UIRegister.MENU_TYPES.register("net_furnace_menu", ()-> IForgeMenuType.create(NetFurnaceMenu::new));
+    public static final Supplier<MenuType<NetMagnetMenu>> Net_Magnet_Menu = UIRegister.MENU_TYPES.register("net_magnet_menu", ()-> IForgeMenuType.create(NetMagnetMenu::new));
+    public static final Supplier<MenuType<NetFeederMenu>> Net_Feeder_Menu = UIRegister.MENU_TYPES.register("net_feeder_menu", ()-> IForgeMenuType.create(NetFeederMenu::new));
 
     public static void register(IEventBus eventBus)
     {
@@ -46,6 +50,10 @@ public class UIRegister
                     MenuScreens.register(Net_Energy_Menu.get(), NetEnergyGUI::new);
                     MenuScreens.<DimensionsCraftMenuTerminal, DimensionsTerminalCraftGUI>register(Dimensions_Craft_Menu_Terminal.get(), DimensionsTerminalCraftGUI::new);
                     MenuScreens.register(Net_Pump_Menu.get(), NetPumpGUI::new);
+                    MenuScreens.register(Net_Hopper_Menu.get(), NetHopperGUI::new);
+                    MenuScreens.register(Net_Furnace_Menu.get(), NetFurnaceGUI::new);
+                    MenuScreens.register(Net_Magnet_Menu.get(), NetMagnetGUI::new);
+                    MenuScreens.register(Net_Feeder_Menu.get(), NetFeederGUI::new);
                 }
         );
     }

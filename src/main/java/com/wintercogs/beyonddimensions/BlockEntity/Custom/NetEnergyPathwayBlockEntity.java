@@ -4,6 +4,9 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.EnergyUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.Machine.BaseMachine;
+import com.wintercogs.beyonddimensions.Machine.PopMode;
+import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,83 +22,74 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
 
-public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements MenuProvider
+public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
 
-    public final int transHold = 20;
-    public int transTime = 0;
-
-    public boolean popMode = false;
+    public PopMode popMode = PopMode.STOP;
 
     private final Direction[] directions = Direction.values();
-
-    private DimensionsNet net = null; //用于缓存
-
 
     public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
-
 
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap,Direction side)
     {
         if(cap == ForgeCapabilities.ENERGY)
         {
-            if(this.getNetId()>=0)
+            if(popMode == PopMode.OPEN)
             {
-                DimensionsNet net = getNet();
-                if(net != null)
-                {
-                    return LazyOptional.of(() -> new EnergyUnifiedStorageHandler(net.getUnifiedStorage())).cast();
-                }
+                return LazyOptional.of(() -> new EnergyStorage(0)).cast();
             }
+            if(getNetId()<0)
+            {
+                return LazyOptional.of(() -> new EnergyStorage(0)).cast();
+            }
+            DimensionsNet net = getNet();
+            if(net != null)
+            {
+                return LazyOptional.of(() -> new EnergyUnifiedStorageHandler(net.getUnifiedStorage())).cast() ;
+            }
+            return LazyOptional.of(() -> new EnergyStorage(0)).cast();
         }
         return super.getCapability(cap,side);
     }
 
+    @Override
+    public boolean shouldWork()
+    {
+        return super.shouldWork() && getNet() != null;
+    }
 
+    @Override
+    public int getTicksPerWork()
+    {
+        return 1;
+    }
 
-    // 此方法的签名与 BlockEntityTicker 函数接口的签名匹配.
-    public static void tick(Level level, BlockPos pos, BlockState state, NetEnergyPathwayBlockEntity blockEntity) {
-        // 你希望在计时期间执行的任何操作.
-        // 例如，你可以在这里更改一个制作进度值或消耗能量.
-        if(level.isClientSide())
-            return; // 客户端不执行任何操作
-
-        if(blockEntity.getNetId() != -1)
+    @Override
+    public void workContent()
+    {
+        super.workContent();
+        if(popMode == PopMode.OPEN)
         {
-            blockEntity.transTime++;
-            if(blockEntity.transTime>=blockEntity.transHold)
-            {
-                blockEntity.transTime = 0;
-                // 定时计划写在这里
-            }
-        }
-
-        // 尝试输出物品到周围
-        if(blockEntity.popMode)
-        {
-            if(!(blockEntity.getNetId()<0))
-            {
-                blockEntity.popEnergy();
-            }
+            popEnergy();
         }
     }
 
     private void popEnergy()
     {
+        DimensionsNet net = getNet();
+
         if(net==null)
         {
-            DimensionsNet net = getNet();
-            if(net != null)
-                this.net = net;
-            else
-                return;
+            return;
         }
 
         for(Direction dir: directions)
@@ -119,24 +113,31 @@ public class NetEnergyPathwayBlockEntity extends NetedBlockEntity implements Men
     }
 
     @Override
-    public void invalidateCaps()
-    {
-        super.invalidateCaps();
-        net = null;
-    }
-
-    @Override
     public void load(CompoundTag tag)
     {
         super.load(tag);
-        this.popMode = tag.getBoolean("popMode");
+
+        // 旧数据兼容
+        String popModeNew = tag.getString("popMode");
+        if(!popModeNew.isEmpty())
+        {
+            this.popMode = PopMode.valueOf(popModeNew);
+        }
+        else if(tag.getBoolean("popMode"))
+        {
+            this.popMode = PopMode.OPEN;
+        }
+        else
+        {
+            this.popMode = PopMode.STOP;
+        }
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag)
     {
         super.saveAdditional(tag);
-        tag.putBoolean("popMode",this.popMode);
+        tag.putString("popMode",this.popMode.name());
     }
 
     @Override

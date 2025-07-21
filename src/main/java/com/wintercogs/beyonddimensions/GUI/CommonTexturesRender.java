@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.Mth;
 import net.minecraftforge.client.extensions.IForgeGuiGraphics;
 
 public class CommonTexturesRender
@@ -113,5 +114,115 @@ public class CommonTexturesRender
                 CommonTextures.RIGHT_TAB_WIDTH,
                 CommonTextures.RIGHT_TAB_HEIGHT);
         yPosRef[0] += height;
+    }
+
+
+    public static void renderNetFurnaceBackground(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    {
+        renderNetFurnaceBackground(guiGraphics, leftPos, yPosRef,
+                CommonTextures.NET_FURNACE_BACKGROUND_WIDTH,
+                CommonTextures.NET_FURNACE_BACKGROUND_HEIGHT);
+    }
+
+    public static void renderNetFurnaceBackground(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+                                                  int width, int height)
+    {
+        guiGraphics.blit(CommonTextures.NET_FURNACE_BACKGROUND, leftPos, yPosRef[0],
+                width, height,
+                0, 0,
+                CommonTextures.NET_FURNACE_BACKGROUND_WIDTH,
+                CommonTextures.NET_FURNACE_BACKGROUND_HEIGHT,
+                CommonTextures.NET_FURNACE_BACKGROUND_WIDTH,
+                CommonTextures.NET_FURNACE_BACKGROUND_HEIGHT);
+        yPosRef[0] += height;
+    }
+
+    public static void renderWorkDoneV(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    {
+        renderWorkDoneV(guiGraphics, leftPos, yPosRef,
+                CommonTextures.WORK_DONE_V_WIDTH,
+                CommonTextures.WORK_DONE_V_HEIGHT);
+    }
+
+    public static void renderWorkDoneV(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+                                       int width, int height)
+    {
+        guiGraphics.blit(CommonTextures.WORK_DONE_V, leftPos, yPosRef[0],
+                width, height,
+                0, 0,
+                CommonTextures.WORK_DONE_V_WIDTH,
+                CommonTextures.WORK_DONE_V_HEIGHT,
+                CommonTextures.WORK_DONE_V_WIDTH,
+                CommonTextures.WORK_DONE_V_HEIGHT);
+        yPosRef[0] += height;
+    }
+
+    public static void renderWorkDoneV_AsProgress(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+                                                  int width, int height, float progress) //从上往下
+    {
+        // 0. 约束进度
+        progress = Mth.clamp(progress, 0f, 1f);
+        if (progress <= 0f) return;          // 0% 不绘制
+
+        /* 2. 贴图需要的 V 高度 —— 按同样比例裁剪 */
+        int vHeight = (int) (CommonTextures.WORK_DONE_V_HEIGHT * progress);
+
+        /* 3. blit：
+          ‑ 只画贴图的顶部 vHeight 像素；
+          ‑ 目标区域从 (leftPos, yPos) 开始往下铺 drawH 像素 */
+        guiGraphics.blit(
+                CommonTextures.WORK_DONE_V,           // atlasLocation
+                CommonTextures.WORK_DONE_V_WIDTH,
+                CommonTextures.WORK_DONE_V_HEIGHT,
+                0,0,
+                leftPos, yPosRef[0],                  // 目标 X,Y
+                CommonTextures.WORK_DONE_V_WIDTH,     // UWidth  = 整张贴图宽
+                vHeight);                              // VHeight = 截掉剩余 (1‑progress)
+    }
+
+    public static void renderFurnaceWorkV(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    {
+        renderWorkDoneV(guiGraphics, leftPos, yPosRef,
+                CommonTextures.FURNACE_WORK_V_WIDTH,
+                CommonTextures.FURNACE_WORK_V_HEIGHT);
+    }
+
+    public static void renderFurnaceWorkV(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+                                          int width, int height)
+    {
+        guiGraphics.blit(CommonTextures.FURNACE_WORK_V, leftPos, yPosRef[0],
+                width, height,
+                0, 0,
+                CommonTextures.FURNACE_WORK_V_WIDTH,
+                CommonTextures.FURNACE_WORK_V_HEIGHT,
+                CommonTextures.FURNACE_WORK_V_WIDTH,
+                CommonTextures.FURNACE_WORK_V_HEIGHT);
+        yPosRef[0] += height;
+    }
+
+    public static void renderFurnaceWorkV_AsProgress(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+                                                     int width, int height, float progress) // 从下往上
+    {
+        // 0. 约束进度
+        progress = Mth.clamp(progress, 0f, 1f);
+        if (progress <= 0f) return;          // 0% 不绘制
+
+        /* 2. 贴图需要的 V 高度 —— 按同样比例裁剪 */
+        int vHeight = (int) (CommonTextures.FURNACE_WORK_V_HEIGHT * progress);
+        int vOffset = (int) (CommonTextures.FURNACE_WORK_V_HEIGHT - vHeight);
+
+        int drawY = yPosRef[0] + vOffset;
+
+        /* 3. blit：
+          ‑ 只画贴图的顶部 vHeight 像素；
+          ‑ 目标区域从 (leftPos, yPos) 开始往下铺 drawH 像素 */
+        guiGraphics.blit(
+                CommonTextures.FURNACE_WORK_V,           // atlasLocation
+                CommonTextures.FURNACE_WORK_V_WIDTH,
+                CommonTextures.FURNACE_WORK_V_HEIGHT,
+                0,vOffset,
+                leftPos, drawY,                  // 目标 X,Y
+                CommonTextures.FURNACE_WORK_V_WIDTH,     // UWidth  = 整张贴图宽
+                vHeight);                              // VHeight = 截掉剩余 (1‑progress)
     }
 }

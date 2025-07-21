@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Block.Custom;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Menu.NetControlMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -25,10 +26,13 @@ public class NetControlBlock extends Block
         super.use(state,level,pos,player,hand,hitResult);
         if(!level.isClientSide())
         {
-            player.openMenu(new SimpleMenuProvider(
-                    (containerId, playerInventory, _player) -> new NetControlMenu(containerId,playerInventory),
-                    Component.translatable("menu.title.beyonddimensions.net_control_menu")
-            ));
+            if(DimensionsNet.getNetFromPlayer(player)!=null)
+            {
+                player.openMenu(new SimpleMenuProvider(
+                        (containerId, playerInventory, _player) -> new NetControlMenu(containerId,playerInventory),
+                        Component.translatable("menu.title.beyonddimensions.net_control_menu")
+                ));
+            }
         }
         return InteractionResult.SUCCESS;
     }

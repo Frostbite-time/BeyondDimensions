@@ -12,6 +12,9 @@ import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.Machine.BaseMachine;
+import com.wintercogs.beyonddimensions.Machine.PopMode;
+import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,10 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuProvider
+public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
-    public final int transHold = 9;
-    public int transTime = 0;
 
     private static final int capacity = 27;
 
@@ -65,7 +66,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
         }
     };
 
-    public boolean popMode = false;
+    public PopMode popMode = PopMode.STOP;
 
     private final Direction[] directions = Direction.values();
     
@@ -87,6 +88,31 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
     public NetInterfaceBlockEntity(BlockPos pos, BlockState blockState)
     {
         super(ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
+    }
+
+
+    @Override
+    public boolean shouldWork()
+    {
+        return super.shouldWork(); // 接口方块使用内部缓存进行弹出，因此不需要检测getNet
+    }
+
+    @Override
+    public void workContent()
+    {
+        super.workContent();
+        if(getNet() != null)
+        {
+            transferToNet();
+            transferFromNet();
+        }
+        // 尝试输出物品到周围
+        if(popMode == PopMode.OPEN)
+        {
+            // 在使用缓存前确保它是最新的
+            updateCapabilityCache();
+            popStack();
+        }
     }
 
     // 更新能力缓存
@@ -150,34 +176,6 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
         return super.getCapability(cap, side);
     }
 
-    // 此方法的签名与 BlockEntityTicker 函数接口的签名匹配.
-    public static void tick(Level level, BlockPos pos, BlockState state, NetInterfaceBlockEntity blockEntity) {
-        // 你希望在计时期间执行的任何操作.
-        // 例如，你可以在这里更改一个制作进度值或消耗能量.
-        if(level.isClientSide())
-            return; // 客户端不执行任何操作
-
-
-        blockEntity.transTime++;
-        if(blockEntity.transTime>=blockEntity.transHold)
-        {
-            if(blockEntity.getNetId() != -1)
-            {
-                blockEntity.transferToNet();
-                blockEntity.transferFromNet();
-            }
-            // 尝试输出物品到周围
-            if(blockEntity.popMode)
-            {
-                // 在使用缓存前确保它是最新的
-                blockEntity.updateCapabilityCache();
-                blockEntity.popStack();
-            }
-
-            blockEntity.transTime = 0;
-        }
-
-    }
 
     public void transferToNet()
     {
@@ -316,7 +314,21 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
         super.load(tag);
         this.stackHandler.deserializeNBT(tag.getCompound("inventory"));
         this.fakeStackHandler.deserializeNBT(tag.getCompound("flags"));
-        this.popMode = tag.getBoolean("popMode");
+
+        // 旧数据兼容
+        String popModeNew = tag.getString("popMode");
+        if(!popModeNew.isEmpty())
+        {
+            this.popMode = PopMode.valueOf(popModeNew);
+        }
+        else if(tag.getBoolean("popMode"))
+        {
+            this.popMode = PopMode.OPEN;
+        }
+        else
+        {
+            this.popMode = PopMode.STOP;
+        }
         // 加载后需要更新缓存
         setNeedsCapabilityUpdate();
     }
@@ -327,13 +339,7 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
         super.saveAdditional(tag);
         tag.put("inventory", stackHandler.serializeNBT());
         tag.put("flags",fakeStackHandler.serializeNBT());
-        tag.putBoolean("popMode",this.popMode);
-    }
-    
-    // 在方块状态变化时重新缓存能力
-    @Override
-    public void setChanged() {
-        super.setChanged();
+        tag.putString("popMode",this.popMode.name());
     }
 
     @Override
@@ -346,5 +352,11 @@ public class NetInterfaceBlockEntity extends NetedBlockEntity implements MenuPro
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
         return new NetInterfaceBaseMenu(containerId,player.getInventory(),this.getStackHandler() ,this.getFakeStackHandler(),this);
+    }
+
+    @Override
+    public int getTicksPerWork()
+    {
+        return 9;
     }
 }

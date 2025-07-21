@@ -3,6 +3,8 @@ package com.wintercogs.beyonddimensions.Menu;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
+import com.wintercogs.beyonddimensions.Machine.PopMode;
+import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.Slot.FlagStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.OrderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
@@ -110,17 +112,20 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putBoolean("popMode", be.popMode);
+        tag.putString("popMode", be.popMode.name());
+        tag.putString("controlMode", be.controlMode.name());
     }
 
     @Override
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        be.popMode = tag.getBoolean("popMode");
+        be.popMode = PopMode.valueOf(tag.getString("popMode"));
+        be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
         // 服务端读取新数据之后利用sendBlockUpdated将数据发送给附近所有玩家
         if(!player.level().isClientSide())
         {
+            player.level().blockEntityChanged(be.getBlockPos());
             player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
         }
     }

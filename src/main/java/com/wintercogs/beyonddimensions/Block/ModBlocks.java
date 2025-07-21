@@ -37,6 +37,17 @@ public class ModBlocks
     public static final RegistryObject<Block> NET_PUMP_BLOCK = registerBlock("net_pump_block",
             ()-> new NetPumpBlock(BlockBehaviour.Properties.of().strength(2f)));
 
+    public static final RegistryObject<Block> NET_HOPPER_BLOCK = registerBlock("net_hopper_block",
+            ()-> new NetHopperBlock(BlockBehaviour.Properties.of().strength(2f)));
+
+    public static final RegistryObject<Block> NET_FURNACE_BLOCK = registerBlock("net_furnace_block",
+            ()-> new NetFurnaceBlock(BlockBehaviour.Properties.of().strength(2f)));
+
+    // 合成材料-维度链接框架
+    public static final RegistryObject<Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock("dimensional_connect_block",
+            ()-> new Block(BlockBehaviour.Properties.of().strength(2f)));
+
+
 
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block)

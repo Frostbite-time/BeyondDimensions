@@ -12,6 +12,11 @@ public class IconButton extends Button
 {
     protected ResourceLocation icon;
 
+    protected final int iconX;
+    protected final int iconY;
+    protected final int iconWidth;
+    protected final int iconHeight;
+
     protected WidgetSprites backgroundSprites = new WidgetSprites(
             ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/slot_button.png"),
             ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/slot_button_disabled.png"),
@@ -20,11 +25,23 @@ public class IconButton extends Button
 
     // 从左到右的含义分别为
     // x起始、y起始、宽、高、组件、按钮名称（父类为按钮上的字）、按下按钮后的行为、叙述（使用默认叙述即可）
-    public IconButton(int x, int y, int width, int height,ResourceLocation icon , OnPress onPress)
+    public IconButton(int x, int y, int width, int height, ResourceLocation icon,
+                      int iconX, int iconY, int iconWidth, int iconHeight,
+                      OnPress onPress)
     {
         super(x, y, width, height, Component.empty(), onPress, Button.DEFAULT_NARRATION);
         this.icon = icon;
+        this.iconX = iconX;
+        this.iconY = iconY;
+        this.iconWidth = iconWidth;
+        this.iconHeight = iconHeight;
         initBackground();
+    }
+
+    public IconButton(int x, int y, int width, int height, ResourceLocation icon,
+                      OnPress onPress)
+    {
+        this(x, y, width, height, icon, x, y, width, height, onPress);
     }
 
     @Override
@@ -53,7 +70,7 @@ public class IconButton extends Button
     }
 
     protected void drawIcon(GuiGraphics st, int mouseX, int mouseY, float pt) {
-        st.blit(getIcon(), this.getX(), this.getY(), 0,0,this.getWidth(), this.getHeight(),this.getWidth(),this.getHeight());
+        st.blit(getIcon(), this.getX(), this.getY(), 0,0,iconX, iconY, iconWidth, iconHeight);
     }
 
     // 用于覆写背景

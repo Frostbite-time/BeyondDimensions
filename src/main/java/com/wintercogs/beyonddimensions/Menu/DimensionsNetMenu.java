@@ -12,6 +12,7 @@ import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedSlotGroupSync;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
+import com.wintercogs.beyonddimensions.Unit.TooltipHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -19,6 +20,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 
 import java.util.*;
@@ -38,6 +40,7 @@ public class DimensionsNetMenu extends BDBaseMenu
     public UnifiedStorage storage;
     public UnifiedStorage viewerStorage; // 在客户端，用于显示物品
     private ArrayList<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
+    private boolean cacheTooltip = false; //客户端使用，用于记录打开UI后的第一次同步是否缓存了工具提示（用于搜索，且第一次同步通常为全量同步，此时处理较好）
 
     public boolean hasShiftDown = false;
 
@@ -92,6 +95,13 @@ public class DimensionsNetMenu extends BDBaseMenu
                     updateViewerStorage();
                 else
                     updateOnlyCountAndNewViewer();
+
+                if(!cacheTooltip)
+                {
+                    // 调用异步缓存
+                    TooltipHelper.readAsCache(storage.getStorage(), player, TooltipFlag.Default.NORMAL);
+                    TooltipHelper.readAsCache(storage.getStorage(), player, TooltipFlag.Default.ADVANCED);
+                }
             }
         });
 
@@ -315,52 +325,57 @@ public class DimensionsNetMenu extends BDBaseMenu
     public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackType> unifiedStorage)
     {
         // 合并过滤空气和搜索逻辑，避免遍历时删除
-        ArrayList<IStackType> cache = new ArrayList<>();
-        ArrayList<Integer> cacheIndex = new ArrayList<>();
+        ArrayList<IStackType> cache      = new ArrayList<>();
+        ArrayList<Integer>   cacheIndex = new ArrayList<>();
+
         for (int i = 0; i < unifiedStorage.size(); i++) {
-            IStackType stack = unifiedStorage.get(i).copy();
+            IStackType stack = unifiedStorage.get(i);
             if (stack == null || stack.isEmpty()) continue;
 
-            // 提前过滤空气，并缓存名称
+            // === 预先准备高频数据（全部小写，避免重复 toLowerCase 开销） ===
             String displayName = stack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
+            String modId       = stack.getModId().toLowerCase(Locale.ENGLISH);
 
-            boolean matchesSearch;
-
-            // 处理搜索逻辑的新规则
-            if (searchText == null || searchText.isEmpty()) {
-                matchesSearch = true; // 空搜索时默认匹配所有
-            } else {
-                // 搜索文本转小写保证大小写不敏感
-                String lowerSearch = searchText.toLowerCase(Locale.ENGLISH);
-                int atIndex = lowerSearch.indexOf('#');
-
-                if (atIndex >= 0) { // 当包含#符号时的处理逻辑
-                    // 拆分#前后的部分（不包括#符号）
-                    String mainPart = atIndex > 0 ? lowerSearch.substring(0, atIndex) : "";
-                    String tooltipPart = (atIndex + 1 < lowerSearch.length()) ?
-                            lowerSearch.substring(atIndex + 1) : "";
-
-                    // 主部分匹配逻辑
-                    boolean matchesMain = mainPart.isEmpty() || // 主部分为空时视为匹配
-                            checkTextMatches(displayName, mainPart);
-
-                    // 工具提示匹配逻辑
-                    boolean matchesTooltip = tooltipPart.isEmpty() || // 工具提示部分为空时视为匹配
-                            checkTooltipMatches(stack, tooltipPart);
-
-                    matchesSearch = matchesMain && matchesTooltip;
-                } else {
-                    // 不含#时的常规匹配逻辑（不检查tooltip）
-                    matchesSearch = checkTextMatches(displayName,lowerSearch);
-                }
-            }
-
-            if (matchesSearch) {
+            /* =======================================================================
+             * 1. 解析搜索串                      ────────────────────────────────
+             *    - 若包含 @ 或 # → AND 规则
+             *    - 都不含       → OR 规则（名称 OR 模组ID OR Tooltip）
+             *    - 检索顺序：名称 → 模组ID → Tooltip（最贵放最后）
+             * =======================================================================*/
+            if (searchText == null || searchText.isEmpty()) {           // ⇢ 直接命中
                 cache.add(stack);
                 cacheIndex.add(i);
+                continue;
             }
-        }
 
+            String lowerSearch = searchText.toLowerCase(Locale.ENGLISH);
+            String[] parts     = splitSearch(lowerSearch);
+            String mainPart    = parts[0];   // 名称
+            String idPart      = parts[1];   // 模组ID
+            String tooltipPart = parts[2];   // Tooltip
+            boolean hasSymbol  = !(idPart.isEmpty() && tooltipPart.isEmpty());  // 任一存在即显式符号
+
+
+            /* ---------- ① 显式符号：AND 规则 ---------- */
+            if (hasSymbol) {
+                // ---------- AND ----------
+                if (!mainPart.isEmpty() && !checkTextMatches(displayName, mainPart)) continue;
+                if (!idPart.isEmpty()   && !modId.contains(idPart))                 continue;
+                if (!tooltipPart.isEmpty() && !checkTooltipMatches(stack, tooltipPart)) continue;
+
+                cache.add(stack); cacheIndex.add(i);
+            } else {
+                // ---------- OR ----------
+                boolean matched = false;
+
+                if (!mainPart.isEmpty() && checkTextMatches(displayName, mainPart)) matched = true;
+                if (!matched && modId.contains(mainPart))                           matched = true;
+                if (!matched && checkTooltipMatches(stack, mainPart))               matched = true;
+
+                if (matched) { cache.add(stack); cacheIndex.add(i); }
+            }
+
+        }
         // 统一排序逻辑，避免重复代码
         ButtonState sortState = Config.uiSortButton;
         if (sortState != ButtonState.SORT_DEFAULT) {
@@ -437,11 +452,10 @@ public class DimensionsNetMenu extends BDBaseMenu
      * @return 结果为真则意味存在
      */
     private boolean checkTooltipMatches(IStackType stack, String matchText) {
-        List<Component> toolTips = stack.getTooltipLines(
+        List<Component> toolTips = TooltipHelper.getTooltipLines(stack,
                 player,
-                Minecraft.getInstance().options.advancedItemTooltips ?
-                        TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
-        );
+                Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+
         return toolTips.stream()
                 .anyMatch(tooltip -> {
 
@@ -450,6 +464,48 @@ public class DimensionsNetMenu extends BDBaseMenu
                     return checkTextMatches(tooltipText, matchText);
 
                 });
+    }
+
+    /**
+     * 把搜索串拆成 “名称 / 模组ID / Tooltip” 三段，顺序任意。
+     * 返回 String[3] ⇒ [namePart, idPart, tooltipPart]，不存在则为空串。
+     */
+    private static String[] splitSearch(String s) {
+        if (s == null) return new String[] {"", "", ""};
+
+        s = s.toLowerCase(Locale.ENGLISH);
+        int at   = s.indexOf('@');
+        int hash = s.indexOf('#');
+
+        // 都没有特殊符号
+        if (at < 0 && hash < 0) return new String[] {s, "", ""};
+
+        String namePart = "";
+        String idPart   = "";
+        String tipPart  = "";
+
+        // 三种情况：只含@、只含#、都含且顺序不定
+        if (at >= 0 && hash >= 0) {
+            // 同时存在：先找较小的索引拆 namePart
+            int first = Math.min(at, hash);
+            namePart  = s.substring(0, first);
+
+            if (at < hash) {                    //  @ ... #
+                idPart  = s.substring(at + 1, hash);
+                tipPart = s.substring(hash + 1);
+            } else {                            //  # ... @
+                tipPart = s.substring(hash + 1, at);
+                idPart  = s.substring(at + 1);
+            }
+        } else if (at >= 0) {                   // 只含 @
+            namePart = s.substring(0, at);
+            idPart   = s.substring(at + 1);
+        } else {                                // 只含 #
+            namePart = s.substring(0, hash);
+            tipPart  = s.substring(hash + 1);
+        }
+
+        return new String[] {namePart, idPart, tipPart};
     }
 
     public void updateScrollLineData(int dataSize)

@@ -19,22 +19,15 @@ import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 
-public class NetPumpBlock extends NetedBlock implements EntityBlock
+public class NetPumpBlock extends BaseMachineBlock
 {
     public NetPumpBlock(BlockBehaviour.Properties properties) {
-        super(properties);
+        super(properties.noOcclusion());
     }
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
         return new NetPumpBlockEntity(blockPos,blockState);
-    }
-
-    // 启用方块实体计时器
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : NetPumpBlockEntity::tick;
     }
 
     @Override

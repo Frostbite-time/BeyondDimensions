@@ -3,6 +3,8 @@ package com.wintercogs.beyonddimensions.Menu;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.Machine.PopMode;
+import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,19 +17,10 @@ public class NetEnergyMenu extends BDBaseMenu
 
     public NetEnergyPathwayBlockEntity be;
 
-    private DimensionsNet net = null; // 注意判断
-
     public long lastEnergyCapacity = 0;
     public long lastEnergyStored = 0;
     public long lastEnergySpeedState = 0;
 
-
-
-
-    // 我们的辅助函数
-    // 我们需要通过IMenuTypeExtension的.create方法才能返回一个menutype，
-    // create方法需要传入一个IContainerFactory的内容，而正好我们的构造函数就是IContainerFactory一样的参数。
-    // 因为就是这样设计的， 所以传入new就可以了。
 
 
     /**
@@ -51,13 +44,6 @@ public class NetEnergyMenu extends BDBaseMenu
 
         this.be = be;
 
-        if (!player.level().isClientSide())
-        {
-            DimensionsNet net = be.getNet();
-            if (net != null)
-                this.net = net;
-        }
-
         inventoryStartIndex = slots.size();
         for (int row = 0; row < 3; ++row)
         {
@@ -77,9 +63,10 @@ public class NetEnergyMenu extends BDBaseMenu
     @Override
     protected boolean shouldSendQuickData()
     {
-        if(net != null)
+        DimensionsNet netCache = be.getNet();
+        if(netCache != null)
         {
-            UnifiedStorage storage = net.getUnifiedStorage();
+            UnifiedStorage storage = netCache.getUnifiedStorage();
             if(lastEnergyStored != storage.getEnergyStored()
                     || lastEnergyCapacity != storage.getSlotCapacity(0)
                     || lastEnergySpeedState != storage.getEnergyStored() - lastEnergyStored)
@@ -90,14 +77,28 @@ public class NetEnergyMenu extends BDBaseMenu
                 return true;
             }
         }
+        else
+        {
+            if(lastEnergyStored != 0
+                    || lastEnergyCapacity != 0
+                    || lastEnergySpeedState != 0)
+            {
+                lastEnergySpeedState = 0;
+                lastEnergyStored = 0;
+                lastEnergyCapacity = 0;
+                return true;
+            }
+        }
         return false;
     }
+
 
     @Override
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putBoolean("popMode", be.popMode);
+        tag.putString("popMode", be.popMode.name());
+        tag.putString("controlMode", be.controlMode.name());
         tag.putLong("lastEnergyCapacity", lastEnergyCapacity);
         tag.putLong("lastEnergySpeedState", lastEnergySpeedState);
         tag.putLong("lastEnergyStored", lastEnergyStored);
@@ -115,7 +116,10 @@ public class NetEnergyMenu extends BDBaseMenu
         }
         else
         {
-            be.popMode = tag.getBoolean("popMode");
+            be.popMode = PopMode.valueOf(tag.getString("popMode"));
+            be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
+            player.level().blockEntityChanged(be.getBlockPos());
+            be.invalidateCaps();
             player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
         }
     }

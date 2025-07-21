@@ -30,13 +30,18 @@ public abstract class NetedBlockEntity extends BlockEntity
 
     public void setNetId(int id)
     {
+        boolean needsUpdate = this.netId != id;
         this.netId = id;
-        setChanged();
+
+        // 标识符变化时更新缓存
+        if(needsUpdate)
+            refreshNetCache();
     }
 
     public void clearNetId()
     {
         this.netId = -1;
+        net = null; // 清空缓存
         setChanged();
     }
 
@@ -45,8 +50,7 @@ public abstract class NetedBlockEntity extends BlockEntity
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
         if(net != null)
         {
-            this.netId = net.getId();
-            setChanged();
+            setNetId(net.getId());
         }
     }
 
@@ -55,43 +59,53 @@ public abstract class NetedBlockEntity extends BlockEntity
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
         if(net != null)
         {
-            this.netId = net.getId();
-            setChanged();
+            setNetId(net.getId());
         }
         else
         {
-            this.netId = -1;
-            setChanged();
+            clearNetId();
         }
     }
 
     public DimensionsNet getNet()
     {
-        if(net == null || net.deleted)
+        if(netId >= 0) // netId作为方块网络的第一标识符高于缓存
         {
-            if(netId>=0)
+            if(net == null || net.deleted)
             {
-                if(getLevel() instanceof ServerLevel)
-                {
-                    DimensionsNet netCache = DimensionsNet.getNetFromId(netId,getLevel().getServer());
-                    if(netCache!=null && !netCache.deleted)
-                    {
-                        net = netCache;
-                        return net;
-                    }
-                    return null;
-                }
+                // 当缓存无效时尝试更正
+                refreshNetCache();
             }
+            return net; // 返回最终缓存
+        }
+        else
+        {
             return null;
         }
-        return net; // net正常，直接返回net
+    }
+
+    // 更新网络缓存
+    protected void refreshNetCache()
+    {
+        if(getLevel() instanceof ServerLevel)
+        {
+            DimensionsNet netCache = DimensionsNet.getNetFromId(netId,getLevel().getServer());
+            if(netCache!=null && !netCache.deleted)
+            {
+                net = netCache;
+            }
+            else
+            {
+                net = null;
+            }
+        }
     }
 
     @Override
     public void load(CompoundTag tag)
     {
         super.load(tag);
-        this.netId = tag.getInt("netId");
+        setNetId(tag.getInt("netId"));
     }
 
     @Override

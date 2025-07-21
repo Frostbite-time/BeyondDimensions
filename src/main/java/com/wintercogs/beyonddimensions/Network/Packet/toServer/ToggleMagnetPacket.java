@@ -1,0 +1,81 @@
+package com.wintercogs.beyonddimensions.Network.Packet.toServer;
+
+import com.wintercogs.beyonddimensions.Item.Custom.BaseMachineItem;
+import com.wintercogs.beyonddimensions.Item.Custom.NetMagnetItem;
+import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkEvent;
+import top.theillusivec4.curios.api.SlotResult;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+
+import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType.deserializeStackCaps;
+import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType.serializeStackCaps;
+
+public record ToggleMagnetPacket()
+{
+    private void handle(NetworkEvent.Context context)
+    {
+        Player player = context.getSender();
+
+        for(ItemStack stack: player.getInventory().items)
+        {
+            if(stack.getItem() instanceof NetMagnetItem)
+            {
+                if(BaseMachineItem.hasControlMode(stack))
+                {
+                    if(BaseMachineItem.getControlModeOrDefault(stack,RedStoneControlMode.IGNORE) == RedStoneControlMode.IGNORE)
+                        BaseMachineItem.setControlMode(stack,RedStoneControlMode.NOT_WORKING);
+                    else if(BaseMachineItem.getControlModeOrDefault(stack,RedStoneControlMode.IGNORE) == RedStoneControlMode.NOT_WORKING)
+                        BaseMachineItem.setControlMode(stack,RedStoneControlMode.IGNORE);
+                }
+            }
+        }
+        top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler ->{
+            List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
+                    .stream()
+                    .map(SlotResult::stack)
+                    .toList();
+
+            for(ItemStack stack: curios)
+            {
+                if(stack.getItem() instanceof NetMagnetItem)
+                {
+                    if(BaseMachineItem.hasControlMode(stack))
+                    {
+                        if(BaseMachineItem.getControlModeOrDefault(stack,RedStoneControlMode.IGNORE) == RedStoneControlMode.IGNORE)
+                            BaseMachineItem.setControlMode(stack,RedStoneControlMode.NOT_WORKING);
+                        else if(BaseMachineItem.getControlModeOrDefault(stack,RedStoneControlMode.IGNORE) == RedStoneControlMode.NOT_WORKING)
+                            BaseMachineItem.setControlMode(stack,RedStoneControlMode.IGNORE);
+                    }
+                }
+            }
+        });
+    }
+
+
+    public static void handle(ToggleMagnetPacket packet, Supplier<NetworkEvent.Context> cxt)
+    {
+        if (packet != null) {
+            NetworkEvent.Context context = cxt.get();
+            context.enqueueWork(() -> packet.handle(context));
+            context.setPacketHandled(true);
+        }
+    }
+
+    public static void encode(ToggleMagnetPacket packet, FriendlyByteBuf buf)
+    {
+
+    }
+
+    public static ToggleMagnetPacket decode(FriendlyByteBuf buf)
+    {
+        return new ToggleMagnetPacket();
+    }
+}

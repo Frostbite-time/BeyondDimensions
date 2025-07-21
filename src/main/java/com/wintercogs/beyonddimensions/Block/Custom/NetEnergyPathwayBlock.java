@@ -20,7 +20,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class NetEnergyPathwayBlock extends NetedBlock implements EntityBlock
+public class NetEnergyPathwayBlock extends BaseMachineBlock
 {
 
     public NetEnergyPathwayBlock(Properties properties) {
@@ -30,15 +30,6 @@ public class NetEnergyPathwayBlock extends NetedBlock implements EntityBlock
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
         return new NetEnergyPathwayBlockEntity(blockPos,blockState);
-    }
-
-    // 启用方块实体计时器
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null :
-                (level1, pos, state1, blockEntity) ->
-                        NetEnergyPathwayBlockEntity.tick(level1, pos, state1, (NetEnergyPathwayBlockEntity) blockEntity);
     }
 
     @Override

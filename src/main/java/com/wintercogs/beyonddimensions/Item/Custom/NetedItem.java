@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -49,6 +50,17 @@ public class NetedItem extends Item
         }
         return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
+
+    public static DimensionsNet getNet(ItemStack stack, MinecraftServer dataProvider)
+    {
+        int netId = getNetId(stack);
+        if(netId >= 0)
+        {
+            return DimensionsNet.getNetFromId(netId,dataProvider);
+        }
+        return null;
+    }
+
     // 可以通过这个方法获取存储的 NetId
     public static int getNetId(ItemStack stack) {
         if (stack.hasTag() && stack.getTag().contains("NetId")) {
@@ -56,6 +68,12 @@ public class NetedItem extends Item
         }
         return -1;
     }
+
+    public static void setNetId(ItemStack stack, int netId)
+    {
+        stack.getOrCreateTag().putInt("NetId", netId);
+    }
+
     protected boolean validToReWrite(DimensionsNet net, Player player) {
         return net.isManager(player);
     }

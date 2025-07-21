@@ -319,4 +319,9 @@ public interface IStackTypedHandler
     {
         return true;
     }
+
+    /**
+     * 当前容器内是否存有物品
+     */
+    boolean isEmpty();
 }

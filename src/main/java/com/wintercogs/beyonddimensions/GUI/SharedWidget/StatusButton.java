@@ -6,22 +6,33 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class StatusButton extends IconButton
 {
     protected ArrayList<Enum<?>> states = new ArrayList<>();;
-    protected Map<Enum<?>,ResourceLocation> iconMap = new HashMap<>();
-    protected Map<Enum<?>, Tooltip> tooltipMap = new HashMap<>(); // 需要添加可变工具提示则添加 需要固定工具提示则直接setTooltip，此处留空
+    // 保证按钮切换顺序按照插入顺序
+    protected Map<Enum<?>,ResourceLocation> iconMap = new LinkedHashMap<>();
+    protected Map<Enum<?>, Tooltip> tooltipMap = new LinkedHashMap<>(); // 需要添加可变工具提示则添加 需要固定工具提示则直接setTooltip，此处留空
     public Enum<?> currentState;
 
 
-    protected StatusButton(int x, int y, int width, int height, OnPress onPress)
+    protected StatusButton(int x, int y, int width, int height,
+                           int iconX, int iconY, int iconWidth, int iconHeight,
+                           OnPress onPress)
     {
         // 给予一个默认图片用于构造父类
-        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/unkonw_thing.png"), onPress);
+        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/unkonw_thing"),iconX,iconY,iconWidth,iconHeight, onPress);
         initButton();
         setIcon(iconMap.get(currentState));
+    }
+
+    protected StatusButton(int x, int y, int width, int height,
+                           OnPress onPress)
+    {
+        // 给予一个默认图片用于构造父类
+        this(x, y, width, height, x,y,width,height, onPress);
     }
 
     // 用于子类初始化状态、状态图片映射表、当前状态

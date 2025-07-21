@@ -30,5 +30,7 @@ public class ModItemModelProvider extends ItemModelProvider
         basicItem(ModItems.NET_DESTROYER.get());
         basicItem(ModItems.NET_AE_STORAGE_CELL.get());
         basicItem(ModItems.MATTER_COMPRESS_BALL.get());
+        basicItem(ModItems.NET_MAGNET_ITEM.get());
+        basicItem(ModItems.NET_FEEDER_ITEM.get());
     }
 }

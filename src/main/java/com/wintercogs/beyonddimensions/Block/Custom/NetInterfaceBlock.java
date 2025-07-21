@@ -23,7 +23,7 @@ import net.minecraftforge.network.NetworkHooks;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-public class NetInterfaceBlock extends NetedBlock implements EntityBlock
+public class NetInterfaceBlock extends BaseMachineBlock
 {
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -33,14 +33,6 @@ public class NetInterfaceBlock extends NetedBlock implements EntityBlock
         super(properties);
     }
 
-    // 启用方块实体计时器
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null :
-                (level1, pos, state1, blockEntity) ->
-                        NetInterfaceBlockEntity.tick(level1, pos, state1, (NetInterfaceBlockEntity) blockEntity);
-    }
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)

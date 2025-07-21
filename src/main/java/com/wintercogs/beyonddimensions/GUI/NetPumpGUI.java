@@ -34,7 +34,8 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
         this.topPos = (this.height - imageHeight)/2;
 
 
-        filterModeButton = new RightTabButton(leftPos + 176, topPos +6, 26,26 , button -> {
+        filterModeButton = new RightTabButton(leftPos + 176, topPos +6, 23,26 ,
+                leftPos + 176+2, topPos +6 +5, 16,16,button -> {
             filterModeButton.toggleState();
             menu.be.filterMode = (FilterMode) filterModeButton.currentState;
             menu.writeAndSendQuickData();
@@ -43,9 +44,9 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FilterMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/down_arrow"));
-                iconMap.put(FilterMode.WHITE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/search_disable"));
-                iconMap.put(FilterMode.BLACK, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/search_enable"));
+                iconMap.put(FilterMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/ignore_filter"));
+                iconMap.put(FilterMode.WHITE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/white_filter"));
+                iconMap.put(FilterMode.BLACK, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/black_filter"));
 
                 tooltipMap.put(FilterMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_ignore")));
                 tooltipMap.put(FilterMode.WHITE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_white")));
@@ -61,7 +62,8 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
         };
         addRenderableWidget(filterModeButton);
 
-        controlModeButton = new RightTabButton(leftPos + 176, topPos +36, 26,26 , button -> {
+        controlModeButton = new RightTabButton(leftPos + 176, topPos +36, 23,26 ,
+                leftPos + 176 +2 , topPos +36 +5, 16,16,button -> {
             controlModeButton.toggleState();
             menu.be.controlMode = (RedStoneControlMode) controlModeButton.currentState;
             menu.writeAndSendQuickData();
@@ -70,15 +72,17 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/down_arrow"));
-                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/search_disable"));
-                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/search_enable"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/search_disable"));
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_powered"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_unpowered"));
+
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
+                tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
                 tooltipMap.put(RedStoneControlMode.POWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_powered")));
                 tooltipMap.put(RedStoneControlMode.UNPOWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_unpowered")));
-                tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
+
 
                 for(Enum<?> state : iconMap.keySet())
                 {
@@ -103,7 +107,7 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float v, int i, int i1)
+    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);

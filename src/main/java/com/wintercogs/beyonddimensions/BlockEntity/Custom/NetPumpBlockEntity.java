@@ -32,7 +32,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import javax.annotation.Nullable;
 import java.util.function.Function;
 
-public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine , MenuProvider
+public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
     // 存储相邻方块的能力
     // 按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
@@ -52,25 +52,22 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
     };
 
     public FilterMode filterMode = FilterMode.BLACK;
-    public RedStoneControlMode controlMode = RedStoneControlMode.IGNORE;
 
     public NetPumpBlockEntity(BlockPos pos, BlockState blockState)
     {
         super(ModBlockEntities.NET_PUMP_BLOCK_ENTITY.get(), pos, blockState);
     }
 
-    public static void tick(Level level, BlockPos pos, BlockState state, BlockEntity blockEntity)
-    {
-        if(blockEntity instanceof NetPumpBlockEntity netPump)
-        {
-            netPump.working();
-        }
-    }
-
     @Override
     public boolean shouldWork()
     {
-        return BaseMachine.super.shouldWork() && getNet() != null;
+        return super.shouldWork() && getNet() != null;
+    }
+
+    @Override
+    public int getTicksPerWork()
+    {
+        return 10;
     }
 
     @Override
@@ -133,16 +130,6 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
         );
     }
 
-    public FilterMode getFilterMode()
-    {
-        return filterMode;
-    }
-
-    public void setFilterMode(FilterMode filterMode)
-    {
-        this.filterMode = filterMode;
-    }
-
     private boolean matchesFilter(IStackType otherStack)
     {
         switch (filterMode)
@@ -171,18 +158,6 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
         return false;
     }
 
-    @Override
-    public RedStoneControlMode getControlMode()
-    {
-        return controlMode;
-    }
-
-    @Override
-    public boolean hasRedStoneSignal()
-    {
-        return level.getBestNeighborSignal(worldPosition) > 0;
-    }
-
     public void setNeedsCapabilityUpdate()
     {
         needsCapabilityUpdate = true;
@@ -201,7 +176,6 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
         super.load(tag);
         filterSlots.deserializeNBT(tag.getCompound("filter_slots"));
         filterMode = FilterMode.valueOf(tag.getString("filter_type"));
-        controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
         setNeedsCapabilityUpdate();
     }
 
@@ -211,7 +185,6 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
         super.saveAdditional(tag);
         tag.put("filter_slots", filterSlots.serializeNBT());
         tag.putString("filter_type", filterMode.name());
-        tag.putString("control_mode", controlMode.name());
     }
 
     @Override

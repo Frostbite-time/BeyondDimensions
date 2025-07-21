@@ -129,5 +129,13 @@ public class PacketRegister
                 QuickDataTagPacket::decode,
                 QuickDataTagPacket::handle
         );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                ToggleMagnetPacket.class,
+                ToggleMagnetPacket::encode,
+                ToggleMagnetPacket::decode,
+                ToggleMagnetPacket::handle
+        );
     }
 }
