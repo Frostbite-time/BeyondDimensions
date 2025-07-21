@@ -175,11 +175,11 @@ dependencies {
 
     // EMI支持
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-    //runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+    runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
 
     // JEI支持
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
-    runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    //runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
     // 多态合成支持
     compileOnly "curse.maven:polymorph-388800:6451024"
