@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.Unit;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 
 import javax.annotation.Nullable;

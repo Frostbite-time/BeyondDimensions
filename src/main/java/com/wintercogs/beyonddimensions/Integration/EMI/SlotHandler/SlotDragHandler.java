@@ -14,7 +14,6 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.Slot;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;

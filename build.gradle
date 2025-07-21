@@ -213,7 +213,7 @@ dependencies {
 
     // 通用拼音搜索的引入
     modCompileOnly "curse.maven:just-enough-characters-250702:6680042"
-    modRuntimeOnly "curse.maven:just-enough-characters-250702:6680042"
+    //modRuntimeOnly "curse.maven:just-enough-characters-250702:6680042"
 
     modRuntimeOnly "curse.maven:sophisticated-core-618298:6596375"
     modRuntimeOnly "curse.maven:sophisticated-backpacks-422301:6587116"

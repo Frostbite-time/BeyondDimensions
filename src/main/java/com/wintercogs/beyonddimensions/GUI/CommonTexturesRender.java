@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.extensions.IForgeGuiGraphics;
 
 public class CommonTexturesRender
 {

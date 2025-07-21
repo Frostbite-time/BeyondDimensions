@@ -3,20 +3,14 @@ package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 import com.wintercogs.beyonddimensions.Item.Custom.BaseMachineItem;
 import com.wintercogs.beyonddimensions.Item.Custom.NetMagnetItem;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
-import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 import top.theillusivec4.curios.api.SlotResult;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-
-import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType.deserializeStackCaps;
-import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType.serializeStackCaps;
 
 public record ToggleMagnetPacket()
 {

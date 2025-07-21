@@ -20,33 +20,6 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
         super(ModBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
-//    //--- 能力注册 (通过事件) ---
-//    public static void registerCapability(RegisterCapabilitiesEvent event) {
-//
-//        CapabilityHelper.BlockCapabilityMap.forEach(
-//                (resourceLocation, directionBlockCapability) -> {
-//                    Function handler = UnifiedStorage.typedHandlerMap.get(resourceLocation);
-//                    event.registerBlockEntity(
-//                            (BlockCapability<? super Object, ? extends Direction>) directionBlockCapability,
-//                            ModBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
-//                            (be, side) -> {
-//                                if(be.getNetId()<0)
-//                                {
-//                                    return null;
-//                                }
-//                                DimensionsNet net = be.getNet();
-//                                if(net != null)
-//                                {
-//                                    return handler.apply(net.getUnifiedStorage());
-//                                }
-//                                return null;
-//                            } // 根据方向返回处理器
-//                    );
-//                }
-//        );
-//    }
-
-
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
     {
