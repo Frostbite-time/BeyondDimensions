@@ -12,86 +12,90 @@ import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import dev.emi.emi.api.EmiDragDropHandler;
 import dev.emi.emi.api.stack.EmiIngredient;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.Slot;
 
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
-
-public class SlotDragHandler implements EmiDragDropHandler<BDBaseGUI>
+public class SlotDragHandler implements EmiDragDropHandler<Screen>
 {
-    private final Predicate<Slot> slotFilter = slot -> {
-        if(slot instanceof AbstractStackTypedSlot sSlot)
-        {
-            return sSlot.isFake();
-        }
-        return false;
-    };
-    private final BiConsumer<Slot, EmiIngredient> dropHandler = (slot, ingredient) -> {
-        // stackKey 是如 Item Fluid的类
-        Object stackKey = ingredient.getEmiStacks().get(0).getKey();
-        CompoundTag dataComponentPatch = ingredient.getEmiStacks().get(0).getNbt();
-
-        IStackType dragging = new ItemStackType();
-        for(IStackType type : StackTypeRegistry.getAllTypes())
-        {
-            if(type.getSourceClass().isAssignableFrom(stackKey.getClass()))
-            {
-
-                dragging = type.fromObject(stackKey,1,dataComponentPatch);
-                break;
-
-            }
-        }
-
-        // AE2通用包裹支持
-        if(BeyondDimensions.AELoaded)
-        {
-            if(dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
-            {
-                appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
-
-                if(genericContent != null)
-                {
-                    dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
-                }
-
-            }
-        }
-
-        PacketRegister.INSTANCE.sendToServer(new SetSlotDirectlyPacket(slot.index,dragging));
-    };
 
     public SlotDragHandler() {}
+
     @Override
-    public boolean dropStack(BDBaseGUI screen, EmiIngredient ingredient, int x, int y) {
-        // 转换屏幕坐标到容器相对坐标
-        double mouseX = x - screen.getGuiLeft();
-        double mouseY = y - screen.getGuiTop();
-        // 遍历所有槽位检查是否在有效区域内
-        for (Slot slot : screen.getMenu().slots) {
-            if (slotFilter.test(slot) && isMouseOverSlot(screen, slot, mouseX, mouseY)) {
-                dropHandler.accept(slot, ingredient);
-                return true;
+    public void render(Screen screen, EmiIngredient dragged, GuiGraphics draw, int mouseX, int mouseY, float delta)
+    {
+        if(!(screen instanceof BDBaseGUI bdGUI))
+            return;
+
+        for(Slot slot : bdGUI.getMenu().slots)
+        {
+            if(slot instanceof AbstractStackTypedSlot sSlot && sSlot.isFake())
+            {
+                int slotLeft = bdGUI.getGuiLeft() + slot.x;
+                int slotTop = bdGUI.getGuiTop() + slot.y;
+
+                draw.fill( slotLeft, slotTop,
+                        slotLeft + 16, slotTop + 16,
+                        0x8822BB33);
             }
         }
-        return false;
     }
 
     @Override
-    public void render(BDBaseGUI screen, EmiIngredient dragged, GuiGraphics draw, int mouseX, int mouseY, float delta)
+    public boolean dropStack(Screen screen, EmiIngredient ingredient, int x, int y)
     {
-        EmiDragDropHandler.super.render(screen, dragged, draw, mouseX, mouseY, delta);
-    }
+        if(!(screen instanceof BDBaseGUI bdGUI))
+            return false;
 
-    private boolean isMouseOverSlot(BDBaseGUI screen, Slot slot,
-                                    double mouseX, double mouseY) {
-        return isPointInRegion(screen, slot.x, slot.y, 16, 16, mouseX, mouseY);
-    }
-    private boolean isPointInRegion(BDBaseGUI<?> screen, int x, int y,
-                                    int width, int height, double pointX, double pointY) {
-        return pointX >= x - 1 && pointX < x + width + 1 &&
-                pointY >= y - 1 && pointY < y + height + 1;
-    }
+        for(Slot slot : bdGUI.getMenu().slots)
+        {
+            if(slot instanceof AbstractStackTypedSlot sSlot && sSlot.isFake())
+            {
+                int slotLeft = bdGUI.getGuiLeft() + slot.x;
+                int slotTop = bdGUI.getGuiTop() + slot.y;
+                Rect2i slotRect = new Rect2i(slotLeft, slotTop, 16, 16);
 
+                if(slotRect.contains(x, y))
+                {
+                    // stackKey 是如 Item Fluid的类
+                    Object stackKey = ingredient.getEmiStacks().get(0).getKey();
+                    CompoundTag dataComponentPatch = ingredient.getEmiStacks().get(0).getNbt();
+
+                    IStackType dragging = new ItemStackType();
+                    for (IStackType type : StackTypeRegistry.getAllTypes())
+                    {
+                        if (type.getSourceClass().isAssignableFrom(stackKey.getClass()))
+                        {
+
+                            dragging = type.fromObject(stackKey, 1, dataComponentPatch);
+                            break;
+
+                        }
+                    }
+
+                    // AE2通用包裹支持
+                    if (BeyondDimensions.AELoaded)
+                    {
+                        if (dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
+                        {
+                            appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
+
+                            if (genericContent != null)
+                            {
+                                dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
+                            }
+
+                        }
+                    }
+
+                    PacketRegister.INSTANCE.sendToServer(new SetSlotDirectlyPacket(slot.index, dragging));
+
+                    return true; // 走到发包即表示完成
+                }
+            }
+        }
+
+        return false;
+    }
 }
