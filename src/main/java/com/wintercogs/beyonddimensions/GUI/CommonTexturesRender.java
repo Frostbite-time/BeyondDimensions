@@ -172,12 +172,12 @@ public class CommonTexturesRender
           ‑ 目标区域从 (leftPos, yPos) 开始往下铺 drawH 像素 */
         guiGraphics.blit(
                 CommonTextures.WORK_DONE_V,           // atlasLocation
-                CommonTextures.WORK_DONE_V_WIDTH,
-                CommonTextures.WORK_DONE_V_HEIGHT,
-                0,0,
                 leftPos, yPosRef[0],                  // 目标 X,Y
-                CommonTextures.WORK_DONE_V_WIDTH,     // UWidth  = 整张贴图宽
-                vHeight);                              // VHeight = 截掉剩余 (1‑progress)
+                width, (int) (height * progress),
+                0,0,
+                CommonTextures.WORK_DONE_V_WIDTH,vHeight,
+                CommonTextures.WORK_DONE_V_WIDTH,
+                CommonTextures.WORK_DONE_V_HEIGHT);                              // VHeight = 截掉剩余 (1‑progress)
     }
 
     public static void renderFurnaceWorkV(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
@@ -218,11 +218,11 @@ public class CommonTexturesRender
           ‑ 目标区域从 (leftPos, yPos) 开始往下铺 drawH 像素 */
         guiGraphics.blit(
                 CommonTextures.FURNACE_WORK_V,           // atlasLocation
-                CommonTextures.FURNACE_WORK_V_WIDTH,
-                CommonTextures.FURNACE_WORK_V_HEIGHT,
-                0,vOffset,
                 leftPos, drawY,                  // 目标 X,Y
-                CommonTextures.FURNACE_WORK_V_WIDTH,     // UWidth  = 整张贴图宽
-                vHeight);                              // VHeight = 截掉剩余 (1‑progress)
+                width, (int)(height * progress),
+                0,vOffset,
+                CommonTextures.FURNACE_WORK_V_WIDTH,vHeight,
+                CommonTextures.FURNACE_WORK_V_WIDTH,
+                CommonTextures.FURNACE_WORK_V_HEIGHT);                              // VHeight = 截掉剩余 (1‑progress)
     }
 }

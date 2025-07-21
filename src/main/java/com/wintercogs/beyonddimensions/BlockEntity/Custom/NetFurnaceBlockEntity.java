@@ -37,6 +37,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
@@ -149,7 +150,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 能量或者可以燃烧的物品能作为燃料标记
             return (stack instanceof EnergyStackType)
                     || (stack instanceof FluidStackType fluidStack && fluidStack.copyStack().getFluid() == Fluids.LAVA)
-                    || (stack instanceof ItemStackType itemFuel && itemFuel.getStack().getBurnTime(RecipeType.SMELTING) >0);
+                    || (stack instanceof ItemStackType itemFuel && ForgeHooks.getBurnTime(itemFuel.getStack(),RecipeType.SMELTING) >0);
         }
 
     };
@@ -213,7 +214,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 能量或者可以燃烧的物品能作为燃料标记
             return (stack instanceof EnergyStackType)
                     || (stack instanceof FluidStackType fluidStack && fluidStack.copyStack().getFluid() == Fluids.LAVA)
-                    || (stack instanceof ItemStackType itemFuel && itemFuel.getStack().getBurnTime(RecipeType.SMELTING) >0);
+                    || (stack instanceof ItemStackType itemFuel && ForgeHooks.getBurnTime(itemFuel.getStack(),RecipeType.SMELTING) >0);
         }
     };
     public StackTypedHandler getFuelStorageSlots()
@@ -407,7 +408,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                         }
                         else if(fuelStack instanceof ItemStackType fuelItem)
                         {
-                            int burnTime = fuelItem.getStack().getBurnTime(RecipeType.SMELTING);
+                            int burnTime = ForgeHooks.getBurnTime(fuelItem.getStack(),RecipeType.SMELTING);
                             if(burnTime > 0)
                             {
                                 ItemStack returnItem = fuelItem.copyStack().getCraftingRemainingItem();

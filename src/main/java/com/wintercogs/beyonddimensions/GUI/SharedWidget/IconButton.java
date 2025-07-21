@@ -70,7 +70,7 @@ public class IconButton extends Button
     }
 
     protected void drawIcon(GuiGraphics st, int mouseX, int mouseY, float pt) {
-        st.blit(getIcon(), this.getX(), this.getY(), 0,0,iconX, iconY, iconWidth, iconHeight);
+        st.blit(getIcon(), iconX, iconY, 0,0,iconWidth, iconHeight, iconWidth, iconHeight);
     }
 
     // 用于覆写背景

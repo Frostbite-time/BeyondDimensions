@@ -238,12 +238,14 @@ public class NetMagnetItem extends BaseMachineItem
                             ? FluidType.BUCKET_VOLUME
                             : 0;
 
-                    FluidStack extracted = new FluidStack(fluidState.getType(), amount);
+                    // 检测时将数量设为1，防止被识别为空栈从而跳过
+                    FluidStack extracted = new FluidStack(fluidState.getType(), 1);
 
                     // ⑤ 交给你的逻辑（存槽、推网络、合并等）
                     FluidStackType typedFluid = new FluidStackType(extracted);
                     if(matchesFilter(filterMode,filterSlots,typedFluid))
                     {
+                        typedFluid.setStackAmount(amount); // 执行逻辑前将数量设为正确值
                         if(storage.insert(typedFluid,true).isEmpty())
                         {
                             storage.insert(typedFluid,false);

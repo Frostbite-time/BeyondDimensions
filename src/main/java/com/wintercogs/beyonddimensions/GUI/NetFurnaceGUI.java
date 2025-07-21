@@ -45,8 +45,8 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(PopMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/popmode_up"));
-                iconMap.put(PopMode.STOP,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/popmode_down"));
+                iconMap.put(PopMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/popmode_up.png"));
+                iconMap.put(PopMode.STOP,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/popmode_down.png"));
 
                 tooltipMap.put(PopMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
                 tooltipMap.put(PopMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
@@ -72,8 +72,8 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(ReceiveMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/net_disable"));
-                iconMap.put(ReceiveMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/net_absorb"));
+                iconMap.put(ReceiveMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/net_disable.png"));
+                iconMap.put(ReceiveMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/net_absorb.png"));
 
                 tooltipMap.put(ReceiveMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.receive_mode_stop")));
                 tooltipMap.put(ReceiveMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.receive_mode_open")));
@@ -99,10 +99,10 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_not_working"));
-                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_powered"));
-                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_unpowered"));
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/control_mode_ignore.png"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/control_mode_not_working.png"));
+                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/control_mode_powered.png"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/control_mode_unpowered.png"));
 
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));

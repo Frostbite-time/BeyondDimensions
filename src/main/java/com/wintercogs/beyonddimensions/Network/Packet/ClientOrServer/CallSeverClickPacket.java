@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
@@ -24,37 +25,17 @@ public record CallSeverClickPacket(int slotIndex , IStackType clickItem, int but
     private void handleServer(NetworkEvent.Context context)
     {
         Player player = context.getSender();
-        if (player.containerMenu instanceof DimensionsNetMenu menu)
+        if (player.containerMenu instanceof BDBaseMenu menu)
         {
             menu.customClickHandler(slotIndex(),clickItem(),button(),shiftDown());
             menu.broadcastChanges();
-            // 这里发包不是让客户端执行操作，而是解除锁定
-            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()->(ServerPlayer) player), new CallSeverClickPacket(1, new ItemStackType(ItemStack.EMPTY),1,false));
-            return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-        }
-        if(player.containerMenu instanceof NetInterfaceBaseMenu menu)
-        {
-            menu.customClickHandler(slotIndex(),clickItem(),button(),shiftDown());
-            menu.broadcastChanges();
-            // 这里发包不是让客户端执行操作，而是解除锁定
-            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()->(ServerPlayer) player), new CallSeverClickPacket(1, new ItemStackType(ItemStack.EMPTY),1,false));
-            return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     private void handleClient(NetworkEvent.Context context)
     {
-        Player player = Minecraft.getInstance().player;
-        if (player.containerMenu instanceof DimensionsNetMenu menu)
-        {
-            menu.isHanding = false;
-            return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
-        }
-        if (player.containerMenu instanceof NetInterfaceBaseMenu menu)
-        {
-            menu.isHanding = false;
-        }
+
     }
 
 

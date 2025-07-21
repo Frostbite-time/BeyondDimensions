@@ -43,10 +43,10 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FeederMode.HUNGER_TO_EAT, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/feeder_mode_hunger_to_eat"));
-                iconMap.put(FeederMode.NORMAL, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/feeder_mode_normal"));
-                iconMap.put(FeederMode.SATURATION_KEEP, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/feeder_mode_saturation_keep"));
-                iconMap.put(FeederMode.CRAZY, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/feeder_mode_crazy"));
+                iconMap.put(FeederMode.HUNGER_TO_EAT, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/feeder_mode_hunger_to_eat.png"));
+                iconMap.put(FeederMode.NORMAL, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/feeder_mode_normal.png"));
+                iconMap.put(FeederMode.SATURATION_KEEP, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/feeder_mode_saturation_keep.png"));
+                iconMap.put(FeederMode.CRAZY, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/feeder_mode_crazy.png"));
 
                 tooltipMap.put(FeederMode.HUNGER_TO_EAT, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.feeder_mode_hunger_to_eat")));
                 tooltipMap.put(FeederMode.NORMAL, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.feeder_mode_normal")));
@@ -73,8 +73,8 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/control_mode_ignore.png"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/control_mode_not_working.png"));
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
                 tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));

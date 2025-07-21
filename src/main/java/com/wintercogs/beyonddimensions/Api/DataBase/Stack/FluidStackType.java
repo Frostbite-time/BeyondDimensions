@@ -103,10 +103,8 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public void setStack(FluidStack stack)
     {
-        this.stack = stack.copy();
         stackSize = stack.getAmount();
-        if(!(this.stack.getRawFluid() == Fluids.EMPTY))
-            this.stack.setAmount(1);
+        this.stack = new FluidStack(stack,1);
         NeedRecalHash = true;
     }
 
@@ -156,25 +154,19 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public FluidStack copyStack()
     {
-        FluidStack copy = stack.copy();
-        if(!(stack.getRawFluid() == Fluids.EMPTY))
-            copy.setAmount(BDMath.clampLongToInt(stackSize));
-        return copy;
+        return new FluidStack(stack,BDMath.clampLongToInt(stackSize));
     }
 
     @Override
     public FluidStack copyStackWithCount(long count)
     {
-        FluidStack copy = stack.copy();
-        if(!(stack.getRawFluid() == Fluids.EMPTY))
-            copy.setAmount(BDMath.clampLongToInt(count));
-        return copy;
+        return new FluidStack(stack,BDMath.clampLongToInt(count));
     }
 
     @Override
     public IStackType<FluidStack> copy()
     {
-        FluidStackType copy = new FluidStackType(stack.copy(), stackSize);
+        FluidStackType copy = new FluidStackType(new FluidStack(stack,stack.getAmount()), stackSize);
         copy.NeedRecalHash = this.NeedRecalHash;
         copy.hashCodeCache = this.hashCodeCache;
         return copy;
@@ -183,7 +175,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public IStackType<FluidStack> copyWithCount(long count)
     {
-        FluidStackType copy = new FluidStackType(stack.copy(),count);
+        FluidStackType copy = new FluidStackType(new FluidStack(stack, stack.getAmount()),count);
         copy.NeedRecalHash = this.NeedRecalHash;
         copy.hashCodeCache = this.hashCodeCache;
         return copy;
@@ -233,7 +225,7 @@ public class FluidStackType implements IStackType<FluidStack>
 
         // 计算可分割的数量
         int splitAmount = BDMath.clampLongToInt(Math.min(amount, stackSize));
-        FluidStack split = stack.copy();
+        FluidStack split = new FluidStack(stack,stack.getAmount());
         split.setAmount(splitAmount);
         shrink(splitAmount);
         return split;
@@ -246,7 +238,7 @@ public class FluidStackType implements IStackType<FluidStack>
 
         // 计算可分割的数量
         long splitAmount = Math.min(amount, stackSize);
-        FluidStack split = stack.copy();
+        FluidStack split = new FluidStack(stack, stack.getAmount());
         shrink(splitAmount);
         return new FluidStackType(split,splitAmount);
     }

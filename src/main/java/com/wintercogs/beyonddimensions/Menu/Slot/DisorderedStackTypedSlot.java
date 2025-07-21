@@ -18,6 +18,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -60,10 +61,10 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 {
                     if(carriedItem.getItem() instanceof BucketItem bucketItem)
                     {
-                        Object handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
-                        if(handler != null)
+                        LazyOptional<?> handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
+                        if(handler.isPresent())
                         {
-                            FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
+                            FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler.resolve().get());
 
                             if(stackHandlerWrapper.getSlots()>0)
                             {
@@ -87,11 +88,11 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     else
                     {
                         CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap)->{
-                            Object handler = carriedItem.getCapability(cap);
-                            if(handler != null)
+                            LazyOptional<?> handler = carriedItem.getCapability(cap);
+                            if(handler.isPresent())
                             {
                                 Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                                IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
 
                                 if(stackHandlerWrapper.getSlots()>0)
                                 {
@@ -196,10 +197,10 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                         }
                         else // 继续投放 insert模拟会自动解决类型不匹配等问题
                         {
-                            Object handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
-                            if(handler != null)
+                            LazyOptional<?> handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
+                            if(handler.isPresent())
                             {
-                                FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
+                                FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler.resolve().get());
 
                                 if(stackHandlerWrapper.getSlots()>0)
                                 {
@@ -229,11 +230,11 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             if(clickStack.getTypeId().equals(typeId))
                             {
                                 // 尝试获取对应能力
-                                Object handler = carriedItem.getCapability(cap);
-                                if(handler != null)
+                                LazyOptional<?> handler = carriedItem.getCapability(cap);
+                                if(handler.isPresent())
                                 {
                                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
                                     if(stackHandlerWrapper.getSlots()>0)
                                     {
                                         IStackType actualClickStack = storage.getStackByStack(clickStack);// 防止客户端假消息
@@ -259,11 +260,11 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                         if(!handled.get())
                         {
                             CapabilityHelper.ItemCapabilityMap.forEach((typeId,cap) -> {
-                                Object handler = carriedItem.getCapability(cap);
-                                if(handler != null)
+                                LazyOptional<?> handler = carriedItem.getCapability(cap);
+                                if(handler.isPresent())
                                 {
                                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
 
                                     if(stackHandlerWrapper.getSlots()>0)
                                     {

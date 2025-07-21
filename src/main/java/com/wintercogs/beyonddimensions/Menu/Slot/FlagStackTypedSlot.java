@@ -13,6 +13,7 @@ import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Function;
@@ -85,11 +86,11 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                     // 注: 通用机械物品必须在堆叠数量为1时才暴露能力。
                     // 这种做法看起来是很有益的。可以防止其他模组错误消耗过多的存储资源
                     CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap)->{
-                        Object handler = copy.getCapability(cap);
-                        if(handler != null)
+                        LazyOptional<?> handler = copy.getCapability(cap);
+                        if(handler.isPresent())
                         {
                             Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                            IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                            IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
 
                             if(stackHandlerWrapper.getSlots()>0)
                             {

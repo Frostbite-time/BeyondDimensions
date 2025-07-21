@@ -21,6 +21,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
@@ -63,10 +66,10 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                 {
                     if(carriedItem.getItem() instanceof BucketItem bucketItem)
                     {
-                        Object handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
-                        if(handler != null)
+                        LazyOptional<IFluidHandlerItem> handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
+                        if(handler.isPresent())
                         {
-                            FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
+                            FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler.resolve().get());
 
                             if(stackHandlerWrapper.getSlots()>0)
                             {
@@ -90,11 +93,11 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     else
                     {
                         CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap)->{
-                            Object handler = carriedItem.getCapability(cap);
-                            if(handler != null)
+                            LazyOptional<?> handler = carriedItem.getCapability(cap);
+                            if(handler.isPresent())
                             {
                                 Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                                IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
 
                                 if(stackHandlerWrapper.getSlots()>0)
                                 {
@@ -213,10 +216,10 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                             }
                             else // 继续投放 insert模拟会自动解决类型不匹配等问题
                             {
-                                Object handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
-                                if(handler != null)
+                                LazyOptional<?> handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
+                                if(handler.isPresent())
                                 {
-                                    FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
+                                    FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler.resolve().get());
 
                                     if(stackHandlerWrapper.getSlots()>0)
                                     {
@@ -244,11 +247,11 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                 if(clickStack.getTypeId().equals(typeId))
                                 {
                                     // 尝试获取对应能力
-                                    Object handler = carriedItem.getCapability(cap);
-                                    if(handler != null)
+                                    LazyOptional<?> handler = carriedItem.getCapability(cap);
+                                    if(handler.isPresent())
                                     {
                                         Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                        IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                                        IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
                                         if(stackHandlerWrapper.getSlots()>0)
                                         {
                                             // 获取真实最大值 防止数据包伪造

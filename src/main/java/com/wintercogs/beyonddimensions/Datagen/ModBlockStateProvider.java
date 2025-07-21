@@ -29,7 +29,7 @@ public class ModBlockStateProvider extends BlockStateProvider
         simpleBlockItem(ModBlocks.NET_TERMINAL_BLOCK.get(),models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID,"net_terminal_block")));
         simpleBlockItem(ModBlocks.NET_PUMP_BLOCK.get(),models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID,"net_pump_block")));
         simpleBlockItem(ModBlocks.NET_HOPPER_BLOCK.get(),models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID,"net_hopper_block")));
-        simpleBlockItem(ModBlocks.NET_FURNACE_BLOCK.get(),models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID,"net_furnace_block.json")));
+        simpleBlockItem(ModBlocks.NET_FURNACE_BLOCK.get(),models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID,"net_furnace_block")));
     }
 
     private void blockWithItem(RegistryObject<Block> deferredBlock)
