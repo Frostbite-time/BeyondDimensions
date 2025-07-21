@@ -21,42 +21,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class SlotDragHandler implements EmiDragDropHandler<Screen>
 {
 
-
-    public static final SlotBased.TriConsumer<? extends BDBaseGUI<?>, Slot, EmiIngredient> dropHandler = (screen, slot, ingredient) -> {
-        // stackKey 是如 Item Fluid的类
-        Object stackKey = ingredient.getEmiStacks().get(0).getKey();
-        DataComponentPatch dataComponentPatch = ingredient.getEmiStacks().get(0).getComponentChanges();
-
-        IStackType dragging = new ItemStackType();
-        for (IStackType type : StackTypeRegistry.getAllTypes())
-        {
-            if (type.getSourceClass().isAssignableFrom(stackKey.getClass()))
-            {
-
-                dragging = type.fromObject(stackKey, 1, dataComponentPatch);
-                break;
-
-            }
-        }
-
-        // AE2通用包裹支持
-        if (BeyondDimensions.AELoaded)
-        {
-            if (dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
-            {
-                appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
-
-                if (genericContent != null)
-                {
-                    dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
-                }
-
-            }
-        }
-
-        PacketDistributor.sendToServer(new SetSlotDirectlyPacket(slot.index, dragging));
-    };
-
     public SlotDragHandler() {}
 
     @Override
