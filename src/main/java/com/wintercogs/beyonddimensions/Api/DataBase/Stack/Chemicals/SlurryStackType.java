@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 // 用于处理通用机械的化学品类
-public class SlurryStackType implements IStackType<SlurryStack>
+public final class SlurryStackType implements IStackType<SlurryStack>
 {
 
     public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemicals/slurry");
@@ -229,11 +229,11 @@ public class SlurryStackType implements IStackType<SlurryStack>
     }
 
     @Override
-    public boolean isSame(IStackType<SlurryStack> other)
+    public boolean isSame(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual(other.getStack());
+        return stack.isTypeEqual((SlurryStack)other.getStack());
     }
 
     @Override

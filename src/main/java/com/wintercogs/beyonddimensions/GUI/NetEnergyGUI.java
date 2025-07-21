@@ -1,14 +1,10 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
-import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
-import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -43,11 +39,11 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
         this.font = Minecraft.getInstance().font;
 
 
-        popButton = new StatusButton(this.leftPos+72+18*4-5,this.topPos+6,16,16, ButtonName.ReverseButton, button ->
+        popButton = new StatusButton(this.leftPos+72+18*4-5,this.topPos+6,16,16, button ->
         {
             popButton.toggleState();
-            menu.popMode = !menu.popMode;
-            PacketRegister.INSTANCE.sendToServer(new PopModeButtonPacket(menu.popMode));
+            menu.be.popMode = !menu.be.popMode;
+            menu.writeAndSendQuickData();
         })
         {
             @Override
@@ -59,17 +55,23 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
                 tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
                 tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
 
-                for(ButtonState state : iconMap.keySet())
+                for(Enum<?> state : iconMap.keySet())
                 {
                     this.states.add(state);
                 }
-                setState(Config.uiReverseButton);
+
+                if(menu.be.popMode)
+                {
+                    setState(ButtonState.ENABLED);
+                }
+                else
+                {
+                    setState(ButtonState.DISABLED);
+                }
             }
         };
         addRenderableWidget(popButton);
 
-
-        menu.suppressRemoteUpdates();
     }
 
     @Override
@@ -77,7 +79,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
     {
         super.containerTick();
 
-        if(menu.popMode)
+        if(menu.be.popMode)
         {
             popButton.setState(ButtonState.ENABLED);
         }
@@ -109,8 +111,8 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752,false);
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY+10, 4210752,false);
 
-        guiGraphics.drawString(this.font, StringFormat.formatCount(menu.energyStored)+"/"+StringFormat.formatCount(menu.energyCapacity), this.inventoryLabelX, this.inventoryLabelY-20, 4210752,false);
-        guiGraphics.drawString(this.font, StringFormat.formatChange(menu.energySpeedState)+" FE/t", this.inventoryLabelX, this.inventoryLabelY-10, 4210752,false);
+        guiGraphics.drawString(this.font, StringFormat.formatCount(menu.lastEnergyStored)+"/"+StringFormat.formatCount(menu.lastEnergyCapacity), this.inventoryLabelX, this.inventoryLabelY-20, 4210752,false);
+        guiGraphics.drawString(this.font, StringFormat.formatChange(menu.lastEnergySpeedState)+" FE/t", this.inventoryLabelX, this.inventoryLabelY-10, 4210752,false);
     }
 
     protected void renderEnergyBar(GuiGraphics guiGraphics, int xStart, int yStart) {
@@ -134,7 +136,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
                     color);
         }
 
-        float energyRatio = (float) menu.energyStored / menu.energyCapacity;
+        float energyRatio = (float) menu.lastEnergyStored / menu.lastEnergyCapacity;
         int filledWidth = (int)(energyRatio * areaWidth);
 
         // 前景绘制添加垂直渐变效果

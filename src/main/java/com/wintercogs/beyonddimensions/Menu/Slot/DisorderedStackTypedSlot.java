@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Menu;
+package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
@@ -9,126 +9,44 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHan
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
-import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
+import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-import static com.wintercogs.beyonddimensions.Unit.InventoryHelper.transferToPlayerInventory;
-
-public abstract class BDDisorderedContainerMenu extends BDBaseMenu
+public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
 {
 
-    protected BDDisorderedContainerMenu(@Nullable MenuType<?> menuType, int containerId, Inventory playerInventory, @Nullable IStackTypedHandler storage)
+    public DisorderedStackTypedSlot(BDBaseMenu menu, IStackTypedHandler stackTypedHandler, int slotIndex, int xPosition, int yPosition)
     {
-        super(menuType, containerId, playerInventory, storage);
+        super(menu, stackTypedHandler, slotIndex, xPosition, yPosition);
+    }
+
+    public DisorderedStackTypedSlot(BDBaseMenu menu, IStackTypedHandler stackTypedHandler, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
+    {
+        super(menu, stackTypedHandler, slotIndex, quickMoveSlotStartIndex, quickMoveSlotEndIndex, xPosition, yPosition);
     }
 
     @Override
-    protected ItemStack quickMoveHandle(Player player, int slotIndex, IStackType clickStack, IStackTypedHandler storage)
+    public boolean isOrdered()
     {
-        ItemStack cacheStack;
-        Slot slot = this.slots.get(slotIndex);
-        if (slot != null && !clickStack.isEmpty())
-        {
-            // 物品从存储移动到背包
-            if(slot instanceof StoredStackSlot)
-            {
-                if(clickStack instanceof ItemStackType clickedItem)
-                {
-                    cacheStack = clickedItem.copyStack();
-                    int moveCount = checkCanMoveStackCount(cacheStack, inventoryStartIndex, inventoryEndIndex, true);
-                    moveCount = Math.min(moveCount,cacheStack.getCount()); // 首先
-                    int nowCount = 0;
-                    IStackType typedStack = storage.getStackByStack(StackCreater.Create(ItemStackType.ID,cacheStack.copy(),cacheStack.getCount()));
-                    ItemStack nowStack;
-                    if(typedStack != null)
-                    {
-                        nowStack = (ItemStack) typedStack.getStack();
-                    }
-                    else
-                    {
-                        return ItemStack.EMPTY;
-                    }
-                    if(nowStack != null)
-                    {
-                        nowCount = nowStack.getCount();
-                    }
-                    moveCount = Math.min(moveCount,nowCount);
-                    if(moveCount>=0)
-                    {
-                        cacheStack.setCount(moveCount);
-                        if (!this.moveItemStackTo(cacheStack, inventoryStartIndex, inventoryEndIndex, true)) {
-                            return ItemStack.EMPTY;
-                        }
-                        storage.extract(StackCreater.Create(ItemStackType.ID, clickStack.copyStackWithCount(moveCount),moveCount) ,false);
-                    }
-                }
-                else
-                {
-                    cacheStack = ItemStack.EMPTY;
-                }
-            }
-            else // 物品由背包移动到存储
-            {
-                // 快速合成
-                if(slot instanceof ResultSlot resultSlot)
-                {
-                    cacheStack = slot.getItem().copy();
-                    for(int i = 0; !slot.getItem().isEmpty() && i< slot.getItem().getMaxStackSize()/slot.getItem().getCount(); i++)
-                    {
-                        ItemStack craftStack = slot.getItem().copy();
-                        if(!ItemStack.isSameItemSameTags(cacheStack, craftStack))
-                            break;
-
-                        // 如果背包放不下再存入存储系统
-                        ItemStack remaining = transferToPlayerInventory(player, craftStack);
-
-                        // 处理剩余物品
-                        if (!remaining.isEmpty()) {
-                            remaining = (ItemStack) storage.insert(StackCreater.Create(ItemStackType.ID, remaining, remaining.getCount()), false).copyStack();
-                        }
-                        // 恢复cacheStack防止后面检测导致resultSlot被设为空
-                        craftStack = slot.getItem().copy();
-
-                        if(remaining.isEmpty())
-                        {
-                            resultSlot.onTake(player, craftStack);
-                        }
-
-                    }
-
-                }
-                else
-                {
-                    cacheStack = slot.getItem().copy();
-                    int remaining = (int)storage.insert(StackCreater.Create(ItemStackType.ID, cacheStack.copy(),cacheStack.getCount()),false).getStackAmount();
-                    slot.tryRemove(cacheStack.getCount() - remaining,Integer.MAX_VALUE,player);
-                }
-            }
-            slot.setChanged();
-        }
-        return ItemStack.EMPTY;
+        return false;
     }
 
     @Override
-    protected void clickHandle(int slotIndex, IStackType clickStack, int button, Player player, IStackTypedHandler storage)
+    public void click(IStackType clickStack, int button, Player player)
     {
-        ItemStack carriedItem = this.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
-        StoredStackSlot slot = (StoredStackSlot) this.slots.get(slotIndex);// clickHandle仅用于处理点击维度槽位的逻辑，如果转换失败，则证明调用逻辑出错
+        // 获取slot以及获取携带物品 防止网络包伪造
+        ItemStack carriedItem = menu.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
 
         if (clickStack.isEmpty())
         {
@@ -142,7 +60,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                 {
                     if(carriedItem.getItem() instanceof BucketItem bucketItem)
                     {
-                        Object handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElse(null);
+                        Object handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
                         if(handler != null)
                         {
                             FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
@@ -159,7 +77,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                                     {
                                         // 执行实际逻辑
                                         storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
-                                        setCarried(new ItemStack(Items.BUCKET));
+                                        menu.setCarried(new ItemStack(Items.BUCKET));
                                         handled.set(true);
                                     }
                                 }
@@ -169,7 +87,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                     else
                     {
                         CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap)->{
-                            Object handler = carriedItem.getCapability(cap).orElse(null);
+                            Object handler = carriedItem.getCapability(cap);
                             if(handler != null)
                             {
                                 Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
@@ -186,7 +104,6 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                                             int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
                                             int remaining = (int)storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
                                             int actualInsert = changedCount - remaining;
-
                                             if(actualInsert>0)
                                             {
                                                 long actualExtracts = stackHandlerWrapper.extract(index,actualInsert,false);
@@ -195,7 +112,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                                                     // 对此进行一个回调
                                                     storage.extract(stack.copyWithCount(actualInsert-actualExtracts),false);
                                                 }
-                                                setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
                                                 handled.set(true);
                                                 break;
                                             }
@@ -214,19 +131,20 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                     int newCount = carriedItem.getCount() - actualInsert;
                     if (newCount <= 0)
                     {
-                        setCarried(ItemStack.EMPTY);
+                        menu.setCarried(ItemStack.EMPTY);
                     }
                     else
                     {
                         ItemStack newCarriedItem = carriedItem.copy();
                         newCarriedItem.setCount(newCount);
-                        setCarried(newCarriedItem);
+                        menu.setCarried(newCarriedItem);
                     }
                 }
             }
         }
-        else if (slot.mayPickup(player))
+        else if (mayPickup(player))
         {
+
             if (carriedItem.isEmpty())
             {
                 if(clickStack instanceof ItemStackType clickItem)
@@ -238,12 +156,12 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                     ItemStack takenItem = ((ItemStack) storage.extract(new ItemStackType(clickItem.copyStackWithCount(actualChangeNum)),false).getStack()).copy();
                     if(takenItem != null)
                     {
-                        setCarried(takenItem);
+                        menu.setCarried(takenItem);
                         storage.onChange();
                     }
                 }
             }
-            else if (slot.mayPlace(carriedItem))
+            else if (mayPlace(carriedItem))
             {
                 // 如果使用一个有存储能力的单个物品，点击右键，
                 // 则，尝试将目标抽入到自身。如果抽取失败
@@ -271,14 +189,14 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                                 {
                                     // 执行操作
                                     storage.extract(fluidStackType.copyWithCount(1000),false);
-                                    setCarried(new ItemStack(filledBucket));
+                                    menu.setCarried(new ItemStack(filledBucket));
                                     handled.set(true);
                                 }
                             }
                         }
                         else // 继续投放 insert模拟会自动解决类型不匹配等问题
                         {
-                            Object handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElse(null);
+                            Object handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
                             if(handler != null)
                             {
                                 FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
@@ -295,7 +213,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                                         {
                                             // 执行实际逻辑
                                             storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
-                                            setCarried(new ItemStack(Items.BUCKET));
+                                            menu.setCarried(new ItemStack(Items.BUCKET));
                                             handled.set(true);
                                         }
                                     }
@@ -311,7 +229,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                             if(clickStack.getTypeId().equals(typeId))
                             {
                                 // 尝试获取对应能力
-                                Object handler = carriedItem.getCapability(cap).orElse(null);
+                                Object handler = carriedItem.getCapability(cap);
                                 if(handler != null)
                                 {
                                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
@@ -327,7 +245,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                                             if(actualInsert>0)
                                             {
                                                 storage.extract(actualClickStack.copyWithCount(actualInsert),false);
-                                                setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
                                                 handled.set(true);
                                             }
                                         }
@@ -341,7 +259,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                         if(!handled.get())
                         {
                             CapabilityHelper.ItemCapabilityMap.forEach((typeId,cap) -> {
-                                Object handler = carriedItem.getCapability(cap).orElse(null);
+                                Object handler = carriedItem.getCapability(cap);
                                 if(handler != null)
                                 {
                                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
@@ -367,7 +285,7 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                                                         // 对此进行一个回调
                                                         storage.extract(stack.copyWithCount(actualInsert-actualExtracts),false);
                                                     }
-                                                    setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                    menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
                                                     handled.set(true);
                                                     break;
                                                 }
@@ -389,13 +307,13 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                     int newCount = carriedItem.getCount() - changedCount;
                     if(newCount <=0)
                     {
-                        setCarried(ItemStack.EMPTY);
+                        menu.setCarried(ItemStack.EMPTY);
                     }
                     else
                     {
                         ItemStack newCarriedItem = carriedItem.copy();
                         newCarriedItem.setCount(newCount);
-                        setCarried(newCarriedItem);
+                        menu.setCarried(newCarriedItem);
                     }
                 }
 
@@ -406,6 +324,83 @@ public abstract class BDDisorderedContainerMenu extends BDBaseMenu
                 // 原版逻辑为取出物品到最大上限
                 // 保留此情况以便后续使用
             }
+
         }
+    }
+
+    @Override
+    public void quickMove(IStackType clickStack, int button, Player player)
+    {
+        if (!clickStack.isEmpty())
+        {
+            // 防止数据包伪造，然后赋予trueStack需要提取的数量
+            IStackType trueStack = storage.getStackByStack(clickStack).copyWithCount(clickStack.getStackAmount());
+
+            // 遍历目标槽位
+            for(int targetSlotIndex=quickMoveSlotStartIndex;targetSlotIndex<quickMoveSlotEndIndex && !trueStack.isEmpty();targetSlotIndex++)
+            {
+                Slot slot = menu.slots.get(targetSlotIndex);
+                if(slot instanceof AbstractStackTypedSlot aSlot)
+                {
+                    // aSlot处理任何情况
+
+                    //首先尝试从存储提取指定堆叠
+                    IStackType extract = storage.extract(trueStack,false);
+                    IStackType remaining = aSlot.safeInsert(extract); // 然后插入到其他堆叠并获取余量
+                    if(!remaining.isEmpty())
+                        storage.insert(remaining,false); // 最后将余量返回
+                    trueStack = remaining.copy();
+
+                }
+                else
+                {
+                    // 普通Slot将只处理物品转移
+                    if(trueStack instanceof ItemStackType trueItemTypedStack)
+                    {
+                        ItemStack extract = (ItemStack) storage.extract(trueItemTypedStack,false).getStack();
+                        ItemStack remaining = slot.safeInsert(extract);
+                        if(!remaining.isEmpty())
+                            storage.insert(new ItemStackType(remaining),false);
+                        trueStack = new ItemStackType(remaining.copy());
+                    }
+                }
+
+            }
+            setChanged();
+        }
+    }
+
+    @Override
+    public IStackType safeInsert(IStackType stack)
+    {
+        if(stack != null)
+        {
+            return storage.insert(stack,false);
+        }
+        return new ItemStackType();
+
+    }
+
+    @Override
+    public IStackType safeExtract(IStackType stack)
+    {
+        if(stack != null)
+        {
+            return storage.extract(stack,false);
+        }
+        return new ItemStackType();
+    }
+
+    // 无序槽位由槽位组负责处理同步
+    @Override
+    public void updateChange()
+    {
+
+    }
+
+    @Override
+    public void loadChange(int where ,IStackType newStack, long newAmount)
+    {
+
     }
 }

@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 // 用于处理通用机械的化学品类
-public class GasStackType implements IStackType<GasStack>
+public final class GasStackType implements IStackType<GasStack>
 {
 
     public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemicals/gas");
@@ -229,11 +229,11 @@ public class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public boolean isSame(IStackType<GasStack> other)
+    public boolean isSame(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual(other.getStack());
+        return stack.isTypeEqual((GasStack)other.getStack());
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Machine.BaseMachine;
+import com.wintercogs.beyonddimensions.Machine.FilterMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetPumpMenu;
 import net.minecraft.core.BlockPos;
@@ -40,7 +41,7 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
     private final Direction[] directions = Direction.values();
 
     private static final int capacity = 36;
-    private final StackTypedHandler fakeSlots = new StackTypedHandler(capacity)
+    private final StackTypedHandler filterSlots = new StackTypedHandler(capacity)
     {
         @Override
         public void onChange()
@@ -49,6 +50,9 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
                 level.blockEntityChanged(worldPosition);
         }
     };
+
+    public FilterMode filterMode = FilterMode.BLACK;
+    public RedStoneControlMode controlMode = RedStoneControlMode.IGNORE;
 
     public NetPumpBlockEntity(BlockPos pos, BlockState blockState)
     {
@@ -110,7 +114,7 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
                         Object stack = stackHandlerWrapper.getStackInSlot(slot);
                         IStackType typedStack = StackCreater.CreateEmpty(typeId);
                         typedStack.setStack(stack);
-                        if(!typedStack.isEmpty())
+                        if(!typedStack.isEmpty() && matchesFilter(typedStack))
                         {
                             DimensionsNet net = getNet();
                             if(net != null)
@@ -129,16 +133,54 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
         );
     }
 
+    public FilterMode getFilterMode()
+    {
+        return filterMode;
+    }
+
+    public void setFilterMode(FilterMode filterMode)
+    {
+        this.filterMode = filterMode;
+    }
+
+    private boolean matchesFilter(IStackType otherStack)
+    {
+        switch (filterMode)
+        {
+            case BLACK -> {
+                for(IStackType stack : filterSlots.getStorage())
+                {
+                    if(stack.isSame(otherStack))
+                        return false;
+                }
+                return true;
+            }
+            case WHITE -> {
+                for(IStackType stack : filterSlots.getStorage())
+                {
+                    if(stack.isSame(otherStack))
+                        return true;
+                }
+                return false;
+            }
+            case IGNORE -> {
+                return true;
+            }
+
+        }
+        return false;
+    }
+
     @Override
     public RedStoneControlMode getControlMode()
     {
-        return RedStoneControlMode.IGNORE;
+        return controlMode;
     }
 
     @Override
     public boolean hasRedStoneSignal()
     {
-        return false;
+        return level.getBestNeighborSignal(worldPosition) > 0;
     }
 
     public void setNeedsCapabilityUpdate()
@@ -157,7 +199,9 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
     public void load(CompoundTag tag)
     {
         super.load(tag);
-        fakeSlots.deserializeNBT(tag.getCompound("filter_slots"));
+        filterSlots.deserializeNBT(tag.getCompound("filter_slots"));
+        filterMode = FilterMode.valueOf(tag.getString("filter_type"));
+        controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
         setNeedsCapabilityUpdate();
     }
 
@@ -165,7 +209,9 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
     protected void saveAdditional(CompoundTag tag)
     {
         super.saveAdditional(tag);
-        tag.put("filter_slots",fakeSlots.serializeNBT());
+        tag.put("filter_slots", filterSlots.serializeNBT());
+        tag.putString("filter_type", filterMode.name());
+        tag.putString("control_mode", controlMode.name());
     }
 
     @Override
@@ -177,6 +223,6 @@ public class NetPumpBlockEntity extends NetedBlockEntity implements BaseMachine 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
-        return new NetPumpMenu(containerId,inventory,fakeSlots);
+        return new NetPumpMenu(containerId,inventory, filterSlots, this);
     }
 }

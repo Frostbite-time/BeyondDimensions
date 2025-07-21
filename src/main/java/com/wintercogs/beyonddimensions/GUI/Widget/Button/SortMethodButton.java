@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.GUI.Widget.Button;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
@@ -13,7 +12,7 @@ public class SortMethodButton extends StatusButton
 {
     public SortMethodButton(int x, int y, OnPress onPress)
     {
-        super(x, y, 16, 16, ButtonName.SortMethodButton, onPress);
+        super(x, y, 16, 16, onPress);
     }
 
     @Override
@@ -29,7 +28,7 @@ public class SortMethodButton extends StatusButton
         tooltipMap.put(ButtonState.SORT_NAME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_name")));
         tooltipMap.put(ButtonState.SORT_MODID, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_modid")));
 
-        for(ButtonState state : iconMap.keySet())
+        for(Enum<?> state : iconMap.keySet())
         {
             this.states.add(state);
         }

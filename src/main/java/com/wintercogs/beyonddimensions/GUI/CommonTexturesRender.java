@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraftforge.client.extensions.IForgeGuiGraphics;
 
 public class CommonTexturesRender
 {
@@ -92,6 +93,25 @@ public class CommonTexturesRender
                 CommonTextures.PLAYER_INV_HEIGHT,
                 CommonTextures.PLAYER_INV_WIDTH,
                 CommonTextures.PLAYER_INV_HEIGHT);
+        yPosRef[0] += height;
+    }
+
+    // 右标签渲染
+    public static void renderRightTab(GuiGraphics guiGraphics, int leftPos, int[] yPosRef) {
+        renderRightTab(guiGraphics, leftPos, yPosRef,
+                CommonTextures.RIGHT_TAB_WIDTH,
+                CommonTextures.RIGHT_TAB_HEIGHT);
+    }
+
+    public static void renderRightTab(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+                                      int width, int height) {
+        guiGraphics.blit(CommonTextures.RIGHT_TAB, leftPos, yPosRef[0],
+                width, height,
+                0, 0,
+                CommonTextures.RIGHT_TAB_WIDTH,
+                CommonTextures.RIGHT_TAB_HEIGHT,
+                CommonTextures.RIGHT_TAB_WIDTH,
+                CommonTextures.RIGHT_TAB_HEIGHT);
         yPosRef[0] += height;
     }
 }

@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.GUI;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.NetMenuType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
@@ -128,8 +127,8 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         sortButton = new SortMethodButton(this.leftPos-18,this.topPos+6,button ->
         {
             sortButton.toggleState();
-            Config.uiSortButton = sortButton.currentState;
-            Config.UI_SORT_BUTTON.set(sortButton.currentState);
+            Config.uiSortButton = (ButtonState) sortButton.currentState;
+            Config.UI_SORT_BUTTON.set((ButtonState) sortButton.currentState);
             Config.UI_SORT_BUTTON.save();
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
         });
@@ -138,8 +137,8 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         reverseButton = new ReverseButton(this.leftPos-18,this.topPos+6+18,button ->
         {
             reverseButton.toggleState();
-            Config.uiReverseButton = reverseButton.currentState;
-            Config.UI_REVERSE_BUTTON.set(reverseButton.currentState);
+            Config.uiReverseButton = (ButtonState) reverseButton.currentState;
+            Config.UI_REVERSE_BUTTON.set((ButtonState) reverseButton.currentState);
             Config.UI_REVERSE_BUTTON.save();
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
         });
@@ -148,15 +147,15 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         // 搜索切换按钮
         searchToggleButton = new SearchToggleButton(this.leftPos-18,this.topPos+6+18*2,button ->{
             searchToggleButton.toggleState();
-            Config.uiSearchButton = searchToggleButton.currentState;
-            Config.UI_SEARCH_BUTTON.set(searchToggleButton.currentState);
+            Config.uiSearchButton = (ButtonState) searchToggleButton.currentState;
+            Config.UI_SEARCH_BUTTON.set((ButtonState) searchToggleButton.currentState);
             Config.UI_SEARCH_BUTTON.save();
         });
         addRenderableWidget(searchToggleButton);
 
 
         //页面增减按钮
-        addPageButton = new IconButton(this.leftPos-18,this.topPos+6+18*3,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/up_arrow.png"),ButtonName.AddPageButton , button ->
+        addPageButton = new IconButton(this.leftPos-18,this.topPos+6+18*3,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/up_arrow.png"), button ->
         {
             if(this.height - 36 <= (rebuildImageHeight()+MID_SLOTS_HEIGHT)
                     || menu.getLines()>=99)
@@ -176,7 +175,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addPageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.add_page")));
         addRenderableWidget(addPageButton);
 
-        removePageButton = new IconButton(this.leftPos-18,this.topPos+6+18*4,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/down_arrow.png"),ButtonName.RemovePageButton , button ->
+        removePageButton = new IconButton(this.leftPos-18,this.topPos+6+18*4,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/down_arrow.png"), button ->
         {
             if(menu.getLines()<=2)
                 return;
@@ -246,7 +245,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     // 用于让子类重写工艺槽位按钮的函数
     protected void addCraftButton()
     {
-        craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*5,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/craft_button.png"),ButtonName.CraftButton , button ->
+        craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*5,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/craft_button.png"), button ->
         {
             UIDataHelper.currentPage = menu.lineData;
 

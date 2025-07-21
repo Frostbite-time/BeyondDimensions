@@ -4,10 +4,10 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.GUI.NetInterfaceBaseGUI;
+import com.wintercogs.beyonddimensions.GUI.BDBaseGUI;
 import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
-import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
+import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.SetSlotDirectlyPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
@@ -17,17 +17,17 @@ import net.minecraft.world.inventory.Slot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NetInterfaceGhostHandler implements IGhostIngredientHandler<NetInterfaceBaseGUI>
+public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseGUI>
 {
 
     @Override
-    public <I> List<Target<I>> getTargetsTyped(NetInterfaceBaseGUI screen, ITypedIngredient<I> ingredient, boolean doStart)
+    public <I> List<Target<I>> getTargetsTyped(BDBaseGUI screen, ITypedIngredient<I> ingredient, boolean doStart)
     {
         List<Target<I>> targets = new ArrayList<>();
 
         for(Slot slot: screen.getMenu().slots)
         {
-            if(slot instanceof StoredStackSlot sSlot && sSlot.isActive() && sSlot.isFake())
+            if(slot instanceof AbstractStackTypedSlot sSlot && sSlot.isActive() && sSlot.isFake())
             {
                 targets.add(new IStackTarget<>(sSlot, screen));
             }
@@ -43,11 +43,11 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<NetInte
 
     private static class IStackTarget<I> implements Target<I>
     {
-        private final StoredStackSlot slot;
+        private final AbstractStackTypedSlot slot;
         private final Rect2i area;
 
 
-        public IStackTarget(StoredStackSlot slot, NetInterfaceBaseGUI screen)
+        public IStackTarget(AbstractStackTypedSlot slot, BDBaseGUI screen)
         {
             this.slot = slot;
             this.area = new Rect2i(screen.getGuiLeft() + slot.x, screen.getGuiTop() + slot.y,16 ,16);
@@ -91,9 +91,7 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<NetInte
                 }
             }
 
-            IStackType clickItem = slot.getVanillaActualStack();
-            // button的数字0代表左键
-            PacketRegister.INSTANCE.sendToServer(new FlagSlotSetPacket(slot.index,clickItem,dragging));
+            PacketRegister.INSTANCE.sendToServer(new SetSlotDirectlyPacket(slot.index,dragging));
 
         }
     }

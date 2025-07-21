@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 // 用于处理通用机械的化学品类
-public class PigmentStackType implements IStackType<PigmentStack>
+public final class PigmentStackType implements IStackType<PigmentStack>
 {
 
     public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemicals/pigment");
@@ -229,11 +229,11 @@ public class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public boolean isSame(IStackType<PigmentStack> other)
+    public boolean isSame(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual(other.getStack());
+        return stack.isTypeEqual((PigmentStack)other.getStack());
     }
 
     @Override

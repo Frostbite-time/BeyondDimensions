@@ -1,7 +1,5 @@
 package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.resources.ResourceLocation;
@@ -12,16 +10,16 @@ import java.util.Map;
 
 public abstract class StatusButton extends IconButton
 {
-    protected ArrayList<ButtonState> states = new ArrayList<>();;
-    protected Map<ButtonState,ResourceLocation> iconMap = new HashMap<>();
-    protected Map<ButtonState, Tooltip> tooltipMap = new HashMap<>(); // 需要添加可变工具提示则添加 需要固定工具提示则直接setTooltip，此处留空
-    public ButtonState currentState;
+    protected ArrayList<Enum<?>> states = new ArrayList<>();;
+    protected Map<Enum<?>,ResourceLocation> iconMap = new HashMap<>();
+    protected Map<Enum<?>, Tooltip> tooltipMap = new HashMap<>(); // 需要添加可变工具提示则添加 需要固定工具提示则直接setTooltip，此处留空
+    public Enum<?> currentState;
 
 
-    protected StatusButton(int x, int y, int width, int height, ButtonName name, OnPress onPress)
+    protected StatusButton(int x, int y, int width, int height, OnPress onPress)
     {
         // 给予一个默认图片用于构造父类
-        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/unkonw_thing.png"), name, onPress);
+        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/unkonw_thing.png"), onPress);
         initButton();
         setIcon(iconMap.get(currentState));
     }
@@ -65,7 +63,7 @@ public abstract class StatusButton extends IconButton
     }
 
     // 用于手动设置当前状态
-    public void setState(ButtonState state)
+    public void setState(Enum<?> state)
     {
         currentState = state;
         setIcon(iconMap.get(currentState));

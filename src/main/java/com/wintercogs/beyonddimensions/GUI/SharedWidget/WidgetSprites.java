@@ -2,32 +2,45 @@ package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class WidgetSprites
+public record WidgetSprites(ResourceLocation enabled, ResourceLocation disabled, ResourceLocation enabledFocused, ResourceLocation disabledFocused)
 {
-    ResourceLocation defaultIcon;
-    ResourceLocation disabledIcon;
-    ResourceLocation hoveredIcon;
-
-    public WidgetSprites(ResourceLocation defaultIcon, ResourceLocation disabledIcon, ResourceLocation hoveredIcon)
-    {
-        this.defaultIcon = defaultIcon;
-        this.disabledIcon = disabledIcon;
-        this.hoveredIcon = hoveredIcon;
+    public WidgetSprites(ResourceLocation noFocused, ResourceLocation focused) {
+        this(noFocused, noFocused, focused, focused);
     }
 
-    public ResourceLocation get(boolean active, boolean hovered)
-    {
-        if(active)
-        {
-            if(hovered)
-                return hoveredIcon;
-            else
-                return defaultIcon;
+    public WidgetSprites(ResourceLocation enabled, ResourceLocation disabled, ResourceLocation enabledFocused) {
+        this(enabled, disabled, enabledFocused, disabled);
+    }
+
+    public WidgetSprites(ResourceLocation enabled, ResourceLocation disabled, ResourceLocation enabledFocused, ResourceLocation disabledFocused) {
+        this.enabled = enabled;
+        this.disabled = disabled;
+        this.enabledFocused = enabledFocused;
+        this.disabledFocused = disabledFocused;
+    }
+
+    public ResourceLocation get(boolean enabled, boolean focused) {
+        if (enabled) {
+            return focused ? this.enabledFocused : this.enabled;
+        } else {
+            return focused ? this.disabledFocused : this.disabled;
         }
-        else
-        {
-            return disabledIcon;
-        }
+    }
+
+    public ResourceLocation enabled() {
+        return this.enabled;
+    }
+
+    public ResourceLocation disabled() {
+        return this.disabled;
+    }
+
+    public ResourceLocation enabledFocused() {
+        return this.enabledFocused;
+    }
+
+    public ResourceLocation disabledFocused() {
+        return this.disabledFocused;
     }
 
 }

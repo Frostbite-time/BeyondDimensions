@@ -101,6 +101,7 @@ public abstract class NetedBlockEntity extends BlockEntity
         tag.putInt("netId",this.netId);
     }
 
+    // 为子类提供基础的网络同步，需要正确实现loadAdditional和saveAdditional
     @Override
     public CompoundTag getUpdateTag()
     {

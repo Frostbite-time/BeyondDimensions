@@ -1,24 +1,13 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.StatusButton;
-import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
 import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
-import com.wintercogs.beyonddimensions.Menu.Slot.StoredStackSlot;
-import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.FlagSlotSetPacket;
-import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -51,66 +40,12 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         this.leftPos = (this.width - imageWidth)/2;
         this.topPos = (this.height - imageHeight)/2;
 
-        // 初始化emi dragHandler
-        if(BeyondDimensions.EMILoaded)
-        {
-            dragHandler = new SlotDragHandler(
-                slot -> {
-                    if(slot instanceof StoredStackSlot sSlot)
-                    {
-                        return sSlot.isFake();
-                    }
-                    return false;
-                },
 
-                (slot, ingredient) -> {
-                    // stackKey 是如 Item Fluid的类
-                    Object stackKey = ingredient.getEmiStacks().get(0).getKey();
-                    long stackAmount = ingredient.getEmiStacks().get(0).getAmount();
-                    CompoundTag dataComponentPatch = ingredient.getEmiStacks().get(0).getNbt();
-
-                    IStackType dragging = new ItemStackType();
-                    for(IStackType type : StackTypeRegistry.getAllTypes())
-                    {
-                        if(type.getSourceClass().isAssignableFrom(stackKey.getClass()))
-                        {
-
-                            dragging = type.fromObject(stackKey,1,dataComponentPatch);
-                            break;
-
-                        }
-                    }
-
-                    // AE2通用包裹支持
-                    if(BeyondDimensions.AELoaded)
-                    {
-                        if(dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
-                        {
-                            appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
-
-                            if(genericContent != null)
-                            {
-                                dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
-                            }
-
-                        }
-                    }
-
-                    StoredStackSlot sSlot = (StoredStackSlot) slot;
-                    IStackType clickItem = sSlot.getVanillaActualStack();
-                    // button的数字0代表左键
-                    PacketRegister.INSTANCE.sendToServer(new FlagSlotSetPacket(sSlot.index,clickItem,dragging));
-                }
-
-            );
-        }
-
-
-        popButton = new StatusButton(this.leftPos+72+18*4-5,this.topPos+6,16,16, ButtonName.ReverseButton, button ->
+        popButton = new StatusButton(this.leftPos+72+18*4-5,this.topPos+6,16,16, button ->
         {
             popButton.toggleState();
-            menu.popMode = !menu.popMode;
-            PacketRegister.INSTANCE.sendToServer(new PopModeButtonPacket(menu.popMode));
+            menu.be.popMode = !menu.be.popMode;
+            menu.writeAndSendQuickData();
         })
         {
             @Override
@@ -123,11 +58,19 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
                 tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
 
 
-                for(ButtonState state : iconMap.keySet())
+                for(Enum<?> state : iconMap.keySet())
                 {
                     this.states.add(state);
                 }
-                setState(Config.uiReverseButton);
+
+                if(menu.be.popMode)
+                {
+                    setState(ButtonState.ENABLED);
+                }
+                else
+                {
+                    setState(ButtonState.DISABLED);
+                }
             }
         };
         addRenderableWidget(popButton);
@@ -151,7 +94,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         super.containerTick();
 
 
-        if(menu.popMode)
+        if(menu.be.popMode)
         {
             popButton.setState(ButtonState.ENABLED);
         }

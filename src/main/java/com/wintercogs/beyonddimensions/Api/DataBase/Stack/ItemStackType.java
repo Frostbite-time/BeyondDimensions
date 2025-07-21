@@ -272,11 +272,11 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public boolean isSame(IStackType<ItemStack> other) {
+    public boolean isSame(IStackType<?> other) {
         // 比较物品类型和基础NBT（如盔甲耐久等）
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return ItemStack.isSameItem(stack, other.copyStackWithCount(1));
+        return ItemStack.isSameItem(stack, (ItemStack) other.copyStackWithCount(1));
     }
 
     @Override

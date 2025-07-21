@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Block.Custom;
 
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPumpBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 
@@ -42,7 +44,7 @@ public class NetPumpBlock extends NetedBlock implements EntityBlock
         if(!level.isClientSide()&&!player.isShiftKeyDown())
         {
             NetPumpBlockEntity blockEntity = (NetPumpBlockEntity) level.getBlockEntity(pos);
-            player.openMenu(blockEntity);
+            NetworkHooks.openScreen((ServerPlayer) player, blockEntity,pos);
         }
         return InteractionResult.SUCCESS;
     }

@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.GUI.Widget.Button;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
@@ -13,7 +12,7 @@ public class SearchToggleButton extends StatusButton
 {
     public SearchToggleButton(int x, int y, OnPress onPress)
     {
-        super(x, y, 16, 16, ButtonName.SearchButton, onPress);
+        super(x, y, 16, 16, onPress);
     }
 
     @Override
@@ -25,7 +24,7 @@ public class SearchToggleButton extends StatusButton
         tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.search_disable")));
         tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.search_enable")));
 
-        for(ButtonState state : iconMap.keySet())
+        for(Enum<?> state : iconMap.keySet())
         {
             this.states.add(state);
         }

@@ -252,11 +252,11 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public boolean isSame(IStackType<FluidStack> other)
+    public boolean isSame(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.getFluid() == other.copyStackWithCount(1).getFluid();
+        return stack.getFluid() == ((FluidStack)other.copyStackWithCount(1)).getFluid();
     }
 
     @Override

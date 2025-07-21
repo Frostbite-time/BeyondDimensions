@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonName;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -11,10 +10,9 @@ import net.minecraft.resources.ResourceLocation;
 
 public class IconButton extends Button
 {
-    protected ButtonName name;
     protected ResourceLocation icon;
 
-    protected static final WidgetSprites SPRITES = new WidgetSprites(
+    protected WidgetSprites backgroundSprites = new WidgetSprites(
             ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/slot_button.png"),
             ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/slot_button_disabled.png"),
             ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/slot_button_hovered.png")
@@ -22,11 +20,11 @@ public class IconButton extends Button
 
     // 从左到右的含义分别为
     // x起始、y起始、宽、高、组件、按钮名称（父类为按钮上的字）、按下按钮后的行为、叙述（使用默认叙述即可）
-    public IconButton(int x, int y, int width, int height,ResourceLocation icon ,ButtonName name, OnPress onPress)
+    public IconButton(int x, int y, int width, int height,ResourceLocation icon , OnPress onPress)
     {
         super(x, y, width, height, Component.empty(), onPress, Button.DEFAULT_NARRATION);
         this.icon = icon;
-        this.name = name;
+        initBackground();
     }
 
     @Override
@@ -40,7 +38,7 @@ public class IconButton extends Button
             RenderSystem.defaultBlendFunc();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             this.isHovered = mouseX >= x && mouseY >= y && mouseX < x + this.width && mouseY < y + this.height;
-            ResourceLocation texture = SPRITES.get(this.active,this.isHoveredOrFocused());
+            ResourceLocation texture = backgroundSprites.get(this.active,this.isHoveredOrFocused());
 
             st.blit(texture, x, y, 0,0,this.width,this.height ,this.width ,this.height );
             drawIcon(st,mouseX,mouseY,pt);
@@ -58,6 +56,17 @@ public class IconButton extends Button
         st.blit(getIcon(), this.getX(), this.getY(), 0,0,this.getWidth(), this.getHeight(),this.getWidth(),this.getHeight());
     }
 
+    // 用于覆写背景
+    public void initBackground()
+    {
+
+    }
+
+    public void setBackgroundSprites(WidgetSprites backgroundSprites)
+    {
+        this.backgroundSprites = backgroundSprites;
+    }
+
     public ResourceLocation getIcon() {
         return icon;
     }
@@ -66,11 +75,5 @@ public class IconButton extends Button
     {
         this.icon = icon;
     }
-
-    public ButtonName getName()
-    {
-        return this.name;
-    }
-
 
 }

@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 // 用于处理通用机械的化学品类
-public class InfusionStackType implements IStackType<InfusionStack>
+public final class InfusionStackType implements IStackType<InfusionStack>
 {
 
     public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemicals/infuse");
@@ -229,11 +229,11 @@ public class InfusionStackType implements IStackType<InfusionStack>
     }
 
     @Override
-    public boolean isSame(IStackType<InfusionStack> other)
+    public boolean isSame(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual(other.getStack());
+        return stack.isTypeEqual((InfusionStack)other.getStack());
     }
 
     @Override

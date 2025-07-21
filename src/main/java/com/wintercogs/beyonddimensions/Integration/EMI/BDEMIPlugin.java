@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.Integration.EMI;
 
+import com.wintercogs.beyonddimensions.GUI.BDBaseGUI;
 import com.wintercogs.beyonddimensions.Integration.EMI.Recipe.NetRecipeHandler;
+import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiPlugin;
@@ -14,5 +16,6 @@ public class BDEMIPlugin implements EmiPlugin
     {
         registry.addRecipeHandler(UIRegister.Dimensions_Craft_Menu.get(), new NetRecipeHandler());
         registry.addRecipeHandler(UIRegister.Dimensions_Craft_Menu_Terminal.get(), new NetRecipeHandler());
+        registry.addDragDropHandler(BDBaseGUI.class,new SlotDragHandler());
     }
 }

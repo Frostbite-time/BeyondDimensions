@@ -2,11 +2,9 @@ package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.PopModeButtonPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toClient.EnergyStoragePacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toClient.PlayerPermissionInfoPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncFlagPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toClient.SyncStoragePacket;
+import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.QuickDataTagPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.SetSlotDirectlyPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toClient.*;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
@@ -46,22 +44,6 @@ public class PacketRegister
 
         INSTANCE.registerMessage(
                 packetId++,
-                EnergyStoragePacket.class,
-                EnergyStoragePacket::encode,
-                EnergyStoragePacket::decode,
-                EnergyStoragePacket::handle
-        );
-
-        INSTANCE.registerMessage(
-                packetId++,
-                FlagSlotSetPacket.class,
-                FlagSlotSetPacket::encode,
-                FlagSlotSetPacket::decode,
-                FlagSlotSetPacket::handle
-        );
-
-        INSTANCE.registerMessage(
-                packetId++,
                 NetControlActionPacket.class,
                 NetControlActionPacket::encode,
                 NetControlActionPacket::decode,
@@ -78,30 +60,6 @@ public class PacketRegister
 
         INSTANCE.registerMessage(
                 packetId++,
-                PopModeButtonPacket.class,
-                PopModeButtonPacket::encode,
-                PopModeButtonPacket::decode,
-                PopModeButtonPacket::handle
-        );
-
-        INSTANCE.registerMessage(
-                packetId++,
-                SyncFlagPacket.class,
-                SyncFlagPacket::encode,
-                SyncFlagPacket::decode,
-                SyncFlagPacket::handle
-        );
-
-        INSTANCE.registerMessage(
-                packetId++,
-                SyncStoragePacket.class,
-                SyncStoragePacket::encode,
-                SyncStoragePacket::decode,
-                SyncStoragePacket::handle
-        );
-
-        INSTANCE.registerMessage(
-                packetId++,
                 RecipeFillC2SPacket.class,
                 RecipeFillC2SPacket::encode,
                 RecipeFillC2SPacket::decode,
@@ -114,14 +72,6 @@ public class PacketRegister
                 ClickTransferCraftButtonPacket::encode,
                 ClickTransferCraftButtonPacket::decode,
                 ClickTransferCraftButtonPacket::handle
-        );
-
-        INSTANCE.registerMessage(
-                packetId++,
-                CraftReturnPacket.class,
-                CraftReturnPacket::encode,
-                CraftReturnPacket::decode,
-                CraftReturnPacket::handle
         );
 
         INSTANCE.registerMessage(
@@ -146,6 +96,38 @@ public class PacketRegister
                 PutHandItemToNetPacket::encode,
                 PutHandItemToNetPacket::decode,
                 PutHandItemToNetPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                DisorderedSlotGroupSyncPacket.class,
+                DisorderedSlotGroupSyncPacket::encode,
+                DisorderedSlotGroupSyncPacket::decode,
+                DisorderedSlotGroupSyncPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                OrderedStackTypedSlotPacket.class,
+                OrderedStackTypedSlotPacket::encode,
+                OrderedStackTypedSlotPacket::decode,
+                OrderedStackTypedSlotPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                SetSlotDirectlyPacket.class,
+                SetSlotDirectlyPacket::encode,
+                SetSlotDirectlyPacket::decode,
+                SetSlotDirectlyPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                packetId++,
+                QuickDataTagPacket.class,
+                QuickDataTagPacket::encode,
+                QuickDataTagPacket::decode,
+                QuickDataTagPacket::handle
         );
     }
 }

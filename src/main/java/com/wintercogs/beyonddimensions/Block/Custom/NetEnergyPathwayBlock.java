@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockE
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class NetEnergyPathwayBlock extends NetedBlock implements EntityBlock
@@ -45,10 +47,7 @@ public class NetEnergyPathwayBlock extends NetedBlock implements EntityBlock
         super.use(state,level,pos,player,hand,hitResult);
         if(!level.isClientSide()&&!player.isShiftKeyDown())
         {
-            player.openMenu(new SimpleMenuProvider(
-                    (containerId, playerInventory, _player) -> new NetEnergyMenu(containerId, _player.getInventory(), ((NetEnergyPathwayBlockEntity) level.getBlockEntity(pos)),new SimpleContainerData(0)),
-                    Component.translatable("menu.title.beyonddimensions.net_energy_menu")
-            ));
+            NetworkHooks.openScreen((ServerPlayer) player, (NetEnergyPathwayBlockEntity)level.getBlockEntity(pos),pos);
         }
         return InteractionResult.SUCCESS;
     }
