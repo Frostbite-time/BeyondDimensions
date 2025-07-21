@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.GUI;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
-import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
@@ -20,12 +19,6 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 
     public RightTabButton popButton; // 弹出模式
     public RightTabButton controlModeButton; // 红石控制模式按钮
-
-    private SlotDragHandler dragHandler; // 仅在emi加载时可用
-
-    private dev.emi.emi.api.stack.EmiIngredient dragIngredient; // 仅在emi加载时可用
-    private boolean isDragging = false;
-
 
     public NetInterfaceBaseGUI(NetInterfaceBaseMenu container, Inventory playerInventory, Component title)
     {
@@ -160,36 +153,6 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752,false);
         GuiRenderHelper.drawRightAnchoredText(guiGraphics,this.font, Component.translatable("menu.label.beyonddimensions.tag_and_stored_slots"), imageWidth-6, this.titleLabelY+3, 4210752,false);
         guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752,false);
-    }
-
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
-
-        // 获取拖动物品
-        if(BeyondDimensions.EMILoaded && !isDragging)
-        {
-            dragIngredient = dev.emi.emi.api.EmiApi.getHoveredStack((int) mouseX, (int) mouseY,true).getStack();
-            if(dragIngredient != null)
-                isDragging = true;
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
-    {
-        super.mouseReleased(mouseX, mouseY, button);
-        if(BeyondDimensions.EMILoaded)
-        {
-            if(dragIngredient != null)
-                this.dragHandler.dropStack(this, dragIngredient,(int)mouseX,(int)mouseY);
-            dragIngredient = null;
-        }
-        isDragging = false;
-        return true;
     }
 
 }

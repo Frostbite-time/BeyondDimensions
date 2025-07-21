@@ -3,12 +3,11 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
 import java.util.List;
 
 // 用于实现StackTypedHandler转向IItemHandler的类
-public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiable
+public class ItemStackTypedHandler implements IItemHandler
 {
     private StackTypedHandler handlerStorage;
 
@@ -76,9 +75,4 @@ public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiab
         return true;
     }
 
-    @Override
-    public void setStackInSlot(int slot, ItemStack itemStack)
-    {
-
-    }
 }
