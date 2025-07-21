@@ -3,7 +3,6 @@
   "textures": {
     "front": "beyonddimensions:block/net_furnace_front_on",
     "side" : "minecraft:block/furnace_side",
-    "top"  : "minecraft:block/furnace_top",
-    "particle": "minecraft:block/net_furnace_front"
+    "top"  : "minecraft:block/furnace_top"
   }
 }
