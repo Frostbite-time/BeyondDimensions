@@ -244,6 +244,9 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
     {
+        if(cap != ForgeCapabilities.ITEM_HANDLER)
+            return super.getCapability(cap, side);
+
         // 遍历注册的能力映射表
         //首先对所有实体槽位进行包装
         ItemStackTypedHandler inputStorage = new ItemStackTypedHandler(inputStorageSlots)

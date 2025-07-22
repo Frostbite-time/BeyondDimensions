@@ -184,6 +184,7 @@ dependencies {
 
     // 编译通用机械的api 以便使用化学品存储
     modCompileOnly "mekanism:Mekanism:${mekanism_version}:api"
+    modRuntimeOnly "mekanism:Mekanism:${mekanism_version}"
 
     // EMI支持
     modCompileOnly "dev.emi:emi-forge:${emi_version}:api"
