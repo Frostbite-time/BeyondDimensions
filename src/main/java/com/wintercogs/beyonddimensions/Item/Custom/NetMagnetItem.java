@@ -136,16 +136,31 @@ public class NetMagnetItem extends BaseMachineItem
     public int getTicksPerWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
         HopperRangeMode hopperRangeMode = getHopperRangeModeOrDefault(stack, HopperRangeMode.RADIUS_MID);
-
-        return switch (hopperRangeMode)
+        HopperFluidMode hopperFluidMode = getHopperFluidModeOrDefault(stack, HopperFluidMode.DENY);
+        if(hopperFluidMode == HopperFluidMode.ALLOW)
         {
-            case RADIUS_LOWEST -> 5;
-            case RADIUS_LOW -> 10;
-            case RADIUS_MID -> 20;
-            case RADIUS_HIGH -> 60;
-            case RADIUS_HIGHEST -> 100;
-            case CHUNK_MODE -> 1200;
-        };
+            return switch (hopperRangeMode)
+            {
+                case RADIUS_LOWEST -> 0;
+                case RADIUS_LOW -> 0;
+                case RADIUS_MID -> 10;
+                case RADIUS_HIGH -> 20;
+                case RADIUS_HIGHEST -> 50;
+                case CHUNK_MODE -> 1200;
+            };
+        }
+        else
+        {
+            return switch (hopperRangeMode)
+            {
+                case RADIUS_LOWEST -> 0;
+                case RADIUS_LOW -> 0;
+                case RADIUS_MID -> 2;
+                case RADIUS_HIGH -> 5;
+                case RADIUS_HIGHEST -> 10;
+                case CHUNK_MODE -> 1200;
+            };
+        }
     }
 
     private AABB getSearchArea(HopperRangeMode hopperRangeMode, Level level, Vec3i pos)

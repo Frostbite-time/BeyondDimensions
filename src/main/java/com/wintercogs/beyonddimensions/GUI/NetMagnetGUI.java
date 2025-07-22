@@ -162,12 +162,12 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                 iconMap.put(HopperRangeMode.RADIUS_HIGHEST, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/hopper_range_mode_highest.png"));
                 iconMap.put(HopperRangeMode.CHUNK_MODE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/hopper_range_mode_chunk.png"));
 
-                tooltipMap.put(HopperRangeMode.RADIUS_LOWEST, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_range_mode_lowest")));
-                tooltipMap.put(HopperRangeMode.RADIUS_LOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_range_mode_low")));
-                tooltipMap.put(HopperRangeMode.RADIUS_MID, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_range_mode_mid")));
-                tooltipMap.put(HopperRangeMode.RADIUS_HIGH, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_range_mode_high")));
-                tooltipMap.put(HopperRangeMode.RADIUS_HIGHEST, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_range_mode_highest")));
-                tooltipMap.put(HopperRangeMode.CHUNK_MODE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_range_mode_chunk")));
+                tooltipMap.put(HopperRangeMode.RADIUS_LOWEST, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.magnet_range_mode_lowest")));
+                tooltipMap.put(HopperRangeMode.RADIUS_LOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.magnet_range_mode_low")));
+                tooltipMap.put(HopperRangeMode.RADIUS_MID, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.magnet_range_mode_mid")));
+                tooltipMap.put(HopperRangeMode.RADIUS_HIGH, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.magnet_range_mode_high")));
+                tooltipMap.put(HopperRangeMode.RADIUS_HIGHEST, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.magnet_range_mode_highest")));
+                tooltipMap.put(HopperRangeMode.CHUNK_MODE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.magnet_range_mode_chunk")));
 
 
                 for(Enum<?> state : iconMap.keySet())
