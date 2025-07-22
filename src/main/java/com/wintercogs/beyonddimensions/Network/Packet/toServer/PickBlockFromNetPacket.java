@@ -37,7 +37,7 @@ public record PickBlockFromNetPacket(ItemStack targetStack)
             }
         }
 
-        if(target != null)
+        if(target != null && player.getMainHandItem().isEmpty())
         {
             ItemStack extract = ((ItemStackType) storage.extract(target,false)).copyStack();
             player.setItemInHand(InteractionHand.MAIN_HAND,extract);
