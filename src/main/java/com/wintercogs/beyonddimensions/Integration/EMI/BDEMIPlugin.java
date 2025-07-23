@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Integration.EMI;
 
+import com.wintercogs.beyonddimensions.Integration.EMI.Exclusion.BDExclusionZones;
 import com.wintercogs.beyonddimensions.Integration.EMI.Recipe.NetRecipeHandler;
 import com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler.SlotDragHandler;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
@@ -17,5 +18,6 @@ public class BDEMIPlugin implements EmiPlugin
         registry.addRecipeHandler(DimensionsCraftMenu.Dimensions_Craft_Menu.get(), new NetRecipeHandler());
         registry.addRecipeHandler(DimensionsCraftMenuTerminal.Dimensions_Craft_Menu_Terminal.get(), new NetRecipeHandler());
         registry.addGenericDragDropHandler(new SlotDragHandler());
+        registry.addGenericExclusionArea(new BDExclusionZones());
     }
 }

@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Integration.JEI;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.BDBaseGUI;
+import com.wintercogs.beyonddimensions.Integration.JEI.ContainerHandler.JeiContainerHandler;
 import com.wintercogs.beyonddimensions.Integration.JEI.RecipeTransfer.CraftMenuRecipeTransferHandler;
 import com.wintercogs.beyonddimensions.Integration.JEI.RecipeTransfer.CraftTerminalRecipeTransferHandler;
 import mezz.jei.api.IModPlugin;
@@ -31,5 +32,6 @@ public class BDjeiPlugin implements IModPlugin
     public void registerGuiHandlers(IGuiHandlerRegistration registration)
     {
         registration.addGhostIngredientHandler(BDBaseGUI.class, new NetInterfaceGhostHandler());
+        registration.addGuiContainerHandler(BDBaseGUI.class, new JeiContainerHandler());
     }
 }

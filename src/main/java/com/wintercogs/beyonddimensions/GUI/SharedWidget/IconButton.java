@@ -6,10 +6,11 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-public class IconButton extends Button
+public class IconButton extends Button implements GuiElementAccess
 {
     protected ResourceLocation icon;
 
@@ -92,4 +93,9 @@ public class IconButton extends Button
     }
 
 
+    @Override
+    public Rect2i getElementArea() //Rect2i是小对象，每帧重新分配应当相当安全
+    {
+        return new Rect2i(getX(), getY(), getWidth(), getHeight());
+    }
 }
