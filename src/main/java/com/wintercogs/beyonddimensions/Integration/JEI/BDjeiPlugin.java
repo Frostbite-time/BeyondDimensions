@@ -32,6 +32,6 @@ public class BDjeiPlugin implements IModPlugin
     public void registerGuiHandlers(IGuiHandlerRegistration registration)
     {
         registration.addGhostIngredientHandler(BDBaseGUI.class, new NetInterfaceGhostHandler());
-        registration.addGuiContainerHandler(BDBaseGUI.class, new JeiContainerHandler());
+        registration.addGenericGuiContainerHandler(BDBaseGUI.class, new JeiContainerHandler());
     }
 }
