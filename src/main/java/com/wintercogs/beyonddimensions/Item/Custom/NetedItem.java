@@ -37,26 +37,7 @@ public class NetedItem extends Item
             DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
             if (net != null)
             {
-                if(validToReWrite(net,player))
-                {
-                    if(itemstack.get(ModDataComponents.NET_ID_DATA) != net.getId())
-                    {
-                        itemstack.set(ModDataComponents.NET_ID_DATA,net.getId());
-                        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
-                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound",net.getId()));
-                    }
-                    else
-                    {
-                        itemstack.set(ModDataComponents.NET_ID_DATA,-1);
-                        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
-                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound",net.getId()));
-                    }
-                }
-                else
-                {
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"));
-                    return InteractionResultHolder.fail(itemstack);
-                }
+                setNet(itemstack,net,player);
             }
             else
             {
@@ -65,6 +46,21 @@ public class NetedItem extends Item
         }
 
         return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+    }
+
+    @Override
+    public void onCraftedBy(ItemStack stack, Level level, Player player)
+    {
+        super.onCraftedBy(stack, level, player);
+
+        if(level.isClientSide())
+            return;
+
+        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        if(net != null)
+        {
+            setNet(stack,net,player);
+        }
     }
 
     public static DimensionsNet getNet(ItemStack stack, MinecraftServer dataProvider)
@@ -77,8 +73,40 @@ public class NetedItem extends Item
         return null;
     }
 
+    // 返回值表示是否成功进行修改操作
+    public static boolean setNet(ItemStack itemstack, DimensionsNet net, Player player)
+    {
+        // 确保仅对网络化物品赋值
+        if(itemstack.getItem() instanceof NetedItem item)
+        {
+            Level level = player.level();
+            if(item.validToReWrite(net,player))
+            {
+                if(itemstack.get(ModDataComponents.NET_ID_DATA) != net.getId())
+                {
+                    itemstack.set(ModDataComponents.NET_ID_DATA,net.getId());
+                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound",net.getId()));
+                }
+                else
+                {
+                    itemstack.set(ModDataComponents.NET_ID_DATA,-1);
+                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound",net.getId()));
+                }
+                return true;
+            }
+            else
+            {
+                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"));
+                return false;
+            }
+        }
+        return false;
+    }
+
     // 覆写此方法以实现自定义网络覆写规则
-    protected boolean validToReWrite(DimensionsNet net, Player player )
+    protected boolean validToReWrite(DimensionsNet net, Player player)
     {
         return net.isManager(player);
     }
