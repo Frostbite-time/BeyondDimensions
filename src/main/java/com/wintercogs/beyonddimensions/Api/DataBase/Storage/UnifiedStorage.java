@@ -127,36 +127,30 @@ public class UnifiedStorage implements IStackTypedHandler
     @Override
     public void setStackDirectly(int slot, IStackType stack)
     {
-        ResourceLocation newTypeId = stack.getTypeId();
-        ResourceLocation oldTypeId = getStorage().get(slot).getTypeId();
-        storage.set(slot,stack.copy());
-        // 更新索引
-        typeIdIndex.computeIfAbsent(oldTypeId, k -> new ArrayList<>()).remove(Integer.valueOf(slot));
-        typeIdIndex.computeIfAbsent(newTypeId, k -> new ArrayList<>()).add(slot);
-
-        onChange();
-    }
-
-    @Override
-    public void addStackToIndexDirectly(int slot, IStackType stack)
-    {
-        //使用add方法增加Stack，并且更新索引
-        ResourceLocation newTypeId = stack.getTypeId();
-        storage.add(slot,stack.copy());
-        // storage自增导致的可能的空索引位置无需管，因为那个位置是null。如果读取必然出错，这是编写时候由其他方法保证的
-        typeIdIndex.computeIfAbsent(newTypeId, k -> new ArrayList<>()).add(slot);
-        onChange();
+        if(!storage.contains(stack))
+        {
+            ResourceLocation newTypeId = stack.getTypeId();
+            ResourceLocation oldTypeId = getStorage().get(slot).getTypeId();
+            storage.set(slot,stack.copy());
+            // 更新索引
+            typeIdIndex.computeIfAbsent(oldTypeId, k -> new ArrayList<>()).remove(Integer.valueOf(slot));
+            typeIdIndex.computeIfAbsent(newTypeId, k -> new ArrayList<>()).add(slot);
+            onChange();
+        }
     }
 
     @Override
     public void addStackDirectly(IStackType stack)
     {
-        //使用add方法增加Stack，并且更新索引
-        ResourceLocation newTypeId = stack.getTypeId();
-        int slot = storage.size();
-        storage.add(stack.copy());
-        typeIdIndex.computeIfAbsent(newTypeId, k -> new ArrayList<>()).add(slot);
-        onChange();
+        if(!storage.contains(stack))
+        {
+            //使用add方法增加Stack，并且更新索引
+            ResourceLocation newTypeId = stack.getTypeId();
+            int slot = storage.size();
+            storage.add(stack.copy());
+            typeIdIndex.computeIfAbsent(newTypeId, k -> new ArrayList<>()).add(slot);
+            onChange();
+        }
     }
 
     @Override
@@ -506,9 +500,7 @@ public class UnifiedStorage implements IStackTypedHandler
             if(stackActual.isEmpty())
                 continue; // 不添加空物品
                 
-            this.storage.add(stackActual);
-            // 更新索引
-            typeIdIndex.computeIfAbsent(typeId, k -> new ArrayList<>()).add(storage.size() - 1);
+            insert(stackActual,false); // 通过insert函数，而不是直接操作列表，自动处理反序列化中的一些问题并自动更新索引
         }
         backupStorage = deepClone(storage); // 对内容进行备份
     }

@@ -111,15 +111,6 @@ public interface IStackTypedHandler
     }
 
     /**
-     * 直接在指定槽位添加一个堆叠，仅在你确定你需要的时候再使用
-     */
-    default void addStackToIndexDirectly(int slot , IStackType stack)
-    {
-        getStorage().add(slot,stack.copy());
-        onChange();
-    }
-
-    /**
      * 在存储末尾添加一个堆叠，仅在你确定你需要的时候再使用
      */
     default void addStackDirectly(IStackType stack)
