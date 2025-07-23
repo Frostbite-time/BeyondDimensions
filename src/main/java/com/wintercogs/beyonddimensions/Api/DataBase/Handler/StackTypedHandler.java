@@ -154,17 +154,6 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     @Override
-    public void addStackToIndexDirectly(int slot, IStackType stack)
-    {
-        //使用add方法增加Stack，并且更新索引
-        ResourceLocation newTypeId = stack.getTypeId();
-        storage.add(slot,stack.copy());
-        // storage自增导致的可能的空索引位置无需管，因为那个位置是null。如果读取必然出错，这是编写时候由其他方法保证的
-        typeIdIndex.computeIfAbsent(newTypeId, k -> new ArrayList<>()).add(slot);
-        onChange();
-    }
-
-    @Override
     public void addStackDirectly(IStackType stack)
     {
         //使用add方法增加Stack，并且更新索引

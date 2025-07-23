@@ -135,7 +135,9 @@ public class HashBPlusList<E> extends AbstractList<E>
         }
         // 禁止插入相同元素
         if (index.containsKey(element)) {
-            throw new IllegalArgumentException("尝试向列表中插入相同的元素: " + element);
+            new IllegalArgumentException("尝试向列表中插入相同的元素，已跳过本次操作: " + element)
+                    .printStackTrace();
+            return old;
         }
         // 运行替换
         IntRef offsetRef = new IntRef();
@@ -157,7 +159,9 @@ public class HashBPlusList<E> extends AbstractList<E>
     @Override
     public void add(int idx, E element) {
         if (index.containsKey(element)) {
-            throw new IllegalArgumentException("尝试向列表中插入相同的元素: " + element);
+            new IllegalArgumentException("尝试向列表中插入相同的元素，已跳过本次操作: " + element)
+                    .printStackTrace();
+            return;
         }
         if (idx < 0 || idx > size) {
             throw new IndexOutOfBoundsException("Index: " + idx);
