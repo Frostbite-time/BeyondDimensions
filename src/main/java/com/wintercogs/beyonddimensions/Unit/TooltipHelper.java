@@ -10,9 +10,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class TooltipHelper
 {
+
+    // 版本号 用于clear后处理
+    private static final AtomicLong EPOCH = new AtomicLong(0);
 
     private static final Map<IStackType, List<Component>> NORMAL_CACHE   = new ConcurrentHashMap<>();
     private static final Map<IStackType, List<Component>> ADVANCED_CACHE = new ConcurrentHashMap<>();
@@ -36,22 +40,29 @@ public class TooltipHelper
             Map<IStackType, List<Component>> cache,
             Map<IStackType, CompletableFuture<List<Component>>> pending
     ) {
-        return pending.computeIfAbsent(stack, stackType ->
+        // 记录它生成时的 epoch
+        final long taskEpoch = EPOCH.get();
+
+        return pending.computeIfAbsent(stack, s ->
                 CompletableFuture
-                        .<List<Component>>supplyAsync(
-                                () -> stack.getTooltipLines(player, flag),
-                                TOOLTIP_EXECUTOR
-                        )
+                        .<List<Component>>supplyAsync(() -> stack.getTooltipLines(player, flag), TOOLTIP_EXECUTOR)
                         .whenComplete((tooltip, err) -> {
+                            // 始终先把自己从 pending 移除，避免泄漏
                             pending.remove(stack);
-                            if (err == null) {
-                                cache.put(stack, (List<Component>) tooltip);
-                            } else {
+
+                            if (err != null) {
                                 ((Throwable)err).printStackTrace();
+                                return;
+                            }
+
+                            // 只有 epoch 没变，才允许写回缓存
+                            if (taskEpoch == EPOCH.get()) {
+                                cache.put(stack, (List<Component>) tooltip);
                             }
                         })
         );
     }
+
 
     /* ---------- 对外 API ---------- */
 
@@ -97,7 +108,11 @@ public class TooltipHelper
         }
     }
 
-    public static void clearCache() {
+    public static void clearCache()
+    {
+        // 修改版本号
+        EPOCH.incrementAndGet();
+
         NORMAL_CACHE.clear();
         ADVANCED_CACHE.clear();
         NORMAL_PENDING.clear();
