@@ -44,7 +44,7 @@ public class DimensionsShortKeys
 
     public static final KeyMapping TOGGLE_MAGNET_KEY = new KeyMapping(
             "key.beyonddimensions.toggle_magnet_key",
-            GLFW.GLFW_KEY_P,
+            GLFW.GLFW_KEY_LEFT_BRACKET, // 对应[
             "key.categories.beyonddimensions"
     );
 
