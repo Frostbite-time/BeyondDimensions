@@ -18,7 +18,7 @@ public class NetMemberInviter extends NetedItem implements IAddNetMemberHandler
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND)
+        if(usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
         {
             return InteractionResultHolder.fail(itemstack);
         }

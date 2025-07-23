@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvents;
@@ -27,28 +26,27 @@ public class NetedItem extends Item
         if (!level.isClientSide()) {
             DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
             if (net != null) {
-                if (validToReWrite(net, player)) {
-                    // 改用 NBT 标签存储数据
-                    CompoundTag tag = itemstack.getOrCreateTag();
-
-                    if (getNetId(itemstack) != net.getId()) {
-                        tag.putInt("NetId", net.getId());
-                        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
-                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound",net.getId()));
-                    } else {
-                        tag.putInt("NetId", -1);
-                        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
-                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound",net.getId()));
-                    }
-                } else {
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"));
-                    return InteractionResultHolder.fail(itemstack);
-                }
+                setNet(itemstack,net,player);
             } else {
                 return InteractionResultHolder.fail(itemstack);
             }
         }
         return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
+    }
+
+    @Override
+    public void onCraftedBy(ItemStack stack, Level level, Player player)
+    {
+        super.onCraftedBy(stack, level, player);
+
+        if(level.isClientSide())
+            return;
+
+        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        if(net != null)
+        {
+            setNet(stack,net,player);
+        }
     }
 
     public static DimensionsNet getNet(ItemStack stack, MinecraftServer dataProvider)
@@ -59,6 +57,38 @@ public class NetedItem extends Item
             return DimensionsNet.getNetFromId(netId,dataProvider);
         }
         return null;
+    }
+
+    public static boolean setNet(ItemStack itemstack, DimensionsNet net, Player player)
+    {
+        // 确保仅对网络化物品赋值
+        if(itemstack.getItem() instanceof NetedItem item)
+        {
+            Level level = player.level();
+            if(item.validToReWrite(net,player))
+            {
+                int netId = getNetId(itemstack);
+                if(netId != net.getId())
+                {
+                    setNetId(itemstack,net.getId());
+                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound",net.getId()));
+                }
+                else
+                {
+                    setNetId(itemstack,-1);
+                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound",net.getId()));
+                }
+                return true;
+            }
+            else
+            {
+                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"));
+                return false;
+            }
+        }
+        return false;
     }
 
     // 可以通过这个方法获取存储的 NetId
