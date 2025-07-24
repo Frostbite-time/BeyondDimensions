@@ -254,11 +254,11 @@ public final class ChemicalStackType implements IStackType<ChemicalStack>
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<ChemicalStack> other)
+    public boolean isSameTypeSameComponents(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return ChemicalStack.isSameChemical(stack, other.getStack());
+        return ChemicalStack.isSameChemical(stack, (ChemicalStack)other.getStack());
     }
 
     @Override

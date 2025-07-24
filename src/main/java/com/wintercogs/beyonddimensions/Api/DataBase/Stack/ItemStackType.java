@@ -248,10 +248,10 @@ public final class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<ItemStack> other) {
+    public boolean isSameTypeSameComponents(IStackType<?> other) {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return ItemStack.isSameItemSameComponents(stack, other.copyStackWithCount(1));
+        return ItemStack.isSameItemSameComponents(stack, (ItemStack) other.copyStackWithCount(1));
     }
 
     // 网络序列化
