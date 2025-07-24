@@ -405,7 +405,7 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     @Override
     public ItemStackType deserializeNBT(CompoundTag nbt) {
-        Long amount = nbt.getLong("Amount"); // 数量直接从原始nbt中取
+        long amount = nbt.getLong("Amount"); // 数量直接从原始nbt中取
 
         CompoundTag stackTag = nbt.getCompound("Stack");
         CompoundTag caps = stackTag.contains("ForgeCaps") ? stackTag.getCompound("ForgeCaps") : null;
