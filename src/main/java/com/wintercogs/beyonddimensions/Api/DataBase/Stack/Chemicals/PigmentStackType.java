@@ -237,11 +237,11 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<PigmentStack> other)
+    public boolean isSameTypeSameComponents(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual(other.getStack());
+        return stack.isTypeEqual((PigmentStack)other.getStack());
     }
 
     @Override

@@ -237,11 +237,11 @@ public final class SlurryStackType implements IStackType<SlurryStack>
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<SlurryStack> other)
+    public boolean isSameTypeSameComponents(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual(other.getStack());
+        return stack.isTypeEqual((SlurryStack)other.getStack());
     }
 
     @Override

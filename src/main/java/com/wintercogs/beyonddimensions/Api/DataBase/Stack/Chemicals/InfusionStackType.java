@@ -237,11 +237,11 @@ public final class InfusionStackType implements IStackType<InfusionStack>
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<InfusionStack> other)
+    public boolean isSameTypeSameComponents(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual(other.getStack());
+        return stack.isTypeEqual((InfusionStack)other.getStack());
     }
 
     @Override

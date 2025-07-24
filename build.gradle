@@ -220,6 +220,11 @@ dependencies {
     modRuntimeOnly "curse.maven:sophisticated-backpacks-422301:6587116"
 
 
+    // 神化测试
+    modRuntimeOnly "curse.maven:placebo-283644:6274231"
+    modRuntimeOnly "curse.maven:apothic-attributes-898963:5634071"
+    modRuntimeOnly "curse.maven:apotheosis-313970:6461960"
+
 
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

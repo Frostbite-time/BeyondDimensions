@@ -167,7 +167,7 @@ public interface IStackType<T>
     /**
      * 检查2个实例是否能精确匹配，即：2个物品，种类、NBT等数据是否一致。但是不考虑存储数量
      */
-    boolean isSameTypeSameComponents(IStackType<T> other);
+    boolean isSameTypeSameComponents(IStackType<?> other);
 
     /**
      * 网络序列化，第一步始终写入类型id

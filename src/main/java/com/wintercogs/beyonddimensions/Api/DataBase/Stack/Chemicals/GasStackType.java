@@ -237,11 +237,11 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<GasStack> other)
+    public boolean isSameTypeSameComponents(IStackType<?> other)
     {
         if(!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual(other.getStack());
+        return stack.isTypeEqual((GasStack)other.getStack());
     }
 
     @Override
