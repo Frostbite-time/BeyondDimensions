@@ -41,6 +41,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     private long stackSize;
 
     private ItemStack cachedStack = null;
+    private int vanillaStackSize = -1; // 缓存原版堆叠大小
 
     private int hashCodeCache = 0; // 哈希码缓存
     private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
@@ -292,8 +293,13 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     @Override
     public long getVanillaMaxStackSize() {
-        // 考虑原版物品的堆叠限制
-        return Math.min(item.getMaxStackSize(), getCustomMaxStackSize());
+        if(vanillaStackSize<=0)
+        {
+            if(cachedStack == null)
+                refreshCachedStack();
+            vanillaStackSize = cachedStack.getMaxStackSize();
+        }
+        return Math.min(vanillaStackSize, getCustomMaxStackSize());
     }
 
     @Override
