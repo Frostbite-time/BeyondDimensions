@@ -14,6 +14,8 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkHooks;
@@ -104,15 +106,31 @@ public class NetFeederItem extends BaseMachineItem
                 if(foodCache != null)
                 {
                     ItemStackType foodToFeed = (ItemStackType)storage.extract(foodCache,false);
-                    ItemStack remaining = player.eat(level,foodToFeed.copyStack());
-                    if(!remaining.isEmpty())
+                    if(!foodToFeed.isEmpty())
                     {
-                        // 剩余堆叠插送回去
-                        ItemStackType remainingAgain = (ItemStackType)storage.insert(new ItemStackType(remaining),false);
-                        if(!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
+                        ItemStack foodStack = foodToFeed.copyStack();
+                        Item foodItem = foodStack.getItem();
+                        FoodProperties foodProperties = foodItem.getFoodProperties(foodStack,player);
+                        // 实际执行效果前对饱食度和饱和度进行二次判断
+                        if(foodProperties != null)
                         {
-                            player.drop(remainingAgain.copyStack(),false);
+                            if((feederMode == FeederMode.SATURATION_KEEP && foodProperties.getSaturationModifier() >0)
+                                    ||(feederMode != FeederMode.SATURATION_KEEP && foodProperties.getNutrition() >0))
+                            {
+                                ItemStack remaining = foodItem.finishUsingItem(foodStack,level,player);
+                                if(!remaining.isEmpty())
+                                {
+                                    // 剩余堆叠插送回去
+                                    ItemStackType remainingAgain = (ItemStackType)storage.insert(new ItemStackType(remaining),false);
+                                    if(!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
+                                    {
+                                        player.drop(remainingAgain.copyStack(),false);
+                                    }
+                                }
+                                return;
+                            }
                         }
+                        storage.insert(foodToFeed,false); // 如果没能步入食用，则在此处将堆叠插回
                     }
                 }
 
