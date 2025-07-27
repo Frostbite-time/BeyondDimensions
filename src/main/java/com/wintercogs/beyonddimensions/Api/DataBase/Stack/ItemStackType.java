@@ -163,6 +163,7 @@ public class ItemStackType implements IStackType<ItemStack> {
         this.tag = stack.tag == null ? null : stack.tag.copy();
         CompoundTag caps = serializeStackCaps(stack);
         this.caps = caps == null ? null : caps.copy();
+        this.stackSize = stack.getCount();
 
         NeedRecalHash = true;
         refreshCachedStack();
