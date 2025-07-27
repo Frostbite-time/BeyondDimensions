@@ -137,10 +137,9 @@ public class ItemStackType implements IStackType<ItemStack> {
         if(key instanceof Item item)
         {
             ItemStack itemStack;
+            itemStack = new ItemStack(item, 1);
             if(dataComponentPatch != null)
-                itemStack = new ItemStack(item, 1,dataComponentPatch);
-            else
-                itemStack = new ItemStack(item,1);
+                itemStack.tag = dataComponentPatch;
             return new ItemStackType(itemStack,amount);
         }
         return null;
