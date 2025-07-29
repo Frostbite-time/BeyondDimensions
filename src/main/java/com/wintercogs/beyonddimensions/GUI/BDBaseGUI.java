@@ -16,9 +16,11 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.anti_ad.mc.ipn.api.IPNIgnore;
 
 
 // 更改渲染以及点击事件，以适配StoredStackSlot
+@IPNIgnore
 public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerScreen<T>
 {
 
