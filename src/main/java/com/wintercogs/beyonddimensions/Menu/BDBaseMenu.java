@@ -321,54 +321,6 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         return false;
     }
 
-    // 检测全部目标槽位，总共最多能容纳多少个给定种类的物品
-    public int checkCanMoveStackCount(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
-    {
-        int flag = 0;
-        int i = startIndex;
-        if (reverseDirection) {
-            i = endIndex - 1;
-        }
-
-        while(!stack.isEmpty()) {
-            if (reverseDirection) {
-                if (i < startIndex) {
-                    break;
-                }
-            } else if (i >= endIndex) {
-                break;
-            }
-            //对普通槽位和存储槽位分开处理
-            if(this.slots.get(i) instanceof AbstractStackTypedSlot)
-            {
-                // 最多可以向维度存储移动多少物品？
-                flag = stack.getMaxStackSize();
-                break;
-            }
-            else
-            {
-                // 最多可以向背包填充多少？
-                Slot slot = this.slots.get(i);
-                ItemStack itemstack = slot.getItem();
-                if (!itemstack.isEmpty() && ItemStack.isSameItemSameTags(stack, itemstack)) {
-                    int k = slot.getMaxStackSize(itemstack);    //槽位可以放入的最大数
-                    int maxCanPut = k - itemstack.getCount();
-                    flag += maxCanPut;
-                }
-                if (itemstack.isEmpty() && slot.mayPlace(stack)) {
-                    int l = slot.getMaxStackSize(stack);
-                    flag += l;
-                }
-            }
-            if (reverseDirection) {
-                --i;
-            } else {
-                ++i;
-            }
-        }
-        return flag;
-    }
-
     // 重写
     @Override
     public abstract boolean stillValid(Player player);

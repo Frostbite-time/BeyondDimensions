@@ -171,6 +171,12 @@ public abstract class AbstractStackTypedSlot extends Slot
         return new ItemStackType(ItemStack.EMPTY);
     }
 
+    public boolean hasStack()
+    {
+        IStackType stack = getStack();
+        return stack != null && !stack.isEmpty();
+    }
+
 
     // 以下这些重写 覆盖了slot中最基本的要素，以便将Container驱动的inv系统，替换成IStackType驱动------------------------------
 
@@ -193,34 +199,6 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 对于无序槽位，应当从整个存储中取出对应种类stack的对应数量
     // 返回取出量
     public abstract IStackType safeExtract(IStackType stack);
-
-
-    @Override
-    public ItemStack getItem()
-    {
-        if(getSlotIndex()<0)
-        {
-            return ItemStack.EMPTY;
-        }
-        //从当前槽索引取物品
-        ItemStack itemStack = getItemStackFromUnifiedStorage();
-        if (itemStack.isEmpty())
-            return ItemStack.EMPTY;
-        if (itemStack != null)
-        {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
-            return itemStack.copy();
-        }
-        return ItemStack.EMPTY;
-
-    }
-
-    @Override
-    public boolean hasItem()
-    {
-        //检查当前槽是否为空
-        return storage.getStackBySlot(getSlotIndex()) != null
-                && !storage.getStackBySlot(getSlotIndex()).isEmpty();
-    }
 
     @Override
     public void setChanged()
@@ -257,11 +235,11 @@ public abstract class AbstractStackTypedSlot extends Slot
         this.theSlot = index;
     }
 
-    public long getItemCount()
+    public long getStackCount()
     {
         if(getSlotIndex()<0)
         {
-            return -1;
+            return 0;
         }
         //从当前槽索引取物品
         IStackType stack = storage.getStackBySlot(getSlotIndex());
@@ -269,7 +247,7 @@ public abstract class AbstractStackTypedSlot extends Slot
         {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
             return stack.getStackAmount();
         }
-        return -1;
+        return 0;
     }
 
     public boolean isFake()
@@ -296,12 +274,28 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 仅对原版slot的重写，但不实际使用它们-------------------------------------------------------------------------------------
     // 如果发现意外使用则可能需要重写原版方法
 
+    @Deprecated
+    @Override
+    public ItemStack getItem()
+    {
+        return ItemStack.EMPTY;
+    }
+
+    @Deprecated
+    @Override
+    public boolean hasItem()
+    {
+        return false;
+    }
+
+    @Deprecated
     @Override
     public void set(ItemStack stack)
     {
         // 此方法会在AbstractContainerMenu初始化时被数据包处理调用
     }
 
+    @Deprecated
     @Override
     public void setByPlayer(ItemStack stack)
     {
@@ -309,20 +303,23 @@ public abstract class AbstractStackTypedSlot extends Slot
         // 点击事件交由其他函数处理，此处废弃
     }
 
+    @Deprecated
     @Override
     public int getMaxStackSize()
     {
         // 获取槽位可存储物品的最大值
-        return Integer.MAX_VALUE;
+        return 0;
     }
 
+    @Deprecated
     @Override
     public int getMaxStackSize(ItemStack stack)
     {
         // 获取槽位可存储物品的最大值
-        return Integer.MAX_VALUE;
+        return 0;
     }
 
+    @Deprecated
     @Override
     public ItemStack remove(int amount)
     {
@@ -330,6 +327,7 @@ public abstract class AbstractStackTypedSlot extends Slot
         return ItemStack.EMPTY; // 表示没有物品被移除
     }
 
+    @Deprecated
     @Override
     public ItemStack safeInsert(ItemStack stack, int increment)
     {
