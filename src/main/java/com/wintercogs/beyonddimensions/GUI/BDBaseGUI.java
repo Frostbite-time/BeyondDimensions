@@ -44,13 +44,13 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     protected void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
-            if(this.hoveredSlot instanceof AbstractStackTypedSlot sSlot)
+        if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null) {
+            if(this.hoveredSlot instanceof AbstractStackTypedSlot sSlot && sSlot.hasStack())
             {
                 IStackType stack = sSlot.getStack();
                 stack.renderTooltip(guiGraphics,minecraft.font,mouseX,mouseY);
             }
-            else
+            else if(this.hoveredSlot.hasItem())
             {
                 ItemStack itemstack = this.hoveredSlot.getItem();
                 guiGraphics.renderTooltip(this.font, this.getTooltipFromContainerItem(itemstack), itemstack.getTooltipImage(), itemstack, mouseX, mouseY);
