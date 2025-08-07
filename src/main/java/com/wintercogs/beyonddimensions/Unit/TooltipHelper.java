@@ -42,27 +42,28 @@ public class TooltipHelper
             Map<IStackType, List<Component>> cache,
             Map<IStackType, CompletableFuture<List<Component>>> pending
     ) {
-        // 记录它生成时的 epoch
         final long taskEpoch = EPOCH.get();
 
-        return pending.computeIfAbsent(stack, s ->
-                CompletableFuture
-                        .<List<Component>>supplyAsync(() -> stack.getTooltipLines(ctx, player, flag), TOOLTIP_EXECUTOR)
-                        .whenComplete((tooltip, err) -> {
-                            // 始终先把自己从 pending 移除，避免泄漏
-                            pending.remove(stack);
-
-                            if (err != null) {
-                                ((Throwable)err).printStackTrace();
-                                return;
-                            }
-
-                            // 只有 epoch 没变，才允许写回缓存
-                            if (taskEpoch == EPOCH.get()) {
-                                cache.put(stack, (List<Component>) tooltip);
-                            }
-                        })
+        // 先原子地拿到 Future（如果已存在就直接返回）
+        CompletableFuture<List<Component>> future = pending.computeIfAbsent(stack, s ->
+                CompletableFuture.supplyAsync(() -> stack.getTooltipLines(ctx, player, flag), TOOLTIP_EXECUTOR)
         );
+
+        // 只给“新建的” future 挂清理 & 缓存逻辑
+        if (future.getNumberOfDependents() == 0) { // 只有首次插入的 future 依赖数为 0
+            future.whenCompleteAsync((tooltip, err) -> {
+                pending.remove(stack);             // <-- 此时不在 computeIfAbsent 的锁域中
+                if (err != null) {
+                    err.printStackTrace();
+                    return;
+                }
+                if (taskEpoch == EPOCH.get()) {
+                    cache.put(stack, tooltip);
+                }
+            }, TOOLTIP_EXECUTOR);                  // 明确指定线程池，避免又跑到主线程
+        }
+
+        return future;
     }
 
 
