@@ -187,7 +187,31 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                 else
                 {
                     // 槽位物品存在，携带物品存在，不为相同类型
-                    // 尝试遍历能力，将槽位物品送入携带物品的存储
+                    if(button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
+                    {
+                        IStackType actualStack = getStack();
+                        if(actualStack instanceof ItemStackType)
+                        {
+                            if(carriedItem.getCount() <= getSlotCap() && actualStack.getStackAmount() <= actualStack.getVanillaMaxStackSize())
+                            {
+                                // 鼠标携带的数量，小于等于槽位容量
+                                // 槽位当前物品数量，小于等于其原版最大数量
+                                ItemStackType extract = (ItemStackType)storage.extract(getSlotIndex(),actualStack.getStackAmount(),false);
+                                IStackType remaining = storage.insert(getSlotIndex(), new ItemStackType(carriedItem),true);
+                                if(remaining.isEmpty())
+                                {
+                                    // 全部插入时则完成交换
+                                    storage.insert(getSlotIndex(), new ItemStackType(carriedItem),false);
+                                    menu.setCarried(extract.getStack());
+                                }
+                                else
+                                {
+                                    // 否则放回取出物
+                                    storage.insert(getSlotIndex(), extract,false);
+                                }
+                            }
+                        }
+                    }
                     if(carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
                     {
                         if(carriedItem.getItem() instanceof BucketItem bucket)
