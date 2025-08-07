@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.GUI;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
+import com.wintercogs.beyonddimensions.Machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
@@ -19,6 +20,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
     private RightTabButton popModeButton; // 弹出模式
     private RightTabButton controlModeButton;
     private RightTabButton receiveModeButton;
+    private RightTabButton sortModeButton;
 
     public NetFurnaceGUI(NetFurnaceMenu menu, Inventory playerInventory, Component title)
     {
@@ -121,7 +123,31 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
         };
         addRenderableWidget(controlModeButton);
 
+        sortModeButton = new RightTabButton(leftPos + imageWidth, topPos +96, 23,26 ,
+                leftPos + imageWidth +2 , topPos +96 +5, 16,16,button -> {
+            sortModeButton.toggleState();
+            menu.be.sortMode = (AutoSortMode) sortModeButton.currentState;
+            menu.writeAndSendQuickData();
+        })
+        {
+            @Override
+            protected void initButton()
+            {
+                iconMap.put(AutoSortMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_mode_open"));
+                iconMap.put(AutoSortMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_mode_stop"));
 
+                tooltipMap.put(AutoSortMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_mode_open")));
+                tooltipMap.put(AutoSortMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_mode_stop")));
+
+                for(Enum<?> state : iconMap.keySet())
+                {
+                    this.states.add(state);
+                }
+
+                setState(menu.be.sortMode);
+            }
+        };
+        addRenderableWidget(sortModeButton);
     }
 
     @Override

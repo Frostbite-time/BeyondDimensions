@@ -7,7 +7,6 @@ import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Machine.FeederMode;
 import com.wintercogs.beyonddimensions.Machine.FilterMode;
 import com.wintercogs.beyonddimensions.Menu.NetFeederMenu;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;

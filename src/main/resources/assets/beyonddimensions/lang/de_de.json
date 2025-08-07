@@ -69,6 +69,8 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "Aktuell: Fütterung bei <50% Sättigung",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Aktuell: Sättigung immer >0 halten",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Aktuell: Immer volle Sättigung",
+  "tooltip.button.beyonddimensions.sort_mode_open": "Aktuell: Sortierung aktiviert",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "Aktuell: Sortierung deaktiviert",
   "tooltip.item.unstable_space_time.long_data": "Raumzeit stabilisiert sich noch, %s Stabilisierungszyklen benötigt. Bitte stets bei sich tragen.",
   "tooltip.editbox.beyonddimensions.search": "Geben Sie '#' ein, um die Tooltip-Inhalte zu filtern\nGeben Sie '@' ein, um die Mod-IDs zu filtern",
 

@@ -69,6 +69,8 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "現在：満腹度50%未満で給餌",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "現在：飽和度0以上を維持",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "現在：常時満腹状態",
+  "tooltip.button.beyonddimensions.sort_mode_open": "現在：自動整頓ON",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "現在：自動整頓OFF",
   "tooltip.item.unstable_space_time.long_data": "時空は安定化中、残り%s回の安定化サイクルが必要です。常に携帯してください。",
   "tooltip.editbox.beyonddimensions.search": "「#」を入力してツールチップの内容をフィルタリング\n「@」を入力してMod IDをフィルタリング",
 

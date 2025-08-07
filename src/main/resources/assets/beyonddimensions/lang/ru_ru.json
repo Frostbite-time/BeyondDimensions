@@ -69,6 +69,8 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "Текущий: Кормить ниже 50%",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Текущий: Поддерживать >0 насыщения",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Текущий: Полная сытость всегда",
+  "tooltip.button.beyonddimensions.sort_mode_open": "Текущий: Автосортировка включена",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "Текущий: Автосортировка отключена",
   "tooltip.item.unstable_space_time.long_data": "Пространство-время стабилизируется, осталось %s циклов. Носите с собой постоянно.",
   "tooltip.editbox.beyonddimensions.search": "Введите '#', чтобы фильтровать содержимое подсказок\nВведите '@', чтобы фильтровать ID модов",
 

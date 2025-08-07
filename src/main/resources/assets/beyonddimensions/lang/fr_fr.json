@@ -69,6 +69,8 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "Actuel : Nourrir si <50%",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Actuel : Maintenir >0 saturation",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Actuel : Saturation toujours pleine",
+  "tooltip.button.beyonddimensions.sort_mode_open": "Actuel : Tri auto. activé",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "Actuel : Tri auto. désactivé",
   "tooltip.item.unstable_space_time.long_data": "L'espace-temps se stabilise encore, %s cycles requis. Gardez-le sur vous en permanence.",
   "tooltip.editbox.beyonddimensions.search": "Saisissez '#' pour filtrer le contenu des infobulles\nSaisissez '@' pour filtrer les ID de mods",
 

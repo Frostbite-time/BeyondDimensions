@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetFurnaceBlockEntity;
+import com.wintercogs.beyonddimensions.Machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
@@ -174,6 +175,7 @@ public class NetFurnaceMenu extends BDBaseMenu
         tag.putString("pop_mode",be.popMode.name());
         tag.putString("receive_mode",be.receiveMode.name());
         tag.putString("control_mode",be.controlMode.name());
+        tag.putString("sort_mode",be.sortMode.name());
         tag.putIntArray("lit_time",be.getLitTime());
         tag.putIntArray("lit_duration",be.getLitDuration());
         tag.putIntArray("cook_time",be.getCookTime());
@@ -189,6 +191,7 @@ public class NetFurnaceMenu extends BDBaseMenu
             be.popMode = PopMode.valueOf(tag.getString("pop_mode"));
             be.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
             be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
+            be.sortMode = AutoSortMode.valueOf(tag.getString("sort_mode"));
             if(!player.level().isClientSide())
             {
                 // 服务端接收到更新信息后立刻通知保存
@@ -201,6 +204,7 @@ public class NetFurnaceMenu extends BDBaseMenu
             be.popMode = PopMode.valueOf(tag.getString("pop_mode"));
             be.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
             be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
+            be.sortMode = AutoSortMode.valueOf(tag.getString("sort_mode"));
             be.setLitTime(Arrays.stream(tag.getIntArray("lit_time")).boxed().collect(Collectors.toList()));
             be.setLitDuration(Arrays.stream(tag.getIntArray("lit_duration")).boxed().collect(Collectors.toList()));
             be.setCookTime(Arrays.stream(tag.getIntArray("cook_time")).boxed().collect(Collectors.toList()));

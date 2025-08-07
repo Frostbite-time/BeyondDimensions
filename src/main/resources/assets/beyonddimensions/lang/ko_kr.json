@@ -69,6 +69,8 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "현재: 포만도 50% 미만 시 공급",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "현재: 포화도 0 이상 유지",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "현재: 항상 완전 포만 상태",
+  "tooltip.button.beyonddimensions.sort_mode_open": "현재: 자동 정렬 활성화됨",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "현재: 자동 정렬 비활성화됨",
   "tooltip.item.unstable_space_time.long_data": "시공간 안정화 중, %s회의 안정화 주기 남음. 항상 휴대하십시오.",
   "tooltip.editbox.beyonddimensions.search": "'#' 입력 시 툴팁 내용 필터링\n'@' 입력 시 모드 ID 필터링",
 

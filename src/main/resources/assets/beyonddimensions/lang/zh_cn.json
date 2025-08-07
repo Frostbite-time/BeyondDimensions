@@ -69,6 +69,8 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "当前：饱食度低于一半时喂食",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "当前：时刻保证玩家的饱和度高于0",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "当前：始终填满饱食度",
+  "tooltip.button.beyonddimensions.sort_mode_open": "当前：自动整理开启",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "当前：自动整理关闭",
   "tooltip.item.unstable_space_time.long_data": "时空仍在稳定中，仍需%s个稳定周期，请保持随身携带",
   "tooltip.editbox.beyonddimensions.search": "输入'#'以筛选提示框内容\n输入'@'以筛选模组ID",
 

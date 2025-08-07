@@ -69,6 +69,8 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "Actual: Alimentar <50% saciedad",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Actual: Mantener >0 saturación",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Actual: Saciedad siempre llena",
+  "tooltip.button.beyonddimensions.sort_mode_open": "Actual: Orden automático activado",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "Actual: Orden automático desactivado",
   "tooltip.item.unstable_space_time.long_data": "El espacio-tiempo aún se estabiliza, faltan %s ciclos. Por favor, llévalo siempre contigo.",
   "tooltip.editbox.beyonddimensions.search": "Escribe '#' para filtrar el contenido de los tooltips\nEscribe '@' para filtrar los ID de mods",
 
