@@ -10,7 +10,6 @@ import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Machine.FeederMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.Slot.FlagStackTypedSlot;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -53,7 +52,7 @@ public class NetFeederMenu extends BDBaseMenu
         {
             return super.isStackValid(slot, stack)
                     && stack instanceof ItemStackType itemStackType
-                    && itemStackType.getStack().has(DataComponents.FOOD);
+                    && itemStackType.getStack().getFoodProperties(player) != null;
         }
     };
     private boolean initialized; //initialized必须在初始数据提供完成之后才能设置为true
