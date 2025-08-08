@@ -48,6 +48,22 @@ public class ModBlocks
             ()-> new Block(BlockBehaviour.Properties.of().strength(2f)));
 
 
+    // 精致存储2---RS维度通道
+    // 始终注册方块，防止数据包或其他问题出现
+    public static final DeferredBlock<Block> RS_NET_PATHWAY = registerBlock("rs_net_pathway",
+            ()-> {
+                if(BeyondDimensions.RS_Loaded)
+                {
+                    return new com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlock(BlockBehaviour.Properties.of().strength(2f));
+                }
+                else
+                {
+                    return new Block(BlockBehaviour.Properties.of().strength(2f));
+                }
+            });
+
+
+
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block)
     {
         DeferredBlock<T> toReturn = BLOCKS.register(name,block);

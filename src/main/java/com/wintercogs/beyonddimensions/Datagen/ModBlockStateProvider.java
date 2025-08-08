@@ -24,6 +24,7 @@ public class ModBlockStateProvider extends BlockStateProvider
         blockWithItem(ModBlocks.NET_PATHWAY);
         blockWithItem(ModBlocks.NET_ENERGY_PATHWAY);
         blockWithItem(ModBlocks.DIMENSIONAL_CONNECT_BLOCK);
+        blockWithItem(ModBlocks.RS_NET_PATHWAY);
         // obj方块 自编写json 仅注册物品
         simpleBlockItem(ModBlocks.NET_TERMINAL_BLOCK.get(),models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID,"net_terminal_block")));
         simpleBlockItem(ModBlocks.NET_PUMP_BLOCK.get(),models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID,"net_pump_block")));

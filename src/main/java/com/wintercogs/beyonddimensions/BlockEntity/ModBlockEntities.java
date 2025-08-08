@@ -91,6 +91,23 @@ public class ModBlockEntities
             ).build(null)
     );
 
+    // 精致存储2---RS维度通道
+    // 仅在模组存在时才注册实体
+    public static Supplier<BlockEntityType<?>> RS_NET_PATHWAY_BLOCK_ENTITY;
+    public static void IntegrationRegister()
+    {
+        if(BeyondDimensions.RS_Loaded)
+        {
+            RS_NET_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+                    "rs_net_pathway_block_entity",
+                    () -> BlockEntityType.Builder.of(
+                            com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity::new,
+                            ModBlocks.RS_NET_PATHWAY.get()
+                    ).build(null)
+            );
+        }
+    }
+
     public static void register(IEventBus eventBus)
     {
         BLOCK_ENTITY_TYPES.register(eventBus);

@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.Datagen;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
+import com.wintercogs.beyonddimensions.Integration.RS.Tags.RSTags;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -8,6 +10,7 @@ import net.minecraft.data.recipes.*;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.conditions.IConditionBuilder;
+import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -240,6 +243,20 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('C', ModItems.SPACE_TIME_STABLE_FRAME.get())
                 .unlockedBy("unlock_net_feeder_item", has(ModItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
+
+        if(BeyondDimensions.RS_Loaded)
+        {
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.RS_NET_PATHWAY.get())
+                    .pattern("ABA")
+                    .pattern("ACA")
+                    .pattern("ADA")
+                    .define('A', RSTags.RS_QUARTZ_ENRICHED_IRON)
+                    .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                    .define('C', com.refinedmods.refinedstorage.common.content.Blocks.INSTANCE.getMachineCasing())
+                    .define('D', Items.REDSTONE)
+                    .unlockedBy("unlock_rs_net_pathway", has(ModItems.SPACE_TIME_STABLE_FRAME.get()))
+                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.RSModId)));
+        }
 
     }
 }

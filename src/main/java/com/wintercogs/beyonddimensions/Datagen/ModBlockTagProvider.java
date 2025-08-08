@@ -32,7 +32,8 @@ public class ModBlockTagProvider extends BlockTagsProvider
                 .add(ModBlocks.NET_PUMP_BLOCK.get())
                 .add(ModBlocks.NET_HOPPER_BLOCK.get())
                 .add(ModBlocks.NET_FURNACE_BLOCK.get())
-                .add(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
+                .add(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .add(ModBlocks.RS_NET_PATHWAY.get());
 
     }
 }

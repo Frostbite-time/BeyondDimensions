@@ -27,6 +27,7 @@ import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
+import com.wintercogs.beyonddimensions.Integration.RS.BD_RSPlugin;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
@@ -70,6 +71,8 @@ public class BeyondDimensions
     public static final String CuriosModId = "curios";
     public static boolean JECharactersLoaded = false;
     public static final String JECharactersModId = "jecharacters";
+    public static final String RSModId = "refinedstorage";
+    public static boolean RS_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -152,6 +155,12 @@ public class BeyondDimensions
         {
             JECharactersLoaded = true;
         }
+        if (ModList.get().isLoaded(RSModId))
+        {
+            RS_Loaded = true;
+        }
+
+        ModBlockEntities.IntegrationRegister();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -217,6 +226,10 @@ public class BeyondDimensions
         if(AEFluxLoaded)
         {
             BD_AEFluxPlugin.register();
+        }
+        if(RS_Loaded)
+        {
+            BD_RSPlugin.register();
         }
     }
 

@@ -19,7 +19,8 @@ public class NetHopperBlock extends BaseMachineBlock
 
     private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 8, 14);
 
-    public NetHopperBlock(Properties properties) {
+    public NetHopperBlock(Properties properties)
+    {
         super(properties.noOcclusion());
     }
 

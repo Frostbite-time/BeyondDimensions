@@ -201,6 +201,10 @@ dependencies {
     // 通用拼音搜索-在安装时自动使用它的拼音处理
     compileOnly "curse.maven:just-enough-characters-250702:6681787"
 
+    // RS支持
+    compileOnly "maven.modrinth:refined-storage:2.0.0-beta.7"
+    runtimeOnly "maven.modrinth:refined-storage:2.0.0-beta.7"
+
     // 精妙背包以及精妙存储调试
     runtimeOnly "curse.maven:sophisticated-backpacks-422301:6679417"
     runtimeOnly "curse.maven:sophisticated-storage-619320:6712033"
