@@ -131,5 +131,6 @@
   "msg.beyonddimensions.item_net_destroyed": "Você destruiu a rede em que estava",
   "msg.beyonddimensions.net_gift_done": "Rede %s fundida com sucesso",
 
-  "types.beyonddimensions.energyType.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.xptype.name": "XP"
 }

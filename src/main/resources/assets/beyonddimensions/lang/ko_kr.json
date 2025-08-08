@@ -131,5 +131,6 @@
   "msg.beyonddimensions.item_net_destroyed": "소속된 네트워크를 삭제했습니다",
   "msg.beyonddimensions.net_gift_done": "%s번 네트워크 통합 성공",
 
-  "types.beyonddimensions.energyType.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.xptype.name": "XP"
 }

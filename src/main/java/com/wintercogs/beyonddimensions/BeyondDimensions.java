@@ -2,10 +2,7 @@ package com.wintercogs.beyonddimensions;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.*;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ChemicalStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.ChemicalHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.EnergyHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
@@ -177,6 +174,7 @@ public class BeyondDimensions
         StackTypeRegistry.registerType(new ItemStackType());
         StackTypeRegistry.registerType(new FluidStackType());
         StackTypeRegistry.registerType(new EnergyStackType());
+        StackTypeRegistry.registerType(new XpStackType());
 
         // 注册方块能力类型，用于动态为方块注册能力
         CapabilityHelper.BlockCapabilityMap.put(ItemStackType.ID,Capabilities.ItemHandler.BLOCK);

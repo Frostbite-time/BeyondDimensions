@@ -131,5 +131,6 @@
   "msg.beyonddimensions.item_net_destroyed": "你已经删除自身所在的网络",
   "msg.beyonddimensions.net_gift_done": "成功合并%s号网络",
 
-  "types.beyonddimensions.energyType.name": "FE能量"
+  "types.beyonddimensions.energytype.name": "FE能量",
+  "types.beyonddimensions.xptype.name": "经验"
 }
