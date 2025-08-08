@@ -28,6 +28,7 @@ import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Integration.RS.BD_RSPlugin;
+import com.wintercogs.beyonddimensions.Integration.RSMek.BD_RSMekPlugin;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
@@ -73,6 +74,8 @@ public class BeyondDimensions
     public static final String JECharactersModId = "jecharacters";
     public static final String RSModId = "refinedstorage";
     public static boolean RS_Loaded = false;
+    public static final String RS_MEK_MODID = "refinedstorage_mekanism_integration";
+    public static boolean RS_MEK_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -159,6 +162,10 @@ public class BeyondDimensions
         {
             RS_Loaded = true;
         }
+        if (ModList.get().isLoaded(RS_MEK_MODID))
+        {
+            RS_MEK_Loaded = true;
+        }
 
         ModBlockEntities.IntegrationRegister();
     }
@@ -230,6 +237,10 @@ public class BeyondDimensions
         if(RS_Loaded)
         {
             BD_RSPlugin.register();
+        }
+        if(RS_MEK_Loaded)
+        {
+            BD_RSMekPlugin.register();
         }
     }
 

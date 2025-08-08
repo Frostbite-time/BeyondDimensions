@@ -204,6 +204,9 @@ dependencies {
     // RS支持
     compileOnly "maven.modrinth:refined-storage:2.0.0-beta.7"
     runtimeOnly "maven.modrinth:refined-storage:2.0.0-beta.7"
+    // RS 通用机械附属
+    compileOnly "maven.modrinth:refined-storage-mekanism-integration:1.0.0"
+    runtimeOnly "maven.modrinth:refined-storage-mekanism-integration:1.0.0"
 
     // 精妙背包以及精妙存储调试
     runtimeOnly "curse.maven:sophisticated-backpacks-422301:6679417"
