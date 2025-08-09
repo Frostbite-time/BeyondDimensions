@@ -138,6 +138,34 @@ public class ModDataComponents {
             )
     );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<HopperItemMode>> HOPPER_ITEM_MODE = register(
+            "hopper_item_mode", builder -> builder.persistent(
+                    Codec.STRING.xmap(
+                            HopperItemMode::valueOf,
+                            HopperItemMode::name
+                    )
+            ).networkSynchronized(
+                    ByteBufCodecs.STRING_UTF8.map(
+                            HopperItemMode::valueOf,
+                            HopperItemMode::name
+                    )
+            )
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<HopperXpMode>> HOPPER_XP_MODE = register(
+            "hopper_xp_mode", builder -> builder.persistent(
+                    Codec.STRING.xmap(
+                            HopperXpMode::valueOf,
+                            HopperXpMode::name
+                    )
+            ).networkSynchronized(
+                    ByteBufCodecs.STRING_UTF8.map(
+                            HopperXpMode::valueOf,
+                            HopperXpMode::name
+                    )
+            )
+    );
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<XpTransferSpeedMode>> XP_TRANSFER_SPEED_MODE = register(
             "xp_transfer_speed_mode", builder -> builder.persistent(
                     Codec.STRING.xmap(

@@ -52,6 +52,8 @@ public class NetMagnetMenu extends BDBaseMenu
 
     private RedStoneControlMode lastControlMode;
     private FilterMode lastFilterMode;
+    private HopperItemMode lastHopperItemMode;
+    private HopperXpMode lastHopperXpMode;
     private HopperNBTMode lastHopperNBTMode;
     private HopperFluidMode lastHopperFluidMode;
     private HopperRangeMode lastHopperRangeMode;
@@ -128,6 +130,8 @@ public class NetMagnetMenu extends BDBaseMenu
         boolean result = super.shouldSendQuickData()
                 || lastControlMode != menuStack.get(ModDataComponents.CONTROL_MODE)
                 || lastFilterMode != menuStack.get(ModDataComponents.FILTER_MODE)
+                || lastHopperItemMode != menuStack.get(ModDataComponents.HOPPER_ITEM_MODE)
+                || lastHopperXpMode != menuStack.get(ModDataComponents.HOPPER_XP_MODE)
                 || lastHopperNBTMode != menuStack.get(ModDataComponents.HOPPER_NBT_MODE)
                 || lastHopperFluidMode != menuStack.get(ModDataComponents.HOPPER_FLUID_MODE)
                 || lastHopperRangeMode != menuStack.get(ModDataComponents.HOPPER_RANGE_MODE);
@@ -136,6 +140,8 @@ public class NetMagnetMenu extends BDBaseMenu
         {
             lastControlMode = menuStack.get(ModDataComponents.CONTROL_MODE);
             lastFilterMode = menuStack.get(ModDataComponents.FILTER_MODE);
+            lastHopperItemMode = menuStack.get(ModDataComponents.HOPPER_ITEM_MODE);
+            lastHopperXpMode = menuStack.get(ModDataComponents.HOPPER_XP_MODE);
             lastHopperNBTMode = menuStack.get(ModDataComponents.HOPPER_NBT_MODE);
             lastHopperFluidMode = menuStack.get(ModDataComponents.HOPPER_FLUID_MODE);
             lastHopperRangeMode = menuStack.get(ModDataComponents.HOPPER_RANGE_MODE);
@@ -150,6 +156,8 @@ public class NetMagnetMenu extends BDBaseMenu
         super.writeQuickDataTag(tag);
         tag.putString("filter_type",menuStack.get(ModDataComponents.FILTER_MODE).name());
         tag.putString("control_mode",menuStack.get(ModDataComponents.CONTROL_MODE).name());
+        tag.putString("hopper_item_mode",menuStack.get(ModDataComponents.HOPPER_ITEM_MODE).name());
+        tag.putString("hopper_xp_mode",menuStack.get(ModDataComponents.HOPPER_XP_MODE).name());
         tag.putString("hopper_nbt_mode", menuStack.get(ModDataComponents.HOPPER_NBT_MODE).name());
         tag.putString("hopper_fluid_mode", menuStack.get(ModDataComponents.HOPPER_FLUID_MODE).name());
         tag.putString("hopper_range_mode", menuStack.get(ModDataComponents.HOPPER_RANGE_MODE).name());
@@ -161,6 +169,8 @@ public class NetMagnetMenu extends BDBaseMenu
         super.readQuickDataTag(tag);
         menuStack.set(ModDataComponents.FILTER_MODE,FilterMode.valueOf(tag.getString("filter_type")));
         menuStack.set(ModDataComponents.CONTROL_MODE,RedStoneControlMode.valueOf(tag.getString("control_mode")));
+        menuStack.set(ModDataComponents.HOPPER_ITEM_MODE,HopperItemMode.valueOf(tag.getString("hopper_item_mode")));
+        menuStack.set(ModDataComponents.HOPPER_XP_MODE,HopperXpMode.valueOf(tag.getString("hopper_xp_mode")));
         menuStack.set(ModDataComponents.HOPPER_NBT_MODE,HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode")));
         menuStack.set(ModDataComponents.HOPPER_FLUID_MODE,HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode")));
         menuStack.set(ModDataComponents.HOPPER_RANGE_MODE,HopperRangeMode.valueOf(tag.getString("hopper_range_mode")));

@@ -6,10 +6,8 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.Machine.FilterMode;
-import com.wintercogs.beyonddimensions.Machine.HopperFluidMode;
-import com.wintercogs.beyonddimensions.Machine.HopperNBTMode;
-import com.wintercogs.beyonddimensions.Machine.HopperRangeMode;
+import com.wintercogs.beyonddimensions.Fluid.ModFluids;
+import com.wintercogs.beyonddimensions.Machine.*;
 import com.wintercogs.beyonddimensions.Menu.NetHopperMenu;
 import com.wintercogs.beyonddimensions.Unit.ItemStackHelper;
 import net.minecraft.core.BlockPos;
@@ -19,6 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -50,11 +49,14 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     };
 
     public FilterMode filterMode = FilterMode.BLACK;
+    public HopperItemMode hopperItemMode = HopperItemMode.ALLOW;
     public HopperFluidMode hopperFluidMode = HopperFluidMode.DENY;
     public HopperNBTMode hopperNBTMode = HopperNBTMode.DENY;
+    public HopperXpMode hopperXpMode = HopperXpMode.DENY;
     public HopperRangeMode hopperRangeMode = HopperRangeMode.RADIUS_MID;
 
     private List<ItemEntity> itemEntities = new ArrayList<>();
+    private List<ExperienceOrb> xpEntities = new ArrayList<>();
 
 
     public NetHopperBlockEntity(BlockPos pos, BlockState blockState)
@@ -85,27 +87,58 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     @Override
     public void workStart()
     {
-        refreshItemEntityCache(getSearchArea());
+        AABB searchArea = getSearchArea();
+        if(hopperItemMode == HopperItemMode.ALLOW)
+            refreshItemEntityCache(searchArea);
+        if(hopperXpMode == HopperXpMode.ALLOW)
+            refreshXpEntityCache(searchArea);
     }
 
     @Override
     public void workContent()
     {
+        UnifiedStorage storage = getNet().getUnifiedStorage(); // getNet已在shouldWork完成null检查
+
         // 开始收集物品
-        for(ItemEntity itemEntity : itemEntities)
+        if(hopperItemMode == HopperItemMode.ALLOW)
         {
-            if(itemEntity != null && !itemEntity.isRemoved())
+            for(ItemEntity itemEntity : itemEntities)
             {
-                ItemStack itemStack = itemEntity.getItem().copy();
-                ItemStackType typedStack = new ItemStackType(itemStack);
-                if(matchesFilter(typedStack))
+                if(itemEntity != null && !itemEntity.isRemoved())
                 {
-                    UnifiedStorage storage = getNet().getUnifiedStorage();
-                    if(storage.insert(typedStack,true).isEmpty()) // 表示能成功插入
+                    ItemStack itemStack = itemEntity.getItem().copy();
+                    ItemStackType typedStack = new ItemStackType(itemStack);
+                    if(matchesFilter(typedStack))
                     {
-                        itemEntity.discard();
-                        // workContent之前已经由shouldWork检查过net的存在性
-                        getNet().getUnifiedStorage().insert(typedStack,false);
+                        if(storage.insert(typedStack,true).isEmpty()) // 表示能成功插入
+                        {
+                            itemEntity.discard();
+                            // workContent之前已经由shouldWork检查过net的存在性
+                            storage.insert(typedStack,false);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 开始收集掉落物
+        if(hopperXpMode == HopperXpMode.ALLOW)
+        {
+            for(ExperienceOrb orb : xpEntities)
+            {
+                if(orb != null && !orb.isRemoved())
+                {
+                    int xp = orb.getValue();
+                    if(xp > 0 )
+                    {
+                        long xpFluid = xp * 20L;
+                        FluidStackType xpStack = new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source(),1),xpFluid);
+
+                        if(storage.insert(xpStack,true).isEmpty())
+                        {
+                            orb.discard();
+                            storage.insert(xpStack,false);
+                        }
                     }
                 }
             }
@@ -179,6 +212,15 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                         return true;
                     }
                 }
+        );
+    }
+
+    private void refreshXpEntityCache(AABB searchArea)
+    {
+        this.xpEntities = this.level.getEntitiesOfClass(
+                ExperienceOrb.class,
+                searchArea,
+                orb -> true // 不做过滤，拿到区域内所有经验球
         );
     }
 
@@ -270,6 +312,8 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         hopperFluidMode = HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode"));
         hopperNBTMode = HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode"));
         hopperRangeMode = HopperRangeMode.valueOf(tag.getString("hopper_range_mode"));
+        hopperItemMode = tag.contains("hopper_item_model") ? HopperItemMode.valueOf(tag.getString("hopper_item_model")) : null;
+        hopperXpMode = tag.contains("hopper_xp_mode") ? HopperXpMode.valueOf(tag.getString("hopper_xp_mode")) : null;
     }
 
     @Override
@@ -281,6 +325,8 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         tag.putString("hopper_fluid_mode", hopperFluidMode.name());
         tag.putString("hopper_nbt_mode", hopperNBTMode.name());
         tag.putString("hopper_range_mode", hopperRangeMode.name());
+        tag.putString("hopper_item_model", hopperItemMode.name());
+        tag.putString("hopper_xp_mode", hopperXpMode.name());
     }
 
     @Override
