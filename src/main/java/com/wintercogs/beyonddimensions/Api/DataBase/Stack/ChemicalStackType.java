@@ -18,6 +18,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -243,6 +244,20 @@ public final class ChemicalStackType implements IStackType<ChemicalStack>
         split.setAmount(splitAmount);
         stack.shrink(splitAmount);
         return new ChemicalStackType(split);
+    }
+
+    @Override
+    public boolean hasTag(TagKey<?> tagKey)
+    {
+        if (tagKey == null) return false;
+        if (this.stack == null || this.stack.isEmpty()) return false;
+
+        if (!tagKey.isFor(MekanismAPI.CHEMICAL_REGISTRY_NAME)) {
+            return false;
+        }
+
+        TagKey<Chemical> chemicalTag = (TagKey<Chemical>) tagKey;
+        return stack.is(chemicalTag);
     }
 
     @Override

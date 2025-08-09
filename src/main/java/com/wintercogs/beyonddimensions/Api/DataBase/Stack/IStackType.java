@@ -10,6 +10,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
@@ -204,6 +205,11 @@ public interface IStackType<T> {
      * @return 实际分割出来的实例
      */
     IStackType<T>  split(long amount);
+
+    /**
+     * 当前堆叠是否有此标签？
+     */
+    boolean hasTag(TagKey<?> tagKey);
 
     /**
      * 检查2个实例是否能模糊匹配，即：2个物品，是否为同一种物品，不管NBT等数据

@@ -72,6 +72,7 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Actual: Orden automático activado",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Actual: Orden automático desactivado",
   "tooltip.item.unstable_space_time.long_data": "El espacio-tiempo aún se estabiliza, faltan %s ciclos. Por favor, llévalo siempre contigo.",
+  "tooltip.beyonddimensions.item.xp_exchange": "En GUI: Clic derecho para depositar XP, Clic central para retirar XP\nAl sostener: Clic derecho para depositar XP, Mayús + Clic derecho para cambiar la tasa de transferencia de XP",
   "tooltip.editbox.beyonddimensions.search": "Escribe '#' para filtrar el contenido de los tooltips\nEscribe '@' para filtrar los ID de mods",
 
   "istack.beyonddimensions.storage_num.item": "Almacenado: %s unidades",
@@ -101,6 +102,7 @@
   "item.beyonddimensions.net_magnet_item": "Imán de Red",
   "item.beyonddimensions.net_feeder_item": "Alimentador de Red",
   "item.beyonddimensions.xp_fluid_bucket": "Cubo de experiencia líquida",
+  "item.beyonddimensions.xp_exchange_item": "Varita de XP",
 
   "block.beyonddimensions.net_control": "Controlador de Red",
   "block.beyonddimensions.net_interface": "Interfaz de Red",
@@ -134,6 +136,10 @@
   "msg.beyonddimensions.cant_delete_net": "No puedes eliminar la red – Solo el propietario puede hacerlo",
   "msg.beyonddimensions.item_net_destroyed": "Destruiste la red en la que estabas",
   "msg.beyonddimensions.net_gift_done": "Red %s fusionada con éxito",
+  "msg.beyonddimensions.xp_mode.switch.slow": "Cantidad de transferencia XP cambiada a: 1 nivel",
+  "msg.beyonddimensions.xp_mode.switch.mid": "Cantidad de transferencia XP cambiada a: 10 niveles",
+  "msg.beyonddimensions.xp_mode.switch.high": "Cantidad de transferencia XP cambiada a: 30 niveles",
+  "msg.beyonddimensions.xp_mode.switch.highest": "Cantidad de transferencia XP cambiada a: 100 niveles",
 
   "types.beyonddimensions.energytype.name": "FE"
 }

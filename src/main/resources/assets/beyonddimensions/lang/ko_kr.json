@@ -72,6 +72,7 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "현재: 자동 정렬 활성화됨",
   "tooltip.button.beyonddimensions.sort_mode_stop": "현재: 자동 정렬 비활성화됨",
   "tooltip.item.unstable_space_time.long_data": "시공간 안정화 중, %s회의 안정화 주기 남음. 항상 휴대하십시오.",
+  "tooltip.beyonddimensions.item.xp_exchange": "GUI에서：우클릭으로 경험치 저장, 휠 클릭으로 경험치 인출\n들고 있을 때：우클릭으로 경험치 저장, 쉬프트 + 우클릭으로 경험치 전송 속도 변경",
   "tooltip.editbox.beyonddimensions.search": "'#' 입력 시 툴팁 내용 필터링\n'@' 입력 시 모드 ID 필터링",
 
   "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
@@ -101,6 +102,7 @@
   "item.beyonddimensions.net_magnet_item": "네트 마그넷",
   "item.beyonddimensions.net_feeder_item": "네트 피더",
   "item.beyonddimensions.xp_fluid_bucket": "액체 경험 양동이",
+  "item.beyonddimensions.xp_exchange_item": "경험치 막대",
 
   "block.beyonddimensions.net_control": "네트워크 제어기",
   "block.beyonddimensions.net_interface": "네트워크 인터페이스",
@@ -134,6 +136,10 @@
   "msg.beyonddimensions.cant_delete_net": "네트워크 삭제 불가 – 소유자만 가능합니다",
   "msg.beyonddimensions.item_net_destroyed": "소속된 네트워크를 삭제했습니다",
   "msg.beyonddimensions.net_gift_done": "%s번 네트워크 통합 성공",
+  "msg.beyonddimensions.xp_mode.switch.slow": "전송량 전환됨: 1레벨",
+  "msg.beyonddimensions.xp_mode.switch.mid": "전송량 전환됨: 10레벨",
+  "msg.beyonddimensions.xp_mode.switch.high": "전송량 전환됨: 30레벨",
+  "msg.beyonddimensions.xp_mode.switch.highest": "전송량 전환됨: 100레벨",
 
   "types.beyonddimensions.energytype.name": "FE"
 }

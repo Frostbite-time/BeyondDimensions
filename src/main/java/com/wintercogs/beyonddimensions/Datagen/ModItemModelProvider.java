@@ -37,6 +37,7 @@ public class ModItemModelProvider extends ItemModelProvider
         basicItem(ModItems.MATTER_COMPRESS_BALL.get());
         basicItem(ModItems.NET_MAGNET_ITEM.get());
         basicItem(ModItems.NET_FEEDER_ITEM.get());
+        basicItem(ModItems.XP_EXCHANGE_ITEM.get());
 
         generateFluidBucketModels();
     }

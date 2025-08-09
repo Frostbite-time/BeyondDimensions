@@ -244,6 +244,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("unlock_net_feeder_item", has(ModItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.XP_EXCHANGE_ITEM.get())
+                .pattern("  A")
+                .pattern(" B ")
+                .pattern("C  ")
+                .define('A', Items.AMETHYST_SHARD)
+                .define('B', Items.STICK)
+                .define('C', ModItems.SPACE_TIME_BAR.get())
+                .unlockedBy("unlock_xp_exchange_item", has(ModItems.SPACE_TIME_BAR.get()))
+                .save(recipeOutput);
+
         if(BeyondDimensions.RS_Loaded)
         {
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.RS_NET_PATHWAY.get())

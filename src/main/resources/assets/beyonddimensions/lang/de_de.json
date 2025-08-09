@@ -72,6 +72,7 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Aktuell: Sortierung aktiviert",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Aktuell: Sortierung deaktiviert",
   "tooltip.item.unstable_space_time.long_data": "Raumzeit stabilisiert sich noch, %s Stabilisierungszyklen benötigt. Bitte stets bei sich tragen.",
+  "tooltip.beyonddimensions.item.xp_exchange": "Im GUI: Rechtsklick zum Einzahlen von XP, Mittlere Maustaste zum Abheben von XP\nIn der Hand: Rechtsklick zum Einzahlen von XP, Umschalt + Rechtsklick zum Ändern der XP-Transferrate",
   "tooltip.editbox.beyonddimensions.search": "Geben Sie '#' ein, um die Tooltip-Inhalte zu filtern\nGeben Sie '@' ein, um die Mod-IDs zu filtern",
 
   "istack.beyonddimensions.storage_num.item": "Gespeichert: %s Stück",
@@ -101,6 +102,7 @@
   "item.beyonddimensions.net_magnet_item": "Netz-Magnet",
   "item.beyonddimensions.net_feeder_item": "Netz-Fütterer",
   "item.beyonddimensions.xp_fluid_bucket": "Eimer mit flüssiger Erfahrung",
+  "item.beyonddimensions.xp_exchange_item": "XP-Stab",
 
   "block.beyonddimensions.net_control": "Netzwerkcontroller",
   "block.beyonddimensions.net_interface": "Netzwerkschnittstelle",
@@ -134,6 +136,10 @@
   "msg.beyonddimensions.cant_delete_net": "Netz kann nicht gelöscht werden – Nur der Besitzer kann dies tun",
   "msg.beyonddimensions.item_net_destroyed": "Du hast dein eigenes Netz gelöscht",
   "msg.beyonddimensions.net_gift_done": "Netz %s erfolgreich fusioniert",
+  "msg.beyonddimensions.xp_mode.switch.slow": "XP-Transfermenge umgeschaltet auf: 1 Stufe",
+  "msg.beyonddimensions.xp_mode.switch.mid": "XP-Transfermenge umgeschaltet auf: 10 Stufen",
+  "msg.beyonddimensions.xp_mode.switch.high": "XP-Transfermenge umgeschaltet auf: 30 Stufen",
+  "msg.beyonddimensions.xp_mode.switch.highest": "XP-Transfermenge umgeschaltet auf: 100 Stufen",
 
   "types.beyonddimensions.energytype.name": "FE"
 }

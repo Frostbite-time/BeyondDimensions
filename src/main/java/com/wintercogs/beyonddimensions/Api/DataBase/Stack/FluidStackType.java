@@ -13,11 +13,13 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.tooltip.BundleTooltip;
@@ -259,6 +261,20 @@ public final class FluidStackType implements IStackType<FluidStack>
         FluidStack split = stack.copy();
         shrink(splitAmount);
         return new FluidStackType(split,splitAmount);
+    }
+
+    @Override
+    public boolean hasTag(TagKey<?> tagKey)
+    {
+        if (tagKey == null) return false;
+        if (this.stack == null || this.stack.isEmpty()) return false;
+
+        if (!tagKey.isFor(Registries.FLUID)) {
+            return false;
+        }
+
+        TagKey<Fluid> fluidTag = (TagKey<Fluid>) tagKey;
+        return stack.is(fluidTag);
     }
 
     @Override

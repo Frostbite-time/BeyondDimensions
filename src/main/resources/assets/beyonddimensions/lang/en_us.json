@@ -72,6 +72,7 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Current: Auto-sort enabled",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Current: Auto-sort disabled",
   "tooltip.item.unstable_space_time.long_data": "Spacetime is stabilizing, requires %s more stabilization cycles. Please keep it on your person.",
+  "tooltip.beyonddimensions.item.xp_exchange": "In GUI: Right-click to deposit XP, Middle-click to withdraw XP\nWhile holding: Right-click to deposit XP, Shift + Right-click to change XP transfer rate",
   "tooltip.editbox.beyonddimensions.search": "Type '#' to filter tooltip contents\nType '@' to filter mod IDs",
 
   "istack.beyonddimensions.storage_num.item": "Stored: %s Items",
@@ -101,6 +102,7 @@
   "item.beyonddimensions.net_magnet_item": "Net Magnet",
   "item.beyonddimensions.net_feeder_item": "Net Feeder",
   "item.beyonddimensions.xp_fluid_bucket": "Bucket of Liquid XP",
+  "item.beyonddimensions.xp_exchange_item": "XP Rod",
 
   "block.beyonddimensions.net_control": "Network Controller",
   "block.beyonddimensions.net_interface": "Network Interface",
@@ -134,6 +136,10 @@
   "msg.beyonddimensions.cant_delete_net": "Cannot delete network – You must be the owner",
   "msg.beyonddimensions.item_net_destroyed": "You destroyed the network you were in",
   "msg.beyonddimensions.net_gift_done": "Merged Network #%s",
+  "msg.beyonddimensions.xp_mode.switch.slow": "XP transfer amount switched to: 1 level",
+  "msg.beyonddimensions.xp_mode.switch.mid": "XP transfer amount switched to: 10 levels",
+  "msg.beyonddimensions.xp_mode.switch.high": "XP transfer amount switched to: 30 levels",
+  "msg.beyonddimensions.xp_mode.switch.highest": "XP transfer amount switched to: 100 levels",
 
   "types.beyonddimensions.energytype.name": "FE"
 }

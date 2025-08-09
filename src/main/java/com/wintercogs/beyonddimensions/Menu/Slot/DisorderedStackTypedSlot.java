@@ -9,8 +9,12 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHan
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Fluid.ModFluids;
+import com.wintercogs.beyonddimensions.Item.Custom.XpExchangeItem;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
+import com.wintercogs.beyonddimensions.Tags.ModFluidTags;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Unit.XpUtil;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BucketItem;
@@ -18,6 +22,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -53,10 +58,33 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
             if (!carriedItem.isEmpty())
             {   //槽位物品为空，携带物品存在，将携带物品插入槽位
 
-
                 AtomicBoolean handled = new AtomicBoolean(false);
-                // 堆叠数量为1 右键点击 尝试取出内容物并插入
-                if(carriedItem.getCount()==1 && button== GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+                // 先检查是否为经验棒交互
+                if(carriedItem.getItem() instanceof XpExchangeItem && button != GLFW.GLFW_MOUSE_BUTTON_LEFT)
+                {
+                    int conversionRate = XpExchangeItem.getConversionRate();
+                    double currentLevel = XpUtil.levelAsDouble(player);
+                    int wantConversionLevel = XpExchangeItem.getXpLevelPerAction(carriedItem);
+
+                    if(button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
+                    {
+                        handled.set(true); // 走到这一步说明已经进行了交互
+                        long needRemovePlayerXp = XpUtil.xpBetweenLevels(Math.max(currentLevel-wantConversionLevel,0),currentLevel);
+                        int actualRemovePlayerXp = BDMath.clampLongToInt(needRemovePlayerXp);
+                        long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
+
+                        // 插入当前经验流体
+                        IStackType remaining = storage.insert(new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source(),1),actualInsertFluid),false);
+                        if(!remaining.isEmpty())
+                        {
+                            int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount()/20); // 由于前面从int*20，这里除回去
+                            actualRemovePlayerXp = actualRemovePlayerXp - needReturnXp;
+                        }
+                        player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值
+                    }
+                }
+                // 再检查是否为能力交互
+                else if(carriedItem.getCount()==1 && button== GLFW.GLFW_MOUSE_BUTTON_RIGHT)
                 {
                     if(carriedItem.getItem() instanceof BucketItem bucketItem)
                     {
@@ -124,6 +152,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     }
                 }
 
+                // 最终回退
                 if(!handled.get())
                 {
                     int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
@@ -161,144 +190,211 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     }
                 }
             }
-            else if (mayPlace(carriedItem))
+            else if (mayPlace(carriedItem)) // 槽位物品存在，携带物品存在
             {
-                // 如果使用一个有存储能力的单个物品，点击右键，
-                // 则，尝试将目标抽入到自身。如果抽取失败
-                // 则，尝试将自身内容物存入网络。
-                // 最后，如果以上两个操作均未进行，则将物品本身存入
-
+                // 标记是否进行了交互
                 AtomicBoolean handled = new AtomicBoolean(false);
 
-                if(carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+                // 先检查是否为经验棒交互
+                if (carriedItem.getItem() instanceof XpExchangeItem && button != GLFW.GLFW_MOUSE_BUTTON_LEFT)
                 {
-                    // 对桶物品进行特殊处理
-                    if(carriedItem.getItem() instanceof BucketItem bucket)
+                    IStackType actualStack = storage.getStackByStack(clickStack);
+
+                    int conversionRate = XpExchangeItem.getConversionRate();
+                    double currentLevel = XpUtil.levelAsDouble(player);
+                    int wantConversionLevel = XpExchangeItem.getXpLevelPerAction(carriedItem);
+
+                    if(actualStack instanceof FluidStackType fluidStackType && fluidStackType.hasTag(ModFluidTags.C_EXPERIENCE))
                     {
-                        // 需要分开处理，分别处理
-                        // 1.空桶接受
-                        // 2.桶向原有区域继续投放
-                        if(bucket == Items.BUCKET) // 空桶接受
+                        handled.set(true); // 走到这一步说明已经进行了交互
+                        if(button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
                         {
-                            if(clickStack instanceof FluidStackType fluidStackType)
-                            {
-                                Item filledBucket = fluidStackType.getStack().getFluid().getBucket();
+                            long needRemovePlayerXp = XpUtil.xpBetweenLevels(Math.max(currentLevel-wantConversionLevel,0),currentLevel);
+                            int actualRemovePlayerXp = BDMath.clampLongToInt(needRemovePlayerXp);
+                            long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
-                                if(filledBucket != null && filledBucket != Items.AIR
-                                        && storage.getStackByStack(fluidStackType).getStackAmount()>=1000)
-                                {
-                                    // 执行操作
-                                    storage.extract(fluidStackType.copyWithCount(1000),false);
-                                    menu.setCarried(new ItemStack(filledBucket));
-                                    handled.set(true);
-                                }
+                            // 插入当前经验流体
+                            IStackType remaining = storage.insert(fluidStackType.copyWithCount(actualInsertFluid),false);
+                            if(!remaining.isEmpty())
+                            {
+                                int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount()/20); // 由于前面从int*20，这里除回去
+                                actualRemovePlayerXp = actualRemovePlayerXp - needReturnXp;
                             }
+                            player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值
                         }
-                        else // 继续投放 insert模拟会自动解决类型不匹配等问题
+                        else if(button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) // 鼠标中键--取出一级
                         {
-                            Object handler = carriedItem.getCapability(Capabilities.FluidHandler.ITEM);
-                            if(handler != null)
-                            {
-                                FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
+                            long needInsertPlayerXp = XpUtil.xpBetweenLevels(currentLevel,currentLevel+wantConversionLevel);
+                            int actualInsertPlayerXp = BDMath.clampLongToInt(needInsertPlayerXp);
+                            long actualRemoveFluid = actualInsertPlayerXp * conversionRate;
 
-                                if(stackHandlerWrapper.getSlots()>0)
-                                {
-                                    FluidStackType stack = new FluidStackType(stackHandlerWrapper.getStackInSlot(0));
-                                    if(stack != null && !stack.isEmpty())
-                                    {
-                                        int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
-                                        // 进行模拟，桶必须完全清空才被允许操作
-                                        int remaining = (int)storage.insert(stack.copyWithCount(changedCount),true).getStackAmount();
-                                        if(remaining<=0)
-                                        {
-                                            // 执行实际逻辑
-                                            storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
-                                            menu.setCarried(new ItemStack(Items.BUCKET));
-                                            handled.set(true);
-                                        }
-                                    }
-                                }
+                            // 首先尝试提取指定数量的经验流体
+                            IStackType extracted = storage.extract(fluidStackType.copyWithCount(actualRemoveFluid) ,false);
+                            actualInsertPlayerXp = BDMath.clampLongToInt(extracted.getStackAmount()/20);
+                            if(actualInsertPlayerXp > 0)
+                            {
+                                player.giveExperiencePoints(actualInsertPlayerXp);
                             }
                         }
                     }
                     else
                     {
-                        // 抽入
-                        CapabilityHelper.ItemCapabilityMap.forEach((typeId,cap) -> {
-                            // 先查看被点击物品的种类和对应能力种类
-                            if(clickStack.getTypeId().equals(typeId))
-                            {
-                                // 尝试获取对应能力
-                                Object handler = carriedItem.getCapability(cap);
-                                if(handler != null)
-                                {
-                                    Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
-                                    if(stackHandlerWrapper.getSlots()>0)
-                                    {
-                                        IStackType actualClickStack = storage.getStackByStack(clickStack);// 防止客户端假消息
-                                        if(actualClickStack != null)
-                                        {
-                                            int changedCount = BDMath.clampLongToInt(Math.min(actualClickStack.getStackAmount(),actualClickStack.getVanillaMaxStackSize()));
-                                            int remaining = (int)stackHandlerWrapper.insert(actualClickStack.copyStackWithCount(changedCount),false);
-                                            int actualInsert = changedCount - remaining;
-                                            if(actualInsert>0)
-                                            {
-                                                storage.extract(actualClickStack.copyWithCount(actualInsert),false);
-                                                menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
-                                                handled.set(true);
-                                            }
-                                        }
+                        if(button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
+                        {
+                            handled.set(true); // 走到这一步说明已经进行了交互
+                            long needRemovePlayerXp = XpUtil.xpBetweenLevels(Math.max(currentLevel-wantConversionLevel,0),currentLevel);
+                            int actualRemovePlayerXp = BDMath.clampLongToInt(needRemovePlayerXp);
+                            long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
+                            // 插入当前经验流体
+                            IStackType remaining = storage.insert(new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source(),1),actualInsertFluid),false);
+                            if(!remaining.isEmpty())
+                            {
+                                int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount()/20); // 由于前面从int*20，这里除回去
+                                actualRemovePlayerXp = actualRemovePlayerXp - needReturnXp;
+                            }
+                            player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值
+                        }
+                    }
+                }
+                else //再检查是否为能力交互
+                {
+                    // 如果使用一个有存储能力的单个物品，点击右键，
+                    // 则，尝试将目标抽入到自身。如果抽取失败
+                    // 则，尝试将自身内容物存入网络。
+                    // 最后，如果以上两个操作均未进行，则将物品本身存入
+
+                    if(carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+                    {
+                        // 对桶物品进行特殊处理
+                        if(carriedItem.getItem() instanceof BucketItem bucket)
+                        {
+                            // 需要分开处理，分别处理
+                            // 1.空桶接受
+                            // 2.桶向原有区域继续投放
+                            if(bucket == Items.BUCKET) // 空桶接受
+                            {
+                                if(clickStack instanceof FluidStackType fluidStackType)
+                                {
+                                    Item filledBucket = fluidStackType.getStack().getFluid().getBucket();
+
+                                    if(filledBucket != null && filledBucket != Items.AIR
+                                            && storage.getStackByStack(fluidStackType).getStackAmount()>=1000)
+                                    {
+                                        // 执行操作
+                                        storage.extract(fluidStackType.copyWithCount(1000),false);
+                                        menu.setCarried(new ItemStack(filledBucket));
+                                        handled.set(true);
                                     }
                                 }
                             }
-                        });
-
-                        //存入
-                        if(!handled.get())
-                        {
-                            CapabilityHelper.ItemCapabilityMap.forEach((typeId,cap) -> {
-                                Object handler = carriedItem.getCapability(cap);
+                            else // 继续投放 insert模拟会自动解决类型不匹配等问题
+                            {
+                                Object handler = carriedItem.getCapability(Capabilities.FluidHandler.ITEM);
                                 if(handler != null)
                                 {
-                                    Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                                    FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
 
                                     if(stackHandlerWrapper.getSlots()>0)
                                     {
-                                        // 一次操作只操作其第一个有效槽位，然后break
-                                        for(int index=0;index<stackHandlerWrapper.getSlots();index++)
+                                        FluidStackType stack = new FluidStackType(stackHandlerWrapper.getStackInSlot(0));
+                                        if(stack != null && !stack.isEmpty())
                                         {
-                                            IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(index));
-                                            if(stack !=null&& !stack.isEmpty())
+                                            int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
+                                            // 进行模拟，桶必须完全清空才被允许操作
+                                            int remaining = (int)storage.insert(stack.copyWithCount(changedCount),true).getStackAmount();
+                                            if(remaining<=0)
                                             {
-                                                int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
-                                                int remaining = (int)storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
+                                                // 执行实际逻辑
+                                                storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
+                                                menu.setCarried(new ItemStack(Items.BUCKET));
+                                                handled.set(true);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // 抽入
+                            CapabilityHelper.ItemCapabilityMap.forEach((typeId,cap) -> {
+                                // 先查看被点击物品的种类和对应能力种类
+                                if(clickStack.getTypeId().equals(typeId))
+                                {
+                                    // 尝试获取对应能力
+                                    Object handler = carriedItem.getCapability(cap);
+                                    if(handler != null)
+                                    {
+                                        Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
+                                        IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                                        if(stackHandlerWrapper.getSlots()>0)
+                                        {
+                                            IStackType actualClickStack = storage.getStackByStack(clickStack);// 防止客户端假消息
+                                            if(actualClickStack != null)
+                                            {
+                                                int changedCount = BDMath.clampLongToInt(Math.min(actualClickStack.getStackAmount(),actualClickStack.getVanillaMaxStackSize()));
+                                                int remaining = (int)stackHandlerWrapper.insert(actualClickStack.copyStackWithCount(changedCount),false);
                                                 int actualInsert = changedCount - remaining;
-
                                                 if(actualInsert>0)
                                                 {
-                                                    long actualExtracts = stackHandlerWrapper.extract(index,actualInsert,false);
-                                                    if(actualExtracts< actualInsert)
-                                                    {
-                                                        // 对此进行一个回调
-                                                        storage.extract(stack.copyWithCount(actualInsert-actualExtracts),false);
-                                                    }
+                                                    storage.extract(actualClickStack.copyWithCount(actualInsert),false);
                                                     menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
                                                     handled.set(true);
-                                                    break;
                                                 }
-
                                             }
+
                                         }
                                     }
                                 }
                             });
+
+                            //存入
+                            if(!handled.get())
+                            {
+                                CapabilityHelper.ItemCapabilityMap.forEach((typeId,cap) -> {
+                                    Object handler = carriedItem.getCapability(cap);
+                                    if(handler != null)
+                                    {
+                                        Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
+                                        IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+
+                                        if(stackHandlerWrapper.getSlots()>0)
+                                        {
+                                            // 一次操作只操作其第一个有效槽位，然后break
+                                            for(int index=0;index<stackHandlerWrapper.getSlots();index++)
+                                            {
+                                                IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(index));
+                                                if(stack !=null&& !stack.isEmpty())
+                                                {
+                                                    int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
+                                                    int remaining = (int)storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
+                                                    int actualInsert = changedCount - remaining;
+
+                                                    if(actualInsert>0)
+                                                    {
+                                                        long actualExtracts = stackHandlerWrapper.extract(index,actualInsert,false);
+                                                        if(actualExtracts< actualInsert)
+                                                        {
+                                                            // 对此进行一个回调
+                                                            storage.extract(stack.copyWithCount(actualInsert-actualExtracts),false);
+                                                        }
+                                                        menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                        handled.set(true);
+                                                        break;
+                                                    }
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            }
                         }
                     }
                 }
 
+                // 最终回退处理（无任何交互时，放回此物品）
                 if(!handled.get())
                 {
                     //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
@@ -316,7 +412,6 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                         menu.setCarried(newCarriedItem);
                     }
                 }
-
             }
             else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
             {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品

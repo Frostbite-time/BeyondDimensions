@@ -72,6 +72,7 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Actuel : Tri auto. activé",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Actuel : Tri auto. désactivé",
   "tooltip.item.unstable_space_time.long_data": "L'espace-temps se stabilise encore, %s cycles requis. Gardez-le sur vous en permanence.",
+  "tooltip.beyonddimensions.item.xp_exchange": "Dans l'interface graphique : Clic droit pour déposer XP, Clic molette pour retirer XP\nEn tenant : Clic droit pour déposer XP, Maj + Clic droit pour changer le taux de transfert XP",
   "tooltip.editbox.beyonddimensions.search": "Saisissez '#' pour filtrer le contenu des infobulles\nSaisissez '@' pour filtrer les ID de mods",
 
   "istack.beyonddimensions.storage_num.item": "Stocké : %s unités",
@@ -101,6 +102,7 @@
   "item.beyonddimensions.net_magnet_item": "Aimant Réseau",
   "item.beyonddimensions.net_feeder_item": "Distributeur Réseau",
   "item.beyonddimensions.xp_fluid_bucket": "Seau d'XP liquide",
+  "item.beyonddimensions.xp_exchange_item": "Baguette d'XP",
 
   "block.beyonddimensions.net_control": "Contrôleur Réseau",
   "block.beyonddimensions.net_interface": "Interface Réseau",
@@ -134,6 +136,10 @@
   "msg.beyonddimensions.cant_delete_net": "Impossible de supprimer le réseau – Vous devez en être le propriétaire",
   "msg.beyonddimensions.item_net_destroyed": "Vous avez détruit votre réseau actuel",
   "msg.beyonddimensions.net_gift_done": "Fusion réussie du réseau %s",
+  "msg.beyonddimensions.xp_mode.switch.slow": "Quantité de transfert XP changée à : 1 niveau",
+  "msg.beyonddimensions.xp_mode.switch.mid": "Quantité de transfert XP changée à : 10 niveaux",
+  "msg.beyonddimensions.xp_mode.switch.high": "Quantité de transfert XP changée à : 30 niveaux",
+  "msg.beyonddimensions.xp_mode.switch.highest": "Quantité de transfert XP changée à : 100 niveaux",
 
   "types.beyonddimensions.energytype.name": "FE"
 }

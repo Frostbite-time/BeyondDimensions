@@ -1,17 +1,21 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Fluid.ModFluids;
+import com.wintercogs.beyonddimensions.Item.Custom.XpExchangeItem;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Packet.OrderedStackTypedSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.function.Function;
@@ -80,32 +84,38 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                 }
                 else if(button==1)
                 {
-                    ItemStack copy = carriedItem.copy();
-                    copy.setCount(1);
-                    // 注: 通用机械物品必须在堆叠数量为1时才暴露能力。
-                    // 这种做法看起来是很有益的。可以防止其他模组错误消耗过多的存储资源
-                    CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap)->{
-                        Object handler = copy.getCapability(cap);
-                        if(handler != null)
-                        {
-                            Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                            IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
-
-                            if(stackHandlerWrapper.getSlots()>0)
+                    if(carriedItem.getItem() instanceof XpExchangeItem)
+                    {
+                        setStackDirectly(new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source(),1),1));
+                    }
+                    else
+                    {
+                        ItemStack copy = carriedItem.copy();
+                        copy.setCount(1);
+                        // 注: 通用机械物品必须在堆叠数量为1时才暴露能力。
+                        // 这种做法看起来是很有益的。可以防止其他模组错误消耗过多的存储资源
+                        CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap)->{
+                            Object handler = copy.getCapability(cap);
+                            if(handler != null)
                             {
-                                for(int index=0;index<stackHandlerWrapper.getSlots();index++)
+                                Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
+                                IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+
+                                if(stackHandlerWrapper.getSlots()>0)
                                 {
-                                    IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(0),1);
-                                    if(stack!=null&& !stack.isEmpty())
+                                    for(int index=0;index<stackHandlerWrapper.getSlots();index++)
                                     {
-                                        setStackDirectly(stack);
-                                        break;
+                                        IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(0),1);
+                                        if(stack!=null&& !stack.isEmpty())
+                                        {
+                                            setStackDirectly(stack);
+                                            break;
+                                        }
                                     }
                                 }
                             }
-                        }
-                    });
-
+                        });
+                    }
                 }
 
             }

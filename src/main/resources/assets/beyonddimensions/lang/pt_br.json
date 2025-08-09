@@ -72,6 +72,7 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Atual: Ordenação automática ativada",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Atual: Ordenação automática desativada",
   "tooltip.item.unstable_space_time.long_data": "O espaço-tempo está estabilizando, faltam %s ciclos. Mantenha-o sempre com você.",
+  "tooltip.beyonddimensions.item.xp_exchange": "No GUI: Clique direito para depositar XP, Clique do meio para retirar XP\nAo segurar: Clique direito para depositar XP, Shift + Clique direito para alterar a taxa de transferência XP",
   "tooltip.editbox.beyonddimensions.search": "Digite '#' para filtrar conteúdo das tooltips\nDigite '@' para filtrar IDs de mods",
 
   "istack.beyonddimensions.storage_num.item": "Armazenado: %s itens",
@@ -101,6 +102,7 @@
   "item.beyonddimensions.net_magnet_item": "Ímã de Rede",
   "item.beyonddimensions.net_feeder_item": "Alimentador de Rede",
   "item.beyonddimensions.xp_fluid_bucket": "Balde de XP líquido",
+  "item.beyonddimensions.xp_exchange_item": "Varinha de XP",
 
   "block.beyonddimensions.net_control": "Controlador de Rede",
   "block.beyonddimensions.net_interface": "Interface de Rede",
@@ -134,6 +136,10 @@
   "msg.beyonddimensions.cant_delete_net": "Não é possível deletar a rede – Apenas o dono pode fazer isso",
   "msg.beyonddimensions.item_net_destroyed": "Você destruiu a rede em que estava",
   "msg.beyonddimensions.net_gift_done": "Rede %s fundida com sucesso",
+  "msg.beyonddimensions.xp_mode.switch.slow": "Quantidade de transferência XP alterada para: 1 nível",
+  "msg.beyonddimensions.xp_mode.switch.mid": "Quantidade de transferência XP alterada para: 10 níveis",
+  "msg.beyonddimensions.xp_mode.switch.high": "Quantidade de transferência XP alterada para: 30 níveis",
+  "msg.beyonddimensions.xp_mode.switch.highest": "Quantidade de transferência XP alterada para: 100 níveis",
 
   "types.beyonddimensions.energytype.name": "FE"
 }

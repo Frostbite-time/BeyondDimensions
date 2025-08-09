@@ -138,6 +138,20 @@ public class ModDataComponents {
             )
     );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<XpTransferSpeedMode>> XP_TRANSFER_SPEED_MODE = register(
+            "xp_transfer_speed_mode", builder -> builder.persistent(
+                    Codec.STRING.xmap(
+                            XpTransferSpeedMode::valueOf,
+                            XpTransferSpeedMode::name
+                    )
+            ).networkSynchronized(
+                    ByteBufCodecs.STRING_UTF8.map(
+                            XpTransferSpeedMode::valueOf,
+                            XpTransferSpeedMode::name
+                    )
+            )
+    );
+
     private static <T> DeferredHolder<DataComponentType<?>,DataComponentType<T>> register(String name, UnaryOperator<DataComponentType.Builder<T>> builder) {
         return DATA_COMPONENTS.register(name,()->  builder.apply(DataComponentType.builder()).build());
     }

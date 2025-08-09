@@ -67,9 +67,13 @@ public class ModItems
     public static final DeferredItem<Item> NET_MAGNET_ITEM = ITEMS.register("net_magnet_item",
             () -> new NetMagnetItem(new Item.Properties()));
 
+    // 网络喂食器
     public static final DeferredItem<Item> NET_FEEDER_ITEM = ITEMS.register("net_feeder_item",
             () -> new NetFeederItem(new Item.Properties()));
 
+    // 经验交换棒
+    public static final DeferredItem<Item> XP_EXCHANGE_ITEM = ITEMS.register("xp_exchange_item",
+            () -> new XpExchangeItem(new Item.Properties()));
 
     // 测试物品 -----------------------
     // 随机物品生成器

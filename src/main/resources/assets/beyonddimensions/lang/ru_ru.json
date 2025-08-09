@@ -72,6 +72,7 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Текущий: Автосортировка включена",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Текущий: Автосортировка отключена",
   "tooltip.item.unstable_space_time.long_data": "Пространство-время стабилизируется, осталось %s циклов. Носите с собой постоянно.",
+  "tooltip.beyonddimensions.item.xp_exchange": "В интерфейсе: ПКМ для пополнения опыта, СКМ для снятия опыта\nВ руках: ПКМ для пополнения опыта, Shift + ПКМ для изменения скорости передачи опыта",
   "tooltip.editbox.beyonddimensions.search": "Введите '#', чтобы фильтровать содержимое подсказок\nВведите '@', чтобы фильтровать ID модов",
 
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
@@ -101,6 +102,7 @@
   "item.beyonddimensions.net_magnet_item": "Сетевой Магнит",
   "item.beyonddimensions.net_feeder_item": "Сетевой Питатель",
   "item.beyonddimensions.xp_fluid_bucket": "Ведро жидкого опыта",
+  "item.beyonddimensions.xp_exchange_item": "Жезл опыта",
 
   "block.beyonddimensions.net_control": "Контроллер Сети",
   "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
@@ -134,6 +136,10 @@
   "msg.beyonddimensions.cant_delete_net": "Не удалить сеть – Только владелец может это сделать",
   "msg.beyonddimensions.item_net_destroyed": "Вы уничтожили свою текущую сеть",
   "msg.beyonddimensions.net_gift_done": "Сеть %s успешно объединена",
+  "msg.beyonddimensions.xp_mode.switch.slow": "Объем передачи переключен на: 1 уровень",
+  "msg.beyonddimensions.xp_mode.switch.mid": "Объем передачи переключен на: 10 уровней",
+  "msg.beyonddimensions.xp_mode.switch.high": "Объем передачи переключен на: 30 уровней",
+  "msg.beyonddimensions.xp_mode.switch.highest": "Объем передачи переключен на: 100 уровней",
 
   "types.beyonddimensions.energytype.name": "FE"
 }

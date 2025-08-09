@@ -72,6 +72,7 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "現在：自動整頓ON",
   "tooltip.button.beyonddimensions.sort_mode_stop": "現在：自動整頓OFF",
   "tooltip.item.unstable_space_time.long_data": "時空は安定化中、残り%s回の安定化サイクルが必要です。常に携帯してください。",
+  "tooltip.beyonddimensions.item.xp_exchange": "GUIで：右クリックで経験値を預ける、ホイールクリックで経験値を取り出す\n手に持って時：右クリックで経験値を預ける、シフト＋右クリックで経験値転送速度を変更",
   "tooltip.editbox.beyonddimensions.search": "「#」を入力してツールチップの内容をフィルタリング\n「@」を入力してMod IDをフィルタリング",
 
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
@@ -101,6 +102,7 @@
   "item.beyonddimensions.net_magnet_item": "ネットマグネット",
   "item.beyonddimensions.net_feeder_item": "ネットフィーダー",
   "item.beyonddimensions.xp_fluid_bucket": "液体経験値のバケツ",
+  "item.beyonddimensions.xp_exchange_item": "経験値の杖",
 
   "block.beyonddimensions.net_control": "ネットワーク制御装置",
   "block.beyonddimensions.net_interface": "ネットワークインタフェース",
@@ -134,6 +136,10 @@
   "msg.beyonddimensions.cant_delete_net": "ネットワークを削除できません―所有者のみが実行可能です",
   "msg.beyonddimensions.item_net_destroyed": "自身が属するネットワークを削除しました",
   "msg.beyonddimensions.net_gift_done": "ネットワーク番号%sの統合に成功",
+  "msg.beyonddimensions.xp_mode.switch.slow": "転送量切り替え済み：1レベル",
+  "msg.beyonddimensions.xp_mode.switch.mid": "転送量切り替え済み：10レベル",
+  "msg.beyonddimensions.xp_mode.switch.high": "転送量切り替え済み：30レベル",
+  "msg.beyonddimensions.xp_mode.switch.highest": "転送量切り替え済み：100レベル",
 
   "types.beyonddimensions.energytype.name": "FE"
 }
