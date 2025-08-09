@@ -131,6 +131,5 @@
   "msg.beyonddimensions.item_net_destroyed": "自身が属するネットワークを削除しました",
   "msg.beyonddimensions.net_gift_done": "ネットワーク番号%sの統合に成功",
 
-  "types.beyonddimensions.energytype.name": "FE",
-  "types.beyonddimensions.xptype.name": "経験値ポイント"
+  "types.beyonddimensions.energytype.name": "FE"
 }

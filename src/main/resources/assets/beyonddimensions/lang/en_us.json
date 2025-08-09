@@ -131,6 +131,5 @@
   "msg.beyonddimensions.item_net_destroyed": "You destroyed the network you were in",
   "msg.beyonddimensions.net_gift_done": "Merged Network #%s",
 
-  "types.beyonddimensions.energytype.name": "FE",
-  "types.beyonddimensions.xptype.name": "XP"
+  "types.beyonddimensions.energytype.name": "FE"
 }

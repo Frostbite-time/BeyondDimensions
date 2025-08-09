@@ -131,6 +131,5 @@
   "msg.beyonddimensions.item_net_destroyed": "Вы уничтожили свою текущую сеть",
   "msg.beyonddimensions.net_gift_done": "Сеть %s успешно объединена",
 
-  "types.beyonddimensions.energytype.name": "FE",
-  "types.beyonddimensions.xptype.name": "XP"
+  "types.beyonddimensions.energytype.name": "FE"
 }

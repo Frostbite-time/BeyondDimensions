@@ -174,7 +174,6 @@ public class BeyondDimensions
         StackTypeRegistry.registerType(new ItemStackType());
         StackTypeRegistry.registerType(new FluidStackType());
         StackTypeRegistry.registerType(new EnergyStackType());
-        StackTypeRegistry.registerType(new XpStackType());
 
         // 注册方块能力类型，用于动态为方块注册能力
         CapabilityHelper.BlockCapabilityMap.put(ItemStackType.ID,Capabilities.ItemHandler.BLOCK);
