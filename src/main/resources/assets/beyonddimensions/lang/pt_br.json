@@ -100,17 +100,21 @@
   "item.beyonddimensions.matter_compress_ball": "Esfera de Matéria Comprimida",
   "item.beyonddimensions.net_magnet_item": "Ímã de Rede",
   "item.beyonddimensions.net_feeder_item": "Alimentador de Rede",
-  "block.beyonddimensions.net_pump_block": "Bomba de Rede",
+  "item.beyonddimensions.xp_fluid_bucket": "Balde de XP líquido",
 
   "block.beyonddimensions.net_control": "Controlador de Rede",
   "block.beyonddimensions.net_interface": "Interface de Rede",
   "block.beyonddimensions.net_pathway": "Caminho Dimensional",
   "block.beyonddimensions.net_energy_pathway": "Canal de Energia",
   "block.beyonddimensions.net_terminal_block": "Terminal de Rede",
+  "block.beyonddimensions.net_pump_block": "Bomba de Rede",
   "block.beyonddimensions.net_hopper_block": "Funil de Rede",
   "block.beyonddimensions.net_furnace_block": "Fornalha de Rede",
   "block.beyonddimensions.dimensional_connect_block": "bloco de conexão dimensional",
   "block.beyonddimensions.rs_net_pathway": "Caminho de Rede Dimensional RS",
+  "block.beyonddimensions.xp_fluid": "XP líquido",
+
+  "fluid_type.beyonddimensions.xp_fluid": "XP líquido",
 
   "creativetab.beyonddimensions.items": "Além das Dimensões - Itens",
   "creativetab.beyonddimensions.blocks": "Além das Dimensões - Blocos",

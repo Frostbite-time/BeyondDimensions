@@ -40,10 +40,11 @@ public class DataGenerators
         generator.addProvider(event.includeClient(),new ModItemModelProvider(packOutput,existingFileHelper));
         generator.addProvider(event.includeClient(),new ModBlockStateProvider(packOutput,existingFileHelper));
 
-        // 生成方块和物品标签
+        // 生成方块、物品、流体标签
         BlockTagsProvider blockTagsProvider = new ModBlockTagProvider(packOutput,lookupProvider,existingFileHelper);
         generator.addProvider(event.includeServer(), blockTagsProvider);
         generator.addProvider(event.includeServer(), new ModItemTagProvider(packOutput,lookupProvider,blockTagsProvider.contentsGetter(),existingFileHelper));
+        generator.addProvider(event.includeServer(), new ModFluidTagsProvider(packOutput,lookupProvider,existingFileHelper));
 
         // 生成配方表
         generator.addProvider(event.includeServer(),new ModRecipeProvider(packOutput,lookupProvider));

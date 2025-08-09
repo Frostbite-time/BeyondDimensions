@@ -100,6 +100,7 @@
   "item.beyonddimensions.matter_compress_ball": "Boule de Matière Compressée",
   "item.beyonddimensions.net_magnet_item": "Aimant Réseau",
   "item.beyonddimensions.net_feeder_item": "Distributeur Réseau",
+  "item.beyonddimensions.xp_fluid_bucket": "Seau d'XP liquide",
 
   "block.beyonddimensions.net_control": "Contrôleur Réseau",
   "block.beyonddimensions.net_interface": "Interface Réseau",
@@ -111,6 +112,9 @@
   "block.beyonddimensions.net_furnace_block": "Four Réseau",
   "block.beyonddimensions.dimensional_connect_block": "Bloc de connexion dimensionnelle",
   "block.beyonddimensions.rs_net_pathway": "Passage Réseau Dimensionnel RS",
+  "block.beyonddimensions.xp_fluid": "XP liquide",
+
+  "fluid_type.beyonddimensions.xp_fluid": "XP liquide",
 
   "creativetab.beyonddimensions.items": "Au-delà - Objets",
   "creativetab.beyonddimensions.blocks": "Au-delà - Blocs",

@@ -100,6 +100,7 @@
   "item.beyonddimensions.matter_compress_ball": "圧縮物質球",
   "item.beyonddimensions.net_magnet_item": "ネットマグネット",
   "item.beyonddimensions.net_feeder_item": "ネットフィーダー",
+  "item.beyonddimensions.xp_fluid_bucket": "液体経験値のバケツ",
 
   "block.beyonddimensions.net_control": "ネットワーク制御装置",
   "block.beyonddimensions.net_interface": "ネットワークインタフェース",
@@ -111,6 +112,9 @@
   "block.beyonddimensions.net_furnace_block": "ネットかまど",
   "block.beyonddimensions.dimensional_connect_block": "ディメンション接続ブロック",
   "block.beyonddimensions.rs_net_pathway": "次元ネットワークRS経路",
+  "block.beyonddimensions.xp_fluid": "液体経験値",
+
+  "fluid_type.beyonddimensions.xp_fluid": "液体経験値",
 
   "creativetab.beyonddimensions.items": "超次元 - アイテム",
   "creativetab.beyonddimensions.blocks": "超次元 - ブロック",

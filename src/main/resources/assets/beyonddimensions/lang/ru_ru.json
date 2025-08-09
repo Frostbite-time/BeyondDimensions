@@ -100,6 +100,7 @@
   "item.beyonddimensions.matter_compress_ball": "Шар Сжатой Материи",
   "item.beyonddimensions.net_magnet_item": "Сетевой Магнит",
   "item.beyonddimensions.net_feeder_item": "Сетевой Питатель",
+  "item.beyonddimensions.xp_fluid_bucket": "Ведро жидкого опыта",
 
   "block.beyonddimensions.net_control": "Контроллер Сети",
   "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
@@ -111,6 +112,9 @@
   "block.beyonddimensions.net_furnace_block": "Сетевая Печь",
   "block.beyonddimensions.dimensional_connect_block": "Блок измерения связи",
   "block.beyonddimensions.rs_net_pathway": "Измеренческий Сетевой Путь RS",
+  "block.beyonddimensions.xp_fluid": "Жидкий опыт",
+
+  "fluid_type.beyonddimensions.xp_fluid": "Жидкий опыт",
 
   "creativetab.beyonddimensions.items": "За Гранью - Предметы",
   "creativetab.beyonddimensions.blocks": "За Гранью - Блоки",

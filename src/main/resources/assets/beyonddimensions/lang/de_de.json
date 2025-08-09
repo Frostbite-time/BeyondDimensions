@@ -100,6 +100,7 @@
   "item.beyonddimensions.matter_compress_ball": "Komprimierte Materiekugel",
   "item.beyonddimensions.net_magnet_item": "Netz-Magnet",
   "item.beyonddimensions.net_feeder_item": "Netz-Fütterer",
+  "item.beyonddimensions.xp_fluid_bucket": "Eimer mit flüssiger Erfahrung",
 
   "block.beyonddimensions.net_control": "Netzwerkcontroller",
   "block.beyonddimensions.net_interface": "Netzwerkschnittstelle",
@@ -111,6 +112,9 @@
   "block.beyonddimensions.net_furnace_block": "Netz-Ofen",
   "block.beyonddimensions.dimensional_connect_block": "Dimensionsverbindungsblock",
   "block.beyonddimensions.rs_net_pathway": "Dimensionsnetzwerk RS-Pfad",
+  "block.beyonddimensions.xp_fluid": "Flüssige Erfahrung",
+
+  "fluid_type.beyonddimensions.xp_fluid": "Flüssige Erfahrung",
 
   "creativetab.beyonddimensions.items": "Jenseits - Gegenstände",
   "creativetab.beyonddimensions.blocks": "Jenseits - Blöcke",

@@ -2,7 +2,10 @@ package com.wintercogs.beyonddimensions;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.*;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.*;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.ChemicalHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.EnergyHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
@@ -18,6 +21,7 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntit
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEFlux.BD_AEFluxPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
@@ -109,6 +113,9 @@ public class BeyondDimensions
 
         // 注册方块
         ModBlocks.register(modEventBus);
+
+        // 注册流体
+        ModFluids.register(modEventBus);
 
         // 注册方块实体
         ModBlockEntities.register(modEventBus);

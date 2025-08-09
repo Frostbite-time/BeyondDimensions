@@ -100,6 +100,7 @@
   "item.beyonddimensions.matter_compress_ball": "压缩物质球",
   "item.beyonddimensions.net_magnet_item": "网络磁铁",
   "item.beyonddimensions.net_feeder_item": "网络喂食器",
+  "item.beyonddimensions.xp_fluid_bucket": "液态经验桶",
 
   "block.beyonddimensions.net_control": "网络控制器",
   "block.beyonddimensions.net_interface": "网络接口",
@@ -111,6 +112,9 @@
   "block.beyonddimensions.net_furnace_block": "网络熔炉",
   "block.beyonddimensions.dimensional_connect_block": "维度连接方块",
   "block.beyonddimensions.rs_net_pathway": "RS维度通道",
+  "block.beyonddimensions.xp_fluid": "液态经验",
+
+  "fluid_type.beyonddimensions.xp_fluid": "液态经验",
 
   "creativetab.beyonddimensions.items": "超越维度-物品",
   "creativetab.beyonddimensions.blocks": "超越维度-方块",

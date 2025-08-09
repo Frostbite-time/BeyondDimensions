@@ -100,6 +100,7 @@
   "item.beyonddimensions.matter_compress_ball": "Esfera de Materia Comprimida",
   "item.beyonddimensions.net_magnet_item": "Imán de Red",
   "item.beyonddimensions.net_feeder_item": "Alimentador de Red",
+  "item.beyonddimensions.xp_fluid_bucket": "Cubo de experiencia líquida",
 
   "block.beyonddimensions.net_control": "Controlador de Red",
   "block.beyonddimensions.net_interface": "Interfaz de Red",
@@ -111,6 +112,9 @@
   "block.beyonddimensions.net_furnace_block": "Horno de Red",
   "block.beyonddimensions.dimensional_connect_block": "Bloque de conexión dimensional",
   "block.beyonddimensions.rs_net_pathway": "Vía de Red Dimensional RS",
+  "block.beyonddimensions.xp_fluid": "Experiencia líquida",
+
+  "fluid_type.beyonddimensions.xp_fluid": "Experiencia líquida",
 
   "creativetab.beyonddimensions.items": "Más Allá de las Dimensiones - Objetos",
   "creativetab.beyonddimensions.blocks": "Más Allá de las Dimensiones - Bloques",
