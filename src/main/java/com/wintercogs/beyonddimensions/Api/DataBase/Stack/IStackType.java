@@ -95,7 +95,7 @@ public interface IStackType<T> {
     IStackType<T> getEmpty();
 
     /**
-     * 返回存储的堆叠本身的引用。不要直接修改返回值，仅用于读取。
+     * 返回存储的堆叠本身的引用。不要直接修改返回值！也不要在任何可能被修改的路径上使用！
      * <p>
      * 如：ItemStackType返回其存储的ItemStack
      * @return 类似ItemStack

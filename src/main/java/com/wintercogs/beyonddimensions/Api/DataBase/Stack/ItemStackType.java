@@ -46,24 +46,29 @@ public final class ItemStackType implements IStackType<ItemStack> {
     private ItemStack stack; // 物品stack信息，数量最好时刻保持为1
     private long stackSize; // 扩容，需要确保所有存入取出的终点在此
 
+    private ItemStack clientStack; // 始终作为stack的copy，负责getTooltips等交互，承载外界对内部stack可能的修改
+
     private int hashCodeCache = 0; // 哈希码缓存
     private boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
 
     public ItemStackType()
     {
         stack = ItemStack.EMPTY;
+        clientStack = stack.copy();
         stackSize = 0;
     }
 
     public ItemStackType(ItemStack stack)
     {
         this.stack = stack;
+        this.clientStack = stack.copy();
         stackSize = stack.getCount();
     }
 
     public ItemStackType(ItemStack stack, long stackSize)
     {
         this.stack = stack;
+        this.clientStack = stack.copy();
         this.stackSize = stackSize;
     }
 
@@ -99,6 +104,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
     public void setStack(ItemStack stack)
     {
         this.stack = stack.copy();
+        this.clientStack = this.stack.copy();
         this.stackSize = stack.getCount();
         NeedRecalHash = true;
     }
@@ -331,9 +337,9 @@ public final class ItemStackType implements IStackType<ItemStack> {
         // 渲染物品图标
         var poseStack = gui.pose(); // 获取渲染的变换矩阵
         poseStack.pushPose(); // 保存矩阵状态
-        stack.setCount(1); // 设置stack数量，而非实际用于操作的stackSize变量
-        gui.renderFakeItem(stack, x, y);
-        gui.renderItemDecorations(Minecraft.getInstance().font, stack, x, y, "");
+        clientStack.setCount(1); // 设置stack数量，而非实际用于操作的stackSize变量
+        gui.renderFakeItem(clientStack, x, y);
+        gui.renderItemDecorations(Minecraft.getInstance().font, clientStack, x, y, "");
         poseStack.popPose(); // 恢复矩阵状态，结束渲染
 
         // 渲染数量文本
@@ -352,7 +358,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
-        if(!stack.isEmpty())
+        if(!clientStack.isEmpty())
             gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
         poseStackText.popPose();
     }
@@ -366,13 +372,13 @@ public final class ItemStackType implements IStackType<ItemStack> {
     @Override
     public Component getDisplayName()
     {
-        return stack.getDisplayName();
+        return clientStack.getDisplayName();
     }
 
     @Override
     public List<Component> getTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag)
     {
-        List<Component> tooltips = stack.getTooltipLines(tooltipContext,player,tooltipFlag);
+        List<Component> tooltips = clientStack.getTooltipLines(tooltipContext,player,tooltipFlag);
         tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.item", getStackAmount()));
         return tooltips;
     }
@@ -380,7 +386,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
     @Override
     public Optional<TooltipComponent> getTooltipImage()
     {
-        return stack.getTooltipImage();
+        return clientStack.getTooltipImage();
     }
 
     @OnlyIn(Dist.CLIENT)
