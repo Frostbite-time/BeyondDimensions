@@ -107,6 +107,7 @@
   "item.beyonddimensions.net_feeder_item": "Netz-Fütterer",
   "item.beyonddimensions.xp_fluid_bucket": "Eimer mit flüssiger Erfahrung",
   "item.beyonddimensions.xp_exchange_item": "XP-Stab",
+  "item.beyonddimensions.warden_soul_tag_item": "Seelenmarkierer",
 
   "block.beyonddimensions.net_control": "Netzwerkcontroller",
   "block.beyonddimensions.net_interface": "Netzwerkschnittstelle",
@@ -145,5 +146,6 @@
   "msg.beyonddimensions.xp_mode.switch.high": "XP-Transfermenge umgeschaltet auf: 30 Stufen",
   "msg.beyonddimensions.xp_mode.switch.highest": "XP-Transfermenge umgeschaltet auf: 100 Stufen",
 
-  "types.beyonddimensions.energytype.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.warden_soul_type.name": "Wächterseelen"
 }

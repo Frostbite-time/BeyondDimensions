@@ -107,6 +107,7 @@
   "item.beyonddimensions.net_feeder_item": "Сетевой Питатель",
   "item.beyonddimensions.xp_fluid_bucket": "Ведро жидкого опыта",
   "item.beyonddimensions.xp_exchange_item": "Жезл опыта",
+  "item.beyonddimensions.warden_soul_tag_item": "Маркер душ",
 
   "block.beyonddimensions.net_control": "Контроллер Сети",
   "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
@@ -145,5 +146,6 @@
   "msg.beyonddimensions.xp_mode.switch.high": "Объем передачи переключен на: 30 уровней",
   "msg.beyonddimensions.xp_mode.switch.highest": "Объем передачи переключен на: 100 уровней",
 
-  "types.beyonddimensions.energytype.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.warden_soul_type.name": "Души Вардена"
 }

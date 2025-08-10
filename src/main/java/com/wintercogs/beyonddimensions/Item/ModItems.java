@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Item;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Integration.IFS.Item.WardenSoulTagItem;
 import com.wintercogs.beyonddimensions.Item.Custom.*;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -74,6 +75,16 @@ public class ModItems
     // 经验交换棒
     public static final DeferredItem<Item> XP_EXCHANGE_ITEM = ITEMS.register("xp_exchange_item",
             () -> new XpExchangeItem(new Item.Properties()));
+
+    // 工业先锋：灵魂涌动联动 - 灵魂标记器
+    public static final DeferredItem<Item> WARDEN_SOUL_TAG_ITEM = ITEMS.register("warden_soul_tag_item",
+            () -> {
+                if(BeyondDimensions.IFS_Loaded)
+                    return new WardenSoulTagItem(new Item.Properties());
+                else
+                    return new Item(new Item.Properties());
+            }
+    );
 
     // 测试物品 -----------------------
     // 随机物品生成器

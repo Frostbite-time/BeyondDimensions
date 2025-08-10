@@ -208,6 +208,12 @@ dependencies {
     compileOnly "maven.modrinth:refined-storage-mekanism-integration:1.0.0"
     runtimeOnly "maven.modrinth:refined-storage-mekanism-integration:1.0.0"
 
+    // 工业先锋：灵魂涌动
+    compileOnly "maven.modrinth:industrial-foregoing-souls:1.21-1.10.5"
+    compileOnly "curse.maven:soulplied-energistics-1143614:6771121"
+    runtimeOnly "maven.modrinth:industrial-foregoing-souls:1.21-1.10.5"
+    runtimeOnly "curse.maven:soulplied-energistics-1143614:6771121"
+
     // 精妙背包以及精妙存储调试
     runtimeOnly "curse.maven:sophisticated-backpacks-422301:6679417"
     runtimeOnly "curse.maven:sophisticated-storage-619320:6712033"

@@ -268,5 +268,18 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.RSModId)));
         }
 
+        if(BeyondDimensions.IFS_Loaded)
+        {
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.WARDEN_SOUL_TAG_ITEM.get())
+                    .pattern("AAA")
+                    .pattern("BCB")
+                    .pattern("AAA")
+                    .define('A', Items.AMETHYST_SHARD)
+                    .define('B', ModItems.SPACE_TIME_BAR.get())
+                    .define('C', Items.ECHO_SHARD)
+                    .unlockedBy("unlock_warden_soul_tag_item", has(Items.ECHO_SHARD))
+                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.IFS_ModId)));
+        }
+
     }
 }

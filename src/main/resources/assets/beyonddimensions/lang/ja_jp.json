@@ -107,6 +107,7 @@
   "item.beyonddimensions.net_feeder_item": "ネットフィーダー",
   "item.beyonddimensions.xp_fluid_bucket": "液体経験値のバケツ",
   "item.beyonddimensions.xp_exchange_item": "経験値の杖",
+  "item.beyonddimensions.warden_soul_tag_item": "魂マーカー",
 
   "block.beyonddimensions.net_control": "ネットワーク制御装置",
   "block.beyonddimensions.net_interface": "ネットワークインタフェース",
@@ -145,5 +146,6 @@
   "msg.beyonddimensions.xp_mode.switch.high": "転送量切り替え済み：30レベル",
   "msg.beyonddimensions.xp_mode.switch.highest": "転送量切り替え済み：100レベル",
 
-  "types.beyonddimensions.energytype.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.warden_soul_type.name": "ウォーデンの魂"
 }

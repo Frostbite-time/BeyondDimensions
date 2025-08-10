@@ -107,6 +107,7 @@
   "item.beyonddimensions.net_feeder_item": "网络喂食器",
   "item.beyonddimensions.xp_fluid_bucket": "液态经验桶",
   "item.beyonddimensions.xp_exchange_item": "经验棒",
+  "item.beyonddimensions.warden_soul_tag_item": "灵魂标记器",
 
   "block.beyonddimensions.net_control": "网络控制器",
   "block.beyonddimensions.net_interface": "网络接口",
@@ -145,5 +146,6 @@
   "msg.beyonddimensions.xp_mode.switch.high": "单次交互量切换到：30级",
   "msg.beyonddimensions.xp_mode.switch.highest": "单次交互量切换到：100级",
 
-  "types.beyonddimensions.energytype.name": "FE能量"
+  "types.beyonddimensions.energytype.name": "FE能量",
+  "types.beyonddimensions.warden_soul_type.name": "监守者之魂"
 }

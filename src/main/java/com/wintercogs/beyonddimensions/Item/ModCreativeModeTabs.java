@@ -45,6 +45,11 @@ public class ModCreativeModeTabs
                         for (ModFluids.FluidEntry e : ModFluids.ALL) { //注册所有桶
                             output.accept(e.bucket().get());
                         }
+
+                        if(BeyondDimensions.IFS_Loaded)
+                        {
+                            output.accept(ModItems.WARDEN_SOUL_TAG_ITEM);
+                        }
                     })
                     .build());
 

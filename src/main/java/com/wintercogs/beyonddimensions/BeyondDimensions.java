@@ -2,14 +2,8 @@ package com.wintercogs.beyonddimensions;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.*;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ChemicalStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.ChemicalHandlerWrapper;
-import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.EnergyHandlerWrapper;
-import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
-import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.ItemHandlerWrapper;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.*;
+import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.*;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
@@ -25,7 +19,10 @@ import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEFlux.BD_AEFluxPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
+import com.wintercogs.beyonddimensions.Integration.AE_IFS.BD_AE_IFS_Plugin;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
+import com.wintercogs.beyonddimensions.Integration.IFS.BD_SoulCaps;
+import com.wintercogs.beyonddimensions.Integration.IFS.Item.WardenSoulTagItem;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Integration.RS.BD_RSPlugin;
@@ -77,6 +74,10 @@ public class BeyondDimensions
     public static boolean RS_Loaded = false;
     public static final String RS_MEK_MODID = "refinedstorage_mekanism_integration";
     public static boolean RS_MEK_Loaded = false;
+    public static final String IFS_ModId = "industrialforegoingsouls"; //工业先锋-灵魂涌动
+    public static boolean IFS_Loaded = false;
+    public static final String AE_IFS_ModId = "soulplied_energistics"; // 工业先锋-灵魂涌动-AE附属
+    public static boolean AE_IFS_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -170,8 +171,17 @@ public class BeyondDimensions
         {
             RS_MEK_Loaded = true;
         }
+        if(ModList.get().isLoaded(IFS_ModId))
+        {
+            IFS_Loaded = true;
+            MOD_EVENT_BUS.addListener(WardenSoulTagItem::registerCapability);
+        }
+        if(ModList.get().isLoaded(AE_IFS_ModId))
+        {
+            AE_IFS_Loaded = true;
+        }
 
-        ModBlockEntities.IntegrationRegister();
+        ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -223,6 +233,20 @@ public class BeyondDimensions
 
         }
 
+        if(IFS_Loaded)
+        {
+            // 注册监守者之魂
+            StackTypeRegistry.registerType(new WardenSoulStackType());
+            CapabilityHelper.BlockCapabilityMap.put(WardenSoulStackType.ID, com.buuz135.industrialforegoingsouls.capabilities.SoulCapabilities.BLOCK);
+            // 此处为自定义物品能力，因为原模组未提供物品能力
+            CapabilityHelper.ItemCapabilityMap.put(WardenSoulStackType.ID, BD_SoulCaps.ITEM);
+            // 注册分化包装
+            UnifiedStorage.typedHandlerMap.put(WardenSoulStackType.ID, WardenSoulUnifiedStorageHandler::new);
+            StackTypedHandler.typedHandlerMap.put(WardenSoulStackType.ID, WardenSoulStackTypedHandler::new);
+            // 注册堆叠处理包装
+            StackHandlerWrapperHelper.stackWrappers.put(WardenSoulStackType.ID, WardenSoulHandlerWrapper::new);
+        }
+
         // 为维度ME硬盘注册，其中BD_AEPlugin用于注册存储元件
         // BD_AEMEKPlugin与BD_AEFluxPlugin分别注册IStackType与AEKey之间的转换。
         // 物品、流体的转换由AEHelper的静态块负责
@@ -245,6 +269,10 @@ public class BeyondDimensions
         if(RS_MEK_Loaded)
         {
             BD_RSMekPlugin.register();
+        }
+        if(AE_IFS_Loaded)
+        {
+            BD_AE_IFS_Plugin.register();
         }
     }
 

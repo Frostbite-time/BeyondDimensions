@@ -107,6 +107,7 @@
   "item.beyonddimensions.net_feeder_item": "Net Feeder",
   "item.beyonddimensions.xp_fluid_bucket": "Bucket of Liquid XP",
   "item.beyonddimensions.xp_exchange_item": "XP Rod",
+  "item.beyonddimensions.warden_soul_tag_item": "Warden Soul Tagger",
 
   "block.beyonddimensions.net_control": "Network Controller",
   "block.beyonddimensions.net_interface": "Network Interface",
@@ -145,5 +146,6 @@
   "msg.beyonddimensions.xp_mode.switch.high": "XP transfer amount switched to: 30 levels",
   "msg.beyonddimensions.xp_mode.switch.highest": "XP transfer amount switched to: 100 levels",
 
-  "types.beyonddimensions.energytype.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.warden_soul_type.name": "Warden Souls"
 }

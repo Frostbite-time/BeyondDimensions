@@ -107,6 +107,7 @@
   "item.beyonddimensions.net_feeder_item": "Alimentador de Rede",
   "item.beyonddimensions.xp_fluid_bucket": "Balde de XP líquido",
   "item.beyonddimensions.xp_exchange_item": "Varinha de XP",
+  "item.beyonddimensions.warden_soul_tag_item": "Marcador de Almas",
 
   "block.beyonddimensions.net_control": "Controlador de Rede",
   "block.beyonddimensions.net_interface": "Interface de Rede",
@@ -145,5 +146,6 @@
   "msg.beyonddimensions.xp_mode.switch.high": "Quantidade de transferência XP alterada para: 30 níveis",
   "msg.beyonddimensions.xp_mode.switch.highest": "Quantidade de transferência XP alterada para: 100 níveis",
 
-  "types.beyonddimensions.energytype.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.warden_soul_type.name": "Almas do Guardião"
 }
