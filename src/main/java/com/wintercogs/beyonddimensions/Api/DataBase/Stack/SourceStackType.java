@@ -13,7 +13,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -29,8 +28,6 @@ public class SourceStackType extends LongStackType<SourceType>
             ).apply(instance, SourceStackType::new));
 
     public static final Codec<SourceStackType> CODEC = TYPE_CODEC.codec();
-
-    private static final net.minecraft.client.resources.model.Material SOURCE = new net.minecraft.client.resources.model.Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.fromNamespaceAndPath("ars_nouveau", "block/mana_still"));
 
     public SourceStackType()
     {
@@ -175,7 +172,7 @@ public class SourceStackType extends LongStackType<SourceType>
         poseStack.pushPose(); // 保存矩阵状态
 
         int tintColor = 0xFFFFFFFF;
-        net.minecraft.client.renderer.texture.TextureAtlasSprite sprite = SOURCE.sprite();
+        net.minecraft.client.renderer.texture.TextureAtlasSprite sprite = com.wintercogs.beyonddimensions.Render.IngredientRenderer.ARS_SOURCE.sprite();
         com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,tintColor,16,sprite,x,y);
 
 
