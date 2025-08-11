@@ -210,9 +210,15 @@ dependencies {
 
     // 工业先锋：灵魂涌动
     compileOnly "maven.modrinth:industrial-foregoing-souls:1.21-1.10.5"
-    compileOnly "curse.maven:soulplied-energistics-1143614:6771121"
+    compileOnly "curse.maven:soulplied-energistics-1143614:6771121" // AE联动
     runtimeOnly "maven.modrinth:industrial-foregoing-souls:1.21-1.10.5"
     runtimeOnly "curse.maven:soulplied-energistics-1143614:6771121"
+
+    // 新生魔艺
+    compileOnly "maven.modrinth:ars-nouveau:5.10.3"
+    compileOnly "maven.modrinth:ars-energistique:2.1.1-beta" // AE联动
+    runtimeOnly "maven.modrinth:ars-nouveau:5.10.3"
+    runtimeOnly "maven.modrinth:ars-energistique:2.1.1-beta"
 
     // 精妙背包以及精妙存储调试
     runtimeOnly "curse.maven:sophisticated-backpacks-422301:6679417"

@@ -120,6 +120,7 @@
   "block.beyonddimensions.dimensional_connect_block": "bloco de conexão dimensional",
   "block.beyonddimensions.rs_net_pathway": "Caminho de Rede Dimensional RS",
   "block.beyonddimensions.xp_fluid": "XP líquido",
+  "block.beyonddimensions.ars_source_pathway": "Caminho da Fonte Interdimensional",
 
   "fluid_type.beyonddimensions.xp_fluid": "XP líquido",
 
@@ -147,5 +148,6 @@
   "msg.beyonddimensions.xp_mode.switch.highest": "Quantidade de transferência XP alterada para: 100 níveis",
 
   "types.beyonddimensions.energytype.name": "FE",
-  "types.beyonddimensions.warden_soul_type.name": "Almas do Guardião"
+  "types.beyonddimensions.warden_soul_type.name": "Almas do Guardião",
+  "types.beyonddimensions.source_type.name": "Fonte"
 }

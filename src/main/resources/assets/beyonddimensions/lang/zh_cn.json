@@ -120,6 +120,7 @@
   "block.beyonddimensions.dimensional_connect_block": "维度连接方块",
   "block.beyonddimensions.rs_net_pathway": "RS维度通道",
   "block.beyonddimensions.xp_fluid": "液态经验",
+  "block.beyonddimensions.ars_source_pathway": "维度魔源通道",
 
   "fluid_type.beyonddimensions.xp_fluid": "液态经验",
 
@@ -147,5 +148,6 @@
   "msg.beyonddimensions.xp_mode.switch.highest": "单次交互量切换到：100级",
 
   "types.beyonddimensions.energytype.name": "FE能量",
-  "types.beyonddimensions.warden_soul_type.name": "监守者之魂"
+  "types.beyonddimensions.warden_soul_type.name": "监守者之魂",
+  "types.beyonddimensions.source_type.name": "魔源"
 }

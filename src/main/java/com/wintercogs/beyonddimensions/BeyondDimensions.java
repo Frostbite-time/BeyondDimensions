@@ -19,7 +19,9 @@ import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEFlux.BD_AEFluxPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
+import com.wintercogs.beyonddimensions.Integration.AE_Ars.BD_AE_ArsPlugin;
 import com.wintercogs.beyonddimensions.Integration.AE_IFS.BD_AE_IFS_Plugin;
+import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.IFS.BD_SoulCaps;
 import com.wintercogs.beyonddimensions.Integration.IFS.Item.WardenSoulTagItem;
@@ -78,6 +80,10 @@ public class BeyondDimensions
     public static boolean IFS_Loaded = false;
     public static final String AE_IFS_ModId = "soulplied_energistics"; // 工业先锋-灵魂涌动-AE附属
     public static boolean AE_IFS_Loaded = false;
+    public static final String ARS_ModId = "ars_nouveau"; // 新生魔艺-魔源兼容
+    public static boolean ARS_Loaded = false;
+    public static final String AE_ARS_ModId = "arseng";
+    public static boolean AE_ARS_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -180,6 +186,15 @@ public class BeyondDimensions
         {
             AE_IFS_Loaded = true;
         }
+        if(ModList.get().isLoaded(ARS_ModId))
+        {
+            ARS_Loaded = true;
+            MOD_EVENT_BUS.addListener(BD_ArsCaps::registerCapability);
+        }
+        if(ModList.get().isLoaded(AE_ARS_ModId))
+        {
+            AE_ARS_Loaded = true;
+        }
 
         ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
     }
@@ -247,6 +262,17 @@ public class BeyondDimensions
             StackHandlerWrapperHelper.stackWrappers.put(WardenSoulStackType.ID, WardenSoulHandlerWrapper::new);
         }
 
+        if(ARS_Loaded)
+        {
+            // 注册魔源
+            StackTypeRegistry.registerType(new SourceStackType());
+            CapabilityHelper.BlockCapabilityMap.put(SourceStackType.ID, com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry.SOURCE_CAPABILITY);
+            CapabilityHelper.ItemCapabilityMap.put(SourceStackType.ID, BD_ArsCaps.ITEM_SOURCE); // 使用的自己的魔源罐能力
+            UnifiedStorage.typedHandlerMap.put(SourceStackType.ID, SourceUnifiedStorageHandler::new);
+            StackTypedHandler.typedHandlerMap.put(SourceStackType.ID, SourceStackTypedHandler::new);
+            StackHandlerWrapperHelper.stackWrappers.put(SourceStackType.ID, SourceHandlerWrapper::new);
+        }
+
         // 为维度ME硬盘注册，其中BD_AEPlugin用于注册存储元件
         // BD_AEMEKPlugin与BD_AEFluxPlugin分别注册IStackType与AEKey之间的转换。
         // 物品、流体的转换由AEHelper的静态块负责
@@ -273,6 +299,10 @@ public class BeyondDimensions
         if(AE_IFS_Loaded)
         {
             BD_AE_IFS_Plugin.register();
+        }
+        if(AE_ARS_Loaded)
+        {
+            BD_AE_ArsPlugin.register();
         }
     }
 

@@ -73,6 +73,10 @@ public class ModCreativeModeTabs
                         {
                             output.accept(ModBlocks.RS_NET_PATHWAY);
                         }
+                        if(BeyondDimensions.ARS_Loaded)
+                        {
+                            output.accept(ModBlocks.ARS_SOURCE_PATHWAY);
+                        }
                     })
                     .build());
 

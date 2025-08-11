@@ -120,6 +120,7 @@
   "block.beyonddimensions.dimensional_connect_block": "ディメンション接続ブロック",
   "block.beyonddimensions.rs_net_pathway": "次元ネットワークRS経路",
   "block.beyonddimensions.xp_fluid": "液体経験値",
+  "block.beyonddimensions.ars_source_pathway": "次元魔素源経路",
 
   "fluid_type.beyonddimensions.xp_fluid": "液体経験値",
 
@@ -147,5 +148,6 @@
   "msg.beyonddimensions.xp_mode.switch.highest": "転送量切り替え済み：100レベル",
 
   "types.beyonddimensions.energytype.name": "FE",
-  "types.beyonddimensions.warden_soul_type.name": "ウォーデンの魂"
+  "types.beyonddimensions.warden_soul_type.name": "ウォーデンの魂",
+  "types.beyonddimensions.source_type.name": "魔素源"
 }

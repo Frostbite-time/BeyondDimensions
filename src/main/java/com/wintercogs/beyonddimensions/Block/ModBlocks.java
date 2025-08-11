@@ -2,6 +2,8 @@ package com.wintercogs.beyonddimensions.Block;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.Custom.*;
+import com.wintercogs.beyonddimensions.Integration.Ars.Block.SourcePathwayBlock;
+import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlock;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -54,7 +56,19 @@ public class ModBlocks
             ()-> {
                 if(BeyondDimensions.RS_Loaded)
                 {
-                    return new com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlock(BlockBehaviour.Properties.of().strength(2f));
+                    return new RSNetPathwayBlock(BlockBehaviour.Properties.of().strength(2f));
+                }
+                else
+                {
+                    return new Block(BlockBehaviour.Properties.of().strength(2f));
+                }
+            });
+
+    public static final DeferredBlock<Block> ARS_SOURCE_PATHWAY = registerBlock("ars_source_pathway",
+            () -> {
+                if(BeyondDimensions.ARS_Loaded)
+                {
+                    return new SourcePathwayBlock(BlockBehaviour.Properties.of().strength(2f));
                 }
                 else
                 {

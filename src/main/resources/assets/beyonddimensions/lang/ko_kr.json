@@ -120,6 +120,7 @@
   "block.beyonddimensions.dimensional_connect_block": "차원 연결 블록",
   "block.beyonddimensions.rs_net_pathway": "차원 네트워크 RS 경로",
   "block.beyonddimensions.xp_fluid": "액체 경험",
+  "block.beyonddimensions.ars_source_pathway": "차원 마력원 경로",
 
   "fluid_type.beyonddimensions.xp_fluid": "액체 경험",
 
@@ -147,5 +148,6 @@
   "msg.beyonddimensions.xp_mode.switch.highest": "전송량 전환됨: 100레벨",
 
   "types.beyonddimensions.energytype.name": "FE",
-  "types.beyonddimensions.warden_soul_type.name": "워든의 영혼"
+  "types.beyonddimensions.warden_soul_type.name": "워든의 영혼",
+  "types.beyonddimensions.source_type.name": "마력원"
 }

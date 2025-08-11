@@ -281,5 +281,19 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.IFS_ModId)));
         }
 
+        if(BeyondDimensions.ARS_Loaded)
+        {
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.ARS_SOURCE_PATHWAY.get())
+                    .pattern("ABA")
+                    .pattern("CDC")
+                    .pattern("ABA")
+                    .define('A', ModItems.SPACE_TIME_BAR.get())
+                    .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                    .define('C', com.hollingsworth.arsnouveau.setup.registry.BlockRegistry.SOURCE_JAR.get())
+                    .define('D', Items.ENDER_EYE)
+                    .unlockedBy("unlock_ars_source_pathway", has(ModItems.SPACE_TIME_BAR.get()))
+                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.ARS_ModId)));
+        }
+
     }
 }
