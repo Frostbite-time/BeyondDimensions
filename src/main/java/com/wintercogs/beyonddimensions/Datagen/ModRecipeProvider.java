@@ -1,7 +1,5 @@
 package com.wintercogs.beyonddimensions.Datagen;
 
-import appeng.core.definitions.AEBlocks;
-import appeng.core.definitions.AEItems;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.Integration.RS.Tags.RSTags;
@@ -251,7 +249,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .pattern("ABA")
                     .pattern("BDB")
                     .pattern("CCC")
-                    .define('A', AEBlocks.QUARTZ_GLASS)
+                    .define('A', appeng.core.definitions.AEBlocks.QUARTZ_GLASS)
                     .define('B', Items.DIAMOND)
                     .define('C', ModItems.SPACE_TIME_BAR.get())
                     .define('D', ModItems.SPACE_TIME_STABLE_FRAME.get())

@@ -9,26 +9,26 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface USHandler
 {
-    Object apply(UnifiedStorage us, @Nullable CapCtx ctx);  // 唯一抽象方法
+    Object apply(UnifiedStorage us, @Nullable CapCtx ctx);
 
-    // —— 对外暴露：是否带上下文 —— //
-    default boolean isContextual() {              // 默认：带上下文
+    // 是否是带上下文的版本
+    default boolean isContextual() {
         return true;
     }
 
-    // —— 工厂方法 —— //
+    // 构造带上下文版本
     static USHandler contextual(BiFunction<UnifiedStorage, CapCtx, ?> f) {
-        // 使用默认 isContextual()=true 即可
         return (us, ctx) -> f.apply(us, ctx);
     }
 
+    // 不带上下文版本
     static USHandler contextless(Function<UnifiedStorage, ?> f) {
         return new USHandler() {
             @Override public Object apply(UnifiedStorage us, CapCtx ctx) {
-                return f.apply(us);               // 忽略 ctx
+                return f.apply(us);
             }
             @Override public boolean isContextual() {
-                return false;                     // 明确声明“无上下文”
+                return false;
             }
         };
     }
