@@ -1,16 +1,21 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.ManaType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Render.IngredientRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 public class ManaStackType extends LongStackType<ManaType>
 {
@@ -155,6 +160,45 @@ public class ManaStackType extends LongStackType<ManaType>
     public IStackType<ManaType> deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
     {
         return new ManaStackType(nbt.getLong("Amount"));
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    public void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y)
+    {
+        if(stack.isEmpty())
+            return;
+
+        // 渲染图标
+        var poseStack = gui.pose(); // 获取渲染的变换矩阵
+        poseStack.pushPose(); // 保存矩阵状态
+
+        int tintColor = 0xFFFFFFFF;
+        net.minecraft.client.renderer.texture.TextureAtlasSprite sprite = IngredientRenderer.BOTANIA_MANA.sprite();
+        com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,tintColor,16,sprite,x,y);
+
+
+        poseStack.popPose(); // 恢复矩阵状态，结束渲染
+
+        // 渲染数量文本
+        String countText = getCountText(getStackAmount());
+        float scale = 0.666f; // 文本缩放因数
+        var poseStackText = gui.pose();
+        poseStackText.pushPose();
+        poseStackText.translate(0,0,200); // 确保文本在顶层
+        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
+        RenderSystem.disableBlend(); // 禁用混合渲染模式
+        final int X = (int)(
+                (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
+                        * 1.0f / 0.666f
+        );
+        final int Y = (int)(
+                (y + -1 + 16.0f - 5.0f * 0.666f)
+                        * 1.0f / 0.666f
+        );
+        if(!stack.isEmpty())
+            gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
+        poseStackText.popPose();
     }
 
 }

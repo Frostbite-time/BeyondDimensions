@@ -46,6 +46,11 @@ public class ModCreativeModeTabs
                             output.accept(e.bucket().get());
                         }
 
+                        if(BeyondDimensions.AELoaded)
+                        {
+                            output.accept(ModItems.NET_AE_STORAGE_CELL);
+                        }
+
                         if(BeyondDimensions.IFS_Loaded)
                         {
                             output.accept(ModItems.WARDEN_SOUL_TAG_ITEM);

@@ -1,5 +1,7 @@
 package com.wintercogs.beyonddimensions.Datagen;
 
+import appeng.core.definitions.AEBlocks;
+import appeng.core.definitions.AEItems;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.Integration.RS.Tags.RSTags;
@@ -171,17 +173,6 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("unlock_net_destroyer", has(ModItems.SPACE_TIME_STABLE_FRAME.get()))
                 .save(recipeOutput);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_AE_STORAGE_CELL.get())
-                .pattern("ABA")
-                .pattern("BDB")
-                .pattern("CCC")
-                .define('A', Items.GLASS)
-                .define('B', Items.DIAMOND)
-                .define('C', ModItems.SPACE_TIME_BAR.get())
-                .define('D', ModItems.NET_MANAGER_INVITER.get())
-                .unlockedBy("unlock_net_ae_storage_cell", has(ModItems.SPACE_TIME_BAR.get()))
-                .save(recipeOutput);
-
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
                 .pattern("ABA")
                 .pattern("BCB")
@@ -253,6 +244,20 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('C', ModItems.SPACE_TIME_BAR.get())
                 .unlockedBy("unlock_xp_exchange_item", has(ModItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
+
+        if(BeyondDimensions.AELoaded)
+        {
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_AE_STORAGE_CELL.get())
+                    .pattern("ABA")
+                    .pattern("BDB")
+                    .pattern("CCC")
+                    .define('A', AEBlocks.QUARTZ_GLASS)
+                    .define('B', Items.DIAMOND)
+                    .define('C', ModItems.SPACE_TIME_BAR.get())
+                    .define('D', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                    .unlockedBy("unlock_net_ae_storage_cell", has(ModItems.SPACE_TIME_BAR.get()))
+                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.AE2MODID)));
+        }
 
         if(BeyondDimensions.RS_Loaded)
         {

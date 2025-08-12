@@ -185,7 +185,7 @@ dependencies {
     compileOnly "curse.maven:polymorph-388800:6451024"
 
     // AE支持
-    compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}:api"
+    compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
     compileOnly "curse.maven:applied-mekanistics-574300:5978711" // AE的通用机械附属
     compileOnly "curse.maven:applied-flux-965012:6649565" // 应用通量附属
 
