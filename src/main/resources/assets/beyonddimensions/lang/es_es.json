@@ -121,6 +121,7 @@
   "block.beyonddimensions.rs_net_pathway": "Vía de Red Dimensional RS",
   "block.beyonddimensions.xp_fluid": "Experiencia líquida",
   "block.beyonddimensions.ars_source_pathway": "Senda de Fuente Interdimensional",
+  "block.beyonddimensions.mana_pool_pathway": "Piscina de Maná Dimensional",
 
   "fluid_type.beyonddimensions.xp_fluid": "Experiencia líquida",
 
@@ -149,5 +150,6 @@
 
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Almas de Guardián",
-  "types.beyonddimensions.source_type.name": "Fuente"
+  "types.beyonddimensions.source_type.name": "Fuente",
+  "types.beyonddimensions.mana_type.name": "Maná Vegetal"
 }

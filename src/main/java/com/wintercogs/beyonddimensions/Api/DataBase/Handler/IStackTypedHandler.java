@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
@@ -27,15 +26,6 @@ public interface IStackTypedHandler
      * 请根据目的自行重写
      */
     void onChange();
-
-    /**
-     * 根据资源id返回对应的存储包装。如：ItemStackType.ID返回一个实现了IItemHandler的类实例。你需要自行保证类型安全
-     * <p>
-     * 这用于性能优化，以及能力注册，但是这个方法并不强制重写，如果你不打算使用，你可以直接返回null，不会有任何影响，这个方法只是一个建议
-     * @param typeId 类似ItemStackType.ID
-     * @return 类似一个实现了IItemHandler的类实例
-     */
-    Object getTypedHandler(ResourceLocation typeId);
 
     /**
      * 获取当前容器的槽位数量

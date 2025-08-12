@@ -14,7 +14,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * 一个通用的，用于存储IStackType实例的类，通过这个类可以快速实现类似原版箱子的容器。
@@ -60,11 +59,6 @@ public class StackTypedHandler implements IStackTypedHandler
      * 为构建分化包装提供良好的性能，其结构为 [资源种类id：对应资源类型的索引列表]
      */
     private final Map<ResourceLocation, List<Integer>> typeIdIndex = new HashMap<>();
-
-    /**
-     * 用于存储创建分化包装的函数
-     */
-    public static final Map<ResourceLocation, Function<StackTypedHandler,Object>> typedHandlerMap = new HashMap<>();
 
     /**
      * 容量大小，不持久化保存，用于主动扩容以实现对部分旧数据进行兼容
@@ -119,12 +113,6 @@ public class StackTypedHandler implements IStackTypedHandler
     public void onChange()
     {
 
-    }
-
-    @Override
-    public Object getTypedHandler(ResourceLocation typeId)
-    {
-        return typedHandlerMap.get(typeId).apply(this);
     }
 
     @Override

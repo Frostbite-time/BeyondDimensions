@@ -295,5 +295,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.ARS_ModId)));
         }
 
+        if(BeyondDimensions.Botania_Loaded)
+        {
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.MANA_POOL_PATHWAY.get())
+                    .pattern("ABA")
+                    .pattern("AAA")
+                    .define('A', vazkii.botania.common.block.BotaniaBlocks.livingrock)
+                    .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                    .unlockedBy("unlock_mana_pool_pathway", has(ModItems.SPACE_TIME_STABLE_FRAME.get()))
+                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.Botania_ModId)));
+        }
+
     }
 }

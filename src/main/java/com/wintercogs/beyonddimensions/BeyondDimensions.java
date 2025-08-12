@@ -14,6 +14,7 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.BlockRender.ModBlockRenders;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
@@ -22,6 +23,8 @@ import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.Integration.AE_Ars.BD_AE_ArsPlugin;
 import com.wintercogs.beyonddimensions.Integration.AE_IFS.BD_AE_IFS_Plugin;
 import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
+import com.wintercogs.beyonddimensions.Integration.Botania.BD_BotaniaPlugin;
+import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.IFS.BD_SoulCaps;
 import com.wintercogs.beyonddimensions.Integration.IFS.Item.WardenSoulTagItem;
@@ -43,6 +46,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -84,6 +88,8 @@ public class BeyondDimensions
     public static boolean ARS_Loaded = false;
     public static final String AE_ARS_ModId = "arseng";
     public static boolean AE_ARS_Loaded = false;
+    public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
+    public static boolean Botania_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -126,6 +132,12 @@ public class BeyondDimensions
 
         // 注册方块实体
         ModBlockEntities.register(modEventBus);
+
+        if(FMLEnvironment.dist == Dist.CLIENT)
+        {
+            // 注册方块实体渲染
+            modEventBus.addListener(ModBlockRenders::onRegisterRenderers);
+        }
 
     }
 
@@ -195,6 +207,12 @@ public class BeyondDimensions
         {
             AE_ARS_Loaded = true;
         }
+        if(ModList.get().isLoaded(Botania_ModId))
+        {
+            Botania_Loaded = true;
+            MOD_EVENT_BUS.addListener(ManaPoolPathwayBlockEntity::registerCapability);
+            MOD_EVENT_BUS.addListener(BD_BotaniaPlugin::registerCapability); // 为网络通道和网络接口手动注册火花附着
+        }
 
         ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
     }
@@ -217,14 +235,14 @@ public class BeyondDimensions
         CapabilityHelper.ItemCapabilityMap.put(EnergyStackType.ID, Capabilities.EnergyStorage.ITEM);
 
         // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-        UnifiedStorage.typedHandlerMap.put(ItemStackType.ID,ItemUnifiedStorageHandler::new);
-        UnifiedStorage.typedHandlerMap.put(FluidStackType.ID,FluidUnifiedStorageHandler::new);
-        UnifiedStorage.typedHandlerMap.put(EnergyStackType.ID, EnergyUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(new ItemStackType(), ItemUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(new FluidStackType(), FluidUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(new EnergyStackType(), EnergyUnifiedStorageHandler::new);
 
         // 注册存储分化包装
-        StackTypedHandler.typedHandlerMap.put(ItemStackType.ID,ItemStackTypedHandler::new);
-        StackTypedHandler.typedHandlerMap.put(FluidStackType.ID,FluidStackTypedHandler::new);
-        StackTypedHandler.typedHandlerMap.put(EnergyStackType.ID, EnergyStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(new ItemStackType(), ItemStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(new FluidStackType(), FluidStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(new EnergyStackType(), EnergyStackTypedHandler::new);
 
         // 注册堆叠处理包装，用于动态包装来自其他模组的handler (如原版的IItemHandler)
         StackHandlerWrapperHelper.stackWrappers.put(ItemStackType.ID, ItemHandlerWrapper::new);
@@ -240,8 +258,8 @@ public class BeyondDimensions
             // 注册化学品物品能力
             CapabilityHelper.ItemCapabilityMap.put(ChemicalStackType.ID, ChemicalCapabilityHelper.CHEMICAL_ITEM);
             // 注册分化包装
-            UnifiedStorage.typedHandlerMap.put(ChemicalStackType.ID,ChemicalUnifiedStorageHandler::new);
-            StackTypedHandler.typedHandlerMap.put(ChemicalStackType.ID,ChemicalStackTypedHandler::new);
+            CapabilityHelper.registerUSHandler(new ChemicalStackType(), ChemicalUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new ChemicalStackType(), ChemicalStackTypedHandler::new);
 
             // 注册堆叠处理包装
             StackHandlerWrapperHelper.stackWrappers.put(ChemicalStackType.ID, ChemicalHandlerWrapper::new);
@@ -256,8 +274,8 @@ public class BeyondDimensions
             // 此处为自定义物品能力，因为原模组未提供物品能力
             CapabilityHelper.ItemCapabilityMap.put(WardenSoulStackType.ID, BD_SoulCaps.ITEM);
             // 注册分化包装
-            UnifiedStorage.typedHandlerMap.put(WardenSoulStackType.ID, WardenSoulUnifiedStorageHandler::new);
-            StackTypedHandler.typedHandlerMap.put(WardenSoulStackType.ID, WardenSoulStackTypedHandler::new);
+            CapabilityHelper.registerUSHandler(new WardenSoulStackType(), WardenSoulUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new WardenSoulStackType(), WardenSoulStackTypedHandler::new);
             // 注册堆叠处理包装
             StackHandlerWrapperHelper.stackWrappers.put(WardenSoulStackType.ID, WardenSoulHandlerWrapper::new);
         }
@@ -268,9 +286,21 @@ public class BeyondDimensions
             StackTypeRegistry.registerType(new SourceStackType());
             CapabilityHelper.BlockCapabilityMap.put(SourceStackType.ID, com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry.SOURCE_CAPABILITY);
             CapabilityHelper.ItemCapabilityMap.put(SourceStackType.ID, BD_ArsCaps.ITEM_SOURCE); // 使用的自己的魔源罐能力
-            UnifiedStorage.typedHandlerMap.put(SourceStackType.ID, SourceUnifiedStorageHandler::new);
-            StackTypedHandler.typedHandlerMap.put(SourceStackType.ID, SourceStackTypedHandler::new);
+            CapabilityHelper.registerUSHandler(new SourceStackType(), SourceUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new SourceStackType(), SourceStackTypedHandler::new);
             StackHandlerWrapperHelper.stackWrappers.put(SourceStackType.ID, SourceHandlerWrapper::new);
+        }
+
+        if(Botania_Loaded)
+        {
+            // 注册Mana（魔力）
+            StackTypeRegistry.registerType(new ManaStackType());
+            CapabilityHelper.BlockCapabilityMap.put(ManaStackType.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_RECEIVER);
+            CapabilityHelper.ItemCapabilityMap.put(ManaStackType.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_ITEM);
+            CapabilityHelper.registerUSHandler(new ManaStackType(), ManaUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new ManaStackType(), ManaStackTypedHandler::new);
+            StackHandlerWrapperHelper.stackWrappers.put(ManaStackType.ID, ManaHandlerWrapper::new);
+
         }
 
         // 为维度ME硬盘注册，其中BD_AEPlugin用于注册存储元件

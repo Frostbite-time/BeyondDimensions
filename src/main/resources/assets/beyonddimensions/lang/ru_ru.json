@@ -121,6 +121,7 @@
   "block.beyonddimensions.rs_net_pathway": "Измеренческий Сетевой Путь RS",
   "block.beyonddimensions.xp_fluid": "Жидкий опыт",
   "block.beyonddimensions.ars_source_pathway": "Межмерный Канал Источника",
+  "block.beyonddimensions.mana_pool_pathway": "Измеренческий Мана-Резервуар",
 
   "fluid_type.beyonddimensions.xp_fluid": "Жидкий опыт",
 
@@ -149,5 +150,6 @@
 
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Души Вардена",
-  "types.beyonddimensions.source_type.name": "Источник"
+  "types.beyonddimensions.source_type.name": "Источник",
+  "types.beyonddimensions.mana_type.name": "Растительная Мана"
 }

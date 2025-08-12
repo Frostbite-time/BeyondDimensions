@@ -9,6 +9,8 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
+import com.wintercogs.beyonddimensions.Api.Util.CommonHandler;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
@@ -155,12 +157,19 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
         CapabilityHelper.BlockCapabilityMap.forEach(
                 (resourceLocation, directionBlockCapability) -> {
-                    Function handler = StackTypedHandler.typedHandlerMap.get(resourceLocation);
+                    CommonHandler handler = CapabilityHelper.CommonHandlerMap.get(resourceLocation);
                     event.registerBlockEntity(
                             (BlockCapability<? super Object, ? extends Direction>)directionBlockCapability,
                             ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                             (be, side) -> {
-                                return handler.apply(be.stackHandler);
+                                if(handler != null)
+                                {
+                                    if(handler.isContextual())
+                                        return handler.apply(be.stackHandler, new CapCtx(be.level, be.getBlockPos(), side, be));
+                                    else
+                                        return handler.apply(be.stackHandler, null);
+                                }
+                                return null; // 如果handler是null，那么必然返回null
                             }
                     );
                 }

@@ -121,6 +121,7 @@
   "block.beyonddimensions.rs_net_pathway": "Passage Réseau Dimensionnel RS",
   "block.beyonddimensions.xp_fluid": "XP liquide",
   "block.beyonddimensions.ars_source_pathway": "Chemin des Sources Arcaniques",
+  "block.beyonddimensions.mana_pool_pathway": "Bassin de Mana Dimensionnel",
 
   "fluid_type.beyonddimensions.xp_fluid": "XP liquide",
 
@@ -149,5 +150,6 @@
 
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Âmes de Gardien",
-  "types.beyonddimensions.source_type.name": "Source Arcanique"
+  "types.beyonddimensions.source_type.name": "Source Arcanique",
+  "types.beyonddimensions.mana_type.name": "Mana Végétal"
 }

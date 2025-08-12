@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Block;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.Custom.*;
 import com.wintercogs.beyonddimensions.Integration.Ars.Block.SourcePathwayBlock;
+import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathway;
 import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlock;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.world.item.BlockItem;
@@ -74,6 +75,14 @@ public class ModBlocks
                 {
                     return new Block(BlockBehaviour.Properties.of().strength(2f));
                 }
+            });
+
+    public static final DeferredBlock<Block> MANA_POOL_PATHWAY = registerBlock("mana_pool_pathway",
+            () -> {
+                if(BeyondDimensions.Botania_Loaded)
+                    return new ManaPoolPathway(BlockBehaviour.Properties.of().strength(2f));
+                else
+                    return new Block(BlockBehaviour.Properties.of().strength(2f));
             });
 
 

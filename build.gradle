@@ -220,6 +220,10 @@ dependencies {
     runtimeOnly "maven.modrinth:ars-nouveau:5.10.3"
     runtimeOnly "maven.modrinth:ars-energistique:2.1.1-beta"
 
+    // 植物魔法支持
+    compileOnly "dev.local:botania-neoforge:1.21.1-451-SNAPSHOT"
+    runtimeOnly "dev.local:botania-neoforge:1.21.1-451-SNAPSHOT"
+
     // 精妙背包以及精妙存储调试
     runtimeOnly "curse.maven:sophisticated-backpacks-422301:6679417"
     runtimeOnly "curse.maven:sophisticated-storage-619320:6712033"

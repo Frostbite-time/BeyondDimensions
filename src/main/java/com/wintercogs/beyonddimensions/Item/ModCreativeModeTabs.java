@@ -77,6 +77,10 @@ public class ModCreativeModeTabs
                         {
                             output.accept(ModBlocks.ARS_SOURCE_PATHWAY);
                         }
+                        if(BeyondDimensions.Botania_Loaded)
+                        {
+                            output.accept(ModBlocks.MANA_POOL_PATHWAY);
+                        }
                     })
                     .build());
 

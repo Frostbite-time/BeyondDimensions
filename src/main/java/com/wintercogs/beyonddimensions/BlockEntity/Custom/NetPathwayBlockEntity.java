@@ -1,8 +1,9 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
+import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
+import com.wintercogs.beyonddimensions.Api.Util.USHandler;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,8 +12,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-
-import java.util.function.Function;
 
 public class NetPathwayBlockEntity extends NetedBlockEntity
 {
@@ -25,19 +24,18 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
 
         CapabilityHelper.BlockCapabilityMap.forEach(
                 (resourceLocation, directionBlockCapability) -> {
-                    Function handler = UnifiedStorage.typedHandlerMap.get(resourceLocation);
+                    USHandler handler = CapabilityHelper.USHandlerMap.get(resourceLocation);
                     event.registerBlockEntity(
                             (BlockCapability<? super Object, ? extends Direction>) directionBlockCapability,
                             ModBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
                             (be, side) -> {
-                                if(be.getNetId()<0)
+                                DimensionsNet net = be.getNet(); // getNet已经在基类中完成缓存处理
+                                if(net != null && handler != null)
                                 {
-                                    return null;
-                                }
-                                DimensionsNet net = be.getNet();
-                                if(net != null)
-                                {
-                                    return handler.apply(net.getUnifiedStorage());
+                                    if(handler.isContextual())
+                                        return handler.apply(net.getUnifiedStorage(), new CapCtx(be.level,be.getBlockPos(),side,be));
+                                    else
+                                        return handler.apply(net.getUnifiedStorage(), null);
                                 }
                                 return null;
                             } // 根据方向返回处理器
