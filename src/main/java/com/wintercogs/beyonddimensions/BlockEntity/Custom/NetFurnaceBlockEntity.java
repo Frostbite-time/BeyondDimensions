@@ -12,6 +12,7 @@ import com.wintercogs.beyonddimensions.Block.Custom.NetFurnaceBlock;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.Machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.Menu.NetFurnaceMenu;
@@ -66,6 +67,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
 
     public PopMode popMode = PopMode.STOP;// 是否弹出输出物
     public ReceiveMode receiveMode = ReceiveMode.STOP; // 是否将输出物送回网络
+    public AutoSortMode sortMode = AutoSortMode.STOP; // 自动整理内容物
+    private int sortCursor = 0; //用来记录当前tick整理到第几个槽位，以将自动整理的处理量平摊到n个tick中
 
     private List<RecipeManager.CachedCheck<Container, SmeltingRecipe>> quickChecks = new ArrayList<>(Collections.nCopies(capacity,RecipeManager.createCheck(RecipeType.SMELTING)));
 
@@ -349,7 +352,100 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     }
                 }
             }
-            // 2.尝试按燃料标记从网络抽取燃料 虽然当前燃料槽仅有一个，但是还是可以继续使用这个方法来方便后续修改
+            // 2.如果开启了自动整理，则每tick进行一次快速整理
+            if(sortMode == AutoSortMode.OPEN)
+            {
+                IStackType[] stacks  = new IStackType[capacity]; // 种类引用 每tick重新获取，无隐藏问题
+                long[] amounts = new long[capacity]; //种类数量
+
+                java.util.Map<IStackType, java.util.List<Integer>> groupSlots = new java.util.HashMap<>(); // 所属槽位
+                java.util.Map<IStackType, Long> groupTotal = new java.util.HashMap<>(); // 种类总数
+
+                java.util.List<Integer> emptySlots = new java.util.ArrayList<>(); // 标记可用的空槽位
+
+                for (int i = 0; i < capacity; i++) {
+                    IStackType s = inputStorageSlots.getStackBySlot(i);
+                    stacks[i] = s;
+
+                    if (s == null || s.isEmpty()) {
+                        emptySlots.add(i);
+                        amounts[i] = 0;
+                        continue;
+                    }
+
+                    long amt = s.getStackAmount();
+                    amounts[i] = amt;
+
+                    groupSlots.computeIfAbsent(s, k -> new java.util.ArrayList<>()).add(i);
+                    groupTotal.put(s, groupTotal.getOrDefault(s, 0L) + amt);
+                }
+                // 为不同的种类再分配，循环次数小于种类数量，即小于capacity
+                for (java.util.Map.Entry<IStackType, java.util.List<Integer>> entry : groupSlots.entrySet())
+                {
+
+                    IStackType type = entry.getKey();
+                    java.util.List<Integer> typedSlots = entry.getValue();
+                    long total = groupTotal.get(type);
+
+                    // 目标槽数 k：现有槽 + 可用空槽，但不超过总量
+                    int k = (int) Math.min(total, typedSlots.size() + emptySlots.size());
+
+                    // 把需要的空槽“借”过来
+                    while (typedSlots.size() < k && !emptySlots.isEmpty()) {
+                        int idx = emptySlots.remove(emptySlots.size() - 1); // 取最后一个空槽
+                        typedSlots.add(idx);
+                        stacks[idx] = type; // 逻辑标记：该槽将容纳同类物品
+                        amounts[idx] = 0;
+                    }
+
+                    // 计算平均值
+                    long base  = total / k; // 每个槽位的基本数量
+                    int  extra = (int) (total % k); // 前extra个槽位平摊余数
+
+                    // 双指针搬运：把“多”的搬给“少”的
+                    int surplusPtr = 0, deficitPtr = 0;
+                    while (true) { // 实际小于k次
+
+                        // 找下一个盈余槽
+                        while (surplusPtr < k) {
+                            int idx = typedSlots.get(surplusPtr);
+                            long target = base + (surplusPtr < extra ? 1 : 0);
+                            if (amounts[idx] > target) break;
+                            surplusPtr++;
+                        }
+
+                        // 找下一个欠额槽
+                        while (deficitPtr < k) {
+                            int idx = typedSlots.get(deficitPtr);
+                            long target = base + (deficitPtr < extra ? 1 : 0);
+                            if (amounts[idx] < target) break;
+                            deficitPtr++;
+                        }
+
+                        if (surplusPtr >= k || deficitPtr >= k) break; // 已平衡
+
+                        int from = typedSlots.get(surplusPtr);
+                        int to = typedSlots.get(deficitPtr);
+
+                        long surplus = amounts[from] - (base + (surplusPtr < extra ? 1 : 0)); // 盈余槽需要减少的
+                        long deficit = (base + (deficitPtr < extra ? 1 : 0)) - amounts[to]; // 缺欠额槽需要增加的
+                        long move = Math.min(surplus, deficit); // 实际搬运量
+
+                        // 真正提取 & 插入
+                        IStackType moved = inputStorageSlots.extract(from, move, false);
+                        IStackType leftover = inputStorageSlots.insert(to, moved, false);
+                        if (!leftover.isEmpty()) {
+                            inputStorageSlots.insert(from, leftover, false);
+                            break;
+                        }
+
+                        // 更新本地计数
+                        amounts[from] -= move;
+                        amounts[to]   += move;
+                    }
+                }
+            }
+            // 3.尝试按燃料标记从网络抽取燃料 虽然当前燃料槽仅有一个，但是还是可以继续使用这个方法来方便后续修改
             for(int fuelSlot = 0; fuelSlot < fuelCapacity; fuelSlot++)
             {
                 if(fuelStorageSlots.getStackBySlot(fuelSlot).isEmpty())
@@ -373,7 +469,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             }
         }
 
-        // 3.尝试将燃料分配到燃烧时间
+        // 4.尝试将燃料分配到燃烧时间
         for(int litSlot = 0; litSlot < capacity; litSlot++)
         {
             // 燃料已经烧完，并且对应槽位仍然有需要冶炼的物品
@@ -733,6 +829,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         this.cookTimeTotal = Arrays.stream(tag.getIntArray("cook_time_total")).boxed().collect(Collectors.toList());
         this.popMode = PopMode.valueOf(tag.getString("pop_mode"));
         this.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
+        this.sortMode = tag.getString("sort_mode").isEmpty() ? AutoSortMode.STOP : AutoSortMode.valueOf(tag.getString("sort_mode"));
     }
 
     @Override
@@ -751,6 +848,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         tag.putIntArray("cook_time_total",cookTimeTotal);
         tag.putString("pop_mode",this.popMode.name());
         tag.putString("receive_mode",this.receiveMode.name());
+        tag.putString("sort_mode", this.sortMode.name());
     }
 
     public void setLit(boolean lit) {

@@ -45,7 +45,7 @@ public class NetFeederMenu extends BDBaseMenu
         {
             return super.isStackValid(slot, stack)
                     && stack instanceof ItemStackType itemStackType
-                    && itemStackType.getStack().isEdible();
+                    && itemStackType.getStack().getFoodProperties(player) != null;
         }
     };
     private boolean initialized; //initialized必须在初始数据提供完成之后才能设置为true
