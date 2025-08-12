@@ -163,6 +163,8 @@ public class BeyondDimensions
         {
             JECharactersLoaded = true;
         }
+
+        ModBlockEntities.IntegrationRegister();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)

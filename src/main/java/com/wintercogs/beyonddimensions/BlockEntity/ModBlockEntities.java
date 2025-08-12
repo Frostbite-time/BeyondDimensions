@@ -91,6 +91,12 @@ public class ModBlockEntities
             ).build(null)
     );
 
+
+    public static void IntegrationRegister()
+    {
+
+    }
+
     public static void register(IEventBus eventBus)
     {
         BLOCK_ENTITY_TYPES.register(eventBus);
