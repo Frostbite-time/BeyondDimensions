@@ -168,7 +168,7 @@ public class BeyondDimensions
             JECharactersLoaded = true;
         }
 
-        ModBlockEntities.IntegrationRegister();
+        ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
