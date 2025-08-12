@@ -35,7 +35,7 @@ public class NetStorageCell implements StorageCell
     @Override
     public boolean canFitInsideCell()
     {
-        return false;
+        return true; // 允许其放入其他存储元件，因为此物品本身极其轻量，仅仅作为一个转接器
     }
 
     @Override
