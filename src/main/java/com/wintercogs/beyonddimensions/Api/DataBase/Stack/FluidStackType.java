@@ -7,11 +7,13 @@ import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -241,6 +243,20 @@ public class FluidStackType implements IStackType<FluidStack>
         FluidStack split = new FluidStack(stack, stack.getAmount());
         shrink(splitAmount);
         return new FluidStackType(split,splitAmount);
+    }
+
+    @Override
+    public boolean hasTag(TagKey<?> tagKey)
+    {
+        if (tagKey == null) return false;
+        if (this.stack == null || this.stack.isEmpty()) return false;
+
+        if (!tagKey.isFor(Registries.FLUID)) {
+            return false;
+        }
+
+        TagKey<Fluid> fluidTag = (TagKey<Fluid>) tagKey;
+        return stack.getFluid().builtInRegistryHolder().is(fluidTag);
     }
 
     @Override

@@ -9,10 +9,14 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHan
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Fluid.ModFluids;
+import com.wintercogs.beyonddimensions.Item.Custom.XpExchangeItem;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.OrderedStackTypedSlotPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
+import com.wintercogs.beyonddimensions.Tags.ModFluidTags;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Unit.XpUtil;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -22,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
@@ -60,8 +65,32 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
             {   //槽位物品为空，携带物品存在，将携带物品插入槽位
 
                 AtomicBoolean handled = new AtomicBoolean(false);
+                // 检查是否为经验棒交互
+                if(carriedItem.getItem() instanceof XpExchangeItem && button != GLFW.GLFW_MOUSE_BUTTON_LEFT)
+                {
+                    int conversionRate = XpExchangeItem.getConversionRate();
+                    double currentLevel = XpUtil.levelAsDouble(player);
+                    int wantConversionLevel = XpExchangeItem.getXpLevelPerAction(carriedItem);
+
+                    if(button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
+                    {
+                        handled.set(true); // 走到这一步说明已经进行了交互
+                        long needRemovePlayerXp = XpUtil.xpBetweenLevels(Math.max(currentLevel-wantConversionLevel,0),currentLevel);
+                        int actualRemovePlayerXp = BDMath.clampLongToInt(needRemovePlayerXp);
+                        long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
+
+                        // 插入当前经验流体
+                        IStackType remaining = storage.insert(getSlotIndex(),new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(),1),actualInsertFluid),false);
+                        if(!remaining.isEmpty())
+                        {
+                            int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount()/20); // 由于前面从int*20，这里除回去
+                            actualRemovePlayerXp = actualRemovePlayerXp - needReturnXp;
+                        }
+                        player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值
+                    }
+                }
                 // 堆叠数量为1 右键点击 尝试取出内容物并插入
-                if(carriedItem.getCount()==1 && button== GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+                else if(carriedItem.getCount()==1 && button== GLFW.GLFW_MOUSE_BUTTON_RIGHT)
                 {
                     if(carriedItem.getItem() instanceof BucketItem bucketItem)
                     {
@@ -187,10 +216,53 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         menu.setCarried(newCarriedItem);
                     }
                 }
-                else
+                else  // 槽位物品存在，携带物品存在，不为相同类型
                 {
-                    // 槽位物品存在，携带物品存在，不为相同类型
-                    if(button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
+                    // 先检查是否为经验棒交互
+                    if(carriedItem.getItem() instanceof XpExchangeItem && button != GLFW.GLFW_MOUSE_BUTTON_LEFT)
+                    {
+                        IStackType actualStack = getStack();
+
+                        int conversionRate = XpExchangeItem.getConversionRate();
+                        double currentLevel = XpUtil.levelAsDouble(player);
+                        int wantConversionLevel = XpExchangeItem.getXpLevelPerAction(carriedItem);
+
+                        if(actualStack instanceof FluidStackType fluidStackType && fluidStackType.hasTag(ModFluidTags.C_EXPERIENCE))
+                        {
+                            if(button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
+                            {
+                                long needRemovePlayerXp = XpUtil.xpBetweenLevels(Math.max(currentLevel-wantConversionLevel,0),currentLevel);
+                                int actualRemovePlayerXp = BDMath.clampLongToInt(needRemovePlayerXp);
+                                long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
+
+                                // 插入当前经验流体
+                                IStackType remaining = storage.insert(getSlotIndex(), new FluidStackType(fluidStackType.copyStack(),actualInsertFluid),false);
+                                if(!remaining.isEmpty())
+                                {
+                                    int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount()/20); // 由于前面从int*20，这里除回去
+                                    actualRemovePlayerXp = actualRemovePlayerXp - needReturnXp;
+                                }
+                                player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值
+
+                            }
+                            else if(button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) // 鼠标中键--取出一级
+                            {
+                                long needInsertPlayerXp = XpUtil.xpBetweenLevels(currentLevel,currentLevel+wantConversionLevel);
+                                int actualInsertPlayerXp = BDMath.clampLongToInt(needInsertPlayerXp);
+                                long actualRemoveFluid = actualInsertPlayerXp * conversionRate;
+
+                                // 首先尝试提取指定数量的经验流体
+                                IStackType extracted = storage.extract(getSlotIndex(),actualRemoveFluid,false);
+                                actualInsertPlayerXp = BDMath.clampLongToInt(extracted.getStackAmount()/20);
+                                if(actualInsertPlayerXp > 0)
+                                {
+                                    player.giveExperiencePoints(actualInsertPlayerXp);
+                                }
+                            }
+                        }
+                    }
+                    // 再检查是否为物品交换
+                    else if(button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
                     {
                         IStackType actualStack = getStack();
                         if(actualStack instanceof ItemStackType)
@@ -215,7 +287,8 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                             }
                         }
                     }
-                    if(carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+                    // 最后检查是否为能力系统交互
+                    else if(carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
                     {
                         if(carriedItem.getItem() instanceof BucketItem bucket)
                         {

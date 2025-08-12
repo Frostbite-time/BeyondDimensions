@@ -13,7 +13,7 @@ public final class EnergyType extends LongType<EnergyType>
     @Override
     public Component getName()
     {
-        return Component.translatable("types.beyonddimensions.energyType.name");
+        return Component.translatable("types.beyonddimensions.energytype.name");
     }
 
     @Override

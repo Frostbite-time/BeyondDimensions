@@ -6,10 +6,12 @@ import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
@@ -328,6 +330,20 @@ public class ItemStackType implements IStackType<ItemStack> {
         ItemStackType split = (ItemStackType)copyWithCount(splitAmount);
         shrink(splitAmount);
         return split;
+    }
+
+    @Override
+    public boolean hasTag(TagKey<?> tagKey)
+    {
+        if (tagKey == null) return false;
+        if (this.item == null || this.item == Items.AIR) return false;
+
+        if (!tagKey.isFor(Registries.ITEM)) {
+            return false;
+        }
+
+        TagKey<Item> itemTag = (TagKey<Item>) tagKey;
+        return item.builtInRegistryHolder().is(itemTag);
     }
 
     @Override

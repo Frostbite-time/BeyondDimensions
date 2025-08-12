@@ -36,6 +36,7 @@ import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEFlux.BD_AEFluxPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
@@ -118,6 +119,9 @@ public class BeyondDimensions
 
         // 注册方块
         ModBlocks.register(modEventBus);
+
+        // 注册流体
+        ModFluids.register(modEventBus);
 
         // 注册方块实体
         ModBlockEntities.register(modEventBus);

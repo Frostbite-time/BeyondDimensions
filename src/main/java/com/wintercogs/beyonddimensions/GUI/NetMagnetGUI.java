@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.GUI.SharedWidget.LeftTabButton;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
 import com.wintercogs.beyonddimensions.Item.Custom.BaseMachineItem;
 import com.wintercogs.beyonddimensions.Machine.*;
@@ -17,9 +18,11 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
 {
     private RightTabButton filterModeButton;
     private RightTabButton controlModeButton;
+    private RightTabButton hopperItemModeButton;
+    private RightTabButton hopperXpModeButton;
     private RightTabButton hopperNBTModeButton;
     private RightTabButton hopperFluidModeButton;
-    private RightTabButton hopperRangeModeButton;
+    private LeftTabButton hopperRangeModeButton;
 
     public NetMagnetGUI(NetMagnetMenu menu, Inventory playerInventory, Component title)
     {
@@ -90,8 +93,64 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         };
         addRenderableWidget(controlModeButton);
 
-        hopperNBTModeButton = new RightTabButton(leftPos + 176, topPos +66, 23,26 ,
+        hopperItemModeButton = new RightTabButton(leftPos + 176, topPos +66, 23,26 ,
                 leftPos + 176 +2 , topPos +66 +5, 16,16,button -> {
+            hopperItemModeButton.toggleState();
+            BaseMachineItem.setHopperItemMode(menu.menuStack, (HopperItemMode) hopperItemModeButton.currentState);
+            menu.writeAndSendQuickData();
+        })
+        {
+            @Override
+            protected void initButton()
+            {
+                iconMap.put(HopperItemMode.DENY, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/hopper_item_mode_deny.png"));
+                iconMap.put(HopperItemMode.ALLOW, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/hopper_item_mode_allow.png"));
+
+
+                tooltipMap.put(HopperItemMode.DENY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_item_mode_deny")));
+                tooltipMap.put(HopperItemMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_item_mode_allow")));
+
+
+                for(Enum<?> state : iconMap.keySet())
+                {
+                    this.states.add(state);
+                }
+
+                setState(BaseMachineItem.getHopperItemModeOrDefault(menu.menuStack, HopperItemMode.ALLOW));
+            }
+        };
+        addRenderableWidget(hopperItemModeButton);
+
+        hopperXpModeButton = new RightTabButton(leftPos + 176, topPos +96, 23,26 ,
+                leftPos + 176 +2 , topPos +96 +5, 16,16,button -> {
+            hopperXpModeButton.toggleState();
+            BaseMachineItem.setHopperXpMode(menu.menuStack, (HopperXpMode) hopperXpModeButton.currentState);
+            menu.writeAndSendQuickData();
+        })
+        {
+            @Override
+            protected void initButton()
+            {
+                iconMap.put(HopperXpMode.DENY, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/hopper_xp_mode_deny.png"));
+                iconMap.put(HopperXpMode.ALLOW, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/hopper_xp_mode_allow.png"));
+
+
+                tooltipMap.put(HopperXpMode.DENY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_xp_mode_deny")));
+                tooltipMap.put(HopperXpMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_xp_mode_allow")));
+
+
+                for(Enum<?> state : iconMap.keySet())
+                {
+                    this.states.add(state);
+                }
+
+                setState(BaseMachineItem.getHopperXpModeOrDefault(menu.menuStack, HopperXpMode.ALLOW));
+            }
+        };
+        addRenderableWidget(hopperXpModeButton);
+
+        hopperNBTModeButton = new RightTabButton(leftPos + 176, topPos +126, 23,26 ,
+                leftPos + 176 +2 , topPos +126 +5, 16,16,button -> {
             hopperNBTModeButton.toggleState();
             BaseMachineItem.setHopperNBTMode(menu.menuStack, (HopperNBTMode) hopperNBTModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -118,8 +177,8 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         };
         addRenderableWidget(hopperNBTModeButton);
 
-        hopperFluidModeButton = new RightTabButton(leftPos + 176, topPos +96, 23,26 ,
-                leftPos + 176 +2 , topPos +96 +5, 16,16,button -> {
+        hopperFluidModeButton = new RightTabButton(leftPos + 176, topPos +156, 23,26 ,
+                leftPos + 176 +2 , topPos +156 +5, 16,16,button -> {
             hopperFluidModeButton.toggleState();
             BaseMachineItem.setHopperFluidMode(menu.menuStack, (HopperFluidMode) hopperFluidModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -145,8 +204,8 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         };
         addRenderableWidget(hopperFluidModeButton);
 
-        hopperRangeModeButton = new RightTabButton(leftPos + 176, topPos +126, 23,26 ,
-                leftPos + 176 +2 , topPos +126 +5, 16,16,button -> {
+        hopperRangeModeButton = new LeftTabButton(leftPos - 23, topPos +156, 23,26 ,
+                leftPos - 18 , topPos +156 +5, 16,16,button -> {
             hopperRangeModeButton.toggleState();
             BaseMachineItem.setHopperRangeMode(menu.menuStack, (HopperRangeMode) hopperRangeModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -190,6 +249,12 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
 
         if(controlModeButton.currentState != BaseMachineItem.getControlModeOrDefault(menu.menuStack, RedStoneControlMode.IGNORE))
             controlModeButton.setState(BaseMachineItem.getControlModeOrDefault(menu.menuStack, RedStoneControlMode.IGNORE));
+
+        if(hopperItemModeButton.currentState != BaseMachineItem.getHopperItemModeOrDefault(menu.menuStack, HopperItemMode.ALLOW))
+            hopperItemModeButton.setState(BaseMachineItem.getHopperItemModeOrDefault(menu.menuStack, HopperItemMode.ALLOW));
+
+        if(hopperXpModeButton.currentState != BaseMachineItem.getHopperXpModeOrDefault(menu.menuStack, HopperXpMode.DENY))
+            hopperXpModeButton.setState(BaseMachineItem.getHopperXpModeOrDefault(menu.menuStack, HopperXpMode.DENY));
 
         if(hopperNBTModeButton.currentState != BaseMachineItem.getHopperNBTModeOrDefault(menu.menuStack, HopperNBTMode.DENY))
             hopperNBTModeButton.setState(BaseMachineItem.getHopperNBTModeOrDefault(menu.menuStack, HopperNBTMode.DENY));

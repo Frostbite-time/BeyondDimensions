@@ -43,6 +43,8 @@ public class NetMagnetMenu extends BDBaseMenu
 
     private RedStoneControlMode lastControlMode;
     private FilterMode lastFilterMode;
+    private HopperItemMode lastHopperItemMode;
+    private HopperXpMode lastHopperXpMode;
     private HopperNBTMode lastHopperNBTMode;
     private HopperFluidMode lastHopperFluidMode;
     private HopperRangeMode lastHopperRangeMode;
@@ -119,6 +121,8 @@ public class NetMagnetMenu extends BDBaseMenu
         boolean result = super.shouldSendQuickData()
                 || lastControlMode != BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE)
                 || lastFilterMode != BaseMachineItem.getFilterModeOrDefault(menuStack, FilterMode.BLACK)
+                || lastHopperItemMode != BaseMachineItem.getHopperItemModeOrDefault(menuStack, HopperItemMode.ALLOW)
+                || lastHopperXpMode != BaseMachineItem.getHopperXpModeOrDefault(menuStack, HopperXpMode.DENY)
                 || lastHopperNBTMode != BaseMachineItem.getHopperNBTModeOrDefault(menuStack,HopperNBTMode.DENY)
                 || lastHopperFluidMode != BaseMachineItem.getHopperFluidModeOrDefault(menuStack,HopperFluidMode.DENY)
                 || lastHopperRangeMode != BaseMachineItem.getHopperRangeModeOrDefault(menuStack,HopperRangeMode.RADIUS_MID);
@@ -127,6 +131,8 @@ public class NetMagnetMenu extends BDBaseMenu
         {
             lastControlMode = BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE);
             lastFilterMode = BaseMachineItem.getFilterModeOrDefault(menuStack, FilterMode.BLACK);
+            lastHopperItemMode = BaseMachineItem.getHopperItemModeOrDefault(menuStack, HopperItemMode.ALLOW);
+            lastHopperXpMode = BaseMachineItem.getHopperXpModeOrDefault(menuStack, HopperXpMode.DENY);
             lastHopperNBTMode = BaseMachineItem.getHopperNBTModeOrDefault(menuStack,HopperNBTMode.DENY);
             lastHopperFluidMode = BaseMachineItem.getHopperFluidModeOrDefault(menuStack,HopperFluidMode.DENY);
             lastHopperRangeMode = BaseMachineItem.getHopperRangeModeOrDefault(menuStack,HopperRangeMode.RADIUS_MID);
@@ -141,6 +147,8 @@ public class NetMagnetMenu extends BDBaseMenu
         super.writeQuickDataTag(tag);
         tag.putString("control_mode",BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE).name());
         tag.putString("filter_type", BaseMachineItem.getFilterModeOrDefault(menuStack, FilterMode.BLACK).name());
+        tag.putString("hopper_item_mode",BaseMachineItem.getHopperItemModeOrDefault(menuStack, HopperItemMode.ALLOW).name());
+        tag.putString("hopper_xp_mode",BaseMachineItem.getHopperXpModeOrDefault(menuStack, HopperXpMode.DENY).name());
         tag.putString("hopper_nbt_mode", BaseMachineItem.getHopperNBTModeOrDefault(menuStack,HopperNBTMode.DENY).name());
         tag.putString("hopper_fluid_mode", BaseMachineItem.getHopperFluidModeOrDefault(menuStack,HopperFluidMode.DENY).name());
         tag.putString("hopper_range_mode", BaseMachineItem.getHopperRangeModeOrDefault(menuStack,HopperRangeMode.RADIUS_MID).name());
@@ -152,6 +160,8 @@ public class NetMagnetMenu extends BDBaseMenu
         super.readQuickDataTag(tag);
         BaseMachineItem.setControlMode(menuStack, RedStoneControlMode.valueOf(tag.getString("control_mode")));
         BaseMachineItem.setFilterMode(menuStack, FilterMode.valueOf(tag.getString("filter_type")));
+        BaseMachineItem.setHopperItemMode(menuStack, HopperItemMode.valueOf(tag.getString("hopper_item_mode")));
+        BaseMachineItem.setHopperXpMode(menuStack, HopperXpMode.valueOf(tag.getString("hopper_xp_mode")));
         BaseMachineItem.setHopperNBTMode(menuStack, HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode")));
         BaseMachineItem.setHopperFluidMode(menuStack, HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode")));
         BaseMachineItem.setHopperRangeMode(menuStack, HopperRangeMode.valueOf(tag.getString("hopper_range_mode")));

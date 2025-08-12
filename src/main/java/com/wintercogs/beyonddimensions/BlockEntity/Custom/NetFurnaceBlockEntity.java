@@ -829,7 +829,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         this.cookTimeTotal = Arrays.stream(tag.getIntArray("cook_time_total")).boxed().collect(Collectors.toList());
         this.popMode = PopMode.valueOf(tag.getString("pop_mode"));
         this.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
-        this.sortMode = tag.getString("sort_mode").isEmpty() ? AutoSortMode.STOP : AutoSortMode.valueOf(tag.getString("sort_mode"));
+        this.sortMode = tag.contains("sort_mode") ? AutoSortMode.valueOf(tag.getString("sort_mode")) : AutoSortMode.STOP;
     }
 
     @Override

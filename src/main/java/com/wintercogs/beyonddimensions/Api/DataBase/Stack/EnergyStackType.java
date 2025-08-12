@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -99,6 +100,12 @@ public final class EnergyStackType extends LongStackType<EnergyType>
         long splitAmount = Math.min(amount, stack.getStackCount());
         stack.shrink(splitAmount);
         return new EnergyStackType(splitAmount);
+    }
+
+    @Override
+    public boolean hasTag(TagKey<?> tagKey)
+    {
+        return false;
     }
 
     @Override

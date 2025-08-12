@@ -116,6 +116,42 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
         return stack.hasTag() && stack.getTag().contains("filter_mode");
     }
 
+    // 漏斗：是否收集物品
+    public static HopperItemMode getHopperItemModeOrDefault(ItemStack stack, @Nullable HopperItemMode defaultValue)
+    {
+        if (stack.hasTag() && stack.getTag().contains("hopper_item_mode"))
+        {
+            return HopperItemMode.valueOf(stack.getTag().getString("hopper_item_mode"));
+        }
+        return defaultValue; //未命中
+    }
+    public static void setHopperItemMode(ItemStack stack, HopperItemMode newMode)
+    {
+        stack.getOrCreateTag().putString("hopper_item_mode", newMode.name());
+    }
+    public static boolean hasHopperItemMode(ItemStack stack)
+    {
+        return stack.hasTag() && stack.getTag().contains("hopper_item_mode");
+    }
+
+    // 漏斗：是否收集经验球
+    public static HopperXpMode getHopperXpModeOrDefault(ItemStack stack, @Nullable HopperXpMode defaultValue)
+    {
+        if (stack.hasTag() && stack.getTag().contains("hopper_xp_mode"))
+        {
+            return HopperXpMode.valueOf(stack.getTag().getString("hopper_xp_mode"));
+        }
+        return defaultValue; //未命中
+    }
+    public static void setHopperXpMode(ItemStack stack, HopperXpMode newMode)
+    {
+        stack.getOrCreateTag().putString("hopper_xp_mode", newMode.name());
+    }
+    public static boolean hasHopperXpMode(ItemStack stack)
+    {
+        return stack.hasTag() && stack.getTag().contains("hopper_xp_mode");
+    }
+
     // 漏斗：是否收集NBT物品
     public static HopperNBTMode getHopperNBTModeOrDefault(ItemStack stack, @Nullable HopperNBTMode defaultValue)
     {

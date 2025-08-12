@@ -1,9 +1,12 @@
 package com.wintercogs.beyonddimensions.Datagen;
 
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
+import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.Set;
@@ -29,6 +32,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider
         dropSelf(ModBlocks.NET_HOPPER_BLOCK.get());
         dropSelf(ModBlocks.NET_FURNACE_BLOCK.get());
         dropSelf(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
+
+        ModFluids.ALL.forEach(e -> add((LiquidBlock)ModFluids.XP_FLUID.block().get(), LootTable.lootTable()));
     }
 
     @Override

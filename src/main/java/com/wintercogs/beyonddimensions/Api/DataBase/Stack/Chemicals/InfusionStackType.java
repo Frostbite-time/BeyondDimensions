@@ -14,6 +14,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -226,6 +227,20 @@ public final class InfusionStackType implements IStackType<InfusionStack>
         split.setAmount(splitAmount);
         stack.shrink(splitAmount);
         return new InfusionStackType(split);
+    }
+
+    @Override
+    public boolean hasTag(TagKey<?> tagKey)
+    {
+        if (tagKey == null) return false;
+        if (this.stack == null || this.stack.isEmpty()) return false;
+
+        if (!tagKey.isFor(MekanismAPI.INFUSE_TYPE_REGISTRY_NAME)) {
+            return false;
+        }
+
+        TagKey<InfuseType> chemicalTag = (TagKey<InfuseType>) tagKey;
+        return stack.getRaw().is(chemicalTag);
     }
 
     @Override

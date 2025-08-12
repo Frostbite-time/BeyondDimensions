@@ -2,10 +2,12 @@ package com.wintercogs.beyonddimensions.Item;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
+import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -39,6 +41,11 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.MATTER_COMPRESS_BALL.get());
                         output.accept(ModItems.NET_MAGNET_ITEM.get());
                         output.accept(ModItems.NET_FEEDER_ITEM.get());
+                        output.accept(ModItems.XP_EXCHANGE_ITEM.get());
+
+                        for (ModFluids.FluidEntry e : ModFluids.ALL) { //注册所有桶
+                            output.accept((Item)e.bucket().get());
+                        }
                     })
                     .build());
 

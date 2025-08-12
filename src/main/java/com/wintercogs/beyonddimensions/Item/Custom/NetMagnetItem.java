@@ -4,10 +4,8 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.Machine.FilterMode;
-import com.wintercogs.beyonddimensions.Machine.HopperFluidMode;
-import com.wintercogs.beyonddimensions.Machine.HopperNBTMode;
-import com.wintercogs.beyonddimensions.Machine.HopperRangeMode;
+import com.wintercogs.beyonddimensions.Fluid.ModFluids;
+import com.wintercogs.beyonddimensions.Machine.*;
 import com.wintercogs.beyonddimensions.Menu.NetMagnetMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -19,6 +17,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -73,6 +72,10 @@ public class NetMagnetItem extends BaseMachineItem
             setFilterSlots(stack,new ArrayList<>(Collections.nCopies(capacity,new ItemStackType())));
         if(!hasFilterMode(stack))
             setFilterMode(stack,FilterMode.BLACK);
+        if(!hasHopperItemMode(stack))
+            setHopperItemMode(stack, HopperItemMode.ALLOW);
+        if(!hasHopperXpMode(stack))
+            setHopperXpMode(stack, HopperXpMode.DENY);
         if(!hasHopperNBTMode(stack))
             setHopperNBTMode(stack,HopperNBTMode.DENY);
         if(!hasHopperFluidMode(stack))
@@ -94,37 +97,65 @@ public class NetMagnetItem extends BaseMachineItem
         super.workContent(stack, level, holder, slotId, isSelected);
 
         FilterMode filterMode = getFilterModeOrDefault(stack,FilterMode.BLACK);
+        HopperItemMode hopperItemMode = getHopperItemModeOrDefault(stack,HopperItemMode.ALLOW);
+        HopperXpMode hopperXpMode = getHopperXpModeOrDefault(stack,HopperXpMode.DENY);
         HopperNBTMode hopperNBTMode = getHopperNBTModeOrDefault(stack,HopperNBTMode.DENY);
         HopperFluidMode hopperFluidMode = getHopperFluidModeOrDefault(stack,HopperFluidMode.DENY);
         HopperRangeMode hopperRangeMode = getHopperRangeModeOrDefault(stack,HopperRangeMode.RADIUS_MID);
         List<IStackType> filterSlots = getFilterSlotsOrDefault(stack,new ArrayList<>());
 
         AABB searchArea = getSearchArea(hopperRangeMode,level,holder.getOnPos());
-        List<ItemEntity> itemEntities = refreshItemEntityCache(hopperNBTMode,level,searchArea);
+
+        List<ItemEntity> itemEntities = hopperItemMode == HopperItemMode.ALLOW ? refreshItemEntityCache(hopperNBTMode,level,searchArea) : new ArrayList<>();
+        List<ExperienceOrb> xpEntities = hopperXpMode == HopperXpMode.ALLOW ? refreshXpEntityCache(level,searchArea) : new ArrayList<>();
 
 
         UnifiedStorage storage = NetedItem.getNet(stack,level.getServer()).getUnifiedStorage();
 
         // 开始收集物品
-        for(ItemEntity itemEntity : itemEntities)
+        if(hopperItemMode == HopperItemMode.ALLOW)
         {
-            if(itemEntity != null && !itemEntity.isRemoved())
+            for(ItemEntity itemEntity : itemEntities)
             {
-                ItemStack itemStack = itemEntity.getItem().copy();
-                ItemStackType typedStack = new ItemStackType(itemStack);
-                if(matchesFilter(filterMode,filterSlots,typedStack))
+                if(itemEntity != null && !itemEntity.isRemoved())
                 {
-
-                    if(storage.insert(typedStack,true).isEmpty()) // 表示能成功插入
+                    ItemStack itemStack = itemEntity.getItem().copy();
+                    ItemStackType typedStack = new ItemStackType(itemStack);
+                    if(matchesFilter(filterMode,filterSlots,typedStack))
                     {
-                        itemEntity.discard();
-                        // workContent之前已经由shouldWork检查过net的存在性
-                        storage.insert(typedStack,false);
+
+                        if(storage.insert(typedStack,true).isEmpty()) // 表示能成功插入
+                        {
+                            itemEntity.discard();
+                            // workContent之前已经由shouldWork检查过net的存在性
+                            storage.insert(typedStack,false);
+                        }
                     }
                 }
             }
         }
+        // 开始收集经验球
+        if(hopperXpMode == HopperXpMode.ALLOW)
+        {
+            for(ExperienceOrb orb : xpEntities)
+            {
+                if(orb != null && !orb.isRemoved())
+                {
+                    int xp = orb.getValue();
+                    if(xp > 0 )
+                    {
+                        long xpFluid = xp * 20L;
+                        FluidStackType xpStack = new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(),1),xpFluid);
 
+                        if(storage.insert(xpStack,true).isEmpty())
+                        {
+                            orb.discard();
+                            storage.insert(xpStack,false);
+                        }
+                    }
+                }
+            }
+        }
         // 开始抽取流体
         if(hopperFluidMode == HopperFluidMode.ALLOW)
         {
@@ -224,6 +255,15 @@ public class NetMagnetItem extends BaseMachineItem
                         return true;
                     }
                 }
+        );
+    }
+
+    private List<ExperienceOrb> refreshXpEntityCache(Level level , AABB searchArea)
+    {
+        return level.getEntitiesOfClass(
+                ExperienceOrb.class,
+                searchArea,
+                orb -> true // 不做过滤，拿到区域内所有经验球
         );
     }
 

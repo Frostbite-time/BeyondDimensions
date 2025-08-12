@@ -98,6 +98,8 @@ public class NetHopperMenu extends BDBaseMenu
         super.writeQuickDataTag(tag);
         tag.putString("filter_type",be.filterMode.name());
         tag.putString("control_mode",be.controlMode.name());
+        tag.putString("hopper_item_mode",be.hopperItemMode.name());
+        tag.putString("hopper_xp_mode",be.hopperXpMode.name());
         tag.putString("hopper_fluid_mode", be.hopperFluidMode.name());
         tag.putString("hopper_nbt_mode", be.hopperNBTMode.name());
         tag.putString("hopper_range_mode", be.hopperRangeMode.name());
@@ -109,6 +111,8 @@ public class NetHopperMenu extends BDBaseMenu
         super.readQuickDataTag(tag);
         be.filterMode = FilterMode.valueOf(tag.getString("filter_type"));
         be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
+        be.hopperItemMode = HopperItemMode.valueOf(tag.getString("hopper_item_mode"));
+        be.hopperXpMode = HopperXpMode.valueOf(tag.getString("hopper_xp_mode"));
         be.hopperFluidMode = HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode"));
         be.hopperNBTMode = HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode"));
         be.hopperRangeMode = HopperRangeMode.valueOf(tag.getString("hopper_range_mode"));

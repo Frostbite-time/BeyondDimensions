@@ -25,6 +25,10 @@ public class CommonTextures
     public static final int RIGHT_TAB_WIDTH = 26;
     public static final int RIGHT_TAB_HEIGHT = 12;
 
+    // 左标签页
+    public static final ResourceLocation LEFT_TAB = new ResourceLocation("beyonddimensions:textures/gui/sprites/widget/left_tab.png");
+    public static final int LEFT_TAB_WIDTH = 26;
+    public static final int LEFT_TAB_HEIGHT = 12;
 
     // 网络熔炉背景图
     public static final ResourceLocation NET_FURNACE_BACKGROUND = new ResourceLocation("beyonddimensions:textures/gui/net_furnace.png");
