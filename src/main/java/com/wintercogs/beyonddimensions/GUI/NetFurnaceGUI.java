@@ -162,6 +162,9 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
 
         if(receiveModeButton.currentState != menu.be.receiveMode)
             receiveModeButton.setState(menu.be.receiveMode);
+
+        if(sortModeButton.currentState != menu.be.sortMode)
+            sortModeButton.setState(menu.be.sortMode);
     }
 
     @Override
