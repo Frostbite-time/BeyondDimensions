@@ -5,10 +5,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.GasStackTy
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.InfusionStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.PigmentStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.SlurryStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.EnergyStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.FluidStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.ItemStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackType;
@@ -16,6 +13,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackT
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals.GasHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals.InfusionHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals.PigmentHandlerWrapper;
@@ -23,14 +21,12 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemical
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.EnergyHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.ItemHandlerWrapper;
+import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.SourceHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.GasUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.InfusionUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.PigmentUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.SlurryUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.EnergyUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.FluidUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.ItemUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Api.DataBase.Storage.*;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
@@ -40,6 +36,8 @@ import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEFlux.BD_AEFluxPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
+import com.wintercogs.beyonddimensions.Integration.AE_Ars.BD_AE_ArsPlugin;
+import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
@@ -88,6 +86,10 @@ public class BeyondDimensions
     public static final String CuriosModId = "curios";
     public static boolean JECharactersLoaded = false;
     public static final String JECharactersModId = "jecharacters";
+    public static final String ARS_ModId = "ars_nouveau"; // 新生魔艺-魔源兼容
+    public static boolean ARS_Loaded = false;
+    public static final String AE_ARS_ModId = "arseng";
+    public static boolean AE_ARS_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -167,6 +169,15 @@ public class BeyondDimensions
         {
             JECharactersLoaded = true;
         }
+        if(ModList.get().isLoaded(ARS_ModId))
+        {
+            ARS_Loaded = true;
+            BD_ArsCaps.registerCapability(MOD_EVENT_BUS);
+        }
+        if(ModList.get().isLoaded(AE_ARS_ModId))
+        {
+            AE_ARS_Loaded = true;
+        }
 
         ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
     }
@@ -241,6 +252,18 @@ public class BeyondDimensions
 
         }
 
+        if(ARS_Loaded)
+        {
+            // 注册魔源
+            StackTypeRegistry.registerType(new SourceStackType());
+            // 自己注册能力作为代替，随后为新生魔艺的方块做包装注册
+            CapabilityHelper.BlockCapabilityMap.put(SourceStackType.ID, BD_ArsCaps.SOURCE_CAP);
+            CapabilityHelper.ItemCapabilityMap.put(SourceStackType.ID, BD_ArsCaps.SOURCE_CAP);
+            UnifiedStorage.typedHandlerMap.put(SourceStackType.ID, SourceUnifiedStorageHandler::new);
+            StackTypedHandler.typedHandlerMap.put(SourceStackType.ID, SourceStackTypedHandler::new);
+            StackHandlerWrapperHelper.stackWrappers.put(SourceStackType.ID, SourceHandlerWrapper::new);
+        }
+
         // 为维度ME硬盘注册，其中BD_AEPlugin用于注册存储元件
         // BD_AEMEKPlugin与BD_AEFluxPlugin分别注册IStackType与AEKey之间的转换。
         // 物品、流体的转换由AEHelper的静态块负责
@@ -255,6 +278,10 @@ public class BeyondDimensions
         if(AEFluxLoaded)
         {
             BD_AEFluxPlugin.register();
+        }
+        if(AE_ARS_Loaded)
+        {
+            BD_AE_ArsPlugin.register();
         }
     }
 

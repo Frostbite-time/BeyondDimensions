@@ -65,6 +65,11 @@ public class ModCreativeModeTabs
                         output.accept(ModBlocks.NET_HOPPER_BLOCK.get());
                         output.accept(ModBlocks.NET_FURNACE_BLOCK.get());
                         output.accept(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
+
+                        if(BeyondDimensions.ARS_Loaded)
+                        {
+                            output.accept(ModBlocks.ARS_SOURCE_PATHWAY.get());
+                        }
                     })
                     .build());
 

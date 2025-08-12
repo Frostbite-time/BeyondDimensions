@@ -206,6 +206,7 @@ dependencies {
 
     // Curios支持
     modCompileOnly "top.theillusivec4.curios:curios-forge:${curios_version}+${minecraft_version}:api"
+    modLocalRuntime "top.theillusivec4.curios:curios-forge:${curios_version}+${minecraft_version}"
 
     // kubejs
     modCompileOnly "dev.latvian.mods:kubejs-forge:${kubejs_version}"
@@ -219,6 +220,14 @@ dependencies {
     // 通用拼音搜索的引入
     modCompileOnly "curse.maven:just-enough-characters-250702:6680042"
     //modRuntimeOnly "curse.maven:just-enough-characters-250702:6680042"
+
+    // 新生魔艺兼容
+    modCompileOnly "maven.modrinth:ars-nouveau:4.12.7"
+    modCompileOnly "maven.modrinth:ars-energistique:1.2.0" // AE附属
+    modLocalRuntime "maven.modrinth:ars-nouveau:4.12.7"
+    modLocalRuntime "maven.modrinth:geckolib:39SztbiB"
+    modLocalRuntime "maven.modrinth:patchouli:1.20.1-84.1-forge"
+
 
     modLocalRuntime "curse.maven:sophisticated-core-618298:6596375"
     modLocalRuntime "curse.maven:sophisticated-backpacks-422301:6587116"

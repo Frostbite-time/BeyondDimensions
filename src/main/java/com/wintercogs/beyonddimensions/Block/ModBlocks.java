@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Block;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.Custom.*;
+import com.wintercogs.beyonddimensions.Integration.Ars.Block.SourcePathwayBlock;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -47,7 +48,17 @@ public class ModBlocks
     public static final RegistryObject<Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock("dimensional_connect_block",
             ()-> new Block(BlockBehaviour.Properties.of().strength(2f)));
 
-
+    public static final RegistryObject<Block> ARS_SOURCE_PATHWAY = registerBlock("ars_source_pathway",
+            () -> {
+                if(BeyondDimensions.ARS_Loaded)
+                {
+                    return new SourcePathwayBlock(BlockBehaviour.Properties.of().strength(2f));
+                }
+                else
+                {
+                    return new Block(BlockBehaviour.Properties.of().strength(2f));
+                }
+            });
 
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block)

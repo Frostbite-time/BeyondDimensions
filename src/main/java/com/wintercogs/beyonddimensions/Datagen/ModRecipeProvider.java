@@ -1,11 +1,14 @@
 package com.wintercogs.beyonddimensions.Datagen;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraftforge.common.crafting.ConditionalRecipe;
 import net.minecraftforge.common.crafting.conditions.IConditionBuilder;
 
 import java.util.function.Consumer;
@@ -249,6 +252,28 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('C', ModItems.SPACE_TIME_BAR.get())
                 .unlockedBy("unlock_xp_exchange_item", has(ModItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
+
+        if(BeyondDimensions.ARS_Loaded)
+        {
+            // 先把原始 ShapedRecipeBuilder 写好
+            ShapedRecipeBuilder builder = ShapedRecipeBuilder
+                    .shaped(RecipeCategory.MISC, ModBlocks.ARS_SOURCE_PATHWAY.get())
+                    .pattern("ABA")
+                    .pattern("CDC")
+                    .pattern("ABA")
+                    .define('A', ModItems.SPACE_TIME_BAR.get())
+                    .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                    .define('C', com.hollingsworth.arsnouveau.setup.registry.BlockRegistry.SOURCE_JAR.get())
+                    .define('D', Items.ENDER_EYE)
+                    .unlockedBy("unlock_ars_source_pathway", has(ModItems.SPACE_TIME_BAR.get()));
+
+            // 用 ConditionalRecipe 包起来，加上“模组已加载”的条件
+            ConditionalRecipe.builder()
+                    .addCondition(modLoaded(BeyondDimensions.ARS_ModId)) // 等同于 forge:mod_loaded
+                    .addRecipe(builder::save)                            // 把上面的 ShapedRecipeBuilder 交给它保存
+                    // .generateAdvancement() // 可选：需要时让它自己生成 Advancement
+                    .build(recipeOutput, new ResourceLocation(BeyondDimensions.MODID, "ars_source_pathway")); // 最终的配方ID
+        }
 
     }
 }
