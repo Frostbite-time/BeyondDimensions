@@ -56,6 +56,12 @@ public class WardenSoulStackType extends LongStackType<WardenSoulType>
     }
 
     @Override
+    public String getModId()
+    {
+        return BeyondDimensions.IFS_ModId;
+    }
+
+    @Override
     public MapCodec<? extends IStackType<WardenSoulType>> codec()
     {
         return TYPE_CODEC;

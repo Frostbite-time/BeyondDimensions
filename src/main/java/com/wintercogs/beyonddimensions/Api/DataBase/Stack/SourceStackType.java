@@ -57,6 +57,12 @@ public class SourceStackType extends LongStackType<SourceType>
     }
 
     @Override
+    public String getModId()
+    {
+        return BeyondDimensions.ARS_ModId;
+    }
+
+    @Override
     public IStackType<SourceType> fromObject(Object key, long amount, DataComponentPatch dataComponentPatch)
     {
         if(key instanceof SourceType)

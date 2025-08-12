@@ -240,7 +240,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
         tooltips.add(displayName);
 
         Component modName;
-        modName = Component.literal(WordUtils.capitalizeFully(BeyondDimensions.MODID.replace('_', ' '))).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
+        modName = Component.literal(WordUtils.capitalizeFully(getModId().replace('_', ' '))).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
         tooltips.add(modName);
 
         tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.long_type",getStackAmount()));

@@ -53,6 +53,12 @@ public class ManaStackType extends LongStackType<ManaType>
     }
 
     @Override
+    public String getModId()
+    {
+        return BeyondDimensions.Botania_ModId;
+    }
+
+    @Override
     public MapCodec<? extends IStackType<ManaType>> codec()
     {
         return TYPE_CODEC;
