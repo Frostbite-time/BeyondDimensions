@@ -67,8 +67,8 @@ public class ModFluids
             public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer)
             {
                 super.initializeClient(consumer);
-                final ResourceLocation still = new ResourceLocation(BeyondDimensions.MODID, "block/" + name + "_still");
-                final ResourceLocation flow  = new ResourceLocation(BeyondDimensions.MODID, "block/" + name + "_flow");
+                final ResourceLocation still = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + name + "_still");
+                final ResourceLocation flow  = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + name + "_flow");
                 final int tint = argbTint;
                 consumer.accept(new IClientFluidTypeExtensions() {
                     @Override public ResourceLocation getStillTexture()   { return still; }

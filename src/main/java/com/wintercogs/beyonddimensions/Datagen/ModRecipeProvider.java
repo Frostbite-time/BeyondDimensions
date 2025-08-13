@@ -260,7 +260,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .addCondition(modLoaded(BeyondDimensions.AE2MODID)) // 等同于 forge:mod_loaded
                     .addRecipe(builder::save)                            // 把上面的 ShapedRecipeBuilder 交给它保存
                     // .generateAdvancement() // 可选：需要时让它自己生成 Advancement
-                    .build(recipeOutput, new ResourceLocation(BeyondDimensions.MODID, "net_ae_storage_cell")); // 最终的配方ID
+                    .build(recipeOutput, ResourceLocation.tryBuild(BeyondDimensions.MODID, "net_ae_storage_cell")); // 最终的配方ID
         }
 
         if(BeyondDimensions.ARS_Loaded)
@@ -282,7 +282,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .addCondition(modLoaded(BeyondDimensions.ARS_ModId)) // 等同于 forge:mod_loaded
                     .addRecipe(builder::save)                            // 把上面的 ShapedRecipeBuilder 交给它保存
                     // .generateAdvancement() // 可选：需要时让它自己生成 Advancement
-                    .build(recipeOutput, new ResourceLocation(BeyondDimensions.MODID, "ars_source_pathway")); // 最终的配方ID
+                    .build(recipeOutput, ResourceLocation.tryBuild(BeyondDimensions.MODID, "ars_source_pathway")); // 最终的配方ID
         }
 
         if(BeyondDimensions.Botania_Loaded)
@@ -300,7 +300,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .addCondition(modLoaded(BeyondDimensions.Botania_ModId)) // 等同于 forge:mod_loaded
                     .addRecipe(builder::save)                            // 把上面的 ShapedRecipeBuilder 交给它保存
                     // .generateAdvancement() // 可选：需要时让它自己生成 Advancement
-                    .build(recipeOutput, new ResourceLocation(BeyondDimensions.MODID, "mana_pool_pathway")); // 最终的配方ID
+                    .build(recipeOutput, ResourceLocation.tryBuild(BeyondDimensions.MODID, "mana_pool_pathway")); // 最终的配方ID
         }
 
     }

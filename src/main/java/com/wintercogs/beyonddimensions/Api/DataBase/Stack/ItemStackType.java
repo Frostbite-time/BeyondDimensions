@@ -432,7 +432,7 @@ public class ItemStackType implements IStackType<ItemStack> {
         CompoundTag stackTag = nbt.getCompound("Stack");
         CompoundTag caps = stackTag.contains("ForgeCaps") ? stackTag.getCompound("ForgeCaps") : null;
         CompoundTag tag = stackTag.contains("tag") ? stackTag.getCompound("tag") : null;
-        Item rawItem = (Item)BuiltInRegistries.ITEM.get(new ResourceLocation(stackTag.getString("id")));
+        Item rawItem = (Item)BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(stackTag.getString("id")));
         Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(rawItem).get();
         return new ItemStackType(item,amount,tag,caps);
     }

@@ -20,7 +20,7 @@ public class PacketRegister
     // 定义网络通道
     private static final String PROTOCOL_VERSION = "1";
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(BeyondDimensions.MODID, "simple_channel"),
+            ResourceLocation.tryBuild(BeyondDimensions.MODID, "simple_channel"),
             () -> PROTOCOL_VERSION,
             PROTOCOL_VERSION::equals,
             PROTOCOL_VERSION::equals

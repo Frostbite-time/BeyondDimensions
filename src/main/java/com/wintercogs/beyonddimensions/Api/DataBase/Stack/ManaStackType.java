@@ -15,7 +15,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class ManaStackType extends LongStackType<ManaType>
 {
 
-    public static final ResourceLocation ID = new ResourceLocation(BeyondDimensions.MODID, "stack_type/mana");
+    public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/mana");
     public static final ManaStackType EMPTY = new ManaStackType(); // 空定义
 
     public ManaStackType()

@@ -200,9 +200,14 @@ dependencies {
     modCompileOnly "curse.maven:polymorph-388800:4928442"
 
     // AE支持
-    modCompileOnly "maven.modrinth:ae2:${ae_version}"
+    modCompileOnly "maven.modrinth:ae2:Zfyso1sP"
+    modLocalRuntime "maven.modrinth:ae2:Zfyso1sP"
+    modLocalRuntime "maven.modrinth:guideme:20.1.11"
     modCompileOnly "curse.maven:applied-mekanistics-574300:4842281" // AE的通用机械附属
+    modLocalRuntime "curse.maven:applied-mekanistics-574300:4842281" // AE的通用机械附属
     modCompileOnly "curse.maven:applied-flux-965012:6649403" // 应用通量
+    modLocalRuntime "curse.maven:applied-flux-965012:6649403" // 应用通量
+    modLocalRuntime "maven.modrinth:glodium:1.20-1.5-forge" // 应用通量
 
     // Curios支持
     modCompileOnly "top.theillusivec4.curios:curios-forge:${curios_version}+${minecraft_version}:api"
@@ -224,6 +229,7 @@ dependencies {
     // 新生魔艺兼容
     modCompileOnly "maven.modrinth:ars-nouveau:4.12.7"
     modCompileOnly "maven.modrinth:ars-energistique:1.2.0" // AE附属
+    modLocalRuntime "maven.modrinth:ars-energistique:1.2.0" // AE附属
     modLocalRuntime "maven.modrinth:ars-nouveau:4.12.7"
     modLocalRuntime "maven.modrinth:geckolib:39SztbiB"
     modLocalRuntime "maven.modrinth:patchouli:1.20.1-84.1-forge"
@@ -232,16 +238,12 @@ dependencies {
     modCompileOnly "maven.modrinth:botania:1.20.1-450-forge"
     modLocalRuntime "maven.modrinth:botania:1.20.1-450-forge"
     modCompileOnly "maven.modrinth:applied-botanics:1.5.0-forge"
+    modLocalRuntime "maven.modrinth:applied-botanics:1.5.0-forge"
 
 
     modLocalRuntime "curse.maven:sophisticated-core-618298:6596375"
     modLocalRuntime "curse.maven:sophisticated-backpacks-422301:6587116"
 
-
-    // 神化测试
-    modLocalRuntime "curse.maven:placebo-283644:6274231"
-    modLocalRuntime "curse.maven:apothic-attributes-898963:5634071"
-    modLocalRuntime "curse.maven:apotheosis-313970:6461960"
 
     // If you wish to declare dependencies against mods, make sure to use the 'mod*' configurations so that they're remapped.
 	// See https://github.com/neoforged/ModDevGradle/blob/main/LEGACY.md#remapping-mod-dependencies for more information.

@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public final class EnergyStackType extends LongStackType<EnergyType>
 {
-    public static final ResourceLocation ID = new ResourceLocation(BeyondDimensions.MODID, "stack_type/energy");
+    public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/energy");
     public static final EnergyStackType EMPTY = new EnergyStackType(); // 空定义
 
     public EnergyStackType()

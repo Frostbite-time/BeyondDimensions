@@ -41,7 +41,7 @@ public class BD_BotaniaPlugin
                 }
 
             };
-            e.addCapability(new ResourceLocation(BeyondDimensions.MODID, "mana"), prov);
+            e.addCapability(ResourceLocation.tryBuild(BeyondDimensions.MODID, "mana"), prov);
         }
 
         if(be instanceof NetInterfaceBlockEntity cIBe)
@@ -59,7 +59,7 @@ public class BD_BotaniaPlugin
                 }
 
             };
-            e.addCapability(new ResourceLocation(BeyondDimensions.MODID, "mana"), prov);
+            e.addCapability(ResourceLocation.tryBuild(BeyondDimensions.MODID, "mana"), prov);
         }
     }
 }

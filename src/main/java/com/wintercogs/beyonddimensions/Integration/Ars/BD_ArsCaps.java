@@ -43,7 +43,7 @@ public class BD_ArsCaps
         if (stack.getItem() == BlockRegistry.SOURCE_JAR.get().asItem() || stack.getItem() == BlockRegistry.CREATIVE_SOURCE_JAR.get().asItem())
         {
             var prov = new ItemSourceProvider(stack);
-            e.addCapability(new ResourceLocation(BeyondDimensions.MODID, "source"), prov);
+            e.addCapability(ResourceLocation.tryBuild(BeyondDimensions.MODID, "source"), prov);
             e.addListener(prov::invalidate); // 生命周期同步，重要！
         }
     }
@@ -55,7 +55,7 @@ public class BD_ArsCaps
         // 给所有实现了某接口的方块实体统一附加
         if (be instanceof ISourceTile holder) {
             var prov = new BESourceProvider(holder); // 见下文 Provider
-            e.addCapability(new ResourceLocation(BeyondDimensions.MODID, "source"), prov);
+            e.addCapability(ResourceLocation.tryBuild(BeyondDimensions.MODID, "source"), prov);
             e.addListener(prov::invalidate); // 跟随 BE 生命周期
         }
 

@@ -13,7 +13,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class SourceStackType extends LongStackType<SourceType>
 {
-    public static final ResourceLocation ID = new ResourceLocation(BeyondDimensions.MODID, "stack_type/source");
+    public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/source");
     public static final SourceStackType EMPTY = new SourceStackType(); // 空定义
 
     public SourceStackType()

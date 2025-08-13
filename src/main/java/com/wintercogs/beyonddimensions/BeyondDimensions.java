@@ -97,9 +97,9 @@ public class BeyondDimensions
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
     // FML 将识别一些参数类型，如 IEventBus 或 ModContainer 并自动传入它们。
-    public BeyondDimensions()
+    public BeyondDimensions(FMLJavaModLoadingContext context)
     {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus modEventBus = context.getModEventBus();
         MOD_EVENT_BUS = modEventBus;
 
         modEventBus.addListener(this::constructMod);
@@ -111,7 +111,7 @@ public class BeyondDimensions
         MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
 
         // 注册模组的ForgeConfigSpec以便Forge可以创建和加载配置文件
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
         // 调用UIRegister的构造函数，从而注册所有UI
         UIRegister.register(modEventBus);
@@ -190,7 +190,7 @@ public class BeyondDimensions
         if(ModList.get().isLoaded(Botania_ModId))
         {
             Botania_Loaded = true;
-            MOD_EVENT_BUS.addGenericListener(BlockEntity.class,BD_BotaniaPlugin::attachBlockEntityCaps); // 为网络通道和网络接口手动注册火花附着
+            MinecraftForge.EVENT_BUS.addGenericListener(BlockEntity.class,BD_BotaniaPlugin::attachBlockEntityCaps); // 为网络通道和网络接口手动注册火花附着
         }
         if(ModList.get().isLoaded(AE_Botania_ModId))
         {
