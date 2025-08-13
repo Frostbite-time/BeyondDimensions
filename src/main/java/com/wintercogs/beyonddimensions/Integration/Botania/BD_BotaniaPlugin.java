@@ -33,9 +33,19 @@ public class BD_BotaniaPlugin
             {
                 private LazyOptional<SparkAttachable> opt = LazyOptional.empty();
 
+                // 固定的监听实例
+                private final Runnable onNetChanged = this::invalidate;
+                private boolean listenerRegistered = false;
+
                 @Override
                 public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
                     if (cap != BotaniaForgeCapabilities.SPARK_ATTACHABLE) return LazyOptional.empty();
+
+                    if(!listenerRegistered)
+                    {
+                        cBe.addNetChangeTask(onNetChanged);
+                        listenerRegistered = true;
+                    }
 
                     if (opt.isPresent()) {
                         return BotaniaForgeCapabilities.SPARK_ATTACHABLE.orEmpty(cap, opt);
@@ -60,7 +70,6 @@ public class BD_BotaniaPlugin
             var prov = new Provider();
             e.addCapability(ResourceLocation.tryBuild(BeyondDimensions.MODID, "mana"), prov);
             e.addListener(prov::invalidate); // 方块实体失效/卸载
-            cBe.addNetChangeTask(prov::invalidate); // net 切换时
         }
 
         if(be instanceof NetInterfaceBlockEntity cIBe)
