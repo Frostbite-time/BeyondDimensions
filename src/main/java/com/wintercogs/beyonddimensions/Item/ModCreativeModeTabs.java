@@ -34,7 +34,6 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.SPACE_TIME_BAR);
                         output.accept(ModItems.TEST_ITEM_GENERATE);
                         output.accept(ModItems.NET_TERMINAL_ITEM);
-                        output.accept(ModItems.NET_AE_STORAGE_CELL);
                         output.accept(ModItems.NET_GIFTER);
                         output.accept(ModItems.NET_DESTROYER);
                         output.accept(ModItems.MATTER_COMPRESS_BALL);
