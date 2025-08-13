@@ -28,7 +28,7 @@ public class BD_BotaniaPlugin
         if(be instanceof NetPathwayBlockEntity cBe)
         {
             class ManaUnifiedStorageHandlerProvider implements ICapabilityProvider {
-                private final ManaUnifiedStorageHandler impl = new ManaUnifiedStorageHandler(cBe.getNet().getUnifiedStorage(),new CapCtx(be.getLevel(), be.getBlockPos(), null, be));
+                private final ManaUnifiedStorageHandler impl = new ManaUnifiedStorageHandler(cBe.getNet().getUnifiedStorage(),new CapCtx(be.getLevel(), be.getBlockPos(), be));
                 private final LazyOptional<ManaUnifiedStorageHandler> opt = LazyOptional.of(() -> impl);
 
                 @Override
@@ -45,7 +45,7 @@ public class BD_BotaniaPlugin
         if(be instanceof NetInterfaceBlockEntity cIBe)
         {
             class ManaStackTypedHandlerProvider implements ICapabilityProvider {
-                private final ManaStackTypedHandler impl = new ManaStackTypedHandler(cIBe.getStackHandler(),new CapCtx(be.getLevel(), be.getBlockPos(), null, be));
+                private final ManaStackTypedHandler impl = new ManaStackTypedHandler(cIBe.getStackHandler(),new CapCtx(be.getLevel(), be.getBlockPos(), be));
                 private final LazyOptional<ManaStackTypedHandler> opt = LazyOptional.of(() -> impl);
 
                 @Override

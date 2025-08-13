@@ -167,7 +167,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                 {
                     Object result;
                     if (handler.isContextual())
-                        result = handler.apply(stackHandler, new CapCtx(level, getBlockPos(), side, this));
+                        result = handler.apply(stackHandler, new CapCtx(level, getBlockPos(), this));
                     else
                         result = handler.apply(stackHandler, null);
                     return LazyOptional.of(() -> result).cast();

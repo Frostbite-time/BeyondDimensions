@@ -242,7 +242,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         }
         else if(getNet() != null) // 上述任一不存在，则刷新
         {
-            handler = new ManaUnifiedStorageHandler(getNet().getUnifiedStorage(), new CapCtx(level,getBlockPos(),null,this));
+            handler = new ManaUnifiedStorageHandler(getNet().getUnifiedStorage(), new CapCtx(level,getBlockPos(),this));
             return true;
         }
         return false; // net不存在则false
