@@ -64,20 +64,24 @@ public class BlockSourceAdp implements ISourceCap
     @Override
     public int receiveSource(int amount, boolean sim)
     {
-        int actInsert = Math.min(amount,Math.min(sourceTile.getMaxSource() - sourceTile.getSource(), sourceTile.getTransferRate()));
+        int before = sourceTile.getSource();
+        // 取速率、意图量、剩余空间的最小值
+        int actInsert = Math.min(amount,Math.min(sourceTile.getMaxSource() - before, sourceTile.getTransferRate()));
         if(!sim)
-            return sourceTile.addSource(actInsert);
+            return sourceTile.addSource(actInsert) - before; // 接收后的量，减去接受前的量 为 接收量
         else
-            return actInsert;
+            return actInsert; // 如果不实际执行，返回手动模拟的结果
     }
 
     @Override
     public int extractSource(int amount, boolean sim)
     {
-        int actExtract = Math.max(amount,Math.min(sourceTile.getSource(),sourceTile.getTransferRate()));
+        int before = sourceTile.getSource();
+        // 取速率、意图量、当前量的最小值
+        int actExtract = Math.max(amount,Math.min(before,sourceTile.getTransferRate()));
         if(!sim)
-            return sourceTile.removeSource(actExtract);
+            return before - sourceTile.removeSource(actExtract); // 取出前的量 - 取出后的量 为 取出量
         else
-            return actExtract;
+            return actExtract; // 回退到手动模拟量
     }
 }

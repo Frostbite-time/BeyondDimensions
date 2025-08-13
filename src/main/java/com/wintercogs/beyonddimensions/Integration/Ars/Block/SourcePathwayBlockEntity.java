@@ -67,17 +67,18 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         return getSource();
     }
 
-    // 返回增加的
+    // 返回增加后的总量
+    // 1.20.1的新生魔艺接口实现如此
+    // 1.21.1的实现改为返回增量
     @Override
     public int addSource(int amount)
     {
         DimensionsNet net = getNet();
         if (net != null)
         {
-            // 此处转换安全
-            return amount - (int) net.getUnifiedStorage().insert(new SourceStackType(amount), false).getStackAmount();
+            net.getUnifiedStorage().insert(new SourceStackType(amount), false).getStackAmount();
         }
-        return 0;
+        return getSource(); // 无论如何，最后返回总量
     }
 
     // 返回导出的
@@ -87,10 +88,9 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         DimensionsNet net = getNet();
         if(net != null)
         {
-            // 此处转换安全
-            return (int) net.getUnifiedStorage().extract(new SourceStackType(amount),false).getStackAmount();
+            net.getUnifiedStorage().extract(new SourceStackType(amount),false).getStackAmount();
         }
-        return 0;
+        return getSource(); // 无论如何，最后返回总量
     }
 
     @Override
