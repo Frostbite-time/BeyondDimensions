@@ -130,7 +130,7 @@
 
   "beyonddimensions.message.insufficient_materials": "Materiales insuficientes",
 
-  "msg.beyonddimensions.network_created": "Has desgarrado una grieta en el cosmos...",
+  "msg.beyonddimensions.network_created": "Has desgarrado una grieta en el cosmos...\nSugerencia: Por defecto pulsa [O] para abrir la red de dimensiones.",
   "msg.beyonddimensions.item_net_bound": "Objeto vinculado a la red nº%d",
   "msg.beyonddimensions.item_net_unbound": "Objeto desvinculado de la red nº%d",
   "msg.beyonddimensions.block_net_bound": "Bloque vinculado a la red nº%d",

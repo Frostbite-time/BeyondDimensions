@@ -130,7 +130,7 @@
 
   "beyonddimensions.message.insufficient_materials": "Matériaux insuffisants",
 
-  "msg.beyonddimensions.network_created": "Vous avez déchiré le tissu cosmique...",
+  "msg.beyonddimensions.network_created": "Tu as déchiré une brèche dans le cosmos...\nAstuce: Par défaut appuyez sur [O] pour ouvrir le réseau dimensionnel.",
   "msg.beyonddimensions.item_net_bound": "Objet lié au réseau n°%d",
   "msg.beyonddimensions.item_net_unbound": "Objet délié du réseau n°%d",
   "msg.beyonddimensions.block_net_bound": "Bloc lié au réseau n°%d",
