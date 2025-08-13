@@ -16,6 +16,7 @@ import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
+import com.wintercogs.beyonddimensions.Unit.SidedCapId;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -34,12 +35,14 @@ import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
+    private final Map<SidedCapId, LazyOptional<?>> caps = new HashMap<>();
 
     private static final int capacity = 27;
 
@@ -87,6 +90,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public NetInterfaceBlockEntity(BlockPos pos, BlockState blockState)
     {
         super(ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
+        // 接口能力与网络id不强相关，无需添加任务
     }
 
 
@@ -149,9 +153,18 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public void invalidateCaps()
     {
         super.invalidateCaps();
-        setNeedsCapabilityUpdate();
+        clearCapCache(); // clearCapCache是用于方块自身的
     }
 
+    private void clearCapCache()
+    {
+        // 无效化能力并清空map
+        var snapshot = new ArrayList<>(caps.values());
+        for (var opt : snapshot) { // invalidate时也会尝试移除一次，最后以clear保底
+            try { opt.invalidate(); } catch (Throwable ignored) {}
+        }
+        caps.clear();
+    }
 
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
@@ -160,19 +173,36 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         for (Map.Entry<ResourceLocation, Capability<?>> entry : CapabilityHelper.BlockCapabilityMap.entrySet()) {
             // 检查当前请求的能力是否匹配注册的能力
             if (entry.getValue() == cap) {
-                // 从类型映射表中获取对应的处理器构造函数
-                CommonHandler handler = CapabilityHelper.CommonHandlerMap.get(entry.getKey());
 
-                if(handler != null)
+                final SidedCapId capId = new SidedCapId(cap, null); //此处无需面信息
+                if(caps.containsKey(capId) && caps.get(capId).isPresent())
                 {
-                    Object result;
-                    if (handler.isContextual())
-                        result = handler.apply(stackHandler, new CapCtx(level, getBlockPos(), this));
-                    else
-                        result = handler.apply(stackHandler, null);
-                    return LazyOptional.of(() -> result).cast();
+                    return caps.get(capId).cast();
                 }
-                return LazyOptional.empty(); // 无对应handler的回调
+                else
+                {
+                    // 从类型映射表中获取对应的处理器构造函数
+                    CommonHandler handler = CapabilityHelper.CommonHandlerMap.get(entry.getKey());
+                    if(handler != null)
+                    {
+                        Object result;
+                        if (handler.isContextual())
+                            result = handler.apply(stackHandler, new CapCtx(level, getBlockPos(), this));
+                        else
+                            result = handler.apply(stackHandler, null);
+
+                        if(result != null)
+                        {
+                            LazyOptional<?> opt = LazyOptional.of(() -> result);
+                            // 如果opt存在，则放入缓存
+                            caps.put(capId, opt);
+                            // opt被无效化时，主动移除引用（此处同时判断值，确保移除的是同一个引用下的内容，至少是完全一致的内容）
+                            opt.addListener(lo -> caps.remove(capId,lo));
+                            return opt.cast();
+                        }
+                    }
+                    return LazyOptional.empty(); // 无对应handler的回调
+                }
             }
         }
         // 未找到匹配能力则调用父类实现

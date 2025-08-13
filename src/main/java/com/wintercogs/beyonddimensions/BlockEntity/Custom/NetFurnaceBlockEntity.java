@@ -49,6 +49,8 @@ import java.util.stream.Collectors;
 
 public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
+    private LazyOptional<IItemHandler> opt = LazyOptional.empty();
+
     private static final int capacity = 9; // 同时处理的任务格数
     public int getCapacity()
     {
@@ -288,9 +290,20 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             }
         };
 
-        CombinedItemHandlerWrapper finalHandler = new CombinedItemHandlerWrapper(new ItemStackTypedHandler[]{inputStorage,fuelStorage,outputStorage,fuelReturn});
+        if(!opt.isPresent())
+        {
+            CombinedItemHandlerWrapper finalHandler = new CombinedItemHandlerWrapper(new ItemStackTypedHandler[]{inputStorage,fuelStorage,outputStorage,fuelReturn});
+            opt = LazyOptional.of(() -> finalHandler).cast();
+        }
+        return opt.cast();
+    }
 
-        return LazyOptional.of(() -> finalHandler).cast();
+    @Override
+    public void invalidateCaps()
+    {
+        super.invalidateCaps();
+        opt.invalidate();
+        opt = LazyOptional.empty();
     }
 
     @Override

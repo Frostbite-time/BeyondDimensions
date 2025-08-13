@@ -58,6 +58,9 @@ import java.util.Optional;
 // 既可以为功能花提供魔力，也可以从产能花以及魔力发射器接收魔力，并能并入火花网络的魔力池
 public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements ManaCollector, ManaPool, SparkAttachable, Wandable
 {
+    LazyOptional<ManaPoolPathwayBlockEntity> opt = LazyOptional.empty();
+    LazyOptional<WandHud> opt_hud = LazyOptional.empty();
+
     private ManaUnifiedStorageHandler handler = null;
     private boolean isOutPutting = true;
 
@@ -69,28 +72,45 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     {
         super(ModBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
         refreshHandler();
+        // 此方块虽是网络化方块，但本身内部已经处理了无网时候的交互，故可以时刻暴露能力
     }
 
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
     {
-        if(cap == BotaniaForgeCapabilities.MANA_RECEIVER)
+        if(cap == BotaniaForgeCapabilities.MANA_RECEIVER
+                || cap == BotaniaForgeCapabilities.SPARK_ATTACHABLE
+                || cap == BotaniaForgeCapabilities.WANDABLE)
         {
-            return LazyOptional.of(() -> this).cast();
-        }
-        if(cap == BotaniaForgeCapabilities.SPARK_ATTACHABLE)
-        {
-            return LazyOptional.of(() -> this).cast();
+            if(!opt.isPresent())
+            {
+                opt = LazyOptional.of(() -> this);
+            }
+            return opt.cast();
         }
         if(cap == BotaniaForgeClientCapabilities.WAND_HUD)
         {
-            return LazyOptional.of(() -> new WandHud(this)).cast();
-        }
-        if(cap == BotaniaForgeCapabilities.WANDABLE)
-        {
-            return LazyOptional.of(() -> this).cast();
+            if(level != null && level.isClientSide())
+            {
+                if(!opt_hud.isPresent())
+                {
+                    opt_hud = LazyOptional.of(() -> new WandHud(this));
+                }
+                return opt_hud.cast();
+            }
+            return LazyOptional.empty();
         }
         return super.getCapability(cap, side);
+    }
+
+    @Override
+    public void invalidateCaps()
+    {
+        super.invalidateCaps();
+        opt.invalidate();
+        opt_hud.invalidate();
+        opt = LazyOptional.empty();
+        opt_hud = LazyOptional.empty();
     }
 
     public static void clientTick(Level level, BlockPos pos, BlockState state, ManaPoolPathwayBlockEntity be)

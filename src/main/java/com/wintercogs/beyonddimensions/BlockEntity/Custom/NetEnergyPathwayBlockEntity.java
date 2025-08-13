@@ -19,13 +19,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
 
 public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
+    LazyOptional<IEnergyStorage> opt = LazyOptional.empty();
 
     public PopMode popMode = PopMode.STOP;
 
@@ -33,6 +33,10 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
 
     public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
+        addNetChangeTask(() -> {
+            opt.invalidate();
+            opt = LazyOptional.empty();
+        });
     }
 
     @Override
@@ -42,20 +46,28 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
         {
             if(popMode == PopMode.OPEN)
             {
-                return LazyOptional.of(() -> new EnergyStorage(0)).cast();
-            }
-            if(getNetId()<0)
-            {
-                return LazyOptional.of(() -> new EnergyStorage(0)).cast();
+                return LazyOptional.empty();
             }
             DimensionsNet net = getNet();
             if(net != null)
             {
-                return LazyOptional.of(() -> new EnergyUnifiedStorageHandler(net.getUnifiedStorage())).cast() ;
+                if (!opt.isPresent())
+                {
+                    opt = LazyOptional.of(() -> new EnergyUnifiedStorageHandler(net.getUnifiedStorage()));
+                }
+                return opt.cast();
             }
-            return LazyOptional.of(() -> new EnergyStorage(0)).cast();
+            return LazyOptional.empty();
         }
         return super.getCapability(cap,side);
+    }
+
+    @Override
+    public void invalidateCaps()
+    {
+        super.invalidateCaps();
+        opt.invalidate();
+        opt = LazyOptional.empty();
     }
 
     @Override

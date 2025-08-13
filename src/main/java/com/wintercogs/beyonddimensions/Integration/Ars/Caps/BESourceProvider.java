@@ -9,20 +9,23 @@ import net.minecraftforge.common.util.LazyOptional;
 
 public class BESourceProvider implements ICapabilityProvider
 {
-    private final BlockSourceAdp impl; // 通常包装 BE 自身的存储
     private final LazyOptional<ISourceCap> opt;
 
-    public BESourceProvider(ISourceTile be) {
-        this.impl = new BlockSourceAdp(be); // 从 BE 获取实际实现
+    public BESourceProvider(ISourceTile be)
+    {
+        ISourceCap impl = new BlockSourceAdp(be);
         this.opt = LazyOptional.of(() -> impl);
     }
 
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction direction)
     {
-        return capability == BD_ArsCaps.SOURCE_CAP ? opt.cast() : LazyOptional.empty();
+        if (capability == BD_ArsCaps.SOURCE_CAP)
+        {
+            return BD_ArsCaps.SOURCE_CAP.orEmpty(capability, opt);
+        }
+        return LazyOptional.empty();
     }
 
     public void invalidate() { opt.invalidate(); }
-
 }
