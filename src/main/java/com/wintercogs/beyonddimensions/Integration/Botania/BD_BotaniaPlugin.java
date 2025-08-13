@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.Menu.Slot.ItemCapInteractionBlackList;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -16,12 +17,17 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import vazkii.botania.api.BotaniaForgeCapabilities;
 import vazkii.botania.api.mana.spark.SparkAttachable;
+import vazkii.botania.common.item.BotaniaItems;
 
 import javax.annotation.Nullable;
 
 public class BD_BotaniaPlugin
 {
 
+    public static void registerItemCapBlackList()
+    {
+        ItemCapInteractionBlackList.addToBlackList(BotaniaItems.manaMirror);
+    }
 
     public static void attachBlockEntityCaps(AttachCapabilitiesEvent<BlockEntity> e)
     {

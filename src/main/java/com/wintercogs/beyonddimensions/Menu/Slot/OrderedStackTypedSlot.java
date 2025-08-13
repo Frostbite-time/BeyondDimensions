@@ -90,7 +90,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     }
                 }
                 // 堆叠数量为1 右键点击 尝试取出内容物并插入
-                else if(carriedItem.getCount()==1 && button== GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+                else if(carriedItem.getCount()==1 && button== GLFW.GLFW_MOUSE_BUTTON_RIGHT && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
                 {
                     if(carriedItem.getItem() instanceof BucketItem bucketItem)
                     {
@@ -288,7 +288,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         }
                     }
                     // 最后检查是否为能力系统交互
-                    else if(carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+                    else if(carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
                     {
                         if(carriedItem.getItem() instanceof BucketItem bucket)
                         {
