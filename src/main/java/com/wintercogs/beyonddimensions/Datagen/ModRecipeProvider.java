@@ -170,17 +170,6 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("unlock_net_destroyer", has(ModItems.SPACE_TIME_STABLE_FRAME.get()))
                 .save(recipeOutput);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_AE_STORAGE_CELL.get())
-                .pattern("ABA")
-                .pattern("BDB")
-                .pattern("CCC")
-                .define('A', Items.GLASS)
-                .define('B', Items.DIAMOND)
-                .define('C', ModItems.SPACE_TIME_BAR.get())
-                .define('D', ModItems.NET_MANAGER_INVITER.get())
-                .unlockedBy("unlock_net_ae_storage_cell", has(ModItems.SPACE_TIME_BAR.get()))
-                .save(recipeOutput);
-
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
                 .pattern("ABA")
                 .pattern("BCB")
@@ -252,6 +241,27 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('C', ModItems.SPACE_TIME_BAR.get())
                 .unlockedBy("unlock_xp_exchange_item", has(ModItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
+
+        if(BeyondDimensions.AELoaded)
+        {
+            // 先把原始 ShapedRecipeBuilder 写好
+            ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_AE_STORAGE_CELL.get())
+                    .pattern("ABA")
+                    .pattern("BDB")
+                    .pattern("CCC")
+                    .define('A', appeng.core.definitions.AEBlocks.QUARTZ_GLASS)
+                    .define('B', Items.DIAMOND)
+                    .define('C', ModItems.SPACE_TIME_BAR.get())
+                    .define('D', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                    .unlockedBy("unlock_net_ae_storage_cell", has(ModItems.SPACE_TIME_BAR.get()));
+
+            // 用 ConditionalRecipe 包起来，加上“模组已加载”的条件
+            ConditionalRecipe.builder()
+                    .addCondition(modLoaded(BeyondDimensions.AE2MODID)) // 等同于 forge:mod_loaded
+                    .addRecipe(builder::save)                            // 把上面的 ShapedRecipeBuilder 交给它保存
+                    // .generateAdvancement() // 可选：需要时让它自己生成 Advancement
+                    .build(recipeOutput, new ResourceLocation(BeyondDimensions.MODID, "net_ae_storage_cell")); // 最终的配方ID
+        }
 
         if(BeyondDimensions.ARS_Loaded)
         {

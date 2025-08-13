@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 

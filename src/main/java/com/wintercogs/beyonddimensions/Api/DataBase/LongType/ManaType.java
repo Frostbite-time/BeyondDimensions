@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.LongType;
 
-import com.mojang.serialization.Codec;
 import net.minecraft.network.chat.Component;
 
 public class ManaType extends LongType<ManaType>

@@ -18,7 +18,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * 基于{@link IStackTypedHandler}接口的无序存储实现。

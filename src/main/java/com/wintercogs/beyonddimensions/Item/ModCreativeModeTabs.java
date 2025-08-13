@@ -35,13 +35,17 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.SPACE_TIME_BAR.get());
                         output.accept(ModItems.TEST_ITEM_GENERATE.get());
                         output.accept(ModItems.NET_TERMINAL_ITEM.get());
-                        output.accept(ModItems.NET_AE_STORAGE_CELL.get());
                         output.accept(ModItems.NET_GIFTER.get());
                         output.accept(ModItems.NET_DESTROYER.get());
                         output.accept(ModItems.MATTER_COMPRESS_BALL.get());
                         output.accept(ModItems.NET_MAGNET_ITEM.get());
                         output.accept(ModItems.NET_FEEDER_ITEM.get());
                         output.accept(ModItems.XP_EXCHANGE_ITEM.get());
+
+                        if(BeyondDimensions.AELoaded)
+                        {
+                            output.accept(ModItems.NET_AE_STORAGE_CELL.get());
+                        }
 
                         for (ModFluids.FluidEntry e : ModFluids.ALL) { //注册所有桶
                             output.accept((Item)e.bucket().get());

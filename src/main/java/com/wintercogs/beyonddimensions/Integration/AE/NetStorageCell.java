@@ -34,7 +34,7 @@ public class NetStorageCell implements StorageCell
     @Override
     public boolean canFitInsideCell()
     {
-        return false;
+        return true;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Item;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Integration.AE.Item.NetAEStorageCell;
 import com.wintercogs.beyonddimensions.Item.Custom.*;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -48,10 +49,6 @@ public class ModItems
     public static final RegistryObject<Item> NET_TERMINAL_ITEM = ITEMS.register("net_terminal_item",
             () -> new NetTerminalItem(new Item.Properties()));
 
-    // AE存储磁盘 对于一个没有安装AE的游戏，这个物品没有任何效果。你可以单方面禁用它。
-    public static final RegistryObject<Item> NET_AE_STORAGE_CELL = ITEMS.register("net_ae_storage_cell",
-            () -> new NetAEStorageCell(new Item.Properties()));
-
     // 网络赠送符
     public static final RegistryObject<Item> NET_GIFTER = ITEMS.register("net_gifter",
             () -> new NetGifter(new Item.Properties()));
@@ -75,6 +72,16 @@ public class ModItems
     // 经验交换棒
     public static final RegistryObject<Item> XP_EXCHANGE_ITEM = ITEMS.register("xp_exchange_item",
             () -> new XpExchangeItem(new Item.Properties()));
+
+    // AE存储磁盘 对于一个没有安装AE的游戏
+    public static final RegistryObject<Item> NET_AE_STORAGE_CELL = ITEMS.register("net_ae_storage_cell",
+            () -> {
+                if(BeyondDimensions.AELoaded)
+                    return new NetAEStorageCell(new Item.Properties());
+                else
+                    return new Item(new Item.Properties());
+            }
+    );
 
 
 

@@ -22,13 +22,13 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
     @Override
     public int getTransferRate()
     {
-        return Integer.MAX_VALUE;
+        return getNet() != null ? Integer.MAX_VALUE : 0;
     }
 
     @Override
     public boolean canAcceptSource()
     {
-        return true;
+        return getNet() != null;
     }
 
     @Override
@@ -58,12 +58,13 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
 
     }
 
-    // 拒绝set，防止内部情况被改变
+    // 拒绝set，防止内部情况被改变，此处直接返回当前容量
     // 此外，新生魔艺确实未对外使用set
+    // 返回值为设置后魔源量，此处不设置，直接返回
     @Override
     public int setSource(int amount)
     {
-        return 0;
+        return getSource();
     }
 
     // 返回增加的

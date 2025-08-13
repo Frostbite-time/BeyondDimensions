@@ -10,7 +10,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * 一个通用的，用于存储IStackType实例的类，通过这个类可以快速实现类似原版箱子的容器。

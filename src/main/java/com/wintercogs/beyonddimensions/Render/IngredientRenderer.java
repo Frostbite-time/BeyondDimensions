@@ -24,6 +24,8 @@ public class IngredientRenderer
 
     // 仅用于新生魔艺的魔源渲染
     public static final Material ARS_SOURCE = new Material(InventoryMenu.BLOCK_ATLAS, new ResourceLocation("ars_nouveau", "block/mana_still"));
+    // 仅用于植物魔法的魔力渲染
+    public static final Material BOTANIA_MANA = new Material(InventoryMenu.BLOCK_ATLAS, new ResourceLocation("botania", "block/mana_water"));
 
     public static void drawTiledSprite(GuiGraphics guiGraphics, final int tiledWidth, final int tiledHeight, int color, long scaledAmount, TextureAtlasSprite sprite, int posX, int posY) {
 

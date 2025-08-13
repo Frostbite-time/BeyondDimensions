@@ -12,7 +12,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -46,6 +45,7 @@ import vazkii.botania.client.fx.WispParticleData;
 import vazkii.botania.client.gui.HUDHandler;
 import vazkii.botania.common.block.BotaniaBlocks;
 import vazkii.botania.common.block.block_entity.mana.BellowsBlockEntity;
+import vazkii.botania.common.block.block_entity.mana.ManaPoolBlockEntity;
 import vazkii.botania.common.handler.ManaNetworkHandler;
 import vazkii.botania.common.item.BotaniaItems;
 import vazkii.botania.common.item.ManaTabletItem;
@@ -55,9 +55,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-import static vazkii.botania.common.block.block_entity.mana.ManaPoolBlockEntity.*;
-import static vazkii.botania.common.block.block_entity.mana.ManaPoolBlockEntity.PARTICLE_COLOR_BLUE;
-
+// 既可以为功能花提供魔力，也可以从产能花以及魔力发射器接收魔力，并能并入火花网络的魔力池
 public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements ManaCollector, ManaPool, SparkAttachable, Wandable
 {
     private ManaUnifiedStorageHandler handler = null;
@@ -100,7 +98,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         double particleChance = 1F - 0.1;
         if (Math.random() > particleChance) {
             WispParticleData data = WispParticleData.wisp((float) Math.random() / 3F,
-                    PARTICLE_COLOR_RED, PARTICLE_COLOR_GREEN, PARTICLE_COLOR_BLUE, 2F);
+                    ManaPoolBlockEntity.PARTICLE_COLOR_RED, ManaPoolBlockEntity.PARTICLE_COLOR_GREEN, ManaPoolBlockEntity.PARTICLE_COLOR_BLUE, 2F);
             level.addParticle(data, pos.getX() + 0.3 + Math.random() * 0.5,
                     pos.getY() + 0.6 + Math.random() * 0.25, pos.getZ() + Math.random(),
                     0, (float) Math.random() / 25F, 0);
@@ -222,8 +220,8 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         double vX0 = horizontalDistance / lifetime;
         Vec3 v0 = horizontalDir.scale(vX0).with(Direction.Axis.Y, vY0);
 
-        WispParticleData data = WispParticleData.wisp(0.1f, PARTICLE_COLOR_RED, PARTICLE_COLOR_GREEN,
-                PARTICLE_COLOR_BLUE, (float) (0.025 * lifetime), CHARGING_GRAVITY).withNoClip(true);
+        WispParticleData data = WispParticleData.wisp(0.1f, ManaPoolBlockEntity.PARTICLE_COLOR_RED, ManaPoolBlockEntity.PARTICLE_COLOR_GREEN,
+                ManaPoolBlockEntity.PARTICLE_COLOR_BLUE, (float) (0.025 * lifetime), CHARGING_GRAVITY).withNoClip(true);
         level.addParticle(data, worldPosition.getX() + startPos.x, worldPosition.getY() + startPos.y,
                 worldPosition.getZ() + startPos.z, v0.x, v0.y, v0.z);
     }

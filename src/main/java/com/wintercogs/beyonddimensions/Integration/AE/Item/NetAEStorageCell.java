@@ -1,5 +1,6 @@
-package com.wintercogs.beyonddimensions.Item.Custom;
+package com.wintercogs.beyonddimensions.Integration.AE.Item;
 
+import com.wintercogs.beyonddimensions.Item.Custom.NetedItem;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;

@@ -43,6 +43,12 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     }
 
     @Override
+    public String getModId()
+    {
+        return "neoforge";
+    }
+
+    @Override
     public IStackType<EnergyType> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
         if(key instanceof EnergyType)
