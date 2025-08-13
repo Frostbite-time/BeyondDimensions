@@ -47,6 +47,10 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "当前：收到红石信号时工作",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "当前：收到红石信号时停止工作",
   "tooltip.button.beyonddimensions.control_mode_not_working": "当前：停止工作",
+  "tooltip.button.beyonddimensions.hopper_item_mode_deny": "当前：不收集掉落物",
+  "tooltip.button.beyonddimensions.hopper_item_mode_allow": "当前：收集掉落物",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "当前：不收集经验球",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_allow": "当前：收集经验球",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_deny": "当前：不收集带NBT物品",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_allow": "当前：收集带NBT物品",
   "tooltip.button.beyonddimensions.hopper_fluid_mode_deny": "当前：不收集流体",
@@ -69,7 +73,10 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "当前：饱食度低于一半时喂食",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "当前：时刻保证玩家的饱和度高于0",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "当前：始终填满饱食度",
+  "tooltip.button.beyonddimensions.sort_mode_open": "当前：自动整理开启",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "当前：自动整理关闭",
   "tooltip.item.unstable_space_time.long_data": "时空仍在稳定中，仍需%s个稳定周期，请保持随身携带",
+  "tooltip.beyonddimensions.item.xp_exchange": "在GUI中：右键存入经验，中键取出经验\n手持时：右键存入经验，Shift右键改变经验交互速率",
   "tooltip.editbox.beyonddimensions.search": "输入'#'以筛选提示框内容\n输入'@'以筛选模组ID",
 
   "istack.beyonddimensions.storage_num.item": "已存储：%s个",
@@ -98,6 +105,9 @@
   "item.beyonddimensions.matter_compress_ball": "压缩物质球",
   "item.beyonddimensions.net_magnet_item": "网络磁铁",
   "item.beyonddimensions.net_feeder_item": "网络喂食器",
+  "item.beyonddimensions.xp_fluid_bucket": "液态经验桶",
+  "item.beyonddimensions.xp_exchange_item": "经验棒",
+  "item.beyonddimensions.warden_soul_tag_item": "灵魂标记器",
 
   "block.beyonddimensions.net_control": "网络控制器",
   "block.beyonddimensions.net_interface": "网络接口",
@@ -108,6 +118,12 @@
   "block.beyonddimensions.net_hopper_block": "网络漏斗",
   "block.beyonddimensions.net_furnace_block": "网络熔炉",
   "block.beyonddimensions.dimensional_connect_block": "维度连接方块",
+  "block.beyonddimensions.rs_net_pathway": "RS维度通道",
+  "block.beyonddimensions.xp_fluid": "液态经验",
+  "block.beyonddimensions.ars_source_pathway": "维度魔源通道",
+  "block.beyonddimensions.mana_pool_pathway": "维度魔力池",
+
+  "fluid_type.beyonddimensions.xp_fluid": "液态经验",
 
   "creativetab.beyonddimensions.items": "超越维度-物品",
   "creativetab.beyonddimensions.blocks": "超越维度-方块",
@@ -127,6 +143,13 @@
   "msg.beyonddimensions.cant_delete_net": "无法删除网络，你必须是网络主人才能执行此操作",
   "msg.beyonddimensions.item_net_destroyed": "你已经删除自身所在的网络",
   "msg.beyonddimensions.net_gift_done": "成功合并%s号网络",
+  "msg.beyonddimensions.xp_mode.switch.slow": "单次交互量切换到：1级",
+  "msg.beyonddimensions.xp_mode.switch.mid": "单次交互量切换到：10级",
+  "msg.beyonddimensions.xp_mode.switch.high": "单次交互量切换到：30级",
+  "msg.beyonddimensions.xp_mode.switch.highest": "单次交互量切换到：100级",
 
-  "types.beyonddimensions.energyType.name": "FE能量"
+  "types.beyonddimensions.energytype.name": "FE能量",
+  "types.beyonddimensions.warden_soul_type.name": "监守者之魂",
+  "types.beyonddimensions.source_type.name": "魔源",
+  "types.beyonddimensions.mana_type.name": "植物魔力"
 }

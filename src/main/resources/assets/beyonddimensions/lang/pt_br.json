@@ -47,6 +47,10 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "Atual: Ativo com redstone",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "Atual: Inativo com redstone",
   "tooltip.button.beyonddimensions.control_mode_not_working": "Atual: Desativado",
+  "tooltip.button.beyonddimensions.hopper_item_mode_deny": "Atual: Não coletar itens",
+  "tooltip.button.beyonddimensions.hopper_item_mode_allow": "Atual: Coletar itens",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "Atual: Não coletar XP",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_allow": "Atual: Coletar XP",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_deny": "Atual: Rejeitar itens com NBT",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_allow": "Atual: Aceitar itens com NBT",
   "tooltip.button.beyonddimensions.hopper_fluid_mode_deny": "Atual: Rejeitar fluidos",
@@ -69,7 +73,10 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "Atual: Alimentar abaixo de 50%",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Atual: Manter saturação >0",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Atual: Saciedade sempre completa",
+  "tooltip.button.beyonddimensions.sort_mode_open": "Atual: Ordenação automática ativada",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "Atual: Ordenação automática desativada",
   "tooltip.item.unstable_space_time.long_data": "O espaço-tempo está estabilizando, faltam %s ciclos. Mantenha-o sempre com você.",
+  "tooltip.beyonddimensions.item.xp_exchange": "No GUI: Clique direito para depositar XP, Clique do meio para retirar XP\nAo segurar: Clique direito para depositar XP, Shift + Clique direito para alterar a taxa de transferência XP",
   "tooltip.editbox.beyonddimensions.search": "Digite '#' para filtrar conteúdo das tooltips\nDigite '@' para filtrar IDs de mods",
 
   "istack.beyonddimensions.storage_num.item": "Armazenado: %s itens",
@@ -98,16 +105,25 @@
   "item.beyonddimensions.matter_compress_ball": "Esfera de Matéria Comprimida",
   "item.beyonddimensions.net_magnet_item": "Ímã de Rede",
   "item.beyonddimensions.net_feeder_item": "Alimentador de Rede",
-  "block.beyonddimensions.net_pump_block": "Bomba de Rede",
+  "item.beyonddimensions.xp_fluid_bucket": "Balde de XP líquido",
+  "item.beyonddimensions.xp_exchange_item": "Varinha de XP",
+  "item.beyonddimensions.warden_soul_tag_item": "Marcador de Almas",
 
   "block.beyonddimensions.net_control": "Controlador de Rede",
   "block.beyonddimensions.net_interface": "Interface de Rede",
   "block.beyonddimensions.net_pathway": "Caminho Dimensional",
   "block.beyonddimensions.net_energy_pathway": "Canal de Energia",
   "block.beyonddimensions.net_terminal_block": "Terminal de Rede",
+  "block.beyonddimensions.net_pump_block": "Bomba de Rede",
   "block.beyonddimensions.net_hopper_block": "Funil de Rede",
   "block.beyonddimensions.net_furnace_block": "Fornalha de Rede",
   "block.beyonddimensions.dimensional_connect_block": "bloco de conexão dimensional",
+  "block.beyonddimensions.rs_net_pathway": "Caminho de Rede Dimensional RS",
+  "block.beyonddimensions.xp_fluid": "XP líquido",
+  "block.beyonddimensions.ars_source_pathway": "Caminho da Fonte Interdimensional",
+  "block.beyonddimensions.mana_pool_pathway": "Poço de Mana Dimensional",
+
+  "fluid_type.beyonddimensions.xp_fluid": "XP líquido",
 
   "creativetab.beyonddimensions.items": "Além das Dimensões - Itens",
   "creativetab.beyonddimensions.blocks": "Além das Dimensões - Blocos",
@@ -127,6 +143,13 @@
   "msg.beyonddimensions.cant_delete_net": "Não é possível deletar a rede – Apenas o dono pode fazer isso",
   "msg.beyonddimensions.item_net_destroyed": "Você destruiu a rede em que estava",
   "msg.beyonddimensions.net_gift_done": "Rede %s fundida com sucesso",
+  "msg.beyonddimensions.xp_mode.switch.slow": "Quantidade de transferência XP alterada para: 1 nível",
+  "msg.beyonddimensions.xp_mode.switch.mid": "Quantidade de transferência XP alterada para: 10 níveis",
+  "msg.beyonddimensions.xp_mode.switch.high": "Quantidade de transferência XP alterada para: 30 níveis",
+  "msg.beyonddimensions.xp_mode.switch.highest": "Quantidade de transferência XP alterada para: 100 níveis",
 
-  "types.beyonddimensions.energyType.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.warden_soul_type.name": "Almas do Guardião",
+  "types.beyonddimensions.source_type.name": "Fonte",
+  "types.beyonddimensions.mana_type.name": "Mana Vegetal"
 }

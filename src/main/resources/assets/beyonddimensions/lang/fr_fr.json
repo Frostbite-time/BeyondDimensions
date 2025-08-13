@@ -47,6 +47,10 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "Actuel : Actif avec redstone",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "Actuel : Inactif avec redstone",
   "tooltip.button.beyonddimensions.control_mode_not_working": "Actuel : Désactivé",
+  "tooltip.button.beyonddimensions.hopper_item_mode_deny": "Actuel : Ne pas collecter les objets",
+  "tooltip.button.beyonddimensions.hopper_item_mode_allow": "Actuel : Collecter les objets",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "Actuel : Ne pas collecter l'XP",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_allow": "Actuel : Collecter l'XP",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_deny": "Actuel : Refuser objets NBT",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_allow": "Actuel : Accepter objets NBT",
   "tooltip.button.beyonddimensions.hopper_fluid_mode_deny": "Actuel : Refuser fluides",
@@ -69,7 +73,10 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "Actuel : Nourrir si <50%",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Actuel : Maintenir >0 saturation",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Actuel : Saturation toujours pleine",
+  "tooltip.button.beyonddimensions.sort_mode_open": "Actuel : Tri auto. activé",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "Actuel : Tri auto. désactivé",
   "tooltip.item.unstable_space_time.long_data": "L'espace-temps se stabilise encore, %s cycles requis. Gardez-le sur vous en permanence.",
+  "tooltip.beyonddimensions.item.xp_exchange": "Dans l'interface graphique : Clic droit pour déposer XP, Clic molette pour retirer XP\nEn tenant : Clic droit pour déposer XP, Maj + Clic droit pour changer le taux de transfert XP",
   "tooltip.editbox.beyonddimensions.search": "Saisissez '#' pour filtrer le contenu des infobulles\nSaisissez '@' pour filtrer les ID de mods",
 
   "istack.beyonddimensions.storage_num.item": "Stocké : %s unités",
@@ -98,6 +105,9 @@
   "item.beyonddimensions.matter_compress_ball": "Boule de Matière Compressée",
   "item.beyonddimensions.net_magnet_item": "Aimant Réseau",
   "item.beyonddimensions.net_feeder_item": "Distributeur Réseau",
+  "item.beyonddimensions.xp_fluid_bucket": "Seau d'XP liquide",
+  "item.beyonddimensions.xp_exchange_item": "Baguette d'XP",
+  "item.beyonddimensions.warden_soul_tag_item": "Marqueur d'Âmes",
 
   "block.beyonddimensions.net_control": "Contrôleur Réseau",
   "block.beyonddimensions.net_interface": "Interface Réseau",
@@ -108,6 +118,12 @@
   "block.beyonddimensions.net_hopper_block": "Entonnoir Réseau",
   "block.beyonddimensions.net_furnace_block": "Four Réseau",
   "block.beyonddimensions.dimensional_connect_block": "Bloc de connexion dimensionnelle",
+  "block.beyonddimensions.rs_net_pathway": "Passage Réseau Dimensionnel RS",
+  "block.beyonddimensions.xp_fluid": "XP liquide",
+  "block.beyonddimensions.ars_source_pathway": "Chemin des Sources Arcaniques",
+  "block.beyonddimensions.mana_pool_pathway": "Bassin de Mana Dimensionnel",
+
+  "fluid_type.beyonddimensions.xp_fluid": "XP liquide",
 
   "creativetab.beyonddimensions.items": "Au-delà - Objets",
   "creativetab.beyonddimensions.blocks": "Au-delà - Blocs",
@@ -127,6 +143,13 @@
   "msg.beyonddimensions.cant_delete_net": "Impossible de supprimer le réseau – Vous devez en être le propriétaire",
   "msg.beyonddimensions.item_net_destroyed": "Vous avez détruit votre réseau actuel",
   "msg.beyonddimensions.net_gift_done": "Fusion réussie du réseau %s",
+  "msg.beyonddimensions.xp_mode.switch.slow": "Quantité de transfert XP changée à : 1 niveau",
+  "msg.beyonddimensions.xp_mode.switch.mid": "Quantité de transfert XP changée à : 10 niveaux",
+  "msg.beyonddimensions.xp_mode.switch.high": "Quantité de transfert XP changée à : 30 niveaux",
+  "msg.beyonddimensions.xp_mode.switch.highest": "Quantité de transfert XP changée à : 100 niveaux",
 
-  "types.beyonddimensions.energyType.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.warden_soul_type.name": "Âmes de Gardien",
+  "types.beyonddimensions.source_type.name": "Source Arcanique",
+  "types.beyonddimensions.mana_type.name": "Mana Végétal"
 }

@@ -47,6 +47,10 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "Aktuell: Bei Redstone-Signal arbeiten",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "Aktuell: Bei Redstone-Signal stoppen",
   "tooltip.button.beyonddimensions.control_mode_not_working": "Aktuell: Arbeit gestoppt",
+  "tooltip.button.beyonddimensions.hopper_item_mode_deny": "Aktuell: Keine Gegenstände sammeln",
+  "tooltip.button.beyonddimensions.hopper_item_mode_allow": "Aktuell: Gegenstände sammeln",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "Aktuell: Keine XP sammeln",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_allow": "Aktuell: XP sammeln",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_deny": "Aktuell: Keine NBT-Items sammeln",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_allow": "Aktuell: NBT-Items sammeln",
   "tooltip.button.beyonddimensions.hopper_fluid_mode_deny": "Aktuell: Keine Fluide sammeln",
@@ -69,7 +73,10 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "Aktuell: Fütterung bei <50% Sättigung",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Aktuell: Sättigung immer >0 halten",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Aktuell: Immer volle Sättigung",
+  "tooltip.button.beyonddimensions.sort_mode_open": "Aktuell: Sortierung aktiviert",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "Aktuell: Sortierung deaktiviert",
   "tooltip.item.unstable_space_time.long_data": "Raumzeit stabilisiert sich noch, %s Stabilisierungszyklen benötigt. Bitte stets bei sich tragen.",
+  "tooltip.beyonddimensions.item.xp_exchange": "Im GUI: Rechtsklick zum Einzahlen von XP, Mittlere Maustaste zum Abheben von XP\nIn der Hand: Rechtsklick zum Einzahlen von XP, Umschalt + Rechtsklick zum Ändern der XP-Transferrate",
   "tooltip.editbox.beyonddimensions.search": "Geben Sie '#' ein, um die Tooltip-Inhalte zu filtern\nGeben Sie '@' ein, um die Mod-IDs zu filtern",
 
   "istack.beyonddimensions.storage_num.item": "Gespeichert: %s Stück",
@@ -98,6 +105,9 @@
   "item.beyonddimensions.matter_compress_ball": "Komprimierte Materiekugel",
   "item.beyonddimensions.net_magnet_item": "Netz-Magnet",
   "item.beyonddimensions.net_feeder_item": "Netz-Fütterer",
+  "item.beyonddimensions.xp_fluid_bucket": "Eimer mit flüssiger Erfahrung",
+  "item.beyonddimensions.xp_exchange_item": "XP-Stab",
+  "item.beyonddimensions.warden_soul_tag_item": "Seelenmarkierer",
 
   "block.beyonddimensions.net_control": "Netzwerkcontroller",
   "block.beyonddimensions.net_interface": "Netzwerkschnittstelle",
@@ -108,6 +118,12 @@
   "block.beyonddimensions.net_hopper_block": "Netz-Trichter",
   "block.beyonddimensions.net_furnace_block": "Netz-Ofen",
   "block.beyonddimensions.dimensional_connect_block": "Dimensionsverbindungsblock",
+  "block.beyonddimensions.rs_net_pathway": "Dimensionsnetzwerk RS-Pfad",
+  "block.beyonddimensions.xp_fluid": "Flüssige Erfahrung",
+  "block.beyonddimensions.ars_source_pathway": "Arkanquelle-Pfad zwischen Dimensionen",
+  "block.beyonddimensions.mana_pool_pathway": "Dimensions-Mana-Pool",
+
+  "fluid_type.beyonddimensions.xp_fluid": "Flüssige Erfahrung",
 
   "creativetab.beyonddimensions.items": "Jenseits - Gegenstände",
   "creativetab.beyonddimensions.blocks": "Jenseits - Blöcke",
@@ -127,6 +143,13 @@
   "msg.beyonddimensions.cant_delete_net": "Netz kann nicht gelöscht werden – Nur der Besitzer kann dies tun",
   "msg.beyonddimensions.item_net_destroyed": "Du hast dein eigenes Netz gelöscht",
   "msg.beyonddimensions.net_gift_done": "Netz %s erfolgreich fusioniert",
+  "msg.beyonddimensions.xp_mode.switch.slow": "XP-Transfermenge umgeschaltet auf: 1 Stufe",
+  "msg.beyonddimensions.xp_mode.switch.mid": "XP-Transfermenge umgeschaltet auf: 10 Stufen",
+  "msg.beyonddimensions.xp_mode.switch.high": "XP-Transfermenge umgeschaltet auf: 30 Stufen",
+  "msg.beyonddimensions.xp_mode.switch.highest": "XP-Transfermenge umgeschaltet auf: 100 Stufen",
 
-  "types.beyonddimensions.energyType.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.warden_soul_type.name": "Wächterseelen",
+  "types.beyonddimensions.source_type.name": "Arkanquelle",
+  "types.beyonddimensions.mana_type.name": "Pflanzen-Mana"
 }

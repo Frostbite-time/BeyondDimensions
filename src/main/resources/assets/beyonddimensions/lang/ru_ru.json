@@ -47,6 +47,10 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "Текущий: Активен при сигнале редстоуна",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "Текущий: Отключается при сигнале",
   "tooltip.button.beyonddimensions.control_mode_not_working": "Текущий: Отключён",
+  "tooltip.button.beyonddimensions.hopper_item_mode_deny": "Текущий: Не собирать предметы",
+  "tooltip.button.beyonddimensions.hopper_item_mode_allow": "Текущий: Собирать предметы",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "Текущий: Не собирать опыт",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_allow": "Текущий: Собирать опыт",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_deny": "Текущий: Не собирать NBT-предметы",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_allow": "Текущий: Собирать NBT-предметы",
   "tooltip.button.beyonddimensions.hopper_fluid_mode_deny": "Текущий: Не собирать жидкости",
@@ -69,7 +73,10 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "Текущий: Кормить ниже 50%",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Текущий: Поддерживать >0 насыщения",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Текущий: Полная сытость всегда",
+  "tooltip.button.beyonddimensions.sort_mode_open": "Текущий: Автосортировка включена",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "Текущий: Автосортировка отключена",
   "tooltip.item.unstable_space_time.long_data": "Пространство-время стабилизируется, осталось %s циклов. Носите с собой постоянно.",
+  "tooltip.beyonddimensions.item.xp_exchange": "В интерфейсе: ПКМ для пополнения опыта, СКМ для снятия опыта\nВ руках: ПКМ для пополнения опыта, Shift + ПКМ для изменения скорости передачи опыта",
   "tooltip.editbox.beyonddimensions.search": "Введите '#', чтобы фильтровать содержимое подсказок\nВведите '@', чтобы фильтровать ID модов",
 
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
@@ -98,6 +105,9 @@
   "item.beyonddimensions.matter_compress_ball": "Шар Сжатой Материи",
   "item.beyonddimensions.net_magnet_item": "Сетевой Магнит",
   "item.beyonddimensions.net_feeder_item": "Сетевой Питатель",
+  "item.beyonddimensions.xp_fluid_bucket": "Ведро жидкого опыта",
+  "item.beyonddimensions.xp_exchange_item": "Жезл опыта",
+  "item.beyonddimensions.warden_soul_tag_item": "Маркер душ",
 
   "block.beyonddimensions.net_control": "Контроллер Сети",
   "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
@@ -108,6 +118,12 @@
   "block.beyonddimensions.net_hopper_block": "Сетевой Загрузчик",
   "block.beyonddimensions.net_furnace_block": "Сетевая Печь",
   "block.beyonddimensions.dimensional_connect_block": "Блок измерения связи",
+  "block.beyonddimensions.rs_net_pathway": "Измеренческий Сетевой Путь RS",
+  "block.beyonddimensions.xp_fluid": "Жидкий опыт",
+  "block.beyonddimensions.ars_source_pathway": "Межмерный Канал Источника",
+  "block.beyonddimensions.mana_pool_pathway": "Измеренческий Мана-Резервуар",
+
+  "fluid_type.beyonddimensions.xp_fluid": "Жидкий опыт",
 
   "creativetab.beyonddimensions.items": "За Гранью - Предметы",
   "creativetab.beyonddimensions.blocks": "За Гранью - Блоки",
@@ -127,6 +143,13 @@
   "msg.beyonddimensions.cant_delete_net": "Не удалить сеть – Только владелец может это сделать",
   "msg.beyonddimensions.item_net_destroyed": "Вы уничтожили свою текущую сеть",
   "msg.beyonddimensions.net_gift_done": "Сеть %s успешно объединена",
+  "msg.beyonddimensions.xp_mode.switch.slow": "Объем передачи переключен на: 1 уровень",
+  "msg.beyonddimensions.xp_mode.switch.mid": "Объем передачи переключен на: 10 уровней",
+  "msg.beyonddimensions.xp_mode.switch.high": "Объем передачи переключен на: 30 уровней",
+  "msg.beyonddimensions.xp_mode.switch.highest": "Объем передачи переключен на: 100 уровней",
 
-  "types.beyonddimensions.energyType.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.warden_soul_type.name": "Души Вардена",
+  "types.beyonddimensions.source_type.name": "Источник",
+  "types.beyonddimensions.mana_type.name": "Растительная Мана"
 }

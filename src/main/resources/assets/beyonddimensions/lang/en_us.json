@@ -47,6 +47,10 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "Current: Active with Redstone",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "Current: Inactive with Redstone",
   "tooltip.button.beyonddimensions.control_mode_not_working": "Current: Disabled",
+  "tooltip.button.beyonddimensions.hopper_item_mode_deny": "Current: Deny Item Collection",
+  "tooltip.button.beyonddimensions.hopper_item_mode_allow": "Current: Allow Item Collection",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "Current: Deny XP Collection",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_allow": "Current: Allow XP Collection",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_deny": "Current: No NBT Items",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_allow": "Current: Accept NBT Items",
   "tooltip.button.beyonddimensions.hopper_fluid_mode_deny": "Current: No Fluids",
@@ -69,7 +73,10 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "Current: Feed below 50%",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "Current: Maintain >0 saturation",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "Current: Always Full Saturation",
+  "tooltip.button.beyonddimensions.sort_mode_open": "Current: Auto-sort enabled",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "Current: Auto-sort disabled",
   "tooltip.item.unstable_space_time.long_data": "Spacetime is stabilizing, requires %s more stabilization cycles. Please keep it on your person.",
+  "tooltip.beyonddimensions.item.xp_exchange": "In GUI: Right-click to deposit XP, Middle-click to withdraw XP\nWhile holding: Right-click to deposit XP, Shift + Right-click to change XP transfer rate",
   "tooltip.editbox.beyonddimensions.search": "Type '#' to filter tooltip contents\nType '@' to filter mod IDs",
 
   "istack.beyonddimensions.storage_num.item": "Stored: %s Items",
@@ -98,6 +105,9 @@
   "item.beyonddimensions.matter_compress_ball": "Compressed Matter Orb",
   "item.beyonddimensions.net_magnet_item": "Net Magnet",
   "item.beyonddimensions.net_feeder_item": "Net Feeder",
+  "item.beyonddimensions.xp_fluid_bucket": "Bucket of Liquid XP",
+  "item.beyonddimensions.xp_exchange_item": "XP Rod",
+  "item.beyonddimensions.warden_soul_tag_item": "Warden Soul Tagger",
 
   "block.beyonddimensions.net_control": "Network Controller",
   "block.beyonddimensions.net_interface": "Network Interface",
@@ -108,6 +118,12 @@
   "block.beyonddimensions.net_hopper_block": "Net Hopper",
   "block.beyonddimensions.net_furnace_block": "Net Furnace",
   "block.beyonddimensions.dimensional_connect_block": "Dimensional Connect Block",
+  "block.beyonddimensions.rs_net_pathway": "Dimensional Network RS Pathway",
+  "block.beyonddimensions.xp_fluid": "Liquid XP",
+  "block.beyonddimensions.ars_source_pathway": "Interdimensional Source Pathway",
+  "block.beyonddimensions.mana_pool_pathway": "Dimensional Mana Pool",
+
+  "fluid_type.beyonddimensions.xp_fluid": "Liquid XP",
 
   "creativetab.beyonddimensions.items": "Beyond Dimensions - Items",
   "creativetab.beyonddimensions.blocks": "Beyond Dimensions - Blocks",
@@ -127,6 +143,13 @@
   "msg.beyonddimensions.cant_delete_net": "Cannot delete network – You must be the owner",
   "msg.beyonddimensions.item_net_destroyed": "You destroyed the network you were in",
   "msg.beyonddimensions.net_gift_done": "Merged Network #%s",
+  "msg.beyonddimensions.xp_mode.switch.slow": "XP transfer amount switched to: 1 level",
+  "msg.beyonddimensions.xp_mode.switch.mid": "XP transfer amount switched to: 10 levels",
+  "msg.beyonddimensions.xp_mode.switch.high": "XP transfer amount switched to: 30 levels",
+  "msg.beyonddimensions.xp_mode.switch.highest": "XP transfer amount switched to: 100 levels",
 
-  "types.beyonddimensions.energyType.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.warden_soul_type.name": "Warden Souls",
+  "types.beyonddimensions.source_type.name": "Source",
+  "types.beyonddimensions.mana_type.name": "Plant Mana"
 }

@@ -47,6 +47,10 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "現在：レッドストーン信号時に動作",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "現在：レッドストーン信号時に停止",
   "tooltip.button.beyonddimensions.control_mode_not_working": "現在：動作停止中",
+  "tooltip.button.beyonddimensions.hopper_item_mode_deny": "現在：アイテム回収無効",
+  "tooltip.button.beyonddimensions.hopper_item_mode_allow": "現在：アイテム回収有効",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "現在：XP回収無効",
+  "tooltip.button.beyonddimensions.hopper_xp_mode_allow": "現在：XP回収有効",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_deny": "現在：NBTアイテム収集不可",
   "tooltip.button.beyonddimensions.hopper_nbt_mode_allow": "現在：NBTアイテム収集可",
   "tooltip.button.beyonddimensions.hopper_fluid_mode_deny": "現在：流体収集不可",
@@ -69,7 +73,10 @@
   "tooltip.button.beyonddimensions.feeder_mode_normal": "現在：満腹度50%未満で給餌",
   "tooltip.button.beyonddimensions.feeder_mode_saturation_keep": "現在：飽和度0以上を維持",
   "tooltip.button.beyonddimensions.feeder_mode_crazy": "現在：常時満腹状態",
+  "tooltip.button.beyonddimensions.sort_mode_open": "現在：自動整頓ON",
+  "tooltip.button.beyonddimensions.sort_mode_stop": "現在：自動整頓OFF",
   "tooltip.item.unstable_space_time.long_data": "時空は安定化中、残り%s回の安定化サイクルが必要です。常に携帯してください。",
+  "tooltip.beyonddimensions.item.xp_exchange": "GUIで：右クリックで経験値を預ける、ホイールクリックで経験値を取り出す\n手に持って時：右クリックで経験値を預ける、シフト＋右クリックで経験値転送速度を変更",
   "tooltip.editbox.beyonddimensions.search": "「#」を入力してツールチップの内容をフィルタリング\n「@」を入力してMod IDをフィルタリング",
 
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
@@ -98,6 +105,9 @@
   "item.beyonddimensions.matter_compress_ball": "圧縮物質球",
   "item.beyonddimensions.net_magnet_item": "ネットマグネット",
   "item.beyonddimensions.net_feeder_item": "ネットフィーダー",
+  "item.beyonddimensions.xp_fluid_bucket": "液体経験値のバケツ",
+  "item.beyonddimensions.xp_exchange_item": "経験値の杖",
+  "item.beyonddimensions.warden_soul_tag_item": "魂マーカー",
 
   "block.beyonddimensions.net_control": "ネットワーク制御装置",
   "block.beyonddimensions.net_interface": "ネットワークインタフェース",
@@ -108,6 +118,12 @@
   "block.beyonddimensions.net_hopper_block": "ネットホッパー",
   "block.beyonddimensions.net_furnace_block": "ネットかまど",
   "block.beyonddimensions.dimensional_connect_block": "ディメンション接続ブロック",
+  "block.beyonddimensions.rs_net_pathway": "次元ネットワークRS経路",
+  "block.beyonddimensions.xp_fluid": "液体経験値",
+  "block.beyonddimensions.ars_source_pathway": "次元魔素源経路",
+  "block.beyonddimensions.mana_pool_pathway": "次元マナプール",
+
+  "fluid_type.beyonddimensions.xp_fluid": "液体経験値",
 
   "creativetab.beyonddimensions.items": "超次元 - アイテム",
   "creativetab.beyonddimensions.blocks": "超次元 - ブロック",
@@ -127,6 +143,13 @@
   "msg.beyonddimensions.cant_delete_net": "ネットワークを削除できません―所有者のみが実行可能です",
   "msg.beyonddimensions.item_net_destroyed": "自身が属するネットワークを削除しました",
   "msg.beyonddimensions.net_gift_done": "ネットワーク番号%sの統合に成功",
+  "msg.beyonddimensions.xp_mode.switch.slow": "転送量切り替え済み：1レベル",
+  "msg.beyonddimensions.xp_mode.switch.mid": "転送量切り替え済み：10レベル",
+  "msg.beyonddimensions.xp_mode.switch.high": "転送量切り替え済み：30レベル",
+  "msg.beyonddimensions.xp_mode.switch.highest": "転送量切り替え済み：100レベル",
 
-  "types.beyonddimensions.energyType.name": "FE"
+  "types.beyonddimensions.energytype.name": "FE",
+  "types.beyonddimensions.warden_soul_type.name": "ウォーデンの魂",
+  "types.beyonddimensions.source_type.name": "魔素源",
+  "types.beyonddimensions.mana_type.name": "植物マナ"
 }
