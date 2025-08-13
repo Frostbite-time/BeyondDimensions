@@ -334,6 +334,12 @@ public class BeyondDimensions
         {
             BD_AE_ArsPlugin.register();
         }
+
+        // 注册物品能力交互黑名单
+        if(Botania_Loaded)
+        {
+            BD_BotaniaPlugin.registerItemCapBlackList();
+        }
     }
 
     @SubscribeEvent

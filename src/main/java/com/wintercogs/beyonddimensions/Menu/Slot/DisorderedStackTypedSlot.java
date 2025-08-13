@@ -84,7 +84,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     }
                 }
                 // 再检查是否为能力交互
-                else if(carriedItem.getCount()==1 && button== GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+                else if(carriedItem.getCount()==1 && button== GLFW.GLFW_MOUSE_BUTTON_RIGHT && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
                 {
                     if(carriedItem.getItem() instanceof BucketItem bucketItem)
                     {
@@ -257,7 +257,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                         }
                     }
                 }
-                else //再检查是否为能力交互
+                else if(!ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))//再检查是否为能力交互
                 {
                     // 如果使用一个有存储能力的单个物品，点击右键，
                     // 则，尝试将目标抽入到自身。如果抽取失败

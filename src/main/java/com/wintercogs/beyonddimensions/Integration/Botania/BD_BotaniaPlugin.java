@@ -5,12 +5,18 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.ManaStackTypedHandle
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.ManaUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.Menu.Slot.ItemCapInteractionBlackList;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import vazkii.botania.api.BotaniaForgeCapabilities;
+import vazkii.botania.common.item.BotaniaItems;
 
 // 为网络通道和网络接口注册火花附着
 public class BD_BotaniaPlugin
 {
+    public static void registerItemCapBlackList()
+    {
+        ItemCapInteractionBlackList.addToBlackList(BotaniaItems.manaMirror);
+    }
 
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
