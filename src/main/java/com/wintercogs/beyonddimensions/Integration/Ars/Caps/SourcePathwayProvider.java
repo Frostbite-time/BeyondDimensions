@@ -23,7 +23,7 @@ public class SourcePathwayProvider implements ISpecialSourceProvider
     @Override
     public boolean isValid()
     {
-        return sourcePathway.getNet() != null;
+        return !sourcePathway.isRemoved() && sourcePathway.getNet() != null;
     }
 
     @Override
