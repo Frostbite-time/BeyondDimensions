@@ -14,11 +14,15 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class NetedBlockEntity extends BlockEntity
 {
     // 存储接口所对应的维度网络id，用于和维度网络交互
-    protected int netId = -1;// 初始化为-1，任何小于0（不包括0）的id表示未绑定网络
+    private int netId = -1;// 初始化为-1，任何小于0（不包括0）的id表示未绑定网络
     private DimensionsNet net = null; //缓存net
+    private List<Runnable> onNetChangeRunnables = new ArrayList<>();
 
     public NetedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
@@ -38,19 +42,24 @@ public abstract class NetedBlockEntity extends BlockEntity
         if(level != null)
         {
             if(needsUpdate)
+            {
                 refreshNetCache();
-
-            setChanged();
+                setChanged();
+            }
         }
     }
 
     public void clearNetId()
     {
+        boolean needsUpdate = this.netId != -1;
         this.netId = -1;
         net = null; // 清空缓存
         if(level != null)
         {
-            setChanged();
+            if(needsUpdate)
+            {
+                setChanged();
+            }
         }
     }
 
@@ -108,6 +117,24 @@ public abstract class NetedBlockEntity extends BlockEntity
                 net = null;
             }
         }
+    }
+
+    public void addNetChangeTask(Runnable runnable)
+    {
+        onNetChangeRunnables.add(runnable);
+    }
+
+    public void onNetChange()
+    {
+        for(Runnable runnable : onNetChangeRunnables)
+            runnable.run();
+    }
+
+    @Override
+    public void setChanged()
+    {
+        super.setChanged();
+        onNetChange();
     }
 
     @Override
