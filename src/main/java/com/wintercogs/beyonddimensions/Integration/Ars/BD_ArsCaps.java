@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.Integration.Ars.Caps.ItemSourceProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
@@ -24,8 +25,8 @@ public class BD_ArsCaps
     public static void registerCapability(IEventBus modEventBus)
     {
         modEventBus.addListener(BD_ArsCaps::onRegisterCaps);
-        modEventBus.addListener(BD_ArsCaps::attachItemCaps);
-        modEventBus.addListener(BD_ArsCaps::attachBlockEntityCaps);
+        MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class,BD_ArsCaps::attachItemCaps);
+        MinecraftForge.EVENT_BUS.addGenericListener(BlockEntity.class,BD_ArsCaps::attachBlockEntityCaps);
     }
 
     public static void onRegisterCaps(RegisterCapabilitiesEvent e)
