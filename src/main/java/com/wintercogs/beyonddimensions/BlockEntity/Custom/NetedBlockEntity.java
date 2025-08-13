@@ -34,15 +34,23 @@ public abstract class NetedBlockEntity extends BlockEntity
         this.netId = id;
 
         // 标识符变化时更新缓存
-        if(needsUpdate)
-            refreshNetCache();
+        if(level != null)
+        {
+            if(needsUpdate)
+                refreshNetCache();
+
+            setChanged();
+        }
     }
 
     public void clearNetId()
     {
         this.netId = -1;
         net = null; // 清空缓存
-        setChanged();
+        if(level != null)
+        {
+            setChanged();
+        }
     }
 
     public void setNetIdFromPlayer(ServerPlayer player)
@@ -99,6 +107,14 @@ public abstract class NetedBlockEntity extends BlockEntity
                 net = null;
             }
         }
+    }
+
+    @Override
+    public void onLoad()
+    {
+        // 读取完成后刷新缓存
+        super.onLoad();
+        refreshNetCache();
     }
 
     @Override
