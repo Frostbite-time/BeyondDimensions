@@ -6,22 +6,16 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.InfusionSt
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.PigmentStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.SlurryStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.*;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals.GasHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals.InfusionHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals.PigmentHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals.SlurryHandlerWrapper;
-import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.EnergyHandlerWrapper;
-import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
-import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.ItemHandlerWrapper;
-import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.SourceHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.GasUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.InfusionUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.PigmentUnifiedStorageHandler;
@@ -32,12 +26,16 @@ import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.BlockRender.ModBlockRenders;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEFlux.BD_AEFluxPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.Integration.AE_Ars.BD_AE_ArsPlugin;
+import com.wintercogs.beyonddimensions.Integration.AE_Botania.BD_AE_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
+import com.wintercogs.beyonddimensions.Integration.Botania.BD_BotaniaPlugin;
+import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
@@ -45,6 +43,7 @@ import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -59,6 +58,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
 
@@ -90,6 +90,10 @@ public class BeyondDimensions
     public static boolean ARS_Loaded = false;
     public static final String AE_ARS_ModId = "arseng";
     public static boolean AE_ARS_Loaded = false;
+    public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
+    public static boolean Botania_Loaded = false;
+    public static final String AE_Botania_ModId = "appbot";// 植物魔法-ae附属
+    public static boolean AE_Botania_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -127,6 +131,12 @@ public class BeyondDimensions
 
         // 注册方块实体
         ModBlockEntities.register(modEventBus);
+
+        if(FMLEnvironment.dist == Dist.CLIENT)
+        {
+            // 注册方块实体渲染
+            modEventBus.addListener(ModBlockRenders::onRegisterRenderers);
+        }
 
     }
 
@@ -178,6 +188,15 @@ public class BeyondDimensions
         {
             AE_ARS_Loaded = true;
         }
+        if(ModList.get().isLoaded(Botania_ModId))
+        {
+            Botania_Loaded = true;
+            MOD_EVENT_BUS.addGenericListener(BlockEntity.class,BD_BotaniaPlugin::attachBlockEntityCaps); // 为网络通道和网络接口手动注册火花附着
+        }
+        if(ModList.get().isLoaded(AE_Botania_ModId))
+        {
+            AE_Botania_Loaded = true;
+        }
 
         ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
     }
@@ -201,14 +220,14 @@ public class BeyondDimensions
         CapabilityHelper.ItemCapabilityMap.put(EnergyStackType.ID,ForgeCapabilities.ENERGY);
 
         // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-        UnifiedStorage.typedHandlerMap.put(ItemStackType.ID,ItemUnifiedStorageHandler::new);
-        UnifiedStorage.typedHandlerMap.put(FluidStackType.ID,FluidUnifiedStorageHandler::new);
-        UnifiedStorage.typedHandlerMap.put(EnergyStackType.ID, EnergyUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(new ItemStackType(), ItemUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(new FluidStackType(), FluidUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(new EnergyStackType(), EnergyUnifiedStorageHandler::new);
 
         // 注册存储分化包装
-        StackTypedHandler.typedHandlerMap.put(ItemStackType.ID,ItemStackTypedHandler::new);
-        StackTypedHandler.typedHandlerMap.put(FluidStackType.ID,FluidStackTypedHandler::new);
-        StackTypedHandler.typedHandlerMap.put(EnergyStackType.ID, EnergyStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(new ItemStackType(), ItemStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(new FluidStackType(), FluidStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(new EnergyStackType(), EnergyStackTypedHandler::new);
 
         // 注册堆叠处理包装，用于动态包装来自其他模组的handler (如原版的IItemHandler)
         StackHandlerWrapperHelper.stackWrappers.put(ItemStackType.ID, ItemHandlerWrapper::new);
@@ -234,15 +253,17 @@ public class BeyondDimensions
             CapabilityHelper.ItemCapabilityMap.put(SlurryStackType.ID, ChemicalCapabilityHelper.SLURRY);
 
             // 注册分化包装
-            UnifiedStorage.typedHandlerMap.put(GasStackType.ID, GasUnifiedStorageHandler::new);
-            UnifiedStorage.typedHandlerMap.put(InfusionStackType.ID, InfusionUnifiedStorageHandler::new);
-            UnifiedStorage.typedHandlerMap.put(PigmentStackType.ID, PigmentUnifiedStorageHandler::new);
-            UnifiedStorage.typedHandlerMap.put(SlurryStackType.ID, SlurryUnifiedStorageHandler::new);
+            // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
+            CapabilityHelper.registerUSHandler(new GasStackType(), GasUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(new InfusionStackType(), InfusionUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(new PigmentStackType(), PigmentUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(new SlurryStackType(), SlurryUnifiedStorageHandler::new);
 
-            StackTypedHandler.typedHandlerMap.put(GasStackType.ID, GasStackTypedHandler::new);
-            StackTypedHandler.typedHandlerMap.put(InfusionStackType.ID, InfusionStackTypedHandler::new);
-            StackTypedHandler.typedHandlerMap.put(PigmentStackType.ID, PigmentStackTypedHandler::new);
-            StackTypedHandler.typedHandlerMap.put(SlurryStackType.ID, SlurryStackTypedHandler::new);
+            // 注册存储分化包装
+            CapabilityHelper.registerStackTypedHandler(new GasStackType(), GasStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new InfusionStackType(), InfusionStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new PigmentStackType(), PigmentStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new SlurryStackType(), SlurryStackTypedHandler::new);
 
             // 注册堆叠处理包装
             StackHandlerWrapperHelper.stackWrappers.put(GasStackType.ID, GasHandlerWrapper::new);
@@ -259,9 +280,21 @@ public class BeyondDimensions
             // 自己注册能力作为代替，随后为新生魔艺的方块做包装注册
             CapabilityHelper.BlockCapabilityMap.put(SourceStackType.ID, BD_ArsCaps.SOURCE_CAP);
             CapabilityHelper.ItemCapabilityMap.put(SourceStackType.ID, BD_ArsCaps.SOURCE_CAP);
-            UnifiedStorage.typedHandlerMap.put(SourceStackType.ID, SourceUnifiedStorageHandler::new);
-            StackTypedHandler.typedHandlerMap.put(SourceStackType.ID, SourceStackTypedHandler::new);
+            CapabilityHelper.registerUSHandler(new SourceStackType(), SourceUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new SourceStackType(), SourceStackTypedHandler::new);
             StackHandlerWrapperHelper.stackWrappers.put(SourceStackType.ID, SourceHandlerWrapper::new);
+        }
+
+        if(Botania_Loaded)
+        {
+            // 注册Mana（魔力）
+            StackTypeRegistry.registerType(new ManaStackType());
+            CapabilityHelper.BlockCapabilityMap.put(ManaStackType.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_RECEIVER);
+            CapabilityHelper.ItemCapabilityMap.put(ManaStackType.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_ITEM);
+            CapabilityHelper.registerUSHandler(new ManaStackType(), ManaUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new ManaStackType(), ManaStackTypedHandler::new);
+            StackHandlerWrapperHelper.stackWrappers.put(ManaStackType.ID, ManaHandlerWrapper::new);
+
         }
 
         // 为维度ME硬盘注册，其中BD_AEPlugin用于注册存储元件
@@ -282,6 +315,10 @@ public class BeyondDimensions
         if(AE_ARS_Loaded)
         {
             BD_AE_ArsPlugin.register();
+        }
+        if(AE_Botania_Loaded)
+        {
+            BD_AE_BotaniaPlugin.register();
         }
     }
 

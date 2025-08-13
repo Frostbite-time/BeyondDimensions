@@ -9,6 +9,8 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
+import com.wintercogs.beyonddimensions.Api.Util.CommonHandler;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
@@ -159,14 +161,18 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
             // 检查当前请求的能力是否匹配注册的能力
             if (entry.getValue() == cap) {
                 // 从类型映射表中获取对应的处理器构造函数
-                Function<StackTypedHandler,Object> handlerConstructor = StackTypedHandler.typedHandlerMap.get(entry.getKey());
+                CommonHandler handler = CapabilityHelper.CommonHandlerMap.get(entry.getKey());
 
-                if (handlerConstructor != null) {
-                    // 创建处理器实例并转换为请求的能力类型
-                    Object handler = handlerConstructor.apply(this.stackHandler);
-                    // 安全类型转换后包装为 LazyOptional
-                    return LazyOptional.of(() -> handler).cast();
+                if(handler != null)
+                {
+                    Object result;
+                    if (handler.isContextual())
+                        result = handler.apply(stackHandler, new CapCtx(level, getBlockPos(), side, this));
+                    else
+                        result = handler.apply(stackHandler, null);
+                    return LazyOptional.of(() -> result).cast();
                 }
+                return LazyOptional.empty(); // 无对应handler的回调
             }
         }
         // 未找到匹配能力则调用父类实现

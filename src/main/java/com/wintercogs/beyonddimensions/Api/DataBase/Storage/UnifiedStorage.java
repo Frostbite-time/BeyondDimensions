@@ -57,11 +57,6 @@ public class UnifiedStorage implements IStackTypedHandler
     private final Map<ResourceLocation, List<Integer>> typeIdIndex = new HashMap<>();
 
     /**
-     * 用于存储创建分化包装的函数
-     */
-    public static final Map<ResourceLocation, Function<UnifiedStorage,Object>> typedHandlerMap = new HashMap<>();
-
-    /**
      * 统一存储的属性 对于真正的存储实例，在序列化和反序列化的时候通过持久化和再赋值确定。
      * <p>
      * 对于临时数据，默认给予最大值
@@ -78,12 +73,6 @@ public class UnifiedStorage implements IStackTypedHandler
     public void onChange()
     {
         net.setDirty();
-    }
-
-    @Override
-    public Object getTypedHandler(ResourceLocation typeId)
-    {
-        return typedHandlerMap.get(typeId).apply(this);
     }
 
     @Override

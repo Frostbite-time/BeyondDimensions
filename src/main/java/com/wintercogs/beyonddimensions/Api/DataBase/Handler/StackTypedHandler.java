@@ -29,11 +29,6 @@ public class StackTypedHandler implements IStackTypedHandler
     private final Map<ResourceLocation, List<Integer>> typeIdIndex = new HashMap<>();
 
     /**
-     * 用于存储创建分化包装的函数
-     */
-    public static final Map<ResourceLocation, Function<StackTypedHandler,Object>> typedHandlerMap = new HashMap<>();
-
-    /**
      * 容量大小，不持久化保存，但是反序列化时以此为准，容量不足则主动扩容以实现对部分旧数据进行兼容
      */
     private final int size;
@@ -86,12 +81,6 @@ public class StackTypedHandler implements IStackTypedHandler
     public void onChange()
     {
 
-    }
-
-    @Override
-    public Object getTypedHandler(ResourceLocation typeId)
-    {
-        return typedHandlerMap.get(typeId).apply(this);
     }
 
     @Override
