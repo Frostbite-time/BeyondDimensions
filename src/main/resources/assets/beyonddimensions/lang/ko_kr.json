@@ -130,7 +130,7 @@
 
   "beyonddimensions.message.insufficient_materials": "재료가 부족합니다",
 
-  "msg.beyonddimensions.network_created": "당신은 우주에 균열을 만들었습니다...",
+  "msg.beyonddimensions.network_created": "당신은 우주에 균열을 만들었습니다...\n팁: 기본적으로 [O] 키를 눌러 차원 네트워크를 엽니다.",
   "msg.beyonddimensions.item_net_bound": "%d번 네트워크에 아이템 연결됨",
   "msg.beyonddimensions.item_net_unbound": "%d번 네트워크에서 아이템 연결 해제",
   "msg.beyonddimensions.block_net_bound": "%d번 네트워크에 블록 연결됨",

@@ -130,7 +130,7 @@
 
   "beyonddimensions.message.insufficient_materials": "Недостаточно материалов",
 
-  "msg.beyonddimensions.network_created": "Вы разорвали ткань реальности...",
+  "msg.beyonddimensions.network_created": "Ты прорвал брешь в космосе...\nПодсказка: По умолчанию нажмите [O], чтобы открыть сеть измерений.",
   "msg.beyonddimensions.item_net_bound": "Предмет привязан к сети №%d",
   "msg.beyonddimensions.item_net_unbound": "Предмет отвязан от сети №%d",
   "msg.beyonddimensions.block_net_bound": "Блок привязан к сети №%d",

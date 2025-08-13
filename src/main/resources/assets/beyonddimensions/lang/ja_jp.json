@@ -130,7 +130,7 @@
 
   "beyonddimensions.message.insufficient_materials": "材料が不足しています",
 
-  "msg.beyonddimensions.network_created": "あなたは宇宙に裂け目を生み出した...",
+  "msg.beyonddimensions.network_created": "あなたは宇宙に裂け目を開けました...\nヒント: デフォルトでは[O]キーを押してディメンション・ネットワークを開きます。",
   "msg.beyonddimensions.item_net_bound": "アイテムを%d番ネットワークに接続しました",
   "msg.beyonddimensions.item_net_unbound": "アイテムを%d番ネットワークから切断しました",
   "msg.beyonddimensions.block_net_bound": "ブロックを%d番ネットワークに接続しました",

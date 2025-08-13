@@ -130,7 +130,7 @@
 
   "beyonddimensions.message.insufficient_materials": "Nicht genug Materialien",
 
-  "msg.beyonddimensions.network_created": "Du hast einen Riss im Kosmos erschaffen...",
+  "msg.beyonddimensions.network_created": "Du hast einen Riss in den Kosmos gerissen...\nHinweis: Standardmäßig drücke [O], um das Dimensionsnetzwerk zu öffnen.",
   "msg.beyonddimensions.item_net_bound": "Gegenstand an Netzwerk %d gebunden",
   "msg.beyonddimensions.item_net_unbound": "Gegenstand von Netzwerk %d entbunden",
   "msg.beyonddimensions.block_net_bound": "Block an Netzwerk %d gebunden",

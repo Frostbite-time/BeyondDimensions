@@ -130,7 +130,7 @@
 
   "beyonddimensions.message.insufficient_materials": "Materiais insuficientes",
 
-  "msg.beyonddimensions.network_created": "Você rasgou uma fenda na realidade...",
+  "msg.beyonddimensions.network_created": "Você abriu uma fenda no cosmos...\nDica: Por padrão pressione [O] para abrir a rede dimensional.",
   "msg.beyonddimensions.item_net_bound": "Item vinculado à rede nº%d",
   "msg.beyonddimensions.item_net_unbound": "Item desvinculado da rede nº%d",
   "msg.beyonddimensions.block_net_bound": "Bloco vinculado à rede nº%d",
