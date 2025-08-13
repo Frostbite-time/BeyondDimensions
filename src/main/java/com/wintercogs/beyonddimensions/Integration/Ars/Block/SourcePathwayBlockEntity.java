@@ -119,8 +119,8 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
     @Override
     public void setChanged()
     {
-        super.setChanged();
-        if(!level.isClientSide() && getNet() != null)
+        super.setChanged(); // 防止level触发NPE
+        if(level != null && !level.isClientSide() && getNet() != null)
             SourceManager.INSTANCE.addInterface(level,new SourcePathwayProvider(this));
     }
 }
