@@ -15,6 +15,8 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import vazkii.botania.api.BotaniaForgeCapabilities;
 
+import javax.annotation.Nullable;
+
 public class BD_BotaniaPlugin
 {
 
@@ -25,41 +27,36 @@ public class BD_BotaniaPlugin
 
         if(be instanceof NetPathwayBlockEntity cBe)
         {
-            ICapabilityProvider prov = new ICapabilityProvider()
-            {
-                @Override
-                public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction direction)
-                {
-                    if(capability == BotaniaForgeCapabilities.SPARK_ATTACHABLE)
-                    {
-                        if(cBe.getNet() != null)
-                        {
-                            return LazyOptional.of(() -> new ManaUnifiedStorageHandler(cBe.getNet().getUnifiedStorage(), new CapCtx(be.getLevel(), be.getBlockPos(), direction, be))).cast();
-                        }
-                    }
-                    return LazyOptional.empty();
-                }
+            class ManaUnifiedStorageHandlerProvider implements ICapabilityProvider {
+                private final ManaUnifiedStorageHandler impl = new ManaUnifiedStorageHandler(cBe.getNet().getUnifiedStorage(),new CapCtx(be.getLevel(), be.getBlockPos(), null, be));
+                private final LazyOptional<ManaUnifiedStorageHandler> opt = LazyOptional.of(() -> impl);
 
-            };
+                @Override
+                public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
+                    return cap == BotaniaForgeCapabilities.SPARK_ATTACHABLE ? opt.cast() : LazyOptional.empty();
+                }
+                void invalidate() { opt.invalidate(); }
+            }
+            ManaUnifiedStorageHandlerProvider prov = new ManaUnifiedStorageHandlerProvider();
             e.addCapability(ResourceLocation.tryBuild(BeyondDimensions.MODID, "mana"), prov);
+            e.addListener(prov::invalidate);
         }
 
         if(be instanceof NetInterfaceBlockEntity cIBe)
         {
-            ICapabilityProvider prov = new ICapabilityProvider()
-            {
-                @Override
-                public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction direction)
-                {
-                    if(capability == BotaniaForgeCapabilities.SPARK_ATTACHABLE)
-                    {
-                        return LazyOptional.of(() -> new ManaStackTypedHandler(cIBe.getStackHandler(), new CapCtx(be.getLevel(), be.getBlockPos(), direction, be))).cast();
-                    }
-                    return LazyOptional.empty();
-                }
+            class ManaStackTypedHandlerProvider implements ICapabilityProvider {
+                private final ManaStackTypedHandler impl = new ManaStackTypedHandler(cIBe.getStackHandler(),new CapCtx(be.getLevel(), be.getBlockPos(), null, be));
+                private final LazyOptional<ManaStackTypedHandler> opt = LazyOptional.of(() -> impl);
 
-            };
+                @Override
+                public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
+                    return cap == BotaniaForgeCapabilities.SPARK_ATTACHABLE ? opt.cast() : LazyOptional.empty();
+                }
+                void invalidate() { opt.invalidate(); }
+            }
+            ManaStackTypedHandlerProvider prov = new ManaStackTypedHandlerProvider();
             e.addCapability(ResourceLocation.tryBuild(BeyondDimensions.MODID, "mana"), prov);
+            e.addListener(prov::invalidate);
         }
     }
 }

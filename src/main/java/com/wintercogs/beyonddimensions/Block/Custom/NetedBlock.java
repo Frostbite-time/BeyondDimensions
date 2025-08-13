@@ -43,7 +43,6 @@ public class NetedBlock extends Block
                             {
                                 // 成功设置网络id
                                 blockEntity.setNetId(net.getId());
-                                blockEntity.invalidateCaps(); // 用于清除实体能力缓存
                                 // 我觉得主动方式无需再弹音效
                                 //level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,0.5F,1.0F);
                                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_bound",net.getId()));
@@ -76,7 +75,6 @@ public class NetedBlock extends Block
                         {
                             // 成功设置网络id
                             blockEntity.setNetId(net.getId());
-                            blockEntity.invalidateCaps();
                             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,0.5F,1.0F);
                             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_bound",net.getId()));
                         }
@@ -97,7 +95,6 @@ public class NetedBlock extends Block
                                 // 成功清除网络id
                                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_unbound",blockEntity.getNetId()));
                                 blockEntity.setNetId(-1);
-                                blockEntity.invalidateCaps();
                                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,0.5F,1.0F);
                             }
                             else
