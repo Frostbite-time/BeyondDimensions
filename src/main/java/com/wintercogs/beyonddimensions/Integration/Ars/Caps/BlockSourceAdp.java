@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Integration.Ars.Caps;
 
 import com.hollingsworth.arsnouveau.api.source.ISourceTile;
+import com.hollingsworth.arsnouveau.common.block.tile.CreativeSourceJarTile;
 
 public class BlockSourceAdp implements ISourceCap
 {
@@ -76,6 +77,9 @@ public class BlockSourceAdp implements ISourceCap
     @Override
     public int extractSource(int amount, boolean sim)
     {
+        if(sourceTile instanceof CreativeSourceJarTile)
+            return 1000000; // 对创造魔源特殊兼容（否则会因为removeSource的设计永远无法取出）
+
         int before = sourceTile.getSource();
         // 取速率、意图量、当前量的最小值
         int actExtract = Math.max(amount,Math.min(before,sourceTile.getTransferRate()));

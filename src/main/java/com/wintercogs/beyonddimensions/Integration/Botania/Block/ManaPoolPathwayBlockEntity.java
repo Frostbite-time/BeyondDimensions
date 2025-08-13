@@ -449,4 +449,12 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         super.load(tag);
         isOutPutting = tag.getBoolean("out_putting");
     }
+
+    // 清空引用
+    @Override
+    public void setRemoved()
+    {
+        super.setRemoved();
+        BotaniaAPI.instance().getManaNetworkInstance().fireManaNetworkEvent(this, ManaBlockType.POOL, ManaNetworkAction.REMOVE);
+    }
 }

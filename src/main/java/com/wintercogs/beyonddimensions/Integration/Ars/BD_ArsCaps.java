@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Integration.Ars;
 
 
 import com.hollingsworth.arsnouveau.api.source.ISourceTile;
+import com.hollingsworth.arsnouveau.common.block.tile.ImbuementTile;
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Integration.Ars.Caps.BESourceProvider;
@@ -54,13 +55,15 @@ public class BD_ArsCaps
 
         // 给所有实现了某接口的方块实体统一附加
         if (be instanceof ISourceTile holder) {
-            var prov = new BESourceProvider(holder); // 见下文 Provider
-            e.addCapability(ResourceLocation.tryBuild(BeyondDimensions.MODID, "source"), prov);
-            e.addListener(prov::invalidate); // 跟随 BE 生命周期
+            // ImbuementTile指灌注室，其实现的传输速率为0，注册无意义。且其内部本身时刻生产魔源，有失平衡
+            if(!(holder instanceof ImbuementTile))
+            {
+                var prov = new BESourceProvider(holder); // 见下文 Provider
+                e.addCapability(ResourceLocation.tryBuild(BeyondDimensions.MODID, "source"), prov);
+                e.addListener(prov::invalidate); // 跟随 BE 生命周期
+            }
         }
 
         // 也可以：按具体 BE 类、按方块、按标签等灵活判断
     }
-
-
 }
