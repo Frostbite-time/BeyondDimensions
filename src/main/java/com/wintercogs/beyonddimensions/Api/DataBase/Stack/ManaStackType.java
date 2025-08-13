@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.ManaType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Render.IngredientRenderer;
@@ -175,7 +174,7 @@ public class ManaStackType extends LongStackType<ManaType>
         poseStackText.pushPose();
         poseStackText.translate(0,0,200); // 确保文本在顶层
         poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
-        RenderSystem.disableBlend(); // 禁用混合渲染模式
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend(); // 禁用混合渲染模式
         final int X = (int)(
                 (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
                         * 1.0f / 0.666f
