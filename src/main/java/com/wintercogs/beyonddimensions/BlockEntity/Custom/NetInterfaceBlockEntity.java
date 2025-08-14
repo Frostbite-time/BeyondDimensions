@@ -93,6 +93,12 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     @Override
     public boolean shouldWork()
     {
+        // 无论接口是否工作，始终保持与网络的内容更新
+        if(getNet() != null)
+        {
+            transferToNet();
+            transferFromNet();
+        }
         return super.shouldWork(); // 接口方块使用内部缓存进行弹出，因此不需要检测getNet
     }
 
@@ -100,11 +106,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public void workContent()
     {
         super.workContent();
-        if(getNet() != null)
-        {
-            transferToNet();
-            transferFromNet();
-        }
         // 尝试输出物品到周围
         if(popMode == PopMode.OPEN)
         {
@@ -195,8 +196,10 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                 IStackType stack = stackHandler.getStackBySlot(i);
                 if(stack !=null &&!stack.isEmpty())
                 {
-                    net.getUnifiedStorage().insert(stack.copy(),false);
-                    stackHandler.setStackDirectly(i, new ItemStackType());
+                    IStackType extracted = stackHandler.extract(i, stack.getStackAmount(),false);
+                    IStackType remaining = net.getUnifiedStorage().insert(extracted,false);
+                    if(!remaining.isEmpty())
+                        stackHandler.insert(i, remaining, false);
                 }
             }
         }
@@ -218,7 +221,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                 if(flag!=null && !flag.isEmpty())
                 {
                     // 到达数量上限或者是不同物品则不尝试插入
-                    IStackType current = stackHandler.getStorage().get(i);
+                    IStackType current = stackHandler.getStackBySlot(i);
                     if(current != null &&!current.isEmpty())
                     {
                         if(current.getVanillaMaxStackSize() >= current.getStackAmount())
@@ -236,7 +239,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                     if(stack !=null &&!stack.isEmpty())
                     {
                         IStackType remaining = stackHandler.insert(i,stack.copy(),false);
-                        if(remaining.getStackAmount()<stack.getStackAmount())
+                        if(!remaining.isEmpty())
                         {
                             net.getUnifiedStorage().insert(remaining.copy(),false);
                         }
