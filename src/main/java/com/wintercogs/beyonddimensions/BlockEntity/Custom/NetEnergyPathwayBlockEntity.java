@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
@@ -27,16 +28,13 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
 {
     LazyOptional<IEnergyStorage> opt = LazyOptional.empty();
 
-    public PopMode popMode = PopMode.STOP;
+    private PopMode popMode = PopMode.STOP;
 
     private final Direction[] directions = Direction.values();
 
     public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
-        addNetChangeTask(() -> {
-            opt.invalidate();
-            opt = LazyOptional.empty();
-        });
+        addNetChangeTask(this::clearCapCache);
     }
 
     @Override
@@ -44,20 +42,18 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     {
         if(cap == ForgeCapabilities.ENERGY)
         {
-            if(popMode == PopMode.OPEN)
-            {
+            DimensionsNet net = getNet();
+            if (net == null) {
                 return LazyOptional.empty();
             }
-            DimensionsNet net = getNet();
-            if(net != null)
-            {
-                if (!opt.isPresent())
-                {
+            if (!opt.isPresent()) {
+                if (popMode == PopMode.OPEN) {
+                    opt = LazyOptional.of(() -> new EnergyStorage(0));
+                } else {
                     opt = LazyOptional.of(() -> new EnergyUnifiedStorageHandler(net.getUnifiedStorage()));
                 }
-                return opt.cast();
             }
-            return LazyOptional.empty();
+            return opt.cast();
         }
         return super.getCapability(cap,side);
     }
@@ -66,8 +62,27 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     public void invalidateCaps()
     {
         super.invalidateCaps();
-        opt.invalidate();
+        clearCapCache();
+    }
+
+    public void clearCapCache()
+    {
+        if (opt.isPresent()) opt.invalidate();
         opt = LazyOptional.empty();
+    }
+
+    public PopMode getPopMode()
+    {
+        return popMode;
+    }
+
+    public void setPopMode(PopMode newMode)
+    {
+        if (this.popMode != newMode) {
+            this.popMode = newMode;
+            clearCapCache();
+            setChanged();
+        }
     }
 
     @Override

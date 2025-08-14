@@ -97,7 +97,7 @@ public class NetEnergyMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putString("popMode", be.popMode.name());
+        tag.putString("popMode", be.getPopMode().name());
         tag.putString("controlMode", be.controlMode.name());
         tag.putLong("lastEnergyCapacity", lastEnergyCapacity);
         tag.putLong("lastEnergySpeedState", lastEnergySpeedState);
@@ -116,7 +116,7 @@ public class NetEnergyMenu extends BDBaseMenu
         }
         else
         {
-            be.popMode = PopMode.valueOf(tag.getString("popMode"));
+            be.setPopMode(PopMode.valueOf(tag.getString("popMode")));
             be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
             player.level().blockEntityChanged(be.getBlockPos());
             be.invalidateCaps();
