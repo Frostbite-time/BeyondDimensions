@@ -53,17 +53,16 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
                         return (ResourceAmount)this.endOfData();
                     } else {
                         while(this.index < finalStorage.getSlots()) {
+
                             IStackType<?> stack = finalStorage.getStackBySlot(this.index);
+                            ++this.index; // 用完index后立刻迭代
                             if (!stack.isEmpty()) {
-                                ++this.index;
                                 ResourceKey key = RSHelper.fromIStackToRSKey(stack).orElse(null);
                                 if(key != null)
                                 {
                                     return new ResourceAmount(key, stack.getStackAmount());
                                 }
                             }
-
-                            ++this.index;
                         }
 
                         return (ResourceAmount)this.endOfData();
