@@ -50,6 +50,7 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -96,9 +97,9 @@ public class BeyondDimensions
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
     // FML 将识别一些参数类型，如 IEventBus 或 ModContainer 并自动传入它们。
-    public BeyondDimensions(FMLJavaModLoadingContext context)
+    public BeyondDimensions()
     {
-        IEventBus modEventBus = context.getModEventBus();
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         MOD_EVENT_BUS = modEventBus;
 
         modEventBus.addListener(this::constructMod);
@@ -110,7 +111,7 @@ public class BeyondDimensions
         MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
 
         // 注册模组的ForgeConfigSpec以便Forge可以创建和加载配置文件
-        context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
         // 调用UIRegister的构造函数，从而注册所有UI
         UIRegister.register(modEventBus);
