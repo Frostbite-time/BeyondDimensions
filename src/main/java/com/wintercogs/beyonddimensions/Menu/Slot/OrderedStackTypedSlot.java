@@ -192,7 +192,6 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     if(takenItem != null)
                     {
                         menu.setCarried(takenItem);
-                        storage.onChange();
                     }
                 }
             }
