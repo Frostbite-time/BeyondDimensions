@@ -18,7 +18,10 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -58,6 +61,51 @@ public class UnifiedStorage implements IStackTypedHandler
      */
     private final Map<ResourceLocation, List<Integer>> typeIdIndex = new HashMap<>();
 
+    //onchange回调处理==================================================
+    @FunctionalInterface // 带上下文版本
+    public interface DeltaListener {
+        void onDelta(IStackType<?> type, long size, boolean insert);
+    }
+
+    @FunctionalInterface // 不带上下文版本
+    public interface AnyChangeListener {
+        void onAnyChange();
+    }
+
+    // 弱订阅用
+    @FunctionalInterface
+    public interface QuadConsumer<A,B,C,D> { void accept(A a, B b, C c, D d); }
+
+    // ====== 弱 owner + 回调条目 ======
+    private static final class OwnerRef extends WeakReference<Object> {
+        OwnerRef(Object owner, ReferenceQueue<Object> q) { super(owner, q); }
+    }
+    // 无信息条目
+    private static final class AnyEntry {
+        final OwnerRef ownerRef;
+        final AnyChangeListener listener; // 强回调，但内部请勿强握 owner
+        AnyEntry(OwnerRef ref, AnyChangeListener l) { this.ownerRef = ref; this.listener = l; }
+    }
+    // 增量信息条目
+    private static final class DeltaEntry {
+        final OwnerRef ownerRef;
+        final DeltaListener listener; // 强回调，但内部请勿强握 owner
+        DeltaEntry(OwnerRef ref, DeltaListener l) { this.ownerRef = ref; this.listener = l; }
+    }
+
+    private final CopyOnWriteArrayList<AnyEntry> anyListeners = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<DeltaEntry> deltaListeners = new CopyOnWriteArrayList<>();
+
+    /** 抑制 any 的“delta 上下文”嵌套计数；>0 时 fireChange() 将被忽略。 */
+    private int deltaContextDepth = 0;
+
+    /** 进入/退出 delta 上下文的小工具 */
+    private void beginDeltaContext() { deltaContextDepth++; }
+    private void endDeltaContext()   { deltaContextDepth = Math.max(0, deltaContextDepth - 1); }
+    private boolean inDeltaContext() { return deltaContextDepth > 0; }
+
+    private final ReferenceQueue<Object> refQueue = new ReferenceQueue<>();
+
     /**
      * 统一存储的属性 对于真正的存储实例，在序列化和反序列化的时候通过持久化和再赋值确定。
      * <p>
@@ -71,10 +119,120 @@ public class UnifiedStorage implements IStackTypedHandler
         this.net = net;
     }
 
+    private UnifiedStorage(long capacity, int maxSize)
+    {
+        this.slotCapacity = capacity;
+        this.slotMaxSize = maxSize;
+    }
+
+    // 返回一个无法被插入和提取的空的UnifiedStorage，其可被安全的视为一个全空容器
+    // 无需提供net，因为其覆写了需要net的方法
+    public static UnifiedStorage getEmpty()
+    {
+        return new UnifiedStorage(0,0){
+            @Override
+            public void onChange()
+            {
+
+            }
+
+            @Override
+            public long getSlotCapacity(int slot)
+            {
+                return 0;
+            }
+        };
+    }
+
+    // ====== 订阅 API（强订阅）======
+    public AutoCloseable subscribeAny(Object owner, AnyChangeListener onAny) {
+        if (owner == null || onAny == null) throw new IllegalArgumentException();
+        drainRefQueue();
+        AnyEntry e = new AnyEntry(new OwnerRef(owner, refQueue), onAny);
+        anyListeners.add(e);
+        return () -> anyListeners.remove(e);
+    }
+    public AutoCloseable subscribeDelta(Object owner, DeltaListener onDelta) {
+        if (owner == null || onDelta == null) throw new IllegalArgumentException();
+        drainRefQueue();
+        DeltaEntry e = new DeltaEntry(new OwnerRef(owner, refQueue), onDelta);
+        deltaListeners.add(e);
+        return () -> deltaListeners.remove(e);
+    }
+
+    // ====== 订阅 API（弱订阅，回调内部也只握弱引用）======
+    public <T> AutoCloseable subscribeAnyWeak(T owner, java.util.function.Consumer<T> onAny) {
+        if (owner == null || onAny == null) throw new IllegalArgumentException();
+        drainRefQueue();
+        OwnerRef ref = new OwnerRef(owner, refQueue);
+        AnyEntry e = new AnyEntry(ref, () -> {
+            @SuppressWarnings("unchecked") T o = (T) ref.get();
+            if (o != null) onAny.accept(o); else drainRefQueue();
+        });
+        anyListeners.add(e);
+        return () -> anyListeners.remove(e);
+    }
+    public <T> AutoCloseable subscribeDeltaWeak(
+            T owner,
+            QuadConsumer<T, IStackType<?>, Long, Boolean> onDelta
+    ) {
+        if (owner == null || onDelta == null) throw new IllegalArgumentException();
+        drainRefQueue();
+        OwnerRef ref = new OwnerRef(owner, refQueue);
+        DeltaEntry e = new DeltaEntry(ref, (type, size, insert) -> {
+            @SuppressWarnings("unchecked") T o = (T) ref.get();
+            if (o != null) onDelta.accept(o, type, size, insert); else drainRefQueue();
+        });
+        deltaListeners.add(e);
+        return () -> deltaListeners.remove(e);
+    }
+
+    // 触发无上下文回调，如果本次更改正在触发上下回调则无视
+    protected void fireChange() {
+        if (inDeltaContext()) return;
+        drainRefQueue();
+        for (AnyEntry e : anyListeners) {
+            try { e.listener.onAnyChange(); } catch (Throwable ignored) {}
+        }
+    }
+    // 触发上下文回调
+    protected void fireDelta(IStackType<?> type, long size, boolean insert) {
+        drainRefQueue();
+        for (DeltaEntry e : deltaListeners) {
+            try { e.listener.onDelta(type, size, insert); } catch (Throwable ignored) {}
+        }
+    }
+
+    // 帮助GC
+    private void drainRefQueue() {
+        OwnerRef ref;
+        while ((ref = (OwnerRef) refQueue.poll()) != null) {
+            OwnerRef dead = ref;
+            anyListeners.removeIf(e -> e.ownerRef == dead);
+            deltaListeners.removeIf(e -> e.ownerRef == dead);
+        }
+    }
+
     @Override
     public void onChange()
     {
         net.setDirty();
+        fireChange();
+    }
+
+    // 注：仅在只有一个内容变化的情况下触发带上下文信息的变化
+    // 其触发时，会阻止无上下文信息的二次触发，要确保此信息所携带的内容，就是本次变化的全部内容
+    // insert为真则为插入操作，否则为提取
+    // size为变化量
+    private void onContentChanged(IStackType type, long size, boolean insert)
+    {
+        beginDeltaContext();
+        try {
+            onChange(); // 走统一入口，但是当处于Delta上下文时，内部的fireChange被略过
+        } finally {
+            endDeltaContext();
+        }
+        fireDelta(type, size, insert); // 发送增量广播
     }
 
     @Override
@@ -205,7 +363,7 @@ public class UnifiedStorage implements IStackTypedHandler
 
             if (!simulate) {
                 existing.grow(actualInsert);
-                onChange();
+                onContentChanged(existing,actualInsert,true); //此处无需传递复制值，因为如果existing增加后的size仍为0，则没有增加的必要
             }
             return stack.copyWithCount(remaining);
         }
@@ -224,7 +382,7 @@ public class UnifiedStorage implements IStackTypedHandler
                 int newIndex = storage.size() - 1;
                 typeIdIndex.computeIfAbsent(stack.getTypeId(), k -> new ArrayList<>()).add(newIndex);
 
-                onChange();
+                onContentChanged(newStack,actualInsert,true); //此处无需传递复制值，如果newStack的size为0，则没有增加的必要
             }
         }
         return stack.copyWithCount(remaining);
@@ -322,7 +480,7 @@ public class UnifiedStorage implements IStackTypedHandler
                         typeIdIndex.remove(stack.getTypeId());
                     }
                 }
-                onChange();
+                onContentChanged(existing.copyWithCount(1),extracted,false); // 提交复制值，防止getStack时被自动更新为empty
             }
             return result;
         }
@@ -394,9 +552,8 @@ public class UnifiedStorage implements IStackTypedHandler
                 
                 // 更新受影响的索引
                 updateIndicesAfterRemoval(slot);
-                
-                onChange();
             }
+            onContentChanged(existing.copyWithCount(1),extracted,false);
         }
         return result;
     }
