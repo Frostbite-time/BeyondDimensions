@@ -93,6 +93,7 @@ public class ModBlockEntities
             ).build(null)
     );
 
+    public static Supplier<BlockEntityType<?>> RS_NET_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> ARS_SOURCE_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> MANA_POOL_PATHWAY_BLOCK_ENTITY;
     public static void IntegrationRegister()
@@ -114,6 +115,16 @@ public class ModBlockEntities
                     () -> BlockEntityType.Builder.of(
                             ManaPoolPathwayBlockEntity::new,
                             ModBlocks.MANA_POOL_PATHWAY.get()
+                    ).build(null)
+            );
+        }
+        if(BeyondDimensions.RS_Loaded)
+        {
+            RS_NET_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+                    "rs_net_pathway_block_entity",
+                    () -> BlockEntityType.Builder.of(
+                            com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity::new,
+                            ModBlocks.RS_NET_PATHWAY.get()
                     ).build(null)
             );
         }

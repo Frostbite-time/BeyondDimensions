@@ -38,6 +38,7 @@ import com.wintercogs.beyonddimensions.Integration.Botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
+import com.wintercogs.beyonddimensions.Integration.RS.BD_RSPlugin;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
@@ -85,6 +86,8 @@ public class BeyondDimensions
     public static final String CuriosModId = "curios";
     public static boolean JECharactersLoaded = false;
     public static final String JECharactersModId = "jecharacters";
+    public static final String RSModId = "refinedstorage";
+    public static boolean RS_Loaded = false;
     public static final String ARS_ModId = "ars_nouveau"; // 新生魔艺-魔源兼容
     public static boolean ARS_Loaded = false;
     public static final String AE_ARS_ModId = "arseng";
@@ -195,6 +198,10 @@ public class BeyondDimensions
         if(ModList.get().isLoaded(AE_Botania_ModId))
         {
             AE_Botania_Loaded = true;
+        }
+        if (ModList.get().isLoaded(RSModId))
+        {
+            RS_Loaded = true;
         }
 
         ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
@@ -318,6 +325,11 @@ public class BeyondDimensions
         if(AE_Botania_Loaded)
         {
             BD_AE_BotaniaPlugin.register();
+        }
+
+        if(RS_Loaded)
+        {
+            BD_RSPlugin.register();
         }
 
         // 注册物品能力交互黑名单

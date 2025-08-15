@@ -69,6 +69,19 @@ public class ModBlocks
                     return new Block(BlockBehaviour.Properties.of().strength(2f));
             });
 
+    public static final RegistryObject<Block> RS_NET_PATHWAY = registerBlock("rs_net_pathway",
+            ()-> {
+                if(BeyondDimensions.RS_Loaded)
+                {
+                    return new com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlock(BlockBehaviour.Properties.of().strength(2f));
+                }
+                else
+                {
+                    return new Block(BlockBehaviour.Properties.of().strength(2f));
+                }
+            });
+
+
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block)
     {

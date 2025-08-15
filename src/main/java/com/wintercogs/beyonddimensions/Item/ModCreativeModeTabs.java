@@ -70,6 +70,10 @@ public class ModCreativeModeTabs
                         output.accept(ModBlocks.NET_FURNACE_BLOCK.get());
                         output.accept(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
 
+                        if(BeyondDimensions.RS_Loaded)
+                        {
+                            output.accept(ModBlocks.RS_NET_PATHWAY.get());
+                        }
                         if(BeyondDimensions.ARS_Loaded)
                         {
                             output.accept(ModBlocks.ARS_SOURCE_PATHWAY.get());

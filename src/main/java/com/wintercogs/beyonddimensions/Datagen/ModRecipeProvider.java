@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Datagen;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
+import com.wintercogs.beyonddimensions.Integration.RS.Tags.RSTags;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
@@ -261,6 +262,26 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .addRecipe(builder::save)                            // 把上面的 ShapedRecipeBuilder 交给它保存
                     // .generateAdvancement() // 可选：需要时让它自己生成 Advancement
                     .build(recipeOutput, ResourceLocation.tryBuild(BeyondDimensions.MODID, "net_ae_storage_cell")); // 最终的配方ID
+        }
+
+        if(BeyondDimensions.RS_Loaded)
+        {
+            ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.RS_NET_PATHWAY.get())
+                    .pattern("ABA")
+                    .pattern("ACA")
+                    .pattern("ADA")
+                    .define('A', RSTags.RS_QUARTZ_ENRICHED_IRON)
+                    .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                    .define('C', com.refinedmods.refinedstorage.RSBlocks.MACHINE_CASING.get())
+                    .define('D', Items.REDSTONE)
+                    .unlockedBy("unlock_rs_net_pathway", has(ModItems.SPACE_TIME_STABLE_FRAME.get()));
+
+            // 用 ConditionalRecipe 包起来，加上“模组已加载”的条件
+            ConditionalRecipe.builder()
+                    .addCondition(modLoaded(BeyondDimensions.RSModId)) // 等同于 forge:mod_loaded
+                    .addRecipe(builder::save)                            // 把上面的 ShapedRecipeBuilder 交给它保存
+                    // .generateAdvancement() // 可选：需要时让它自己生成 Advancement
+                    .build(recipeOutput, ResourceLocation.tryBuild(BeyondDimensions.MODID, "rs_net_pathway")); // 最终的配方ID
         }
 
         if(BeyondDimensions.ARS_Loaded)
