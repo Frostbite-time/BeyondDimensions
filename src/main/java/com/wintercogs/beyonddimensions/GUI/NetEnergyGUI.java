@@ -43,7 +43,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
                 this.leftPos+176 +2,this.topPos+6+5,16,16,button ->
         {
             popButton.toggleState();
-            menu.be.popMode = (PopMode) popButton.currentState;
+            menu.be.setPopMode((PopMode) popButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -62,7 +62,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.be.popMode);
+                setState(menu.be.getPopMode());
             }
         };
         addRenderableWidget(popButton);
@@ -105,8 +105,8 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
     {
         super.containerTick();
 
-        if(popButton.currentState != menu.be.popMode)
-            popButton.setState(menu.be.popMode);
+        if(popButton.currentState != menu.be.getPopMode())
+            popButton.setState(menu.be.getPopMode());
         if(controlModeButton.currentState != menu.be.controlMode)
             controlModeButton.setState(menu.be.controlMode);
     }

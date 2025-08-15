@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
 
-    public PopMode popMode = PopMode.STOP;
+    private PopMode popMode = PopMode.STOP;
     private final Direction[] directions = Direction.values();
 
     public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState) {
@@ -55,6 +55,19 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
                     return new EnergyStorage(0);
                 } // 根据方向返回处理器
         );
+    }
+
+    public PopMode getPopMode()
+    {
+        return popMode;
+    }
+
+    public void setPopMode(PopMode newMode)
+    {
+        if (this.popMode != newMode) {
+            this.popMode = newMode;
+            setChanged();
+        }
     }
 
     @Override
