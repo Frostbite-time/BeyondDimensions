@@ -186,7 +186,6 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     if(takenItem != null)
                     {
                         menu.setCarried(takenItem);
-                        storage.onChange();
                     }
                 }
             }

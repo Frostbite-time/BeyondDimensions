@@ -223,8 +223,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     @Override
     public void setChanged()
     {
-        // 重要函数，确保存储被修改后net能被设定为脏数据保存
-        this.storage.onChange();
+        // IStackTypedHandler系列均应当在实际变化后自行调用onchange，此处不重复处理
     }
 
     @Override
