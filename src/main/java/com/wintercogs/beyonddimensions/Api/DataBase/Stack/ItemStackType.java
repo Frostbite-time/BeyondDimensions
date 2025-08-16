@@ -123,7 +123,8 @@ public final class ItemStackType implements IStackType<ItemStack> {
     private long stackSize;
 
     // 统一缓存，避免频繁 new ItemStack
-    private ItemStack cachedStack;
+    private ItemStack serverCache;
+    private ItemStack clientCache;
 
     private int hashCodeCache = 0; // 哈希码缓存（基于 item+patch）
     private boolean NeedRecalHash = true; // 指示何时需要重算哈希
@@ -132,21 +133,24 @@ public final class ItemStackType implements IStackType<ItemStack> {
         this.item = Items.AIR;
         this.patch = DataComponentPatch.EMPTY;
         this.stackSize = 0;
-        this.cachedStack = ItemStack.EMPTY;
+        this.serverCache = ItemStack.EMPTY;
+        this.clientCache = ItemStack.EMPTY;
     }
 
     public ItemStackType(ItemStack stack) {
         this.item = stack.getItem();
         this.patch = stack.getComponentsPatch(); // 这里的返回值在后续实际上无法被修改，因此无需担心
         this.stackSize = stack.getCount();
-        this.cachedStack = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch); // this.patch直接传递引用即可，PatchedDataComponentMap会在第一次修改前替换内部引用
+        this.serverCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch); // this.patch直接传递引用即可，PatchedDataComponentMap会在第一次修改前替换内部引用
+        this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
     }
 
     public ItemStackType(ItemStack stack, long stackSize) {
         this.item = stack.getItem();
         this.patch = stack.getComponentsPatch();
         this.stackSize = stackSize;
-        this.cachedStack = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        this.serverCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
     }
 
     // 供 TYPE_CODEC 使用的构造
@@ -155,8 +159,8 @@ public final class ItemStackType implements IStackType<ItemStack> {
         // 未知来源的patch，走一遍fromPatch清洗一下
         this.patch = patch == null || patch.isEmpty() ? DataComponentPatch.EMPTY : PatchedDataComponentMap.fromPatch(item.components(),patch).asPatch();
         this.stackSize = stackSize;
-        this.cachedStack = this.item == Items.AIR ? ItemStack.EMPTY
-                : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        this.serverCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
     }
 
     @Override
@@ -180,13 +184,13 @@ public final class ItemStackType implements IStackType<ItemStack> {
     public ItemStack getStack()
     {
         // 返回缓存对象，并把数量同步为当前 long（clamp 到 int）
-        if (this.cachedStack.isEmpty() || this.cachedStack.getItem() != this.item) {
-            this.cachedStack = this.item == Items.AIR ? ItemStack.EMPTY
+        if (this.serverCache.isEmpty() || this.serverCache.getItem() != this.item) {
+            this.serverCache = this.item == Items.AIR ? ItemStack.EMPTY
                     : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
             NeedRecalHash = true; // 极少发生：item 变化
         }
-        this.cachedStack.setCount(BDMath.clampLongToInt(this.stackSize));
-        return this.cachedStack;
+        this.serverCache.setCount(BDMath.clampLongToInt(this.stackSize));
+        return this.serverCache;
     }
 
     @Override
@@ -195,7 +199,8 @@ public final class ItemStackType implements IStackType<ItemStack> {
         this.item = stack.getItem();
         this.patch = stack.getComponentsPatch();
         this.stackSize = stack.getCount();
-        this.cachedStack = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        this.serverCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         NeedRecalHash = true;
     }
 
@@ -308,10 +313,10 @@ public final class ItemStackType implements IStackType<ItemStack> {
     public long getVanillaMaxStackSize() {
         // 保留与原版一致的行为：交给ItemStack去获取getMaxStackSize，保证能得到正确值
         if (this.item == Items.AIR) return 0;
-        if (this.cachedStack.isEmpty() || this.cachedStack.getItem() != this.item) {
-            this.cachedStack = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        if (this.serverCache.isEmpty() || this.serverCache.getItem() != this.item) {
+            this.serverCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         }
-        return Math.min(this.cachedStack.getMaxStackSize(), getCustomMaxStackSize());
+        return Math.min(this.serverCache.getMaxStackSize(), getCustomMaxStackSize());
     }
 
     @Override
@@ -321,8 +326,8 @@ public final class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public ItemStack splitStack(long amount) {
-
+    public ItemStack splitStack(long amount)
+    {
         if (amount <= 0 || this.item == Items.AIR) return ItemStack.EMPTY;
         int splitAmount = BDMath.clampLongToInt(Math.min(amount, this.stackSize));
         shrink(splitAmount);
@@ -484,13 +489,13 @@ public final class ItemStackType implements IStackType<ItemStack> {
         // 渲染物品图标
         var poseStack = gui.pose(); // 获取渲染的变换矩阵
         poseStack.pushPose(); // 保存矩阵状态
-        if (this.cachedStack.isEmpty() || this.cachedStack.getItem() != this.item) { // 这是个极其轻量的检查，即使是每帧渲染也不可能卡顿
-            this.cachedStack = this.item == Items.AIR ? ItemStack.EMPTY
+        if (this.clientCache.isEmpty() || this.clientCache.getItem() != this.item) { // 这是个极其轻量的检查，即使是每帧渲染也不可能卡顿
+            this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY
                     : new ItemStack(this.item.builtInRegistryHolder(), 1, this.patch);
         }
-        this.cachedStack.setCount(1); // 防止数量被设为0后getItem返回EMPTY 实际数量单独绘制 此处仅为客户端使用，数量错误也无问题
-        gui.renderFakeItem(cachedStack, x, y);
-        gui.renderItemDecorations(Minecraft.getInstance().font, cachedStack, x, y, "");
+        this.clientCache.setCount(1); // 防止数量被设为0后getItem返回EMPTY 实际数量单独绘制 此处仅为客户端使用，数量错误也无问题
+        gui.renderFakeItem(clientCache, x, y);
+        gui.renderItemDecorations(Minecraft.getInstance().font, clientCache, x, y, "");
         poseStack.popPose(); // 恢复矩阵状态，结束渲染
 
         // 渲染数量文本
@@ -509,7 +514,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
-        if(!cachedStack.isEmpty())
+        if(!clientCache.isEmpty())
             gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
         poseStackText.popPose();
     }
@@ -523,21 +528,21 @@ public final class ItemStackType implements IStackType<ItemStack> {
     @Override
     public Component getDisplayName()
     {
-        if (this.cachedStack.isEmpty() || this.cachedStack.getItem() != this.item) {
-            this.cachedStack = this.item == Items.AIR ? ItemStack.EMPTY
+        if (this.clientCache.isEmpty() || this.clientCache.getItem() != this.item) {
+            this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY
                     : new ItemStack(this.item.builtInRegistryHolder(), 1, this.patch);
         }
-        return cachedStack.getDisplayName();
+        return clientCache.getDisplayName();
     }
 
     @Override
     public List<Component> getTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag)
     {
-        if (this.cachedStack.isEmpty() || this.cachedStack.getItem() != this.item) {
-            this.cachedStack = this.item == Items.AIR ? ItemStack.EMPTY
+        if (this.clientCache.isEmpty() || this.clientCache.getItem() != this.item) {
+            this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY
                     : new ItemStack(this.item.builtInRegistryHolder(), 1, this.patch);
         }
-        List<Component> tooltips = cachedStack.getTooltipLines(tooltipContext,player,tooltipFlag);
+        List<Component> tooltips = clientCache.getTooltipLines(tooltipContext,player,tooltipFlag);
         tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.item", getStackAmount()));
         return tooltips;
     }
@@ -545,11 +550,11 @@ public final class ItemStackType implements IStackType<ItemStack> {
     @Override
     public Optional<TooltipComponent> getTooltipImage()
     {
-        if (this.cachedStack.isEmpty() || this.cachedStack.getItem() != this.item) {
-            this.cachedStack = this.item == Items.AIR ? ItemStack.EMPTY
+        if (this.clientCache.isEmpty() || this.clientCache.getItem() != this.item) {
+            this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY
                     : new ItemStack(this.item.builtInRegistryHolder(), 1, this.patch);
         }
-        return cachedStack.getTooltipImage();
+        return clientCache.getTooltipImage();
     }
 
     @OnlyIn(Dist.CLIENT)
