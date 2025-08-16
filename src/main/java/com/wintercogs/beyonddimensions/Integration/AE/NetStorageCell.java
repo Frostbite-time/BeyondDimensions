@@ -8,8 +8,6 @@ import appeng.api.storage.cells.CellState;
 import appeng.api.storage.cells.StorageCell;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.network.chat.Component;
 
 import java.util.Optional;
@@ -19,8 +17,8 @@ public class NetStorageCell implements StorageCell
 
     private final UnifiedStorage storage;
 
-    /** 使用紧凑表替代 KeyCounter，避免结构级复制与额外开销 */
-    private final Object2LongMap<AEKey> snapMap = new Object2LongOpenHashMap<>();
+    // ---- 缓存快照 ----
+    private final KeyCounter snapshot = new KeyCounter();
 
     // 订阅句柄（弱订阅已可自动清理，但保留以便需要时主动关闭）
     private AutoCloseable deltaSub = null;
@@ -92,10 +90,7 @@ public class NetStorageCell implements StorageCell
     @Override
     public void getAvailableStacks(KeyCounter out)
     {
-        // 逐条写入，避免 KeyCounter.addAll 触发 VariantCounter.copy()
-        for (var e : snapMap.object2LongEntrySet()) {
-            out.add(e.getKey(), e.getLongValue());
-        }
+        out.addAll(snapshot);
     }
 
     @Override
@@ -106,38 +101,38 @@ public class NetStorageCell implements StorageCell
 
     // ========== 快照维护 ==========
 
-    /** 增量补丁：O(1) 更新计数表（不保留 0 项） */
+    /** 增量补丁：O(1) 更新 KeyCounter（避免留下 0 项） */
     private void applyDelta(IStackType<?> type, long size, boolean insert) {
         Optional<AEKey> keyOpt = AEHelper.fromIStackToAEKey(type);
         if (keyOpt.isEmpty()) return;
         AEKey key = keyOpt.get();
 
-        long cur = snapMap.getOrDefault(key, 0L);
+        long cur = snapshot.get(key);
         long next = insert ? (cur + size) : (cur - size);
 
         if (next > 0) {
-            snapMap.put(key, next);
+            // set 比 add/remove 更直接，且不会留下 0 项
+            snapshot.set(key, next);
         } else {
-            // 使用 removeLong，避免装箱
-            snapMap.removeLong(key);
+            // 删除该键
+            snapshot.remove(key);
         }
     }
 
     /** 全量重建（仅在绑定/any 兜底时调用） */
     private void fullRebuildSnapshot() {
-        snapMap.clear();
+        snapshot.clear();
         for (IStackType<?> stack : storage.getStorage()) {
             if (stack.isEmpty()) continue;
             AEHelper.fromIStackToAEKey(stack).ifPresent(aeKey -> {
-                long prev = snapMap.getOrDefault(aeKey, 0L);
-                snapMap.put(aeKey, prev + stack.getStackAmount());
+                snapshot.add(aeKey, stack.getStackAmount());
             });
         }
     }
 
 
     // 实际无需主动清理，仅保留此方法，该类生命周期会在被移除出驱动器的时候结束
-    // 等待 UnifiedStorage 对其清理后进入 GC
+    // 等待UnifiedStorage对其清理后进入GC
     public void close() {
         try { if (deltaSub != null) deltaSub.close(); } catch (Exception ignored) {}
         try { if (anySub != null) anySub.close(); } catch (Exception ignored) {}
