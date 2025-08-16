@@ -42,7 +42,8 @@ public class ItemStackType implements IStackType<ItemStack> {
     private @Nullable CompoundTag caps; // forge能力
     private long stackSize;
 
-    private ItemStack cachedStack = null;
+    private ItemStack serverCache = null;
+    private ItemStack clientCache = null;
     private int vanillaStackSize = -1; // 缓存原版堆叠大小
 
     private int hashCodeCache = 0; // 哈希码缓存
@@ -128,8 +129,10 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     private void refreshCachedStack() //refresh不负责数量正确，需要时自行修正数量
     {
-        cachedStack = new ItemStack(item, 1, caps == null ? null : caps.copy());
-        cachedStack.tag = tag == null ? null : tag.copy();
+        serverCache = new ItemStack(item, 1, caps == null ? null : caps.copy());
+        serverCache.tag = tag == null ? null : tag.copy();
+        clientCache = new ItemStack(item, 1, caps == null ? null : caps.copy());
+        clientCache.tag = tag == null ? null : tag.copy();
     }
 
     @Override
@@ -150,11 +153,11 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public ItemStack getStack()
     {
-        if(cachedStack == null)
+        if(serverCache == null)
             refreshCachedStack();
 
-        cachedStack.setCount(BDMath.clampLongToInt(stackSize));
-        return cachedStack;
+        serverCache.setCount(BDMath.clampLongToInt(stackSize));
+        return serverCache;
     }
 
     @Override
@@ -297,9 +300,9 @@ public class ItemStackType implements IStackType<ItemStack> {
     public long getVanillaMaxStackSize() {
         if(vanillaStackSize<=0)
         {
-            if(cachedStack == null)
+            if(serverCache == null)
                 refreshCachedStack();
-            vanillaStackSize = cachedStack.getMaxStackSize();
+            vanillaStackSize = serverCache.getMaxStackSize();
         }
         return Math.min(vanillaStackSize, getCustomMaxStackSize());
     }
@@ -441,15 +444,15 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public void render(net.minecraft.client.gui.GuiGraphics gui,int x, int y) {
 
-        if(cachedStack == null)
+        if(clientCache == null)
             refreshCachedStack();
 
         // 渲染物品图标
         var poseStack = gui.pose(); // 获取渲染的变换矩阵
         poseStack.pushPose(); // 保存矩阵状态
-        cachedStack.setCount(1); //设置一次数量，以防万一
-        gui.renderFakeItem(cachedStack, x, y);
-        gui.renderItemDecorations(Minecraft.getInstance().font, cachedStack, x, y, "");
+        clientCache.setCount(1); //设置一次数量，以防万一
+        gui.renderFakeItem(clientCache, x, y);
+        gui.renderItemDecorations(Minecraft.getInstance().font, clientCache, x, y, "");
         poseStack.popPose(); // 恢复矩阵状态，结束渲染
 
         // 渲染数量文本
@@ -468,7 +471,7 @@ public class ItemStackType implements IStackType<ItemStack> {
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
-        if(!cachedStack.isEmpty())
+        if(!clientCache.isEmpty())
             gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
         poseStackText.popPose();
     }
@@ -482,17 +485,17 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public Component getDisplayName()
     {
-        if(cachedStack == null)
+        if(clientCache == null)
             refreshCachedStack();
-        return cachedStack.getDisplayName();
+        return clientCache.getDisplayName();
     }
 
     @Override
     public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag)
     {
-        if(cachedStack == null)
+        if(clientCache == null)
             refreshCachedStack();
-        List<Component> tooltips = cachedStack.getTooltipLines(player,tooltipFlag);
+        List<Component> tooltips = clientCache.getTooltipLines(player,tooltipFlag);
         tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.item", getStackAmount()));
         return tooltips;
     }
@@ -500,9 +503,9 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public Optional<TooltipComponent> getTooltipImage()
     {
-        if(cachedStack == null)
+        if(clientCache == null)
             refreshCachedStack();
-        return cachedStack.getTooltipImage();
+        return clientCache.getTooltipImage();
     }
 
     @OnlyIn(Dist.CLIENT)

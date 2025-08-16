@@ -300,7 +300,11 @@ public class UnifiedStorage implements IStackTypedHandler
     @Override
     public IStackType getStackByStack(IStackType stackType)
     {
-        return storage.get(stackType);
+        IStackType stack = storage.get(stackType); // 对于不存在的，会返回null
+        if(stack != null)
+            return stack;
+        else
+            return stackType.getEmpty(); // 不返回null了，防止错误调用
     }
 
     @Override
