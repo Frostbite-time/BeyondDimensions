@@ -6,6 +6,7 @@ import com.refinedmods.refinedstorage.api.storage.cache.IStorageCache;
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorage;
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorageContext;
 import com.refinedmods.refinedstorage.api.util.Action;
+import com.refinedmods.refinedstorage.api.util.IComparer;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
@@ -179,17 +180,45 @@ public class BD_RS120ExternalStorageItems implements IExternalStorage<ItemStack>
     //导出量
     @Override
     public ItemStack extract(ItemStack prototype, int size, int flags, Action action) {
-        if (!active || unified == null) return ItemStack.EMPTY; // 未绑定
-        if (prototype.isEmpty() || size <= 0) return ItemStack.EMPTY;
-        if (ctx.getAccessType() == AccessType.INSERT) return ItemStack.EMPTY; // 只写
+        if (!active || unified == null) return ItemStack.EMPTY;          // 未绑定
+        if (prototype.isEmpty() || size <= 0) return ItemStack.EMPTY;    // 无效请求
+        if (ctx.getAccessType() == AccessType.INSERT) return ItemStack.EMPTY; // 只写，禁止提取
 
-        long actually = RSHelper.fromItemStackToIStack(prototype, size)
-                .map(s -> unified.extract(s, action == Action.SIMULATE).getStackAmount())
-                .orElse(0L);
-        if (actually <= 0) return ItemStack.EMPTY;
+        var reqOpt = RSHelper.fromItemStackToIStack(prototype, size);
+        if (reqOpt.isEmpty()) return ItemStack.EMPTY;
+
+        IStackType req = reqOpt.get();
+
+        // 最多能拿多少(can)
+        long can = unified.extract(req, true).getStackAmount();
+        if (can <= 0) return ItemStack.EMPTY;
+
+        // 处理 COMPARE_QUANTITY 语义
+        boolean quantityStrict = (flags & IComparer.COMPARE_QUANTITY) == IComparer.COMPARE_QUANTITY;
+        if (quantityStrict && can < size) {
+            return ItemStack.EMPTY; // 全量提取，否则返回
+        }
+
+        // 3) 计算最终要拿的数量（不带数量标志时允许部分返回）
+        int want = (int) Math.min(can, size);
+        if (want <= 0) return ItemStack.EMPTY;
+
+        // 4) 根据 action 返回或执行
+        if (action == Action.SIMULATE) {
+            ItemStack out = prototype.copy();
+            out.setCount(want);
+            return out;
+        }
+
+        // 真正执行抽取（再次用精确 want 数量）
+        long took = unified.extract(
+                req.copyWithCount(want),
+                false
+        ).getStackAmount();
+        if (took <= 0) return ItemStack.EMPTY;
 
         ItemStack out = prototype.copy();
-        out.setCount((int) Math.min(actually, Integer.MAX_VALUE));
+        out.setCount((int) Math.min(took, Integer.MAX_VALUE));
         return out;
     }
 
