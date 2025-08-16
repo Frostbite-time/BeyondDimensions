@@ -6,7 +6,9 @@ import com.refinedmods.refinedstorage.api.storage.cache.IStorageCache;
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorage;
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorageContext;
 import com.refinedmods.refinedstorage.api.util.Action;
+import com.refinedmods.refinedstorage.apiimpl.API;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity;
@@ -183,6 +185,24 @@ public class BD_RS120ExternalStorageFluids implements IExternalStorage<FluidStac
         if (!active || unified == null) return FluidStack.EMPTY;
         if (prototype.isEmpty() || size <= 0) return FluidStack.EMPTY;
         if (ctx.getAccessType() == AccessType.INSERT) return FluidStack.EMPTY; // 只写
+
+        // 先根据flags判断一次是否继续
+        boolean continuous;
+        if((flags & 1) == 1) // 维度网络始终只提取NBT完全相等的物品，故当flags要求检查NBT时，可以直接跳过
+        {
+            continuous = true;
+        }
+        else
+        {
+            IStackType preCheck = unified.getStackByStack(new FluidStackType(prototype));
+            if(preCheck != null && !preCheck.isEmpty() && preCheck instanceof FluidStackType fluidCheck)
+            {
+                continuous = API.instance().getComparer().isEqual(fluidCheck.getStack(), prototype, flags);
+            }
+            else continuous = false;
+        }
+        if(!continuous)
+            return FluidStack.EMPTY;
 
         long actually = RSHelper.fromFluidStackToIStack(prototype, size)
                 .map(s -> unified.extract(s, action == Action.SIMULATE).getStackAmount())
