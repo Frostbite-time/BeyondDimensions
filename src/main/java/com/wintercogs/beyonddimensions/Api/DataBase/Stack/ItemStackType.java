@@ -45,12 +45,8 @@ public final class ItemStackType implements IStackType<ItemStack> {
             instance.group(
                     BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("item")
                             .forGetter(t -> RegistryUtil.holderOf(t.item)),
-                    // 关键：写出时以当前 cachedStack 的 patch 为准，避免丢运行期变更/修复
                     DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY)
-                            .forGetter(t -> {
-                                ItemStack s = t.getStack(); // 返回缓存对象，不新建
-                                return s.isEmpty() ? DataComponentPatch.EMPTY : s.getComponentsPatch();
-                            }),
+                            .forGetter(t -> t.patch),
                     Codec.LONG.fieldOf("amount").forGetter(ItemStackType::getStackAmount)
             ).apply(instance, (holder, patch, amount) -> new ItemStackType(holder.value(), patch, amount))
     );
@@ -153,11 +149,10 @@ public final class ItemStackType implements IStackType<ItemStack> {
         this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
     }
 
-    // 供 TYPE_CODEC 使用的构造
-    public ItemStackType(Item item, DataComponentPatch patch, long stackSize) {
+    // 仅供内部使用，不直接对外暴露
+    private ItemStackType(Item item, DataComponentPatch patch, long stackSize) {
         this.item = item;
-        // 未知来源的patch，走一遍fromPatch清洗一下
-        this.patch = patch == null || patch.isEmpty() ? DataComponentPatch.EMPTY : PatchedDataComponentMap.fromPatch(item.components(),patch).asPatch();
+        this.patch = patch == null ? DataComponentPatch.EMPTY : patch;
         this.stackSize = stackSize;
         this.serverCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
@@ -173,8 +168,9 @@ public final class ItemStackType implements IStackType<ItemStack> {
     public IStackType<ItemStack> fromObject(Object key, long amount, DataComponentPatch dataComponentPatch)
     {
         if (key instanceof Item it) {
-            DataComponentPatch p = dataComponentPatch != null ? dataComponentPatch : DataComponentPatch.EMPTY;
-            return new ItemStackType(it, p, amount); // 内部会自行清洗
+            // 未知路径的清洗一遍后再送入
+            DataComponentPatch p = dataComponentPatch != null && !dataComponentPatch.isEmpty() ? PatchedDataComponentMap.fromPatch(item.components(),dataComponentPatch).asPatch() : DataComponentPatch.EMPTY;
+            return new ItemStackType(it, p, amount);
         }
         return null;
     }
