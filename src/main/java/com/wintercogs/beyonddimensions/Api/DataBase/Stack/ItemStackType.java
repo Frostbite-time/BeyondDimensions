@@ -121,6 +121,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
     // 统一缓存，避免频繁 new ItemStack
     private ItemStack serverCache;
     private ItemStack clientCache;
+    private int vanillaStackSize = -1; // 缓存原版堆叠大小
 
     private int hashCodeCache = 0; // 哈希码缓存（基于 item+patch）
     private boolean NeedRecalHash = true; // 指示何时需要重算哈希
@@ -198,6 +199,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
         this.serverCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         NeedRecalHash = true;
+        vanillaStackSize = -1; // 强制要求重算
     }
 
     @Override
@@ -306,13 +308,18 @@ public final class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public long getVanillaMaxStackSize() {
-        // 保留与原版一致的行为：交给ItemStack去获取getMaxStackSize，保证能得到正确值
+    public long getVanillaMaxStackSize()
+    {
+        // 此处已经判过AIR，如果不是，不可能继续往后走，故后续只要是isEmpty则证明需要重设
         if (this.item == Items.AIR) return 0;
-        if (this.serverCache.isEmpty() || this.serverCache.getItem() != this.item) {
-            this.serverCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        if(vanillaStackSize<=0)
+        {
+            if (this.serverCache.isEmpty() || this.serverCache.getItem() != this.item) {
+                this.serverCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+            }
+            vanillaStackSize = serverCache.getMaxStackSize();
         }
-        return Math.min(this.serverCache.getMaxStackSize(), getCustomMaxStackSize());
+        return Math.min(vanillaStackSize, getCustomMaxStackSize());
     }
 
     @Override
