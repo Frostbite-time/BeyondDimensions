@@ -1,18 +1,22 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
+import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -28,45 +32,97 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.ClientTooltipFlag;
 
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public final class ItemStackType implements IStackType<ItemStack> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
-    // === 新格式：item + components(patch) + amount（写入始终用它） ===
-    public static final MapCodec<ItemStackType> TYPE_CODEC = RecordCodecBuilder.mapCodec(instance ->
+    // 很尴尬，我一开始没写CODEC，但是后续又被数据组件所需要，现在要同时维护CODEC的还有序列化方法里面的两份兼容
+
+    // 新的CODEC，写入时使用
+    private static final MapCodec<ItemStackType> NEW_FMT = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("item")
                             .forGetter(t -> t.item.builtInRegistryHolder()),
+                    // 关键：写出时以当前 cachedStack 的 patch 为准，避免丢运行期变更/修复
                     DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY)
-                            .forGetter(t -> t.patch),
+                            .forGetter(t -> {
+                                ItemStack s = t.getStack(); // 返回缓存对象，不新建
+                                return s.isEmpty() ? DataComponentPatch.EMPTY : s.getComponentsPatch();
+                            }),
                     Codec.LONG.fieldOf("amount").forGetter(ItemStackType::getStackAmount)
-            ).apply(instance, (holder, patch, amount) ->
-                    new ItemStackType(
-                            // 构造时就建立 cachedStack，后续复用
-                            holder.value(),
-                            patch,
-                            amount
-                    )
-            )
+            ).apply(instance, (holder, patch, amount) -> new ItemStackType(holder.value(), patch, amount))
     );
 
-    // === 旧格式（只用于读取）：internal_stack + amount ===
+    // 旧格式CODEC
     private static final Codec<ItemStackType> LEGACY_CODEC = RecordCodecBuilder.create(inst -> inst.group(
             ItemStack.OPTIONAL_CODEC.fieldOf("internal_stack").forGetter(ItemStackType::getStack),
             Codec.LONG.fieldOf("amount").forGetter(ItemStackType::getStackAmount)
     ).apply(inst, (stack, amt) -> new ItemStackType(stack, amt)));
 
-    // 读时先尝试新格式，失败则回退旧格式；写时只用新格式
-    public static final Codec<ItemStackType> CODEC =
-            net.minecraft.util.ExtraCodecs.orAlternative(TYPE_CODEC.codec(), LEGACY_CODEC);
+    // 这里的 TYPE_CODEC 自己实现“读时新优先、无新字段则读旧；写时永远用新”
+    public static final MapCodec<ItemStackType> TYPE_CODEC = new MapCodec<>() {
+        @Override
+        public <T> DataResult<ItemStackType> decode(DynamicOps<T> ops, MapLike<T> input) {
+            final T kItem = ops.createString("item");
+            final T kAmount = ops.createString("amount");
+            final T kLegacy = ops.createString("internal_stack");
+            final T kComps  = ops.createString("components");
 
-    // === 实际存储：item + patch + amount ===
+            T hasItem = input.get(kItem);
+            T hasAmount = input.get(kAmount);
+
+            if (hasItem != null && hasAmount != null) {
+                // 先按新格式正常解码
+                DataResult<ItemStackType> r = NEW_FMT.decode(ops, input);
+                if (r.result().isPresent()) return r;
+
+                // ——宽松回退：新格式存在但解码失败（多为未知 item）→ 退化为 AIR —— //
+                long amt = Codec.LONG.parse(ops, hasAmount).result().orElse(0L);
+                DataComponentPatch patch = DataComponentPatch.EMPTY;
+                T compsNode = input.get(kComps);
+                if (compsNode != null) {
+                    patch = DataComponentPatch.CODEC.parse(ops, compsNode).result().orElse(DataComponentPatch.EMPTY);
+                }
+                return DataResult.success(new ItemStackType(Items.AIR, patch, amt));
+            }
+
+            // 尝试旧格式
+            T hasLegacy = input.get(kLegacy);
+            if (hasLegacy != null && hasAmount != null) {
+                java.util.Map<T, T> map = new java.util.LinkedHashMap<>();
+                input.entries().forEach(p -> map.put(p.getFirst(), p.getSecond()));
+                T node = ops.createMap(map);
+                return LEGACY_CODEC.decode(ops, node).map(com.mojang.datafixers.util.Pair::getFirst);
+            }
+
+            // 都不满足：让 NEW_FMT 报出明确缺字段信息
+            return NEW_FMT.decode(ops, input);
+        }
+
+        @Override
+        public <T> RecordBuilder<T> encode(ItemStackType value, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+            // 写出：始终用新格式
+            return NEW_FMT.encode(value, ops, prefix);
+        }
+
+        @Override
+        public <T> Stream<T> keys(DynamicOps<T> ops) {
+            // 向外暴露新格式的键集合
+            return Stream.of("item", "components", "amount").map(ops::createString);
+        }
+
+    };
+
+    // 若外部有用到 CODEC，维持别名即可
+    public static final Codec<ItemStackType> CODEC = TYPE_CODEC.codec();
+
+    // === 实际存储：item + patch + stackSize ===
     private Item item;
-    private DataComponentPatch patch;
+    private DataComponentPatch patch; // 只拿额外组件，理论上完全足够了
     private long stackSize;
 
     // 统一缓存（服务端/客户端通用），避免频繁 new ItemStack
@@ -115,9 +171,8 @@ public final class ItemStackType implements IStackType<ItemStack> {
     public IStackType<ItemStack> fromObject(Object key, long amount, DataComponentPatch dataComponentPatch)
     {
         if (key instanceof Item it) {
-            Item item0 = it;
             DataComponentPatch p = dataComponentPatch != null ? dataComponentPatch : DataComponentPatch.EMPTY;
-            return new ItemStackType(item0, p, amount);
+            return new ItemStackType(it, p, amount);
         }
         return null;
     }
@@ -316,57 +371,112 @@ public final class ItemStackType implements IStackType<ItemStack> {
 
     // 网络序列化
     @Override
-    public void serialize(RegistryFriendlyByteBuf buf) {
-        // 始终写入类型ID
+    public void serialize(RegistryFriendlyByteBuf buf)
+    {
+        // 1) 类型ID
         buf.writeResourceLocation(getTypeId());
 
-        // 写入是否存在物品的标志
-        boolean hasItem = !stack.isEmpty();
+        // 2) 是否有物品（AIR 视为无）
+        boolean hasItem = this.item != Items.AIR;
         buf.writeBoolean(hasItem);
+        if (!hasItem) return;
 
-        if (hasItem) {
-            // 写入数量
-            buf.writeVarLong(stackSize);
-            // 使用副本避免修改原堆栈
-            ItemStack copy = stack.copyWithCount(1);
-            // 使用OPTIONAL_CODEC处理可能为空的情况
-            ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, copy);
-        }
+        // 3) 数量
+        buf.writeVarLong(this.stackSize);
+
+        // 4) 物品 ID（ResourceLocation）
+        ResourceLocation key = BuiltInRegistries.ITEM.getKey(this.item);
+        buf.writeResourceLocation(key);
+
+        // 差异组件
+        DataComponentPatch.STREAM_CODEC.encode(buf, patch);
     }
 
     @Override
     public ItemStackType deserialize(RegistryFriendlyByteBuf buf,ResourceLocation typeId) {
-        if (!typeId.equals(getTypeId())) {
-            return null;// 表示未能读取任何类型
-        }
+        if (!typeId.equals(getTypeId())) return null; //必要的，标识未能读取任何内容，用于外部处理
 
-        // 读取是否存在物品的标志
+        // 1) 是否有物品
         boolean hasItem = buf.readBoolean();
-        if (!hasItem) {
-            return new ItemStackType(ItemStack.EMPTY);
-        }
+        if (!hasItem) return new ItemStackType(ItemStack.EMPTY);
 
-        // 读取数量
-        long count = buf.readVarLong();
-        // 使用OPTIONAL_CODEC解码
-        ItemStack stack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
-        return new ItemStackType(stack,count);
+        // 2) 数量
+        long amount = buf.readVarLong();
+
+        // 3) 物品 ID（未知或已移除 → 回退 AIR）
+        ResourceLocation key = buf.readResourceLocation();
+        Item it = BuiltInRegistries.ITEM.get(key); // 内部实现已经处理了null清空，未注册项目返回Items.AIR
+
+        // 4) 组件差异
+        DataComponentPatch patch = DataComponentPatch.STREAM_CODEC.decode(buf);
+
+        return new ItemStackType(it, patch, amount);
     }
 
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("Type", ID.toString());
-        tag.putLong("Amount", getStackAmount());
-        tag.put("Stack",stack.copyWithCount(1).saveOptional(levelRegistryAccess));
+        final CompoundTag tag = new CompoundTag();
+        try {
+            tag.putString("Type", ID.toString());
+            tag.putLong("Amount", this.stackSize);
+
+            // 写入 Item 注册名（未知注册表时下内部会返回Items.AIR）
+            ResourceLocation key = BuiltInRegistries.ITEM.getKey(this.item);
+            tag.putString("Item", key.toString());
+
+            var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
+            DataComponentPatch.CODEC.encodeStart(ops, patch)
+                    .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("ItemStackType.serializeNBT: components encode warning: {}", err))
+                    .ifPresent(nbt -> tag.put("Components", nbt));
+
+        } catch (Throwable t) {
+            // 写入异常不抛出，避免 IO 过程中崩溃
+            BeyondDimensions.LOGGER.error("ItemStackType.serializeNBT failed: {}", t.getMessage(), t);
+        }
         return tag;
     }
 
     @Override
     public ItemStackType deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
-        ItemStackType stack =  new ItemStackType(ItemStack.parseOptional(levelRegistryAccess,nbt.getCompound("Stack")));
-        stack.setStackAmount(nbt.getLong("Amount"));
-        return stack;
+        try {
+            // ===== 新格式：Item + Components + Amount =====
+            if (nbt.contains("Item", Tag.TAG_STRING)) {
+                ResourceLocation key = ResourceLocation.tryParse(nbt.getString("Item"));
+                Item it = (key != null) ? BuiltInRegistries.ITEM.get(key) : null;
+                if (it == null) {
+                    BeyondDimensions.LOGGER.warn("ItemStackType.deserializeNBT: unknown item id '{}', falling back to AIR.", nbt.getString("Item"));
+                    it = Items.AIR;
+                }
+
+                long amount = nbt.getLong("Amount");
+
+                DataComponentPatch p = DataComponentPatch.EMPTY;
+                if (nbt.contains("Components")) {
+                    var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
+                    p = DataComponentPatch.CODEC.parse(ops, nbt.get("Components"))
+                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("ItemStackType.deserializeNBT: components decode warning: {}", err))
+                            .orElse(DataComponentPatch.EMPTY);
+                }
+
+                return new ItemStackType(it, p, amount);
+            }
+
+            // ===== 旧格式：Stack + Amount =====
+            if (nbt.contains("Stack", Tag.TAG_COMPOUND)) {
+                ItemStack s = ItemStack.parseOptional(levelRegistryAccess, nbt.getCompound("Stack"));
+                long amount = nbt.getLong("Amount");
+                return new ItemStackType(s, amount);
+            }
+
+            // 两种格式都不匹配：记录并返回空
+            BeyondDimensions.LOGGER.warn("ItemStackType.deserializeNBT: missing both 'Item' and 'Stack' keys, returning empty. Keys={}", nbt.getAllKeys());
+        } catch (Throwable t) {
+            // 读取异常：记录并返回空，避免全盘崩溃
+            BeyondDimensions.LOGGER.error("ItemStackType.deserializeNBT failed, returning empty. Keys={} Error={}",
+                    nbt.getAllKeys(), t.getMessage(), t);
+        }
+
+        return new ItemStackType(); // 空实现
     }
 
     @OnlyIn(Dist.CLIENT)
