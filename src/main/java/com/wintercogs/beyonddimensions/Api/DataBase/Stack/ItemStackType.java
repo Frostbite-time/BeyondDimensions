@@ -169,7 +169,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
     {
         if (key instanceof Item it) {
             // 未知路径的清洗一遍后再送入
-            DataComponentPatch p = dataComponentPatch != null && !dataComponentPatch.isEmpty() ? PatchedDataComponentMap.fromPatch(item.components(),dataComponentPatch).asPatch() : DataComponentPatch.EMPTY;
+            DataComponentPatch p = dataComponentPatch != null && !dataComponentPatch.isEmpty() ? PatchedDataComponentMap.fromPatch(it.components(),dataComponentPatch).asPatch() : DataComponentPatch.EMPTY;
             return new ItemStackType(it, p, amount);
         }
         return null;
@@ -225,7 +225,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
     @Override
     public Object getSource()
     {
-        return ItemStack.EMPTY.getItem();
+        return Items.AIR; // 总是返回AIR，这是目前接口的定义
     }
 
     @Override
@@ -415,67 +415,80 @@ public final class ItemStackType implements IStackType<ItemStack> {
 
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
-        final CompoundTag tag = new CompoundTag();
+        final CompoundTag out = new CompoundTag();
         try {
-            tag.putString("Type", ID.toString());
-            tag.putLong("Amount", this.stackSize);
+            // 兼容外部依赖：保留旧字段 Type
+            out.putString("Type", ID.toString());
 
-            // 写入 Item 注册名（未知注册表时下内部会返回Items.AIR）
-            ResourceLocation key = BuiltInRegistries.ITEM.getKey(this.item);
-            tag.putString("Item", key.toString());
-
+            // 写回采用与 NEW_FMT/TYPE_CODEC 完全一致的键：item / components / amount
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
-            DataComponentPatch.CODEC.encodeStart(ops, patch)
-                    .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("ItemStackType 在序列化组件时出错: {}", err))
-                    .ifPresent(nbt -> tag.put("Components", nbt));
+            CODEC.encodeStart(ops, this)
+                    .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("ItemStackType 在序列化(Codec)时出错: {}", err))
+                    .ifPresent(nbt -> {
+                        if (nbt instanceof CompoundTag ct) {
+                            // 合并到根层；额外保留的 Type 不会被覆盖
+                            out.merge(ct);
+                        } else {
+                            // 理论上不会发生：MapCodec 应该产出 CompoundTag
+                            out.put("value", nbt);
+                        }
+                    });
 
         } catch (Throwable t) {
             // 写入异常不抛出，避免 IO 过程中崩溃
             BeyondDimensions.LOGGER.error("ItemStackType 在序列化时出错: {}", t.getMessage(), t);
         }
-        return tag;
+        return out;
     }
 
     @Override
     public ItemStackType deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
         try {
-            // ===== 新格式：Item + Components + Amount =====
+            // 1) 新格式：直接用与写入一致的 CODEC（TYPE_CODEC）
+            var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
+            var decoded = CODEC.parse(ops, nbt).result();
+            if (decoded.isPresent()) {
+                return decoded.get();
+            }
+
+            // 2) 嵌套回退：如果被偶然 "value" 包裹
+            if (nbt.contains("value", Tag.TAG_COMPOUND)) {
+                var valDecoded = CODEC.parse(ops, nbt.getCompound("value")).result();
+                if (valDecoded.isPresent()) {
+                    return valDecoded.get();
+                }
+            }
+
+            // 3) 旧格式回退 A：Item + Components + Amount（大写键）
             if (nbt.contains("Item", Tag.TAG_STRING)) {
                 ResourceLocation key = ResourceLocation.tryParse(nbt.getString("Item"));
                 Item it = (key != null) ? BuiltInRegistries.ITEM.get(key) : null;
                 if (it == null) {
-                    BeyondDimensions.LOGGER.warn("ItemStackType在反序列化时出错，未找到对应键： '{}', 回退到Items.AIR", nbt.getString("Item"));
+                    BeyondDimensions.LOGGER.warn("ItemStackType 反序列化旧格式时未找到物品: '{}', 回退 AIR", nbt.getString("Item"));
                     it = Items.AIR;
                 }
-
                 long amount = nbt.getLong("Amount");
 
                 DataComponentPatch p = DataComponentPatch.EMPTY;
                 if (nbt.contains("Components")) {
-                    var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
                     p = DataComponentPatch.CODEC.parse(ops, nbt.get("Components"))
-                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("ItemStackType在反序列化组件时出错: {}", err))
+                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("ItemStackType 反序列化旧组件时出错: {}", err))
                             .orElse(DataComponentPatch.EMPTY);
                 }
-
                 return new ItemStackType(it, p, amount);
             }
 
-            // ===== 旧格式：Stack + Amount =====
+            // 4) 旧格式回退 B：Stack + Amount
             if (nbt.contains("Stack", Tag.TAG_COMPOUND)) {
                 ItemStack s = ItemStack.parseOptional(levelRegistryAccess, nbt.getCompound("Stack"));
                 long amount = nbt.getLong("Amount");
                 return new ItemStackType(s, amount);
             }
 
-            // 两种格式都不匹配：记录并返回空
-            BeyondDimensions.LOGGER.warn("ItemStackType在反序列化时，新旧格式均无法正常读取，返回空实现，打印NBT信息：{}", nbt.getAllKeys());
+            BeyondDimensions.LOGGER.warn("ItemStackType 反序列化时：新旧格式均不匹配，返回空实现。Keys={}", nbt.getAllKeys());
         } catch (Throwable t) {
-            // 读取异常：记录并返回空，避免全盘崩溃
-            BeyondDimensions.LOGGER.error("ItemStackType反序列化时出现未知错误，打印NBT与报错信息：Keys={} Error={}",
-                    nbt.getAllKeys(), t.getMessage(), t);
+            BeyondDimensions.LOGGER.error("ItemStackType 反序列化出现错误。Keys={} Error={}", nbt.getAllKeys(), t.getMessage(), t);
         }
-
         return new ItemStackType(); // 空实现
     }
 
@@ -487,7 +500,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
         poseStack.pushPose(); // 保存矩阵状态
         if (this.clientCache.isEmpty() || this.clientCache.getItem() != this.item) { // 这是个极其轻量的检查，即使是每帧渲染也不可能卡顿
             this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY
-                    : new ItemStack(this.item.builtInRegistryHolder(), 1, this.patch);
+                    : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         }
         this.clientCache.setCount(1); // 防止数量被设为0后getItem返回EMPTY 实际数量单独绘制 此处仅为客户端使用，数量错误也无问题
         gui.renderFakeItem(clientCache, x, y);
@@ -526,7 +539,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
     {
         if (this.clientCache.isEmpty() || this.clientCache.getItem() != this.item) {
             this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY
-                    : new ItemStack(this.item.builtInRegistryHolder(), 1, this.patch);
+                    : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         }
         return clientCache.getDisplayName();
     }
@@ -536,7 +549,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
     {
         if (this.clientCache.isEmpty() || this.clientCache.getItem() != this.item) {
             this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY
-                    : new ItemStack(this.item.builtInRegistryHolder(), 1, this.patch);
+                    : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         }
         List<Component> tooltips = clientCache.getTooltipLines(tooltipContext,player,tooltipFlag);
         tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.item", getStackAmount()));
@@ -548,7 +561,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
     {
         if (this.clientCache.isEmpty() || this.clientCache.getItem() != this.item) {
             this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY
-                    : new ItemStack(this.item.builtInRegistryHolder(), 1, this.patch);
+                    : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         }
         return clientCache.getTooltipImage();
     }
@@ -558,7 +571,9 @@ public final class ItemStackType implements IStackType<ItemStack> {
     public void renderTooltip(net.minecraft.client.gui.GuiGraphics gui,net.minecraft.client.gui.Font font, int mouseX, int mouseY)
     {
         var minecraft = Minecraft.getInstance();
-        gui.renderTooltip(minecraft.font, this.getTooltipLines(Item.TooltipContext.of(minecraft.level),minecraft.player, ClientTooltipFlag.of(minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL))
+        var ctx = minecraft.level != null ? Item.TooltipContext.of(minecraft.level)
+                : Item.TooltipContext.EMPTY; // 或提供你自己的空上下文
+        gui.renderTooltip(minecraft.font, this.getTooltipLines(ctx,minecraft.player, ClientTooltipFlag.of(minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL))
                 , getTooltipImage(), ItemStack.EMPTY, mouseX, mouseY);
     }
 
