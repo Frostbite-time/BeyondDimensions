@@ -171,6 +171,7 @@ public class ItemStackType implements IStackType<ItemStack> {
 
         NeedRecalHash = true;
         refreshCachedStack();
+        vanillaStackSize = -1; // 强制重新计算
     }
 
     @Override
