@@ -31,7 +31,9 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.ClientTooltipFlag;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class ItemStackType implements IStackType<ItemStack> {
