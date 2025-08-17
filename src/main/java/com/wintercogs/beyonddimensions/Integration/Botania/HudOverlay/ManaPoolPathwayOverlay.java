@@ -10,13 +10,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import org.lwjgl.opengl.GL11;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public class ManaPoolPathwayOverlay
 {
     @SubscribeEvent

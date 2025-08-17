@@ -25,6 +25,7 @@ import com.wintercogs.beyonddimensions.Integration.AE_IFS.BD_AE_IFS_Plugin;
 import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.Integration.Botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.Integration.Botania.HudOverlay.ManaPoolPathwayOverlay;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.IFS.BD_SoulCaps;
 import com.wintercogs.beyonddimensions.Integration.IFS.Item.WardenSoulTagItem;
@@ -364,6 +365,10 @@ public class BeyondDimensions
             if(PolymorphLoaded)
             {
                 PolymorphPlug.register();
+            }
+            if(Botania_Loaded)
+            {
+                NeoForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);
             }
         }
     }
