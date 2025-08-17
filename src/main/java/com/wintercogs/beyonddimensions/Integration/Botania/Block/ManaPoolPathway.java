@@ -2,6 +2,8 @@ package com.wintercogs.beyonddimensions.Integration.Botania.Block;
 
 import com.wintercogs.beyonddimensions.Block.Custom.NetedBlock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
@@ -60,6 +62,24 @@ public class ManaPoolPathway extends NetedBlock implements EntityBlock
                     ManaPoolPathwayBlockEntity.serverTick(level1,blockPos,blockState,pool);
             }
         };
+    }
+
+    // 调用collideEntityItem来合成配方
+    @Override
+    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
+        if (entity instanceof ItemEntity item) {
+            if(level.getBlockEntity(pos) instanceof ManaPoolPathwayBlockEntity manaBe)
+                manaBe.collideEntityItem(item);
+        }
+    }
+
+    // NetedBlock忘记加事件触发了，暂时不改，这里手写一下
+    @Override
+    protected boolean triggerEvent(BlockState state, Level level, BlockPos pos, int id, int param)
+    {
+        super.triggerEvent(state, level, pos, id, param);
+        BlockEntity be = level.getBlockEntity(pos);
+        return be != null && be.triggerEvent(id, param);
     }
 
     @Override
