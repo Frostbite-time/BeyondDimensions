@@ -145,6 +145,9 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public void quickMove(IStackType clickStack, int button, Player player)
     {
+        // flag的quickMove和click走统一通道，因此无需额外检查，此处保留注释，防止某一天忘记
+        // if(!(quickMoveSlotStartIndex >= 0 && quickMoveSlotEndIndex >= 0 && quickMoveSlotStartIndex < quickMoveSlotEndIndex))
+        //   return;
         click(clickStack, button, player);
     }
 

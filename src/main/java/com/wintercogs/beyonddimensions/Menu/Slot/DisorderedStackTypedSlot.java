@@ -425,6 +425,9 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public void quickMove(IStackType clickStack, int button, Player player)
     {
+        // 虽然当前的默认值不会导致出现问题，但还是添加执行前检查，防止某一天遗漏
+        if(!(quickMoveSlotStartIndex >= 0 && quickMoveSlotEndIndex >= 0 && quickMoveSlotStartIndex < quickMoveSlotEndIndex))
+            return;
         if (!clickStack.isEmpty())
         {
             // 防止数据包伪造，然后赋予trueStack需要提取的数量
