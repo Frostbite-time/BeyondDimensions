@@ -166,7 +166,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                                 if(handler != null)
                                 {
                                     if(handler.isContextual())
-                                        return handler.apply(be.stackHandler, new CapCtx(be.level, be.getBlockPos(), side, be));
+                                        return handler.apply(be.stackHandler, new CapCtx(be.level, be.getBlockPos(), be));
                                     else
                                         return handler.apply(be.stackHandler, null);
                                 }

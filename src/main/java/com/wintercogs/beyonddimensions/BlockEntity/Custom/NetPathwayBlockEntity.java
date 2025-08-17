@@ -33,7 +33,7 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
                                 if(net != null && handler != null)
                                 {
                                     if(handler.isContextual())
-                                        return handler.apply(net.getUnifiedStorage(), new CapCtx(be.level,be.getBlockPos(),side,be));
+                                        return handler.apply(net.getUnifiedStorage(), new CapCtx(be.level,be.getBlockPos(),be));
                                     else
                                         return handler.apply(net.getUnifiedStorage(), null);
                                 }

@@ -27,7 +27,7 @@ public class BD_BotaniaPlugin
                     DimensionsNet net = be.getNet();
                     if(net != null)
                     {
-                        return new ManaUnifiedStorageHandler(net.getUnifiedStorage(), new CapCtx(be.getLevel(), be.getBlockPos(), side, be));
+                        return new ManaUnifiedStorageHandler(net.getUnifiedStorage(), new CapCtx(be.getLevel(), be.getBlockPos(), be));
                     }
                     return null;
                 }
@@ -37,7 +37,7 @@ public class BD_BotaniaPlugin
                 BotaniaForgeCapabilities.SPARK_ATTACHABLE,
                 ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                 (be, side) -> {
-                    return new ManaStackTypedHandler(be.getStackHandler(), new CapCtx(be.getLevel(), be.getBlockPos(), side, be));
+                    return new ManaStackTypedHandler(be.getStackHandler(), new CapCtx(be.getLevel(), be.getBlockPos(), be));
                 }
         );
     }
