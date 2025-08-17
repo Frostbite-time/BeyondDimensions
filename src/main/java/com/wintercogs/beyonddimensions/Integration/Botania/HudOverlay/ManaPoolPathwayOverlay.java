@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.Integration.Botania.HudOverlay;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
@@ -32,7 +31,7 @@ public class ManaPoolPathwayOverlay
         if (!(hit instanceof BlockHitResult bhr)) return;
 
         BlockEntity be = mc.level.getBlockEntity(bhr.getBlockPos());
-        if (!(be instanceof ManaPoolPathwayBlockEntity pool)) return;
+        if (!(be instanceof com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity pool)) return;
 
         ItemStack held = mc.player.getMainHandItem();
         if (held.isEmpty() || held.getItem() instanceof vazkii.botania.common.item.WandOfTheForestItem) return; // 法杖交由植魔自己的逻辑处理

@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -62,7 +63,6 @@ import vazkii.botania.common.item.ManaTabletItem;
 import vazkii.botania.xplat.BotaniaConfig;
 import vazkii.botania.xplat.XplatAbstractions;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,6 +82,11 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     // soundTicks用于合成配方的粒子特效和声音
     private int soundTicks = 0;
     private int ticks = 0; // 用于触发充能和放能的动画，虽然速率无限，基本不可能看到动画。。
+
+    // 成员：放在你的 BE 里
+    private final Long2ObjectOpenHashMap<RecipeHolder<ManaInfusionRecipe>> recipeCache = new Long2ObjectOpenHashMap<>();
+    private int recipeCacheVersionSeen = -1;
+    private static volatile int GLOBAL_RECIPE_CACHE_VERSION = 0;
 
     public ManaPoolPathwayBlockEntity(BlockPos pos, BlockState blockState)
     {
@@ -223,23 +228,58 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         return compressedX | compressedY << 3 | compressedZ << 5;
     }
 
-    @Nullable
-    public RecipeHolder<ManaInfusionRecipe> getMatchingRecipe(ItemStack stack, BlockState state) {
-        List<RecipeHolder<ManaInfusionRecipe>> matchingNonCatRecipes = new ArrayList<>();
-        List<RecipeHolder<ManaInfusionRecipe>> matchingCatRecipes = new ArrayList<>();
+    // 供 配方重载 调用
+    public static void onRecipesReloaded() {
+        GLOBAL_RECIPE_CACHE_VERSION++;
+    }
 
-        for (var recipe : BotaniaRecipeTypes.getRecipes(level, BotaniaRecipeTypes.MANA_INFUSION_TYPE)) {
-            if (recipe.value().matches(stack)) {
-                if (recipe.value().getRecipeCatalyst() == StateIngredients.NONE) {
-                    matchingNonCatRecipes.add(recipe);
-                } else if (recipe.value().getRecipeCatalyst().test(state)) {
-                    matchingCatRecipes.add(recipe);
-                }
+    @Nullable
+    public RecipeHolder<ManaInfusionRecipe> getMatchingRecipe(ItemStack stack, BlockState below) {
+        if (level == null || stack.isEmpty()) return null;
+
+        // 版本变化 → 清缓存
+        if (recipeCacheVersionSeen != GLOBAL_RECIPE_CACHE_VERSION) {
+            recipeCache.clear();
+            recipeCacheVersionSeen = GLOBAL_RECIPE_CACHE_VERSION;
+        }
+
+        final int itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getId(stack.getItem());
+        final int blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getId(below.getBlock());
+        final long key = ((long) itemId << 32) | (blockId & 0xFFFFFFFFL);
+
+        var cached = recipeCache.get(key);
+        if (cached != null) {
+            var r = cached.value();
+            // 二次校验，防止属性型催化剂不匹配
+            if (r.matches(stack) && (r.getRecipeCatalyst() == StateIngredients.NONE || r.getRecipeCatalyst().test(below))) {
+                return cached;
+            } else {
+                recipeCache.remove(key); // 失效
             }
         }
 
-        // Recipes with matching catalyst take priority above recipes with no catalyst specified
-        return !matchingCatRecipes.isEmpty() ? matchingCatRecipes.getFirst() : !matchingNonCatRecipes.isEmpty() ? matchingNonCatRecipes.getFirst() : null;
+        // 没命中 → 走“档 A”逻辑
+        RecipeHolder<ManaInfusionRecipe> best = null, firstNonCat = null;
+        for (var rh : BotaniaRecipeTypes.getRecipes(level, BotaniaRecipeTypes.MANA_INFUSION_TYPE)) {
+            var r = rh.value();
+            if (!r.matches(stack)) continue;
+
+            if (r.getRecipeCatalyst() != StateIngredients.NONE) {
+                if (r.getRecipeCatalyst().test(below)) {
+                    best = rh; // 最高优先级，直接确定
+                    break;
+                }
+            } else if (firstNonCat == null) {
+                firstNonCat = rh;
+            }
+        }
+        if (best == null) best = firstNonCat;
+
+        if (best != null) {
+            if (recipeCache.size() > 256) recipeCache.clear(); // 简易限流
+            recipeCache.put(key, best);
+        }
+        return best;
     }
 
     // 用于配方合成
