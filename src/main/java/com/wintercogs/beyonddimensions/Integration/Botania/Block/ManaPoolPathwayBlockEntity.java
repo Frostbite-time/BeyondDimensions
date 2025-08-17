@@ -9,10 +9,13 @@ import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -21,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -37,18 +41,25 @@ import vazkii.botania.api.block.WandHUD;
 import vazkii.botania.api.block.Wandable;
 import vazkii.botania.api.internal.ManaBurst;
 import vazkii.botania.api.internal.VanillaPacketDispatcher;
+import vazkii.botania.api.item.ManaDissolvable;
 import vazkii.botania.api.mana.*;
 import vazkii.botania.api.mana.spark.ManaSpark;
 import vazkii.botania.api.mana.spark.SparkAttachable;
+import vazkii.botania.api.recipe.ManaInfusionRecipe;
 import vazkii.botania.client.core.helper.RenderHelper;
+import vazkii.botania.client.fx.SparkleParticleData;
 import vazkii.botania.client.fx.WispParticleData;
 import vazkii.botania.client.gui.HUDHandler;
 import vazkii.botania.common.block.BotaniaBlocks;
 import vazkii.botania.common.block.block_entity.mana.BellowsBlockEntity;
 import vazkii.botania.common.block.block_entity.mana.ManaPoolBlockEntity;
+import vazkii.botania.common.crafting.BotaniaRecipeTypes;
+import vazkii.botania.common.handler.BotaniaSounds;
 import vazkii.botania.common.handler.ManaNetworkHandler;
+import vazkii.botania.common.helper.EntityHelper;
 import vazkii.botania.common.item.BotaniaItems;
 import vazkii.botania.common.item.ManaTabletItem;
+import vazkii.botania.xplat.BotaniaConfig;
 import vazkii.botania.xplat.XplatAbstractions;
 
 import javax.annotation.Nullable;
@@ -67,6 +78,19 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     private final Int2ObjectMap<MutableInt> chargingParticles = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<MutableInt> drainingParticles = new Int2ObjectOpenHashMap<>();
     private static final float CHARGING_GRAVITY = 0.003f;
+    // 植物魔法的三个事件id
+    private static final int CRAFT_EFFECT_EVENT = 0;
+    private static final int CHARGE_EFFECT_EVENT = 1;
+    private static final int DRAIN_EFFECT_EVENT = 2;
+    // soundTicks用于合成配方的粒子特效和声音
+    private int soundTicks = 0;
+    private int ticks = 0; // 用于触发充能和放能的动画，虽然速率无限，基本不可能看到动画。。
+
+    // 成员：放在你的 BE 里
+    private final Long2ObjectOpenHashMap<ManaInfusionRecipe> recipeCache = new Long2ObjectOpenHashMap<>();
+    private int recipeCacheVersionSeen = -1;
+    private static volatile int GLOBAL_RECIPE_CACHE_VERSION = 0;
+
 
     public ManaPoolPathwayBlockEntity(BlockPos pos, BlockState blockState)
     {
@@ -132,6 +156,10 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     {
         be.initManaCapAndNetwork();
 
+        if (be.soundTicks > 0) {
+            be.soundTicks--;
+        }
+
         List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, new AABB(pos));
         for (ItemEntity item : items) {
             if (!item.isAlive()) {
@@ -141,14 +169,16 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
             ItemStack stack = item.getItem();
             ManaItem mana = XplatAbstractions.INSTANCE.findManaItem(stack);
             if (!stack.isEmpty() && mana != null) {
-                if (be.isOutPutting && mana.canReceiveManaFromPool(be) || !be.isOutPutting && mana.canExportManaToPool(be)) {
-
+                if (be.isOutPutting && mana.canReceiveManaFromPool(be) || !be.isOutPutting && mana.canExportManaToPool(be))
+                {
+                    boolean didSomething = false;
                     int transfRate = Integer.MAX_VALUE;
 
                     if (be.isOutPutting) //输出到石板
                     {
                         if (be.getCurrentMana() > 0 && mana.getMana() < mana.getMaxMana())
                         {
+                            didSomething = true;
                             int manaVal = Math.min(transfRate, Math.min(be.getCurrentMana(), mana.getMaxMana() - mana.getMana()));
                             mana.addMana(manaVal);
                             be.receiveMana(-manaVal);
@@ -157,6 +187,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
                     else // 从石板接收
                     {
                         if (mana.getMana() > 0 && !be.isFull()) {
+                            didSomething = true;
                             int manaVal = Math.min(transfRate, Math.min(BDMath.clampLongToInt(be.getActualMaxMana() - be.getActualCurrentMana()), mana.getMana()));
                             if (manaVal == 0 && be.level.getBlockState(pos.below()).is(BotaniaBlocks.manaVoid)) {
                                 manaVal = Math.min(transfRate, mana.getMana());
@@ -165,15 +196,190 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
                             be.receiveMana(manaVal);
                         }
                     }
+
+                    if (didSomething)
+                    {
+                        if (BotaniaConfig.common().chargingAnimationEnabled() && be.ticks % 10 == 0) {
+                            level.blockEvent(pos, state.getBlock(),
+                                    be.isOutPutting ? CHARGE_EFFECT_EVENT : DRAIN_EFFECT_EVENT,
+                                    encodeRelativeItemPosition(pos, item));
+                        }
+                        EntityHelper.syncItem(item);
+                    }
                 }
             }
         }
+        be.ticks++;
     }
+
+    private static int encodeRelativeItemPosition(BlockPos worldPosition, ItemEntity item) {
+        double relX = Mth.clamp(item.position().x() - worldPosition.getX(), 0, 1);
+        double relY = Mth.clamp(0.125 + 0.875 * (item.position().y() - worldPosition.getY()), 0.125, 0.9);
+        double relZ = Mth.clamp(item.position().z() - worldPosition.getZ(), 0, 1);
+
+        int compressedX = (int) Math.round(7.0 * relX);
+        int compressedY = 4 - Mth.ceillog2(14 - (int) (14.0 * relY));
+        int compressedZ = (int) Math.round(7.0 * relZ);
+
+        return compressedX | compressedY << 3 | compressedZ << 5;
+    }
+
+    // 供 配方重载 调用
+    public static void onRecipesReloaded() {
+        GLOBAL_RECIPE_CACHE_VERSION++;
+    }
+
+    @Nullable
+    public ManaInfusionRecipe getMatchingRecipe(ItemStack stack, BlockState below) {
+        if (level == null || stack.isEmpty()) return null;
+
+        // 版本变化 → 清缓存
+        if (recipeCacheVersionSeen != GLOBAL_RECIPE_CACHE_VERSION) {
+            recipeCache.clear();
+            recipeCacheVersionSeen = GLOBAL_RECIPE_CACHE_VERSION;
+        }
+
+        final int itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getId(stack.getItem());
+        final int blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getId(below.getBlock());
+        final long key = ((long) itemId << 32) | (blockId & 0xFFFFFFFFL);
+
+        var cached = recipeCache.get(key);
+        if (cached != null) {
+            var r = cached;
+            // 二次校验，防止属性型催化剂不匹配
+            if (r.matches(stack) && (r.getRecipeCatalyst() == null || r.getRecipeCatalyst().test(below))) {
+                return cached;
+            } else {
+                recipeCache.remove(key); // 失效
+            }
+        }
+
+        // 没命中 → 走“档 A”逻辑
+        ManaInfusionRecipe best = null, firstNonCat = null;
+        for (var rh : BotaniaRecipeTypes.getRecipes(this.level, BotaniaRecipeTypes.MANA_INFUSION_TYPE).values()) {
+            var r = rh;
+            if (!r.matches(stack)) continue;
+
+            if (r.getRecipeCatalyst() != null) {
+                if (r.getRecipeCatalyst().test(below)) {
+                    best = rh; // 最高优先级，直接确定
+                    break;
+                }
+            } else if (firstNonCat == null) {
+                firstNonCat = rh;
+            }
+        }
+        if (best == null) best = firstNonCat;
+
+        if (best != null) {
+            if (recipeCache.size() > 256) recipeCache.clear(); // 简易限流
+            recipeCache.put(key, best);
+        }
+        return best;
+    }
+
+    // 用于配方合成
+    public boolean collideEntityItem(ItemEntity item) {
+        if (level.isClientSide || !item.isAlive() || item.getItem().isEmpty()) {
+            return false;
+        }
+
+        ItemStack stack = item.getItem();
+
+        if (stack.getItem() instanceof ManaDissolvable dissolvable) {
+            dissolvable.onDissolveTick(this, item);
+        }
+
+        if (XplatAbstractions.INSTANCE.itemFlagsComponent(item).manaInfusionSpawned) {
+            return false;
+        }
+
+        ManaInfusionRecipe recipe = getMatchingRecipe(stack, level.getBlockState(worldPosition.below()));
+
+        if (recipe != null) {
+            int mana = recipe.getManaToConsume();
+            if (getCurrentMana() >= mana) {
+                receiveMana(-mana);
+
+                ItemStack output = recipe.getRecipeOutput(level.registryAccess(), stack);
+                EntityHelper.shrinkItem(item);
+                item.setOnGround(false); //Force entity collision update to run every tick if crafting is in progress
+
+                ItemEntity outputItem = new ItemEntity(level, worldPosition.getX() + 0.5, worldPosition.getY() + 1.5, worldPosition.getZ() + 0.5, output);
+                XplatAbstractions.INSTANCE.itemFlagsComponent(outputItem).manaInfusionSpawned = true;
+                if (item.getOwner() instanceof Player player)
+                {
+                    player.triggerRecipeCrafted(recipe, List.of(output));
+                    output.onCraftedBy(level, player, output.getCount());
+                }
+                level.addFreshEntity(outputItem);
+
+                craftingEffect(true);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // 播放配方合成后的粒子特效和声音
+    public void craftingEffect(boolean playSound) {
+        if (playSound && soundTicks == 0) {
+            level.playSound(null, worldPosition, BotaniaSounds.manaPoolCraft, SoundSource.BLOCKS, 1F, 1F);
+            soundTicks = 6;
+        }
+
+        level.gameEvent(null, GameEvent.BLOCK_ACTIVATE, getBlockPos());
+        level.blockEvent(getBlockPos(), getBlockState().getBlock(), CRAFT_EFFECT_EVENT, 0);
+    }
+
+
+    @Override
+    public boolean triggerEvent(int event, int param) {
+        return switch (event)
+        {
+            case 0 ->
+            {/* 表示CRAFT_EFFECT_EVENT */
+                if (level.isClientSide)
+                {
+                    for (int i = 0; i < 25; i++)
+                    {
+                        float red = (float) Math.random();
+                        float green = (float) Math.random();
+                        float blue = (float) Math.random();
+                        SparkleParticleData data = SparkleParticleData.sparkle((float) Math.random(), red, green, blue, 10);
+                        level.addParticle(data, worldPosition.getX() + 0.5 + Math.random() * 0.4 - 0.2, worldPosition.getY() + 0.75, worldPosition.getZ() + 0.5 + Math.random() * 0.4 - 0.2, 0, 0, 0);
+                    }
+                }
+
+                yield true;
+            }
+            case CHARGE_EFFECT_EVENT ->
+            {
+                if (level.isClientSide && BotaniaConfig.common().chargingAnimationEnabled())
+                {
+                    chargingParticles.computeIfAbsent(param, i -> new MutableInt(15)).setValue(15);
+                }
+                yield true;
+            }
+            case DRAIN_EFFECT_EVENT ->
+            {
+                if (level.isClientSide && BotaniaConfig.common().chargingAnimationEnabled())
+                {
+                    drainingParticles.computeIfAbsent(param, i -> new MutableInt(15)).setValue(15);
+                }
+                yield true;
+            }
+            default -> super.triggerEvent(event, param);
+        };
+    }
+
 
     private static void displayChargingParticles(Level level, BlockPos worldPosition, ManaPoolPathwayBlockEntity be,
                                                  Int2ObjectMap<MutableInt> particles, boolean charging) {
         int bellowCount = charging ? getBellowCount(level, worldPosition, be) : 0;
-        float relativeMana = (float) be.getCurrentMana() / be.getMaxMana();
+        int max = be.getMaxMana();
+        float relativeMana = (max > 0) ? (float) be.getCurrentMana() / max : 0f;
         var particlesIterator = particles.int2ObjectEntrySet().iterator();
         while (particlesIterator.hasNext()) {
             var entry = particlesIterator.next();
@@ -232,6 +438,11 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         double maxHeight = Math.max(startPos.y, endPos.y) - endPos.y + 0.05 * Math.random();
         Vec3 horizontalDiff = new Vec3(endPos.x - startPos.x, 0, endPos.z - startPos.z);
         double horizontalDistance = horizontalDiff.horizontalDistance();
+        if (horizontalDistance < 1.0e-6) {
+            // 退化处理：轻微随机偏移，避免除零
+            horizontalDiff = new Vec3((Math.random() - 0.5) * 0.01, 0, (Math.random() - 0.5) * 0.01);
+            horizontalDistance = horizontalDiff.horizontalDistance();
+        }
         Vec3 horizontalDir = horizontalDiff.scale(1 / horizontalDistance);
         double startHeight = startPos.y - endPos.y;
         double vY0Squared = 2 * CHARGING_GRAVITY * (maxHeight - startHeight);
@@ -407,8 +618,9 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     @Override
     public boolean onUsedByWand(@Nullable Player player, ItemStack stack, Direction side)
     {
-        if (player == null || player.isShiftKeyDown() && !level.isClientSide()) {
+        if ((player == null || player.isShiftKeyDown()) && !level.isClientSide()) {
             isOutPutting = !isOutPutting;
+            setChanged();
             VanillaPacketDispatcher.dispatchTEToNearbyPlayers(this);
         }
         return true;
@@ -470,7 +682,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         isOutPutting = tag.getBoolean("out_putting");
     }
 
-    // 清空引用
+    // 清除引用
     @Override
     public void setRemoved()
     {
