@@ -383,7 +383,8 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     private static void displayChargingParticles(Level level, BlockPos worldPosition, ManaPoolPathwayBlockEntity be,
                                                  Int2ObjectMap<MutableInt> particles, boolean charging) {
         int bellowCount = charging ? getBellowCount(level, worldPosition, be) : 0;
-        float relativeMana = (float) be.getCurrentMana() / be.getMaxMana();
+        int max = be.getMaxMana();
+        float relativeMana = (max > 0) ? (float) be.getCurrentMana() / max : 0f;
         var particlesIterator = particles.int2ObjectEntrySet().iterator();
         while (particlesIterator.hasNext()) {
             var entry = particlesIterator.next();
@@ -442,6 +443,11 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         double maxHeight = Math.max(startPos.y, endPos.y) - endPos.y + 0.05 * Math.random();
         Vec3 horizontalDiff = new Vec3(endPos.x - startPos.x, 0, endPos.z - startPos.z);
         double horizontalDistance = horizontalDiff.horizontalDistance();
+        if (horizontalDistance < 1.0e-6) {
+            // 退化处理：轻微随机偏移，避免除零
+            horizontalDiff = new Vec3((Math.random() - 0.5) * 0.01, 0, (Math.random() - 0.5) * 0.01);
+            horizontalDistance = horizontalDiff.horizontalDistance();
+        }
         Vec3 horizontalDir = horizontalDiff.scale(1 / horizontalDistance);
         double startHeight = startPos.y - endPos.y;
         double vY0Squared = 2 * CHARGING_GRAVITY * (maxHeight - startHeight);
@@ -605,8 +611,9 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     @Override
     public boolean onUsedByWand(@Nullable Player player, ItemStack stack, Direction side)
     {
-        if (player == null || player.isShiftKeyDown() && !level.isClientSide()) {
+        if ((player == null || player.isShiftKeyDown()) && !level.isClientSide()) {
             isOutPutting = !isOutPutting;
+            setChanged();
             VanillaPacketDispatcher.dispatchTEToNearbyPlayers(this);
         }
         return true;
