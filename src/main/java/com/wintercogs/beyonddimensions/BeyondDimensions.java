@@ -35,6 +35,7 @@ import com.wintercogs.beyonddimensions.Integration.AE_Ars.BD_AE_ArsPlugin;
 import com.wintercogs.beyonddimensions.Integration.AE_Botania.BD_AE_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.Integration.Botania.BD_BotaniaPlugin;
+import com.wintercogs.beyonddimensions.Integration.Botania.HudOverlay.ManaPoolPathwayOverlay;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
@@ -360,6 +361,10 @@ public class BeyondDimensions
             if(PolymorphLoaded)
             {
                 PolymorphPlug.register();
+            }
+            if(Botania_Loaded)
+            {
+                MinecraftForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);
             }
         }
     }
