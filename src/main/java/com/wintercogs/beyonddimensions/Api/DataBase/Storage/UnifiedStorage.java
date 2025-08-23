@@ -342,7 +342,7 @@ public class UnifiedStorage implements IStackTypedHandler
 
     @Override
     public IStackType insert(IStackType stack,boolean simulate) {
-        if (stack.isEmpty()) return StackCreater.CreateEmpty(stack.getTypeId());
+        if (stack.isEmpty()) return stack.getEmpty();
 
         // 对物质压缩球的特殊处理
         if(stack instanceof ItemStackType itemStackType)
@@ -358,24 +358,29 @@ public class UnifiedStorage implements IStackTypedHandler
         long canInsert = Math.min(getSlotCapacity(0),stack.getCustomMaxStackSize()); // 能被插入的空间
 
         // 尝试合并现有堆叠
-        if(storage.contains(stack))
+        IStackType existing = storage.get(stack);
+        if(existing != null && !existing.isEmpty())
         {
-            IStackType existing = storage.get(stack);
-            canInsert = canInsert - existing.getStackAmount();
+            canInsert = Math.max(0L, canInsert - existing.getStackAmount()); // 防止剩余容量为负
+            if(canInsert <= 0) // 完全无法合并，直接返回原堆叠
+                return stack.copyWithCount(remaining);
+
             long actualInsert = Math.min(remaining,canInsert);
             remaining = remaining-actualInsert;
 
-            if (!simulate) {
+            if (!simulate && actualInsert > 0) { // 有实际变化，且非模拟操作
                 existing.grow(actualInsert);
                 onContentChanged(existing,actualInsert,true); //此处无需传递复制值，因为如果existing增加后的size仍为0，则没有增加的必要
             }
-            return stack.copyWithCount(remaining);
+            return stack.copyWithCount(remaining); // 返回剩余量
         }
 
         // 现有堆叠未找到，尝试新增
         if(storage.size() < slotMaxSize)
         {
             long actualInsert = Math.min(remaining,canInsert);
+            if(actualInsert <= 0) return stack.copyWithCount(remaining); // 可插入量为0时，不新建槽位（此处也可能是容量导致的0，因此返回原堆叠）
+
             remaining = remaining-actualInsert;
             if(!simulate)
             {
@@ -458,40 +463,49 @@ public class UnifiedStorage implements IStackTypedHandler
     // 尝试按类型导出，返回实际导出量
     @Override
     public IStackType extract(IStackType stack, boolean simulate) {
+        // 此处模拟操作固定一次copy，非模拟固定2次copy
         if (stack.isEmpty()) return stack.getEmpty();
 
         List<Integer> indices = typeIdIndex.get(stack.getTypeId());
+        if(indices == null || indices.isEmpty()) return stack.getEmpty();
 
-        if (storage.contains(stack))
-        {
-            int storageIndex = storage.indexOf(stack);
-            IStackType existing = storage.get(stack);
+        IStackType existing = storage.get(stack); // 在此list中，从stack来get比直接get索引更快
+        if(existing == null || existing.isEmpty()) return stack.getEmpty();
 
-            long extracted = Math.min(stack.getStackAmount(), existing.getStackAmount());
-            IStackType sim = existing.copy();
-            IStackType result = sim.split(extracted);
-
-            if (!simulate) {
-                existing.shrink(extracted);
-                if (existing.getStackAmount() <= 0) {
-                    storage.remove(storageIndex);
-                    indices.remove(Integer.valueOf(storageIndex));
-
-                    // 更新受影响的索引
-                    updateIndicesAfterRemoval(storageIndex);
-
-                    if (indices.isEmpty()) {
-                        typeIdIndex.remove(stack.getTypeId());
-                    }
-                }
-                onContentChanged(existing.copyWithCount(1),extracted,false); // 提交复制值，防止getStack时被自动更新为empty
-            }
-            return result;
+        long available = existing.getStackAmount();
+        long extracted = Math.min(stack.getStackAmount(), available); // 导出量为要求量与可用量的最小值
+        if (extracted <= 0) {
+            return stack.getEmpty();
         }
 
+        // 模拟：生成一个“只带数量”的结果副本即可，无需额外快照
+        if (simulate) {
+            return existing.copyWithCount(extracted);
+        }
 
+        // 真正执行：在任何修改 existing 之前做一次“类型快照”，避免后续 shrink 导致取空
+        IStackType beforeType = existing.copyWithCount(1);
+        // 先构造返回值
+        IStackType result = beforeType.copyWithCount(extracted);
 
-        return stack.getEmpty();
+        // 再进行实际变更
+        if (extracted >= available) {
+            // 全量取走：移除并维护索引
+            int storageIndex = storage.indexOf(stack); // 走到这一步时，storageIndex必然存在合适值
+            storage.remove(storageIndex);
+            indices.remove(Integer.valueOf(storageIndex));
+            updateIndicesAfterRemoval(storageIndex);
+            if (indices.isEmpty()) {
+                typeIdIndex.remove(stack.getTypeId());
+            }
+        } else {
+            // 部分取走：只 shrink，不影响 indices
+            existing.shrink(extracted);
+        }
+
+        // 使用“变更前”的类型快照进行通知，保证一致性
+        onContentChanged(beforeType, extracted, false);
+        return result;
     }
 
     /**
@@ -534,31 +548,47 @@ public class UnifiedStorage implements IStackTypedHandler
         }
         
         IStackType existing = storage.get(slot);
-        if (existing.isEmpty()) return existing.getEmpty();
-
-        long extracted = Math.min(amount, existing.getStackAmount());
-        IStackType sim = existing.copy();
-        IStackType result = sim.split(extracted);
-        if (!simulate) {
-            existing.shrink(extracted);
-            if (existing.getStackAmount() <= 0) {
-                ResourceLocation typeId = existing.getTypeId();
-                storage.remove(slot);
-                
-                // 更新索引
-                List<Integer> indices = typeIdIndex.get(typeId);
-                if (indices != null) {
-                    indices.remove(Integer.valueOf(slot));
-                    if (indices.isEmpty()) {
-                        typeIdIndex.remove(typeId);
-                    }
-                }
-                
-                // 更新受影响的索引
-                updateIndicesAfterRemoval(slot);
-            }
-            onContentChanged(existing.copyWithCount(1),extracted,false);
+        if (existing == null || existing.isEmpty()) {
+            return (existing != null) ? existing.getEmpty() : new ItemStackType(); // 如果为null，最终保底返回一个空物品实现，绝对不能返回null
         }
+
+        long available = existing.getStackAmount();
+        long extracted = Math.min(amount, available);
+        if (extracted <= 0) {
+            return existing.getEmpty();
+        }
+
+        // 模拟：只需1次副本
+        if (simulate) {
+            return existing.copyWithCount(extracted);
+        }
+
+        // 非模拟：修改前做“类型快照”（count=1），保证通知一致性
+        IStackType beforeType = existing.copyWithCount(1);
+        IStackType result = beforeType.copyWithCount(extracted); // 第 2 次 copy：返回值
+
+        if (extracted == available) {
+            // 全量取走：移除并维护索引
+            final ResourceLocation typeId = existing.getTypeId();
+            storage.remove(slot);
+
+            List<Integer> indices = typeIdIndex.get(typeId);
+            if (indices != null) {
+                indices.remove(Integer.valueOf(slot));
+                if (indices.isEmpty()) {
+                    typeIdIndex.remove(typeId);
+                }
+            }
+
+            // 下调受影响的索引
+            updateIndicesAfterRemoval(slot);
+        } else {
+            // 部分取走：只 shrink，不动索引表
+            existing.shrink(extracted);
+        }
+
+        // 用 变更前 的类型快照进行通知
+        onContentChanged(beforeType, extracted, false);
         return result;
     }
     // endregion
