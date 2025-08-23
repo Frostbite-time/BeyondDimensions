@@ -207,6 +207,9 @@ dependencies {
     // RS 通用机械附属
     compileOnly "maven.modrinth:refined-storage-mekanism-integration:1.0.0"
     runtimeOnly "maven.modrinth:refined-storage-mekanism-integration:1.0.0"
+    // RS Types附属
+    compileOnly "curse.maven:refined-types-1327983:6904430"
+    runtimeOnly "curse.maven:refined-types-1327983:6904430"
 
     // 工业先锋：灵魂涌动
     compileOnly "maven.modrinth:industrial-foregoing-souls:1.21-1.10.5"

@@ -33,6 +33,7 @@ import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabi
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Integration.RS.BD_RSPlugin;
 import com.wintercogs.beyonddimensions.Integration.RSMek.BD_RSMekPlugin;
+import com.wintercogs.beyonddimensions.Integration.RSTypes.BD_RSTypesPlugin;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
@@ -91,6 +92,8 @@ public class BeyondDimensions
     public static boolean AE_ARS_Loaded = false;
     public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
     public static boolean Botania_Loaded = false;
+    public static final String RSTypesModId = "refinedtypes";
+    public static boolean RSTypesLoaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -214,6 +217,10 @@ public class BeyondDimensions
             MOD_EVENT_BUS.addListener(ManaPoolPathwayBlockEntity::registerCapability);
             MOD_EVENT_BUS.addListener(BD_BotaniaPlugin::registerCapability); // 为网络通道和网络接口手动注册火花附着
         }
+        if(ModList.get().isLoaded(RSTypesModId))
+        {
+            RSTypesLoaded = true;
+        }
 
         ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
     }
@@ -326,6 +333,10 @@ public class BeyondDimensions
         if(RS_MEK_Loaded)
         {
             BD_RSMekPlugin.register();
+        }
+        if(RSTypesLoaded)
+        {
+            BD_RSTypesPlugin.register();
         }
         if(AE_IFS_Loaded)
         {
