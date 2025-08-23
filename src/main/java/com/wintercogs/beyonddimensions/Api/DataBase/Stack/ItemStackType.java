@@ -313,7 +313,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
     public long getVanillaMaxStackSize()
     {
         // 此处已经判过AIR，如果不是，不可能继续往后走，故后续只要是isEmpty则证明需要重设
-        if (this.item == Items.AIR) return 0;
+        if (this.item == Items.AIR) return 1; // 返回1，与原版行为一致，且不会使外部认为无法输入
         if(vanillaStackSize<=0)
         {
             if (this.serverCache.isEmpty() || this.serverCache.getItem() != this.item) {
