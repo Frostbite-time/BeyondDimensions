@@ -99,6 +99,13 @@ public class BeyondDimensions
     public static boolean AE_Botania_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
+//    防止某些神经整合包禁用消息输出，预留一下位子，平常不启用
+//    static {
+//        try {
+//            org.apache.logging.log4j.core.config.Configurator.setLevel("com.wintercogs", org.apache.logging.log4j.Level.INFO);
+//        } catch (Throwable ignored) {}
+//    }
+
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
     // FML 将识别一些参数类型，如 IEventBus 或 ModContainer 并自动传入它们。
     public BeyondDimensions()
