@@ -113,7 +113,7 @@ public class PigmentStackTypedHandler implements IPigmentHandler
                 .map(slots -> slots.get(0))
                 .filter(actualIndex -> actualIndex >= 0)
                 .map(handlerStorage::getStackBySlot)
-                .map(stack -> stack.copy())
+                .map(stack -> stack.copyWithCount(amount))
                 .map(stack -> handlerStorage.extract(stack, action.simulate()))
                 .map(extracts -> ((PigmentStackType)extracts).copyStack())
                 .orElse(PigmentStack.EMPTY);
