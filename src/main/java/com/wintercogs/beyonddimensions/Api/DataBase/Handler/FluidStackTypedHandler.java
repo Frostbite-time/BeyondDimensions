@@ -74,7 +74,7 @@ public class FluidStackTypedHandler implements IFluidHandler
                 .map(slots -> slots.getFirst())                     // 提取第一个索引
                 .filter(actualIndex -> actualIndex >= 0)            // 过滤无效索引
                 .map(handlerStorage::getStackBySlot)                // 获取存储对象（自动处理 null）
-                .map(stack -> stack.copy())                         // 复制对象（若 stack 为 null，此步自动跳过）
+                .map(stack -> stack.copyWithCount(count))                         // 复制对象（若 stack 为 null，此步自动跳过）
                 .map(stack -> handlerStorage.extract(stack, fluidAction.simulate()))
                 .map(extracts -> ((FluidStackType)extracts).copyStack())                     // 生成 FluidStack
                 .orElse(FluidStack.EMPTY);                          // 兜底返回空

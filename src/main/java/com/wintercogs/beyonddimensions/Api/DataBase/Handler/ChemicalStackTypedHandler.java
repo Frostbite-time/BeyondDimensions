@@ -112,7 +112,7 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
                 .map(slots -> slots.getFirst())
                 .filter(actualIndex -> actualIndex >= 0)
                 .map(handlerStorage::getStackBySlot)
-                .map(stack -> stack.copy())
+                .map(stack -> stack.copyWithCount(amount))
                 .map(stack -> handlerStorage.extract(stack, action.simulate()))
                 .map(extracts -> ((ChemicalStackType)extracts).copyStack())
                 .orElse(ChemicalStack.EMPTY);
