@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.wintercogs.beyonddimensions.Api.Util.NbtEq;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
@@ -27,7 +28,6 @@ import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class ItemStackType implements IStackType<ItemStack> {
@@ -365,8 +365,8 @@ public class ItemStackType implements IStackType<ItemStack> {
         if(other instanceof ItemStackType otherStackType)
         {
             return otherStackType.item == item
-                    && Objects.equals(otherStackType.tag, tag)
-                    && Objects.equals(otherStackType.caps, caps);
+                    && NbtEq.equalsRelaxed(this.tag, otherStackType.tag)
+                    && NbtEq.equalsRelaxed(this.caps, otherStackType.caps);
         }
         return false;
     }
@@ -521,6 +521,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public boolean equals(Object other)
     {
+        // 我知道我没做引用比较，等我统一整理代码时再处理
         if(other instanceof ItemStackType otherStack)
         {
             return this.isSameTypeSameComponents(otherStack);
@@ -534,14 +535,8 @@ public class ItemStackType implements IStackType<ItemStack> {
         if(NeedRecalHash)
         {
             int i = 31 + item.hashCode();
-            if(tag != null)
-            {
-                i = i * 31 + tag.hashCode();
-            }
-            if(caps != null)
-            {
-                i = i * 31 + caps.hashCode();
-            }
+            i = i * 31 + NbtEq.hashRelaxed(tag); // 内部已处理null
+            i = i * 31 + NbtEq.hashRelaxed(caps);
             hashCodeCache = i;
             NeedRecalHash = false;
         }
