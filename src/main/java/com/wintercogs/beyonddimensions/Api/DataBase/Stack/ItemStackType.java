@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -29,6 +30,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.ClientTooltipFlag;
 
 import javax.annotation.Nullable;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -130,6 +132,8 @@ public final class ItemStackType implements IStackType<ItemStack> {
     // Patch -> NBT -> 递归顺序规范化 -> 写为非压缩字节
     /** 规范化后的 NBT 字节缓存（用于 equals/hash），使用前必须以ensureByte刷新，空patch会返回空标记（有长度的非空数组），provider未就绪则返回空数组*/
     private byte[] equalsByte = new byte[0];
+    // 规范化字节是在哪个 Provider 下计算出来的（弱引用避免内存泄漏）
+    private transient WeakReference<HolderLookup.Provider> equalsByteProviderRef = null;
 
     public ItemStackType() {
         this.item = Items.AIR;
@@ -206,6 +210,7 @@ public final class ItemStackType implements IStackType<ItemStack> {
         NeedRecalHash = true;
         vanillaStackSize = -1; // 强制要求重算
         this.equalsByte = new byte[0]; // 失效字节缓存
+        this.equalsByteProviderRef = null; // 失效持有者
     }
 
     @Override
@@ -632,19 +637,57 @@ public final class ItemStackType implements IStackType<ItemStack> {
 
     private void ensureByte()
     {
+        // 先拿“当前应使用”的 Provider（Server→Connection→Level→Builtin）
+        HolderLookup.Provider current = null;
+        try {
+            current = RegistryAccessResolver.resolve();
+        } catch (Throwable ignored) {
+            // 保持 null，后面会兜底
+        }
 
-        // 缓存仍有效：字节已算出且没有 item/patch 改动触发 NeedRecalHash
-        if (this.equalsByte != null && this.equalsByte.length > 0 && !NeedRecalHash) {
+        // 若已有有效缓存，且没有显式要求重算，并且 Provider 身份未变 → 直接复用
+        HolderLookup.Provider cached = (equalsByteProviderRef != null) ? equalsByteProviderRef.get() : null;
+        if (!NeedRecalHash // 没有显式重算要求
+                && this.equalsByte != null && this.equalsByte.length > 0 // 字节已经计算完毕
+                && cached != null && cached == current) { // 注册表提供者身份不变
             return;
         }
 
-        try {
-            // 空补丁快速路径：工具类也会返回常量 EMPTY_BYTES，这里直接走工具类即可
-            HolderLookup.Provider provider = RegistryAccessResolver.resolve(); // 这里不知道实际提供者是谁，始终选择看起来的最优提供者
-            this.equalsByte = DataComponentPatchHelper.toCanonicalBytes(this.patch, provider);
+        try { // 客户端断线重连后可能会为了缓存tooltip的IStackType有一次cached导致的计算
+
+            // 1) 用当前 Provider 先算一次（空补丁会得到稳定的非空 EMPTY_BYTES，length不会为0，仅有失败时为0）
+            // 若当前provider不可用，则用内建表
+            HolderLookup.Provider use = (current != null) ? current : RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+            byte[] out = DataComponentPatchHelper.toCanonicalBytes(this.patch, use);
+
+            // 2) 客户端兜底：若失败（返回长度==0），再强制用 Connection 的 Provider 重试一次
+            if (out.length == 0 && net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT) {
+                var mc = net.minecraft.client.Minecraft.getInstance();
+                var conn = mc.getConnection();
+                if (conn != null) {
+                    HolderLookup.Provider connProv = conn.registryAccess();
+                    if (connProv != use) { // 提供者和已经失败的提供者不应为同一人
+                        byte[] retry = DataComponentPatchHelper.toCanonicalBytes(this.patch, connProv);
+                        if (retry.length > 0) {
+                            out = retry;
+                            use = connProv;
+                        }
+                    }
+                }
+            }
+
+            // 3) 写入缓存；失败则清空 Provider 绑定
+            this.equalsByte = out;
+            if (out.length > 0) {
+                this.equalsByteProviderRef = new java.lang.ref.WeakReference<>(use);
+            } else {
+                this.equalsByteProviderRef = null;
+            }
         } catch (Throwable t) {
             // 不让逻辑中断，留给 equals/hashCode 回退到 patch.equals/hash
-            BeyondDimensions.LOGGER.warn("ItemStackType.ensureByte failed: {}", t.toString());
+            BeyondDimensions.LOGGER.warn("ItemStackType字节序列化失败: {}", t.toString());
+            this.equalsByte = new byte[0];
+            this.equalsByteProviderRef = null;
         }
     }
 }
