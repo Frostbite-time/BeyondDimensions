@@ -205,12 +205,10 @@ public final class RegistryAccessResolver {
         @SubscribeEvent
         public static void onTagsUpdated(TagsUpdatedEvent e)
         {
-            // 仅接收包时强制更新
-            boolean force = (e.getUpdateCause() == net.neoforged.neoforge.event.TagsUpdatedEvent.UpdateCause.CLIENT_PACKET_RECEIVED);
             setProviderInternal(
                     e.getRegistryAccess(),
                     clientLabel() + "标签已更新（原因：" + String.valueOf(e.getUpdateCause()) + "）",
-                    force
+                    true
             );
         }
 
