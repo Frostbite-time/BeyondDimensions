@@ -4,9 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
-import com.wintercogs.beyonddimensions.Unit.RegistryUtil;
-import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import com.wintercogs.beyonddimensions.Unit.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
@@ -31,6 +29,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.ClientTooltipFlag;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -125,8 +124,14 @@ public final class ItemStackType implements IStackType<ItemStack> {
     private ItemStack clientCache;
     private int vanillaStackSize = -1; // 缓存原版堆叠大小
 
-    private int hashCodeCache = 0; // 哈希码缓存（基于 item+patch）
-    private boolean NeedRecalHash = true; // 指示何时需要重算哈希
+    private int hashCodeCache = 0;
+    private boolean NeedRecalHash = true;
+
+    // Patch -> NBT -> 递归顺序规范化 -> 写为非压缩字节
+    /** 规范化后的 NBT 字节缓存（用于 equals/hash），使用前必须以ensureByte刷新，空patch会返回空标记（有长度的非空数组），provider未就绪则返回空数组*/
+    private byte[] equalsByte = new byte[0];
+    /** 生成 equalsByte 时使用的注册表 epoch */
+    private long RegistryEpochCache = -1L;
 
     public ItemStackType() {
         this.item = Items.AIR;
@@ -202,6 +207,8 @@ public final class ItemStackType implements IStackType<ItemStack> {
         this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         NeedRecalHash = true;
         vanillaStackSize = -1; // 强制要求重算
+        this.equalsByte = new byte[0]; // 失效字节缓存
+        this.RegistryEpochCache = -1L;
     }
 
     @Override
@@ -275,6 +282,9 @@ public final class ItemStackType implements IStackType<ItemStack> {
         ItemStackType cp = new ItemStackType(this.item, this.patch, this.stackSize);
         cp.NeedRecalHash = this.NeedRecalHash;
         cp.hashCodeCache = this.hashCodeCache;
+        // 拷贝字节缓存与 epoch
+        cp.equalsByte = (this.equalsByte == null ? null : Arrays.copyOf(this.equalsByte, this.equalsByte.length));
+        cp.RegistryEpochCache = this.RegistryEpochCache;
         return cp;
     }
 
@@ -283,6 +293,9 @@ public final class ItemStackType implements IStackType<ItemStack> {
         ItemStackType cp = new ItemStackType(this.item, this.patch, count);
         cp.NeedRecalHash = this.NeedRecalHash;
         cp.hashCodeCache = this.hashCodeCache;
+        // 拷贝字节缓存与 epoch
+        cp.equalsByte = (this.equalsByte == null ? null : Arrays.copyOf(this.equalsByte, this.equalsByte.length));
+        cp.RegistryEpochCache = this.RegistryEpochCache;
         return cp;
     }
 
@@ -373,7 +386,18 @@ public final class ItemStackType implements IStackType<ItemStack> {
     {
         if(other instanceof ItemStackType otherItemStackType) // 顺手处理空
         {
-            return this.item == otherItemStackType.item && Objects.equals(this.patch,otherItemStackType.patch); // 直接比对
+            if (this.item != otherItemStackType.item) return false;
+
+            // 确保两侧都有规范化后的字节快照
+            this.ensureByte();
+            otherItemStackType.ensureByte();
+
+            if (this.equalsByte != null && this.equalsByte.length > 0 &&
+                    otherItemStackType.equalsByte != null && otherItemStackType.equalsByte.length > 0) {
+                return Arrays.equals(this.equalsByte, otherItemStackType.equalsByte);
+            }
+            // 回退：在 Provider 尚未就绪或异常时，退回到 patch 的值语义
+            return Objects.equals(this.patch, otherItemStackType.patch);
         }
         return false;
     }
@@ -598,14 +622,39 @@ public final class ItemStackType implements IStackType<ItemStack> {
 
     @Override
     public int hashCode() {
-        // 基于物品类型和组件生成哈希码
-        if(NeedRecalHash)
-        {
-            int i = 31 + item.hashCode();
-            hashCodeCache = 31 * i + patch.hashCode();
+        // 当 item/patch 变化或 epoch 变化，需要重算
+        long curEpoch = RegistryAccessResolver.epoch();
+        if (NeedRecalHash || this.RegistryEpochCache != curEpoch || this.equalsByte == null || this.equalsByte.length == 0) {
+            ensureByte(); // 尝试生成/刷新字节；失败时会保留空字节以便回退
+            int base = 31 + item.hashCode();
+            int patchPart = (this.equalsByte != null && this.equalsByte.length > 0)
+                    ? Arrays.hashCode(this.equalsByte)
+                    : patch.hashCode(); // 回退，Provider未就绪或者发生别的异常时启用
+            hashCodeCache = 31 * base + patchPart;
             NeedRecalHash = false;
         }
         return hashCodeCache;
+    }
+
+    private void ensureByte()
+    {
+        long cur = RegistryAccessResolver.epoch();
+
+        // 缓存仍有效：epoch 未变、字节已算出且没有 item/patch 改动触发 NeedRecalHash
+        if (this.equalsByte != null && this.equalsByte.length > 0
+                && this.RegistryEpochCache == cur && !NeedRecalHash) {
+            return;
+        }
+
+        try {
+            // 空补丁快速路径：工具类也会返回常量 EMPTY_BYTES，这里直接走工具类即可
+            HolderLookup.Provider provider = RegistryAccessResolver.current();
+            this.equalsByte = DataComponentPatchHelper.toCanonicalBytes(this.patch, provider);
+            this.RegistryEpochCache = cur;
+        } catch (Throwable t) {
+            // 不让逻辑中断，留给 equals/hashCode 回退到 patch.equals/hash
+            BeyondDimensions.LOGGER.warn("ItemStackType.ensureByte failed: {}", t.toString());
+        }
     }
 }
 
