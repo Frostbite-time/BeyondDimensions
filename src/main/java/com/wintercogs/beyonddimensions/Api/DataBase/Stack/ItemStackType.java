@@ -130,8 +130,6 @@ public final class ItemStackType implements IStackType<ItemStack> {
     // Patch -> NBT -> 递归顺序规范化 -> 写为非压缩字节
     /** 规范化后的 NBT 字节缓存（用于 equals/hash），使用前必须以ensureByte刷新，空patch会返回空标记（有长度的非空数组），provider未就绪则返回空数组*/
     private byte[] equalsByte = new byte[0];
-    /** 生成 equalsByte 时使用的注册表 epoch */
-    private long RegistryEpochCache = -1L;
 
     public ItemStackType() {
         this.item = Items.AIR;
@@ -208,7 +206,6 @@ public final class ItemStackType implements IStackType<ItemStack> {
         NeedRecalHash = true;
         vanillaStackSize = -1; // 强制要求重算
         this.equalsByte = new byte[0]; // 失效字节缓存
-        this.RegistryEpochCache = -1L;
     }
 
     @Override
@@ -284,7 +281,6 @@ public final class ItemStackType implements IStackType<ItemStack> {
         cp.hashCodeCache = this.hashCodeCache;
         // 拷贝字节缓存与 epoch
         cp.equalsByte = (this.equalsByte == null ? null : Arrays.copyOf(this.equalsByte, this.equalsByte.length));
-        cp.RegistryEpochCache = this.RegistryEpochCache;
         return cp;
     }
 
@@ -295,7 +291,6 @@ public final class ItemStackType implements IStackType<ItemStack> {
         cp.hashCodeCache = this.hashCodeCache;
         // 拷贝字节缓存与 epoch
         cp.equalsByte = (this.equalsByte == null ? null : Arrays.copyOf(this.equalsByte, this.equalsByte.length));
-        cp.RegistryEpochCache = this.RegistryEpochCache;
         return cp;
     }
 
@@ -621,10 +616,9 @@ public final class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public int hashCode() {
-        // 当 item/patch 变化或 epoch 变化，需要重算
-        long curEpoch = RegistryAccessResolver.epoch();
-        if (NeedRecalHash || this.RegistryEpochCache != curEpoch || this.equalsByte == null || this.equalsByte.length == 0) {
+    public int hashCode()
+    {
+        if (NeedRecalHash || this.equalsByte == null || this.equalsByte.length == 0) {
             ensureByte(); // 尝试生成/刷新字节；失败时会保留空字节以便回退
             int base = 31 + item.hashCode();
             int patchPart = (this.equalsByte != null && this.equalsByte.length > 0)
@@ -638,19 +632,16 @@ public final class ItemStackType implements IStackType<ItemStack> {
 
     private void ensureByte()
     {
-        long cur = RegistryAccessResolver.epoch();
 
-        // 缓存仍有效：epoch 未变、字节已算出且没有 item/patch 改动触发 NeedRecalHash
-        if (this.equalsByte != null && this.equalsByte.length > 0
-                && this.RegistryEpochCache == cur && !NeedRecalHash) {
+        // 缓存仍有效：字节已算出且没有 item/patch 改动触发 NeedRecalHash
+        if (this.equalsByte != null && this.equalsByte.length > 0 && !NeedRecalHash) {
             return;
         }
 
         try {
             // 空补丁快速路径：工具类也会返回常量 EMPTY_BYTES，这里直接走工具类即可
-            HolderLookup.Provider provider = RegistryAccessResolver.current();
+            HolderLookup.Provider provider = RegistryAccessResolver.resolve(); // 这里不知道实际提供者是谁，始终选择看起来的最优提供者
             this.equalsByte = DataComponentPatchHelper.toCanonicalBytes(this.patch, provider);
-            this.RegistryEpochCache = cur;
         } catch (Throwable t) {
             // 不让逻辑中断，留给 equals/hashCode 回退到 patch.equals/hash
             BeyondDimensions.LOGGER.warn("ItemStackType.ensureByte failed: {}", t.toString());
