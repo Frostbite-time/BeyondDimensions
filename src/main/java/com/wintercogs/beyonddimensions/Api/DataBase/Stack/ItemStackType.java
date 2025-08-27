@@ -284,8 +284,14 @@ public final class ItemStackType implements IStackType<ItemStack> {
         ItemStackType cp = new ItemStackType(this.item, this.patch, this.stackSize);
         cp.NeedRecalHash = this.NeedRecalHash;
         cp.hashCodeCache = this.hashCodeCache;
-        // 拷贝字节缓存与 epoch
+        // 拷贝字节缓存与Provider 的弱引用（若仍然存活）
         cp.equalsByte = (this.equalsByte == null ? null : Arrays.copyOf(this.equalsByte, this.equalsByte.length));
+        if (this.equalsByte != null && this.equalsByte.length > 0 && this.equalsByteProviderRef != null) {
+            HolderLookup.Provider prov = this.equalsByteProviderRef.get();
+            cp.equalsByteProviderRef = (prov != null) ? new WeakReference<>(prov) : null;
+        } else {
+            cp.equalsByteProviderRef = null;
+        }
         return cp;
     }
 
@@ -294,8 +300,14 @@ public final class ItemStackType implements IStackType<ItemStack> {
         ItemStackType cp = new ItemStackType(this.item, this.patch, count);
         cp.NeedRecalHash = this.NeedRecalHash;
         cp.hashCodeCache = this.hashCodeCache;
-        // 拷贝字节缓存与 epoch
+        // 拷贝字节缓存与Provider 的弱引用（若仍然存活）
         cp.equalsByte = (this.equalsByte == null ? null : Arrays.copyOf(this.equalsByte, this.equalsByte.length));
+        if (this.equalsByte != null && this.equalsByte.length > 0 && this.equalsByteProviderRef != null) {
+            HolderLookup.Provider prov = this.equalsByteProviderRef.get();
+            cp.equalsByteProviderRef = (prov != null) ? new WeakReference<>(prov) : null;
+        } else {
+            cp.equalsByteProviderRef = null;
+        }
         return cp;
     }
 
