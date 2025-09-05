@@ -1,0 +1,444 @@
+package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
+
+import com.mojang.serialization.*;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Unit.DataComponentPatchHelper;
+import com.wintercogs.beyonddimensions.Unit.RegistryAccessResolver;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.fluids.FluidStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+public final class FluidStackKey implements IStackKey<FluidStack>
+{
+
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
+
+    // —— 新格式：fluid + components（不含 amount）——
+    private static final MapCodec<FluidStackKey> NEW_FMT = RecordCodecBuilder.mapCodec(instance ->
+            instance.group(
+                    BuiltInRegistries.FLUID.holderByNameCodec().fieldOf("fluid")
+                            .forGetter(t -> BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(t.fluid)).orElseThrow()),
+                    DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY)
+                            .forGetter(t -> t.patch)
+            ).apply(instance, (holder, patch) -> new FluidStackKey(holder.value(), patch))
+    );
+
+    // —— 旧格式：internal_stack (+ amount) ——（仅用于解码）
+    private static final Codec<FluidStackKey> LEGACY_CODEC = RecordCodecBuilder.create(inst -> inst.group(
+            FluidStack.OPTIONAL_CODEC.fieldOf("internal_stack").forGetter(FluidStackKey::copyStackForLegacyEncode) // 实际不会用于 encode
+    ).apply(inst, (stack) -> new FluidStackKey(stack)));
+
+    /**
+     * 读时新优先，无新键再尝试旧；写时永远用新。
+     */
+    public static final MapCodec<FluidStackKey> TYPE_CODEC = new MapCodec<>() {
+        @Override
+        public <T> DataResult<FluidStackKey> decode(DynamicOps<T> ops, MapLike<T> input) {
+            final T kFluid   = ops.createString("fluid");
+            final T kLegacy  = ops.createString("internal_stack");
+            final T kComps   = ops.createString("components");
+
+            T hasFluid = input.get(kFluid);
+            if (hasFluid != null) {
+                // 优先新格式
+                DataResult<FluidStackKey> r = NEW_FMT.decode(ops, input);
+                if (r.result().isPresent()) return r;
+
+                // 兜底：如果 components 可以读，但 fluid 解析失败 → 记日志，回退 EMPTY
+                T compsNode = input.get(kComps);
+                if (compsNode != null) {
+                    BeyondDimensions.LOGGER.warn("FluidStackKey: 存在 'fluid' 键但解析失败，尝试仅读取 components 后回退 EMPTY。");
+                    DataComponentPatch patch = DataComponentPatch.CODEC.parse(ops, compsNode)
+                            .result().orElse(DataComponentPatch.EMPTY);
+                    return DataResult.success(new FluidStackKey(Fluids.EMPTY, patch));
+                }
+                // 让 NEW_FMT 抛出更明确的错误
+                return NEW_FMT.decode(ops, input);
+            }
+
+            // 尝试旧格式（internal_stack + amount）
+            T hasLegacy = input.get(kLegacy);
+            if (hasLegacy != null) {
+                java.util.Map<T, T> map = new java.util.LinkedHashMap<>();
+                input.entries().forEach(p -> map.put(p.getFirst(), p.getSecond()));
+                T node = ops.createMap(map);
+                return LEGACY_CODEC.decode(ops, node).map(com.mojang.datafixers.util.Pair::getFirst);
+            }
+
+            // 都没有：让 NEW_FMT 报缺字段
+            return NEW_FMT.decode(ops, input);
+        }
+
+        @Override
+        public <T> RecordBuilder<T> encode(FluidStackKey value, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+            return NEW_FMT.encode(value, ops, prefix);
+        }
+
+        @Override
+        public <T> Stream<T> keys(DynamicOps<T> ops) {
+            return Stream.of("fluid", "components").map(ops::createString);
+        }
+    };
+
+    public static final Codec<FluidStackKey> CODEC = TYPE_CODEC.codec();
+
+    // ===== 实际不可变要素 =====
+    private final Fluid fluid;
+    private final DataComponentPatch patch;
+
+    // equals/hash 的规范化快照
+    private volatile byte[] patchByte = new byte[0];
+    private transient volatile WeakReference<HolderLookup.Provider> equalsByteProviderRef = null;
+
+    // 渲染/便捷复制用的客户端缓存（amount 仅用于渲染，不参与 key 语义）
+    private FluidStack clientCache;
+
+    public FluidStackKey() {
+        this.fluid = Fluids.EMPTY;
+        this.patch = DataComponentPatch.EMPTY;
+        this.clientCache = FluidStack.EMPTY;
+    }
+
+    public FluidStackKey(FluidStack stack) {
+        this.fluid = stack.getFluid();
+        // FluidStack 在 1.21+ 同样有组件系统；此处只存“差异补丁”作为 Key 的可比部分
+        this.patch = stack.getComponentsPatch();
+        this.clientCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY
+                : new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(this.fluid)).orElseThrow(), 1, this.patch);
+    }
+
+    private FluidStackKey(Fluid fluid, DataComponentPatch patch) {
+        this.fluid = fluid;
+        this.patch = (patch == null) ? DataComponentPatch.EMPTY : patch;
+        this.clientCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY
+                : new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(this.fluid)).orElseThrow(), 1, this.patch);
+    }
+
+    // 仅供 LEGACY_CODEC 的虚拟 getter 使用；不会真的走 encode
+    private FluidStack copyStackForLegacyEncode() {
+        return copyStackWithCount(1);
+    }
+
+    // ===== IStackKey =====
+
+    @Override
+    public ResourceLocation getTypeId() {
+        return ID;
+    }
+
+    @Override
+    public MapCodec<FluidStackKey> codec() {
+        return TYPE_CODEC;
+    }
+
+    @Override
+    public @Nullable FluidStackKey fromObject(Object key, DataComponentPatch dataComponentPatch) {
+        if (key instanceof Fluid f) {
+            DataComponentPatch p = (dataComponentPatch != null && !dataComponentPatch.isEmpty())
+                    ? dataComponentPatch
+                    : DataComponentPatch.EMPTY;
+            return new FluidStackKey(f, p);
+        }
+        return null;
+    }
+
+    @Override
+    public Class<FluidStack> getStackClass() {
+        return FluidStack.class;
+    }
+
+    @Override
+    public @NotNull Object getSource() {
+        return fluid;
+    }
+
+    @Override
+    public Class<?> getSourceClass() {
+        return Fluid.class;
+    }
+
+    @Override
+    public String getModId() {
+        var key = BuiltInRegistries.FLUID.getKey(fluid);
+        return key != null ? key.getNamespace() : "minecraft";
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.fluid == Fluids.EMPTY;
+    }
+
+    @Override
+    public FluidStackKey getEmpty() {
+        return new FluidStackKey();
+    }
+
+    @Override
+    public FluidStack getEmptyStack() {
+        return FluidStack.EMPTY;
+    }
+
+    @Override
+    public FluidStack copyStack() {
+        return copyStackWithCount(1);
+    }
+
+    @Override
+    public FluidStack copyStackWithCount(long count) {
+        if (this.fluid == Fluids.EMPTY) return FluidStack.EMPTY;
+        int amt = (int)Math.max(1, Math.min(Integer.MAX_VALUE, count)); // 渲染/显示用途；不影响 key 语义
+        return new FluidStack(
+                BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(this.fluid)).orElseThrow(),
+                amt,
+                this.patch
+        );
+    }
+
+    @Override
+    public long getVanillaMaxStackSize() {
+        // 对流体无硬性原版上限；保持与旧实现的“64桶”展示一致（仅 UI/逻辑辅助，不参与 key）
+        return Math.min(64_000L, getCustomMaxStackSize());
+    }
+
+    @Override
+    public long getCustomMaxStackSize() {
+        return Long.MAX_VALUE;
+    }
+
+    @Override
+    public boolean hasTag(TagKey<?> tagKey) {
+        if (tagKey == null || this.fluid == Fluids.EMPTY) return false;
+        if (!tagKey.isFor(Registries.FLUID)) return false;
+        @SuppressWarnings("unchecked")
+        TagKey<Fluid> t = (TagKey<Fluid>) tagKey;
+        return BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(this.fluid))
+                .map(h -> h.is(t)).orElse(false);
+    }
+
+    @Override
+    public boolean isSame(IStackKey<?> other) {
+        if (this == other) return true;
+        if (other instanceof FluidStackKey o) {
+            return this.fluid == o.fluid;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isSameTypeSameComponents(IStackKey<?> other) {
+        if (this == other) return true;
+        if (other instanceof FluidStackKey o) {
+            if (this.fluid != o.fluid) return false;
+
+            // 规范化组件字节对比（Provider 稳定时避免重复计算）
+            this.ensureByte();
+            o.ensureByte();
+
+            if (this.patchByte != null && this.patchByte.length > 0
+                    && o.patchByte != null && o.patchByte.length > 0) {
+                return Arrays.equals(this.patchByte, o.patchByte);
+            }
+            // 兜底：Provider 未就绪/异常，退回值语义
+            return Objects.equals(this.patch, o.patch);
+        }
+        return false;
+    }
+
+    // ===== 网络序列化（新形态：类型ID + hasFluid + fluid RL + components）=====
+
+    @Override
+    public void serialize(RegistryFriendlyByteBuf buf) {
+        buf.writeResourceLocation(getTypeId());
+
+        boolean hasFluid = this.fluid != Fluids.EMPTY;
+        buf.writeBoolean(hasFluid);
+        if (!hasFluid) return;
+
+        ResourceLocation key = BuiltInRegistries.FLUID.getKey(this.fluid);
+        buf.writeResourceLocation(key);
+        DataComponentPatch.STREAM_CODEC.encode(buf, patch);
+    }
+
+    @Override
+    public FluidStackKey deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId) {
+        if (!typeId.equals(getTypeId())) return null;
+
+        boolean hasFluid = buf.readBoolean();
+        if (!hasFluid) return new FluidStackKey(Fluids.EMPTY, DataComponentPatch.EMPTY);
+
+        ResourceLocation key = buf.readResourceLocation();
+        Fluid f = BuiltInRegistries.FLUID.get(key); // 未注册时内部会回退到 EMPTY
+        DataComponentPatch p = DataComponentPatch.STREAM_CODEC.decode(buf);
+        return new FluidStackKey(f, p);
+    }
+
+    // ===== NBT 序列化：写新格式；读新优先 + 旧兼容 =====
+
+    @Override
+    public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
+        final CompoundTag out = new CompoundTag();
+        try {
+            out.putString("Type", ID.toString());
+
+            var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
+            CODEC.encodeStart(ops, this)
+                    .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("FluidStackKey 序列化(Codec)出错: {}", err))
+                    .ifPresent(nbt -> {
+                        if (nbt instanceof CompoundTag ct) {
+                            out.merge(ct);
+                        } else {
+                            out.put("value", nbt);
+                        }
+                    });
+        } catch (Throwable t) {
+            BeyondDimensions.LOGGER.error("FluidStackKey 序列化时出错: {}", t.getMessage(), t);
+        }
+        return out;
+    }
+
+    @Override
+    public FluidStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
+        try {
+            // 1) 新格式：直接走 TYPE_CODEC
+            var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
+            var decoded = CODEC.parse(ops, nbt).result();
+            if (decoded.isPresent()) return decoded.get();
+
+            // 2) 嵌套回退
+            if (nbt.contains("value", Tag.TAG_COMPOUND)) {
+                var val = CODEC.parse(ops, nbt.getCompound("value")).result();
+                if (val.isPresent()) return val.get();
+            }
+
+            // 3) 旧格式回退：Stack + Amount
+            if (nbt.contains("Stack", Tag.TAG_COMPOUND)) {
+                FluidStack s = FluidStack.parseOptional(levelRegistryAccess, nbt.getCompound("Stack"));
+                return new FluidStackKey(s); // 忽略旧的 Amount
+            }
+
+            BeyondDimensions.LOGGER.warn("FluidStackKey 反序列化：新旧格式均不匹配，返回 EMPTY。Keys={}", nbt.getAllKeys());
+        } catch (Throwable t) {
+            BeyondDimensions.LOGGER.error("FluidStackKey 反序列化错误。Keys={} Error={}", nbt.getAllKeys(), t.getMessage(), t);
+        }
+        return new FluidStackKey();
+    }
+
+    // ===== 渲染支持：交给外部渲染器；仅提供一个稳定的最小量副本 =====
+
+    @Override
+    public IStackRender<?> getRender() {
+        // 与 ItemStackKey 一致，采用单独渲染器（请在你的渲染模块提供 FluidStackKeyRender.INSTANCE）
+        return FluidStackKeyRender.INSTANCE;
+    }
+
+    @Override
+    public FluidStack getRenderStack() {
+        if (this.fluid == Fluids.EMPTY) {
+            if (!this.clientCache.isEmpty()) {
+                this.clientCache = FluidStack.EMPTY;
+            }
+            return FluidStack.EMPTY;
+        }
+
+        FluidStack cache = this.clientCache;
+        if (cache.isEmpty() || cache.getFluid() != this.fluid) {
+            this.clientCache = new FluidStack(
+                    BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(this.fluid)).orElseThrow(),
+                    1,
+                    this.patch
+            );
+            return this.clientCache;
+        }
+
+        // 非 EMPTY：返回前保证 amount >= 1（部分版本对 EMPTY.setAmount 会抛错）
+        if (cache.getAmount() <= 0) {
+            cache.setAmount(1);
+        }
+        return cache;
+    }
+
+    // ===== equals/hashCode：以 fluid + 规范化 components 为准（不含数量）=====
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other instanceof FluidStackKey o) {
+            return isSameTypeSameComponents(o);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        // 与 ItemStackKey 一致：优先用规范化字节；失败回退到 patch.hashCode
+        ensureByte();
+        int base = 31 + fluid.hashCode();
+        int patchPart = (this.patchByte != null && this.patchByte.length > 0)
+                ? Arrays.hashCode(this.patchByte)
+                : patch.hashCode();
+        return 31 * base + patchPart;
+    }
+
+    // ===== 规范化快照计算 =====
+
+    private void ensureByte() {
+        HolderLookup.Provider current = null;
+        try {
+            current = RegistryAccessResolver.resolve();
+        } catch (Throwable ignored) {}
+
+        HolderLookup.Provider cached = (equalsByteProviderRef != null) ? equalsByteProviderRef.get() : null;
+        if (this.patchByte != null && this.patchByte.length > 0 && cached != null && cached == current) {
+            return;
+        }
+
+        try {
+            HolderLookup.Provider use = (current != null) ? current : RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+            byte[] out = DataComponentPatchHelper.toCanonicalBytes(this.patch, use);
+
+            // 客户端兜底：若失败再尝试连接提供者
+            if (out.length == 0 && FMLEnvironment.dist == Dist.CLIENT) {
+                var mc = net.minecraft.client.Minecraft.getInstance();
+                var conn = mc.getConnection();
+                if (conn != null) {
+                    HolderLookup.Provider connProv = conn.registryAccess();
+                    if (connProv != use) {
+                        byte[] retry = DataComponentPatchHelper.toCanonicalBytes(this.patch, connProv);
+                        if (retry.length > 0) {
+                            out = retry;
+                            use = connProv;
+                        }
+                    }
+                }
+            }
+
+            this.patchByte = out;
+            this.equalsByteProviderRef = (out.length > 0) ? new WeakReference<>(use) : null;
+        } catch (Throwable t) {
+            BeyondDimensions.LOGGER.warn("FluidStackKey 组件规范化失败: {}", t.toString());
+            this.patchByte = new byte[0];
+            this.equalsByteProviderRef = null;
+        }
+    }
+}

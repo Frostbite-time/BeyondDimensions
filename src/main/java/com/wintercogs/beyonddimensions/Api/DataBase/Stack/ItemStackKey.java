@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class ItemStackKey implements IStackKey<ItemStack>
+public final class ItemStackKey implements IStackKey<ItemStack>
 {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
@@ -244,9 +244,9 @@ public class ItemStackKey implements IStackKey<ItemStack>
     public boolean isSame(IStackKey<?> other)
     {
         if(this == other) return true; // 额外做一次引用对比
-        if(other instanceof ItemStackKey otherItemStackType) // 顺手处理空
+        if(other instanceof ItemStackKey otherItemStackKey) // 顺手处理空
         {
-            return this.item == otherItemStackType.item; // 直接比对
+            return this.item == otherItemStackKey.item; // 直接比对
         }
         return false;
     }
@@ -322,7 +322,7 @@ public class ItemStackKey implements IStackKey<ItemStack>
             // 兼容外部依赖：保留旧字段 Type
             out.putString("Type", ID.toString());
 
-            // 写回采用与 NEW_FMT/TYPE_CODEC 完全一致的键：item / components / amount
+            // 写回采用与 NEW_FMT/TYPE_CODEC 完全一致的键：item / components
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             CODEC.encodeStart(ops, this)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("ItemStackKey 在序列化(Codec)时出错: {}", err))
@@ -386,9 +386,9 @@ public class ItemStackKey implements IStackKey<ItemStack>
                 return new ItemStackKey(s);
             }
 
-            BeyondDimensions.LOGGER.warn("ItemStackType 反序列化时：新旧格式均不匹配，返回空实现。Keys={}", nbt.getAllKeys());
+            BeyondDimensions.LOGGER.warn("ItemStackKey 反序列化时：新旧格式均不匹配，返回空实现。Keys={}", nbt.getAllKeys());
         } catch (Throwable t) {
-            BeyondDimensions.LOGGER.error("ItemStackType 反序列化出现错误。Keys={} Error={}", nbt.getAllKeys(), t.getMessage(), t);
+            BeyondDimensions.LOGGER.error("ItemStackKey 反序列化出现错误。Keys={} Error={}", nbt.getAllKeys(), t.getMessage(), t);
         }
         return new ItemStackKey(); // 空实现
     }
@@ -438,7 +438,7 @@ public class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public int hashCode()
     {
-        if (this.patchByte == null || this.patchByte.length == 0)
+        if (hashCodeCache == 0 || this.patchByte == null || this.patchByte.length == 0)
         {
             ensureByte(); // 尝试生成/刷新字节；失败时会保留空字节以便回退
             int base = 31 + item.hashCode();
@@ -499,7 +499,7 @@ public class ItemStackKey implements IStackKey<ItemStack>
             }
         } catch (Throwable t) {
             // 不让逻辑中断，留给 equals/hashCode 回退到 patch.equals/hash
-            BeyondDimensions.LOGGER.warn("ItemStackType字节序列化失败: {}", t.toString());
+            BeyondDimensions.LOGGER.warn("ItemStackKey字节序列化失败: {}", t.toString());
             this.patchByte = new byte[0];
             this.equalsByteProviderRef = null;
         }

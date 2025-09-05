@@ -1,0 +1,143 @@
+package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.wintercogs.beyonddimensions.Api.DataBase.LongType.EnergyType;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import org.jetbrains.annotations.Nullable;
+
+public class EnergyStackKey extends LongStackKey<EnergyType> {
+
+    public static final ResourceLocation ID =
+            ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/energy");
+
+    /** 唯一实例（不区分空/非空） */
+    public static final EnergyStackKey INSTANCE = new EnergyStackKey();
+
+    /** 无字段的新格式：decode 直接返回单例，encode 不写任何键 */
+    public static final MapCodec<EnergyStackKey> TYPE_CODEC = new MapCodec<>() {
+        @Override
+        public <T> DataResult<EnergyStackKey> decode(com.mojang.serialization.DynamicOps<T> ops,
+                                                     com.mojang.serialization.MapLike<T> input) {
+            return DataResult.success(EnergyStackKey.INSTANCE);
+        }
+
+        @Override
+        public <T> com.mojang.serialization.RecordBuilder<T> encode(EnergyStackKey value,
+                                                                    com.mojang.serialization.DynamicOps<T> ops,
+                                                                    com.mojang.serialization.RecordBuilder<T> prefix) {
+            return prefix; // 不写任何字段
+        }
+
+        @Override
+        public <T> java.util.stream.Stream<T> keys(com.mojang.serialization.DynamicOps<T> ops) {
+            return java.util.stream.Stream.empty();
+        }
+    };
+
+    public static final Codec<EnergyStackKey> CODEC = TYPE_CODEC.codec();
+
+    private EnergyStackKey() {
+        // 仅用于渲染/展示时构造“最小非空”的栈；不影响 Key 语义
+        this.stack = new EnergyType(1);
+    }
+
+    // ---------------- IStackKey 必要实现 ----------------
+
+    @Override
+    public MapCodec<EnergyStackKey> codec() {
+        return TYPE_CODEC;
+    }
+
+    @Override
+    public ResourceLocation getTypeID() {
+        return ID;
+    }
+
+    /** 允许从 EnergyType/数字（数量无意义）转换为同一个 Key 实例 */
+    @Override
+    public @Nullable EnergyStackKey fromObject(Object key, net.minecraft.core.component.DataComponentPatch ignored) {
+        if (key instanceof EnergyType || key instanceof Number) {
+            return INSTANCE;
+        }
+        return null;
+    }
+
+    @Override
+    public Object getSource() {
+        // 提供一个“空”源对象（仅用于需要展示/占位的场景）
+        return new EnergyType(0);
+    }
+
+    @Override
+    public IStackKey<EnergyType> getEmpty()
+    {
+        return null;
+    }
+
+    @Override
+    public EnergyType getEmptyStack()
+    {
+        return new EnergyType(0);
+    }
+
+    @Override
+    public boolean hasTag(TagKey<?> tagKey)
+    {
+        return false;
+    }
+
+    // ---------------- 网络序列化 ----------------
+    // 只写入 typeId；deserialize 时直接返回单例
+
+    @Override
+    public void serialize(RegistryFriendlyByteBuf buf) {
+        buf.writeResourceLocation(getTypeId());
+        // 不再写任何字段（Key 无数量）
+    }
+
+    @Override
+    public EnergyStackKey deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId) {
+        if (!typeId.equals(getTypeId())) return null;
+        return INSTANCE;
+    }
+
+    // ---------------- NBT ----------------
+    // 仅写 Type；读取时直接返回单例。旧 LongType 是纯 long，可直接忽略。
+
+    @Override
+    public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("Type", ID.toString());
+        return tag;
+    }
+
+    @Override
+    public EnergyStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
+        // 无论旧/新，都统一成单例 Key（旧数据里的 Amount 属于值层，不参与 Key）
+        return INSTANCE;
+    }
+
+    // ---------------- 渲染支持（可选：若你的渲染系统通过 getRender() 取渲染器） ----------------
+
+    @Override
+    public IStackRender<?> getRender() {
+        return EnergyStackKeyRender.INSTANCE; // 若不需要渲染器，可改为抛 UnsupportedOperationException
+    }
+
+    @Override
+    public EnergyType getRenderStack() {
+        // 保证数量至少为 1，避免某些版本对 0 量渲染异常
+        EnergyType cache = this.stack;
+        if (cache.getStackCount() <= 0) {
+            cache.setStackCount(1);
+        }
+        return cache;
+    }
+}
