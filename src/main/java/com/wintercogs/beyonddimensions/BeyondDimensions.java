@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.*;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
@@ -229,85 +230,85 @@ public class BeyondDimensions
     {
 
         // 注册堆叠类型，使得网络能够存储相关堆叠
-        StackTypeRegistry.registerType(new ItemStackType());
-        StackTypeRegistry.registerType(new FluidStackType());
-        StackTypeRegistry.registerType(new EnergyStackType());
+        StackKeyRegistry.registerType(new ItemStackKey());
+        StackKeyRegistry.registerType(new FluidStackKey());
+        StackKeyRegistry.registerType(EnergyStackKey.INSTANCE);
 
         // 注册方块能力类型，用于动态为方块注册能力
-        CapabilityHelper.BlockCapabilityMap.put(ItemStackType.ID,Capabilities.ItemHandler.BLOCK);
-        CapabilityHelper.BlockCapabilityMap.put(FluidStackType.ID,Capabilities.FluidHandler.BLOCK);
-        CapabilityHelper.BlockCapabilityMap.put(EnergyStackType.ID, Capabilities.EnergyStorage.BLOCK);
+        CapabilityHelper.BlockCapabilityMap.put(ItemStackKey.ID,Capabilities.ItemHandler.BLOCK);
+        CapabilityHelper.BlockCapabilityMap.put(FluidStackKey.ID,Capabilities.FluidHandler.BLOCK);
+        CapabilityHelper.BlockCapabilityMap.put(EnergyStackKey.ID, Capabilities.EnergyStorage.BLOCK);
         // 注册物品能力，用于动态操作
-        CapabilityHelper.ItemCapabilityMap.put(ItemStackType.ID,Capabilities.ItemHandler.ITEM);
-        CapabilityHelper.ItemCapabilityMap.put(FluidStackType.ID,Capabilities.FluidHandler.ITEM);
-        CapabilityHelper.ItemCapabilityMap.put(EnergyStackType.ID, Capabilities.EnergyStorage.ITEM);
+        CapabilityHelper.ItemCapabilityMap.put(ItemStackKey.ID,Capabilities.ItemHandler.ITEM);
+        CapabilityHelper.ItemCapabilityMap.put(FluidStackKey.ID,Capabilities.FluidHandler.ITEM);
+        CapabilityHelper.ItemCapabilityMap.put(EnergyStackKey.ID, Capabilities.EnergyStorage.ITEM);
 
         // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-        CapabilityHelper.registerUSHandler(new ItemStackType(), ItemUnifiedStorageHandler::new);
-        CapabilityHelper.registerUSHandler(new FluidStackType(), FluidUnifiedStorageHandler::new);
-        CapabilityHelper.registerUSHandler(new EnergyStackType(), EnergyUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(new ItemStackKey(), ItemUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(new FluidStackKey(), FluidUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(EnergyStackKey.INSTANCE, EnergyUnifiedStorageHandler::new);
 
         // 注册存储分化包装
-        CapabilityHelper.registerStackTypedHandler(new ItemStackType(), ItemStackTypedHandler::new);
-        CapabilityHelper.registerStackTypedHandler(new FluidStackType(), FluidStackTypedHandler::new);
-        CapabilityHelper.registerStackTypedHandler(new EnergyStackType(), EnergyStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(new ItemStackKey(), ItemStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(new FluidStackKey(), FluidStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(EnergyStackKey.INSTANCE, EnergyStackTypedHandler::new);
 
         // 注册堆叠处理包装，用于动态包装来自其他模组的handler (如原版的IItemHandler)
-        StackHandlerWrapperHelper.stackWrappers.put(ItemStackType.ID, ItemHandlerWrapper::new);
+        StackHandlerWrapperHelper.stackWrappers.put(ItemStackKey.ID, ItemHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackType.ID, FluidHandlerWrapper::new);
-        StackHandlerWrapperHelper.stackWrappers.put(EnergyStackType.ID, EnergyHandlerWrapper::new);
+        StackHandlerWrapperHelper.stackWrappers.put(EnergyStackKey.ID, EnergyHandlerWrapper::new);
 
         if(MekLoaded)
         {
             // 注册化学品堆叠
-            StackTypeRegistry.registerType(new ChemicalStackType());
+            StackKeyRegistry.registerType(new ChemicalStackKey());
             // 注册化学品方块能力
-            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackType.ID, ChemicalCapabilityHelper.CHEMICAL_BLOCK);
+            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackKey.ID, ChemicalCapabilityHelper.CHEMICAL_BLOCK);
             // 注册化学品物品能力
-            CapabilityHelper.ItemCapabilityMap.put(ChemicalStackType.ID, ChemicalCapabilityHelper.CHEMICAL_ITEM);
+            CapabilityHelper.ItemCapabilityMap.put(ChemicalStackKey.ID, ChemicalCapabilityHelper.CHEMICAL_ITEM);
             // 注册分化包装
-            CapabilityHelper.registerUSHandler(new ChemicalStackType(), ChemicalUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new ChemicalStackType(), ChemicalStackTypedHandler::new);
+            CapabilityHelper.registerUSHandler(new ChemicalStackKey(), ChemicalUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new ChemicalStackKey(), ChemicalStackTypedHandler::new);
 
             // 注册堆叠处理包装
-            StackHandlerWrapperHelper.stackWrappers.put(ChemicalStackType.ID, ChemicalHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(ChemicalStackKey.ID, ChemicalHandlerWrapper::new);
 
         }
 
         if(IFS_Loaded)
         {
             // 注册监守者之魂
-            StackTypeRegistry.registerType(new WardenSoulStackType());
-            CapabilityHelper.BlockCapabilityMap.put(WardenSoulStackType.ID, com.buuz135.industrialforegoingsouls.capabilities.SoulCapabilities.BLOCK);
+            StackKeyRegistry.registerType(WardenSoulStackKey.INSTANCE);
+            CapabilityHelper.BlockCapabilityMap.put(WardenSoulStackKey.ID, com.buuz135.industrialforegoingsouls.capabilities.SoulCapabilities.BLOCK);
             // 此处为自定义物品能力，因为原模组未提供物品能力
-            CapabilityHelper.ItemCapabilityMap.put(WardenSoulStackType.ID, BD_SoulCaps.ITEM);
+            CapabilityHelper.ItemCapabilityMap.put(WardenSoulStackKey.ID, BD_SoulCaps.ITEM);
             // 注册分化包装
-            CapabilityHelper.registerUSHandler(new WardenSoulStackType(), WardenSoulUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new WardenSoulStackType(), WardenSoulStackTypedHandler::new);
+            CapabilityHelper.registerUSHandler(WardenSoulStackKey.INSTANCE, WardenSoulUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(WardenSoulStackKey.INSTANCE, WardenSoulStackTypedHandler::new);
             // 注册堆叠处理包装
-            StackHandlerWrapperHelper.stackWrappers.put(WardenSoulStackType.ID, WardenSoulHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(WardenSoulStackKey.ID, WardenSoulHandlerWrapper::new);
         }
 
         if(ARS_Loaded)
         {
             // 注册魔源
-            StackTypeRegistry.registerType(new SourceStackType());
-            CapabilityHelper.BlockCapabilityMap.put(SourceStackType.ID, com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry.SOURCE_CAPABILITY);
-            CapabilityHelper.ItemCapabilityMap.put(SourceStackType.ID, BD_ArsCaps.ITEM_SOURCE); // 使用的自己的魔源罐能力
-            CapabilityHelper.registerUSHandler(new SourceStackType(), SourceUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new SourceStackType(), SourceStackTypedHandler::new);
-            StackHandlerWrapperHelper.stackWrappers.put(SourceStackType.ID, SourceHandlerWrapper::new);
+            StackKeyRegistry.registerType(SourceStackKey.INSTANCE);
+            CapabilityHelper.BlockCapabilityMap.put(SourceStackKey.ID, com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry.SOURCE_CAPABILITY);
+            CapabilityHelper.ItemCapabilityMap.put(SourceStackKey.ID, BD_ArsCaps.ITEM_SOURCE); // 使用的自己的魔源罐能力
+            CapabilityHelper.registerUSHandler(SourceStackKey.INSTANCE, SourceUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(SourceStackKey.INSTANCE, SourceStackTypedHandler::new);
+            StackHandlerWrapperHelper.stackWrappers.put(SourceStackKey.ID, SourceHandlerWrapper::new);
         }
 
         if(Botania_Loaded)
         {
             // 注册Mana（魔力）
-            StackTypeRegistry.registerType(new ManaStackType());
-            CapabilityHelper.BlockCapabilityMap.put(ManaStackType.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_RECEIVER);
-            CapabilityHelper.ItemCapabilityMap.put(ManaStackType.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_ITEM);
-            CapabilityHelper.registerUSHandler(new ManaStackType(), ManaUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new ManaStackType(), ManaStackTypedHandler::new);
-            StackHandlerWrapperHelper.stackWrappers.put(ManaStackType.ID, ManaHandlerWrapper::new);
+            StackKeyRegistry.registerType(ManaStackKey.INSTANCE);
+            CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_RECEIVER);
+            CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_ITEM);
+            CapabilityHelper.registerUSHandler(ManaStackKey.INSTANCE, ManaUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
+            StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
 
         }
 
