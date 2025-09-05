@@ -3,7 +3,10 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Unit.*;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Unit.DataComponentPatchHelper;
+import com.wintercogs.beyonddimensions.Unit.RegistryAccessResolver;
+import com.wintercogs.beyonddimensions.Unit.RegistryUtil;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentPatch;
@@ -44,7 +47,7 @@ public class ItemStackKey implements IStackKey<ItemStack>
 
     // 旧格式CODEC
     private static final Codec<ItemStackKey> LEGACY_CODEC = RecordCodecBuilder.create(inst -> inst.group(
-            ItemStack.OPTIONAL_CODEC.fieldOf("internal_stack").forGetter(ItemStackKey::getStack)
+            ItemStack.OPTIONAL_CODEC.fieldOf("internal_stack").forGetter(ItemStackKey::copyStack)
     ).apply(inst, (stack) -> new ItemStackKey(stack)));
 
     // 读时新优先、无新字段则读旧；写时永远用新
@@ -108,7 +111,6 @@ public class ItemStackKey implements IStackKey<ItemStack>
     private transient WeakReference<HolderLookup.Provider> equalsByteProviderRef = null; // 序列化时所用的注册表提供者，如果提供者变化，应当重新计算字节
 
     // 缓存字段
-    private ItemStack serverCache; // 用于服务端的缓存，主要给getStack方法
     private ItemStack clientCache; // 用于客户端的缓存，主要给getTooltip之类的方法使用
     private int vanillaMaxSize = -1; // 缓存原版堆叠的最大大小，从serverCache去获取
     private int hashCodeCache = 0;
@@ -116,14 +118,12 @@ public class ItemStackKey implements IStackKey<ItemStack>
     public ItemStackKey() {
         this.item = Items.AIR;
         this.patch = DataComponentPatch.EMPTY;
-        this.serverCache = ItemStack.EMPTY;
         this.clientCache = ItemStack.EMPTY;
     }
 
     public ItemStackKey(ItemStack stack) {
         this.item = stack.getItem();
         this.patch = stack.getComponentsPatch(); // 这里的返回值在后续实际上无法被修改，因此无需担心
-        this.serverCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch); // this.patch直接传递引用即可，PatchedDataComponentMap会在第一次修改前替换内部引用
         this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
     }
 
@@ -131,7 +131,6 @@ public class ItemStackKey implements IStackKey<ItemStack>
     private ItemStackKey(Item item, DataComponentPatch patch) {
         this.item = item;
         this.patch = patch == null ? DataComponentPatch.EMPTY : patch;
-        this.serverCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
     }
 
@@ -156,19 +155,6 @@ public class ItemStackKey implements IStackKey<ItemStack>
             return new ItemStackKey(it, p);
         }
         return null;
-    }
-
-    // 不要在任何路径调用上修改它的任何部分！
-    @Override
-    public @NotNull ItemStack getStack()
-    {
-        if (this.serverCache.isEmpty() || this.serverCache.getItem() != this.item)
-        {
-            this.serverCache = this.item == Items.AIR ? ItemStack.EMPTY
-                    : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
-        }
-        this.serverCache.setCount(1);
-        return this.serverCache;
     }
 
     @Override
@@ -213,22 +199,6 @@ public class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
-    public ItemStackKey copy()
-    {
-        ItemStackKey cp = new ItemStackKey(this.item, this.patch);
-        cp.hashCodeCache = this.hashCodeCache;
-        // 拷贝字节缓存与Provider 的弱引用（若仍然存活）
-        cp.patchByte = (this.patchByte == null ? null : Arrays.copyOf(this.patchByte, this.patchByte.length));
-        if (this.patchByte != null && this.patchByte.length > 0 && this.equalsByteProviderRef != null) {
-            HolderLookup.Provider prov = this.equalsByteProviderRef.get();
-            cp.equalsByteProviderRef = (prov != null) ? new WeakReference<>(prov) : null;
-        } else {
-            cp.equalsByteProviderRef = null;
-        }
-        return cp;
-    }
-
-    @Override
     public ItemStack copyStack()
     {
         return copyStackWithCount(1);
@@ -248,10 +218,7 @@ public class ItemStackKey implements IStackKey<ItemStack>
         if (this.item == Items.AIR) return 1; // 返回1，与原版行为一致，且不会使外部认为无法输入
         if(vanillaMaxSize <=0)
         {
-            if (this.serverCache.isEmpty() || this.serverCache.getItem() != this.item) {
-                this.serverCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
-            }
-            vanillaMaxSize = serverCache.getMaxStackSize();
+            vanillaMaxSize = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch).getMaxStackSize();
         }
         return Math.min(vanillaMaxSize, getCustomMaxStackSize());
     }
@@ -435,12 +402,26 @@ public class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public ItemStack getRenderStack()
     {
-        if (this.clientCache.isEmpty() || this.clientCache.getItem() != this.item) { // 这是个极其轻量的检查，即使是每帧渲染也不可能卡顿
-            this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY
-                    : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        // item为空时，必须返回 EMPTY，且不要对 EMPTY 调用 setCount(方便复制到1.20.1的流体实现去)
+        if (this.item == Items.AIR)
+        {
+            if (!this.clientCache.isEmpty())
+            {
+                this.clientCache = ItemStack.EMPTY; // 折叠为 EMPTY，防止外界留存非空引用
+            }
+            return ItemStack.EMPTY;
         }
-        this.clientCache.setCount(1); // 防止数量被设为0后getItem返回EMPTY 实际数量单独绘制 此处仅为客户端使用，数量错误也无问题
-        return clientCache;
+
+        // 非AIR：若为空或物品被外界改了，则重建（数量直接置 1）
+        ItemStack cache = this.clientCache;
+        if (cache.isEmpty() || cache.getItem() != this.item) {
+            this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+            return this.clientCache;
+        }
+
+        // 缓存非空且物品匹配，返回前设置数量为1
+        cache.setCount(1);
+        return cache;
     }
 
     @Override
@@ -471,22 +452,22 @@ public class ItemStackKey implements IStackKey<ItemStack>
 
     private void ensureByte()
     {
-        // 先拿“当前应使用”的 Provider（Server→Connection→Level→Builtin）
+        // 优先使用最优提供者（Server→Connection→Level→Builtin）
         HolderLookup.Provider current = null;
         try {
             current = RegistryAccessResolver.resolve();
         } catch (Throwable ignored) {
-            // 保持 null，后面会兜底
+            // 保持null，后面会兜底
         }
 
-        // 若已有有效缓存，且没有显式要求重算，并且 Provider 身份未变 → 直接复用
+        // 如果已有有效缓存，且提供者身份不变，则保持不继续计算，直接使用缓存
         HolderLookup.Provider cached = (equalsByteProviderRef != null) ? equalsByteProviderRef.get() : null;
         if (this.patchByte != null && this.patchByte.length > 0 // 字节已经计算完毕
                 && cached != null && cached == current) { // 注册表提供者身份不变
             return;
         }
 
-        try { // 客户端断线重连后可能会为了缓存tooltip的IStackType有一次cached导致的计算
+        try { // 客户端断线重连后可能会为了缓存tooltip的IStackType有一次cached导致的计算，这是正常的
 
             // 1) 用当前 Provider 先算一次（空补丁会得到稳定的非空 EMPTY_BYTES，length不会为0，仅有失败时为0）
             // 若当前provider不可用，则用内建表

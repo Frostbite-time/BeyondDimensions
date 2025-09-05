@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * 资源Key，对一种资源的唯一标识
+ * 资源Key，对一种资源的唯一标识，其实现必须是不可变对象
  */
 public interface IStackKey<T>
 {
@@ -69,14 +69,6 @@ public interface IStackKey<T>
     @Nullable IStackKey<T> fromObject(Object key, DataComponentPatch dataComponentPatch);
 
     /**
-     * 返回存储的堆叠本身的引用。不要直接修改返回值！也不要在任何可能被修改的路径上使用！
-     * <p>
-     * 如：ItemStackType返回其存储的ItemStack
-     * @return 类似ItemStack
-     */
-    @NotNull T getStack();
-
-    /**
      * 获取堆叠的类型，如ItemStackType，返回ItemStack.class
      */
     Class<T> getStackClass();
@@ -110,11 +102,6 @@ public interface IStackKey<T>
      * 获得当前存储类型的空实例，如ItemStackType返回ItemStack.EMPTY
      */
     T getEmptyStack();
-
-    /**
-     * 复制当前实例
-     */
-    IStackKey<T> copy();
 
     /**
      * 复制存储的堆叠
