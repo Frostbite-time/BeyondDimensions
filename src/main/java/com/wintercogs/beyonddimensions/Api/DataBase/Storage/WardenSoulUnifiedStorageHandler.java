@@ -1,7 +1,8 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
 import com.buuz135.industrialforegoingsouls.capabilities.ISoulHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.WardenSoulStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.WardenSoulStackKey;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 
 public class WardenSoulUnifiedStorageHandler implements ISoulHandler
@@ -17,7 +18,7 @@ public class WardenSoulUnifiedStorageHandler implements ISoulHandler
     @Override
     public int getSoulTanks()
     {
-        return storage.getTypeIdIndexList(WardenSoulStackType.ID)
+        return storage.getBucket(WardenSoulStackKey.ID)
                 .map(list -> storage.isFullSlotsSize() ? list.size() : list.size()+1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
@@ -25,12 +26,13 @@ public class WardenSoulUnifiedStorageHandler implements ISoulHandler
     @Override
     public int getSoulInTank(int slot)
     {
-        return storage.getTypeIdIndexList(WardenSoulStackType.ID)
+        return storage.getBucket(WardenSoulStackKey.ID)
                 .filter(slots -> slot>=0 && slot<slots.size())
                 .map(slots -> slots.get(slot))
-                .filter(actualIndex -> actualIndex>=0)
-                .map(actualIndex -> (WardenSoulStackType)storage.getStackBySlot(actualIndex))
-                .map(stack -> BDMath.clampLongToInt(stack.getStackAmount()))
+                .map(key -> {
+                    KeyAmount keyAmount = storage.getStackByKey(key);
+                    return BDMath.clampLongToInt(keyAmount.amount());
+                })
                 .orElse(0);
     }
 
@@ -45,13 +47,13 @@ public class WardenSoulUnifiedStorageHandler implements ISoulHandler
     @Override
     public int fill(int amount, Action action)
     {
-        return (int) (amount - storage.insert(new WardenSoulStackType(amount),action.simulate()).getStackAmount());
+        return (int) (amount - storage.insert(WardenSoulStackKey.INSTANCE, amount,action.simulate()).amount());
     }
 
     // 返回提取量
     @Override
     public int drain(int amount, Action action)
     {
-        return (int) storage.extract(new WardenSoulStackType(amount),action.simulate()).getStackAmount();
+        return (int) storage.extract(WardenSoulStackKey.INSTANCE, amount, action.simulate()).amount();
     }
 }

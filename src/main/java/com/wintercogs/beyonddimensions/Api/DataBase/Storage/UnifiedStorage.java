@@ -372,7 +372,7 @@ public class UnifiedStorage implements IStackHandler
         if (!simulate && actual > 0L) {
             storage.put(key, current + actual);
             ensureInIndex(key);
-            onChange();
+            onContentChanged(key, actual, true);
         }
         return new KeyAmount(key, leftover);
     }
@@ -455,7 +455,7 @@ public class UnifiedStorage implements IStackHandler
             } else {
                 storage.put(key, left);
             }
-            onChange();
+            onContentChanged(key, take, false);
         }
         return new KeyAmount(key, take);
     }
@@ -475,7 +475,7 @@ public class UnifiedStorage implements IStackHandler
             } else {
                 storage.put(key, left);
             }
-            onChange();
+            onContentChanged(key, take, false);
         }
         return new KeyAmount(key, take);
     }
@@ -589,10 +589,9 @@ public class UnifiedStorage implements IStackHandler
      */
     public long getEnergyStored()
     {
+        // 即使网络内没有，也会返回一个带0L的keyAmount
         KeyAmount stack = getStackByKey(EnergyStackKey.INSTANCE);
-        if(Objects.equals(stack.key(),EnergyStackKey.INSTANCE))
-            return stack.amount();
-        return 0;
+        return stack.amount();
     }
 
     /**
@@ -652,11 +651,13 @@ public class UnifiedStorage implements IStackHandler
         return type2buckets.computeIfAbsent(type, t -> new TypeBucket());
     }
 
+    /** 获取对应类型的桶视图 */
     public Optional<TypeBucket> getBucket(ResourceLocation type)
     {
         return Optional.ofNullable(type2buckets.get(type));
     }
 
+    /** 根据key获取已经缓存的对应stack，自行判断类型，返回值的数量无法确定，根据keyAmount自己使用setCount，如果要缓存它，必须复制一个副本 */
     public Object getOutStackByKey(IStackKey<?> key)
     {
         return key2stackMap.get(key);
