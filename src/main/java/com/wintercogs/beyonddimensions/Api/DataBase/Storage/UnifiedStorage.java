@@ -384,57 +384,103 @@ public class UnifiedStorage implements IStackHandler
      *   - simulate=false：实际将内容插入，并“消耗”这些球（返回 (ballKey, 0)）
      * - 否则：返回 (ballKey, 原球数)
      */
+    /**
+     * 解压物质球逻辑（修复：全或无 + 新槽位预估 + 原子性回滚）
+     * - 若球内内容 * 球数 能完全插入（考虑到“需要新增的不同 key 个数”与“单键容量”），则：
+     *   - simulate=true：返回 (ballKey, 0)
+     *   - simulate=false：真实插入；若中途任何一条失败，立刻回滚已插入增量并返回 (ballKey, 原球数)
+     * - 否则：返回 (ballKey, 原球数)
+     */
     protected KeyAmount unzipMatterBall(ItemStackKey ballKey, long ballCount, boolean simulate)
     {
-        // 尝试从 key 构造 1 个球的 ItemStack（你项目里若有更高效的适配方法，请替换这里）
         ItemStack ballStack = ballKey.copyStackWithCount(ballCount);
-        if (ballStack.isEmpty()) {
-            // 无法还原出物品栈：保守退回，不做解压
-            return new KeyAmount(ballKey, ballCount);
-        }
-        // 再保证确实是物质球
-        if (!(ballStack.getItem() instanceof MatterCompressionBall)) {
+        if (ballStack.isEmpty() || !(ballStack.getItem() instanceof MatterCompressionBall)) {
             return new KeyAmount(ballKey, ballCount);
         }
 
-        // 读取球内内容（建议你的 ISTACK_SLOTS 直接存 List<KeyAmount>；
-        // 若仍是旧的 List<IStackType>，请在 getBallContents(...) 里做转换）
-        List<KeyAmount> contents = ballStack.getOrDefault(ModDataComponents.ISTACK_SLOTS,new ArrayList<>());
+        List<KeyAmount> contents = ballStack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
         if (contents == null || contents.isEmpty()) {
             // 空球：直接“消耗球”
             return new KeyAmount(ballKey, 0L);
         }
 
-        // 1) 先模拟是否能全部放下（全或无）
-        boolean allFit = true;
-        for (KeyAmount entry : contents) {
-            if (entry == null || entry.key() == null || entry.amount() <= 0L) continue;
-            long scaled = Math.multiplyExact(entry.amount(), ballCount); // 若担心溢出可改成安全相乘
-            KeyAmount leftover = insert(entry.key(), scaled, true);      // 注意：虚拟容器模拟不改变现状
-            if (leftover.amount() > 0L) {
-                allFit = false;
-                break;
+        // ---------- 预检阶段：聚合同 key，总需求与新槽位数量校验 ----------
+        // 聚合同 key 需求量：needMap[key] = sum(amountInBall) * ballCount
+        final Map<IStackKey<?>, Long> needMap = new HashMap<>();
+        try {
+            for (KeyAmount entry : contents) {
+                if (entry == null || entry.key() == null || entry.amount() <= 0L) continue;
+                long scaled = Math.multiplyExact(entry.amount(), ballCount); // 溢出视为失败
+                needMap.merge(entry.key(), scaled, Math::addExact);          // 聚合时也检测溢出
             }
-        }
-
-        if (!allFit) {
-            // 不能完全插入：整箱退回
+        } catch (ArithmeticException overflow) {
+            // 任何溢出都当作“放不下”
             return new KeyAmount(ballKey, ballCount);
         }
 
-        // 2) 可以完全插入
+        // 统计需要新增的不同 key 个数，同时校验单键容量是否足够
+        int freeSlots = Math.max(0, slotMaxSize - slotIndex.size());
+        int newKeysNeeded = 0;
+        for (Map.Entry<IStackKey<?>, Long> e : needMap.entrySet()) {
+            IStackKey<?> k = e.getKey();
+            long need = e.getValue();
+            long current = storage.getOrDefault(k, 0L);
+
+            boolean isNew = (current == 0L) && !posMap.containsKey(k);
+            if (isNew) {
+                newKeysNeeded++;
+                if (newKeysNeeded > freeSlots) {
+                    return new KeyAmount(ballKey, ballCount); // 新槽位不够
+                }
+            }
+            long room = (slotCapacity <= current) ? 0L : (slotCapacity - current);
+            if (need > room) {
+                return new KeyAmount(ballKey, ballCount); // 单键容量不够
+            }
+        }
+
+        // 到这里说明“严格预检通过”
         if (simulate) {
             return new KeyAmount(ballKey, 0L);
-        } else {
-            for (KeyAmount entry : contents) {
-                if (entry == null || entry.key() == null || entry.amount() <= 0L) continue;
-                long scaled = Math.multiplyExact(entry.amount(), ballCount);
-                // 真实插入：按 key 累加，必要时新建槽位
-                insert(entry.key(), scaled, false);
-            }
-            return new KeyAmount(ballKey, 0L);
         }
+
+        // ---------- 真实阶段：逐条插入 + 原子性回滚 ----------
+        // 注意：为与球内数据一致，这里按原 contents 顺序插入（允许重复 key）
+        final ArrayList<KeyAmount> applied = new ArrayList<>(); // 记录已成功插入的增量，用于失败回滚
+        for (KeyAmount entry : contents) {
+            if (entry == null || entry.key() == null || entry.amount() <= 0L) continue;
+            long scaled;
+            try {
+                scaled = Math.multiplyExact(entry.amount(), ballCount);
+            } catch (ArithmeticException overflow) {
+                // 极端情况：此条溢出，按失败处理并回滚
+                // 回滚
+                for (int i = applied.size() - 1; i >= 0; i--) {
+                    KeyAmount a = applied.get(i);
+                    extract(a.key(), a.amount(), false);
+                }
+                return new KeyAmount(ballKey, ballCount);
+            }
+
+            KeyAmount leftover = insert(entry.key(), scaled, false);
+            long appliedNow = scaled - leftover.amount();
+            if (appliedNow > 0L) {
+                applied.add(new KeyAmount(entry.key(), appliedNow));
+            }
+            if (leftover.amount() > 0L) {
+                // 发生了不可预期的失败（理论上预检已保证不会失败），执行回滚
+                for (int i = applied.size() - 1; i >= 0; i--) {
+                    KeyAmount a = applied.get(i);
+                    extract(a.key(), a.amount(), false);
+                }
+                return new KeyAmount(ballKey, ballCount);
+            }
+        }
+
+        // 全部成功插入，消耗物质球
+        return new KeyAmount(ballKey, 0L);
     }
+
 
     @Override
     public @NotNull KeyAmount extract(int slot, long count, boolean simulate)

@@ -1,0 +1,360 @@
+package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
+
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+
+/**
+ * 有序、固定槽位的堆叠容器实现（箱子类）。
+ * - 槽位数固定，允许同一 Key 占用多个槽位（与虚拟容器相反）
+ * - 采用数组存储 + 多级索引（类型桶/精确 Key 桶 + 换尾删除） + BitSet 空槽位快速定位
+ * - insert(key, ...) 优先合并已有同 Key 的槽位，再填充空槽
+ * - insert(slot, ...) 仅对指定槽位尝试
+ */
+public class StackHandler implements IStackHandler
+{
+
+    /* ---------------- 基本存储（固定大小） ---------------- */
+
+    private final int size;
+    private final IStackKey<?>[] keys;   // 槽位上的 Key（null 代表空）
+    private final long[] amounts;        // 槽位上的数量（==0 则视为空，与 keys 同步）
+
+    // 空槽位标记：bit=1 表示该槽位为空
+    private final BitSet emptySlots;
+
+    // 可选：统一的每槽容量上限（getSlotCapacity 若需要更复杂逻辑可重写）
+    private long perSlotCapacity = Long.MAX_VALUE;
+
+    /* ---------------- 只读视图 ---------------- */
+
+    private final List<KeyAmount> entriesView = Collections.unmodifiableList(new AbstractList<KeyAmount>() {
+        @Override public KeyAmount get(int index) {
+            if (index < 0 || index >= size) return new KeyAmount(null, 0L);
+            IStackKey<?> k = keys[index];
+            long amt = (k == null) ? 0L : amounts[index];
+            return new KeyAmount(k, amt);
+        }
+        @Override public int size() { return size; }
+    });
+
+    /* ---------------- 索引（类型桶 / 精确 Key 桶） ---------------- */
+
+    private static final class SlotBucket {
+        final ArrayList<Integer> slots = new ArrayList<>();
+        final HashMap<Integer, Integer> pos = new HashMap<>(); // slot -> index in slots
+
+        void add(int slot) {
+            if (pos.containsKey(slot)) return;
+            int i = slots.size();
+            slots.add(slot);
+            pos.put(slot, i);
+        }
+        void remove(int slot) {
+            Integer p = pos.remove(slot);
+            if (p == null) return;
+            int last = slots.size() - 1;
+            if (p != last) {
+                int tail = slots.get(last);
+                slots.set(p, tail);
+                pos.put(tail, p);
+            }
+            slots.remove(last);
+        }
+        int size() { return slots.size(); }
+        int get(int i) { return slots.get(i); }
+        List<Integer> snapshot() { return new ArrayList<>(slots); } // 防御性副本（模拟/遍历时可用）
+    }
+
+    // typeId -> 该类型下所有非空槽位（按换尾维护）
+    private final Map<ResourceLocation, SlotBucket> typeBuckets = new HashMap<>();
+    private SlotBucket bucketOf(ResourceLocation typeId) {
+        return typeBuckets.computeIfAbsent(typeId, t -> new SlotBucket());
+    }
+
+    // 精确 Key -> 该 Key 占用的所有槽位（允许同 Key 多槽）
+    private final Map<IStackKey<?>, SlotBucket> keyBuckets = new HashMap<>();
+    private SlotBucket bucketOf(IStackKey<?> key) {
+        return keyBuckets.computeIfAbsent(key, k -> new SlotBucket());
+    }
+
+    /* ---------------- 构造 ---------------- */
+
+    public StackHandler(int size) {
+        this.size = Math.max(0, size);
+        this.keys = new IStackKey<?>[this.size];
+        this.amounts = new long[this.size];
+        this.emptySlots = new BitSet(this.size);
+        this.emptySlots.set(0, this.size, true); // 初始全部为空
+    }
+
+    /* ---------------- IStackHandler 实现 ---------------- */
+
+    @Override public List<KeyAmount> getStorage() { return entriesView; }
+
+    @Override public void onChange() { /* 根据需要覆写（保存/脏标记/事件） */ }
+
+    @Override public int getSlots() { return size; }
+
+    @Override
+    public void clearStorage() {
+        // 清空数组
+        Arrays.fill(keys, null);
+        Arrays.fill(amounts, 0L);
+        // 清空索引
+        typeBuckets.clear();
+        keyBuckets.clear();
+        // 标记空槽
+        emptySlots.clear();
+        emptySlots.set(0, size, true);
+        onChange();
+    }
+
+    @Override
+    public @NotNull KeyAmount getStackBySlot(int slot) {
+        if (slot < 0 || slot >= size) return new KeyAmount(null, 0L);
+        IStackKey<?> k = keys[slot];
+        return new KeyAmount(k, (k == null) ? 0L : amounts[slot]);
+    }
+
+    @Override
+    public @NotNull KeyAmount getStackByKey(IStackKey<?> key) {
+        if (key == null) return new KeyAmount(null, 0L);
+        SlotBucket b = keyBuckets.get(key);
+        if (b == null || b.size() == 0) return new KeyAmount(key, 0L);
+        int slot = b.get(0); // “第一个找到的堆叠”
+        return new KeyAmount(key, amounts[slot]);
+    }
+
+    @Override
+    public boolean hasStack(IStackKey<?> key) {
+        SlotBucket b = (key == null) ? null : keyBuckets.get(key);
+        return b != null && b.size() > 0;
+    }
+
+    @Override
+    public void setStackDirectly(int slot, IStackKey<?> key, long amount) {
+        if (slot < 0 || slot >= size) return;
+
+        // 先移除旧的槽位映射
+        IStackKey<?> oldKey = keys[slot];
+        if (oldKey != null) {
+            bucketOf(oldKey.getTypeId()).remove(slot);
+            bucketOf(oldKey).remove(slot);
+        }
+
+        if (key == null || amount <= 0L) {
+            // 置空
+            keys[slot] = null;
+            amounts[slot] = 0L;
+            emptySlots.set(slot);
+            onChange();
+            return;
+        }
+
+        long clamped = Math.max(0L, Math.min(amount, getSlotCapacity(slot)));
+        keys[slot] = key;
+        amounts[slot] = clamped;
+
+        // 建立新映射
+        bucketOf(key.getTypeId()).add(slot);
+        bucketOf(key).add(slot);
+        emptySlots.clear(slot);
+
+        onChange();
+    }
+
+    @Override
+    public void addStackDirectly(IStackKey<?> key, long amount) {
+        if (key == null || amount <= 0L) return;
+        int empty = emptySlots.nextSetBit(0);
+        if (empty < 0) return; // 没空位
+        setStackDirectly(empty, key, amount);
+    }
+
+    @Override
+    public @NotNull KeyAmount insert(int slot, IStackKey<?> key, long amount, boolean simulate) {
+        if (key == null || amount <= 0L) return new KeyAmount(null, 0L);
+        if (slot < 0 || slot >= size) return new KeyAmount(key, amount);
+        if (!isStackValid(slot, key)) return new KeyAmount(key, amount);
+
+        long left = amount;
+
+        IStackKey<?> curKey = keys[slot];
+        if (curKey == null) {
+            // 空槽：仅受容量限制
+            long cap = getSlotCapacity(slot);
+            long ins = Math.min(left, cap);
+            if (ins <= 0) return new KeyAmount(key, left);
+            if (!simulate) {
+                keys[slot] = key;
+                amounts[slot] = ins;
+                bucketOf(key.getTypeId()).add(slot);
+                bucketOf(key).add(slot);
+                emptySlots.clear(slot);
+                onChange();
+            }
+            left -= ins;
+            return new KeyAmount(key, left);
+        }
+
+        // 非空：类型必须相同（完全相同的 Key）
+        if (!curKey.equals(key)) {
+            return new KeyAmount(key, left);
+        }
+
+        long cap = getSlotCapacity(slot);
+        long room = Math.max(0L, cap - amounts[slot]);
+        long ins = Math.min(left, room);
+        if (ins <= 0) return new KeyAmount(key, left);
+        if (!simulate) {
+            amounts[slot] += ins;
+            onChange();
+        }
+        left -= ins;
+        return new KeyAmount(key, left);
+    }
+
+    @Override
+    public @NotNull KeyAmount insert(IStackKey<?> key, long amount, boolean simulate) {
+        if (key == null || amount <= 0L) return new KeyAmount(null, 0L);
+
+        long left = amount;
+
+        // 第一阶段：合并已有同 Key 的槽位
+        SlotBucket exact = keyBuckets.get(key);
+        if (exact != null && exact.size() > 0) {
+            // 为避免遍历时被结构修改，做一个快照
+            List<Integer> slots = exact.snapshot();
+            for (int slot : slots) {
+                if (left <= 0) break;
+                long cap = getSlotCapacity(slot);
+                long room = Math.max(0L, cap - amounts[slot]);
+                if (room <= 0) continue;
+                long ins = Math.min(left, room);
+                if (simulate) {
+                    left -= ins;
+                } else {
+                    amounts[slot] += ins;
+                    left -= ins;
+                }
+            }
+        }
+
+        // 第二阶段：填充空槽位
+        if (left > 0) {
+            int idx = emptySlots.nextSetBit(0);
+            while (idx >= 0 && left > 0) {
+                if (isStackValid(idx, key)) {
+                    long cap = getSlotCapacity(idx);
+                    long ins = Math.min(left, cap);
+                    if (ins > 0) {
+                        if (!simulate) {
+                            keys[idx] = key;
+                            amounts[idx] = ins;
+                            bucketOf(key.getTypeId()).add(idx);
+                            bucketOf(key).add(idx);
+                            emptySlots.clear(idx);
+                        }
+                        left -= ins;
+                    }
+                }
+                idx = emptySlots.nextSetBit(idx + 1);
+            }
+        }
+
+        if (!simulate && left != amount) {
+            onChange(); // 本次按类型插入可能影响多个槽位，只发一次变更
+        }
+
+        return new KeyAmount(key, left);
+    }
+
+    @Override
+    public @NotNull KeyAmount extract(int slot, long count, boolean simulate) {
+        if (slot < 0 || slot >= size || count <= 0L) return new KeyAmount(null, 0L);
+        IStackKey<?> k = keys[slot];
+        if (k == null) return new KeyAmount(null, 0L);
+
+        long have = amounts[slot];
+        long take = Math.min(count, have);
+        if (take <= 0) return new KeyAmount(k, 0L);
+
+        if (!simulate) {
+            long left = have - take;
+            if (left == 0L) {
+                // 置空并维护索引
+                bucketOf(k.getTypeId()).remove(slot);
+                bucketOf(k).remove(slot);
+                keys[slot] = null;
+                amounts[slot] = 0L;
+                emptySlots.set(slot);
+            } else {
+                amounts[slot] = left;
+            }
+            onChange();
+        }
+        return new KeyAmount(k, take);
+    }
+
+    @Override
+    public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate) {
+        if (key == null || amount <= 0L) return new KeyAmount(null, 0L);
+        SlotBucket exact = keyBuckets.get(key);
+        if (exact == null || exact.size() == 0) return new KeyAmount(key, 0L);
+
+        long need = amount;
+        long taken = 0L;
+
+        // 快照防止遍历期间结构改变
+        List<Integer> slots = exact.snapshot();
+        for (int slot : slots) {
+            if (need <= 0) break;
+            long have = amounts[slot];
+            if (have <= 0) continue;
+            long t = Math.min(need, have);
+            if (t <= 0) continue;
+
+            if (!simulate) {
+                long left = have - t;
+                if (left == 0L) {
+                    bucketOf(key.getTypeId()).remove(slot);
+                    bucketOf(key).remove(slot);
+                    keys[slot] = null;
+                    amounts[slot] = 0L;
+                    emptySlots.set(slot);
+                } else {
+                    amounts[slot] = left;
+                }
+            }
+            taken += t;
+            need -= t;
+        }
+
+        if (!simulate && taken > 0) onChange();
+        return new KeyAmount(key, taken);
+    }
+
+    @Override
+    public long getSlotCapacity(int slot) {
+        return perSlotCapacity;
+    }
+
+    @Override
+    public boolean isStackValid(int slot, IStackKey<?> key) {
+        return true; // 如需白名单/黑名单，覆写或改成策略
+    }
+
+    @Override
+    public boolean isEmpty() {
+        // 有空位 BitSet 不等于“非空计数”，但 keys[slot]==null 意味该位为 1
+        // 只要有任意非空槽位，即空位数 < 总槽位
+        return emptySlots.cardinality() == size;
+    }
+
+    /* ---------------- 便捷：容量设置 ---------------- */
+    public void setPerSlotCapacity(long cap) { this.perSlotCapacity = Math.max(0L, cap); }
+}
