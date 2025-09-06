@@ -39,7 +39,8 @@ public class ItemUnifiedStorageHandler implements IItemHandler
                     Object outStack = storage.getOutStackByKey(key);
                     if(outStack instanceof ItemStack itemStack)
                     {
-                        itemStack.setCount(BDMath.clampLongToInt(storage.getStackByKey(key).amount()));
+                        if(!itemStack.isEmpty())
+                            itemStack.setCount(BDMath.clampLongToInt(storage.getStackByKey(key).amount()));
                         return itemStack;
                     }
                     return null;
