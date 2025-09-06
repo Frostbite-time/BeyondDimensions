@@ -1,15 +1,15 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.hollingsworth.arsnouveau.api.source.ISourceCap;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackKey;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 
 public class SourceStackTypedHandler implements ISourceCap
 {
-    private StackTypedHandler handlerStorage;
+    private final StackHandler handlerStorage;
 
-    public SourceStackTypedHandler(StackTypedHandler handlerStorage) {
+    public SourceStackTypedHandler(StackHandler handlerStorage) {
         this.handlerStorage = handlerStorage;
     }
 
@@ -45,11 +45,23 @@ public class SourceStackTypedHandler implements ISourceCap
     @Override
     public int getSource()
     {
-        return handlerStorage.getTypeIdIndexList(SourceStackType.ID)
-                .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex>=0)
-                .map(actualIndex -> (SourceStackType)handlerStorage.getStackBySlot(actualIndex))
-                .map(stack -> BDMath.clampLongToInt(stack.getStackAmount()))
+        return handlerStorage.getBucket(SourceStackKey.ID)
+                .map(bucket -> {
+                    long sum = 0L;
+                    for (int slot : bucket.snapshot()) {
+                        if (slot < 0) continue;
+                        long amt = handlerStorage.getStackBySlot(slot).amount();
+                        if (amt <= 0) continue;
+
+                        // 保证sum <= Integer.MAX_VALUE，不会溢出
+                        long remain = (long) Integer.MAX_VALUE - sum;
+                        if (amt > remain) {
+                            return Integer.MAX_VALUE;
+                        }
+                        sum += amt;
+                    }
+                    return (int) sum; // 安全转换
+                })
                 .orElse(0);
     }
 
@@ -91,9 +103,9 @@ public class SourceStackTypedHandler implements ISourceCap
         long operation = wanted-actualInside;
         BeyondDimensions.LOGGER.info("某个网络的魔源数量被外界强行设置，可能导致错误，最终魔源数量被设置为：{}",operation);
         if(operation>0)
-            handlerStorage.insert(new SourceStackType(operation),false);
+            handlerStorage.insert(SourceStackKey.INSTANCE, operation,false);
         else
-            handlerStorage.extract(new SourceStackType(-operation),false);
+            handlerStorage.extract(SourceStackKey.INSTANCE, -operation,false);
     }
 
     // 强行设置最大值，不生效，因为容量仅由容器决定（新生魔艺并未使用过这个方法，可以放心）
@@ -107,13 +119,13 @@ public class SourceStackTypedHandler implements ISourceCap
     @Override
     public int receiveSource(int amount, boolean sim)
     {
-        return (int) (amount - handlerStorage.insert(new SourceStackType(amount),sim).getStackAmount());
+        return (int) (amount - handlerStorage.insert(SourceStackKey.INSTANCE, amount,sim).amount());
     }
 
     // 返回导出量
     @Override
     public int extractSource(int amount, boolean sim)
     {
-        return (int) handlerStorage.extract(new SourceStackType(amount),sim).getStackAmount();
+        return (int) handlerStorage.extract(SourceStackKey.INSTANCE, amount,sim).amount();
     }
 }

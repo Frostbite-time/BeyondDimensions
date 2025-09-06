@@ -552,7 +552,10 @@ public class UnifiedStorage implements IStackHandler
         slotIndex.add(key);
         posMap.put(key, idx);
         bucketOf(key.getTypeId()).add(key);
-        key2stackMap.put(key,key.copyStack());
+        if(!key2stackMap.containsKey(key))
+        {
+            key2stackMap.put(key,key.copyStack());
+        }
     }
 
     // 换尾删除

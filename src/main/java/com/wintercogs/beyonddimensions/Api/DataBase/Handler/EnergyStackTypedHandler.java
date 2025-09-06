@@ -1,38 +1,49 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 
 public class EnergyStackTypedHandler implements IEnergyStorage
 {
 
-    private StackTypedHandler handlerStorage;
+    private StackHandler handlerStorage;
 
-    public EnergyStackTypedHandler(StackTypedHandler handlerStorage) {
+    public EnergyStackTypedHandler(StackHandler handlerStorage) {
         this.handlerStorage = handlerStorage;
     }
 
     @Override
     public int receiveEnergy(int count, boolean simulate)
     {
-        return (int) (count - handlerStorage.insert(new EnergyStackType(count),simulate).getStackAmount());
+        return (int) (count - handlerStorage.insert(EnergyStackKey.INSTANCE, count,simulate).amount());
     }
 
     @Override
     public int extractEnergy(int count, boolean simulate)
     {
-        return (int) handlerStorage.extract(new EnergyStackType(count),simulate).getStackAmount();
+        return (int) handlerStorage.extract(EnergyStackKey.INSTANCE, count,simulate).amount();
     }
 
     @Override
     public int getEnergyStored()
     {
-        return handlerStorage.getTypeIdIndexList(EnergyStackType.ID)
-                .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex>=0)
-                .map(actualIndex -> (EnergyStackType)handlerStorage.getStackBySlot(actualIndex))
-                .map(energyStackType -> BDMath.clampLongToInt(energyStackType.getStackAmount()))
+        return handlerStorage.getBucket(EnergyStackKey.ID)
+                .map(bucket -> {
+                    long sum = 0L;
+                    for (int slot : bucket.snapshot()) {
+                        if (slot < 0) continue;
+                        long amt = handlerStorage.getStackBySlot(slot).amount();
+                        if (amt <= 0) continue;
+
+                        // 保证sum <= Integer.MAX_VALUE，不会溢出
+                        long remain = (long) Integer.MAX_VALUE - sum;
+                        if (amt > remain) {
+                            return Integer.MAX_VALUE;
+                        }
+                        sum += amt;
+                    }
+                    return (int) sum; // 安全转换
+                })
                 .orElse(0);
     }
 

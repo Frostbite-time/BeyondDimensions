@@ -26,8 +26,8 @@ public class StackHandler implements IStackHandler
     // 空槽位标记：bit=1 表示该槽位为空
     private final BitSet emptySlots;
 
-    // 可选：统一的每槽容量上限（getSlotCapacity 若需要更复杂逻辑可重写）
-    private long perSlotCapacity = Long.MAX_VALUE;
+    /** key -> 具体存储物的对照（如ItemStackKey -> ItemStack），只维护类型，不维护数量，分化包装读取时手动设置数量 */
+    private final Map<IStackKey<?>, Object> key2stackMap = new HashMap<>();
 
     /* ---------------- 只读视图 ---------------- */
 
@@ -42,8 +42,8 @@ public class StackHandler implements IStackHandler
     });
 
     /* ---------------- 索引（类型桶 / 精确 Key 桶） ---------------- */
-
-    private static final class SlotBucket {
+    /* 一方面加速分化包装，另一方面加速按key查询、插入、移除 */
+    public static final class SlotBucket {
         final ArrayList<Integer> slots = new ArrayList<>();
         final HashMap<Integer, Integer> pos = new HashMap<>(); // slot -> index in slots
 
@@ -74,11 +74,19 @@ public class StackHandler implements IStackHandler
     private SlotBucket bucketOf(ResourceLocation typeId) {
         return typeBuckets.computeIfAbsent(typeId, t -> new SlotBucket());
     }
+    public Optional<SlotBucket> getBucket(ResourceLocation typeId)
+    {
+        return Optional.ofNullable(typeBuckets.get(typeId));
+    }
 
     // 精确 Key -> 该 Key 占用的所有槽位（允许同 Key 多槽）
     private final Map<IStackKey<?>, SlotBucket> keyBuckets = new HashMap<>();
     private SlotBucket bucketOf(IStackKey<?> key) {
         return keyBuckets.computeIfAbsent(key, k -> new SlotBucket());
+    }
+    public Optional<SlotBucket> getBucket(IStackKey<?> key)
+    {
+        return Optional.ofNullable(keyBuckets.get(key));
     }
 
     /* ---------------- 构造 ---------------- */
@@ -185,8 +193,8 @@ public class StackHandler implements IStackHandler
 
         IStackKey<?> curKey = keys[slot];
         if (curKey == null) {
-            // 空槽：仅受容量限制
-            long cap = getSlotCapacity(slot);
+            // 容量同时受key类型的原版最大容量以及槽位最大容量限制
+            long cap = Math.min(key.getVanillaMaxStackSize(), getSlotCapacity(slot));
             long ins = Math.min(left, cap);
             if (ins <= 0) return new KeyAmount(key, left);
             if (!simulate) {
@@ -195,6 +203,7 @@ public class StackHandler implements IStackHandler
                 bucketOf(key.getTypeId()).add(slot);
                 bucketOf(key).add(slot);
                 emptySlots.clear(slot);
+                ensureInIndex(key);
                 onChange();
             }
             left -= ins;
@@ -206,7 +215,7 @@ public class StackHandler implements IStackHandler
             return new KeyAmount(key, left);
         }
 
-        long cap = getSlotCapacity(slot);
+        long cap = Math.min(key.getVanillaMaxStackSize(), getSlotCapacity(slot));
         long room = Math.max(0L, cap - amounts[slot]);
         long ins = Math.min(left, room);
         if (ins <= 0) return new KeyAmount(key, left);
@@ -231,7 +240,7 @@ public class StackHandler implements IStackHandler
             List<Integer> slots = exact.snapshot();
             for (int slot : slots) {
                 if (left <= 0) break;
-                long cap = getSlotCapacity(slot);
+                long cap = Math.min(key.getVanillaMaxStackSize(), getSlotCapacity(slot));
                 long room = Math.max(0L, cap - amounts[slot]);
                 if (room <= 0) continue;
                 long ins = Math.min(left, room);
@@ -249,7 +258,7 @@ public class StackHandler implements IStackHandler
             int idx = emptySlots.nextSetBit(0);
             while (idx >= 0 && left > 0) {
                 if (isStackValid(idx, key)) {
-                    long cap = getSlotCapacity(idx);
+                    long cap = Math.min(key.getVanillaMaxStackSize(), getSlotCapacity(idx));
                     long ins = Math.min(left, cap);
                     if (ins > 0) {
                         if (!simulate) {
@@ -258,6 +267,7 @@ public class StackHandler implements IStackHandler
                             bucketOf(key.getTypeId()).add(idx);
                             bucketOf(key).add(idx);
                             emptySlots.clear(idx);
+                            ensureInIndex(key);
                         }
                         left -= ins;
                     }
@@ -292,6 +302,7 @@ public class StackHandler implements IStackHandler
                 keys[slot] = null;
                 amounts[slot] = 0L;
                 emptySlots.set(slot);
+                removeFromIndex(k);
             } else {
                 amounts[slot] = left;
             }
@@ -326,6 +337,7 @@ public class StackHandler implements IStackHandler
                     keys[slot] = null;
                     amounts[slot] = 0L;
                     emptySlots.set(slot);
+                    removeFromIndex(key);
                 } else {
                     amounts[slot] = left;
                 }
@@ -340,7 +352,7 @@ public class StackHandler implements IStackHandler
 
     @Override
     public long getSlotCapacity(int slot) {
-        return perSlotCapacity;
+        return Long.MAX_VALUE;
     }
 
     @Override
@@ -355,6 +367,23 @@ public class StackHandler implements IStackHandler
         return emptySlots.cardinality() == size;
     }
 
-    /* ---------------- 便捷：容量设置 ---------------- */
-    public void setPerSlotCapacity(long cap) { this.perSlotCapacity = Math.max(0L, cap); }
+    private void ensureInIndex(IStackKey<?> key)
+    {
+        if(!key2stackMap.containsKey(key))
+        {
+            key2stackMap.put(key,key.copyStack());
+        }
+
+    }
+
+    private void removeFromIndex(IStackKey<?> key)
+    {
+        key2stackMap.remove(key);
+    }
+
+    /** 根据key获取已经缓存的对应stack，自行判断类型，返回值的数量无法确定，根据keyAmount自己使用setCount，如果要缓存它，必须复制一个副本 */
+    public Object getOutStackByKey(IStackKey<?> key)
+    {
+        return key2stackMap.get(key);
+    }
 }
