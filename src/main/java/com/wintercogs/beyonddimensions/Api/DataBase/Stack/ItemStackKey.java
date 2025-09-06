@@ -163,7 +163,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
-    public @NotNull Object getSource()
+    public @NotNull Item getSource()
     {
         return item;
     }
