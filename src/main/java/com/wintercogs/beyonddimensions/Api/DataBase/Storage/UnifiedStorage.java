@@ -51,10 +51,10 @@ public class UnifiedStorage implements IStackHandler
     /** key -> 槽位位置（仅记录非空键） */
     private final Map<IStackKey<?>, Integer> posMap = new HashMap<>();
     // 分化包装
-    /** key -> 具体存储物的对照（如ItemStackKey -> ItemStack） */
+    /** key -> 具体存储物的对照（如ItemStackKey -> ItemStack），只维护类型，不维护数量，分化包装读取时手动设置数量 */
     private final Map<IStackKey<?>, Object> key2stackMap = new HashMap<>();
     /** typeId -> key列表的对照，使用换尾删除（不同类型对外界的维护表，如itemId配合此列表后用于IItemHandler的实现） */
-    private final Map<ResourceLocation, List<IStackKey<?>>> type2keysMap = new HashMap<>();
+    private final Map<ResourceLocation, TypeBucket> type2buckets = new HashMap<>();
 
     /** 只读、动态的 KeyAmount 视图（推荐给新界面使用） */
     private final List<KeyAmount> entriesView = Collections.unmodifiableList(
@@ -505,6 +505,8 @@ public class UnifiedStorage implements IStackHandler
         int idx = slotIndex.size();
         slotIndex.add(key);
         posMap.put(key, idx);
+        bucketOf(key.getTypeId()).add(key);
+        key2stackMap.put(key,key.copyStack());
     }
 
     // 换尾删除
@@ -519,6 +521,8 @@ public class UnifiedStorage implements IStackHandler
             posMap.put(tail, pos);
         }
         slotIndex.remove(last);
+        bucketOf(key.getTypeId()).remove(key); // 内部换尾
+        key2stackMap.remove(key);
     }
 
     // region 序列化方法
@@ -615,6 +619,47 @@ public class UnifiedStorage implements IStackHandler
     public void setSlotMaxSize(int maxSize)
     {
         this.slotMaxSize = maxSize;
+    }
+
+    // 每类型一个紧凑桶：keys + 反向位置表（换尾删除，O(1)）
+    public static final class TypeBucket
+    {
+        final ArrayList<IStackKey<?>> keys = new ArrayList<>();
+        final Map<IStackKey<?>, Integer> pos = new HashMap<>();
+
+        void add(IStackKey<?> k) {
+            if (pos.containsKey(k)) return;
+            int i = keys.size();
+            keys.add(k);
+            pos.put(k, i);
+        }
+        void remove(IStackKey<?> k) {
+            Integer p = pos.remove(k);
+            if (p == null) return;
+            int last = keys.size() - 1;
+            if (p != last) {
+                IStackKey<?> tail = keys.get(last);
+                keys.set(p, tail);
+                pos.put(tail, p);
+            }
+            keys.remove(last);
+        }
+        int size() { return keys.size(); }
+        IStackKey<?> get(int i) { return keys.get(i); }
+    }
+    private TypeBucket bucketOf(ResourceLocation type)
+    {
+        return type2buckets.computeIfAbsent(type, t -> new TypeBucket());
+    }
+
+    public Optional<TypeBucket> getBucket(ResourceLocation type)
+    {
+        return Optional.ofNullable(type2buckets.get(type));
+    }
+
+    public Object getOutStackByKey(IStackKey<?> key)
+    {
+        return key2stackMap.get(key);
     }
 }
 

@@ -11,4 +11,9 @@ public record KeyAmount(IStackKey<?> key, long amount)
     {
         return key == null || amount <= 0L;
     }
+
+    public Object toStack()
+    {
+        return key.copyStackWithCount(amount);
+    }
 }

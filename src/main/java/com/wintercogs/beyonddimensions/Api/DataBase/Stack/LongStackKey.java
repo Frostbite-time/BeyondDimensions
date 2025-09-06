@@ -50,7 +50,7 @@ public abstract class LongStackKey<T extends LongType<T>> implements IStackKey<T
     @Override
     public T copyStack()
     {
-        return (T) stack.copy();
+        return copyStackWithCount(1L);
     }
 
     @Override

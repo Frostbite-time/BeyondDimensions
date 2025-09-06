@@ -104,7 +104,7 @@ public interface IStackKey<T>
     T getEmptyStack();
 
     /**
-     * 复制存储的堆叠
+     * 复制存储的堆叠，数量固定为1
      */
     T copyStack();
 
