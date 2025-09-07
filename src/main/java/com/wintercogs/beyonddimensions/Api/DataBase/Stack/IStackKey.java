@@ -201,7 +201,7 @@ public interface IStackKey<T>
         return null;
     }
 
-    IStackRender<?> getRender();
+    IStackRender getRender();
 
     T getRenderStack();
 

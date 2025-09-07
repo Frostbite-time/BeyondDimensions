@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackType;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.core.BlockPos;
@@ -119,11 +118,10 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     public int getMaxMana()
     {
         long maxMana = 0;
-        ManaStackType stackType = new ManaStackType();
         for(KeyAmount stack : storageHandler.getStorage())
         {
             if(stack.isEmpty())
-                maxMana += stackType.getVanillaMaxStackSize();
+                maxMana += ManaStackKey.INSTANCE.getVanillaMaxStackSize();
             if(stack.key() instanceof ManaStackKey && stack.amount() < stack.key().getVanillaMaxStackSize())
                 maxMana += stack.key().getVanillaMaxStackSize() - stack.amount();
         }

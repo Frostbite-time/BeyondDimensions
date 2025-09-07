@@ -2,8 +2,10 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
@@ -237,7 +239,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
             // 剩余数量从存储提取
             if (remaining > 0) {
-                remaining = extractFromStorage(storage, new ItemStackType(collected), remaining);
+                remaining = extractFromStorage(storage, new ItemStackKey(collected) , remaining);
             }
             // 设置合成槽物品
             if (remaining < required.getCount()) {
@@ -265,10 +267,10 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         return remaining;
     }
     // 从存储提取物品
-    private int extractFromStorage(IStackTypedHandler storage, IStackType type, int amount) {
-        IStackType extraction = storage.extract(type.copyWithCount(amount), false);
-        if (extraction.getStackAmount() > 0) {
-            return amount - (int)extraction.getStackAmount();
+    private int extractFromStorage(IStackHandler storage, IStackKey<?> type, int amount) {
+        KeyAmount extraction = storage.extract(type,amount, false);
+        if (extraction.amount() > 0) {
+            return amount - (int)extraction.amount();
         }
         return amount;
     }
@@ -341,7 +343,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                     long remaining;
                     if(toStorageFirst)
                     {
-                        remaining = storage.insert(new ItemStackType(stack.copy()),false).getStackAmount();
+                        remaining = storage.insert(new ItemStackKey(stack),stack.getCount(),false).amount();
                         if(remaining>0)
                         {
                             stack.setCount((int)remaining);
@@ -360,7 +362,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                         if(remaining>0)
                         {
                             stack.setCount((int)remaining);
-                            remaining = storage.insert(new ItemStackType(stack.copy()),false).getStackAmount();
+                            remaining = storage.insert(new ItemStackKey(stack),stack.getCount(),false).amount();
                             if(remaining>0)
                             {
                                 stack.setCount((int)remaining);

@@ -3,8 +3,8 @@ package com.wintercogs.beyonddimensions.Integration.Ars.Block;
 import com.hollingsworth.arsnouveau.api.source.ISourceTile;
 import com.hollingsworth.arsnouveau.api.source.SourceManager;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackKey;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Integration.Ars.Caps.SourcePathwayProvider;
@@ -43,10 +43,10 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         DimensionsNet net = getNet();
         if(net != null)
         {
-            IStackType stack = net.getUnifiedStorage().getStackByStack(new SourceStackType(0));
-            if(stack != null)
+            KeyAmount stack = net.getUnifiedStorage().getStackByKey(SourceStackKey.INSTANCE);
+            if(stack.key() == SourceStackKey.INSTANCE)
             {
-                return BDMath.clampLongToInt(stack.getStackAmount());
+                return BDMath.clampLongToInt(stack.amount());
             }
         }
         return 0;
@@ -75,7 +75,7 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         if(net != null)
         {
             // 此处转换安全
-            return amount - (int) net.getUnifiedStorage().insert(new SourceStackType(amount),simulate).getStackAmount();
+            return amount - (int) net.getUnifiedStorage().insert(SourceStackKey.INSTANCE,amount,simulate).amount();
         }
         return 0;
     }
@@ -100,7 +100,7 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         if(net != null)
         {
             // 此处转换安全
-            return (int) net.getUnifiedStorage().extract(new SourceStackType(amount),simulate).getStackAmount();
+            return (int) net.getUnifiedStorage().extract(SourceStackKey.INSTANCE ,amount,simulate).amount();
         }
         return 0;
     }

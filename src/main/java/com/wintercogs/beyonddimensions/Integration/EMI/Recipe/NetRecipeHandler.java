@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Integration.EMI.Recipe;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Packet.RecipeFillC2SPacket;
@@ -65,12 +65,12 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         List<EmiStack> stacks = getInputSources(screen.getMenu()).stream().map(Slot::getItem).map(EmiStack::of).collect(Collectors.toCollection(ArrayList::new));
         if(screen.getMenu().storage.getStorage() != null)
         {
-            for(IStackType stackType : screen.getMenu().storage.getStorage())
+            for(KeyAmount stack : screen.getMenu().storage.getStorage())
             {
-                if(stackType instanceof ItemStackType itemStackType)
+                if(stack.key() instanceof ItemStackKey itemStackKey)
                 {
-                    if(!itemStackType.isEmpty())
-                        stacks.add(EmiStack.of(itemStackType.getStack()));
+                    if(!itemStackKey.isEmpty())
+                        stacks.add(EmiStack.of(itemStackKey.copyStack()));
                 }
             }
         }
@@ -95,7 +95,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
 
         // 获取所有可能的物品来源（常规合成槽+存储槽）
         List<Slot> craftingSlots = getInputSources(menu);
-        List<IStackType> storageSlots = menu.storage.getStorage();
+        List<KeyAmount> storageSlots = menu.storage.getStorage();
         // 创建虚拟库存用于模拟物品匹配
         List<ItemStack> availableItems = new ArrayList<>();
 
@@ -106,9 +106,9 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
             }
         }
         // 收集存储槽物品
-        for (IStackType stackType : storageSlots) {
-            if (stackType instanceof ItemStackType itemStackType) {
-                ItemStack stack = itemStackType.getStack();
+        for (KeyAmount keyAmount : storageSlots) {
+            if (keyAmount.key() instanceof ItemStackKey itemStackKey) {
+                ItemStack stack = itemStackKey.copyStack();
                 if (!stack.isEmpty()) {
                     availableItems.add(stack);
                 }

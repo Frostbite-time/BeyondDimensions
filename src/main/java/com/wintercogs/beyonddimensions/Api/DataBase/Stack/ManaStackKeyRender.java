@@ -18,13 +18,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class ManaStackKeyRender implements IStackRender<ManaStackKey> {
+public class ManaStackKeyRender implements IStackRender {
     public static final ManaStackKeyRender INSTANCE = new ManaStackKeyRender();
 
     private ManaStackKeyRender() {}
 
     @Override
-    public void render(GuiGraphics gui, ManaStackKey key, int x, int y) {
+    public void render(GuiGraphics gui, IStackKey<?> key, int x, int y) {
         var pose = gui.pose();
         pose.pushPose();
 
@@ -63,12 +63,12 @@ public class ManaStackKeyRender implements IStackRender<ManaStackKey> {
     }
 
     @Override
-    public Component getDisplayName(ManaStackKey key) {
-        return key.getRenderStack().getName();
+    public Component getDisplayName(IStackKey<?> key) {
+        return ManaStackKey.INSTANCE.getRenderStack().getName();
     }
 
     @Override
-    public List<Component> getTooltipLines(ManaStackKey key, long amount, Item.TooltipContext tooltipContext,
+    public List<Component> getTooltipLines(IStackKey<?> key, long amount, Item.TooltipContext tooltipContext,
                                            @Nullable net.minecraft.world.entity.player.Player player,
                                            TooltipFlag tooltipFlag) {
         return List.of(
@@ -78,12 +78,12 @@ public class ManaStackKeyRender implements IStackRender<ManaStackKey> {
     }
 
     @Override
-    public Optional<TooltipComponent> getTooltipImage(ManaStackKey key) {
+    public Optional<TooltipComponent> getTooltipImage(IStackKey<?> key) {
         return Optional.empty();
     }
 
     @Override
-    public void renderTooltip(GuiGraphics gui, Font font, ManaStackKey key, long amount, int mouseX, int mouseY) {
+    public void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY) {
         var mc = Minecraft.getInstance();
         var ctx = mc.level != null ? Item.TooltipContext.of(mc.level) : Item.TooltipContext.EMPTY;
         gui.renderTooltip(

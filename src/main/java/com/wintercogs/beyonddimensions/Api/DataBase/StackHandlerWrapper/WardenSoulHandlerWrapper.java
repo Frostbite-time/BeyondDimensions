@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
 import com.buuz135.industrialforegoingsouls.capabilities.ISoulHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.WardenSoulType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.WardenSoulStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.WardenSoulStackKey;
 import net.minecraft.resources.ResourceLocation;
 
 public class WardenSoulHandlerWrapper implements IStackHandlerWrapper<WardenSoulType>
@@ -18,7 +18,7 @@ public class WardenSoulHandlerWrapper implements IStackHandlerWrapper<WardenSoul
     @Override
     public ResourceLocation getTypeId()
     {
-        return WardenSoulStackType.ID;
+        return WardenSoulStackKey.ID;
     }
 
     @Override

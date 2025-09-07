@@ -1,7 +1,10 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
@@ -34,7 +37,7 @@ public class NetFeederMenu extends BDBaseMenu
     private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT*4 + CommonTextures.COMMON_CONNECTION_HEIGHT +7;
 
     // storage的初始数据由itemStack提供，随后storage每次变化都重新向其中写入数据
-    private final IStackTypedHandler storage = new StackTypedHandler(36)
+    private final IStackHandler storage = new StackHandler(36)
     {
         @Override
         public void onChange()
@@ -46,11 +49,11 @@ public class NetFeederMenu extends BDBaseMenu
         }
 
         @Override
-        public boolean isStackValid(int slot, IStackType stack)
+        public boolean isStackValid(int slot, IStackKey<?> stack)
         {
             return super.isStackValid(slot, stack)
-                    && stack instanceof ItemStackType itemStackType
-                    && itemStackType.getStack().getFoodProperties(player) != null;
+                    && stack instanceof ItemStackKey itemStackKey
+                    && itemStackKey.copyStack().getFoodProperties(player) != null;
         }
     };
     private boolean initialized; //initialized必须在初始数据提供完成之后才能设置为true
@@ -75,10 +78,10 @@ public class NetFeederMenu extends BDBaseMenu
         // 为服务端注入真实数据，客户端由槽位同步
         if(!playerInventory.player.level().isClientSide())
         {
-            List<IStackType> stacks = menuStack.getOrDefault(ModDataComponents.ISTACK_SLOTS,new ArrayList<IStackType>());
+            List<KeyAmount> stacks = menuStack.getOrDefault(ModDataComponents.ISTACK_SLOTS,new ArrayList<>());
             for(int i =0; i<stacks.size(); i++)
             {
-                storage.insert(i,stacks.get(i).copy(),false);
+                storage.insert(i,stacks.get(i).key(),stacks.get(i).amount(),false);
             }
         }
         initialized = true;

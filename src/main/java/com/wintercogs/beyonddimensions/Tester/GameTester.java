@@ -1,7 +1,8 @@
 package com.wintercogs.beyonddimensions.Tester;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,7 +29,7 @@ public class GameTester
         BeyondDimensions.LOGGER.info("============= 存储系统性能测试报告 =============");
         // 预先生成所有测试数据（2000组）
         final int totalTestTimes = 2000;
-        List<List<ItemStackType>> allInsertData = new ArrayList<>(totalTestTimes);
+        List<List<KeyAmount>> allInsertData = new ArrayList<>(totalTestTimes);
         List<int[]> allExtractData = new ArrayList<>(totalTestTimes);
         Random masterRandom = new Random(42); // 固定种子保证可重复性
         for (int i = 0; i < totalTestTimes; i++) {
@@ -37,10 +38,10 @@ public class GameTester
             Collections.shuffle(shuffledItems, new Random(masterRandom.nextLong()));
 
             // 生成插入数据
-            List<ItemStackType> insertData = new ArrayList<>();
+            List<KeyAmount> insertData = new ArrayList<>();
             for (Item item : shuffledItems) {
                 int amount = 100 + masterRandom.nextInt(201);
-                insertData.add(new ItemStackType(new ItemStack(item, amount)));
+                insertData.add(new KeyAmount(new ItemStackKey(new ItemStack(item, amount)),amount));
             }
             allInsertData.add(insertData);
 
@@ -54,9 +55,9 @@ public class GameTester
         // 预热阶段（不记录结果）
         UnifiedStorage warmupStorage = new UnifiedStorage(new DimensionsNet(true));
         for (int i = 0; i < 50; i++) {
-            List<ItemStackType> data = allInsertData.get(0);
-            for (ItemStackType stack : data) {
-                warmupStorage.insert(stack, false);
+            List<KeyAmount> data = allInsertData.get(0);
+            for (KeyAmount stack : data) {
+                warmupStorage.insert(stack.key(),stack.amount(), false);
             }
             int[] extData = allExtractData.get(0);
             for (int j = warmupStorage.getSlots() - 1; j >= 0; j--) {
@@ -70,18 +71,18 @@ public class GameTester
         long[] combinedTimes = new long[totalTestTimes];
         for (int times = 0; times < totalTestTimes; times++) {
             UnifiedStorage storage = new UnifiedStorage(new DimensionsNet(true));
-            List<ItemStackType> insertData = allInsertData.get(times);
+            List<KeyAmount> insertData = allInsertData.get(times);
             int[] extractData = allExtractData.get(times);
             // 纯插入测试
             long insertStart = System.nanoTime();
-            for (ItemStackType stack : insertData) {
-                storage.insert(stack, false);
+            for (KeyAmount stack : insertData) {
+                storage.insert(stack.key(),stack.amount(), false);
             }
             insertTimes[times] = System.nanoTime() - insertStart;
             // 纯提取测试（重置存储状态）
             storage.clearStorage();
-            for (ItemStackType stack : insertData) {
-                storage.insert(stack, false); // 重新填充
+            for (KeyAmount stack : insertData) {
+                storage.insert(stack.key(),stack.amount(), false); // 重新填充
             }
 
             long extractStart = System.nanoTime();
@@ -92,8 +93,8 @@ public class GameTester
             // 综合测试（新建存储）
             UnifiedStorage combinedStorage = new UnifiedStorage(new DimensionsNet(true));
             long combinedStart = System.nanoTime();
-            for (ItemStackType stack : insertData) {
-                combinedStorage.insert(stack, false);
+            for (KeyAmount stack : insertData) {
+                combinedStorage.insert(stack.key(),stack.amount(), false);
             }
             for (int i = combinedStorage.getSlots() - 1; i >= 0; i--) {
                 combinedStorage.extract(i, extractData[i], false);

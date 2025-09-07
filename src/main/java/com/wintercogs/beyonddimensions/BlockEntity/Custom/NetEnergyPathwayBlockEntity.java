@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.EnergyUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
@@ -115,7 +115,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
                     int maxExtract = (int)Math.min(net.getUnifiedStorage().getEnergyStored(), Integer.MAX_VALUE);
                     int receive = otherStorage.receiveEnergy(maxExtract, false);
-                    net.getUnifiedStorage().extract(new EnergyStackType(receive),false);
+                    net.getUnifiedStorage().extract(EnergyStackKey.INSTANCE,receive,false);
                 }
             }
         }

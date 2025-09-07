@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Packet;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.ArrayList;
 import java.util.List;
 
-public record DisorderedSlotGroupSyncPacket(int groupId,List<IStackType> stacks,
+public record DisorderedSlotGroupSyncPacket(int groupId,List<IStackKey<?>> stacks,
                                             List<Long> changedCounts) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
@@ -27,7 +27,7 @@ public record DisorderedSlotGroupSyncPacket(int groupId,List<IStackType> stacks,
                     DisorderedSlotGroupSyncPacket::groupId,
                     ByteBufCodecs.collection(
                             ArrayList::new,
-                            IStackType.STREAM_CODEC
+                            IStackKey.STREAM_CODEC
                     ),
                     DisorderedSlotGroupSyncPacket::stacks,
                     ByteBufCodecs.collection(

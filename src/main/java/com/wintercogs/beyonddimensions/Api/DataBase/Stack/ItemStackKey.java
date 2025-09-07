@@ -402,7 +402,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
-    public IStackRender<?> getRender()
+    public IStackRender getRender()
     {
         return ItemStackKeyRender.INSTANCE;
     }

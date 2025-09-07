@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.ManaType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackKey;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.resources.ResourceLocation;
 import vazkii.botania.api.mana.ManaCollector;
@@ -22,7 +22,7 @@ public class ManaHandlerWrapper implements IStackHandlerWrapper<ManaType>
     @Override
     public ResourceLocation getTypeId()
     {
-        return ManaStackType.ID;
+        return ManaStackKey.ID;
     }
 
     @Override

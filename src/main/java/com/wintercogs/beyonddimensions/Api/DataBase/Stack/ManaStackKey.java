@@ -133,7 +133,7 @@ public class ManaStackKey extends LongStackKey<ManaType> {
     // ------- 渲染 -------
 
     @Override
-    public IStackRender<?> getRender() {
+    public IStackRender getRender() {
         return ManaStackKeyRender.INSTANCE;
     }
 

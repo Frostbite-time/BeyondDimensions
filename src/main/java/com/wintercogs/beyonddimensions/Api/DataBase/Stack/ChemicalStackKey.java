@@ -289,7 +289,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     // —— 渲染支持 —— //
 
     @Override
-    public IStackRender<?> getRender() {
+    public IStackRender getRender() {
         return ChemicalStackKeyRender.INSTANCE;
     }
 

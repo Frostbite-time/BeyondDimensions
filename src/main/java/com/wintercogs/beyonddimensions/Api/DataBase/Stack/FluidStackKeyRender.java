@@ -23,32 +23,36 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class FluidStackKeyRender implements IStackRender<FluidStackKey> {
+public class FluidStackKeyRender implements IStackRender {
     public static final FluidStackKeyRender INSTANCE = new FluidStackKeyRender();
 
     @Override
-    public void render(GuiGraphics gui, FluidStackKey key, int x, int y) {
-        // 渲染流体图标（16×16）
-        var pose = gui.pose();
-        pose.pushPose();
+    public void render(GuiGraphics gui, IStackKey<?> key, int x, int y) {
+        if(key instanceof FluidStackKey fluidKey)
+        {
+            // 渲染流体图标（16×16）
+            var pose = gui.pose();
+            pose.pushPose();
 
-        FluidStack stack = key.getRenderStack();
-        if (!stack.isEmpty()) {
-            var fluid = stack.getFluid();
-            IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluid);
-            ResourceLocation still = props.getStillTexture(stack);
-            TextureAtlasSprite sprite = still == null ? null :
-                    Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(still);
+            FluidStack stack = fluidKey.getRenderStack();
+            if (!stack.isEmpty()) {
+                var fluid = stack.getFluid();
+                IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluid);
+                ResourceLocation still = props.getStillTexture(stack);
+                TextureAtlasSprite sprite = still == null ? null :
+                        Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(still);
 
-            if (sprite != null && sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation()) {
-                int tint = IClientFluidTypeExtensions.of(fluid).getTintColor();
-                // 复用项目现有的绘制工具
-                com.wintercogs.beyonddimensions.Render.IngredientRenderer
-                        .drawTiledSprite(gui, 16, 16, tint, 16, sprite, x, y);
+                if (sprite != null && sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation()) {
+                    int tint = IClientFluidTypeExtensions.of(fluid).getTintColor();
+                    // 复用项目现有的绘制工具
+                    com.wintercogs.beyonddimensions.Render.IngredientRenderer
+                            .drawTiledSprite(gui, 16, 16, tint, 16, sprite, x, y);
+                }
             }
+
+            pose.popPose();
         }
 
-        pose.popPose();
     }
 
     @Override
@@ -80,13 +84,17 @@ public class FluidStackKeyRender implements IStackRender<FluidStackKey> {
     }
 
     @Override
-    public Component getDisplayName(FluidStackKey key) {
-        FluidStack stack = key.getRenderStack();
-        return stack.isEmpty() ? Component.empty() : stack.getHoverName();
+    public Component getDisplayName(IStackKey<?> key) {
+        if(key instanceof FluidStackKey fluidKey)
+        {
+            FluidStack stack = fluidKey.getRenderStack();
+            return stack.isEmpty() ? Component.empty() : stack.getHoverName();
+        }
+        return Component.empty();
     }
 
     @Override
-    public List<Component> getTooltipLines(FluidStackKey key, long amount, Item.TooltipContext tooltipContext,
+    public List<Component> getTooltipLines(IStackKey<?> key, long amount, Item.TooltipContext tooltipContext,
                                            @Nullable net.minecraft.world.entity.player.Player player,
                                            TooltipFlag tooltipFlag) {
         List<Component> lines = new ArrayList<>();
@@ -96,13 +104,13 @@ public class FluidStackKeyRender implements IStackRender<FluidStackKey> {
     }
 
     @Override
-    public Optional<TooltipComponent> getTooltipImage(FluidStackKey key) {
+    public Optional<TooltipComponent> getTooltipImage(IStackKey<?> key) {
         // 流体默认无额外 TooltipComponent
         return Optional.empty();
     }
 
     @Override
-    public void renderTooltip(GuiGraphics gui, Font font, FluidStackKey key, long amount, int mouseX, int mouseY) {
+    public void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY) {
         var mc = Minecraft.getInstance();
         var ctx = mc.level != null ? Item.TooltipContext.of(mc.level) : Item.TooltipContext.EMPTY;
         gui.renderTooltip(

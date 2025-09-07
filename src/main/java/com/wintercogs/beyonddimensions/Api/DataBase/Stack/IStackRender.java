@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public interface IStackRender<T>
+public interface IStackRender
 {
     /**
      * UI渲染，即绘制当前资源的图标。
@@ -22,7 +22,7 @@ public interface IStackRender<T>
      * 必须以注解标注为仅客户端
      */
     @OnlyIn(Dist.CLIENT)
-    void render(GuiGraphics gui, T key, int x, int y);
+    void render(GuiGraphics gui, IStackKey<?> key, int x, int y);
 
     void renderAmount(GuiGraphics gui, long amount, int x, int y);
 
@@ -34,21 +34,21 @@ public interface IStackRender<T>
     /**
      * 获取资源名称
      */
-    Component getDisplayName(T key);
+    Component getDisplayName(IStackKey<?> key);
 
     /**
      * 获取资源的工具提示
      */
-    List<Component> getTooltipLines(T key, long amount, Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag);
+    List<Component> getTooltipLines(IStackKey<?> key, long amount, Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag);
 
     /**
      *
      */
-    Optional<TooltipComponent> getTooltipImage(T key);
+    Optional<TooltipComponent> getTooltipImage(IStackKey<?> key);
 
     /**
      * 绘制工具提示，必须要标记为仅客户端
      */
     @OnlyIn(Dist.CLIENT)
-    void renderTooltip(GuiGraphics gui, Font font, T key, long amount, int mouseX, int mouseY);
+    void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY);
 }

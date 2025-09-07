@@ -355,7 +355,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     // ===== 渲染支持：交给外部渲染器；仅提供一个稳定的最小量副本 =====
 
     @Override
-    public IStackRender<?> getRender() {
+    public IStackRender getRender() {
         // 与 ItemStackKey 一致，采用单独渲染器（请在你的渲染模块提供 FluidStackKeyRender.INSTANCE）
         return FluidStackKeyRender.INSTANCE;
     }

@@ -289,6 +289,53 @@ public class UnifiedStorage implements IStackHandler
     }
 
     /**
+     * 辅助：根据键直接设置当前数量。
+     * 语义：
+     * - amount <= 0 ：移除该键（若存在）
+     * - 否则：将其数量设置为 min(amount, slotCapacity)
+     * 约束：
+     * - 若该键当前不存在且需要新建槽位，但已达 slotMaxSize，则不修改并返回原数量（通常为 0）
+     * 返回：最终存储的数量（long）
+     */
+    public long setAmountByKey(IStackKey<?> key, long amount) {
+        if (key == null) return 0L;
+
+        long current = storage.getOrDefault(key, 0L);
+        long target  = Math.max(0L, Math.min(amount, slotCapacity));
+
+        // 无变化，直接返回
+        if (target == current) return current;
+
+        // 目标为 0 -> 移除
+        if (target == 0L) {
+            if (current > 0L) {
+                storage.remove(key);
+                removeFromIndex(key);
+                onContentChanged(key, current, /*insert=*/false);
+            }
+            return 0L;
+        }
+
+        // 需要从 0 -> 正数：可能要新建槽位
+        if (current == 0L) {
+            if (!posMap.containsKey(key) && slotIndex.size() >= slotMaxSize) {
+                // 槽位不足：不做修改
+                return current; // 一般为 0
+            }
+            storage.put(key, target);
+            ensureInIndex(key);
+            onContentChanged(key, target, /*insert=*/true);
+            return target;
+        }
+
+        // 已存在且为正：更新为目标值
+        storage.put(key, target);
+        long delta = Math.abs(target - current);
+        onContentChanged(key, delta, /*insert=*/target > current);
+        return target;
+    }
+
+    /**
      * “整对替换”：把该槽位的旧 KV 移除，再把传入的 KV 写入。
      * 若 newKey 已存在于其他槽位，不会产生重复槽位，新键仍占其原有槽位（数量被覆盖为 target）。
      */

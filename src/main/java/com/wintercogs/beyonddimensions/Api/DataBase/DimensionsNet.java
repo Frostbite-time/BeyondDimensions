@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Api.DataBase;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
@@ -218,7 +218,7 @@ public class DimensionsNet extends SavedData
             CompoundTag energyTag = tag.getCompound("EnergyStorage");
             if (energyTag.contains("Energy"))
             {
-                net.unifiedStorage.insert(new EnergyStackType(energyTag.getLong("Energy")),false);
+                net.unifiedStorage.insert(EnergyStackKey.INSTANCE, energyTag.getLong("Energy"),false);
             }
         }
 
@@ -451,9 +451,9 @@ public class DimensionsNet extends SavedData
                 addPlayer(entry.getKey());
         }
         // 合并统一存储系统
-        for(IStackType stack : otherNet.getUnifiedStorage().getStorage())
+        for(KeyAmount stack : otherNet.getUnifiedStorage().getStorage())
         {
-            unifiedStorage.insert(stack,false);
+            unifiedStorage.insert(stack.key(),stack.amount(),false);
         }
 
         // 销毁另一个网络
@@ -526,8 +526,7 @@ public class DimensionsNet extends SavedData
         if(currentTime <= 0)
         {
             ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(),1);
-            IStackType stackType = new ItemStackType(stack);
-            this.unifiedStorage.insert(stackType,false);
+            this.unifiedStorage.insert(new ItemStackKey(stack),stack.getCount(),false);
             currentTime = holdTime;
         }
 

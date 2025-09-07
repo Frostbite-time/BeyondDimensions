@@ -5,7 +5,7 @@ import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.MEStorage;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import net.minecraft.network.chat.Component;
 
@@ -30,8 +30,8 @@ public class NetStorage implements MEStorage
     @Override
     public long insert(AEKey what, long amount, Actionable mode, IActionSource source)
     {
-        return AEHelper.fromAEKeyToIStack(what,amount)
-                .map(stack -> amount - storage.insert(stack, mode.isSimulate()).getStackAmount())
+        return AEHelper.fromAEKeyToIStack(what)
+                .map(stack -> amount - storage.insert(stack,amount, mode.isSimulate()).amount())
                 .orElse(0L);
     }
 
@@ -39,17 +39,17 @@ public class NetStorage implements MEStorage
     @Override
     public long extract(AEKey what, long amount, Actionable mode, IActionSource source)
     {
-        return AEHelper.fromAEKeyToIStack(what, amount)
-                .map(stack -> storage.extract(stack, mode.isSimulate()).getStackAmount())
+        return AEHelper.fromAEKeyToIStack(what)
+                .map(stack -> storage.extract(stack,amount, mode.isSimulate()).amount())
                 .orElse(0L);
     }
 
     @Override
     public void getAvailableStacks(KeyCounter out)
     {
-        for(IStackType stack : storage.getStorage())
+        for(KeyAmount stack : storage.getStorage())
         {
-            AEHelper.fromIStackToAEKey(stack).ifPresent(aeKey -> out.add(aeKey,stack.getStackAmount()));
+            AEHelper.fromIStackToAEKey(stack.key()).ifPresent(aeKey -> out.add(aeKey,stack.amount()));
         }
     }
 

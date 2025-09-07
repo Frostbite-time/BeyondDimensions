@@ -99,7 +99,7 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
     }
 
     @Override
-    public IStackRender<?> getRender() {
+    public IStackRender getRender() {
         return WardenSoulStackKeyRender.INSTANCE;
     }
 

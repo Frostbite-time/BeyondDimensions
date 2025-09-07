@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Integration.JEI.RecipeTransfer;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Packet.RecipeFillC2SPacket;
 import mezz.jei.api.constants.RecipeTypes;
@@ -59,7 +59,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
 
         // 收集所有可用物品来源（合成槽+存储槽）
         List<Slot> craftingSlots = getInputSources(container);
-        List<IStackType> storageSlots = container.storage.getStorage();
+        List<KeyAmount> storageSlots = container.storage.getStorage();
         List<ItemStack> availableItems = new ArrayList<>();
 
         // 收集合成槽物品
@@ -70,9 +70,9 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
         }
 
         // 收集存储槽物品
-        for (IStackType stackType : storageSlots) {
-            if (stackType instanceof ItemStackType itemStackType) {
-                ItemStack stack = itemStackType.getStack();
+        for (KeyAmount stackType : storageSlots) {
+            if (stackType.key() instanceof ItemStackKey itemStackKey) {
+                ItemStack stack = itemStackKey.copyStack();
                 if (!stack.isEmpty()) {
                     availableItems.add(stack);
                 }

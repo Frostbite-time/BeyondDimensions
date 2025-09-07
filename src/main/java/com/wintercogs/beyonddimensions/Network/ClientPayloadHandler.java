@@ -156,7 +156,7 @@ public class ClientPayloadHandler
                     {
                         if(menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
                         {
-                            slot.setStackDirectly(packet.stack());
+                            slot.setStackDirectly(packet.stack().key(),packet.stack().amount());
                         }
                     }
                 }

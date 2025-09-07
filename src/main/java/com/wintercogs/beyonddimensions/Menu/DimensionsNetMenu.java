@@ -2,7 +2,8 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
@@ -27,7 +28,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -243,9 +243,9 @@ public class DimensionsNetMenu extends BDBaseMenu
     public void updateViewerStorage()
     {
         viewerStorage.clearStorage();
-        for(IStackType stack : this.storage.getStorage())
+        for(KeyAmount stack : this.storage.getStorage())
         {
-            this.viewerStorage.insert(stack.copy(),false);
+            this.viewerStorage.insert(stack.key(),stack.amount(),false);
         }
         buildIndexList(new ArrayList<>(viewerStorage.getStorage()),true);
     }
@@ -257,24 +257,25 @@ public class DimensionsNetMenu extends BDBaseMenu
         // 由于viewerStorage的对象来自storage。而storage不会被随意清空
         // hashCode将能被自定义的copy函数一并传递，无需过多性能
 
-        Map<IStackType, Long> storageMap = new HashMap<>();
+        Map<IStackKey<?>, Long> storageMap = new HashMap<>();
 
         // 填充主存储物品数量 (O(n))
-        for (IStackType stack : storage.getStorage()) {
-            storageMap.put(stack, stack.getStackAmount());
+        for (KeyAmount stack : storage.getStorage()) {
+            storageMap.put(stack.key(), stack.amount());
         }
         // 更新查看者存储的数量 (O(m))
-        for (IStackType viewerStack : viewerStorage.getStorage()) {
+        for (KeyAmount viewerStack : viewerStorage.getStorage()) {
             // 使用哈希表直接查找数量，不存在时默认为0
-            long amount = storageMap.getOrDefault(viewerStack, 0L);
-            viewerStack.setStackAmount(amount);
+            long amount = storageMap.getOrDefault(viewerStack.key(), 0L);
+            // 这里内部会移除数量为0的情况，到时候再修改为锁定情况，现在先放着不管
+            viewerStorage.setAmountByKey(viewerStack.key(), amount);
         }
 
     }
 
 
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList(ArrayList<IStackType> itemStorage, boolean needsUpdateCacheIndex)
+    public void buildIndexList(ArrayList<KeyAmount> itemStorage, boolean needsUpdateCacheIndex)
     {
         if(!this.player.level().isClientSide())
         {
@@ -332,19 +333,19 @@ public class DimensionsNetMenu extends BDBaseMenu
      * @param unifiedStorage 要排序的存储
      * @return 完成排序的索引列表
      */
-    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackType> unifiedStorage)
+    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<KeyAmount> unifiedStorage)
     {
         // 合并过滤空气和搜索逻辑，避免遍历时删除
-        ArrayList<IStackType> cache      = new ArrayList<>();
+        ArrayList<KeyAmount> cache      = new ArrayList<>();
         ArrayList<Integer>   cacheIndex = new ArrayList<>();
 
         for (int i = 0; i < unifiedStorage.size(); i++) {
-            IStackType stack = unifiedStorage.get(i);
+            KeyAmount stack = unifiedStorage.get(i);
             if (stack == null || stack.isEmpty()) continue;
 
             // === 预先准备高频数据（全部小写，避免重复 toLowerCase 开销） ===
-            String displayName = stack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
-            String modId       = stack.getModId().toLowerCase(Locale.ENGLISH);
+            String displayName = stack.key().getRender().getDisplayName(stack.key()).getString().toLowerCase(Locale.ENGLISH);
+            String modId       = stack.key().getModId().toLowerCase(Locale.ENGLISH);
 
             /* =======================================================================
              * 1. 解析搜索串                      ────────────────────────────────
@@ -391,24 +392,24 @@ public class DimensionsNetMenu extends BDBaseMenu
         // 统一排序逻辑，避免重复代码
         ButtonState sortState = Config.uiSortButton;
         if (sortState != ButtonState.SORT_DEFAULT) {
-            Comparator<IStackType> comparator;
+            Comparator<KeyAmount> comparator;
             if(sortState == ButtonState.SORT_NAME)
-                comparator = Comparator.comparing(item -> item.getDisplayName().getString());
+                comparator = Comparator.comparing(item -> item.key().getRender().getDisplayName(item.key()).getString());
             else if(sortState == ButtonState.SORT_QUANTITY)
-                comparator = Comparator.comparingLong(IStackType::getStackAmount);
+                comparator = Comparator.comparingLong(KeyAmount::amount);
             else if(sortState == ButtonState.SORT_MODID)
-                comparator = Comparator.comparing(IStackType::getModId);
+                comparator = Comparator.comparing(ka -> ka.key().getModId());
             else // 保底条件
-                comparator = Comparator.comparing(item -> item.getDisplayName().getString());
+                comparator = Comparator.comparing(item -> item.key().getRender().getDisplayName(item.key()).getString());
 
 
             // 生成索引排序映射
-            ArrayList<IStackType> finalCache = cache;
+            ArrayList<KeyAmount> finalCache = cache;
             List<Integer> indices = IntStream.range(0, cache.size())
                     .parallel()
                     .boxed()
                     .sorted((a, b) -> comparator.compare(finalCache.get(a), finalCache.get(b)))
-                    .collect(Collectors.toList());
+                    .toList();
 
             // 这一步排序完成后不再需要缓存
             // 根据排序结果重组索引
@@ -463,7 +464,7 @@ public class DimensionsNetMenu extends BDBaseMenu
      * @param matchText 文本
      * @return 结果为真则意味存在
      */
-    private boolean checkTooltipMatches(IStackType stack, String matchText) {
+    private boolean checkTooltipMatches(KeyAmount stack, String matchText) {
         List<Component> toolTips = TooltipHelper.getTooltipLines(stack,
                 Item.TooltipContext.of(player.level()),
                 player,

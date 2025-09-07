@@ -2,8 +2,9 @@ package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
@@ -134,7 +135,7 @@ public class ServerPayloadHandler
                         menu.customClickHandler(packet.slotIndex(),packet.clickItem(),packet.button(),packet.shiftDown());
                         menu.broadcastChanges();
                         // 这里发包不是让客户端执行操作，而是解除锁定
-                        PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, new ItemStackType(ItemStack.EMPTY),1,false));
+                        PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, new KeyAmount(new ItemStackKey(),0),1,false));
                     }
                 }
 
@@ -213,7 +214,7 @@ public class ServerPayloadHandler
         context.enqueueWork(
                 () ->
                 {
-                    if(packet.clickStack() instanceof ItemStackType clickItem)
+                    if(packet.clickStack().key() instanceof ItemStackKey clickItem)
                     {
                         Player player = context.player();
 
@@ -226,8 +227,8 @@ public class ServerPayloadHandler
                                 {
                                     if(menu.inventoryStartIndex<=invSlot.index&& invSlot.index<menu.inventoryEndIndex)
                                     {
-                                        if(ItemStack.isSameItemSameComponents(clickItem.getStack(), invSlot.getItem()))
-                                            menu.customClickHandler(invSlot.index, new ItemStackType(invSlot.getItem()), 0, true);
+                                        if(ItemStack.isSameItemSameComponents(clickItem.copyStack(), invSlot.getItem()))
+                                            menu.customClickHandler(invSlot.index, new KeyAmount(new ItemStackKey(invSlot.getItem()),invSlot.getItem().getCount()), 0, true);
                                     }
                                 }
                             }
@@ -255,14 +256,14 @@ public class ServerPayloadHandler
                     if(net == null) return;
                     UnifiedStorage storage = net.getUnifiedStorage();
 
-                    ItemStackType target = null;
-                    for(IStackType stack : storage.getStorage())
+                    IStackKey<?> target = null;
+                    for(KeyAmount stack : storage.getStorage())
                     {
-                        if(stack instanceof ItemStackType itemStackType)
+                        if(stack.key() instanceof ItemStackKey itemStackKey)
                         {
-                            if(itemStackType.getStack().getItem() == packet.targetStack().getItem())
+                            if(itemStackKey.getSource() == packet.targetStack().getItem())
                             {
-                                target = (ItemStackType) itemStackType.copyWithCount(itemStackType.getVanillaMaxStackSize());
+                                target = itemStackKey;
                                 break;
                             }
                         }
@@ -270,7 +271,7 @@ public class ServerPayloadHandler
 
                     if(target != null && player.getMainHandItem().isEmpty())
                     {
-                        ItemStack extract = ((ItemStackType) storage.extract(target,false)).copyStack();
+                        ItemStack extract = (ItemStack) storage.extract(target,target.getVanillaMaxStackSize(),false).toStack();
                         player.setItemInHand(InteractionHand.MAIN_HAND,extract);
                     }
                 }
@@ -287,8 +288,8 @@ public class ServerPayloadHandler
                     DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
                     if(net == null) return;
                     UnifiedStorage storage = net.getUnifiedStorage();
-                    IStackType remaining = storage.insert(new ItemStackType(player.getMainHandItem()),false);
-                    player.getMainHandItem().setCount((BDMath.clampLongToInt(remaining.getStackAmount())));
+                    KeyAmount remaining = storage.insert(new ItemStackKey(player.getMainHandItem()),player.getMainHandItem().getCount(),false);
+                    player.getMainHandItem().setCount((BDMath.clampLongToInt(remaining.amount())));
                 }
         );
     }
@@ -313,7 +314,7 @@ public class ServerPayloadHandler
                     {
                         if(menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
                         {
-                            slot.setStackDirectly(packet.stack());
+                            slot.setStackDirectly(packet.stack().key(), packet.stack().amount());
                         }
                     }
                 }

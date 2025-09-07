@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.DataComponents;
 
 import com.mojang.serialization.Codec;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
@@ -46,11 +45,11 @@ public class ModDataComponents {
     // IStackType类已经实现了hashCode和equals，直接使用即可
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<KeyAmount>>> ISTACK_SLOTS = register(
       "istack_slots", builder -> builder.persistent(
-                    IStackType.CODEC.listOf()
+                    KeyAmount.CODEC.listOf()
             ).networkSynchronized(
                     ByteBufCodecs.collection(
                             ArrayList::new,
-                            IStackType.STREAM_CODEC
+                            KeyAmount.STREAM_CODEC
                     )
             )
     );

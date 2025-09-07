@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Packet.DisorderedSlotGroupSyncPacket;
 import io.netty.buffer.Unpooled;
@@ -20,10 +22,10 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
 {
     public final int groupId; // 用于读取时的标记
     private final BDBaseMenu menu;
-    private final IStackTypedHandler storage; //对真实存储的直接引用
-    private final List<IStackType> lastStorage = new ArrayList<>();
+    private final IStackHandler storage; //对真实存储的直接引用
+    private final List<KeyAmount> lastStorage = new ArrayList<>();
 
-    public DisorderedSlotGroupSync(BDBaseMenu menu,int id,IStackTypedHandler storage)
+    public DisorderedSlotGroupSync(BDBaseMenu menu,int id,IStackHandler storage)
     {
         this.menu = menu;
         this.groupId = id;
@@ -41,34 +43,34 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     public void updateChange()
     {
         // 开始运行原子化物品比较
-        ArrayList<IStackType> changedItem = new ArrayList<>();
+        ArrayList<IStackKey<?>> changedItem = new ArrayList<>();
         ArrayList<Long> changedCount = new ArrayList<>();
 
         // 为两个缓存数组分别创建Map
-        Map<IStackType, Long> lastMap = new HashMap<>();
-        for (IStackType stack : this.lastStorage) {
-            lastMap.put(stack, lastMap.getOrDefault(stack, (long) 0) + stack.getStackAmount());
+        Map<IStackKey<?>, Long> lastMap = new HashMap<>();
+        for (KeyAmount stack : this.lastStorage) {
+            lastMap.put(stack.key(), lastMap.getOrDefault(stack.key(), (long) 0) + stack.amount());
         }
 
-        Map<IStackType, Long> nowMap = new HashMap<>();
-        for (IStackType stack : this.storage.getStorage()) {
-            nowMap.put(stack, nowMap.getOrDefault(stack, (long) 0) + stack.getStackAmount());
+        Map<IStackKey<?>, Long> nowMap = new HashMap<>();
+        for (KeyAmount stack : this.storage.getStorage()) {
+            nowMap.put(stack.key(), nowMap.getOrDefault(stack.key(), (long) 0) + stack.amount());
         }
         // 缓存结束后，立刻更新last列表
         refreshLast();
 
         // 比较两个Map的差异
-        Set<IStackType> allKeys = new HashSet<>();
+        Set<IStackKey<?>> allKeys = new HashSet<>();
         allKeys.addAll(lastMap.keySet());
         allKeys.addAll(nowMap.keySet());
 
-        for (IStackType key : allKeys) {
+        for (IStackKey<?> key : allKeys) {
             long lastCount = lastMap.getOrDefault(key, (long) 0);
             long nowCount = nowMap.getOrDefault(key, (long) 0);
             long delta = nowCount - lastCount;
 
             if (delta != 0) {
-                changedItem.add(key.copy()); // 获取基础物品的拷贝
+                changedItem.add(key); // 获取基础物品的拷贝
                 changedCount.add(delta);
             }
         }
@@ -90,7 +92,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
                 );
 
                 // 序列化物品和数量
-                IStackType stack = changedItem.get(i);
+                IStackKey<?> stack = changedItem.get(i);
                 if (stack != null) {
                     stack.serialize(registryBuf);
                 }
@@ -99,7 +101,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
                 entrySizes.add(buf.readableBytes());
             }
             // 动态分包
-            List<IStackType> batchItems = new ArrayList<>();
+            List<IStackKey<?>> batchItems = new ArrayList<>();
             List<Long> batchCounts = new ArrayList<>();
             int currentSize = 0;
             for (int i = 0; i < changedItem.size(); i++) {
@@ -133,29 +135,29 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
 
     // 仅客户端 负责读取
     @Override
-    public void loadChange(List<IStackType> stacks, List<Long> changedCounts)
+    public void loadChange(List<IStackKey<?>> stacks, List<Long> changedCounts)
     {
-        IStackTypedHandler clientStorage = storage;
+        IStackHandler clientStorage = storage;
         int i = 0;
-        for(IStackType remoteStack : stacks)
+        for(IStackKey<?> remoteStack : stacks)
         {
             // 如果当前存储存在此物品
-            if(clientStorage.hasStackType(remoteStack))
+            if(clientStorage.hasStack(remoteStack))
             {
                 if(changedCounts.get(i) > 0)
                 {
-                    clientStorage.insert(remoteStack.copyWithCount(changedCounts.get(i)),false);
+                    clientStorage.insert(remoteStack,changedCounts.get(i),false);
                 }
                 else
                 {
-                    clientStorage.extract(remoteStack.copyWithCount(-changedCounts.get(i)),false);
+                    clientStorage.extract(remoteStack,-changedCounts.get(i),false);
                 }
             }
             else // 如果当前存储不存在此物品
             {
                 if(changedCounts.get(i) > 0)
                 {
-                    clientStorage.insert(remoteStack.copyWithCount(changedCounts.get(i)),false);
+                    clientStorage.insert(remoteStack,changedCounts.get(i),false);
                 }
             }
             i++; // 一次遍历完毕后索引自增
@@ -174,9 +176,9 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     public void refreshLast()
     {
         this.lastStorage.clear();
-        for(IStackType stack : this.storage.getStorage())
+        for(KeyAmount stack : this.storage.getStorage())
         {
-            this.lastStorage.add(stack.copy());
+            this.lastStorage.add(stack);
         }
     }
 }

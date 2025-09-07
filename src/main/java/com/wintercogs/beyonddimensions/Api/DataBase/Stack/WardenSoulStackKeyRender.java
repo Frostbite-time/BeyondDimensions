@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class WardenSoulStackKeyRender implements IStackRender<WardenSoulStackKey> {
+public class WardenSoulStackKeyRender implements IStackRender {
     public static final WardenSoulStackKeyRender INSTANCE = new WardenSoulStackKeyRender();
 
     // 粒子状态（静态，避免频繁分配）
@@ -29,7 +29,7 @@ public class WardenSoulStackKeyRender implements IStackRender<WardenSoulStackKey
     private WardenSoulStackKeyRender() {}
 
     @Override
-    public void render(GuiGraphics gui, WardenSoulStackKey key, int x, int y) {
+    public void render(GuiGraphics gui, IStackKey<?> key, int x, int y) {
         var mc = Minecraft.getInstance();
         if (mc.level == null) return;
 
@@ -128,12 +128,12 @@ public class WardenSoulStackKeyRender implements IStackRender<WardenSoulStackKey
     }
 
     @Override
-    public Component getDisplayName(WardenSoulStackKey key) {
-        return key.getRenderStack().getName();
+    public Component getDisplayName(IStackKey<?> key) {
+        return WardenSoulStackKey.INSTANCE.getRenderStack().getName();
     }
 
     @Override
-    public List<Component> getTooltipLines(WardenSoulStackKey key, long amount, Item.TooltipContext tooltipContext,
+    public List<Component> getTooltipLines(IStackKey<?> key, long amount, Item.TooltipContext tooltipContext,
                                            @Nullable net.minecraft.world.entity.player.Player player,
                                            TooltipFlag tooltipFlag) {
         return List.of(
@@ -143,12 +143,12 @@ public class WardenSoulStackKeyRender implements IStackRender<WardenSoulStackKey
     }
 
     @Override
-    public Optional<TooltipComponent> getTooltipImage(WardenSoulStackKey key) {
+    public Optional<TooltipComponent> getTooltipImage(IStackKey<?> key) {
         return Optional.empty();
     }
 
     @Override
-    public void renderTooltip(GuiGraphics gui, Font font, WardenSoulStackKey key, long amount, int mouseX, int mouseY) {
+    public void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY) {
         var mc = Minecraft.getInstance();
         var ctx = mc.level != null ? Item.TooltipContext.of(mc.level) : Item.TooltipContext.EMPTY;
         gui.renderTooltip(

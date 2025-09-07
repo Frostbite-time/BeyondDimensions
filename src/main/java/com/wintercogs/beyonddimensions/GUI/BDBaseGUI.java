@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Packet.BatchTransferPacket;
@@ -47,8 +47,8 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
             if(this.hoveredSlot instanceof AbstractStackTypedSlot sSlot)
             {
-                IStackType stack = sSlot.getStack();
-                stack.renderTooltip(guiGraphics,minecraft.font,mouseX,mouseY);
+                KeyAmount stack = sSlot.getStack();
+                stack.key().getRender().renderTooltip(guiGraphics,minecraft.font,stack.key(),stack.amount(),mouseX,mouseY);
             }
             else
             {
@@ -66,11 +66,12 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
             // 获取stack
             int x = slot.x;
             int y = slot.y;
-            IStackType stack = sSlot.getStack();
+            KeyAmount stack = sSlot.getStack();
 
             if(stack != null)
             {
-                stack.render(guiGraphics,x,y);
+                stack.key().getRender().render(guiGraphics,stack.key(),x,y);
+                stack.key().getRender().renderAmount(guiGraphics,stack.amount(),x,y);
             }
 
         }
@@ -132,7 +133,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
             if (true)
             {
                 int slotId = slot.index;
-                IStackType clickItem;
+                KeyAmount clickItem;
                 if(hasShiftDown())
                 {
                     if(slot instanceof AbstractStackTypedSlot sSlot)
@@ -141,7 +142,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                     }
                     else
                     {
-                        clickItem = new ItemStackType(slot.getItem());
+                        clickItem = new KeyAmount(new ItemStackKey(slot.getItem()),slot.getItem().getCount());
 
                         // 快速移动仓库物品
                         // 原版会处理一部分快速移动 此处处理原版未能正常处理的部分
@@ -149,7 +150,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                         // 因为操作基本全由服务端处理
                         if(lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
                         {
-                            PacketDistributor.sendToServer(new BatchTransferPacket(new ItemStackType(lastInvClickedStack),true));
+                            PacketDistributor.sendToServer(new BatchTransferPacket(new KeyAmount(new ItemStackKey(lastInvClickedStack),lastInvClickedStack.getCount()) ,true));
                             menu.isHanding = true;
                         }
                         else if(menu.inventoryStartIndex<=slotId&& slotId<menu.inventoryEndIndex)

@@ -101,7 +101,7 @@ public class SourceStackKey extends LongStackKey<SourceType> {
     }
 
     @Override
-    public IStackRender<?> getRender() {
+    public IStackRender getRender() {
         return SourceStackKeyRender.INSTANCE;
     }
 
