@@ -53,6 +53,14 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
     }
 
     @Override
+    public @Nullable KeyAmount fromStackObject(Object stack)
+    {
+        if(stack instanceof WardenSoulType wardenSoulType)
+            return new KeyAmount(WardenSoulStackKey.INSTANCE, wardenSoulType.getStackCount());
+        return null;
+    }
+
+    @Override
     public ResourceLocation getTypeID() {
         return ID;
     }
@@ -69,13 +77,13 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
     }
 
     @Override
-    public @Nullable WardenSoulStackKey fromObject(Object key, net.minecraft.core.component.DataComponentPatch ignored) {
+    public @Nullable WardenSoulStackKey fromSourceObject(Object key, net.minecraft.core.component.DataComponentPatch ignored) {
         if (key instanceof WardenSoulType || key instanceof Number) return INSTANCE;
         return null;
     }
 
     @Override
-    public Object getSource() {
+    public WardenSoulType getSource() {
         return new WardenSoulType(0);
     }
 

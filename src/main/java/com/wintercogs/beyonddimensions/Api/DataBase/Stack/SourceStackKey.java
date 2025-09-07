@@ -54,6 +54,14 @@ public class SourceStackKey extends LongStackKey<SourceType> {
     }
 
     @Override
+    public @Nullable KeyAmount fromStackObject(Object stack)
+    {
+        if(stack instanceof SourceType sourceType)
+            return new KeyAmount(SourceStackKey.INSTANCE, sourceType.getStackCount());
+        return null;
+    }
+
+    @Override
     public ResourceLocation getTypeID() {
         return ID;
     }
@@ -71,13 +79,13 @@ public class SourceStackKey extends LongStackKey<SourceType> {
 
     /** 允许从 SourceType 或 Number（数量无意义）映射为同一个 Key 实例 */
     @Override
-    public @Nullable SourceStackKey fromObject(Object key, net.minecraft.core.component.DataComponentPatch ignored) {
+    public @Nullable SourceStackKey fromSourceObject(Object key, net.minecraft.core.component.DataComponentPatch ignored) {
         if (key instanceof SourceType || key instanceof Number) return INSTANCE;
         return null;
     }
 
     @Override
-    public Object getSource() {
+    public SourceType getSource() {
         return new SourceType(0);
     }
 

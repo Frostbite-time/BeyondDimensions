@@ -60,13 +60,15 @@ public interface IStackKey<T>
      */
     MapCodec<? extends IStackKey<T>> codec();
 
+    @Nullable KeyAmount fromStackObject(Object stack);
+
     /**
      * 从未知Object构建实例，如果Object不合法，则返回null
      * @param key 类似Item
      * @param dataComponentPatch 数据组件
      * @return 类似ItemStack
      */
-    @Nullable IStackKey<T> fromObject(Object key, DataComponentPatch dataComponentPatch);
+    @Nullable IStackKey<T> fromSourceObject(Object key, DataComponentPatch dataComponentPatch);
 
     /**
      * 获取堆叠的类型，如ItemStackType，返回ItemStack.class

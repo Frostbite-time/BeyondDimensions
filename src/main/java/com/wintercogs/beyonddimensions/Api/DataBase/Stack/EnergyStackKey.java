@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class EnergyStackKey extends LongStackKey<EnergyType> {
@@ -56,13 +57,21 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     }
 
     @Override
+    public @Nullable KeyAmount fromStackObject(Object stack)
+    {
+        if(stack instanceof EnergyType energyType)
+            return new KeyAmount(EnergyStackKey.INSTANCE, energyType.getStackCount());
+        return null;
+    }
+
+    @Override
     public ResourceLocation getTypeID() {
         return ID;
     }
 
     /** 允许从 EnergyType/数字（数量无意义）转换为同一个 Key 实例 */
     @Override
-    public @Nullable EnergyStackKey fromObject(Object key, net.minecraft.core.component.DataComponentPatch ignored) {
+    public @Nullable EnergyStackKey fromSourceObject(Object key, net.minecraft.core.component.DataComponentPatch ignored) {
         if (key instanceof EnergyType || key instanceof Number) {
             return INSTANCE;
         }
@@ -70,7 +79,7 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     }
 
     @Override
-    public Object getSource() {
+    public @NotNull EnergyType getSource() {
         // 提供一个“空”源对象（仅用于需要展示/占位的场景）
         return new EnergyType(0);
     }

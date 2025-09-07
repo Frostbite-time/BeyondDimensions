@@ -153,7 +153,15 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     }
 
     @Override
-    public @Nullable FluidStackKey fromObject(Object key, DataComponentPatch dataComponentPatch) {
+    public @Nullable KeyAmount fromStackObject(Object stack)
+    {
+        if(stack instanceof FluidStack fluidStack)
+            return new KeyAmount(new FluidStackKey(fluidStack), fluidStack.getAmount());
+        return null;
+    }
+
+    @Override
+    public @Nullable FluidStackKey fromSourceObject(Object key, DataComponentPatch dataComponentPatch) {
         if (key instanceof Fluid f) {
             DataComponentPatch p = (dataComponentPatch != null && !dataComponentPatch.isEmpty())
                     ? dataComponentPatch
@@ -169,7 +177,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     }
 
     @Override
-    public @NotNull Object getSource() {
+    public @NotNull Fluid getSource() {
         return fluid;
     }
 

@@ -1,13 +1,14 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Item.Custom.XpExchangeItem;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
@@ -25,9 +26,9 @@ import java.util.function.Function;
 public class FlagStackTypedSlot extends AbstractStackTypedSlot
 {
 
-    private IStackType lastStack = new ItemStackType();
+    private KeyAmount lastStack = new KeyAmount(new ItemStackKey(), 0);
 
-    public FlagStackTypedSlot(BDBaseMenu menu, IStackTypedHandler storage, int slotIndex, int xPosition, int yPosition)
+    public FlagStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex, int xPosition, int yPosition)
     {
         super(menu, storage, slotIndex, xPosition, yPosition);
         setFake(true); // 标记性槽位为假槽位
@@ -42,31 +43,30 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     // 内部会copy这个stack，因此无需再次操作
     // Flag实际上会通过insert插入，这样能考虑内部的isStackValid，从而限制标记类型
     @Override
-    public void setStackDirectly(IStackType stack)
+    public void setStackDirectly(IStackKey<?> key, long amount)
     {
-        storage.setStackDirectly(theSlot, new ItemStackType());
-        storage.insert(theSlot,stack,false);
+        storage.setStackDirectly(theSlot, key, amount);
     }
 
     @Override
-    public IStackType safeInsert(IStackType stack)
+    public KeyAmount safeInsert(IStackKey<?> key, long amount)
     {
-        if(stack != null)
+        if(key != null)
         {
-            setStackDirectly(stack);
+            setStackDirectly(key,amount);
         }
-        return stack;
+        return new KeyAmount(key, amount);
     }
 
     @Override
-    public IStackType safeExtract(IStackType stack)
+    public KeyAmount safeExtract(IStackKey<?> key, long amount)
     {
-        setStackDirectly(new ItemStackType());
-        return stack;
+        setStackDirectly(new ItemStackKey() ,amount);
+        return new KeyAmount(new ItemStackKey(), amount); // 标记槽永远取出空
     }
 
     @Override
-    public void click(IStackType clickStack, int button, Player player)
+    public void click(KeyAmount clickStack, int button, Player player)
     {
         // 获取光标物品
         ItemStack carriedItem = menu.getCarried().copy();
@@ -78,15 +78,13 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
 
                 if(button==0)
                 {
-                    ItemStack copy = carriedItem.copy();
-                    copy.setCount(1);
-                    setStackDirectly(new ItemStackType(copy));
+                    setStackDirectly(new ItemStackKey(carriedItem), 1);
                 }
                 else if(button==1)
                 {
                     if(carriedItem.getItem() instanceof XpExchangeItem)
                     {
-                        setStackDirectly(new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source(),1),1));
+                        setStackDirectly(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(),1)) ,1);
                     }
                     else
                     {
@@ -105,11 +103,16 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                                 {
                                     for(int index=0;index<stackHandlerWrapper.getSlots();index++)
                                     {
-                                        IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(0),1);
-                                        if(stack!=null&& !stack.isEmpty())
+                                        IStackKey<?> typeKey = StackKeyRegistry.getType(typeId);
+                                        KeyAmount typeStack = typeKey.fromStackObject(stackHandlerWrapper.getStackInSlot(0));
+                                        if(typeStack != null)
                                         {
-                                            setStackDirectly(stack);
-                                            break;
+                                            KeyAmount stack = new KeyAmount(typeStack.key(), 1);
+                                            if(stack.key()!=null&& !stack.isEmpty())
+                                            {
+                                                setStackDirectly(stack.key(),stack.amount());
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -125,14 +128,14 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
             if (carriedItem.isEmpty())
             {
                 //槽位物品存在，携带物品为空，尝试清空标记
-                setStackDirectly(new ItemStackType());
+                setStackDirectly(new ItemStackKey(), 0);
             }
             else if (true)
             {   //槽位物品存在，携带物品存在，物品可以放置，取消标记
 
-                setStackDirectly(new ItemStackType());
+                setStackDirectly(new ItemStackKey(), 0);
             }
-            else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
+            else if (clickStack.key().isSameTypeSameComponents(new ItemStackKey(carriedItem)))
             {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
 
             }
@@ -143,7 +146,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     // 标记性槽位不能进行快速转移
     // 任何快速转移的意图直接移交给click处理
     @Override
-    public void quickMove(IStackType clickStack, int button, Player player)
+    public void quickMove(KeyAmount clickStack, int button, Player player)
     {
         // flag的quickMove和click走统一通道，因此无需额外检查，此处保留注释，防止某一天忘记
         // if(!(quickMoveSlotStartIndex >= 0 && quickMoveSlotEndIndex >= 0 && quickMoveSlotStartIndex < quickMoveSlotEndIndex))
@@ -154,28 +157,28 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public void updateChange()
     {
-        IStackType currentStack = storage.getStackBySlot(this.getSlotIndex());
-        if(currentStack == null)
+        KeyAmount currentStack = storage.getStackBySlot(this.getSlotIndex());
+        if(currentStack.key() == null)
         {
-            lastStack = new ItemStackType();
-            PacketDistributor.sendToPlayer((ServerPlayer) menu.player,new OrderedStackTypedSlotPacket(index,theSlot,lastStack,0));
+            lastStack = new KeyAmount(new ItemStackKey(), 0);
+            PacketDistributor.sendToPlayer((ServerPlayer) menu.player,new OrderedStackTypedSlotPacket(index,theSlot,lastStack.key(),lastStack.amount()));
         }
         else if(currentStack.isEmpty() && lastStack.isEmpty())
         {
         }
-        else if(lastStack.getStackAmount() != currentStack.getStackAmount()
-                ||!lastStack.getTypeId().equals(currentStack.getTypeId())
-                ||!lastStack.isSameTypeSameComponents(currentStack))
+        else if(lastStack.amount() != currentStack.amount()
+                ||!lastStack.key().getTypeId().equals(currentStack.key().getTypeId())
+                ||!lastStack.key().isSameTypeSameComponents(currentStack.key()))
         {
             lastStack = currentStack;
-            PacketDistributor.sendToPlayer((ServerPlayer) menu.player,new OrderedStackTypedSlotPacket(index,theSlot,lastStack,lastStack.getStackAmount()));
+            PacketDistributor.sendToPlayer((ServerPlayer) menu.player,new OrderedStackTypedSlotPacket(index,theSlot,lastStack.key(),lastStack.amount()));
         }
     }
 
     @Override
-    public void loadChange(int where ,IStackType newStack, long newAmount)
+    public void loadChange(int where ,IStackKey<?> newKey, long newAmount)
     {
         // 同步读取仍直接操作storage
-        storage.setStackDirectly(where, newStack);
+        storage.setStackDirectly(where, newKey, newAmount);
     }
 }

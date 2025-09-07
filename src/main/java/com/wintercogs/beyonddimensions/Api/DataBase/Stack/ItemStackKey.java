@@ -147,7 +147,15 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
-    public @Nullable ItemStackKey fromObject(Object key, DataComponentPatch dataComponentPatch)
+    public @Nullable KeyAmount fromStackObject(Object stack)
+    {
+        if(stack instanceof ItemStack itemStack)
+            return new KeyAmount(new ItemStackKey(itemStack), itemStack.getCount());
+        return null;
+    }
+
+    @Override
+    public @Nullable ItemStackKey fromSourceObject(Object key, DataComponentPatch dataComponentPatch)
     {
         if (key instanceof Item it) {
             // 未知路径的清洗一遍后再送入

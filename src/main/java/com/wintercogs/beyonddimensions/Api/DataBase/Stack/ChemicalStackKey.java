@@ -114,7 +114,15 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     }
 
     @Override
-    public @Nullable ChemicalStackKey fromObject(Object key, DataComponentPatch ignored) {
+    public @Nullable KeyAmount fromStackObject(Object stack)
+    {
+        if(stack instanceof ChemicalStack chemicalStack)
+            return new KeyAmount(new ChemicalStackKey(chemicalStack), chemicalStack.getAmount());
+        return null;
+    }
+
+    @Override
+    public @Nullable ChemicalStackKey fromSourceObject(Object key, DataComponentPatch ignored) {
         if (key instanceof Chemical c) {
             return new ChemicalStackKey(c);
         }
@@ -127,7 +135,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     }
 
     @Override
-    public @NotNull Object getSource() {
+    public @NotNull Chemical getSource() {
         return chemical;
     }
 

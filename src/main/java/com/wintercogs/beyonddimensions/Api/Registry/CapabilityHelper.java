@@ -1,8 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.Registry;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Api.Util.CommonHandler;
@@ -66,14 +65,14 @@ public class CapabilityHelper
         USHandlerMap.put(type.getTypeId(), USHandler.contextual(handler));
     }
 
-    public static <T> void registerStackTypedHandler(IStackKey<?> type, Function<StackTypedHandler, T> handler)
+    public static <T> void registerStackTypedHandler(IStackKey<?> type, Function<StackHandler, T> handler)
     {
         if(CommonHandlerMap.containsKey(type.getTypeId()))
             throw new RuntimeException("此类型的通用存储分化表已被注册：" + type.getTypeId());
         CommonHandlerMap.put(type.getTypeId(), CommonHandler.contextless(handler));
     }
 
-    public static <T> void registerStackTypedHandler(IStackKey<?> type, BiFunction<StackTypedHandler, CapCtx, T> handler)
+    public static <T> void registerStackTypedHandler(IStackKey<?> type, BiFunction<StackHandler, CapCtx, T> handler)
     {
         if(CommonHandlerMap.containsKey(type.getTypeId()))
             throw new RuntimeException("此类型的通用存储分化表已被注册：" + type.getTypeId());

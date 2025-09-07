@@ -1,7 +1,17 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +26,45 @@ import java.util.*;
  */
 public class StackHandler implements IStackHandler
 {
+
+    public static final Codec<StackHandler> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    KeyAmount.CODEC.listOf().fieldOf("stacks")
+                            .forGetter(stackHandler -> {
+                                java.util.ArrayList<KeyAmount> list = new java.util.ArrayList<>(stackHandler.size);
+                                for (int i = 0; i < stackHandler.size; i++) {
+                                    list.add(new KeyAmount(stackHandler.keys[i], stackHandler.amounts[i]));
+                                }
+                                return list;
+                            })
+            ).apply(instance, StackHandler::new)
+    );
+
+    public static final StreamCodec<RegistryFriendlyByteBuf,StackHandler> STREAM_CODEC = new StreamCodec<>()
+    {
+        @Override
+        public StackHandler decode(RegistryFriendlyByteBuf buf)
+        {
+            int size = buf.readVarInt();
+            ArrayList<KeyAmount> list = new ArrayList<>();
+            for(int i = 0; i < size; i++)
+            {
+                list.add(new KeyAmount(IStackKey.deserializeCommon(buf), buf.readVarLong()));
+            }
+            return new StackHandler(list);
+        }
+
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, StackHandler stackHandler)
+        {
+            buf.writeVarInt(stackHandler.size);
+            for(int i = 0; i < stackHandler.size; i++)
+            {
+                stackHandler.keys[i].serialize(buf);
+                buf.writeVarLong(stackHandler.amounts[i]);
+            }
+        }
+    };
 
     /* ---------------- 基本存储（固定大小） ---------------- */
 
@@ -97,6 +146,24 @@ public class StackHandler implements IStackHandler
         this.amounts = new long[this.size];
         this.emptySlots = new BitSet(this.size);
         this.emptySlots.set(0, this.size, true); // 初始全部为空
+    }
+
+    public StackHandler(List<KeyAmount> stacks)
+    {
+        this(stacks.size());
+
+        for(int i=0;i<this.size;i++)
+        {
+            KeyAmount ka = stacks.get(i);
+            if(ka != null)
+            {
+                setStackDirectly(i,ka.key(),ka.amount());
+            }
+            else
+            {
+                setStackDirectly(i,new ItemStackKey(),0);
+            }
+        }
     }
 
     /* ---------------- IStackHandler 实现 ---------------- */
@@ -365,6 +432,27 @@ public class StackHandler implements IStackHandler
         // 有空位 BitSet 不等于“非空计数”，但 keys[slot]==null 意味该位为 1
         // 只要有任意非空槽位，即空位数 < 总槽位
         return emptySlots.cardinality() == size;
+    }
+
+    public CompoundTag serializeNBT(HolderLookup.Provider provider)
+    {
+        RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
+        Tag encoded = CODEC.encodeStart(ops, this)
+                .getOrThrow(msg -> new IllegalStateException());
+        // 这里一定是 CompoundTag（因为用了 fieldOf -> 记录结构）
+        return (CompoundTag) encoded;
+    }
+
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag)
+    {
+        clearStorage();
+        RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
+        StackHandler decoded = CODEC.parse(ops, tag)
+                .getOrThrow(msg -> new IllegalStateException());
+        for(int i = 0; i < decoded.size; i++)
+        {
+            setStackDirectly(i,decoded.keys[i],decoded.amounts[i]);
+        }
     }
 
     private void ensureInIndex(IStackKey<?> key)

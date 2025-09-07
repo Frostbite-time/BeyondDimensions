@@ -1,5 +1,10 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -9,6 +14,20 @@ import net.minecraft.world.item.ItemStack;
  */
 public record KeyAmount(IStackKey<?> key, long amount)
 {
+    public static final Codec<KeyAmount> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+            IStackKey.CODEC.fieldOf("key").forGetter(KeyAmount::key),
+            Codec.LONG.fieldOf("amount").forGetter(KeyAmount::amount)
+    ).apply(instance, KeyAmount::new));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, KeyAmount> STREAM_CODEC =
+            StreamCodec.composite(
+                    IStackKey.STREAM_CODEC,
+                    KeyAmount::key,
+                    ByteBufCodecs.VAR_LONG,
+                    KeyAmount::amount,
+                    KeyAmount::new
+            );
+
     public boolean isEmpty()
     {
         return key == null || amount <= 0L || key.isEmpty();

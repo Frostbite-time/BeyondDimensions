@@ -54,6 +54,14 @@ public class ManaStackKey extends LongStackKey<ManaType> {
     }
 
     @Override
+    public @Nullable KeyAmount fromStackObject(Object stack)
+    {
+        if(stack instanceof ManaType manaType)
+            return new KeyAmount(ManaStackKey.INSTANCE, manaType.getStackCount());
+        return null;
+    }
+
+    @Override
     public ResourceLocation getTypeID() {
         return ID;
     }
@@ -71,7 +79,7 @@ public class ManaStackKey extends LongStackKey<ManaType> {
 
     /** 允许从 ManaType 或 Number（数量无意义）映射到同一个 Key 实例 */
     @Override
-    public @Nullable ManaStackKey fromObject(Object key, net.minecraft.core.component.DataComponentPatch ignored) {
+    public @Nullable ManaStackKey fromSourceObject(Object key, net.minecraft.core.component.DataComponentPatch ignored) {
         if (key instanceof ManaType || key instanceof Number) {
             return INSTANCE;
         }
@@ -79,7 +87,7 @@ public class ManaStackKey extends LongStackKey<ManaType> {
     }
 
     @Override
-    public Object getSource() {
+    public ManaType getSource() {
         return new ManaType(0);
     }
 
