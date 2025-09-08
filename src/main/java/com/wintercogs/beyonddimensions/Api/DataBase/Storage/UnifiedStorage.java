@@ -58,7 +58,7 @@ public class UnifiedStorage implements IStackHandler
     /** typeId -> key列表的对照，使用换尾删除（不同类型对外界的维护表，如itemId配合此列表后用于IItemHandler的实现） */
     private final Map<ResourceLocation, TypeBucket> type2buckets = new HashMap<>();
 
-    /** 只读、动态的 KeyAmount 视图（推荐给新界面使用） */
+    /** 只读、动态的 KeyAmount 视图（推荐给新界面使用），注意，视图无法同步modCount */
     private final List<KeyAmount> entriesView = Collections.unmodifiableList(
             new AbstractList<KeyAmount>() {
                 @Override

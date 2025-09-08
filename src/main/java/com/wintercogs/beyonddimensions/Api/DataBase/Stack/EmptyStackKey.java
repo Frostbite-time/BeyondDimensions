@@ -1,5 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.core.HolderLookup;
@@ -17,6 +19,29 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID,"stack_type/empty");
     public static final EmptyStackKey INSTANCE = new EmptyStackKey();
 
+    /** 无字段的新格式：decode 直接返回单例，encode 不写任何键 */
+    public static final MapCodec<EmptyStackKey> TYPE_CODEC = new MapCodec<>() {
+        @Override
+        public <T> DataResult<EmptyStackKey> decode(com.mojang.serialization.DynamicOps<T> ops,
+                                                     com.mojang.serialization.MapLike<T> input) {
+            return DataResult.success(EmptyStackKey.INSTANCE);
+        }
+
+        @Override
+        public <T> com.mojang.serialization.RecordBuilder<T> encode(EmptyStackKey value,
+                                                                    com.mojang.serialization.DynamicOps<T> ops,
+                                                                    com.mojang.serialization.RecordBuilder<T> prefix) {
+            return prefix; // 不写任何字段
+        }
+
+        @Override
+        public <T> java.util.stream.Stream<T> keys(com.mojang.serialization.DynamicOps<T> ops) {
+            return java.util.stream.Stream.empty();
+        }
+    };
+
+    public static final Codec<EmptyStackKey> CODEC = TYPE_CODEC.codec();
+
     private EmptyStackKey() {}
 
     @Override
@@ -28,7 +53,7 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     @Override
     public MapCodec<? extends EmptyStackKey> codec()
     {
-        return null;
+        return TYPE_CODEC;
     }
 
     @Override
