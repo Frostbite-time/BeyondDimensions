@@ -4,6 +4,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 
 public class RegistryUtil
 {
@@ -19,5 +21,20 @@ public class RegistryUtil
         return reg.getResourceKey(item)
                 .map(reg::getHolderOrThrow)
                 .orElseGet(() -> reg.getHolderOrThrow(reg.getResourceKey(Items.AIR).orElseThrow()));
+    }
+
+    /** 安全获取某个 Fluid 的 Holder；未知/为空则回退 为空 */
+    public static Holder<Fluid> holderOf(Fluid fluid)
+    {
+        var reg = BuiltInRegistries.FLUID;
+
+        if (fluid == null) {
+            return reg.getHolderOrThrow(reg.getResourceKey(Fluids.EMPTY).orElseThrow());
+        }
+
+        // 已注册就用它的 key，否则回退 AIR
+        return reg.getResourceKey(fluid)
+                .map(reg::getHolderOrThrow)
+                .orElseGet(() -> reg.getHolderOrThrow(reg.getResourceKey(Fluids.EMPTY).orElseThrow()));
     }
 }

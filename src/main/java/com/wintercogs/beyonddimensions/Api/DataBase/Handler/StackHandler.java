@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
@@ -82,7 +83,7 @@ public class StackHandler implements IStackHandler
 
     private final List<KeyAmount> entriesView = Collections.unmodifiableList(new AbstractList<KeyAmount>() {
         @Override public KeyAmount get(int index) {
-            if (index < 0 || index >= size) return new KeyAmount(null, 0L);
+            if (index < 0 || index >= size) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
             IStackKey<?> k = keys[index];
             long amt = (k == null) ? 0L : amounts[index];
             return new KeyAmount(k, amt);
@@ -190,14 +191,14 @@ public class StackHandler implements IStackHandler
 
     @Override
     public @NotNull KeyAmount getStackBySlot(int slot) {
-        if (slot < 0 || slot >= size) return new KeyAmount(null, 0L);
+        if (slot < 0 || slot >= size) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         IStackKey<?> k = keys[slot];
-        return new KeyAmount(k, (k == null) ? 0L : amounts[slot]);
+        return new KeyAmount(k, (k == EmptyStackKey.INSTANCE) ? 0L : amounts[slot]);
     }
 
     @Override
     public @NotNull KeyAmount getStackByKey(IStackKey<?> key) {
-        if (key == null) return new KeyAmount(null, 0L);
+        if (key == null) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         SlotBucket b = keyBuckets.get(key);
         if (b == null || b.size() == 0) return new KeyAmount(key, 0L);
         int slot = b.get(0); // “第一个找到的堆叠”
@@ -252,7 +253,7 @@ public class StackHandler implements IStackHandler
 
     @Override
     public @NotNull KeyAmount insert(int slot, IStackKey<?> key, long amount, boolean simulate) {
-        if (key == null || amount <= 0L) return new KeyAmount(null, 0L);
+        if (key == null || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         if (slot < 0 || slot >= size) return new KeyAmount(key, amount);
         if (!isStackValid(slot, key)) return new KeyAmount(key, amount);
 
@@ -296,7 +297,7 @@ public class StackHandler implements IStackHandler
 
     @Override
     public @NotNull KeyAmount insert(IStackKey<?> key, long amount, boolean simulate) {
-        if (key == null || amount <= 0L) return new KeyAmount(null, 0L);
+        if (key == null || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
 
         long left = amount;
 
@@ -352,9 +353,9 @@ public class StackHandler implements IStackHandler
 
     @Override
     public @NotNull KeyAmount extract(int slot, long count, boolean simulate) {
-        if (slot < 0 || slot >= size || count <= 0L) return new KeyAmount(null, 0L);
+        if (slot < 0 || slot >= size || count <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         IStackKey<?> k = keys[slot];
-        if (k == null) return new KeyAmount(null, 0L);
+        if (k == null) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
 
         long have = amounts[slot];
         long take = Math.min(count, have);
@@ -380,7 +381,7 @@ public class StackHandler implements IStackHandler
 
     @Override
     public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate) {
-        if (key == null || amount <= 0L) return new KeyAmount(null, 0L);
+        if (key == null || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         SlotBucket exact = keyBuckets.get(key);
         if (exact == null || exact.size() == 0) return new KeyAmount(key, 0L);
 

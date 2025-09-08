@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.LongType;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
@@ -33,17 +32,13 @@ public abstract class LongStackKey<T extends LongType<T>> implements IStackKey<T
         return stack.getClass();
     }
 
-
-    @Override
-    public String getModId()
-    {
-        return BeyondDimensions.MODID;
-    }
-
+    /**
+     * 不可能为空键
+     */
     @Override
     public boolean isEmpty()
     {
-        return stack.isEmpty();
+        return false;
     }
 
     @Override

@@ -229,6 +229,7 @@ public class BeyondDimensions
     {
 
         // 注册堆叠类型，使得网络能够存储相关堆叠
+        StackKeyRegistry.registerType(EmptyStackKey.INSTANCE); // 全空堆叠，用于避免使用null
         StackKeyRegistry.registerType(ItemStackKey.EMPTY);
         StackKeyRegistry.registerType(FluidStackKey.EMPTY);
         StackKeyRegistry.registerType(EnergyStackKey.INSTANCE);

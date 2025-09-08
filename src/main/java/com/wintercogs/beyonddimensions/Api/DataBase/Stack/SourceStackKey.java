@@ -44,9 +44,9 @@ public class SourceStackKey extends LongStackKey<SourceType> {
 
     public static final Codec<SourceStackKey> CODEC = TYPE_CODEC.codec();
 
-    private SourceStackKey() {
-        // 仅用于渲染：最小非空
-        this.stack = new SourceType(1);
+    private SourceStackKey()
+    {
+        this.stack = new SourceType(0);
     }
 
     @Override
@@ -102,14 +102,14 @@ public class SourceStackKey extends LongStackKey<SourceType> {
     }
 
     @Override
-    public IStackRender getRender() {
+    public @NotNull IStackRender getRender() {
         return SourceStackKeyRender.INSTANCE;
     }
 
     @Override
-    public SourceType getRenderStack() {
+    public @NotNull SourceType getRenderStack() {
         SourceType cache = this.stack;
-        if (cache.getStackCount() <= 0) cache.setStackCount(1);
+        cache.setStackCount(1);
         return cache;
     }
 
@@ -125,7 +125,7 @@ public class SourceStackKey extends LongStackKey<SourceType> {
 
     // —— NBT：仅写 Type；读回单例（忽略旧 Amount） —— //
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider access) {
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider access) {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
         return tag;

@@ -25,6 +25,8 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/chemical");
     public static final ChemicalStackKey EMPTY = new ChemicalStackKey();
 
+    private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
+
     // 新格式：仅化学品注册名
     private static final MapCodec<ChemicalStackKey> NEW_FMT = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
@@ -32,7 +34,6 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
                             .forGetter(t -> MekanismAPI.CHEMICAL_REGISTRY.getKey(t.chemical))
             ).apply(instance, (rl) -> {
                 Chemical c = MekanismAPI.CHEMICAL_REGISTRY.get(rl);
-                if (c == null) c = MekanismAPI.EMPTY_CHEMICAL; // 兜底
                 return new ChemicalStackKey(c);
             })
     );
@@ -40,7 +41,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     // 旧格式：internal_stack（忽略 amount）
     private static final Codec<ChemicalStackKey> LEGACY_CODEC = RecordCodecBuilder.create(inst -> inst.group(
             ChemicalStack.OPTIONAL_CODEC.fieldOf("internal_stack")
-                    .forGetter(ChemicalStackKey::legacyGetter)
+                    .forGetter(ChemicalStackKey::copyStack) // 不会被调用
     ).apply(inst, (stack) -> new ChemicalStackKey(stack)));
 
     public static final MapCodec<ChemicalStackKey> TYPE_CODEC = new MapCodec<>() {
@@ -83,23 +84,20 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     private ChemicalStack clientCache;
     private int hashCodeCache = 0;
 
-    private ChemicalStackKey() {
-        this.chemical = MekanismAPI.EMPTY_CHEMICAL;
-        this.clientCache = ChemicalStack.EMPTY;
+    private ChemicalStackKey()
+    {
+        this(MekanismAPI.EMPTY_CHEMICAL);
     }
 
-    public ChemicalStackKey(ChemicalStack stack) {
-        this(stack == null ? MekanismAPI.EMPTY_CHEMICAL : stack.getChemical());
+    public ChemicalStackKey(ChemicalStack stack)
+    {
+        this(stack.getChemical());
     }
 
-    private ChemicalStackKey(Chemical chemical) {
+    private ChemicalStackKey(Chemical chemical)
+    {
         this.chemical = (chemical == null) ? MekanismAPI.EMPTY_CHEMICAL : chemical;
         this.clientCache = this.chemical.isEmptyType() ? ChemicalStack.EMPTY : new ChemicalStack(this.chemical, 1);
-    }
-
-    // 仅用于旧 codec 的虚拟 getter（不会被 encode 调用）
-    private ChemicalStack legacyGetter() {
-        return getRenderStack();
     }
 
     // ===== IStackKey =====
@@ -123,7 +121,8 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     }
 
     @Override
-    public @Nullable ChemicalStackKey fromSourceObject(Object key, DataComponentPatch ignored) {
+    public @Nullable ChemicalStackKey fromSourceObject(Object key, DataComponentPatch ignored)
+    {
         if (key instanceof Chemical c) {
             return new ChemicalStackKey(c);
         }
@@ -146,9 +145,9 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     }
 
     @Override
-    public String getModId() {
-        ResourceLocation rl = MekanismAPI.CHEMICAL_REGISTRY.getKey(chemical);
-        return rl == null ? "mekanism" : rl.getNamespace();
+    public String getModId()
+    {
+        return MekanismAPI.CHEMICAL_REGISTRY.getKey(chemical).getNamespace();
     }
 
     @Override
@@ -186,7 +185,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
 
     @Override
     public long getCustomMaxStackSize() {
-        return Long.MAX_VALUE;
+        return CUSTOM_MAX_STACK_SIZE;
     }
 
     @Override
@@ -194,10 +193,9 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
         if (tagKey == null || chemical.isEmptyType()) return false;
         if (!tagKey.isFor(MekanismAPI.CHEMICAL_REGISTRY_NAME)) return false;
         @SuppressWarnings("unchecked")
-        TagKey<Chemical> t = (TagKey<Chemical>) tagKey;
+        TagKey<Chemical> chemicalTag = (TagKey<Chemical>) tagKey;
         ResourceLocation key = MekanismAPI.CHEMICAL_REGISTRY.getKey(chemical);
-        if (key == null) return false;
-        return MekanismAPI.CHEMICAL_REGISTRY.getHolder(key).map(h -> h.is(t)).orElse(false);
+        return MekanismAPI.CHEMICAL_REGISTRY.getHolder(key).map(h -> h.is(chemicalTag)).orElse(false);
     }
 
     @Override
@@ -225,7 +223,6 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
         if (!has) return;
 
         ResourceLocation rl = MekanismAPI.CHEMICAL_REGISTRY.getKey(chemical);
-        if (rl == null) rl = ResourceLocation.tryBuild("mekanism", "empty");
         buf.writeResourceLocation(rl);
     }
 
@@ -237,14 +234,13 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
 
         ResourceLocation rl = buf.readResourceLocation();
         Chemical c = MekanismAPI.CHEMICAL_REGISTRY.get(rl);
-        if (c == null) c = MekanismAPI.EMPTY_CHEMICAL;
         return new ChemicalStackKey(c);
     }
 
     // —— NBT：写新；读新优先 + 旧兼容 —— //
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
         CompoundTag out = new CompoundTag();
         try {
             out.putString("Type", ID.toString());
@@ -289,12 +285,12 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     // —— 渲染支持 —— //
 
     @Override
-    public IStackRender getRender() {
+    public @NotNull IStackRender getRender() {
         return ChemicalStackKeyRender.INSTANCE;
     }
 
     @Override
-    public ChemicalStack getRenderStack() {
+    public @NotNull ChemicalStack getRenderStack() {
         if (chemical.isEmptyType()) {
             if (!clientCache.isEmpty()) clientCache = ChemicalStack.EMPTY;
             return ChemicalStack.EMPTY;
@@ -304,7 +300,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
             clientCache = new ChemicalStack(this.chemical, 1);
             return clientCache;
         }
-        if (cache.getAmount() <= 0) cache.setAmount(1);
+        cache.setAmount(1);
         return cache;
     }
 

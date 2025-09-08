@@ -43,9 +43,9 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
 
     public static final Codec<WardenSoulStackKey> CODEC = TYPE_CODEC.codec();
 
-    private WardenSoulStackKey() {
-        // 仅用于渲染最小非空量；不影响 Key 语义
-        this.stack = new WardenSoulType(1);
+    private WardenSoulStackKey()
+    {
+        this.stack = new WardenSoulType(0);
     }
 
     @Override
@@ -100,14 +100,14 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
     }
 
     @Override
-    public IStackRender getRender() {
+    public @NotNull IStackRender getRender() {
         return WardenSoulStackKeyRender.INSTANCE;
     }
 
     @Override
-    public WardenSoulType getRenderStack() {
+    public @NotNull WardenSoulType getRenderStack() {
         WardenSoulType cache = this.stack;
-        if (cache.getStackCount() <= 0) cache.setStackCount(1);
+        cache.setStackCount(1);
         return cache;
     }
 
@@ -123,7 +123,7 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
 
     // —— NBT：仅写 Type；读回单例（旧 LongType 的 long 忽略） —— //
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider access) {
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider access) {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
         return tag;

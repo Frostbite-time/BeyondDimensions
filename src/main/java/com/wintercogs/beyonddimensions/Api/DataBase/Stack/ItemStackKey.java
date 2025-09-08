@@ -119,16 +119,12 @@ public final class ItemStackKey implements IStackKey<ItemStack>
 
     private ItemStackKey()
     {
-        this.item = Items.AIR;
-        this.patch = DataComponentPatch.EMPTY;
-        this.clientCache = ItemStack.EMPTY;
+        this(Items.AIR, DataComponentPatch.EMPTY);
     }
 
     public ItemStackKey(ItemStack stack)
     {
-        this.item = stack.getItem();
-        this.patch = stack.getComponentsPatch(); // 这里的返回值在后续实际上无法被修改，因此无需担心
-        this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        this(stack.getItem(),stack.getComponentsPatch());
     }
 
     // 仅供内部使用，不直接对外暴露
@@ -249,7 +245,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     {
         if (tagKey == null || this.item == Items.AIR) return false;
         if (!tagKey.isFor(Registries.ITEM)) return false;
-
+        @SuppressWarnings("unchecked")
         TagKey<Item> itemTag = (TagKey<Item>) tagKey;
         return RegistryUtil.holderOf(this.item).is(itemTag);
     }
@@ -324,7 +320,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
     {
         final CompoundTag out = new CompoundTag();
         try {
@@ -403,13 +399,13 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
-    public IStackRender getRender()
+    public @NotNull IStackRender getRender()
     {
         return ItemStackKeyRender.INSTANCE;
     }
 
     @Override
-    public ItemStack getRenderStack()
+    public @NotNull ItemStack getRenderStack()
     {
         // item为空时，必须返回 EMPTY，且不要对 EMPTY 调用 setCount(方便复制到1.20.1的流体实现去)
         if (this.item == Items.AIR)

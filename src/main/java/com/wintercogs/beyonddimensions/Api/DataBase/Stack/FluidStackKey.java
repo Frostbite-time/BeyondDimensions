@@ -3,8 +3,10 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.DataComponentPatchHelper;
 import com.wintercogs.beyonddimensions.Unit.RegistryAccessResolver;
+import com.wintercogs.beyonddimensions.Unit.RegistryUtil;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentPatch;
@@ -34,11 +36,13 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
     public static final FluidStackKey EMPTY = new FluidStackKey();
 
+    private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
+
     // —— 新格式：fluid + components（不含 amount）——
     private static final MapCodec<FluidStackKey> NEW_FMT = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     BuiltInRegistries.FLUID.holderByNameCodec().fieldOf("fluid")
-                            .forGetter(t -> BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(t.fluid)).orElseThrow()),
+                            .forGetter(t -> RegistryUtil.holderOf(t.fluid)),
                     DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY)
                             .forGetter(t -> t.patch)
             ).apply(instance, (holder, patch) -> new FluidStackKey(holder.value(), patch))
@@ -46,7 +50,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     // —— 旧格式：internal_stack (+ amount) ——（仅用于解码）
     private static final Codec<FluidStackKey> LEGACY_CODEC = RecordCodecBuilder.create(inst -> inst.group(
-            FluidStack.OPTIONAL_CODEC.fieldOf("internal_stack").forGetter(FluidStackKey::copyStackForLegacyEncode) // 实际不会用于 encode
+            FluidStack.OPTIONAL_CODEC.fieldOf("internal_stack").forGetter(FluidStackKey::copyStack) // 实际不会用于 encode
     ).apply(inst, (stack) -> new FluidStackKey(stack)));
 
     /**
@@ -103,7 +107,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     public static final Codec<FluidStackKey> CODEC = TYPE_CODEC.codec();
 
-    // ===== 实际不可变要素 =====
+    // 实际不可变要素
     private final Fluid fluid;
     private final DataComponentPatch patch;
 
@@ -115,30 +119,21 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     private FluidStack clientCache;
     private int hashCodeCache = 0;
 
-    private FluidStackKey() {
-        this.fluid = Fluids.EMPTY;
-        this.patch = DataComponentPatch.EMPTY;
-        this.clientCache = FluidStack.EMPTY;
+    private FluidStackKey()
+    {
+        this(Fluids.EMPTY, DataComponentPatch.EMPTY);
     }
 
-    public FluidStackKey(FluidStack stack) {
-        this.fluid = stack.getFluid();
-        // FluidStack 在 1.21+ 同样有组件系统；此处只存“差异补丁”作为 Key 的可比部分
-        this.patch = stack.getComponentsPatch();
-        this.clientCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY
-                : new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(this.fluid)).orElseThrow(), 1, this.patch);
+    public FluidStackKey(FluidStack stack)
+    {
+        this(stack.getFluid(),stack.getComponentsPatch());
     }
 
-    private FluidStackKey(Fluid fluid, DataComponentPatch patch) {
+    private FluidStackKey(Fluid fluid, DataComponentPatch patch)
+    {
         this.fluid = fluid;
         this.patch = (patch == null) ? DataComponentPatch.EMPTY : patch;
-        this.clientCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY
-                : new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(this.fluid)).orElseThrow(), 1, this.patch);
-    }
-
-    // 仅供 LEGACY_CODEC 的虚拟 getter 使用；不会真的走 encode
-    private FluidStack copyStackForLegacyEncode() {
-        return copyStackWithCount(1);
+        this.clientCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
     }
 
     // ===== IStackKey =====
@@ -162,11 +157,11 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     }
 
     @Override
-    public @Nullable FluidStackKey fromSourceObject(Object key, DataComponentPatch dataComponentPatch) {
-        if (key instanceof Fluid f) {
-            DataComponentPatch p = (dataComponentPatch != null && !dataComponentPatch.isEmpty())
-                    ? dataComponentPatch
-                    : DataComponentPatch.EMPTY;
+    public @Nullable FluidStackKey fromSourceObject(Object key, DataComponentPatch dataComponentPatch)
+    {
+        if (key instanceof Fluid f)
+        {
+            DataComponentPatch p = (dataComponentPatch != null && !dataComponentPatch.isEmpty()) ? dataComponentPatch : DataComponentPatch.EMPTY;
             return new FluidStackKey(f, p);
         }
         return null;
@@ -178,86 +173,94 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     }
 
     @Override
-    public @NotNull Fluid getSource() {
+    public @NotNull Fluid getSource()
+    {
         return fluid;
     }
 
     @Override
-    public Class<?> getSourceClass() {
+    public Class<?> getSourceClass()
+    {
         return Fluid.class;
     }
 
     @Override
-    public String getModId() {
-        var key = BuiltInRegistries.FLUID.getKey(fluid);
-        return key != null ? key.getNamespace() : "minecraft";
+    public String getModId()
+    {
+        return BuiltInRegistries.FLUID.getKey(fluid).getNamespace();
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmpty()
+    {
         return this == FluidStackKey.EMPTY || this.fluid == Fluids.EMPTY;
     }
 
     @Override
-    public FluidStackKey getEmpty() {
+    public FluidStackKey getEmpty()
+    {
         return FluidStackKey.EMPTY;
     }
 
     @Override
-    public FluidStack getEmptyStack() {
+    public FluidStack getEmptyStack()
+    {
         return FluidStack.EMPTY;
     }
 
     @Override
-    public FluidStack copyStack() {
+    public FluidStack copyStack()
+    {
         return copyStackWithCount(1);
     }
 
     @Override
-    public FluidStack copyStackWithCount(long count) {
+    public FluidStack copyStackWithCount(long count)
+    {
         if (this.fluid == Fluids.EMPTY) return FluidStack.EMPTY;
-        int amt = (int)Math.max(1, Math.min(Integer.MAX_VALUE, count)); // 渲染/显示用途；不影响 key 语义
-        return new FluidStack(
-                BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(this.fluid)).orElseThrow(),
-                amt,
-                this.patch
-        );
+        return new FluidStack(RegistryUtil.holderOf(this.fluid), BDMath.clampLongToInt(count), this.patch);
     }
 
     @Override
-    public long getVanillaMaxStackSize() {
-        // 对流体无硬性原版上限；保持与旧实现的“64桶”展示一致（仅 UI/逻辑辅助，不参与 key）
+    public long getVanillaMaxStackSize()
+    {
+        // 64桶一格
         return Math.min(64_000L, getCustomMaxStackSize());
     }
 
     @Override
-    public long getCustomMaxStackSize() {
-        return Long.MAX_VALUE;
+    public long getCustomMaxStackSize()
+    {
+        return CUSTOM_MAX_STACK_SIZE;
     }
 
     @Override
-    public boolean hasTag(TagKey<?> tagKey) {
+    public boolean hasTag(TagKey<?> tagKey)
+    {
         if (tagKey == null || this.fluid == Fluids.EMPTY) return false;
         if (!tagKey.isFor(Registries.FLUID)) return false;
         @SuppressWarnings("unchecked")
-        TagKey<Fluid> t = (TagKey<Fluid>) tagKey;
-        return BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(this.fluid))
-                .map(h -> h.is(t)).orElse(false);
+        TagKey<Fluid> fluidTag = (TagKey<Fluid>) tagKey;
+        return RegistryUtil.holderOf(this.fluid).is(fluidTag);
     }
 
     @Override
-    public boolean isSame(IStackKey<?> other) {
+    public boolean isSame(IStackKey<?> other)
+    {
         if (this == other) return true;
-        if (other instanceof FluidStackKey o) {
+        if (other instanceof FluidStackKey o)
+        {
             return this.fluid == o.fluid;
         }
         return false;
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackKey<?> other) {
+    public boolean isSameTypeSameComponents(IStackKey<?> other)
+    {
         if (this == other) return true;
-        if (other instanceof FluidStackKey o) {
+        if (other instanceof FluidStackKey o)
+        {
             if (this.fluid != o.fluid) return false;
 
             // 规范化组件字节对比（Provider 稳定时避免重复计算）
@@ -303,7 +306,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     // ===== NBT 序列化：写新格式；读新优先 + 旧兼容 =====
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
         final CompoundTag out = new CompoundTag();
         try {
             out.putString("Type", ID.toString());
@@ -354,13 +357,13 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     // ===== 渲染支持：交给外部渲染器；仅提供一个稳定的最小量副本 =====
 
     @Override
-    public IStackRender getRender() {
+    public @NotNull IStackRender getRender() {
         // 与 ItemStackKey 一致，采用单独渲染器（请在你的渲染模块提供 FluidStackKeyRender.INSTANCE）
         return FluidStackKeyRender.INSTANCE;
     }
 
     @Override
-    public FluidStack getRenderStack() {
+    public @NotNull FluidStack getRenderStack() {
         if (this.fluid == Fluids.EMPTY) {
             if (!this.clientCache.isEmpty()) {
                 this.clientCache = FluidStack.EMPTY;
@@ -370,18 +373,12 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
         FluidStack cache = this.clientCache;
         if (cache.isEmpty() || cache.getFluid() != this.fluid) {
-            this.clientCache = new FluidStack(
-                    BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(this.fluid)).orElseThrow(),
-                    1,
-                    this.patch
-            );
+            this.clientCache = new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
             return this.clientCache;
         }
 
         // 非 EMPTY：返回前保证 amount >= 1（部分版本对 EMPTY.setAmount 会抛错）
-        if (cache.getAmount() <= 0) {
-            cache.setAmount(1);
-        }
+        cache.setAmount(1);
         return cache;
     }
 

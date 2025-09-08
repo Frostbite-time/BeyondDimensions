@@ -4,10 +4,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.*;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
@@ -275,7 +272,7 @@ public class UnifiedStorage implements IStackHandler
     @Override
     public @NotNull KeyAmount getStackBySlot(int slot)
     {
-        if (slot < 0 || slot >= slotIndex.size()) return new KeyAmount(null, 0L);
+        if (slot < 0 || slot >= slotIndex.size()) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         IStackKey<?> key = slotIndex.get(slot);
         return new KeyAmount(key, storage.getOrDefault(key, 0L));
     }
@@ -283,7 +280,7 @@ public class UnifiedStorage implements IStackHandler
     @Override
     public @NotNull KeyAmount getStackByKey(IStackKey<?> key)
     {
-        if (key == null) return new KeyAmount(null, 0L);
+        if (key == null) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         return new KeyAmount(key, storage.getOrDefault(key, 0L));
     }
 
@@ -394,7 +391,7 @@ public class UnifiedStorage implements IStackHandler
     @Override
     public KeyAmount insert(IStackKey<?> key, long amount, boolean simulate)
     {
-        if (key == null) return new KeyAmount(null, Math.max(0L, amount));
+        if (key == null) return new KeyAmount(EmptyStackKey.INSTANCE, Math.max(0L, amount));
         long add = Math.max(0L, amount);
         if (add == 0L) return new KeyAmount(key, 0L);
 
@@ -538,7 +535,7 @@ public class UnifiedStorage implements IStackHandler
     public @NotNull KeyAmount extract(int slot, long count, boolean simulate)
     {
         if (slot < 0 || slot >= slotIndex.size() || count <= 0L) {
-            return new KeyAmount(null, 0L);
+            return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         }
         IStackKey<?> key = slotIndex.get(slot);
         long current = storage.getOrDefault(key, 0L);
@@ -560,7 +557,7 @@ public class UnifiedStorage implements IStackHandler
 
     @Override
     public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate) {
-        if (key == null || amount <= 0L) return new KeyAmount(null, 0L);
+        if (key == null || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         long current = storage.getOrDefault(key, 0L);
         if (current <= 0L) return new KeyAmount(key, 0L);
 

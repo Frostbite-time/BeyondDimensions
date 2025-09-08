@@ -44,9 +44,9 @@ public class ManaStackKey extends LongStackKey<ManaType> {
 
     public static final Codec<ManaStackKey> CODEC = TYPE_CODEC.codec();
 
-    private ManaStackKey() {
-        // 仅用于渲染/显示：提供一个最小非空量的栈；不影响 Key 语义
-        this.stack = new ManaType(1);
+    private ManaStackKey()
+    {
+        this.stack = new ManaType(0);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class ManaStackKey extends LongStackKey<ManaType> {
     // ------- NBT：仅写 Type；读取直接返回单例（忽略旧的 Amount） -------
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
         return tag;
@@ -131,17 +131,15 @@ public class ManaStackKey extends LongStackKey<ManaType> {
     // ------- 渲染 -------
 
     @Override
-    public IStackRender getRender() {
+    public @NotNull IStackRender getRender() {
         return ManaStackKeyRender.INSTANCE;
     }
 
     @Override
-    public ManaType getRenderStack() {
+    public @NotNull ManaType getRenderStack() {
         // 确保数量 >= 1，避免部分版本对 0 量渲染异常
         ManaType cache = this.stack;
-        if (cache.getStackCount() <= 0) {
-            cache.setStackCount(1);
-        }
+        cache.setStackCount(1);
         return cache;
     }
 }

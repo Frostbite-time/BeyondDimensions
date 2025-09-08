@@ -6,6 +6,7 @@ import com.mojang.serialization.MapCodec;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.EnergyType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -44,9 +45,9 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
 
     public static final Codec<EnergyStackKey> CODEC = TYPE_CODEC.codec();
 
-    private EnergyStackKey() {
-        // 仅用于渲染/展示时构造“最小非空”的栈；不影响 Key 语义
-        this.stack = new EnergyType(1);
+    private EnergyStackKey()
+    {
+        this.stack = new EnergyType(0);
     }
 
     // ---------------- IStackKey 必要实现 ----------------
@@ -65,13 +66,15 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     }
 
     @Override
-    public ResourceLocation getTypeID() {
+    public ResourceLocation getTypeID()
+    {
         return ID;
     }
 
     /** 允许从 EnergyType/数字（数量无意义）转换为同一个 Key 实例 */
     @Override
-    public @Nullable EnergyStackKey fromSourceObject(Object key, net.minecraft.core.component.DataComponentPatch ignored) {
+    public @Nullable EnergyStackKey fromSourceObject(Object key, DataComponentPatch ignored)
+    {
         if (key instanceof EnergyType || key instanceof Number) {
             return INSTANCE;
         }
@@ -82,6 +85,12 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     public @NotNull EnergyType getSource() {
         // 提供一个“空”源对象（仅用于需要展示/占位的场景）
         return new EnergyType(0);
+    }
+
+    @Override
+    public String getModId()
+    {
+        return "NeoForge";
     }
 
     @Override
@@ -118,7 +127,7 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     // 仅写 Type；读取时直接返回单例。旧 LongType 是纯 long，可直接忽略。
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
         return tag;
@@ -133,17 +142,15 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     // ---------------- 渲染支持（可选：若你的渲染系统通过 getRender() 取渲染器） ----------------
 
     @Override
-    public IStackRender getRender() {
+    public @NotNull IStackRender getRender() {
         return EnergyStackKeyRender.INSTANCE; // 若不需要渲染器，可改为抛 UnsupportedOperationException
     }
 
     @Override
-    public EnergyType getRenderStack() {
+    public @NotNull EnergyType getRenderStack() {
         // 保证数量至少为 1，避免某些版本对 0 量渲染异常
         EnergyType cache = this.stack;
-        if (cache.getStackCount() <= 0) {
-            cache.setStackCount(1);
-        }
+        cache.setStackCount(1);
         return cache;
     }
 }
