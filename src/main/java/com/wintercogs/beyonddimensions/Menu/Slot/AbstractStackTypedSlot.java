@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
@@ -93,11 +94,7 @@ public abstract class AbstractStackTypedSlot extends Slot
 
     public KeyAmount getTypedStackFromUnifiedStorage()
     {
-        KeyAmount stackType = storage.getStackBySlot(getSlotIndex());
-        if(stackType.key() != null)
-            return stackType;
-        else
-            return new KeyAmount(ItemStackKey.EMPTY,0);
+        return storage.getStackBySlot(getSlotIndex());
     }
 
     public ItemStack getItemStackFromUnifiedStorage()
@@ -126,19 +123,15 @@ public abstract class AbstractStackTypedSlot extends Slot
         KeyAmount stack = getTypedStackFromUnifiedStorage();
         if (stack.isEmpty())
             return stack;
-        if (stack.key() != null)
+        if (stack.amount() > stack.key().getVanillaMaxStackSize())
         {
-            if(stack.amount()>stack.key().getVanillaMaxStackSize())
-            {
-                return new KeyAmount(stack.key(),stack.key().getVanillaMaxStackSize());
-            }
-            else
-            {
-                return stack;
-            }
-
+            return new KeyAmount(stack.key(), stack.key().getVanillaMaxStackSize());
         }
-        return new KeyAmount(ItemStackKey.EMPTY,0);
+        else
+        {
+            return stack;
+        }
+
     }
 
     // 获取原版最大堆叠数的Stack，一般仅用于GUI类，可以保留Item实现
@@ -148,33 +141,17 @@ public abstract class AbstractStackTypedSlot extends Slot
         KeyAmount stack = getTypedStackFromUnifiedStorage();
         if (stack.isEmpty())
             return stack;
-        if (stack.key() != null)
-        {
-            return new KeyAmount(stack.key(),stack.key().getVanillaMaxStackSize());
-        }
-        return new KeyAmount(ItemStackKey.EMPTY, 0);
+        return new KeyAmount(stack.key(), stack.key().getVanillaMaxStackSize());
     }
 
-    public KeyAmount getStack()
+    public @NotNull KeyAmount getStack()
     {
         if(getSlotIndex()<0||getSlotIndex()>= storage.getSlots())
         {
-            return new KeyAmount(ItemStackKey.EMPTY, 0);
+            return new KeyAmount(EmptyStackKey.INSTANCE, 0);
         }
         //从当前槽索引取物品
-        KeyAmount stack = storage.getStackBySlot(getSlotIndex());
-        if (stack.key() != null)
-        {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
-            if(!stack.key().isEmpty())
-            {
-                return stack;
-            }
-            else
-            {
-                return new KeyAmount(stack.key().getEmpty(),0);
-            }
-        }
-        return new KeyAmount(ItemStackKey.EMPTY,0);
+        return storage.getStackBySlot(getSlotIndex());
     }
 
 

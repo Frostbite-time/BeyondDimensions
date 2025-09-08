@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerKeepZero;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
@@ -41,7 +42,7 @@ public class DimensionsNetMenu extends BDBaseMenu
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
     public UnifiedStorage storage;
-    public UnifiedStorage viewerStorage; // 在客户端，用于显示物品
+    public UnorderedStackHandlerKeepZero viewerStorage; // 在客户端，用于显示物品
     private ArrayList<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
     private boolean cacheTooltip = false; //客户端使用，用于记录打开UI后的第一次同步是否缓存了工具提示（用于搜索，且第一次同步通常为全量同步，此时处理较好）
 
@@ -91,7 +92,7 @@ public class DimensionsNetMenu extends BDBaseMenu
 
         // 初始化维度网络容器
         storage = data.getUnifiedStorage();
-        viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
+        viewerStorage = new UnorderedStackHandlerKeepZero(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
 
         addSlotGroupSync(new DisorderedSlotGroupSync(this,slotGroupSyncs.size(),storage) {
             @Override

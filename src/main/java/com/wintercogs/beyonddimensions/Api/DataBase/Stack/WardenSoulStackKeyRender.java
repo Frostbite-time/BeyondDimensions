@@ -101,8 +101,8 @@ public class WardenSoulStackKeyRender implements IStackRender {
 
     @Override
     public void renderAmount(GuiGraphics gui, long amount, int x, int y) {
-        if (amount <= 0) return;
         String text = getCountText(amount);
+        if(text.isEmpty()) return;
 
         float scale = 0.666f;
         var pose = gui.pose();
@@ -123,7 +123,7 @@ public class WardenSoulStackKeyRender implements IStackRender {
 
     @Override
     public String getCountText(long count) {
-        if (count <= 0) return "";
+        if (count < 0) return "";
         return StringFormat.formatCount(count);
     }
 

@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
@@ -80,12 +81,12 @@ public class NetEnergyMenu extends BDBaseMenu
         if(netCache != null)
         {
             UnifiedStorage storage = netCache.getUnifiedStorage();
-            if(lastEnergyStored != storage.getEnergyStored()
+            if(lastEnergyStored != getEnergyStored(storage)
                 || lastEnergyCapacity != storage.getSlotCapacity(0)
-                || lastEnergySpeedState != storage.getEnergyStored() - lastEnergyStored)
+                || lastEnergySpeedState != getEnergyStored(storage) - lastEnergyStored)
             {
-                lastEnergySpeedState = storage.getEnergyStored() - lastEnergyStored;
-                lastEnergyStored = storage.getEnergyStored();
+                lastEnergySpeedState = getEnergyStored(storage) - lastEnergyStored;
+                lastEnergyStored = getEnergyStored(storage);
                 lastEnergyCapacity = storage.getSlotCapacity(0);
                 return true;
             }
@@ -140,5 +141,10 @@ public class NetEnergyMenu extends BDBaseMenu
     public boolean stillValid(Player player)
     {
         return be != null && !be.isRemoved();
+    }
+
+    long getEnergyStored(UnifiedStorage storage)
+    {
+        return storage.getStackByKey(EnergyStackKey.INSTANCE).amount();
     }
 }

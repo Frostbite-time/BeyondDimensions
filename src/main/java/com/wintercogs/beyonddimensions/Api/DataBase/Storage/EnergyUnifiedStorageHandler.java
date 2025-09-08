@@ -27,7 +27,7 @@ public class EnergyUnifiedStorageHandler implements IEnergyStorage
     @Override
     public int getEnergyStored()
     {
-        return BDMath.clampLongToInt(storage.getEnergyStored());
+        return BDMath.clampLongToInt(storage.getStackByKey(EnergyStackKey.INSTANCE).amount());
     }
 
     @Override

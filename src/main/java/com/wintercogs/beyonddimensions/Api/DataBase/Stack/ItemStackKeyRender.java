@@ -42,6 +42,8 @@ public class ItemStackKeyRender implements IStackRender
     {
         // 渲染数量文本
         String countText = getCountText(amount);
+        if(countText.isEmpty()) return;
+
         float scale = 0.666f; // 文本缩放因数
         var poseStackText = gui.pose();
         poseStackText.pushPose();
@@ -64,7 +66,7 @@ public class ItemStackKeyRender implements IStackRender
     @Override
     public String getCountText(long count)
     {
-        if (count <= 0) return "";
+        if (count < 0) return "";
         return StringFormat.formatCount(count);
     }
 

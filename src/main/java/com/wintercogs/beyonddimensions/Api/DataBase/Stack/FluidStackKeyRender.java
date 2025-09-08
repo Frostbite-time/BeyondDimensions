@@ -59,6 +59,8 @@ public class FluidStackKeyRender implements IStackRender {
     public void renderAmount(GuiGraphics gui, long amount, int x, int y) {
         // 渲染数量文本（右下角）
         String text = getCountText(amount);
+        if(text.isEmpty()) return;
+
         float scale = 0.666f;
 
         var pose = gui.pose();
@@ -71,15 +73,13 @@ public class FluidStackKeyRender implements IStackRender {
         final int X = (int) ((x - 1 + 16.0f + 2.0f - w * 0.666f) / 0.666f);
         final int Y = (int) ((y - 1 + 16.0f - 5.0f * 0.666f) / 0.666f);
 
-        if (amount >= 0) {
-            gui.drawString(Minecraft.getInstance().font, text, X, Y, 0xFFFFFF);
-        }
+        gui.drawString(Minecraft.getInstance().font, text, X, Y, 0xFFFFFF);
         pose.popPose();
     }
 
     @Override
     public String getCountText(long count) {
-        if (count <= 0) return "";
+        if (count < 0) return "";
         return StringFormat.formatBucket(count);
     }
 

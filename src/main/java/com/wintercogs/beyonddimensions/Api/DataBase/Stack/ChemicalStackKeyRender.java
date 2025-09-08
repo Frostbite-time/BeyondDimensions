@@ -72,7 +72,7 @@ public class ChemicalStackKeyRender implements IStackRender
 
     @Override
     public String getCountText(long count) {
-        if (count <= 0) return "";
+        if (count < 0) return "";
         return StringFormat.formatBucket(count);
     }
 
