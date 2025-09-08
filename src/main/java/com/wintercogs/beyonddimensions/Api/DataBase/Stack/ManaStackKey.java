@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ManaStackKey extends LongStackKey<ManaType> {
@@ -87,7 +88,7 @@ public class ManaStackKey extends LongStackKey<ManaType> {
     }
 
     @Override
-    public ManaType getSource() {
+    public @NotNull ManaType getSource() {
         return new ManaType(0);
     }
 
@@ -105,14 +106,11 @@ public class ManaStackKey extends LongStackKey<ManaType> {
     // ------- 网络序列化：仅写 typeId；读回单例 -------
 
     @Override
-    public void serialize(RegistryFriendlyByteBuf buf) {
-        buf.writeResourceLocation(getTypeId());
-        // 不写任何字段（Key 无数量）
-    }
+    public void serialize(RegistryFriendlyByteBuf buf) {}
 
     @Override
-    public ManaStackKey deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId) {
-        if (!typeId.equals(getTypeId())) return null;
+    public @NotNull ManaStackKey deserialize(RegistryFriendlyByteBuf buf)
+    {
         return INSTANCE;
     }
 
@@ -126,7 +124,7 @@ public class ManaStackKey extends LongStackKey<ManaType> {
     }
 
     @Override
-    public ManaStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
+    public @NotNull ManaStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
         return INSTANCE;
     }
 

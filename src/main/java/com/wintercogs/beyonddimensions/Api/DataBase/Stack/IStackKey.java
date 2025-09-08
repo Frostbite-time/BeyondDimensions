@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 public interface IStackKey<T>
 {
     /**
-     * CODEC定义
+     * CODEC定义，根据StackKeyRegistry分发到对应子类
      */
     public static final Codec<IStackKey<?>> CODEC = ResourceLocation.CODEC
             .dispatch(
@@ -32,23 +32,27 @@ public interface IStackKey<T>
             );
 
     /*
-     * 流编码器定义
+     * 流编码器定义，根据StackKeyRegistry分发到对应子类
      */
-    public static final StreamCodec<RegistryFriendlyByteBuf, IStackKey<?>> STREAM_CODEC =
-            new StreamCodec<>()
-            {
-                @Override
-                public void encode(RegistryFriendlyByteBuf buf, IStackKey<?> stackType)
-                {
-                    stackType.serialize(buf);
-                }
+    public static final StreamCodec<RegistryFriendlyByteBuf, IStackKey<?>> STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, IStackKey<?> key) {
+            // 先写类型 id
+            buf.writeResourceLocation(key.getTypeId());
+            // 再写负载（各子类自己实现，注意不再写 typeId）
+            key.serialize(buf);
+        }
 
-                @Override
-                public @NotNull IStackKey<?> decode(RegistryFriendlyByteBuf byteBuf)
-                {
-                    return IStackKey.deserializeCommon(byteBuf);
-                }
-            };
+        @Override
+        public @NotNull IStackKey<?> decode(RegistryFriendlyByteBuf buf) {
+            // 先读类型 id
+            ResourceLocation typeId = buf.readResourceLocation();
+            // 通过注册表找到对应的“类型原型/工厂”
+            IStackKey<?> typePrototype = StackKeyRegistry.getType(typeId);
+            // 让对应类型去读取负载并返回具体实例
+            return typePrototype.deserialize(buf);
+        }
+    };
 
     /**
      * 获取类型的唯一标识符 如(beyonddimension:stack_type/item) beyonddimension为本modID，提供对原版Item的支持，Item为要支持的Stack类型
@@ -56,14 +60,19 @@ public interface IStackKey<T>
     ResourceLocation getTypeId();
 
     /*
-     * 定义实现的编解码器 需要注册表信息，在接口实现实在太复杂了，分开到每个具体实现就会简单很多
+     * 用于向IStackKey的Codec提供具体编解码器
      */
     MapCodec<? extends IStackKey<T>> codec();
 
+    /**
+     * 从具体堆叠转出一个KeyAmount，如：ItemStack->KeyAmount(ItemStackKey,Long)
+     * <p>
+     * 如当前实例的解释无法完成转换，应当返回null
+     */
     @Nullable KeyAmount fromStackObject(Object stack);
 
     /**
-     * 从未知Object构建实例，如果Object不合法，则返回null
+     * 从未知源Object构建实例，如果Object不合法，则返回null
      * @param key 类似Item
      * @param dataComponentPatch 数据组件
      * @return 类似ItemStack
@@ -76,7 +85,7 @@ public interface IStackKey<T>
     Class<T> getStackClass();
 
     /**
-     * 获取根，如：ItemStackType，返回其存储的ItemStack的Item
+     * 获取根，如：ItemStackType，返回其存储的Item
      */
     @NotNull Object getSource();
 
@@ -96,12 +105,12 @@ public interface IStackKey<T>
     boolean isEmpty();
 
     /**
-     * 获取当前类型的空堆叠，如：ItemStackType.getEmpty会返回 new ItemStackType()
+     * 获取当前类型的空堆叠，如：ItemStackKey.getEmpty会返回 ItemStackKey.EMPTY
      */
     IStackKey<T> getEmpty();
 
     /**
-     * 获得当前存储类型的空实例，如ItemStackType返回ItemStack.EMPTY
+     * 获得当前存储类型的空实例，如ItemStackKey返回ItemStack.EMPTY
      */
     T getEmptyStack();
 
@@ -136,74 +145,39 @@ public interface IStackKey<T>
     boolean isSame(IStackKey<?> other);
 
     /**
-     * 检查2个实例是否能精确匹配，即：2个物品，种类、NBT等数据是否一致。但是不考虑存储数量
+     * 检查2个实例是否能精确匹配，即：2个物品，种类、NBT等数据是否一致
      */
     boolean isSameTypeSameComponents(IStackKey<?> other);
 
     /**
-     * 网络序列化，第一步始终写入类型id
+     * 网络序列化，只写入自己的实际负载
      */
     void serialize(RegistryFriendlyByteBuf buf);
 
     /**
-     * 网络反序列化，除非你是特意的，否则不要读取写入的类型id。也不要调用这个函数。
-     * <p>
-     * 你应该由{@link IStackKey#deserializeCommon(RegistryFriendlyByteBuf)}来反序列化
+     * 网络反序列化，只处理自己的负载
      */
-    IStackKey<T> deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId);
+    @NotNull IStackKey<T> deserialize(RegistryFriendlyByteBuf buf);
 
     /**
-     * 网络反序列化，会自动匹配类型
+     * NBT序列化
      */
-    static IStackKey<?> deserializeCommon(RegistryFriendlyByteBuf buf)
-    {
-        ResourceLocation typeId = buf.readResourceLocation();
-        for(IStackKey<?> stacktype : StackKeyRegistry.getAllTypes())
-        {
-            IStackKey<?> stack = stacktype.deserialize(buf,typeId);
-            if(stack!=null)
-            {
-                return stack;
-            }
-        }
-
-        return null;
-    }
+    @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess);
 
     /**
-     * NBT序列化，必须写入Type数据
+     * NBT反序列化
      */
-    CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess);
+    @NotNull IStackKey<T> deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess);
 
     /**
-     * NBT反序列化，与网络序列化不同的是，你可以在需要的时候调用它。
+     * 获取对应渲染器，仅在客户端调用
      */
-    IStackKey<T> deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess);
+    @NotNull IStackRender getRender();
 
     /**
-     * NBT反序列化，自动匹配类型
+     * 获取仅用于渲染显示的堆叠，尽可能返回缓存以提高性能
      */
-    static IStackKey deserializeNBTCommon(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
-    {
-        ResourceLocation typeId = ResourceLocation.tryParse(nbt.getString("Type"));
-        for(IStackKey stacktype : StackKeyRegistry.getAllTypes())
-        {
-            if(stacktype.getTypeId().equals(typeId))
-            {
-                IStackKey stack = stacktype.deserializeNBT(nbt,levelRegistryAccess);
-                if(stack!=null)
-                {
-                    return stack;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    IStackRender getRender();
-
-    T getRenderStack();
+    @NotNull T getRenderStack();
 
     /**
      * 强制要求重写哈希码

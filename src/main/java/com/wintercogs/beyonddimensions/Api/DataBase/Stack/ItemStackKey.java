@@ -293,9 +293,6 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public void serialize(RegistryFriendlyByteBuf buf)
     {
-        // 1) 类型ID
-        buf.writeResourceLocation(getTypeId());
-
         // 2) 是否有物品（AIR 视为无）
         boolean hasItem = this.item != Items.AIR;
         buf.writeBoolean(hasItem);
@@ -310,10 +307,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
-    public ItemStackKey deserialize(RegistryFriendlyByteBuf buf,ResourceLocation typeId)
+    public @NotNull ItemStackKey deserialize(RegistryFriendlyByteBuf buf)
     {
-        if (!typeId.equals(getTypeId())) return null; //必要的，标识未能读取任何内容，用于外部处理
-
         // 1) 是否有物品
         boolean hasItem = buf.readBoolean();
         if (!hasItem) return new ItemStackKey(ItemStack.EMPTY);
@@ -358,7 +353,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
-    public ItemStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
+    public @NotNull ItemStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
     {
         try {
             // 1) 新格式：直接用与写入一致的 CODEC（TYPE_CODEC）

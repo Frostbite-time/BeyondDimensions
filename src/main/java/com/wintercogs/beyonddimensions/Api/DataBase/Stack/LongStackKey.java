@@ -14,7 +14,6 @@ public abstract class LongStackKey<T extends LongType<T>> implements IStackKey<T
     protected T stack;
 
     protected int hashCodeCache = 0; // 哈希码缓存
-    protected boolean NeedRecalHash = true; // 指示什么时候需要重新计算哈希
 
     @Override
     public ResourceLocation getTypeId()
@@ -92,10 +91,9 @@ public abstract class LongStackKey<T extends LongType<T>> implements IStackKey<T
     @Override
     public int hashCode() {
         // 基于物品类型和组件生成哈希码
-        if(NeedRecalHash)
+        if(hashCodeCache == 0)
         {
-            hashCodeCache = Objects.hash(getTypeId());
-            NeedRecalHash = false;
+            hashCodeCache = 31 + Objects.hashCode(getTypeId());
         }
         return hashCodeCache;
     }

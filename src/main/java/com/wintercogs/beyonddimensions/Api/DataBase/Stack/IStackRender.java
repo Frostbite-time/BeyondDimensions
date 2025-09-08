@@ -14,16 +14,22 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * 用与StackKey的渲染器，实现一般可以使用单例模式
+ */
 public interface IStackRender
 {
     /**
-     * UI渲染，即绘制当前资源的图标。
+     * UI渲染，即绘制当前资源的图标
      * <p>
      * 必须以注解标注为仅客户端
      */
     @OnlyIn(Dist.CLIENT)
     void render(GuiGraphics gui, IStackKey<?> key, int x, int y);
 
+    /**
+     * 将数量绘制到屏幕上
+     */
     void renderAmount(GuiGraphics gui, long amount, int x, int y);
 
     /**

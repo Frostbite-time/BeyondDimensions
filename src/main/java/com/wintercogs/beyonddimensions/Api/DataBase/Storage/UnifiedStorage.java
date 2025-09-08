@@ -1,18 +1,23 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -649,32 +654,45 @@ public class UnifiedStorage implements IStackHandler
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag)
     {
         clearStorage();
-        // 稍后再做旧数据兼容，先单纯完成数据反序列化
-        if(tag.contains("slotCapacity"))
-            slotCapacity = tag.getLong("slotCapacity");
-        else
-            slotCapacity = Long.MAX_VALUE;
-        if(tag.contains("slotMaxSize"))
-            slotMaxSize = tag.getInt("slotMaxSize");
-        else
-            slotMaxSize = Integer.MAX_VALUE;
 
+        // 读取容量/上限
+        slotCapacity = tag.contains("slotCapacity", Tag.TAG_LONG) ? tag.getLong("slotCapacity") : Long.MAX_VALUE;
+        slotMaxSize  = tag.contains("slotMaxSize",  Tag.TAG_INT)  ? tag.getInt("slotMaxSize")  : Integer.MAX_VALUE;
+
+        // stacks: List<CompoundTag>，每个元素包含 { key: CompoundTag, amount: long }
         ListTag stacksTag = tag.getList("stacks", Tag.TAG_COMPOUND);
 
-        for (Tag t : stacksTag)
+        // 使用带注册表上下文的 Ops，保证 CODEC 可解析注册表关联内容
+        final DynamicOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
+
+        for (int i = 0; i < stacksTag.size(); i++)
         {
+            Tag el = stacksTag.get(i);
+            if (!(el instanceof CompoundTag stackTag)) continue;
+
+            long amount = stackTag.getLong("amount");
+            if (amount <= 0) continue;
+
+            // 读取 key 子标签
+            Tag rawKeyTag = stackTag.get("key");
+            if (!(rawKeyTag instanceof CompoundTag keyTag)) continue;
+
             try
             {
-                CompoundTag stackTag = (CompoundTag) t;
-                CompoundTag keyTag = (CompoundTag) stackTag.get("key");
-                long amount = stackTag.getLong("amount");
-                IStackKey<?> key = IStackKey.deserializeNBTCommon(keyTag, provider);
-                if(key.isEmpty() || amount <= 0) continue;
-                insert(key, amount, false);
+                // 用 IStackKey.CODEC 解析 key（不再调用 deserializeNBTCommon）
+                DataResult<IStackKey<?>> res = IStackKey.CODEC.parse(ops, keyTag);
+
+                res.resultOrPartial(err -> {
+                }).ifPresent(key -> {
+                    if (!key.isEmpty()) {
+                        insert(key, amount, false);
+                    }
+                });
             }
-            catch (Throwable e)
+            catch (Throwable t)
             {
-                // 目前直接忽略，跳到下一个键
+                // 记录日志，然后继续下一个解码
+                BeyondDimensions.LOGGER.warn("解码第{}个堆叠时出错: {}", i, t.toString());
             }
         }
     }

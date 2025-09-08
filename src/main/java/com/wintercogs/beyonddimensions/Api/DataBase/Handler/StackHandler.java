@@ -49,7 +49,7 @@ public class StackHandler implements IStackHandler
             ArrayList<KeyAmount> list = new ArrayList<>();
             for(int i = 0; i < size; i++)
             {
-                list.add(new KeyAmount(IStackKey.deserializeCommon(buf), buf.readVarLong()));
+                list.add(new KeyAmount(IStackKey.STREAM_CODEC.decode(buf), buf.readVarLong()));
             }
             return new StackHandler(list);
         }

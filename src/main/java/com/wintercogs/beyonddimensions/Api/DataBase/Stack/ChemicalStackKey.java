@@ -81,6 +81,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
 
     // 客户端渲染/复制缓存（amount≥1，仅用于显示，不参与 Key 语义）
     private ChemicalStack clientCache;
+    private int hashCodeCache = 0;
 
     private ChemicalStackKey() {
         this.chemical = MekanismAPI.EMPTY_CHEMICAL;
@@ -217,8 +218,8 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     // —— 网络序列化（新形态）——
 
     @Override
-    public void serialize(RegistryFriendlyByteBuf buf) {
-        buf.writeResourceLocation(getTypeId());
+    public void serialize(RegistryFriendlyByteBuf buf)
+    {
         boolean has = !chemical.isEmptyType();
         buf.writeBoolean(has);
         if (!has) return;
@@ -229,9 +230,8 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     }
 
     @Override
-    public ChemicalStackKey deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId) {
-        if (!typeId.equals(getTypeId())) return null;
-
+    public @NotNull ChemicalStackKey deserialize(RegistryFriendlyByteBuf buf)
+    {
         boolean has = buf.readBoolean();
         if (!has) return ChemicalStackKey.EMPTY;
 
@@ -262,7 +262,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     }
 
     @Override
-    public ChemicalStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
+    public @NotNull ChemicalStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
         try {
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             var decoded = CODEC.parse(ops, nbt).result();
@@ -320,7 +320,12 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     }
 
     @Override
-    public int hashCode() {
-        return 31 + Objects.hashCode(this.chemical);
+    public int hashCode()
+    {
+        if(hashCodeCache == 0)
+        {
+            hashCodeCache = 31 + Objects.hashCode(this.chemical);
+        }
+        return hashCodeCache;
     }
 }

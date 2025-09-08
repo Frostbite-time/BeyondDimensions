@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Api.Registry;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,16 +14,16 @@ public class StackKeyRegistry
 
     public static <T> void registerType(IStackKey<T> type) {
         if (TYPES.containsKey(type.getTypeId())) {
-            throw new IllegalStateException("Duplicate stack type registration: " + type.getTypeId());
+            throw new IllegalStateException("尝试注册重复类型的Key: " + type.getTypeId());
         }
         TYPES.put(type.getTypeId(), type);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> IStackKey<T> getType(ResourceLocation id) {
+    public static <T> @NotNull IStackKey<T> getType(ResourceLocation id) {
         IStackKey<?> type = TYPES.get(id);
         if (type == null) {
-            throw new IllegalArgumentException("Unknown stack type: " + id);
+            throw new IllegalArgumentException("注册表中不存在此类型的Key，请先注册再使用: " + id);
         }
         return (IStackKey<T>) type;
     }

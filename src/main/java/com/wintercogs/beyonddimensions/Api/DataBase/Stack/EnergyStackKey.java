@@ -106,14 +106,11 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     // 只写入 typeId；deserialize 时直接返回单例
 
     @Override
-    public void serialize(RegistryFriendlyByteBuf buf) {
-        buf.writeResourceLocation(getTypeId());
-        // 不再写任何字段（Key 无数量）
-    }
+    public void serialize(RegistryFriendlyByteBuf buf) {}
 
     @Override
-    public EnergyStackKey deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId) {
-        if (!typeId.equals(getTypeId())) return null;
+    public @NotNull EnergyStackKey deserialize(RegistryFriendlyByteBuf buf)
+    {
         return INSTANCE;
     }
 
@@ -128,7 +125,7 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     }
 
     @Override
-    public EnergyStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
+    public @NotNull EnergyStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
         // 无论旧/新，都统一成单例 Key（旧数据里的 Amount 属于值层，不参与 Key）
         return INSTANCE;
     }

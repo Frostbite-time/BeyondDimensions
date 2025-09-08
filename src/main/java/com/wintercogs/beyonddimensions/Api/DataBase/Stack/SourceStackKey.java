@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class SourceStackKey extends LongStackKey<SourceType> {
@@ -85,7 +86,7 @@ public class SourceStackKey extends LongStackKey<SourceType> {
     }
 
     @Override
-    public SourceType getSource() {
+    public @NotNull SourceType getSource() {
         return new SourceType(0);
     }
 
@@ -114,13 +115,11 @@ public class SourceStackKey extends LongStackKey<SourceType> {
 
     // —— 网络：仅写 typeId；读回单例 —— //
     @Override
-    public void serialize(RegistryFriendlyByteBuf buf) {
-        buf.writeResourceLocation(getTypeId());
-    }
+    public void serialize(RegistryFriendlyByteBuf buf) {}
 
     @Override
-    public SourceStackKey deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId) {
-        if (!typeId.equals(getTypeId())) return null;
+    public @NotNull SourceStackKey deserialize(RegistryFriendlyByteBuf buf)
+    {
         return INSTANCE;
     }
 
@@ -133,7 +132,7 @@ public class SourceStackKey extends LongStackKey<SourceType> {
     }
 
     @Override
-    public SourceStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider access) {
+    public @NotNull SourceStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider access) {
         return INSTANCE;
     }
 }

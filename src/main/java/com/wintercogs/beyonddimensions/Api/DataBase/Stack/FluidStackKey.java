@@ -113,6 +113,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     // 渲染/便捷复制用的客户端缓存（amount 仅用于渲染，不参与 key 语义）
     private FluidStack clientCache;
+    private int hashCodeCache = 0;
 
     private FluidStackKey() {
         this.fluid = Fluids.EMPTY;
@@ -277,7 +278,6 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     @Override
     public void serialize(RegistryFriendlyByteBuf buf) {
-        buf.writeResourceLocation(getTypeId());
 
         boolean hasFluid = this.fluid != Fluids.EMPTY;
         buf.writeBoolean(hasFluid);
@@ -289,9 +289,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     }
 
     @Override
-    public FluidStackKey deserialize(RegistryFriendlyByteBuf buf, ResourceLocation typeId) {
-        if (!typeId.equals(getTypeId())) return null;
-
+    public @NotNull FluidStackKey deserialize(RegistryFriendlyByteBuf buf)
+    {
         boolean hasFluid = buf.readBoolean();
         if (!hasFluid) return new FluidStackKey(Fluids.EMPTY, DataComponentPatch.EMPTY);
 
@@ -326,7 +325,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     }
 
     @Override
-    public FluidStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
+    public @NotNull FluidStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
         try {
             // 1) 新格式：直接走 TYPE_CODEC
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
@@ -398,14 +397,18 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     }
 
     @Override
-    public int hashCode() {
-        // 与 ItemStackKey 一致：优先用规范化字节；失败回退到 patch.hashCode
-        ensureByte();
-        int base = 31 + fluid.hashCode();
-        int patchPart = (this.patchByte != null && this.patchByte.length > 0)
-                ? Arrays.hashCode(this.patchByte)
-                : patch.hashCode();
-        return 31 * base + patchPart;
+    public int hashCode()
+    {
+        if (hashCodeCache == 0 || this.patchByte == null || this.patchByte.length == 0)
+        {
+            ensureByte();
+            int base = 31 + fluid.hashCode();
+            int patchPart = (this.patchByte != null && this.patchByte.length > 0)
+                    ? Arrays.hashCode(this.patchByte)
+                    : patch.hashCode();
+            hashCodeCache = 31 * base + patchPart;
+        }
+        return hashCodeCache;
     }
 
     // ===== 规范化快照计算 =====
