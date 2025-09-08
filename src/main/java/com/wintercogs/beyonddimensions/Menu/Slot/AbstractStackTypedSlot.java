@@ -97,7 +97,7 @@ public abstract class AbstractStackTypedSlot extends Slot
         if(stackType.key() != null)
             return stackType;
         else
-            return new KeyAmount(new ItemStackKey(),0);
+            return new KeyAmount(ItemStackKey.EMPTY,0);
     }
 
     public ItemStack getItemStackFromUnifiedStorage()
@@ -138,7 +138,7 @@ public abstract class AbstractStackTypedSlot extends Slot
             }
 
         }
-        return new KeyAmount(new ItemStackKey(),0);
+        return new KeyAmount(ItemStackKey.EMPTY,0);
     }
 
     // 获取原版最大堆叠数的Stack，一般仅用于GUI类，可以保留Item实现
@@ -152,14 +152,14 @@ public abstract class AbstractStackTypedSlot extends Slot
         {
             return new KeyAmount(stack.key(),stack.key().getVanillaMaxStackSize());
         }
-        return new KeyAmount(new ItemStackKey(), 0);
+        return new KeyAmount(ItemStackKey.EMPTY, 0);
     }
 
     public KeyAmount getStack()
     {
         if(getSlotIndex()<0||getSlotIndex()>= storage.getSlots())
         {
-            return new KeyAmount(new ItemStackKey(), 0);
+            return new KeyAmount(ItemStackKey.EMPTY, 0);
         }
         //从当前槽索引取物品
         KeyAmount stack = storage.getStackBySlot(getSlotIndex());
@@ -174,7 +174,7 @@ public abstract class AbstractStackTypedSlot extends Slot
                 return new KeyAmount(stack.key().getEmpty(),0);
             }
         }
-        return new KeyAmount(new ItemStackKey(),0);
+        return new KeyAmount(ItemStackKey.EMPTY,0);
     }
 
 

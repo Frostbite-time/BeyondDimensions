@@ -479,7 +479,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
         {
             return storage.insert(stack,amount,false);
         }
-        return new KeyAmount(new ItemStackKey(),0);
+        return new KeyAmount(ItemStackKey.EMPTY,0);
 
     }
 
@@ -490,7 +490,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
         {
             return storage.extract(stack,amount,false);
         }
-        return new KeyAmount(new ItemStackKey(),0);
+        return new KeyAmount(ItemStackKey.EMPTY,0);
     }
 
     // 无序槽位由槽位组负责处理同步

@@ -229,8 +229,8 @@ public class BeyondDimensions
     {
 
         // 注册堆叠类型，使得网络能够存储相关堆叠
-        StackKeyRegistry.registerType(new ItemStackKey());
-        StackKeyRegistry.registerType(new FluidStackKey());
+        StackKeyRegistry.registerType(ItemStackKey.EMPTY);
+        StackKeyRegistry.registerType(FluidStackKey.EMPTY);
         StackKeyRegistry.registerType(EnergyStackKey.INSTANCE);
 
         // 注册方块能力类型，用于动态为方块注册能力
@@ -243,13 +243,13 @@ public class BeyondDimensions
         CapabilityHelper.ItemCapabilityMap.put(EnergyStackKey.ID, Capabilities.EnergyStorage.ITEM);
 
         // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-        CapabilityHelper.registerUSHandler(new ItemStackKey(), ItemUnifiedStorageHandler::new);
-        CapabilityHelper.registerUSHandler(new FluidStackKey(), FluidUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(ItemStackKey.EMPTY, ItemUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(FluidStackKey.EMPTY, FluidUnifiedStorageHandler::new);
         CapabilityHelper.registerUSHandler(EnergyStackKey.INSTANCE, EnergyUnifiedStorageHandler::new);
 
         // 注册存储分化包装
-        CapabilityHelper.registerStackTypedHandler(new ItemStackKey(), ItemStackTypedHandler::new);
-        CapabilityHelper.registerStackTypedHandler(new FluidStackKey(), FluidStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(ItemStackKey.EMPTY, ItemStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(FluidStackKey.EMPTY, FluidStackTypedHandler::new);
         CapabilityHelper.registerStackTypedHandler(EnergyStackKey.INSTANCE, EnergyStackTypedHandler::new);
 
         // 注册堆叠处理包装，用于动态包装来自其他模组的handler (如原版的IItemHandler)
@@ -260,14 +260,14 @@ public class BeyondDimensions
         if(MekLoaded)
         {
             // 注册化学品堆叠
-            StackKeyRegistry.registerType(new ChemicalStackKey());
+            StackKeyRegistry.registerType(ChemicalStackKey.EMPTY);
             // 注册化学品方块能力
             CapabilityHelper.BlockCapabilityMap.put(ChemicalStackKey.ID, ChemicalCapabilityHelper.CHEMICAL_BLOCK);
             // 注册化学品物品能力
             CapabilityHelper.ItemCapabilityMap.put(ChemicalStackKey.ID, ChemicalCapabilityHelper.CHEMICAL_ITEM);
             // 注册分化包装
-            CapabilityHelper.registerUSHandler(new ChemicalStackKey(), ChemicalUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new ChemicalStackKey(), ChemicalStackTypedHandler::new);
+            CapabilityHelper.registerUSHandler(ChemicalStackKey.EMPTY, ChemicalUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(ChemicalStackKey.EMPTY, ChemicalStackTypedHandler::new);
 
             // 注册堆叠处理包装
             StackHandlerWrapperHelper.stackWrappers.put(ChemicalStackKey.ID, ChemicalHandlerWrapper::new);

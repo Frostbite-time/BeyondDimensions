@@ -69,7 +69,7 @@ public class NetMagnetItem extends BaseMachineItem
     {
         super.checkComponents(stack);
         if(!stack.has(ModDataComponents.ISTACK_SLOTS))
-            stack.set(ModDataComponents.ISTACK_SLOTS,new ArrayList<>(Collections.nCopies(capacity,new KeyAmount(new ItemStackKey(),0))));
+            stack.set(ModDataComponents.ISTACK_SLOTS,new ArrayList<>(Collections.nCopies(capacity,new KeyAmount(ItemStackKey.EMPTY,0))));
         if(!stack.has(ModDataComponents.FILTER_MODE))
             stack.set(ModDataComponents.FILTER_MODE,FilterMode.BLACK);
         if(!stack.has(ModDataComponents.HOPPER_ITEM_MODE))

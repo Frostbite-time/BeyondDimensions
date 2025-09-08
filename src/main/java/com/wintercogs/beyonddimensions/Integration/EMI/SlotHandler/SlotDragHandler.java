@@ -64,7 +64,7 @@ public class SlotDragHandler implements EmiDragDropHandler<Screen>
                     Object stackKey = ingredient.getEmiStacks().get(0).getKey();
                     DataComponentPatch dataComponentPatch = ingredient.getEmiStacks().get(0).getComponentChanges();
 
-                    IStackKey<?> dragging = new ItemStackKey();
+                    IStackKey<?> dragging = ItemStackKey.EMPTY;
                     for (IStackKey<?> type : StackKeyRegistry.getAllTypes())
                     {
                         if (type.getSourceClass().isAssignableFrom(stackKey.getClass()))
@@ -85,7 +85,7 @@ public class SlotDragHandler implements EmiDragDropHandler<Screen>
 
                             if (genericContent != null)
                             {
-                                dragging = AEHelper.fromAEKeyToIStack(genericContent.what()).orElse(new ItemStackKey());
+                                dragging = AEHelper.fromAEKeyToIStack(genericContent.what()).orElse(ItemStackKey.EMPTY);
                             }
 
                         }

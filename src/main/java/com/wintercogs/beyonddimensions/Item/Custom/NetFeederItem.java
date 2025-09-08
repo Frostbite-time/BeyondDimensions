@@ -57,7 +57,7 @@ public class NetFeederItem extends BaseMachineItem
     {
         super.checkComponents(stack);
         if(!stack.has(ModDataComponents.ISTACK_SLOTS))
-            stack.set(ModDataComponents.ISTACK_SLOTS,new ArrayList<>(Collections.nCopies(capacity,new KeyAmount(new ItemStackKey(),0))));
+            stack.set(ModDataComponents.ISTACK_SLOTS,new ArrayList<>(Collections.nCopies(capacity,new KeyAmount(ItemStackKey.EMPTY,0))));
         if(!stack.has(ModDataComponents.FEEDER_MODE))
             stack.set(ModDataComponents.FEEDER_MODE, FeederMode.NORMAL);
 

@@ -34,7 +34,7 @@ import java.util.function.Function;
 
 public class OrderedStackTypedSlot extends AbstractStackTypedSlot
 {
-    private KeyAmount lastStack = new KeyAmount(new ItemStackKey(), 0);
+    private KeyAmount lastStack = new KeyAmount(ItemStackKey.EMPTY, 0);
 
     public OrderedStackTypedSlot(BDBaseMenu menu, IStackHandler stackTypedHandler, int slotIndex, int xPosition, int yPosition)
     {
@@ -430,7 +430,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
             // storage的insert应当考虑到一切情况
             return storage.insert(theSlot,key,amount,false);
         }
-        return new KeyAmount(new ItemStackKey(), 0);
+        return new KeyAmount(ItemStackKey.EMPTY, 0);
     }
 
     @Override
@@ -449,7 +449,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
         KeyAmount currentStack = storage.getStackBySlot(this.getSlotIndex());
         if(currentStack.key() == null)
         {
-            lastStack = new KeyAmount(new ItemStackKey(), 0);
+            lastStack = new KeyAmount(ItemStackKey.EMPTY, 0);
             PacketDistributor.sendToPlayer((ServerPlayer) menu.player,new OrderedStackTypedSlotPacket(index,theSlot,lastStack.key(),0));
         }
         else if(currentStack.isEmpty() && lastStack.isEmpty())

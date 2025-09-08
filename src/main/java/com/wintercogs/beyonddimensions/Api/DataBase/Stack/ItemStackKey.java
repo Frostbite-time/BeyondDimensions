@@ -33,6 +33,8 @@ import java.util.stream.Stream;
 public final class ItemStackKey implements IStackKey<ItemStack>
 {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
+    public static final ItemStackKey EMPTY = new ItemStackKey();
+
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
     // 新的CODEC，写入时使用
@@ -115,20 +117,23 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     private int vanillaMaxSize = -1; // 缓存原版堆叠的最大大小，从serverCache去获取
     private int hashCodeCache = 0;
 
-    public ItemStackKey() {
+    private ItemStackKey()
+    {
         this.item = Items.AIR;
         this.patch = DataComponentPatch.EMPTY;
         this.clientCache = ItemStack.EMPTY;
     }
 
-    public ItemStackKey(ItemStack stack) {
+    public ItemStackKey(ItemStack stack)
+    {
         this.item = stack.getItem();
         this.patch = stack.getComponentsPatch(); // 这里的返回值在后续实际上无法被修改，因此无需担心
         this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
     }
 
     // 仅供内部使用，不直接对外暴露
-    private ItemStackKey(Item item, DataComponentPatch patch) {
+    private ItemStackKey(Item item, DataComponentPatch patch)
+    {
         this.item = item;
         this.patch = patch == null ? DataComponentPatch.EMPTY : patch;
         this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
@@ -166,7 +171,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
-    public Class<ItemStack> getStackClass() {
+    public Class<ItemStack> getStackClass()
+    {
         return ItemStack.class;
     }
 
@@ -191,13 +197,13 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public boolean isEmpty()
     {
-        return this.item == Items.AIR;
+        return this == ItemStackKey.EMPTY || this.item == Items.AIR;
     }
 
     @Override
     public ItemStackKey getEmpty()
     {
-        return new ItemStackKey();
+        return ItemStackKey.EMPTY;
     }
 
     @Override
@@ -398,7 +404,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         } catch (Throwable t) {
             BeyondDimensions.LOGGER.error("ItemStackKey 反序列化出现错误。Keys={} Error={}", nbt.getAllKeys(), t.getMessage(), t);
         }
-        return new ItemStackKey(); // 空实现
+        return ItemStackKey.EMPTY; // 空实现
     }
 
     @Override

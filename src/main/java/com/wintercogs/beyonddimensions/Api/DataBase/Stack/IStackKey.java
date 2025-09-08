@@ -44,7 +44,7 @@ public interface IStackKey<T>
                 }
 
                 @Override
-                public IStackKey<?> decode(RegistryFriendlyByteBuf byteBuf)
+                public @NotNull IStackKey<?> decode(RegistryFriendlyByteBuf byteBuf)
                 {
                     return IStackKey.deserializeCommon(byteBuf);
                 }
@@ -155,12 +155,12 @@ public interface IStackKey<T>
     /**
      * 网络反序列化，会自动匹配类型
      */
-    static IStackKey deserializeCommon(RegistryFriendlyByteBuf buf)
+    static IStackKey<?> deserializeCommon(RegistryFriendlyByteBuf buf)
     {
         ResourceLocation typeId = buf.readResourceLocation();
-        for(IStackKey stacktype : StackKeyRegistry.getAllTypes())
+        for(IStackKey<?> stacktype : StackKeyRegistry.getAllTypes())
         {
-            IStackKey stack = stacktype.deserialize(buf,typeId);
+            IStackKey<?> stack = stacktype.deserialize(buf,typeId);
             if(stack!=null)
             {
                 return stack;

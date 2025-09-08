@@ -161,7 +161,7 @@ public class StackHandler implements IStackHandler
             }
             else
             {
-                setStackDirectly(i,new ItemStackKey(),0);
+                setStackDirectly(i,ItemStackKey.EMPTY,0);
             }
         }
     }

@@ -31,8 +31,8 @@ import java.util.stream.Stream;
 
 public final class FluidStackKey implements IStackKey<FluidStack>
 {
-
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
+    public static final FluidStackKey EMPTY = new FluidStackKey();
 
     // —— 新格式：fluid + components（不含 amount）——
     private static final MapCodec<FluidStackKey> NEW_FMT = RecordCodecBuilder.mapCodec(instance ->
@@ -114,7 +114,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     // 渲染/便捷复制用的客户端缓存（amount 仅用于渲染，不参与 key 语义）
     private FluidStack clientCache;
 
-    public FluidStackKey() {
+    private FluidStackKey() {
         this.fluid = Fluids.EMPTY;
         this.patch = DataComponentPatch.EMPTY;
         this.clientCache = FluidStack.EMPTY;
@@ -194,12 +194,12 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     @Override
     public boolean isEmpty() {
-        return this.fluid == Fluids.EMPTY;
+        return this == FluidStackKey.EMPTY || this.fluid == Fluids.EMPTY;
     }
 
     @Override
     public FluidStackKey getEmpty() {
-        return new FluidStackKey();
+        return FluidStackKey.EMPTY;
     }
 
     @Override
@@ -349,7 +349,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         } catch (Throwable t) {
             BeyondDimensions.LOGGER.error("FluidStackKey 反序列化错误。Keys={} Error={}", nbt.getAllKeys(), t.getMessage(), t);
         }
-        return new FluidStackKey();
+        return FluidStackKey.EMPTY;
     }
 
     // ===== 渲染支持：交给外部渲染器；仅提供一个稳定的最小量副本 =====

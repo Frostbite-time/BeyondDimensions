@@ -66,7 +66,7 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
         public void accept(I ingredient)
         {
             Object stackKey = ingredient;
-            IStackKey<?> dragging = new ItemStackKey();
+            IStackKey<?> dragging = ItemStackKey.EMPTY;
             for(IStackKey<?> type : StackKeyRegistry.getAllTypes())
             {
                 if(type.getStackClass().isAssignableFrom(stackKey.getClass()))
@@ -90,7 +90,7 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
 
                     if(genericContent != null)
                     {
-                        dragging = AEHelper.fromAEKeyToIStack(genericContent.what()).orElse(new ItemStackKey());
+                        dragging = AEHelper.fromAEKeyToIStack(genericContent.what()).orElse(ItemStackKey.EMPTY);
                     }
 
                 }

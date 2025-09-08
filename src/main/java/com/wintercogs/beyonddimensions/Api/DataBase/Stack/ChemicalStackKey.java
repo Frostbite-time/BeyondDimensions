@@ -22,8 +22,8 @@ import java.util.stream.Stream;
 
 public class ChemicalStackKey implements IStackKey<ChemicalStack> {
 
-    public static final ResourceLocation ID =
-            ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/chemical");
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/chemical");
+    public static final ChemicalStackKey EMPTY = new ChemicalStackKey();
 
     // 新格式：仅化学品注册名
     private static final MapCodec<ChemicalStackKey> NEW_FMT = RecordCodecBuilder.mapCodec(instance ->
@@ -82,7 +82,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     // 客户端渲染/复制缓存（amount≥1，仅用于显示，不参与 Key 语义）
     private ChemicalStack clientCache;
 
-    public ChemicalStackKey() {
+    private ChemicalStackKey() {
         this.chemical = MekanismAPI.EMPTY_CHEMICAL;
         this.clientCache = ChemicalStack.EMPTY;
     }
@@ -152,12 +152,12 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
 
     @Override
     public boolean isEmpty() {
-        return chemical.isEmptyType();
+        return this == ChemicalStackKey.EMPTY || chemical.isEmptyType();
     }
 
     @Override
     public ChemicalStackKey getEmpty() {
-        return new ChemicalStackKey();
+        return ChemicalStackKey.EMPTY;
     }
 
     @Override
@@ -233,7 +233,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
         if (!typeId.equals(getTypeId())) return null;
 
         boolean has = buf.readBoolean();
-        if (!has) return new ChemicalStackKey();
+        if (!has) return ChemicalStackKey.EMPTY;
 
         ResourceLocation rl = buf.readResourceLocation();
         Chemical c = MekanismAPI.CHEMICAL_REGISTRY.get(rl);
@@ -283,7 +283,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
         } catch (Throwable t) {
             BeyondDimensions.LOGGER.error("ChemicalStackKey 反序列化错误。Keys={} Error={}", nbt.getAllKeys(), t.getMessage(), t);
         }
-        return new ChemicalStackKey();
+        return ChemicalStackKey.EMPTY;
     }
 
     // —— 渲染支持 —— //

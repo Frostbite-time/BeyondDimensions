@@ -26,7 +26,7 @@ import java.util.function.Function;
 public class FlagStackTypedSlot extends AbstractStackTypedSlot
 {
 
-    private KeyAmount lastStack = new KeyAmount(new ItemStackKey(), 0);
+    private KeyAmount lastStack = new KeyAmount(ItemStackKey.EMPTY, 0);
 
     public FlagStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex, int xPosition, int yPosition)
     {
@@ -61,8 +61,8 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public KeyAmount safeExtract(IStackKey<?> key, long amount)
     {
-        setStackDirectly(new ItemStackKey() ,amount);
-        return new KeyAmount(new ItemStackKey(), amount); // 标记槽永远取出空
+        setStackDirectly(ItemStackKey.EMPTY ,amount);
+        return new KeyAmount(ItemStackKey.EMPTY, amount); // 标记槽永远取出空
     }
 
     @Override
@@ -128,12 +128,12 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
             if (carriedItem.isEmpty())
             {
                 //槽位物品存在，携带物品为空，尝试清空标记
-                setStackDirectly(new ItemStackKey(), 0);
+                setStackDirectly(ItemStackKey.EMPTY, 0);
             }
             else if (true)
             {   //槽位物品存在，携带物品存在，物品可以放置，取消标记
 
-                setStackDirectly(new ItemStackKey(), 0);
+                setStackDirectly(ItemStackKey.EMPTY, 0);
             }
             else if (clickStack.key().isSameTypeSameComponents(new ItemStackKey(carriedItem)))
             {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
@@ -160,7 +160,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
         KeyAmount currentStack = storage.getStackBySlot(this.getSlotIndex());
         if(currentStack.key() == null)
         {
-            lastStack = new KeyAmount(new ItemStackKey(), 0);
+            lastStack = new KeyAmount(ItemStackKey.EMPTY, 0);
             PacketDistributor.sendToPlayer((ServerPlayer) menu.player,new OrderedStackTypedSlotPacket(index,theSlot,lastStack.key(),lastStack.amount()));
         }
         else if(currentStack.isEmpty() && lastStack.isEmpty())
