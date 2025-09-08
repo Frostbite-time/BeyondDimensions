@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedSlotGroupSync;
 import com.wintercogs.beyonddimensions.Menu.Slot.SlotGroupSync;
 import com.wintercogs.beyonddimensions.Packet.QuickDataTagPacket;
 import net.minecraft.nbt.CompoundTag;
@@ -334,4 +335,16 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         return false;
     }
 
+    @Override
+    public void removed(Player player)
+    {
+        super.removed(player);
+        for(SlotGroupSync slotGroupSync : slotGroupSyncs)
+        {
+            if(slotGroupSync instanceof DisorderedSlotGroupSync disSync)
+            {
+                disSync.dispose();
+            }
+        }
+    }
 }

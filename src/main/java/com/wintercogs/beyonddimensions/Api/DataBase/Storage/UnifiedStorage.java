@@ -12,7 +12,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandle
 public class UnifiedStorage extends UnorderedStackHandlerRemoveZero {
 
     /** 对应的维度网络，仅用于持久化脏标记 */
-    private DimensionsNet net;
+    private final DimensionsNet net;
 
     public UnifiedStorage(DimensionsNet net) {
         super();
