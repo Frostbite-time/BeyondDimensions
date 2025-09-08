@@ -488,17 +488,37 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         ListTag stacksTag = new ListTag();
         boolean writeZero = (zeroPolicy == ZeroPolicy.KEEP_ZERO);
 
+        // 与反序列化保持一致：使用带注册表上下文的 Ops
+        final DynamicOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
+
         for (Map.Entry<IStackKey<?>, Long> entry : storage.entrySet()) {
             IStackKey<?> key = entry.getKey();
             long value = entry.getValue();
-            if (key.isEmpty()) continue;
+            if (key == null || key.isEmpty()) continue;
             if (!writeZero && value <= 0L) continue;
 
+            // 用 CODEC 编码 key -> Tag（期望是 CompoundTag）
+            DataResult<Tag> enc = IStackKey.CODEC.encodeStart(ops, key);
+
+            Tag encoded = enc.resultOrPartial(err -> {
+                // 记录一次警告，但不中断后续条目
+                BeyondDimensions.LOGGER.warn("编码 IStackKey 失败：{} | key={}", err, key);
+            }).orElse(null);
+
+            if (!(encoded instanceof CompoundTag)) {
+                // 理论上不会发生；若发生，为保证与解码端一致（那里要求 CompoundTag），这里跳过该条目
+                if (encoded != null) {
+                    BeyondDimensions.LOGGER.warn("IStackKey 编码结果不是 CompoundTag：{} | key={}", encoded.getClass().getName(), key);
+                }
+                continue;
+            }
+
             CompoundTag stackTag = new CompoundTag();
-            stackTag.put("key", key.serializeNBT(provider));
+            stackTag.put("key", (CompoundTag) encoded);
             stackTag.putLong("amount", value);
             stacksTag.add(stackTag);
         }
+
         tag.put("stacks", stacksTag);
         return tag;
     }
@@ -522,7 +542,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
 
             try {
                 DataResult<IStackKey<?>> res = IStackKey.CODEC.parse(ops, keyTag);
-                res.resultOrPartial(err -> {}).ifPresent(key -> {
+                res.resultOrPartial(err -> {
+                    BeyondDimensions.LOGGER.warn("解码 IStackKey 失败，原因：{}", err);
+                }).ifPresent(key -> {
                     if (key.isEmpty()) return;
                     if (amount <= 0L) {
                         if (zeroPolicy == ZeroPolicy.KEEP_ZERO) {
