@@ -127,10 +127,9 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     // 仅写 Type；读取时直接返回单例。旧 LongType 是纯 long，可直接忽略。
 
     @Override
-    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("Type", ID.toString());
-        return tag;
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
+    {
+        return new CompoundTag();
     }
 
     @Override

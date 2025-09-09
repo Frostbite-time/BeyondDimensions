@@ -240,7 +240,8 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     // —— NBT：写新；读新优先 + 旧兼容 —— //
 
     @Override
-    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
+    {
         CompoundTag out = new CompoundTag();
         try {
             out.putString("Type", ID.toString());
@@ -258,7 +259,8 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     }
 
     @Override
-    public @NotNull ChemicalStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
+    public @NotNull ChemicalStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
+    {
         try {
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             var decoded = CODEC.parse(ops, nbt).result();

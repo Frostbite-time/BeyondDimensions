@@ -117,10 +117,9 @@ public class ManaStackKey extends LongStackKey<ManaType> {
     // ------- NBT：仅写 Type；读取直接返回单例（忽略旧的 Amount） -------
 
     @Override
-    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("Type", ID.toString());
-        return tag;
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
+    {
+        return new CompoundTag();
     }
 
     @Override

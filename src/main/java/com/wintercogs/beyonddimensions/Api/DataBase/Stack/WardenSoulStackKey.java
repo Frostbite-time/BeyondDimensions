@@ -123,10 +123,9 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
 
     // —— NBT：仅写 Type；读回单例（旧 LongType 的 long 忽略） —— //
     @Override
-    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider access) {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("Type", ID.toString());
-        return tag;
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider access)
+    {
+        return new CompoundTag();
     }
 
     @Override

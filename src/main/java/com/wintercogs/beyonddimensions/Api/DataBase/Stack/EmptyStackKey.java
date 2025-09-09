@@ -168,9 +168,7 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     @Override
     public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
     {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("Type", ID.toString());
-        return tag;
+        return new CompoundTag();
     }
 
     @Override

@@ -125,10 +125,9 @@ public class SourceStackKey extends LongStackKey<SourceType> {
 
     // —— NBT：仅写 Type；读回单例（忽略旧 Amount） —— //
     @Override
-    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider access) {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("Type", ID.toString());
-        return tag;
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider access)
+    {
+        return new CompoundTag();
     }
 
     @Override

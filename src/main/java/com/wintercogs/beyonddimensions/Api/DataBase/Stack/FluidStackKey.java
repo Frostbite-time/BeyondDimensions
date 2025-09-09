@@ -309,8 +309,6 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
         final CompoundTag out = new CompoundTag();
         try {
-            out.putString("Type", ID.toString());
-
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             CODEC.encodeStart(ops, this)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("FluidStackKey 序列化(Codec)出错: {}", err))

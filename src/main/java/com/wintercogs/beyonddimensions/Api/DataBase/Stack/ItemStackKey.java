@@ -324,9 +324,6 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     {
         final CompoundTag out = new CompoundTag();
         try {
-            // 兼容外部依赖：保留旧字段 Type
-            out.putString("Type", ID.toString());
-
             // 写回采用与 NEW_FMT/TYPE_CODEC 完全一致的键：item / components
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             CODEC.encodeStart(ops, this)
