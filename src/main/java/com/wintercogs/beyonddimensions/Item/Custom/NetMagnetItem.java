@@ -88,7 +88,7 @@ public class NetMagnetItem extends BaseMachineItem
     public boolean shouldWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
         return super.shouldWork(stack, level, holder, slotId, isSelected)
-                && NetedItem.getNet(stack,level.getServer()) != null;
+                && NetedItem.getNet(stack) != null;
     }
 
     @Override
@@ -109,7 +109,7 @@ public class NetMagnetItem extends BaseMachineItem
         List<ItemEntity> itemEntities = hopperItemMode == HopperItemMode.ALLOW ? refreshItemEntityCache(hopperNBTMode,level,searchArea) : new ArrayList<>();
         List<ExperienceOrb> xpEntities = hopperXpMode == HopperXpMode.ALLOW ? refreshXpEntityCache(level,searchArea) : new ArrayList<>();
 
-        UnifiedStorage storage = NetedItem.getNet(stack,level.getServer()).getUnifiedStorage();
+        UnifiedStorage storage = NetedItem.getNet(stack).getUnifiedStorage();
 
         // 开始收集物品
         if(hopperItemMode == HopperItemMode.ALLOW)

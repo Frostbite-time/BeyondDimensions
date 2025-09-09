@@ -67,7 +67,7 @@ public class NetFeederItem extends BaseMachineItem
     public boolean shouldWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
         return super.shouldWork(stack, level, holder, slotId, isSelected)
-                && NetedItem.getNet(stack,level.getServer()) != null;
+                && NetedItem.getNet(stack) != null;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class NetFeederItem extends BaseMachineItem
             // feederModeMatch会进行一次饥饿值判定，决定要不要实际执行
             if(feederModeMatch(playerFoodState,feederMode))
             {
-                UnifiedStorage storage = NetedItem.getNet(stack,level.getServer()).getUnifiedStorage();
+                UnifiedStorage storage = NetedItem.getNet(stack).getUnifiedStorage();
 
                 // 尝试取出一个Food
                 KeyAmount foodCache = null;

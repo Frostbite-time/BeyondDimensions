@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public class NetedItem extends Item
@@ -63,12 +64,12 @@ public class NetedItem extends Item
         }
     }
 
-    public static DimensionsNet getNet(ItemStack stack, MinecraftServer dataProvider)
+    public static @Nullable DimensionsNet getNet(ItemStack stack)
     {
         int netId = stack.getOrDefault(ModDataComponents.NET_ID_DATA,-1);
         if(netId >= 0)
         {
-            return DimensionsNet.getNetFromId(netId,dataProvider);
+            return DimensionsNet.getNetFromId(netId);
         }
         return null;
     }

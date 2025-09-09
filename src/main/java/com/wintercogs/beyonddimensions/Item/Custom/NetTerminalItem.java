@@ -46,7 +46,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
             if(itemstack.get(ModDataComponents.NET_ID_DATA)>=0)
             {
-                DimensionsNet net = DimensionsNet.getNetFromId(itemstack.get(ModDataComponents.NET_ID_DATA),level.getServer());
+                DimensionsNet net = DimensionsNet.getNetFromId(itemstack.get(ModDataComponents.NET_ID_DATA));
                 if (net != null)
                 {
                     contextMap.put(player, new MenuTriggerContext(usedHand, itemstack));
@@ -83,7 +83,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
             return null;
         }
         // 使用上下文中的物品栈
-        DimensionsNet net = DimensionsNet.getNetFromId(ctx.stack.get(ModDataComponents.NET_ID_DATA), player.getServer());
+        DimensionsNet net = DimensionsNet.getNetFromId(ctx.stack.get(ModDataComponents.NET_ID_DATA));
         return new DimensionsCraftMenuTerminal(
                 containerId,
                 inventory,
