@@ -37,6 +37,7 @@ import com.wintercogs.beyonddimensions.Integration.RSTypes.BD_RSTypesPlugin;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
+import com.wintercogs.beyonddimensions.Tester.GameTester;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -51,6 +52,7 @@ import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
 
@@ -359,6 +361,11 @@ public class BeyondDimensions
     public void onServerStarting(ServerStartingEvent event)
     {
         LOGGER.info("维度网络初始化完成(服务端)");
+    }
+
+    @SubscribeEvent
+    public void onServerStared(ServerStartedEvent event)
+    {
         //GameTester.OnSeverStartTester(event.getServer());
     }
 
