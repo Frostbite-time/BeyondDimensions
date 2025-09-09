@@ -51,7 +51,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -61,7 +61,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };

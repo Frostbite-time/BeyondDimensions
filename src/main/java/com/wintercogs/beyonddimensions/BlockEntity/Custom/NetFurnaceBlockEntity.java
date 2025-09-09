@@ -108,7 +108,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
 
@@ -130,7 +130,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
 
@@ -155,7 +155,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
 
@@ -178,7 +178,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
 
@@ -194,7 +194,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
 
@@ -218,7 +218,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };

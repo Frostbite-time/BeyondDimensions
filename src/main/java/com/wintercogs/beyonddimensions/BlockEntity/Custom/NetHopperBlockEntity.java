@@ -44,7 +44,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };

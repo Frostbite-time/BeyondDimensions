@@ -44,7 +44,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
