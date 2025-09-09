@@ -64,7 +64,7 @@ public class DimensionsNet extends SavedData
     private final Set<UUID> players = new HashSet<>();
 
     /**
-     * 通用存储空间，存储任何实现了{@link IStackType}的资源类型
+     * 通用存储空间，存储任何实现了{@link com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey}的资源类型
      */
     private UnifiedStorage unifiedStorage;
 

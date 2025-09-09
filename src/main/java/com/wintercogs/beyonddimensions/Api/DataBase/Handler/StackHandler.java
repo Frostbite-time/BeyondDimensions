@@ -1,16 +1,16 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -27,44 +27,122 @@ import java.util.*;
 public class StackHandler implements IStackHandler
 {
 
-    public static final Codec<StackHandler> CODEC = RecordCodecBuilder.create(instance ->
+    private static final MapCodec<StackHandler> NEW_FMT = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     KeyAmount.CODEC.listOf().fieldOf("stacks")
-                            .forGetter(stackHandler -> {
-                                java.util.ArrayList<KeyAmount> list = new java.util.ArrayList<>(stackHandler.size);
-                                for (int i = 0; i < stackHandler.size; i++) {
-                                    list.add(new KeyAmount(stackHandler.keys[i], stackHandler.amounts[i]));
+                            .forGetter(sh -> {
+                                ArrayList<KeyAmount> list = new ArrayList<>(sh.size);
+                                for (int i = 0; i < sh.size; i++) {
+                                    list.add(new KeyAmount(sh.keys[i], sh.amounts[i]));
                                 }
                                 return list;
                             })
             ).apply(instance, StackHandler::new)
     );
 
-    public static final StreamCodec<RegistryFriendlyByteBuf,StackHandler> STREAM_CODEC = new StreamCodec<>()
-    {
+    // === 兼容型 MapCodec：新优先，旧回退（写时永远写新） ===
+    public static final MapCodec<StackHandler> TYPE_CODEC = new MapCodec<>() {
+        private static final String K_NEW_STACKS = "stacks";   // 新
+        private static final String K_OLD_STACKS = "Stacks";   // 旧（大写）
+        private static final String K_TYPED      = "TypedStack";
+        private static final String K_TYPE       = "Type";
+        private static final String K_type       = "type";     // IStackKey.CODEC 分发键
+
         @Override
-        public StackHandler decode(RegistryFriendlyByteBuf buf)
-        {
-            int size = buf.readVarInt();
-            ArrayList<KeyAmount> list = new ArrayList<>();
-            for(int i = 0; i < size; i++)
-            {
-                list.add(new KeyAmount(IStackKey.STREAM_CODEC.decode(buf), buf.readVarLong()));
+        public <T> DataResult<StackHandler> decode(DynamicOps<T> ops, MapLike<T> input) {
+            final T kNewStacks = ops.createString(K_NEW_STACKS);
+            final T kOldStacks = ops.createString(K_OLD_STACKS);
+
+            // 1) 新格式优先
+            if (input.get(kNewStacks) != null) {
+                return NEW_FMT.decode(ops, input);
             }
-            return new StackHandler(list);
+
+            // 2) 旧格式回退：Stacks -> [{ TypedStack, Type }]
+            final T oldNode = input.get(kOldStacks);
+            if (oldNode == null) {
+                // 让 NEW_FMT 给出缺键错误，便于定位
+                return NEW_FMT.decode(ops, input);
+            }
+
+            return ops.getStream(oldNode).flatMap(stream -> {
+                ArrayList<KeyAmount> out = new ArrayList<>();
+
+                stream.forEach(elem -> {
+                    MapLike<T> entry = ops.getMap(elem).result().orElse(null);
+                    if (entry == null) {
+                        out.add(new KeyAmount(ItemStackKey.EMPTY, 0L));
+                        return;
+                    }
+
+                    // 旧外层 Type
+                    T typeNode = entry.get(ops.createString("Type"));
+                    String typeStr = typeNode == null ? null : ops.getStringValue(typeNode).result().orElse(null);
+                    if ("Empty".equals(typeStr)) {
+                        out.add(new KeyAmount(ItemStackKey.EMPTY, 0L));
+                        return;
+                    }
+
+                    // 旧 TypedStack
+                    T typedNode = entry.get(ops.createString("TypedStack"));
+                    MapLike<T> typedMap = typedNode == null ? null : ops.getMap(typedNode).result().orElse(null);
+                    if (typedMap == null || typeStr == null || typeStr.isEmpty()) {
+                        out.add(new KeyAmount(ItemStackKey.EMPTY, 0L));
+                        return;
+                    }
+
+                    // 把旧外层 Type 注入到 TypedStack -> "type" 供 IStackKey.CODEC 分发
+                    java.util.Map<T, T> mergedKey = new java.util.LinkedHashMap<>();
+                    typedMap.entries().forEach(p -> mergedKey.put(p.getFirst(), p.getSecond()));
+                    mergedKey.put(ops.createString("type"), ops.createString(typeStr));
+                    T compatKeyNode = ops.createMap(mergedKey);
+
+                    // 解析 key
+                    IStackKey<?> key = IStackKey.CODEC.parse(ops, compatKeyNode)
+                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("旧 Stacks -> IStackKey 解码失败: {} | type={}", err, typeStr))
+                            .orElse(ItemStackKey.EMPTY);
+
+                    // 用 KeyAmount.AMOUNT_COMPAT 解析 amount（外层/内层兼容）
+                    java.util.Map<T, T> probe = new java.util.LinkedHashMap<>();
+                    probe.put(ops.createString("key"), compatKeyNode);
+                    // 若旧条目外层带了 amount/Amount，就一并提供给 AMOUNT_COMPAT
+                    T vAmt = entry.get(ops.createString("amount"));
+                    if (vAmt != null) probe.put(ops.createString("amount"), vAmt);
+                    T vAmtOld = entry.get(ops.createString("Amount"));
+                    if (vAmtOld != null) probe.put(ops.createString("Amount"), vAmtOld);
+
+                    T probeNode = ops.createMap(probe);
+                    long amount = KeyAmount.AMOUNT_COMPAT.codec().decode(ops, probeNode)
+                            .map(com.mojang.datafixers.util.Pair::getFirst)
+                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("旧 Stacks -> amount 解析失败: {}", err))
+                            .orElse(0L);
+
+                    out.add(new KeyAmount(key, amount));
+                });
+
+                return DataResult.success(new StackHandler(out));
+            });
         }
 
         @Override
-        public void encode(RegistryFriendlyByteBuf buf, StackHandler stackHandler)
-        {
-            buf.writeVarInt(stackHandler.size);
-            for(int i = 0; i < stackHandler.size; i++)
-            {
-                stackHandler.keys[i].serialize(buf);
-                buf.writeVarLong(stackHandler.amounts[i]);
-            }
+        public <T> RecordBuilder<T> encode(StackHandler value, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+            return NEW_FMT.encode(value, ops, prefix); // 只写新格式
+        }
+
+        @Override
+        public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops) {
+            return java.util.stream.Stream.of(ops.createString(K_NEW_STACKS));
+        }
+
+        private <T> void copyIfPresent(DynamicOps<T> ops, MapLike<T> from, java.util.Map<T, T> to, String key) {
+            T k = ops.createString(key);
+            T v = from.get(k);
+            if (v != null) to.put(k, v);
         }
     };
+
+    public static final Codec<StackHandler> CODEC = TYPE_CODEC.codec();
+
 
     /* ---------------- 基本存储（固定大小） ---------------- */
 

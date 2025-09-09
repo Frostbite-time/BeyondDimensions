@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -536,15 +537,14 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         return key2stackMap.get(key);
     }
 
-    /* ---------------- NBT 序列化（按策略处理 0） ---------------- */
-    public CompoundTag serializeNBT(net.minecraft.core.HolderLookup.Provider provider) {
+    /* ---------------- NBT 序列化（仅写新格式） ---------------- */
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         tag.putLong("slotCapacity", this.slotCapacity);
         tag.putInt("slotMaxSize", this.slotMaxSize);
 
         ListTag stacksTag = new ListTag();
-        boolean writeZero = (zeroPolicy == ZeroPolicy.KEEP_ZERO);
-
+        final boolean writeZero = (zeroPolicy == ZeroPolicy.KEEP_ZERO);
         final DynamicOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
 
         for (Map.Entry<IStackKey<?>, Long> entry : storage.entrySet()) {
@@ -554,19 +554,20 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             if (!writeZero && value <= 0L) continue;
 
             DataResult<Tag> enc = IStackKey.CODEC.encodeStart(ops, key);
-            Tag encoded = enc.resultOrPartial(err -> {
-                BeyondDimensions.LOGGER.warn("编码 IStackKey 失败：{} | key={}", err, key);
-            }).orElse(null);
+            Tag encoded = enc.resultOrPartial(err ->
+                    BeyondDimensions.LOGGER.warn("编码 IStackKey 失败：{} | key={}", err, key)
+            ).orElse(null);
 
-            if (!(encoded instanceof CompoundTag)) {
+            if (!(encoded instanceof CompoundTag ct)) {
                 if (encoded != null) {
-                    BeyondDimensions.LOGGER.warn("IStackKey 编码结果不是 CompoundTag：{} | key={}", encoded.getClass().getName(), key);
+                    BeyondDimensions.LOGGER.warn("IStackKey 编码结果不是 CompoundTag：{} | key={}",
+                            encoded.getClass().getName(), key);
                 }
                 continue;
             }
 
             CompoundTag stackTag = new CompoundTag();
-            stackTag.put("key", (CompoundTag) encoded);
+            stackTag.put("key", ct);
             stackTag.putLong("amount", value);
             stacksTag.add(stackTag);
         }
@@ -575,50 +576,111 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         return tag;
     }
 
-    public void deserializeNBT(net.minecraft.core.HolderLookup.Provider provider, CompoundTag tag) {
+    /* ---------------- NBT 反序列化（新优先 + 旧兼容） ---------------- */
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         clearStorage();
 
+        // 基本字段（与旧版兼容）
         slotCapacity = tag.contains("slotCapacity", Tag.TAG_LONG) ? tag.getLong("slotCapacity") : Long.MAX_VALUE;
         slotMaxSize  = tag.contains("slotMaxSize",  Tag.TAG_INT)  ? tag.getInt("slotMaxSize")  : Integer.MAX_VALUE;
 
-        ListTag stacksTag = tag.getList("stacks", Tag.TAG_COMPOUND);
         final DynamicOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
 
-        for (int i = 0; i < stacksTag.size(); i++) {
-            Tag el = stacksTag.get(i);
-            if (!(el instanceof CompoundTag stackTag)) continue;
+        // ---------- 1) 新格式：stacks ----------
+        ListTag stacksNew = tag.getList("stacks", Tag.TAG_COMPOUND);
+        if (!stacksNew.isEmpty()) {
+            for (int i = 0; i < stacksNew.size(); i++) {
+                Tag el = stacksNew.get(i);
+                if (!(el instanceof CompoundTag stackTag)) continue;
 
-            long amount = stackTag.getLong("amount");
-            Tag rawKeyTag = stackTag.get("key");
-            if (!(rawKeyTag instanceof CompoundTag keyTag)) continue;
+                long amount = readAmountCompat(stackTag); // 兼容 amount/Amount（为稳健）
+                Tag rawKeyTag = stackTag.get("key");
+                if (!(rawKeyTag instanceof CompoundTag keyTag)) continue;
 
+                try {
+                    IStackKey.CODEC.parse(ops, keyTag)
+                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("解码 IStackKey 失败：{}", err))
+                            .ifPresent(key -> acceptEntry(key, amount));
+                } catch (Throwable t) {
+                    BeyondDimensions.LOGGER.warn("解码第 {} 个新格式条目时出错: {}", i, t.toString());
+                }
+            }
+            return; // 有新格式就不再读取旧格式，避免重复累加
+        }
+
+        // ---------- 2) 旧格式：Stacks (大写 S) ----------
+        ListTag stacksOld = tag.getList("Stacks", Tag.TAG_COMPOUND);
+        for (int i = 0; i < stacksOld.size(); i++) {
+            Tag el = stacksOld.get(i);
+            if (!(el instanceof CompoundTag entry)) continue;
+
+            String typeStr = entry.getString("Type"); // 旧外层 Type（资源路径）
+            if (typeStr == null || typeStr.isEmpty()) {
+                BeyondDimensions.LOGGER.warn("旧格式条目缺少 Type，已跳过（index={}）", i);
+                continue;
+            }
+
+            CompoundTag typed = entry.getCompound("TypedStack");
+            if (typed.isEmpty()) {
+                BeyondDimensions.LOGGER.warn("旧格式条目缺少 TypedStack，已跳过（index={}）", i);
+                continue;
+            }
+
+            // 将旧外层 Type 注入为键内的 "type" 字段，让 IStackKey.CODEC 可以分发
+            CompoundTag compatKey = typed.copy();
+            compatKey.putString("type", typeStr);
+
+            long amount = readAmountCompat(typed); // 优先外部 Amount/amount；否则尝试内层 stack 的数量键
             try {
-                DataResult<IStackKey<?>> res = IStackKey.CODEC.parse(ops, keyTag);
-                res.resultOrPartial(err -> {
-                    BeyondDimensions.LOGGER.warn("解码 IStackKey 失败，原因：{}", err);
-                }).ifPresent(key -> {
-                    if (key.isEmpty()) return;
-                    // 反序列化：也初始化 UI 时间（便于 UI 初次显示）
-                    if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
-                        long now = nowMillis();
-                        creationTimeMap.put(key, now);
-                        lastModifiedTimeMap.put(key, now);
-                    }
-
-                    if (amount <= 0L) {
-                        if (zeroPolicy == ZeroPolicy.KEEP_ZERO) {
-                            storage.put(key, 0L);
-                            ensureInIndex(key);
-                        }
-                    } else {
-                        insert(key, amount, false);
-                    }
-                });
+                IStackKey.CODEC.parse(ops, compatKey)
+                        .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("旧格式 IStackKey 解码失败：{} | type={}", err, typeStr))
+                        .ifPresent(key -> acceptEntry(key, amount));
             } catch (Throwable t) {
-                BeyondDimensions.LOGGER.warn("解码第{}个堆叠时出错: {}", i, t.toString());
+                BeyondDimensions.LOGGER.warn("解码旧格式条目时出错（index={} type={}）：{}", i, typeStr, t.toString());
             }
         }
     }
+
+    /* ---------- 辅助：统一处理 amount 兼容 ---------- */
+    /** 写入时永远写 "amount"；读取时：amount -> Amount -> 内层 Stack 的 count/Count/amount/Amount -> 默认 0 */
+    private static long readAmountCompat(CompoundTag holder) {
+        if (holder.contains("amount", Tag.TAG_LONG)) return holder.getLong("amount");
+        if (holder.contains("Amount", Tag.TAG_LONG)) return holder.getLong("Amount");
+
+        // 尝试从内层 Stack 读取
+        if (holder.contains("Stack", Tag.TAG_COMPOUND)) {
+            CompoundTag inner = holder.getCompound("Stack");
+            // ItemStack: count/Count；Fluid/Chemical: amount/Amount
+            if (inner.contains("count", Tag.TAG_INT))   return inner.getInt("count");
+            if (inner.contains("Count", Tag.TAG_INT))   return inner.getInt("Count");
+            if (inner.contains("amount", Tag.TAG_INT))  return inner.getInt("amount");
+            if (inner.contains("Amount", Tag.TAG_INT))  return inner.getInt("Amount");
+            if (inner.contains("amount", Tag.TAG_LONG)) return inner.getLong("amount");
+            if (inner.contains("Amount", Tag.TAG_LONG)) return inner.getLong("Amount");
+        }
+        return 0L; // 读不到就按空处理，避免虚增
+    }
+
+    /* ---------- 辅助：把解码后的 (key, amount) 写入当前结构，含零值与 UI 时间策略 ---------- */
+    private void acceptEntry(IStackKey<?> key, long amount) {
+        if (key == null || key.isEmpty()) return;
+
+        if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+            long now = nowMillis();
+            creationTimeMap.put(key, now);
+            lastModifiedTimeMap.put(key, now);
+        }
+
+        if (amount <= 0L) {
+            if (zeroPolicy == ZeroPolicy.KEEP_ZERO) {
+                storage.put(key, 0L);
+                ensureInIndex(key);
+            }
+        } else {
+            insert(key, amount, false);
+        }
+    }
+
 
     /* ---------------- 便捷设置 ---------------- */
     public void setSlotCapacity(long capacity) { this.slotCapacity = capacity; }

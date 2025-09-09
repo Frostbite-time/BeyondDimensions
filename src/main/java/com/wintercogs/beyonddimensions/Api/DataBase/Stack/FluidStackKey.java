@@ -14,7 +14,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -29,7 +28,6 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 public final class FluidStackKey implements IStackKey<FluidStack>
 {
@@ -48,60 +46,88 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             ).apply(instance, (holder, patch) -> new FluidStackKey(holder.value(), patch))
     );
 
-    // —— 旧格式：internal_stack (+ amount) ——（仅用于解码）
-    private static final Codec<FluidStackKey> LEGACY_CODEC = RecordCodecBuilder.create(inst -> inst.group(
-            FluidStack.OPTIONAL_CODEC.fieldOf("internal_stack").forGetter(FluidStackKey::copyStack) // 实际不会用于 encode
-    ).apply(inst, (stack) -> new FluidStackKey(stack)));
-
-    /**
-     * 读时新优先，无新键再尝试旧；写时永远用新。
-     */
+    // —— 最终产出的 MapCodec：编码总是走新格式；解码按代次兼容 —— //
     public static final MapCodec<FluidStackKey> TYPE_CODEC = new MapCodec<>() {
+
+        // 统一键名
+        private static final String K_FLUID       = "fluid";
+        private static final String K_COMPS       = "components";
+        // 【兼容 G1】旧别名键（大写）
+        private static final String K_FLUID_OLD   = "Fluid";
+        private static final String K_COMPS_OLD   = "Components";
+        // 【兼容 G0】早期直接内嵌 FluidStack 的形态
+        private static final String K_LEGACY      = "internal_stack"; // 旧 JSON/Codec
+        private static final String K_STACK       = "Stack";          // 旧 NBT 写法
+        // 旧数量键（Key 层不需要，读到即忽略）
+        private static final String K_AMOUNT      = "amount";
+        private static final String K_AMOUNT_OLD  = "Amount";
+
         @Override
         public <T> DataResult<FluidStackKey> decode(DynamicOps<T> ops, MapLike<T> input) {
-            final T kFluid   = ops.createString("fluid");
-            final T kLegacy  = ops.createString("internal_stack");
-            final T kComps   = ops.createString("components");
+            final T kFluid     = ops.createString(K_FLUID);
+            final T kComps     = ops.createString(K_COMPS);
+            final T kFluidOld  = ops.createString(K_FLUID_OLD);
+            final T kCompsOld  = ops.createString(K_COMPS_OLD);
+            final T kLegacy    = ops.createString(K_LEGACY);
+            final T kStack     = ops.createString(K_STACK);
+            final T kAmt       = ops.createString(K_AMOUNT);
+            final T kAmtOld    = ops.createString(K_AMOUNT_OLD);
 
-            T hasFluid = input.get(kFluid);
-            if (hasFluid != null) {
-                // 优先新格式
+            // 新格式
+            if (input.get(kFluid) != null) {
                 DataResult<FluidStackKey> r = NEW_FMT.decode(ops, input);
                 if (r.result().isPresent()) return r;
 
-                // 兜底：如果 components 可以读，但 fluid 解析失败 → 记日志，回退 EMPTY
+                // 宽松兜底：fluid 存在但解析失败 → 仅保留 components，回退 EMPTY
                 T compsNode = input.get(kComps);
-                if (compsNode != null) {
-                    BeyondDimensions.LOGGER.warn("FluidStackKey: 存在 'fluid' 键但解析失败，尝试仅读取 components 后回退 EMPTY。");
-                    DataComponentPatch patch = DataComponentPatch.CODEC.parse(ops, compsNode)
-                            .result().orElse(DataComponentPatch.EMPTY);
-                    return DataResult.success(new FluidStackKey(Fluids.EMPTY, patch));
-                }
-                // 让 NEW_FMT 抛出更明确的错误
-                return NEW_FMT.decode(ops, input);
+                if (compsNode == null) compsNode = input.get(kCompsOld); // 也兼容大写
+                DataComponentPatch patch = compsNode == null
+                        ? DataComponentPatch.EMPTY
+                        : DataComponentPatch.CODEC.parse(ops, compsNode).result().orElse(DataComponentPatch.EMPTY);
+                return DataResult.success(new FluidStackKey(Fluids.EMPTY, patch));
             }
 
-            // 尝试旧格式（internal_stack + amount）
-            T hasLegacy = input.get(kLegacy);
-            if (hasLegacy != null) {
+
+            // 大写键名模式
+            if (input.get(kFluidOld) != null || input.get(kCompsOld) != null) {
                 java.util.Map<T, T> map = new java.util.LinkedHashMap<>();
-                input.entries().forEach(p -> map.put(p.getFirst(), p.getSecond()));
-                T node = ops.createMap(map);
-                return LEGACY_CODEC.decode(ops, node).map(com.mojang.datafixers.util.Pair::getFirst);
+                input.entries().forEach(p -> {
+                    T key = p.getFirst();
+                    if (key.equals(kFluidOld))      key = kFluid;  // Fluid -> fluid
+                    else if (key.equals(kCompsOld)) key = kComps;  // Components -> components
+                    // 忽略 amount/Amount
+                    if (!key.equals(kAmt) && !key.equals(kAmtOld)) {
+                        map.put(key, p.getSecond());
+                    }
+                });
+                T remapped = ops.createMap(map);
+                return NEW_FMT.codec().decode(ops, remapped)
+                        .map(com.mojang.datafixers.util.Pair::getFirst);
             }
 
-            // 都没有：让 NEW_FMT 报缺字段
+
+            // 内嵌模式
+            T legacyNode = input.get(kLegacy);
+            if (legacyNode == null) legacyNode = input.get(kStack);
+            if (legacyNode != null) {
+                return FluidStack.OPTIONAL_CODEC.parse(ops, legacyNode)
+                        .map(FluidStackKey::new);
+            }
+
+            // 未匹配
             return NEW_FMT.decode(ops, input);
         }
 
         @Override
         public <T> RecordBuilder<T> encode(FluidStackKey value, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+            // 仅写新格式（fluid / components）
             return NEW_FMT.encode(value, ops, prefix);
         }
 
         @Override
-        public <T> Stream<T> keys(DynamicOps<T> ops) {
-            return Stream.of("fluid", "components").map(ops::createString);
+        public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops) {
+            // 对外暴露新格式键集合
+            return java.util.stream.Stream.of(K_FLUID, K_COMPS).map(ops::createString);
         }
     };
 
@@ -303,53 +329,42 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         return new FluidStackKey(f, p);
     }
 
-    // ===== NBT 序列化：写新格式；读新优先 + 旧兼容 =====
-
+    // ===== NBT 序列化：仅写新格式（fluid / components），无额外兜底 =====
     @Override
     public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
-        final CompoundTag out = new CompoundTag();
         try {
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
-            CODEC.encodeStart(ops, this)
-                    .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("FluidStackKey 序列化(Codec)出错: {}", err))
-                    .ifPresent(nbt -> {
-                        if (nbt instanceof CompoundTag ct) {
-                            out.merge(ct);
-                        } else {
-                            out.put("value", nbt);
-                        }
-                    });
+            return CODEC.encodeStart(ops, this)
+                    .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
+                            "FluidStackKey 序列化(Codec)出错: {}", err))
+                    .map(nbt -> {
+                        if (nbt instanceof CompoundTag ct) return ct; // 期望产物
+                        BeyondDimensions.LOGGER.error(
+                                "FluidStackKey 序列化得到的 NBT 非 CompoundTag，已丢弃该结果: {}",
+                                nbt.getClass().getName());
+                        return new CompoundTag();
+                    })
+                    .orElseGet(CompoundTag::new); // 编码失败 -> 空 Compound
         } catch (Throwable t) {
             BeyondDimensions.LOGGER.error("FluidStackKey 序列化时出错: {}", t.getMessage(), t);
+            return new CompoundTag();
         }
-        return out;
     }
 
+    // ===== NBT 反序列化：直接交给 CODEC（TYPE_CODEC 内部已做新旧兼容）=====
     @Override
     public @NotNull FluidStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
         try {
-            // 1) 新格式：直接走 TYPE_CODEC
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
-            var decoded = CODEC.parse(ops, nbt).result();
-            if (decoded.isPresent()) return decoded.get();
-
-            // 2) 嵌套回退
-            if (nbt.contains("value", Tag.TAG_COMPOUND)) {
-                var val = CODEC.parse(ops, nbt.getCompound("value")).result();
-                if (val.isPresent()) return val.get();
-            }
-
-            // 3) 旧格式回退：Stack + Amount
-            if (nbt.contains("Stack", Tag.TAG_COMPOUND)) {
-                FluidStack s = FluidStack.parseOptional(levelRegistryAccess, nbt.getCompound("Stack"));
-                return new FluidStackKey(s); // 忽略旧的 Amount
-            }
-
-            BeyondDimensions.LOGGER.warn("FluidStackKey 反序列化：新旧格式均不匹配，返回 EMPTY。Keys={}", nbt.getAllKeys());
+            return CODEC.parse(ops, nbt)
+                    .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
+                            "FluidStackKey 反序列化(Codec)出错: {} | Keys={}", err, nbt.getAllKeys()))
+                    .orElse(FluidStackKey.EMPTY);
         } catch (Throwable t) {
-            BeyondDimensions.LOGGER.error("FluidStackKey 反序列化错误。Keys={} Error={}", nbt.getAllKeys(), t.getMessage(), t);
+            BeyondDimensions.LOGGER.error("FluidStackKey 反序列化错误。Keys={} Error={}",
+                    nbt.getAllKeys(), t.getMessage(), t);
+            return FluidStackKey.EMPTY;
         }
-        return FluidStackKey.EMPTY;
     }
 
     // ===== 渲染支持：交给外部渲染器；仅提供一个稳定的最小量副本 =====
