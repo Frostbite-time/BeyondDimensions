@@ -7,7 +7,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Integration.AE.Item.NetAEStorageCell;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
 public class CellHandler implements ICellHandler
@@ -20,21 +19,19 @@ public class CellHandler implements ICellHandler
         return itemstack.getItem() instanceof NetAEStorageCell;
     }
 
-    // host用于通知存储已被更变
+    // host用于通知存储已被更变，我们不需要
     @Override
     public @Nullable StorageCell getCellInventory(ItemStack itemstack, @Nullable ISaveProvider host)
     {
         if(!itemstack.has(ModDataComponents.NET_ID_DATA))
             return null;
-        int netId = itemstack.get(ModDataComponents.NET_ID_DATA);
-        if(netId >=0)
-        {
-            DimensionsNet net = DimensionsNet.getNetFromId(netId);
-            if(net != null)
-            {
-                return new NetStorageCell(net.getUnifiedStorage());
-            }
-        }
-        return null;
+
+        int netId = itemstack.getOrDefault(ModDataComponents.NET_ID_DATA, -1);
+        if(netId < 0) return null;
+
+        DimensionsNet net = DimensionsNet.getNetFromId(netId);
+        if(net == null) return null;
+
+        return new NetStorageCell(net.getUnifiedStorage());
     }
 }

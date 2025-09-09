@@ -45,8 +45,12 @@ public class NetControlMenu extends BDBaseMenu
 
         if(!player.level().isClientSide())
         {
-            net = DimensionsNet.getNetFromPlayer(player);
-            playerInfo = net.getPlayerPermissionInfoMap(player.getServer());
+            if(player.getServer() != null)
+            {
+                net = DimensionsNet.getNetFromPlayer(player);
+                if(net != null)
+                    playerInfo = net.getPlayerPermissionInfoMap(player.getServer());
+            }
         }
     }
 
