@@ -4,7 +4,6 @@ import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.core.HolderLookup;
@@ -50,79 +49,61 @@ public class StackHandler implements IStackHandler
 
         @Override
         public <T> DataResult<StackHandler> decode(DynamicOps<T> ops, MapLike<T> input) {
-            final T kNewStacks = ops.createString(K_NEW_STACKS);
-            final T kOldStacks = ops.createString(K_OLD_STACKS);
+            final T kNewStacks = ops.createString(K_NEW_STACKS); // "stacks"
+            final T kOldStacks = ops.createString(K_OLD_STACKS); // "Stacks"
+            final T kTyped     = ops.createString("TypedStack");
 
-            // 1) 新格式优先
+            // 1) 新格式优先：{ "stacks": [ KeyAmount, ... ] }
             if (input.get(kNewStacks) != null) {
                 return NEW_FMT.decode(ops, input);
             }
 
-            // 2) 旧格式回退：Stacks -> [{ TypedStack, Type }]
+            // 2) 旧格式回退：{ "Stacks": [ { "TypedStack": <Compound or IntTag>, "Type": ... }, ... ] }
             final T oldNode = input.get(kOldStacks);
             if (oldNode == null) {
-                // 让 NEW_FMT 给出缺键错误，便于定位
+                // 让 NEW_FMT 报缺键错误（便于定位数据异常）
                 return NEW_FMT.decode(ops, input);
             }
 
             return ops.getStream(oldNode).flatMap(stream -> {
-                ArrayList<KeyAmount> out = new ArrayList<>();
+                java.util.ArrayList<KeyAmount> out = new java.util.ArrayList<>();
 
                 stream.forEach(elem -> {
-                    MapLike<T> entry = ops.getMap(elem).result().orElse(null);
-                    if (entry == null) {
-                        out.add(new KeyAmount(ItemStackKey.EMPTY, 0L));
+                    // 旧条目本身必须是个对象
+                    var entryML = ops.getMap(elem).result().orElse(null);
+                    if (entryML == null) {
+                        out.add(new KeyAmount(EmptyStackKey.INSTANCE, 0L));
                         return;
                     }
 
-                    // 旧外层 Type
-                    T typeNode = entry.get(ops.createString("Type"));
-                    String typeStr = typeNode == null ? null : ops.getStringValue(typeNode).result().orElse(null);
-                    if ("Empty".equals(typeStr)) {
-                        out.add(new KeyAmount(ItemStackKey.EMPTY, 0L));
+                    // 取出 TypedStack 节点
+                    T typedNode = entryML.get(kTyped);
+                    if (typedNode == null) {
+                        // 丢失 TypedStack，判空占位
+                        out.add(new KeyAmount(EmptyStackKey.INSTANCE, 0L));
                         return;
                     }
 
-                    // 旧 TypedStack
-                    T typedNode = entry.get(ops.createString("TypedStack"));
-                    MapLike<T> typedMap = typedNode == null ? null : ops.getMap(typedNode).result().orElse(null);
-                    if (typedMap == null || typeStr == null || typeStr.isEmpty()) {
-                        out.add(new KeyAmount(ItemStackKey.EMPTY, 0L));
+                    // 旧占位：TypedStack 不是 Compound（例如 IntTag(1)）
+                    if (ops.getMap(typedNode).result().isEmpty()) {
+                        out.add(new KeyAmount(EmptyStackKey.INSTANCE, 0L));
                         return;
                     }
 
-                    // 把旧外层 Type 注入到 TypedStack -> "type" 供 IStackKey.CODEC 分发
-                    java.util.Map<T, T> mergedKey = new java.util.LinkedHashMap<>();
-                    typedMap.entries().forEach(p -> mergedKey.put(p.getFirst(), p.getSecond()));
-                    mergedKey.put(ops.createString("type"), ops.createString(typeStr));
-                    T compatKeyNode = ops.createMap(mergedKey);
-
-                    // 解析 key
-                    IStackKey<?> key = IStackKey.CODEC.parse(ops, compatKeyNode)
-                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("旧 Stacks -> IStackKey 解码失败: {} | type={}", err, typeStr))
-                            .orElse(ItemStackKey.EMPTY);
-
-                    // 用 KeyAmount.AMOUNT_COMPAT 解析 amount（外层/内层兼容）
-                    java.util.Map<T, T> probe = new java.util.LinkedHashMap<>();
-                    probe.put(ops.createString("key"), compatKeyNode);
-                    // 若旧条目外层带了 amount/Amount，就一并提供给 AMOUNT_COMPAT
-                    T vAmt = entry.get(ops.createString("amount"));
-                    if (vAmt != null) probe.put(ops.createString("amount"), vAmt);
-                    T vAmtOld = entry.get(ops.createString("Amount"));
-                    if (vAmtOld != null) probe.put(ops.createString("Amount"), vAmtOld);
-
-                    T probeNode = ops.createMap(probe);
-                    long amount = KeyAmount.AMOUNT_COMPAT.codec().decode(ops, probeNode)
+                    // 关键点：直接把 TypedStack 本体交给 KeyAmount.CODEC
+                    KeyAmount ka = KeyAmount.CODEC.decode(ops, typedNode)
                             .map(com.mojang.datafixers.util.Pair::getFirst)
-                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("旧 Stacks -> amount 解析失败: {}", err))
-                            .orElse(0L);
+                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
+                                    "旧 Stacks -> KeyAmount(来自 TypedStack) 解码失败: {}", err))
+                            .orElse(new KeyAmount(EmptyStackKey.INSTANCE, 0L));
 
-                    out.add(new KeyAmount(key, amount));
+                    out.add(ka);
                 });
 
                 return DataResult.success(new StackHandler(out));
             });
         }
+
 
         @Override
         public <T> RecordBuilder<T> encode(StackHandler value, DynamicOps<T> ops, RecordBuilder<T> prefix) {
