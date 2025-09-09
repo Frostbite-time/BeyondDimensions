@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerKeepZero;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
@@ -42,8 +43,8 @@ public class DimensionsNetMenu extends BDBaseMenu
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
-    public UnifiedStorage storage;
-    public UnorderedStackHandlerKeepZero viewerStorage; // 在客户端，用于显示物品
+    public AbstractUnorderedStackHandler storage; // 客户端与服务端都使用RemoveZero版本作为实际存储
+    public AbstractUnorderedStackHandler viewerStorage; // 在客户端，用于显示物品，允许保留0堆叠
     private ArrayList<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
     private boolean cacheTooltip = false; //客户端使用，用于记录打开UI后的第一次同步是否缓存了工具提示（用于搜索，且第一次同步通常为全量同步，此时处理较好）
 
@@ -71,16 +72,16 @@ public class DimensionsNetMenu extends BDBaseMenu
     public DimensionsNetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
-        this(Dimensions_Net_Menu.get(), id, playerInventory, new DimensionsNet(true));
+        this(Dimensions_Net_Menu.get(), id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE));
     }
 
     /**
      * 服务端构造函数
      *
      * @param playerInventory 玩家背包
-     * @param data            维度网络信息，包含了存储信息
+     * @param data            存储信息
      */
-    public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, DimensionsNet data)
+    public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, AbstractUnorderedStackHandler data)
     {
         super(menuType, id, playerInventory);
 
@@ -92,7 +93,7 @@ public class DimensionsNetMenu extends BDBaseMenu
         }
 
         // 初始化维度网络容器
-        storage = data.getUnifiedStorage();
+        storage = data; // 此处，客户端使用可移0堆叠，不维护时间对的版本，服务端传入维度网络携带的版本
         viewerStorage = new UnorderedStackHandlerKeepZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
 
         addSlotGroupSync(new DisorderedSlotGroupSync(this,slotGroupSyncs.size(),storage) {
@@ -350,12 +351,12 @@ public class DimensionsNetMenu extends BDBaseMenu
             String modId       = stack.key().getModId().toLowerCase(Locale.ENGLISH);
 
             /* =======================================================================
-             * 1. 解析搜索串                      ────────────────────────────────
+             * 1. 解析搜索串
              *    - 若包含 @ 或 # → AND 规则
              *    - 都不含       → OR 规则（名称 OR 模组ID OR Tooltip）
              *    - 检索顺序：名称 → 模组ID → Tooltip（最贵放最后）
              * =======================================================================*/
-            if (searchText == null || searchText.isEmpty()) {           // ⇢ 直接命中
+            if (searchText == null || searchText.isEmpty()) {
                 cache.add(stack);
                 cacheIndex.add(i);
                 continue;
@@ -364,70 +365,89 @@ public class DimensionsNetMenu extends BDBaseMenu
             String lowerSearch = searchText.toLowerCase(Locale.ENGLISH);
             String[] parts     = splitSearch(lowerSearch);
             String mainPart    = parts[0];   // 名称
-            String idPart      = parts[1];   // 模组ID
-            String tooltipPart = parts[2];   // Tooltip
+            String idPart      = parts[1];   // 模组ID（带 @）
+            String tooltipPart = parts[2];   // Tooltip（带 #）
             boolean hasSymbol  = !(idPart.isEmpty() && tooltipPart.isEmpty());  // 任一存在即显式符号
 
-
-            /* ---------- ① 显式符号：AND 规则 ---------- */
             if (hasSymbol) {
-                // ---------- AND ----------
-                if (!mainPart.isEmpty() && !checkTextMatches(displayName, mainPart)) continue;
-                if (!idPart.isEmpty()   && !modId.contains(idPart))                 continue;
-                if (!tooltipPart.isEmpty() && !checkTooltipMatches(stack, tooltipPart)) continue;
-
+                // AND
+                if (!mainPart.isEmpty()   && !checkTextMatches(displayName, mainPart)) continue;
+                if (!idPart.isEmpty()     && !modId.contains(idPart))                 continue;
+                if (!tooltipPart.isEmpty()&& !checkTooltipMatches(stack, tooltipPart)) continue;
                 cache.add(stack); cacheIndex.add(i);
             } else {
-                // ---------- OR ----------
+                // OR
                 boolean matched = false;
-
                 if (!mainPart.isEmpty() && checkTextMatches(displayName, mainPart)) matched = true;
                 if (!matched && modId.contains(mainPart))                           matched = true;
                 if (!matched && checkTooltipMatches(stack, mainPart))               matched = true;
-
                 if (matched) { cache.add(stack); cacheIndex.add(i); }
             }
-
         }
 
+        // 统一排序：主排序 + 次排序（仅在主排序相等时介入）
+        ButtonState sortState        = Config.uiSortButton;
+        ButtonState secondSortState  = Config.uiSecondSortButton;
 
-        // 统一排序逻辑，避免重复代码
-        ButtonState sortState = Config.uiSortButton;
-        if (sortState != ButtonState.SORT_DEFAULT) {
-            Comparator<KeyAmount> comparator;
-            if(sortState == ButtonState.SORT_NAME)
-                comparator = Comparator.comparing(item -> item.key().getRender().getDisplayName(item.key()).getString());
-            else if(sortState == ButtonState.SORT_QUANTITY)
-                comparator = Comparator.comparingLong(KeyAmount::amount);
-            else if(sortState == ButtonState.SORT_MODID)
-                comparator = Comparator.comparing(ka -> ka.key().getModId());
-            else // 保底条件
-                comparator = Comparator.comparing(item -> item.key().getRender().getDisplayName(item.key()).getString());
+        Comparator<KeyAmount> primary   = buildComparator(sortState);
+        Comparator<KeyAmount> secondary = (secondSortState != null && secondSortState != sortState)
+                ? buildComparator(secondSortState)
+                : null;
 
+        Comparator<KeyAmount> combined  = (secondary != null) ? primary.thenComparing(secondary) : primary;
 
-            // 生成索引排序映射
-            ArrayList<KeyAmount> finalCache = cache;
-            List<Integer> indices = IntStream.range(0, cache.size())
-                    .parallel()
-                    .boxed()
-                    .sorted((a, b) -> comparator.compare(finalCache.get(a), finalCache.get(b)))
-                    .toList();
+        // 按 combined 对 cache 的“索引”排序，得到映射
+        ArrayList<KeyAmount> finalCache = cache;
+        List<Integer> indices = IntStream.range(0, cache.size())
+                .boxed()
+                .sorted((a, b) -> combined.compare(finalCache.get(a), finalCache.get(b)))
+                .toList();
 
-            // 这一步排序完成后不再需要缓存
-            // 根据排序结果重组索引
-            ArrayList<Integer> sortedIndices = new ArrayList<>(cacheIndex.size());
-            for (int index : indices) {
-                sortedIndices.add(cacheIndex.get(index));
-            }
-            cacheIndex = sortedIndices;
-        }
+        // 根据排序结果重组原始 unifiedStorage 的索引
+        ArrayList<Integer> sortedIndices = new ArrayList<>(cacheIndex.size());
+        for (int idx : indices) sortedIndices.add(cacheIndex.get(idx));
+        cacheIndex = sortedIndices;
 
-        // 直接通过排序器处理倒序，避免反转操作
+        // 倒序（全局翻转）
         if (Config.uiReverseButton == ButtonState.ENABLED) {
             Collections.reverse(cacheIndex);
         }
 
         return cacheIndex;
+    }
+
+    /** 构建对应 ButtonState 的比较器（默认按名称） */
+    private Comparator<KeyAmount> buildComparator(ButtonState state) {
+        if (state == null) {
+            return Comparator.comparing(ka -> ka.key().getRender().getDisplayName(ka.key()).getString(), String::compareTo);
+        }
+        return switch (state)
+        {
+            case SORT_QUANTITY -> Comparator.comparingLong(KeyAmount::amount);
+            case SORT_NAME -> Comparator.comparing(
+                    ka -> ka.key().getRender().getDisplayName(ka.key()).getString(),
+                    String::compareTo
+            );
+            case SORT_MODID -> Comparator.comparing(ka -> ka.key().getModId(), String::compareTo);
+            case SORT_INSERTED_TIME ->
+                // 插入时间：从 storage 的 creationTimeMap 读取；无记录则按 0
+                    Comparator.comparingLong(ka -> {
+                        Long t = storage.getCreationTimeMap().get(ka.key());
+                        return (t == null ? 0L : t);
+                    });
+            case SORT_MODIFIED_TIME ->
+                // 修改时间：从 storage 的 lastModifiedTimeMap 读取；无记录则按 0
+                    Comparator.comparingLong(ka -> {
+                        Long t = storage.getLastModifiedTimeMap().get(ka.key());
+                        return (t == null ? 0L : t);
+                    });
+            default ->
+                // 兜底：按名称
+                    Comparator.comparing(
+                            ka -> ka.key().getRender().getDisplayName(ka.key()).getString(),
+                            String::compareTo
+                    );
+        };
     }
 
     /**

@@ -44,7 +44,7 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
             // 在服务端中craftItems作为直接引用传递。保证为同一个列表
             // 而后，craftItems会在Menu被包装，并通过Menu的包装类完成网络同步
             // 最后，利用方块实体进行持久保存
-            return new DimensionsCraftMenuTerminal(containerId,inventory,net, craftItems, null, this.getBlockPos());
+            return new DimensionsCraftMenuTerminal(containerId,inventory,net.getUnifiedStorage(), craftItems, null, this.getBlockPos());
         }
         return null;
     }

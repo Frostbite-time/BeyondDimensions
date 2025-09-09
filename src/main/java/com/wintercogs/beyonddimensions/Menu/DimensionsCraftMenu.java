@@ -2,7 +2,9 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
@@ -64,7 +66,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     public DimensionsCraftMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
-        this(Dimensions_Craft_Menu.get(),id, playerInventory, new DimensionsNet(true), null, null);
+        this(Dimensions_Craft_Menu.get(),id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE), null, null);
     }
 
     /**
@@ -72,7 +74,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
      * @param playerInventory 玩家背包
      * @param data 维度网络信息，包含了存储信息
      */
-    public DimensionsCraftMenu(MenuType<?> type , int id, Inventory playerInventory, DimensionsNet data , @Nullable NonNullList<ItemStack> craftItems, @Nullable BlockPos entityPos)
+    public DimensionsCraftMenu(MenuType<?> type , int id, Inventory playerInventory, AbstractUnorderedStackHandler data , @Nullable NonNullList<ItemStack> craftItems, @Nullable BlockPos entityPos)
     {
         // 利用父类函数处理存储槽位 玩家背包 和一些其他数据添加处理
         super(type, id,playerInventory,data);

@@ -87,7 +87,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
         return new DimensionsCraftMenuTerminal(
                 containerId,
                 inventory,
-                net,
+                net.getUnifiedStorage(),
                 ctx.stack.get(ModDataComponents.CRAFT_SLOTS).contents(),
                 ctx.stack,
                 null
