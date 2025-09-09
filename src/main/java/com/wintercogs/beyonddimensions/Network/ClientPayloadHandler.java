@@ -174,7 +174,7 @@ public class ClientPayloadHandler
                         SlotGroupSync sync = menu.slotGroupSyncs.get(packet.groupId());
                         if(sync != null)
                         {
-                            sync.loadChange(packet.stacks(),packet.changedCounts());
+                            sync.loadChange(packet.keys(),packet.newCounts(), packet.newModifiedTime(), packet.newInsertedTime());
                             sync.afterLoadChange();
 
                         }

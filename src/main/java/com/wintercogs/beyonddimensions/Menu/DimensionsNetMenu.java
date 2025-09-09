@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerKeepZero;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
@@ -92,7 +93,7 @@ public class DimensionsNetMenu extends BDBaseMenu
 
         // 初始化维度网络容器
         storage = data.getUnifiedStorage();
-        viewerStorage = new UnorderedStackHandlerKeepZero(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
+        viewerStorage = new UnorderedStackHandlerKeepZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
 
         addSlotGroupSync(new DisorderedSlotGroupSync(this,slotGroupSyncs.size(),storage) {
             @Override

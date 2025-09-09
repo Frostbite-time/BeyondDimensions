@@ -9,12 +9,12 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
  */
 public class UnorderedStackHandlerRemoveZero extends AbstractUnorderedStackHandler {
 
-    public UnorderedStackHandlerRemoveZero() {
-        super(ZeroPolicy.REMOVE_ON_ZERO);
+    public UnorderedStackHandlerRemoveZero(UiTimestampPolicy uiTimestampPolicy) {
+        super(ZeroPolicy.REMOVE_ON_ZERO,uiTimestampPolicy);
     }
 
-    public UnorderedStackHandlerRemoveZero(long slotCapacity, int slotMaxSize) {
-        super(ZeroPolicy.REMOVE_ON_ZERO);
+    public UnorderedStackHandlerRemoveZero(UiTimestampPolicy uiTimestampPolicy, long slotCapacity, int slotMaxSize) {
+        super(ZeroPolicy.REMOVE_ON_ZERO, uiTimestampPolicy);
         this.slotCapacity = slotCapacity;
         this.slotMaxSize  = slotMaxSize;
     }

@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
@@ -88,7 +89,7 @@ public class DimensionsNet extends SavedData
      */
     public DimensionsNet(boolean temporary)
     {
-        unifiedStorage = new UnifiedStorage(this);
+        unifiedStorage = new UnifiedStorage(this, AbstractUnorderedStackHandler.UiTimestampPolicy.AUTO);
         NeoForge.EVENT_BUS.addListener(this::onServerTick);
         this.temporary = temporary;
     }

@@ -11,8 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.ArrayList;
 import java.util.List;
 
-public record DisorderedSlotGroupSyncPacket(int groupId,List<IStackKey<?>> stacks,
-                                            List<Long> changedCounts) implements CustomPacketPayload
+public record DisorderedSlotGroupSyncPacket(int groupId,List<IStackKey<?>> keys, List<Long> newCounts, List<Long> newModifiedTime, List<Long> newInsertedTime) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<DisorderedSlotGroupSyncPacket> TYPE =
@@ -29,12 +28,22 @@ public record DisorderedSlotGroupSyncPacket(int groupId,List<IStackKey<?>> stack
                             ArrayList::new,
                             IStackKey.STREAM_CODEC
                     ),
-                    DisorderedSlotGroupSyncPacket::stacks,
+                    DisorderedSlotGroupSyncPacket::keys,
                     ByteBufCodecs.collection(
                             ArrayList::new,
                             ByteBufCodecs.VAR_LONG
                     ),
-                    DisorderedSlotGroupSyncPacket::changedCounts,
+                    DisorderedSlotGroupSyncPacket::newCounts,
+                    ByteBufCodecs.collection(
+                            ArrayList::new,
+                            ByteBufCodecs.VAR_LONG
+                    ),
+                    DisorderedSlotGroupSyncPacket::newModifiedTime,
+                    ByteBufCodecs.collection(
+                            ArrayList::new,
+                            ByteBufCodecs.VAR_LONG
+                    ),
+                    DisorderedSlotGroupSyncPacket::newInsertedTime,
                     DisorderedSlotGroupSyncPacket::new
             );
 

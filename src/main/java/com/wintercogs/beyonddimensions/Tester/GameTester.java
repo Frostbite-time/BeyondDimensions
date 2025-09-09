@@ -53,7 +53,7 @@ public class GameTester
             allExtractData.add(extractData);
         }
         // 预热阶段（不记录结果）
-        UnifiedStorage warmupStorage = new UnifiedStorage(new DimensionsNet(true));
+        UnifiedStorage warmupStorage = new DimensionsNet(true).getUnifiedStorage();
         for (int i = 0; i < 50; i++) {
             List<KeyAmount> data = allInsertData.get(0);
             for (KeyAmount stack : data) {
@@ -70,7 +70,7 @@ public class GameTester
         long[] extractTimes = new long[totalTestTimes];
         long[] combinedTimes = new long[totalTestTimes];
         for (int times = 0; times < totalTestTimes; times++) {
-            UnifiedStorage storage = new UnifiedStorage(new DimensionsNet(true));
+            UnifiedStorage storage = new DimensionsNet(true).getUnifiedStorage();
             List<KeyAmount> insertData = allInsertData.get(times);
             int[] extractData = allExtractData.get(times);
             // 纯插入测试
@@ -91,7 +91,7 @@ public class GameTester
             }
             extractTimes[times] = System.nanoTime() - extractStart;
             // 综合测试（新建存储）
-            UnifiedStorage combinedStorage = new UnifiedStorage(new DimensionsNet(true));
+            UnifiedStorage combinedStorage = new DimensionsNet(true).getUnifiedStorage();
             long combinedStart = System.nanoTime();
             for (KeyAmount stack : insertData) {
                 combinedStorage.insert(stack.key(),stack.amount(), false);

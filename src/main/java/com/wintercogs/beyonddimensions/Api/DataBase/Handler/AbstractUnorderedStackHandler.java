@@ -24,28 +24,35 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class AbstractUnorderedStackHandler implements IStackHandler {
+public abstract class AbstractUnorderedStackHandler implements IStackHandler
+{
 
     /* ---------- 策略：是否保留 amount==0 的键 ---------- */
     protected enum ZeroPolicy { KEEP_ZERO, REMOVE_ON_ZERO }
 
-    private final ZeroPolicy zeroPolicy;
+    /* ---------- 新增：UI 时间戳维护策略 ---------- */
+    public enum UiTimestampPolicy { NONE, AUTO } // NONE: 不主动维护；AUTO: 自动维护
 
-    protected AbstractUnorderedStackHandler(ZeroPolicy policy) {
+    private final ZeroPolicy zeroPolicy;
+    private UiTimestampPolicy uiTimestampPolicy; // 默认自动维护（可通过 setter 修改）
+
+    protected AbstractUnorderedStackHandler(ZeroPolicy policy, UiTimestampPolicy uiTimestampPolicy) {
         this.zeroPolicy = Objects.requireNonNull(policy);
+        this.uiTimestampPolicy = Objects.requireNonNull(uiTimestampPolicy);
     }
 
     /* ---------- 内部存储 ---------- */
-    /** 存储：key -> amount；KeepZero 时允许 0；RemoveZero 时保证 >0 才存在 */
     protected final Map<IStackKey<?>, Long> storage = new HashMap<>();
-    /** 非空键（以及 KeepZero 时可能包含 amount==0 的键）的紧凑槽位索引（换尾删除） */
     protected final ArrayList<IStackKey<?>> slotIndex = new ArrayList<>();
-    /** key -> 槽位位置（仅记录存在于 slotIndex 的键） */
     protected final Map<IStackKey<?>, Integer> posMap = new HashMap<>();
-    /** 分化包装：key -> 具体 stack 副本（只维护类型，不维护数量） */
     protected final Map<IStackKey<?>, Object> key2stackMap = new HashMap<>();
-    /** typeId -> key 列表的对照（换尾删除） */
     protected final Map<ResourceLocation, TypeBucket> type2buckets = new HashMap<>();
+
+    /* ---------- 新增：仅供 UI 使用的时间表 ---------- */
+    /** 记录该 Key 最近一次“从无到有建槽位”的时间（毫秒时间戳）。仅供 UI 展示，无其他语义。 */
+    protected final Map<IStackKey<?>, Long> creationTimeMap = new HashMap<>();
+    /** 记录该 Key 最近一次“数量被修改”的时间（毫秒时间戳）。仅供 UI 展示，无其他语义。 */
+    protected final Map<IStackKey<?>, Long> lastModifiedTimeMap = new HashMap<>();
 
     /* ---------- 只读、动态的 KeyAmount 视图 ---------- */
     private final List<KeyAmount> entriesView = Collections.unmodifiableList(
@@ -92,6 +99,28 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
     /* ---------- 可配置容量/槽位上限 ---------- */
     public long slotCapacity = Long.MAX_VALUE;
     public int  slotMaxSize  = Integer.MAX_VALUE;
+
+    /* =================== UI 时间策略：工具 =================== */
+    protected long nowMillis() { return System.currentTimeMillis(); }
+
+    /** 主动覆写：设定某个 key 的“建槽位时间” */
+    public void setCreationTime(IStackKey<?> key, long timeMillis) {
+        if (key != null) creationTimeMap.put(key, timeMillis);
+    }
+    /** 主动覆写：设定某个 key 的“最后修改时间” */
+    public void setLastModifiedTime(IStackKey<?> key, long timeMillis) {
+        if (key != null) lastModifiedTimeMap.put(key, timeMillis);
+    }
+    /** 获取“建槽位时间表”的引用（按你的要求，返回真实引用） */
+    public Map<IStackKey<?>, Long> getCreationTimeMap() { return creationTimeMap; }
+    /** 获取“最后修改时间表”的引用（按你的要求，返回真实引用） */
+    public Map<IStackKey<?>, Long> getLastModifiedTimeMap() { return lastModifiedTimeMap; }
+
+    /** 切换 UI 时间戳策略 */
+    public void setUiTimestampPolicy(UiTimestampPolicy policy) {
+        this.uiTimestampPolicy = (policy == null ? UiTimestampPolicy.NONE : policy);
+    }
+    public UiTimestampPolicy getUiTimestampPolicy() { return uiTimestampPolicy; }
 
     /* ================= 公共订阅 API（放在抽象基类里） ================= */
     public AutoCloseable subscribeAny(Object owner, AnyChangeListener onAny) {
@@ -154,7 +183,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
     }
 
     /* ============== 生命周期：留给子类覆写的统一入口 ============== */
-    /** 统一触发点：子类可覆写添加自定义行为（例如 UnifiedStorage 中的 net.setDirty()）。 */
     @Override
     public void onChange() {
         fireChange();
@@ -176,6 +204,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         posMap.clear();
         key2stackMap.clear();
         type2buckets.clear();
+        // 新增：清空 UI 时间表
+        creationTimeMap.clear();
+        lastModifiedTimeMap.clear();
         onChange();
     }
 
@@ -197,12 +228,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         return key != null && storage.getOrDefault(key, 0L) > 0L;
     }
 
-    /**
-     * 语义：
-     * - amount <= 0 ：KEEP_ZERO => 置 0 且保留索引；REMOVE_ON_ZERO => 移除
-     * - 否则：将其数量设置为 min(amount, slotCapacity)，必要时建立槽位（看上限）
-     * 返回：最终存储的数量
-     */
     public long setAmountByKey(IStackKey<?> key, long amount) {
         if (key == null) return 0L;
 
@@ -215,12 +240,19 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
                 if (current > 0L || posMap.containsKey(key)) {
                     storage.remove(key);
                     removeFromIndex(key);
+                    // 修改时间：数量变化
+                    if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+                        lastModifiedTimeMap.put(key, nowMillis());
+                    }
                     onContentChanged(key, current, false);
                 }
                 return 0L;
             } else { // KEEP_ZERO
                 storage.put(key, 0L);
-                ensureInIndex(key);
+                ensureInIndex(key); // ensureInIndex 内部会做“建槽位时间”记录（首次）
+                if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+                    lastModifiedTimeMap.put(key, nowMillis());
+                }
                 long delta = current; // 全部减少
                 if (delta > 0L) onContentChanged(key, delta, false);
                 return 0L;
@@ -230,11 +262,13 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         // target > 0
         boolean isNew = (current == 0L) && !posMap.containsKey(key);
         if (isNew && slotIndex.size() >= slotMaxSize) {
-            // 槽位不足：对 KEEP_ZERO 如果当前已有 0（posMap.contains 为 false/true?）已处理在 isNew 里
             return current;
         }
         storage.put(key, target);
         ensureInIndex(key);
+        if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+            lastModifiedTimeMap.put(key, nowMillis());
+        }
         long delta = Math.abs(target - current);
         if (delta > 0L) onContentChanged(key, delta, target > current);
         return target;
@@ -248,24 +282,29 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         long target = Math.max(0L, amount);
 
         if (Objects.equals(oldKey, newKey)) {
-            // 修改老键的数量/或清空
             setAmountByKey(oldKey, target);
             return;
         }
 
-        // 移除旧
         long oldAmt = storage.getOrDefault(oldKey, 0L);
         if (zeroPolicy == ZeroPolicy.REMOVE_ON_ZERO) {
             storage.remove(oldKey);
             removeFromIndex(oldKey);
         } else {
             storage.put(oldKey, 0L);
-            // 保留索引（不调用 removeFromIndex）
+            // 保留索引
+        }
+        if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+            lastModifiedTimeMap.put(oldKey, nowMillis());
         }
         if (oldAmt > 0L) onContentChanged(oldKey, oldAmt, false);
 
-        // 写入新
-        if (newKey != null) setAmountByKey(newKey, target);
+        if (newKey != null) {
+            setAmountByKey(newKey, target);
+            if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+                lastModifiedTimeMap.put(newKey, nowMillis());
+            }
+        }
     }
 
     @Override public void addStackDirectly(IStackKey<?> key, long amount) { insert(key, amount, false); }
@@ -279,7 +318,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         long add = Math.max(0L, amount);
         if (add == 0L) return new KeyAmount(key, 0L);
 
-        // 物质压缩球：全或无
         if (key instanceof ItemStackKey itemKey && itemKey.getSource() == ModItems.MATTER_COMPRESS_BALL.get()) {
             return unzipMatterBall(itemKey, add, simulate);
         }
@@ -300,6 +338,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         if (!simulate && actual > 0L) {
             storage.put(key, current + actual);
             ensureInIndex(key);
+            if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+                lastModifiedTimeMap.put(key, nowMillis());
+            }
             onContentChanged(key, actual, true);
         }
         return new KeyAmount(key, leftover);
@@ -313,7 +354,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         List<KeyAmount> contents = ballStack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
         if (contents == null || contents.isEmpty()) return new KeyAmount(ballKey, 0L);
 
-        // 预检：聚合同 key
         final Map<IStackKey<?>, Long> needMap = new HashMap<>();
         try {
             for (KeyAmount entry : contents) {
@@ -339,14 +379,12 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
 
         if (simulate) return new KeyAmount(ballKey, 0L);
 
-        // 真实阶段 + 回滚
         final ArrayList<KeyAmount> applied = new ArrayList<>();
         for (KeyAmount entry : contents) {
             if (entry == null || entry.key() == null || entry.amount() <= 0L) continue;
             long scaled;
             try { scaled = Math.multiplyExact(entry.amount(), ballCount); }
             catch (ArithmeticException e) {
-                // 回滚
                 for (int i = applied.size()-1; i>=0; i--) {
                     KeyAmount a = applied.get(i);
                     extract(a.key(), a.amount(), false);
@@ -380,6 +418,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         if (!simulate) {
             long left = current - take;
             if (left == 0L) {
+                if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+                    lastModifiedTimeMap.put(key, nowMillis());
+                }
                 if (zeroPolicy == ZeroPolicy.REMOVE_ON_ZERO) {
                     storage.remove(key);
                     removeFromIndex(key);
@@ -389,6 +430,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
                 }
             } else {
                 storage.put(key, left);
+                if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+                    lastModifiedTimeMap.put(key, nowMillis());
+                }
             }
             onContentChanged(key, take, false);
         }
@@ -405,6 +449,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         if (!simulate) {
             long left = current - take;
             if (left == 0L) {
+                if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+                    lastModifiedTimeMap.put(key, nowMillis());
+                }
                 if (zeroPolicy == ZeroPolicy.REMOVE_ON_ZERO) {
                     storage.remove(key);
                     removeFromIndex(key);
@@ -414,6 +461,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
                 }
             } else {
                 storage.put(key, left);
+                if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+                    lastModifiedTimeMap.put(key, nowMillis());
+                }
             }
             onContentChanged(key, take, false);
         }
@@ -432,6 +482,10 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         posMap.put(key, idx);
         bucketOf(key.getTypeId()).add(key);
         if (!key2stackMap.containsKey(key)) key2stackMap.put(key, key.copyStack());
+        // 新建槽位时间
+        if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+            creationTimeMap.put(key, nowMillis());
+        }
     }
     protected void removeFromIndex(IStackKey<?> key) {
         Integer pos = posMap.remove(key);
@@ -445,6 +499,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         slotIndex.remove(last);
         bucketOf(key.getTypeId()).remove(key);
         key2stackMap.remove(key);
+        // 为避免无上限增长，这里选择在移除槽位时一并清理时间记录
+        creationTimeMap.remove(key);
+        lastModifiedTimeMap.remove(key);
     }
 
     /* ---------------- 类型桶 ---------------- */
@@ -488,7 +545,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
         ListTag stacksTag = new ListTag();
         boolean writeZero = (zeroPolicy == ZeroPolicy.KEEP_ZERO);
 
-        // 与反序列化保持一致：使用带注册表上下文的 Ops
         final DynamicOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
 
         for (Map.Entry<IStackKey<?>, Long> entry : storage.entrySet()) {
@@ -497,16 +553,12 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
             if (key == null || key.isEmpty()) continue;
             if (!writeZero && value <= 0L) continue;
 
-            // 用 CODEC 编码 key -> Tag（期望是 CompoundTag）
             DataResult<Tag> enc = IStackKey.CODEC.encodeStart(ops, key);
-
             Tag encoded = enc.resultOrPartial(err -> {
-                // 记录一次警告，但不中断后续条目
                 BeyondDimensions.LOGGER.warn("编码 IStackKey 失败：{} | key={}", err, key);
             }).orElse(null);
 
             if (!(encoded instanceof CompoundTag)) {
-                // 理论上不会发生；若发生，为保证与解码端一致（那里要求 CompoundTag），这里跳过该条目
                 if (encoded != null) {
                     BeyondDimensions.LOGGER.warn("IStackKey 编码结果不是 CompoundTag：{} | key={}", encoded.getClass().getName(), key);
                 }
@@ -546,13 +598,19 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
                     BeyondDimensions.LOGGER.warn("解码 IStackKey 失败，原因：{}", err);
                 }).ifPresent(key -> {
                     if (key.isEmpty()) return;
+                    // 反序列化：也初始化 UI 时间（便于 UI 初次显示）
+                    if (uiTimestampPolicy == UiTimestampPolicy.AUTO) {
+                        long now = nowMillis();
+                        creationTimeMap.put(key, now);
+                        lastModifiedTimeMap.put(key, now);
+                    }
+
                     if (amount <= 0L) {
                         if (zeroPolicy == ZeroPolicy.KEEP_ZERO) {
                             storage.put(key, 0L);
                             ensureInIndex(key);
                         }
                     } else {
-                        // 正数：正常插入（不模拟，触发事件）
                         insert(key, amount, false);
                     }
                 });
@@ -566,6 +624,5 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler {
     public void setSlotCapacity(long capacity) { this.slotCapacity = capacity; }
     public void setSlotMaxSize(int maxSize)    { this.slotMaxSize  = maxSize; }
 
-    /** 是否达到槽位数量上限 */
     public boolean isFullSlotsSize() { return slotIndex.size() >= slotMaxSize; }
 }

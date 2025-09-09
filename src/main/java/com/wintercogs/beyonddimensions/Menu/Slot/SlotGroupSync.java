@@ -11,7 +11,7 @@ public interface SlotGroupSync
 
     void updateChange();
 
-    void loadChange(List<IStackKey<?>> stacks, List<Long> changedCounts);
+    void loadChange(List<IStackKey<?>> keys, List<Long> newCounts, List<Long> newModifiedTime,List<Long> newInsertedTime);
 
     void afterLoadChange();
 }

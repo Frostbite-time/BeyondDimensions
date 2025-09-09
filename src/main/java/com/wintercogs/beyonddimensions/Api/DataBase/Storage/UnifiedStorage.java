@@ -14,19 +14,19 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero {
     /** 对应的维度网络，仅用于持久化脏标记 */
     private final DimensionsNet net;
 
-    public UnifiedStorage(DimensionsNet net) {
-        super();
+    public UnifiedStorage(DimensionsNet net, UiTimestampPolicy uiTimestampPolicy) {
+        super(uiTimestampPolicy);
         this.net = net;
     }
 
-    public UnifiedStorage(DimensionsNet net, long slotCapacity, int slotMaxSize) {
-        super(slotCapacity, slotMaxSize);
+    public UnifiedStorage(DimensionsNet net, UiTimestampPolicy uiTimestampPolicy, long slotCapacity, int slotMaxSize) {
+        super(uiTimestampPolicy,slotCapacity, slotMaxSize);
         this.net = net;
     }
 
     /** 返回一个“完全不可用”的空实现（0容量、0槽位），对外表现为全空容器且不会做脏标记 */
     public static UnifiedStorage getEmpty() {
-        return new UnifiedStorage(null, 0, 0) {
+        return new UnifiedStorage(null,UiTimestampPolicy.NONE, 0, 0) {
             @Override
             public void onChange() {
                 // no-op：空实现不做脏标记也不广播
