@@ -68,8 +68,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
             int y = slot.y;
             KeyAmount stack = sSlot.getStack();
 
-            if(stack.isEmpty()) return; // 不绘制空槽
-
+            if(stack.key().isEmpty()) return; // 不绘制空键
             stack.key().getRender().render(guiGraphics, stack.key(), x, y);
             stack.key().getRender().renderAmount(guiGraphics,stack.amount(),x,y);
 
