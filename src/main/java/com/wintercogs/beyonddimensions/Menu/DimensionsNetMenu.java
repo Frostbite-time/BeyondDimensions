@@ -29,7 +29,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 /**
  * 打开维度网络时候所用到的Menu，处理了网络同步以及点击操作等问题
@@ -44,7 +43,6 @@ public class DimensionsNetMenu extends BDBaseMenu
     public AbstractUnorderedStackHandler storage; // 客户端与服务端都使用RemoveZero版本作为实际存储
     public AbstractUnorderedStackHandler viewerStorage; // 在客户端，用于显示物品，允许保留0堆叠
     private ArrayList<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
-    private boolean cacheTooltip = false; //客户端使用，用于记录打开UI后的第一次同步是否缓存了工具提示（用于搜索，且第一次同步通常为全量同步，此时处理较好）
 
 
     public boolean hasShiftDown = false;
@@ -104,12 +102,8 @@ public class DimensionsNetMenu extends BDBaseMenu
                 else
                     updateOnlyCountAndNewViewer();
 
-                if(!cacheTooltip)
-                {
-                    // 调用异步缓存
-                    TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.NORMAL);
-                    TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.ADVANCED);
-                }
+                TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.NORMAL);
+                TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.ADVANCED);
             }
         });
 
@@ -331,122 +325,171 @@ public class DimensionsNetMenu extends BDBaseMenu
 
     /**
      * 根据当前的搜索状态、按钮状态对存储进行排序
-     * @param unifiedStorage 要排序的存储
-     * @return 完成排序的索引列表
+     * - 仅按需收集字段（显示名/模组ID/Tooltip/时间戳/数量）
+     * - 比较器只比较已准备好的字段，不再做昂贵取值
+     * - 不做 viewerIndex 兜底（避免额外开销，也避免在“换尾删除”下产生误导）
      */
     public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<KeyAmount> unifiedStorage)
     {
-        // 合并过滤空气和搜索逻辑，避免遍历时删除
-        ArrayList<KeyAmount> cache      = new ArrayList<>();
-        ArrayList<Integer>   cacheIndex = new ArrayList<>();
+        if (!this.player.level().isClientSide()) return new ArrayList<>();
 
+        // ---- 解析搜索串并确定过滤需求 ----
+        final String s = (searchText == null) ? "" : searchText.toLowerCase(Locale.ENGLISH);
+        final boolean hasSearch = !s.isEmpty();
+        final String[] parts = splitSearch(s);
+        final String namePart = parts[0];  // 名称
+        final String idPart   = parts[1];  // @modid
+        final String tipPart  = parts[2];  // #tooltip
+        final boolean hasSymbol = !(idPart.isEmpty() && tipPart.isEmpty());
+
+        final boolean needNameFilter    = hasSearch && (!namePart.isEmpty());
+        final boolean needModFilter     = hasSearch && (hasSymbol ? !idPart.isEmpty() : !namePart.isEmpty());
+        final boolean needTooltipFilter = hasSearch && (hasSymbol ? !tipPart.isEmpty() : !namePart.isEmpty());
+
+        // ---- 决定排序需求（只在需要时准备对应字段）----
+        ButtonState primaryState   = Config.uiSortButton;
+        ButtonState secondaryState = Config.uiSecondSortButton;
+        if (primaryState == null) primaryState = ButtonState.SORT_NAME;
+        final boolean useSecondary = (secondaryState != null && secondaryState != primaryState);
+
+        final boolean needNameSort  = (primaryState == ButtonState.SORT_NAME)  || (useSecondary && secondaryState == ButtonState.SORT_NAME);
+        final boolean needModidSort = (primaryState == ButtonState.SORT_MODID) || (useSecondary && secondaryState == ButtonState.SORT_MODID);
+        final boolean needQtySort   = (primaryState == ButtonState.SORT_QUANTITY) ||
+                (useSecondary && secondaryState == ButtonState.SORT_QUANTITY);
+        final boolean needCTimeSort = (primaryState == ButtonState.SORT_INSERTED_TIME) ||
+                (useSecondary && secondaryState == ButtonState.SORT_INSERTED_TIME);
+        final boolean needMTimeSort = (primaryState == ButtonState.SORT_MODIFIED_TIME) ||
+                (useSecondary && secondaryState == ButtonState.SORT_MODIFIED_TIME);
+
+        final boolean needNameField   = needNameFilter || needNameSort;
+        final boolean needModLower    = needModFilter;     // 过滤用小写
+        final boolean needModSortField= needModidSort;     // 排序用原字符串
+
+        // 只有在需要时才拿时间戳 map
+        final Map<IStackKey<?>, Long> ctimeMap = needCTimeSort ? storage.getCreationTimeMap()     : null;
+        final Map<IStackKey<?>, Long> mtimeMap = needMTimeSort ? storage.getLastModifiedTimeMap() : null;
+
+        final ArrayList<Row> rows = new ArrayList<>(unifiedStorage.size());
+
+        // ---- 过滤 + 收集排序键（按需取值，尽量短路）----
         for (int i = 0; i < unifiedStorage.size(); i++) {
-            KeyAmount stack = unifiedStorage.get(i);
-            if (stack == null || stack.isEmpty()) continue;
+            KeyAmount ka = unifiedStorage.get(i);
+            if (ka == null || ka.isEmpty()) continue;
 
-            // === 预先准备高频数据（全部小写，避免重复 toLowerCase 开销） ===
-            String displayName = stack.key().getRender().getDisplayName(stack.key()).getString().toLowerCase(Locale.ENGLISH);
-            String modId       = stack.key().getModId().toLowerCase(Locale.ENGLISH);
+            IStackKey<?> key = ka.key();
 
-            /* =======================================================================
-             * 1. 解析搜索串
-             *    - 若包含 @ 或 # → AND 规则
-             *    - 都不含       → OR 规则（名称 OR 模组ID OR Tooltip）
-             *    - 检索顺序：名称 → 模组ID → Tooltip（最贵放最后）
-             * =======================================================================*/
-            if (searchText == null || searchText.isEmpty()) {
-                cache.add(stack);
-                cacheIndex.add(i);
-                continue;
-            }
+            String displayName = null;   // 只有 needNameField 时才取
+            String modIdLower  = null;   // 过滤用小写
+            String modIdSort   = null;   // 排序用原字符串
 
-            String lowerSearch = searchText.toLowerCase(Locale.ENGLISH);
-            String[] parts     = splitSearch(lowerSearch);
-            String mainPart    = parts[0];   // 名称
-            String idPart      = parts[1];   // 模组ID（带 @）
-            String tooltipPart = parts[2];   // Tooltip（带 #）
-            boolean hasSymbol  = !(idPart.isEmpty() && tooltipPart.isEmpty());  // 任一存在即显式符号
-
-            if (hasSymbol) {
-                // AND
-                if (!mainPart.isEmpty()   && !checkTextMatches(displayName, mainPart)) continue;
-                if (!idPart.isEmpty()     && !modId.contains(idPart))                 continue;
-                if (!tooltipPart.isEmpty()&& !checkTooltipMatches(stack, tooltipPart)) continue;
-                cache.add(stack); cacheIndex.add(i);
+            boolean matched;
+            if (!hasSearch) {
+                matched = true;
+            } else if (hasSymbol) {
+                matched = true;
+                if (needNameFilter) {
+                    if (displayName == null) displayName = key.getRender().getDisplayName(key).getString();
+                    if (!checkTextMatches(displayName, namePart)) matched = false;
+                }
+                if (matched && !idPart.isEmpty()) {
+                    if (modIdLower == null) modIdLower = key.getModId().toLowerCase(Locale.ENGLISH);
+                    if (!modIdLower.contains(idPart)) matched = false;
+                }
+                if (matched && !tipPart.isEmpty()) {
+                    if (!checkTooltipMatches(ka, tipPart)) matched = false;
+                }
             } else {
-                // OR
-                boolean matched = false;
-                if (!mainPart.isEmpty() && checkTextMatches(displayName, mainPart)) matched = true;
-                if (!matched && modId.contains(mainPart))                           matched = true;
-                if (!matched && checkTooltipMatches(stack, mainPart))               matched = true;
-                if (matched) { cache.add(stack); cacheIndex.add(i); }
+                boolean any = false;
+                if (!namePart.isEmpty()) {
+                    if (needNameFilter) {
+                        if (displayName == null) displayName = key.getRender().getDisplayName(key).getString();
+                        any |= checkTextMatches(displayName, namePart);
+                    }
+                    if (!any && needModFilter) {
+                        if (modIdLower == null) modIdLower = key.getModId().toLowerCase(Locale.ENGLISH);
+                        any |= modIdLower.contains(namePart);
+                    }
+                    if (!any && needTooltipFilter) {
+                        any |= checkTooltipMatches(ka, namePart);
+                    }
+                }
+                matched = any;
+            }
+            if (!matched) continue;
+
+            // 进入排序键收集：仅在需要时取
+            if (needNameSort && displayName == null) {
+                displayName = key.getRender().getDisplayName(key).getString();
+            }
+            if (needModSortField) {
+                modIdSort = key.getModId();
+            }
+
+            long amt   = needQtySort   ? ka.amount() : 0L;
+            long ctime = (needCTimeSort && ctimeMap != null) ? ctimeMap.getOrDefault(key, 0L) : 0L;
+            long mtime = (needMTimeSort && mtimeMap != null) ? mtimeMap.getOrDefault(key, 0L) : 0L;
+
+            rows.add(new Row(i, displayName, modIdSort, amt, ctime, mtime));
+        }
+
+        // ---- 排序（无 viewerIndex 兜底）----
+        if (!rows.isEmpty()) {
+            final Comparator<Row> primary = buildRowComparator(primaryState);
+            if (useSecondary) {
+                final Comparator<Row> secondary = buildRowComparator(secondaryState);
+                rows.sort(primary.thenComparing(secondary));
+            } else {
+                rows.sort(primary);
+            }
+            if (Config.uiReverseButton == ButtonState.ENABLED) {
+                Collections.reverse(rows);
             }
         }
 
-        // 统一排序：主排序 + 次排序（仅在主排序相等时介入）
-        ButtonState sortState        = Config.uiSortButton;
-        ButtonState secondSortState  = Config.uiSecondSortButton;
-
-        Comparator<KeyAmount> primary   = buildComparator(sortState);
-        Comparator<KeyAmount> secondary = (secondSortState != null && secondSortState != sortState)
-                ? buildComparator(secondSortState)
-                : null;
-
-        Comparator<KeyAmount> combined  = (secondary != null) ? primary.thenComparing(secondary) : primary;
-
-        // 按 combined 对 cache 的“索引”排序，得到映射
-        ArrayList<KeyAmount> finalCache = cache;
-        List<Integer> indices = IntStream.range(0, cache.size())
-                .boxed()
-                .sorted((a, b) -> combined.compare(finalCache.get(a), finalCache.get(b)))
-                .toList();
-
-        // 根据排序结果重组原始 unifiedStorage 的索引
-        ArrayList<Integer> sortedIndices = new ArrayList<>(cacheIndex.size());
-        for (int idx : indices) sortedIndices.add(cacheIndex.get(idx));
-        cacheIndex = sortedIndices;
-
-        // 倒序（全局翻转）
-        if (Config.uiReverseButton == ButtonState.ENABLED) {
-            Collections.reverse(cacheIndex);
+        // ---- 产出“视觉存储下标”列表 ----
+        ArrayList<Integer> result = new ArrayList<>(rows.size());
+        for (int k = 0; k < rows.size(); k++) {
+            result.add(rows.get(k).idx);
         }
-
-        return cacheIndex;
+        return result;
     }
 
-    /** 构建对应 ButtonState 的比较器（默认按名称） */
-    private Comparator<KeyAmount> buildComparator(ButtonState state) {
+    // 局部行结构：仅保存排序所需键
+    private static final class Row {
+        final int idx;           // 指向 unifiedStorage（即 viewerStorage）的下标
+        final String name;       // 显示名（仅在需要时非 null）
+        final String modIdSort;  // 模组ID（排序用原字符串；仅在需要时非 null）
+        final long amount;       // 数量（仅在需要时有意义）
+        final long ctime;        // 插入时间（仅在需要时有意义）
+        final long mtime;        // 修改时间（仅在需要时有意义）
+        Row(int idx, String name, String modIdSort, long amount, long ctime, long mtime) {
+            this.idx = idx; this.name = name; this.modIdSort = modIdSort;
+            this.amount = amount; this.ctime = ctime; this.mtime = mtime;
+        }
+    }
+
+    /** 仅比较 Row 中已准备好的字段；不做任何额外取值或 viewerIndex 兜底 */
+    private Comparator<Row> buildRowComparator(ButtonState state) {
         if (state == null) {
-            return Comparator.comparing(ka -> ka.key().getRender().getDisplayName(ka.key()).getString(), String::compareTo);
+            // 与旧逻辑一致：默认按名称（这里假定需要时我们已填充了 name）
+            return Comparator.comparing((Row r) -> r.name, String::compareTo);
         }
-        return switch (state)
-        {
-            case SORT_QUANTITY -> Comparator.comparingLong(KeyAmount::amount);
-            case SORT_NAME -> Comparator.comparing(
-                    ka -> ka.key().getRender().getDisplayName(ka.key()).getString(),
-                    String::compareTo
-            );
-            case SORT_MODID -> Comparator.comparing(ka -> ka.key().getModId(), String::compareTo);
-            case SORT_INSERTED_TIME ->
-                // 插入时间：从 storage 的 creationTimeMap 读取；无记录则按 0
-                    Comparator.comparingLong(ka -> {
-                        Long t = storage.getCreationTimeMap().get(ka.key());
-                        return (t == null ? 0L : t);
-                    });
-            case SORT_MODIFIED_TIME ->
-                // 修改时间：从 storage 的 lastModifiedTimeMap 读取；无记录则按 0
-                    Comparator.comparingLong(ka -> {
-                        Long t = storage.getLastModifiedTimeMap().get(ka.key());
-                        return (t == null ? 0L : t);
-                    });
-            default ->
-                // 兜底：按名称
-                    Comparator.comparing(
-                            ka -> ka.key().getRender().getDisplayName(ka.key()).getString(),
-                            String::compareTo
-                    );
-        };
+        switch (state) {
+            case SORT_QUANTITY:
+                return Comparator.comparingLong((Row r) -> r.amount);
+            case SORT_NAME:
+                return Comparator.comparing((Row r) -> r.name, String::compareTo);
+            case SORT_MODID:
+                return Comparator.comparing((Row r) -> r.modIdSort, String::compareTo);
+            case SORT_INSERTED_TIME:
+                return Comparator.comparingLong((Row r) -> r.ctime);
+            case SORT_MODIFIED_TIME:
+                return Comparator.comparingLong((Row r) -> r.mtime);
+            default:
+                return Comparator.comparing((Row r) -> r.name, String::compareTo);
+        }
     }
+
 
     /**
      * 检查文本是否匹配名称（同时检查拼音以及原文本）
