@@ -32,6 +32,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.items.IItemHandler;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -242,7 +243,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     ItemStackTypedHandler inputStorage = new ItemStackTypedHandler(be.inputStorageSlots)
                     {
                         @Override
-                        public ItemStack extractItem(int slot, int count, boolean sim)
+                        public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
                         {
                             return ItemStack.EMPTY; //禁止提取
                         }
@@ -251,7 +252,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     ItemStackTypedHandler fuelStorage = new ItemStackTypedHandler(be.fuelStorageSlots)
                     {
                         @Override
-                        public ItemStack extractItem(int slot, int count, boolean sim)
+                        public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
                         {
                             return ItemStack.EMPTY; //禁止提取
                         }
@@ -260,7 +261,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     ItemStackTypedHandler outputStorage = new ItemStackTypedHandler(be.outputStorageSlots)
                     {
                         @Override
-                        public ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
+                        public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
                         {
                             return itemStack; //禁止插入
                         }
@@ -269,7 +270,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     ItemStackTypedHandler fuelReturn = new ItemStackTypedHandler(be.fuelReturnSlots)
                     {
                         @Override
-                        public ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
+                        public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
                         {
                             return itemStack; //禁止插入
                         }

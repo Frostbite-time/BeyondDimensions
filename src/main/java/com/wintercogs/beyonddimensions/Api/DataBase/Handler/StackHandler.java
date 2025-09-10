@@ -13,8 +13,10 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * 有序、固定槽位的堆叠容器实现（箱子类）。
@@ -44,29 +46,27 @@ public class StackHandler implements IStackHandler
         private static final String K_NEW_STACKS = "stacks";   // 新
         private static final String K_OLD_STACKS = "Stacks";   // 旧（大写）
         private static final String K_TYPED      = "TypedStack";
-        private static final String K_TYPE       = "Type";
-        private static final String K_type       = "type";     // IStackKey.CODEC 分发键
 
         @Override
         public <T> DataResult<StackHandler> decode(DynamicOps<T> ops, MapLike<T> input) {
             final T kNewStacks = ops.createString(K_NEW_STACKS); // "stacks"
             final T kOldStacks = ops.createString(K_OLD_STACKS); // "Stacks"
-            final T kTyped     = ops.createString("TypedStack");
+            final T kTyped     = ops.createString(K_TYPED);
 
             // 1) 新格式优先：{ "stacks": [ KeyAmount, ... ] }
             if (input.get(kNewStacks) != null) {
                 return NEW_FMT.decode(ops, input);
             }
 
-            // 2) 旧格式回退：{ "Stacks": [ { "TypedStack": <Compound or IntTag>, "Type": ... }, ... ] }
+            // 2) 旧格式回退：{ "Stacks": [ { "TypedStack": <Compound or IntTag>, ... }, ... ] }
             final T oldNode = input.get(kOldStacks);
             if (oldNode == null) {
                 // 让 NEW_FMT 报缺键错误（便于定位数据异常）
                 return NEW_FMT.decode(ops, input);
             }
 
-            return ops.getStream(oldNode).flatMap(stream -> {
-                java.util.ArrayList<KeyAmount> out = new java.util.ArrayList<>();
+            return ops.getStream(oldNode).flatMap((Stream<T> stream) -> {
+                ArrayList<KeyAmount> out = new ArrayList<>();
 
                 stream.forEach(elem -> {
                     // 旧条目本身必须是个对象
@@ -104,7 +104,6 @@ public class StackHandler implements IStackHandler
             });
         }
 
-
         @Override
         public <T> RecordBuilder<T> encode(StackHandler value, DynamicOps<T> ops, RecordBuilder<T> prefix) {
             return NEW_FMT.encode(value, ops, prefix); // 只写新格式
@@ -114,18 +113,11 @@ public class StackHandler implements IStackHandler
         public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops) {
             return java.util.stream.Stream.of(ops.createString(K_NEW_STACKS));
         }
-
-        private <T> void copyIfPresent(DynamicOps<T> ops, MapLike<T> from, java.util.Map<T, T> to, String key) {
-            T k = ops.createString(key);
-            T v = from.get(k);
-            if (v != null) to.put(k, v);
-        }
     };
 
     public static final Codec<StackHandler> CODEC = TYPE_CODEC.codec();
 
-
-    /* ---------------- 基本存储（固定大小） ---------------- */
+    /* ================= 基本存储（固定大小） ================= */
 
     private final int size;
 
@@ -135,13 +127,10 @@ public class StackHandler implements IStackHandler
     /** 槽位上的数量（空槽位必须为 0，与 keys 同步） */
     private final long[] amounts;
 
-    /** 空槽位标记：bit=1 表示该槽位为空 */
-    private final BitSet emptySlots;
-
     /** key -> 具体存储物的对照（只维护类型，不维护数量；不缓存 EmptyStackKey） */
     private final Map<IStackKey<?>, Object> key2stackMap = new HashMap<>();
 
-    /* ---------------- 只读视图 ---------------- */
+    /* ================= 只读视图 ================= */
 
     private final List<KeyAmount> entriesView = Collections.unmodifiableList(new AbstractList<KeyAmount>() {
         @Override public KeyAmount get(int index) {
@@ -153,8 +142,8 @@ public class StackHandler implements IStackHandler
         @Override public int size() { return size; }
     });
 
-    /* ---------------- 索引（类型桶 / 精确 Key 桶） ---------------- */
-    /* 一方面加速分化包装，另一方面加速按key查询、插入、移除 */
+    /* ================= 索引（类型桶 / 精确 Key 桶 / 空桶） ================= */
+
     public static final class SlotBucket {
         final ArrayList<Integer> slots = new ArrayList<>();
         final HashMap<Integer, Integer> pos = new HashMap<>(); // slot -> index in slots
@@ -181,9 +170,10 @@ public class StackHandler implements IStackHandler
         List<Integer> snapshot() { return new ArrayList<>(slots); } // 防御性副本
     }
 
-    // typeId -> 该类型下所有非空槽位（按换尾维护）
+    // typeId -> 该类型下所有非空槽位（按换尾维护）【不包含 EmptyStackKey】
     private final Map<ResourceLocation, SlotBucket> typeBuckets = new HashMap<>();
-    private SlotBucket bucketOf(ResourceLocation typeId) {
+    private SlotBucket bucketOf(ResourceLocation typeId)
+    {
         return typeBuckets.computeIfAbsent(typeId, t -> new SlotBucket());
     }
     public Optional<SlotBucket> getBucket(ResourceLocation typeId)
@@ -191,9 +181,10 @@ public class StackHandler implements IStackHandler
         return Optional.ofNullable(typeBuckets.get(typeId));
     }
 
-    // 精确 Key -> 该 Key 占用的所有槽位（允许同 Key 多槽）
+    // 精确 Key -> 该 Key 占用的所有槽位（允许同 Key 多槽）【包含 EmptyStackKey，一个“空桶”】
     private final Map<IStackKey<?>, SlotBucket> keyBuckets = new HashMap<>();
-    private SlotBucket bucketOf(IStackKey<?> key) {
+    private SlotBucket bucketOf(IStackKey<?> key)
+    {
         return keyBuckets.computeIfAbsent(key, k -> new SlotBucket());
     }
     public Optional<SlotBucket> getBucket(IStackKey<?> key)
@@ -201,39 +192,39 @@ public class StackHandler implements IStackHandler
         return Optional.ofNullable(keyBuckets.get(key));
     }
 
-    /* ---------------- 构造 ---------------- */
+    /* ================= 构造 ================= */
 
-    public StackHandler(int size) {
+    public StackHandler(int size)
+    {
         this.size = Math.max(0, size);
         this.keys = new IStackKey<?>[this.size];
         this.amounts = new long[this.size];
-        this.emptySlots = new BitSet(this.size);
 
         // 初始全部置空：使用 EmptyStackKey.INSTANCE，不使用 null
         Arrays.fill(this.keys, EmptyStackKey.INSTANCE);
         Arrays.fill(this.amounts, 0L);
-        this.emptySlots.set(0, this.size, true);
+
+        // ★ 初始化“空桶”：所有槽都是空
+        SlotBucket eb = bucketOf(EmptyStackKey.INSTANCE);
+        for (int i = 0; i < this.size; i++) {
+            eb.add(i);
+        }
     }
 
     public StackHandler(List<KeyAmount> stacks)
     {
         this(stacks.size());
-
-        for(int i=0;i<this.size;i++)
-        {
+        for (int i = 0; i < this.size; i++) {
             KeyAmount ka = stacks.get(i);
-            if(ka != null)
-            {
+            if (ka != null) {
                 setStackDirectly(i, ka.key(), ka.amount());
-            }
-            else
-            {
+            } else {
                 setStackDirectly(i, EmptyStackKey.INSTANCE, 0);
             }
         }
     }
 
-    /* ---------------- IStackHandler 实现 ---------------- */
+    /* ================= IStackHandler 实现 ================= */
 
     @Override public List<KeyAmount> getStorage() { return entriesView; }
 
@@ -252,14 +243,15 @@ public class StackHandler implements IStackHandler
         keyBuckets.clear();
 
         // 清空外部类型缓存
-        key2stackMap.clear(); // ★ 新增：同步清理缓存
+        key2stackMap.clear();
 
-        // 标记空槽
-        emptySlots.clear();
-        emptySlots.set(0, size, true);
+        // ★ 重建空桶
+        SlotBucket eb = bucketOf(EmptyStackKey.INSTANCE);
+        for (int i = 0; i < size; i++) {
+            eb.add(i);
+        }
         onChange();
     }
-
 
     @Override
     public @NotNull KeyAmount getStackBySlot(int slot) {
@@ -288,9 +280,13 @@ public class StackHandler implements IStackHandler
     public void setStackDirectly(int slot, IStackKey<?> key, long amount) {
         if (slot < 0 || slot >= size) return;
 
-        // 先移除旧的槽位映射（谨慎：用 get()，不创建新桶；空桶则顺手移除）
+        // 先移除旧的槽位映射（谨慎：用 get()，不创建新桶）
         IStackKey<?> oldKey = keys[slot];
-        if (oldKey != EmptyStackKey.INSTANCE) {
+        if (oldKey == EmptyStackKey.INSTANCE) {
+            // 从空桶移除
+            SlotBucket eb = keyBuckets.get(EmptyStackKey.INSTANCE);
+            if (eb != null) eb.remove(slot);
+        } else {
             SlotBucket tb = typeBuckets.get(oldKey.getTypeId());
             if (tb != null) {
                 tb.remove(slot);
@@ -307,9 +303,11 @@ public class StackHandler implements IStackHandler
         if (key == null || key == EmptyStackKey.INSTANCE || amount <= 0L) {
             keys[slot] = EmptyStackKey.INSTANCE;
             amounts[slot] = 0L;
-            emptySlots.set(slot);
 
-            // ★ 仅当容器已无旧键时，才移除外部缓存
+            // 加入空桶
+            bucketOf(EmptyStackKey.INSTANCE).add(slot);
+
+            // 仅当容器已无旧键时，才移除外部缓存
             removeFromIndex(oldKey);
 
             onChange();
@@ -320,9 +318,10 @@ public class StackHandler implements IStackHandler
         if (clamped <= 0L) {
             keys[slot] = EmptyStackKey.INSTANCE;
             amounts[slot] = 0L;
-            emptySlots.set(slot);
 
-            // ★ 同上
+            // ★ 加入空桶
+            bucketOf(EmptyStackKey.INSTANCE).add(slot);
+
             removeFromIndex(oldKey);
 
             onChange();
@@ -333,10 +332,13 @@ public class StackHandler implements IStackHandler
         keys[slot] = key;
         amounts[slot] = clamped;
 
-        // 建立新映射
+        // ★ 从空桶移除
+        SlotBucket eb = keyBuckets.get(EmptyStackKey.INSTANCE);
+        if (eb != null) eb.remove(slot);
+
+        // 建立新映射（仅非空键）
         bucketOf(key.getTypeId()).add(slot);
         bucketOf(key).add(slot);
-        emptySlots.clear(slot);
         ensureInIndex(key);
 
         // ★ 如果换键，且旧键已无任何槽位占用，则移除缓存
@@ -345,17 +347,19 @@ public class StackHandler implements IStackHandler
         onChange();
     }
 
-
     @Override
-    public void addStackDirectly(IStackKey<?> key, long amount) {
+    public void addStackDirectly(IStackKey<?> key, long amount)
+    {
         if (key == null || key == EmptyStackKey.INSTANCE || amount <= 0L) return;
-        int empty = emptySlots.nextSetBit(0);
-        if (empty < 0) return; // 没空位
+        SlotBucket eb = keyBuckets.get(EmptyStackKey.INSTANCE);
+        if (eb == null || eb.size() == 0) return; // 没空位
+        int empty = eb.get(0); // 放入第一个空位
         setStackDirectly(empty, key, amount);
     }
 
     @Override
-    public @NotNull KeyAmount insert(int slot, IStackKey<?> key, long amount, boolean simulate) {
+    public @NotNull KeyAmount insert(int slot, IStackKey<?> key, long amount, boolean simulate)
+    {
         if (key == null || key == EmptyStackKey.INSTANCE || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         if (slot < 0 || slot >= size) return new KeyAmount(key, amount);
         if (!isStackValid(slot, key)) return new KeyAmount(key, amount);
@@ -370,9 +374,13 @@ public class StackHandler implements IStackHandler
             if (!simulate) {
                 keys[slot] = key;
                 amounts[slot] = ins;
+
+                // ★ 从空桶移除
+                SlotBucket eb = keyBuckets.get(EmptyStackKey.INSTANCE);
+                if (eb != null) eb.remove(slot);
+
                 bucketOf(key.getTypeId()).add(slot);
                 bucketOf(key).add(slot);
-                emptySlots.clear(slot);
                 ensureInIndex(key);
                 onChange();
             }
@@ -398,7 +406,8 @@ public class StackHandler implements IStackHandler
     }
 
     @Override
-    public @NotNull KeyAmount insert(IStackKey<?> key, long amount, boolean simulate) {
+    public @NotNull KeyAmount insert(IStackKey<?> key, long amount, boolean simulate)
+    {
         if (key == null || key == EmptyStackKey.INSTANCE || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
 
         long left = amount;
@@ -422,26 +431,32 @@ public class StackHandler implements IStackHandler
             }
         }
 
-        // 第二阶段：填充空槽位
+        // 第二阶段：填充空槽位（从空桶拿候选）
         if (left > 0) {
-            int idx = emptySlots.nextSetBit(0);
-            while (idx >= 0 && left > 0) {
-                if (isStackValid(idx, key)) {
+            SlotBucket eb = keyBuckets.get(EmptyStackKey.INSTANCE);
+            if (eb != null && eb.size() > 0) {
+                List<Integer> slots = eb.snapshot(); // 快照
+                for (int idx : slots) {
+                    if (left <= 0) break;
+                    if (!isStackValid(idx, key)) continue;
+
                     long cap = Math.min(key.getVanillaMaxStackSize(), getSlotCapacity(idx));
                     long ins = Math.min(left, cap);
                     if (ins > 0) {
                         if (!simulate) {
                             keys[idx] = key;
                             amounts[idx] = ins;
+
+                            // ★ 从空桶移除
+                            eb.remove(idx);
+
                             bucketOf(key.getTypeId()).add(idx);
                             bucketOf(key).add(idx);
-                            emptySlots.clear(idx);
                             ensureInIndex(key);
                         }
                         left -= ins;
                     }
                 }
-                idx = emptySlots.nextSetBit(idx + 1);
             }
         }
 
@@ -465,7 +480,7 @@ public class StackHandler implements IStackHandler
         if (!simulate) {
             long left = have - take;
             if (left == 0L) {
-                // 置空并维护索引（注意：用 get()，并在空时清桶）
+                // 置空并维护索引
                 SlotBucket tb = typeBuckets.get(k.getTypeId());
                 if (tb != null) {
                     tb.remove(slot);
@@ -478,9 +493,11 @@ public class StackHandler implements IStackHandler
                 }
                 keys[slot] = EmptyStackKey.INSTANCE;
                 amounts[slot] = 0L;
-                emptySlots.set(slot);
 
-                // ★ 仅当容器已无该键时才移除缓存
+                // 加入空桶
+                bucketOf(EmptyStackKey.INSTANCE).add(slot);
+
+                // 仅当容器已无该键时才移除缓存
                 removeFromIndex(k);
             } else {
                 amounts[slot] = left;
@@ -489,7 +506,6 @@ public class StackHandler implements IStackHandler
         }
         return new KeyAmount(k, take);
     }
-
 
     @Override
     public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate) {
@@ -512,7 +528,7 @@ public class StackHandler implements IStackHandler
             if (!simulate) {
                 long left = have - t;
                 if (left == 0L) {
-                    // 删除槽位映射（用 get()，清空桶）
+                    // 删除槽位映射
                     SlotBucket tb = typeBuckets.get(key.getTypeId());
                     if (tb != null) {
                         tb.remove(slot);
@@ -525,7 +541,9 @@ public class StackHandler implements IStackHandler
                     }
                     keys[slot] = EmptyStackKey.INSTANCE;
                     amounts[slot] = 0L;
-                    emptySlots.set(slot);
+
+                    // ★ 加入空桶
+                    bucketOf(EmptyStackKey.INSTANCE).add(slot);
 
                     // ★ 仅当容器已无该键时才移除缓存
                     removeFromIndex(key);
@@ -541,7 +559,6 @@ public class StackHandler implements IStackHandler
         return new KeyAmount(key, taken);
     }
 
-
     @Override
     public long getSlotCapacity(int slot) {
         return Long.MAX_VALUE;
@@ -554,33 +571,29 @@ public class StackHandler implements IStackHandler
 
     @Override
     public boolean isEmpty() {
-        return emptySlots.cardinality() == size;
+        SlotBucket eb = keyBuckets.get(EmptyStackKey.INSTANCE);
+        return eb != null && eb.size() == size;
     }
 
-    public CompoundTag serializeNBT(HolderLookup.Provider provider)
-    {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
         Tag encoded = CODEC.encodeStart(ops, this)
-                .getOrThrow(msg -> new IllegalStateException());
+                .getOrThrow(IllegalStateException::new);
         return (CompoundTag) encoded; // 记录结构
     }
 
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag)
-    {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         clearStorage();
         RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
         StackHandler decoded = CODEC.parse(ops, tag)
-                .getOrThrow(msg -> new IllegalStateException());
-        for(int i = 0; i < decoded.size; i++)
-        {
+                .getOrThrow(IllegalStateException::new);
+        for (int i = 0; i < decoded.size; i++) {
             setStackDirectly(i, decoded.keys[i], decoded.amounts[i]);
         }
     }
 
-    private void ensureInIndex(IStackKey<?> key)
-    {
-        if(key != null && key != EmptyStackKey.INSTANCE && !key2stackMap.containsKey(key))
-        {
+    private void ensureInIndex(IStackKey<?> key) {
+        if (key != null && key != EmptyStackKey.INSTANCE && !key2stackMap.containsKey(key)) {
             key2stackMap.put(key, key.copyStack());
         }
     }
@@ -593,7 +606,7 @@ public class StackHandler implements IStackHandler
         boolean stillPresent = (kb != null && kb.size() > 0);
 
         if (!stillPresent) {
-            // 清理空桶，避免泄漏
+            // 清理空桶（若已空），避免泄漏
             if (kb != null && kb.size() == 0) {
                 keyBuckets.remove(key);
             }
@@ -601,10 +614,8 @@ public class StackHandler implements IStackHandler
         }
     }
 
-
     /** 根据key获取已经缓存的对应stack，自行判断类型；返回值数量未设定，需要调用方自行 setCount；若要缓存请复制副本 */
-    public Object getOutStackByKey(IStackKey<?> key)
-    {
+    public @Nullable Object getOutStackByKey(IStackKey<?> key) {
         return (key == null || key == EmptyStackKey.INSTANCE) ? null : key2stackMap.get(key);
     }
 }

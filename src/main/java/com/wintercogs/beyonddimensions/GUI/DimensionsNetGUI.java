@@ -275,7 +275,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     // 用于让子类重写工艺槽位按钮的函数
     protected void addCraftButton()
     {
-        craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*5,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/craft_button"), button ->
+        craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*6,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/craft_button"), button ->
         {
             UIDataHelper.currentPage = menu.lineData;
 

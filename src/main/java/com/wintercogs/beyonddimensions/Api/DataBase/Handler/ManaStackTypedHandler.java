@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackKey;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
@@ -117,15 +118,23 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     @Override
     public int getMaxMana()
     {
-        long maxMana = 0;
-        for(KeyAmount stack : storageHandler.getStorage())
-        {
-            if(stack.isEmpty())
-                maxMana += ManaStackKey.INSTANCE.getVanillaMaxStackSize();
-            if(stack.key() instanceof ManaStackKey && stack.amount() < stack.key().getVanillaMaxStackSize())
-                maxMana += stack.key().getVanillaMaxStackSize() - stack.amount();
-        }
-        return BDMath.clampLongToInt(maxMana);
+        int manaSlots  = storageHandler.getBucket(ManaStackKey.ID)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+        int emptySlots = storageHandler.getBucket(EmptyStackKey.INSTANCE)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+
+        int eligibleSlots = manaSlots + emptySlots;
+        if (eligibleSlots <= 0) return 0;
+
+        long perSlot = Math.min(
+                ManaStackKey.INSTANCE.getVanillaMaxStackSize(),
+                storageHandler.getSlotCapacity(0) // 槽位容量对所有槽相同
+        );
+
+        long total = perSlot * (long) eligibleSlots;
+        return BDMath.clampLongToInt(total);
     }
 
     @Override
