@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
@@ -101,14 +102,12 @@ public abstract class AbstractStackTypedSlot extends Slot
     {
         //从当前槽索引取物品
         KeyAmount stackType = storage.getStackBySlot(getSlotIndex());
-        if(stackType.key() == null)
-        {
-            return ItemStack.EMPTY;
-        }
 
         if(stackType.key() instanceof ItemStackKey itemStackType)
         {
-            return itemStackType.copyStackWithCount(stackType.amount());
+            ItemStack readOnlyStack = itemStackType.getReadOnlyStack();
+            readOnlyStack.setCount(BDMath.clampLongToInt(stackType.amount()));
+            return readOnlyStack;
         }
         else
         {
@@ -187,11 +186,8 @@ public abstract class AbstractStackTypedSlot extends Slot
         ItemStack itemStack = getItemStackFromUnifiedStorage();
         if (itemStack.isEmpty())
             return ItemStack.EMPTY;
-        if (itemStack != null)
-        {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
-            return itemStack.copy();
-        }
-        return ItemStack.EMPTY;
+        //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
+        return itemStack.copy();
 
     }
 
@@ -199,8 +195,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     public boolean hasItem()
     {
         //检查当前槽是否为空
-        return storage.getStackBySlot(getSlotIndex()) != null
-                && !storage.getStackBySlot(getSlotIndex()).isEmpty();
+        return !storage.getStackBySlot(getSlotIndex()).isEmpty();
     }
 
     @Override
@@ -216,7 +211,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     }
 
     @Override
-    public boolean isSameInventory(Slot other)
+    public boolean isSameInventory(@NotNull Slot other)
     {
         if (other instanceof AbstractStackTypedSlot)
         {
@@ -245,7 +240,7 @@ public abstract class AbstractStackTypedSlot extends Slot
         }
         //从当前槽索引取物品
         KeyAmount stack = storage.getStackBySlot(getSlotIndex());
-        if (stack.key() != null && !stack.isEmpty())
+        if (!stack.isEmpty())
         {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
             return stack.amount();
         }
@@ -278,13 +273,13 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 如果发现意外使用则可能需要重写原版方法
 
     @Override
-    public void set(ItemStack stack)
+    public void set(@NotNull ItemStack stack)
     {
         // 此方法会在AbstractContainerMenu初始化时被数据包处理调用
     }
 
     @Override
-    public void setByPlayer(ItemStack newStack, ItemStack oldStack)
+    public void setByPlayer(@NotNull ItemStack newStack, @NotNull ItemStack oldStack)
     {
         // 当玩家拿着物品点击这个槽会发生什么
         // 点击事件交由其他函数处理，此处废弃
@@ -298,21 +293,21 @@ public abstract class AbstractStackTypedSlot extends Slot
     }
 
     @Override
-    public int getMaxStackSize(ItemStack stack)
+    public int getMaxStackSize(@NotNull ItemStack stack)
     {
         // 获取槽位可存储物品的最大值
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public ItemStack remove(int amount)
+    public @NotNull ItemStack remove(int amount)
     {
         // 交由点击函数一并处理，此处废弃
         return ItemStack.EMPTY; // 表示没有物品被移除
     }
 
     @Override
-    public ItemStack safeInsert(ItemStack stack, int increment)
+    public @NotNull ItemStack safeInsert(@NotNull ItemStack stack, int increment)
     {
         // 此处废弃
         return stack; // 剩余原有的所有物品，即没有物品被插入

@@ -116,7 +116,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         public boolean isStackValid(int slot, IStackKey<?> key)
         {
             // 仅接收可以熔炼的物品
-            return key instanceof ItemStackKey itemKey && quickChecks.get(slot).getRecipeFor(new SingleRecipeInput(itemKey.copyStack()),level).isPresent();
+            return key instanceof ItemStackKey itemKey && level != null && quickChecks.get(slot).getRecipeFor(new SingleRecipeInput(itemKey.getReadOnlyStack()),level).isPresent();
         }
     };
     public StackHandler getInputFilterSlots()
@@ -140,7 +140,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 能量或者可以燃烧的物品能作为燃料标记
             return (key instanceof EnergyStackKey)
                     || (key instanceof FluidStackKey fluidKey && fluidKey.getSource() == Fluids.LAVA)
-                    || (key instanceof ItemStackKey itemKey && itemKey.copyStack().getBurnTime(RecipeType.SMELTING) >0);
+                    || (key instanceof ItemStackKey itemKey && itemKey.getReadOnlyStack().getBurnTime(RecipeType.SMELTING) >0);
         }
 
     };
@@ -164,7 +164,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         public boolean isStackValid(int slot, IStackKey<?> key)
         {
             // 仅接收可以熔炼的物品
-            return key instanceof ItemStackKey itemKey && quickChecks.get(slot).getRecipeFor(new SingleRecipeInput(itemKey.copyStack()),level).isPresent();
+            return key instanceof ItemStackKey itemKey && level != null && quickChecks.get(slot).getRecipeFor(new SingleRecipeInput(itemKey.getReadOnlyStack()),level).isPresent();
         }
     };
     public StackHandler getInputStorageSlots()
@@ -204,7 +204,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 能量或者可以燃烧的物品能作为燃料标记
             return (key instanceof EnergyStackKey)
                     || (key instanceof FluidStackKey fluidKey && fluidKey.getSource() == Fluids.LAVA)
-                    || (key instanceof ItemStackKey itemKey && itemKey.copyStack().getBurnTime(RecipeType.SMELTING) >0);
+                    || (key instanceof ItemStackKey itemKey && itemKey.getReadOnlyStack().getBurnTime(RecipeType.SMELTING) >0);
         }
     };
     public StackHandler getFuelStorageSlots()
@@ -489,10 +489,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                         }
                         else if(fuelStack.key() instanceof ItemStackKey fuelItem)
                         {
-                            int burnTime = fuelItem.copyStack().getBurnTime(RecipeType.SMELTING);
+                            int burnTime = fuelItem.getReadOnlyStack().getBurnTime(RecipeType.SMELTING);
                             if(burnTime > 0)
                             {
-                                ItemStack returnItem = fuelItem.copyStack().getCraftingRemainingItem();
+                                ItemStack returnItem = fuelItem.getReadOnlyStack().getCraftingRemainingItem();
                                 if(returnItem.isEmpty())
                                 {
                                     fuelStorageSlots.extract(fuelItem,1,false);
@@ -531,6 +531,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
     public void workContent()
     {
         super.workContent();
+        if(level == null) return;
+
         //开始熔炼
         for(int inputSlot = 0; inputSlot < capacity; inputSlot++)
         {
@@ -541,7 +543,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     && !inputItem.isEmpty())
             {
                 RecipeHolder<SmeltingRecipe> recipeHolder = quickChecks.get(inputSlot)
-                        .getRecipeFor(new SingleRecipeInput(inputItem.copyStack()),level).orElse(null);
+                        .getRecipeFor(new SingleRecipeInput(inputItem.getReadOnlyStack()),level).orElse(null);
                 if(recipeHolder != null)
                 {
                     // 一旦找到配方，始终重设总时间，以防错误越过

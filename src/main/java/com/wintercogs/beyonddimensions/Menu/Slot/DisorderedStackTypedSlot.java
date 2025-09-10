@@ -333,7 +333,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                         if(stackHandlerWrapper.getSlots()>0)
                                         {
                                             KeyAmount actualClickStack = storage.getStackByKey(clickStack.key());// 防止客户端假消息
-                                            if(actualClickStack != null)
+                                            if(!actualClickStack.isEmpty())
                                             {
                                                 int changedCount = BDMath.clampLongToInt(Math.min(actualClickStack.amount(),actualClickStack.key().getVanillaMaxStackSize()));
                                                 int remaining = (int)stackHandlerWrapper.insert(actualClickStack.key().copyStackWithCount(changedCount),false);

@@ -72,7 +72,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
         // 收集存储槽物品
         for (KeyAmount stackType : storageSlots) {
             if (stackType.key() instanceof ItemStackKey itemStackKey) {
-                ItemStack stack = itemStackKey.copyStack();
+                ItemStack stack = itemStackKey.getReadOnlyStack();
                 if (!stack.isEmpty()) {
                     availableItems.add(stack);
                 }

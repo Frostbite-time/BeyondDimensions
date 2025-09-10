@@ -227,7 +227,7 @@ public class ServerPayloadHandler
                                 {
                                     if(menu.inventoryStartIndex<=invSlot.index&& invSlot.index<menu.inventoryEndIndex)
                                     {
-                                        if(ItemStack.isSameItemSameComponents(clickItem.copyStack(), invSlot.getItem()))
+                                        if(clickItem.equals(new ItemStackKey(invSlot.getItem())))
                                             menu.customClickHandler(invSlot.index, new KeyAmount(new ItemStackKey(invSlot.getItem()),invSlot.getItem().getCount()), 0, true);
                                     }
                                 }

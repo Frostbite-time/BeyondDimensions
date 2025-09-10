@@ -70,7 +70,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
                 if(stack.key() instanceof ItemStackKey itemStackKey)
                 {
                     if(!itemStackKey.isEmpty())
-                        stacks.add(EmiStack.of(itemStackKey.copyStack()));
+                        stacks.add(EmiStack.of(itemStackKey.getReadOnlyStack()));
                 }
             }
         }
@@ -108,7 +108,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         // 收集存储槽物品
         for (KeyAmount keyAmount : storageSlots) {
             if (keyAmount.key() instanceof ItemStackKey itemStackKey) {
-                ItemStack stack = itemStackKey.copyStack();
+                ItemStack stack = itemStackKey.getReadOnlyStack();
                 if (!stack.isEmpty()) {
                     availableItems.add(stack);
                 }

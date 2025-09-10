@@ -96,7 +96,7 @@ public class NetFeederItem extends BaseMachineItem
                         // isSame会在最后变为引用比较，所以无需担心，这个比较即使对于大存储来说也非常迅速
                         if(storedStack.key() instanceof ItemStackKey itemStackKey
                             && itemStackKey.isSame(filter.key())
-                            && itemStackKey.copyStack().getFoodProperties(player) != null)
+                            && itemStackKey.getReadOnlyStack().getFoodProperties(player) != null)
                         {
                             foodCache = new KeyAmount(storedStack.key(),1);
                             break;

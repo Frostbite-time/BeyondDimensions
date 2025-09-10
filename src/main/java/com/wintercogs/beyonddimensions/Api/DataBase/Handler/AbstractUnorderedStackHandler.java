@@ -57,7 +57,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
 
     /* ---------- 只读、动态的 KeyAmount 视图 ---------- */
     private final List<KeyAmount> entriesView = Collections.unmodifiableList(
-            new AbstractList<KeyAmount>() {
+            new AbstractList<>() {
                 @Override
                 public KeyAmount get(int index) {
                     IStackKey<?> key = slotIndex.get(index);
@@ -314,7 +314,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     @Override
-    public KeyAmount insert(IStackKey<?> key, long amount, boolean simulate) {
+    public @NotNull KeyAmount insert(IStackKey<?> key, long amount, boolean simulate) {
         if (key == null) return new KeyAmount(EmptyStackKey.INSTANCE, Math.max(0L, amount));
         long add = Math.max(0L, amount);
         if (add == 0L) return new KeyAmount(key, 0L);
@@ -353,12 +353,12 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             return new KeyAmount(ballKey, ballCount);
         }
         List<KeyAmount> contents = ballStack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
-        if (contents == null || contents.isEmpty()) return new KeyAmount(ballKey, 0L);
+        if (contents.isEmpty()) return new KeyAmount(ballKey, 0L);
 
         final Map<IStackKey<?>, Long> needMap = new HashMap<>();
         try {
             for (KeyAmount entry : contents) {
-                if (entry == null || entry.key() == null || entry.amount() <= 0L) continue;
+                if (entry.isEmpty()) continue;
                 long scaled = Math.multiplyExact(entry.amount(), ballCount);
                 needMap.merge(entry.key(), scaled, Math::addExact);
             }
@@ -382,7 +382,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
 
         final ArrayList<KeyAmount> applied = new ArrayList<>();
         for (KeyAmount entry : contents) {
-            if (entry == null || entry.key() == null || entry.amount() <= 0L) continue;
+            if (entry.isEmpty()) continue;
             long scaled;
             try { scaled = Math.multiplyExact(entry.amount(), ballCount); }
             catch (ArithmeticException e) {
@@ -615,7 +615,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             if (!(el instanceof CompoundTag entry)) continue;
 
             String typeStr = entry.getString("Type"); // 旧外层 Type（资源路径）
-            if (typeStr == null || typeStr.isEmpty()) {
+            if (typeStr.isEmpty()) {
                 BeyondDimensions.LOGGER.warn("旧格式条目缺少 Type，已跳过（index={}）", i);
                 continue;
             }

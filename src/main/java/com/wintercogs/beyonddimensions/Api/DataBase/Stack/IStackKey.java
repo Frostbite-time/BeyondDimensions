@@ -80,9 +80,11 @@ public interface IStackKey<T>
     @Nullable IStackKey<T> fromSourceObject(Object key, DataComponentPatch dataComponentPatch);
 
     /**
-     * 如ItemStackKey，返回ItemStack，应当返回一个缓存对象以提高性能。
+     * 如ItemStackKey，返回ItemStack，应当返回一个缓存对象以提高性能
      * <p>
-     * 由此获取的堆叠不要修改！
+     * 由此输出的对象应当总是将数量设定为1，外界需要数量则应当自己再重新设置
+     * <p>
+     * 对于有组件的堆叠，不要修改它的组件！
      */
     T getReadOnlyStack();
 
@@ -183,6 +185,8 @@ public interface IStackKey<T>
 
     /**
      * 获取仅用于渲染显示的堆叠，尽可能返回缓存以提高性能
+     * <p>
+     * 其行为与GetReadOnly可以相同，但是可以返回不同的缓存备份以区分用途
      */
     @NotNull T getRenderStack();
 

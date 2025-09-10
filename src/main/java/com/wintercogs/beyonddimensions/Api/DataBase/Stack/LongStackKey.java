@@ -24,12 +24,14 @@ public abstract class LongStackKey<T extends LongType<T>> implements IStackKey<T
     @Override
     public T getReadOnlyStack()
     {
+        this.stack.setStackCount(1);
         return this.stack;
     }
 
     @Override
     public @NotNull T getRenderStack()
     {
+        this.stack.setStackCount(1);
         return this.stack;
     }
 
