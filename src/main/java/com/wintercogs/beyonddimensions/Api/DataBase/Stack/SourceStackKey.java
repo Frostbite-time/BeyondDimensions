@@ -73,9 +73,9 @@ public class SourceStackKey extends LongStackKey<SourceType> {
     }
 
     @Override
-    public IStackKey<SourceType> getEmpty()
+    public SourceStackKey getEmpty()
     {
-        return new SourceStackKey();
+        return SourceStackKey.INSTANCE;
     }
 
     /** 允许从 SourceType 或 Number（数量无意义）映射为同一个 Key 实例 */
@@ -87,7 +87,7 @@ public class SourceStackKey extends LongStackKey<SourceType> {
 
     @Override
     public @NotNull SourceType getSource() {
-        return new SourceType(0);
+        return this.stack;
     }
 
     @Override
@@ -104,13 +104,6 @@ public class SourceStackKey extends LongStackKey<SourceType> {
     @Override
     public @NotNull IStackRender getRender() {
         return SourceStackKeyRender.INSTANCE;
-    }
-
-    @Override
-    public @NotNull SourceType getRenderStack() {
-        SourceType cache = this.stack;
-        cache.setStackCount(1);
-        return cache;
     }
 
     // —— 网络：仅写 typeId；读回单例 —— //

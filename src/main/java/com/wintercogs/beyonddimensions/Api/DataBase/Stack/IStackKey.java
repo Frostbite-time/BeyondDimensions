@@ -80,7 +80,14 @@ public interface IStackKey<T>
     @Nullable IStackKey<T> fromSourceObject(Object key, DataComponentPatch dataComponentPatch);
 
     /**
-     * 获取堆叠的类型，如ItemStackType，返回ItemStack.class
+     * 如ItemStackKey，返回ItemStack，应当返回一个缓存对象以提高性能。
+     * <p>
+     * 由此获取的堆叠不要修改！
+     */
+    T getReadOnlyStack();
+
+    /**
+     * 获取堆叠的类型，如ItemStackKey，返回ItemStack.class
      */
     Class<T> getStackClass();
 

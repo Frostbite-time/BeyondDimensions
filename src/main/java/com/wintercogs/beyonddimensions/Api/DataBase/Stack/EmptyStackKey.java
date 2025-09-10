@@ -73,6 +73,12 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     }
 
     @Override
+    public EmptyStackType getReadOnlyStack()
+    {
+        return EmptyStackType.INSTANCE;
+    }
+
+    @Override
     public Class<EmptyStackType> getStackClass()
     {
         return EmptyStackType.class;

@@ -109,6 +109,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     private final Chemical chemical;
 
     // 客户端渲染/复制缓存（amount≥1，仅用于显示，不参与 Key 语义）
+    private ChemicalStack severCache;
     private ChemicalStack clientCache;
     private int hashCodeCache = 0;
 
@@ -125,7 +126,6 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     private ChemicalStackKey(Chemical chemical)
     {
         this.chemical = (chemical == null) ? MekanismAPI.EMPTY_CHEMICAL : chemical;
-        this.clientCache = this.chemical.isEmptyType() ? ChemicalStack.EMPTY : new ChemicalStack(this.chemical, 1);
     }
 
     // ===== IStackKey =====
@@ -155,6 +155,27 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
             return new ChemicalStackKey(c);
         }
         return null;
+    }
+
+    @Override
+    public ChemicalStack getReadOnlyStack()
+    {
+        if(severCache == null)
+        {
+            this.severCache = this.chemical.isEmptyType() ? ChemicalStack.EMPTY : new ChemicalStack(this.chemical, 1);
+        }
+
+        if (chemical.isEmptyType()) {
+            if (!severCache.isEmpty()) severCache = ChemicalStack.EMPTY;
+            return ChemicalStack.EMPTY;
+        }
+        ChemicalStack cache = severCache;
+        if (cache.isEmpty() || cache.getChemical() != this.chemical) {
+            severCache = new ChemicalStack(this.chemical, 1);
+            return severCache;
+        }
+        cache.setAmount(1);
+        return cache;
     }
 
     @Override
@@ -310,6 +331,11 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
 
     @Override
     public @NotNull ChemicalStack getRenderStack() {
+        if(clientCache == null)
+        {
+            this.clientCache = this.chemical.isEmptyType() ? ChemicalStack.EMPTY : new ChemicalStack(this.chemical, 1);
+        }
+
         if (chemical.isEmptyType()) {
             if (!clientCache.isEmpty()) clientCache = ChemicalStack.EMPTY;
             return ChemicalStack.EMPTY;

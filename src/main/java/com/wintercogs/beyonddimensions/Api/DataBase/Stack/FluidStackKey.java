@@ -142,7 +142,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     private transient volatile WeakReference<HolderLookup.Provider> equalsByteProviderRef = null;
 
     // 渲染/便捷复制用的客户端缓存（amount 仅用于渲染，不参与 key 语义）
-    private FluidStack clientCache;
+    private FluidStack severCache; // （懒加载）
+    private FluidStack clientCache; // （懒加载）
     private int hashCodeCache = 0;
 
     private FluidStackKey()
@@ -159,7 +160,6 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     {
         this.fluid = fluid;
         this.patch = (patch == null) ? DataComponentPatch.EMPTY : patch;
-        this.clientCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
     }
 
     // ===== IStackKey =====
@@ -191,6 +191,32 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             return new FluidStackKey(f, p);
         }
         return null;
+    }
+
+    @Override
+    public FluidStack getReadOnlyStack()
+    {
+        if(this.severCache == null)
+        {
+            this.severCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
+        }
+
+        if (this.fluid == Fluids.EMPTY) {
+            if (!this.severCache.isEmpty()) {
+                this.severCache = FluidStack.EMPTY;
+            }
+            return FluidStack.EMPTY;
+        }
+
+        FluidStack cache = this.severCache;
+        if (cache.isEmpty() || cache.getFluid() != this.fluid) {
+            this.severCache = new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
+            return this.severCache;
+        }
+
+        // 非 EMPTY：返回前保证 amount >= 1（部分版本对 EMPTY.setAmount 会抛错）
+        cache.setAmount(1);
+        return cache;
     }
 
     @Override
@@ -377,6 +403,11 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     @Override
     public @NotNull FluidStack getRenderStack() {
+        if(this.clientCache == null)
+        {
+            this.clientCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
+        }
+
         if (this.fluid == Fluids.EMPTY) {
             if (!this.clientCache.isEmpty()) {
                 this.clientCache = FluidStack.EMPTY;

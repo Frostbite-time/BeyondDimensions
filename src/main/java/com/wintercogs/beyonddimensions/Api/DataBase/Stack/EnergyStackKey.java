@@ -82,9 +82,9 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     }
 
     @Override
-    public @NotNull EnergyType getSource() {
-        // 提供一个“空”源对象（仅用于需要展示/占位的场景）
-        return new EnergyType(0);
+    public @NotNull EnergyType getSource()
+    {
+        return this.stack;
     }
 
     @Override
@@ -94,9 +94,9 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     }
 
     @Override
-    public IStackKey<EnergyType> getEmpty()
+    public EnergyStackKey getEmpty()
     {
-        return null;
+        return EnergyStackKey.INSTANCE;
     }
 
     @Override
@@ -141,15 +141,8 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     // ---------------- 渲染支持（可选：若你的渲染系统通过 getRender() 取渲染器） ----------------
 
     @Override
-    public @NotNull IStackRender getRender() {
+    public @NotNull IStackRender getRender()
+    {
         return EnergyStackKeyRender.INSTANCE; // 若不需要渲染器，可改为抛 UnsupportedOperationException
-    }
-
-    @Override
-    public @NotNull EnergyType getRenderStack() {
-        // 保证数量至少为 1，避免某些版本对 0 量渲染异常
-        EnergyType cache = this.stack;
-        cache.setStackCount(1);
-        return cache;
     }
 }

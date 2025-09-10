@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.LongType;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -18,6 +19,18 @@ public abstract class LongStackKey<T extends LongType<T>> implements IStackKey<T
     public ResourceLocation getTypeId()
     {
         return getTypeID();
+    }
+
+    @Override
+    public T getReadOnlyStack()
+    {
+        return this.stack;
+    }
+
+    @Override
+    public @NotNull T getRenderStack()
+    {
+        return this.stack;
     }
 
     @Override

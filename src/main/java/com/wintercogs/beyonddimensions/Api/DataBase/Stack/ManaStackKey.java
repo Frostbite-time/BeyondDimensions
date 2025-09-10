@@ -73,9 +73,9 @@ public class ManaStackKey extends LongStackKey<ManaType> {
     }
 
     @Override
-    public IStackKey<ManaType> getEmpty()
+    public ManaStackKey getEmpty()
     {
-        return new ManaStackKey();
+        return ManaStackKey.INSTANCE;
     }
 
     /** 允许从 ManaType 或 Number（数量无意义）映射到同一个 Key 实例 */
@@ -89,7 +89,7 @@ public class ManaStackKey extends LongStackKey<ManaType> {
 
     @Override
     public @NotNull ManaType getSource() {
-        return new ManaType(0);
+        return this.stack;
     }
 
     @Override
@@ -132,13 +132,5 @@ public class ManaStackKey extends LongStackKey<ManaType> {
     @Override
     public @NotNull IStackRender getRender() {
         return ManaStackKeyRender.INSTANCE;
-    }
-
-    @Override
-    public @NotNull ManaType getRenderStack() {
-        // 确保数量 >= 1，避免部分版本对 0 量渲染异常
-        ManaType cache = this.stack;
-        cache.setStackCount(1);
-        return cache;
     }
 }

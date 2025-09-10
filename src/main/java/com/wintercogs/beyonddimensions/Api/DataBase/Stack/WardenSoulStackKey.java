@@ -72,9 +72,9 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
     }
 
     @Override
-    public IStackKey<WardenSoulType> getEmpty()
+    public WardenSoulStackKey getEmpty()
     {
-        return new WardenSoulStackKey();
+        return WardenSoulStackKey.INSTANCE;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
 
     @Override
     public @NotNull WardenSoulType getSource() {
-        return new WardenSoulType(0);
+        return this.stack;
     }
 
     @Override
@@ -102,13 +102,6 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
     @Override
     public @NotNull IStackRender getRender() {
         return WardenSoulStackKeyRender.INSTANCE;
-    }
-
-    @Override
-    public @NotNull WardenSoulType getRenderStack() {
-        WardenSoulType cache = this.stack;
-        cache.setStackCount(1);
-        return cache;
     }
 
     // —— 网络：仅写 typeId；读回单例 —— //

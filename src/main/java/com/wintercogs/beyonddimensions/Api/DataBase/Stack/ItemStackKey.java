@@ -142,7 +142,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     private transient WeakReference<HolderLookup.Provider> equalsByteProviderRef = null; // 序列化时所用的注册表提供者，如果提供者变化，应当重新计算字节
 
     // 缓存字段
-    private ItemStack clientCache; // 用于客户端的缓存，主要给getTooltip之类的方法使用
+    private ItemStack severCache; // 用于非渲染用途的缓存，始终保持对外数量为1（懒加载）
+    private ItemStack clientCache; // 用于客户端的缓存，主要给getTooltip之类的方法使用（懒加载）
     private int vanillaMaxSize = -1; // 缓存原版堆叠的最大大小，从serverCache去获取
     private int hashCodeCache = 0;
 
@@ -161,7 +162,6 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     {
         this.item = item;
         this.patch = patch == null ? DataComponentPatch.EMPTY : patch;
-        this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
     }
 
     @Override
@@ -193,6 +193,35 @@ public final class ItemStackKey implements IStackKey<ItemStack>
             return new ItemStackKey(it, p);
         }
         return null;
+    }
+
+    @Override
+    public ItemStack getReadOnlyStack()
+    {
+        if(this.severCache == null)
+        {
+            this.severCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        }
+        // item为空时，必须返回 EMPTY，且不要对 EMPTY 调用 setCount(方便复制到1.20.1的流体实现去)
+        if (this.item == Items.AIR)
+        {
+            if (!this.severCache.isEmpty())
+            {
+                this.severCache = ItemStack.EMPTY; // 折叠为 EMPTY，防止外界留存非空引用
+            }
+            return ItemStack.EMPTY;
+        }
+
+        // 非AIR：若为空或物品被外界改了，则重建（数量直接置 1）
+        ItemStack cache = this.severCache;
+        if (cache.isEmpty() || cache.getItem() != this.item) {
+            this.severCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+            return this.severCache;
+        }
+
+        // 缓存非空且物品匹配，返回前设置数量为1
+        cache.setCount(1);
+        return cache;
     }
 
     @Override
@@ -401,6 +430,10 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public @NotNull ItemStack getRenderStack()
     {
+        if(this.clientCache == null)
+        {
+            this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+        }
         // item为空时，必须返回 EMPTY，且不要对 EMPTY 调用 setCount(方便复制到1.20.1的流体实现去)
         if (this.item == Items.AIR)
         {
