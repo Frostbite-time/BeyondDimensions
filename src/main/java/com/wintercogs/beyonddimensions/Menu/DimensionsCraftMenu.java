@@ -219,36 +219,26 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         return level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
     }
 
-
-    public void transferRecipe(List<ItemStack> inputs)
-    {
+    public void transferRecipe(List<IStackKey<?>> inputKeys, List<Long> amount) {
         // 清空工艺槽物品
-        // 先尝试放入玩家背包 这个过程中多出来的会掉落
-        // 然后尝试放入存储
-        // 最后尝试掉落
         cleanCraftSlots(firstCraftReturnDir);
 
+        final int limit = Math.min(craftSlots.getContainerSize(), inputKeys.size());
+        for (int i = 0; i < limit; i++) {
+            long needL = (i < amount.size() ? amount.get(i) : 0L);
+            IStackKey<?> key = inputKeys.get(i);
 
-        // 物品转移逻辑
-        for (int slotIndex = 0; slotIndex < inputs.size() && slotIndex < craftSlots.getContainerSize(); slotIndex++) {
-            ItemStack required = inputs.get(slotIndex);
-            if (required.isEmpty()) continue;
-            int remaining = required.getCount();
-            ItemStack collected = required.copy();
-            // 优先从背包提取
-            remaining = extractFromInventory(player.getInventory(), collected, remaining);
+            if (!(key instanceof ItemStackKey itemStackKey) || needL <= 0) continue;
 
-            // 剩余数量从存储提取
-            if (remaining > 0) {
-                remaining = extractFromStorage(storage, new ItemStackKey(collected) , remaining);
-            }
-            // 设置合成槽物品
-            if (remaining < required.getCount()) {
-                collected.setCount(required.getCount() - remaining);
-                craftSlots.setItem(slotIndex, collected);
-            }
+            int need = (int) Math.min(Integer.MAX_VALUE, needL);
+
+            // 这里只有实际执行转移时才会调用copy，且槽位数量有限，整体性能可控
+            int remaining = extractFromInventory(player.getInventory(), itemStackKey.copyStack(), need);
+            if (remaining > 0) remaining = extractFromStorage(storage, itemStackKey, remaining);
+
+            int got = need - remaining;
+            if (got > 0) craftSlots.setItem(i, itemStackKey.copyStackWithCount(got));
         }
-
     }
 
     // 从背包提取物品

@@ -1,17 +1,18 @@
 package com.wintercogs.beyonddimensions.Packet;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record RecipeFillC2SPacket(List<ItemStack> inputs) implements CustomPacketPayload
+public record RecipeFillC2SPacket(List<IStackKey<?>> keys, List<Long> amount) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final Type<RecipeFillC2SPacket> TYPE =
@@ -24,15 +25,19 @@ public record RecipeFillC2SPacket(List<ItemStack> inputs) implements CustomPacke
             StreamCodec.composite(
                     ByteBufCodecs.collection(
                             ArrayList::new,
-                            ItemStack.OPTIONAL_STREAM_CODEC
+                            IStackKey.STREAM_CODEC
                     ),
-                    RecipeFillC2SPacket::inputs,
+                    RecipeFillC2SPacket::keys,
+                    ByteBufCodecs.collection(
+                            ArrayList::new,
+                            ByteBufCodecs.VAR_LONG
+                    ),
+                    RecipeFillC2SPacket::amount,
                     RecipeFillC2SPacket::new
-
             );
 
     @Override //重写type方法，用于返回当前的TYPE
-    public Type<? extends CustomPacketPayload> type()
+    public @NotNull Type<? extends CustomPacketPayload> type()
     {
         return TYPE;
     }
