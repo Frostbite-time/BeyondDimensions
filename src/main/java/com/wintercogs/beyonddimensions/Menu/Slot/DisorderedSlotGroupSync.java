@@ -15,11 +15,10 @@ import net.neoforged.neoforge.network.connection.ConnectionType;
 import java.util.*;
 
 /**
- * 用于无序槽位的同步器（事件驱动版）
- * - 服务端订阅 storage 的 Any/Delta 事件
- *   - Any：执行全量对比并分包发送
- *   - Delta：按细节即时发送（单条变更一个包）
- * - 客户端接收包后按差量应用
+ * 用于无序槽位的同步器（事件驱动 + 逐 tick 合并发送）
+ * - 服务端仅入队更新，不立刻发包；
+ * - updateChange() 每 tick 合并一次并分包发送；
+ * - 每个 key 在一次发送周期内只发送一次，且为“最近一次”的绝对状态。
  */
 public class DisorderedSlotGroupSync implements SlotGroupSync
 {
@@ -36,18 +35,30 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     private AutoCloseable anySub;
     private AutoCloseable deltaSub;
 
+    /** 等待发送的“最新绝对状态”缓存（同一 key 多次更新仅保留最后一次）
+     *  保证每tick最多统一发送一次，防止客户端接收到过多刷新包 */
+    private final Map<IStackKey<?>, PendingRecord> pending = new HashMap<>();
+
+    /** 标记：需要在下一次 tick 做一次全量对比（Any 触发） */
+    private boolean dirtyFullRescan = false;
+
+    /**
+     * 缓存条目：绝对数量 + UI 用时间戳
+     */
+    private record PendingRecord(long count, long modified, long inserted) {}
+
     public DisorderedSlotGroupSync(BDBaseMenu menu, int id, AbstractUnorderedStackHandler storage)
     {
         this.menu = menu;
         this.groupId = id;
         this.storage = storage;
 
-        // 仅在服务端订阅，避免客户端回环
+        // 仅在服务端订阅
         if (isServerSide())
         {
-            // 订阅 Any（全量结构变更）
+            // 订阅 Any（全量结构变更 -> 仅置脏，不立刻发送）
             this.anySub = storage.subscribeAny(menu, this::onAnyChange);
-            // 订阅 Delta（单次增量变更）
+            // 订阅 Delta（单次增量变更 -> 仅入队绝对状态，不立刻发送）
             this.deltaSub = storage.subscribeDelta(menu, this::onDeltaChange);
         }
     }
@@ -61,109 +72,118 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         deltaSub = null;
     }
 
-    private boolean isServerSide() {
+    private boolean isServerSide()
+    {
         return menu.player instanceof ServerPlayer;
     }
 
     @Override
     public int getGroupId() { return groupId; }
 
-    /* -------------------- 事件回调（仅服务端执行） -------------------- */
+    /* -------------------- 事件回调（仅服务端执行，不立刻发送） -------------------- */
 
-    /** Any 回调：执行一次全量对比（对变化键发送“绝对数量+时间戳”） */
+    /** Any 回调：标记需要一次全量对比；真正的对比与发送放到下一次 tick */
     private void onAnyChange()
     {
         if (!isServerSide()) return;
-        sendFullDiff();
+        dirtyFullRescan = true;
     }
 
-    /** Delta 回调：按细节即时发送（单事件 -> 单包，内容为当前“绝对数量+时间戳”） */
+    /** Delta 回调：仅缓存该 key 的“当前绝对状态”，不立刻发送 */
     private void onDeltaChange(IStackKey<?> key, long size, boolean insert)
     {
-        if (!isServerSide()) return;
-        if (key == null) return;
+        if (!isServerSide() || key == null) return;
 
-        // 直接读取当前数量（绝对值）
         long countNow = storage.getStackByKey(key).amount();
-
-        // UI 时间戳：可能不存在则发 0
         long lastModified = getLastModifiedOrZero(key);
         long insertedTime = getCreationOrZero(key);
 
-        PacketDistributor.sendToPlayer(
-                (ServerPlayer) menu.player,
-                new DisorderedSlotGroupSyncPacket(
-                        groupId,
-                        Collections.singletonList(key),
-                        Collections.singletonList(countNow),
-                        Collections.singletonList(lastModified),
-                        Collections.singletonList(insertedTime)
-                )
-        );
-
-        // 更新基线（保持与服务端真实状态一致）
-        refreshLast();
+        // 覆盖式缓存：确保同一 key 在一个发送周期内只保留最新状态
+        pending.put(key, new PendingRecord(countNow, lastModified, insertedTime));
     }
 
-    /* -------------------- 全量对比并分包发送（服务端） -------------------- */
+    /* -------------------- 逐 tick 合并并发送（服务端） -------------------- */
 
     @Override
     public void updateChange()
     {
-        // 仅首次全量推送；之后依赖事件驱动
-        if(initialized) return;
         if (!isServerSide()) return;
-        sendFullDiff();
-        initialized = true;
+
+        // 首次：做一次全量对比（但也放在本 tick 发送逻辑里处理）
+        if (!initialized) {
+            initialized = true;
+            dirtyFullRescan = true;
+        }
+
+        // 把 full-rescan 与 pending 合并为最终 toSend，再分包发送
+        drainAndSend();
     }
 
-    /** 构建 last vs now 的差量（按绝对数量）并分包发送；最后刷新基线 */
-    private void sendFullDiff()
+    /** 汇总待发更新（full-rescan 或 pending）-> 分包发送 -> 推进基线 */
+    private void drainAndSend()
     {
-        // 统计 last（基线）与 now（当前）的计数
-        Map<IStackKey<?>, Long> lastMap = new HashMap<>();
-        for (KeyAmount ka : this.lastStorage) {
-            lastMap.merge(ka.key(), ka.amount(), Long::sum);
-        }
+        if (!dirtyFullRescan && pending.isEmpty()) return;
 
-        Map<IStackKey<?>, Long> nowMap = new HashMap<>();
-        for (KeyAmount ka : this.storage.getStorage()) {
-            nowMap.merge(ka.key(), ka.amount(), Long::sum);
-        }
+        Map<IStackKey<?>, PendingRecord> toSend = new LinkedHashMap<>();
 
-        // 变化集合 = 并集
-        Set<IStackKey<?>> allKeys = new HashSet<>();
-        allKeys.addAll(lastMap.keySet());
-        allKeys.addAll(nowMap.keySet());
-
-        // 收集“需要发送”的绝对值与时间戳
-        ArrayList<IStackKey<?>> changedKeys = new ArrayList<>();
-        ArrayList<Long> newCounts = new ArrayList<>();
-        ArrayList<Long> newModifiedTimes = new ArrayList<>();
-        ArrayList<Long> newInsertedTimes = new ArrayList<>();
-
-        for (IStackKey<?> key : allKeys) {
-            long lastCount = lastMap.getOrDefault(key, 0L);
-            long nowCount  = nowMap.getOrDefault(key, 0L);
-            if (nowCount != lastCount) {
-                changedKeys.add(key);
-                newCounts.add(nowCount);
-                newModifiedTimes.add(getLastModifiedOrZero(key));
-                newInsertedTimes.add(getCreationOrZero(key));
+        if (dirtyFullRescan)
+        {
+            // === 仅做全量对比 ===
+            Map<IStackKey<?>, Long> lastMap = new HashMap<>();
+            for (KeyAmount ka : this.lastStorage) {
+                lastMap.merge(ka.key(), ka.amount(), Long::sum);
             }
+            Map<IStackKey<?>, Long> nowMap = new HashMap<>();
+            for (KeyAmount ka : this.storage.getStorage()) {
+                nowMap.merge(ka.key(), ka.amount(), Long::sum);
+            }
+
+            Set<IStackKey<?>> allKeys = new HashSet<>();
+            allKeys.addAll(lastMap.keySet());
+            allKeys.addAll(nowMap.keySet());
+
+            for (IStackKey<?> key : allKeys) {
+                long lastCount = lastMap.getOrDefault(key, 0L);
+                long nowCount  = nowMap.getOrDefault(key, 0L);
+                if (nowCount != lastCount) {
+                    long mtime = getLastModifiedOrZero(key);
+                    long ctime = getCreationOrZero(key);
+                    toSend.put(key, new PendingRecord(nowCount, mtime, ctime));
+                }
+            }
+
+            // 本轮 full-rescan 权威，丢弃本轮 pending；下一 tick 再积累新的事件
+            pending.clear();
+            dirtyFullRescan = false;
+        } else {
+            // === 仅发送 pending ===
+            toSend.putAll(pending);
+            pending.clear();
         }
 
-        // 立刻更新last列表（基线推进）
+        if (toSend.isEmpty()) return;
+
+        // 转列表并分包发送
+        List<IStackKey<?>> keys  = new ArrayList<>(toSend.size());
+        List<Long> counts        = new ArrayList<>(toSend.size());
+        List<Long> modifiedTimes = new ArrayList<>(toSend.size());
+        List<Long> insertedTimes = new ArrayList<>(toSend.size());
+
+        for (Map.Entry<IStackKey<?>, PendingRecord> e : toSend.entrySet()) {
+            keys.add(e.getKey());
+            counts.add(e.getValue().count);
+            modifiedTimes.add(e.getValue().modified);
+            insertedTimes.add(e.getValue().inserted);
+        }
+
+        List<DisorderedSlotGroupSyncPacket> packets =
+                buildBatchedPackets(keys, counts, modifiedTimes, insertedTimes);
+        for (DisorderedSlotGroupSyncPacket packet : packets) {
+            PacketDistributor.sendToPlayer((ServerPlayer) menu.player, packet);
+        }
+
+        // 推进基线
         refreshLast();
-
-        // 分包发送
-        if (!changedKeys.isEmpty()) {
-            List<DisorderedSlotGroupSyncPacket> packets =
-                    buildBatchedPackets(changedKeys, newCounts, newModifiedTimes, newInsertedTimes);
-            for (DisorderedSlotGroupSyncPacket packet : packets) {
-                PacketDistributor.sendToPlayer((ServerPlayer) menu.player, packet);
-            }
-        }
     }
 
     /** 估算每条记录字节大小并按 MAX_PACKET_SIZE 分包（key + count + lastModified + inserted） */
@@ -285,7 +305,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     @Override
     public void afterLoadChange() { }
 
-    // 仅服务端：推进基线
+    // 仅服务端：推进基线（每次实际发送后调用）
     public void refreshLast()
     {
         if (!isServerSide()) return;
@@ -293,3 +313,4 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         this.lastStorage.addAll(this.storage.getStorage());
     }
 }
+
