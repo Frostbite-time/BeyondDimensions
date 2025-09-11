@@ -238,13 +238,13 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack> {
     }
 
     @Override
-    public boolean hasTag(TagKey<?> tagKey) {
+    public boolean hasTag(TagKey<?> tagKey)
+    {
         if (tagKey == null || chemical.isEmptyType()) return false;
         if (!tagKey.isFor(MekanismAPI.CHEMICAL_REGISTRY_NAME)) return false;
         @SuppressWarnings("unchecked")
         TagKey<Chemical> chemicalTag = (TagKey<Chemical>) tagKey;
-        ResourceLocation key = MekanismAPI.CHEMICAL_REGISTRY.getKey(chemical);
-        return MekanismAPI.CHEMICAL_REGISTRY.getHolder(key).map(h -> h.is(chemicalTag)).orElse(false);
+        return chemical.getAsHolder().is(chemicalTag);
     }
 
     @Override

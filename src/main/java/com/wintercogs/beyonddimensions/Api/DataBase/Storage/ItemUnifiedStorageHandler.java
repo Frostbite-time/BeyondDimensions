@@ -64,12 +64,12 @@ public class ItemUnifiedStorageHandler implements IItemHandler
                 .filter(slots -> slot>=0 && slot<slots.size())
                 .map(slots -> slots.get(slot))
                 .map(key -> storage.extract(key,count,sim))
-                .filter(keyAmount -> !keyAmount.key().isEmpty() && keyAmount.amount() >0)
+                .filter(keyAmount -> !keyAmount.isEmpty())
                 .map(keyAmount -> {
                     Object outStack = keyAmount.toStack();
                     if(outStack instanceof ItemStack itemStack)
                         return itemStack;
-                    return null;
+                    return ItemStack.EMPTY;
                 })
                 .orElse(ItemStack.EMPTY);
     }
