@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Packet;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -8,7 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public record BatchTransferPacket(IStackType clickStack, boolean dirToStorage) implements CustomPacketPayload
+public record BatchTransferPacket(KeyAmount clickStack, boolean dirToStorage) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<BatchTransferPacket> TYPE =
@@ -19,21 +19,7 @@ public record BatchTransferPacket(IStackType clickStack, boolean dirToStorage) i
     // 定义数据包的流编码方式 注册用
     public static final StreamCodec<RegistryFriendlyByteBuf, BatchTransferPacket> STREAM_CODEC =
             StreamCodec.composite(
-                    new StreamCodec<RegistryFriendlyByteBuf, IStackType>()
-                    {
-
-                        @Override
-                        public void encode(RegistryFriendlyByteBuf buf, IStackType stackType)
-                        {
-                            stackType.serialize(buf);
-                        }
-
-                        @Override
-                        public IStackType decode(RegistryFriendlyByteBuf byteBuf)
-                        {
-                            return IStackType.deserializeCommon(byteBuf);
-                        }
-                    },
+                    KeyAmount.STREAM_CODEC,
                     BatchTransferPacket::clickStack,
                     ByteBufCodecs.BOOL,
                     BatchTransferPacket::dirToStorage,

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Packet;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 // 此记录的处理会调用对应slot的setStackDirectly
 // 不会有数据校验
 // 因此，请仅在绝对需要setStackDirectly再重写实现（如标记槽位）
-public record SetSlotDirectlyPacket(int slotId,IStackType stack) implements CustomPacketPayload
+public record SetSlotDirectlyPacket(int slotId, KeyAmount stack) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<SetSlotDirectlyPacket> TYPE =
@@ -24,7 +24,7 @@ public record SetSlotDirectlyPacket(int slotId,IStackType stack) implements Cust
             StreamCodec.composite(
                     ByteBufCodecs.VAR_INT,
                     SetSlotDirectlyPacket::slotId,
-                    IStackType.STREAM_CODEC,
+                    KeyAmount.STREAM_CODEC,
                     SetSlotDirectlyPacket::stack,
                     SetSlotDirectlyPacket::new
             );

@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Integration.RSMek;
 
 import com.refinedmods.refinedstorage.mekanism.ChemicalResource;
 import com.refinedmods.refinedstorage.mekanism.ChemicalResourceType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ChemicalStackKey;
 import com.wintercogs.beyonddimensions.Integration.RS.RSHelper;
 import mekanism.api.chemical.ChemicalStack;
 
@@ -12,8 +12,8 @@ public class BD_RSMekPlugin
 {
     public static void register()
     {
-        RSHelper.ISTACK_TO_RSKEY_MAP.put(ChemicalStackType.ID, stackType -> Optional.ofNullable(new ChemicalResource(((ChemicalStackType)stackType).getStack().getChemical())));
+        RSHelper.ISTACK_TO_RSKEY_MAP.put(ChemicalStackKey.ID, stackType -> Optional.of(new ChemicalResource(((ChemicalStackKey)stackType).getSource())));
 
-        RSHelper.RSKEY_TO_STACK_TYPE_MAP.put(ChemicalResourceType.INSTANCE, (key, amount) -> Optional.of(new ChemicalStackType(new ChemicalStack(((ChemicalResource)key).chemical(), amount))));
+        RSHelper.RSKEY_TO_STACK_TYPE_MAP.put(ChemicalResourceType.INSTANCE, key -> Optional.of(new ChemicalStackKey(new ChemicalStack(((ChemicalResource)key).chemical(),1))));
     }
 }

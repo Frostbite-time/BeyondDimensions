@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Packet;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 // stack表示用于覆盖的堆叠。不过这只是建议，如果你想省一些网络传输，你也可以传入空堆叠，然后自己在对应Slot类型的loadStorage中处理情况
 // newAmount表示变化后的数量，不过一般stack中可以存储数量，如果你因为某些情况传入空堆叠，或者不放心stack的数量，又或者需要额外的数据标记，都可以用这个
 // 只需要在自己的loadStorage中完成处理
-public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackType stack, long newAmount) implements CustomPacketPayload
+public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackKey<?> stack, long newAmount) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<OrderedStackTypedSlotPacket> TYPE =
@@ -29,7 +29,7 @@ public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackType 
                     OrderedStackTypedSlotPacket::slotId,
                     ByteBufCodecs.VAR_INT,
                     OrderedStackTypedSlotPacket::slotIndex,
-                    IStackType.STREAM_CODEC,
+                    IStackKey.STREAM_CODEC,
                     OrderedStackTypedSlotPacket::stack,
                     ByteBufCodecs.VAR_LONG,
                     OrderedStackTypedSlotPacket::newAmount,

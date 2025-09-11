@@ -1,15 +1,18 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 // 专用于IStackType泛型类的slot组件，内部自带click、quick-click以及数据的网络同步处理
 // 以便于在本模组的不同UI中使用时可以被快速而泛化的添加
@@ -21,7 +24,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     private static final Container empty_inv = new SimpleContainer(0);
     // 如果双端不用同一套逻辑的stackTypedHandler处理，请确保服务端使用的stackTypedHandler可以直接操作数据
     // 因为服务端需要处理数据同步和鼠标点击，而客户端只需要显示数据
-    protected final IStackTypedHandler storage;
+    protected final IStackHandler storage;
 
     // 这两行int信息用来标注快速物品转移的目标区间，这将借助BDBaseMenu从中获得的slots列表来辅助完成
     // 其使用前会进行数据校验，不正确的数值应当阻止quickMove函数调用（请自行实现）
@@ -34,7 +37,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     protected final BDBaseMenu menu;
 
 
-    public AbstractStackTypedSlot(BDBaseMenu menu, IStackTypedHandler storage, int slotIndex, int xPosition, int yPosition)
+    public AbstractStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex, int xPosition, int yPosition)
     {
         super(empty_inv, slotIndex, xPosition, yPosition);
         this.theSlot = slotIndex;
@@ -44,7 +47,7 @@ public abstract class AbstractStackTypedSlot extends Slot
         this.quickMoveSlotEndIndex = -1;
     }
 
-    public AbstractStackTypedSlot(BDBaseMenu menu, IStackTypedHandler storage, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
+    public AbstractStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
     {
         super(empty_inv, slotIndex, xPosition, yPosition);
         this.theSlot = slotIndex;
@@ -58,7 +61,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 注意，此处的函数除loadChange外请仅在服务端调用，重写时也只考虑服务端逻辑
     // 客户端请通过loadChange从服务端接收数据，然后处理
 
-    public IStackTypedHandler getStorage()
+    public IStackHandler getStorage()
     {
         return storage;
     }
@@ -67,10 +70,10 @@ public abstract class AbstractStackTypedSlot extends Slot
 
     // 当鼠标直接点击此槽位会发生什么
     // IStackType为客户端所认为的，自己所点击的物品，用于无序容器处理
-    public abstract void click(IStackType clickStack, int button, Player player);
+    public abstract void click(KeyAmount clickStack, int button, Player player);
 
     // 当鼠标shift点击此槽位会发生什么
-    public abstract void quickMove(IStackType clickStack, int button, Player player);
+    public abstract void quickMove(KeyAmount clickStack, int button, Player player);
 
     // 如何处理此槽位的数据同步
     public abstract void updateChange();
@@ -78,7 +81,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 如何读取同步所用的数据包
     // where表示要newStack应当覆盖的位置
     // 绝大部分情况下，where是用不到的，这里只是提供给你一个额外的数据，用来验证或者放着不管都可以
-    public abstract void loadChange(int where ,IStackType newStack, long newAmount);
+    public abstract void loadChange(int where ,IStackKey<?> newKey, long newAmount);
 
 
 
@@ -90,27 +93,21 @@ public abstract class AbstractStackTypedSlot extends Slot
         return storage.getSlotCapacity(theSlot);
     }
 
-    public IStackType getTypedStackFromUnifiedStorage()
+    public KeyAmount getTypedStackFromUnifiedStorage()
     {
-        IStackType stackType = storage.getStackBySlot(getSlotIndex());
-        if(stackType != null)
-            return stackType.copy();
-        else
-            return new ItemStackType();
+        return storage.getStackBySlot(getSlotIndex());
     }
 
     public ItemStack getItemStackFromUnifiedStorage()
     {
         //从当前槽索引取物品
-        IStackType stackType = storage.getStackBySlot(getSlotIndex());
-        if(stackType == null)
-        {
-            return ItemStack.EMPTY;
-        }
+        KeyAmount stackType = storage.getStackBySlot(getSlotIndex());
 
-        if(stackType instanceof ItemStackType itemStackType)
+        if(stackType.key() instanceof ItemStackKey itemStackType)
         {
-            return itemStackType.getStack();
+            ItemStack readOnlyStack = itemStackType.getReadOnlyStack();
+            readOnlyStack.setCount(BDMath.clampLongToInt(stackType.amount()));
+            return readOnlyStack;
         }
         else
         {
@@ -119,61 +116,46 @@ public abstract class AbstractStackTypedSlot extends Slot
     }
 
     // 获取不超过原版最大堆叠数的Stack，一般仅用于GUI类，可以保留Item实现
-    public IStackType getVanillaActualStack()
+    public KeyAmount getVanillaActualStack()
     {
         //从当前槽索引取物品
-        IStackType stack = getTypedStackFromUnifiedStorage();
+        KeyAmount stack = getTypedStackFromUnifiedStorage();
         if (stack.isEmpty())
             return stack;
-        if (stack != null)
+        if (stack.amount() > stack.key().getVanillaMaxStackSize())
         {
-            if(stack.getStackAmount()>stack.getVanillaMaxStackSize())
-            {
-                return stack.copyWithCount(stack.getVanillaMaxStackSize());
-            }
-            else
-            {
-                return stack.copy();
-            }
-
+            return new KeyAmount(stack.key(), stack.key().getVanillaMaxStackSize());
         }
-        return new ItemStackType();
+        else
+        {
+            return stack;
+        }
+
     }
 
     // 获取原版最大堆叠数的Stack，一般仅用于GUI类，可以保留Item实现
-    public IStackType getVanillaMaxSizeStack()
+    public KeyAmount getVanillaMaxSizeStack()
     {
         //从当前槽索引取物品
-        IStackType stack = getTypedStackFromUnifiedStorage();
+        KeyAmount stack = getTypedStackFromUnifiedStorage();
         if (stack.isEmpty())
             return stack;
-        if (stack != null)
-        {
-            return stack.copyWithCount(stack.getVanillaMaxStackSize());
-        }
-        return new ItemStackType();
+        return new KeyAmount(stack.key(), stack.key().getVanillaMaxStackSize());
     }
 
-    public IStackType getStack()
+    public @NotNull KeyAmount getStack()
     {
         if(getSlotIndex()<0||getSlotIndex()>= storage.getSlots())
         {
-            return new ItemStackType(ItemStack.EMPTY);
+            return new KeyAmount(EmptyStackKey.INSTANCE, 0);
         }
         //从当前槽索引取物品
-        IStackType stack = storage.getStackBySlot(getSlotIndex());
-        if (stack.isEmptyStack())
-            return StackCreater.CreateEmpty(stack.getTypeId());
-        if (stack != null)
-        {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
-            return stack.copy();
-        }
-        return new ItemStackType(ItemStack.EMPTY);
+        return storage.getStackBySlot(getSlotIndex());
     }
 
 
     // 以下这些重写 覆盖了slot中最基本的要素，以便将Container驱动的inv系统，替换成IStackType驱动------------------------------
-    public void setStackDirectly(IStackType stack)
+    public void setStackDirectly(IStackKey<?> key, long amount)
     {
         // 绕过一切限制直接设置目标槽位的内容
         // 因为这种操作很难进行数据校验，因此抽象类仅提供空实现
@@ -185,16 +167,16 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 有序槽位只取出当前槽中数量，无序槽位从整个存储中取出
     // 另一种类型的safeInsert，专用于此种槽位
     // 返回余量
-    public abstract IStackType safeInsert(IStackType stack);
+    public abstract KeyAmount safeInsert(IStackKey<?> key, long amount);
 
     // 对于有序槽位，应当从当前槽位中取出对应种类stack的对应数量
     // 对于无序槽位，应当从整个存储中取出对应种类stack的对应数量
     // 返回取出量
-    public abstract IStackType safeExtract(IStackType stack);
+    public abstract KeyAmount safeExtract(IStackKey<?> key, long amount);
 
 
     @Override
-    public ItemStack getItem()
+    public @NotNull ItemStack getItem()
     {
         if(getSlotIndex()<0)
         {
@@ -204,11 +186,8 @@ public abstract class AbstractStackTypedSlot extends Slot
         ItemStack itemStack = getItemStackFromUnifiedStorage();
         if (itemStack.isEmpty())
             return ItemStack.EMPTY;
-        if (itemStack != null)
-        {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
-            return itemStack.copy();
-        }
-        return ItemStack.EMPTY;
+        //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
+        return itemStack.copy();
 
     }
 
@@ -216,8 +195,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     public boolean hasItem()
     {
         //检查当前槽是否为空
-        return storage.getStackBySlot(getSlotIndex()) != null
-                && !storage.getStackBySlot(getSlotIndex()).isEmpty();
+        return !storage.getStackBySlot(getSlotIndex()).isEmpty();
     }
 
     @Override
@@ -233,7 +211,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     }
 
     @Override
-    public boolean isSameInventory(Slot other)
+    public boolean isSameInventory(@NotNull Slot other)
     {
         if (other instanceof AbstractStackTypedSlot)
         {
@@ -261,10 +239,10 @@ public abstract class AbstractStackTypedSlot extends Slot
             return -1;
         }
         //从当前槽索引取物品
-        IStackType stack = storage.getStackBySlot(getSlotIndex());
-        if (stack != null && !stack.isEmpty())
+        KeyAmount stack = storage.getStackBySlot(getSlotIndex());
+        if (!stack.isEmpty())
         {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
-            return stack.getStackAmount();
+            return stack.amount();
         }
         return -1;
     }
@@ -295,13 +273,13 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 如果发现意外使用则可能需要重写原版方法
 
     @Override
-    public void set(ItemStack stack)
+    public void set(@NotNull ItemStack stack)
     {
         // 此方法会在AbstractContainerMenu初始化时被数据包处理调用
     }
 
     @Override
-    public void setByPlayer(ItemStack newStack, ItemStack oldStack)
+    public void setByPlayer(@NotNull ItemStack newStack, @NotNull ItemStack oldStack)
     {
         // 当玩家拿着物品点击这个槽会发生什么
         // 点击事件交由其他函数处理，此处废弃
@@ -315,21 +293,21 @@ public abstract class AbstractStackTypedSlot extends Slot
     }
 
     @Override
-    public int getMaxStackSize(ItemStack stack)
+    public int getMaxStackSize(@NotNull ItemStack stack)
     {
         // 获取槽位可存储物品的最大值
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public ItemStack remove(int amount)
+    public @NotNull ItemStack remove(int amount)
     {
         // 交由点击函数一并处理，此处废弃
         return ItemStack.EMPTY; // 表示没有物品被移除
     }
 
     @Override
-    public ItemStack safeInsert(ItemStack stack, int increment)
+    public @NotNull ItemStack safeInsert(@NotNull ItemStack stack, int increment)
     {
         // 此处废弃
         return stack; // 剩余原有的所有物品，即没有物品被插入

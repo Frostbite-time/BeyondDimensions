@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ChemicalStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ChemicalStackKey;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
@@ -18,7 +18,7 @@ public class ChemicalHandlerWrapper implements IStackHandlerWrapper<ChemicalStac
     @Override
     public ResourceLocation getTypeId()
     {
-        return ChemicalStackType.ID;
+        return ChemicalStackKey.ID;
     }
 
     @Override

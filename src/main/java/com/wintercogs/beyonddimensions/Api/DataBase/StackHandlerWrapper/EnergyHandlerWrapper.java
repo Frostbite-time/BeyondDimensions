@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.EnergyType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 
@@ -18,7 +18,7 @@ public class EnergyHandlerWrapper implements IStackHandlerWrapper<EnergyType>
     @Override
     public ResourceLocation getTypeId()
     {
-        return EnergyStackType.ID;
+        return EnergyStackKey.ID;
     }
 
     @Override

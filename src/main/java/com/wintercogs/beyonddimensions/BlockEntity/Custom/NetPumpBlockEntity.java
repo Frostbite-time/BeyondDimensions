@@ -3,13 +3,14 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Machine.FilterMode;
 import com.wintercogs.beyonddimensions.Menu.NetPumpMenu;
@@ -38,12 +39,12 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     private final Direction[] directions = Direction.values();
 
     private static final int capacity = 36;
-    private final StackTypedHandler filterSlots = new StackTypedHandler(capacity)
+    private final StackHandler filterSlots = new StackHandler(capacity)
     {
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -106,20 +107,19 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
                     for(int slot= 0;slot< stackHandlerWrapper.getSlots();slot++)
                     {
                         Object stack = stackHandlerWrapper.getStackInSlot(slot);
-                        IStackType typedStack = StackCreater.CreateEmpty(typeId);
-                        typedStack.setStack(stack);
-                        if(!typedStack.isEmpty() && matchesFilter(typedStack))
+                        IStackKey<?> typeKey = StackKeyRegistry.getType(typeId);
+                        KeyAmount ka = typeKey.fromStackObject(stack);
+                        if(ka != null && !ka.key().isEmpty() && matchesFilter(ka.key()))
                         {
                             DimensionsNet net = getNet();
                             if(net != null)
                             {
                                 UnifiedStorage storage = net.getUnifiedStorage();
 
-                                long canInsert = typedStack.getStackAmount() - storage.insert(typedStack,true).getStackAmount();
-                                canInsert = Math.min(canInsert,typedStack.getStackAmount());
+                                long canInsert = ka.amount() - storage.insert(ka.key(),ka.amount(),true).amount();
+                                canInsert = Math.min(canInsert,ka.amount());
                                 long extract = stackHandlerWrapper.extract(slot,canInsert,false);
-                                typedStack.setStackAmount(extract);
-                                net.getUnifiedStorage().insert(typedStack,false);
+                                net.getUnifiedStorage().insert(ka.key(),extract,false);
                             }
                         }
                     }
@@ -127,22 +127,22 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
         );
     }
 
-    private boolean matchesFilter(IStackType otherStack)
+    private boolean matchesFilter(IStackKey<?> otherStack)
     {
         switch (filterMode)
         {
             case BLACK -> {
-                for(IStackType stack : filterSlots.getStorage())
+                for(KeyAmount stack : filterSlots.getStorage())
                 {
-                    if(stack.isSame(otherStack))
+                    if(stack.key().isSame(otherStack))
                         return false;
                 }
                 return true;
             }
             case WHITE -> {
-                for(IStackType stack : filterSlots.getStorage())
+                for(KeyAmount stack : filterSlots.getStorage())
                 {
-                    if(stack.isSame(otherStack))
+                    if(stack.key().isSame(otherStack))
                         return true;
                 }
                 return false;

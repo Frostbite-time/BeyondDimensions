@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Packet;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -8,7 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public record CallSeverClickPacket(int slotIndex , IStackType clickItem, int button, boolean shiftDown) implements CustomPacketPayload
+public record CallSeverClickPacket(int slotIndex , KeyAmount clickItem, int button, boolean shiftDown) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final Type<CallSeverClickPacket> TYPE =
@@ -21,21 +21,7 @@ public record CallSeverClickPacket(int slotIndex , IStackType clickItem, int but
             StreamCodec.composite(
                     ByteBufCodecs.VAR_INT,
                     CallSeverClickPacket::slotIndex,
-                    new StreamCodec<RegistryFriendlyByteBuf, IStackType>()
-                    {
-
-                        @Override
-                        public void encode(RegistryFriendlyByteBuf buf, IStackType stackType)
-                        {
-                            stackType.serialize(buf);
-                        }
-
-                        @Override
-                        public IStackType decode(RegistryFriendlyByteBuf byteBuf)
-                        {
-                            return IStackType.deserializeCommon(byteBuf);
-                        }
-                    },
+                    KeyAmount.STREAM_CODEC,
                     CallSeverClickPacket::clickItem,
                     ByteBufCodecs.VAR_INT,
                     CallSeverClickPacket::button,

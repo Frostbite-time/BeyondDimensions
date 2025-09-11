@@ -4,7 +4,6 @@ import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -13,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public class NetedItem extends Item
@@ -63,12 +63,12 @@ public class NetedItem extends Item
         }
     }
 
-    public static DimensionsNet getNet(ItemStack stack, MinecraftServer dataProvider)
+    public static @Nullable DimensionsNet getNet(ItemStack stack)
     {
         int netId = stack.getOrDefault(ModDataComponents.NET_ID_DATA,-1);
         if(netId >= 0)
         {
-            return DimensionsNet.getNetFromId(netId,dataProvider);
+            return DimensionsNet.getNetFromId(netId);
         }
         return null;
     }
@@ -82,7 +82,7 @@ public class NetedItem extends Item
             Level level = player.level();
             if(item.validToReWrite(net,player))
             {
-                if(itemstack.get(ModDataComponents.NET_ID_DATA) != net.getId())
+                if(itemstack.getOrDefault(ModDataComponents.NET_ID_DATA,-1) != net.getId())
                 {
                     itemstack.set(ModDataComponents.NET_ID_DATA,net.getId());
                     level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);

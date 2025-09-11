@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -17,7 +17,7 @@ public class ItemHandlerWrapper implements IStackHandlerWrapper<ItemStack>
     @Override
     public ResourceLocation getTypeId()
     {
-        return ItemStackType.ID;
+        return ItemStackKey.ID;
     }
 
     @Override

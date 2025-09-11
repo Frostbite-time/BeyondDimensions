@@ -1,7 +1,8 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackKey;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.core.BlockPos;
@@ -18,11 +19,11 @@ import java.util.Optional;
 
 public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAttachable
 {
-    private StackTypedHandler storageHandler;
-    private Level level;
-    private BlockPos pos;
+    private final StackHandler storageHandler;
+    private final Level level;
+    private final BlockPos pos;
 
-    public ManaStackTypedHandler(StackTypedHandler storageHandler, CapCtx ctx)
+    public ManaStackTypedHandler(StackHandler storageHandler, CapCtx ctx)
     {
         this.storageHandler = storageHandler;
         this.level = ctx.level();
@@ -45,15 +46,23 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     @Override
     public int getCurrentMana()
     {
-        return storageHandler.getTypeIdIndexList(ManaStackType.ID)
-                .map(list -> list.stream()
-                        .filter(idx -> idx >= 0)
-                        .map(storageHandler::getStackBySlot)
-                        .filter(ManaStackType.class::isInstance)
-                        .map(ManaStackType.class::cast)
-                        .mapToLong(ManaStackType::getStackAmount)
-                        .sum())
-                .map(BDMath::clampLongToInt)
+        return storageHandler.getBucket(ManaStackKey.ID)
+                .map(bucket -> {
+                    long sum = 0L;
+                    for (int slot : bucket.snapshot()) {
+                        if (slot < 0) continue;
+                        long amt = storageHandler.getStackBySlot(slot).amount();
+                        if (amt <= 0) continue;
+
+                        // 保证sum <= Integer.MAX_VALUE，不会溢出
+                        long remain = (long) Integer.MAX_VALUE - sum;
+                        if (amt > remain) {
+                            return Integer.MAX_VALUE;
+                        }
+                        sum += amt;
+                    }
+                    return (int) sum; // 安全转换
+                })
                 .orElse(0);
     }
 
@@ -61,11 +70,11 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     @Override
     public boolean isFull()
     {
-        for(IStackType stack : storageHandler.getStorage())
+        for(KeyAmount keyAmount : storageHandler.getStorage())
         {
-            if(stack.isEmpty())
+            if(keyAmount.isEmpty())
                 return false;
-            if(stack instanceof ManaStackType && stack.getStackAmount() < stack.getVanillaMaxStackSize())
+            if(keyAmount.key() instanceof ManaStackKey && keyAmount.amount() < keyAmount.key().getVanillaMaxStackSize())
                 return false;
         }
         return true;
@@ -75,9 +84,9 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     public void receiveMana(int mana)
     {
         if(mana > 0)
-            storageHandler.insert(new ManaStackType(mana), false);
+            storageHandler.insert(ManaStackKey.INSTANCE, mana,false);
         else
-            storageHandler.extract(new ManaStackType(-mana), false);
+            storageHandler.extract(ManaStackKey.INSTANCE, -mana,false);
     }
 
     @Override
@@ -109,16 +118,23 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     @Override
     public int getMaxMana()
     {
-        long maxMana = 0;
-        ManaStackType stackType = new ManaStackType();
-        for(IStackType stack : storageHandler.getStorage())
-        {
-            if(stack.isEmpty())
-                maxMana += stackType.getVanillaMaxStackSize();
-            if(stack instanceof ManaStackType && stack.getStackAmount() < stack.getVanillaMaxStackSize())
-                maxMana += stack.getVanillaMaxStackSize() - stack.getStackAmount();
-        }
-        return BDMath.clampLongToInt(maxMana);
+        int manaSlots  = storageHandler.getBucket(ManaStackKey.ID)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+        int emptySlots = storageHandler.getBucket(EmptyStackKey.INSTANCE)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+
+        int eligibleSlots = manaSlots + emptySlots;
+        if (eligibleSlots <= 0) return 0;
+
+        long perSlot = Math.min(
+                ManaStackKey.INSTANCE.getVanillaMaxStackSize(),
+                storageHandler.getSlotCapacity(0) // 槽位容量对所有槽相同
+        );
+
+        long total = perSlot * (long) eligibleSlots;
+        return BDMath.clampLongToInt(total);
     }
 
     @Override

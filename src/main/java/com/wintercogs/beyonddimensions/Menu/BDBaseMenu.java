@@ -1,10 +1,11 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.google.common.base.Suppliers;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedSlotGroupSync;
 import com.wintercogs.beyonddimensions.Menu.Slot.SlotGroupSync;
 import com.wintercogs.beyonddimensions.Packet.QuickDataTagPacket;
 import net.minecraft.nbt.CompoundTag;
@@ -175,7 +176,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     // 自定义点击操作
-    public void customClickHandler(int slotIndex, IStackType clickedStack, int button, boolean shiftDown)
+    public void customClickHandler(int slotIndex, KeyAmount clickedStack, int button, boolean shiftDown)
     {
         if(inventoryStartIndex <0 || inventoryEndIndex <0)
             BeyondDimensions.LOGGER.info("警告:背包索引设置错误！！！");
@@ -198,7 +199,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     // 处理非AbstractStackTypedSlot槽位的快速转移
-    protected ItemStack quickMoveHandle(Player player,int slotIndex, IStackType clickStack, int targetStartIndex, int targetEndIndex)
+    protected ItemStack quickMoveHandle(Player player,int slotIndex, KeyAmount clickStack, int targetStartIndex, int targetEndIndex)
     {
         Slot slot = this.slots.get(slotIndex);
         if (slot != null && !clickStack.isEmpty()) // 根据客户端信息，无视空槽或者null
@@ -234,7 +235,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                         {
                             // 此处是安全的转换，remaining不会超出int
                             // AbstractStackTypedSlot槽位的safeInsert是安全的，并且new ItemStackType会进行被动copy
-                            newSize = (int)aTargetSlot.safeInsert(new ItemStackType(remaining)).getStackAmount();
+                            newSize = (int)aTargetSlot.safeInsert(new ItemStackKey(remaining), remaining.getCount()).amount();
                         }
                         else
                         {
@@ -262,7 +263,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                             Slot afterSlot = slots.get(entry.getKey());
                             if(afterSlot instanceof AbstractStackTypedSlot aSlot)
                             {
-                                aSlot.safeExtract(new ItemStackType(cacheStack.copyWithCount(entry.getValue())));
+                                aSlot.safeExtract(new ItemStackKey(cacheStack), entry.getValue());
                             }
                             else
                             {
@@ -285,7 +286,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                     if(targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
                     {
                         // 此处是安全的转换，remaining不会超出int
-                        newSize = (int)aTargetSlot.safeInsert(new ItemStackType(remaining)).getStackAmount();
+                        newSize = (int)aTargetSlot.safeInsert(new ItemStackKey(remaining) , remaining.getCount()).amount();
                     }
                     else
                     {
@@ -334,4 +335,16 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         return false;
     }
 
+    @Override
+    public void removed(Player player)
+    {
+        super.removed(player);
+        for(SlotGroupSync slotGroupSync : slotGroupSyncs)
+        {
+            if(slotGroupSync instanceof DisorderedSlotGroupSync disSync)
+            {
+                disSync.dispose();
+            }
+        }
+    }
 }

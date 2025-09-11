@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -30,7 +31,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
+    public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
@@ -44,9 +45,9 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
             if(itemstack.get(ModDataComponents.CRAFT_SLOTS)==null)
                 itemstack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9,ItemStack.EMPTY)));
 
-            if(itemstack.get(ModDataComponents.NET_ID_DATA)>=0)
+            if(itemstack.getOrDefault(ModDataComponents.NET_ID_DATA,-1)>=0)
             {
-                DimensionsNet net = DimensionsNet.getNetFromId(itemstack.get(ModDataComponents.NET_ID_DATA),level.getServer());
+                DimensionsNet net = DimensionsNet.getNetFromId(itemstack.getOrDefault(ModDataComponents.NET_ID_DATA,-1));
                 if (net != null)
                 {
                     contextMap.put(player, new MenuTriggerContext(usedHand, itemstack));
@@ -83,11 +84,12 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
             return null;
         }
         // 使用上下文中的物品栈
-        DimensionsNet net = DimensionsNet.getNetFromId(ctx.stack.get(ModDataComponents.NET_ID_DATA), player.getServer());
+        DimensionsNet net = DimensionsNet.getNetFromId(ctx.stack.getOrDefault(ModDataComponents.NET_ID_DATA,-1));
+        if(net==null) return null;
         return new DimensionsCraftMenuTerminal(
                 containerId,
                 inventory,
-                net,
+                net.getUnifiedStorage(),
                 ctx.stack.get(ModDataComponents.CRAFT_SLOTS).contents(),
                 ctx.stack,
                 null

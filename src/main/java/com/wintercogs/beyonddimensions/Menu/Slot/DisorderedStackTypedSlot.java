@@ -1,14 +1,15 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Item.Custom.XpExchangeItem;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
@@ -31,12 +32,12 @@ import java.util.function.Function;
 public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
 {
 
-    public DisorderedStackTypedSlot(BDBaseMenu menu, IStackTypedHandler stackTypedHandler, int slotIndex, int xPosition, int yPosition)
+    public DisorderedStackTypedSlot(BDBaseMenu menu, IStackHandler stackTypedHandler, int slotIndex, int xPosition, int yPosition)
     {
         super(menu, stackTypedHandler, slotIndex, xPosition, yPosition);
     }
 
-    public DisorderedStackTypedSlot(BDBaseMenu menu, IStackTypedHandler stackTypedHandler, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
+    public DisorderedStackTypedSlot(BDBaseMenu menu, IStackHandler stackTypedHandler, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
     {
         super(menu, stackTypedHandler, slotIndex, quickMoveSlotStartIndex, quickMoveSlotEndIndex, xPosition, yPosition);
     }
@@ -48,7 +49,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public void click(IStackType clickStack, int button, Player player)
+    public void click(KeyAmount clickStack, int button, Player player)
     {
         // 获取slot以及获取携带物品 防止网络包伪造
         ItemStack carriedItem = menu.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
@@ -74,10 +75,10 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                         long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                         // 插入当前经验流体
-                        IStackType remaining = storage.insert(new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source(),1),actualInsertFluid),false);
+                        KeyAmount remaining = storage.insert(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(),1)),actualInsertFluid,false);
                         if(!remaining.isEmpty())
                         {
-                            int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount()/20); // 由于前面从int*20，这里除回去
+                            int needReturnXp = BDMath.clampLongToInt(remaining.amount()/20); // 由于前面从int*20，这里除回去
                             actualRemovePlayerXp = actualRemovePlayerXp - needReturnXp;
                         }
                         player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值
@@ -95,16 +96,17 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
 
                             if(stackHandlerWrapper.getSlots()>0)
                             {
-                                FluidStackType stack = new FluidStackType(stackHandlerWrapper.getStackInSlot(0));
-                                if(stack != null && !stack.isEmpty())
+                                FluidStack typeStack = stackHandlerWrapper.getStackInSlot(0);
+                                KeyAmount stack = new KeyAmount(new FluidStackKey(typeStack),typeStack.getAmount());
+                                if(stack.key() != null && !stack.isEmpty())
                                 {
-                                    int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
+                                    int changedCount = BDMath.clampLongToInt(Math.min(stack.amount(),stack.key().getVanillaMaxStackSize()));
                                     // 进行模拟，桶必须完全清空才被允许操作
-                                    int remaining = (int)storage.insert(stack.copyWithCount(changedCount),true).getStackAmount();
+                                    int remaining = (int)storage.insert(stack.key(),changedCount,true).amount();
                                     if(remaining<=0)
                                     {
                                         // 执行实际逻辑
-                                        storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
+                                        storage.insert(stack.key(),changedCount,false).amount();
                                         menu.setCarried(new ItemStack(Items.BUCKET));
                                         handled.set(true);
                                     }
@@ -126,11 +128,12 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                     // 一次操作只操作其第一个有效槽位，然后break
                                     for(int index=0;index<stackHandlerWrapper.getSlots();index++)
                                     {
-                                        IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(index));
+                                        IStackKey<?> typeKey = StackKeyRegistry.getType(typeId);
+                                        KeyAmount stack = typeKey.fromStackObject(stackHandlerWrapper.getStackInSlot(index));
                                         if(stack !=null&& !stack.isEmpty())
                                         {
-                                            int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
-                                            int remaining = (int)storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
+                                            int changedCount = BDMath.clampLongToInt(Math.min(stack.amount(),stack.key().getVanillaMaxStackSize()));
+                                            int remaining = (int)storage.insert(stack.key(),changedCount,false).amount();
                                             int actualInsert = changedCount - remaining;
                                             if(actualInsert>0)
                                             {
@@ -138,7 +141,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                                 if(actualExtracts< actualInsert)
                                                 {
                                                     // 对此进行一个回调
-                                                    storage.extract(stack.copyWithCount(actualInsert-actualExtracts),false);
+                                                    storage.extract(stack.key(),actualInsert-actualExtracts,false);
                                                 }
                                                 menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
                                                 handled.set(true);
@@ -156,7 +159,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 if(!handled.get())
                 {
                     int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                    int actualInsert = (int) (changedCount - storage.insert(StackCreater.Create(ItemStackType.ID, carriedItem.copyWithCount(changedCount), changedCount), false).getStackAmount());
+                    int actualInsert = (int) (changedCount - storage.insert(new ItemStackKey(carriedItem), changedCount, false).amount());
                     int newCount = carriedItem.getCount() - actualInsert;
                     if (newCount <= 0)
                     {
@@ -176,13 +179,13 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
 
             if (carriedItem.isEmpty())
             {
-                if(clickStack instanceof ItemStackType clickItem)
+                if(clickStack.key() instanceof ItemStackKey clickKey)
                 {
                     //槽位物品存在，携带物品为空，尝试取出槽位物品
                     // 确保一次取出最大不得超过原版数量
-                    int woundChangeNum = BDMath.clampLongToInt(Math.min(clickItem.getStackAmount(), clickItem.getVanillaMaxStackSize()));
+                    int woundChangeNum = BDMath.clampLongToInt(Math.min(clickStack.amount(), clickKey.getVanillaMaxStackSize()));
                     int actualChangeNum = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
-                    ItemStack takenItem = ((ItemStack) storage.extract(new ItemStackType(clickItem.copyStackWithCount(actualChangeNum)),false).getStack()).copy();
+                    ItemStack takenItem = (ItemStack) storage.extract(clickKey, actualChangeNum,false).toStack();
                     if(takenItem != null)
                     {
                         menu.setCarried(takenItem);
@@ -197,13 +200,13 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 // 先检查是否为经验棒交互
                 if (carriedItem.getItem() instanceof XpExchangeItem && button != GLFW.GLFW_MOUSE_BUTTON_LEFT)
                 {
-                    IStackType actualStack = storage.getStackByStack(clickStack);
+                    KeyAmount actualStack = storage.getStackByKey(clickStack.key());
 
                     int conversionRate = XpExchangeItem.getConversionRate();
                     double currentLevel = XpUtil.levelAsDouble(player);
                     int wantConversionLevel = XpExchangeItem.getXpLevelPerAction(carriedItem);
 
-                    if(actualStack instanceof FluidStackType fluidStackType && fluidStackType.hasTag(ModFluidTags.C_EXPERIENCE))
+                    if(actualStack.key() instanceof FluidStackKey fluidStackKey && fluidStackKey.hasTag(ModFluidTags.C_EXPERIENCE))
                     {
                         handled.set(true); // 走到这一步说明已经进行了交互
                         if(button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
@@ -213,10 +216,10 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                             // 插入当前经验流体
-                            IStackType remaining = storage.insert(fluidStackType.copyWithCount(actualInsertFluid),false);
+                            KeyAmount remaining = storage.insert(fluidStackKey,actualInsertFluid,false);
                             if(!remaining.isEmpty())
                             {
-                                int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount()/20); // 由于前面从int*20，这里除回去
+                                int needReturnXp = BDMath.clampLongToInt(remaining.amount()/20); // 由于前面从int*20，这里除回去
                                 actualRemovePlayerXp = actualRemovePlayerXp - needReturnXp;
                             }
                             player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值
@@ -228,8 +231,8 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             long actualRemoveFluid = actualInsertPlayerXp * conversionRate;
 
                             // 首先尝试提取指定数量的经验流体
-                            IStackType extracted = storage.extract(fluidStackType.copyWithCount(actualRemoveFluid) ,false);
-                            actualInsertPlayerXp = BDMath.clampLongToInt(extracted.getStackAmount()/20);
+                            KeyAmount extracted = storage.extract(fluidStackKey, actualRemoveFluid ,false);
+                            actualInsertPlayerXp = BDMath.clampLongToInt(extracted.amount()/20);
                             if(actualInsertPlayerXp > 0)
                             {
                                 player.giveExperiencePoints(actualInsertPlayerXp);
@@ -246,10 +249,10 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                             // 插入当前经验流体
-                            IStackType remaining = storage.insert(new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source(),1),actualInsertFluid),false);
+                            KeyAmount remaining = storage.insert(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(),1)), actualInsertFluid,false);
                             if(!remaining.isEmpty())
                             {
-                                int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount()/20); // 由于前面从int*20，这里除回去
+                                int needReturnXp = BDMath.clampLongToInt(remaining.amount()/20); // 由于前面从int*20，这里除回去
                                 actualRemovePlayerXp = actualRemovePlayerXp - needReturnXp;
                             }
                             player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值
@@ -273,15 +276,14 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             // 2.桶向原有区域继续投放
                             if(bucket == Items.BUCKET) // 空桶接受
                             {
-                                if(clickStack instanceof FluidStackType fluidStackType)
+                                if(clickStack.key() instanceof FluidStackKey fluidStackKey)
                                 {
-                                    Item filledBucket = fluidStackType.getStack().getFluid().getBucket();
+                                    Item filledBucket = fluidStackKey.getSource().getBucket();
 
-                                    if(filledBucket != null && filledBucket != Items.AIR
-                                            && storage.getStackByStack(fluidStackType).getStackAmount()>=1000)
+                                    if(filledBucket != Items.AIR && storage.getStackByKey(fluidStackKey).amount() >= 1000)
                                     {
                                         // 执行操作
-                                        storage.extract(fluidStackType.copyWithCount(1000),false);
+                                        storage.extract(fluidStackKey,1000,false);
                                         menu.setCarried(new ItemStack(filledBucket));
                                         handled.set(true);
                                     }
@@ -296,16 +298,17 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
 
                                     if(stackHandlerWrapper.getSlots()>0)
                                     {
-                                        FluidStackType stack = new FluidStackType(stackHandlerWrapper.getStackInSlot(0));
-                                        if(stack != null && !stack.isEmpty())
+                                        FluidStack typeStack = stackHandlerWrapper.getStackInSlot(0);
+                                        KeyAmount stack = new KeyAmount(new FluidStackKey(typeStack),typeStack.getAmount());
+                                        if(stack.key() != null && !stack.isEmpty())
                                         {
-                                            int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
+                                            int changedCount = BDMath.clampLongToInt(Math.min(stack.amount(),stack.key().getVanillaMaxStackSize()));
                                             // 进行模拟，桶必须完全清空才被允许操作
-                                            int remaining = (int)storage.insert(stack.copyWithCount(changedCount),true).getStackAmount();
+                                            int remaining = (int)storage.insert(stack.key(),changedCount,true).amount();
                                             if(remaining<=0)
                                             {
                                                 // 执行实际逻辑
-                                                storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
+                                                storage.insert(stack.key(),changedCount,false);
                                                 menu.setCarried(new ItemStack(Items.BUCKET));
                                                 handled.set(true);
                                             }
@@ -319,7 +322,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             // 抽入
                             CapabilityHelper.ItemCapabilityMap.forEach((typeId,cap) -> {
                                 // 先查看被点击物品的种类和对应能力种类
-                                if(clickStack.getTypeId().equals(typeId))
+                                if(clickStack.key().getTypeId().equals(typeId))
                                 {
                                     // 尝试获取对应能力
                                     Object handler = carriedItem.getCapability(cap);
@@ -329,15 +332,15 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                         IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
                                         if(stackHandlerWrapper.getSlots()>0)
                                         {
-                                            IStackType actualClickStack = storage.getStackByStack(clickStack);// 防止客户端假消息
-                                            if(actualClickStack != null)
+                                            KeyAmount actualClickStack = storage.getStackByKey(clickStack.key());// 防止客户端假消息
+                                            if(!actualClickStack.isEmpty())
                                             {
-                                                int changedCount = BDMath.clampLongToInt(Math.min(actualClickStack.getStackAmount(),actualClickStack.getVanillaMaxStackSize()));
-                                                int remaining = (int)stackHandlerWrapper.insert(actualClickStack.copyStackWithCount(changedCount),false);
+                                                int changedCount = BDMath.clampLongToInt(Math.min(actualClickStack.amount(),actualClickStack.key().getVanillaMaxStackSize()));
+                                                int remaining = (int)stackHandlerWrapper.insert(actualClickStack.key().copyStackWithCount(changedCount),false);
                                                 int actualInsert = changedCount - remaining;
                                                 if(actualInsert>0)
                                                 {
-                                                    storage.extract(actualClickStack.copyWithCount(actualInsert),false);
+                                                    storage.extract(actualClickStack.key(),actualInsert,false);
                                                     menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
                                                     handled.set(true);
                                                 }
@@ -363,11 +366,12 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                             // 一次操作只操作其第一个有效槽位，然后break
                                             for(int index=0;index<stackHandlerWrapper.getSlots();index++)
                                             {
-                                                IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(index));
+                                                IStackKey<?> typeKey = StackKeyRegistry.getType(typeId);
+                                                KeyAmount stack = typeKey.fromStackObject(stackHandlerWrapper.getStackInSlot(index));
                                                 if(stack !=null&& !stack.isEmpty())
                                                 {
-                                                    int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(),stack.getVanillaMaxStackSize()));
-                                                    int remaining = (int)storage.insert(stack.copyWithCount(changedCount),false).getStackAmount();
+                                                    int changedCount = BDMath.clampLongToInt(Math.min(stack.amount(),stack.key().getVanillaMaxStackSize()));
+                                                    int remaining = (int)storage.insert(stack.key(),changedCount,false).amount();
                                                     int actualInsert = changedCount - remaining;
 
                                                     if(actualInsert>0)
@@ -376,7 +380,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                                         if(actualExtracts< actualInsert)
                                                         {
                                                             // 对此进行一个回调
-                                                            storage.extract(stack.copyWithCount(actualInsert-actualExtracts),false);
+                                                            storage.extract(stack.key(),actualInsert-actualExtracts,false);
                                                         }
                                                         menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
                                                         handled.set(true);
@@ -398,7 +402,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 {
                     //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
                     int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                    storage.insert(StackCreater.Create(ItemStackType.ID,carriedItem.copyWithCount(changedCount),changedCount),false);
+                    storage.insert(new ItemStackKey(carriedItem), changedCount,false);
                     int newCount = carriedItem.getCount() - changedCount;
                     if(newCount <=0)
                     {
@@ -412,7 +416,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     }
                 }
             }
-            else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
+            else if (clickStack.key().isSameTypeSameComponents(new ItemStackKey(carriedItem)))
             {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
                 // 此情况在点击维度存储槽时永远不可能发生，如果发生，无需处理
                 // 原版逻辑为取出物品到最大上限
@@ -423,7 +427,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public void quickMove(IStackType clickStack, int button, Player player)
+    public void quickMove(KeyAmount clickStack, int button, Player player)
     {
         // 虽然当前的默认值不会导致出现问题，但还是添加执行前检查，防止某一天遗漏
         if(!(quickMoveSlotStartIndex >= 0 && quickMoveSlotEndIndex >= 0 && quickMoveSlotStartIndex < quickMoveSlotEndIndex))
@@ -431,7 +435,8 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
         if (!clickStack.isEmpty())
         {
             // 防止数据包伪造，然后赋予trueStack需要提取的数量
-            IStackType trueStack = storage.getStackByStack(clickStack).copyWithCount(clickStack.getStackAmount());
+            KeyAmount trueKA = storage.getStackByKey(clickStack.key());
+            KeyAmount trueStack = new KeyAmount(trueKA.key(),clickStack.amount());
 
             // 遍历目标槽位
             for(int targetSlotIndex=quickMoveSlotStartIndex;targetSlotIndex<quickMoveSlotEndIndex && !trueStack.isEmpty();targetSlotIndex++)
@@ -442,23 +447,23 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     // aSlot处理任何情况
 
                     //首先尝试从存储提取指定堆叠
-                    IStackType extract = storage.extract(trueStack,false);
-                    IStackType remaining = aSlot.safeInsert(extract); // 然后插入到其他堆叠并获取余量
+                    KeyAmount extract = storage.extract(trueStack.key(),trueStack.amount(),false);
+                    KeyAmount remaining = aSlot.safeInsert(extract.key(),extract.amount()); // 然后插入到其他堆叠并获取余量
                     if(!remaining.isEmpty())
-                        storage.insert(remaining,false); // 最后将余量返回
-                    trueStack = remaining.copy();
+                        storage.insert(remaining.key(),remaining.amount(),false); // 最后将余量返回
+                    trueStack = remaining;
 
                 }
                 else
                 {
                     // 普通Slot将只处理物品转移
-                    if(trueStack instanceof ItemStackType trueItemTypedStack)
+                    if(trueStack.key() instanceof ItemStackKey trueItemTypedKey)
                     {
-                        ItemStack extract = (ItemStack) storage.extract(trueItemTypedStack,false).getStack();
+                        ItemStack extract = (ItemStack) storage.extract(trueItemTypedKey,trueStack.amount(),false).toStack();
                         ItemStack remaining = slot.safeInsert(extract);
                         if(!remaining.isEmpty())
-                            storage.insert(new ItemStackType(remaining),false);
-                        trueStack = new ItemStackType(remaining.copy());
+                            storage.insert(new ItemStackKey(remaining) , remaining.getCount(),false);
+                        trueStack = new KeyAmount(new ItemStackKey(remaining) , remaining.getCount());
                     }
                 }
 
@@ -468,24 +473,24 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public IStackType safeInsert(IStackType stack)
+    public KeyAmount safeInsert(IStackKey<?> stack, long amount)
     {
         if(stack != null)
         {
-            return storage.insert(stack,false);
+            return storage.insert(stack,amount,false);
         }
-        return new ItemStackType();
+        return new KeyAmount(ItemStackKey.EMPTY,0);
 
     }
 
     @Override
-    public IStackType safeExtract(IStackType stack)
+    public KeyAmount safeExtract(IStackKey<?> stack, long amount)
     {
         if(stack != null)
         {
-            return storage.extract(stack,false);
+            return storage.extract(stack,amount,false);
         }
-        return new ItemStackType();
+        return new KeyAmount(ItemStackKey.EMPTY,0);
     }
 
     // 无序槽位由槽位组负责处理同步
@@ -496,7 +501,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public void loadChange(int where ,IStackType newStack, long newAmount)
+    public void loadChange(int where ,IStackKey<?> newStack, long newAmount)
     {
 
     }

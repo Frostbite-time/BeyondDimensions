@@ -1,9 +1,11 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerKeepZero;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerRemoveZero;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Integration.JECharacters.PinInMatches;
@@ -27,8 +29,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * 打开维度网络时候所用到的Menu，处理了网络同步以及点击操作等问题
@@ -40,10 +40,9 @@ public class DimensionsNetMenu extends BDBaseMenu
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
-    public UnifiedStorage storage;
-    public UnifiedStorage viewerStorage; // 在客户端，用于显示物品
+    public AbstractUnorderedStackHandler storage; // 客户端与服务端都使用RemoveZero版本作为实际存储
+    public AbstractUnorderedStackHandler viewerStorage; // 在客户端，用于显示物品，允许保留0堆叠
     private ArrayList<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
-    private boolean cacheTooltip = false; //客户端使用，用于记录打开UI后的第一次同步是否缓存了工具提示（用于搜索，且第一次同步通常为全量同步，此时处理较好）
 
 
     public boolean hasShiftDown = false;
@@ -69,16 +68,16 @@ public class DimensionsNetMenu extends BDBaseMenu
     public DimensionsNetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
-        this(Dimensions_Net_Menu.get(), id, playerInventory, new DimensionsNet(true));
+        this(Dimensions_Net_Menu.get(), id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE));
     }
 
     /**
      * 服务端构造函数
      *
      * @param playerInventory 玩家背包
-     * @param data            维度网络信息，包含了存储信息
+     * @param data            存储信息
      */
-    public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, DimensionsNet data)
+    public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, AbstractUnorderedStackHandler data)
     {
         super(menuType, id, playerInventory);
 
@@ -90,8 +89,8 @@ public class DimensionsNetMenu extends BDBaseMenu
         }
 
         // 初始化维度网络容器
-        storage = data.getUnifiedStorage();
-        viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
+        storage = data; // 此处，客户端使用可移0堆叠，不维护时间对的版本，服务端传入维度网络携带的版本
+        viewerStorage = new UnorderedStackHandlerKeepZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
 
         addSlotGroupSync(new DisorderedSlotGroupSync(this,slotGroupSyncs.size(),storage) {
             @Override
@@ -103,12 +102,8 @@ public class DimensionsNetMenu extends BDBaseMenu
                 else
                     updateOnlyCountAndNewViewer();
 
-                if(!cacheTooltip)
-                {
-                    // 调用异步缓存
-                    TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.NORMAL);
-                    TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.ADVANCED);
-                }
+                TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.NORMAL);
+                TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.ADVANCED);
             }
         });
 
@@ -183,10 +178,8 @@ public class DimensionsNetMenu extends BDBaseMenu
         {
             if (slot instanceof AbstractStackTypedSlot sSlot)
             {
-                if (sSlotNum / 9 < getLines())
-                    sSlot.setActive(true);
-                else
-                    sSlot.setActive(false);
+                // 仅激活当前应当显示的槽位
+                sSlot.setActive(sSlotNum / 9 < getLines());
                 sSlotNum++; // 先处理再加数，可以防止最后一个槽位出现问题
             }
         }
@@ -195,20 +188,18 @@ public class DimensionsNetMenu extends BDBaseMenu
         for (int i = inventoryStartIndex; i < inventoryEndIndex; ++i)
         {
             Slot slot = slots.get(i);
-            if (slot != null)
+            // slot不为null
+            if (slotNum / 9 < 3)
             {
-                if (slotNum / 9 < 3)
-                {
-                    slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + slotNum / 9 * 18;
-                }
-                else
-                {
-                    slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4;
-                }
-
-
-                slotNum++;
+                slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + slotNum / 9 * 18;
             }
+            else
+            {
+                slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4;
+            }
+
+
+            slotNum++;
         }
     }
 
@@ -243,9 +234,9 @@ public class DimensionsNetMenu extends BDBaseMenu
     public void updateViewerStorage()
     {
         viewerStorage.clearStorage();
-        for(IStackType stack : this.storage.getStorage())
+        for(KeyAmount stack : this.storage.getStorage())
         {
-            this.viewerStorage.insert(stack.copy(),false);
+            this.viewerStorage.insert(stack.key(),stack.amount(),false);
         }
         buildIndexList(new ArrayList<>(viewerStorage.getStorage()),true);
     }
@@ -257,24 +248,25 @@ public class DimensionsNetMenu extends BDBaseMenu
         // 由于viewerStorage的对象来自storage。而storage不会被随意清空
         // hashCode将能被自定义的copy函数一并传递，无需过多性能
 
-        Map<IStackType, Long> storageMap = new HashMap<>();
+        Map<IStackKey<?>, Long> storageMap = new HashMap<>();
 
         // 填充主存储物品数量 (O(n))
-        for (IStackType stack : storage.getStorage()) {
-            storageMap.put(stack, stack.getStackAmount());
+        for (KeyAmount stack : storage.getStorage()) {
+            storageMap.put(stack.key(), stack.amount());
         }
         // 更新查看者存储的数量 (O(m))
-        for (IStackType viewerStack : viewerStorage.getStorage()) {
+        for (KeyAmount viewerStack : viewerStorage.getStorage()) {
             // 使用哈希表直接查找数量，不存在时默认为0
-            long amount = storageMap.getOrDefault(viewerStack, 0L);
-            viewerStack.setStackAmount(amount);
+            long amount = storageMap.getOrDefault(viewerStack.key(), 0L);
+            // 这里内部会移除数量为0的情况，到时候再修改为锁定情况，现在先放着不管
+            viewerStorage.setAmountByKey(viewerStack.key(), amount);
         }
 
     }
 
 
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList(ArrayList<IStackType> itemStorage, boolean needsUpdateCacheIndex)
+    public void buildIndexList(ArrayList<KeyAmount> itemStorage, boolean needsUpdateCacheIndex)
     {
         if(!this.player.level().isClientSide())
         {
@@ -329,103 +321,166 @@ public class DimensionsNetMenu extends BDBaseMenu
 
     /**
      * 根据当前的搜索状态、按钮状态对存储进行排序
-     * @param unifiedStorage 要排序的存储
-     * @return 完成排序的索引列表
+     * - 仅按需收集字段（显示名/模组ID/Tooltip/时间戳/数量）
+     * - 比较器只比较已准备好的字段，不再做昂贵取值
+     * - 不做 viewerIndex 兜底（避免额外开销，也避免在“换尾删除”下产生误导）
      */
-    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackType> unifiedStorage)
+    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<KeyAmount> unifiedStorage)
     {
-        // 合并过滤空气和搜索逻辑，避免遍历时删除
-        ArrayList<IStackType> cache      = new ArrayList<>();
-        ArrayList<Integer>   cacheIndex = new ArrayList<>();
+        if (!this.player.level().isClientSide()) return new ArrayList<>();
 
-        for (int i = 0; i < unifiedStorage.size(); i++) {
-            IStackType stack = unifiedStorage.get(i);
-            if (stack == null || stack.isEmpty()) continue;
+        // ---- 解析搜索串并确定过滤需求 ----
+        final String s = (searchText == null) ? "" : searchText.toLowerCase(Locale.ENGLISH);
+        final boolean hasSearch = !s.isEmpty();
+        final String[] parts = splitSearch(s);
+        final String namePart = parts[0];  // 名称
+        final String idPart = parts[1];  // @modid
+        final String tipPart = parts[2];  // #tooltip
+        final boolean hasSymbol = !(idPart.isEmpty() && tipPart.isEmpty());
 
-            // === 预先准备高频数据（全部小写，避免重复 toLowerCase 开销） ===
-            String displayName = stack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
-            String modId       = stack.getModId().toLowerCase(Locale.ENGLISH);
+        final boolean needNameFilter = hasSearch && (!namePart.isEmpty());
+        final boolean needModFilter = hasSearch && (hasSymbol ? !idPart.isEmpty() : !namePart.isEmpty());
+        final boolean needTooltipFilter = hasSearch && (hasSymbol ? !tipPart.isEmpty() : !namePart.isEmpty());
 
-            /* =======================================================================
-             * 1. 解析搜索串                      ────────────────────────────────
-             *    - 若包含 @ 或 # → AND 规则
-             *    - 都不含       → OR 规则（名称 OR 模组ID OR Tooltip）
-             *    - 检索顺序：名称 → 模组ID → Tooltip（最贵放最后）
-             * =======================================================================*/
-            if (searchText == null || searchText.isEmpty()) {           // ⇢ 直接命中
-                cache.add(stack);
-                cacheIndex.add(i);
-                continue;
+        // ---- 决定排序需求（只在需要时准备对应字段）----
+        ButtonState primaryState = Config.uiSortButton;
+        ButtonState secondaryState = Config.uiSecondSortButton;
+        if (primaryState == null) primaryState = ButtonState.SORT_NAME;
+        final boolean useSecondary = (secondaryState != null && secondaryState != primaryState);
+
+        final boolean needNameSort = (primaryState == ButtonState.SORT_NAME)  || (useSecondary && secondaryState == ButtonState.SORT_NAME);
+        final boolean needModidSort = (primaryState == ButtonState.SORT_MODID) || (useSecondary && secondaryState == ButtonState.SORT_MODID);
+        final boolean needQtySort = (primaryState == ButtonState.SORT_QUANTITY) || (useSecondary && secondaryState == ButtonState.SORT_QUANTITY);
+        final boolean needCTimeSort = (primaryState == ButtonState.SORT_INSERTED_TIME) || (useSecondary && secondaryState == ButtonState.SORT_INSERTED_TIME);
+        final boolean needMTimeSort = (primaryState == ButtonState.SORT_MODIFIED_TIME) || (useSecondary && secondaryState == ButtonState.SORT_MODIFIED_TIME);
+
+        // 只有在需要时才拿时间戳 map
+        final Map<IStackKey<?>, Long> ctimeMap = needCTimeSort ? storage.getCreationTimeMap() : null;
+        final Map<IStackKey<?>, Long> mtimeMap = needMTimeSort ? storage.getLastModifiedTimeMap() : null;
+
+        final ArrayList<Row> rows = new ArrayList<>(unifiedStorage.size());
+
+        // ---- 过滤 + 收集排序键（按需取值，尽量短路）----
+        for (int i = 0; i < unifiedStorage.size(); i++)
+        {
+            KeyAmount ka = unifiedStorage.get(i);
+            if (ka == null || ka.isEmpty()) continue;
+
+            IStackKey<?> key = ka.key();
+
+            String displayName = null;   // 仅在需要按名称过滤/排序时取
+            String modIdLower  = null;   // 过滤用小写
+            String modIdSort   = null;   // 排序用原字符串
+
+            boolean matched;
+            if (!hasSearch)
+            {
+                matched = true;
+            }
+            else if (hasSymbol)
+            {
+                matched = true;
+                if (needNameFilter)
+                {
+                    displayName = key.getRender().getDisplayName(key).getString();
+                    if (!checkTextMatches(displayName, namePart)) matched = false;
+                }
+                if (matched && !idPart.isEmpty())
+                {
+                    modIdLower = key.getModId().toLowerCase(Locale.ENGLISH);
+                    if (!modIdLower.contains(idPart)) matched = false;
+                }
+                if (matched && !tipPart.isEmpty())
+                {
+                    if (!checkTooltipMatches(ka, tipPart)) matched = false;
+                }
+            }
+            else
+            {
+                boolean any = false;
+                if (!namePart.isEmpty()) {
+                    if (needNameFilter) {
+                        displayName = key.getRender().getDisplayName(key).getString();
+                        any |= checkTextMatches(displayName, namePart);
+                    }
+                    if (!any && needModFilter) {
+                        modIdLower = key.getModId().toLowerCase(Locale.ENGLISH);
+                        any |= modIdLower.contains(namePart);
+                    }
+                    if (!any && needTooltipFilter) {
+                        any |= checkTooltipMatches(ka, namePart);
+                    }
+                }
+                matched = any;
+            }
+            if (!matched) continue;
+
+            // 进入排序键收集：仅在需要时取
+            if (needNameSort && displayName == null) {
+                displayName = key.getRender().getDisplayName(key).getString();
+            }
+            if (needModidSort) {
+                modIdSort = key.getModId();
             }
 
-            String lowerSearch = searchText.toLowerCase(Locale.ENGLISH);
-            String[] parts     = splitSearch(lowerSearch);
-            String mainPart    = parts[0];   // 名称
-            String idPart      = parts[1];   // 模组ID
-            String tooltipPart = parts[2];   // Tooltip
-            boolean hasSymbol  = !(idPart.isEmpty() && tooltipPart.isEmpty());  // 任一存在即显式符号
+            long amt   = needQtySort   ? ka.amount() : 0L;
+            long ctime = (needCTimeSort && ctimeMap != null) ? ctimeMap.getOrDefault(key, 0L) : 0L;
+            long mtime = (needMTimeSort && mtimeMap != null) ? mtimeMap.getOrDefault(key, 0L) : 0L;
 
+            rows.add(new Row(i, displayName, modIdSort, amt, ctime, mtime));
+        }
 
-            /* ---------- ① 显式符号：AND 规则 ---------- */
-            if (hasSymbol) {
-                // ---------- AND ----------
-                if (!mainPart.isEmpty() && !checkTextMatches(displayName, mainPart)) continue;
-                if (!idPart.isEmpty()   && !modId.contains(idPart))                 continue;
-                if (!tooltipPart.isEmpty() && !checkTooltipMatches(stack, tooltipPart)) continue;
-
-                cache.add(stack); cacheIndex.add(i);
+        // ---- 排序（无 viewerIndex 兜底）----
+        if (!rows.isEmpty()) {
+            final Comparator<Row> primary = buildRowComparator(primaryState);
+            if (useSecondary) {
+                final Comparator<Row> secondary = buildRowComparator(secondaryState);
+                rows.sort(primary.thenComparing(secondary));
             } else {
-                // ---------- OR ----------
-                boolean matched = false;
-
-                if (!mainPart.isEmpty() && checkTextMatches(displayName, mainPart)) matched = true;
-                if (!matched && modId.contains(mainPart))                           matched = true;
-                if (!matched && checkTooltipMatches(stack, mainPart))               matched = true;
-
-                if (matched) { cache.add(stack); cacheIndex.add(i); }
+                rows.sort(primary);
             }
-
-        }
-
-
-        // 统一排序逻辑，避免重复代码
-        ButtonState sortState = Config.uiSortButton;
-        if (sortState != ButtonState.SORT_DEFAULT) {
-            Comparator<IStackType> comparator;
-            if(sortState == ButtonState.SORT_NAME)
-                comparator = Comparator.comparing(item -> item.getDisplayName().getString());
-            else if(sortState == ButtonState.SORT_QUANTITY)
-                comparator = Comparator.comparingLong(IStackType::getStackAmount);
-            else if(sortState == ButtonState.SORT_MODID)
-                comparator = Comparator.comparing(IStackType::getModId);
-            else // 保底条件
-                comparator = Comparator.comparing(item -> item.getDisplayName().getString());
-
-
-            // 生成索引排序映射
-            ArrayList<IStackType> finalCache = cache;
-            List<Integer> indices = IntStream.range(0, cache.size())
-                    .parallel()
-                    .boxed()
-                    .sorted((a, b) -> comparator.compare(finalCache.get(a), finalCache.get(b)))
-                    .collect(Collectors.toList());
-
-            // 这一步排序完成后不再需要缓存
-            // 根据排序结果重组索引
-            ArrayList<Integer> sortedIndices = new ArrayList<>(cacheIndex.size());
-            for (int index : indices) {
-                sortedIndices.add(cacheIndex.get(index));
+            if (Config.uiReverseButton == ButtonState.ENABLED) {
+                Collections.reverse(rows);
             }
-            cacheIndex = sortedIndices;
         }
 
-        // 直接通过排序器处理倒序，避免反转操作
-        if (Config.uiReverseButton == ButtonState.ENABLED) {
-            Collections.reverse(cacheIndex);
+        // ---- 产出“视觉存储下标”列表 ----
+        ArrayList<Integer> result = new ArrayList<>(rows.size());
+        for (Row row : rows)
+        {
+            result.add(row.idx);
         }
-
-        return cacheIndex;
+        return result;
     }
+
+    /**
+     * @param idx       指向 unifiedStorage（即 viewerStorage）的下标
+     * @param name      显示名（仅在需要时非 null）
+     * @param modIdSort 模组ID（排序用原字符串；仅在需要时非 null）
+     * @param amount    数量（仅在需要时有意义）
+     * @param ctime     插入时间（仅在需要时有意义）
+     * @param mtime     修改时间（仅在需要时有意义）
+     */ // 局部行结构：仅保存排序所需键
+    private record Row(int idx, String name, String modIdSort, long amount, long ctime, long mtime) {}
+
+    /** 仅比较 Row 中已准备好的字段；不做任何额外取值或 viewerIndex 兜底 */
+    private Comparator<Row> buildRowComparator(ButtonState state)
+    {
+        if (state == null) {
+            // 与旧逻辑一致：默认按名称（这里假定需要时我们已填充了 name）
+            return Comparator.comparing((Row r) -> r.name, String::compareTo);
+        }
+        return switch (state)
+        {
+            case SORT_QUANTITY -> Comparator.comparingLong((Row r) -> r.amount);
+            case SORT_NAME -> Comparator.comparing((Row r) -> r.name, String::compareTo);
+            case SORT_MODID -> Comparator.comparing((Row r) -> r.modIdSort, String::compareTo);
+            case SORT_INSERTED_TIME -> Comparator.comparingLong((Row r) -> r.ctime);
+            case SORT_MODIFIED_TIME -> Comparator.comparingLong((Row r) -> r.mtime);
+            default -> Comparator.comparing((Row r) -> r.name, String::compareTo);
+        };
+    }
+
 
     /**
      * 检查文本是否匹配名称（同时检查拼音以及原文本）
@@ -463,7 +518,7 @@ public class DimensionsNetMenu extends BDBaseMenu
      * @param matchText 文本
      * @return 结果为真则意味存在
      */
-    private boolean checkTooltipMatches(IStackType stack, String matchText) {
+    private boolean checkTooltipMatches(KeyAmount stack, String matchText) {
         List<Component> toolTips = TooltipHelper.getTooltipLines(stack,
                 Item.TooltipContext.of(player.level()),
                 player,

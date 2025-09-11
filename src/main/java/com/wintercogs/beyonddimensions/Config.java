@@ -18,6 +18,10 @@ public class Config
             .comment("存储UI搜索按钮值 (除非你知道你在做什么，否则不要手动修改)")
             .defineEnum("ui_sort_button", ButtonState.SORT_NAME);
 
+    public static final ModConfigSpec.EnumValue<ButtonState> UI_SECOND_SORT_BUTTON = BUILDER
+            .comment("存储UI搜索按钮值 (除非你知道你在做什么，否则不要手动修改)")
+            .defineEnum("ui_second_sort_button", ButtonState.SORT_INSERTED_TIME);
+
     public static final ModConfigSpec.EnumValue<ButtonState> UI_REVERSE_BUTTON = BUILDER
             .comment("存储UI倒序按钮值 (除非你知道你在做什么，否则不要手动修改)")
             .defineEnum("ui_reverse_button", ButtonState.DISABLED);
@@ -44,6 +48,7 @@ public class Config
                     "");
 
     public static ButtonState uiSortButton;
+    public static ButtonState uiSecondSortButton;
     public static ButtonState uiReverseButton;
     public static ButtonState uiSearchButton;
     public static ButtonState uiCraftButton;
@@ -59,7 +64,8 @@ public class Config
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event)
     {
-        uiSortButton = UI_SORT_BUTTON.get();
+        uiSortButton = UI_SORT_BUTTON.get() == ButtonState.SORT_DEFAULT ? ButtonState.SORT_NAME : UI_SORT_BUTTON.get();
+        uiSecondSortButton = UI_SECOND_SORT_BUTTON.get();
         uiReverseButton = UI_REVERSE_BUTTON.get();
         uiSearchButton = UI_SEARCH_BUTTON.get();
         uiPageNum = UI_PAGE_NUM.get();

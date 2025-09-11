@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -18,7 +18,7 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
     @Override
     public ResourceLocation getTypeId()
     {
-        return FluidStackType.ID;
+        return FluidStackKey.ID;
     }
 
     @Override

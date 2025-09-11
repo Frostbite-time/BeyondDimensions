@@ -1,8 +1,9 @@
 package com.wintercogs.beyonddimensions.Integration.JEI;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.BDBaseGUI;
 import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
@@ -65,14 +66,17 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
         public void accept(I ingredient)
         {
             Object stackKey = ingredient;
-            IStackType dragging = new ItemStackType();
-            for(IStackType type : StackTypeRegistry.getAllTypes())
+            IStackKey<?> dragging = ItemStackKey.EMPTY;
+            for(IStackKey<?> type : StackKeyRegistry.getAllTypes())
             {
                 if(type.getStackClass().isAssignableFrom(stackKey.getClass()))
                 {
+                    KeyAmount ka = type.fromStackObject(ingredient);
+                    if(ka != null)
+                    {
+                        dragging = ka.key();
+                    }
 
-                    dragging = type.getEmpty();
-                    dragging.setStack(ingredient);
                     break;
                 }
             }
@@ -80,19 +84,19 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
             // AE2通用包裹支持
             if(BeyondDimensions.AELoaded)
             {
-                if(dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
+                if(dragging instanceof ItemStackKey draggingItemKey && !dragging.isEmpty())
                 {
-                    appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
+                    appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItemKey.copyStack());
 
                     if(genericContent != null)
                     {
-                        dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
+                        dragging = AEHelper.fromAEKeyToIStack(genericContent.what()).orElse(ItemStackKey.EMPTY);
                     }
 
                 }
             }
 
-            PacketDistributor.sendToServer(new SetSlotDirectlyPacket(slot.index,dragging));
+            PacketDistributor.sendToServer(new SetSlotDirectlyPacket(slot.index,new KeyAmount(dragging,1)));
 
         }
     }

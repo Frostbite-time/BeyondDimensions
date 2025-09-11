@@ -156,7 +156,7 @@ public class ClientPayloadHandler
                     {
                         if(menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
                         {
-                            slot.setStackDirectly(packet.stack());
+                            slot.setStackDirectly(packet.stack().key(),packet.stack().amount());
                         }
                     }
                 }
@@ -174,7 +174,7 @@ public class ClientPayloadHandler
                         SlotGroupSync sync = menu.slotGroupSyncs.get(packet.groupId());
                         if(sync != null)
                         {
-                            sync.loadChange(packet.stacks(),packet.changedCounts());
+                            sync.loadChange(packet.keys(),packet.newCounts(), packet.newModifiedTime(), packet.newInsertedTime());
                             sync.afterLoadChange();
 
                         }

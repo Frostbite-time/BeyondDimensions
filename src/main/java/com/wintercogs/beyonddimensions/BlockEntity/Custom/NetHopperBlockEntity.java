@@ -1,9 +1,10 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
@@ -38,12 +39,12 @@ import java.util.List;
 public class NetHopperBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
     private static final int capacity = 36;
-    private final StackTypedHandler filterSlots = new StackTypedHandler(capacity)
+    private final StackHandler filterSlots = new StackHandler(capacity)
     {
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -106,15 +107,15 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
             {
                 if(itemEntity != null && !itemEntity.isRemoved())
                 {
-                    ItemStack itemStack = itemEntity.getItem().copy();
-                    ItemStackType typedStack = new ItemStackType(itemStack);
-                    if(matchesFilter(typedStack))
+                    ItemStack itemStack = itemEntity.getItem();
+                    IStackKey<?> itemKey = new ItemStackKey(itemStack);
+                    if(matchesFilter(itemKey))
                     {
-                        if(storage.insert(typedStack,true).isEmpty()) // 表示能成功插入
+                        if(storage.insert(itemKey,itemStack.getCount(),true).isEmpty()) // 表示能成功插入
                         {
                             itemEntity.discard();
                             // workContent之前已经由shouldWork检查过net的存在性
-                            storage.insert(typedStack,false);
+                            storage.insert(itemKey,itemStack.getCount(),false);
                         }
                     }
                 }
@@ -132,12 +133,12 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                     if(xp > 0 )
                     {
                         long xpFluid = xp * 20L;
-                        FluidStackType xpStack = new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source(),1),xpFluid);
+                        FluidStackKey xpKey = new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(),1));
 
-                        if(storage.insert(xpStack,true).isEmpty())
+                        if(storage.insert(xpKey,xpFluid,true).isEmpty())
                         {
                             orb.discard();
-                            storage.insert(xpStack,false);
+                            storage.insert(xpKey,xpFluid,false);
                         }
                     }
                 }
@@ -259,12 +260,12 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
 
                     // ⑤ 交给你的逻辑（存槽、推网络、合并等）
                     UnifiedStorage storage = getNet().getUnifiedStorage();
-                    FluidStackType typedFluid = new FluidStackType(extracted);
-                    if(matchesFilter(typedFluid))
+                    FluidStackKey fluidKey = new FluidStackKey(extracted);
+                    if(matchesFilter(fluidKey))
                     {
-                        if(storage.insert(typedFluid,true).isEmpty())
+                        if(storage.insert(fluidKey,extracted.getAmount(),true).isEmpty())
                         {
-                            storage.insert(typedFluid,false);
+                            storage.insert(fluidKey,extracted.getAmount(),false);
                             // ⑥ 清空方块 & 通知客户端
                             level.setBlock(pos, Blocks.AIR.defaultBlockState(),
                                     Block.UPDATE_ALL_IMMEDIATE);  // 立即更新并刷新渲染
@@ -275,22 +276,22 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         }
     }
 
-    private boolean matchesFilter(IStackType otherStack)
+    private boolean matchesFilter(IStackKey<?> otherStack)
     {
         switch (filterMode)
         {
             case BLACK -> {
-                for(IStackType stack : filterSlots.getStorage())
+                for(KeyAmount stack : filterSlots.getStorage())
                 {
-                    if(stack.isSame(otherStack))
+                    if(stack.key().isSame(otherStack))
                         return false;
                 }
                 return true;
             }
             case WHITE -> {
-                for(IStackType stack : filterSlots.getStorage())
+                for(KeyAmount stack : filterSlots.getStorage())
                 {
-                    if(stack.isSame(otherStack))
+                    if(stack.key().isSame(otherStack))
                         return true;
                 }
                 return false;

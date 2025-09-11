@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
 import com.hollingsworth.arsnouveau.api.source.ISourceCap;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.SourceType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackKey;
 import net.minecraft.resources.ResourceLocation;
 
 public class SourceHandlerWrapper implements IStackHandlerWrapper<SourceType>
@@ -17,7 +17,7 @@ public class SourceHandlerWrapper implements IStackHandlerWrapper<SourceType>
     @Override
     public ResourceLocation getTypeId()
     {
-        return SourceStackType.ID;
+        return SourceStackKey.ID;
     }
 
     @Override

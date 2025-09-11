@@ -1,10 +1,12 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerRemoveZero;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
@@ -63,7 +65,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     public DimensionsCraftMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
-        this(Dimensions_Craft_Menu.get(),id, playerInventory, new DimensionsNet(true), null, null);
+        this(Dimensions_Craft_Menu.get(),id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE), null, null);
     }
 
     /**
@@ -71,7 +73,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
      * @param playerInventory 玩家背包
      * @param data 维度网络信息，包含了存储信息
      */
-    public DimensionsCraftMenu(MenuType<?> type , int id, Inventory playerInventory, DimensionsNet data , @Nullable NonNullList<ItemStack> craftItems, @Nullable BlockPos entityPos)
+    public DimensionsCraftMenu(MenuType<?> type , int id, Inventory playerInventory, AbstractUnorderedStackHandler data , @Nullable NonNullList<ItemStack> craftItems, @Nullable BlockPos entityPos)
     {
         // 利用父类函数处理存储槽位 玩家背包 和一些其他数据添加处理
         super(type, id,playerInventory,data);
@@ -217,36 +219,26 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         return level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
     }
 
-
-    public void transferRecipe(List<ItemStack> inputs)
-    {
+    public void transferRecipe(List<IStackKey<?>> inputKeys, List<Long> amount) {
         // 清空工艺槽物品
-        // 先尝试放入玩家背包 这个过程中多出来的会掉落
-        // 然后尝试放入存储
-        // 最后尝试掉落
         cleanCraftSlots(firstCraftReturnDir);
 
+        final int limit = Math.min(craftSlots.getContainerSize(), inputKeys.size());
+        for (int i = 0; i < limit; i++) {
+            long needL = (i < amount.size() ? amount.get(i) : 0L);
+            IStackKey<?> key = inputKeys.get(i);
 
-        // 物品转移逻辑
-        for (int slotIndex = 0; slotIndex < inputs.size() && slotIndex < craftSlots.getContainerSize(); slotIndex++) {
-            ItemStack required = inputs.get(slotIndex);
-            if (required.isEmpty()) continue;
-            int remaining = required.getCount();
-            ItemStack collected = required.copy();
-            // 优先从背包提取
-            remaining = extractFromInventory(player.getInventory(), collected, remaining);
+            if (!(key instanceof ItemStackKey itemStackKey) || needL <= 0) continue;
 
-            // 剩余数量从存储提取
-            if (remaining > 0) {
-                remaining = extractFromStorage(storage, new ItemStackType(collected), remaining);
-            }
-            // 设置合成槽物品
-            if (remaining < required.getCount()) {
-                collected.setCount(required.getCount() - remaining);
-                craftSlots.setItem(slotIndex, collected);
-            }
+            int need = (int) Math.min(Integer.MAX_VALUE, needL);
+
+            // 这里只有实际执行转移时才会调用copy，且槽位数量有限，整体性能可控
+            int remaining = extractFromInventory(player.getInventory(), itemStackKey.copyStack(), need);
+            if (remaining > 0) remaining = extractFromStorage(storage, itemStackKey, remaining);
+
+            int got = need - remaining;
+            if (got > 0) craftSlots.setItem(i, itemStackKey.copyStackWithCount(got));
         }
-
     }
 
     // 从背包提取物品
@@ -266,10 +258,10 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         return remaining;
     }
     // 从存储提取物品
-    private int extractFromStorage(IStackTypedHandler storage, IStackType type, int amount) {
-        IStackType extraction = storage.extract(type.copyWithCount(amount), false);
-        if (extraction.getStackAmount() > 0) {
-            return amount - (int)extraction.getStackAmount();
+    private int extractFromStorage(IStackHandler storage, IStackKey<?> type, int amount) {
+        KeyAmount extraction = storage.extract(type,amount, false);
+        if (extraction.amount() > 0) {
+            return amount - (int)extraction.amount();
         }
         return amount;
     }
@@ -342,7 +334,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                     long remaining;
                     if(toStorageFirst)
                     {
-                        remaining = storage.insert(new ItemStackType(stack.copy()),false).getStackAmount();
+                        remaining = storage.insert(new ItemStackKey(stack),stack.getCount(),false).amount();
                         if(remaining>0)
                         {
                             stack.setCount((int)remaining);
@@ -361,7 +353,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                         if(remaining>0)
                         {
                             stack.setCount((int)remaining);
-                            remaining = storage.insert(new ItemStackType(stack.copy()),false).getStackAmount();
+                            remaining = storage.insert(new ItemStackKey(stack),stack.getCount(),false).amount();
                             if(remaining>0)
                             {
                                 stack.setCount((int)remaining);

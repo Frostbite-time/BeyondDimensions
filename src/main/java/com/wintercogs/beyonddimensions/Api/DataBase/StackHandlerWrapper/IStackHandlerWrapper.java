@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import net.minecraft.resources.ResourceLocation;
 
 /**

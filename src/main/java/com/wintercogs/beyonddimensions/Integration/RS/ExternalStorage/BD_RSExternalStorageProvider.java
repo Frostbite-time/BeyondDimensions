@@ -6,7 +6,7 @@ import com.refinedmods.refinedstorage.api.resource.ResourceKey;
 import com.refinedmods.refinedstorage.api.storage.Actor;
 import com.refinedmods.refinedstorage.api.storage.external.ExternalStorageProvider;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Integration.RS.RSHelper;
@@ -73,8 +73,8 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
     public long extract(ResourceKey resourceKey, long amount, Action action, Actor actor) {
         UnifiedStorage us = currentUnified();
         if (us == null || amount <= 0) return 0L;
-        return RSHelper.fromRSKeyToIStack(resourceKey, amount)
-                .map(s -> us.extract(s, action == Action.SIMULATE).getStackAmount())
+        return RSHelper.fromRSKeyToIStack(resourceKey)
+                .map(s -> us.extract(s,amount, action == Action.SIMULATE).amount())
                 .orElse(0L);
     }
 
@@ -82,8 +82,8 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
     public long insert(ResourceKey resourceKey, long amount, Action action, Actor actor) {
         UnifiedStorage us = currentUnified();
         if (us == null || amount <= 0) return 0L;
-        return RSHelper.fromRSKeyToIStack(resourceKey, amount)
-                .map(s -> amount - us.insert(s, action == Action.SIMULATE).getStackAmount())
+        return RSHelper.fromRSKeyToIStack(resourceKey)
+                .map(s -> amount - us.insert(s,amount, action == Action.SIMULATE).amount())
                 .orElse(0L);
     }
 
@@ -183,11 +183,11 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
 
         UnifiedStorage us = currentUnified();
         if (us != null) {
-            for (IStackType<?> s : us.getStorage()) {
+            for (KeyAmount s : us.getStorage()) {
                 if (s.isEmpty()) continue;
-                RSHelper.fromIStackToRSKey(s).ifPresent(k -> {
+                RSHelper.fromIStackToRSKey(s.key()).ifPresent(k -> {
                     long prev = counts.getLong(k);
-                    long now = prev + s.getStackAmount();
+                    long now = prev + s.amount();
                     if (prev == 0) {
                         counts.put(k, now);
                         index.put(k, all.size());

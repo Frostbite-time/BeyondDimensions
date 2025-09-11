@@ -6,7 +6,8 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.cells.CellState;
 import appeng.api.storage.cells.StorageCell;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import net.minecraft.network.chat.Component;
 
@@ -74,16 +75,16 @@ public class NetStorageCell implements StorageCell
     @Override
     public long insert(AEKey what, long amount, Actionable mode, IActionSource source)
     {
-        return AEHelper.fromAEKeyToIStack(what,amount)
-                .map(stack -> amount - storage.insert(stack, mode.isSimulate()).getStackAmount())
+        return AEHelper.fromAEKeyToIStack(what)
+                .map(stack -> amount - storage.insert(stack,amount, mode.isSimulate()).amount())
                 .orElse(0L);
     }
 
     @Override
     public long extract(AEKey what, long amount, Actionable mode, IActionSource source)
     {
-        return AEHelper.fromAEKeyToIStack(what, amount)
-                .map(stack -> storage.extract(stack, mode.isSimulate()).getStackAmount())
+        return AEHelper.fromAEKeyToIStack(what)
+                .map(stack -> storage.extract(stack,amount, mode.isSimulate()).amount())
                 .orElse(0L);
     }
 
@@ -102,7 +103,7 @@ public class NetStorageCell implements StorageCell
     // ========== 快照维护 ==========
 
     /** 增量补丁：O(1) 更新 KeyCounter（避免留下 0 项） */
-    private void applyDelta(IStackType<?> type, long size, boolean insert) {
+    private void applyDelta(IStackKey<?> type, long size, boolean insert) {
         Optional<AEKey> keyOpt = AEHelper.fromIStackToAEKey(type);
         if (keyOpt.isEmpty()) return;
         AEKey key = keyOpt.get();
@@ -122,10 +123,10 @@ public class NetStorageCell implements StorageCell
     /** 全量重建（仅在绑定/any 兜底时调用） */
     private void fullRebuildSnapshot() {
         snapshot.clear();
-        for (IStackType<?> stack : storage.getStorage()) {
+        for (KeyAmount stack : storage.getStorage()) {
             if (stack.isEmpty()) continue;
-            AEHelper.fromIStackToAEKey(stack).ifPresent(aeKey -> {
-                snapshot.add(aeKey, stack.getStackAmount());
+            AEHelper.fromIStackToAEKey(stack.key()).ifPresent(aeKey -> {
+                snapshot.add(aeKey, stack.amount());
             });
         }
     }

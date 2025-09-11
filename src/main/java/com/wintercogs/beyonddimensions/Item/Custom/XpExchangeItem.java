@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
@@ -81,10 +81,10 @@ public class XpExchangeItem extends Item
                     long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                     // 插入当前经验流体
-                    IStackType remaining = storage.insert(new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source(),1),actualInsertFluid),false);
+                    KeyAmount remaining = storage.insert(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(),1)),actualInsertFluid,false);
                     if(!remaining.isEmpty())
                     {
-                        int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount()/20); // 由于前面从int*20，这里除回去
+                        int needReturnXp = BDMath.clampLongToInt(remaining.amount()/20); // 由于前面从int*20，这里除回去
                         actualRemovePlayerXp = actualRemovePlayerXp - needReturnXp;
                     }
                     player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值

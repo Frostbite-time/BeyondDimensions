@@ -6,9 +6,9 @@ import com.refinedmods.refinedstorage.common.api.support.resource.ResourceType;
 import com.refinedmods.refinedstorage.common.support.resource.FluidResource;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 import com.refinedmods.refinedstorage.common.support.resource.ResourceTypes;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -17,45 +17,44 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class RSHelper
 {
-    public static final Map<ResourceLocation, Function<IStackType, Optional<ResourceKey>>> ISTACK_TO_RSKEY_MAP = new HashMap<>();
-    public static final Map<ResourceType, BiFunction<ResourceKey, Long, Optional<IStackType<?>>>> RSKEY_TO_STACK_TYPE_MAP = new HashMap<>();
+    public static final Map<ResourceLocation, Function<IStackKey<?>, Optional<ResourceKey>>> ISTACK_TO_RSKEY_MAP = new HashMap<>();
+    public static final Map<ResourceType, Function<ResourceKey, Optional<IStackKey<?>>>> RSKEY_TO_STACK_TYPE_MAP = new HashMap<>();
 
     static
     {
-        ISTACK_TO_RSKEY_MAP.put(ItemStackType.ID, stackType -> Optional.ofNullable(ItemResource.ofItemStack((ItemStack)stackType.copyStack())));
-        ISTACK_TO_RSKEY_MAP.put(FluidStackType.ID, stackType -> {
+        ISTACK_TO_RSKEY_MAP.put(ItemStackKey.ID, stackType -> Optional.of(ItemResource.ofItemStack((ItemStack)stackType.copyStack())));
+        ISTACK_TO_RSKEY_MAP.put(FluidStackKey.ID, stackType -> {
             FluidStack stack = (FluidStack) stackType.copyStack();
-            return Optional.ofNullable(new FluidResource(stack.getFluid(), stack.getComponentsPatch()));
+            return Optional.of(new FluidResource(stack.getFluid(), stack.getComponentsPatch()));
         });
 
-        RSKEY_TO_STACK_TYPE_MAP.put(ResourceTypes.ITEM, (key, amount) -> Optional.of(new ItemStackType(((ItemResource)key).toItemStack(),amount)));
-        RSKEY_TO_STACK_TYPE_MAP.put(ResourceTypes.FLUID, (key, amount) -> {
+        RSKEY_TO_STACK_TYPE_MAP.put(ResourceTypes.ITEM, key -> Optional.of(new ItemStackKey(((ItemResource)key).toItemStack())));
+        RSKEY_TO_STACK_TYPE_MAP.put(ResourceTypes.FLUID, key -> {
             FluidResource fluidKey = (FluidResource) key;
             FluidStack stack = new FluidStack(BuiltInRegistries.FLUID.wrapAsHolder(fluidKey.fluid()),1,fluidKey.components());
-            return Optional.of(new FluidStackType(stack,amount));
+            return Optional.of(new FluidStackKey(stack));
         });
     }
 
 
-    public static Optional<IStackType<?>> fromRSKeyToIStack(ResourceKey key, long amount)
+    public static Optional<IStackKey<?>> fromRSKeyToIStack(ResourceKey key)
     {
         if(key instanceof PlatformResourceKey pKey)
         {
             if(RSKEY_TO_STACK_TYPE_MAP.containsKey(pKey.getResourceType()))
             {
-                return RSKEY_TO_STACK_TYPE_MAP.get(pKey.getResourceType()).apply(pKey, amount);
+                return RSKEY_TO_STACK_TYPE_MAP.get(pKey.getResourceType()).apply(pKey);
             }
         }
         return Optional.empty();
     }
 
 
-    public static Optional<ResourceKey> fromIStackToRSKey(IStackType stack)
+    public static Optional<ResourceKey> fromIStackToRSKey(IStackKey<?> stack)
     {
         if(ISTACK_TO_RSKEY_MAP.containsKey(stack.getTypeId()))
         {

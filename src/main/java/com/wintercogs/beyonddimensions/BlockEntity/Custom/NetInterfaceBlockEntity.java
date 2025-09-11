@@ -3,9 +3,9 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
@@ -45,23 +45,23 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     private static final int capacity = 27;
 
     // 用来标记物品或者流体的槽位，只由UI控制
-    private final StackTypedHandler fakeStackHandler = new StackTypedHandler(capacity)
+    private final StackHandler fakeStackHandler = new StackHandler(capacity)
     {
         // 只触发方块自身的保存，但是不向周围发信
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
 
-    private final StackTypedHandler stackHandler = new StackTypedHandler(capacity)
+    private final StackHandler stackHandler = new StackHandler(capacity)
     {
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if(level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -76,12 +76,12 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     private final Multimap<ResourceLocation,Object> handlerCache = ArrayListMultimap.create();
     private boolean needsCapabilityUpdate = true;
 
-    public StackTypedHandler getStackHandler()
+    public StackHandler getStackHandler()
     {
         return this.stackHandler;
     }
 
-    public StackTypedHandler getFakeStackHandler(){
+    public StackHandler getFakeStackHandler(){
         return this.fakeStackHandler;
     }
 
@@ -187,19 +187,19 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         {
             for(int i=0; i<capacity; i++)
             {
-                IStackType flag = fakeStackHandler.getStackBySlot(i);
-                if(flag!= null && !flag.isEmpty())
+                KeyAmount flag = fakeStackHandler.getStackBySlot(i);
+                if(!flag.isEmpty())
                 {
-                    if (flag.isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
+                    if (flag.key().isSameTypeSameComponents(stackHandler.getStackBySlot(i).key()))
                         continue;
                 }
-                IStackType stack = stackHandler.getStackBySlot(i);
-                if(stack !=null &&!stack.isEmpty())
+                KeyAmount stack = stackHandler.getStackBySlot(i);
+                if(!stack.isEmpty())
                 {
-                    IStackType extracted = stackHandler.extract(i, stack.getStackAmount(),false);
-                    IStackType remaining = net.getUnifiedStorage().insert(extracted,false);
+                    KeyAmount extracted = stackHandler.extract(i, stack.amount(),false);
+                    KeyAmount remaining = net.getUnifiedStorage().insert(extracted.key(),extracted.amount(),false);
                     if(!remaining.isEmpty())
-                        stackHandler.insert(i, remaining, false);
+                        stackHandler.insert(i, remaining.key(),remaining.amount(), false);
                 }
             }
         }
@@ -217,31 +217,31 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         {
             for(int i=0; i<capacity; i++)
             {
-                IStackType flag = fakeStackHandler.getStackBySlot(i);
-                if(flag!=null && !flag.isEmpty())
+                KeyAmount flag = fakeStackHandler.getStackBySlot(i);
+                if(!flag.isEmpty())
                 {
                     // 到达数量上限或者是不同物品则不尝试插入
-                    IStackType current = stackHandler.getStackBySlot(i);
-                    if(current != null &&!current.isEmpty())
+                    KeyAmount current = stackHandler.getStackBySlot(i);
+                    if(!current.isEmpty())
                     {
-                        if(current.getVanillaMaxStackSize() >= current.getStackAmount())
+                        if(current.key().getVanillaMaxStackSize() >= current.amount())
                         {
                             continue;
                         }
-                        if(!current.isSameTypeSameComponents(flag.copy()))
+                        if(!current.key().isSameTypeSameComponents(flag.key()))
                         {
                             continue;
                         }
                     }
 
                     // 插入逻辑
-                    IStackType stack = net.getUnifiedStorage().extract(flag.copyWithCount(flag.getVanillaMaxStackSize()),false);
-                    if(stack !=null &&!stack.isEmpty())
+                    KeyAmount stack = net.getUnifiedStorage().extract(flag.key(),flag.key().getVanillaMaxStackSize(),false);
+                    if(!stack.isEmpty())
                     {
-                        IStackType remaining = stackHandler.insert(i,stack.copy(),false);
+                        KeyAmount remaining = stackHandler.insert(i,stack.key(),stack.amount(),false);
                         if(!remaining.isEmpty())
                         {
-                            net.getUnifiedStorage().insert(remaining.copy(),false);
+                            net.getUnifiedStorage().insert(remaining.key(),remaining.amount(),false);
                         }
                     }
                 }
@@ -261,17 +261,17 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
                     for(int i = 0;i<capacity;i++)
                     {
-                        if(fakeStackHandler.getStackBySlot(i).getTypeId().equals(typeId))
+                        if(fakeStackHandler.getStackBySlot(i).key().getTypeId().equals(typeId))
                         {
-                            if(fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
+                            if(fakeStackHandler.getStackBySlot(i).key().isSameTypeSameComponents(stackHandler.getStackBySlot(i).key()))
                             {
-                                IStackType current = stackHandler.getStackBySlot(i).copy();
+                                KeyAmount current = stackHandler.getStackBySlot(i);
                                 for(int slot= 0;slot< stackHandlerWrapper.getSlots();slot++)
                                 {
-                                    long remainging = stackHandlerWrapper.insert(slot,current.copyStack(),false);
-                                    long extract = current.getStackAmount() - remainging;
+                                    long remainging = stackHandlerWrapper.insert(slot,current.toStack(),false);
+                                    long extract = current.amount() - remainging;
                                     stackHandler.extract(i,extract,false);
-                                    current.shrink(extract);
+                                    current = new KeyAmount(current.key(),current.amount() - extract);
                                     if(current.isEmpty())
                                         break;
                                 }
@@ -285,22 +285,22 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
     public void dropContent()
     {
-        List<IStackType> dropList = new ArrayList<>();
-        for(IStackType stack : stackHandler.getStorage())
+        List<KeyAmount> dropList = new ArrayList<>();
+        for(KeyAmount stack : stackHandler.getStorage())
         {
             if(!stack.isEmpty())
             {
                 // 如果内含物质球，直接弹出，防止NBT套娃
-                if(stack instanceof ItemStackType itemStackType)
+                if(stack.key() instanceof ItemStackKey itemStackKey)
                 {
-                    if(itemStackType.getStack().getItem() instanceof MatterCompressionBall)
-                        Block.popResource(level,getBlockPos(),itemStackType.copyStack());
+                    if(itemStackKey.getSource() instanceof MatterCompressionBall)
+                        Block.popResource(level,getBlockPos(),itemStackKey.copyStackWithCount(stack.amount()));
                     else
-                        dropList.add(stack.copy());
+                        dropList.add(stack);
                 }
                 else
                 {
-                    dropList.add(stack.copy());
+                    dropList.add(stack);
                 }
             }
         }
