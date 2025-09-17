@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackType> stacks, List<Long> changedCounts)
+public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackType> stacks, List<Long> newCount)
 {
 
     @OnlyIn(Dist.CLIENT)
@@ -27,7 +27,7 @@ public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackType> stacks
             SlotGroupSync sync = menu.slotGroupSyncs.get(groupId());
             if(sync != null)
             {
-                sync.loadChange(stacks(),changedCounts());
+                sync.loadChange(stacks(), newCount());
                 sync.afterLoadChange();
 
             }
@@ -58,8 +58,8 @@ public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackType> stacks
         }
 
         // 序列化changedCounts列表（长整型）
-        buf.writeInt(packet.changedCounts().size());
-        for (long count : packet.changedCounts()) {
+        buf.writeInt(packet.newCount().size());
+        for (long count : packet.newCount()) {
             buf.writeLong(count);
         }
 

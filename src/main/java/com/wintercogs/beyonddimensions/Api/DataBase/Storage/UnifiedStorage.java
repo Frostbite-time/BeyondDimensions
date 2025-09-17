@@ -6,7 +6,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
 import com.wintercogs.beyonddimensions.Api.Util.HashBPlusList;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
@@ -267,6 +266,23 @@ public class UnifiedStorage implements IStackTypedHandler
     public boolean hasStackType(IStackType other)
     {
         return storage.contains(other);
+    }
+
+    // 仅用于UI，不做任何状态更新，禁止于服务端调用
+    public void setStackAmount(IStackType key, long amount)
+    {
+        IStackType old = getStackByStack(key);
+        if(!old.isEmpty())
+        {
+            if(amount > 0)
+                old.setStackAmount(amount);
+            else
+                extract(key.copyWithCount(old.getStackAmount()+1) , false);
+        }
+        else if(amount > 0) // old不存在
+        {
+            insert(key.copyWithCount(amount), false);
+        }
     }
 
     @Override

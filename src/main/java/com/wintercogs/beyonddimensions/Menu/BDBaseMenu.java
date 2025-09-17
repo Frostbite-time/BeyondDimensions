@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedSlotGroupSync;
 import com.wintercogs.beyonddimensions.Menu.Slot.SlotGroupSync;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.QuickDataTagPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
@@ -333,5 +334,16 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         return false;
     }
 
-
+    @Override
+    public void removed(Player player)
+    {
+        super.removed(player);
+        for(SlotGroupSync slotGroupSync : slotGroupSyncs)
+        {
+            if(slotGroupSync instanceof DisorderedSlotGroupSync disSync)
+            {
+                disSync.dispose();
+            }
+        }
+    }
 }
