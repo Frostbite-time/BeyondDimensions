@@ -20,21 +20,22 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
 {
     private static final int MAX_PACKET_SIZE = 900 * 1024; // 921,600 bytes
 
-    public final int groupId; // 用于读取时的标记
+    public final int groupId;
     private final BDBaseMenu menu;
-    private final UnifiedStorage storage; // 对真实存储的直接引用
-    private final List<IStackType> lastStorage = new ArrayList<>();
+    private final UnifiedStorage storage;
 
-    private boolean initialized = false; // 首次发送控制
+    // 基线缓存：key 不含数量语义 -> 直接可做 map 的 key；value 为绝对数量
+    private final Map<IStackType, Long> lastMap = new HashMap<>();
 
-    // 订阅句柄，便于释放
+    private boolean initialized = false;
+
     private AutoCloseable anySub;
     private AutoCloseable deltaSub;
 
-    /** 等待发送的“最新绝对状态”缓存（同一 key 多次更新仅保留最后一次） */
+    /** 本 tick 待发的“最终绝对值”缓存：同一 key 仅保留最后状态 */
     private final Map<IStackType, Long> pendingAbsolute = new HashMap<>();
 
-    /** 标记：需要在下一次 tick 做一次全量对比（Any 触发） */
+    /** Any 事件置脏：下一 tick 做一次全量 */
     private boolean dirtyFullRescan = false;
 
     public DisorderedSlotGroupSync(BDBaseMenu menu, int id, UnifiedStorage storage)
@@ -43,17 +44,12 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         this.groupId = id;
         this.storage = storage;
 
-        // 仅在服务端订阅
-        if (isServerSide())
-        {
-            // Any：结构/大变动，只置脏，下一 tick 再对比发送
-            this.anySub = storage.subscribeAny(menu, this::onAnyChange);
-            // Delta：单次增量事件 → 记录该 key 的“当前绝对数量”，不立刻发送
+        if (isServerSide()) {
+            this.anySub   = storage.subscribeAny(menu, this::onAnyChange);
             this.deltaSub = storage.subscribeDelta(menu, this::onDeltaChange);
         }
     }
 
-    /** 在菜单关闭时调用，主动解订阅，避免句柄悬挂 */
     public void dispose()
     {
         try { if (anySub != null) anySub.close(); } catch (Throwable ignored) {}
@@ -62,115 +58,122 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         deltaSub = null;
     }
 
-    private boolean isServerSide()
-    {
-        return menu.player instanceof ServerPlayer;
-    }
+    private boolean isServerSide() { return menu.player instanceof ServerPlayer; }
 
     @Override
     public int getGroupId() { return groupId; }
 
-    /* -------------------- 事件回调（仅服务端执行，不立刻发送） -------------------- */
+    /* -------------------- 事件回调 -------------------- */
 
-    /** Any 回调：标记需要一次全量对比；真正的对比与发送放到下一次 tick */
     private void onAnyChange()
     {
         if (!isServerSide()) return;
         dirtyFullRescan = true;
     }
 
-    /** Delta 回调：仅缓存“当前绝对数量”，不立刻发送（覆盖式） */
+    /** 将 delta 累加到“基线 + 本 tick 已缓存的绝对值”上，得到该 key 的最终绝对值 */
     private void onDeltaChange(IStackType key, long size, boolean insert)
     {
-        if (!isServerSide() || key == null) return;
-        // 读取当前绝对数量（IStackType 的 equals/hashCode 不含数量，可直接当键）
-        long now = getNowAbsoluteCount(key);
-        pendingAbsolute.put(key, now); // 覆盖式缓存：仅保留最新绝对状态
+        if (!isServerSide() || key == null || size == 0) return;
+
+        long base = pendingAbsolute.getOrDefault(key, lastMap.getOrDefault(key, 0L));
+        long next = insert ? base + size : base - size;
+        if (next < 0) next = 0; // 保护
+        pendingAbsolute.put(key, next); // 覆盖式缓存
     }
 
-    /* -------------------- 逐 tick 合并并发送（服务端） -------------------- */
+    /* -------------------- 合并并发送 -------------------- */
 
     @Override
     public void updateChange()
     {
         if (!isServerSide()) return;
 
-        // 首次：做一次全量对比（也放到本 tick 的发送逻辑里）
         if (!initialized) {
             initialized = true;
-            dirtyFullRescan = true;
+            dirtyFullRescan = true; // 首次强制全量
         }
 
         drainAndSend();
     }
 
-    /** 汇总待发更新（full-rescan 或 pending）-> 分包发送 -> 推进基线 */
     private void drainAndSend()
     {
         if (!dirtyFullRescan && pendingAbsolute.isEmpty()) return;
 
-        Map<IStackType, Long> toSend = new LinkedHashMap<>();
+        List<IStackType> keys = new ArrayList<>();
+        List<Long> counts = new ArrayList<>();
 
-        if (dirtyFullRescan)
-        {
-            // === 全量对比：把 last vs now 不同的 key 的“现在值(绝对)”发出去 ===
-            Map<IStackType, Long> lastMap = new HashMap<>();
-            for (IStackType st : this.lastStorage) {
-                lastMap.merge(st, st.getStackAmount(), Long::sum);
-            }
-            Map<IStackType, Long> nowMap = new HashMap<>();
-            for (IStackType st : this.storage.getStorage()) {
-                nowMap.merge(st, st.getStackAmount(), Long::sum);
-            }
+        if (dirtyFullRescan) {
+            // ===== 全量：构建 nowMap，比较 lastMap 差异，发送绝对值 =====
+            Map<IStackType, Long> nowMap = buildNowMapFromStorage();
 
-            Set<IStackType> all = new HashSet<>();
-            all.addAll(lastMap.keySet());
+            // 合并 key 集
+            Set<IStackType> all = new HashSet<>(lastMap.keySet());
             all.addAll(nowMap.keySet());
 
             for (IStackType k : all) {
-                long lastCnt = lastMap.getOrDefault(k, 0L);
-                long nowCnt  = nowMap.getOrDefault(k, 0L);
-                if (nowCnt != lastCnt) {
-                    toSend.put(k.copy(), nowCnt); // 发送现在值（覆盖式）
+                long last = lastMap.getOrDefault(k, 0L);
+                long now  = nowMap.getOrDefault(k, 0L);
+                if (now != last) {
+                    keys.add(k.copy());
+                    counts.add(now);
                 }
             }
 
-            // 全量权威：清空本轮 pending；下一 tick 重新积累
+            // 全量权威：清空当 tick 的 pending；基线 = nowMap
             pendingAbsolute.clear();
+            lastMap.clear();
+            lastMap.putAll(nowMap);
             dirtyFullRescan = false;
-        }
-        else
-        {
-            // === 仅发送 pending 的“最新绝对状态” ===
+        } else {
+            // ===== 非全量：仅发送本 tick 的最终绝对值 =====
+
             for (Map.Entry<IStackType, Long> e : pendingAbsolute.entrySet()) {
-                toSend.put(e.getKey().copy(), e.getValue());
+                keys.add(e.getKey().copy());
+                counts.add(e.getValue());
             }
+
+            // 发送后增量更新基线（0 → 移除；>0 → 覆盖/新增）
+            applyIncrementalToBaseline(pendingAbsolute);
             pendingAbsolute.clear();
         }
 
-        if (toSend.isEmpty()) {
-            refreshLast(); // 仍推进基线
-            return;
-        }
+        if (keys.isEmpty()) return;
 
-        // 转列表并分包发送（协议：IStackType + long(绝对数量)）
-        List<IStackType> keys  = new ArrayList<>(toSend.size());
-        List<Long> counts      = new ArrayList<>(toSend.size());
-        for (Map.Entry<IStackType, Long> e : toSend.entrySet()) {
-            keys.add(e.getKey());
-            counts.add(e.getValue());
-        }
-
+        // 分包（协议：key.serialize + long 绝对数量）
         List<DisorderedSlotGroupSyncPacket> packets = buildBatchedPackets(keys, counts);
         for (DisorderedSlotGroupSyncPacket pkt : packets) {
             PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) menu.player), pkt);
         }
-
-        // 推进基线
-        refreshLast();
     }
 
-    /** 估算每条记录字节大小并按 MAX_PACKET_SIZE 分包（key + absoluteCount） */
+    private Map<IStackType, Long> buildNowMapFromStorage()
+    {
+        Map<IStackType, Long> now = new HashMap<>();
+        for (IStackType st : this.storage.getStorage()) {
+            long amt = st.getStackAmount();
+            if (amt <= 0) continue;
+            now.merge(st, amt, Long::sum); // IStackType 不含数量 → 合并数量
+        }
+        return now;
+    }
+
+    /** 非全量发送后把变更直接打到基线：0→remove, >0→put */
+    private void applyIncrementalToBaseline(Map<IStackType, Long> applied)
+    {
+        for (Map.Entry<IStackType, Long> e : applied.entrySet()) {
+            IStackType k = e.getKey();
+            long v = e.getValue();
+            if (v == 0L) {
+                lastMap.remove(k);
+            } else {
+                lastMap.put(k, v);
+            }
+        }
+    }
+
+    /** 分包估算：IStackType + long(绝对数量) */
     private List<DisorderedSlotGroupSyncPacket> buildBatchedPackets(
             List<IStackType> keys,
             List<Long> counts
@@ -180,7 +183,6 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         List<DisorderedSlotGroupSyncPacket> packets = new ArrayList<>(Math.max(1, n / 128));
         List<Integer> entrySizes = new ArrayList<>(n);
 
-        // 预估单条大小（按旧版写法：key.serialize + long）
         for (int i = 0; i < n; i++) {
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             IStackType k = keys.get(i);
@@ -189,7 +191,6 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
             entrySizes.add(buf.readableBytes());
         }
 
-        // 动态分包
         List<IStackType> batchKeys = new ArrayList<>();
         List<Long>       batchCounts = new ArrayList<>();
         int currentSize = 0;
@@ -211,52 +212,26 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
             currentSize += entrySize;
         }
         if (!batchKeys.isEmpty()) {
-            packets.add(new DisorderedSlotGroupSyncPacket(
-                    groupId,
-                    batchKeys,
-                    batchCounts
-            ));
+            packets.add(new DisorderedSlotGroupSyncPacket(groupId, batchKeys, batchCounts));
         }
         return packets;
     }
 
-    /* -------------------- 客户端：接收并覆盖写入（绝对数量） -------------------- */
+    /* -------------------- 客户端：覆盖式应用 -------------------- */
 
     @Override
     public void loadChange(List<IStackType> stacks, List<Long> absoluteCounts)
     {
         UnifiedStorage clientStorage = storage;
         int n = Math.min(stacks.size(), absoluteCounts.size());
-
         for (int i = 0; i < n; i++) {
             IStackType key = stacks.get(i);
             long absolute = absoluteCounts.get(i);
             if (key == null) continue;
-            // 覆盖写入为“绝对数量”
-            clientStorage.setStackAmount(key, absolute);
+            clientStorage.setStackAmount(key, absolute); // 覆盖
         }
     }
 
     @Override
     public void afterLoadChange() { }
-
-    /** 仅服务端：推进基线（每次实际发送后调用） */
-    public void refreshLast()
-    {
-        if (!isServerSide()) return;
-        this.lastStorage.clear();
-        for (IStackType st : this.storage.getStorage()) {
-            this.lastStorage.add(st.copy()); // 数量留在副本中
-        }
-    }
-
-    /** 读取指定 key 的当前绝对数量（IStackType 等价性不含数量，需聚合） */
-    private long getNowAbsoluteCount(IStackType key)
-    {
-        IStackType current = this.storage.getStackByStack(key);
-        if(!current.isEmpty())
-            return current.getStackAmount();
-        else
-            return 0L;
-    }
 }
