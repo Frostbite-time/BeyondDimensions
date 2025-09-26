@@ -47,6 +47,10 @@ public class Config
             .define("ui_search",
                     "");
 
+    public static final ModConfigSpec.BooleanValue GENERATE_TIME_CRYSTALLIZATION = BUILDER
+            .comment("是否自动生成破碎的时空结晶？")
+            .define("generate_time_crystallization", true);
+
     public static ButtonState uiSortButton;
     public static ButtonState uiSecondSortButton;
     public static ButtonState uiReverseButton;
@@ -55,6 +59,7 @@ public class Config
     public static ButtonState uiCraftReturnButton;
     public static int uiPageNum;
     public static String uiSearch;
+    public static boolean generateTimeCrystallization;
 
     // 一定放到最后进行静态初始化
     static final ModConfigSpec SPEC = BUILDER.build();
@@ -72,6 +77,7 @@ public class Config
         uiSearch = UI_SEARCH.get();
         uiCraftButton = UI_CRAFT_BUTTON.get();
         uiCraftReturnButton = UI_CRAFT_RETURN_BUTTON.get();
+        generateTimeCrystallization = GENERATE_TIME_CRYSTALLIZATION.get();
 
     }
 }

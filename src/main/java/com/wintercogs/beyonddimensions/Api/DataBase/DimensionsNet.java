@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
 import net.minecraft.core.HolderLookup;
@@ -521,7 +522,7 @@ public class DimensionsNet extends SavedData
     public void onServerTick(ServerTickEvent.Pre event)
     {
         // 不对临时网络执行倒计时
-        if(temporary)
+        if(temporary || !Config.generateTimeCrystallization)
             return;
 
         currentTime--;
