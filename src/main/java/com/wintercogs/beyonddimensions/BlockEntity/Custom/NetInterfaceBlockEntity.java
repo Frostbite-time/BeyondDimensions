@@ -12,6 +12,7 @@ import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Api.Util.CommonHandler;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
@@ -100,8 +101,10 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         // 无论接口是否工作，始终保持与网络的内容更新
         if(getNet() != null)
         {
-            transferToNet();
-            transferFromNet();
+            if(Config.interfaceCanReceiveResource)
+                transferToNet();
+            if(Config.interfaceCanOutputResource)
+                transferFromNet();
         }
         return super.shouldWork(); // 接口方块使用内部缓存进行弹出，因此不需要检测getNet
     }
@@ -110,12 +113,15 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public void workContent()
     {
         super.workContent();
-        // 尝试输出物品到周围
-        if(popMode == PopMode.OPEN)
+        if(Config.interfaceCanPopResource)
         {
-            // 在使用缓存前确保它是最新的
-            updateCapabilityCache();
-            popStack();
+            // 尝试输出物品到周围
+            if(popMode == PopMode.OPEN)
+            {
+                // 在使用缓存前确保它是最新的
+                updateCapabilityCache();
+                popStack();
+            }
         }
     }
 

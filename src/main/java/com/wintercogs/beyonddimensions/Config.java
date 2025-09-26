@@ -49,6 +49,18 @@ public class Config
             .comment("是否自动生成破碎的时空结晶？")
             .define("generate_time_crystallization", true);
 
+    public static final ForgeConfigSpec.BooleanValue INTERFACE_CAN_RECEIVE_RESOURCE = BUILDER
+            .comment("是否允许网络接口将资源送入网络")
+            .define("interface_can_receive_resource", true);
+
+    public static final ForgeConfigSpec.BooleanValue INTERFACE_CAN_OUTPUT_RESOURCE = BUILDER
+            .comment("是否允许网络接口从网络提取标记的资源")
+            .define("interface_can_output_resource", true);
+
+    public static final ForgeConfigSpec.BooleanValue INTERFACE_CAN_POP_RESOURCE = BUILDER
+            .comment("是否允许网络接口将内容物弹出到附近容器")
+            .define("interface_can_pop_resource", true);
+
     public static ButtonState uiSortButton;
     public static ButtonState uiReverseButton;
     public static ButtonState uiSearchButton;
@@ -57,6 +69,9 @@ public class Config
     public static int uiPageNum;
     public static String uiSearch;
     public static boolean generateTimeCrystallization;
+    public static boolean interfaceCanReceiveResource;
+    public static boolean interfaceCanOutputResource;
+    public static boolean interfaceCanPopResource;
 
 
     // 一定放到最后进行静态初始化
@@ -75,6 +90,9 @@ public class Config
         uiCraftButton = UI_CRAFT_BUTTON.get();
         uiCraftReturnButton = UI_CRAFT_RETURN_BUTTON.get();
         generateTimeCrystallization = GENERATE_TIME_CRYSTALLIZATION.get();
+        interfaceCanReceiveResource = INTERFACE_CAN_RECEIVE_RESOURCE.get();
+        interfaceCanOutputResource = INTERFACE_CAN_OUTPUT_RESOURCE.get();
+        interfaceCanPopResource = INTERFACE_CAN_POP_RESOURCE.get();
 
     }
 }
