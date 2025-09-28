@@ -394,11 +394,10 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 // 最终回退处理（无任何交互时，放回此物品）
                 if(!handled.get())
                 {
-                    //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
                     int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                    storage.insert(StackCreater.Create(ItemStackType.ID,carriedItem.copyWithCount(changedCount),changedCount),false);
-                    int newCount = carriedItem.getCount() - changedCount;
-                    if(newCount <=0)
+                    int actualInsert = (int) (changedCount - storage.insert(StackCreater.Create(ItemStackType.ID, carriedItem.copyWithCount(changedCount), changedCount), false).getStackAmount());
+                    int newCount = carriedItem.getCount() - actualInsert;
+                    if (newCount <= 0)
                     {
                         menu.setCarried(ItemStack.EMPTY);
                     }
