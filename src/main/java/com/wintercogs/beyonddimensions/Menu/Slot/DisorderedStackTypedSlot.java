@@ -402,9 +402,9 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 {
                     //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
                     int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                    storage.insert(new ItemStackKey(carriedItem), changedCount,false);
-                    int newCount = carriedItem.getCount() - changedCount;
-                    if(newCount <=0)
+                    int actualInsert = (int) (changedCount - storage.insert(new ItemStackKey(carriedItem), changedCount, false).amount());
+                    int newCount = carriedItem.getCount() - actualInsert;
+                    if (newCount <= 0)
                     {
                         menu.setCarried(ItemStack.EMPTY);
                     }
