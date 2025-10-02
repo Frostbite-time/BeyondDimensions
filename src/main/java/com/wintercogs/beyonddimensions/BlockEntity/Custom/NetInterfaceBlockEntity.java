@@ -45,7 +45,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 {
     private final Map<SidedCapId, LazyOptional<?>> caps = new HashMap<>();
 
-    private static final int capacity = 27;
+    private static final int capacity = Config.interfaceUsableCapacity;
 
     // 用来标记物品或者流体的槽位，只由UI控制
     private final StackTypedHandler fakeStackHandler = new StackTypedHandler(capacity)
@@ -393,7 +393,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     @Override
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
-        return new NetInterfaceBaseMenu(containerId,player.getInventory(),this.getStackHandler() ,this.getFakeStackHandler(),this);
+        return new NetInterfaceBaseMenu(containerId,player.getInventory(),this);
     }
 
     @Override

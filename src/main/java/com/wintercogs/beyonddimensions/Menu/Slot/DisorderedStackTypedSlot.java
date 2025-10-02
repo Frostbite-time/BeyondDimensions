@@ -17,10 +17,7 @@ import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.XpUtil;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.BucketItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
@@ -87,7 +84,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 // 再检查是否为能力交互
                 else if(carriedItem.getCount()==1 && button== GLFW.GLFW_MOUSE_BUTTON_RIGHT && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
                 {
-                    if(carriedItem.getItem() instanceof BucketItem bucketItem)
+                    if(carriedItem.getItem() instanceof BucketItem bucketItem || carriedItem.getItem() instanceof MilkBucketItem)
                     {
                         LazyOptional<?> handler = carriedItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
                         if(handler.isPresent())
