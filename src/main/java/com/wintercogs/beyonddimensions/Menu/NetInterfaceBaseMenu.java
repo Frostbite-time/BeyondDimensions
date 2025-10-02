@@ -44,20 +44,20 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
      */
     public NetInterfaceBaseMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, new StackHandler(27),new StackHandler(27), (NetInterfaceBlockEntity) playerInventory.player.level().getBlockEntity(data.readBlockPos()));
+        this(id, playerInventory, (NetInterfaceBlockEntity) playerInventory.player.level().getBlockEntity(data.readBlockPos()));
     }
 
     /**
      * 服务端构造函数
      * @param playerInventory 玩家背包
      */
-    public NetInterfaceBaseMenu(int id, Inventory playerInventory, StackHandler storage , StackHandler flagStorage, NetInterfaceBlockEntity be)
+    public NetInterfaceBaseMenu(int id, Inventory playerInventory, NetInterfaceBlockEntity be)
     {
         super(Net_Interface_Menu.get(), id,playerInventory);
 
         // 初始化标记容器（slot负责同步）
-        this.storage = storage;
-        this.flagStorage = flagStorage;
+        this.storage = be.getStackHandler();
+        this.flagStorage = be.getFakeStackHandler();
 
         this.be = be;
 
@@ -69,29 +69,52 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
 
     private void addStorageSlots()
     {
-        // 添加存储槽
-        vanillaQuickMoveStartIndex = slots.size();
-        for(int row = 0; row < 3; row++)
-        {
-            for (int col = 0; col < 9; col++)
-            {
-                this.addSlot(new OrderedStackTypedSlot(this,storage, row*9+col,inventoryStartIndex,inventoryEndIndex, 8 + col * 18, slotStartY + 18 + row * 36));
-            }
-        }
-        vanillaQuickMoveEndIndex = slots.size();
+        // 动态添加存储槽
+        vanillaQuickMoveStartIndex = this.slots.size();
 
+        final int slotCount = storage.getSlots();
+        final int cols = 9;                // 每行列数
+        final int x0 = 8;                  // 起始 X
+        final int y0 = slotStartY + 18;    // 起始 Y（保持原偏移）
+        final int dx = 18;                 // 横向间距
+        final int dy = 36;                 // 纵向间距（保持原来的 36）
+
+        for (int i = 0; i < slotCount; i++) {
+            int col = i % cols;
+            int row = i / cols;
+            int x = x0 + col * dx;
+            int y = y0 + row * dy;
+
+            this.addSlot(new OrderedStackTypedSlot(
+                    this,
+                    storage,
+                    i, // 槽索引
+                    inventoryStartIndex,
+                    inventoryEndIndex,
+                    x, y
+            ));
+        }
+
+        vanillaQuickMoveEndIndex = this.slots.size();
     }
 
     private void addFlagSlots()
     {
-        // 添加标记槽
-        for(int row = 0; row < 3; row++)
-        {
-            for (int col = 0; col < 9; col++)
-            {
-                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, flagStorage, row*9+col, 8 + col * 18, slotStartY + row * 36);
-                this.addSlot(flagSlot);
-            }
+        // 动态添加标记槽
+        final int slotCount = flagStorage.getSlots();
+        final int cols = 9;             // 每行列数
+        final int x0 = 8;               // 起始 X
+        final int y0 = slotStartY;      // 起始 Y（保持原定位）
+        final int dx = 18;              // 横向间距
+        final int dy = 36;              // 纵向间距
+
+        for (int i = 0; i < slotCount; i++) {
+            int col = i % cols;
+            int row = i / cols;
+            int x = x0 + col * dx;
+            int y = y0 + row * dy;
+
+            this.addSlot(new FlagStackTypedSlot(this, flagStorage, i, x, y));
         }
     }
 

@@ -313,8 +313,8 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         hopperFluidMode = HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode"));
         hopperNBTMode = HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode"));
         hopperRangeMode = HopperRangeMode.valueOf(tag.getString("hopper_range_mode"));
-        hopperItemMode = tag.contains("hopper_item_model") ? HopperItemMode.valueOf(tag.getString("hopper_item_model")) : null;
-        hopperXpMode = tag.contains("hopper_xp_mode") ? HopperXpMode.valueOf(tag.getString("hopper_xp_mode")) : null;
+        hopperItemMode = tag.contains("hopper_item_model") ? HopperItemMode.valueOf(tag.getString("hopper_item_model")) : HopperItemMode.ALLOW;
+        hopperXpMode = tag.contains("hopper_xp_mode") ? HopperXpMode.valueOf(tag.getString("hopper_xp_mode")) : HopperXpMode.DENY;
     }
 
     @Override

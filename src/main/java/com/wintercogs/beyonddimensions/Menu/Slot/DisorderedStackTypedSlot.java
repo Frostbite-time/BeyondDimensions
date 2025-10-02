@@ -18,10 +18,7 @@ import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.XpUtil;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.BucketItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.lwjgl.glfw.GLFW;
@@ -87,7 +84,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 // 再检查是否为能力交互
                 else if(carriedItem.getCount()==1 && button== GLFW.GLFW_MOUSE_BUTTON_RIGHT && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
                 {
-                    if(carriedItem.getItem() instanceof BucketItem bucketItem)
+                    if(carriedItem.getItem() instanceof BucketItem bucketItem || carriedItem.getItem() instanceof MilkBucketItem)
                     {
                         Object handler = carriedItem.getCapability(Capabilities.FluidHandler.ITEM);
                         if(handler != null)

@@ -63,6 +63,11 @@ public class Config
             .comment("是否允许网络接口将内容物弹出到附近容器")
             .define("interface_can_pop_resource", true);
 
+    public static final ModConfigSpec.IntValue INTERFACE_USABLE_CAPACITY = BUILDER
+            .comment("网络接口有多少个槽位实际可用？")
+            .comment("注意：仅在确定需要时使用，后续版本更新会将其移除并添加其他替代方案，会保证存档兼容。")
+            .defineInRange("interface_usable_capacity", 27, 1, 27);
+
     public static ButtonState uiSortButton;
     public static ButtonState uiSecondSortButton;
     public static ButtonState uiReverseButton;
@@ -75,6 +80,7 @@ public class Config
     public static boolean interfaceCanReceiveResource;
     public static boolean interfaceCanOutputResource;
     public static boolean interfaceCanPopResource;
+    public static int interfaceUsableCapacity;
 
     // 一定放到最后进行静态初始化
     static final ModConfigSpec SPEC = BUILDER.build();
@@ -96,6 +102,6 @@ public class Config
         interfaceCanReceiveResource = INTERFACE_CAN_RECEIVE_RESOURCE.get();
         interfaceCanOutputResource = INTERFACE_CAN_OUTPUT_RESOURCE.get();
         interfaceCanPopResource = INTERFACE_CAN_POP_RESOURCE.get();
-
+        interfaceUsableCapacity = INTERFACE_USABLE_CAPACITY.get();
     }
 }
