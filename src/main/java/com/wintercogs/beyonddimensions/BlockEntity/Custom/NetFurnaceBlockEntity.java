@@ -616,7 +616,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         for(int outputSlot = 0; outputSlot < capacity; outputSlot++)
         {
             KeyAmount outputStack = outputStorageSlots.getStackBySlot(outputSlot);
-            if(outputStack != null && !outputStack.isEmpty())
+            if(!outputStack.isEmpty())
             {
                 // 弹出模式（如果弹出模式关闭，这里会由迭代器安全的离开）
                 for(IItemHandler otherStorage: otherStroages)
@@ -625,7 +625,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     for(int otherSlot = 0; otherSlot < otherStorage.getSlots(); otherSlot++)
                     {
                         KeyAmount extracted = outputStorageSlots.extract(outputSlot,outputStack.key().getVanillaMaxStackSize(),false);
-                        int remaining = otherStorage.insertItem(otherSlot,(ItemStack) extracted.toStack(),false).getCount();
+                        if(!(extracted.key() instanceof ItemStackKey)) continue;
+                        int remaining = otherStorage.insertItem(otherSlot, (ItemStack) extracted.toStack(),false).getCount();
                         if(remaining > 0)
                         {
                             outputStorageSlots.insert(outputSlot,extracted.key(),remaining,false);
