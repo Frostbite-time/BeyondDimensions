@@ -151,5 +151,8 @@
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "워든의 영혼",
   "types.beyonddimensions.source_type.name": "마력원",
-  "types.beyonddimensions.mana_type.name": "식물 마나"
+  "types.beyonddimensions.mana_type.name": "식물 마나",
+
+  "msg.beyonddimensions.magnet.close": "자석 비활성화됨",
+  "msg.beyonddimensions.magnet.open": "자석 활성화됨"
 }

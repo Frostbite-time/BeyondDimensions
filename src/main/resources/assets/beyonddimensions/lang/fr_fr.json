@@ -151,5 +151,8 @@
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Âmes de Gardien",
   "types.beyonddimensions.source_type.name": "Source Arcanique",
-  "types.beyonddimensions.mana_type.name": "Mana Végétal"
+  "types.beyonddimensions.mana_type.name": "Mana Végétal",
+
+  "msg.beyonddimensions.magnet.close": "Aimant désactivé",
+  "msg.beyonddimensions.magnet.open": "Aimant activé"
 }

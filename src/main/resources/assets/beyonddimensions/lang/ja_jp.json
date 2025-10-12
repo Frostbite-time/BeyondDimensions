@@ -151,5 +151,8 @@
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "ウォーデンの魂",
   "types.beyonddimensions.source_type.name": "魔素源",
-  "types.beyonddimensions.mana_type.name": "植物マナ"
+  "types.beyonddimensions.mana_type.name": "植物マナ",
+
+  "msg.beyonddimensions.magnet.close": "マグネットが無効",
+  "msg.beyonddimensions.magnet.open": "マグネットが有効"
 }

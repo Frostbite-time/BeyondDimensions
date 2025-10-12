@@ -151,5 +151,8 @@
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Wächterseelen",
   "types.beyonddimensions.source_type.name": "Arkanquelle",
-  "types.beyonddimensions.mana_type.name": "Pflanzen-Mana"
+  "types.beyonddimensions.mana_type.name": "Pflanzen-Mana",
+
+  "msg.beyonddimensions.magnet.close": "Magnet deaktiviert",
+  "msg.beyonddimensions.magnet.open": "Magnet aktiviert"
 }

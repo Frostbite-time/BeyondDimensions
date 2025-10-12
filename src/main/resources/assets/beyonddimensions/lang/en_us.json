@@ -151,5 +151,8 @@
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Warden Souls",
   "types.beyonddimensions.source_type.name": "Source",
-  "types.beyonddimensions.mana_type.name": "Plant Mana"
+  "types.beyonddimensions.mana_type.name": "Plant Mana",
+
+  "msg.beyonddimensions.magnet.close": "Magnet disabled",
+  "msg.beyonddimensions.magnet.open": "Magnet enabled"
 }

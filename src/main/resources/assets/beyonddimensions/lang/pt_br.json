@@ -151,5 +151,8 @@
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Almas do Guardião",
   "types.beyonddimensions.source_type.name": "Fonte",
-  "types.beyonddimensions.mana_type.name": "Mana Vegetal"
+  "types.beyonddimensions.mana_type.name": "Mana Vegetal",
+
+  "msg.beyonddimensions.magnet.close": "Ímã desativado",
+  "msg.beyonddimensions.magnet.open": "Ímã ativado"
 }

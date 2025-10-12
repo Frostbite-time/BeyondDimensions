@@ -151,5 +151,8 @@
   "types.beyonddimensions.energytype.name": "FE能量",
   "types.beyonddimensions.warden_soul_type.name": "监守者之魂",
   "types.beyonddimensions.source_type.name": "魔源",
-  "types.beyonddimensions.mana_type.name": "植物魔力"
+  "types.beyonddimensions.mana_type.name": "植物魔力",
+
+  "msg.beyonddimensions.magnet.close": "磁铁被禁用",
+  "msg.beyonddimensions.magnet.open": "磁铁被启用"
 }

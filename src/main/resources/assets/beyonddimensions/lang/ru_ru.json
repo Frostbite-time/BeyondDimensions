@@ -151,5 +151,8 @@
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Души Вардена",
   "types.beyonddimensions.source_type.name": "Источник",
-  "types.beyonddimensions.mana_type.name": "Растительная Мана"
+  "types.beyonddimensions.mana_type.name": "Растительная Мана",
+
+  "msg.beyonddimensions.magnet.close": "Магнит отключён",
+  "msg.beyonddimensions.magnet.open": "Магнит включён"
 }
