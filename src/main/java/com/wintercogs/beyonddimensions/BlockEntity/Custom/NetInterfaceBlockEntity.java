@@ -72,6 +72,8 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public PopMode popMode = PopMode.STOP;
 
     private final Direction[] directions = Direction.values();
+
+    private int redstoneLevel = 0;
     
 
     // 存储相邻方块的能力
@@ -88,6 +90,11 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         return this.fakeStackHandler;
     }
 
+    public int getRedstoneLevel()
+    {
+        return redstoneLevel;
+    }
+
     public NetInterfaceBlockEntity(BlockPos pos, BlockState blockState)
     {
         super(ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
@@ -98,14 +105,22 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     @Override
     public boolean shouldWork()
     {
-        // 无论接口是否工作，始终保持与网络的内容更新
-        if(getNet() != null)
+        // 无论接口是否工作，更新红石信号
+
+        int notEmpty = 0;
+        for(IStackType<?> stackType : stackHandler.getStorage())
         {
-            if(Config.interfaceCanReceiveResource)
-                transferToNet();
-            if(Config.interfaceCanOutputResource)
-                transferFromNet();
+            if(stackType != null && !stackType.isEmpty())
+                notEmpty++;
         }
+
+        int newRedstoneLevel = (int)(((float)notEmpty/stackHandler.getSlots()) * 15);
+        if(redstoneLevel != newRedstoneLevel)
+        {
+            redstoneLevel = newRedstoneLevel;
+            level.updateNeighbourForOutputSignal(worldPosition, getBlockState().getBlock());
+        }
+
         return super.shouldWork(); // 接口方块使用内部缓存进行弹出，因此不需要检测getNet
     }
 
@@ -113,6 +128,15 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public void workContent()
     {
         super.workContent();
+
+        if(getNet() != null)
+        {
+            if(Config.interfaceCanReceiveResource)
+                transferToNet();
+            if(Config.interfaceCanOutputResource)
+                transferFromNet();
+        }
+
         if(Config.interfaceCanPopResource)
         {
             // 尝试输出物品到周围

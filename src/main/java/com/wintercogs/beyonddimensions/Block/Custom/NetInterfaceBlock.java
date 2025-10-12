@@ -60,6 +60,20 @@ public class NetInterfaceBlock extends BaseMachineBlock
     }
 
     @Override
+    public boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
+
+    @Override
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof NetInterfaceBlockEntity ce) {
+            return ce.getRedstoneLevel(); // 0..15
+        }
+        return 0;
+    }
+
+    @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
     {
         return new NetInterfaceBlockEntity(blockPos,blockState);
