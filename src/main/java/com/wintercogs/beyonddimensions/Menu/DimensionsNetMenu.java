@@ -380,11 +380,17 @@ public class DimensionsNetMenu extends BDBaseMenu
         if (sortState != ButtonState.SORT_DEFAULT) {
             Comparator<IStackType> comparator;
             if(sortState == ButtonState.SORT_NAME)
-                comparator = Comparator.comparing(item -> item.getDisplayName().getString());
+                comparator = Comparator.comparing((IStackType item) -> item.getDisplayName().getString())
+                        .thenComparing(IStackType::getModId)
+                        .thenComparing(IStackType::getStackAmount);
             else if(sortState == ButtonState.SORT_QUANTITY)
-                comparator = Comparator.comparingLong(IStackType::getStackAmount);
+                comparator = Comparator.comparingLong((IStackType item) -> item.getStackAmount())
+                        .thenComparing((IStackType item) -> item.getDisplayName().getString())
+                        .thenComparing(IStackType::getModId);
             else if(sortState == ButtonState.SORT_MODID)
-                comparator = Comparator.comparing(IStackType::getModId);
+                comparator = Comparator.comparing((IStackType item) -> item.getModId())
+                        .thenComparing((IStackType item) -> item.getDisplayName().getString())
+                        .thenComparing(IStackType::getStackAmount);
             else // 保底条件
                 comparator = Comparator.comparing(item -> item.getDisplayName().getString());
 
