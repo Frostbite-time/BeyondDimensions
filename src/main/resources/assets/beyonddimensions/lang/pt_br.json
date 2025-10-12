@@ -77,7 +77,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "Atual: Ordenação automática desativada",
   "tooltip.item.unstable_space_time.long_data": "O espaço-tempo está estabilizando, faltam %s ciclos. Mantenha-o sempre com você.",
   "tooltip.beyonddimensions.item.xp_exchange": "No GUI: Clique direito para depositar XP, Clique do meio para retirar XP\nAo segurar: Clique direito para depositar XP, Shift + Clique direito para alterar a taxa de transferência XP",
-  "tooltip.editbox.beyonddimensions.search": "Digite '#' para filtrar conteúdo das tooltips\nDigite '@' para filtrar IDs de mods",
+  "tooltip.editbox.beyonddimensions.search": "Digite '#' para filtrar o conteúdo da dica (tooltip)\nDigite '@' para filtrar IDs de mods\nPressione Shift+Z para alternar a vinculação da caixa de pesquisa JEI/EMI",
 
   "istack.beyonddimensions.storage_num.item": "Armazenado: %s itens",
   "istack.beyonddimensions.storage_num.fluid": "Armazenado: %s mB",

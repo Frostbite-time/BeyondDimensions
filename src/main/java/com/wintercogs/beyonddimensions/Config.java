@@ -66,6 +66,10 @@ public class Config
             .comment("注意：仅在确定需要时使用，后续版本更新会将其移除并添加其他替代方案，会保证存档兼容。")
             .defineInRange("interface_usable_capacity", 27, 1, 27);
 
+    public static final ForgeConfigSpec.BooleanValue SEARCH_TEXT_WITH_JEI_EMI = BUILDER
+            .comment("是否与JEI或EMI同步搜索")
+            .define("search_text_with_jei_emi", true);
+
     public static ButtonState uiSortButton;
     public static ButtonState uiReverseButton;
     public static ButtonState uiSearchButton;
@@ -78,6 +82,7 @@ public class Config
     public static boolean interfaceCanOutputResource;
     public static boolean interfaceCanPopResource;
     public static int interfaceUsableCapacity;
+    public static boolean searchTextWithJEIEMI;
 
 
     // 一定放到最后进行静态初始化
@@ -100,5 +105,6 @@ public class Config
         interfaceCanOutputResource = INTERFACE_CAN_OUTPUT_RESOURCE.get();
         interfaceCanPopResource = INTERFACE_CAN_POP_RESOURCE.get();
         interfaceUsableCapacity = INTERFACE_USABLE_CAPACITY.get();
+        searchTextWithJEIEMI = SEARCH_TEXT_WITH_JEI_EMI.get();
     }
 }

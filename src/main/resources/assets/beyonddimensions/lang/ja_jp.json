@@ -77,7 +77,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "現在：自動整頓OFF",
   "tooltip.item.unstable_space_time.long_data": "時空は安定化中、残り%s回の安定化サイクルが必要です。常に携帯してください。",
   "tooltip.beyonddimensions.item.xp_exchange": "GUIで：右クリックで経験値を預ける、ホイールクリックで経験値を取り出す\n手に持って時：右クリックで経験値を預ける、シフト＋右クリックで経験値転送速度を変更",
-  "tooltip.editbox.beyonddimensions.search": "「#」を入力してツールチップの内容をフィルタリング\n「@」を入力してMod IDをフィルタリング",
+  "tooltip.editbox.beyonddimensions.search": "'#'を入力してツールチップの内容を絞り込む\n'@'を入力してModのIDを絞り込む\nJEI/EMI 検索ボックスの連動を切り替えるには Shift+Z を押す",
 
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
   "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",

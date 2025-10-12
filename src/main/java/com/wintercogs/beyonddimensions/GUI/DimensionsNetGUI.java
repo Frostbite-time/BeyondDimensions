@@ -12,12 +12,14 @@ import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SearchToggleButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
+import com.wintercogs.beyonddimensions.Integration.JEI.BDjeiPlugin;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
 import com.wintercogs.beyonddimensions.Unit.UIDataHelper;
+import dev.emi.emi.api.EmiApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -62,8 +64,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     protected SearchToggleButton searchToggleButton;
     protected IconButton craftButton;
     protected BigScroller scroller;
-
-    private boolean isTransferMode = false;
 
     public DimensionsNetGUI(T container, Inventory playerInventory, Component title)
     {
@@ -202,6 +202,42 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         this.searchField.setTextColor(16777215);
         this.searchField.setValue(Config.uiSearch);
         this.searchField.setTooltip(Tooltip.create(Component.translatable("tooltip.editbox.beyonddimensions.search")));
+        this.searchField.setResponder(text -> {
+            if (text.isEmpty()) {
+                searchField.setSuggestion(Component.translatable(
+                        "wintercogs.beyonddimensions.dimensionsguisearch").getString());
+            } else {
+                searchField.setSuggestion(null);
+            }
+            menu.loadSearchText(text);
+            Config.uiSearch = text;
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            lastSearchText = text;
+
+            // 文本同步
+            if(Config.searchTextWithJEIEMI)
+            {
+                // JEI
+                if(BeyondDimensions.JEILoaded)
+                {
+                    BDjeiPlugin.runtime().ifPresent(rt -> {
+                        var overlay = rt.getIngredientFilter();
+                        String current = overlay.getFilterText();
+                        if (!Objects.equals(current, text)) {
+                            overlay.setFilterText(text);
+                        }
+                    });
+                }
+                // 同步到EMI
+                if(BeyondDimensions.EMILoaded)
+                {
+                    String current = EmiApi.getSearchText();
+                    if (!Objects.equals(current, text)) {
+                        EmiApi.setSearchText(text);
+                    }
+                }
+            }
+        });
         if(!this.searchField.getValue().equals(""))
         {
             this.searchField.setSuggestion(null);
@@ -224,21 +260,30 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     protected void containerTick()
     {
         super.containerTick();
-        //父类无操作
-        //每tick自动更新搜索方案
-        if(!Objects.equals(lastSearchText, searchField.getValue()))
+
+        // 每tick从emi或jei同步一次文本
+        if(Config.searchTextWithJEIEMI)
         {
+            if(BeyondDimensions.JEILoaded)
+            {
+                BDjeiPlugin.runtime().ifPresent(rt -> {
+                    var overlay = rt.getIngredientFilter();
+                    String current = overlay.getFilterText();
+                    if (!Objects.equals(current, lastSearchText)) {
+                        searchField.setValue(current);
+                    }
+                });
+            }
 
-            if(!searchField.getValue().equals(""))
-                searchField.setSuggestion(null);
-            else
-                searchField.setSuggestion(Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch").getString());
-
-            menu.loadSearchText(searchField.getValue());
-            Config.uiSearch = searchField.getValue();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
-            lastSearchText = searchField.getValue();
+            if(BeyondDimensions.EMILoaded)
+            {
+                String current = EmiApi.getSearchText();
+                if (!Objects.equals(current, lastSearchText)) {
+                    searchField.setValue(current);
+                }
+            }
         }
+
         scroller.updateScrollPosition(menu.lineData,menu.maxLineData);// 读取翻页数据并应用
     }
 
@@ -404,21 +449,20 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             menu.hasShiftDown = true;
 
         InputConstants.Key mouseKey = InputConstants.getKey(keyCode, scanCode);
-        if(this.searchField.isFocused())
+
+        if(hasShiftDown() && mouseKey.getValue() == GLFW.GLFW_KEY_Z)
         {
-            if ((mouseKey.getValue()>=48 &&mouseKey.getValue()<=57) || // 属于数字键
-                    (mouseKey.getValue()>=65 &&mouseKey.getValue()<=90) || // 属于字母键
-                    (mouseKey.getValue()>=320 &&mouseKey.getValue()<=329) || // 属于小键盘数字
-                    mouseKey.getValue() == 32 ) // 属于空格
-            {
-                // 当搜索框为焦点且属于常见输入时，禁止其他操作
-                return true;
-            }
+            boolean current = Config.searchTextWithJEIEMI;
+            Config.searchTextWithJEIEMI = !current;
+            Config.SEARCH_TEXT_WITH_JEI_EMI.set(!current);
+            Config.SEARCH_TEXT_WITH_JEI_EMI.save();
         }
+
         if(this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey) ||
                 DimensionsShortKeys.OPEN_GUI_KEY.getKey() == mouseKey)
         {
-            onClose();
+            if(!this.searchField.isFocused())
+                onClose();
             return true;
         }
         else

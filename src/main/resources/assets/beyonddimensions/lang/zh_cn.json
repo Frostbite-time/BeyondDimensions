@@ -77,7 +77,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "当前：自动整理关闭",
   "tooltip.item.unstable_space_time.long_data": "时空仍在稳定中，仍需%s个稳定周期，请保持随身携带",
   "tooltip.beyonddimensions.item.xp_exchange": "在GUI中：右键存入经验，中键取出经验\n手持时：右键存入经验，Shift右键改变经验交互速率",
-  "tooltip.editbox.beyonddimensions.search": "输入'#'以筛选提示框内容\n输入'@'以筛选模组ID",
+  "tooltip.editbox.beyonddimensions.search": "输入'#'以筛选提示框内容\n输入'@'以筛选模组ID\n按Shift+Z以切换JEI/EMI搜索框联动",
 
   "istack.beyonddimensions.storage_num.item": "已存储：%s个",
   "istack.beyonddimensions.storage_num.fluid": "已存储：%smB",

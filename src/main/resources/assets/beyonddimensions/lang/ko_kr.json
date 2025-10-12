@@ -77,7 +77,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "현재: 자동 정렬 비활성화됨",
   "tooltip.item.unstable_space_time.long_data": "시공간 안정화 중, %s회의 안정화 주기 남음. 항상 휴대하십시오.",
   "tooltip.beyonddimensions.item.xp_exchange": "GUI에서：우클릭으로 경험치 저장, 휠 클릭으로 경험치 인출\n들고 있을 때：우클릭으로 경험치 저장, 쉬프트 + 우클릭으로 경험치 전송 속도 변경",
-  "tooltip.editbox.beyonddimensions.search": "'#' 입력 시 툴팁 내용 필터링\n'@' 입력 시 모드 ID 필터링",
+  "tooltip.editbox.beyonddimensions.search": "도구 설명 내용 필터링: '#' 입력\n모드 ID 필터링: '@' 입력\nJEI/EMI 검색창 연동 전환: Shift+Z 누름",
 
   "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
   "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",

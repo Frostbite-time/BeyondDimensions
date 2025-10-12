@@ -77,7 +77,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "Текущий: Автосортировка отключена",
   "tooltip.item.unstable_space_time.long_data": "Пространство-время стабилизируется, осталось %s циклов. Носите с собой постоянно.",
   "tooltip.beyonddimensions.item.xp_exchange": "В интерфейсе: ПКМ для пополнения опыта, СКМ для снятия опыта\nВ руках: ПКМ для пополнения опыта, Shift + ПКМ для изменения скорости передачи опыта",
-  "tooltip.editbox.beyonddimensions.search": "Введите '#', чтобы фильтровать содержимое подсказок\nВведите '@', чтобы фильтровать ID модов",
+  "tooltip.editbox.beyonddimensions.search": "Введите '#', чтобы фильтровать содержимое подсказок\nВведите '@', чтобы фильтровать ID модов\nНажмите Shift+Z для переключения привязки к поисковой строке JEI/EMI",
 
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
   "istack.beyonddimensions.storage_num.fluid": "Сохранено: %s мБ",

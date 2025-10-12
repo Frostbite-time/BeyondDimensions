@@ -77,7 +77,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "Actuel : Tri auto. désactivé",
   "tooltip.item.unstable_space_time.long_data": "L'espace-temps se stabilise encore, %s cycles requis. Gardez-le sur vous en permanence.",
   "tooltip.beyonddimensions.item.xp_exchange": "Dans l'interface graphique : Clic droit pour déposer XP, Clic molette pour retirer XP\nEn tenant : Clic droit pour déposer XP, Maj + Clic droit pour changer le taux de transfert XP",
-  "tooltip.editbox.beyonddimensions.search": "Saisissez '#' pour filtrer le contenu des infobulles\nSaisissez '@' pour filtrer les ID de mods",
+  "tooltip.editbox.beyonddimensions.search": "Tapez '#' pour filtrer le contenu des infobulles\nTapez '@' pour filtrer les IDs des mods\nAppuyez sur Maj+Z pour activer/désactiver le lien avec la barre de recherche JEI/EMI",
 
   "istack.beyonddimensions.storage_num.item": "Stocké : %s unités",
   "istack.beyonddimensions.storage_num.fluid": "Stocké : %s mB",
