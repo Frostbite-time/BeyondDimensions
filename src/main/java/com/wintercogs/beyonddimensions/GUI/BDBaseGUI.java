@@ -26,6 +26,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
 
     // 用于 shift双击加左键的效果
     ItemStack lastInvClickedStack = ItemStack.EMPTY;
+    ItemStackType lastStorageClickedStack = new ItemStackType();
     int lastInvClickedSlot = -1;
     int cleanHold = 10; // 给予半秒时间
 
@@ -94,6 +95,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         {
             lastInvClickedStack = ItemStack.EMPTY;
             lastInvClickedSlot = -1;
+            lastStorageClickedStack = new ItemStackType();
             cleanHold = 10;
         }
 
@@ -136,6 +138,14 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                     if(slot instanceof AbstractStackTypedSlot sSlot)
                     {
                         clickItem = sSlot.getVanillaActualStack();
+                        if(!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem))
+                        {
+                            PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(lastStorageClickedStack.copyWithCount(Long.MAX_VALUE),false));
+                        }
+                        else if(!clickItem.isEmpty() && clickItem instanceof ItemStackType itemStackType)
+                        {
+                            this.lastStorageClickedStack = (ItemStackType)itemStackType.copy();
+                        }
                     }
                     else
                     {
