@@ -154,5 +154,7 @@
   "types.beyonddimensions.mana_type.name": "Plant Mana",
 
   "msg.beyonddimensions.magnet.close": "Magnet disabled",
-  "msg.beyonddimensions.magnet.open": "Magnet enabled"
+  "msg.beyonddimensions.magnet.open": "Magnet enabled",
+  "msg.beyonddimensions.item.xp_exchange.open": "Enable XP auto-exchange, maintaining level per interaction",
+  "msg.beyonddimensions.item.xp_exchange.close": "Disable XP auto-exchange"
 }

@@ -154,5 +154,7 @@
   "types.beyonddimensions.mana_type.name": "植物マナ",
 
   "msg.beyonddimensions.magnet.close": "マグネットが無効",
-  "msg.beyonddimensions.magnet.open": "マグネットが有効"
+  "msg.beyonddimensions.magnet.open": "マグネットが有効",
+  "msg.beyonddimensions.item.xp_exchange.open": "XP自動交換を有効化（1回の操作あたりの経験値量を維持）",
+  "msg.beyonddimensions.item.xp_exchange.close": "XP自動交換を無効化"
 }

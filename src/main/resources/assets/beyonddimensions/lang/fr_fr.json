@@ -154,5 +154,7 @@
   "types.beyonddimensions.mana_type.name": "Mana Végétal",
 
   "msg.beyonddimensions.magnet.close": "Aimant désactivé",
-  "msg.beyonddimensions.magnet.open": "Aimant activé"
+  "msg.beyonddimensions.magnet.open": "Aimant activé",
+  "msg.beyonddimensions.item.xp_exchange.open": "Activer l'échange automatique d'XP, maintenant le niveau par interaction",
+  "msg.beyonddimensions.item.xp_exchange.close": "Désactiver l'échange automatique d'XP"
 }

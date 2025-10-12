@@ -6,8 +6,13 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.XpTransferSpeedMode;
+import com.wintercogs.beyonddimensions.Tags.ModFluidTags;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import com.wintercogs.beyonddimensions.Unit.XpUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -19,14 +24,18 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 
 public class XpExchangeItem extends Item
 {
+    public static List<Fluid> xpFluids = new ArrayList<>();
     public XpExchangeItem(Properties properties)
     {
         super(properties.stacksTo(1));
@@ -37,12 +46,18 @@ public class XpExchangeItem extends Item
     {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         checkComponents(stack);
+        if(xpFluids.isEmpty())
+            xpFluids = getExperienceFluids(level);
+        if(entity instanceof Player player && !level.isClientSide() && getOrDefaultXpNetKeepMode(stack, false))
+            keepXpLevel(stack, player, level);
     }
 
     private void checkComponents(ItemStack stack)
     {
         if(!hasXpTransferSpeedMode(stack))
             setXpTransferSpeedMode(stack, XpTransferSpeedMode.SLOW);
+        if(!hasXpNetKeepMode(stack))
+            setXpNetKeepMode(stack, false);
     }
 
     @Override
@@ -81,32 +96,116 @@ public class XpExchangeItem extends Item
             }
             else
             {
-                DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-                if(net != null)
-                {
-                    int conversionRate = XpExchangeItem.getConversionRate();
-                    double currentLevel = XpUtil.levelAsDouble(player);
-                    int wantConversionLevel = getXpLevelPerAction(itemstack);
-                    UnifiedStorage storage = net.getUnifiedStorage();
-
-                    long needRemovePlayerXp = XpUtil.xpBetweenLevels(Math.max(currentLevel-wantConversionLevel,0),currentLevel);
-                    int actualRemovePlayerXp = BDMath.clampLongToInt(needRemovePlayerXp);
-                    long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
-
-                    // 插入当前经验流体
-                    IStackType remaining = storage.insert(new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(),1),actualInsertFluid),false);
-                    if(!remaining.isEmpty())
-                    {
-                        int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount()/20); // 由于前面从int*20，这里除回去
-                        actualRemovePlayerXp = actualRemovePlayerXp - needReturnXp;
-                    }
-                    player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值
-                }
+                boolean current = getOrDefaultXpNetKeepMode(itemstack, false);
+                setXpNetKeepMode(itemstack, !current);
+                if(getOrDefaultXpNetKeepMode(itemstack, false))
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.open"));
+                else
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.close"));
             }
         }
 
         // 最终回退
         return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+    }
+
+    private void keepXpLevel(ItemStack stack, Player player, Level level)
+    {
+        if (level.isClientSide()) return;
+
+        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        if (net == null) return;
+
+        final int conversionRate = XpExchangeItem.getConversionRate();
+        final double currentLevel = XpUtil.levelAsDouble(player);
+        final int targetLevel = getXpLevelPerAction(stack);
+        final UnifiedStorage storage = net.getUnifiedStorage();
+
+        // 经验流体候选列表：优先自家 XP 流体，其次为所有带 C_EXPERIENCE 标签的其它流体
+        final Fluid canonicalXp = ModFluids.XP_FLUID.source().get();
+
+        if (currentLevel > targetLevel) {
+            // 把多余的 XP 存成“自家 XP 流体”
+            long needRemoveXp = XpUtil.xpBetweenLevels(targetLevel, currentLevel);
+            int toRemoveXp = BDMath.clampLongToInt(needRemoveXp);
+
+            long toInsertUnits = (long) toRemoveXp * conversionRate;
+            IStackType remaining = storage.insert(
+                    new FluidStackType(new FluidStack(canonicalXp, 1), toInsertUnits),
+                    false
+            );
+
+            if (!remaining.isEmpty()) {
+                // 有剩余（仓库放不下），把这部分折算回 XP，不再扣玩家
+                int overflowXp = BDMath.clampLongToInt(remaining.getStackAmount() / conversionRate);
+                toRemoveXp -= overflowXp;
+            }
+
+            if (toRemoveXp != 0) {
+                player.giveExperiencePoints(-toRemoveXp);
+            }
+
+        } else if (currentLevel < targetLevel) {
+            // 从任意“经验流体”里提取，尽量把玩家补到目标等级
+            long needAddXp = XpUtil.xpBetweenLevels(currentLevel, targetLevel);
+            int remainingXp = BDMath.clampLongToInt(needAddXp);
+            int gainedXpTotal = 0;
+
+            for (Fluid f : xpFluids) {
+                if (remainingXp <= 0) break;
+
+                long wantUnits = (long) remainingXp * conversionRate;
+                if (wantUnits <= 0) break;
+
+                IStackType extracted = storage.extract(
+                        new FluidStackType(new FluidStack(f, 1), wantUnits),
+                        false
+                );
+
+                if (extracted.isEmpty()) continue;
+
+                long units = extracted.getStackAmount();
+                int gainedXp = BDMath.clampLongToInt(units / conversionRate);
+                if (gainedXp <= 0) {
+                    // 抽到了不足 1 XP 的零头，原样放回，继续尝试其它流体
+                    storage.insert(new FluidStackType(new FluidStack(f, 1), units), false);
+                    continue;
+                }
+
+                long consumedUnits = (long) gainedXp * conversionRate;
+                long remainderUnits = units - consumedUnits;
+
+                // 多抽出来但不足 1 XP 的部分回滚
+                if (remainderUnits > 0) {
+                    storage.insert(new FluidStackType(new FluidStack(f, 1), remainderUnits), false);
+                }
+
+                gainedXpTotal += gainedXp;
+                remainingXp -= gainedXp;
+            }
+
+            if (gainedXpTotal > 0) {
+                player.giveExperiencePoints(gainedXpTotal);
+            }
+            // 如果仓库里经验流体不足，玩家会被尽量接近目标等级，等待下次再补。
+        }
+    }
+
+    /**
+     * 获取“经验流体”候选列表：先放 canonical，再放其它带标签的（去重）。
+     */
+    private List<Fluid> getExperienceFluids(Level level)
+    {
+        final Registry<Fluid> reg = level.registryAccess().registryOrThrow(Registries.FLUID);
+        final LinkedHashSet<Fluid> set = new LinkedHashSet<>();
+        // 追加所有带 C_EXPERIENCE 标签的流体
+        reg.getTag(ModFluidTags.C_EXPERIENCE).ifPresent((HolderSet<Fluid> holders) -> {
+            for (Holder<Fluid> h : holders) {
+                set.add(h.value());
+            }
+        });
+
+        return new ArrayList<>(set);
     }
 
     // 获取本次操作时最大操作的经验等级
@@ -156,5 +255,23 @@ public class XpExchangeItem extends Item
     public static void setXpTransferSpeedMode(ItemStack stack, XpTransferSpeedMode newMode)
     {
         stack.getOrCreateTag().putString("xp_transfer_speed_mode", newMode.name());
+    }
+
+    public static boolean getOrDefaultXpNetKeepMode(ItemStack stack, boolean defaultValue)
+    {
+        if (stack.hasTag() && stack.getTag().contains("xp_net_keep_mode")) {
+            return stack.getTag().getBoolean("xp_net_keep_mode");
+        }
+        return defaultValue; //未命中
+    }
+
+    public static boolean hasXpNetKeepMode(ItemStack stack)
+    {
+        return stack.hasTag() && stack.getTag().contains("xp_net_keep_mode");
+    }
+
+    public static void setXpNetKeepMode(ItemStack stack, boolean newMode)
+    {
+        stack.getOrCreateTag().putBoolean("xp_net_keep_mode", newMode);
     }
 }

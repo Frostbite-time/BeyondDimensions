@@ -154,5 +154,7 @@
   "types.beyonddimensions.mana_type.name": "Maná Vegetal",
 
   "msg.beyonddimensions.magnet.close": "Imán desactivado",
-  "msg.beyonddimensions.magnet.open": "Imán activado"
+  "msg.beyonddimensions.magnet.open": "Imán activado",
+  "msg.beyonddimensions.item.xp_exchange.open": "Habilitar intercambio automático de XP, manteniendo nivel por interacción",
+  "msg.beyonddimensions.item.xp_exchange.close": "Deshabilitar intercambio automático de XP"
 }

@@ -154,5 +154,7 @@
   "types.beyonddimensions.mana_type.name": "Растительная Мана",
 
   "msg.beyonddimensions.magnet.close": "Магнит отключён",
-  "msg.beyonddimensions.magnet.open": "Магнит включён"
+  "msg.beyonddimensions.magnet.open": "Магнит включён",
+  "msg.beyonddimensions.item.xp_exchange.open": "Включить автоматический обмен опыта, поддерживая уровень за одно взаимодействие",
+  "msg.beyonddimensions.item.xp_exchange.close": "Выключить автоматический обмен опыта"
 }

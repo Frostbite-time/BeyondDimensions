@@ -154,5 +154,7 @@
   "types.beyonddimensions.mana_type.name": "Mana Vegetal",
 
   "msg.beyonddimensions.magnet.close": "Ímã desativado",
-  "msg.beyonddimensions.magnet.open": "Ímã ativado"
+  "msg.beyonddimensions.magnet.open": "Ímã ativado",
+  "msg.beyonddimensions.item.xp_exchange.open": "Ativar troca automática de XP, mantendo nível por interação",
+  "msg.beyonddimensions.item.xp_exchange.close": "Desativar troca automática de XP"
 }

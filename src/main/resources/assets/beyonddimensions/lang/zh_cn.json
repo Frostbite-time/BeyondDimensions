@@ -154,5 +154,7 @@
   "types.beyonddimensions.mana_type.name": "植物魔力",
 
   "msg.beyonddimensions.magnet.close": "磁铁被禁用",
-  "msg.beyonddimensions.magnet.open": "磁铁被启用"
+  "msg.beyonddimensions.magnet.open": "磁铁被启用",
+  "msg.beyonddimensions.item.xp_exchange.open": "开启经验自动存取，将经验等级维持在单次交互量",
+  "msg.beyonddimensions.item.xp_exchange.close": "关闭经验自动存取"
 }

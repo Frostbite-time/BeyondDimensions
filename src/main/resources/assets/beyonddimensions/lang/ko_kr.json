@@ -154,5 +154,7 @@
   "types.beyonddimensions.mana_type.name": "식물 마나",
 
   "msg.beyonddimensions.magnet.close": "자석 비활성화됨",
-  "msg.beyonddimensions.magnet.open": "자석 활성화됨"
+  "msg.beyonddimensions.magnet.open": "자석 활성화됨",
+  "msg.beyonddimensions.item.xp_exchange.open": "XP 자동 교환 활성화, 상호작용당 레벨 유지",
+  "msg.beyonddimensions.item.xp_exchange.close": "XP 자동 교환 비활성화"
 }

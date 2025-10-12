@@ -154,5 +154,7 @@
   "types.beyonddimensions.mana_type.name": "Pflanzen-Mana",
 
   "msg.beyonddimensions.magnet.close": "Magnet deaktiviert",
-  "msg.beyonddimensions.magnet.open": "Magnet aktiviert"
+  "msg.beyonddimensions.magnet.open": "Magnet aktiviert",
+  "msg.beyonddimensions.item.xp_exchange.open": "Erfahrungspunkt-Automatik aktivieren, behält den Erfahrungsgrad mit einer Einzelinteraktionsmenge aufrecht",
+  "msg.beyonddimensions.item.xp_exchange.close": "Erfahrungspunkt-Automatik deaktivieren"
 }
