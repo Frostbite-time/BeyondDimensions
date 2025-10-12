@@ -2,7 +2,7 @@
   "parent": "minecraft:block/orientable",
   "textures": {
     "front": "beyonddimensions:block/net_furnace_front",
-    "side" : "minecraft:block/furnace_side",
-    "top"  : "minecraft:block/furnace_top"
+    "side" : "beyonddimensions:block/mana_pool_top",
+    "top"  : "beyonddimensions:block/mana_pool_top"
   }
 }
