@@ -165,8 +165,8 @@ public class StackHandler implements IStackHandler
             }
             slots.remove(last);
         }
-        int size() { return slots.size(); }
-        int get(int i) { return slots.get(i); }
+        public int size() { return slots.size(); }
+        public int get(int i) { return slots.get(i); }
         List<Integer> snapshot() { return new ArrayList<>(slots); } // 防御性副本
     }
 

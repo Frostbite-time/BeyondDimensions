@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
@@ -70,7 +71,8 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public PopMode popMode = PopMode.STOP;
 
     private final Direction[] directions = Direction.values();
-    
+
+    private int redstoneLevel = 0;
 
     // 存储相邻方块的能力
     // 按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
@@ -82,8 +84,14 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         return this.stackHandler;
     }
 
-    public StackHandler getFakeStackHandler(){
+    public StackHandler getFakeStackHandler()
+    {
         return this.fakeStackHandler;
+    }
+
+    public int getRedstoneLevel()
+    {
+        return redstoneLevel;
     }
 
     public NetInterfaceBlockEntity(BlockPos pos, BlockState blockState)
@@ -94,14 +102,18 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     @Override
     public boolean shouldWork()
     {
-        // 无论接口是否工作，始终保持与网络的内容更新
-        if(getNet() != null)
+        // 无论接口是否工作，更新红石信号
+
+        int empty = stackHandler.getBucket(EmptyStackKey.ID).map(StackHandler.SlotBucket::size).orElse(0);
+        int notEmpty = stackHandler.getSlots() - empty;
+
+        int newRedstoneLevel = (int)(((float)notEmpty/stackHandler.getSlots()) * 15);
+        if(redstoneLevel != newRedstoneLevel)
         {
-            if(Config.interfaceCanReceiveResource)
-                transferToNet();
-            if(Config.interfaceCanOutputResource)
-                transferFromNet();
+            redstoneLevel = newRedstoneLevel;
+            level.updateNeighbourForOutputSignal(worldPosition, getBlockState().getBlock());
         }
+
         return super.shouldWork(); // 接口方块使用内部缓存进行弹出，因此不需要检测getNet
     }
 
@@ -109,6 +121,15 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public void workContent()
     {
         super.workContent();
+
+        if(getNet() != null)
+        {
+            if(Config.interfaceCanReceiveResource)
+                transferToNet();
+            if(Config.interfaceCanOutputResource)
+                transferFromNet();
+        }
+
         if(Config.interfaceCanPopResource)
         {
             // 尝试输出物品到周围
