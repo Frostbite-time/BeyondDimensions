@@ -379,9 +379,15 @@ public class ServerPayloadHandler
                             if(stack.has(ModDataComponents.CONTROL_MODE))
                             {
                                 if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                                {
                                     stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
+                                }
                                 else if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                                {
                                     stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
+                                }
                             }
                         }
                     }
@@ -398,9 +404,15 @@ public class ServerPayloadHandler
                                 if(stack.has(ModDataComponents.CONTROL_MODE))
                                 {
                                     if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                                    {
                                         stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
+                                    }
                                     else if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                                    {
                                         stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
+                                    }
                                 }
                             }
                         }
