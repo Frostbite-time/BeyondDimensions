@@ -104,7 +104,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     {
         // 无论接口是否工作，更新红石信号
 
-        int empty = stackHandler.getBucket(EmptyStackKey.ID).map(StackHandler.SlotBucket::size).orElse(0);
+        int empty = stackHandler.getBucket(EmptyStackKey.INSTANCE).map(StackHandler.SlotBucket::size).orElse(stackHandler.getSlots());
         int notEmpty = stackHandler.getSlots() - empty;
 
         int newRedstoneLevel = (int)(((float)notEmpty/stackHandler.getSlots()) * 15);
