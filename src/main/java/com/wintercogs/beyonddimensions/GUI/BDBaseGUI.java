@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Packet.BatchTransferPacket;
 import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -26,6 +27,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
 
     // 用于 shift双击加左键的效果
     ItemStack lastInvClickedStack = ItemStack.EMPTY;
+    ItemStackKey lastStorageClickedStack = ItemStackKey.EMPTY;
     int lastInvClickedSlot = -1;
     int cleanHold = 10; // 给予半秒时间
 
@@ -92,6 +94,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         else
         {
             lastInvClickedStack = ItemStack.EMPTY;
+            lastStorageClickedStack = ItemStackKey.EMPTY;
             lastInvClickedSlot = -1;
             cleanHold = 10;
         }
@@ -137,6 +140,14 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                     if(slot instanceof AbstractStackTypedSlot sSlot)
                     {
                         clickItem = sSlot.getVanillaActualStack();
+                        if(!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem.key()))
+                        {
+                            PacketDistributor.sendToServer(new BatchTransferPacket(clickItem,false));
+                        }
+                        else if(!clickItem.isEmpty() && clickItem.key() instanceof ItemStackKey itemStackKey)
+                        {
+                            this.lastStorageClickedStack = itemStackKey;
+                        }
                     }
                     else
                     {

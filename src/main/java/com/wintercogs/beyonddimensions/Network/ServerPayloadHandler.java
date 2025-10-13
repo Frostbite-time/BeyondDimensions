@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Network;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
@@ -232,10 +233,29 @@ public class ServerPayloadHandler
                                     }
                                 }
                             }
-                            //到背包 暂时留空，以后如果需要再写
-                            else
+                            // 存储到背包
+                            else if(menu instanceof DimensionsNetMenu netMenu)
                             {
+                                if (!packet.clickStack().isEmpty())
+                                {
+                                    AbstractUnorderedStackHandler storage = netMenu.storage;
 
+                                    // 遍历目标槽位
+                                    for(int targetSlotIndex=menu.inventoryStartIndex; targetSlotIndex<menu.inventoryEndIndex && storage.hasStack(clickItem); targetSlotIndex++)
+                                    {
+                                        Slot slot = menu.slots.get(targetSlotIndex);
+
+                                        KeyAmount extract = storage.extract(clickItem, Integer.MAX_VALUE,false); // 防止数量过多无法回插
+                                        if(extract.toStack() instanceof ItemStack extractedStack)
+                                        {
+                                            ItemStack remaining = slot.safeInsert(extractedStack);
+                                            if(!remaining.isEmpty())
+                                                storage.insert(new ItemStackKey(remaining), remaining.getCount(),false);
+                                        }
+                                        else  // 防御操作，如果不是物品堆，整个回插
+                                            storage.insert(extract.key(), extract.amount(),false);
+                                    }
+                                }
                             }
 
                             menu.broadcastChanges();
