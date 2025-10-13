@@ -54,6 +54,24 @@ public class XpUtil
         }
     }
 
+    /** 从 fromLevel 补到“至少 targetLevel（整数级，进度>=0）”需要的 XP（向上取整）。*/
+    public static long xpToReachAtLeast(double fromLevel, int targetLevel)
+    {
+        if (fromLevel < 0 || targetLevel < 0) return 0L;
+        double diff = totalXpAtIntegerLevel(targetLevel) - totalXpAtFractionalLevel(fromLevel);
+        if (diff <= 0) return 0L;
+        return (long) Math.ceil(diff - 1e-9); // epsilon 防止 0.999999 被误判
+    }
+
+    /** 当前相比于“targetLevel 的 0 进度”多出来的 XP（向下取整），用于抽走。*/
+    public static long xpExcessAbove(double fromLevel, int targetLevel)
+    {
+        if (fromLevel < 0 || targetLevel < 0) return 0L;
+        double diff = totalXpAtFractionalLevel(fromLevel) - totalXpAtIntegerLevel(targetLevel);
+        if (diff <= 0) return 0L;
+        return (long) Math.floor(diff + 1e-9); // epsilon
+    }
+
     /** 从等级 L 升到 L+1 需要的经验（L 为整数等级）。 */
     private static int xpCostToNextLevel(int L) {
         if (L <= 15) {

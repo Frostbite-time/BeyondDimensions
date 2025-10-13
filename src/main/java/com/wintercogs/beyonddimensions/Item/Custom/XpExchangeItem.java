@@ -126,7 +126,7 @@ public class XpExchangeItem extends Item
 
         if (currentLevel > targetLevel) {
             // 把多余的 XP 存成“自家 XP 流体”
-            long needRemoveXp = XpUtil.xpBetweenLevels(targetLevel, currentLevel);
+            long needRemoveXp = XpUtil.xpExcessAbove(currentLevel, targetLevel);
             int toRemoveXp = BDMath.clampLongToInt(needRemoveXp);
 
             long toInsertUnits = (long) toRemoveXp * conversionRate;
@@ -147,7 +147,7 @@ public class XpExchangeItem extends Item
 
         } else if (currentLevel < targetLevel) {
             // 从任意“经验流体”里提取，尽量把玩家补到目标等级
-            long needAddXp = XpUtil.xpBetweenLevels(currentLevel, targetLevel);
+            long needAddXp = XpUtil.xpToReachAtLeast(currentLevel, targetLevel);
             int remainingXp = BDMath.clampLongToInt(needAddXp);
             int gainedXpTotal = 0;
 
