@@ -76,7 +76,7 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Actual: Orden automático activado",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Actual: Orden automático desactivado",
   "tooltip.item.unstable_space_time.long_data": "El espacio-tiempo aún se estabiliza, faltan %s ciclos. Por favor, llévalo siempre contigo.",
-  "tooltip.beyonddimensions.item.xp_exchange": "En GUI: Clic derecho para depositar XP, Clic central para retirar XP\nAl sostener: Clic derecho para depositar XP, Mayús + Clic derecho para cambiar la tasa de transferencia de XP",
+  "tooltip.beyonddimensions.item.xp_exchange": "En GUI: Clic derecho para guardar XP, Clic medio para obtener XP\nAl sostener: Clic derecho para cambiar modo de trabajo, Mayús+Clic derecho para cambiar tasa de interacción de XP",
   "tooltip.editbox.beyonddimensions.search": "Escribe '#' para filtrar el contenido de los tooltips\nEscribe '@' para filtrar IDs de mods\nPulsa Shift+Z para alternar el enlace con la caja de búsqueda JEI/EMI",
 
   "istack.beyonddimensions.storage_num.item": "Almacenado: %s unidades",
