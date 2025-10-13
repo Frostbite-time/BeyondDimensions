@@ -38,7 +38,7 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
         this.topPos = (this.height - imageHeight)/2;
 
         filterModeButton = new RightTabButton(leftPos + 176, topPos +6, 23,26 ,
-                leftPos + 176+2, topPos +6 +5, 16,16,button -> {
+                leftPos + 176+3, topPos +6 +4, 16,16,button -> {
             filterModeButton.toggleState();
             menu.be.filterMode = (FilterMode) filterModeButton.currentState;
             menu.writeAndSendQuickData();
@@ -66,7 +66,7 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
         addRenderableWidget(filterModeButton);
 
         controlModeButton = new RightTabButton(leftPos + 176, topPos +36, 23,26 ,
-                leftPos + 176 +2 , topPos +36 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +36 +4, 16,16,button -> {
             controlModeButton.toggleState();
             menu.be.controlMode = (RedStoneControlMode) controlModeButton.currentState;
             menu.writeAndSendQuickData();
@@ -98,7 +98,7 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
         addRenderableWidget(controlModeButton);
 
         hopperItemModeButton = new RightTabButton(leftPos + 176, topPos +66, 23,26 ,
-                leftPos + 176 +2 , topPos +66 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +66 +4, 16,16,button -> {
             hopperItemModeButton.toggleState();
             menu.be.hopperItemMode = (HopperItemMode) hopperItemModeButton.currentState;
             menu.writeAndSendQuickData();
@@ -126,7 +126,7 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
         addRenderableWidget(hopperItemModeButton);
 
         hopperXpModeButton = new RightTabButton(leftPos + 176, topPos +96, 23,26 ,
-                leftPos + 176 +2 , topPos +96 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +96 +4, 16,16,button -> {
             hopperXpModeButton.toggleState();
             menu.be.hopperXpMode = (HopperXpMode) hopperXpModeButton.currentState;
             menu.writeAndSendQuickData();
@@ -154,7 +154,7 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
         addRenderableWidget(hopperXpModeButton);
 
         hopperNBTModeButton = new RightTabButton(leftPos + 176, topPos +126, 23,26 ,
-                leftPos + 176 +2 , topPos +126 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +126 +4, 16,16,button -> {
             hopperNBTModeButton.toggleState();
             menu.be.hopperNBTMode = (HopperNBTMode) hopperNBTModeButton.currentState;
             menu.writeAndSendQuickData();
@@ -182,7 +182,7 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
         addRenderableWidget(hopperNBTModeButton);
 
         hopperFluidModeButton = new RightTabButton(leftPos + 176, topPos +156, 23,26 ,
-                leftPos + 176 +2 , topPos +156 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +156 +4, 16,16,button -> {
             hopperFluidModeButton.toggleState();
             menu.be.hopperFluidMode = (HopperFluidMode) hopperFluidModeButton.currentState;
             menu.writeAndSendQuickData();
@@ -209,7 +209,7 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
         addRenderableWidget(hopperFluidModeButton);
 
         hopperRangeModeButton = new LeftTabButton(leftPos - 23, topPos + 156, 23,26 ,
-                leftPos - 18 , topPos + 156 +5, 16,16,button -> {
+                leftPos - 18 , topPos + 156 +4, 16,16,button -> {
             hopperRangeModeButton.toggleState();
             menu.be.hopperRangeMode = (HopperRangeMode) hopperRangeModeButton.currentState;
             menu.writeAndSendQuickData();

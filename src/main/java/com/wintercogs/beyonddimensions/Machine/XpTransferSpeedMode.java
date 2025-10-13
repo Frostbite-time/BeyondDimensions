@@ -5,7 +5,8 @@ public enum XpTransferSpeedMode
     SLOW, // 1级
     MID,  // 10级
     HIGH, // 30级
-    HIGHEST; // 100级
+    HIGHEST, // 100级
+    OVER_HIGHEST; // 150级
 
     public XpTransferSpeedMode next() {
         XpTransferSpeedMode[] v = values();

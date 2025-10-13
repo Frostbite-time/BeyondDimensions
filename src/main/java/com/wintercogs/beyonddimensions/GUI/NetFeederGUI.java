@@ -34,7 +34,7 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
         this.topPos = (this.height - imageHeight)/2;
 
         feederModeButton = new RightTabButton(leftPos + 176, topPos +6, 23,26 ,
-                leftPos + 176 +2 , topPos +6 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +6 +4, 16,16,button -> {
             feederModeButton.toggleState();
             menu.menuStack.set(ModDataComponents.FEEDER_MODE,(FeederMode) feederModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -65,7 +65,7 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
         addRenderableWidget(feederModeButton);
 
         controlModeButton = new RightTabButton(leftPos + 176, topPos +36, 23,26 ,
-                leftPos + 176 +2 , topPos +36 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +36 +4, 16,16,button -> {
             controlModeButton.toggleState();
             menu.menuStack.set(ModDataComponents.CONTROL_MODE,(RedStoneControlMode) controlModeButton.currentState);
             menu.writeAndSendQuickData();

@@ -33,7 +33,7 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
         this.topPos = (this.height - imageHeight)/2;
 
         filterModeButton = new RightTabButton(leftPos + 176, topPos +6, 23,26 ,
-                leftPos + 176+2, topPos +6 +5, 16,16,button -> {
+                leftPos + 176+3, topPos +6 +4, 16,16,button -> {
             filterModeButton.toggleState();
             menu.be.filterMode = (FilterMode) filterModeButton.currentState;
             menu.writeAndSendQuickData();
@@ -61,7 +61,7 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
         addRenderableWidget(filterModeButton);
 
         controlModeButton = new RightTabButton(leftPos + 176, topPos +36, 23,26 ,
-                leftPos + 176 +2 , topPos +36 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +36 +4, 16,16,button -> {
             controlModeButton.toggleState();
             menu.be.controlMode = (RedStoneControlMode) controlModeButton.currentState;
             menu.writeAndSendQuickData();

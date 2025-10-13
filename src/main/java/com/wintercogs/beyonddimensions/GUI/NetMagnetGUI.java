@@ -39,7 +39,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         this.topPos = (this.height - imageHeight)/2;
 
         filterModeButton = new RightTabButton(leftPos + 176, topPos +6, 23,26 ,
-                leftPos + 176+2, topPos +6 +5, 16,16,button -> {
+                leftPos + 176+3, topPos +6 +4, 16,16,button -> {
             filterModeButton.toggleState();
             menu.menuStack.set(ModDataComponents.FILTER_MODE,(FilterMode) filterModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -67,7 +67,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         addRenderableWidget(filterModeButton);
 
         controlModeButton = new RightTabButton(leftPos + 176, topPos +36, 23,26 ,
-                leftPos + 176 +2 , topPos +36 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +36 +4, 16,16,button -> {
             controlModeButton.toggleState();
             menu.menuStack.set(ModDataComponents.CONTROL_MODE,(RedStoneControlMode) controlModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -94,7 +94,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         addRenderableWidget(controlModeButton);
 
         hopperItemModeButton = new RightTabButton(leftPos + 176, topPos +66, 23,26 ,
-                leftPos + 176 +2 , topPos +66 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +66 +4, 16,16,button -> {
             hopperItemModeButton.toggleState();
             menu.menuStack.set(ModDataComponents.HOPPER_ITEM_MODE,(HopperItemMode) hopperItemModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -122,7 +122,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         addRenderableWidget(hopperItemModeButton);
 
         hopperXpModeButton = new RightTabButton(leftPos + 176, topPos +96, 23,26 ,
-                leftPos + 176 +2 , topPos +96 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +96 +4, 16,16,button -> {
             hopperXpModeButton.toggleState();
             menu.menuStack.set(ModDataComponents.HOPPER_XP_MODE,(HopperXpMode) hopperXpModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -150,7 +150,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         addRenderableWidget(hopperXpModeButton);
 
         hopperNBTModeButton = new RightTabButton(leftPos + 176, topPos +126, 23,26 ,
-                leftPos + 176 +2 , topPos +126 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +126 +4, 16,16,button -> {
             hopperNBTModeButton.toggleState();
             menu.menuStack.set(ModDataComponents.HOPPER_NBT_MODE,(HopperNBTMode) hopperNBTModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -178,7 +178,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         addRenderableWidget(hopperNBTModeButton);
 
         hopperFluidModeButton = new RightTabButton(leftPos + 176, topPos +156, 23,26 ,
-                leftPos + 176 +2 , topPos +156 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +156 +4, 16,16,button -> {
             hopperFluidModeButton.toggleState();
             menu.menuStack.set(ModDataComponents.HOPPER_FLUID_MODE,(HopperFluidMode) hopperFluidModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -205,7 +205,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         addRenderableWidget(hopperFluidModeButton);
 
         hopperRangeModeButton = new LeftTabButton(leftPos - 23, topPos +156, 23,26 ,
-                leftPos - 18 , topPos +156 +5, 16,16,button -> {
+                leftPos - 18 , topPos +156 +4, 16,16,button -> {
             hopperRangeModeButton.toggleState();
             menu.menuStack.set(ModDataComponents.HOPPER_RANGE_MODE,(HopperRangeMode) hopperRangeModeButton.currentState);
             menu.writeAndSendQuickData();
