@@ -147,6 +147,7 @@
   "msg.beyonddimensions.xp_mode.switch.mid": "Cantidad de transferencia XP cambiada a: 10 niveles",
   "msg.beyonddimensions.xp_mode.switch.high": "Cantidad de transferencia XP cambiada a: 30 niveles",
   "msg.beyonddimensions.xp_mode.switch.highest": "Cantidad de transferencia XP cambiada a: 100 niveles",
+  "msg.beyonddimensions.xp_mode.switch.over_highest": "Cantidad de transferencia XP cambiada a: 150 niveles",
 
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Almas de Guardián",

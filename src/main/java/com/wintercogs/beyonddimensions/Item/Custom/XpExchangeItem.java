@@ -221,6 +221,7 @@ public class XpExchangeItem extends Item
                 case MID -> 10;
                 case HIGH -> 30;
                 case HIGHEST -> 100;
+                case OVER_HIGHEST -> 150;
             };
         }
         return 0; // 最终回退

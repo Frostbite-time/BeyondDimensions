@@ -147,6 +147,7 @@
   "msg.beyonddimensions.xp_mode.switch.mid": "Объем передачи переключен на: 10 уровней",
   "msg.beyonddimensions.xp_mode.switch.high": "Объем передачи переключен на: 30 уровней",
   "msg.beyonddimensions.xp_mode.switch.highest": "Объем передачи переключен на: 100 уровней",
+  "msg.beyonddimensions.xp_mode.switch.over_highest": "Объем передачи переключен на: 150 уровней",
 
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Души Вардена",

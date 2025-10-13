@@ -147,6 +147,7 @@
   "msg.beyonddimensions.xp_mode.switch.mid": "전송량 전환됨: 10레벨",
   "msg.beyonddimensions.xp_mode.switch.high": "전송량 전환됨: 30레벨",
   "msg.beyonddimensions.xp_mode.switch.highest": "전송량 전환됨: 100레벨",
+  "msg.beyonddimensions.xp_mode.switch.over_highest": "전송량 전환됨: 150레벨",
 
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "워든의 영혼",

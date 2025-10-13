@@ -34,7 +34,7 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
         this.topPos = (this.height - imageHeight)/2;
 
         feederModeButton = new RightTabButton(leftPos + 176, topPos +6, 23,26 ,
-                leftPos + 176 +2 , topPos +6 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +6 +4, 16,16,button -> {
             feederModeButton.toggleState();
             BaseMachineItem.setFeederMode(menu.menuStack, (FeederMode) feederModeButton.currentState);
             menu.writeAndSendQuickData();

@@ -39,7 +39,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
 
 
         popButton = new RightTabButton(this.leftPos+176,this.topPos+6,23,26,
-                this.leftPos+176 +2,this.topPos+6+5,16,16,button ->
+                this.leftPos+176 +3,this.topPos+6+4,16,16,button ->
         {
             popButton.toggleState();
             menu.be.setPopMode((PopMode) popButton.currentState);
@@ -67,7 +67,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
         addRenderableWidget(popButton);
 
         controlModeButton = new RightTabButton(leftPos + 176, topPos +36, 23,26 ,
-                leftPos + 176 +2 , topPos +36 +5, 16,16,button -> {
+                leftPos + 176 +3 , topPos +36 +4, 16,16,button -> {
             controlModeButton.toggleState();
             menu.be.controlMode = (RedStoneControlMode) controlModeButton.currentState;
             menu.writeAndSendQuickData();

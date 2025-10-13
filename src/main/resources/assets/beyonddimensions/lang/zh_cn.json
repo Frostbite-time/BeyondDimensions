@@ -147,6 +147,7 @@
   "msg.beyonddimensions.xp_mode.switch.mid": "单次交互量切换到：10级",
   "msg.beyonddimensions.xp_mode.switch.high": "单次交互量切换到：30级",
   "msg.beyonddimensions.xp_mode.switch.highest": "单次交互量切换到：100级",
+  "msg.beyonddimensions.xp_mode.switch.over_highest": "单次交互量切换到：150级",
 
   "types.beyonddimensions.energytype.name": "FE能量",
   "types.beyonddimensions.warden_soul_type.name": "监守者之魂",

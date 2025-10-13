@@ -37,7 +37,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
         this.topPos = (this.height - imageHeight)/2;
 
         popModeButton = new RightTabButton(this.leftPos+imageWidth,this.topPos+6,23,26,
-                this.leftPos+imageWidth +2,this.topPos+6+5,16,16,button ->
+                this.leftPos+imageWidth +3,this.topPos+6+4,16,16,button ->
         {
             popModeButton.toggleState();
             menu.be.popMode = (PopMode) popModeButton.currentState;
@@ -65,7 +65,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
         addRenderableWidget(popModeButton);
 
         receiveModeButton = new RightTabButton(leftPos + imageWidth, topPos +36, 23,26 ,
-                leftPos + imageWidth +2 , topPos +36 +5, 16,16,button -> {
+                leftPos + imageWidth +3 , topPos +36 +4, 16,16,button -> {
             receiveModeButton.toggleState();
             menu.be.receiveMode = (ReceiveMode) receiveModeButton.currentState;
             menu.writeAndSendQuickData();
@@ -92,7 +92,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
         addRenderableWidget(receiveModeButton);
 
         controlModeButton = new RightTabButton(leftPos + imageWidth, topPos +66, 23,26 ,
-                leftPos + imageWidth +2 , topPos +66 +5, 16,16,button -> {
+                leftPos + imageWidth +3 , topPos +66 +4, 16,16,button -> {
             controlModeButton.toggleState();
             menu.be.controlMode = (RedStoneControlMode) controlModeButton.currentState;
             menu.writeAndSendQuickData();
@@ -124,7 +124,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
         addRenderableWidget(controlModeButton);
 
         sortModeButton = new RightTabButton(leftPos + imageWidth, topPos +96, 23,26 ,
-                leftPos + imageWidth +2 , topPos +96 +5, 16,16,button -> {
+                leftPos + imageWidth +3 , topPos +96 +4, 16,16,button -> {
             sortModeButton.toggleState();
             menu.be.sortMode = (AutoSortMode) sortModeButton.currentState;
             menu.writeAndSendQuickData();
