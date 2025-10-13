@@ -82,8 +82,8 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Actuel : Tri auto. activé",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Actuel : Tri auto. désactivé",
   "tooltip.item.unstable_space_time.long_data": "L'espace-temps se stabilise encore, %s cycles requis. Gardez-le sur vous en permanence.",
-  "tooltip.beyonddimensions.item.xp_exchange": "Dans l'interface graphique : Clic droit pour déposer XP, Clic molette pour retirer XP\nEn tenant : Clic droit pour déposer XP, Maj + Clic droit pour changer le taux de transfert XP",
-  "tooltip.editbox.beyonddimensions.search": "Saisissez '#' pour filtrer le contenu des infobulles\nSaisissez '@' pour filtrer les ID de mods",
+  "tooltip.beyonddimensions.item.xp_exchange": "Dans l'interface : Clic droit pour stocker l'XP, Clic milieu pour récupérer l'XP\nTenue en main : Clic droit pour changer de mode, Maj+Clic droit pour modifier la vitesse d'interaction d'XP",
+  "tooltip.editbox.beyonddimensions.search": "Tapez '#' pour filtrer le contenu des infobulles\nTapez '@' pour filtrer les IDs des mods\nAppuyez sur Maj+Z pour activer/désactiver le lien avec la barre de recherche JEI/EMI",
 
   "istack.beyonddimensions.storage_num.item": "Stocké : %s unités",
   "istack.beyonddimensions.storage_num.fluid": "Stocké : %s mB",
@@ -153,9 +153,15 @@
   "msg.beyonddimensions.xp_mode.switch.mid": "Quantité de transfert XP changée à : 10 niveaux",
   "msg.beyonddimensions.xp_mode.switch.high": "Quantité de transfert XP changée à : 30 niveaux",
   "msg.beyonddimensions.xp_mode.switch.highest": "Quantité de transfert XP changée à : 100 niveaux",
+  "msg.beyonddimensions.xp_mode.switch.over_highest": "Quantité de transfert XP changée à : 150 niveaux",
 
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Âmes de Gardien",
   "types.beyonddimensions.source_type.name": "Source Arcanique",
-  "types.beyonddimensions.mana_type.name": "Mana Végétal"
+  "types.beyonddimensions.mana_type.name": "Mana Végétal",
+
+  "msg.beyonddimensions.magnet.close": "Aimant désactivé",
+  "msg.beyonddimensions.magnet.open": "Aimant activé",
+  "msg.beyonddimensions.item.xp_exchange.open": "Activer l'échange automatique d'XP, maintenant le niveau par interaction",
+  "msg.beyonddimensions.item.xp_exchange.close": "Désactiver l'échange automatique d'XP"
 }

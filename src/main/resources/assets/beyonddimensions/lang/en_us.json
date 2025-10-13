@@ -82,8 +82,8 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Current: Auto-sort enabled",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Current: Auto-sort disabled",
   "tooltip.item.unstable_space_time.long_data": "Spacetime is stabilizing, requires %s more stabilization cycles. Please keep it on your person.",
-  "tooltip.beyonddimensions.item.xp_exchange": "In GUI: Right-click to deposit XP, Middle-click to withdraw XP\nWhile holding: Right-click to deposit XP, Shift + Right-click to change XP transfer rate",
-  "tooltip.editbox.beyonddimensions.search": "Type '#' to filter tooltip contents\nType '@' to filter mod IDs",
+  "tooltip.beyonddimensions.item.xp_exchange": "In GUI: Right-click to store XP, Middle-click to retrieve XP\nWhen held: Right-click to switch work mode, Shift+Right-click to change XP interaction rate",
+  "tooltip.editbox.beyonddimensions.search": "Type '#' to filter tooltip contents\nType '@' to filter mod IDs\nPress Shift+Z to toggle JEI/EMI search box linking",
 
   "istack.beyonddimensions.storage_num.item": "Stored: %s Items",
   "istack.beyonddimensions.storage_num.fluid": "Stored: %s mB",
@@ -153,9 +153,15 @@
   "msg.beyonddimensions.xp_mode.switch.mid": "XP transfer amount switched to: 10 levels",
   "msg.beyonddimensions.xp_mode.switch.high": "XP transfer amount switched to: 30 levels",
   "msg.beyonddimensions.xp_mode.switch.highest": "XP transfer amount switched to: 100 levels",
+  "msg.beyonddimensions.xp_mode.switch.over_highest": "XP transfer amount switched to: 150 levels",
 
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Warden Souls",
   "types.beyonddimensions.source_type.name": "Source",
-  "types.beyonddimensions.mana_type.name": "Plant Mana"
+  "types.beyonddimensions.mana_type.name": "Plant Mana",
+
+  "msg.beyonddimensions.magnet.close": "Magnet disabled",
+  "msg.beyonddimensions.magnet.open": "Magnet enabled",
+  "msg.beyonddimensions.item.xp_exchange.open": "Enable XP auto-exchange, maintaining level per interaction",
+  "msg.beyonddimensions.item.xp_exchange.close": "Disable XP auto-exchange"
 }

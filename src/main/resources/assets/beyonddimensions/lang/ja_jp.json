@@ -82,8 +82,8 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "現在：自動整頓ON",
   "tooltip.button.beyonddimensions.sort_mode_stop": "現在：自動整頓OFF",
   "tooltip.item.unstable_space_time.long_data": "時空は安定化中、残り%s回の安定化サイクルが必要です。常に携帯してください。",
-  "tooltip.beyonddimensions.item.xp_exchange": "GUIで：右クリックで経験値を預ける、ホイールクリックで経験値を取り出す\n手に持って時：右クリックで経験値を預ける、シフト＋右クリックで経験値転送速度を変更",
-  "tooltip.editbox.beyonddimensions.search": "「#」を入力してツールチップの内容をフィルタリング\n「@」を入力してMod IDをフィルタリング",
+  "tooltip.beyonddimensions.item.xp_exchange": "GUI内：右クリックで経験値を貯蔵、中クリックで経験値を取り出す\n手に持った状態：右クリックで作業モード切替、Shift+右クリックで経験値操作速度変更",
+  "tooltip.editbox.beyonddimensions.search": "'#'を入力してツールチップの内容を絞り込む\n'@'を入力してModのIDを絞り込む\nJEI/EMI 検索ボックスの連動を切り替えるには Shift+Z を押す",
 
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
   "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",
@@ -153,9 +153,15 @@
   "msg.beyonddimensions.xp_mode.switch.mid": "転送量切り替え済み：10レベル",
   "msg.beyonddimensions.xp_mode.switch.high": "転送量切り替え済み：30レベル",
   "msg.beyonddimensions.xp_mode.switch.highest": "転送量切り替え済み：100レベル",
+  "msg.beyonddimensions.xp_mode.switch.over_highest": "転送量切り替え済み：150レベル",
 
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "ウォーデンの魂",
   "types.beyonddimensions.source_type.name": "魔素源",
-  "types.beyonddimensions.mana_type.name": "植物マナ"
+  "types.beyonddimensions.mana_type.name": "植物マナ",
+
+  "msg.beyonddimensions.magnet.close": "マグネットが無効",
+  "msg.beyonddimensions.magnet.open": "マグネットが有効",
+  "msg.beyonddimensions.item.xp_exchange.open": "XP自動交換を有効化（1回の操作あたりの経験値量を維持）",
+  "msg.beyonddimensions.item.xp_exchange.close": "XP自動交換を無効化"
 }

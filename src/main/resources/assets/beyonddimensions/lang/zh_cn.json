@@ -82,8 +82,8 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "当前：自动整理开启",
   "tooltip.button.beyonddimensions.sort_mode_stop": "当前：自动整理关闭",
   "tooltip.item.unstable_space_time.long_data": "时空仍在稳定中，仍需%s个稳定周期，请保持随身携带",
-  "tooltip.beyonddimensions.item.xp_exchange": "在GUI中：右键存入经验，中键取出经验\n手持时：右键存入经验，Shift右键改变经验交互速率",
-  "tooltip.editbox.beyonddimensions.search": "输入'#'以筛选提示框内容\n输入'@'以筛选模组ID",
+  "tooltip.beyonddimensions.item.xp_exchange": "在GUI中：右键存入经验，中键取出经验\n手持时：右键切换工作模式，Shift右键改变经验交互速率",
+  "tooltip.editbox.beyonddimensions.search": "输入'#'以筛选提示框内容\n输入'@'以筛选模组ID\n按Shift+Z以开关JEI/EMI搜索框联动",
 
   "istack.beyonddimensions.storage_num.item": "已存储：%s个",
   "istack.beyonddimensions.storage_num.fluid": "已存储：%smB",
@@ -153,9 +153,15 @@
   "msg.beyonddimensions.xp_mode.switch.mid": "单次交互量切换到：10级",
   "msg.beyonddimensions.xp_mode.switch.high": "单次交互量切换到：30级",
   "msg.beyonddimensions.xp_mode.switch.highest": "单次交互量切换到：100级",
+  "msg.beyonddimensions.xp_mode.switch.over_highest": "单次交互量切换到：150级",
 
   "types.beyonddimensions.energytype.name": "FE能量",
   "types.beyonddimensions.warden_soul_type.name": "监守者之魂",
   "types.beyonddimensions.source_type.name": "魔源",
-  "types.beyonddimensions.mana_type.name": "植物魔力"
+  "types.beyonddimensions.mana_type.name": "植物魔力",
+
+  "msg.beyonddimensions.magnet.close": "磁铁被禁用",
+  "msg.beyonddimensions.magnet.open": "磁铁被启用",
+  "msg.beyonddimensions.item.xp_exchange.open": "开启经验自动存取，将经验等级维持在单次交互量",
+  "msg.beyonddimensions.item.xp_exchange.close": "关闭经验自动存取"
 }

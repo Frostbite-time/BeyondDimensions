@@ -82,8 +82,8 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "현재: 자동 정렬 활성화됨",
   "tooltip.button.beyonddimensions.sort_mode_stop": "현재: 자동 정렬 비활성화됨",
   "tooltip.item.unstable_space_time.long_data": "시공간 안정화 중, %s회의 안정화 주기 남음. 항상 휴대하십시오.",
-  "tooltip.beyonddimensions.item.xp_exchange": "GUI에서：우클릭으로 경험치 저장, 휠 클릭으로 경험치 인출\n들고 있을 때：우클릭으로 경험치 저장, 쉬프트 + 우클릭으로 경험치 전송 속도 변경",
-  "tooltip.editbox.beyonddimensions.search": "'#' 입력 시 툴팁 내용 필터링\n'@' 입력 시 모드 ID 필터링",
+  "tooltip.beyonddimensions.item.xp_exchange": "GUI에서: 우클릭 시 경험치 저장, 휠 클릭 시 경험치 회수\n손에 들었을 때: 우클릭으로 작업 모드 전환, 쉬프트+우클릭으로 경험치 상호작용 속도 변경",
+  "tooltip.editbox.beyonddimensions.search": "도구 설명 내용 필터링: '#' 입력\n모드 ID 필터링: '@' 입력\nJEI/EMI 검색창 연동 전환: Shift+Z 누름",
 
   "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
   "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",
@@ -153,9 +153,15 @@
   "msg.beyonddimensions.xp_mode.switch.mid": "전송량 전환됨: 10레벨",
   "msg.beyonddimensions.xp_mode.switch.high": "전송량 전환됨: 30레벨",
   "msg.beyonddimensions.xp_mode.switch.highest": "전송량 전환됨: 100레벨",
+  "msg.beyonddimensions.xp_mode.switch.over_highest": "전송량 전환됨: 150레벨",
 
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "워든의 영혼",
   "types.beyonddimensions.source_type.name": "마력원",
-  "types.beyonddimensions.mana_type.name": "식물 마나"
+  "types.beyonddimensions.mana_type.name": "식물 마나",
+
+  "msg.beyonddimensions.magnet.close": "자석 비활성화됨",
+  "msg.beyonddimensions.magnet.open": "자석 활성화됨",
+  "msg.beyonddimensions.item.xp_exchange.open": "XP 자동 교환 활성화, 상호작용당 레벨 유지",
+  "msg.beyonddimensions.item.xp_exchange.close": "XP 자동 교환 비활성화"
 }

@@ -82,8 +82,8 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Текущий: Автосортировка включена",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Текущий: Автосортировка отключена",
   "tooltip.item.unstable_space_time.long_data": "Пространство-время стабилизируется, осталось %s циклов. Носите с собой постоянно.",
-  "tooltip.beyonddimensions.item.xp_exchange": "В интерфейсе: ПКМ для пополнения опыта, СКМ для снятия опыта\nВ руках: ПКМ для пополнения опыта, Shift + ПКМ для изменения скорости передачи опыта",
-  "tooltip.editbox.beyonddimensions.search": "Введите '#', чтобы фильтровать содержимое подсказок\nВведите '@', чтобы фильтровать ID модов",
+  "tooltip.beyonddimensions.item.xp_exchange": "В интерфейсе: ПКМ - сохранить опыт, СКМ - извлечь опыт\nВ руке: ПКМ - переключить режим работы, Shift+ПКМ - изменить скорость взаимодействия с опытом",
+  "tooltip.editbox.beyonddimensions.search": "Введите '#', чтобы фильтровать содержимое подсказок\nВведите '@', чтобы фильтровать ID модов\nНажмите Shift+Z для переключения привязки к поисковой строке JEI/EMI",
 
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
   "istack.beyonddimensions.storage_num.fluid": "Сохранено: %s мБ",
@@ -153,9 +153,15 @@
   "msg.beyonddimensions.xp_mode.switch.mid": "Объем передачи переключен на: 10 уровней",
   "msg.beyonddimensions.xp_mode.switch.high": "Объем передачи переключен на: 30 уровней",
   "msg.beyonddimensions.xp_mode.switch.highest": "Объем передачи переключен на: 100 уровней",
+  "msg.beyonddimensions.xp_mode.switch.over_highest": "Объем передачи переключен на: 150 уровней",
 
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Души Вардена",
   "types.beyonddimensions.source_type.name": "Источник",
-  "types.beyonddimensions.mana_type.name": "Растительная Мана"
+  "types.beyonddimensions.mana_type.name": "Растительная Мана",
+
+  "msg.beyonddimensions.magnet.close": "Магнит отключён",
+  "msg.beyonddimensions.magnet.open": "Магнит включён",
+  "msg.beyonddimensions.item.xp_exchange.open": "Включить автоматический обмен опыта, поддерживая уровень за одно взаимодействие",
+  "msg.beyonddimensions.item.xp_exchange.close": "Выключить автоматический обмен опыта"
 }
