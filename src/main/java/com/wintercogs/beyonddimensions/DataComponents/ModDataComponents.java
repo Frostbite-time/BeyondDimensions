@@ -180,6 +180,12 @@ public class ModDataComponents {
             )
     );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> XP_NET_KEEP_MODE = register(
+            "xp_net_keep_mode", builder -> builder
+                    .persistent(Codec.BOOL)
+                    .networkSynchronized(ByteBufCodecs.BOOL)
+    );
+
     private static <T> DeferredHolder<DataComponentType<?>,DataComponentType<T>> register(String name, UnaryOperator<DataComponentType.Builder<T>> builder) {
         return DATA_COMPONENTS.register(name,()->  builder.apply(DataComponentType.builder()).build());
     }
