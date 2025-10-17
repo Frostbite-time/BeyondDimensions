@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
@@ -32,7 +33,7 @@ public class AutoRefillResultSlot extends ResultSlot
         this.checkTakeAchievements(stack);
         ForgeHooks.setCraftingPlayer(player);
         NonNullList<ItemStack> nonnulllist = player.level().getRecipeManager().getRemainingItemsFor(RecipeType.CRAFTING, this.craftSlots, player.level());
-        ForgeHooks.setCraftingPlayer((Player)null);
+        ForgeHooks.setCraftingPlayer(null);
 
         for(int i = 0; i < nonnulllist.size(); ++i) {
             ItemStack slotStack = this.craftSlots.getItem(i);
