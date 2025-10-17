@@ -208,9 +208,10 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
             // 快速合成处理
             if(slot instanceof ResultSlot resultSlot)
             {
-                cacheStack = slot.getItem().copy(); // 完成数据包校验
-                // !slot.getItem().isEmpty()可以预防除数为0，而后面的则是确定循环执行的次数
-                for(int i = 0;  !slot.getItem().isEmpty() && i< slot.getItem().getMaxStackSize()/slot.getItem().getCount(); i++)
+                cacheStack = slot.getItem().copy(); // 完成数据包校验 并锁定本次合成使用的配方成品
+                for(int i = 0; !slot.getItem().isEmpty() && // 当合成槽为空时不执行操作
+                        slot.getItem().getItem() == cacheStack.getItem() && // 当合成槽物品已经从一个配方变成另一个配方时不执行操作
+                        i< slot.getItem().getMaxStackSize()/slot.getItem().getCount(); i++) // 限制单次合成次数
                 {
                     // 尝试将物品分别插入背包和快速转移区间，并记录回滚信息
                     ItemStack remaining = cacheStack.copy();
