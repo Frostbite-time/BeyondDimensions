@@ -194,6 +194,11 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
     }
 
+    @Override
+    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot)
+    {
+        return slot.container != resultSlots && super.canTakeItemForPickAll(stack, slot);
+    }
 
     public static Optional<CraftingRecipe> getRecipe(Player player, CraftingContainer input, Level level)
     {
