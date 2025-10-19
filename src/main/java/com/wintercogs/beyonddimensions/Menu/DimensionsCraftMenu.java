@@ -211,7 +211,13 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
     }
 
-    public static Optional<RecipeHolder<CraftingRecipe>> getRecipe(Player player,CraftingInput input, Level level)
+    @Override
+    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot)
+    {
+        return slot.container != resultSlots && super.canTakeItemForPickAll(stack, slot);
+    }
+
+    public static Optional<RecipeHolder<CraftingRecipe>> getRecipe(Player player, CraftingInput input, Level level)
     {
         if (BeyondDimensions.PolymorphLoaded && player != null) {
             return PolymorphHelper.getRecipe(player, RecipeType.CRAFTING, input, level);
