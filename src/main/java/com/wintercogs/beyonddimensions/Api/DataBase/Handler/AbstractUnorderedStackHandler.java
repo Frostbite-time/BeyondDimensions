@@ -683,8 +683,16 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
 
 
     /* ---------------- 便捷设置 ---------------- */
-    public void setSlotCapacity(long capacity) { this.slotCapacity = capacity; }
-    public void setSlotMaxSize(int maxSize)    { this.slotMaxSize  = maxSize; }
+    public void setSlotCapacity(long capacity)
+    {
+        this.slotCapacity = capacity;
+        onChange();
+    }
+    public void setSlotMaxSize(int maxSize)
+    {
+        this.slotMaxSize  = maxSize;
+        onChange();
+    }
 
     public boolean isFullSlotsSize() { return slotIndex.size() >= slotMaxSize; }
 }
