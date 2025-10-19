@@ -752,6 +752,7 @@ public class UnifiedStorage implements IStackTypedHandler
     public void setSlotCapacity(long capacity)
     {
         this.slotCapacity = capacity;
+        net.setDirty();
     }
 
     /**
@@ -760,6 +761,7 @@ public class UnifiedStorage implements IStackTypedHandler
     public void setSlotMaxSize(int maxSize)
     {
         this.slotMaxSize = maxSize;
+        net.setDirty();
     }
 
     /** 把 origin 深克隆到一个新的 HashBPlusList */
