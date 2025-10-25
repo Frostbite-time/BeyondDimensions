@@ -19,6 +19,7 @@ import com.wintercogs.beyonddimensions.Unit.XpUtil;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
+import net.minecraft.world.level.material.FluidState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.lwjgl.glfw.GLFW;
@@ -453,14 +454,39 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 }
                 else
                 {
+                    var key = trueStack.key();
+
                     // 普通Slot将只处理物品转移
-                    if(trueStack.key() instanceof ItemStackKey trueItemTypedKey)
+                    if (key instanceof ItemStackKey trueItemTypedKey)
                     {
                         ItemStack extract = (ItemStack) storage.extract(trueItemTypedKey,trueStack.amount(),false).toStack();
                         ItemStack remaining = slot.safeInsert(extract);
                         if(!remaining.isEmpty())
                             storage.insert(new ItemStackKey(remaining) , remaining.getCount(),false);
                         trueStack = new KeyAmount(new ItemStackKey(remaining) , remaining.getCount());
+                    }
+                    // 移动流体并装桶
+                    else if (key instanceof FluidStackKey trueFluidTypedKey) {
+                        var extract = (FluidStack) storage.extract(trueFluidTypedKey, 1000, false).toStack();
+                        if (extract.getAmount() != 1000) {
+                            storage.insert(new FluidStackKey(new FluidStack(trueFluidTypedKey.getSource(), extract.getAmount())), extract.getAmount(), false);
+                            break;
+                        }
+                        var bucket = (ItemStack) storage.extract(new ItemStackKey(new ItemStack(Items.BUCKET)), 1, false).toStack();
+                        if (bucket.isEmpty()) {
+                            storage.insert(new FluidStackKey(new FluidStack(trueFluidTypedKey.getSource(), extract.getAmount())), extract.getAmount(), false);
+                            break;
+                        }
+
+                        var bucketItem = trueFluidTypedKey.getSource().getBucket();
+                        var insertStack = new ItemStack(bucketItem);
+                        var remaining = slot.safeInsert(insertStack);
+                        if (!remaining.isEmpty()) {
+                            storage.insert(new ItemStackKey(bucket), bucket.getCount(), false);
+                            storage.insert(new FluidStackKey(new FluidStack(trueFluidTypedKey.getSource(), remaining.getCount() * 1000)), remaining.getCount() * 1000L, false);
+                            continue;
+                        }
+                        trueStack = new KeyAmount(new ItemStackKey(new ItemStack(bucketItem)),1);
                     }
                 }
 
