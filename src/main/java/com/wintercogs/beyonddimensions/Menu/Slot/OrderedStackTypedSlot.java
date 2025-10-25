@@ -420,17 +420,17 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     // 移动流体并装桶
                     else if(key instanceof FluidStackKey trueFluidTypedKey && trueFluidTypedKey.getSource().getBucket() != Items.AIR)
                     {
-                        KeyAmount extract = storage.extract(trueFluidTypedKey, 1000, false);
+                        KeyAmount extract = safeExtract(trueFluidTypedKey, 1000);
                         if (extract.amount() != 1000)
                         {
-                            storage.insert(extract.key(), extract.amount(), false);
+                            safeInsert(extract.key(), extract.amount());
                             break;
                         }
 
                         KeyAmount bucket = storage.extract(new ItemStackKey(new ItemStack(Items.BUCKET)), 1, false);
                         if (bucket.isEmpty())
                         {
-                            storage.insert(extract.key(), extract.amount(), false);
+                            safeInsert(extract.key(), extract.amount());
                             break;
                         }
 
@@ -439,8 +439,8 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         ItemStack remaining = slot.safeInsert(insertStack);
                         if(!remaining.isEmpty())
                         {
+                            safeInsert(extract.key(), extract.amount());
                             storage.insert(bucket.key(), bucket.amount(), false);
-                            storage.insert(extract.key(), extract.amount(), false);
                             continue;
                         }
                         trueStack = new KeyAmount(trueFluidTypedKey, trueStack.amount() - 1000);
