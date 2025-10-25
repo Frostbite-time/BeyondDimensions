@@ -19,7 +19,6 @@ import com.wintercogs.beyonddimensions.Unit.XpUtil;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.material.FluidState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.lwjgl.glfw.GLFW;
@@ -432,9 +431,11 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
             return;
         if (!clickStack.isEmpty())
         {
-            // 防止数据包伪造，然后赋予trueStack需要提取的数量
-            KeyAmount trueKA = storage.getStackByKey(clickStack.key());
-            KeyAmount trueStack = new KeyAmount(trueKA.key(),clickStack.amount());
+            // TODO
+            // 这里的trueStack和注释并不正确，实际上后续操作中extract本身就不会提取超出真实数量的值，本身即有数据包验证的效果
+            // 这里的trueStack更类似于wannaStack，这里先加上这些注释，后续有空再改名
+            // 之前错误的注释：防止数据包伪造，然后赋予trueStack需要提取的数量
+            KeyAmount trueStack = new KeyAmount(clickStack.key(),clickStack.amount());
 
             // 遍历目标槽位
             for(int targetSlotIndex=quickMoveSlotStartIndex;targetSlotIndex<quickMoveSlotEndIndex && !trueStack.isEmpty();targetSlotIndex++)
@@ -452,12 +453,12 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     trueStack = remaining;
 
                 }
-                else
+                else // 目标slot为非StackTypedSlot时
                 {
-                    var key = trueStack.key();
+                    IStackKey<?> key = trueStack.key();
 
-                    // 普通Slot将只处理物品转移
-                    if (key instanceof ItemStackKey trueItemTypedKey)
+                    // 物品转移
+                    if(key instanceof ItemStackKey trueItemTypedKey)
                     {
                         ItemStack extract = (ItemStack) storage.extract(trueItemTypedKey,trueStack.amount(),false).toStack();
                         ItemStack remaining = slot.safeInsert(extract);
@@ -466,27 +467,33 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                         trueStack = new KeyAmount(new ItemStackKey(remaining) , remaining.getCount());
                     }
                     // 移动流体并装桶
-                    else if (key instanceof FluidStackKey trueFluidTypedKey) {
-                        var extract = (FluidStack) storage.extract(trueFluidTypedKey, 1000, false).toStack();
-                        if (extract.getAmount() != 1000) {
-                            storage.insert(new FluidStackKey(new FluidStack(trueFluidTypedKey.getSource(), extract.getAmount())), extract.getAmount(), false);
-                            break;
-                        }
-                        var bucket = (ItemStack) storage.extract(new ItemStackKey(new ItemStack(Items.BUCKET)), 1, false).toStack();
-                        if (bucket.isEmpty()) {
-                            storage.insert(new FluidStackKey(new FluidStack(trueFluidTypedKey.getSource(), extract.getAmount())), extract.getAmount(), false);
+                    else if (key instanceof FluidStackKey trueFluidTypedKey && trueFluidTypedKey.getSource().getBucket() != Items.AIR)
+                    {
+                        KeyAmount extract = storage.extract(trueFluidTypedKey, 1000, false);
+                        if (extract.amount() != 1000)
+                        {
+                            storage.insert(extract.key(), extract.amount(), false);
                             break;
                         }
 
-                        var bucketItem = trueFluidTypedKey.getSource().getBucket();
-                        var insertStack = new ItemStack(bucketItem);
-                        var remaining = slot.safeInsert(insertStack);
-                        if (!remaining.isEmpty()) {
-                            storage.insert(new ItemStackKey(bucket), bucket.getCount(), false);
-                            storage.insert(new FluidStackKey(new FluidStack(trueFluidTypedKey.getSource(), remaining.getCount() * 1000)), remaining.getCount() * 1000L, false);
+                        KeyAmount bucket = storage.extract(new ItemStackKey(new ItemStack(Items.BUCKET)), 1, false);
+                        if (bucket.isEmpty())
+                        {
+                            storage.insert(extract.key(), extract.amount(), false);
+                            break;
+                        }
+
+                        Item bucketItem = trueFluidTypedKey.getSource().getBucket();
+                        ItemStack insertStack = new ItemStack(bucketItem);
+                        ItemStack remaining = slot.safeInsert(insertStack);
+                        if (!remaining.isEmpty())
+                        {
+                            storage.insert(bucket.key(), bucket.amount(), false);
+                            storage.insert(extract.key(), extract.amount(), false);
                             continue;
                         }
-                        trueStack = new KeyAmount(new ItemStackKey(new ItemStack(bucketItem)),1);
+                        trueStack = new KeyAmount(trueFluidTypedKey, trueStack.amount() - 1000);
+                        break; // 更新trueStack以保持语义相同，但是这里我们break，以确保一次点击最多只成功装桶一次
                     }
                 }
 
