@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.client.Minecraft;
@@ -36,7 +37,8 @@ public class ChemicalStackKeyRender implements IStackRender
 
             ChemicalStack stack = chemicalKey.getRenderStack();
             Chemical chem = stack.getChemical();
-            if (!chem.isEmptyType()) {
+            if (stack.getChemicalHolder() != MekanismAPI.EMPTY_CHEMICAL_HOLDER)
+            {
                 ResourceLocation icon = chem.getIcon();
                 TextureAtlasSprite sprite = icon == null ? null :
                         Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(icon);
