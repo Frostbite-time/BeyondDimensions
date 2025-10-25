@@ -123,7 +123,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public Object getSource()
+    public Fluid getSource()
     {
         return FluidStack.EMPTY.getFluid();
     }

@@ -443,7 +443,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     trueStack = remaining.copy();
 
                 }
-                else
+                else // 目标slot为非StackTypedSlot时
                 {
                     // 普通Slot将只处理物品转移
                     if(trueStack instanceof ItemStackType trueItemTypedStack)
@@ -453,6 +453,34 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                         if(!remaining.isEmpty())
                             storage.insert(new ItemStackType(remaining),false);
                         trueStack = new ItemStackType(remaining.copy());
+                    }
+                    // 移动流体并装桶
+                    else if (trueStack instanceof FluidStackType trueFluidTypedKey && trueFluidTypedKey.getSource().getBucket() != Items.AIR)
+                    {
+                        IStackType<?> extract = storage.extract(trueFluidTypedKey.copyWithCount(1000), false);
+                        if (extract.getStackAmount() != 1000)
+                        {
+                            storage.insert(extract, false);
+                            break;
+                        }
+
+                        IStackType<?> bucket = storage.extract(new ItemStackType(new ItemStack(Items.BUCKET)), false);
+                        if (bucket.isEmpty())
+                        {
+                            storage.insert(extract, false);
+                            break;
+                        }
+
+                        Item bucketItem = trueFluidTypedKey.getSource().getBucket();
+                        ItemStack insertStack = new ItemStack(bucketItem);
+                        ItemStack remaining = slot.safeInsert(insertStack);
+                        if (!remaining.isEmpty())
+                        {
+                            storage.insert(bucket, false);
+                            storage.insert(extract, false);
+                            continue;
+                        }
+                        break; // 这里我们break，以确保一次点击最多只成功装桶一次，trueStack也不需要更新
                     }
                 }
 
