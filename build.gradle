@@ -172,6 +172,7 @@ dependencies {
 
     // 编译通用机械的api 以便使用化学品存储
     compileOnly "mekanism:Mekanism:${mekanism_version}:api"
+    runtimeOnly "mekanism:Mekanism:${mekanism_version}"
 
     // EMI支持
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
@@ -183,22 +184,29 @@ dependencies {
 
     // 多态合成支持
     compileOnly "curse.maven:polymorph-388800:6451024"
+    runtimeOnly "curse.maven:polymorph-388800:6451024"
 
     // AE支持
     compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
+    runtimeOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
     compileOnly "curse.maven:applied-mekanistics-574300:5978711" // AE的通用机械附属
+    runtimeOnly "curse.maven:applied-mekanistics-574300:5978711" // AE的通用机械附属
     compileOnly "curse.maven:applied-flux-965012:6649565" // 应用通量附属
+    runtimeOnly "curse.maven:applied-flux-965012:6649565" // 应用通量附属
+    runtimeOnly "curse.maven:glodium-957920:5821676" // ae flux 前置
+    runtimeOnly "maven.modrinth:guideme:21.1.15" // guideme
 
     // 饰品栏支持
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}:api"
+    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}"
 
-    // 在本模组的UI禁用IPN
+    // 在本模组的UI禁用IPN 不启用runtime
     compileOnly "maven.modrinth:inventory-profiles-next:neoforge-1.21.1-2.1.9"
 
     // kubejs
     api("dev.latvian.mods:kubejs-neoforge:$kubejs_version")
 
-    // 通用拼音搜索-在安装时自动使用它的拼音处理
+    // 通用拼音搜索-在安装时优先使用它的拼音处理 不启用runtime：会导致runServer失败
     compileOnly "curse.maven:just-enough-characters-250702:6681787"
 
     // RS支持
@@ -216,14 +224,18 @@ dependencies {
     compileOnly "curse.maven:soulplied-energistics-1143614:6771121" // AE联动
     runtimeOnly "maven.modrinth:industrial-foregoing-souls:1.21-1.10.5"
     runtimeOnly "curse.maven:soulplied-energistics-1143614:6771121"
+    runtimeOnly "maven.modrinth:industrial-foregoing:1.21-3.6.36"
+    runtimeOnly "maven.modrinth:titanium:1.21-4.0.40"
 
     // 新生魔艺
     compileOnly "maven.modrinth:ars-nouveau:5.10.3"
     compileOnly "maven.modrinth:ars-energistique:2.1.1-beta" // AE联动
     runtimeOnly "maven.modrinth:ars-nouveau:5.10.3"
     runtimeOnly "maven.modrinth:ars-energistique:2.1.1-beta"
+    runtimeOnly "maven.modrinth:geckolib:RVIo5f6E" // geckolib
+    runtimeOnly "maven.modrinth:patchouli:1.21.1-92-neoforge" // 帕秋莎
 
-    // 植物魔法支持
+    // 植物魔法支持 - 后续需要更新
     compileOnly "dev.local:botania-neoforge:1.21.1-451-SNAPSHOT"
     runtimeOnly "dev.local:botania-neoforge:1.21.1-451-SNAPSHOT"
 
