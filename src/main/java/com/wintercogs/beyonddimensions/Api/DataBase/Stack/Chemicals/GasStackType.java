@@ -104,9 +104,9 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public Object getSource()
+    public Gas getSource()
     {
-        return GasStack.EMPTY.getType();
+        return stack.getType();
     }
 
     @Override

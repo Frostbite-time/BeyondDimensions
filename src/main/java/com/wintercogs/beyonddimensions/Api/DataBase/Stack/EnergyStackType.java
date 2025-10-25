@@ -64,9 +64,9 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     }
 
     @Override
-    public Object getSource()
+    public EnergyType getSource()
     {
-        return new EnergyType(0);
+        return this.stack;
     }
 
     @Override

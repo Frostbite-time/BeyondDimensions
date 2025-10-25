@@ -104,9 +104,9 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public Object getSource()
+    public Pigment getSource()
     {
-        return PigmentStack.EMPTY.getType();
+        return stack.getType();
     }
 
     @Override

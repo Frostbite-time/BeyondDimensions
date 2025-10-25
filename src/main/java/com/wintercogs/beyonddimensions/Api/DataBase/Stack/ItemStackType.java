@@ -197,9 +197,9 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public Object getSource()
+    public Item getSource()
     {
-        return ItemStack.EMPTY.getItem();
+        return item;
     }
 
     @Override

@@ -60,9 +60,9 @@ public class SourceStackType extends LongStackType<SourceType>
     }
 
     @Override
-    public Object getSource()
+    public SourceType getSource()
     {
-        return new SourceType(0);
+        return this.stack;
     }
 
     @Override

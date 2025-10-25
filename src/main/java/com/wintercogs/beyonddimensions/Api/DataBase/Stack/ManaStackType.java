@@ -62,9 +62,9 @@ public class ManaStackType extends LongStackType<ManaType>
     }
 
     @Override
-    public Object getSource()
+    public ManaType getSource()
     {
-        return new ManaType(0);
+        return this.stack;
     }
 
     @Override

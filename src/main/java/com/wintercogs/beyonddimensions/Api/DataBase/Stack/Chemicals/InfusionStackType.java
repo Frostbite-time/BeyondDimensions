@@ -104,9 +104,9 @@ public final class InfusionStackType implements IStackType<InfusionStack>
     }
 
     @Override
-    public Object getSource()
+    public InfuseType getSource()
     {
-        return InfusionStack.EMPTY.getType();
+        return stack.getType();
     }
 
     @Override

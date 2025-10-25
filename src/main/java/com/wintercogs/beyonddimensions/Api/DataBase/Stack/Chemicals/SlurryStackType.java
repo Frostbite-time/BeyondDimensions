@@ -104,9 +104,9 @@ public final class SlurryStackType implements IStackType<SlurryStack>
     }
 
     @Override
-    public Object getSource()
+    public Slurry getSource()
     {
-        return SlurryStack.EMPTY.getType();
+        return stack.getType();
     }
 
     @Override
