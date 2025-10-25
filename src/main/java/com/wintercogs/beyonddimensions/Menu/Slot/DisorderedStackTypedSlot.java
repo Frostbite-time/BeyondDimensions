@@ -266,12 +266,12 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     if(carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
                     {
                         // 对桶物品进行特殊处理
-                        if(carriedItem.getItem() instanceof BucketItem bucket)
+                        if(carriedItem.getItem() instanceof BucketItem || carriedItem.getItem() instanceof MilkBucketItem)
                         {
                             // 需要分开处理，分别处理
                             // 1.空桶接受
                             // 2.桶向原有区域继续投放
-                            if(bucket == Items.BUCKET) // 空桶接受
+                            if(carriedItem.getItem() == Items.BUCKET) // 空桶接受
                             {
                                 if(clickStack.key() instanceof FluidStackKey fluidStackKey)
                                 {
