@@ -26,10 +26,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +48,7 @@ public class NetMagnetItem extends BaseMachineItem
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
+    public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
@@ -284,24 +287,29 @@ public class NetMagnetItem extends BaseMachineItem
                 for (int z = minZ; z <= maxZ; ++z) {
                     pos.set(x, y, z);
 
+                    // 使用原始数据计算提取量
                     FluidState fluidState = level.getFluidState(pos);
                     if (fluidState.isEmpty()) continue;          // 不是流体
 
-                    // ④ 计算提取量（mB）
+                    // 计算提取量（mB）
                     int amount = fluidState.isSource()
                             ? FluidType.BUCKET_VOLUME
                             : 0;
 
-                    FluidStack extracted = new FluidStack(fluidState.getType(), 1);
+                    // 进行实际交互前，将流体统一归为源+1mb副本
+                    Fluid stillFluid = fluidState.getType();
+                    if (stillFluid instanceof FlowingFluid ff)
+                        stillFluid = ff.getSource();
+                    FluidStack extracted = new FluidStack(stillFluid, 1);
 
-                    // ⑤ 交给你的逻辑（存槽、推网络、合并等）
+                    // 进行存储交互
                     FluidStackKey fluidKey = new FluidStackKey(extracted);
                     if(matchesFilter(filterMode,filterSlots,fluidKey))
                     {
                         if(storage.insert(fluidKey,amount,true).isEmpty())
                         {
                             storage.insert(fluidKey,amount,false);
-                            // ⑥ 清空方块 & 通知客户端
+                            // 清空方块 & 通知客户端
                             level.setBlock(pos, Blocks.AIR.defaultBlockState(),
                                     Block.UPDATE_ALL_IMMEDIATE);  // 立即更新并刷新渲染
                         }
