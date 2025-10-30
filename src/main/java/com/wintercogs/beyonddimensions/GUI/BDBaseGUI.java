@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.Network.Packet.toServer.BatchTransferPack
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -17,6 +18,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.anti_ad.mc.ipn.api.IPNIgnore;
+import org.jetbrains.annotations.NotNull;
 
 
 // 更改渲染以及点击事件，以适配StoredStackSlot
@@ -101,93 +103,106 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
 
     }
 
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    {
+        return super.mouseClicked(mouseX,mouseY,button);
+    }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    {
+        // 先把事件交给当前 focused 控件
+        GuiEventListener focused = this.getFocused();
+        if (focused != null && this.isDragging())
+        {
+            if (focused.mouseDragged(mouseX, mouseY, button, dragX, dragY))
+            {
+                return true;
+            }
+            // 返回 false，继续往下走，让容器/槽逻辑按需处理
+        }
+
+        // 命中自定义槽位：拦截容器 quick-craft，不让容器接管
         Slot slot = this.findSlot(mouseX, mouseY);
-        if(!(slot instanceof AbstractStackTypedSlot))
-            super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
+        if (slot instanceof AbstractStackTypedSlot) return true;
 
-        return true;
+        // 其它情况：让容器逻辑处理
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        super.mouseClicked(mouseX,mouseY,button);
-
-        return true;
+    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    {
+        GuiEventListener focused = this.getFocused();
+        if (focused != null)
+        {
+            if (focused.mouseReleased(mouseX, mouseY, button))
+            {
+                return true;
+            }
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
-    protected void slotClicked(Slot slot, int slotIndex, int mouseButton, ClickType type)
+    protected void slotClicked(Slot slot, int slotIndex, int mouseButton, @NotNull ClickType type)
     {
         if(!(slot instanceof AbstractStackTypedSlot))
             super.slotClicked(slot, slotIndex, mouseButton, type);
 
-        // 十分奇怪 为什么我以前不用slotClicked而是使用了mouseClicked手动处理
-        // 我记得我明明考虑过的
-        // 我会把这段代码作为测试版推出一段时间，以防止这里潜藏着被我遗忘的虫子
-        if(slot != null)
+        if(slot == null) return; // 这里绝对可能为null，不可移除此行
+
+        int slotId = slot.index;
+        IStackType<?> clickItem;
+        if(hasShiftDown())
         {
-            if (true)
+            if(slot instanceof AbstractStackTypedSlot sSlot)
             {
-                int slotId = slot.index;
-                IStackType clickItem;
-                if(hasShiftDown())
+                clickItem = sSlot.getVanillaActualStack();
+                if(!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem))
                 {
-                    if(slot instanceof AbstractStackTypedSlot sSlot)
-                    {
-                        clickItem = sSlot.getVanillaActualStack();
-                        if(!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem))
-                        {
-                            PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(lastStorageClickedStack.copyWithCount(Long.MAX_VALUE),false));
-                        }
-                        else if(!clickItem.isEmpty() && clickItem instanceof ItemStackType itemStackType)
-                        {
-                            this.lastStorageClickedStack = (ItemStackType)itemStackType.copy();
-                        }
-                    }
-                    else
-                    {
-                        clickItem = new ItemStackType(slot.getItem());
+                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(lastStorageClickedStack.copyWithCount(Long.MAX_VALUE),false));
+                }
+                else if(!clickItem.isEmpty() && clickItem instanceof ItemStackType itemStackType)
+                {
+                    this.lastStorageClickedStack = (ItemStackType)itemStackType.copy();
+                }
+            }
+            else
+            {
+                clickItem = new ItemStackType(slot.getItem());
 
-                        if(lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
-                        {
-                            PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(new ItemStackType(lastInvClickedStack),true));
-                            menu.isHanding = true;
-                        }
-                        else if(menu.inventoryStartIndex<=slotId&& slotId<menu.inventoryEndIndex)
-                        {
-                            lastInvClickedStack = slot.getItem();
-                            lastInvClickedSlot = slotId;
-                        }
+                if(lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
+                {
+                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(new ItemStackType(lastInvClickedStack),true));
+                }
+                else if(menu.inventoryStartIndex<=slotId&& slotId<menu.inventoryEndIndex)
+                {
+                    lastInvClickedStack = slot.getItem();
+                    lastInvClickedSlot = slotId;
+                }
 
-                    }
-                    menu.isHanding = true;
-                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,true));
+            }
+            PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,true));
+        }
+        else
+        {
+            if(slot instanceof AbstractStackTypedSlot sSlot)
+            {
+                if(sSlot.isFake())
+                {
+                    // 对于标记槽位
+                    clickItem = sSlot.getVanillaActualStack();
+                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
                 }
                 else
                 {
-                    if(slot instanceof AbstractStackTypedSlot sSlot)
-                    {
-                        if(sSlot.isFake())
-                        {
-                            // 对于标记槽位
-                            clickItem = sSlot.getVanillaActualStack();
-                            menu.isHanding = true;
-                            PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
-                        }
-                        else
-                        {
-                            clickItem = sSlot.getVanillaActualStack();
-                            menu.isHanding = true;
-                            PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
-                        }
-                    }
+                    clickItem = sSlot.getVanillaActualStack();
+                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
                 }
             }
         }
-        // 至此
     }
 
 
