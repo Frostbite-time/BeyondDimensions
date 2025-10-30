@@ -23,8 +23,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.TooltipFlag;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * 打开维度网络时候所用到的Menu，处理了网络同步以及点击操作等问题
@@ -41,19 +39,21 @@ public class DimensionsNetMenu extends BDBaseMenu
     private ArrayList<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
     private boolean cacheTooltip = false; //客户端使用，用于记录打开UI后的第一次同步是否缓存了工具提示（用于搜索，且第一次同步通常为全量同步，此时处理较好）
 
+    // 客户端用搜索缓存
+    private static final int NAME_CACHE_MAX = 10_000;
+    private static final LinkedHashMap<IStackType<?>, String> NAME_CACHE = new LinkedHashMap<>(4096, 0.75f, true)
+    {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<IStackType<?>, String> eldest)
+        {
+            return size() > NAME_CACHE_MAX;
+        }
+    };
+
     public boolean hasShiftDown = false;
 
     protected int storageStartIndex;
     protected int storageEndIndex;
-
-
-    // 构建注册用的信息
-
-    // 我们的辅助函数
-    // 我们需要通过IMenuTypeExtension的.create方法才能返回一个menutype，
-    // create方法需要传入一个IContainerFactory的内容，而正好我们的构造函数就是IContainerFactory一样的参数。
-    // 因为就是这样设计的， 所以传入new就可以了。
-
 
     /**
      * 客户端构造函数
@@ -263,7 +263,7 @@ public class DimensionsNetMenu extends BDBaseMenu
     }
 
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList(ArrayList<IStackType> itemStorage, boolean needsUpdateCacheIndex)
+    public void buildIndexList(ArrayList<IStackType<?>> itemStorage, boolean needsUpdateCacheIndex)
     {
         if(!this.player.level().isClientSide())
         {
@@ -321,102 +321,90 @@ public class DimensionsNetMenu extends BDBaseMenu
      * @param unifiedStorage 要排序的存储
      * @return 完成排序的索引列表
      */
-    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackType> unifiedStorage)
+    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackType<?>> unifiedStorage)
     {
-        // 合并过滤空气和搜索逻辑，避免遍历时删除
-        ArrayList<IStackType> cache      = new ArrayList<>();
-        ArrayList<Integer>   cacheIndex = new ArrayList<>();
+        // 过滤（合并空气与搜索）
+        final ArrayList<Keyed> filtered = new ArrayList<>(unifiedStorage.size());
+        final boolean needSearch = this.searchText != null && !this.searchText.isEmpty();
+        final String lowerSearch = needSearch ? this.searchText.toLowerCase(Locale.ENGLISH) : "";
+        final String[] parts = needSearch ? splitSearch(lowerSearch) : new String[]{"","",""};
+        final String namePart = parts[0], idPart = parts[1], tipPart = parts[2];
+        final boolean hasSymbol = needSearch && !(idPart.isEmpty() && tipPart.isEmpty());
 
-        for (int i = 0; i < unifiedStorage.size(); i++) {
-            IStackType stack = unifiedStorage.get(i);
-            if (stack == null || stack.isEmpty()) continue;
+        for (int i = 0; i < unifiedStorage.size(); i++)
+        {
+            IStackType<?> s = unifiedStorage.get(i);
+            if (s == null || s.isEmpty()) continue;
 
-            // === 预先准备高频数据（全部小写，避免重复 toLowerCase 开销） ===
-            String displayName = stack.getDisplayName().getString().toLowerCase(Locale.ENGLISH);
-            String modId       = stack.getModId().toLowerCase(Locale.ENGLISH);
+            // 预计算一次 key（名字走缓存）
+            final String nameKey = getDisplayNameKeyCached(s);
+            final String modIdKey = s.getModId() == null ? "" : s.getModId().toLowerCase(Locale.ENGLISH);
 
-            /* =======================================================================
-             * 1. 解析搜索串                      ────────────────────────────────
-             *    - 若包含 @ 或 # → AND 规则
-             *    - 都不含       → OR 规则（名称 OR 模组ID OR Tooltip）
-             *    - 检索顺序：名称 → 模组ID → Tooltip（最贵放最后）
-             * =======================================================================*/
-            if (searchText == null || searchText.isEmpty()) {           // ⇢ 直接命中
-                cache.add(stack);
-                cacheIndex.add(i);
+            // 搜索匹配
+            if (!needSearch)
+            {
+                filtered.add(new Keyed(s, i, nameKey, modIdKey, s.getStackAmount()));
                 continue;
             }
 
-            String lowerSearch = searchText.toLowerCase(Locale.ENGLISH);
-            String[] parts     = splitSearch(lowerSearch);
-            String mainPart    = parts[0];   // 名称
-            String idPart      = parts[1];   // 模组ID
-            String tooltipPart = parts[2];   // Tooltip
-            boolean hasSymbol  = !(idPart.isEmpty() && tooltipPart.isEmpty());  // 任一存在即显式符号
-
-
-            /* ---------- ① 显式符号：AND 规则 ---------- */
-            if (hasSymbol) {
-                // ---------- AND ----------
-                if (!mainPart.isEmpty() && !checkTextMatches(displayName, mainPart)) continue;
-                if (!idPart.isEmpty()   && !modId.contains(idPart))                 continue;
-                if (!tooltipPart.isEmpty() && !checkTooltipMatches(stack, tooltipPart)) continue;
-
-                cache.add(stack); cacheIndex.add(i);
-            } else {
-                // ---------- OR ----------
+            if (hasSymbol) // AND 规则
+            {
+                if (!namePart.isEmpty() && !checkTextMatches(nameKey, namePart)) continue;
+                if (!idPart.isEmpty()   && !modIdKey.contains(idPart))           continue;
+                if (!tipPart.isEmpty()  && !checkTooltipMatches(s, tipPart))     continue;
+                filtered.add(new Keyed(s, i, nameKey, modIdKey, s.getStackAmount()));
+            }
+            else // OR 规则
+            {
                 boolean matched = false;
-
-                if (!mainPart.isEmpty() && checkTextMatches(displayName, mainPart)) matched = true;
-                if (!matched && modId.contains(mainPart))                           matched = true;
-                if (!matched && checkTooltipMatches(stack, mainPart))               matched = true;
-
-                if (matched) { cache.add(stack); cacheIndex.add(i); }
+                if (!namePart.isEmpty() && checkTextMatches(nameKey, namePart)) matched = true;
+                if (!matched && modIdKey.contains(namePart))                    matched = true;
+                if (!matched && checkTooltipMatches(s, namePart))               matched = true;
+                if (matched) filtered.add(new Keyed(s, i, nameKey, modIdKey, s.getStackAmount()));
             }
-
-        }
-        // 统一排序逻辑，避免重复代码
-        ButtonState sortState = Config.uiSortButton;
-        if (sortState != ButtonState.SORT_DEFAULT) {
-            Comparator<IStackType> comparator;
-            if(sortState == ButtonState.SORT_NAME)
-                comparator = Comparator.comparing((IStackType item) -> item.getDisplayName().getString())
-                        .thenComparing(IStackType::getModId)
-                        .thenComparing(IStackType::getStackAmount);
-            else if(sortState == ButtonState.SORT_QUANTITY)
-                comparator = Comparator.comparingLong((IStackType item) -> item.getStackAmount())
-                        .thenComparing((IStackType item) -> item.getDisplayName().getString())
-                        .thenComparing(IStackType::getModId);
-            else if(sortState == ButtonState.SORT_MODID)
-                comparator = Comparator.comparing((IStackType item) -> item.getModId())
-                        .thenComparing((IStackType item) -> item.getDisplayName().getString())
-                        .thenComparing(IStackType::getStackAmount);
-            else // 保底条件
-                comparator = Comparator.comparing(item -> item.getDisplayName().getString());
-
-
-            // 生成索引排序映射
-            ArrayList<IStackType> finalCache = cache;
-            List<Integer> indices = IntStream.range(0, cache.size())
-                    .parallel()
-                    .boxed()
-                    .sorted((a, b) -> comparator.compare(finalCache.get(a), finalCache.get(b)))
-                    .collect(Collectors.toList());
-
-            // 这一步排序完成后不再需要缓存
-            // 根据排序结果重组索引
-            ArrayList<Integer> sortedIndices = new ArrayList<>(cacheIndex.size());
-            for (int index : indices) {
-                sortedIndices.add(cacheIndex.get(index));
-            }
-            cacheIndex = sortedIndices;
         }
 
-        // 直接通过排序器处理倒序，避免反转操作
-        if (Config.uiReverseButton == ButtonState.ENABLED) {
-            Collections.reverse(cacheIndex);
+        // 排序
+        final ButtonState sortState = Config.uiSortButton;
+
+        Comparator<Keyed> cmp;
+        if (sortState == ButtonState.SORT_NAME)
+        {
+            cmp = Comparator.comparing((Keyed k) -> k.nameKey)
+                    .thenComparing(k -> k.modIdKey)
+                    .thenComparingLong(k -> k.amount);
+        }
+        else if (sortState == ButtonState.SORT_QUANTITY)
+        {
+            cmp = Comparator.comparingLong((Keyed k) -> k.amount)
+                    .thenComparing((Keyed k) -> k.nameKey)
+                    .thenComparing(k -> k.modIdKey);
+        }
+        else if (sortState == ButtonState.SORT_MODID)
+        {
+            cmp = Comparator.comparing((Keyed k) -> k.modIdKey)
+                    .thenComparing(k -> k.nameKey)
+                    .thenComparingLong(k -> k.amount);
+        }
+        else // 默认：名字
+        {
+            cmp = Comparator.comparing((Keyed k) -> k.nameKey);
         }
 
+        // 倒序
+        if (Config.uiReverseButton == ButtonState.ENABLED)
+        {
+            cmp = cmp.reversed();
+        }
+
+        filtered.sort(cmp);
+
+        // 回填索引
+        ArrayList<Integer> cacheIndex = new ArrayList<>(filtered.size());
+        for (Keyed k : filtered)
+        {
+            cacheIndex.add(k.origIndex);
+        }
         return cacheIndex;
     }
 
@@ -532,5 +520,34 @@ public class DimensionsNetMenu extends BDBaseMenu
         return true; // 可根据需求修改条件
     }
 
+    // 仅用于排序/过滤的快照，避免在比较器里反复取重名信息
+    private static final class Keyed
+    {
+        final IStackType<?> stack;
+        final int origIndex; // 原始索引，用来回填到 cacheIndex
+        final String nameKey; // 排序/匹配用的“名字key”
+        final String modIdKey;
+        final long amount;
+
+        Keyed(IStackType<?> s, int idx, String nameKey, String modIdKey, long amount)
+        {
+            this.stack = s;
+            this.origIndex = idx;
+            this.nameKey = nameKey;
+            this.modIdKey = modIdKey;
+            this.amount = amount;
+        }
+    }
+
+    private static String getDisplayNameKeyCached(IStackType<?> key)
+    {
+        String val = NAME_CACHE.get(key);
+        if (val != null) return val;
+        String computed = key.getDisplayName().getString();
+        computed = computed.toLowerCase(Locale.ENGLISH);
+        // 如果未命中，做一个copy，理论上每次打开UI仅一次全量，后续增量，不会有过多负载
+        NAME_CACHE.put(key.copy(), computed);
+        return computed;
+    }
 }
 
