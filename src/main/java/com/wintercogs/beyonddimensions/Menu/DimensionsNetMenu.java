@@ -92,12 +92,13 @@ public class DimensionsNetMenu extends BDBaseMenu
         storage = data; // 此处，客户端使用可移0堆叠，不维护时间对的版本，服务端传入维度网络携带的版本
         viewerStorage = new UnorderedStackHandlerKeepZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
 
-        addSlotGroupSync(new DisorderedSlotGroupSync(this,slotGroupSyncs.size(),storage) {
+        addSlotGroupSync(new DisorderedSlotGroupSync(this, slotGroupSyncs.size(), storage)
+        {
             @Override
             public void afterLoadChange()
             {
                 // 按住shift时锁定排序
-                if(!hasShiftDown)
+                if (!hasShiftDown)
                     updateViewerStorage();
                 else
                     updateOnlyCountAndNewViewer();
@@ -120,13 +121,13 @@ public class DimensionsNetMenu extends BDBaseMenu
         // 默认添加99行，但将99之外的行全部设置为不激活状态，以实现动态增加和减少行数
         storageStartIndex = slots.size();
         vanillaQuickMoveStartIndex = storageStartIndex;
-        if(player.level().isClientSide())
+        if (player.level().isClientSide())
         {
             for (int row = 0; row < 99; ++row)
             {
                 for (int col = 0; col < 9; ++col)
                 {
-                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this,viewerStorage,-1,inventoryStartIndex,inventoryEndIndex,  8 + col * 18, 25 + row * 18);
+                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, viewerStorage, -1, inventoryStartIndex, inventoryEndIndex, 8 + col * 18, 25 + row * 18);
                     if (row >= getLines())
                         newSlot.setActive(false);
                     this.addSlot(newSlot);
@@ -139,7 +140,7 @@ public class DimensionsNetMenu extends BDBaseMenu
             {
                 for (int col = 0; col < 9; ++col)
                 {
-                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this,storage,-1,inventoryStartIndex,inventoryEndIndex, 8 + col * 18, 25 + row * 18);
+                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, storage, -1, inventoryStartIndex, inventoryEndIndex, 8 + col * 18, 25 + row * 18);
                     if (row >= getLines())
                         newSlot.setActive(false);
                     this.addSlot(newSlot);
@@ -234,11 +235,11 @@ public class DimensionsNetMenu extends BDBaseMenu
     public void updateViewerStorage()
     {
         viewerStorage.clearStorage();
-        for(KeyAmount stack : this.storage.getStorage())
+        for (KeyAmount stack : this.storage.getStorage())
         {
-            this.viewerStorage.insert(stack.key(),stack.amount(),false);
+            this.viewerStorage.insert(stack.key(), stack.amount(), false);
         }
-        buildIndexList(new ArrayList<>(viewerStorage.getStorage()),true);
+        buildIndexList(new ArrayList<>(viewerStorage.getStorage()), true);
     }
 
     // 仅仅更新视觉存储的数量信息
@@ -251,11 +252,13 @@ public class DimensionsNetMenu extends BDBaseMenu
         Map<IStackKey<?>, Long> storageMap = new HashMap<>();
 
         // 填充主存储物品数量 (O(n))
-        for (KeyAmount stack : storage.getStorage()) {
+        for (KeyAmount stack : storage.getStorage())
+        {
             storageMap.put(stack.key(), stack.amount());
         }
         // 更新查看者存储的数量 (O(m))
-        for (KeyAmount viewerStack : viewerStorage.getStorage()) {
+        for (KeyAmount viewerStack : viewerStorage.getStorage())
+        {
             // 使用哈希表直接查找数量，不存在时默认为0
             long amount = storageMap.getOrDefault(viewerStack.key(), 0L);
             // 这里内部会移除数量为0的情况，到时候再修改为锁定情况，现在先放着不管
@@ -268,12 +271,12 @@ public class DimensionsNetMenu extends BDBaseMenu
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
     public void buildIndexList(ArrayList<KeyAmount> itemStorage, boolean needsUpdateCacheIndex)
     {
-        if(!this.player.level().isClientSide())
+        if (!this.player.level().isClientSide())
         {
             return;
         }
         // 1 构建正确的索引数据
-        if(needsUpdateCacheIndex || cacheIndex == null)
+        if (needsUpdateCacheIndex || cacheIndex == null)
         {
             cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
         }
@@ -303,7 +306,7 @@ public class DimensionsNetMenu extends BDBaseMenu
     public void loadIndexList(ArrayList<Integer> list)
     {
         int listIndex = 0;
-        for(int slotIndex = storageStartIndex;listIndex<list.size() && slotIndex<storageEndIndex;slotIndex++)
+        for (int slotIndex = storageStartIndex; listIndex < list.size() && slotIndex < storageEndIndex; slotIndex++)
         {
             ((AbstractStackTypedSlot) slots.get(slotIndex)).setTheSlotIndex(list.get(listIndex));
             listIndex++;
@@ -312,6 +315,7 @@ public class DimensionsNetMenu extends BDBaseMenu
 
     /**
      * 设置当前菜单searchText，过程中会将其按照英文本地化惯例进行小写化处理
+     *
      * @param text 传入的文本
      */
     public void loadSearchText(String text)
@@ -348,7 +352,7 @@ public class DimensionsNetMenu extends BDBaseMenu
         if (primaryState == null) primaryState = ButtonState.SORT_NAME;
         final boolean useSecondary = (secondaryState != null && secondaryState != primaryState);
 
-        final boolean needNameSort = (primaryState == ButtonState.SORT_NAME)  || (useSecondary && secondaryState == ButtonState.SORT_NAME);
+        final boolean needNameSort = (primaryState == ButtonState.SORT_NAME) || (useSecondary && secondaryState == ButtonState.SORT_NAME);
         final boolean needModidSort = (primaryState == ButtonState.SORT_MODID) || (useSecondary && secondaryState == ButtonState.SORT_MODID);
         final boolean needQtySort = (primaryState == ButtonState.SORT_QUANTITY) || (useSecondary && secondaryState == ButtonState.SORT_QUANTITY);
         final boolean needCTimeSort = (primaryState == ButtonState.SORT_INSERTED_TIME) || (useSecondary && secondaryState == ButtonState.SORT_INSERTED_TIME);
@@ -369,8 +373,8 @@ public class DimensionsNetMenu extends BDBaseMenu
             IStackKey<?> key = ka.key();
 
             String displayName = null;   // 仅在需要按名称过滤/排序时取
-            String modIdLower  = null;   // 过滤用小写
-            String modIdSort   = null;   // 排序用原字符串
+            String modIdLower = null;   // 过滤用小写
+            String modIdSort = null;   // 排序用原字符串
 
             boolean matched;
             if (!hasSearch)
@@ -398,16 +402,20 @@ public class DimensionsNetMenu extends BDBaseMenu
             else
             {
                 boolean any = false;
-                if (!namePart.isEmpty()) {
-                    if (needNameFilter) {
+                if (!namePart.isEmpty())
+                {
+                    if (needNameFilter)
+                    {
                         displayName = key.getRender().getDisplayName(key).getString();
                         any |= checkTextMatches(displayName, namePart);
                     }
-                    if (!any && needModFilter) {
+                    if (!any && needModFilter)
+                    {
                         modIdLower = key.getModId().toLowerCase(Locale.ENGLISH);
                         any |= modIdLower.contains(namePart);
                     }
-                    if (!any && needTooltipFilter) {
+                    if (!any && needTooltipFilter)
+                    {
                         any |= checkTooltipMatches(ka, namePart);
                     }
                 }
@@ -416,14 +424,16 @@ public class DimensionsNetMenu extends BDBaseMenu
             if (!matched) continue;
 
             // 进入排序键收集：仅在需要时取
-            if (needNameSort && displayName == null) {
+            if (needNameSort && displayName == null)
+            {
                 displayName = key.getRender().getDisplayName(key).getString();
             }
-            if (needModidSort) {
+            if (needModidSort)
+            {
                 modIdSort = key.getModId();
             }
 
-            long amt   = needQtySort   ? ka.amount() : 0L;
+            long amt = needQtySort ? ka.amount() : 0L;
             long ctime = (needCTimeSort && ctimeMap != null) ? ctimeMap.getOrDefault(key, 0L) : 0L;
             long mtime = (needMTimeSort && mtimeMap != null) ? mtimeMap.getOrDefault(key, 0L) : 0L;
 
@@ -431,15 +441,20 @@ public class DimensionsNetMenu extends BDBaseMenu
         }
 
         // ---- 排序（无 viewerIndex 兜底）----
-        if (!rows.isEmpty()) {
+        if (!rows.isEmpty())
+        {
             final Comparator<Row> primary = buildRowComparator(primaryState);
-            if (useSecondary) {
+            if (useSecondary)
+            {
                 final Comparator<Row> secondary = buildRowComparator(secondaryState);
                 rows.sort(primary.thenComparing(secondary));
-            } else {
+            }
+            else
+            {
                 rows.sort(primary);
             }
-            if (Config.uiReverseButton == ButtonState.ENABLED) {
+            if (Config.uiReverseButton == ButtonState.ENABLED)
+            {
                 Collections.reverse(rows);
             }
         }
@@ -461,12 +476,17 @@ public class DimensionsNetMenu extends BDBaseMenu
      * @param ctime     插入时间（仅在需要时有意义）
      * @param mtime     修改时间（仅在需要时有意义）
      */ // 局部行结构：仅保存排序所需键
-    private record Row(int idx, String name, String modIdSort, long amount, long ctime, long mtime) {}
+    private record Row(int idx, String name, String modIdSort, long amount, long ctime, long mtime)
+    {
+    }
 
-    /** 仅比较 Row 中已准备好的字段；不做任何额外取值或 viewerIndex 兜底 */
+    /**
+     * 仅比较 Row 中已准备好的字段；不做任何额外取值或 viewerIndex 兜底
+     */
     private Comparator<Row> buildRowComparator(ButtonState state)
     {
-        if (state == null) {
+        if (state == null)
+        {
             // 与旧逻辑一致：默认按名称（这里假定需要时我们已填充了 name）
             return Comparator.comparing((Row r) -> r.name, String::compareTo);
         }
@@ -495,11 +515,11 @@ public class DimensionsNetMenu extends BDBaseMenu
 
         boolean matchPinyin;
 
-        if(!Minecraft.getInstance().options.languageCode.startsWith("zh"))
+        if (!Minecraft.getInstance().options.languageCode.startsWith("zh"))
         {
             matchPinyin = false; // 非中文地区默认不匹配
         }
-        else if(BeyondDimensions.JECharactersLoaded)
+        else if (BeyondDimensions.JECharactersLoaded)
         {
             matchPinyin = PinInMatches.contains(srcText, inputText);
         }
@@ -509,16 +529,18 @@ public class DimensionsNetMenu extends BDBaseMenu
             String firstPinyin = TinyPinyinUtils.getFirstPinYin(srcText).toLowerCase(Locale.ENGLISH);
             matchPinyin = allPinyin.contains(inputText) || firstPinyin.contains(inputText);
         }
-        return matchText||matchPinyin;
+        return matchText || matchPinyin;
     }
 
     /**
      * 检查文本是否存在于目标物品堆叠
-     * @param stack 目标物品堆叠
+     *
+     * @param stack     目标物品堆叠
      * @param matchText 文本
      * @return 结果为真则意味存在
      */
-    private boolean checkTooltipMatches(KeyAmount stack, String matchText) {
+    private boolean checkTooltipMatches(KeyAmount stack, String matchText)
+    {
         List<Component> toolTips = TooltipHelper.getTooltipLines(stack,
                 Item.TooltipContext.of(player.level()),
                 player,
@@ -538,56 +560,65 @@ public class DimensionsNetMenu extends BDBaseMenu
      * 把搜索串拆成 “名称 / 模组ID / Tooltip” 三段，顺序任意。
      * 返回 String[3] ⇒ [namePart, idPart, tooltipPart]，不存在则为空串。
      */
-    private static String[] splitSearch(String s) {
-        if (s == null) return new String[] {"", "", ""};
+    private static String[] splitSearch(String s)
+    {
+        if (s == null) return new String[]{"", "", ""};
 
         s = s.toLowerCase(Locale.ENGLISH);
-        int at   = s.indexOf('@');
+        int at = s.indexOf('@');
         int hash = s.indexOf('#');
 
         // 都没有特殊符号
-        if (at < 0 && hash < 0) return new String[] {s, "", ""};
+        if (at < 0 && hash < 0) return new String[]{s, "", ""};
 
         String namePart = "";
-        String idPart   = "";
-        String tipPart  = "";
+        String idPart = "";
+        String tipPart = "";
 
         // 三种情况：只含@、只含#、都含且顺序不定
-        if (at >= 0 && hash >= 0) {
+        if (at >= 0 && hash >= 0)
+        {
             // 同时存在：先找较小的索引拆 namePart
             int first = Math.min(at, hash);
-            namePart  = s.substring(0, first);
+            namePart = s.substring(0, first);
 
-            if (at < hash) {                    //  @ ... #
-                idPart  = s.substring(at + 1, hash);
+            if (at < hash)
+            {                    //  @ ... #
+                idPart = s.substring(at + 1, hash);
                 tipPart = s.substring(hash + 1);
-            } else {                            //  # ... @
-                tipPart = s.substring(hash + 1, at);
-                idPart  = s.substring(at + 1);
             }
-        } else if (at >= 0) {                   // 只含 @
+            else
+            {                            //  # ... @
+                tipPart = s.substring(hash + 1, at);
+                idPart = s.substring(at + 1);
+            }
+        }
+        else if (at >= 0)
+        {                   // 只含 @
             namePart = s.substring(0, at);
-            idPart   = s.substring(at + 1);
-        } else {                                // 只含 #
+            idPart = s.substring(at + 1);
+        }
+        else
+        {                                // 只含 #
             namePart = s.substring(0, hash);
-            tipPart  = s.substring(hash + 1);
+            tipPart = s.substring(hash + 1);
         }
 
-        return new String[] {namePart, idPart, tipPart};
+        return new String[]{namePart, idPart, tipPart};
     }
 
 
     public void updateScrollLineData(int dataSize)
     {
-        maxLineData = dataSize / 9 ;
-        if(dataSize % 9 !=0) //如果余数不为0，说明还有一行，加1
+        maxLineData = dataSize / 9;
+        if (dataSize % 9 != 0) //如果余数不为0，说明还有一行，加1
         {
             maxLineData++;
         }
         maxLineData -= getLines();
-        maxLineData = Math.max(maxLineData,0);
-        lineData = Math.max(lineData,0);
-        lineData = Math.min(lineData,maxLineData);
+        maxLineData = Math.max(maxLineData, 0);
+        lineData = Math.max(lineData, 0);
+        lineData = Math.min(lineData, maxLineData);
     }
 
 
