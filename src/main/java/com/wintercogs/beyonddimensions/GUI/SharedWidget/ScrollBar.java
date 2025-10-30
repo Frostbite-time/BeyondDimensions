@@ -281,12 +281,10 @@ public class ScrollBar extends AbstractWidget
         RenderSystem.enableDepthTest();
 
         // 在 (x, y + scrollerOffset) 处绘制“滑块”
-        gg.blit(
+        gg.blitSprite(
                 SPRITE,
                 this.getX(),
                 this.getY() + this.scrollerOffset,
-                0, 0,
-                this.getWidth(), this.getHeight(),
                 this.getWidth(), this.getHeight()
         );
 
