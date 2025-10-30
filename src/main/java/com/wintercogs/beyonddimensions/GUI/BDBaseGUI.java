@@ -9,6 +9,7 @@ import com.wintercogs.beyonddimensions.Packet.BatchTransferPacket;
 import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -101,19 +102,45 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        Slot slot = this.findSlot(mouseX, mouseY);
-        if(!(slot instanceof AbstractStackTypedSlot))
-            super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
-
-        return true;
+    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    {
+        return super.mouseClicked(mouseX,mouseY,button);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        super.mouseClicked(mouseX,mouseY,button);
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    {
+        // 先把事件交给当前 focused 控件
+        GuiEventListener focused = this.getFocused();
+        if (focused != null && this.isDragging())
+        {
+            if (focused.mouseDragged(mouseX, mouseY, button, dragX, dragY))
+            {
+                return true;
+            }
+            // 返回 false，继续往下走，让容器/槽逻辑按需处理
+        }
 
-        return true;
+        // 命中自定义槽位：拦截容器 quick-craft，不让容器接管
+        Slot slot = this.findSlot(mouseX, mouseY);
+        if (slot instanceof AbstractStackTypedSlot) return true;
+
+        // 其它情况：让容器逻辑处理
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    {
+        GuiEventListener focused = this.getFocused();
+        if (focused != null)
+        {
+            if (focused.mouseReleased(mouseX, mouseY, button))
+            {
+                return true;
+            }
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
@@ -123,77 +150,62 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
             super.slotClicked(slot, slotIndex, mouseButton, type);
 
 
-        // 十分奇怪 为什么我以前不用slotClicked而是使用了mouseClicked手动处理
-        // 我记得我明明考虑过的
-        if(slot != null)
+        if(slot == null) return; // slot绝对可能为null，不可移除此行
+
+        int slotId = slot.index;
+        KeyAmount clickItem;
+        if(hasShiftDown())
         {
-            // 数据伪造以及重复修改已经在服务端阻止
-            // 将menu.isHanding检测暂时移除，增强原版兼容性
-            // 如果一段时间后没有问题则移除
-            if (true)
+            if(slot instanceof AbstractStackTypedSlot sSlot)
             {
-                int slotId = slot.index;
-                KeyAmount clickItem;
-                if(hasShiftDown())
+                clickItem = sSlot.getVanillaActualStack();
+                if(!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem.key()))
                 {
-                    if(slot instanceof AbstractStackTypedSlot sSlot)
-                    {
-                        clickItem = sSlot.getVanillaActualStack();
-                        if(!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem.key()))
-                        {
-                            PacketDistributor.sendToServer(new BatchTransferPacket(clickItem,false));
-                        }
-                        else if(!clickItem.isEmpty() && clickItem.key() instanceof ItemStackKey itemStackKey)
-                        {
-                            this.lastStorageClickedStack = itemStackKey;
-                        }
-                    }
-                    else
-                    {
-                        clickItem = new KeyAmount(new ItemStackKey(slot.getItem()),slot.getItem().getCount());
+                    PacketDistributor.sendToServer(new BatchTransferPacket(clickItem,false));
+                }
+                else if(!clickItem.isEmpty() && clickItem.key() instanceof ItemStackKey itemStackKey)
+                {
+                    this.lastStorageClickedStack = itemStackKey;
+                }
+            }
+            else
+            {
+                clickItem = new KeyAmount(new ItemStackKey(slot.getItem()),slot.getItem().getCount());
 
-                        // 快速移动仓库物品
-                        // 原版会处理一部分快速移动 此处处理原版未能正常处理的部分
-                        // 理论上说，这俩者即使同时操作一个槽位也不会导致物品复制等bug
-                        // 因为操作基本全由服务端处理
-                        if(lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
-                        {
-                            PacketDistributor.sendToServer(new BatchTransferPacket(new KeyAmount(new ItemStackKey(lastInvClickedStack),lastInvClickedStack.getCount()) ,true));
-                            menu.isHanding = true;
-                        }
-                        else if(menu.inventoryStartIndex<=slotId&& slotId<menu.inventoryEndIndex)
-                        {
-                            lastInvClickedStack = slot.getItem();
-                            lastInvClickedSlot = slotId;
-                        }
+                // 快速移动仓库物品
+                // 原版会处理一部分快速移动 此处处理原版未能正常处理的部分
+                // 理论上说，这俩者即使同时操作一个槽位也不会导致物品复制等bug
+                // 因为操作基本全由服务端处理
+                if(lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
+                {
+                    PacketDistributor.sendToServer(new BatchTransferPacket(new KeyAmount(new ItemStackKey(lastInvClickedStack),lastInvClickedStack.getCount()) ,true));
+                }
+                else if(menu.inventoryStartIndex<=slotId&& slotId<menu.inventoryEndIndex)
+                {
+                    lastInvClickedStack = slot.getItem();
+                    lastInvClickedSlot = slotId;
+                }
 
-                    }
-                    menu.isHanding = true;
-                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,true));
+            }
+            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,true));
+        }
+        else
+        {
+            if(slot instanceof AbstractStackTypedSlot sSlot)
+            {
+                if(sSlot.isFake())
+                {
+                    // 对于标记槽位
+                    clickItem = sSlot.getVanillaActualStack();
+                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
                 }
                 else
                 {
-                    if(slot instanceof AbstractStackTypedSlot sSlot)
-                    {
-                        if(sSlot.isFake())
-                        {
-                            // 对于标记槽位
-                            clickItem = sSlot.getVanillaActualStack();
-                            menu.isHanding = true;
-                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
-                        }
-                        else
-                        {
-                            clickItem = sSlot.getVanillaActualStack();
-                            menu.isHanding = true;
-                            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
-                        }
-                    }
+                    clickItem = sSlot.getVanillaActualStack();
+                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
                 }
             }
         }
-        // 至此
-
 
     }
 

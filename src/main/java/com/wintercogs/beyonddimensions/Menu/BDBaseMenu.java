@@ -40,10 +40,6 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     protected List<AbstractStackTypedSlot> updatedSlots = new ArrayList<>(); // 用于槽位更新
     public List<SlotGroupSync> slotGroupSyncs = new ArrayList<>();
 
-    public boolean isHanding = false; // 用于标记当前是否向服务端发出操作请求却未得到回应 true表示无正在处理未回应，false表示空闲
-
-
-
     protected BDBaseMenu(@Nullable MenuType<?> menuType, int containerId, Inventory playerInventory)
     {
         super(menuType, containerId);

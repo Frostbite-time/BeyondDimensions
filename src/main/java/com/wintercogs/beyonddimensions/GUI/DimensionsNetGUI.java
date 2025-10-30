@@ -276,8 +276,24 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         }
         addRenderableWidget(searchField);
 
-        // 初始化滚动按钮
-        this.scroller = new BigScroller(this.leftPos+174,this.topPos+TOP_BASE_HEIGHT+1,18*menu.getLines() - 15 -2,0,menu.maxLineData);
+        // 初始化滚动条
+        int trackLength = 18 * menu.getLines() - 15 - 2;
+        this.scroller = new BigScroller(
+                this.leftPos + 174,
+                this.topPos + TOP_BASE_HEIGHT + 1,
+                trackLength,
+                menu.lineData,
+                menu.maxLineData,
+                pos ->
+                {
+                    if(menu.lineData != pos)
+                    {
+                        menu.lineData = pos;
+                        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),false);
+                    }
+                }
+        );
+        this.scroller.setStep(1);
         addRenderableWidget(scroller);
 
         lastSearchText = searchField.getValue();
@@ -311,7 +327,8 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             }
         }
 
-        scroller.updateScrollPosition(menu.lineData,menu.maxLineData);// 读取翻页数据并应用
+        // 更新滑动条信息
+        scroller.updateScrollPosition(menu.lineData, menu.maxLineData); // 读取翻页数据并应用
     }
 
     // 用于让子类重写工艺槽位按钮的函数
@@ -412,41 +429,15 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
     {
-        super.mouseScrolled(mouseX,mouseY,scrollX,scrollY);
-        if (scrollY > 0)
-        {
-            menu.lineData--;
-        } else if(scrollY < 0)
-        {
-            menu.lineData++;
-        }
-        //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
-        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),false);
-        return true;
-    }
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
-        // 父类的覆写方法没有显式调用其被拖拽的子元素的拖拽方法，所以需要手动调用
-        int scrollY =  scroller.customDragAction(mouseX,mouseY,button,dragX,dragY);
-        int lastLine = menu.lineData;
-        if (scrollY > 0)
-        {
-            menu.lineData--;
-        } else if(scrollY < 0)
-        {
-            menu.lineData++;
-        }
-        //ScrollTo会处理lineData小于0的情况 并通知客户端翻页
-        if(lastLine != menu.lineData) // 只有确实改变页面的情况下再重构索引
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),false);
-        return true;
+        boolean result = super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        if(!result) // 让滑动条全局可滑
+            result = scroller.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return result;
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        super.mouseClicked(mouseX,mouseY,button);
+        boolean result = super.mouseClicked(mouseX,mouseY,button);
 
         // 处理对搜索框的焦点取消
         boolean flag =  searchField.active && searchField.visible && mouseX >= (double)searchField.getX() && mouseY >= (double)searchField.getY() && mouseX < (double)(searchField.getX() + searchField.getWidth()) && mouseY < (double)(searchField.getY() + searchField.getHeight());
@@ -466,36 +457,46 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             searchField.setValue("");
         }
 
-        return true;
+        return result;
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
+        // 先处理menu相关数据
         if(keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
             menu.hasShiftDown = true;
 
         InputConstants.Key mouseKey = InputConstants.getKey(keyCode, scanCode);
 
+        // 如果搜索框有效，拦截，然后让搜索框接管处理
+        if(searchField != null && searchField.canConsumeInput() && mouseKey.getValue() != GLFW.GLFW_KEY_ESCAPE)
+        {
+            // 无论如何都不继续后续逻辑
+            // 等以后可能改为重写searchField以获得更稳定的效果
+            searchField.keyPressed(keyCode, scanCode, modifiers);
+            return true;
+        }
+
+        // 处理shift + z切换
         if(hasShiftDown() && mouseKey.getValue() == GLFW.GLFW_KEY_Z)
         {
             boolean current = Config.searchTextWithJEIEMI;
             Config.searchTextWithJEIEMI = !current;
             Config.SEARCH_TEXT_WITH_JEI_EMI.set(!current);
             Config.SEARCH_TEXT_WITH_JEI_EMI.save();
+            return true;
         }
 
+        // 处理背包关闭热键
         if(this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey) ||
                 DimensionsShortKeys.OPEN_GUI_KEY.getKey() == mouseKey)
         {
-            if(!this.searchField.isFocused())
-                onClose();
+            onClose();
             return true;
         }
-        else
-        {
-            return super.keyPressed(keyCode, scanCode, modifiers);
-        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
