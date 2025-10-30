@@ -36,7 +36,7 @@ public class NetFeederMenu extends BDBaseMenu
         {
             super.onChange();
             if (!player.level().isClientSide() && initialized)
-                BaseMachineItem.setFilterSlots(menuStack, new ArrayList<>(storage.getStorage()));
+                BaseMachineItem.setFilterSlots(menuStack, new ArrayList<IStackType<?>>(storage.getStorage()));
 
         }
 

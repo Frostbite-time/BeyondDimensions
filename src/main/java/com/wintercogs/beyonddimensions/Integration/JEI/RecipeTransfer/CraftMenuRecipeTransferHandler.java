@@ -57,7 +57,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
 
         // 收集所有可用物品来源（合成槽+存储槽）
         List<Slot> craftingSlots = getInputSources(container);
-        List<IStackType> storageSlots = container.storage.getStorage();
+        List<IStackType<?>> storageSlots = container.storage.getStorage();
         List<ItemStack> availableItems = new ArrayList<>();
 
         // 收集合成槽物品
@@ -68,7 +68,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
         }
 
         // 收集存储槽物品
-        for (IStackType stackType : storageSlots) {
+        for (IStackType<?> stackType : storageSlots) {
             if (stackType instanceof ItemStackType itemStackType) {
                 ItemStack stack = itemStackType.getStack();
                 if (!stack.isEmpty()) {

@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -198,7 +199,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
+    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side)
     {
         // 遍历注册的能力映射表
         for (Map.Entry<ResourceLocation, Capability<?>> entry : CapabilityHelper.BlockCapabilityMap.entrySet()) {
@@ -249,17 +250,17 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         {
             for(int i=0; i<capacity; i++)
             {
-                IStackType flag = fakeStackHandler.getStackBySlot(i);
+                IStackType<?> flag = fakeStackHandler.getStackBySlot(i);
                 if(flag!= null && !flag.isEmpty())
                 {
                     if (flag.isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
                         continue;
                 }
-                IStackType stack = stackHandler.getStackBySlot(i);
+                IStackType<?> stack = stackHandler.getStackBySlot(i);
                 if(stack !=null &&!stack.isEmpty())
                 {
-                    IStackType extracted = stackHandler.extract(i, stack.getStackAmount(),false);
-                    IStackType remaining = net.getUnifiedStorage().insert(extracted,false);
+                    IStackType<?> extracted = stackHandler.extract(i, stack.getStackAmount(),false);
+                    IStackType<?> remaining = net.getUnifiedStorage().insert(extracted,false);
                     if(!remaining.isEmpty())
                         stackHandler.insert(i, remaining, false);
                 }
@@ -279,11 +280,11 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         {
             for(int i=0; i<capacity; i++)
             {
-                IStackType flag = fakeStackHandler.getStackBySlot(i);
+                IStackType<?> flag = fakeStackHandler.getStackBySlot(i);
                 if(flag!=null && !flag.isEmpty())
                 {
                     // 到达数量上限或者是不同物品则不尝试插入
-                    IStackType current = stackHandler.getStackBySlot(i);
+                    IStackType<?> current = stackHandler.getStackBySlot(i);
                     if(current != null &&!current.isEmpty())
                     {
                         if(current.getVanillaMaxStackSize() >= current.getStackAmount())
@@ -347,8 +348,8 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
     public void dropContent()
     {
-        List<IStackType> dropList = new ArrayList<>();
-        for(IStackType stack : stackHandler.getStorage())
+        List<IStackType<?>> dropList = new ArrayList<>();
+        for(IStackType<?> stack : stackHandler.getStorage())
         {
             if(!stack.isEmpty())
             {

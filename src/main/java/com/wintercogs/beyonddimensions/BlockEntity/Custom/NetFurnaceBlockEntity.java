@@ -743,8 +743,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
 
     public void dropContent()
     {
-        List<IStackType> dropList = new ArrayList<>();
-        for(IStackType stack : inputStorageSlots.getStorage())
+        List<IStackType<?>> dropList = new ArrayList<>();
+        for(IStackType<?> stack : inputStorageSlots.getStorage())
         {
             if(!stack.isEmpty())
             {

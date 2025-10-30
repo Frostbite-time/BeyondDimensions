@@ -95,7 +95,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
 
         // 获取所有可能的物品来源（常规合成槽+存储槽）
         List<Slot> craftingSlots = getInputSources(menu);
-        List<IStackType> storageSlots = menu.storage.getStorage();
+        List<IStackType<?>> storageSlots = menu.storage.getStorage();
         // 创建虚拟库存用于模拟物品匹配
         List<ItemStack> availableItems = new ArrayList<>();
 
