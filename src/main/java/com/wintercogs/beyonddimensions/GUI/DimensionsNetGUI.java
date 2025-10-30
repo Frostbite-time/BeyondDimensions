@@ -70,14 +70,15 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    protected void init() {
+    protected void init()
+    {
 
         clearWidgets();
 
-        if(UIDataHelper.isTransfer)
+        if (UIDataHelper.isTransfer)
         {
             menu.lineData = UIDataHelper.currentPage;
-            if(UIDataHelper.lastMousePos != null)
+            if (UIDataHelper.lastMousePos != null)
             {
                 Window window = Minecraft.getInstance().getWindow();
                 GLFW.glfwSetCursorPos(
@@ -92,10 +93,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         // 计算最大行数
         int maxLines = calMaxLines();
-        if(maxLines < menu.getLines())
+        if (maxLines < menu.getLines())
         {
             // 自动计算不主动持久化参数
-            if(maxLines<2)
+            if (maxLines < 2)
                 maxLines = 2;
             menu.setLines(maxLines);
             menu.rebuildSlots();
@@ -108,8 +109,8 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         // 用于计算期望的起点位置
         // 宽按176 高按235可以得到一个较好的效果
-        this.leftPos = (this.width - 176)/2;
-        this.topPos = (this.height - imageHeight)/2;
+        this.leftPos = (this.width - 176) / 2;
+        this.topPos = (this.height - imageHeight) / 2;
 
         // Label的渲染函数使用drawString，默认以topPos为起点
         rebuildLabelHeight();
@@ -117,33 +118,33 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         // 初始化按钮组件
         //排序按钮
-        sortButton = new SortMethodButton(this.leftPos-18,this.topPos+6,button ->
+        sortButton = new SortMethodButton(this.leftPos - 18, this.topPos + 6, button ->
         {
             sortButton.toggleState();
             Config.uiSortButton = (ButtonState) sortButton.currentState;
             Config.UI_SORT_BUTTON.set((ButtonState) sortButton.currentState);
             Config.UI_SORT_BUTTON.save();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
         });
         addRenderableWidget(sortButton);
         // 第二搜索策略按钮
-        secondSortButton = new SortMethodButton(this.leftPos-18,this.topPos+6+18,button ->
+        secondSortButton = new SortMethodButton(this.leftPos - 18, this.topPos + 6 + 18, button ->
         {
             secondSortButton.toggleState();
             Config.uiSecondSortButton = (ButtonState) secondSortButton.currentState;
             Config.UI_SECOND_SORT_BUTTON.set((ButtonState) secondSortButton.currentState);
             Config.UI_SECOND_SORT_BUTTON.save();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
         })
         {
             @Override
             protected void initButton()
             {
-                iconMap.put(ButtonState.SORT_QUANTITY,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_quantity"));
-                iconMap.put(ButtonState.SORT_NAME,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_name"));
-                iconMap.put(ButtonState.SORT_MODID, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_modid"));
-                iconMap.put(ButtonState.SORT_INSERTED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_inserted_time"));
-                iconMap.put(ButtonState.SORT_MODIFIED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/sort_modified_time"));
+                iconMap.put(ButtonState.SORT_QUANTITY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_quantity"));
+                iconMap.put(ButtonState.SORT_NAME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_name"));
+                iconMap.put(ButtonState.SORT_MODID, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_modid"));
+                iconMap.put(ButtonState.SORT_INSERTED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_inserted_time"));
+                iconMap.put(ButtonState.SORT_MODIFIED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_modified_time"));
 
                 tooltipMap.put(ButtonState.SORT_QUANTITY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_quantity_second")));
                 tooltipMap.put(ButtonState.SORT_NAME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_name_second")));
@@ -151,7 +152,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 tooltipMap.put(ButtonState.SORT_INSERTED_TIME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_inserted_time_second")));
                 tooltipMap.put(ButtonState.SORT_MODIFIED_TIME, Tooltip.create(Component.translatable(("tooltip.button.beyonddimensions.sort_modified_time_second"))));
 
-                for(Enum<?> state : iconMap.keySet())
+                for (Enum<?> state : iconMap.keySet())
                 {
                     this.states.add(state);
                 }
@@ -160,17 +161,17 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         };
         addRenderableWidget(secondSortButton);
         // 倒序切换按钮
-        reverseButton = new ReverseButton(this.leftPos-18,this.topPos+6+18*2,button ->
+        reverseButton = new ReverseButton(this.leftPos - 18, this.topPos + 6 + 18 * 2, button ->
         {
             reverseButton.toggleState();
             Config.uiReverseButton = (ButtonState) reverseButton.currentState;
             Config.UI_REVERSE_BUTTON.set((ButtonState) reverseButton.currentState);
             Config.UI_REVERSE_BUTTON.save();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
         });
         addRenderableWidget(reverseButton);
         // 搜索切换按钮
-        searchToggleButton = new SearchToggleButton(this.leftPos-18,this.topPos+6+18*3,button ->{
+        searchToggleButton = new SearchToggleButton(this.leftPos - 18, this.topPos + 6 + 18 * 3, button -> {
             searchToggleButton.toggleState();
             Config.uiSearchButton = (ButtonState) searchToggleButton.currentState;
             Config.UI_SEARCH_BUTTON.set((ButtonState) searchToggleButton.currentState);
@@ -179,10 +180,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addRenderableWidget(searchToggleButton);
 
         //页面增减按钮
-        addPageButton = new IconButton(this.leftPos-18,this.topPos+6+18*4,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/up_arrow"), button ->
+        addPageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 4, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/up_arrow"), button ->
         {
-            if(this.height - 36 <= (rebuildImageHeight()+MID_SLOTS_HEIGHT)
-                || menu.getLines()>=99)
+            if (this.height - 36 <= (rebuildImageHeight() + MID_SLOTS_HEIGHT)
+                    || menu.getLines() >= 99)
             {
                 return;
             }
@@ -193,15 +194,15 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             Config.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
             init();
         });
         addPageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.add_page")));
         addRenderableWidget(addPageButton);
 
-        removePageButton = new IconButton(this.leftPos-18,this.topPos+6+18*5,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/down_arrow"), button ->
+        removePageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 5, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/down_arrow"), button ->
         {
-            if(menu.getLines()<=2)
+            if (menu.getLines() <= 2)
                 return;
             menu.reduceLines();
             Config.uiPageNum = menu.getLines();
@@ -210,7 +211,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             Config.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
             init();
         });
         removePageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.remove_page")));
@@ -219,9 +220,8 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addCraftButton();
 
 
-
         // 初始化搜索方案
-        this.searchField = new EditBox(getFont(), this.leftPos+60, this.topPos+7, 120, this.getFont().lineHeight+5, Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch"));
+        this.searchField = new EditBox(getFont(), this.leftPos + 60, this.topPos + 7, 120, this.getFont().lineHeight + 5, Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch"));
         this.searchField.setMaxLength(200);
         this.searchField.setBordered(true);
         this.searchField.setVisible(true);
@@ -243,30 +243,32 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             lastSearchText = text;
 
             // 文本同步
-            if(Config.searchTextWithJEIEMI)
+            if (Config.searchTextWithJEIEMI)
             {
                 // JEI
-                if(BeyondDimensions.JEILoaded)
+                if (BeyondDimensions.JEILoaded)
                 {
                     BDjeiPlugin.runtime().ifPresent(rt -> {
                         var overlay = rt.getIngredientFilter();
                         String current = overlay.getFilterText();
-                        if (!Objects.equals(current, text)) {
+                        if (!Objects.equals(current, text))
+                        {
                             overlay.setFilterText(text);
                         }
                     });
                 }
                 // 同步到EMI
-                if(BeyondDimensions.EMILoaded)
+                if (BeyondDimensions.EMILoaded)
                 {
                     String current = EmiApi.getSearchText();
-                    if (!Objects.equals(current, text)) {
+                    if (!Objects.equals(current, text))
+                    {
                         EmiApi.setSearchText(text);
                     }
                 }
             }
         });
-        if(!this.searchField.getValue().equals(""))
+        if (!this.searchField.getValue().equals(""))
         {
             this.searchField.setSuggestion(null);
         }
@@ -286,10 +288,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 menu.maxLineData,
                 pos ->
                 {
-                    if(menu.lineData != pos)
+                    if (menu.lineData != pos)
                     {
                         menu.lineData = pos;
-                        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),false);
+                        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), false);
                     }
                 }
         );
@@ -305,23 +307,25 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     {
         super.containerTick();
         // 每tick从emi或jei同步一次文本
-        if(Config.searchTextWithJEIEMI)
+        if (Config.searchTextWithJEIEMI)
         {
-            if(BeyondDimensions.JEILoaded)
+            if (BeyondDimensions.JEILoaded)
             {
                 BDjeiPlugin.runtime().ifPresent(rt -> {
                     var overlay = rt.getIngredientFilter();
                     String current = overlay.getFilterText();
-                    if (!Objects.equals(current, lastSearchText)) {
+                    if (!Objects.equals(current, lastSearchText))
+                    {
                         searchField.setValue(current);
                     }
                 });
             }
 
-            if(BeyondDimensions.EMILoaded)
+            if (BeyondDimensions.EMILoaded)
             {
                 String current = EmiApi.getSearchText();
-                if (!Objects.equals(current, lastSearchText)) {
+                if (!Objects.equals(current, lastSearchText))
+                {
                     searchField.setValue(current);
                 }
             }
@@ -334,7 +338,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     // 用于让子类重写工艺槽位按钮的函数
     protected void addCraftButton()
     {
-        craftButton = new IconButton(this.leftPos-18,this.topPos+6+18*6,16,16,ResourceLocation.tryBuild(BeyondDimensions.MODID,"widget/craft_button"), button ->
+        craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/craft_button"), button ->
         {
             UIDataHelper.currentPage = menu.lineData;
 
@@ -348,19 +352,19 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
             UIDataHelper.isTransfer = true;
 
-            if(menu instanceof DimensionsCraftMenu)
+            if (menu instanceof DimensionsCraftMenu)
             {
                 Config.uiCraftButton = ButtonState.DISABLED;
                 Config.UI_CRAFT_BUTTON.set(ButtonState.DISABLED);
                 Config.UI_CRAFT_BUTTON.save();
-                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),NetMenuType.NET_MENU));
+                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_MENU));
             }
             else
             {
                 Config.uiCraftButton = ButtonState.ENABLED;
                 Config.UI_CRAFT_BUTTON.set(ButtonState.ENABLED);
                 Config.UI_CRAFT_BUTTON.save();
-                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),NetMenuType.NET_CRAFT_MENU));
+                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
             }
         });
         craftButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.craft_toggle")));
@@ -369,18 +373,18 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
     protected int rebuildImageHeight()
     {
-        return TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
+        return TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines() - 2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
     }
 
     protected void rebuildLabelHeight()
     {
         this.titleLabelY = 8;
-        this.inventoryLabelY = TOP_BASE_HEIGHT + menu.getLines()*18+5;
+        this.inventoryLabelY = TOP_BASE_HEIGHT + menu.getLines() * 18 + 5;
     }
 
     protected int calMaxLines()
     {
-        return (int)((this.height -36 - (TOP_BASE_HEIGHT+TOP_SLOTS_HEIGHT+BOTTOM_SLOTS_HEIGHT+PLAYER_INV_HEIGHT))/(float)MID_SLOTS_HEIGHT +2);
+        return (int) ((this.height - 36 - (TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT)) / (float) MID_SLOTS_HEIGHT + 2);
     }
 
     @Override
@@ -398,7 +402,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         drawY += TOP_SLOTS_HEIGHT;
 
         RenderSystem.setShaderTexture(0, GUI_TEXTURE_MID_SLOTS);
-        for(int i = 0;i<menu.getLines()-2;i++)
+        for (int i = 0; i < menu.getLines() - 2; i++)
         {
             guiGraphics.blit(GUI_TEXTURE_MID_SLOTS, this.leftPos, drawY, 0, 0, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT);
             drawY += MID_SLOTS_HEIGHT;
@@ -422,37 +426,38 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752,false);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752,false);
+        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752, false);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
     {
         boolean result = super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
-        if(!result) // 让滑动条全局可滑
+        if (!result) // 让滑动条全局可滑
             result = scroller.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
         return result;
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean result = super.mouseClicked(mouseX,mouseY,button);
+    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    {
+        boolean result = super.mouseClicked(mouseX, mouseY, button);
 
         // 处理对搜索框的焦点取消
-        boolean flag =  searchField.active && searchField.visible && mouseX >= (double)searchField.getX() && mouseY >= (double)searchField.getY() && mouseX < (double)(searchField.getX() + searchField.getWidth()) && mouseY < (double)(searchField.getY() + searchField.getHeight());
-        if(!flag)
+        boolean flag = searchField.active && searchField.visible && mouseX >= (double) searchField.getX() && mouseY >= (double) searchField.getY() && mouseX < (double) (searchField.getX() + searchField.getWidth()) && mouseY < (double) (searchField.getY() + searchField.getHeight());
+        if (!flag)
         {
-            if(this.getFocused() != null)
+            if (this.getFocused() != null)
             {
-                if(this.getFocused() == searchField)
+                if (this.getFocused() == searchField)
                 {   // 在未命中搜索框情况下 焦点不为空 且焦点为搜索框，则取消搜索框的焦点身份
                     searchField.setFocused(false);
                     this.setFocused(null);
                 }
             }
         }
-        else if(button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 右键点击搜索框则清空搜索框内容
+        else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 右键点击搜索框则清空搜索框内容
         {
             searchField.setValue("");
         }
@@ -464,13 +469,13 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
         // 先处理menu相关数据
-        if(keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
+        if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
             menu.hasShiftDown = true;
 
         InputConstants.Key mouseKey = InputConstants.getKey(keyCode, scanCode);
 
         // 如果搜索框有效，拦截，然后让搜索框接管处理
-        if(searchField != null && searchField.canConsumeInput() && mouseKey.getValue() != GLFW.GLFW_KEY_ESCAPE)
+        if (searchField != null && searchField.canConsumeInput() && mouseKey.getValue() != GLFW.GLFW_KEY_ESCAPE)
         {
             // 无论如何都不继续后续逻辑
             // 等以后可能改为重写searchField以获得更稳定的效果
@@ -479,7 +484,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         }
 
         // 处理shift + z切换
-        if(hasShiftDown() && mouseKey.getValue() == GLFW.GLFW_KEY_Z)
+        if (hasShiftDown() && mouseKey.getValue() == GLFW.GLFW_KEY_Z)
         {
             boolean current = Config.searchTextWithJEIEMI;
             Config.searchTextWithJEIEMI = !current;
@@ -489,7 +494,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         }
 
         // 处理背包关闭热键
-        if(this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey) ||
+        if (this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey) ||
                 DimensionsShortKeys.OPEN_GUI_KEY.getKey() == mouseKey)
         {
             onClose();
@@ -518,9 +523,9 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     {
         super.removed();
 
-        if(searchField != null)
+        if (searchField != null)
         {
-            if(searchField.getValue().length() > 0 && Config.uiSearchButton == ButtonState.ENABLED)
+            if (searchField.getValue().length() > 0 && Config.uiSearchButton == ButtonState.ENABLED)
             {
                 Config.uiSearch = searchField.getValue();
                 Config.UI_SEARCH.set(searchField.getValue());
