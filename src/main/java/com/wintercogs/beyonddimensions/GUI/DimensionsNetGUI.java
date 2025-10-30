@@ -435,32 +435,42 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    {
+        // 先处理menu相关数据
         if(keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
             menu.hasShiftDown = true;
 
         InputConstants.Key mouseKey = InputConstants.getKey(keyCode, scanCode);
 
+        // 如果搜索框有效，拦截，然后让搜索框接管处理
+        if(searchField != null && searchField.canConsumeInput() && mouseKey.getValue() != GLFW.GLFW_KEY_ESCAPE)
+        {
+            // 无论如何都不继续后续逻辑
+            // 等以后可能改为重写searchField以获得更稳定的效果
+            searchField.keyPressed(keyCode, scanCode, modifiers);
+            return true;
+        }
+
+        // 处理shift + z切换
         if(hasShiftDown() && mouseKey.getValue() == GLFW.GLFW_KEY_Z)
         {
             boolean current = Config.searchTextWithJEIEMI;
             Config.searchTextWithJEIEMI = !current;
             Config.SEARCH_TEXT_WITH_JEI_EMI.set(!current);
             Config.SEARCH_TEXT_WITH_JEI_EMI.save();
+            return true;
         }
 
+        // 处理背包关闭热键
         if(this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey) ||
                 DimensionsShortKeys.OPEN_GUI_KEY.getKey() == mouseKey)
         {
-            if(!this.searchField.isFocused())
-                onClose();
+            onClose();
             return true;
         }
-        else
-        {
-            return super.keyPressed(keyCode, scanCode, modifiers);
-        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
