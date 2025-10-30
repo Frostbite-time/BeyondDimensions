@@ -18,7 +18,9 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,32 +34,33 @@ public class NetFeederItem extends BaseMachineItem
     {
         super(properties.stacksTo(1));
     }
+
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
+    public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
+        if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
         {
             return InteractionResultHolder.fail(itemstack);
         }
 
-        if(!level.isClientSide())
+        if (!level.isClientSide())
         {
-            NetworkHooks.openScreen((ServerPlayer) player,new SimpleMenuProvider((containerId, inv, ServerPlayer) ->
-                    new NetFeederMenu(containerId,inv,itemstack),
-                    Component.translatable("menu.title.beyonddimensions.feeder_menu")),buf -> buf.writeEnum(usedHand));
+            NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider((containerId, inv, ServerPlayer) ->
+                    new NetFeederMenu(containerId, inv, itemstack),
+                    Component.translatable("menu.title.beyonddimensions.feeder_menu")), buf -> buf.writeEnum(usedHand));
         }
-        return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
     @Override
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
-        if(!hasFilterSlots(stack))
-            setFilterSlots(stack,new ArrayList<>(Collections.nCopies(capacity,new ItemStackType())));
-        if(!hasFeederMode(stack))
+        if (!hasFilterSlots(stack))
+            setFilterSlots(stack, new ArrayList<>(Collections.nCopies(capacity, new ItemStackType())));
+        if (!hasFeederMode(stack))
             setFeederMode(stack, FeederMode.NORMAL);
 
     }
@@ -66,7 +69,7 @@ public class NetFeederItem extends BaseMachineItem
     public boolean shouldWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
         return super.shouldWork(stack, level, holder, slotId, isSelected)
-                && NetedItem.getNet(stack,level.getServer()) != null;
+                && NetedItem.getNet(stack, level.getServer()) != null;
     }
 
     @Override
@@ -74,26 +77,26 @@ public class NetFeederItem extends BaseMachineItem
     {
         super.workContent(stack, level, holder, slotId, isSelected);
 
-        if(holder instanceof Player player) // 只喂食玩家（实际上是其他实体没有FoodData 2333）
+        if (holder instanceof Player player) // 只喂食玩家（实际上是其他实体没有FoodData 2333）
         {
-            FeederMode feederMode = getFeederModeOrDefault(stack,FeederMode.NORMAL);
-            List<IStackType> filterSlots = getFilterSlotsOrDefault(stack,new ArrayList<>());
+            FeederMode feederMode = getFeederModeOrDefault(stack, FeederMode.NORMAL);
+            List<IStackType<?>> filterSlots = getFilterSlotsOrDefault(stack, new ArrayList<>());
 
             FoodData playerFoodState = player.getFoodData();
 
             // feederModeMatch会进行一次饥饿值判定，决定要不要实际执行
-            if(feederModeMatch(playerFoodState,feederMode))
+            if (feederModeMatch(playerFoodState, feederMode))
             {
-                UnifiedStorage storage = NetedItem.getNet(stack,level.getServer()).getUnifiedStorage();
+                UnifiedStorage storage = NetedItem.getNet(stack, level.getServer()).getUnifiedStorage();
 
                 // 尝试取出一个Food
-                IStackType foodCache = null;
-                for(IStackType filter: filterSlots)
+                IStackType<?> foodCache = null;
+                for (IStackType<?> filter : filterSlots)
                 {
-                    for(IStackType storedStack: storage.getStorage())
+                    for (IStackType<?> storedStack : storage.getStorage())
                     {
                         // isSame会在最后变为引用比较，所以无需担心，这个比较即使对于大存储来说也非常迅速
-                        if(storedStack instanceof ItemStackType itemStackType
+                        if (storedStack instanceof ItemStackType itemStackType
                                 && itemStackType.isSame(filter)
                                 && itemStackType.getStack().getFoodProperties(player) != null)
                         {
@@ -103,34 +106,36 @@ public class NetFeederItem extends BaseMachineItem
                     }
                 }
 
-                if(foodCache != null)
+                if (foodCache != null)
                 {
-                    ItemStackType foodToFeed = (ItemStackType)storage.extract(foodCache,false);
-                    if(!foodToFeed.isEmpty())
+                    ItemStackType foodToFeed = (ItemStackType) storage.extract(foodCache, false);
+                    if (!foodToFeed.isEmpty())
                     {
                         ItemStack foodStack = foodToFeed.copyStack();
                         Item foodItem = foodStack.getItem();
-                        FoodProperties foodProperties = foodItem.getFoodProperties(foodStack,player);
+                        FoodProperties foodProperties = foodItem.getFoodProperties(foodStack, player);
                         // 实际执行效果前对饱食度和饱和度进行二次判断
-                        if(foodProperties != null)
+                        if (foodProperties != null)
                         {
-                            if((feederMode == FeederMode.SATURATION_KEEP && foodProperties.getSaturationModifier() >0)
-                                    ||(feederMode != FeederMode.SATURATION_KEEP && foodProperties.getNutrition() >0))
+                            if ((feederMode == FeederMode.SATURATION_KEEP && foodProperties.getSaturationModifier() > 0)
+                                    || (feederMode != FeederMode.SATURATION_KEEP && foodProperties.getNutrition() > 0))
                             {
-                                ItemStack remaining = foodItem.finishUsingItem(foodStack,level,player);
-                                if(!remaining.isEmpty())
+                                ItemStack remaining = ForgeEventFactory.onItemUseFinish(player, foodStack.copy(), 0, foodItem.finishUsingItem(foodStack, level, player));
+                                if (!remaining.isEmpty())
                                 {
                                     // 剩余堆叠插送回去
-                                    ItemStackType remainingAgain = (ItemStackType)storage.insert(new ItemStackType(remaining),false);
-                                    if(!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
+                                    if (storage.insert(new ItemStackType(remaining), false) instanceof ItemStackType remainingAgain)
                                     {
-                                        player.drop(remainingAgain.copyStack(),false);
+                                        if (!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
+                                        {
+                                            player.drop(remainingAgain.copyStack(), false);
+                                        }
                                     }
                                 }
                                 return;
                             }
                         }
-                        storage.insert(foodToFeed,false); // 如果没能步入食用，则在此处将堆叠插回
+                        storage.insert(foodToFeed, false); // 如果没能步入食用，则在此处将堆叠插回
                     }
                 }
 
@@ -146,33 +151,35 @@ public class NetFeederItem extends BaseMachineItem
             case HUNGER_TO_EAT -> playerFoodState.getFoodLevel() <= 2;
             case NORMAL -> playerFoodState.getFoodLevel() <= 10;
             case SATURATION_KEEP -> playerFoodState.getSaturationLevel() <= 0;
-            case CRAZY -> playerFoodState.getFoodLevel()<20;
-            default -> false;
+            case CRAZY -> playerFoodState.getFoodLevel() < 20;
         };
     }
 
-    private boolean matchesFilter(List<IStackType> filterSlots,IStackType otherStack)
+    private boolean matchesFilter(List<IStackType<?>> filterSlots, IStackType<?> otherStack)
     {
         switch (FilterMode.WHITE) //喂食器始终白名单
         {
 
-            case BLACK -> {
-                for(IStackType stack : filterSlots)
+            case BLACK ->
+            {
+                for (IStackType<?> stack : filterSlots)
                 {
-                    if(stack.isSame(otherStack))
+                    if (stack.isSame(otherStack))
                         return false;
                 }
                 return true;
             }
-            case WHITE -> {
-                for(IStackType stack : filterSlots)
+            case WHITE ->
+            {
+                for (IStackType<?> stack : filterSlots)
                 {
-                    if(stack.isSame(otherStack))
+                    if (stack.isSame(otherStack))
                         return true;
                 }
                 return false;
             }
-            case IGNORE -> {
+            case IGNORE ->
+            {
                 return true;
             }
 

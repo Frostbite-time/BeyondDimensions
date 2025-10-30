@@ -168,6 +168,7 @@ obfuscation {
 
 dependencies {
 
+    compileOnly "org.jetbrains:annotations:26.0.2"
 
     // 引入对拼音库的依赖 并将其打包到模组
     jarJar(implementation group: 'com.github.promeg', name: 'tinypinyin', version: '2.0.3'){

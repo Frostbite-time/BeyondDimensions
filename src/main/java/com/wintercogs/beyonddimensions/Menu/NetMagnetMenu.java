@@ -23,7 +23,7 @@ public class NetMagnetMenu extends BDBaseMenu
 {
 
     private static final int slotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + 1;
-    private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT*4 + CommonTextures.COMMON_CONNECTION_HEIGHT +7;
+    private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + 7;
 
     // storage的初始数据由itemStack提供，随后storage每次变化都重新向其中写入数据
     private final IStackTypedHandler storage = new StackTypedHandler(36)
@@ -32,8 +32,8 @@ public class NetMagnetMenu extends BDBaseMenu
         public void onChange()
         {
             super.onChange();
-            if(!player.level().isClientSide() && initialized)
-                BaseMachineItem.setFilterSlots(menuStack,new ArrayList<>(storage.getStorage()));
+            if (!player.level().isClientSide() && initialized)
+                BaseMachineItem.setFilterSlots(menuStack, new ArrayList<>(storage.getStorage()));
 
         }
     };
@@ -62,16 +62,15 @@ public class NetMagnetMenu extends BDBaseMenu
 
         initialized = false;
         // 为服务端注入真实数据，客户端由槽位同步
-        if(!playerInventory.player.level().isClientSide())
+        if (!playerInventory.player.level().isClientSide())
         {
-            List<IStackType> stacks = BaseMachineItem.getFilterSlotsOrDefault(menuStack,new ArrayList<IStackType>());
-            for(int i =0; i<stacks.size(); i++)
+            List<IStackType<?>> stacks = BaseMachineItem.getFilterSlotsOrDefault(menuStack, new ArrayList<>());
+            for (int i = 0; i < stacks.size(); i++)
             {
-                storage.insert(i,stacks.get(i).copy(),false);
+                storage.insert(i, stacks.get(i).copy(), false);
             }
         }
         initialized = true;
-
 
 
         addPlayerInv(playerInventory);
@@ -81,11 +80,11 @@ public class NetMagnetMenu extends BDBaseMenu
 
     private void addFlagSlots()
     {
-        for(int row = 0; row < 4; row++)
+        for (int row = 0; row < 4; row++)
         {
             for (int col = 0; col < 9; col++)
             {
-                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row*9+col, 8 + col * 18, slotStartY + row * 18);
+                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row * 9 + col, 8 + col * 18, slotStartY + row * 18);
                 this.addSlot(flagSlot);
             }
         }
@@ -104,7 +103,7 @@ public class NetMagnetMenu extends BDBaseMenu
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18,  4+invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 4 + invSlotStartY + 3 * 18));
         }
         inventoryEndIndex = slots.size();
     }
@@ -123,19 +122,19 @@ public class NetMagnetMenu extends BDBaseMenu
                 || lastFilterMode != BaseMachineItem.getFilterModeOrDefault(menuStack, FilterMode.BLACK)
                 || lastHopperItemMode != BaseMachineItem.getHopperItemModeOrDefault(menuStack, HopperItemMode.ALLOW)
                 || lastHopperXpMode != BaseMachineItem.getHopperXpModeOrDefault(menuStack, HopperXpMode.DENY)
-                || lastHopperNBTMode != BaseMachineItem.getHopperNBTModeOrDefault(menuStack,HopperNBTMode.DENY)
-                || lastHopperFluidMode != BaseMachineItem.getHopperFluidModeOrDefault(menuStack,HopperFluidMode.DENY)
-                || lastHopperRangeMode != BaseMachineItem.getHopperRangeModeOrDefault(menuStack,HopperRangeMode.RADIUS_MID);
+                || lastHopperNBTMode != BaseMachineItem.getHopperNBTModeOrDefault(menuStack, HopperNBTMode.DENY)
+                || lastHopperFluidMode != BaseMachineItem.getHopperFluidModeOrDefault(menuStack, HopperFluidMode.DENY)
+                || lastHopperRangeMode != BaseMachineItem.getHopperRangeModeOrDefault(menuStack, HopperRangeMode.RADIUS_MID);
 
-        if(result)
+        if (result)
         {
             lastControlMode = BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE);
             lastFilterMode = BaseMachineItem.getFilterModeOrDefault(menuStack, FilterMode.BLACK);
             lastHopperItemMode = BaseMachineItem.getHopperItemModeOrDefault(menuStack, HopperItemMode.ALLOW);
             lastHopperXpMode = BaseMachineItem.getHopperXpModeOrDefault(menuStack, HopperXpMode.DENY);
-            lastHopperNBTMode = BaseMachineItem.getHopperNBTModeOrDefault(menuStack,HopperNBTMode.DENY);
-            lastHopperFluidMode = BaseMachineItem.getHopperFluidModeOrDefault(menuStack,HopperFluidMode.DENY);
-            lastHopperRangeMode = BaseMachineItem.getHopperRangeModeOrDefault(menuStack,HopperRangeMode.RADIUS_MID);
+            lastHopperNBTMode = BaseMachineItem.getHopperNBTModeOrDefault(menuStack, HopperNBTMode.DENY);
+            lastHopperFluidMode = BaseMachineItem.getHopperFluidModeOrDefault(menuStack, HopperFluidMode.DENY);
+            lastHopperRangeMode = BaseMachineItem.getHopperRangeModeOrDefault(menuStack, HopperRangeMode.RADIUS_MID);
         }
 
         return result;
@@ -145,13 +144,13 @@ public class NetMagnetMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putString("control_mode",BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE).name());
+        tag.putString("control_mode", BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE).name());
         tag.putString("filter_type", BaseMachineItem.getFilterModeOrDefault(menuStack, FilterMode.BLACK).name());
-        tag.putString("hopper_item_mode",BaseMachineItem.getHopperItemModeOrDefault(menuStack, HopperItemMode.ALLOW).name());
-        tag.putString("hopper_xp_mode",BaseMachineItem.getHopperXpModeOrDefault(menuStack, HopperXpMode.DENY).name());
-        tag.putString("hopper_nbt_mode", BaseMachineItem.getHopperNBTModeOrDefault(menuStack,HopperNBTMode.DENY).name());
-        tag.putString("hopper_fluid_mode", BaseMachineItem.getHopperFluidModeOrDefault(menuStack,HopperFluidMode.DENY).name());
-        tag.putString("hopper_range_mode", BaseMachineItem.getHopperRangeModeOrDefault(menuStack,HopperRangeMode.RADIUS_MID).name());
+        tag.putString("hopper_item_mode", BaseMachineItem.getHopperItemModeOrDefault(menuStack, HopperItemMode.ALLOW).name());
+        tag.putString("hopper_xp_mode", BaseMachineItem.getHopperXpModeOrDefault(menuStack, HopperXpMode.DENY).name());
+        tag.putString("hopper_nbt_mode", BaseMachineItem.getHopperNBTModeOrDefault(menuStack, HopperNBTMode.DENY).name());
+        tag.putString("hopper_fluid_mode", BaseMachineItem.getHopperFluidModeOrDefault(menuStack, HopperFluidMode.DENY).name());
+        tag.putString("hopper_range_mode", BaseMachineItem.getHopperRangeModeOrDefault(menuStack, HopperRangeMode.RADIUS_MID).name());
     }
 
     @Override

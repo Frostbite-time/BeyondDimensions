@@ -26,7 +26,7 @@ public class NetFeederMenu extends BDBaseMenu
 
 
     private static final int slotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + 1;
-    private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT*4 + CommonTextures.COMMON_CONNECTION_HEIGHT +7;
+    private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + 7;
 
     // storage的初始数据由itemStack提供，随后storage每次变化都重新向其中写入数据
     private final IStackTypedHandler storage = new StackTypedHandler(36)
@@ -35,8 +35,8 @@ public class NetFeederMenu extends BDBaseMenu
         public void onChange()
         {
             super.onChange();
-            if(!player.level().isClientSide() && initialized)
-                BaseMachineItem.setFilterSlots(menuStack,new ArrayList<>(storage.getStorage()));
+            if (!player.level().isClientSide() && initialized)
+                BaseMachineItem.setFilterSlots(menuStack, new ArrayList<>(storage.getStorage()));
 
         }
 
@@ -68,16 +68,15 @@ public class NetFeederMenu extends BDBaseMenu
 
         initialized = false;
         // 为服务端注入真实数据，客户端由槽位同步
-        if(!playerInventory.player.level().isClientSide())
+        if (!playerInventory.player.level().isClientSide())
         {
-            List<IStackType> stacks = BaseMachineItem.getFilterSlotsOrDefault(menuStack,new ArrayList<IStackType>());
-            for(int i =0; i<stacks.size(); i++)
+            List<IStackType<?>> stacks = BaseMachineItem.getFilterSlotsOrDefault(menuStack, new ArrayList<>());
+            for (int i = 0; i < stacks.size(); i++)
             {
-                storage.insert(i,stacks.get(i).copy(),false);
+                storage.insert(i, stacks.get(i).copy(), false);
             }
         }
         initialized = true;
-
 
 
         addPlayerInv(playerInventory);
@@ -87,11 +86,11 @@ public class NetFeederMenu extends BDBaseMenu
 
     private void addFlagSlots()
     {
-        for(int row = 0; row < 4; row++)
+        for (int row = 0; row < 4; row++)
         {
             for (int col = 0; col < 9; col++)
             {
-                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row*9+col, 8 + col * 18, slotStartY + row * 18);
+                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row * 9 + col, 8 + col * 18, slotStartY + row * 18);
                 this.addSlot(flagSlot);
             }
         }
@@ -110,7 +109,7 @@ public class NetFeederMenu extends BDBaseMenu
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18,  4+invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 4 + invSlotStartY + 3 * 18));
         }
         inventoryEndIndex = slots.size();
     }
@@ -128,7 +127,7 @@ public class NetFeederMenu extends BDBaseMenu
                 || lastControlMode != BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE)
                 || lastFeederMode != BaseMachineItem.getFeederModeOrDefault(menuStack, FeederMode.NORMAL);
 
-        if(result)
+        if (result)
         {
             lastControlMode = BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE);
             lastFeederMode = BaseMachineItem.getFeederModeOrDefault(menuStack, FeederMode.NORMAL);
@@ -141,8 +140,8 @@ public class NetFeederMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putString("control_mode",BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE).name());
-        tag.putString("feeder_mode",BaseMachineItem.getFeederModeOrDefault(menuStack, FeederMode.NORMAL).name());
+        tag.putString("control_mode", BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE).name());
+        tag.putString("feeder_mode", BaseMachineItem.getFeederModeOrDefault(menuStack, FeederMode.NORMAL).name());
     }
 
     @Override

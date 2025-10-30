@@ -8,8 +8,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected)
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected)
     {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
 
@@ -30,16 +31,16 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
         if (level.isClientSide()) return;
 
         // 同时确保getTicksPerWork为0时可以每tick触发
-        if(getTicksPerWork(stack,level,entity,slotId,isSelected) <= 0)
+        if (getTicksPerWork(stack, level, entity, slotId, isSelected) <= 0)
             working(stack, level, entity, slotId, isSelected);
-        else if(level.getGameTime() % getTicksPerWork(stack,level,entity,slotId,isSelected) == 0)
+        else if (level.getGameTime() % getTicksPerWork(stack, level, entity, slotId, isSelected) == 0)
             working(stack, level, entity, slotId, isSelected);
     }
 
     public void checkComponents(ItemStack stack)
     {
-        if(!hasControlMode(stack))
-            setControlMode(stack,RedStoneControlMode.IGNORE);
+        if (!hasControlMode(stack))
+            setControlMode(stack, RedStoneControlMode.IGNORE);
     }
 
     @Override
@@ -84,15 +85,18 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
     // 基本：红石控制模式
     public static RedStoneControlMode getControlModeOrDefault(ItemStack stack, @Nullable RedStoneControlMode defaultValue)
     {
-        if (stack.hasTag() && stack.getTag().contains("control_mode")) {
+        if (stack.hasTag() && stack.getTag().contains("control_mode"))
+        {
             return RedStoneControlMode.valueOf(stack.getTag().getString("control_mode"));
         }
         return defaultValue; //未命中
     }
+
     public static void setControlMode(ItemStack stack, RedStoneControlMode newMode)
     {
         stack.getOrCreateTag().putString("control_mode", newMode.name());
     }
+
     // 检查是否有control_mode的tag
     public static boolean hasControlMode(ItemStack stack)
     {
@@ -102,15 +106,18 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
     // 通用：过滤模式
     public static FilterMode getFilterModeOrDefault(ItemStack stack, @Nullable FilterMode defaultValue)
     {
-        if (stack.hasTag() && stack.getTag().contains("filter_mode")) {
+        if (stack.hasTag() && stack.getTag().contains("filter_mode"))
+        {
             return FilterMode.valueOf(stack.getTag().getString("filter_mode"));
         }
         return defaultValue; //未命中
     }
+
     public static void setFilterMode(ItemStack stack, FilterMode newMode)
     {
         stack.getOrCreateTag().putString("filter_mode", newMode.name());
     }
+
     public static boolean hasFilterMode(ItemStack stack)
     {
         return stack.hasTag() && stack.getTag().contains("filter_mode");
@@ -125,10 +132,12 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
         }
         return defaultValue; //未命中
     }
+
     public static void setHopperItemMode(ItemStack stack, HopperItemMode newMode)
     {
         stack.getOrCreateTag().putString("hopper_item_mode", newMode.name());
     }
+
     public static boolean hasHopperItemMode(ItemStack stack)
     {
         return stack.hasTag() && stack.getTag().contains("hopper_item_mode");
@@ -143,10 +152,12 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
         }
         return defaultValue; //未命中
     }
+
     public static void setHopperXpMode(ItemStack stack, HopperXpMode newMode)
     {
         stack.getOrCreateTag().putString("hopper_xp_mode", newMode.name());
     }
+
     public static boolean hasHopperXpMode(ItemStack stack)
     {
         return stack.hasTag() && stack.getTag().contains("hopper_xp_mode");
@@ -161,10 +172,12 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
         }
         return defaultValue; //未命中
     }
+
     public static void setHopperNBTMode(ItemStack stack, HopperNBTMode newMode)
     {
         stack.getOrCreateTag().putString("hopper_nbt_mode", newMode.name());
     }
+
     public static boolean hasHopperNBTMode(ItemStack stack)
     {
         return stack.hasTag() && stack.getTag().contains("hopper_nbt_mode");
@@ -173,15 +186,18 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
     // 漏斗：是否收集流体
     public static HopperFluidMode getHopperFluidModeOrDefault(ItemStack stack, @Nullable HopperFluidMode defaultValue)
     {
-        if (stack.hasTag() && stack.getTag().contains("hopper_fluid_mode")) {
+        if (stack.hasTag() && stack.getTag().contains("hopper_fluid_mode"))
+        {
             return HopperFluidMode.valueOf(stack.getTag().getString("hopper_fluid_mode"));
         }
         return defaultValue; //未命中
     }
+
     public static void setHopperFluidMode(ItemStack stack, HopperFluidMode newMode)
     {
         stack.getOrCreateTag().putString("hopper_fluid_mode", newMode.name());
     }
+
     public static boolean hasHopperFluidMode(ItemStack stack)
     {
         return stack.hasTag() && stack.getTag().contains("hopper_fluid_mode");
@@ -190,15 +206,18 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
     // 漏斗：收集范围
     public static HopperRangeMode getHopperRangeModeOrDefault(ItemStack stack, @Nullable HopperRangeMode defaultValue)
     {
-        if (stack.hasTag() && stack.getTag().contains("hopper_range_mode")) {
+        if (stack.hasTag() && stack.getTag().contains("hopper_range_mode"))
+        {
             return HopperRangeMode.valueOf(stack.getTag().getString("hopper_range_mode"));
         }
         return defaultValue; //未命中
     }
+
     public static void setHopperRangeMode(ItemStack stack, HopperRangeMode newMode)
     {
         stack.getOrCreateTag().putString("hopper_range_mode", newMode.name());
     }
+
     public static boolean hasHopperRangeMode(ItemStack stack)
     {
         return stack.hasTag() && stack.getTag().contains("hopper_range_mode");
@@ -207,27 +226,31 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
     // 喂食：喂食模式
     public static FeederMode getFeederModeOrDefault(ItemStack stack, @Nullable FeederMode defaultValue)
     {
-        if (stack.hasTag() && stack.getTag().contains("feeder_mode")) {
+        if (stack.hasTag() && stack.getTag().contains("feeder_mode"))
+        {
             return FeederMode.valueOf(stack.getTag().getString("feeder_mode"));
         }
         return defaultValue; //未命中
     }
+
     public static void setFeederMode(ItemStack stack, FeederMode newMode)
     {
         stack.getOrCreateTag().putString("feeder_mode", newMode.name());
     }
+
     public static boolean hasFeederMode(ItemStack stack)
     {
         return stack.hasTag() && stack.getTag().contains("feeder_mode");
     }
 
     // 标记槽位：IStackType的列表
-    public static List<IStackType> getFilterSlotsOrDefault(ItemStack stack, @Nullable List<IStackType> defaultValue)
+    public static List<IStackType<?>> getFilterSlotsOrDefault(ItemStack stack, @Nullable List<IStackType<?>> defaultValue)
     {
-        if (stack.hasTag() && stack.getTag().contains("filter_slots")) {
+        if (stack.hasTag() && stack.getTag().contains("filter_slots"))
+        {
             ListTag tags = stack.getTag().getList("filter_slots", Tag.TAG_COMPOUND);
-            List<IStackType> filterSlots = new ArrayList<IStackType>();
-            for(int i = 0; i < tags.size(); i++)
+            List<IStackType<?>> filterSlots = new ArrayList<>();
+            for (int i = 0; i < tags.size(); i++)
             {
                 filterSlots.add(IStackType.deserializeNBTCommon(tags.getCompound(i)));
             }
@@ -236,10 +259,10 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
         return defaultValue;
     }
 
-    public static void setFilterSlots(ItemStack stack, List<IStackType> filterSlots)
+    public static void setFilterSlots(ItemStack stack, List<IStackType<?>> filterSlots)
     {
         ListTag tags = new ListTag();
-        for(int i = 0; i < filterSlots.size(); i++)
+        for (int i = 0; i < filterSlots.size(); i++)
         {
             tags.add(filterSlots.get(i).serializeNBT());
         }
