@@ -133,14 +133,8 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
-        GuiEventListener focused = this.getFocused();
-        if (focused != null)
-        {
-            if (focused.mouseReleased(mouseX, mouseY, button))
-            {
-                return true;
-            }
-        }
+        // AbstractContainerScreen的drag没有调用组件drag，但是Release却调用了，不需要手动重复处理
+        // 在此注释，防止我某一天忘记了
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
