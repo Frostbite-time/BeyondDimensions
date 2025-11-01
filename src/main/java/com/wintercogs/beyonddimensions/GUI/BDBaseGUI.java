@@ -134,13 +134,12 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
+        // 帮助调用focused的Release，剩余逻辑交给super
+        // 在这个版本中，super会取消dragging，并调用所在位置的release（所以这里我要额外调用focused的）
         GuiEventListener focused = this.getFocused();
-        if (focused != null)
+        if (focused != null && this.isDragging())
         {
-            if (focused.mouseReleased(mouseX, mouseY, button))
-            {
-                return true;
-            }
+            focused.mouseReleased(mouseX, mouseY, button);
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
