@@ -34,6 +34,7 @@ import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Integration.RS.BD_RSPlugin;
 import com.wintercogs.beyonddimensions.Integration.RSMek.BD_RSMekPlugin;
 import com.wintercogs.beyonddimensions.Integration.RSTypes.BD_RSTypesPlugin;
+import com.wintercogs.beyonddimensions.Integration.create.blocks.entities.SchematicannonPathWayBlockEntity;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
@@ -95,6 +96,8 @@ public class BeyondDimensions
     public static boolean Botania_Loaded = false;
     public static final String RSTypesModId = "refinedtypes";
     public static boolean RSTypesLoaded = false;
+    public static final String Create_ModId = "create";
+    public static boolean Create_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     // mod 类的构造函数是加载 mod 时运行的第一个代码。
@@ -221,6 +224,11 @@ public class BeyondDimensions
         if(ModList.get().isLoaded(RSTypesModId))
         {
             RSTypesLoaded = true;
+        }
+        if(ModList.get().isLoaded(Create_ModId))
+        {
+            Create_Loaded = true;
+            MOD_EVENT_BUS.addListener(SchematicannonPathWayBlockEntity::registerCapability);
         }
 
         ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体

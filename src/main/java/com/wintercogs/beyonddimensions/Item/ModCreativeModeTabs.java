@@ -85,6 +85,10 @@ public class ModCreativeModeTabs
                         {
                             output.accept(ModBlocks.MANA_POOL_PATHWAY);
                         }
+                        if(BeyondDimensions.Create_Loaded)
+                        {
+                            output.accept(ModBlocks.SCHEMATICANNON_PATHWAY);
+                        }
                     })
                     .build());
 

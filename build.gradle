@@ -59,7 +59,8 @@ repositories {
             includeGroup "com.github.rtyley"
         }
     }
-
+    maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" }
+    maven { url = "https://maven.createmod.net" }
 }
 
 base {
@@ -238,6 +239,12 @@ dependencies {
     // 植物魔法支持 - 后续需要更新
     compileOnly "dev.local:botania-neoforge:1.21.1-451-SNAPSHOT"
     runtimeOnly "dev.local:botania-neoforge:1.21.1-451-SNAPSHOT"
+
+    // 机械动力支持 - 蓝图炮
+    compileOnly "maven.modrinth:create:mc1.21.1-6.0.8"
+    runtimeOnly "maven.modrinth:create:mc1.21.1-6.0.8"
+
+    compileOnly "net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.69"
 
     // 精妙背包以及精妙存储调试
     runtimeOnly "curse.maven:sophisticated-backpacks-422301:6679417"
