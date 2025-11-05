@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.*;
 import com.wintercogs.beyonddimensions.Integration.Ars.Block.SourcePathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.Integration.create.blocks.entities.SchematicannonPathWayBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -96,6 +97,7 @@ public class ModBlockEntities
     public static Supplier<BlockEntityType<?>> RS_NET_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> ARS_SOURCE_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> MANA_POOL_PATHWAY_BLOCK_ENTITY;
+    public static Supplier<BlockEntityType<?>> SCHEMATICANNON_PATHWAY_BLOCK_ENTITY;
     public static void IntegrationRegister()
     {
         if(BeyondDimensions.ARS_Loaded)
@@ -125,6 +127,16 @@ public class ModBlockEntities
                     () -> BlockEntityType.Builder.of(
                             com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity::new,
                             ModBlocks.RS_NET_PATHWAY.get()
+                    ).build(null)
+            );
+        }
+        if(BeyondDimensions.Create_Loaded)
+        {
+            SCHEMATICANNON_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+                    "schematicannon_pathway_block_entity",
+                    () -> BlockEntityType.Builder.of(
+                            SchematicannonPathWayBlockEntity::new,
+                            ModBlocks.SCHEMATICANNON_PATHWAY.get()
                     ).build(null)
             );
         }

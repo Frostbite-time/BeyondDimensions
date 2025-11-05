@@ -70,6 +70,9 @@ repositories {
             includeGroup "com.github.rtyley"
         }
     }
+
+    maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" }
+    maven { url = "https://maven.createmod.net" }
 }
 
 base {
@@ -244,6 +247,12 @@ dependencies {
     // RS兼容
     modCompileOnly "maven.modrinth:refined-storage:1.12.4"
     modLocalRuntime "maven.modrinth:refined-storage:1.12.4"
+
+    // 机械动力支持 - 蓝图炮
+    modCompileOnly "maven.modrinth:create:mc1.20.1-6.0.8"
+    modLocalRuntime "maven.modrinth:create:mc1.20.1-6.0.8"
+
+    modCompileOnly "net.createmod.ponder:Ponder-Forge-1.20.1:1.0.92"
 
     modLocalRuntime "curse.maven:sophisticated-core-618298:6596375"
     modLocalRuntime "curse.maven:sophisticated-backpacks-422301:6587116"

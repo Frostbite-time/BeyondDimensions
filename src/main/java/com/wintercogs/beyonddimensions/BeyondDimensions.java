@@ -97,6 +97,8 @@ public class BeyondDimensions
     public static boolean Botania_Loaded = false;
     public static final String AE_Botania_ModId = "appbot";// 植物魔法-ae附属
     public static boolean AE_Botania_Loaded = false;
+    public static final String Create_ModId = "create";
+    public static boolean Create_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
 //    防止某些神经整合包禁用消息输出，预留一下位子，平常不启用
@@ -210,6 +212,10 @@ public class BeyondDimensions
         if (ModList.get().isLoaded(RSModId))
         {
             RS_Loaded = true;
+        }
+        if(ModList.get().isLoaded(Create_ModId))
+        {
+            Create_Loaded = true;
         }
 
         ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
