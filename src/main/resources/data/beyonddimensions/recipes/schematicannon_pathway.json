@@ -1,0 +1,28 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "create"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shapeless",
+        "category": "misc",
+        "ingredients": [
+          {
+            "item": "beyonddimensions:net_pathway"
+          },
+          {
+            "item": "create:schematic_table"
+          }
+        ],
+        "result": {
+          "item": "beyonddimensions:schematicannon_pathway"
+        }
+      }
+    }
+  ]
+}
