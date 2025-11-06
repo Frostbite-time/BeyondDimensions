@@ -32,6 +32,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider
         dropSelf(ModBlocks.RS_NET_PATHWAY.get());
         dropSelf(ModBlocks.ARS_SOURCE_PATHWAY.get());
         dropSelf(ModBlocks.MANA_POOL_PATHWAY.get());
+        dropSelf(ModBlocks.SCHEMATICANNON_PATHWAY.get());
     }
 
     @Override

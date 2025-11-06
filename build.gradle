@@ -205,7 +205,7 @@ dependencies {
     compileOnly "maven.modrinth:inventory-profiles-next:neoforge-1.21.1-2.1.9"
 
     // kubejs
-    api("dev.latvian.mods:kubejs-neoforge:$kubejs_version")
+    compileOnly "dev.latvian.mods:kubejs-neoforge:$kubejs_version"
 
     // 通用拼音搜索-在安装时优先使用它的拼音处理 不启用runtime：会导致runServer失败
     compileOnly "curse.maven:just-enough-characters-250702:6681787"

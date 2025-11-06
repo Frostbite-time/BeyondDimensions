@@ -89,9 +89,9 @@ public class ModBlocks
     public static final DeferredBlock<Block> SCHEMATICANNON_PATHWAY = registerBlock("schematicannon_pathway",
             () -> {
                 if(BeyondDimensions.Create_Loaded)
-                    return new SchematicannonPathWayBlock(BlockBehaviour.Properties.of().strength(2f));
+                    return new SchematicannonPathWayBlock(BlockBehaviour.Properties.of().strength(2f).noOcclusion());
                 else
-                    return new Block(BlockBehaviour.Properties.of().strength(2f));
+                    return new Block(BlockBehaviour.Properties.of().strength(2f).noOcclusion());
             });
 
 

@@ -1,5 +1,8 @@
 package com.wintercogs.beyonddimensions.Datagen;
 
+import appeng.core.definitions.AEBlocks;
+import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
+import com.refinedmods.refinedstorage.common.content.Blocks;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.Integration.RS.Tags.RSTags;
@@ -11,6 +14,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.conditions.IConditionBuilder;
 import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
+import vazkii.botania.common.block.BotaniaBlocks;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -249,7 +253,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .pattern("ABA")
                     .pattern("BDB")
                     .pattern("CCC")
-                    .define('A', appeng.core.definitions.AEBlocks.QUARTZ_GLASS)
+                    .define('A', AEBlocks.QUARTZ_GLASS)
                     .define('B', Items.DIAMOND)
                     .define('C', ModItems.SPACE_TIME_BAR.get())
                     .define('D', ModItems.SPACE_TIME_STABLE_FRAME.get())
@@ -265,7 +269,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .pattern("ADA")
                     .define('A', RSTags.RS_QUARTZ_ENRICHED_IRON)
                     .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
-                    .define('C', com.refinedmods.refinedstorage.common.content.Blocks.INSTANCE.getMachineCasing())
+                    .define('C', Blocks.INSTANCE.getMachineCasing())
                     .define('D', Items.REDSTONE)
                     .unlockedBy("unlock_rs_net_pathway", has(ModItems.SPACE_TIME_STABLE_FRAME.get()))
                     .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.RSModId)));
@@ -292,7 +296,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .pattern("ABA")
                     .define('A', ModItems.SPACE_TIME_BAR.get())
                     .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
-                    .define('C', com.hollingsworth.arsnouveau.setup.registry.BlockRegistry.SOURCE_JAR.get())
+                    .define('C', BlockRegistry.SOURCE_JAR.get())
                     .define('D', Items.ENDER_EYE)
                     .unlockedBy("unlock_ars_source_pathway", has(ModItems.SPACE_TIME_BAR.get()))
                     .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.ARS_ModId)));
@@ -303,7 +307,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.MANA_POOL_PATHWAY.get())
                     .pattern("ABA")
                     .pattern("AAA")
-                    .define('A', vazkii.botania.common.block.BotaniaBlocks.livingrock)
+                    .define('A', BotaniaBlocks.livingrock)
                     .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
                     .unlockedBy("unlock_mana_pool_pathway", has(ModItems.SPACE_TIME_STABLE_FRAME.get()))
                     .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.Botania_ModId)));
