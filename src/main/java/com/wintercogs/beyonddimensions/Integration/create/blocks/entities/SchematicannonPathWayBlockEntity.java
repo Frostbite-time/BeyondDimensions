@@ -58,10 +58,10 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
     {
         if(cap == ForgeCapabilities.ITEM_HANDLER)
         {
+            if(direction == null || !this.allowedDirections.contains(direction)) return LazyOptional.empty();
             if(!opt.isPresent())
             {
-                if (direction != null
-                        && this.schematicannonItemHandler != null
+                if (this.schematicannonItemHandler != null
                         && this.allowedDirections.contains(direction))
                 {
                     opt = LazyOptional.of(() -> this.schematicannonItemHandler);
