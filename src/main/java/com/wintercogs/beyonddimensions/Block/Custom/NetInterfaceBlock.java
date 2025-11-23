@@ -66,7 +66,7 @@ public class NetInterfaceBlock extends NetedBlock
         super.onNeighborChange(world, pos, neighbor);
         if (world.getTileEntity(pos) instanceof NetInterfaceBlockEntity) {
             NetInterfaceBlockEntity blockEntity = (NetInterfaceBlockEntity) world.getTileEntity(pos);
-            blockEntity.markDirty(); // 或自定义标记更新方法
+            blockEntity.setNeedsCapabilityUpdate();
         }
     }
 

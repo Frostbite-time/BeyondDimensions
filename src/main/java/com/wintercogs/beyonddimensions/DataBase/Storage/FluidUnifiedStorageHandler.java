@@ -79,7 +79,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     {
         return storage.getTypeIdIndexList(FluidStackType.ID)
                 .map(slots -> {
-                    IFluidTankProperties[] tankProperties = new IFluidTankProperties[slots.size()];
+                    IFluidTankProperties[] tankProperties = new IFluidTankProperties[slots.size() + 1];
                     for (int i = 0; i < slots.size() + 1; i++) {
                         tankProperties[i] = new FluidUnifiedStorageHandler.TankProperties(i, this);
                     }
@@ -117,18 +117,12 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     {
         boolean sim = !doAction;
         return storage.getTypeIdIndexList(FluidStackType.ID)
-                // 获取第一个有效槽位索引的Optional
                 .flatMap(list -> list.stream().findFirst())
-                // 获取槽位中的堆栈对象（自动处理null）
                 .flatMap(actualIndex -> Optional.ofNullable(storage.getStackBySlot(actualIndex)))
-                // 复制堆栈内容（假设copy()不会返回null）
                 .map(stack -> stack.copyWithCount(count))
-                // 执行提取操作并类型转换（假设extract返回非null）
                 .flatMap(copiedStack ->
                         Optional.ofNullable((FluidStackType) storage.extract(copiedStack, sim)))
-                // 最终复制堆栈数据
                 .map(FluidStackType::copyStack)
-                // 无有效结果时返回null（可替换为.orElseThrow()）
                 .orElse(new FluidStackType().getStack());
     }
 }
