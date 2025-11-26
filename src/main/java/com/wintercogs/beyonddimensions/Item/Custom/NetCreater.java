@@ -2,6 +2,8 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -37,7 +39,7 @@ public class NetCreater extends Item
                 return InteractionResultHolder.fail(itemstack);
             }
 
-            DimensionsNet.createNewNetForPlayer(player,Long.MAX_VALUE, Integer.MAX_VALUE);
+            DimensionsNet newNet = DimensionsNet.createNewNetForPlayer(player,Long.MAX_VALUE, Integer.MAX_VALUE);
 
             itemstack.consume(1,player);
 
@@ -52,6 +54,13 @@ public class NetCreater extends Item
                     1.0F);
             // 发送文字提示
             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.network_created"));
+
+            // 为新网络添加一些时空碎片
+            if(newNet != null)
+            {
+                ItemStack timeCrystal = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
+                newNet.getUnifiedStorage().insert(new ItemStackKey(timeCrystal), 64, false);
+            }
         }
 
         return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());

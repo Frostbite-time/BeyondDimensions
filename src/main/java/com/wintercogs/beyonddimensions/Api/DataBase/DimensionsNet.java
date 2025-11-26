@@ -67,7 +67,7 @@ public class DimensionsNet extends SavedData
     /**
      * 通用存储空间，存储任何实现了{@link com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey}的资源类型
      */
-    private UnifiedStorage unifiedStorage;
+    private final @NotNull UnifiedStorage unifiedStorage;
 
     /**
      * 标记网络是否为一个临时网络，临时网络通常用于客户端菜单的同步中，作为资源容器使用
@@ -510,7 +510,7 @@ public class DimensionsNet extends SavedData
      * 获取当前网络所携带的统一存储空间，统一存储空间是网络存储资源的地方
      * @return 当前网络的统一存储空间
      */
-    public UnifiedStorage getUnifiedStorage()
+    public @NotNull UnifiedStorage getUnifiedStorage()
     {
         return this.unifiedStorage;
     }
