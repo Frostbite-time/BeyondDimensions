@@ -63,7 +63,7 @@ public class StackTypedHandler implements IStackTypedHandler
             }
             else
             {
-                storage.set(i, new ItemStackType());
+                storage.add(new ItemStackType());
                 typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(i);
             }
         }
@@ -93,6 +93,11 @@ public class StackTypedHandler implements IStackTypedHandler
     {
         storage.clear();
         typeIdIndex.clear();
+        for (int i = 0; i < size; i++)
+        {
+            storage.add(new ItemStackType());
+            typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(i);
+        }
         onChange();
     }
 

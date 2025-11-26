@@ -39,6 +39,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -257,7 +258,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         ItemStackTypedHandler inputStorage = new ItemStackTypedHandler(inputStorageSlots)
         {
             @Override
-            public ItemStack extractItem(int slot, int count, boolean sim)
+            public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
             {
                 return ItemStack.EMPTY; //禁止提取
             }
@@ -266,7 +267,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         ItemStackTypedHandler fuelStorage = new ItemStackTypedHandler(fuelStorageSlots)
         {
             @Override
-            public ItemStack extractItem(int slot, int count, boolean sim)
+            public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
             {
                 return ItemStack.EMPTY; //禁止提取
             }
@@ -275,7 +276,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         ItemStackTypedHandler outputStorage = new ItemStackTypedHandler(outputStorageSlots)
         {
             @Override
-            public ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
+            public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
             {
                 return itemStack; //禁止插入
             }
@@ -284,7 +285,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         ItemStackTypedHandler fuelReturn = new ItemStackTypedHandler(fuelReturnSlots)
         {
             @Override
-            public ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
+            public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
             {
                 return itemStack; //禁止插入
             }
