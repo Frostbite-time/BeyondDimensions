@@ -31,8 +31,8 @@ public class ServerConfig {
     public static Integer CRYSTAL_GENERATE_TIME = SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME.getDefault();
 
     @SubscribeEvent
-    static void onLoad(final ModConfigEvent event) {
-        if (event.getConfig().getType() == ModConfig.Type.SERVER) {
+    static void onLoad(final ModConfigEvent.Loading event) {
+        if (event.getConfig().getSpec() == SPEC) {
             FRAGMENT_TRANSFER_TIME = UNSTABLE_SPACE_TIME_FRAGMENT_TRANSFER_TIME.get();
             CRYSTAL_GENERATE_TIME = SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME.get();
         }

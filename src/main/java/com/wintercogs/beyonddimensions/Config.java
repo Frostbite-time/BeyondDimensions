@@ -85,8 +85,8 @@ public class Config {
 
 
     @SubscribeEvent
-    static void onLoad(final ModConfigEvent event) {
-        if (event.getConfig().getType() == ModConfig.Type.COMMON) {
+    static void onLoad(final ModConfigEvent.Loading event) {
+        if (event.getConfig().getSpec() == SPEC) {
             uiSortButton = UI_SORT_BUTTON.get() == ButtonState.SORT_DEFAULT ? ButtonState.SORT_NAME : UI_SORT_BUTTON.get();
             uiSecondSortButton = UI_SECOND_SORT_BUTTON.get();
             uiReverseButton = UI_REVERSE_BUTTON.get();
