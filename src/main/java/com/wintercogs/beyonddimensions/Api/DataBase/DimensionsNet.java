@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.ServerConfig;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -81,8 +82,7 @@ public class DimensionsNet extends SavedData
      * <p>
      * holdTime是固定的时间间隔，用于确定多久生成一次时间间隔，每当currentTime归零，holdTime会为它赋值
      */
-    private int currentTime = 600*20;
-    private int holdTime = 600*20;
+    private int currentTime = 0;
 
     /**
      * 构造函数
@@ -522,16 +522,16 @@ public class DimensionsNet extends SavedData
     public void onServerTick(ServerTickEvent.Pre event)
     {
         // 不对临时网络执行倒计时
-        if(temporary || !Config.generateTimeCrystallization)
+        if(temporary || ServerConfig.CRYSTAL_GENERATE_TIME <= 0)
             return;
 
-        currentTime--;
+        currentTime++;
         setDirty();
-        if(currentTime <= 0)
+        if(currentTime >= ServerConfig.CRYSTAL_GENERATE_TIME * 20)
         {
             ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(),1);
             this.unifiedStorage.insert(new ItemStackKey(stack),stack.getCount(),false);
-            currentTime = holdTime;
+            currentTime = 0;
         }
 
     }

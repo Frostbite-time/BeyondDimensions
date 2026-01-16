@@ -119,6 +119,7 @@ public class BeyondDimensions
         NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
 
         // 调用UIRegister的构造函数，从而注册所有UI
         UIRegister.register(modEventBus);
@@ -378,7 +379,7 @@ public class BeyondDimensions
 
 
     // 你可以使用EventBusSubscriber来自动注册类中所有标注了@SubscribeEvent的静态方法。
-    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
     public static class ClientModEvents
     {
         @SubscribeEvent

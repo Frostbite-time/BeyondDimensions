@@ -3,15 +3,13 @@ package com.wintercogs.beyonddimensions;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-
-@EventBusSubscriber(modid = BeyondDimensions.MODID, bus = EventBusSubscriber.Bus.MOD)
-public class Config
-{
+@EventBusSubscriber(modid = BeyondDimensions.MODID)
+public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
-
 
 
     public static final ModConfigSpec.EnumValue<ButtonState> UI_SORT_BUTTON = BUILDER
@@ -47,10 +45,6 @@ public class Config
             .define("ui_search",
                     "");
 
-    public static final ModConfigSpec.BooleanValue GENERATE_TIME_CRYSTALLIZATION = BUILDER
-            .comment("是否自动生成破碎的时空结晶？")
-            .define("generate_time_crystallization", true);
-
     public static final ModConfigSpec.BooleanValue INTERFACE_CAN_RECEIVE_RESOURCE = BUILDER
             .comment("是否允许网络接口将资源送入网络")
             .define("interface_can_receive_resource", true);
@@ -80,7 +74,6 @@ public class Config
     public static ButtonState uiCraftReturnButton;
     public static int uiPageNum;
     public static String uiSearch;
-    public static boolean generateTimeCrystallization;
     public static boolean interfaceCanReceiveResource;
     public static boolean interfaceCanOutputResource;
     public static boolean interfaceCanPopResource;
@@ -91,23 +84,22 @@ public class Config
     static final ModConfigSpec SPEC = BUILDER.build();
 
 
-
     @SubscribeEvent
-    static void onLoad(final ModConfigEvent event)
-    {
-        uiSortButton = UI_SORT_BUTTON.get() == ButtonState.SORT_DEFAULT ? ButtonState.SORT_NAME : UI_SORT_BUTTON.get();
-        uiSecondSortButton = UI_SECOND_SORT_BUTTON.get();
-        uiReverseButton = UI_REVERSE_BUTTON.get();
-        uiSearchButton = UI_SEARCH_BUTTON.get();
-        uiPageNum = UI_PAGE_NUM.get();
-        uiSearch = UI_SEARCH.get();
-        uiCraftButton = UI_CRAFT_BUTTON.get();
-        uiCraftReturnButton = UI_CRAFT_RETURN_BUTTON.get();
-        generateTimeCrystallization = GENERATE_TIME_CRYSTALLIZATION.get();
-        interfaceCanReceiveResource = INTERFACE_CAN_RECEIVE_RESOURCE.get();
-        interfaceCanOutputResource = INTERFACE_CAN_OUTPUT_RESOURCE.get();
-        interfaceCanPopResource = INTERFACE_CAN_POP_RESOURCE.get();
-        interfaceUsableCapacity = INTERFACE_USABLE_CAPACITY.get();
-        searchTextWithJEIEMI = SEARCH_TEXT_WITH_JEI_EMI.get();
+    static void onLoad(final ModConfigEvent event) {
+        if (event.getConfig().getType() == ModConfig.Type.COMMON) {
+            uiSortButton = UI_SORT_BUTTON.get() == ButtonState.SORT_DEFAULT ? ButtonState.SORT_NAME : UI_SORT_BUTTON.get();
+            uiSecondSortButton = UI_SECOND_SORT_BUTTON.get();
+            uiReverseButton = UI_REVERSE_BUTTON.get();
+            uiSearchButton = UI_SEARCH_BUTTON.get();
+            uiPageNum = UI_PAGE_NUM.get();
+            uiSearch = UI_SEARCH.get();
+            uiCraftButton = UI_CRAFT_BUTTON.get();
+            uiCraftReturnButton = UI_CRAFT_RETURN_BUTTON.get();
+            interfaceCanReceiveResource = INTERFACE_CAN_RECEIVE_RESOURCE.get();
+            interfaceCanOutputResource = INTERFACE_CAN_OUTPUT_RESOURCE.get();
+            interfaceCanPopResource = INTERFACE_CAN_POP_RESOURCE.get();
+            interfaceUsableCapacity = INTERFACE_USABLE_CAPACITY.get();
+            searchTextWithJEIEMI = SEARCH_TEXT_WITH_JEI_EMI.get();
+        }
     }
 }
