@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "beyonddimensions:xp_exchange_item"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "unlock_xp_exchange_item": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "beyonddimensions:space_time_bar"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "unlock_xp_exchange_item",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "beyonddimensions:xp_exchange_item"
+    ]
+  },
+  "sends_telemetry_event": false
+}

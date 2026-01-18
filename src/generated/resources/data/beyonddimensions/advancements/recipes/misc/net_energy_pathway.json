@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "beyonddimensions:net_energy_pathway"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "unlock_net_energy_pathway": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "beyonddimensions:space_time_stable_frame"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "unlock_net_energy_pathway",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "beyonddimensions:net_energy_pathway"
+    ]
+  },
+  "sends_telemetry_event": false
+}

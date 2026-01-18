@@ -1,0 +1,33 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "botania"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "category": "misc",
+        "key": {
+          "A": {
+            "item": "botania:livingrock"
+          },
+          "B": {
+            "item": "beyonddimensions:space_time_stable_frame"
+          }
+        },
+        "pattern": [
+          "ABA",
+          "AAA"
+        ],
+        "result": {
+          "item": "beyonddimensions:mana_pool_pathway"
+        },
+        "show_notification": true
+      }
+    }
+  ]
+}

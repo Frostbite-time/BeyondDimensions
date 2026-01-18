@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "beyonddimensions:net_manager_inviter"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "unlock_net_manager_inviter": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "beyonddimensions:space_time_stable_frame"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "unlock_net_manager_inviter",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "beyonddimensions:net_manager_inviter"
+    ]
+  },
+  "sends_telemetry_event": false
+}

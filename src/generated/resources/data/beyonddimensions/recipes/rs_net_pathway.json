@@ -1,0 +1,40 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "refinedstorage"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "category": "misc",
+        "key": {
+          "A": {
+            "tag": "beyonddimensions:rs/quartz_enriched_iron"
+          },
+          "B": {
+            "item": "beyonddimensions:space_time_stable_frame"
+          },
+          "C": {
+            "item": "refinedstorage:machine_casing"
+          },
+          "D": {
+            "item": "minecraft:redstone"
+          }
+        },
+        "pattern": [
+          "ABA",
+          "ACA",
+          "ADA"
+        ],
+        "result": {
+          "item": "beyonddimensions:rs_net_pathway"
+        },
+        "show_notification": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "ae2"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "category": "misc",
+        "key": {
+          "A": {
+            "item": "ae2:quartz_glass"
+          },
+          "B": {
+            "item": "minecraft:diamond"
+          },
+          "C": {
+            "item": "beyonddimensions:space_time_bar"
+          },
+          "D": {
+            "item": "beyonddimensions:space_time_stable_frame"
+          }
+        },
+        "pattern": [
+          "ABA",
+          "BDB",
+          "CCC"
+        ],
+        "result": {
+          "item": "beyonddimensions:net_ae_storage_cell"
+        },
+        "show_notification": true
+      }
+    }
+  ]
+}

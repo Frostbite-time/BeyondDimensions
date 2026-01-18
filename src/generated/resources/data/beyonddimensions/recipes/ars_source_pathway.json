@@ -1,0 +1,40 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "ars_nouveau"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "category": "misc",
+        "key": {
+          "A": {
+            "item": "beyonddimensions:space_time_bar"
+          },
+          "B": {
+            "item": "beyonddimensions:space_time_stable_frame"
+          },
+          "C": {
+            "item": "ars_nouveau:source_jar"
+          },
+          "D": {
+            "item": "minecraft:ender_eye"
+          }
+        },
+        "pattern": [
+          "ABA",
+          "CDC",
+          "ABA"
+        ],
+        "result": {
+          "item": "beyonddimensions:ars_source_pathway"
+        },
+        "show_notification": true
+      }
+    }
+  ]
+}

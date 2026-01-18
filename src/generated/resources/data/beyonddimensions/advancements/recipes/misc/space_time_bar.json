@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "beyonddimensions:space_time_bar"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "unlock_space_time_bar": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "beyonddimensions:shattered_space_time_crystallization"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "unlock_space_time_bar",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "beyonddimensions:space_time_bar"
+    ]
+  },
+  "sends_telemetry_event": false
+}
