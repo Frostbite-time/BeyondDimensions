@@ -2,12 +2,20 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerRemoveZero;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.Registry.UnifiedStorageBeforeInsertHandler;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 
 /**
  * 统一存储（与旧类同名）：
  * - 策略采用“到0即删除”（继承 UnorderedStackHandlerRemoveZero）
  * - 在 onChange() 时对接 DimensionsNet.setDirty()，再广播变更（调用 super.onChange()）
+ * - 注意：此存储仅用于维度网络，维度网络也仅使用此存储，以便存放一些维度网络专用特性
  */
 public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
 {
@@ -66,4 +74,23 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
         // 调用基类的广播逻辑（Any/Delta 订阅）
         super.onChange();
     }
+
+    @Override
+    public @NotNull KeyAmount insert(IStackKey<?> key, long amount, boolean simulate)
+    {
+        KeyAmount input = new KeyAmount(Objects.requireNonNullElse(key, EmptyStackKey.INSTANCE), amount);
+
+        var info = UnifiedStorageBeforeInsertHandler.onBeforeInsert(input, net);
+
+        if (info.cancel())
+            return input;
+
+        KeyAmount adjusted = info.beforeInsert();
+
+        if (adjusted.isEmpty())
+            return adjusted;
+
+        return super.insert(adjusted.key(), adjusted.amount(), simulate);
+    }
+
 }
