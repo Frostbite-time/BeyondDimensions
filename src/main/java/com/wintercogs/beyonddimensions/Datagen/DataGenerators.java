@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = BeyondDimensions.MODID)
 public class DataGenerators
 {
     public static final Logger LOGGER = LogUtils.getLogger();
