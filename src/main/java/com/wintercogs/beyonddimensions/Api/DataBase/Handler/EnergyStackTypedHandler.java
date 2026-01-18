@@ -9,20 +9,21 @@ public class EnergyStackTypedHandler implements IEnergyStorage
 
     private StackTypedHandler handlerStorage;
 
-    public EnergyStackTypedHandler(StackTypedHandler handlerStorage) {
+    public EnergyStackTypedHandler(StackTypedHandler handlerStorage)
+    {
         this.handlerStorage = handlerStorage;
     }
 
     @Override
     public int receiveEnergy(int count, boolean simulate)
     {
-        return (int) (count - handlerStorage.insert(new EnergyStackType(count),simulate).getStackAmount());
+        return (int) (count - handlerStorage.insert(new EnergyStackType(count), simulate).getStackAmount());
     }
 
     @Override
     public int extractEnergy(int count, boolean simulate)
     {
-        return (int) handlerStorage.extract(new EnergyStackType(count),simulate).getStackAmount();
+        return (int) handlerStorage.extract(new EnergyStackType(count), simulate).getStackAmount();
     }
 
     @Override
@@ -30,8 +31,8 @@ public class EnergyStackTypedHandler implements IEnergyStorage
     {
         return handlerStorage.getTypeIdIndexList(EnergyStackType.ID)
                 .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex>=0)
-                .map(actualIndex -> (EnergyStackType)handlerStorage.getStackBySlot(actualIndex))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> (EnergyStackType) handlerStorage.getStackBySlot(actualIndex))
                 .map(energyStackType -> BDMath.clampLongToInt(energyStackType.getStackAmount()))
                 .orElse(0);
     }

@@ -28,14 +28,14 @@ public class AEHelper
         ISTACK_TO_AEKEY_MAP.put(ItemStackType.ID, stackType -> Optional.ofNullable(AEItemKey.of((ItemStack) stackType.copyStack())));
         ISTACK_TO_AEKEY_MAP.put(FluidStackType.ID, stackType -> Optional.ofNullable(AEFluidKey.of((FluidStack) stackType.copyStack())));
 
-        AEKEY_TO_STACK_TYPE_MAP.put(AEKeyType.items(), (key, amount) -> Optional.of(new ItemStackType( ((AEItemKey)key).toStack(1),amount )));
-        AEKEY_TO_STACK_TYPE_MAP.put(AEKeyType.fluids(), (key, amount) -> Optional.of(new FluidStackType( ((AEFluidKey)key).toStack(1),amount )));
+        AEKEY_TO_STACK_TYPE_MAP.put(AEKeyType.items(), (key, amount) -> Optional.of(new ItemStackType(((AEItemKey) key).toStack(1), amount)));
+        AEKEY_TO_STACK_TYPE_MAP.put(AEKeyType.fluids(), (key, amount) -> Optional.of(new FluidStackType(((AEFluidKey) key).toStack(1), amount)));
     }
 
 
     public static Optional<IStackType<?>> fromAEKeyToIStack(AEKey key, long amount)
     {
-        if(AEKEY_TO_STACK_TYPE_MAP.containsKey(key.getType()))
+        if (AEKEY_TO_STACK_TYPE_MAP.containsKey(key.getType()))
         {
             return AEKEY_TO_STACK_TYPE_MAP.get(key.getType()).apply(key, amount);
         }
@@ -45,7 +45,7 @@ public class AEHelper
 
     public static Optional<AEKey> fromIStackToAEKey(IStackType stack)
     {
-        if(ISTACK_TO_AEKEY_MAP.containsKey(stack.getTypeId()))
+        if (ISTACK_TO_AEKEY_MAP.containsKey(stack.getTypeId()))
         {
             return ISTACK_TO_AEKEY_MAP.get(stack.getTypeId()).apply(stack);
         }

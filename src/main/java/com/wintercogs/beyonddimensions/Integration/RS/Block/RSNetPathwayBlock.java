@@ -17,7 +17,8 @@ public class RSNetPathwayBlock extends NetedBlock implements EntityBlock
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new RSNetPathwayBlockEntity(blockPos,blockState);
+    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
+    {
+        return new RSNetPathwayBlockEntity(blockPos, blockState);
     }
 }

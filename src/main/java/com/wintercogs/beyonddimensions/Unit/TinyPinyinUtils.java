@@ -7,26 +7,34 @@ import static com.github.promeg.pinyinhelper.Pinyin.isChinese;
 public class TinyPinyinUtils
 {
 
-    static {
+    static
+    {
         // 初始化TinyPinyin配置
         Pinyin.init(Pinyin.newConfig());
     }
 
     /**
      * 获取中文汉字的拼音首字母
+     *
      * @param hanyu 中文字符串
      * @return 拼音首字母字符串
      */
-    public static String getFirstPinYin(String hanyu) {
+    public static String getFirstPinYin(String hanyu)
+    {
         StringBuilder firstPinyin = new StringBuilder();
         char[] chars = hanyu.trim().toCharArray();
-        for (char c : chars) {
-            if (isChinese(c)) {
+        for (char c : chars)
+        {
+            if (isChinese(c))
+            {
                 String pinyin = Pinyin.toPinyin(c);
-                if (!pinyin.isEmpty()) {
+                if (!pinyin.isEmpty())
+                {
                     firstPinyin.append(pinyin.charAt(0));
                 }
-            } else {
+            }
+            else
+            {
                 firstPinyin.append(c);
             }
         }
@@ -35,24 +43,32 @@ public class TinyPinyinUtils
 
     /**
      * 将中文汉字转为全拼音
-     * @param hanzi 中文字符串
+     *
+     * @param hanzi    中文字符串
      * @param addSpace 是否用空格分隔拼音
      * @return 全拼字符串
      */
-    public static String getAllPinyin(String hanzi, boolean addSpace) {
+    public static String getAllPinyin(String hanzi, boolean addSpace)
+    {
         StringBuilder result = new StringBuilder();
         char[] chars = hanzi.trim().toCharArray();
-        for (char c : chars) {
-            if (isChinese(c)) {
+        for (char c : chars)
+        {
+            if (isChinese(c))
+            {
                 result.append(Pinyin.toPinyin(c));
-            } else {
+            }
+            else
+            {
                 result.append(c);
             }
-            if (addSpace) {
+            if (addSpace)
+            {
                 result.append(' ');
             }
         }
-        if (addSpace && result.length() > 0) {
+        if (addSpace && result.length() > 0)
+        {
             result.deleteCharAt(result.length() - 1);
         }
         return result.toString();

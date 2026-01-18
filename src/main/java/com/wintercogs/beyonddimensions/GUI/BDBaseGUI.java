@@ -48,11 +48,12 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     protected void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
-            if(this.hoveredSlot instanceof AbstractStackTypedSlot sSlot)
+        if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem())
+        {
+            if (this.hoveredSlot instanceof AbstractStackTypedSlot sSlot)
             {
                 IStackType stack = sSlot.getStack();
-                stack.renderTooltip(guiGraphics,minecraft.font,mouseX,mouseY);
+                stack.renderTooltip(guiGraphics, minecraft.font, mouseX, mouseY);
             }
             else
             {
@@ -65,22 +66,22 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     public void renderSlot(GuiGraphics guiGraphics, Slot slot)
     {
-        if(slot instanceof AbstractStackTypedSlot sSlot)
+        if (slot instanceof AbstractStackTypedSlot sSlot)
         {
             // 获取stack
             int x = slot.x;
             int y = slot.y;
             IStackType stack = sSlot.getStack();
 
-            if(stack != null)
+            if (stack != null)
             {
-                stack.render(guiGraphics,x,y);
+                stack.render(guiGraphics, x, y);
             }
 
         }
         else
         {
-            super.renderSlot(guiGraphics,slot);
+            super.renderSlot(guiGraphics, slot);
         }
     }
 
@@ -90,7 +91,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     {
         super.containerTick();
 
-        if(cleanHold > 0)
+        if (cleanHold > 0)
         {
             cleanHold--;
         }
@@ -107,7 +108,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button)
     {
-        return super.mouseClicked(mouseX,mouseY,button);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
@@ -148,58 +149,58 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     protected void slotClicked(Slot slot, int slotIndex, int mouseButton, @NotNull ClickType type)
     {
-        if(!(slot instanceof AbstractStackTypedSlot))
+        if (!(slot instanceof AbstractStackTypedSlot))
             super.slotClicked(slot, slotIndex, mouseButton, type);
 
-        if(slot == null) return; // 这里绝对可能为null，不可移除此行
+        if (slot == null) return; // 这里绝对可能为null，不可移除此行
 
         int slotId = slot.index;
         IStackType<?> clickItem;
-        if(hasShiftDown())
+        if (hasShiftDown())
         {
-            if(slot instanceof AbstractStackTypedSlot sSlot)
+            if (slot instanceof AbstractStackTypedSlot sSlot)
             {
                 clickItem = sSlot.getVanillaActualStack();
-                if(!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem))
+                if (!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem))
                 {
-                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(lastStorageClickedStack.copyWithCount(Long.MAX_VALUE),false));
+                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(lastStorageClickedStack.copyWithCount(Long.MAX_VALUE), false));
                 }
-                else if(!clickItem.isEmpty() && clickItem instanceof ItemStackType itemStackType)
+                else if (!clickItem.isEmpty() && clickItem instanceof ItemStackType itemStackType)
                 {
-                    this.lastStorageClickedStack = (ItemStackType)itemStackType.copy();
+                    this.lastStorageClickedStack = (ItemStackType) itemStackType.copy();
                 }
             }
             else
             {
                 clickItem = new ItemStackType(slot.getItem());
 
-                if(lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
+                if (lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
                 {
-                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(new ItemStackType(lastInvClickedStack),true));
+                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(new ItemStackType(lastInvClickedStack), true));
                 }
-                else if(menu.inventoryStartIndex<=slotId&& slotId<menu.inventoryEndIndex)
+                else if (menu.inventoryStartIndex <= slotId && slotId < menu.inventoryEndIndex)
                 {
                     lastInvClickedStack = slot.getItem();
                     lastInvClickedSlot = slotId;
                 }
 
             }
-            PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,true));
+            PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, true));
         }
         else
         {
-            if(slot instanceof AbstractStackTypedSlot sSlot)
+            if (slot instanceof AbstractStackTypedSlot sSlot)
             {
-                if(sSlot.isFake())
+                if (sSlot.isFake())
                 {
                     // 对于标记槽位
                     clickItem = sSlot.getVanillaActualStack();
-                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
+                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
                 }
                 else
                 {
                     clickItem = sSlot.getVanillaActualStack();
-                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId,clickItem,mouseButton,false));
+                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
                 }
             }
         }
@@ -209,21 +210,25 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     protected boolean checkHotbarKeyPressed(int keyCode, int scanCode)
     {
-        if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null) {
+        if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null)
+        {
 
-            if(hoveredSlot instanceof AbstractStackTypedSlot sSlot)
+            if (hoveredSlot instanceof AbstractStackTypedSlot sSlot)
             {
 
             }
             else
             {
                 // 副手交换仅对于非存储槽才生效
-                if (this.minecraft.options.keySwapOffhand.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
+                if (this.minecraft.options.keySwapOffhand.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode)))
+                {
                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
                     return true;
                 }
-                for(int i = 0; i < 9; ++i) {
-                    if (this.minecraft.options.keyHotbarSlots[i].isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
+                for (int i = 0; i < 9; ++i)
+                {
+                    if (this.minecraft.options.keyHotbarSlots[i].isActiveAndMatches(InputConstants.getKey(keyCode, scanCode)))
+                    {
                         this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, i, ClickType.SWAP);
                         return true;
                     }
@@ -235,7 +240,8 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
 
-    public Font getFont() {
+    public Font getFont()
+    {
         return font;
     }
 

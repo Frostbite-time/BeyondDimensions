@@ -10,11 +10,13 @@ public interface ISourceCap
 
     int getMaxReceive();
 
-    default boolean canExtract() {
+    default boolean canExtract()
+    {
         return this.canProvideSource(1);
     }
 
-    default boolean canReceive() {
+    default boolean canReceive()
+    {
         return this.canAcceptSource(1);
     }
 
@@ -22,7 +24,8 @@ public interface ISourceCap
 
     int getSourceCapacity();
 
-    default int getMaxSource() {
+    default int getMaxSource()
+    {
         return this.getSourceCapacity();
     }
 

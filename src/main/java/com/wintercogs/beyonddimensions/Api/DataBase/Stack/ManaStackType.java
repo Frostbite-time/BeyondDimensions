@@ -48,7 +48,7 @@ public class ManaStackType extends LongStackType<ManaType>
     @Override
     public IStackType<ManaType> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
-        if(key instanceof ManaType)
+        if (key instanceof ManaType)
         {
             return new ManaStackType(amount);
         }
@@ -126,7 +126,8 @@ public class ManaStackType extends LongStackType<ManaType>
     @Override
     public IStackType<ManaType> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
-        if (!typeId.equals(getTypeId())) {
+        if (!typeId.equals(getTypeId()))
+        {
             return null;// 表示未能读取任何类型
         }
         // 读取数量
@@ -153,7 +154,7 @@ public class ManaStackType extends LongStackType<ManaType>
     @Override
     public void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y)
     {
-        if(stack.isEmpty())
+        if (stack.isEmpty())
             return;
 
         // 渲染图标
@@ -162,7 +163,7 @@ public class ManaStackType extends LongStackType<ManaType>
 
         int tintColor = 0xFFFFFFFF;
         net.minecraft.client.renderer.texture.TextureAtlasSprite sprite = IngredientRenderer.BOTANIA_MANA.sprite();
-        com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,tintColor,16,sprite,x,y);
+        com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui, 16, 16, tintColor, 16, sprite, x, y);
 
 
         poseStack.popPose(); // 恢复矩阵状态，结束渲染
@@ -172,18 +173,18 @@ public class ManaStackType extends LongStackType<ManaType>
         float scale = 0.666f; // 文本缩放因数
         var poseStackText = gui.pose();
         poseStackText.pushPose();
-        poseStackText.translate(0,0,200); // 确保文本在顶层
-        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
+        poseStackText.translate(0, 0, 200); // 确保文本在顶层
+        poseStackText.scale(scale, scale, scale); // 文本整体缩放，便于查看
         com.mojang.blaze3d.systems.RenderSystem.disableBlend(); // 禁用混合渲染模式
-        final int X = (int)(
+        final int X = (int) (
                 (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
                         * 1.0f / 0.666f
         );
-        final int Y = (int)(
+        final int Y = (int) (
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
-        if(!stack.isEmpty())
+        if (!stack.isEmpty())
             gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
         poseStackText.popPose();
     }

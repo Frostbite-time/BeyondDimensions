@@ -41,7 +41,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if (!level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -86,9 +86,9 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     public void workStart()
     {
         AABB searchArea = getSearchArea();
-        if(hopperItemMode == HopperItemMode.ALLOW)
+        if (hopperItemMode == HopperItemMode.ALLOW)
             refreshItemEntityCache(searchArea);
-        if(hopperXpMode == HopperXpMode.ALLOW)
+        if (hopperXpMode == HopperXpMode.ALLOW)
             refreshXpEntityCache(searchArea);
     }
 
@@ -98,21 +98,21 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         UnifiedStorage storage = getNet().getUnifiedStorage(); // getNet已在shouldWork完成null检查
 
         // 开始收集物品
-        if(hopperItemMode == HopperItemMode.ALLOW)
+        if (hopperItemMode == HopperItemMode.ALLOW)
         {
-            for(ItemEntity itemEntity : itemEntities)
+            for (ItemEntity itemEntity : itemEntities)
             {
-                if(itemEntity != null && !itemEntity.isRemoved())
+                if (itemEntity != null && !itemEntity.isRemoved())
                 {
                     ItemStack itemStack = itemEntity.getItem().copy();
                     ItemStackType typedStack = new ItemStackType(itemStack);
-                    if(matchesFilter(typedStack))
+                    if (matchesFilter(typedStack))
                     {
-                        if(storage.insert(typedStack,true).isEmpty()) // 表示能成功插入
+                        if (storage.insert(typedStack, true).isEmpty()) // 表示能成功插入
                         {
                             itemEntity.discard();
                             // workContent之前已经由shouldWork检查过net的存在性
-                            storage.insert(typedStack,false);
+                            storage.insert(typedStack, false);
                         }
                     }
                 }
@@ -120,22 +120,22 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         }
 
         // 开始收集掉落物
-        if(hopperXpMode == HopperXpMode.ALLOW)
+        if (hopperXpMode == HopperXpMode.ALLOW)
         {
-            for(ExperienceOrb orb : xpEntities)
+            for (ExperienceOrb orb : xpEntities)
             {
-                if(orb != null && !orb.isRemoved())
+                if (orb != null && !orb.isRemoved())
                 {
                     int xp = orb.getValue();
-                    if(xp > 0 )
+                    if (xp > 0)
                     {
                         long xpFluid = xp * 20L;
-                        FluidStackType xpStack = new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(),1),xpFluid);
+                        FluidStackType xpStack = new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), xpFluid);
 
-                        if(storage.insert(xpStack,true).isEmpty())
+                        if (storage.insert(xpStack, true).isEmpty())
                         {
                             orb.discard();
-                            storage.insert(xpStack,false);
+                            storage.insert(xpStack, false);
                         }
                     }
                 }
@@ -143,7 +143,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         }
 
         // 开始抽取流体
-        if(hopperFluidMode == HopperFluidMode.ALLOW)
+        if (hopperFluidMode == HopperFluidMode.ALLOW)
         {
             fluidCollect(getSearchArea());
         }
@@ -151,7 +151,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
 
     private AABB getSearchArea()
     {
-        if(hopperRangeMode != HopperRangeMode.CHUNK_MODE)
+        if (hopperRangeMode != HopperRangeMode.CHUNK_MODE)
         {
             //更正半径
             int radius = switch (hopperRangeMode)
@@ -201,7 +201,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                 searchArea,
                 itemEntity -> {
                     // NBT过滤
-                    if(hopperNBTMode == HopperNBTMode.DENY)
+                    if (hopperNBTMode == HopperNBTMode.DENY)
                     {
                         return !itemEntity.getItem().hasTag();
                     }
@@ -226,7 +226,8 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     private void fluidCollect(AABB searchArea)
     {
         // ① 安全性检查
-        if (level == null || level.isClientSide) {
+        if (level == null || level.isClientSide)
+        {
             return;                       // 只在服务器端执行
         }
 
@@ -240,9 +241,12 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
 
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
-        for (int x = minX; x <= maxX; ++x) {
-            for (int y = minY; y <= maxY; ++y) {
-                for (int z = minZ; z <= maxZ; ++z) {
+        for (int x = minX; x <= maxX; ++x)
+        {
+            for (int y = minY; y <= maxY; ++y)
+            {
+                for (int z = minZ; z <= maxZ; ++z)
+                {
                     pos.set(x, y, z);
 
                     FluidState fluidState = level.getFluidState(pos);
@@ -258,11 +262,11 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                     // ⑤ 交给你的逻辑（存槽、推网络、合并等）
                     UnifiedStorage storage = getNet().getUnifiedStorage();
                     FluidStackType typedFluid = new FluidStackType(extracted);
-                    if(matchesFilter(typedFluid))
+                    if (matchesFilter(typedFluid))
                     {
-                        if(storage.insert(typedFluid,true).isEmpty())
+                        if (storage.insert(typedFluid, true).isEmpty())
                         {
-                            storage.insert(typedFluid,false);
+                            storage.insert(typedFluid, false);
                             // ⑥ 清空方块 & 通知客户端
                             level.setBlock(pos, Blocks.AIR.defaultBlockState(),
                                     Block.UPDATE_ALL_IMMEDIATE);  // 立即更新并刷新渲染
@@ -277,23 +281,26 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     {
         switch (filterMode)
         {
-            case BLACK -> {
-                for(IStackType stack : filterSlots.getStorage())
+            case BLACK ->
+            {
+                for (IStackType stack : filterSlots.getStorage())
                 {
-                    if(stack.isSame(otherStack))
+                    if (stack.isSame(otherStack))
                         return false;
                 }
                 return true;
             }
-            case WHITE -> {
-                for(IStackType stack : filterSlots.getStorage())
+            case WHITE ->
+            {
+                for (IStackType stack : filterSlots.getStorage())
                 {
-                    if(stack.isSame(otherStack))
+                    if (stack.isSame(otherStack))
                         return true;
                 }
                 return false;
             }
-            case IGNORE -> {
+            case IGNORE ->
+            {
                 return true;
             }
 
@@ -336,7 +343,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     @Override
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
-        return new NetHopperMenu(containerId,inventory, filterSlots, this);
+        return new NetHopperMenu(containerId, inventory, filterSlots, this);
     }
 }
 

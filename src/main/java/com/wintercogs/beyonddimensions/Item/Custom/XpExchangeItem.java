@@ -36,6 +36,7 @@ import java.util.Locale;
 public class XpExchangeItem extends Item
 {
     public static List<Fluid> xpFluids = new ArrayList<>();
+
     public XpExchangeItem(Properties properties)
     {
         super(properties.stacksTo(1));
@@ -46,17 +47,17 @@ public class XpExchangeItem extends Item
     {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         checkComponents(stack);
-        if(xpFluids.isEmpty())
+        if (xpFluids.isEmpty())
             xpFluids = getExperienceFluids(level);
-        if(entity instanceof Player player && !level.isClientSide() && getOrDefaultXpNetKeepMode(stack, false))
+        if (entity instanceof Player player && !level.isClientSide() && getOrDefaultXpNetKeepMode(stack, false))
             keepXpLevel(stack, player, level);
     }
 
     private void checkComponents(ItemStack stack)
     {
-        if(!hasXpTransferSpeedMode(stack))
+        if (!hasXpTransferSpeedMode(stack))
             setXpTransferSpeedMode(stack, XpTransferSpeedMode.SLOW);
-        if(!hasXpNetKeepMode(stack))
+        if (!hasXpNetKeepMode(stack))
             setXpNetKeepMode(stack, false);
     }
 
@@ -78,27 +79,27 @@ public class XpExchangeItem extends Item
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND)
+        if (usedHand != InteractionHand.MAIN_HAND)
             return InteractionResultHolder.fail(itemstack); // 非主手使用默认fail
 
-        if(level.isClientSide()) // 客户端shift使用时播放失败动画，否则播放pass动画（直接步进到最终回退）
+        if (level.isClientSide()) // 客户端shift使用时播放失败动画，否则播放pass动画（直接步进到最终回退）
         {
-            if(player.isShiftKeyDown())
+            if (player.isShiftKeyDown())
             {
                 return InteractionResultHolder.fail(itemstack);
             }
         }
-        if(!level.isClientSide()) // 服务端实际处理两个不同操作
+        if (!level.isClientSide()) // 服务端实际处理两个不同操作
         {
-            if(player.isShiftKeyDown())
+            if (player.isShiftKeyDown())
             {
-                cycleMode(itemstack,player,level);
+                cycleMode(itemstack, player, level);
             }
             else
             {
                 boolean current = getOrDefaultXpNetKeepMode(itemstack, false);
                 setXpNetKeepMode(itemstack, !current);
-                if(getOrDefaultXpNetKeepMode(itemstack, false))
+                if (getOrDefaultXpNetKeepMode(itemstack, false))
                     player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.open"));
                 else
                     player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.close"));
@@ -106,7 +107,7 @@ public class XpExchangeItem extends Item
         }
 
         // 最终回退
-        return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
     private void keepXpLevel(ItemStack stack, Player player, Level level)
@@ -124,7 +125,8 @@ public class XpExchangeItem extends Item
         // 经验流体候选列表：优先自家 XP 流体，其次为所有带 C_EXPERIENCE 标签的其它流体
         final Fluid canonicalXp = ModFluids.XP_FLUID.source().get();
 
-        if (currentLevel > targetLevel) {
+        if (currentLevel > targetLevel)
+        {
             // 把多余的 XP 存成“自家 XP 流体”
             long needRemoveXp = XpUtil.xpExcessAbove(currentLevel, targetLevel);
             int toRemoveXp = BDMath.clampLongToInt(needRemoveXp);
@@ -135,23 +137,28 @@ public class XpExchangeItem extends Item
                     false
             );
 
-            if (!remaining.isEmpty()) {
+            if (!remaining.isEmpty())
+            {
                 // 有剩余（仓库放不下），把这部分折算回 XP，不再扣玩家
                 int overflowXp = BDMath.clampLongToInt(remaining.getStackAmount() / conversionRate);
                 toRemoveXp -= overflowXp;
             }
 
-            if (toRemoveXp != 0) {
+            if (toRemoveXp != 0)
+            {
                 player.giveExperiencePoints(-toRemoveXp);
             }
 
-        } else if (currentLevel < targetLevel) {
+        }
+        else if (currentLevel < targetLevel)
+        {
             // 从任意“经验流体”里提取，尽量把玩家补到目标等级
             long needAddXp = XpUtil.xpToReachAtLeast(currentLevel, targetLevel);
             int remainingXp = BDMath.clampLongToInt(needAddXp);
             int gainedXpTotal = 0;
 
-            for (Fluid f : xpFluids) {
+            for (Fluid f : xpFluids)
+            {
                 if (remainingXp <= 0) break;
 
                 long wantUnits = (long) remainingXp * conversionRate;
@@ -166,7 +173,8 @@ public class XpExchangeItem extends Item
 
                 long units = extracted.getStackAmount();
                 int gainedXp = BDMath.clampLongToInt(units / conversionRate);
-                if (gainedXp <= 0) {
+                if (gainedXp <= 0)
+                {
                     // 抽到了不足 1 XP 的零头，原样放回，继续尝试其它流体
                     storage.insert(new FluidStackType(new FluidStack(f, 1), units), false);
                     continue;
@@ -176,7 +184,8 @@ public class XpExchangeItem extends Item
                 long remainderUnits = units - consumedUnits;
 
                 // 多抽出来但不足 1 XP 的部分回滚
-                if (remainderUnits > 0) {
+                if (remainderUnits > 0)
+                {
                     storage.insert(new FluidStackType(new FluidStack(f, 1), remainderUnits), false);
                 }
 
@@ -184,7 +193,8 @@ public class XpExchangeItem extends Item
                 remainingXp -= gainedXp;
             }
 
-            if (gainedXpTotal > 0) {
+            if (gainedXpTotal > 0)
+            {
                 player.giveExperiencePoints(gainedXpTotal);
             }
             // 如果仓库里经验流体不足，玩家会被尽量接近目标等级，等待下次再补。
@@ -200,7 +210,8 @@ public class XpExchangeItem extends Item
         final LinkedHashSet<Fluid> set = new LinkedHashSet<>();
         // 追加所有带 C_EXPERIENCE 标签的流体
         reg.getTag(ModFluidTags.C_EXPERIENCE).ifPresent((HolderSet<Fluid> holders) -> {
-            for (Holder<Fluid> h : holders) {
+            for (Holder<Fluid> h : holders)
+            {
                 set.add(h.value());
             }
         });
@@ -211,11 +222,11 @@ public class XpExchangeItem extends Item
     // 获取本次操作时最大操作的经验等级
     public static int getXpLevelPerAction(ItemStack stack)
     {
-        if(stack.getItem() instanceof XpExchangeItem)
+        if (stack.getItem() instanceof XpExchangeItem)
         {
             XpTransferSpeedMode xpMode = getOrDefaultXpTransferSpeedMode(stack, XpTransferSpeedMode.SLOW);
 
-            return switch(xpMode)
+            return switch (xpMode)
             {
                 case SLOW -> 1;
                 case MID -> 10;
@@ -237,12 +248,13 @@ public class XpExchangeItem extends Item
         // 提示切换
         // 键为 beyonddimensions.xp_mode.switch.<xpmode>
         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.xp_mode.switch." + next.name().toLowerCase(Locale.ENGLISH)));
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
     }
 
     public static XpTransferSpeedMode getOrDefaultXpTransferSpeedMode(ItemStack stack, XpTransferSpeedMode defaultValue)
     {
-        if (stack.hasTag() && stack.getTag().contains("xp_transfer_speed_mode")) {
+        if (stack.hasTag() && stack.getTag().contains("xp_transfer_speed_mode"))
+        {
             return XpTransferSpeedMode.valueOf(stack.getTag().getString("xp_transfer_speed_mode"));
         }
         return defaultValue; //未命中
@@ -260,7 +272,8 @@ public class XpExchangeItem extends Item
 
     public static boolean getOrDefaultXpNetKeepMode(ItemStack stack, boolean defaultValue)
     {
-        if (stack.hasTag() && stack.getTag().contains("xp_net_keep_mode")) {
+        if (stack.hasTag() && stack.getTag().contains("xp_net_keep_mode"))
+        {
             return stack.getTag().getBoolean("xp_net_keep_mode");
         }
         return defaultValue; //未命中

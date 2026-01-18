@@ -10,13 +10,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class NetPathwayBlock extends NetedBlock implements EntityBlock
 {
 
-    public NetPathwayBlock(Properties properties) {
+    public NetPathwayBlock(Properties properties)
+    {
         super(properties);
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new NetPathwayBlockEntity(blockPos,blockState);
+    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
+    {
+        return new NetPathwayBlockEntity(blockPos, blockState);
     }
 
 }

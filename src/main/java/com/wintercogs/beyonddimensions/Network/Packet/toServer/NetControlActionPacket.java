@@ -22,13 +22,14 @@ public record NetControlActionPacket(UUID receiver, NetControlAction action)
             return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
         }
         menu = (NetControlMenu) player.containerMenu;
-        menu.handlePlayerAction(receiver(),action());
+        menu.handlePlayerAction(receiver(), action());
     }
 
 
     public static void handle(NetControlActionPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
             context.enqueueWork(() -> packet.handle(context));
             context.setPacketHandled(true);

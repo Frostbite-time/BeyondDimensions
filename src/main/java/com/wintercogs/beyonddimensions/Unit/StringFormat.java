@@ -14,12 +14,14 @@ public class StringFormat
     };
 
     // 单位格式化
-    public static String formatCount(long count) {
+    public static String formatCount(long count)
+    {
         if (count < 1000) return String.valueOf(count);
 
         // 寻找最大单位
         int unitIndex = 0;
-        while (unitIndex < THRESHOLDS.length - 1 && count >= THRESHOLDS[unitIndex + 1]) {
+        while (unitIndex < THRESHOLDS.length - 1 && count >= THRESHOLDS[unitIndex + 1])
+        {
             unitIndex++;
         }
 
@@ -29,8 +31,9 @@ public class StringFormat
     }
 
     // 单位格式化 以1000为计量
-    public static String formatBucket(long count) {
-        if (count < 1000) return String.valueOf(count/1000f);
+    public static String formatBucket(long count)
+    {
+        if (count < 1000) return String.valueOf(count / 1000f);
 
         count = count / 1000;
 
@@ -38,7 +41,8 @@ public class StringFormat
 
         // 寻找最大单位
         int unitIndex = 0;
-        while (unitIndex < THRESHOLDS.length - 1 && count >= THRESHOLDS[unitIndex + 1]) {
+        while (unitIndex < THRESHOLDS.length - 1 && count >= THRESHOLDS[unitIndex + 1])
+        {
             unitIndex++;
         }
 
@@ -47,8 +51,10 @@ public class StringFormat
         return String.format("%d%s", (long) value, UNITS[unitIndex + 1]);
     }
 
-    public static String formatChange(long change) {
-        if (change == 0) {
+    public static String formatChange(long change)
+    {
+        if (change == 0)
+        {
             return "0";
         }
 
@@ -56,13 +62,15 @@ public class StringFormat
         long absValue = Math.abs(change);
 
         // 特殊处理小于1000的值（直接显示原始值）
-        if (absValue < 1000) {
+        if (absValue < 1000)
+        {
             return sign + String.format("%d", absValue);
         }
 
         // 寻找匹配的单位
         int unitIndex = 0;
-        while (unitIndex < THRESHOLDS.length - 1 && absValue >= THRESHOLDS[unitIndex + 1]) {
+        while (unitIndex < THRESHOLDS.length - 1 && absValue >= THRESHOLDS[unitIndex + 1])
+        {
             unitIndex++;
         }
 

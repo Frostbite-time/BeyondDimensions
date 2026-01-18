@@ -15,7 +15,7 @@ public record ClickTransferCraftButtonPacket(boolean toStorage)
         //获取玩家上下文
         Player player = context.getSender();
 
-        if(player.containerMenu instanceof DimensionsCraftMenu menu)
+        if (player.containerMenu instanceof DimensionsCraftMenu menu)
         {
             //服务端处理示意
             //1.解析数组
@@ -29,7 +29,8 @@ public record ClickTransferCraftButtonPacket(boolean toStorage)
 
     public static void handle(ClickTransferCraftButtonPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
             context.enqueueWork(() -> packet.handle(context));
             context.setPacketHandled(true);

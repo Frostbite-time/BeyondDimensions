@@ -33,7 +33,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
 {
     // 存储相邻方块的能力
     // 按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
-    private final Multimap<ResourceLocation,Object> handlerCache = ArrayListMultimap.create();
+    private final Multimap<ResourceLocation, Object> handlerCache = ArrayListMultimap.create();
     private boolean needsCapabilityUpdate = true;
     private final Direction[] directions = Direction.values();
 
@@ -43,7 +43,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if (!level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -74,15 +74,18 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
 
         handlerCache.clear();
 
-        for (Direction dir : directions) {
+        for (Direction dir : directions)
+        {
             BlockPos targetPos = this.getBlockPos().relative(dir);
             BlockEntity neighbor = level.getBlockEntity(targetPos);
-            if (neighbor != null && !(neighbor instanceof NetedBlockEntity)) {
+            if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
+            {
 
                 CapabilityHelper.BlockCapabilityMap.forEach(
                         (resourceLocation, cap) -> {
                             LazyOptional handler = neighbor.getCapability(cap, dir.getOpposite());
-                            if (handler.isPresent()) {
+                            if (handler.isPresent())
+                            {
                                 handlerCache.put(resourceLocation, handler.resolve().get());
                             }
                         }
@@ -101,25 +104,25 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
                 (typeId, handler) -> {
                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
 
-                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper)handlerGetter.apply(handler);
+                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
 
-                    for(int slot= 0;slot< stackHandlerWrapper.getSlots();slot++)
+                    for (int slot = 0; slot < stackHandlerWrapper.getSlots(); slot++)
                     {
                         Object stack = stackHandlerWrapper.getStackInSlot(slot);
                         IStackType typedStack = StackCreater.CreateEmpty(typeId);
                         typedStack.setStack(stack);
-                        if(!typedStack.isEmpty() && matchesFilter(typedStack))
+                        if (!typedStack.isEmpty() && matchesFilter(typedStack))
                         {
                             DimensionsNet net = getNet();
-                            if(net != null)
+                            if (net != null)
                             {
                                 UnifiedStorage storage = net.getUnifiedStorage();
 
-                                long canInsert = typedStack.getStackAmount() - storage.insert(typedStack,true).getStackAmount();
-                                canInsert = Math.min(canInsert,typedStack.getStackAmount());
-                                long extract = stackHandlerWrapper.extract(slot,canInsert,false);
+                                long canInsert = typedStack.getStackAmount() - storage.insert(typedStack, true).getStackAmount();
+                                canInsert = Math.min(canInsert, typedStack.getStackAmount());
+                                long extract = stackHandlerWrapper.extract(slot, canInsert, false);
                                 typedStack.setStackAmount(extract);
-                                net.getUnifiedStorage().insert(typedStack,false);
+                                net.getUnifiedStorage().insert(typedStack, false);
                             }
                         }
                     }
@@ -131,23 +134,26 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     {
         switch (filterMode)
         {
-            case BLACK -> {
-                for(IStackType stack : filterSlots.getStorage())
+            case BLACK ->
+            {
+                for (IStackType stack : filterSlots.getStorage())
                 {
-                    if(stack.isSame(otherStack))
+                    if (stack.isSame(otherStack))
                         return false;
                 }
                 return true;
             }
-            case WHITE -> {
-                for(IStackType stack : filterSlots.getStorage())
+            case WHITE ->
+            {
+                for (IStackType stack : filterSlots.getStorage())
                 {
-                    if(stack.isSame(otherStack))
+                    if (stack.isSame(otherStack))
                         return true;
                 }
                 return false;
             }
-            case IGNORE -> {
+            case IGNORE ->
+            {
                 return true;
             }
 
@@ -193,6 +199,6 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     @Override
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
-        return new NetPumpMenu(containerId,inventory, filterSlots, this);
+        return new NetPumpMenu(containerId, inventory, filterSlots, this);
     }
 }

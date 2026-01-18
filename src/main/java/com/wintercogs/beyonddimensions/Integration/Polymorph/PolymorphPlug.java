@@ -11,8 +11,8 @@ public class PolymorphPlug
     public static void register()
     {
 
-        PolymorphApi.client().registerWidget(screen ->{
-            if(screen instanceof DimensionsCraftGUI<?> gui)
+        PolymorphApi.client().registerWidget(screen -> {
+            if (screen instanceof DimensionsCraftGUI<?> gui)
                 return new RecipeWidget(gui, gui.getMenu().getSlot(gui.getMenu().resultSlotIndex));
 
             return null;

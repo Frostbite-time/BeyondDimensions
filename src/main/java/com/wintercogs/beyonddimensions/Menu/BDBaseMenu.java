@@ -56,7 +56,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     @Override
     protected Slot addSlot(Slot slot)
     {
-        if(slot instanceof AbstractStackTypedSlot sSlot)
+        if (slot instanceof AbstractStackTypedSlot sSlot)
             updatedSlots.add(sSlot);
         return super.addSlot(slot);
     }
@@ -65,9 +65,10 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     public void broadcastChanges()
     {
         // 在原版方法上剔除了对StoredStackSlot的处理
-        for(int i = 0; i < this.slots.size(); ++i) {
+        for (int i = 0; i < this.slots.size(); ++i)
+        {
             Slot slot = this.slots.get(i);
-            if(slot instanceof AbstractStackTypedSlot)
+            if (slot instanceof AbstractStackTypedSlot)
                 continue; // 不允许broadcastChanges自动同步StoredItemStackSlot以便自定义处理
             ItemStack itemstack = slot.getItem();
             Objects.requireNonNull(itemstack);
@@ -78,25 +79,27 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
 
         this.synchronizeCarriedToRemote();
 
-        for(int j = 0; j < this.dataSlots.size(); ++j) {
+        for (int j = 0; j < this.dataSlots.size(); ++j)
+        {
             DataSlot dataslot = this.dataSlots.get(j);
             int k = dataslot.get();
-            if (dataslot.checkAndClearUpdateFlag()) {
+            if (dataslot.checkAndClearUpdateFlag())
+            {
                 this.updateDataSlotListeners(j, k);
             }
 
             this.synchronizeDataSlotToRemote(j, k);
         }
 
-        if(!player.level().isClientSide())
+        if (!player.level().isClientSide())
         {
-            if(!init)
+            if (!init)
             {
                 initUpdate();
                 init = true;
             }
 
-            if(shouldSendQuickData())
+            if (shouldSendQuickData())
             {
                 CompoundTag updateTag = new CompoundTag();
                 writeQuickDataTag(updateTag);
@@ -132,20 +135,20 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     {
         CompoundTag updateTag = new CompoundTag();
         writeQuickDataTag(updateTag);
-        if(player.level().isClientSide())
+        if (player.level().isClientSide())
         {
             PacketRegister.INSTANCE.sendToServer(new QuickDataTagPacket(updateTag));
         }
         else
         {
-            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()->(ServerPlayer) player), new QuickDataTagPacket(updateTag));
+            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new QuickDataTagPacket(updateTag));
         }
     }
 
     // 槽位更新
     protected void abstractSlotsUpdate()
     {
-        for(AbstractStackTypedSlot slot : updatedSlots)
+        for (AbstractStackTypedSlot slot : updatedSlots)
         {
             slot.updateChange();
         }
@@ -154,7 +157,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     // 槽位组更新
     protected void setSlotGroupSyncsUpdate()
     {
-        for(SlotGroupSync slotGroupSync : slotGroupSyncs)
+        for (SlotGroupSync slotGroupSync : slotGroupSyncs)
         {
             slotGroupSync.updateChange();
         }
@@ -176,22 +179,22 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     public void customClickHandler(int slotIndex, IStackType clickedStack, int button, boolean shiftDown)
     {
 
-        if(inventoryStartIndex <0 || inventoryEndIndex <0)
+        if (inventoryStartIndex < 0 || inventoryEndIndex < 0)
             BeyondDimensions.LOGGER.info("警告:背包索引设置错误！！！");
 
-        if(slots.get(slotIndex) instanceof AbstractStackTypedSlot slot)
+        if (slots.get(slotIndex) instanceof AbstractStackTypedSlot slot)
         {
-            if(shiftDown)
-                slot.quickMove(clickedStack,button,player);
+            if (shiftDown)
+                slot.quickMove(clickedStack, button, player);
             else
-                slot.click(clickedStack,button,player);
+                slot.click(clickedStack, button, player);
         }
         else
         {
             // 用于处理原版槽位的快速转移
-            if(shiftDown && vanillaQuickMoveEndIndex>=0 && vanillaQuickMoveStartIndex>=0 && vanillaQuickMoveStartIndex < vanillaQuickMoveEndIndex)
+            if (shiftDown && vanillaQuickMoveEndIndex >= 0 && vanillaQuickMoveStartIndex >= 0 && vanillaQuickMoveStartIndex < vanillaQuickMoveEndIndex)
             {
-                quickMoveHandle(player,slotIndex,clickedStack,vanillaQuickMoveStartIndex,vanillaQuickMoveEndIndex);
+                quickMoveHandle(player, slotIndex, clickedStack, vanillaQuickMoveStartIndex, vanillaQuickMoveEndIndex);
             }
         }
     }
@@ -204,76 +207,76 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     // 处理非AbstractStackTypedSlot槽位的快速转移
-    protected ItemStack quickMoveHandle(Player player,int slotIndex, IStackType clickStack, int targetStartIndex, int targetEndIndex)
+    protected ItemStack quickMoveHandle(Player player, int slotIndex, IStackType clickStack, int targetStartIndex, int targetEndIndex)
     {
         Slot slot = this.slots.get(slotIndex);
         if (slot != null && !clickStack.isEmpty()) // 根据客户端信息，无视空槽或者null
         {
             ItemStack cacheStack;
             // 快速合成处理
-            if(slot instanceof ResultSlot resultSlot)
+            if (slot instanceof ResultSlot resultSlot)
             {
                 cacheStack = slot.getItem().copy(); // 完成数据包校验 并锁定本次合成使用的配方成品
-                for(int i = 0; !slot.getItem().isEmpty() && // 当合成槽为空时不执行操作
+                for (int i = 0; !slot.getItem().isEmpty() && // 当合成槽为空时不执行操作
                         slot.getItem().getItem() == cacheStack.getItem() && // 当合成槽物品已经从一个配方变成另一个配方时不执行操作
-                        i< slot.getItem().getMaxStackSize()/slot.getItem().getCount(); i++) // 限制单次合成次数
+                        i < slot.getItem().getMaxStackSize() / slot.getItem().getCount(); i++) // 限制单次合成次数
                 {
                     // 尝试将物品分别插入背包和快速转移区间，并记录回滚信息
                     ItemStack remaining = cacheStack.copy();
-                    Map<Integer,Integer> insertedToInv = new HashMap<>();
-                    Map<Integer,Integer> insertedToSlots = new HashMap<>();
-                    for(int invSlot = inventoryStartIndex; invSlot < inventoryEndIndex && !remaining.isEmpty(); invSlot++)
+                    Map<Integer, Integer> insertedToInv = new HashMap<>();
+                    Map<Integer, Integer> insertedToSlots = new HashMap<>();
+                    for (int invSlot = inventoryStartIndex; invSlot < inventoryEndIndex && !remaining.isEmpty(); invSlot++)
                     {
                         Slot targetSlot = slots.get(invSlot);
                         // safeInsert会破坏stack的数量，因此放入一个copy
                         int newSize = targetSlot.safeInsert(remaining.copy()).getCount();
-                        if((remaining.getCount() - newSize) != 0)
+                        if ((remaining.getCount() - newSize) != 0)
                             insertedToInv.put(invSlot, remaining.getCount() - newSize);
                         remaining.setCount(newSize);
                     }
 
                     // 处理剩余物品
-                    for(int targetSlotIndex = targetStartIndex; targetSlotIndex < targetEndIndex && !remaining.isEmpty(); targetSlotIndex++)
+                    for (int targetSlotIndex = targetStartIndex; targetSlotIndex < targetEndIndex && !remaining.isEmpty(); targetSlotIndex++)
                     {
                         Slot targetSlot = slots.get(targetSlotIndex);
                         int newSize;
-                        if(targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
+                        if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
                         {
                             // 此处是安全的转换，remaining不会超出int
                             // AbstractStackTypedSlot槽位的safeInsert是安全的，并且new ItemStackType会进行被动copy
-                            newSize = (int)aTargetSlot.safeInsert(new ItemStackType(remaining)).getStackAmount();
+                            newSize = (int) aTargetSlot.safeInsert(new ItemStackType(remaining)).getStackAmount();
                         }
                         else
                         {
                             newSize = targetSlot.safeInsert(remaining.copy()).getCount();
                         }
-                        if((remaining.getCount() - newSize) != 0)
+                        if ((remaining.getCount() - newSize) != 0)
                             insertedToSlots.put(targetSlotIndex, remaining.getCount() - newSize);
                         remaining.setCount(newSize);
                     }
 
 
-                    if(remaining.isEmpty()) // 如果产物被完整取出，则通知resultSlot槽位进行onTake，以移除工艺槽上的原料，并执行后续操作
+                    if (remaining.isEmpty()) // 如果产物被完整取出，则通知resultSlot槽位进行onTake，以移除工艺槽上的原料，并执行后续操作
                     {
                         resultSlot.onTake(player, slot.getItem().copy());
                     }
                     else // 没能完整取出所有产物，则将之前插入仓库的物品进行回滚
                     {
-                        for(Map.Entry<Integer,Integer> entry : insertedToInv.entrySet())
+                        for (Map.Entry<Integer, Integer> entry : insertedToInv.entrySet())
                         {
                             Slot afterSlot = slots.get(entry.getKey());
-                            afterSlot.safeTake(entry.getValue(),Integer.MAX_VALUE,player);
+                            afterSlot.safeTake(entry.getValue(), Integer.MAX_VALUE, player);
                         }
-                        for(Map.Entry<Integer,Integer> entry : insertedToSlots.entrySet())
+                        for (Map.Entry<Integer, Integer> entry : insertedToSlots.entrySet())
                         {
                             Slot afterSlot = slots.get(entry.getKey());
-                            if(afterSlot instanceof AbstractStackTypedSlot aSlot)
+                            if (afterSlot instanceof AbstractStackTypedSlot aSlot)
                             {
                                 aSlot.safeExtract(new ItemStackType(cacheStack.copyWithCount(entry.getValue())));
                             }
                             else
                             {
-                                afterSlot.safeTake(entry.getValue(),Integer.MAX_VALUE,player);
+                                afterSlot.safeTake(entry.getValue(), Integer.MAX_VALUE, player);
                             }
                         }
                     }
@@ -285,14 +288,14 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
             {
                 cacheStack = slot.getItem().copy(); // 完成数据包校验
                 ItemStack remaining = cacheStack.copy();
-                for(int targetSlotIndex = targetStartIndex; targetSlotIndex < targetEndIndex && !remaining.isEmpty(); targetSlotIndex++)
+                for (int targetSlotIndex = targetStartIndex; targetSlotIndex < targetEndIndex && !remaining.isEmpty(); targetSlotIndex++)
                 {
                     Slot targetSlot = slots.get(targetSlotIndex);
                     int newSize;
-                    if(targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
+                    if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
                     {
                         // 此处是安全的转换，remaining不会超出int
-                        newSize = (int)aTargetSlot.safeInsert(new ItemStackType(remaining)).getStackAmount();
+                        newSize = (int) aTargetSlot.safeInsert(new ItemStackType(remaining)).getStackAmount();
                     }
                     else
                     {
@@ -300,7 +303,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                     }
                     remaining.setCount(newSize);
                 }
-                slot.tryRemove(cacheStack.getCount() - remaining.getCount(),Integer.MAX_VALUE,player);
+                slot.tryRemove(cacheStack.getCount() - remaining.getCount(), Integer.MAX_VALUE, player);
             }
 
             slot.setChanged();
@@ -327,7 +330,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     @Override
     public boolean canTakeItemForPickAll(ItemStack stack, Slot slot)
     {
-        if(!(slot instanceof AbstractStackTypedSlot))
+        if (!(slot instanceof AbstractStackTypedSlot))
             return super.canTakeItemForPickAll(stack, slot);
         return false;
     }
@@ -336,9 +339,9 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     public void removed(Player player)
     {
         super.removed(player);
-        for(SlotGroupSync slotGroupSync : slotGroupSyncs)
+        for (SlotGroupSync slotGroupSync : slotGroupSyncs)
         {
-            if(slotGroupSync instanceof DisorderedSlotGroupSync disSync)
+            if (slotGroupSync instanceof DisorderedSlotGroupSync disSync)
             {
                 disSync.dispose();
             }

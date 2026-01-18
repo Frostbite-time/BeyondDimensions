@@ -30,6 +30,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
     public abstract ResourceLocation getTypeID();
+
     protected T stack;
 
     protected int hashCodeCache = 0; // 哈希码缓存
@@ -50,7 +51,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     @Override
     public void setStack(T stack)
     {
-        this.stack = (T)stack.copy();
+        this.stack = (T) stack.copy();
         NeedRecalHash = true;
     }
 
@@ -94,7 +95,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     @Override
     public T copyStackWithCount(long count)
     {
-        return (T)stack.copyWithAmount(count);
+        return (T) stack.copyWithAmount(count);
     }
 
     @Override
@@ -148,7 +149,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     @Override
     public boolean isSame(IStackType<?> other)
     {
-        if(!other.getTypeId().equals(this.getTypeId()))
+        if (!other.getTypeId().equals(this.getTypeId()))
             return false;
         return stack.isSame((LongType<?>) other.getStack());
     }
@@ -156,7 +157,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     @Override
     public boolean isSameTypeSameComponents(IStackType<?> other)
     {
-        if(!other.getTypeId().equals(this.getTypeId()))
+        if (!other.getTypeId().equals(this.getTypeId()))
             return false;
         return stack.isSame((LongType<?>) other.getStack());
     }
@@ -165,7 +166,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     @Override
     public void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y)
     {
-        if(stack.isEmpty())
+        if (stack.isEmpty())
             return;
 
         // 渲染图标
@@ -173,7 +174,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
         poseStack.pushPose(); // 保存矩阵状态
 
         Fluid fluid = Fluids.WATER;
-        if(!fluid.isSame(Fluids.EMPTY))
+        if (!fluid.isSame(Fluids.EMPTY))
         {
             net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions renderProperties = net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions.of(fluid);
             ResourceLocation fluidStill = renderProperties.getStillTexture();
@@ -183,10 +184,10 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
                             .apply(f)
                     )
                     .filter(s -> s.atlasLocation() != net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());
-            if(fluidStillSprite.isPresent())
+            if (fluidStillSprite.isPresent())
             {
-                int fluidColor =  0xFF00FF00; // 绿色
-                com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,fluidColor,16,fluidStillSprite.get(),x,y);
+                int fluidColor = 0xFF00FF00; // 绿色
+                com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui, 16, 16, fluidColor, 16, fluidStillSprite.get(), x, y);
             }
         }
 
@@ -198,18 +199,18 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
         float scale = 0.666f; // 文本缩放因数
         var poseStackText = gui.pose();
         poseStackText.pushPose();
-        poseStackText.translate(0,0,200); // 确保文本在顶层
-        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
+        poseStackText.translate(0, 0, 200); // 确保文本在顶层
+        poseStackText.scale(scale, scale, scale); // 文本整体缩放，便于查看
         RenderSystem.disableBlend(); // 禁用混合渲染模式
-        final int X = (int)(
+        final int X = (int) (
                 (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
                         * 1.0f / 0.666f
         );
-        final int Y = (int)(
+        final int Y = (int) (
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
-        if(!stack.isEmpty())
+        if (!stack.isEmpty())
             gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
         poseStackText.popPose();
     }
@@ -230,7 +231,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     @Override
     public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag)
     {
-        if(stack.isEmpty())
+        if (stack.isEmpty())
             return List.of(Component.empty());
 
         List<Component> tooltips = new ArrayList<>();
@@ -242,7 +243,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
         modName = Component.literal(WordUtils.capitalizeFully(getModId().replace('_', ' '))).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
         tooltips.add(modName);
 
-        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.long_type",getStackAmount()));
+        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.long_type", getStackAmount()));
         return tooltips;
     }
 
@@ -264,7 +265,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     @Override
     public boolean equals(Object other)
     {
-        if(other instanceof LongStackType otherStack)
+        if (other instanceof LongStackType otherStack)
         {
             return this.isSameTypeSameComponents(otherStack);
         }
@@ -272,9 +273,10 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         // 基于物品类型和组件生成哈希码
-        if(NeedRecalHash)
+        if (NeedRecalHash)
         {
             hashCodeCache = stack.hashCode();
             NeedRecalHash = false;

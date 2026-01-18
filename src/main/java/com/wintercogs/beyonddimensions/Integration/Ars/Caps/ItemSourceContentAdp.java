@@ -15,7 +15,8 @@ public class ItemSourceContentAdp implements ISourceCap
     {
         if (stack.getItem() == BlockRegistry.SOURCE_JAR.asItem())// 普通魔源罐
         {
-            this.sourceStorage = new SourceStorage(10000, 10000){
+            this.sourceStorage = new SourceStorage(10000, 10000)
+            {
                 @Override
                 public int receiveSource(int toReceive, boolean simulate)
                 {
@@ -42,16 +43,20 @@ public class ItemSourceContentAdp implements ISourceCap
         }
 
         else if (stack.getItem() == BlockRegistry.CREATIVE_SOURCE_JAR.asItem())// 创造魔源罐
-            this.sourceStorage = new SourceStorage(1000000, 1000000, 1000000, 1000000) {
-                public int receiveSource(int toReceive, boolean simulate) {
+            this.sourceStorage = new SourceStorage(1000000, 1000000, 1000000, 1000000)
+            {
+                public int receiveSource(int toReceive, boolean simulate)
+                {
                     return toReceive;
                 }
 
-                public int extractSource(int toExtract, boolean simulate) {
+                public int extractSource(int toExtract, boolean simulate)
+                {
                     return toExtract;
                 }
 
-                public int getSource() {
+                public int getSource()
+                {
                     return 1000000;
                 }
             };
@@ -114,7 +119,7 @@ public class ItemSourceContentAdp implements ISourceCap
     @Override
     public void setSource(int amount)
     {
-        if(sourceStorage != null)
+        if (sourceStorage != null)
             sourceStorage.setSource(amount);
     }
 
@@ -122,7 +127,7 @@ public class ItemSourceContentAdp implements ISourceCap
     @Override
     public void setMaxSource(int amount)
     {
-        if(sourceStorage != null)
+        if (sourceStorage != null)
             sourceStorage.setMaxSource(amount);
     }
 
@@ -139,13 +144,15 @@ public class ItemSourceContentAdp implements ISourceCap
     }
 
     // 用于获取并设置物品内部魔源
-    public static int getSource(ItemStack stack) {
+    public static int getSource(ItemStack stack)
+    {
         if (stack.isEmpty()) return 0;
         CompoundTag bet = stack.getTagElement("BlockEntityTag");
         return bet != null && bet.contains("source", Tag.TAG_INT) ? bet.getInt("source") : 0;
     }
 
-    public static void setSource(ItemStack stack, int value) {
+    public static void setSource(ItemStack stack, int value)
+    {
         if (stack.isEmpty()) return;
         CompoundTag bet = stack.getOrCreateTagElement("BlockEntityTag");
         bet.putInt("source", Math.max(0, value));

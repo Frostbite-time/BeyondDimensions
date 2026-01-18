@@ -20,7 +20,8 @@ public class ManaPoolPathwayBlockEntityRender implements BlockEntityRenderer<Man
 {
     private final TextureAtlasSprite waterSprite;
 
-    public ManaPoolPathwayBlockEntityRender(BlockEntityRendererProvider.Context ctx) {
+    public ManaPoolPathwayBlockEntityRender(BlockEntityRendererProvider.Context ctx)
+    {
         this.waterSprite = Objects.requireNonNull(
                 Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
                         .apply(ResourceLocation.tryBuild(BeyondDimensions.Botania_ModId, "block/mana_water"))

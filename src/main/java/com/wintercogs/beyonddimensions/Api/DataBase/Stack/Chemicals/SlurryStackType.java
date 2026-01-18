@@ -58,7 +58,7 @@ public final class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public IStackType<SlurryStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
-        if(key instanceof Slurry chemical)
+        if (key instanceof Slurry chemical)
         {
             SlurryStack chemicalStack = new SlurryStack(chemical, amount);
             return new SlurryStackType(chemicalStack);
@@ -173,7 +173,7 @@ public final class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public void setStackAmount(long amount)
     {
-        if(stack.getRaw().isEmptyType())
+        if (stack.getRaw().isEmptyType())
             return;
         stack.setAmount(amount);
     }
@@ -181,7 +181,7 @@ public final class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public void grow(long amount)
     {
-        setStackAmount(getStackAmount()+amount);
+        setStackAmount(getStackAmount() + amount);
     }
 
     @Override
@@ -235,7 +235,8 @@ public final class SlurryStackType implements IStackType<SlurryStack>
         if (tagKey == null) return false;
         if (this.stack == null || this.stack.isEmpty()) return false;
 
-        if (!tagKey.isFor(MekanismAPI.SLURRY_REGISTRY_NAME)) {
+        if (!tagKey.isFor(MekanismAPI.SLURRY_REGISTRY_NAME))
+        {
             return false;
         }
 
@@ -246,17 +247,17 @@ public final class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public boolean isSame(IStackType<?> other)
     {
-        if(!other.getTypeId().equals(this.getTypeId()))
+        if (!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual((SlurryStack)other.getStack());
+        return stack.isTypeEqual((SlurryStack) other.getStack());
     }
 
     @Override
     public boolean isSameTypeSameComponents(IStackType<?> other)
     {
-        if(!other.getTypeId().equals(this.getTypeId()))
+        if (!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isTypeEqual((SlurryStack)other.getStack());
+        return stack.isTypeEqual((SlurryStack) other.getStack());
     }
 
     @Override
@@ -269,11 +270,12 @@ public final class SlurryStackType implements IStackType<SlurryStack>
         boolean hasItem = !stack.isEmpty();
         buf.writeBoolean(hasItem);
 
-        if (hasItem) {
+        if (hasItem)
+        {
             // 写入数量
             buf.writeVarLong(stack.getAmount());
             // 使用副本避免修改原堆栈
-            SlurryStack copy = new SlurryStack(stack,1);
+            SlurryStack copy = new SlurryStack(stack, 1);
             // 使用OPTIONAL_CODEC处理可能为空的情况
             copy.writeToPacket(buf);
         }
@@ -282,20 +284,22 @@ public final class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public IStackType<SlurryStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
-        if (!typeId.equals(getTypeId())) {
+        if (!typeId.equals(getTypeId()))
+        {
             return null;// 表示未能读取任何类型
         }
 
         // 读取是否存在物品的标志
         boolean hasItem = buf.readBoolean();
-        if (!hasItem) {
+        if (!hasItem)
+        {
             return new SlurryStackType(SlurryStack.EMPTY);
         }
 
         // 读取数量
         long count = buf.readVarLong();
         // 使用OPTIONAL_CODEC解码
-        SlurryStack stack = new SlurryStack(SlurryStack.readFromPacket(buf),count);
+        SlurryStack stack = new SlurryStack(SlurryStack.readFromPacket(buf), count);
         return new SlurryStackType(stack);
     }
 
@@ -305,14 +309,14 @@ public final class SlurryStackType implements IStackType<SlurryStack>
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
         tag.putLong("Amount", getStackAmount());
-        tag.put("Stack",new SlurryStack(stack,1).write(new CompoundTag()));
+        tag.put("Stack", new SlurryStack(stack, 1).write(new CompoundTag()));
         return tag;
     }
 
     @Override
     public IStackType<SlurryStack> deserializeNBT(CompoundTag nbt)
     {
-        SlurryStackType stack =  new SlurryStackType(SlurryStack.readFromNBT(nbt.getCompound("Stack")));
+        SlurryStackType stack = new SlurryStackType(SlurryStack.readFromNBT(nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));
         return stack;
     }
@@ -326,7 +330,7 @@ public final class SlurryStackType implements IStackType<SlurryStack>
         poseStack.pushPose(); // 保存矩阵状态
 
         Slurry chemical = stack.getType();
-        if(!chemical.isEmptyType())
+        if (!chemical.isEmptyType())
         {
             ResourceLocation fluidStill = chemical.getIcon();
             Optional<net.minecraft.client.renderer.texture.TextureAtlasSprite> fluidStillSprite = Optional.ofNullable(fluidStill)
@@ -335,10 +339,10 @@ public final class SlurryStackType implements IStackType<SlurryStack>
                             .apply(f)
                     )
                     .filter(s -> s.atlasLocation() != net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());
-            if(fluidStillSprite.isPresent())
+            if (fluidStillSprite.isPresent())
             {
                 int fluidColor = chemical.getTint();
-                com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,fluidColor,16,fluidStillSprite.get(),x,y);
+                com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui, 16, 16, fluidColor, 16, fluidStillSprite.get(), x, y);
             }
         }
 
@@ -350,14 +354,14 @@ public final class SlurryStackType implements IStackType<SlurryStack>
         float scale = 0.666f; // 文本缩放因数
         var poseStackText = gui.pose();
         poseStackText.pushPose();
-        poseStackText.translate(0,0,200); // 确保文本在顶层
-        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
+        poseStackText.translate(0, 0, 200); // 确保文本在顶层
+        poseStackText.scale(scale, scale, scale); // 文本整体缩放，便于查看
         RenderSystem.disableBlend(); // 禁用混合渲染模式
-        final int X = (int)(
+        final int X = (int) (
                 (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
                         * 1.0f / 0.666f
         );
-        final int Y = (int)(
+        final int Y = (int) (
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
@@ -385,7 +389,7 @@ public final class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag)
     {
-        if(stack.isEmpty())
+        if (stack.isEmpty())
             return List.of(Component.empty());
 
         List<Component> tooltips = new ArrayList<>();
@@ -395,22 +399,25 @@ public final class SlurryStackType implements IStackType<SlurryStack>
         tooltips.add(displayName);
 
         ResourceLocation resourceLocation = chemical.getRegistryName();
-        if (resourceLocation != null) {
-            if (tooltipFlag.isAdvanced()) {
+        if (resourceLocation != null)
+        {
+            if (tooltipFlag.isAdvanced())
+            {
                 MutableComponent advancedId = Component.literal(resourceLocation.toString())
                         .withStyle(ChatFormatting.DARK_GRAY);
                 tooltips.add(advancedId);
             }
             Optional<? extends ModContainer> container = ModList.get().getModContainerById(resourceLocation.getNamespace());
             Component modName;
-            if(container.isPresent())
+            if (container.isPresent())
             {
                 modName = Component.literal(container.get().getModInfo().getDisplayName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
             }
             else
             {
                 container = ModList.get().getModContainerById(resourceLocation.getNamespace().replace('_', '-'));
-                if (container.isPresent()) {
+                if (container.isPresent())
+                {
                     modName = Component.literal(container.get().getModInfo().getDisplayName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
                 }
                 else
@@ -421,7 +428,7 @@ public final class SlurryStackType implements IStackType<SlurryStack>
             tooltips.add(modName);
         }
 
-        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.fluid",getStackAmount()));
+        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.fluid", getStackAmount()));
         return tooltips;
     }
 
@@ -443,7 +450,7 @@ public final class SlurryStackType implements IStackType<SlurryStack>
     @Override
     public boolean equals(Object other)
     {
-        if(other instanceof SlurryStackType otherStack)
+        if (other instanceof SlurryStackType otherStack)
         {
             return this.isSameTypeSameComponents(otherStack);
         }
@@ -451,9 +458,10 @@ public final class SlurryStackType implements IStackType<SlurryStack>
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         // 基于物品类型和组件生成哈希码
-        if(NeedRecalHash)
+        if (NeedRecalHash)
         {
             int code = 1;
             code = 31 * code + stack.getType().hashCode();

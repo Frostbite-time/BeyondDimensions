@@ -32,8 +32,9 @@ public interface IStackType<T>
 
     /**
      * 从未知Object构建实例
-     * @param key 类似Item
-     * @param amount 数量
+     *
+     * @param key                类似Item
+     * @param amount             数量
      * @param dataComponentPatch 数据组件
      * @return 类似ItemStack
      */
@@ -53,6 +54,7 @@ public interface IStackType<T>
      * 返回存储的堆叠本身的引用。不要直接修改返回值，仅用于读取。
      * <p>
      * 如：ItemStackType返回其存储的ItemStack
+     *
      * @return 类似ItemStack
      */
     T getStack();
@@ -147,6 +149,7 @@ public interface IStackType<T>
 
     /**
      * 按数量分割出一部分存储的堆叠，并减少当前数量
+     *
      * @param amount 分割数量
      * @return 实际分割出来的堆叠
      */
@@ -155,10 +158,11 @@ public interface IStackType<T>
 
     /**
      * 按数量分割出一部分存储实例，并减少当前数量
+     *
      * @param amount 分割数量
      * @return 实际分割出来的实例
      */
-    IStackType<T>  split(long amount);
+    IStackType<T> split(long amount);
 
     /**
      * 当前堆叠是否有此标签？
@@ -193,10 +197,10 @@ public interface IStackType<T>
     static IStackType deserializeCommon(FriendlyByteBuf buf)
     {
         ResourceLocation typeId = buf.readResourceLocation();
-        for(IStackType stacktype : StackTypeRegistry.getAllTypes())
+        for (IStackType stacktype : StackTypeRegistry.getAllTypes())
         {
-            IStackType stack = stacktype.deserialize(buf,typeId);
-            if(stack!=null)
+            IStackType stack = stacktype.deserialize(buf, typeId);
+            if (stack != null)
             {
                 return stack;
             }
@@ -221,12 +225,12 @@ public interface IStackType<T>
     static IStackType deserializeNBTCommon(CompoundTag nbt)
     {
         ResourceLocation typeId = ResourceLocation.tryParse(nbt.getString("Type"));
-        for(IStackType stacktype : StackTypeRegistry.getAllTypes())
+        for (IStackType stacktype : StackTypeRegistry.getAllTypes())
         {
-            if(stacktype.getTypeId().equals(typeId))
+            if (stacktype.getTypeId().equals(typeId))
             {
                 IStackType stack = stacktype.deserializeNBT(nbt);
-                if(stack!=null)
+                if (stack != null)
                 {
                     return stack;
                 }

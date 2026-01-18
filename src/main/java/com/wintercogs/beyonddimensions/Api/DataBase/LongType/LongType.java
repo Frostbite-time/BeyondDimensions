@@ -21,7 +21,7 @@ public abstract class LongType<T>
 
     public void grow(long amount)
     {
-        setStackCount(getStackCount()+amount);
+        setStackCount(getStackCount() + amount);
     }
 
     public void shrink(long amount)
@@ -44,7 +44,8 @@ public abstract class LongType<T>
 
     public boolean isSame(LongType<?> other)
     {
-        if (other == null) {
+        if (other == null)
+        {
             return false;
         }
         return getClass() == other.getClass();

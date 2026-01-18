@@ -27,7 +27,8 @@ public class PacketRegister
     );
     private static int packetId = 1;
 
-    static {
+    static
+    {
         INSTANCE.registerMessage(
                 packetId++,
                 OpenNetGuiPacket.class,

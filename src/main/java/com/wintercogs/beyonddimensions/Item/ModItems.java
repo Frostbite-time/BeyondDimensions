@@ -11,7 +11,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 public class ModItems
 {
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS,BeyondDimensions.MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, BeyondDimensions.MODID);
 
     // 维度创造器
     public static final RegistryObject<Item> NET_CREATER = ITEMS.register("net_creater",
@@ -76,13 +76,12 @@ public class ModItems
     // AE存储磁盘 对于一个没有安装AE的游戏
     public static final RegistryObject<Item> NET_AE_STORAGE_CELL = ITEMS.register("net_ae_storage_cell",
             () -> {
-                if(BeyondDimensions.AELoaded)
+                if (BeyondDimensions.AELoaded)
                     return new NetAEStorageCell(new Item.Properties());
                 else
                     return new Item(new Item.Properties());
             }
     );
-
 
 
     // 测试物品 -----------------------

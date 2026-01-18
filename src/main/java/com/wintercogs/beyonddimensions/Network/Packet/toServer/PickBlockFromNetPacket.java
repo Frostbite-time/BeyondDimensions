@@ -19,17 +19,17 @@ public record PickBlockFromNetPacket(ItemStack targetStack)
     private void handle(NetworkEvent.Context context)
     {
         Player player = context.getSender();
-        if(!player.getMainHandItem().isEmpty()) return;
+        if (!player.getMainHandItem().isEmpty()) return;
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-        if(net == null) return;
+        if (net == null) return;
         UnifiedStorage storage = net.getUnifiedStorage();
 
         ItemStackType target = null;
-        for(IStackType stack : storage.getStorage())
+        for (IStackType stack : storage.getStorage())
         {
-            if(stack instanceof ItemStackType itemStackType)
+            if (stack instanceof ItemStackType itemStackType)
             {
-                if(itemStackType.getStack().getItem() == targetStack().getItem())
+                if (itemStackType.getStack().getItem() == targetStack().getItem())
                 {
                     target = (ItemStackType) itemStackType.copyWithCount(itemStackType.getVanillaMaxStackSize());
                     break;
@@ -37,17 +37,18 @@ public record PickBlockFromNetPacket(ItemStack targetStack)
             }
         }
 
-        if(target != null && player.getMainHandItem().isEmpty())
+        if (target != null && player.getMainHandItem().isEmpty())
         {
-            ItemStack extract = ((ItemStackType) storage.extract(target,false)).copyStack();
-            player.setItemInHand(InteractionHand.MAIN_HAND,extract);
+            ItemStack extract = ((ItemStackType) storage.extract(target, false)).copyStack();
+            player.setItemInHand(InteractionHand.MAIN_HAND, extract);
         }
     }
 
 
     public static void handle(PickBlockFromNetPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
             context.enqueueWork(() -> packet.handle(context));
             context.setPacketHandled(true);

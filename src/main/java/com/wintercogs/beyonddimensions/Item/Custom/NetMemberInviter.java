@@ -10,25 +10,27 @@ import net.minecraft.world.level.Level;
 
 public class NetMemberInviter extends NetedItem implements IAddNetMemberHandler
 {
-    public NetMemberInviter(Properties properties) {
+    public NetMemberInviter(Properties properties)
+    {
         super(properties);
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
+    {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
+        if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
         {
             return InteractionResultHolder.fail(itemstack);
         }
-        if(!level.isClientSide())
+        if (!level.isClientSide())
         {
-            if(DimensionsNet.getNetFromPlayer(player) == null)
+            if (DimensionsNet.getNetFromPlayer(player) == null)
             {
-                if(NetedItem.getNetId(itemstack)>=0)
+                if (NetedItem.getNetId(itemstack) >= 0)
                 {
-                    boolean flag = AddPlayerToNet(DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack),level.getServer()),player);
+                    boolean flag = AddPlayerToNet(DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack), level.getServer()), player);
                     if (flag)
                     {
                         itemstack.shrink(1);
@@ -36,13 +38,13 @@ public class NetMemberInviter extends NetedItem implements IAddNetMemberHandler
                 }
             }
         }
-        return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
     @Override
     public boolean AddPlayerToNet(DimensionsNet net, Player player)
     {
-        if(net != null)
+        if (net != null)
         {
             net.addPlayer(player.getUUID());
             return true;

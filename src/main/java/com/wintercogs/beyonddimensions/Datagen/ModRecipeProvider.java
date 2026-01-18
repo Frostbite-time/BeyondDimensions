@@ -36,11 +36,11 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .save(recipeOutput);
 
         SimpleCookingRecipeBuilder.smelting(
-                Ingredient.of(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get()),
-                RecipeCategory.MISC,
-                ModItems.SPACE_TIME_BAR.get(),
-                1f,
-                600)
+                        Ingredient.of(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get()),
+                        RecipeCategory.MISC,
+                        ModItems.SPACE_TIME_BAR.get(),
+                        1f,
+                        600)
                 .unlockedBy("unlock_space_time_bar", has(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get()))
                 .save(recipeOutput);
 
@@ -243,7 +243,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("unlock_xp_exchange_item", has(ModItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
 
-        if(BeyondDimensions.AELoaded)
+        if (BeyondDimensions.AELoaded)
         {
             // 先把原始 ShapedRecipeBuilder 写好
             ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_AE_STORAGE_CELL.get())
@@ -264,7 +264,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .build(recipeOutput, ResourceLocation.tryBuild(BeyondDimensions.MODID, "net_ae_storage_cell")); // 最终的配方ID
         }
 
-        if(BeyondDimensions.RS_Loaded)
+        if (BeyondDimensions.RS_Loaded)
         {
             ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.RS_NET_PATHWAY.get())
                     .pattern("ABA")
@@ -284,7 +284,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .build(recipeOutput, ResourceLocation.tryBuild(BeyondDimensions.MODID, "rs_net_pathway")); // 最终的配方ID
         }
 
-        if(BeyondDimensions.ARS_Loaded)
+        if (BeyondDimensions.ARS_Loaded)
         {
             // 先把原始 ShapedRecipeBuilder 写好
             ShapedRecipeBuilder builder = ShapedRecipeBuilder
@@ -306,16 +306,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .build(recipeOutput, ResourceLocation.tryBuild(BeyondDimensions.MODID, "ars_source_pathway")); // 最终的配方ID
         }
 
-        if(BeyondDimensions.Botania_Loaded)
+        if (BeyondDimensions.Botania_Loaded)
         {
             // 先把原始 ShapedRecipeBuilder 写好
             ShapedRecipeBuilder builder =
                     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.MANA_POOL_PATHWAY.get())
-                    .pattern("ABA")
-                    .pattern("AAA")
-                    .define('A', vazkii.botania.common.block.BotaniaBlocks.livingrock)
-                    .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
-                    .unlockedBy("unlock_mana_pool_pathway", has(ModItems.SPACE_TIME_STABLE_FRAME.get()));
+                            .pattern("ABA")
+                            .pattern("AAA")
+                            .define('A', vazkii.botania.common.block.BotaniaBlocks.livingrock)
+                            .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                            .unlockedBy("unlock_mana_pool_pathway", has(ModItems.SPACE_TIME_STABLE_FRAME.get()));
             // 用 ConditionalRecipe 包起来，加上“模组已加载”的条件
             ConditionalRecipe.builder()
                     .addCondition(modLoaded(BeyondDimensions.Botania_ModId)) // 等同于 forge:mod_loaded

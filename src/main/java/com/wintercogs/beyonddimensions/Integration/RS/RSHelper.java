@@ -12,26 +12,26 @@ public class RSHelper
 {
     public static Optional<ItemStack> fromIStackToItemStack(IStackType<?> stackType)
     {
-        if(stackType instanceof ItemStackType itemStackType)
+        if (stackType instanceof ItemStackType itemStackType)
             return Optional.of(itemStackType.getStack());
         return Optional.empty();
     }
 
-    public static Optional<ItemStackType> fromItemStackToIStack(ItemStack stack,long size)
+    public static Optional<ItemStackType> fromItemStackToIStack(ItemStack stack, long size)
     {
-        return Optional.of(new ItemStackType(stack,size));
+        return Optional.of(new ItemStackType(stack, size));
     }
 
     public static Optional<FluidStack> fromIStackToFluidStack(IStackType<?> stackType)
     {
-        if(stackType instanceof FluidStackType fluidStackType)
+        if (stackType instanceof FluidStackType fluidStackType)
             return Optional.of(fluidStackType.getStack());
         return Optional.empty();
     }
 
     public static Optional<FluidStackType> fromFluidStackToIStack(FluidStack stack, long size)
     {
-        return Optional.of(new FluidStackType(stack,size));
+        return Optional.of(new FluidStackType(stack, size));
     }
 
 }

@@ -10,7 +10,8 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
 
     private UnifiedStorage storage;
 
-    public FluidUnifiedStorageHandler(UnifiedStorage storage) {
+    public FluidUnifiedStorageHandler(UnifiedStorage storage)
+    {
         this.storage = storage;
     }
 
@@ -18,7 +19,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     public int getTanks()
     {
         return storage.getTypeIdIndexList(FluidStackType.ID)
-                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size()+1)
+                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
@@ -26,10 +27,10 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     public FluidStack getFluidInTank(int slot)
     {
         return storage.getTypeIdIndexList(FluidStackType.ID)
-                .filter(slots -> slot>=0 && slot<slots.size())
+                .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
-                .filter(actualIndex -> actualIndex>=0)
-                .map(actualIndex -> (FluidStackType)storage.getStackBySlot(actualIndex))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> (FluidStackType) storage.getStackBySlot(actualIndex))
                 .map(FluidStackType::getStack)
                 .orElse(FluidStack.EMPTY);
     }
@@ -50,18 +51,18 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public int fill(FluidStack fluidStack, FluidAction fluidAction)
     {
-        if(fluidStack.isEmpty())
+        if (fluidStack.isEmpty())
             return 0;
         int allAmount = fluidStack.getAmount();
         int remaining = (int) storage.insert(new FluidStackType(fluidStack.copy()), fluidAction.simulate()).getStackAmount();
-        return allAmount-remaining;// 实际插入量
+        return allAmount - remaining;// 实际插入量
     }
 
     // 返回实际导出数量
     @Override
     public FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
     {
-        return ((FluidStackType)storage.extract(new FluidStackType(fluidStack.copy()),fluidAction.simulate()))
+        return ((FluidStackType) storage.extract(new FluidStackType(fluidStack.copy()), fluidAction.simulate()))
                 .copyStack();
     }
 
@@ -71,7 +72,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public FluidStack drain(int count, FluidAction fluidAction)
     {
-        return ((FluidStackType)storage.extract(new FluidStackType(new FluidStack(getFluidInTank(0),count)),fluidAction.simulate()))
+        return ((FluidStackType) storage.extract(new FluidStackType(new FluidStack(getFluidInTank(0), count)), fluidAction.simulate()))
                 .copyStack();
     }
 }

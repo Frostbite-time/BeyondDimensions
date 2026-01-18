@@ -18,18 +18,19 @@ public record PutHandItemToNetPacket(InteractionHand hand)
     private void handle(NetworkEvent.Context context)
     {
         Player player = context.getSender();
-        if(player.getMainHandItem().isEmpty()) return;
+        if (player.getMainHandItem().isEmpty()) return;
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-        if(net == null) return;
+        if (net == null) return;
         UnifiedStorage storage = net.getUnifiedStorage();
-        IStackType remaining = storage.insert(new ItemStackType(player.getMainHandItem()),false);
+        IStackType remaining = storage.insert(new ItemStackType(player.getMainHandItem()), false);
         player.getMainHandItem().setCount((BDMath.clampLongToInt(remaining.getStackAmount())));
     }
 
 
     public static void handle(PutHandItemToNetPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
             context.enqueueWork(() -> packet.handle(context));
             context.setPacketHandled(true);

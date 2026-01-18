@@ -23,7 +23,8 @@ public abstract class NetedBlockEntity extends BlockEntity
     private DimensionsNet net = null; //缓存net
     private List<Runnable> onNetChangeRunnables = new ArrayList<>();
 
-    public NetedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
+    public NetedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState)
+    {
         super(type, pos, blockState);
     }
 
@@ -38,9 +39,9 @@ public abstract class NetedBlockEntity extends BlockEntity
         this.netId = id;
 
         // 标识符变化时更新缓存
-        if(level != null)
+        if (level != null)
         {
-            if(needsUpdate)
+            if (needsUpdate)
             {
                 refreshNetCache();
                 setChanged();
@@ -53,9 +54,9 @@ public abstract class NetedBlockEntity extends BlockEntity
         boolean needsUpdate = this.netId != -1;
         this.netId = -1;
         net = null; // 清空缓存
-        if(level != null)
+        if (level != null)
         {
-            if(needsUpdate)
+            if (needsUpdate)
             {
                 setChanged();
             }
@@ -65,7 +66,7 @@ public abstract class NetedBlockEntity extends BlockEntity
     public void setNetIdFromPlayer(ServerPlayer player)
     {
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-        if(net != null)
+        if (net != null)
         {
             setNetId(net.getId());
         }
@@ -74,7 +75,7 @@ public abstract class NetedBlockEntity extends BlockEntity
     public void setNetIdFromPlayerOrClean(ServerPlayer player)
     {
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-        if(net != null)
+        if (net != null)
         {
             setNetId(net.getId());
         }
@@ -86,9 +87,9 @@ public abstract class NetedBlockEntity extends BlockEntity
 
     public DimensionsNet getNet()
     {
-        if(netId >= 0) // netId作为方块网络的第一标识符高于缓存
+        if (netId >= 0) // netId作为方块网络的第一标识符高于缓存
         {
-            if(net == null || net.deleted)
+            if (net == null || net.deleted)
             {
                 // 当缓存无效时尝试更正
                 refreshNetCache();
@@ -104,10 +105,10 @@ public abstract class NetedBlockEntity extends BlockEntity
     // 更新网络缓存
     protected void refreshNetCache()
     {
-        if(getLevel() instanceof ServerLevel)
+        if (getLevel() instanceof ServerLevel)
         {
-            DimensionsNet netCache = DimensionsNet.getNetFromId(netId,getLevel().getServer());
-            if(netCache!=null && !netCache.deleted)
+            DimensionsNet netCache = DimensionsNet.getNetFromId(netId, getLevel().getServer());
+            if (netCache != null && !netCache.deleted)
             {
                 net = netCache;
             }
@@ -125,7 +126,7 @@ public abstract class NetedBlockEntity extends BlockEntity
 
     public void onNetChange()
     {
-        for(Runnable runnable : onNetChangeRunnables)
+        for (Runnable runnable : onNetChangeRunnables)
             runnable.run();
     }
 
@@ -155,7 +156,7 @@ public abstract class NetedBlockEntity extends BlockEntity
     protected void saveAdditional(CompoundTag tag)
     {
         super.saveAdditional(tag);
-        tag.putInt("netId",this.netId);
+        tag.putInt("netId", this.netId);
     }
 
     // 为子类提供基础的网络同步，需要正确实现loadAdditional和saveAdditional

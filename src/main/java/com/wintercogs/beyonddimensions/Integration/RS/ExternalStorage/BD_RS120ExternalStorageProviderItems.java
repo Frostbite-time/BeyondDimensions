@@ -23,20 +23,24 @@ public class BD_RS120ExternalStorageProviderItems implements IExternalStoragePro
 {
 
     @Override
-    public boolean canProvide(BlockEntity be, Direction direction) {
+    public boolean canProvide(BlockEntity be, Direction direction)
+    {
         // 具体逻辑下放
         return be instanceof RSNetPathwayBlockEntity;
     }
 
     @Nonnull
     @Override
-    public IExternalStorage<ItemStack> provide(IExternalStorageContext ctx, BlockEntity externalBe, Direction direction) {
-        if (!(externalBe.getLevel() instanceof ServerLevel serverLevel)) {
+    public IExternalStorage<ItemStack> provide(IExternalStorageContext ctx, BlockEntity externalBe, Direction direction)
+    {
+        if (!(externalBe.getLevel() instanceof ServerLevel serverLevel))
+        {
             // 客户端/容错：返回 No-Op 实现，避免 NPE
             return new NoOpExternalStorageItems(ctx);
         }
 
-        if (externalBe instanceof RSNetPathwayBlockEntity rsBe) {
+        if (externalBe instanceof RSNetPathwayBlockEntity rsBe)
+        {
             DimensionsNet net = rsBe.getNet();
             UnifiedStorage us = net != null ? net.getUnifiedStorage() : UnifiedStorage.getEmpty();
 
@@ -51,19 +55,68 @@ public class BD_RS120ExternalStorageProviderItems implements IExternalStoragePro
         return new NoOpExternalStorageItems(ctx);
     }
 
-    /** 简单的 No-Op 外部存储，避免在客户端创建真实实现导致 NPE */
-    private static final class NoOpExternalStorageItems implements IExternalStorage<ItemStack> {
+    /**
+     * 简单的 No-Op 外部存储，避免在客户端创建真实实现导致 NPE
+     */
+    private static final class NoOpExternalStorageItems implements IExternalStorage<ItemStack>
+    {
         private final IExternalStorageContext ctx;
-        NoOpExternalStorageItems(IExternalStorageContext ctx) { this.ctx = ctx; }
-        @Override public void update(INetwork network) {}
-        @Override public long getCapacity() { return 0; }
-        @Override public List<ItemStack> getStacks() { return Collections.emptyList(); }
-        @Override public ItemStack insert(ItemStack prototype, int size, Action action) { return prototype.copy(); }
-        @Override public ItemStack extract(ItemStack prototype, int size, int flags, Action action) { return ItemStack.EMPTY; }
-        @Override public int getStored() { return 0; }
-        @Override public int getPriority() { return ctx.getPriority(); }
-        @Override public AccessType getAccessType() { return ctx.getAccessType(); }
-        @Override public int getCacheDelta(int storedPreInsertion, int size, @Nullable ItemStack remainder) {
+
+        NoOpExternalStorageItems(IExternalStorageContext ctx)
+        {
+            this.ctx = ctx;
+        }
+
+        @Override
+        public void update(INetwork network)
+        {
+        }
+
+        @Override
+        public long getCapacity()
+        {
+            return 0;
+        }
+
+        @Override
+        public List<ItemStack> getStacks()
+        {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public ItemStack insert(ItemStack prototype, int size, Action action)
+        {
+            return prototype.copy();
+        }
+
+        @Override
+        public ItemStack extract(ItemStack prototype, int size, int flags, Action action)
+        {
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public int getStored()
+        {
+            return 0;
+        }
+
+        @Override
+        public int getPriority()
+        {
+            return ctx.getPriority();
+        }
+
+        @Override
+        public AccessType getAccessType()
+        {
+            return ctx.getAccessType();
+        }
+
+        @Override
+        public int getCacheDelta(int storedPreInsertion, int size, @Nullable ItemStack remainder)
+        {
             int rem = remainder == null ? 0 : remainder.getCount();
             int delta = size - rem;
             return Math.max(0, Math.min(delta, Integer.MAX_VALUE));
@@ -71,12 +124,14 @@ public class BD_RS120ExternalStorageProviderItems implements IExternalStoragePro
     }
 
     @Override
-    public int getPriority() {
+    public int getPriority()
+    {
         // 固定高优先级，避免被 RS 内置 provider（0）或其他同优先级的 provider 覆盖
         return 15_624_380;
     }
 
-    private static ServerLevel serverLevel(BlockEntity be) {
+    private static ServerLevel serverLevel(BlockEntity be)
+    {
         return (ServerLevel) be.getLevel();
     }
 }

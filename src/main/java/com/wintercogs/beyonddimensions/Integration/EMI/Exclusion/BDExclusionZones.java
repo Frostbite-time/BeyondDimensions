@@ -16,11 +16,11 @@ public class BDExclusionZones implements EmiExclusionArea<Screen>
     @Override
     public void addExclusionArea(Screen screen, Consumer<Bounds> consumer)
     {
-        if(screen instanceof BDBaseGUI<?>)
+        if (screen instanceof BDBaseGUI<?>)
         {
-            for(Renderable renderable: screen.renderables) // 仅为可渲染元素创造避让区域
+            for (Renderable renderable : screen.renderables) // 仅为可渲染元素创造避让区域
             {
-                if(renderable instanceof GuiElementAccess access)
+                if (renderable instanceof GuiElementAccess access)
                 {
                     Rect2i area = access.getElementArea();
                     consumer.accept(new Bounds(area.getX(), area.getY(), area.getWidth(), area.getHeight()));

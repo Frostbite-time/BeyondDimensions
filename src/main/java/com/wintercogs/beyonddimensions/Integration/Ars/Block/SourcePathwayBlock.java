@@ -17,6 +17,6 @@ public class SourcePathwayBlock extends NetedBlock implements EntityBlock
     @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
     {
-        return new SourcePathwayBlockEntity(blockPos,blockState);
+        return new SourcePathwayBlockEntity(blockPos, blockState);
     }
 }

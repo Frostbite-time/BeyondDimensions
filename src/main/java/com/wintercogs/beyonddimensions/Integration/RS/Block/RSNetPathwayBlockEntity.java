@@ -20,31 +20,44 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
     }
 
     // 对外暴露的注册/注销 API
-    public void addRemoveTask(Runnable r) {
+    public void addRemoveTask(Runnable r)
+    {
         if (r != null) onRemoveTasks.add(r);
     }
-    public void removeRemoveTask(Runnable r) {
+
+    public void removeRemoveTask(Runnable r)
+    {
         if (r != null) onRemoveTasks.remove(r);
     }
 
-    private void fireRemoveTasksOnce() {
+    private void fireRemoveTasksOnce()
+    {
         if (removalFired) return;
         removalFired = true;
-        for (Runnable r : onRemoveTasks) {
-            try { r.run(); } catch (Throwable t) {}
+        for (Runnable r : onRemoveTasks)
+        {
+            try
+            {
+                r.run();
+            }
+            catch (Throwable t)
+            {
+            }
         }
         onRemoveTasks.clear();
     }
 
 
     @Override
-    public void setRemoved() {
+    public void setRemoved()
+    {
         super.setRemoved();
         fireRemoveTasksOnce();
     }
 
     @Override
-    public void onChunkUnloaded() {
+    public void onChunkUnloaded()
+    {
         super.onChunkUnloaded();
         fireRemoveTasksOnce();
     }

@@ -56,10 +56,10 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction direction)
     {
-        if(cap == ForgeCapabilities.ITEM_HANDLER)
+        if (cap == ForgeCapabilities.ITEM_HANDLER)
         {
-            if(direction == null || !this.allowedDirections.contains(direction)) return LazyOptional.empty();
-            if(!opt.isPresent())
+            if (direction == null || !this.allowedDirections.contains(direction)) return LazyOptional.empty();
+            if (!opt.isPresent())
             {
                 if (this.schematicannonItemHandler != null
                         && this.allowedDirections.contains(direction))

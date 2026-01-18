@@ -37,7 +37,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider
         dropSelf(ModBlocks.MANA_POOL_PATHWAY.get());
         dropSelf(ModBlocks.SCHEMATICANNON_PATHWAY.get());
 
-        ModFluids.ALL.forEach(e -> add((LiquidBlock)ModFluids.XP_FLUID.block().get(), LootTable.lootTable()));
+        ModFluids.ALL.forEach(e -> add((LiquidBlock) ModFluids.XP_FLUID.block().get(), LootTable.lootTable()));
     }
 
     @Override

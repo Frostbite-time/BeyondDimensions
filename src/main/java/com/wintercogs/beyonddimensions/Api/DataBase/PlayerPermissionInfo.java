@@ -5,7 +5,8 @@ import net.minecraft.network.FriendlyByteBuf;
 public record PlayerPermissionInfo(String name, NetPermissionlevel level)
 {
 
-    public static void encode(PlayerPermissionInfo info , FriendlyByteBuf buf) {
+    public static void encode(PlayerPermissionInfo info, FriendlyByteBuf buf)
+    {
         buf.writeUtf(info.name()); // 写入字符串
         buf.writeEnum(info.level()); // 写入枚举值
     }

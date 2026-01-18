@@ -33,7 +33,7 @@ public class BD_BotaniaPlugin
     {
         BlockEntity be = e.getObject();
 
-        if(be instanceof NetPathwayBlockEntity cBe)
+        if (be instanceof NetPathwayBlockEntity cBe)
         {
             class Provider implements ICapabilityProvider
             {
@@ -44,22 +44,25 @@ public class BD_BotaniaPlugin
                 private boolean listenerRegistered = false;
 
                 @Override
-                public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
+                public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side)
+                {
                     if (cap != BotaniaForgeCapabilities.SPARK_ATTACHABLE) return LazyOptional.empty();
 
-                    if(!listenerRegistered)
+                    if (!listenerRegistered)
                     {
                         cBe.addNetChangeTask(onNetChanged);
                         listenerRegistered = true;
                     }
 
-                    if (opt.isPresent()) {
+                    if (opt.isPresent())
+                    {
                         return BotaniaForgeCapabilities.SPARK_ATTACHABLE.orEmpty(cap, opt);
                     }
 
                     Level lvl = be.getLevel();
                     var net = cBe.getNet();
-                    if (lvl == null || net == null) {
+                    if (lvl == null || net == null)
+                    {
                         return LazyOptional.empty();
                     }
 
@@ -67,7 +70,8 @@ public class BD_BotaniaPlugin
                     return BotaniaForgeCapabilities.SPARK_ATTACHABLE.orEmpty(cap, opt);
                 }
 
-                void invalidate() {
+                void invalidate()
+                {
                     if (opt.isPresent()) opt.invalidate();
                     opt = LazyOptional.empty(); // 允许后续重建
                 }
@@ -78,27 +82,31 @@ public class BD_BotaniaPlugin
             e.addListener(prov::invalidate); // 方块实体失效/卸载
         }
 
-        if(be instanceof NetInterfaceBlockEntity cIBe)
+        if (be instanceof NetInterfaceBlockEntity cIBe)
         {
             class Provider implements ICapabilityProvider
             {
                 private LazyOptional<SparkAttachable> opt = LazyOptional.empty();
 
-                private SparkAttachable create() {
+                private SparkAttachable create()
+                {
                     var ctx = new CapCtx(be.getLevel(), be.getBlockPos(), be);
                     return new ManaStackTypedHandler(cIBe.getStackHandler(), ctx);
                 }
 
                 @Override
-                public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-                    if (cap == BotaniaForgeCapabilities.SPARK_ATTACHABLE) {
+                public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side)
+                {
+                    if (cap == BotaniaForgeCapabilities.SPARK_ATTACHABLE)
+                    {
                         if (!opt.isPresent()) opt = LazyOptional.of(this::create);
                         return BotaniaForgeCapabilities.SPARK_ATTACHABLE.orEmpty(cap, opt);
                     }
                     return LazyOptional.empty();
                 }
 
-                void invalidate() {
+                void invalidate()
+                {
                     if (opt.isPresent()) opt.invalidate();
                     opt = LazyOptional.empty();
                 }

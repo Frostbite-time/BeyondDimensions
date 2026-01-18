@@ -65,11 +65,11 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     @Override
     public boolean isFull()
     {
-        for(IStackType stack : storageHandler.getStorage())
+        for (IStackType stack : storageHandler.getStorage())
         {
-            if(stack.isEmpty())
+            if (stack.isEmpty())
                 return false;
-            if(stack instanceof ManaStackType && stack.getStackAmount() < stack.getVanillaMaxStackSize())
+            if (stack instanceof ManaStackType && stack.getStackAmount() < stack.getVanillaMaxStackSize())
                 return false;
         }
         return true;
@@ -78,7 +78,7 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     @Override
     public void receiveMana(int mana)
     {
-        if(mana > 0)
+        if (mana > 0)
             storageHandler.insert(new ManaStackType(mana), false);
         else
             storageHandler.extract(new ManaStackType(-mana), false);
@@ -115,11 +115,11 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     {
         long maxMana = 0;
         ManaStackType stackType = new ManaStackType();
-        for(IStackType stack : storageHandler.getStorage())
+        for (IStackType stack : storageHandler.getStorage())
         {
-            if(stack.isEmpty())
+            if (stack.isEmpty())
                 maxMana += stackType.getVanillaMaxStackSize();
-            if(stack instanceof ManaStackType && stack.getStackAmount() < stack.getVanillaMaxStackSize())
+            if (stack instanceof ManaStackType && stack.getStackAmount() < stack.getVanillaMaxStackSize())
                 maxMana += stack.getVanillaMaxStackSize() - stack.getStackAmount();
         }
         return BDMath.clampLongToInt(maxMana);
@@ -153,7 +153,8 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     public ManaSpark getAttachedSpark()
     {
         List<Entity> sparks = level.getEntitiesOfClass(Entity.class, new AABB(pos.above()), Predicates.instanceOf(ManaSpark.class));
-        if (sparks.size() == 1) {
+        if (sparks.size() == 1)
+        {
             Entity e = sparks.get(0);
             return (ManaSpark) e;
         }

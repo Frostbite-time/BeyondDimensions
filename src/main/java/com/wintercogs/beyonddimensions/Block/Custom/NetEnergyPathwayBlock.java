@@ -16,22 +16,24 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class NetEnergyPathwayBlock extends BaseMachineBlock
 {
 
-    public NetEnergyPathwayBlock(Properties properties) {
+    public NetEnergyPathwayBlock(Properties properties)
+    {
         super(properties);
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new NetEnergyPathwayBlockEntity(blockPos,blockState);
+    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
+    {
+        return new NetEnergyPathwayBlockEntity(blockPos, blockState);
     }
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
     {
-        super.use(state,level,pos,player,hand,hitResult);
-        if(!level.isClientSide()&&!player.isShiftKeyDown())
+        super.use(state, level, pos, player, hand, hitResult);
+        if (!level.isClientSide() && !player.isShiftKeyDown())
         {
-            NetworkHooks.openScreen((ServerPlayer) player, (NetEnergyPathwayBlockEntity)level.getBlockEntity(pos),pos);
+            NetworkHooks.openScreen((ServerPlayer) player, (NetEnergyPathwayBlockEntity) level.getBlockEntity(pos), pos);
         }
         return InteractionResult.SUCCESS;
     }

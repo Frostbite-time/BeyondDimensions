@@ -25,13 +25,13 @@ public class CellHandler implements ICellHandler
     @Override
     public @Nullable StorageCell getCellInventory(ItemStack itemstack, @Nullable ISaveProvider host)
     {
-        if(NetedItem.getNetId(itemstack) < 0)
+        if (NetedItem.getNetId(itemstack) < 0)
             return null;
         int netId = NetedItem.getNetId(itemstack);
-        if(netId >=0)
+        if (netId >= 0)
         {
             DimensionsNet net = DimensionsNet.getNetFromId(netId, ServerLifecycleHooks.getCurrentServer());
-            if(net != null)
+            if (net != null)
             {
                 return new NetStorageCell(net.getUnifiedStorage());
             }

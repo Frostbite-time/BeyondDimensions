@@ -28,10 +28,10 @@ public class TestItem_ItemGenerate extends Item
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
     {
-        if(!level.isClientSide())
+        if (!level.isClientSide())
         {
             DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-            if(net != null)
+            if (net != null)
             {
                 UnifiedStorage storage = net.getUnifiedStorage();
                 // 从注册表获取所有非空气物品
@@ -48,18 +48,19 @@ public class TestItem_ItemGenerate extends Item
                 // 生成100种随机物品
                 int count = Math.min(100, allItems.size());
 
-                for (int i = 0; i < count; i++) {
+                for (int i = 0; i < count; i++)
+                {
                     Item item = allItems.get(i);
                     int amount = 100 + random.nextInt(201); // 生成100-300之间的随机数量
 
                     ItemStackType stack = new ItemStackType(new ItemStack(item, amount));
 
-                    storage.insert(stack,false);
+                    storage.insert(stack, false);
                 }
             }
         }
 
 
-        return InteractionResultHolder.sidedSuccess(player.getItemInHand(usedHand),level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(player.getItemInHand(usedHand), level.isClientSide());
     }
 }

@@ -43,14 +43,14 @@ public class UnifiedStorage implements IStackTypedHandler
     /**
      * 存储的数据结构
      */
-    private final HashBPlusList<IStackType<?>> storage = new HashBPlusList<>(64,128);
+    private final HashBPlusList<IStackType<?>> storage = new HashBPlusList<>(64, 128);
 
     /**
      * 存储的错误备份结构
      * 每次保存或者读取时，将其设为storage的深克隆
      * 如果在保存时出现错误，则利用其进行一个最近回退处理
      */
-    private HashBPlusList<IStackType<?>> backupStorage = new HashBPlusList<>(64,128);
+    private HashBPlusList<IStackType<?>> backupStorage = new HashBPlusList<>(64, 128);
 
     /**
      * 为构建分化包装提供良好的性能，其结构为 [资源种类id：对应资源类型的索引列表]
@@ -59,47 +59,84 @@ public class UnifiedStorage implements IStackTypedHandler
 
     //onchange回调处理==================================================
     @FunctionalInterface // 带上下文版本
-    public interface DeltaListener {
+    public interface DeltaListener
+    {
         void onDelta(IStackType<?> type, long size, boolean insert);
     }
 
     @FunctionalInterface // 不带上下文版本
-    public interface AnyChangeListener {
+    public interface AnyChangeListener
+    {
         void onAnyChange();
     }
 
     // 弱订阅用
     @FunctionalInterface
-    public interface QuadConsumer<A,B,C,D> { void accept(A a, B b, C c, D d); }
+    public interface QuadConsumer<A, B, C, D>
+    {
+        void accept(A a, B b, C c, D d);
+    }
 
     // ====== 弱 owner + 回调条目 ======
     private static final class OwnerRef extends WeakReference<Object>
     {
-        OwnerRef(Object owner, ReferenceQueue<Object> q) { super(owner, q); }
+        OwnerRef(Object owner, ReferenceQueue<Object> q)
+        {
+            super(owner, q);
+        }
     }
+
     // 无信息条目
-    private static final class AnyEntry {
+    private static final class AnyEntry
+    {
         final OwnerRef ownerRef;
         final AnyChangeListener listener; // 强回调，但内部请勿强握 owner
-        AnyEntry(OwnerRef ref, AnyChangeListener l) { this.ownerRef = ref; this.listener = l; }
+
+        AnyEntry(OwnerRef ref, AnyChangeListener l)
+        {
+            this.ownerRef = ref;
+            this.listener = l;
+        }
     }
+
     // 增量信息条目
-    private static final class DeltaEntry {
+    private static final class DeltaEntry
+    {
         final OwnerRef ownerRef;
         final DeltaListener listener; // 强回调，但内部请勿强握 owner
-        DeltaEntry(OwnerRef ref, DeltaListener l) { this.ownerRef = ref; this.listener = l; }
+
+        DeltaEntry(OwnerRef ref, DeltaListener l)
+        {
+            this.ownerRef = ref;
+            this.listener = l;
+        }
     }
 
     private final CopyOnWriteArrayList<AnyEntry> anyListeners = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<DeltaEntry> deltaListeners = new CopyOnWriteArrayList<>();
 
-    /** 抑制 any 的“delta 上下文”嵌套计数；>0 时 fireChange() 将被忽略。 */
+    /**
+     * 抑制 any 的“delta 上下文”嵌套计数；>0 时 fireChange() 将被忽略。
+     */
     private int deltaContextDepth = 0;
 
-    /** 进入/退出 delta 上下文的小工具 */
-    private void beginDeltaContext() { deltaContextDepth++; }
-    private void endDeltaContext()   { deltaContextDepth = Math.max(0, deltaContextDepth - 1); }
-    private boolean inDeltaContext() { return deltaContextDepth > 0; }
+    /**
+     * 进入/退出 delta 上下文的小工具
+     */
+    private void beginDeltaContext()
+    {
+        deltaContextDepth++;
+    }
+
+    private void endDeltaContext()
+    {
+        deltaContextDepth = Math.max(0, deltaContextDepth - 1);
+    }
+
+    private boolean inDeltaContext()
+    {
+        return deltaContextDepth > 0;
+    }
 
     private final ReferenceQueue<Object> refQueue = new ReferenceQueue<>();
 
@@ -126,7 +163,8 @@ public class UnifiedStorage implements IStackTypedHandler
     // 无需提供net，因为其覆写了需要net的方法
     public static UnifiedStorage getEmpty()
     {
-        return new UnifiedStorage(0,0){
+        return new UnifiedStorage(0, 0)
+        {
             @Override
             public void onChange()
             {
@@ -142,14 +180,17 @@ public class UnifiedStorage implements IStackTypedHandler
     }
 
     // ====== 订阅 API（强订阅）======
-    public AutoCloseable subscribeAny(Object owner, AnyChangeListener onAny) {
+    public AutoCloseable subscribeAny(Object owner, AnyChangeListener onAny)
+    {
         if (owner == null || onAny == null) throw new IllegalArgumentException();
         drainRefQueue();
         AnyEntry e = new AnyEntry(new OwnerRef(owner, refQueue), onAny);
         anyListeners.add(e);
         return () -> anyListeners.remove(e);
     }
-    public AutoCloseable subscribeDelta(Object owner, DeltaListener onDelta) {
+
+    public AutoCloseable subscribeDelta(Object owner, DeltaListener onDelta)
+    {
         if (owner == null || onDelta == null) throw new IllegalArgumentException();
         drainRefQueue();
         DeltaEntry e = new DeltaEntry(new OwnerRef(owner, refQueue), onDelta);
@@ -158,52 +199,76 @@ public class UnifiedStorage implements IStackTypedHandler
     }
 
     // ====== 订阅 API（弱订阅，回调内部也只握弱引用）======
-    public <T> AutoCloseable subscribeAnyWeak(T owner, java.util.function.Consumer<T> onAny) {
+    public <T> AutoCloseable subscribeAnyWeak(T owner, java.util.function.Consumer<T> onAny)
+    {
         if (owner == null || onAny == null) throw new IllegalArgumentException();
         drainRefQueue();
         OwnerRef ref = new OwnerRef(owner, refQueue);
         AnyEntry e = new AnyEntry(ref, () -> {
             @SuppressWarnings("unchecked") T o = (T) ref.get();
-            if (o != null) onAny.accept(o); else drainRefQueue();
+            if (o != null) onAny.accept(o);
+            else drainRefQueue();
         });
         anyListeners.add(e);
         return () -> anyListeners.remove(e);
     }
+
     public <T> AutoCloseable subscribeDeltaWeak(
             T owner,
             QuadConsumer<T, IStackType<?>, Long, Boolean> onDelta
-    ) {
+    )
+    {
         if (owner == null || onDelta == null) throw new IllegalArgumentException();
         drainRefQueue();
         OwnerRef ref = new OwnerRef(owner, refQueue);
         DeltaEntry e = new DeltaEntry(ref, (type, size, insert) -> {
             @SuppressWarnings("unchecked") T o = (T) ref.get();
-            if (o != null) onDelta.accept(o, type, size, insert); else drainRefQueue();
+            if (o != null) onDelta.accept(o, type, size, insert);
+            else drainRefQueue();
         });
         deltaListeners.add(e);
         return () -> deltaListeners.remove(e);
     }
 
     // 触发无上下文回调，如果本次更改正在触发上下回调则无视
-    protected void fireChange() {
+    protected void fireChange()
+    {
         if (inDeltaContext()) return;
         drainRefQueue();
-        for (AnyEntry e : anyListeners) {
-            try { e.listener.onAnyChange(); } catch (Throwable ignored) {}
+        for (AnyEntry e : anyListeners)
+        {
+            try
+            {
+                e.listener.onAnyChange();
+            }
+            catch (Throwable ignored)
+            {
+            }
         }
     }
+
     // 触发上下文回调
-    protected void fireDelta(IStackType<?> type, long size, boolean insert) {
+    protected void fireDelta(IStackType<?> type, long size, boolean insert)
+    {
         drainRefQueue();
-        for (DeltaEntry e : deltaListeners) {
-            try { e.listener.onDelta(type, size, insert); } catch (Throwable ignored) {}
+        for (DeltaEntry e : deltaListeners)
+        {
+            try
+            {
+                e.listener.onDelta(type, size, insert);
+            }
+            catch (Throwable ignored)
+            {
+            }
         }
     }
 
     // 帮助GC
-    private void drainRefQueue() {
+    private void drainRefQueue()
+    {
         OwnerRef ref;
-        while ((ref = (OwnerRef) refQueue.poll()) != null) {
+        while ((ref = (OwnerRef) refQueue.poll()) != null)
+        {
             OwnerRef dead = ref;
             anyListeners.removeIf(e -> e.ownerRef == dead);
             deltaListeners.removeIf(e -> e.ownerRef == dead);
@@ -224,9 +289,12 @@ public class UnifiedStorage implements IStackTypedHandler
     private void onContentChanged(IStackType<?> type, long size, boolean insert)
     {
         beginDeltaContext();
-        try {
+        try
+        {
             onChange(); // 走统一入口，但是当处于Delta上下文时，内部的fireChange被略过
-        } finally {
+        }
+        finally
+        {
             endDeltaContext();
         }
         fireDelta(type, size, insert); // 发送增量广播
@@ -272,14 +340,14 @@ public class UnifiedStorage implements IStackTypedHandler
     public void setStackAmount(IStackType<?> key, long amount)
     {
         IStackType<?> old = getStackByStack(key);
-        if(!old.isEmpty())
+        if (!old.isEmpty())
         {
-            if(amount > 0)
+            if (amount > 0)
                 old.setStackAmount(amount);
             else
-                extract(key.copyWithCount(old.getStackAmount()+1) , false);
+                extract(key.copyWithCount(old.getStackAmount() + 1), false);
         }
-        else if(amount > 0) // old不存在
+        else if (amount > 0) // old不存在
         {
             insert(key.copyWithCount(amount), false);
         }
@@ -288,11 +356,11 @@ public class UnifiedStorage implements IStackTypedHandler
     @Override
     public void setStackDirectly(int slot, IStackType<?> stack)
     {
-        if(!storage.contains(stack))
+        if (!storage.contains(stack))
         {
             ResourceLocation newTypeId = stack.getTypeId();
             ResourceLocation oldTypeId = getStorage().get(slot).getTypeId();
-            storage.set(slot,stack.copy());
+            storage.set(slot, stack.copy());
             // 更新索引
             typeIdIndex.computeIfAbsent(oldTypeId, k -> new ArrayList<>()).remove(Integer.valueOf(slot));
             typeIdIndex.computeIfAbsent(newTypeId, k -> new ArrayList<>()).add(slot);
@@ -303,7 +371,7 @@ public class UnifiedStorage implements IStackTypedHandler
     @Override
     public void addStackDirectly(IStackType<?> stack)
     {
-        if(!storage.contains(stack))
+        if (!storage.contains(stack))
         {
             ResourceLocation newTypeId = stack.getTypeId();
             int slot = storage.size();
@@ -317,7 +385,7 @@ public class UnifiedStorage implements IStackTypedHandler
     public IStackType<?> getStackByStack(IStackType<?> stackType)
     {
         IStackType<?> stack = storage.get(stackType); // 对于不存在的，会返回null
-        if(stack != null)
+        if (stack != null)
             return stack;
         else
             return stackType.getEmpty(); // 不返回null了，防止错误调用
@@ -351,18 +419,18 @@ public class UnifiedStorage implements IStackTypedHandler
     @Override
     public IStackType<?> insert(int slot, IStackType<?> stack, boolean simulate)
     {
-        return insert(stack,simulate);
+        return insert(stack, simulate);
     }
 
     @Override
-    public IStackType<?> insert(IStackType<?> stack,boolean simulate)
+    public IStackType<?> insert(IStackType<?> stack, boolean simulate)
     {
         if (stack.isEmpty()) return stack.getEmpty();
 
         // 对物质压缩球的特殊处理
-        if(stack instanceof ItemStackType itemStackType)
+        if (stack instanceof ItemStackType itemStackType)
         {
-            if(itemStackType.getStack().getItem() instanceof MatterCompressionBall)
+            if (itemStackType.getStack().getItem() instanceof MatterCompressionBall)
             {
                 return unzipMatterBall(itemStackType, simulate);
             }
@@ -370,34 +438,35 @@ public class UnifiedStorage implements IStackTypedHandler
 
         // 正常处理
         long remaining = stack.getStackAmount(); // 剩余可被插入的量
-        long canInsert = Math.min(getSlotCapacity(0),stack.getCustomMaxStackSize()); // 能被插入的空间
+        long canInsert = Math.min(getSlotCapacity(0), stack.getCustomMaxStackSize()); // 能被插入的空间
 
         // 尝试合并现有堆叠
         IStackType<?> existing = storage.get(stack);
-        if(existing != null && !existing.isEmpty())
+        if (existing != null && !existing.isEmpty())
         {
             canInsert = Math.max(0L, canInsert - existing.getStackAmount()); // 防止剩余容量为负
-            if(canInsert <= 0) // 完全无法合并，直接返回原堆叠
+            if (canInsert <= 0) // 完全无法合并，直接返回原堆叠
                 return stack.copyWithCount(remaining);
 
-            long actualInsert = Math.min(remaining,canInsert);
-            remaining = remaining-actualInsert;
+            long actualInsert = Math.min(remaining, canInsert);
+            remaining = remaining - actualInsert;
 
-            if (!simulate && actualInsert > 0) { // 有实际变化，且非模拟操作
+            if (!simulate && actualInsert > 0)
+            { // 有实际变化，且非模拟操作
                 existing.grow(actualInsert);
-                onContentChanged(existing,actualInsert,true); //此处无需传递复制值，因为如果existing增加后的size仍为0，则没有增加的必要
+                onContentChanged(existing, actualInsert, true); //此处无需传递复制值，因为如果existing增加后的size仍为0，则没有增加的必要
             }
             return stack.copyWithCount(remaining); // 返回剩余量
         }
 
         // 现有堆叠未找到，尝试新增
-        if(storage.size() < slotMaxSize)
+        if (storage.size() < slotMaxSize)
         {
-            long actualInsert = Math.min(remaining,canInsert);
-            if(actualInsert <= 0) return stack.copyWithCount(remaining); // 可插入量为0时，不新建槽位（此处也可能是容量导致的0，因此返回原堆叠）
+            long actualInsert = Math.min(remaining, canInsert);
+            if (actualInsert <= 0) return stack.copyWithCount(remaining); // 可插入量为0时，不新建槽位（此处也可能是容量导致的0，因此返回原堆叠）
 
-            remaining = remaining-actualInsert;
-            if(!simulate)
+            remaining = remaining - actualInsert;
+            if (!simulate)
             {
                 IStackType<?> newStack = stack.copyWithCount(actualInsert);
                 storage.add(newStack);
@@ -406,7 +475,7 @@ public class UnifiedStorage implements IStackTypedHandler
                 int newIndex = storage.size() - 1;
                 typeIdIndex.computeIfAbsent(stack.getTypeId(), k -> new ArrayList<>()).add(newIndex);
 
-                onContentChanged(newStack,actualInsert,true); //此处无需传递复制值，如果newStack的size为0，则没有增加的必要
+                onContentChanged(newStack, actualInsert, true); //此处无需传递复制值，如果newStack的size为0，则没有增加的必要
             }
         }
         return stack.copyWithCount(remaining);
@@ -425,10 +494,10 @@ public class UnifiedStorage implements IStackTypedHandler
         List<IStackType<?>> ballStorage;
 
         // 再次检测，如果不是物质球则不处理
-        if(!(stack.getStack().getItem() instanceof MatterCompressionBall))
+        if (!(stack.getStack().getItem() instanceof MatterCompressionBall))
             return stack;
 
-        if(MatterCompressionBall.hasIStackList(ballStack))
+        if (MatterCompressionBall.hasIStackList(ballStack))
         {
             long ballNum = stack.getStackAmount(); // 乘数，防止未知情况下，多个相同nbt的物质球同时被插入。 虽然一般不可能
 
@@ -436,31 +505,31 @@ public class UnifiedStorage implements IStackTypedHandler
             ballStorage = MatterCompressionBall.getIStackList(ballStack);
 
             // 首先模拟物质插入
-            for(IStackType<?> stackType: ballStorage)
+            for (IStackType<?> stackType : ballStorage)
             {
-                stackType.setStackAmount(stackType.getStackAmount()*ballNum);
-                newBallStorage.add(insert(stackType,true));
+                stackType.setStackAmount(stackType.getStackAmount() * ballNum);
+                newBallStorage.add(insert(stackType, true));
             }
             // 假设剩余为空，然后遍历newBallStorage，如果遇见不为空的堆叠，则设置球不为空
             boolean newBallStorageIsEmpty = true;
-            for(IStackType<?> stackType: newBallStorage)
+            for (IStackType<?> stackType : newBallStorage)
             {
-                if(!stackType.isEmpty())
+                if (!stackType.isEmpty())
                 {
                     newBallStorageIsEmpty = false;
                 }
             }
 
             // 如果球为空，则执行insert操作
-            if(newBallStorageIsEmpty)
+            if (newBallStorageIsEmpty)
             {
-                if(simulate)
+                if (simulate)
                     return new ItemStackType();
                 else
                 {
-                    for(IStackType<?> stackType: ballStorage)
+                    for (IStackType<?> stackType : ballStorage)
                     {
-                        stackType.setStackAmount(stackType.getStackAmount()*ballNum);
+                        stackType.setStackAmount(stackType.getStackAmount() * ballNum);
                         insert(stackType, false);
                     }
                     return new ItemStackType();
@@ -483,19 +552,21 @@ public class UnifiedStorage implements IStackTypedHandler
         if (stack.isEmpty()) return stack.getEmpty();
 
         List<Integer> indices = typeIdIndex.get(stack.getTypeId());
-        if(indices == null || indices.isEmpty()) return stack.getEmpty();
+        if (indices == null || indices.isEmpty()) return stack.getEmpty();
 
         IStackType<?> existing = storage.get(stack); // 在此list中，从stack来get比直接get索引更快
-        if(existing == null || existing.isEmpty()) return stack.getEmpty();
+        if (existing == null || existing.isEmpty()) return stack.getEmpty();
 
         long available = existing.getStackAmount();
         long extracted = Math.min(stack.getStackAmount(), available); // 导出量为要求量与可用量的最小值
-        if (extracted <= 0) {
+        if (extracted <= 0)
+        {
             return stack.getEmpty();
         }
 
         // 模拟：生成一个“只带数量”的结果副本即可，无需额外快照
-        if (simulate) {
+        if (simulate)
+        {
             return existing.copyWithCount(extracted);
         }
 
@@ -505,16 +576,20 @@ public class UnifiedStorage implements IStackTypedHandler
         IStackType<?> result = beforeType.copyWithCount(extracted);
 
         // 再进行实际变更
-        if (extracted >= available) {
+        if (extracted >= available)
+        {
             // 全量取走：移除并维护索引
             int storageIndex = storage.indexOf(stack); // 走到这一步时，storageIndex必然存在合适值
             storage.remove(storageIndex);
             indices.remove(Integer.valueOf(storageIndex));
             updateIndicesAfterRemoval(storageIndex);
-            if (indices.isEmpty()) {
+            if (indices.isEmpty())
+            {
                 typeIdIndex.remove(stack.getTypeId());
             }
-        } else {
+        }
+        else
+        {
             // 部分取走：只 shrink，不影响 indices
             existing.shrink(extracted);
         }
@@ -526,13 +601,18 @@ public class UnifiedStorage implements IStackTypedHandler
 
     /**
      * 当从storage中移除一个堆叠后，更新所有受影响的索引值
+     *
      * @param removedIndex 被移除堆叠的索引值
      */
-    private void updateIndicesAfterRemoval(int removedIndex) {
-        for (List<Integer> indexList : typeIdIndex.values()) {
-            for (int i = 0; i < indexList.size(); i++) {
+    private void updateIndicesAfterRemoval(int removedIndex)
+    {
+        for (List<Integer> indexList : typeIdIndex.values())
+        {
+            for (int i = 0; i < indexList.size(); i++)
+            {
                 int currentIndex = indexList.get(i);
-                if (currentIndex > removedIndex) {
+                if (currentIndex > removedIndex)
+                {
                     indexList.set(i, currentIndex - 1);
                 }
             }
@@ -545,10 +625,10 @@ public class UnifiedStorage implements IStackTypedHandler
     public void rebuildAllIndices()
     {
         typeIdIndex.clear();
-        for(int i = 0; i < storage.size(); i++)
+        for (int i = 0; i < storage.size(); i++)
         {
             IStackType<?> stack = storage.get(i);
-            if(stack != null && !stack.isEmpty())
+            if (stack != null && !stack.isEmpty())
             {
                 ResourceLocation typeId = stack.getTypeId();
                 typeIdIndex.computeIfAbsent(typeId, k -> new ArrayList<>()).add(i);
@@ -558,25 +638,29 @@ public class UnifiedStorage implements IStackTypedHandler
 
     // 尝试按槽位导出 返回实际导出量
     @Override
-    public IStackType<?> extract(int slot,long amount, boolean simulate)
+    public IStackType<?> extract(int slot, long amount, boolean simulate)
     {
-        if (slot < 0 || slot >= storage.size()) {
+        if (slot < 0 || slot >= storage.size())
+        {
             return null;
         }
 
         IStackType<?> existing = storage.get(slot);
-        if (existing == null || existing.isEmpty()) {
+        if (existing == null || existing.isEmpty())
+        {
             return (existing != null) ? existing.getEmpty() : new ItemStackType(); // 如果为null，最终保底返回一个空物品实现，绝对不能返回null
         }
 
         long available = existing.getStackAmount();
         long extracted = Math.min(amount, available);
-        if (extracted <= 0) {
+        if (extracted <= 0)
+        {
             return existing.getEmpty();
         }
 
         // 模拟：只需1次副本
-        if (simulate) {
+        if (simulate)
+        {
             return existing.copyWithCount(extracted);
         }
 
@@ -584,22 +668,27 @@ public class UnifiedStorage implements IStackTypedHandler
         IStackType<?> beforeType = existing.copyWithCount(1);
         IStackType<?> result = beforeType.copyWithCount(extracted); // 第 2 次 copy：返回值
 
-        if (extracted == available) {
+        if (extracted == available)
+        {
             // 全量取走：移除并维护索引
             final ResourceLocation typeId = existing.getTypeId();
             storage.remove(slot);
 
             List<Integer> indices = typeIdIndex.get(typeId);
-            if (indices != null) {
+            if (indices != null)
+            {
                 indices.remove(Integer.valueOf(slot));
-                if (indices.isEmpty()) {
+                if (indices.isEmpty())
+                {
                     typeIdIndex.remove(typeId);
                 }
             }
 
             // 下调受影响的索引
             updateIndicesAfterRemoval(slot);
-        } else {
+        }
+        else
+        {
             // 部分取走：只 shrink，不动索引表
             existing.shrink(extracted);
         }
@@ -613,7 +702,8 @@ public class UnifiedStorage implements IStackTypedHandler
     // region 序列化方法
     public CompoundTag serializeNBT()
     {
-        try { // 尝试保存
+        try
+        { // 尝试保存
             CompoundTag tag = new CompoundTag();
 
             tag.putLong("slotCapacity", this.slotCapacity);
@@ -621,14 +711,15 @@ public class UnifiedStorage implements IStackTypedHandler
 
             ListTag stacksTag = new ListTag();
 
-            for (IStackType<?> stack : storage) {
+            for (IStackType<?> stack : storage)
+            {
                 // 修改后的序列化代码
-                if(stack.isEmpty())
+                if (stack.isEmpty())
                     continue; // 不序列化空物品
                 CompoundTag stackTag = new CompoundTag();
                 // 使用类型安全的序列化方式 将堆叠数据放入"Data"标签
-                stackTag.put("TypedStack",stack.serializeNBT());
-                stackTag.putString("Type",stack.getTypeId().toString());
+                stackTag.put("TypedStack", stack.serializeNBT());
+                stackTag.putString("Type", stack.getTypeId().toString());
                 stacksTag.add(stackTag);
             }
 
@@ -638,12 +729,15 @@ public class UnifiedStorage implements IStackTypedHandler
             backupStorage = deepClone(storage);
             return tag;
 
-        } catch (Exception ex) {
-            BeyondDimensions.LOGGER.error("{}号维度网络保存失败，尝试使用最近的备份并打印错误信息",net.getId(), ex);
+        }
+        catch (Exception ex)
+        {
+            BeyondDimensions.LOGGER.error("{}号维度网络保存失败，尝试使用最近的备份并打印错误信息", net.getId(), ex);
 
             // === 回滚：用备份替换当前内存状态 ===
             storage.clear();
-            if (backupStorage != null) {
+            if (backupStorage != null)
+            {
                 for (IStackType<?> s : backupStorage) storage.add(s.copy());
             }
 
@@ -654,14 +748,15 @@ public class UnifiedStorage implements IStackTypedHandler
 
             ListTag stacksTag = new ListTag();
 
-            for (IStackType<?> stack : storage) {
+            for (IStackType<?> stack : storage)
+            {
                 // 修改后的序列化代码
-                if(stack.isEmpty())
+                if (stack.isEmpty())
                     continue; // 不序列化空物品
                 CompoundTag stackTag = new CompoundTag();
                 // 使用类型安全的序列化方式 将堆叠数据放入"Data"标签
-                stackTag.put("TypedStack",stack.serializeNBT());
-                stackTag.putString("Type",stack.getTypeId().toString());
+                stackTag.put("TypedStack", stack.serializeNBT());
+                stackTag.putString("Type", stack.getTypeId().toString());
                 stacksTag.add(stackTag);
             }
 
@@ -678,31 +773,32 @@ public class UnifiedStorage implements IStackTypedHandler
         typeIdIndex.clear();
 
         // 旧数据兼容
-        if(tag.contains("slotCapacity"))
+        if (tag.contains("slotCapacity"))
             slotCapacity = tag.getLong("slotCapacity");
         else
             slotCapacity = Long.MAX_VALUE;
-        if(tag.contains("slotMaxSize"))
+        if (tag.contains("slotMaxSize"))
             slotMaxSize = tag.getInt("slotMaxSize");
         else
             slotMaxSize = Integer.MAX_VALUE;
 
         ListTag stacksTag = tag.getList("Stacks", Tag.TAG_COMPOUND);
 
-        for (Tag t : stacksTag) {
+        for (Tag t : stacksTag)
+        {
             CompoundTag stackTag = (CompoundTag) t;
             ResourceLocation typeId = ResourceLocation.tryParse(stackTag.getString("Type"));
 
             // 旧版本兼容
-            if(typeId.equals(ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemical")))
+            if (typeId.equals(ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemical")))
                 typeId = GasStackType.ID;
 
             IStackType stackEmpty = StackTypeRegistry.getType(typeId).copy();
             IStackType stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"));
-            if(stackActual.isEmpty())
+            if (stackActual.isEmpty())
                 continue; // 不添加空物品
-                
-            insert(stackActual,false); // 通过insert函数，而不是直接操作列表，自动处理反序列化中的一些问题并自动更新索引
+
+            insert(stackActual, false); // 通过insert函数，而不是直接操作列表，自动处理反序列化中的一些问题并自动更新索引
         }
         backupStorage = deepClone(storage); // 对内容进行备份
     }
@@ -729,7 +825,7 @@ public class UnifiedStorage implements IStackTypedHandler
     public long getEnergyStored()
     {
         IStackType<?> stack = getStackByStack(EnergyStackType.EMPTY);
-        if(stack != null)
+        if (stack != null)
             return stack.getStackAmount();
         return 0;
     }
@@ -764,10 +860,14 @@ public class UnifiedStorage implements IStackTypedHandler
         net.setDirty();
     }
 
-    /** 把 origin 深克隆到一个新的 HashBPlusList */
-    private static HashBPlusList<IStackType<?>> deepClone(HashBPlusList<IStackType<?>> origin) {
+    /**
+     * 把 origin 深克隆到一个新的 HashBPlusList
+     */
+    private static HashBPlusList<IStackType<?>> deepClone(HashBPlusList<IStackType<?>> origin)
+    {
         HashBPlusList<IStackType<?>> clone = new HashBPlusList<>(64, 128);
-        for (IStackType<?> s : origin) {
+        for (IStackType<?> s : origin)
+        {
             clone.add(s.copy());   // IStackType.copy() = 深克隆
         }
         return clone;

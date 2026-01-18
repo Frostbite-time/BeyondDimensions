@@ -35,10 +35,10 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
     public int getSource()
     {
         DimensionsNet net = getNet();
-        if(net != null)
+        if (net != null)
         {
             IStackType stack = net.getUnifiedStorage().getStackByStack(new SourceStackType(0));
-            if(stack != null)
+            if (stack != null)
             {
                 return BDMath.clampLongToInt(stack.getStackAmount());
             }
@@ -86,9 +86,9 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
     public int removeSource(int amount)
     {
         DimensionsNet net = getNet();
-        if(net != null)
+        if (net != null)
         {
-            net.getUnifiedStorage().extract(new SourceStackType(amount),false).getStackAmount();
+            net.getUnifiedStorage().extract(new SourceStackType(amount), false).getStackAmount();
         }
         return getSource(); // 无论如何，最后返回总量
     }
@@ -97,9 +97,9 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
     public void onLoad()
     {
         super.onLoad();
-        if(!level.isClientSide() && getNet() != null)
+        if (!level.isClientSide() && getNet() != null)
         {
-            SourceManager.INSTANCE.addInterface(level,new SourcePathwayProvider(this));
+            SourceManager.INSTANCE.addInterface(level, new SourcePathwayProvider(this));
         }
 
     }
@@ -108,7 +108,7 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
     public void setChanged()
     {
         super.setChanged(); // 防止误触发NPE
-        if(level != null && !level.isClientSide() && getNet() != null)
-            SourceManager.INSTANCE.addInterface(level,new SourcePathwayProvider(this));
+        if (level != null && !level.isClientSide() && getNet() != null)
+            SourceManager.INSTANCE.addInterface(level, new SourcePathwayProvider(this));
     }
 }

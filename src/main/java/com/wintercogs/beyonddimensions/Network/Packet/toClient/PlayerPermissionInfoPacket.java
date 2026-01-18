@@ -32,10 +32,10 @@ public record PlayerPermissionInfoPacket(HashMap<UUID, PlayerPermissionInfo> inf
     }
 
 
-
     public static void handle(PlayerPermissionInfoPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
 
             context.enqueueWork(() ->
@@ -65,7 +65,8 @@ public record PlayerPermissionInfoPacket(HashMap<UUID, PlayerPermissionInfo> inf
         int entryCount = buf.readInt();
 
         // 循环读取每个键值对
-        for (int i = 0; i < entryCount; i++) {
+        for (int i = 0; i < entryCount; i++)
+        {
             UUID uuid = buf.readUUID(); // 读取UUID
             PlayerPermissionInfo info = PlayerPermissionInfo.decode(buf); // 复用PlayerPermissionInfo的解码方法
             map.put(uuid, info);

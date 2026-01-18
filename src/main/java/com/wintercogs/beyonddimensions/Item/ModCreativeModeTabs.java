@@ -21,8 +21,8 @@ public class ModCreativeModeTabs
 
     public static final Supplier<CreativeModeTab> BEYOND_DIMENSIONS_ITEMS_TAB = CREATIVE_MODE_TAB.register(
             "beyond_dimensions_items_tab",
-            ()->CreativeModeTab.builder()
-                    .icon(()->new ItemStack(ModItems.NET_CREATER.get()))
+            () -> CreativeModeTab.builder()
+                    .icon(() -> new ItemStack(ModItems.NET_CREATER.get()))
                     .title(Component.translatable("creativetab.beyonddimensions.items"))
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModItems.NET_CREATER.get());
@@ -42,22 +42,23 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.NET_FEEDER_ITEM.get());
                         output.accept(ModItems.XP_EXCHANGE_ITEM.get());
 
-                        if(BeyondDimensions.AELoaded)
+                        if (BeyondDimensions.AELoaded)
                         {
                             output.accept(ModItems.NET_AE_STORAGE_CELL.get());
                         }
 
-                        for (ModFluids.FluidEntry e : ModFluids.ALL) { //注册所有桶
-                            output.accept((Item)e.bucket().get());
+                        for (ModFluids.FluidEntry e : ModFluids.ALL)
+                        { //注册所有桶
+                            output.accept((Item) e.bucket().get());
                         }
                     })
                     .build());
 
     public static final Supplier<CreativeModeTab> BEYOND_DIMENSIONS_BLOCKS_TAB = CREATIVE_MODE_TAB.register(
             "beyond_dimensions_blocks_tab",
-            ()->CreativeModeTab.builder()
-                    .icon(()->new ItemStack(ModBlocks.NET_CONTROL.get()))
-                    .withTabsBefore(ResourceLocation.tryBuild(BeyondDimensions.MODID,"beyond_dimensions_items_tab"))
+            () -> CreativeModeTab.builder()
+                    .icon(() -> new ItemStack(ModBlocks.NET_CONTROL.get()))
+                    .withTabsBefore(ResourceLocation.tryBuild(BeyondDimensions.MODID, "beyond_dimensions_items_tab"))
                     .title(Component.translatable("creativetab.beyonddimensions.blocks"))
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModBlocks.NET_CONTROL.get());
@@ -70,25 +71,24 @@ public class ModCreativeModeTabs
                         output.accept(ModBlocks.NET_FURNACE_BLOCK.get());
                         output.accept(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
 
-                        if(BeyondDimensions.RS_Loaded)
+                        if (BeyondDimensions.RS_Loaded)
                         {
                             output.accept(ModBlocks.RS_NET_PATHWAY.get());
                         }
-                        if(BeyondDimensions.ARS_Loaded)
+                        if (BeyondDimensions.ARS_Loaded)
                         {
                             output.accept(ModBlocks.ARS_SOURCE_PATHWAY.get());
                         }
-                        if(BeyondDimensions.Botania_Loaded)
+                        if (BeyondDimensions.Botania_Loaded)
                         {
                             output.accept(ModBlocks.MANA_POOL_PATHWAY.get());
                         }
-                        if(BeyondDimensions.Create_Loaded)
+                        if (BeyondDimensions.Create_Loaded)
                         {
                             output.accept(ModBlocks.SCHEMATICANNON_PATHWAY.get());
                         }
                     })
                     .build());
-
 
 
     public static void register(IEventBus eventBus)

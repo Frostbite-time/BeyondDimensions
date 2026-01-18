@@ -13,7 +13,6 @@ import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Api.Util.CommonHandler;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
@@ -56,7 +55,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if (!level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -66,7 +65,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         @Override
         public void onChange()
         {
-            if(!level.isClientSide())
+            if (!level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -76,11 +75,11 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     private final Direction[] directions = Direction.values();
 
     private int redstoneLevel = 0;
-    
+
 
     // 存储相邻方块的能力
     // 按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
-    private final Multimap<ResourceLocation,Object> handlerCache = ArrayListMultimap.create();
+    private final Multimap<ResourceLocation, Object> handlerCache = ArrayListMultimap.create();
     private boolean needsCapabilityUpdate = true;
 
     public StackTypedHandler getStackHandler()
@@ -88,7 +87,8 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         return this.stackHandler;
     }
 
-    public StackTypedHandler getFakeStackHandler(){
+    public StackTypedHandler getFakeStackHandler()
+    {
         return this.fakeStackHandler;
     }
 
@@ -110,14 +110,14 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         // 无论接口是否工作，更新红石信号
 
         int notEmpty = 0;
-        for(IStackType<?> stackType : stackHandler.getStorage())
+        for (IStackType<?> stackType : stackHandler.getStorage())
         {
-            if(stackType != null && !stackType.isEmpty())
+            if (stackType != null && !stackType.isEmpty())
                 notEmpty++;
         }
 
-        int newRedstoneLevel = (int)(((float)notEmpty/stackHandler.getSlots()) * 15);
-        if(redstoneLevel != newRedstoneLevel)
+        int newRedstoneLevel = (int) (((float) notEmpty / stackHandler.getSlots()) * 15);
+        if (redstoneLevel != newRedstoneLevel)
         {
             redstoneLevel = newRedstoneLevel;
             level.updateNeighbourForOutputSignal(worldPosition, getBlockState().getBlock());
@@ -131,18 +131,18 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     {
         super.workContent();
 
-        if(getNet() != null)
+        if (getNet() != null)
         {
-            if(CommonConfigRuntime.interfaceCanReceiveResource)
+            if (CommonConfigRuntime.interfaceCanReceiveResource)
                 transferToNet();
-            if(CommonConfigRuntime.interfaceCanOutputResource)
+            if (CommonConfigRuntime.interfaceCanOutputResource)
                 transferFromNet();
         }
 
-        if(CommonConfigRuntime.interfaceCanPopResource)
+        if (CommonConfigRuntime.interfaceCanPopResource)
         {
             // 尝试输出物品到周围
-            if(popMode == PopMode.OPEN)
+            if (popMode == PopMode.OPEN)
             {
                 // 在使用缓存前确保它是最新的
                 updateCapabilityCache();
@@ -152,20 +152,24 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     }
 
     // 更新能力缓存
-    public void updateCapabilityCache() {
+    public void updateCapabilityCache()
+    {
         if (level == null || !needsCapabilityUpdate) return;
 
         handlerCache.clear();
-        
-        for (Direction dir : directions) {
+
+        for (Direction dir : directions)
+        {
             BlockPos targetPos = this.getBlockPos().relative(dir);
             BlockEntity neighbor = level.getBlockEntity(targetPos);
-            if (neighbor != null && !(neighbor instanceof NetedBlockEntity)) {
+            if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
+            {
 
                 CapabilityHelper.BlockCapabilityMap.forEach(
                         (resourceLocation, cap) -> {
                             LazyOptional handler = neighbor.getCapability(cap, dir.getOpposite());
-                            if (handler.isPresent()) {
+                            if (handler.isPresent())
+                            {
                                 handlerCache.put(resourceLocation, handler.resolve().get());
                             }
                         }
@@ -173,7 +177,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
             }
         }
-        
+
         needsCapabilityUpdate = false;
     }
 
@@ -193,8 +197,15 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     {
         // 无效化能力并清空map
         var snapshot = new ArrayList<>(caps.values());
-        for (var opt : snapshot) { // invalidate时也会尝试移除一次，最后以clear保底
-            try { opt.invalidate(); } catch (Throwable ignored) {}
+        for (var opt : snapshot)
+        { // invalidate时也会尝试移除一次，最后以clear保底
+            try
+            {
+                opt.invalidate();
+            }
+            catch (Throwable ignored)
+            {
+            }
         }
         caps.clear();
     }
@@ -203,12 +214,14 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side)
     {
         // 遍历注册的能力映射表
-        for (Map.Entry<ResourceLocation, Capability<?>> entry : CapabilityHelper.BlockCapabilityMap.entrySet()) {
+        for (Map.Entry<ResourceLocation, Capability<?>> entry : CapabilityHelper.BlockCapabilityMap.entrySet())
+        {
             // 检查当前请求的能力是否匹配注册的能力
-            if (entry.getValue() == cap) {
+            if (entry.getValue() == cap)
+            {
 
                 final SidedCapId capId = new SidedCapId(cap, null); //此处无需面信息
-                if(caps.containsKey(capId) && caps.get(capId).isPresent())
+                if (caps.containsKey(capId) && caps.get(capId).isPresent())
                 {
                     return caps.get(capId).cast();
                 }
@@ -216,7 +229,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                 {
                     // 从类型映射表中获取对应的处理器构造函数
                     CommonHandler handler = CapabilityHelper.CommonHandlerMap.get(entry.getKey());
-                    if(handler != null)
+                    if (handler != null)
                     {
                         Object result;
                         if (handler.isContextual())
@@ -224,13 +237,13 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                         else
                             result = handler.apply(stackHandler, null);
 
-                        if(result != null)
+                        if (result != null)
                         {
                             LazyOptional<?> opt = LazyOptional.of(() -> result);
                             // 如果opt存在，则放入缓存
                             caps.put(capId, opt);
                             // opt被无效化时，主动移除引用（此处同时判断值，确保移除的是同一个引用下的内容，至少是完全一致的内容）
-                            opt.addListener(lo -> caps.remove(capId,lo));
+                            opt.addListener(lo -> caps.remove(capId, lo));
                             return opt.cast();
                         }
                     }
@@ -247,22 +260,22 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     {
         // 只有不被标记的槽位才会被收纳进入网络
         DimensionsNet net = getNet();
-        if(net != null)
+        if (net != null)
         {
-            for(int i=0; i<capacity; i++)
+            for (int i = 0; i < capacity; i++)
             {
                 IStackType<?> flag = fakeStackHandler.getStackBySlot(i);
-                if(flag!= null && !flag.isEmpty())
+                if (flag != null && !flag.isEmpty())
                 {
                     if (flag.isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
                         continue;
                 }
                 IStackType<?> stack = stackHandler.getStackBySlot(i);
-                if(stack !=null &&!stack.isEmpty())
+                if (stack != null && !stack.isEmpty())
                 {
-                    IStackType<?> extracted = stackHandler.extract(i, stack.getStackAmount(),false);
-                    IStackType<?> remaining = net.getUnifiedStorage().insert(extracted,false);
-                    if(!remaining.isEmpty())
+                    IStackType<?> extracted = stackHandler.extract(i, stack.getStackAmount(), false);
+                    IStackType<?> remaining = net.getUnifiedStorage().insert(extracted, false);
+                    if (!remaining.isEmpty())
                         stackHandler.insert(i, remaining, false);
                 }
             }
@@ -277,35 +290,35 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         // 插入物品槽
         // 将剩余插回网络
         DimensionsNet net = getNet();
-        if(net != null)
+        if (net != null)
         {
-            for(int i=0; i<capacity; i++)
+            for (int i = 0; i < capacity; i++)
             {
                 IStackType<?> flag = fakeStackHandler.getStackBySlot(i);
-                if(flag!=null && !flag.isEmpty())
+                if (flag != null && !flag.isEmpty())
                 {
                     // 到达数量上限或者是不同物品则不尝试插入
                     IStackType<?> current = stackHandler.getStackBySlot(i);
-                    if(current != null &&!current.isEmpty())
+                    if (current != null && !current.isEmpty())
                     {
-                        if(current.getVanillaMaxStackSize() >= current.getStackAmount())
+                        if (current.getVanillaMaxStackSize() >= current.getStackAmount())
                         {
                             continue;
                         }
-                        if(!current.isSameTypeSameComponents(flag.copy()))
+                        if (!current.isSameTypeSameComponents(flag.copy()))
                         {
                             continue;
                         }
                     }
 
                     // 插入逻辑
-                    IStackType stack = net.getUnifiedStorage().extract(flag.copyWithCount(flag.getVanillaMaxStackSize()),false);
-                    if(stack !=null &&!stack.isEmpty())
+                    IStackType stack = net.getUnifiedStorage().extract(flag.copyWithCount(flag.getVanillaMaxStackSize()), false);
+                    if (stack != null && !stack.isEmpty())
                     {
-                        IStackType remaining = stackHandler.insert(i,stack.copy(),false);
-                        if(!remaining.isEmpty())
+                        IStackType remaining = stackHandler.insert(i, stack.copy(), false);
+                        if (!remaining.isEmpty())
                         {
-                            net.getUnifiedStorage().insert(remaining.copy(),false);
+                            net.getUnifiedStorage().insert(remaining.copy(), false);
                         }
                     }
                 }
@@ -321,22 +334,22 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                 (typeId, handler) -> {
                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
 
-                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper)handlerGetter.apply(handler);
+                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
 
-                    for(int i = 0;i<capacity;i++)
+                    for (int i = 0; i < capacity; i++)
                     {
-                        if(fakeStackHandler.getStackBySlot(i).getTypeId().equals(typeId))
+                        if (fakeStackHandler.getStackBySlot(i).getTypeId().equals(typeId))
                         {
-                            if(fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
+                            if (fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
                             {
                                 IStackType current = stackHandler.getStackBySlot(i).copy();
-                                for(int slot= 0;slot< stackHandlerWrapper.getSlots();slot++)
+                                for (int slot = 0; slot < stackHandlerWrapper.getSlots(); slot++)
                                 {
-                                    long remainging = stackHandlerWrapper.insert(slot,current.copyStack(),false);
+                                    long remainging = stackHandlerWrapper.insert(slot, current.copyStack(), false);
                                     long extract = current.getStackAmount() - remainging;
-                                    stackHandler.extract(i,extract,false);
+                                    stackHandler.extract(i, extract, false);
                                     current.shrink(extract);
-                                    if(current.isEmpty())
+                                    if (current.isEmpty())
                                         break;
                                 }
                             }
@@ -350,15 +363,15 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public void dropContent()
     {
         List<IStackType<?>> dropList = new ArrayList<>();
-        for(IStackType<?> stack : stackHandler.getStorage())
+        for (IStackType<?> stack : stackHandler.getStorage())
         {
-            if(!stack.isEmpty())
+            if (!stack.isEmpty())
             {
                 // 如果内含物质球，直接弹出，防止NBT套娃
-                if(stack instanceof ItemStackType itemStackType)
+                if (stack instanceof ItemStackType itemStackType)
                 {
-                    if(itemStackType.getStack().getItem() instanceof MatterCompressionBall)
-                        Block.popResource(level,getBlockPos(),itemStackType.copyStack());
+                    if (itemStackType.getStack().getItem() instanceof MatterCompressionBall)
+                        Block.popResource(level, getBlockPos(), itemStackType.copyStack());
                     else
                         dropList.add(stack.copy());
                 }
@@ -369,10 +382,10 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
             }
         }
         ItemStack ball = new ItemStack(ModItems.MATTER_COMPRESS_BALL.get(), 1);
-        if(!dropList.isEmpty())
+        if (!dropList.isEmpty())
         {
             MatterCompressionBall.setIStackList(ball, dropList);
-            Block.popResource(level,getBlockPos(),ball);
+            Block.popResource(level, getBlockPos(), ball);
         }
     }
 
@@ -385,11 +398,11 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
         // 旧数据兼容
         String popModeNew = tag.getString("popMode");
-        if(!popModeNew.isEmpty())
+        if (!popModeNew.isEmpty())
         {
             this.popMode = PopMode.valueOf(popModeNew);
         }
-        else if(tag.getBoolean("popMode"))
+        else if (tag.getBoolean("popMode"))
         {
             this.popMode = PopMode.OPEN;
         }
@@ -406,8 +419,8 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     {
         super.saveAdditional(tag);
         tag.put("inventory", stackHandler.serializeNBT());
-        tag.put("flags",fakeStackHandler.serializeNBT());
-        tag.putString("popMode",this.popMode.name());
+        tag.put("flags", fakeStackHandler.serializeNBT());
+        tag.putString("popMode", this.popMode.name());
     }
 
     @Override
@@ -419,7 +432,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     @Override
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
-        return new NetInterfaceBaseMenu(containerId,player.getInventory(),this);
+        return new NetInterfaceBaseMenu(containerId, player.getInventory(), this);
     }
 
     @Override

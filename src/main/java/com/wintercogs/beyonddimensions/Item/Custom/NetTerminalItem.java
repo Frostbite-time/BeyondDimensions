@@ -30,23 +30,22 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
     public static final Map<Player, MenuTriggerContext> contextMap = new WeakHashMap<>();
 
 
-
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
+        if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
         {
             return InteractionResultHolder.fail(itemstack);
         }
 
-        if(!level.isClientSide())
+        if (!level.isClientSide())
         {
 
-            if(NetedItem.getNetId(itemstack)>=0)
+            if (NetedItem.getNetId(itemstack) >= 0)
             {
-                DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack),level.getServer());
+                DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack), level.getServer());
                 if (net != null)
                 {
                     contextMap.put(player, new MenuTriggerContext(usedHand, itemstack));
@@ -59,7 +58,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
             }
 
         }
-        return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
     @Override
@@ -74,12 +73,14 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
         // 从上下文映射中获取触发时的物品
         MenuTriggerContext ctx = contextMap.remove(player);
-        if (ctx == null) {
+        if (ctx == null)
+        {
             // 没有上下文记录，则退回到原始方法
             ctx = new MenuTriggerContext(player.getUsedItemHand(), player.getItemInHand(player.getUsedItemHand()));
         }
         // 验证物品是否仍是有效的NetTerminalItem
-        if (ctx.stack.getItem() != this) {
+        if (ctx.stack.getItem() != this)
+        {
             return null;
         }
         // 使用上下文中的物品栈
@@ -88,17 +89,20 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
         // 从NBT获取合成槽位
         CompoundTag tag = ctx.stack.getOrCreateTag();
-        if (!tag.contains("craft_slots", Tag.TAG_LIST)) {
+        if (!tag.contains("craft_slots", Tag.TAG_LIST))
+        {
             // 初始化默认的9个空槽位
             ListTag slots = new ListTag();
-            for (int i = 0; i < 9; i++) {
+            for (int i = 0; i < 9; i++)
+            {
                 slots.add(ItemStack.EMPTY.save(new CompoundTag()));
             }
             tag.put("craft_slots", slots);
         }
         ListTag slotsTag = tag.getList("craft_slots", Tag.TAG_COMPOUND);
         NonNullList<ItemStack> craftSlots = NonNullList.withSize(9, ItemStack.EMPTY);
-        for (int i = 0; i < slotsTag.size() && i < 9; i++) {
+        for (int i = 0; i < slotsTag.size() && i < 9; i++)
+        {
             craftSlots.set(i, ItemStack.of(slotsTag.getCompound(i)));
         }
         return new DimensionsCraftMenuTerminal(containerId, inventory, net, craftSlots, ctx.stack, null);
@@ -106,10 +110,13 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
 
     // 创建一个内部类来存储触发时的上下文
-    public static class MenuTriggerContext {
+    public static class MenuTriggerContext
+    {
         public final InteractionHand hand;
         public final ItemStack stack;
-        public MenuTriggerContext(InteractionHand hand, ItemStack stack) {
+
+        public MenuTriggerContext(InteractionHand hand, ItemStack stack)
+        {
             this.hand = hand;
             this.stack = stack;
         }

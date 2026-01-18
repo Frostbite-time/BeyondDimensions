@@ -5,7 +5,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
-import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -82,6 +81,7 @@ public class DimensionsNet extends SavedData
 
     /**
      * 构造函数
+     *
      * @param temporary 为真则说明是临时网络
      */
     public DimensionsNet(boolean temporary)
@@ -103,9 +103,10 @@ public class DimensionsNet extends SavedData
 
     /**
      * 用于创建一个维度网络，仅在服务端调用
-     * @param player 传入的玩家会作为网络所有者
+     *
+     * @param player                传入的玩家会作为网络所有者
      * @param defaultSlotCapability 新网络单个槽位可存储的容量
-     * @param defaultSlotMaxSize 新网络所拥有的槽位数量
+     * @param defaultSlotMaxSize    新网络所拥有的槽位数量
      * @return 返回新创建的维度网络，但如果传入的player加入了一个网络，只会返回其当前所在的网络
      */
     public static DimensionsNet createNewNetForPlayer(Player player, long defaultSlotCapability, int defaultSlotMaxSize)
@@ -131,6 +132,7 @@ public class DimensionsNet extends SavedData
 
     /**
      * 构建最新的，可用的网络名称，用于创建新网络时确定新网络的id，仅在服务端调用
+     *
      * @param dataProvider 用于获取SavedData
      * @return 最新可用的网络名称，内容为字符串："BDNet_<数字id>"
      */
@@ -151,18 +153,19 @@ public class DimensionsNet extends SavedData
 
     /**
      * 尝试从数字id获取一个维度网络，仅在服务端调用
-     * @param id 数字id
+     *
+     * @param id           数字id
      * @param dataProvider 用于获取SavedData
      * @return 返回找到的网络，如果数字id对应的网络不存在或者不合法(例如被删除)，则直接返回null
      */
     public static @Nullable DimensionsNet getNetFromId(int id, MinecraftServer dataProvider)
     {
-        if(id<0)
+        if (id < 0)
         {
             return null;
         }
         DimensionsNet net = dataProvider.getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + id);
-        if(net !=null && !net.deleted)
+        if (net != null && !net.deleted)
         {
             return net;
         }
@@ -171,6 +174,7 @@ public class DimensionsNet extends SavedData
 
     /**
      * 尝试从玩家获取维度网络，仅在服务端调用
+     *
      * @param player 玩家
      * @return 返回玩家所在的维度网络，如果不存在，则返回null
      */
@@ -182,7 +186,7 @@ public class DimensionsNet extends SavedData
             DimensionsNet net = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + netId);
             if (net != null && !net.deleted)
             {
-                if(net.players.contains(player.getUUID()))
+                if (net.players.contains(player.getUUID()))
                 {
                     return net;
                 }
@@ -211,18 +215,18 @@ public class DimensionsNet extends SavedData
 
         net.unifiedStorage.deserializeNBT(tag.getCompound("UnifiedStorage"));
         // 旧数据兼容
-        if(tag.contains("EnergyStorage"))
+        if (tag.contains("EnergyStorage"))
         {
             CompoundTag energyTag = tag.getCompound("EnergyStorage");
             if (energyTag.contains("Energy"))
             {
-                net.unifiedStorage.insert(new EnergyStackType(energyTag.getLong("Energy")),false);
+                net.unifiedStorage.insert(new EnergyStackType(energyTag.getLong("Energy")), false);
             }
         }
 
         if (tag.contains("Managers"))
         {
-            ListTag managerList = tag.getList("Managers",8);
+            ListTag managerList = tag.getList("Managers", 8);
             managerList.forEach(manager -> net.managers.add(UUID.fromString(manager.getAsString())));
         }
 
@@ -235,7 +239,7 @@ public class DimensionsNet extends SavedData
         // 读取倒计时
         net.currentTime = tag.getInt("currentTime");
 
-        if(tag.contains("Deleted"))
+        if (tag.contains("Deleted"))
             net.deleted = tag.getBoolean("Deleted");
 
         return net;
@@ -250,10 +254,10 @@ public class DimensionsNet extends SavedData
         // 保存 ID
         tag.putInt("Id", this.id);
         // 保存网络所有者 UUID
-        if(this.owner != null)
+        if (this.owner != null)
             tag.putUUID("Owner", this.owner);
 
-        if(!tag.contains("OldDataTag"))
+        if (!tag.contains("OldDataTag"))
         {
             tag.putBoolean("OldDataTag", true);
         }
@@ -264,7 +268,7 @@ public class DimensionsNet extends SavedData
         {
             managerListTag.add(StringTag.valueOf(manager.toString()));
         }
-        tag.put("Managers",managerListTag);
+        tag.put("Managers", managerListTag);
 
         // 保存绑定的玩家列表
         ListTag playerListTag = new ListTag();
@@ -275,7 +279,7 @@ public class DimensionsNet extends SavedData
         tag.put("Players", playerListTag);
 
         // 保存存储
-        tag.put("UnifiedStorage",unifiedStorage.serializeNBT());
+        tag.put("UnifiedStorage", unifiedStorage.serializeNBT());
 
         // 保存倒计时
         tag.putInt("currentTime", this.currentTime);
@@ -336,6 +340,7 @@ public class DimensionsNet extends SavedData
 
     /**
      * 添加一个网络管理员
+     *
      * @param managerId 新增管理员的uuid
      */
     public void addManager(UUID managerId)
@@ -352,7 +357,7 @@ public class DimensionsNet extends SavedData
      */
     public void removeManager(UUID managerId)
     {
-        if(managerId.equals(owner))
+        if (managerId.equals(owner))
         {
             return;
         }
@@ -384,12 +389,12 @@ public class DimensionsNet extends SavedData
      */
     public void removePlayer(UUID playerId)
     {
-        if(playerId == owner)
+        if (playerId == owner)
         {
             return;
         }
         players.remove(playerId);
-        if(managers.contains(playerId))
+        if (managers.contains(playerId))
         {
             managers.remove(playerId);
         }
@@ -398,6 +403,7 @@ public class DimensionsNet extends SavedData
 
     /**
      * 传入的玩家是否为所有者
+     *
      * @param player 玩家
      * @return 是所有者则返回真
      */
@@ -408,6 +414,7 @@ public class DimensionsNet extends SavedData
 
     /**
      * 传入的玩家uuid是否为所有者
+     *
      * @param playerId 玩家的uuid
      * @return 是所有者则返回真
      */
@@ -436,22 +443,23 @@ public class DimensionsNet extends SavedData
      * 合并另一个网络，其所有资源，玩家均被合并，但其绑定的方块会自动解绑（通过标记另一个网络为被删除实现）
      * <p>
      * 仅在服务端使用
+     *
      * @param otherNet 被合并的网络
      */
     public void mergeOtherNet(DimensionsNet otherNet)
     {
         // 合并玩家和管理员
-        for(Map.Entry<UUID,PlayerPermissionInfo> entry: otherNet.getPlayerPermissionInfoMap(ServerLifecycleHooks.getCurrentServer()).entrySet())
+        for (Map.Entry<UUID, PlayerPermissionInfo> entry : otherNet.getPlayerPermissionInfoMap(ServerLifecycleHooks.getCurrentServer()).entrySet())
         {
-            if(entry.getValue().level() == NetPermissionlevel.Owner ||entry.getValue().level() == NetPermissionlevel.Manager)
+            if (entry.getValue().level() == NetPermissionlevel.Owner || entry.getValue().level() == NetPermissionlevel.Manager)
                 addManager(entry.getKey());
-            else if(entry.getValue().level() == NetPermissionlevel.Member)
+            else if (entry.getValue().level() == NetPermissionlevel.Member)
                 addPlayer(entry.getKey());
         }
         // 合并统一存储系统
-        for(IStackType stack : otherNet.getUnifiedStorage().getStorage())
+        for (IStackType stack : otherNet.getUnifiedStorage().getStorage())
         {
-            unifiedStorage.insert(stack,false);
+            unifiedStorage.insert(stack, false);
         }
 
         // 销毁另一个网络
@@ -477,23 +485,23 @@ public class DimensionsNet extends SavedData
     /**
      * 获取一份当前网络所有玩家的UUID以及其对应的最高权限等级的映射
      */
-    public HashMap<UUID,PlayerPermissionInfo> getPlayerPermissionInfoMap(MinecraftServer dataProvider)
+    public HashMap<UUID, PlayerPermissionInfo> getPlayerPermissionInfoMap(MinecraftServer dataProvider)
     {
 
-        HashMap<UUID,PlayerPermissionInfo> infoMap = new HashMap<>();
-        for(UUID playerId :players)
+        HashMap<UUID, PlayerPermissionInfo> infoMap = new HashMap<>();
+        for (UUID playerId : players)
         {
-            if(isOwner(playerId))
+            if (isOwner(playerId))
             {
-                infoMap.put(playerId, new PlayerPermissionInfo(PlayerNameHelper.getPlayerNameByUUID(playerId,dataProvider),NetPermissionlevel.Owner));
+                infoMap.put(playerId, new PlayerPermissionInfo(PlayerNameHelper.getPlayerNameByUUID(playerId, dataProvider), NetPermissionlevel.Owner));
             }
-            else if(isManager(playerId))
+            else if (isManager(playerId))
             {
-                infoMap.put(playerId, new PlayerPermissionInfo(PlayerNameHelper.getPlayerNameByUUID(playerId,dataProvider),NetPermissionlevel.Manager));
+                infoMap.put(playerId, new PlayerPermissionInfo(PlayerNameHelper.getPlayerNameByUUID(playerId, dataProvider), NetPermissionlevel.Manager));
             }
             else
             {
-                infoMap.put(playerId, new PlayerPermissionInfo(PlayerNameHelper.getPlayerNameByUUID(playerId,dataProvider),NetPermissionlevel.Member));
+                infoMap.put(playerId, new PlayerPermissionInfo(PlayerNameHelper.getPlayerNameByUUID(playerId, dataProvider), NetPermissionlevel.Member));
             }
         }
         return infoMap;
@@ -501,6 +509,7 @@ public class DimensionsNet extends SavedData
 
     /**
      * 获取当前网络所携带的统一存储空间，统一存储空间是网络存储资源的地方
+     *
      * @return 当前网络的统一存储空间
      */
     public UnifiedStorage getUnifiedStorage()
@@ -522,9 +531,9 @@ public class DimensionsNet extends SavedData
         setDirty();
         if (currentTime >= ServerConfigRuntime.crystalGenerateTime * 20)
         {
-            ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(),1);
+            ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(), 1);
             IStackType stackType = new ItemStackType(stack);
-            this.unifiedStorage.insert(stackType,false);
+            this.unifiedStorage.insert(stackType, false);
             currentTime = 0;
         }
 

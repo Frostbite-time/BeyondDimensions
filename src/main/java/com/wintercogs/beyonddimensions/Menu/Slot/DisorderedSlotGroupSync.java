@@ -32,10 +32,14 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     private AutoCloseable anySub;
     private AutoCloseable deltaSub;
 
-    /** 本 tick 待发的“最终绝对值”缓存：同一 key 仅保留最后状态 */
+    /**
+     * 本 tick 待发的“最终绝对值”缓存：同一 key 仅保留最后状态
+     */
     private final Map<IStackType, Long> pendingAbsolute = new HashMap<>();
 
-    /** Any 事件置脏：下一 tick 做一次全量 */
+    /**
+     * Any 事件置脏：下一 tick 做一次全量
+     */
     private boolean dirtyFullRescan = false;
 
     public DisorderedSlotGroupSync(BDBaseMenu menu, int id, UnifiedStorage storage)
@@ -44,24 +48,43 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         this.groupId = id;
         this.storage = storage;
 
-        if (isServerSide()) {
-            this.anySub   = storage.subscribeAny(menu, this::onAnyChange);
+        if (isServerSide())
+        {
+            this.anySub = storage.subscribeAny(menu, this::onAnyChange);
             this.deltaSub = storage.subscribeDelta(menu, this::onDeltaChange);
         }
     }
 
     public void dispose()
     {
-        try { if (anySub != null) anySub.close(); } catch (Throwable ignored) {}
-        try { if (deltaSub != null) deltaSub.close(); } catch (Throwable ignored) {}
+        try
+        {
+            if (anySub != null) anySub.close();
+        }
+        catch (Throwable ignored)
+        {
+        }
+        try
+        {
+            if (deltaSub != null) deltaSub.close();
+        }
+        catch (Throwable ignored)
+        {
+        }
         anySub = null;
         deltaSub = null;
     }
 
-    private boolean isServerSide() { return menu.player instanceof ServerPlayer; }
+    private boolean isServerSide()
+    {
+        return menu.player instanceof ServerPlayer;
+    }
 
     @Override
-    public int getGroupId() { return groupId; }
+    public int getGroupId()
+    {
+        return groupId;
+    }
 
     /* -------------------- 事件回调 -------------------- */
 
@@ -71,7 +94,9 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         dirtyFullRescan = true;
     }
 
-    /** 将 delta 累加到“基线 + 本 tick 已缓存的绝对值”上，得到该 key 的最终绝对值 */
+    /**
+     * 将 delta 累加到“基线 + 本 tick 已缓存的绝对值”上，得到该 key 的最终绝对值
+     */
     private void onDeltaChange(IStackType key, long size, boolean insert)
     {
         if (!isServerSide() || key == null || size == 0) return;
@@ -89,7 +114,8 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     {
         if (!isServerSide()) return;
 
-        if (!initialized) {
+        if (!initialized)
+        {
             initialized = true;
             dirtyFullRescan = true; // 首次强制全量
         }
@@ -104,7 +130,8 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         List<IStackType> keys = new ArrayList<>();
         List<Long> counts = new ArrayList<>();
 
-        if (dirtyFullRescan) {
+        if (dirtyFullRescan)
+        {
             // ===== 全量：构建 nowMap，比较 lastMap 差异，发送绝对值 =====
             Map<IStackType, Long> nowMap = buildNowMapFromStorage();
 
@@ -112,10 +139,12 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
             Set<IStackType> all = new HashSet<>(lastMap.keySet());
             all.addAll(nowMap.keySet());
 
-            for (IStackType k : all) {
+            for (IStackType k : all)
+            {
                 long last = lastMap.getOrDefault(k, 0L);
-                long now  = nowMap.getOrDefault(k, 0L);
-                if (now != last) {
+                long now = nowMap.getOrDefault(k, 0L);
+                if (now != last)
+                {
                     keys.add(k.copy());
                     counts.add(now);
                 }
@@ -126,10 +155,13 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
             lastMap.clear();
             lastMap.putAll(nowMap);
             dirtyFullRescan = false;
-        } else {
+        }
+        else
+        {
             // ===== 非全量：仅发送本 tick 的最终绝对值 =====
 
-            for (Map.Entry<IStackType, Long> e : pendingAbsolute.entrySet()) {
+            for (Map.Entry<IStackType, Long> e : pendingAbsolute.entrySet())
+            {
                 keys.add(e.getKey().copy());
                 counts.add(e.getValue());
             }
@@ -143,7 +175,8 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
 
         // 分包（协议：key.serialize + long 绝对数量）
         List<DisorderedSlotGroupSyncPacket> packets = buildBatchedPackets(keys, counts);
-        for (DisorderedSlotGroupSyncPacket pkt : packets) {
+        for (DisorderedSlotGroupSyncPacket pkt : packets)
+        {
             PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) menu.player), pkt);
         }
     }
@@ -151,7 +184,8 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     private Map<IStackType, Long> buildNowMapFromStorage()
     {
         Map<IStackType, Long> now = new HashMap<>();
-        for (IStackType st : this.storage.getStorage()) {
+        for (IStackType st : this.storage.getStorage())
+        {
             long amt = st.getStackAmount();
             if (amt <= 0) continue;
             now.merge(st, amt, Long::sum); // IStackType 不含数量 → 合并数量
@@ -159,21 +193,29 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         return now;
     }
 
-    /** 非全量发送后把变更直接打到基线：0→remove, >0→put */
+    /**
+     * 非全量发送后把变更直接打到基线：0→remove, >0→put
+     */
     private void applyIncrementalToBaseline(Map<IStackType, Long> applied)
     {
-        for (Map.Entry<IStackType, Long> e : applied.entrySet()) {
+        for (Map.Entry<IStackType, Long> e : applied.entrySet())
+        {
             IStackType k = e.getKey();
             long v = e.getValue();
-            if (v == 0L) {
+            if (v == 0L)
+            {
                 lastMap.remove(k);
-            } else {
+            }
+            else
+            {
                 lastMap.put(k, v);
             }
         }
     }
 
-    /** 分包估算：IStackType + long(绝对数量) */
+    /**
+     * 分包估算：IStackType + long(绝对数量)
+     */
     private List<DisorderedSlotGroupSyncPacket> buildBatchedPackets(
             List<IStackType> keys,
             List<Long> counts
@@ -183,7 +225,8 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         List<DisorderedSlotGroupSyncPacket> packets = new ArrayList<>(Math.max(1, n / 128));
         List<Integer> entrySizes = new ArrayList<>(n);
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++)
+        {
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             IStackType k = keys.get(i);
             if (k != null) k.serialize(buf);
@@ -192,12 +235,14 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         }
 
         List<IStackType> batchKeys = new ArrayList<>();
-        List<Long>       batchCounts = new ArrayList<>();
+        List<Long> batchCounts = new ArrayList<>();
         int currentSize = 0;
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++)
+        {
             int entrySize = entrySizes.get(i);
-            if (currentSize + entrySize > MAX_PACKET_SIZE && !batchKeys.isEmpty()) {
+            if (currentSize + entrySize > MAX_PACKET_SIZE && !batchKeys.isEmpty())
+            {
                 packets.add(new DisorderedSlotGroupSyncPacket(
                         groupId,
                         new ArrayList<>(batchKeys),
@@ -211,7 +256,8 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
             batchCounts.add(counts.get(i));
             currentSize += entrySize;
         }
-        if (!batchKeys.isEmpty()) {
+        if (!batchKeys.isEmpty())
+        {
             packets.add(new DisorderedSlotGroupSyncPacket(groupId, batchKeys, batchCounts));
         }
         return packets;
@@ -224,7 +270,8 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     {
         UnifiedStorage clientStorage = storage;
         int n = Math.min(stacks.size(), absoluteCounts.size());
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++)
+        {
             IStackType key = stacks.get(i);
             long absolute = absoluteCounts.get(i);
             if (key == null) continue;
@@ -233,5 +280,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     }
 
     @Override
-    public void afterLoadChange() { }
+    public void afterLoadChange()
+    {
+    }
 }

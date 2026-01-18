@@ -13,7 +13,8 @@ public class ItemSourceProvider implements ICapabilityProvider
     private final ItemSourceContentAdp impl; // 你自己的实现
     private final LazyOptional<ISourceCap> opt;
 
-    public ItemSourceProvider(ItemStack stack) {
+    public ItemSourceProvider(ItemStack stack)
+    {
         this.stack = stack;
         this.impl = new ItemSourceContentAdp(stack);
         this.opt = LazyOptional.of(() -> impl);

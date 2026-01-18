@@ -20,22 +20,24 @@ import net.minecraft.world.inventory.Slot;
 public class SlotDragHandler implements EmiDragDropHandler<Screen>
 {
 
-    public SlotDragHandler() {}
+    public SlotDragHandler()
+    {
+    }
 
     @Override
     public void render(Screen screen, EmiIngredient dragged, GuiGraphics draw, int mouseX, int mouseY, float delta)
     {
-        if(!(screen instanceof BDBaseGUI bdGUI))
+        if (!(screen instanceof BDBaseGUI bdGUI))
             return;
 
-        for(Slot slot : bdGUI.getMenu().slots)
+        for (Slot slot : bdGUI.getMenu().slots)
         {
-            if(slot instanceof AbstractStackTypedSlot sSlot && sSlot.isFake())
+            if (slot instanceof AbstractStackTypedSlot sSlot && sSlot.isFake())
             {
                 int slotLeft = bdGUI.getGuiLeft() + slot.x;
                 int slotTop = bdGUI.getGuiTop() + slot.y;
 
-                draw.fill( slotLeft, slotTop,
+                draw.fill(slotLeft, slotTop,
                         slotLeft + 16, slotTop + 16,
                         0x8822BB33);
             }
@@ -45,18 +47,18 @@ public class SlotDragHandler implements EmiDragDropHandler<Screen>
     @Override
     public boolean dropStack(Screen screen, EmiIngredient ingredient, int x, int y)
     {
-        if(!(screen instanceof BDBaseGUI bdGUI))
+        if (!(screen instanceof BDBaseGUI bdGUI))
             return false;
 
-        for(Slot slot : bdGUI.getMenu().slots)
+        for (Slot slot : bdGUI.getMenu().slots)
         {
-            if(slot instanceof AbstractStackTypedSlot sSlot && sSlot.isFake())
+            if (slot instanceof AbstractStackTypedSlot sSlot && sSlot.isFake())
             {
                 int slotLeft = bdGUI.getGuiLeft() + slot.x;
                 int slotTop = bdGUI.getGuiTop() + slot.y;
                 Rect2i slotRect = new Rect2i(slotLeft, slotTop, 16, 16);
 
-                if(slotRect.contains(x, y))
+                if (slotRect.contains(x, y))
                 {
                     // stackKey 是如 Item Fluid的类
                     Object stackKey = ingredient.getEmiStacks().get(0).getKey();

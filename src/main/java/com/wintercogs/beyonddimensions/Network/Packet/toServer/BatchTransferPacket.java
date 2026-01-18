@@ -18,20 +18,20 @@ public record BatchTransferPacket(IStackType clickStack, boolean dirToStorage)
 
     private void handle(NetworkEvent.Context context)
     {
-        if(clickStack() instanceof ItemStackType clickItem)
+        if (clickStack() instanceof ItemStackType clickItem)
         {
             Player player = context.getSender();
 
-            if(player.containerMenu instanceof DimensionsNetMenu menu)
+            if (player.containerMenu instanceof DimensionsNetMenu menu)
             {
                 // 批量转移到存储
-                if(dirToStorage)
+                if (dirToStorage)
                 {
-                    for(Slot invSlot : menu.slots)
+                    for (Slot invSlot : menu.slots)
                     {
-                        if(menu.inventoryStartIndex<=invSlot.index&& invSlot.index<menu.inventoryEndIndex)
+                        if (menu.inventoryStartIndex <= invSlot.index && invSlot.index < menu.inventoryEndIndex)
                         {
-                            if(ItemStack.isSameItemSameTags(clickItem.getStack(), invSlot.getItem()))
+                            if (ItemStack.isSameItemSameTags(clickItem.getStack(), invSlot.getItem()))
                                 menu.customClickHandler(invSlot.index, new ItemStackType(invSlot.getItem()), 0, true);
                         }
                     }
@@ -46,16 +46,16 @@ public record BatchTransferPacket(IStackType clickStack, boolean dirToStorage)
                         IStackType trueStack = storage.getStackByStack(clickStack).copyWithCount(clickStack.getStackAmount());
 
                         // 遍历目标槽位
-                        for(int targetSlotIndex=menu.inventoryStartIndex; targetSlotIndex<menu.inventoryEndIndex && !trueStack.isEmpty(); targetSlotIndex++)
+                        for (int targetSlotIndex = menu.inventoryStartIndex; targetSlotIndex < menu.inventoryEndIndex && !trueStack.isEmpty(); targetSlotIndex++)
                         {
                             Slot slot = menu.slots.get(targetSlotIndex);
 
-                            if(trueStack instanceof ItemStackType trueItemTypedStack)
+                            if (trueStack instanceof ItemStackType trueItemTypedStack)
                             {
-                                ItemStack extract = (ItemStack) storage.extract(trueItemTypedStack,false).getStack();
+                                ItemStack extract = (ItemStack) storage.extract(trueItemTypedStack, false).getStack();
                                 ItemStack remaining = slot.safeInsert(extract);
-                                if(!remaining.isEmpty())
-                                    storage.insert(new ItemStackType(remaining),false);
+                                if (!remaining.isEmpty())
+                                    storage.insert(new ItemStackType(remaining), false);
                                 trueStack = new ItemStackType(remaining.copy());
                             }
                         }
@@ -71,7 +71,8 @@ public record BatchTransferPacket(IStackType clickStack, boolean dirToStorage)
 
     public static void handle(BatchTransferPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
             context.enqueueWork(() -> packet.handle(context));
             context.setPacketHandled(true);

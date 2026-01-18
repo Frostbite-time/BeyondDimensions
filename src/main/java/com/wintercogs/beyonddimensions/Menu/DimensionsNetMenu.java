@@ -6,7 +6,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Integration.JECharacters.PinInMatches;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedSlotGroupSync;
@@ -58,25 +57,27 @@ public class DimensionsNetMenu extends BDBaseMenu
 
     /**
      * 客户端构造函数
+     *
      * @param playerInventory 玩家背包
      */
     public DimensionsNetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
-        this(UIRegister.Dimensions_Net_Menu.get(),id, playerInventory, new DimensionsNet(true));
+        this(UIRegister.Dimensions_Net_Menu.get(), id, playerInventory, new DimensionsNet(true));
     }
 
     /**
      * 服务端构造函数
+     *
      * @param playerInventory 玩家背包
-     * @param data 维度网络信息，包含了存储信息
+     * @param data            维度网络信息，包含了存储信息
      */
     public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, DimensionsNet data)
     {
-        super(menuType, id,playerInventory);
+        super(menuType, id, playerInventory);
 
         // 初始化搜索方案
-        if(player.level().isClientSide())
+        if (player.level().isClientSide())
         {
             this.maxLines = CommonConfigRuntime.uiPageNum;
             this.searchText = CommonConfigRuntime.uiSearch;
@@ -86,17 +87,18 @@ public class DimensionsNetMenu extends BDBaseMenu
         storage = data.getUnifiedStorage();
         viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
 
-        addSlotGroupSync(new DisorderedSlotGroupSync(this,slotGroupSyncs.size(),storage) {
+        addSlotGroupSync(new DisorderedSlotGroupSync(this, slotGroupSyncs.size(), storage)
+        {
             @Override
             public void afterLoadChange()
             {
                 // 按住shift时锁定排序
-                if(!hasShiftDown)
+                if (!hasShiftDown)
                     updateViewerStorage();
                 else
                     updateOnlyCountAndNewViewer();
 
-                if(!cacheTooltip)
+                if (!cacheTooltip)
                 {
                     // 调用异步缓存
                     TooltipHelper.readAsCache(storage.getStorage(), player, TooltipFlag.Default.NORMAL);
@@ -140,13 +142,13 @@ public class DimensionsNetMenu extends BDBaseMenu
         // 默认添加99行，但将99之外的行全部设置为不激活状态，以实现动态增加和减少行数
         storageStartIndex = slots.size();
         vanillaQuickMoveStartIndex = storageStartIndex;
-        if(player.level().isClientSide())
+        if (player.level().isClientSide())
         {
             for (int row = 0; row < 99; ++row)
             {
                 for (int col = 0; col < 9; ++col)
                 {
-                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this,viewerStorage,-1,inventoryStartIndex,inventoryEndIndex,  8 + col * 18, 25 + row * 18);
+                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, viewerStorage, -1, inventoryStartIndex, inventoryEndIndex, 8 + col * 18, 25 + row * 18);
                     if (row >= getLines())
                         newSlot.setActive(false);
                     this.addSlot(newSlot);
@@ -159,7 +161,7 @@ public class DimensionsNetMenu extends BDBaseMenu
             {
                 for (int col = 0; col < 9; ++col)
                 {
-                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this,storage,-1,inventoryStartIndex,inventoryEndIndex, 8 + col * 18, 25 + row * 18);
+                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, storage, -1, inventoryStartIndex, inventoryEndIndex, 8 + col * 18, 25 + row * 18);
                     if (row >= getLines())
                         newSlot.setActive(false);
                     this.addSlot(newSlot);
@@ -177,12 +179,12 @@ public class DimensionsNetMenu extends BDBaseMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 25+ (getLines()-1)*18 + 26 + 6 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 25 + (getLines() - 1) * 18 + 26 + 6 + row * 18));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 25+ (getLines()-1)*18 + 26 + 6 + 3 * 18+ 4));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 25 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4));
         }
         inventoryEndIndex = slots.size();
     }
@@ -192,11 +194,11 @@ public class DimensionsNetMenu extends BDBaseMenu
     public void rebuildSlots()
     {
         int sSlotNum = 0;
-        for(Slot slot : slots)
+        for (Slot slot : slots)
         {
-            if(slot instanceof AbstractStackTypedSlot sSlot)
+            if (slot instanceof AbstractStackTypedSlot sSlot)
             {
-                if(sSlotNum/9 < getLines())
+                if (sSlotNum / 9 < getLines())
                     sSlot.setActive(true);
                 else
                     sSlot.setActive(false);
@@ -205,18 +207,18 @@ public class DimensionsNetMenu extends BDBaseMenu
         }
 
         int slotNum = 0;
-        for(int i = inventoryStartIndex; i < inventoryEndIndex; ++i)
+        for (int i = inventoryStartIndex; i < inventoryEndIndex; ++i)
         {
             Slot slot = slots.get(i);
-            if(slot != null)
+            if (slot != null)
             {
-                if(slotNum/9<3)
+                if (slotNum / 9 < 3)
                 {
-                    slot.y = 25+ (getLines()-1)*18 + 26 + 6 + slotNum/9 * 18;
+                    slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + slotNum / 9 * 18;
                 }
                 else
                 {
-                    slot.y = 25+ (getLines()-1)*18 + 26 + 6 + 3 * 18+ 4;
+                    slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4;
                 }
 
 
@@ -224,7 +226,6 @@ public class DimensionsNetMenu extends BDBaseMenu
             }
         }
     }
-
 
 
     /**
@@ -235,9 +236,9 @@ public class DimensionsNetMenu extends BDBaseMenu
     public void updateViewerStorage()
     {
         viewerStorage.clearStorage();
-        for(IStackType stack : this.storage.getStorage())
+        for (IStackType stack : this.storage.getStorage())
         {
-            this.viewerStorage.insert(stack.copy(),false);
+            this.viewerStorage.insert(stack.copy(), false);
         }
         buildIndexList(new ArrayList<>(viewerStorage.getStorage()), true);
     }
@@ -252,11 +253,13 @@ public class DimensionsNetMenu extends BDBaseMenu
         Map<IStackType, Long> storageMap = new HashMap<>();
 
         // 填充主存储物品数量 (O(n))
-        for (IStackType stack : storage.getStorage()) {
+        for (IStackType stack : storage.getStorage())
+        {
             storageMap.put(stack, stack.getStackAmount());
         }
         // 更新查看者存储的数量 (O(m))
-        for (IStackType viewerStack : viewerStorage.getStorage()) {
+        for (IStackType viewerStack : viewerStorage.getStorage())
+        {
             // 使用哈希表直接查找数量，不存在时默认为0
             long amount = storageMap.getOrDefault(viewerStack, 0L);
             viewerStack.setStackAmount(amount);
@@ -266,12 +269,12 @@ public class DimensionsNetMenu extends BDBaseMenu
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
     public void buildIndexList(ArrayList<IStackType<?>> itemStorage, boolean needsUpdateCacheIndex)
     {
-        if(!this.player.level().isClientSide())
+        if (!this.player.level().isClientSide())
         {
             return;
         }
         // 1 构建正确的索引数据
-        if(needsUpdateCacheIndex || cacheIndex == null)
+        if (needsUpdateCacheIndex || cacheIndex == null)
         {
             cacheIndex = buildStorageWithCurrentState(new ArrayList<>(itemStorage));
         }
@@ -300,7 +303,7 @@ public class DimensionsNetMenu extends BDBaseMenu
     public void loadIndexList(ArrayList<Integer> list)
     {
         int listIndex = 0;
-        for(int slotIndex = storageStartIndex;listIndex<list.size() && slotIndex<storageEndIndex;slotIndex++)
+        for (int slotIndex = storageStartIndex; listIndex < list.size() && slotIndex < storageEndIndex; slotIndex++)
         {
             ((AbstractStackTypedSlot) slots.get(slotIndex)).setTheSlotIndex(list.get(listIndex));
             listIndex++;
@@ -309,6 +312,7 @@ public class DimensionsNetMenu extends BDBaseMenu
 
     /**
      * 设置当前菜单searchText，过程中会将其按照英文本地化惯例进行小写化处理
+     *
      * @param text 传入的文本
      */
     public void loadSearchText(String text)
@@ -319,6 +323,7 @@ public class DimensionsNetMenu extends BDBaseMenu
 
     /**
      * 根据当前的搜索状态、按钮状态对存储进行排序
+     *
      * @param unifiedStorage 要排序的存储
      * @return 完成排序的索引列表
      */
@@ -328,7 +333,7 @@ public class DimensionsNetMenu extends BDBaseMenu
         final ArrayList<Keyed> filtered = new ArrayList<>(unifiedStorage.size());
         final boolean needSearch = this.searchText != null && !this.searchText.isEmpty();
         final String lowerSearch = needSearch ? this.searchText.toLowerCase(Locale.ENGLISH) : "";
-        final String[] parts = needSearch ? splitSearch(lowerSearch) : new String[]{"","",""};
+        final String[] parts = needSearch ? splitSearch(lowerSearch) : new String[]{"", "", ""};
         final String namePart = parts[0], idPart = parts[1], tipPart = parts[2];
         final boolean hasSymbol = needSearch && !(idPart.isEmpty() && tipPart.isEmpty());
 
@@ -351,16 +356,16 @@ public class DimensionsNetMenu extends BDBaseMenu
             if (hasSymbol) // AND 规则
             {
                 if (!namePart.isEmpty() && !checkTextMatches(nameKey, namePart)) continue;
-                if (!idPart.isEmpty()   && !modIdKey.contains(idPart))           continue;
-                if (!tipPart.isEmpty()  && !checkTooltipMatches(s, tipPart))     continue;
+                if (!idPart.isEmpty() && !modIdKey.contains(idPart)) continue;
+                if (!tipPart.isEmpty() && !checkTooltipMatches(s, tipPart)) continue;
                 filtered.add(new Keyed(s, i, nameKey, modIdKey, s.getStackAmount()));
             }
             else // OR 规则
             {
                 boolean matched = false;
                 if (!namePart.isEmpty() && checkTextMatches(nameKey, namePart)) matched = true;
-                if (!matched && modIdKey.contains(namePart))                    matched = true;
-                if (!matched && checkTooltipMatches(s, namePart))               matched = true;
+                if (!matched && modIdKey.contains(namePart)) matched = true;
+                if (!matched && checkTooltipMatches(s, namePart)) matched = true;
                 if (matched) filtered.add(new Keyed(s, i, nameKey, modIdKey, s.getStackAmount()));
             }
         }
@@ -422,11 +427,11 @@ public class DimensionsNetMenu extends BDBaseMenu
 
         boolean matchPinyin;
 
-        if(!Minecraft.getInstance().options.languageCode.startsWith("zh"))
+        if (!Minecraft.getInstance().options.languageCode.startsWith("zh"))
         {
             matchPinyin = false; // 非中文地区默认不匹配
         }
-        else if(BeyondDimensions.JECharactersLoaded)
+        else if (BeyondDimensions.JECharactersLoaded)
         {
             matchPinyin = PinInMatches.contains(srcText, inputText);
         }
@@ -436,16 +441,18 @@ public class DimensionsNetMenu extends BDBaseMenu
             String firstPinyin = TinyPinyinUtils.getFirstPinYin(srcText).toLowerCase(Locale.ENGLISH);
             matchPinyin = allPinyin.contains(inputText) || firstPinyin.contains(inputText);
         }
-        return matchText||matchPinyin;
+        return matchText || matchPinyin;
     }
 
     /**
      * 检查文本是否存在于目标物品堆叠
-     * @param stack 目标物品堆叠
+     *
+     * @param stack     目标物品堆叠
      * @param matchText 文本
      * @return 结果为真则意味存在
      */
-    private boolean checkTooltipMatches(IStackType stack, String matchText) {
+    private boolean checkTooltipMatches(IStackType stack, String matchText)
+    {
         List<Component> toolTips = TooltipHelper.getTooltipLines(stack,
                 player,
                 Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
@@ -464,55 +471,64 @@ public class DimensionsNetMenu extends BDBaseMenu
      * 把搜索串拆成 “名称 / 模组ID / Tooltip” 三段，顺序任意。
      * 返回 String[3] ⇒ [namePart, idPart, tooltipPart]，不存在则为空串。
      */
-    private static String[] splitSearch(String s) {
-        if (s == null) return new String[] {"", "", ""};
+    private static String[] splitSearch(String s)
+    {
+        if (s == null) return new String[]{"", "", ""};
 
         s = s.toLowerCase(Locale.ENGLISH);
-        int at   = s.indexOf('@');
+        int at = s.indexOf('@');
         int hash = s.indexOf('#');
 
         // 都没有特殊符号
-        if (at < 0 && hash < 0) return new String[] {s, "", ""};
+        if (at < 0 && hash < 0) return new String[]{s, "", ""};
 
         String namePart = "";
-        String idPart   = "";
-        String tipPart  = "";
+        String idPart = "";
+        String tipPart = "";
 
         // 三种情况：只含@、只含#、都含且顺序不定
-        if (at >= 0 && hash >= 0) {
+        if (at >= 0 && hash >= 0)
+        {
             // 同时存在：先找较小的索引拆 namePart
             int first = Math.min(at, hash);
-            namePart  = s.substring(0, first);
+            namePart = s.substring(0, first);
 
-            if (at < hash) {                    //  @ ... #
-                idPart  = s.substring(at + 1, hash);
+            if (at < hash)
+            {                    //  @ ... #
+                idPart = s.substring(at + 1, hash);
                 tipPart = s.substring(hash + 1);
-            } else {                            //  # ... @
-                tipPart = s.substring(hash + 1, at);
-                idPart  = s.substring(at + 1);
             }
-        } else if (at >= 0) {                   // 只含 @
+            else
+            {                            //  # ... @
+                tipPart = s.substring(hash + 1, at);
+                idPart = s.substring(at + 1);
+            }
+        }
+        else if (at >= 0)
+        {                   // 只含 @
             namePart = s.substring(0, at);
-            idPart   = s.substring(at + 1);
-        } else {                                // 只含 #
+            idPart = s.substring(at + 1);
+        }
+        else
+        {                                // 只含 #
             namePart = s.substring(0, hash);
-            tipPart  = s.substring(hash + 1);
+            tipPart = s.substring(hash + 1);
         }
 
-        return new String[] {namePart, idPart, tipPart};
+        return new String[]{namePart, idPart, tipPart};
     }
 
     public void updateScrollLineData(int dataSize)
     {
-        maxLineData = dataSize / 9 ;
-        if(dataSize % 9 !=0) //如果余数不为0，说明还有一行，加1
+        maxLineData = dataSize / 9;
+        if (dataSize % 9 != 0) //如果余数不为0，说明还有一行，加1
         {
             maxLineData++;
         }
         maxLineData -= getLines();
-        maxLineData = Math.max(maxLineData,0);
-        lineData = Math.max(lineData,0);
-        lineData = Math.min(lineData,maxLineData);
+        maxLineData = Math.max(maxLineData, 0);
+        lineData = Math.max(lineData, 0);
+        lineData = Math.min(lineData, maxLineData);
     }
 
     @Override

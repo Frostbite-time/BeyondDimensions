@@ -18,23 +18,25 @@ import javax.annotation.Nullable;
 
 public class NetPumpBlock extends BaseMachineBlock
 {
-    public NetPumpBlock(BlockBehaviour.Properties properties) {
+    public NetPumpBlock(BlockBehaviour.Properties properties)
+    {
         super(properties.noOcclusion());
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new NetPumpBlockEntity(blockPos,blockState);
+    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
+    {
+        return new NetPumpBlockEntity(blockPos, blockState);
     }
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
     {
         super.use(state, level, pos, player, hand, hitResult);
-        if(!level.isClientSide()&&!player.isShiftKeyDown())
+        if (!level.isClientSide() && !player.isShiftKeyDown())
         {
             NetPumpBlockEntity blockEntity = (NetPumpBlockEntity) level.getBlockEntity(pos);
-            NetworkHooks.openScreen((ServerPlayer) player, blockEntity,pos);
+            NetworkHooks.openScreen((ServerPlayer) player, blockEntity, pos);
         }
         return InteractionResult.SUCCESS;
     }
@@ -43,7 +45,8 @@ public class NetPumpBlock extends BaseMachineBlock
     public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor)
     {
         super.onNeighborChange(state, level, pos, neighbor);
-        if (level.getBlockEntity(pos) instanceof NetPumpBlockEntity blockEntity) {
+        if (level.getBlockEntity(pos) instanceof NetPumpBlockEntity blockEntity)
+        {
             blockEntity.setNeedsCapabilityUpdate();
         }
     }

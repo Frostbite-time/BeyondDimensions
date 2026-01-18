@@ -15,7 +15,8 @@ import java.util.List;
 
 public class UnstableSpaceTimeFragment extends Item
 {
-    public UnstableSpaceTimeFragment(Properties properties) {
+    public UnstableSpaceTimeFragment(Properties properties)
+    {
         super(properties);
     }
 
@@ -24,31 +25,39 @@ public class UnstableSpaceTimeFragment extends Item
     {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
 
-        tooltipComponents.add(Component.translatable("tooltip.item.unstable_space_time.long_data", getRemainingTime(stack)/10));
+        tooltipComponents.add(Component.translatable("tooltip.item.unstable_space_time.long_data", getRemainingTime(stack) / 10));
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected)
+    {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
-        if (!level.isClientSide() && entity instanceof Player player) {
+        if (!level.isClientSide() && entity instanceof Player player)
+        {
             CompoundTag tag = stack.getOrCreateTag();
 
             // 初始化默认值
-            if (!tag.contains("LongData")) {
+            if (!tag.contains("LongData"))
+            {
                 tag.putLong("LongData", 3600L);
             }
-            if (!tag.contains("TimeLine")) {
+            if (!tag.contains("TimeLine"))
+            {
                 tag.putLong("TimeLine", 0L);
             }
             final long currentTick = level.getGameTime();
             final long lastProcessed = tag.getLong("TimeLine");
 
-            if (currentTick - lastProcessed > 200L) {
+            if (currentTick - lastProcessed > 200L)
+            {
                 long currentValue = tag.getLong("LongData");
 
-                if (currentValue > 0) {
+                if (currentValue > 0)
+                {
                     tag.putLong("LongData", currentValue - 10);
-                } else {
+                }
+                else
+                {
                     // 替换物品并保持堆叠数量
                     ItemStack stable = new ItemStack(ModItems.STABLE_SPACE_TIME_FRAGMENT.get(), stack.getCount());
                     player.getInventory().setItem(slotId, stable);
@@ -59,9 +68,12 @@ public class UnstableSpaceTimeFragment extends Item
             }
         }
     }
+
     // 辅助方法获取剩余时间
-    public static long getRemainingTime(ItemStack stack) {
-        if (stack.hasTag() && stack.getTag().contains("LongData")) {
+    public static long getRemainingTime(ItemStack stack)
+    {
+        if (stack.hasTag() && stack.getTag().contains("LongData"))
+        {
             return stack.getTag().getLong("LongData");
         }
         return 3600L; // 默认值

@@ -18,7 +18,7 @@ public record QuickDataTagPacket(CompoundTag tag)
     private void handleServer(NetworkEvent.Context context)
     {
         Player player = context.getSender();
-        if(player.containerMenu instanceof BDBaseMenu menu)
+        if (player.containerMenu instanceof BDBaseMenu menu)
         {
             menu.readQuickDataTag(tag());
         }
@@ -28,7 +28,7 @@ public record QuickDataTagPacket(CompoundTag tag)
     private void handleClient(NetworkEvent.Context context)
     {
         Player player = Minecraft.getInstance().player;
-        if(player.containerMenu instanceof BDBaseMenu menu)
+        if (player.containerMenu instanceof BDBaseMenu menu)
         {
             menu.readQuickDataTag(tag());
         }
@@ -37,17 +37,18 @@ public record QuickDataTagPacket(CompoundTag tag)
 
     public static void handle(QuickDataTagPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
             NetworkDirection direction = context.getDirection();
-            if(direction == NetworkDirection.PLAY_TO_CLIENT)
+            if (direction == NetworkDirection.PLAY_TO_CLIENT)
             {
                 context.enqueueWork(() ->
                         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> packet.handleClient(context))
                 );
                 context.setPacketHandled(true);
             }
-            else if(direction == NetworkDirection.PLAY_TO_SERVER)
+            else if (direction == NetworkDirection.PLAY_TO_SERVER)
             {
                 context.enqueueWork(() -> packet.handleServer(context));
                 context.setPacketHandled(true);

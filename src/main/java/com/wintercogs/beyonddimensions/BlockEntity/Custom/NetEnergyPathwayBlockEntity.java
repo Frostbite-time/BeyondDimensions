@@ -32,30 +32,36 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
 
     private final Direction[] directions = Direction.values();
 
-    public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState) {
+    public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState)
+    {
         super(ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
         addNetChangeTask(this::clearCapCache);
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap,Direction side)
+    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
     {
-        if(cap == ForgeCapabilities.ENERGY)
+        if (cap == ForgeCapabilities.ENERGY)
         {
             DimensionsNet net = getNet();
-            if (net == null) {
+            if (net == null)
+            {
                 return LazyOptional.empty();
             }
-            if (!opt.isPresent()) {
-                if (popMode == PopMode.OPEN) {
+            if (!opt.isPresent())
+            {
+                if (popMode == PopMode.OPEN)
+                {
                     opt = LazyOptional.of(() -> new EnergyStorage(0));
-                } else {
+                }
+                else
+                {
                     opt = LazyOptional.of(() -> new EnergyUnifiedStorageHandler(net.getUnifiedStorage()));
                 }
             }
             return opt.cast();
         }
-        return super.getCapability(cap,side);
+        return super.getCapability(cap, side);
     }
 
     @Override
@@ -78,7 +84,8 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
 
     public void setPopMode(PopMode newMode)
     {
-        if (this.popMode != newMode) {
+        if (this.popMode != newMode)
+        {
             this.popMode = newMode;
             clearCapCache();
             setChanged();
@@ -101,7 +108,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     public void workContent()
     {
         super.workContent();
-        if(popMode == PopMode.OPEN)
+        if (popMode == PopMode.OPEN)
         {
             popEnergy();
         }
@@ -111,12 +118,12 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     {
         DimensionsNet net = getNet();
 
-        if(net==null)
+        if (net == null)
         {
             return;
         }
 
-        for(Direction dir: directions)
+        for (Direction dir : directions)
         {
             BlockPos targetPos = this.getBlockPos().relative(dir);
             BlockEntity neighbor = level.getBlockEntity(targetPos);
@@ -128,9 +135,9 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
                 {
                     IEnergyStorage otherStorage = otherStorageOptional.resolve().get();
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
-                    int maxExtract = (int)Math.min(net.getUnifiedStorage().getEnergyStored(), Integer.MAX_VALUE);
+                    int maxExtract = (int) Math.min(net.getUnifiedStorage().getEnergyStored(), Integer.MAX_VALUE);
                     int receive = otherStorage.receiveEnergy(maxExtract, false);
-                    net.getUnifiedStorage().extract(new EnergyStackType(receive),false);
+                    net.getUnifiedStorage().extract(new EnergyStackType(receive), false);
                 }
             }
         }
@@ -143,11 +150,11 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
 
         // 旧数据兼容
         String popModeNew = tag.getString("popMode");
-        if(!popModeNew.isEmpty())
+        if (!popModeNew.isEmpty())
         {
             this.popMode = PopMode.valueOf(popModeNew);
         }
-        else if(tag.getBoolean("popMode"))
+        else if (tag.getBoolean("popMode"))
         {
             this.popMode = PopMode.OPEN;
         }
@@ -161,7 +168,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     protected void saveAdditional(CompoundTag tag)
     {
         super.saveAdditional(tag);
-        tag.putString("popMode",this.popMode.name());
+        tag.putString("popMode", this.popMode.name());
     }
 
     @Override

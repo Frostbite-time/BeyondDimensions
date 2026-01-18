@@ -27,7 +27,7 @@ public class NetFurnaceBlock extends BaseMachineBlock
 {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final BooleanProperty LIT     = BlockStateProperties.LIT;
+    public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
     public NetFurnaceBlock(Properties properties)
     {
@@ -40,39 +40,44 @@ public class NetFurnaceBlock extends BaseMachineBlock
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+    {
         builder.add(FACING, LIT);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+    public BlockState getStateForPlacement(BlockPlaceContext ctx)
+    {
         return this.defaultBlockState().setValue(
                 FACING, ctx.getHorizontalDirection().getOpposite());
     }
 
     @Override
-    public BlockState rotate(BlockState state, Rotation rot) {
+    public BlockState rotate(BlockState state, Rotation rot)
+    {
         return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
     }
 
     @Override
-    public BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror)
+    {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new NetFurnaceBlockEntity(blockPos,blockState);
+    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
+    {
+        return new NetFurnaceBlockEntity(blockPos, blockState);
     }
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
     {
-        super.use(state,level,pos,player,hand,hitResult);
-        if(!level.isClientSide()&&!player.isShiftKeyDown())
+        super.use(state, level, pos, player, hand, hitResult);
+        if (!level.isClientSide() && !player.isShiftKeyDown())
         {
-            NetworkHooks.openScreen((ServerPlayer) player,(NetFurnaceBlockEntity)level.getBlockEntity(pos),pos);
+            NetworkHooks.openScreen((ServerPlayer) player, (NetFurnaceBlockEntity) level.getBlockEntity(pos), pos);
         }
         return InteractionResult.SUCCESS;
     }
@@ -81,8 +86,10 @@ public class NetFurnaceBlock extends BaseMachineBlock
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
     {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof NetFurnaceBlockEntity blockEntity) {
+        if (!state.is(newState.getBlock()))
+        {
+            if (level.getBlockEntity(pos) instanceof NetFurnaceBlockEntity blockEntity)
+            {
                 level.updateNeighbourForOutputSignal(pos, this);
                 blockEntity.dropContent();
             }

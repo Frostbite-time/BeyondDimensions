@@ -45,6 +45,7 @@ public interface IStackTypedHandler
 
     /**
      * 获取指定槽位的堆叠
+     *
      * @param slot 槽位索引
      * @return 获取的堆叠，注意处理null
      */
@@ -64,6 +65,7 @@ public interface IStackTypedHandler
      * 根据传入的堆叠种类精确匹配（包括类型、内容、NBT，但不包括堆叠的当前数量），并返回找到的堆叠。
      * <p>
      * 如，传入堆叠是1个钻石，那么会返回找到的第一个钻石堆叠，不论钻石有多少个。
+     *
      * @param stackType 目标堆叠
      * @return 找到的堆叠，注意处理null
      */
@@ -73,7 +75,7 @@ public interface IStackTypedHandler
         {
             if (existing.getTypeId().equals(stackType.getTypeId()))
             {
-                if(existing.isSameTypeSameComponents(stackType))
+                if (existing.isSameTypeSameComponents(stackType))
                     return existing.copy();
             }
         }
@@ -85,7 +87,7 @@ public interface IStackTypedHandler
      */
     default boolean hasStackType(IStackType<?> other)
     {
-        if(getStackByStack(other) != null)
+        if (getStackByStack(other) != null)
             return true;
         else
             return false;
@@ -96,7 +98,7 @@ public interface IStackTypedHandler
      */
     default void setStackDirectly(int slot, IStackType<?> stack)
     {
-        getStorage().set(slot,stack.copy());
+        getStorage().set(slot, stack.copy());
         onChange();
     }
 
@@ -111,8 +113,9 @@ public interface IStackTypedHandler
 
     /**
      * 尝试将指定的堆叠插入指定的槽位，并返回余量。但注意，不要修改传入的堆叠，利用副本进行操作。
-     * @param slot 槽位索引
-     * @param stack 堆叠
+     *
+     * @param slot     槽位索引
+     * @param stack    堆叠
      * @param simulate 是否为模拟操作，如果为真，则只计算余量，不操作存储
      * @return 剩余堆叠
      */
@@ -120,11 +123,13 @@ public interface IStackTypedHandler
     {
         List<IStackType<?>> storage = getStorage();
         // 检查槽位有效性
-        if (slot < 0 || slot >= storage.size()) {
+        if (slot < 0 || slot >= storage.size())
+        {
             return stack.copy();
         }
         // 检查堆叠有效性
-        if (!isStackValid(slot, stack) || stack.isEmpty()) {
+        if (!isStackValid(slot, stack) || stack.isEmpty())
+        {
             return stack.copy();
         }
 
@@ -132,25 +137,30 @@ public interface IStackTypedHandler
         long maxInsert;
         IStackType<?> remaining;
 
-        if (current == null || current.isEmpty()) {
+        if (current == null || current.isEmpty())
+        {
             // 空槽位：创建新堆叠
             maxInsert = Math.min(stack.getStackAmount(), getSlotCapacity(slot));
-            maxInsert = Math.min(maxInsert,stack.getVanillaMaxStackSize()); // 如需突破堆叠上限，则需要重写并移除这条语句
+            maxInsert = Math.min(maxInsert, stack.getVanillaMaxStackSize()); // 如需突破堆叠上限，则需要重写并移除这条语句
             if (maxInsert <= 0) return stack.copy();
 
             remaining = stack.copyWithCount(stack.getStackAmount() - maxInsert);
-            if (!simulate) {
+            if (!simulate)
+            {
                 IStackType<?> newStack = stack.copyWithCount(maxInsert);
                 storage.set(slot, newStack);
                 onChange();
             }
-        } else {
+        }
+        else
+        {
             // 已有堆叠：检查类型一致性
-            if (!current.isSameTypeSameComponents(stack)) {
+            if (!current.isSameTypeSameComponents(stack))
+            {
                 return stack.copy();
             }
             // 计算可插入量
-            long slotCap = Math.min(getSlotCapacity(slot),stack.getVanillaMaxStackSize());// 如需突破堆叠上限，则需要重写并移除这条语句
+            long slotCap = Math.min(getSlotCapacity(slot), stack.getVanillaMaxStackSize());// 如需突破堆叠上限，则需要重写并移除这条语句
             maxInsert = Math.min(
                     stack.getStackAmount(),
                     slotCap - current.getStackAmount()
@@ -158,7 +168,8 @@ public interface IStackTypedHandler
             if (maxInsert <= 0) return stack.copy();
 
             remaining = stack.copyWithCount(stack.getStackAmount() - maxInsert);
-            if (!simulate) {
+            if (!simulate)
+            {
                 current.grow(maxInsert);
                 onChange();
             }
@@ -168,7 +179,8 @@ public interface IStackTypedHandler
 
     /**
      * 尝试插入指定的堆叠，直到容器所有位置被填满，然后返回剩余堆叠。不要修改传入的堆叠
-     * @param stack 堆叠
+     *
+     * @param stack    堆叠
      * @param simulate 是否为模拟操作
      * @return 剩余堆叠
      */
@@ -177,19 +189,24 @@ public interface IStackTypedHandler
         IStackType<?> remaining = stack.copy();
 
         // 第一阶段：合并现有堆叠
-        for (int slot = 0; slot < getSlots(); slot++) {
+        for (int slot = 0; slot < getSlots(); slot++)
+        {
             IStackType<?> current = getStorage().get(slot);
-            if (!current.isEmpty() && current.isSameTypeSameComponents(stack)) {
+            if (!current.isEmpty() && current.isSameTypeSameComponents(stack))
+            {
                 remaining = insert(slot, remaining, simulate);
                 if (remaining.isEmpty()) break;
             }
         }
 
         // 第二阶段：填充空槽位
-        if (!remaining.isEmpty()) {
-            for (int slot = 0; slot < getSlots(); slot++) {
+        if (!remaining.isEmpty())
+        {
+            for (int slot = 0; slot < getSlots(); slot++)
+            {
                 IStackType<?> current = getStorage().get(slot);
-                if (current.isEmpty()) {
+                if (current.isEmpty())
+                {
                     remaining = insert(slot, remaining, simulate);
                     if (remaining.isEmpty()) break;
                 }
@@ -203,29 +220,34 @@ public interface IStackTypedHandler
      * 尝试从指定的槽位提取出指定数量的堆叠，并返回提取的堆叠。
      * <p>
      * 此方法会在索引越界时直接返回空的ItemStackType，因此对于类型要求严格的方法。在使用其返回值时需要检测typeId或者其实例是否为空。
-     * @param slot 槽位索引
-     * @param count 指定的数量
+     *
+     * @param slot     槽位索引
+     * @param count    指定的数量
      * @param simulate 是否为模拟操作
      * @return 实际能提取的堆叠
      */
     default IStackType<?> extract(int slot, long count, boolean simulate)
     {
         List<IStackType<?>> storage = getStorage();
-        if (slot < 0 || slot >= storage.size()) {
+        if (slot < 0 || slot >= storage.size())
+        {
             return new ItemStackType(); // 以不带参数ItemStackType作为空体
         }
 
         IStackType<?> current = storage.get(slot);
-        if (current.isEmpty()) {
+        if (current.isEmpty())
+        {
             return current.getEmpty();
         }
 
         long extractable = Math.min(count, current.getStackAmount());
         IStackType<?> extracted = current.copyWithCount(extractable);
 
-        if (!simulate) {
+        if (!simulate)
+        {
             current.shrink(extractable);
-            if (current.isEmpty()) {
+            if (current.isEmpty())
+            {
                 storage.set(slot, current.getEmpty());
             }
             onChange();
@@ -237,7 +259,8 @@ public interface IStackTypedHandler
 
     /**
      * 按类型导出堆叠，并返回提取的堆叠
-     * @param stack 堆叠类型，精确匹配
+     *
+     * @param stack    堆叠类型，精确匹配
      * @param simulate 是否为模拟操作
      * @return 实际能提取的堆叠
      */
@@ -247,9 +270,11 @@ public interface IStackTypedHandler
         long remaining = stack.getStackAmount();
 
         // 遍历所有槽位提取匹配的堆叠
-        for (int slot = 0; slot < getSlots(); slot++) {
+        for (int slot = 0; slot < getSlots(); slot++)
+        {
             IStackType<?> current = getStorage().get(slot);
-            if (current.isEmpty() || !current.isSameTypeSameComponents(stack)) {
+            if (current.isEmpty() || !current.isSameTypeSameComponents(stack))
+            {
                 continue;
             }
 
@@ -260,10 +285,14 @@ public interface IStackTypedHandler
 
             // 执行提取操作
             IStackType<?> extracted = extract(slot, toExtract, simulate);
-            if (!extracted.isEmpty()) {
-                if (result.isEmpty()) {
+            if (!extracted.isEmpty())
+            {
+                if (result.isEmpty())
+                {
                     result = extracted;
-                } else {
+                }
+                else
+                {
                     result.grow(extracted.getStackAmount());
                 }
                 remaining -= extracted.getStackAmount();
@@ -278,6 +307,7 @@ public interface IStackTypedHandler
      * 指定的槽位最大容量是多少？
      * <p>
      * 一般处理此函数时只考虑指定槽位和存储容器本身的状态，而不考虑指定槽位的内容物。如果你要按内容物限制单格存储上限，你应当修改insert方法。
+     *
      * @param slot 槽位索引
      * @return 最大容量
      */
@@ -292,7 +322,8 @@ public interface IStackTypedHandler
      *     <li>以原版容器举例，向一个已经存了64个钻石的槽位再存入一个钻石，此函数也应该返回true。</li>
      *     <li>以通用机械的化学品举例，向普通化学品储罐存入放射性化学品，无论当前储罐是什么状态，都返回false。</li>
      * </ul>
-     * @param slot 槽位索引
+     *
+     * @param slot  槽位索引
      * @param stack 意图存入的堆叠
      * @return 是否能存入
      */

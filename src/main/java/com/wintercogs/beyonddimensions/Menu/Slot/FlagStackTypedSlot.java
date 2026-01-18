@@ -46,13 +46,13 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     public void setStackDirectly(IStackType stack)
     {
         storage.setStackDirectly(theSlot, new ItemStackType());
-        storage.insert(theSlot,stack,false);
+        storage.insert(theSlot, stack, false);
     }
 
     @Override
     public IStackType safeInsert(IStackType stack)
     {
-        if(stack != null)
+        if (stack != null)
         {
             setStackDirectly(stack);
         }
@@ -77,17 +77,17 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
             if (!carriedItem.isEmpty())
             {   //槽位物品为空，携带物品存在，将携带物品插入标记
 
-                if(button==0)
+                if (button == 0)
                 {
                     ItemStack copy = carriedItem.copy();
                     copy.setCount(1);
                     setStackDirectly(new ItemStackType(copy));
                 }
-                else if(button==1)
+                else if (button == 1)
                 {
-                    if(carriedItem.getItem() instanceof XpExchangeItem)
+                    if (carriedItem.getItem() instanceof XpExchangeItem)
                     {
-                        setStackDirectly(new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(),1),1));
+                        setStackDirectly(new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), 1));
                     }
                     else
                     {
@@ -95,19 +95,19 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                         copy.setCount(1);
                         // 注: 通用机械物品必须在堆叠数量为1时才暴露能力。
                         // 这种做法看起来是很有益的。可以防止其他模组错误消耗过多的存储资源
-                        CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap)->{
+                        CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap) -> {
                             LazyOptional<?> handler = copy.getCapability(cap);
-                            if(handler.isPresent())
+                            if (handler.isPresent())
                             {
                                 Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
                                 IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
 
-                                if(stackHandlerWrapper.getSlots()>0)
+                                if (stackHandlerWrapper.getSlots() > 0)
                                 {
-                                    for(int index=0;index<stackHandlerWrapper.getSlots();index++)
+                                    for (int index = 0; index < stackHandlerWrapper.getSlots(); index++)
                                     {
-                                        IStackType stack = StackCreater.Create(typeId,stackHandlerWrapper.getStackInSlot(0),1);
-                                        if(stack!=null&& !stack.isEmpty())
+                                        IStackType stack = StackCreater.Create(typeId, stackHandlerWrapper.getStackInSlot(0), 1);
+                                        if (stack != null && !stack.isEmpty())
                                         {
                                             setStackDirectly(stack);
                                             break;
@@ -155,25 +155,25 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     public void updateChange()
     {
         IStackType currentStack = storage.getStackBySlot(this.getSlotIndex());
-        if(currentStack == null)
+        if (currentStack == null)
         {
             lastStack = new ItemStackType();
-            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()->(ServerPlayer)menu.player), new OrderedStackTypedSlotPacket(index,theSlot,lastStack,0));
+            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) menu.player), new OrderedStackTypedSlotPacket(index, theSlot, lastStack, 0));
         }
-        else if(currentStack.isEmpty() && lastStack.isEmpty())
+        else if (currentStack.isEmpty() && lastStack.isEmpty())
         {
         }
-        else if(lastStack.getStackAmount() != currentStack.getStackAmount()
-                ||!lastStack.getTypeId().equals(currentStack.getTypeId())
-                ||!lastStack.isSameTypeSameComponents(currentStack))
+        else if (lastStack.getStackAmount() != currentStack.getStackAmount()
+                || !lastStack.getTypeId().equals(currentStack.getTypeId())
+                || !lastStack.isSameTypeSameComponents(currentStack))
         {
             lastStack = currentStack;
-            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()->(ServerPlayer)menu.player), new OrderedStackTypedSlotPacket(index,theSlot,lastStack,lastStack.getStackAmount()));
+            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) menu.player), new OrderedStackTypedSlotPacket(index, theSlot, lastStack, lastStack.getStackAmount()));
         }
     }
 
     @Override
-    public void loadChange(int where ,IStackType newStack, long newAmount)
+    public void loadChange(int where, IStackType newStack, long newAmount)
     {
         // 同步读取仍直接操作storage
         storage.setStackDirectly(where, newStack);

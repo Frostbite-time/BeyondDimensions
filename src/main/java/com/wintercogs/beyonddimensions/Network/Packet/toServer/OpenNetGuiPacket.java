@@ -31,32 +31,32 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target)
         if (net != null)
         {
             NetMenuType targetMenu = target();
-            if(targetMenu == NetMenuType.NET_CRAFT_MENU)
+            if (targetMenu == NetMenuType.NET_CRAFT_MENU)
             {
                 player.openMenu(new SimpleMenuProvider(
-                        (containerId, playerInventory, _player) -> new DimensionsCraftMenu(UIRegister.Dimensions_Craft_Menu.get(),containerId, playerInventory, net,null, null),
+                        (containerId, playerInventory, _player) -> new DimensionsCraftMenu(UIRegister.Dimensions_Craft_Menu.get(), containerId, playerInventory, net, null, null),
                         Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                 ));
             }
-            else if(targetMenu == NetMenuType.NET_MENU)
+            else if (targetMenu == NetMenuType.NET_MENU)
             {
                 player.openMenu(new SimpleMenuProvider(
                         (containerId, playerInventory, _player) -> new DimensionsNetMenu(UIRegister.Dimensions_Net_Menu.get(), containerId, playerInventory, net),
                         Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                 ));
             }
-            else if(targetMenu == NetMenuType.NET_CRAFT_TERMINAL)
+            else if (targetMenu == NetMenuType.NET_CRAFT_TERMINAL)
             {
                 ItemStack terminalStack = null;
-                if(player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof NetTerminalItem)
+                if (player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof NetTerminalItem)
                     terminalStack = player.getItemInHand(InteractionHand.MAIN_HAND);
-                else if(player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof NetTerminalItem)
+                else if (player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof NetTerminalItem)
                     terminalStack = player.getItemInHand(InteractionHand.OFF_HAND);
                 else
                 {
-                    for(ItemStack itemStack : player.getInventory().items)
+                    for (ItemStack itemStack : player.getInventory().items)
                     {
-                        if(itemStack.getItem() instanceof NetTerminalItem)
+                        if (itemStack.getItem() instanceof NetTerminalItem)
                         {
                             terminalStack = itemStack;
                             break;
@@ -64,7 +64,7 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target)
 
                     }
 
-                    if(terminalStack == null && BeyondDimensions.CuriosLoaded)
+                    if (terminalStack == null && BeyondDimensions.CuriosLoaded)
                     {
                         terminalStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
                                 .resolve()
@@ -76,10 +76,10 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target)
                     }
                 }
 
-                if(terminalStack != null)
+                if (terminalStack != null)
                 {
                     NetTerminalItem.contextMap.put(player, new NetTerminalItem.MenuTriggerContext(InteractionHand.MAIN_HAND, terminalStack));
-                    player.openMenu((NetTerminalItem)terminalStack.getItem());
+                    player.openMenu((NetTerminalItem) terminalStack.getItem());
                 }
             }
 
@@ -89,7 +89,8 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target)
 
     public static void handle(OpenNetGuiPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
             context.enqueueWork(() -> packet.handle(context));
             context.setPacketHandled(true);
@@ -104,6 +105,6 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target)
 
     public static OpenNetGuiPacket decode(FriendlyByteBuf buf)
     {
-        return new OpenNetGuiPacket(buf.readUtf(),buf.readEnum(NetMenuType.class));
+        return new OpenNetGuiPacket(buf.readUtf(), buf.readEnum(NetMenuType.class));
     }
 }

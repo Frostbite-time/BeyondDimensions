@@ -33,14 +33,13 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
     }
 
 
-
     @Override
     protected void init()
     {
         super.init();
 
         //槽位转移按钮
-        transferCraftToInvButton = new IconButton(this.leftPos+90, this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/down_arrow.png"),  button ->
+        transferCraftToInvButton = new IconButton(this.leftPos + 90, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/down_arrow.png"), button ->
         {
             PacketRegister.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(false));
         });
@@ -48,7 +47,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         addRenderableWidget(transferCraftToInvButton);
 
 
-        transferCraftToStorageButton = new IconButton(this.leftPos+81,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/up_arrow.png"),  button ->
+        transferCraftToStorageButton = new IconButton(this.leftPos + 81, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/up_arrow.png"), button ->
         {
             PacketRegister.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(true));
         });
@@ -57,7 +56,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
 
         // 槽位优先转移切换按钮
         menu.writeAndSendQuickData();
-        craftReturnButton = new StatusButton(this.leftPos+99,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8, button -> {
+        craftReturnButton = new StatusButton(this.leftPos + 99, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, button -> {
             craftReturnButton.toggleState();
             CommonConfigRuntime.uiCraftReturnButton = (ButtonState) craftReturnButton.currentState;
             Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.set((ButtonState) craftReturnButton.currentState);
@@ -69,13 +68,13 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
             @Override
             protected void initButton()
             {
-                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_asc.png"));
-                iconMap.put(ButtonState.DISABLED,ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/sort_desc.png"));
+                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_asc.png"));
+                iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_desc.png"));
 
                 tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_storage")));
                 tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_inv")));
 
-                for(Enum<?> state : iconMap.keySet())
+                for (Enum<?> state : iconMap.keySet())
                 {
                     this.states.add(state);
                 }
@@ -101,7 +100,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         drawY += TOP_SLOTS_HEIGHT;
 
         RenderSystem.setShaderTexture(0, GUI_TEXTURE_MID_SLOTS);
-        for(int i = 0;i<menu.getLines()-2;i++)
+        for (int i = 0; i < menu.getLines() - 2; i++)
         {
             guiGraphics.blit(GUI_TEXTURE_MID_SLOTS, this.leftPos, drawY, 0, 0, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT);
             drawY += MID_SLOTS_HEIGHT;
@@ -123,20 +122,20 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
     @Override
     protected int rebuildImageHeight()
     {
-        return TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines()-2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + CRAFT_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
+        return TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines() - 2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + CRAFT_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
     }
 
     @Override
     protected void rebuildLabelHeight()
     {
         this.titleLabelY = 8;
-        this.inventoryLabelY = TOP_BASE_HEIGHT + menu.getLines()*18+5 + CRAFT_SLOTS_HEIGHT;
+        this.inventoryLabelY = TOP_BASE_HEIGHT + menu.getLines() * 18 + 5 + CRAFT_SLOTS_HEIGHT;
     }
 
     @Override
     protected int calMaxLines()
     {
-        return (int)((this.height -36 - (TOP_BASE_HEIGHT+TOP_SLOTS_HEIGHT+BOTTOM_SLOTS_HEIGHT+CRAFT_SLOTS_HEIGHT+PLAYER_INV_HEIGHT))/(float)MID_SLOTS_HEIGHT +2);
+        return (int) ((this.height - 36 - (TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + CRAFT_SLOTS_HEIGHT + PLAYER_INV_HEIGHT)) / (float) MID_SLOTS_HEIGHT + 2);
     }
 
     @Override

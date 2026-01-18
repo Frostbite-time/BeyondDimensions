@@ -9,6 +9,6 @@ import java.util.function.Function;
 
 public class StackHandlerWrapperHelper
 {
-    public static final Map<ResourceLocation, Function<?,IStackHandlerWrapper<?>>> stackWrappers = new HashMap<>();
+    public static final Map<ResourceLocation, Function<?, IStackHandlerWrapper<?>>> stackWrappers = new HashMap<>();
 
 }

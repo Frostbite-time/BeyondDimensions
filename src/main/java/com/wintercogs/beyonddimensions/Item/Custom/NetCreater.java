@@ -26,12 +26,12 @@ public class NetCreater extends Item
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
     {
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND)
+        if (usedHand != InteractionHand.MAIN_HAND)
         {
             return InteractionResultHolder.fail(itemstack);
         }
 
-        if(!level.isClientSide())
+        if (!level.isClientSide())
         {
             DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
             if (net != null)
@@ -39,7 +39,7 @@ public class NetCreater extends Item
                 return InteractionResultHolder.fail(itemstack);
             }
 
-            DimensionsNet newNet = DimensionsNet.createNewNetForPlayer(player,Long.MAX_VALUE, Integer.MAX_VALUE);
+            DimensionsNet newNet = DimensionsNet.createNewNetForPlayer(player, Long.MAX_VALUE, Integer.MAX_VALUE);
 
             itemstack.shrink(1);
 
@@ -61,7 +61,7 @@ public class NetCreater extends Item
             newNet.getUnifiedStorage().insert(new ItemStackType(timeCrystal), false);
         }
 
-        return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
 }

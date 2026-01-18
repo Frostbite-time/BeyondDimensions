@@ -32,10 +32,12 @@ public class MatterCompressionBall extends Item
             return result;
 
         ListTag listTag = tag.getList("StackList", Tag.TAG_COMPOUND);
-        for (Tag element : listTag) {
+        for (Tag element : listTag)
+        {
             CompoundTag elementTag = (CompoundTag) element;
             IStackType<?> stackType = IStackType.deserializeNBTCommon(elementTag);
-            if (stackType != null) {
+            if (stackType != null)
+            {
                 result.add(stackType);
             }
         }
@@ -45,10 +47,12 @@ public class MatterCompressionBall extends Item
     public static void setIStackList(ItemStack stack, List<IStackType<?>> stackList)
     {
         ListTag listTag = new ListTag();
-        for (IStackType<?> stackType : stackList) {
+        for (IStackType<?> stackType : stackList)
+        {
             CompoundTag elementTag = stackType.serializeNBT();
             // 确保序列化后包含类型标识
-            if (!elementTag.contains("Type")) {
+            if (!elementTag.contains("Type"))
+            {
                 elementTag.putString("Type", stackType.getTypeId().toString());
             }
             listTag.add(elementTag);

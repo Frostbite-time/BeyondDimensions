@@ -8,20 +8,21 @@ public class EnergyUnifiedStorageHandler implements IEnergyStorage
 {
     private UnifiedStorage storage;
 
-    public EnergyUnifiedStorageHandler(UnifiedStorage storage) {
+    public EnergyUnifiedStorageHandler(UnifiedStorage storage)
+    {
         this.storage = storage;
     }
 
     @Override
     public int receiveEnergy(int count, boolean simulate)
     {
-        return (int) (count - storage.insert(new EnergyStackType(count),simulate).getStackAmount());
+        return (int) (count - storage.insert(new EnergyStackType(count), simulate).getStackAmount());
     }
 
     @Override
     public int extractEnergy(int count, boolean simulate)
     {
-        return (int) storage.extract(new EnergyStackType(count),simulate).getStackAmount();
+        return (int) storage.extract(new EnergyStackType(count), simulate).getStackAmount();
     }
 
     @Override
@@ -29,8 +30,8 @@ public class EnergyUnifiedStorageHandler implements IEnergyStorage
     {
         return storage.getTypeIdIndexList(EnergyStackType.ID)
                 .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex>=0)
-                .map(actualIndex -> (EnergyStackType)storage.getStackBySlot(actualIndex))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> (EnergyStackType) storage.getStackBySlot(actualIndex))
                 .map(energyStackType -> BDMath.clampLongToInt(energyStackType.getStackAmount()))
                 .orElse(0);
     }

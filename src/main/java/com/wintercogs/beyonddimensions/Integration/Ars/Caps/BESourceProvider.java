@@ -27,5 +27,8 @@ public class BESourceProvider implements ICapabilityProvider
         return LazyOptional.empty();
     }
 
-    public void invalidate() { opt.invalidate(); }
+    public void invalidate()
+    {
+        opt.invalidate();
+    }
 }

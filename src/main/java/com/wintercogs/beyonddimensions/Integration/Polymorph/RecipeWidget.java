@@ -10,6 +10,7 @@ import net.minecraft.world.inventory.Slot;
 public class RecipeWidget extends PlayerRecipesWidget
 {
     private final DimensionsCraftMenu menu;
+
     public RecipeWidget(DimensionsCraftGUI<?> containerScreen, Slot outputSlot)
     {
         super(containerScreen, outputSlot);

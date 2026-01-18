@@ -39,7 +39,7 @@ public class ModFluids
 
     public static final List<FluidEntry<ForgeFlowingFluid.Source, ForgeFlowingFluid.Flowing>> ALL = new ArrayList<>();
 
-    public static final FluidEntry<ForgeFlowingFluid.Source, ForgeFlowingFluid.Flowing> XP_FLUID =  registerFluid(
+    public static final FluidEntry<ForgeFlowingFluid.Source, ForgeFlowingFluid.Flowing> XP_FLUID = registerFluid(
             "xp_fluid",
             FluidType.Properties.create()
                     .lightLevel(10)
@@ -60,20 +60,37 @@ public class ModFluids
             int lightlevel,
             Function<ForgeFlowingFluid.Properties, S> sourceCtor,
             Function<ForgeFlowingFluid.Properties, F> flowingCtor
-    ) {
+    )
+    {
         // 1) FluidType
-        RegistryObject<FluidType> type = FLUID_TYPES.register(name, () -> new FluidType(typeProps){
+        RegistryObject<FluidType> type = FLUID_TYPES.register(name, () -> new FluidType(typeProps)
+        {
             @Override
             public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer)
             {
                 super.initializeClient(consumer);
                 final ResourceLocation still = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + name + "_still");
-                final ResourceLocation flow  = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + name + "_flow");
+                final ResourceLocation flow = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + name + "_flow");
                 final int tint = argbTint;
-                consumer.accept(new IClientFluidTypeExtensions() {
-                    @Override public ResourceLocation getStillTexture()   { return still; }
-                    @Override public ResourceLocation getFlowingTexture() { return flow; }
-                    @Override public int getTintColor()                   { return tint; }
+                consumer.accept(new IClientFluidTypeExtensions()
+                {
+                    @Override
+                    public ResourceLocation getStillTexture()
+                    {
+                        return still;
+                    }
+
+                    @Override
+                    public ResourceLocation getFlowingTexture()
+                    {
+                        return flow;
+                    }
+
+                    @Override
+                    public int getTintColor()
+                    {
+                        return tint;
+                    }
                 });
             }
         });
@@ -112,7 +129,8 @@ public class ModFluids
     }
 
     // 使用基础的 BaseFlowingFluid
-    public static FluidEntry<ForgeFlowingFluid.Source, ForgeFlowingFluid.Flowing> registerSimpleFluid(String name, FluidType.Properties typeProps, int argbTint, int lightlevel) {
+    public static FluidEntry<ForgeFlowingFluid.Source, ForgeFlowingFluid.Flowing> registerSimpleFluid(String name, FluidType.Properties typeProps, int argbTint, int lightlevel)
+    {
         return registerFluid(
                 name, typeProps, argbTint, lightlevel,
                 ForgeFlowingFluid.Source::new,
@@ -120,7 +138,8 @@ public class ModFluids
         );
     }
 
-    public static void register(IEventBus modBus) {
+    public static void register(IEventBus modBus)
+    {
         FLUID_TYPES.register(modBus);
         FLUIDS.register(modBus);
     }
@@ -133,17 +152,22 @@ public class ModFluids
             RegistryObject<LiquidBlock> block,
             RegistryObject<Item> bucket,
             int argbTint
-    ) {}
+    )
+    {
+    }
 
     @Mod.EventBusSubscriber(modid = BeyondDimensions.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static final class ClientOnly {
+    public static final class ClientOnly
+    {
         // IClientFluidTypeExtensions在注册type的时候直接挂上
 
         // 渲染层（半透明）
         @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent evt) {
+        public static void onClientSetup(FMLClientSetupEvent evt)
+        {
             evt.enqueueWork(() -> {
-                for (var e : ModFluids.ALL) {
+                for (var e : ModFluids.ALL)
+                {
                     ItemBlockRenderTypes.setRenderLayer((Fluid) e.source().get(), RenderType.translucent());
                     ItemBlockRenderTypes.setRenderLayer((Fluid) e.flowing().get(), RenderType.translucent());
                 }

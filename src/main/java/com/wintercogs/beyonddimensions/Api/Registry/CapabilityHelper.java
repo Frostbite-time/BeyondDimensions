@@ -27,28 +27,28 @@ public class CapabilityHelper
 
     public static <T> void registerUSHandler(IStackType<?> type, Function<UnifiedStorage, T> handler)
     {
-        if(USHandlerMap.containsKey(type.getTypeId()))
+        if (USHandlerMap.containsKey(type.getTypeId()))
             throw new RuntimeException("此类型的统一存储分化表被重复注册：" + type.getTypeId());
         USHandlerMap.put(type.getTypeId(), USHandler.contextless(handler));
     }
 
     public static <T> void registerUSHandler(IStackType<?> type, BiFunction<UnifiedStorage, CapCtx, T> handler)
     {
-        if(USHandlerMap.containsKey(type.getTypeId()))
+        if (USHandlerMap.containsKey(type.getTypeId()))
             throw new RuntimeException("此类型的统一存储分化表被重复注册：" + type.getTypeId());
         USHandlerMap.put(type.getTypeId(), USHandler.contextual(handler));
     }
 
     public static <T> void registerStackTypedHandler(IStackType<?> type, Function<StackTypedHandler, T> handler)
     {
-        if(CommonHandlerMap.containsKey(type.getTypeId()))
+        if (CommonHandlerMap.containsKey(type.getTypeId()))
             throw new RuntimeException("此类型的通用存储分化表已被注册：" + type.getTypeId());
         CommonHandlerMap.put(type.getTypeId(), CommonHandler.contextless(handler));
     }
 
     public static <T> void registerStackTypedHandler(IStackType<?> type, BiFunction<StackTypedHandler, CapCtx, T> handler)
     {
-        if(CommonHandlerMap.containsKey(type.getTypeId()))
+        if (CommonHandlerMap.containsKey(type.getTypeId()))
             throw new RuntimeException("此类型的通用存储分化表已被注册：" + type.getTypeId());
         CommonHandlerMap.put(type.getTypeId(), CommonHandler.contextual(handler));
     }

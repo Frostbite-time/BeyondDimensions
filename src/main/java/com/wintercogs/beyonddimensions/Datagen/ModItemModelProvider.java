@@ -43,21 +43,27 @@ public class ModItemModelProvider extends ItemModelProvider
         generateFluidBucketModels();
     }
 
-    /** 为所有流体生成桶模型（基于我们封装的 ModFluids.ALL） */
-    private void generateFluidBucketModels() {
-        for (ModFluids.FluidEntry e : ModFluids.ALL) {
+    /**
+     * 为所有流体生成桶模型（基于我们封装的 ModFluids.ALL）
+     */
+    private void generateFluidBucketModels()
+    {
+        for (ModFluids.FluidEntry e : ModFluids.ALL)
+        {
             fluidBucketModel(e);
         }
     }
 
-    /** 生成单个流体桶模型：
+    /**
+     * 生成单个流体桶模型：
      * {
-     *   "parent": "neoforge:item/bucket",
-     *   "loader": "neoforge:fluid_container",
-     *   "fluid": "<modid>:<fluidName>"
+     * "parent": "neoforge:item/bucket",
+     * "loader": "neoforge:fluid_container",
+     * "fluid": "<modid>:<fluidName>"
      * }
      */
-    private void fluidBucketModel(ModFluids.FluidEntry e) {
+    private void fluidBucketModel(ModFluids.FluidEntry e)
+    {
         // 模型文件名建议与桶物品注册名一致，避免资源定位搞混
         final String modelName = e.bucket().getId().getPath(); // 例如 "<fluid>_bucket"
 

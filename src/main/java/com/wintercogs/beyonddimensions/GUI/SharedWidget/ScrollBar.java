@@ -20,44 +20,62 @@ import java.util.function.IntConsumer;
 public class ScrollBar extends AbstractWidget
 {
 
-    /** 滑块贴图 */
+    /**
+     * 滑块贴图
+     */
     protected final ResourceLocation SPRITE;
 
-    /** 轨道可滑动像素长度（滑块“顶部”从0到末端的位移量） */
+    /**
+     * 轨道可滑动像素长度（滑块“顶部”从0到末端的位移量）
+     */
     protected int maxScrollLength;
 
-    /** 当前位置（0..maxPosition） */
+    /**
+     * 当前位置（0..maxPosition）
+     */
     protected int currentPosition;
 
-    /** 最大位置（总数据“起始行”或总索引；包含可见+不可见） */
+    /**
+     * 最大位置（总数据“起始行”或总索引；包含可见+不可见）
+     */
     protected int maxPosition;
 
-    /** 步长（滚轮/量化的最小单位） */
+    /**
+     * 步长（滚轮/量化的最小单位）
+     */
     protected int step = 1;
 
-    /** 当前滑块像素偏移（相对组件y；只用于渲染/命中，不改变组件y） */
+    /**
+     * 当前滑块像素偏移（相对组件y；只用于渲染/命中，不改变组件y）
+     */
     protected int scrollerOffset = 0;
 
-    /** 是否按“滑块中心对齐鼠标”（true更自然；false为顶部对齐） */
+    /**
+     * 是否按“滑块中心对齐鼠标”（true更自然；false为顶部对齐）
+     */
     protected boolean alignCenterToMouse = true;
 
-    /** 拖拽状态 */
+    /**
+     * 拖拽状态
+     */
     protected boolean isDragging = false;
 
-    /** 位置变化回调（在 setCurrentPosition() 时触发） */
+    /**
+     * 位置变化回调（在 setCurrentPosition() 时触发）
+     */
     protected @Nullable IntConsumer onScroll;
 
     /**
-     * @param x             组件左上角X（固定不动）
-     * @param y             组件左上角Y（固定不动：轨道起点Y）
-     * @param width         滑块宽度（不是轨道宽）
-     * @param height        滑块高度（不是轨道高）
-     * @param sprite        滑块贴图
-     * @param maxScrollLen  轨道可滑动像素长度（滑块顶部0..此值）
-     * @param currentPos    初始当前位置（0..maxPosition）
-     * @param maxPos        最大位置
-     * @param onScroll      位置变化回调，可为null
-     * @param message       读屏文本
+     * @param x            组件左上角X（固定不动）
+     * @param y            组件左上角Y（固定不动：轨道起点Y）
+     * @param width        滑块宽度（不是轨道宽）
+     * @param height       滑块高度（不是轨道高）
+     * @param sprite       滑块贴图
+     * @param maxScrollLen 轨道可滑动像素长度（滑块顶部0..此值）
+     * @param currentPos   初始当前位置（0..maxPosition）
+     * @param maxPos       最大位置
+     * @param onScroll     位置变化回调，可为null
+     * @param message      读屏文本
      */
     public ScrollBar(int x, int y, int width, int height,
                      ResourceLocation sprite,
@@ -87,21 +105,27 @@ public class ScrollBar extends AbstractWidget
         this.alignCenterToMouse = center;
     }
 
-    /** 动态更新“当前位置/最大位置”（会触发量化+回调） */
+    /**
+     * 动态更新“当前位置/最大位置”（会触发量化+回调）
+     */
     public void updateScrollPosition(int currentPosition, int maxPosition)
     {
         this.maxPosition = Math.max(0, maxPosition);
         setCurrentPosition(currentPosition);
     }
 
-    /** 动态更新轨道长度（像素） */
+    /**
+     * 动态更新轨道长度（像素）
+     */
     public void setMaxScrollLength(int maxScrollLength)
     {
         this.maxScrollLength = Math.max(0, maxScrollLength);
         // 长度变化后，偏移重新按当前位置换算（renderWidget里会计算，这里可不做）
     }
 
-    /** 设置步长（>=1） */
+    /**
+     * 设置步长（>=1）
+     */
     public void setStep(int step)
     {
         this.step = Math.max(1, step);
@@ -113,7 +137,9 @@ public class ScrollBar extends AbstractWidget
         return this.step;
     }
 
-    /** 相对滚动“步数”（>0 向下，<0 向上） */
+    /**
+     * 相对滚动“步数”（>0 向下，<0 向上）
+     */
     public void scrollBySteps(int steps)
     {
         if (maxPosition <= 0) return;
@@ -122,7 +148,9 @@ public class ScrollBar extends AbstractWidget
         setCurrentPosition((int) Mth.clamp(target, 0, this.maxPosition));
     }
 
-    /** 把当前位置锚到“鼠标在轨道上的比例” */
+    /**
+     * 把当前位置锚到“鼠标在轨道上的比例”
+     */
     public void scrollToMouse(double mouseY)
     {
         if (maxPosition <= 0 || maxScrollLength <= 0) return;
@@ -134,7 +162,9 @@ public class ScrollBar extends AbstractWidget
         setCurrentPosition(pos);
     }
 
-    /** 设置当前位置（统一出口：clamp + 步长量化 + 回调） */
+    /**
+     * 设置当前位置（统一出口：clamp + 步长量化 + 回调）
+     */
     public void setCurrentPosition(int pos)
     {
         int clamped = Mth.clamp(pos, 0, Math.max(0, this.maxPosition));
@@ -148,7 +178,9 @@ public class ScrollBar extends AbstractWidget
 
     /* ---------------------------- 内部工具 ---------------------------- */
 
-    /** 四舍五入到最近步长 */
+    /**
+     * 四舍五入到最近步长
+     */
     protected int quantizeToStep(int value)
     {
         if (step <= 1) return value;
@@ -156,7 +188,9 @@ public class ScrollBar extends AbstractWidget
         return Mth.clamp(q, 0, Math.max(0, this.maxPosition));
     }
 
-    /** 根据 current/max → 计算像素偏移（滑块“顶部”） */
+    /**
+     * 根据 current/max → 计算像素偏移（滑块“顶部”）
+     */
     protected int computeOffset()
     {
         if (maxPosition > 0 && maxScrollLength > 0)
@@ -168,7 +202,9 @@ public class ScrollBar extends AbstractWidget
 
     /* ---------------------------- 事件处理 ---------------------------- */
 
-    /** 整个轨道（y .. y + maxScrollLength + knobHeight）都算 hover，可点击/拖拽 */
+    /**
+     * 整个轨道（y .. y + maxScrollLength + knobHeight）都算 hover，可点击/拖拽
+     */
     @Override
     public boolean isMouseOver(double mouseX, double mouseY)
     {
@@ -217,7 +253,9 @@ public class ScrollBar extends AbstractWidget
         this.isDragging = false;
     }
 
-    /** 悬停轨道区域滚轮即生效 */
+    /**
+     * 悬停轨道区域滚轮即生效
+     */
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta)
     {
@@ -225,7 +263,8 @@ public class ScrollBar extends AbstractWidget
         if (maxPosition <= 0) return false;
 
         int dir = (int) Math.signum(delta); // +1 上滚，-1 下滚
-        if (dir != 0) {
+        if (dir != 0)
+        {
             // 上滚 → 位置减小；下滚 → 位置增大
             scrollBySteps(-dir);
             return true;

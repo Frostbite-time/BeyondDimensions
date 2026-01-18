@@ -21,27 +21,27 @@ public class NetGifter extends NetedItem
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
+        if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
         {
             return InteractionResultHolder.fail(itemstack);
         }
 
-        if(!level.isClientSide())
+        if (!level.isClientSide())
         {
 
-            if(NetedItem.getNetId(itemstack)>=0)
+            if (NetedItem.getNetId(itemstack) >= 0)
             {
-                DimensionsNet itemNet = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack),level.getServer());
+                DimensionsNet itemNet = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack), level.getServer());
                 if (itemNet != null)
                 {
                     DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
                     // 只有网络主人能合并其他人的网络
-                    if(playerNet != null && playerNet.getId() != itemNet.getId() && playerNet.isOwner(player))
+                    if (playerNet != null && playerNet.getId() != itemNet.getId() && playerNet.isOwner(player))
                     {
                         int id = itemNet.getId();
                         playerNet.mergeOtherNet(itemNet);
                         itemstack.shrink(1);
-                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.net_gift_done",id));
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.net_gift_done", id));
                     }
                     else
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.cant_merge_net"));
@@ -55,7 +55,7 @@ public class NetGifter extends NetedItem
             }
 
         }
-        return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
     @Override

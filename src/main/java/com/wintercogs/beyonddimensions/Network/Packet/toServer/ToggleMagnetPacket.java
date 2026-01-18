@@ -19,45 +19,45 @@ public record ToggleMagnetPacket()
     {
         Player player = context.getSender();
 
-        for(ItemStack stack: player.getInventory().items)
+        for (ItemStack stack : player.getInventory().items)
         {
-            if(stack.getItem() instanceof NetMagnetItem)
+            if (stack.getItem() instanceof NetMagnetItem)
             {
-                if(BaseMachineItem.hasControlMode(stack))
+                if (BaseMachineItem.hasControlMode(stack))
                 {
-                    if(BaseMachineItem.getControlModeOrDefault(stack,RedStoneControlMode.IGNORE) == RedStoneControlMode.IGNORE)
+                    if (BaseMachineItem.getControlModeOrDefault(stack, RedStoneControlMode.IGNORE) == RedStoneControlMode.IGNORE)
                     {
-                        BaseMachineItem.setControlMode(stack,RedStoneControlMode.NOT_WORKING);
+                        BaseMachineItem.setControlMode(stack, RedStoneControlMode.NOT_WORKING);
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
                     }
-                    else if(BaseMachineItem.getControlModeOrDefault(stack,RedStoneControlMode.IGNORE) == RedStoneControlMode.NOT_WORKING)
+                    else if (BaseMachineItem.getControlModeOrDefault(stack, RedStoneControlMode.IGNORE) == RedStoneControlMode.NOT_WORKING)
                     {
-                        BaseMachineItem.setControlMode(stack,RedStoneControlMode.IGNORE);
+                        BaseMachineItem.setControlMode(stack, RedStoneControlMode.IGNORE);
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
                     }
                 }
             }
         }
-        top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler ->{
+        top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
             List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
                     .stream()
                     .map(SlotResult::stack)
                     .toList();
 
-            for(ItemStack stack: curios)
+            for (ItemStack stack : curios)
             {
-                if(stack.getItem() instanceof NetMagnetItem)
+                if (stack.getItem() instanceof NetMagnetItem)
                 {
-                    if(BaseMachineItem.hasControlMode(stack))
+                    if (BaseMachineItem.hasControlMode(stack))
                     {
-                        if(BaseMachineItem.getControlModeOrDefault(stack,RedStoneControlMode.IGNORE) == RedStoneControlMode.IGNORE)
+                        if (BaseMachineItem.getControlModeOrDefault(stack, RedStoneControlMode.IGNORE) == RedStoneControlMode.IGNORE)
                         {
-                            BaseMachineItem.setControlMode(stack,RedStoneControlMode.NOT_WORKING);
+                            BaseMachineItem.setControlMode(stack, RedStoneControlMode.NOT_WORKING);
                             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
                         }
-                        else if(BaseMachineItem.getControlModeOrDefault(stack,RedStoneControlMode.IGNORE) == RedStoneControlMode.NOT_WORKING)
+                        else if (BaseMachineItem.getControlModeOrDefault(stack, RedStoneControlMode.IGNORE) == RedStoneControlMode.NOT_WORKING)
                         {
-                            BaseMachineItem.setControlMode(stack,RedStoneControlMode.IGNORE);
+                            BaseMachineItem.setControlMode(stack, RedStoneControlMode.IGNORE);
                             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
                         }
                     }
@@ -69,7 +69,8 @@ public record ToggleMagnetPacket()
 
     public static void handle(ToggleMagnetPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
             context.enqueueWork(() -> packet.handle(context));
             context.setPacketHandled(true);

@@ -13,7 +13,8 @@ public class MissStackError implements IRecipeTransferError
     private static final int HIGHLIGHT_COLOR = 1727987712;
     private final Collection<IRecipeSlotView> slots;
 
-    public MissStackError(Collection<IRecipeSlotView> slots) {
+    public MissStackError(Collection<IRecipeSlotView> slots)
+    {
         this.slots = slots;
     }
 
@@ -45,7 +46,8 @@ public class MissStackError implements IRecipeTransferError
     }
 
     @Override
-    public int getMissingCountHint() {
+    public int getMissingCountHint()
+    {
         return this.slots.size();
     }
 }

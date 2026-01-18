@@ -50,7 +50,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     @Override
     public IStackType<EnergyType> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
-        if(key instanceof EnergyType)
+        if (key instanceof EnergyType)
         {
             return new EnergyStackType(amount);
         }
@@ -89,7 +89,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     public IStackType<EnergyType> copyWithCount(long count)
     {
         EnergyStackType copy = new EnergyStackType(count);
-        if(count == stack.getStackCount())
+        if (count == stack.getStackCount())
         {
             copy.NeedRecalHash = this.NeedRecalHash;
             copy.hashCodeCache = this.hashCodeCache;
@@ -125,7 +125,8 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     @Override
     public IStackType<EnergyType> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
-        if (!typeId.equals(getTypeId())) {
+        if (!typeId.equals(getTypeId()))
+        {
             return null;// 表示未能读取任何类型
         }
         // 读取数量
@@ -152,7 +153,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     @Override
     public void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y)
     {
-        if(stack.isEmpty())
+        if (stack.isEmpty())
             return;
 
         // 渲染图标
@@ -160,7 +161,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
         poseStack.pushPose(); // 保存矩阵状态
 
         Fluid fluid = Fluids.WATER;
-        if(!fluid.isSame(Fluids.EMPTY))
+        if (!fluid.isSame(Fluids.EMPTY))
         {
             net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions renderProperties = net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions.of(fluid);
             ResourceLocation fluidStill = renderProperties.getStillTexture();
@@ -170,10 +171,10 @@ public final class EnergyStackType extends LongStackType<EnergyType>
                             .apply(f)
                     )
                     .filter(s -> s.atlasLocation() != net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());
-            if(fluidStillSprite.isPresent())
+            if (fluidStillSprite.isPresent())
             {
-                int fluidColor =  0x50F18E; // 绿色
-                com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,fluidColor,16,fluidStillSprite.get(),x,y);
+                int fluidColor = 0x50F18E; // 绿色
+                com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui, 16, 16, fluidColor, 16, fluidStillSprite.get(), x, y);
             }
         }
 
@@ -185,18 +186,18 @@ public final class EnergyStackType extends LongStackType<EnergyType>
         float scale = 0.666f; // 文本缩放因数
         var poseStackText = gui.pose();
         poseStackText.pushPose();
-        poseStackText.translate(0,0,200); // 确保文本在顶层
-        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
+        poseStackText.translate(0, 0, 200); // 确保文本在顶层
+        poseStackText.scale(scale, scale, scale); // 文本整体缩放，便于查看
         com.mojang.blaze3d.systems.RenderSystem.disableBlend(); // 禁用混合渲染模式
-        final int X = (int)(
+        final int X = (int) (
                 (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
                         * 1.0f / 0.666f
         );
-        final int Y = (int)(
+        final int Y = (int) (
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
-        if(!stack.isEmpty())
+        if (!stack.isEmpty())
             gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
         poseStackText.popPose();
     }

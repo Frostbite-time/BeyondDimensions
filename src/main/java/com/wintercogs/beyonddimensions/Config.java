@@ -27,7 +27,7 @@ public class Config
             {
                 commonConfig.onLoaded();
             }
-            if(evt.getConfig().getSpec() == serverConfig.spec)
+            if (evt.getConfig().getSpec() == serverConfig.spec)
             {
                 serverConfig.onLoaded();
             }
@@ -38,7 +38,7 @@ public class Config
             {
                 commonConfig.onLoaded();
             }
-            if(evt.getConfig().getSpec() == serverConfig.spec)
+            if (evt.getConfig().getSpec() == serverConfig.spec)
             {
                 serverConfig.onLoaded();
             }

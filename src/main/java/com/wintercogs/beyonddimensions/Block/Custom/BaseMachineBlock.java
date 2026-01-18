@@ -21,13 +21,13 @@ public abstract class BaseMachineBlock extends NetedBlock implements EntityBlock
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
     {
-        if(level.isClientSide())
+        if (level.isClientSide())
             return null;
 
         return (level1, blockPos, blockState, blockEntity) -> {
-            if(blockEntity instanceof BaseMachineBlockEntity machine)
+            if (blockEntity instanceof BaseMachineBlockEntity machine)
             {
-                BaseMachineBlockEntity.tick(level1,blockPos,blockState,machine);
+                BaseMachineBlockEntity.tick(level1, blockPos, blockState, machine);
             }
         };
     }

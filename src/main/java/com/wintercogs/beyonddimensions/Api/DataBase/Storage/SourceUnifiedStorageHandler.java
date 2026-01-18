@@ -48,8 +48,8 @@ public class SourceUnifiedStorageHandler implements ISourceCap
     {
         return storage.getTypeIdIndexList(SourceStackType.ID)
                 .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex>=0)
-                .map(actualIndex -> (SourceStackType)storage.getStackBySlot(actualIndex))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> (SourceStackType) storage.getStackBySlot(actualIndex))
                 .map(stack -> BDMath.clampLongToInt(stack.getStackAmount()))
                 .orElse(0);
     }
@@ -89,12 +89,12 @@ public class SourceUnifiedStorageHandler implements ISourceCap
         int wanted = BDMath.clampLongToInt(storage.getSlotCapacity(0));
         long actualInside = getSource();
 
-        long operation = wanted-actualInside;
-        BeyondDimensions.LOGGER.info("某个网络的魔源数量被外界强行设置，可能导致错误，最终魔源数量被设置为：{}",operation);
-        if(operation>0)
-            storage.insert(new SourceStackType(operation),false);
+        long operation = wanted - actualInside;
+        BeyondDimensions.LOGGER.info("某个网络的魔源数量被外界强行设置，可能导致错误，最终魔源数量被设置为：{}", operation);
+        if (operation > 0)
+            storage.insert(new SourceStackType(operation), false);
         else
-            storage.extract(new SourceStackType(-operation),false);
+            storage.extract(new SourceStackType(-operation), false);
     }
 
     // 强行设置最大值，不生效，因为UnifiedStorage的容量仅由容器决定（新生魔艺并未使用过这个方法，可以放心）
@@ -108,13 +108,13 @@ public class SourceUnifiedStorageHandler implements ISourceCap
     @Override
     public int receiveSource(int amount, boolean sim)
     {
-        return (int) (amount - storage.insert(new SourceStackType(amount),sim).getStackAmount());
+        return (int) (amount - storage.insert(new SourceStackType(amount), sim).getStackAmount());
     }
 
     // 返回导出量
     @Override
     public int extractSource(int amount, boolean sim)
     {
-        return (int) storage.extract(new SourceStackType(amount),sim).getStackAmount();
+        return (int) storage.extract(new SourceStackType(amount), sim).getStackAmount();
     }
 }

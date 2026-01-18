@@ -28,29 +28,36 @@ public class AutoRefillResultSlot extends ResultSlot
     }
 
     @Override
-    public void onTake(Player player, ItemStack stack) {
+    public void onTake(Player player, ItemStack stack)
+    {
         this.checkTakeAchievements(stack);
         ForgeHooks.setCraftingPlayer(player);
         NonNullList<ItemStack> nonnulllist = player.level().getRecipeManager().getRemainingItemsFor(RecipeType.CRAFTING, this.craftSlots, player.level());
         ForgeHooks.setCraftingPlayer(null);
 
-        for(int i = 0; i < nonnulllist.size(); ++i) {
+        for (int i = 0; i < nonnulllist.size(); ++i)
+        {
             ItemStack slotStack = this.craftSlots.getItem(i);
             ItemStack recipeRemainder = nonnulllist.get(i);
 
-            if (!slotStack.isEmpty()) {
+            if (!slotStack.isEmpty())
+            {
                 int itemsToRemove = 1;
 
                 // 当槽位物品只剩1个时触发特殊逻辑
-                if (slotStack.getCount() == 1) {
+                if (slotStack.getCount() == 1)
+                {
                     ItemStack singleItem = slotStack.copyWithCount(1);
                     boolean consumed = false;
 
                     // 优先尝试存储系统
-                    if (menu.storage != null) {
+                    if (menu.storage != null)
+                    {
                         long extracted = menu.storage.extract(new ItemStackType(singleItem), true).getStackAmount();
-                        if (extracted >= 1) {
-                            if (!player.level().isClientSide()) {
+                        if (extracted >= 1)
+                        {
+                            if (!player.level().isClientSide())
+                            {
                                 menu.storage.extract(new ItemStackType(singleItem), false);
                             }
                             itemsToRemove = 0;
@@ -59,11 +66,15 @@ public class AutoRefillResultSlot extends ResultSlot
                     }
 
                     // 存储系统不足时尝试玩家背包
-                    if (!consumed) {
-                        for (int j = 0; j < player.getInventory().items.size(); j++) {
+                    if (!consumed)
+                    {
+                        for (int j = 0; j < player.getInventory().items.size(); j++)
+                        {
                             ItemStack invStack = player.getInventory().items.get(j);
-                            if (ItemStack.isSameItemSameTags(invStack, singleItem) && invStack.getCount() >= 1) {
-                                if (!player.level().isClientSide()) {
+                            if (ItemStack.isSameItemSameTags(invStack, singleItem) && invStack.getCount() >= 1)
+                            {
+                                if (!player.level().isClientSide())
+                                {
                                     invStack.shrink(1);
                                     player.getInventory().setItem(j, invStack.isEmpty() ? ItemStack.EMPTY : invStack);
                                 }
@@ -75,27 +86,34 @@ public class AutoRefillResultSlot extends ResultSlot
                     }
                 }
 
-                if (itemsToRemove > 0) {
+                if (itemsToRemove > 0)
+                {
                     this.craftSlots.removeItem(i, itemsToRemove);
                 }
                 slotStack = this.craftSlots.getItem(i);
             }
 
             // 处理剩余物品
-            if (!recipeRemainder.isEmpty()) {
-                if (slotStack.isEmpty()) {
+            if (!recipeRemainder.isEmpty())
+            {
+                if (slotStack.isEmpty())
+                {
                     this.craftSlots.setItem(i, recipeRemainder);
-                } else if (ItemStack.isSameItemSameTags(slotStack, recipeRemainder)) {
+                }
+                else if (ItemStack.isSameItemSameTags(slotStack, recipeRemainder))
+                {
                     recipeRemainder.grow(slotStack.getCount());
                     this.craftSlots.setItem(i, recipeRemainder);
-                } else if (!this.player.getInventory().add(recipeRemainder)) {
+                }
+                else if (!this.player.getInventory().add(recipeRemainder))
+                {
                     this.player.drop(recipeRemainder, false);
                 }
             }
         }
 
         // 触发合成网格更新
-        menu.slotChangedCraftingGrid(menu,player.level(),player,craftSlots,(ResultContainer) this.container, this.index);
+        menu.slotChangedCraftingGrid(menu, player.level(), player, craftSlots, (ResultContainer) this.container, this.index);
     }
 
 }

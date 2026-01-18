@@ -5,7 +5,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.NetMenuType;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.ToggleMagnetPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
@@ -70,13 +69,13 @@ public class DimensionsShortKeys
                 return;
             }
 
-            if(CommonConfigRuntime.uiCraftButton == ButtonState.ENABLED)
+            if (CommonConfigRuntime.uiCraftButton == ButtonState.ENABLED)
             {
                 PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
             }
-            else if(CommonConfigRuntime.uiCraftButton == ButtonState.DISABLED)
+            else if (CommonConfigRuntime.uiCraftButton == ButtonState.DISABLED)
             {
-                PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),NetMenuType.NET_MENU));
+                PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_MENU));
             }
 
         }
@@ -90,7 +89,7 @@ public class DimensionsShortKeys
                 return;
             }
 
-            PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),NetMenuType.NET_CRAFT_TERMINAL));
+            PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_CRAFT_TERMINAL));
         }
 
         while (TOGGLE_MAGNET_KEY.consumeClick())

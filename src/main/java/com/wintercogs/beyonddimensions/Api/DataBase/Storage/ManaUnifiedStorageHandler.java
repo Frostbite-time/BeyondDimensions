@@ -54,8 +54,8 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
     {
         return storage.getTypeIdIndexList(ManaStackType.ID)
                 .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex>=0)
-                .map(actualIndex -> (ManaStackType)storage.getStackBySlot(actualIndex))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> (ManaStackType) storage.getStackBySlot(actualIndex))
                 .map(stack -> stack.getStackAmount())
                 .orElse(0L);
     }
@@ -70,8 +70,8 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
     {
         return storage.getTypeIdIndexList(ManaStackType.ID)
                 .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex>=0)
-                .map(actualIndex -> (ManaStackType)storage.getStackBySlot(actualIndex))
+                .filter(actualIndex -> actualIndex >= 0)
+                .map(actualIndex -> (ManaStackType) storage.getStackBySlot(actualIndex))
                 .map(stack -> BDMath.clampLongToInt(stack.getStackAmount()))
                 .orElse(0);
     }
@@ -88,7 +88,7 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
     @Override
     public void receiveMana(int mana)
     {
-        if(mana > 0)
+        if (mana > 0)
             storage.insert(new ManaStackType(mana), false);
         else
             storage.extract(new ManaStackType(-mana), false);
@@ -152,7 +152,8 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
     public ManaSpark getAttachedSpark()
     {
         List<Entity> sparks = level.getEntitiesOfClass(Entity.class, new AABB(pos.above()), Predicates.instanceOf(ManaSpark.class));
-        if (sparks.size() == 1) {
+        if (sparks.size() == 1)
+        {
             Entity e = sparks.get(0);
             return (ManaSpark) e;
         }

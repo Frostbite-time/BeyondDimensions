@@ -67,8 +67,8 @@ public class BlockSourceAdp implements ISourceCap
     {
         int before = sourceTile.getSource();
         // 取速率、意图量、剩余空间的最小值
-        int actInsert = Math.min(amount,Math.min(sourceTile.getMaxSource() - before, sourceTile.getTransferRate()));
-        if(!sim)
+        int actInsert = Math.min(amount, Math.min(sourceTile.getMaxSource() - before, sourceTile.getTransferRate()));
+        if (!sim)
             return sourceTile.addSource(actInsert) - before; // 接收后的量，减去接受前的量 为 接收量
         else
             return actInsert; // 如果不实际执行，返回手动模拟的结果
@@ -77,13 +77,13 @@ public class BlockSourceAdp implements ISourceCap
     @Override
     public int extractSource(int amount, boolean sim)
     {
-        if(sourceTile instanceof CreativeSourceJarTile)
+        if (sourceTile instanceof CreativeSourceJarTile)
             return 1000000; // 对创造魔源特殊兼容（否则会因为removeSource的设计永远无法取出）
 
         int before = sourceTile.getSource();
         // 取速率、意图量、当前量的最小值
-        int actExtract = Math.max(amount,Math.min(before,sourceTile.getTransferRate()));
-        if(!sim)
+        int actExtract = Math.max(amount, Math.min(before, sourceTile.getTransferRate()));
+        if (!sim)
             return before - sourceTile.removeSource(actExtract); // 取出前的量 - 取出后的量 为 取出量
         else
             return actExtract; // 回退到手动模拟量

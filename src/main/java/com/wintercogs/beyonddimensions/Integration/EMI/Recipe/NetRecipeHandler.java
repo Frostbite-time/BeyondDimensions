@@ -31,9 +31,9 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
     public List<Slot> getInputSources(T handler)
     {
         List<Slot> inputSlots = new ArrayList<>();
-        for(Slot slot : handler.slots)
+        for (Slot slot : handler.slots)
         {
-            if(!(slot instanceof ResultSlot) && !(slot instanceof AbstractStackTypedSlot))
+            if (!(slot instanceof ResultSlot) && !(slot instanceof AbstractStackTypedSlot))
             {
                 inputSlots.add(slot);
             }
@@ -45,7 +45,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
     public List<Slot> getCraftingSlots(T handler)
     {
         List<Slot> craftingSlots = new ArrayList<>();
-        for(int i = handler.craftSlotStartIndex; i <= handler.craftSlotEndIndex; ++i)
+        for (int i = handler.craftSlotStartIndex; i <= handler.craftSlotEndIndex; ++i)
         {
             craftingSlots.add(handler.slots.get(i));
         }
@@ -63,13 +63,13 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
     {
         //return new EmiPlayerInventory(getInputSources(screen.getMenu()).stream().map(Slot::getItem).map(EmiStack::of).toList());
         List<EmiStack> stacks = getInputSources(screen.getMenu()).stream().map(Slot::getItem).map(EmiStack::of).collect(Collectors.toCollection(ArrayList::new));
-        if(screen.getMenu().storage.getStorage() != null)
+        if (screen.getMenu().storage.getStorage() != null)
         {
-            for(IStackType stackType : screen.getMenu().storage.getStorage())
+            for (IStackType stackType : screen.getMenu().storage.getStorage())
             {
-                if(stackType instanceof ItemStackType itemStackType)
+                if (stackType instanceof ItemStackType itemStackType)
                 {
-                    if(!itemStackType.isEmpty())
+                    if (!itemStackType.isEmpty())
                         stacks.add(EmiStack.of(itemStackType.getStack()));
                 }
             }
@@ -100,30 +100,36 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         List<ItemStack> availableItems = new ArrayList<>();
 
         // 收集常规合成槽物品（假设是输入槽位）
-        for (Slot slot : craftingSlots) {
-            if (slot.hasItem()) {
+        for (Slot slot : craftingSlots)
+        {
+            if (slot.hasItem())
+            {
                 availableItems.add(slot.getItem());
             }
         }
         // 收集存储槽物品
-        for (IStackType stackType : storageSlots) {
-            if (stackType instanceof ItemStackType itemStackType) {
+        for (IStackType stackType : storageSlots)
+        {
+            if (stackType instanceof ItemStackType itemStackType)
+            {
                 ItemStack stack = itemStackType.getStack();
-                if (!stack.isEmpty()) {
+                if (!stack.isEmpty())
+                {
                     availableItems.add(stack);
                 }
             }
         }
         // 收集背包物品
-        for(ItemStack itemStack : menu.player.getInventory().items)
+        for (ItemStack itemStack : menu.player.getInventory().items)
         {
-            if(!itemStack.isEmpty())
+            if (!itemStack.isEmpty())
                 availableItems.add(itemStack);
         }
         // 匹配配方输入需求
-        for (EmiIngredient ingredient : inputs) {
+        for (EmiIngredient ingredient : inputs)
+        {
 
-            if(ingredient.isEmpty())
+            if (ingredient.isEmpty())
             {
                 inputElements.add(ItemStack.EMPTY);
                 continue;
@@ -132,17 +138,20 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
             List<ItemStack> matching = new ArrayList<>();
 
             // 遍历所有可能的物品匹配
-            for (ItemStack stack : availableItems) {
+            for (ItemStack stack : availableItems)
+            {
                 if (!stack.isEmpty() && ingredient.getEmiStacks().stream()
-                        .anyMatch(emiStack -> emiStack.getItemStack().getItem() == stack.getItem())) {
+                        .anyMatch(emiStack -> emiStack.getItemStack().getItem() == stack.getItem()))
+                {
                     matching.add(stack.copy());
                 }
             }
             // 计算总数量
-            int required = (int)ingredient.getAmount();
+            int required = (int) ingredient.getAmount();
             int available = matching.stream().mapToInt(ItemStack::getCount).sum();
 
-            if (available >= required) {
+            if (available >= required)
+            {
                 // 创建合并后的堆栈
                 ItemStack merged = matching.isEmpty() ? ItemStack.EMPTY :
                         matching.get(0).copyWithCount(required);
@@ -150,13 +159,16 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
 
                 // 从虚拟库存中扣除（仅客户端模拟）
                 int remaining = required;
-                for (ItemStack stack : matching) {
+                for (ItemStack stack : matching)
+                {
                     int deduct = Math.min(remaining, stack.getCount());
                     stack.shrink(deduct);
                     remaining -= deduct;
                     if (remaining <= 0) break;
                 }
-            } else {
+            }
+            else
+            {
                 // 材料不足，提前返回
                 Minecraft.getInstance().player.displayClientMessage(
                         Component.translatable("beyonddimensions.message.insufficient_materials"), true);

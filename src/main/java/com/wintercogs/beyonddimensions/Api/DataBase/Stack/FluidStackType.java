@@ -70,14 +70,14 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public IStackType<FluidStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
-        if(key instanceof Fluid fluid)
+        if (key instanceof Fluid fluid)
         {
             FluidStack fluidStack;
-            if(dataComponentPatch != null)
-                fluidStack = new FluidStack(fluid, 1,dataComponentPatch);
+            if (dataComponentPatch != null)
+                fluidStack = new FluidStack(fluid, 1, dataComponentPatch);
             else
                 fluidStack = new FluidStack(fluid, 1);
-            return new FluidStackType(fluidStack,amount);
+            return new FluidStackType(fluidStack, amount);
         }
         return null;
     }
@@ -97,7 +97,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public FluidStack getStack()
     {
-        if(!(stack.getRawFluid() == Fluids.EMPTY))
+        if (!(stack.getRawFluid() == Fluids.EMPTY))
             stack.setAmount(BDMath.clampLongToInt(stackSize));
         return stack;
     }
@@ -106,7 +106,7 @@ public class FluidStackType implements IStackType<FluidStack>
     public void setStack(FluidStack stack)
     {
         stackSize = stack.getAmount();
-        this.stack = new FluidStack(stack,1);
+        this.stack = new FluidStack(stack, 1);
         NeedRecalHash = true;
     }
 
@@ -156,19 +156,19 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public FluidStack copyStack()
     {
-        return new FluidStack(stack,BDMath.clampLongToInt(stackSize));
+        return new FluidStack(stack, BDMath.clampLongToInt(stackSize));
     }
 
     @Override
     public FluidStack copyStackWithCount(long count)
     {
-        return new FluidStack(stack,BDMath.clampLongToInt(count));
+        return new FluidStack(stack, BDMath.clampLongToInt(count));
     }
 
     @Override
     public IStackType<FluidStack> copy()
     {
-        FluidStackType copy = new FluidStackType(new FluidStack(stack,stack.getAmount()), stackSize);
+        FluidStackType copy = new FluidStackType(new FluidStack(stack, stack.getAmount()), stackSize);
         copy.NeedRecalHash = this.NeedRecalHash;
         copy.hashCodeCache = this.hashCodeCache;
         return copy;
@@ -177,7 +177,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public IStackType<FluidStack> copyWithCount(long count)
     {
-        FluidStackType copy = new FluidStackType(new FluidStack(stack, stack.getAmount()),count);
+        FluidStackType copy = new FluidStackType(new FluidStack(stack, stack.getAmount()), count);
         copy.NeedRecalHash = this.NeedRecalHash;
         copy.hashCodeCache = this.hashCodeCache;
         return copy;
@@ -198,7 +198,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public void grow(long amount)
     {
-        setStackAmount(getStackAmount()+amount);
+        setStackAmount(getStackAmount() + amount);
     }
 
     @Override
@@ -227,7 +227,7 @@ public class FluidStackType implements IStackType<FluidStack>
 
         // 计算可分割的数量
         int splitAmount = BDMath.clampLongToInt(Math.min(amount, stackSize));
-        FluidStack split = new FluidStack(stack,stack.getAmount());
+        FluidStack split = new FluidStack(stack, stack.getAmount());
         split.setAmount(splitAmount);
         shrink(splitAmount);
         return split;
@@ -242,7 +242,7 @@ public class FluidStackType implements IStackType<FluidStack>
         long splitAmount = Math.min(amount, stackSize);
         FluidStack split = new FluidStack(stack, stack.getAmount());
         shrink(splitAmount);
-        return new FluidStackType(split,splitAmount);
+        return new FluidStackType(split, splitAmount);
     }
 
     @Override
@@ -251,7 +251,8 @@ public class FluidStackType implements IStackType<FluidStack>
         if (tagKey == null) return false;
         if (this.stack == null || this.stack.isEmpty()) return false;
 
-        if (!tagKey.isFor(Registries.FLUID)) {
+        if (!tagKey.isFor(Registries.FLUID))
+        {
             return false;
         }
 
@@ -262,17 +263,17 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public boolean isSame(IStackType<?> other)
     {
-        if(!other.getTypeId().equals(this.getTypeId()))
+        if (!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.getFluid() == ((FluidStack)other.copyStackWithCount(1)).getFluid();
+        return stack.getFluid() == ((FluidStack) other.copyStackWithCount(1)).getFluid();
     }
 
     @Override
     public boolean isSameTypeSameComponents(IStackType<?> other)
     {
-        if(!other.getTypeId().equals(this.getTypeId()))
+        if (!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return stack.isFluidEqual((FluidStack)other.copyStackWithCount(1));
+        return stack.isFluidEqual((FluidStack) other.copyStackWithCount(1));
     }
 
     @Override
@@ -285,11 +286,12 @@ public class FluidStackType implements IStackType<FluidStack>
         boolean hasItem = !stack.isEmpty();
         buf.writeBoolean(hasItem);
 
-        if (hasItem) {
+        if (hasItem)
+        {
             // 写入数量
             buf.writeVarLong(stackSize);
             // 使用副本避免修改原堆栈
-            FluidStack copy = new FluidStack(stack,1);
+            FluidStack copy = new FluidStack(stack, 1);
             // 使用OPTIONAL_CODEC处理可能为空的情况
             copy.writeToPacket(buf);
         }
@@ -298,21 +300,23 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public IStackType<FluidStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
-        if (!typeId.equals(getTypeId())) {
+        if (!typeId.equals(getTypeId()))
+        {
             return null;// 表示未能读取任何类型
         }
 
         // 读取是否存在物品的标志
         boolean hasItem = buf.readBoolean();
-        if (!hasItem) {
+        if (!hasItem)
+        {
             return new FluidStackType(FluidStack.EMPTY);
         }
 
         // 读取数量
         long count = buf.readVarLong();
         // 使用OPTIONAL_CODEC解码
-        FluidStack stack = new FluidStack(FluidStack.readFromPacket(buf),1);
-        return new FluidStackType(stack,count);
+        FluidStack stack = new FluidStack(FluidStack.readFromPacket(buf), 1);
+        return new FluidStackType(stack, count);
     }
 
     @Override
@@ -321,14 +325,14 @@ public class FluidStackType implements IStackType<FluidStack>
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
         tag.putLong("Amount", getStackAmount());
-        tag.put("Stack",new FluidStack(stack,1).writeToNBT(new CompoundTag()));
+        tag.put("Stack", new FluidStack(stack, 1).writeToNBT(new CompoundTag()));
         return tag;
     }
 
     @Override
     public IStackType<FluidStack> deserializeNBT(CompoundTag nbt)
     {
-        FluidStackType stack =  new FluidStackType(FluidStack.loadFluidStackFromNBT(nbt.getCompound("Stack")));
+        FluidStackType stack = new FluidStackType(FluidStack.loadFluidStackFromNBT(nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));
         return stack;
     }
@@ -342,7 +346,7 @@ public class FluidStackType implements IStackType<FluidStack>
         poseStack.pushPose(); // 保存矩阵状态
 
         Fluid fluid = stack.getFluid();
-        if(!fluid.isSame(Fluids.EMPTY))
+        if (!fluid.isSame(Fluids.EMPTY))
         {
             IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
             ResourceLocation fluidStill = renderProperties.getStillTexture(stack);
@@ -352,10 +356,10 @@ public class FluidStackType implements IStackType<FluidStack>
                             .apply(f)
                     )
                     .filter(s -> s.atlasLocation() != net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());
-            if(fluidStillSprite.isPresent())
+            if (fluidStillSprite.isPresent())
             {
                 int fluidColor = IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor();
-                com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui,16,16,fluidColor,16,fluidStillSprite.get(),x,y);
+                com.wintercogs.beyonddimensions.Render.IngredientRenderer.drawTiledSprite(gui, 16, 16, fluidColor, 16, fluidStillSprite.get(), x, y);
             }
         }
 
@@ -367,18 +371,18 @@ public class FluidStackType implements IStackType<FluidStack>
         float scale = 0.666f; // 文本缩放因数
         var poseStackText = gui.pose();
         poseStackText.pushPose();
-        poseStackText.translate(0,0,200); // 确保文本在顶层
-        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
+        poseStackText.translate(0, 0, 200); // 确保文本在顶层
+        poseStackText.scale(scale, scale, scale); // 文本整体缩放，便于查看
         RenderSystem.disableBlend(); // 禁用混合渲染模式
-        final int X = (int)(
+        final int X = (int) (
                 (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
                         * 1.0f / 0.666f
         );
-        final int Y = (int)(
+        final int Y = (int) (
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
-        if(!stack.isEmpty())
+        if (!stack.isEmpty())
             gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
         poseStackText.popPose();
     }
@@ -399,7 +403,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag)
     {
-        if(stack.isEmpty())
+        if (stack.isEmpty())
             return List.of(Component.empty());
 
         List<Component> tooltips = new ArrayList<>();
@@ -408,23 +412,26 @@ public class FluidStackType implements IStackType<FluidStack>
         Component displayName = getDisplayName();
         tooltips.add(displayName);
 
-        ResourceLocation resourceLocation =  BuiltInRegistries.FLUID.getKey(fluid);
-        if (resourceLocation != null) {
-            if (tooltipFlag.isAdvanced()) {
+        ResourceLocation resourceLocation = BuiltInRegistries.FLUID.getKey(fluid);
+        if (resourceLocation != null)
+        {
+            if (tooltipFlag.isAdvanced())
+            {
                 MutableComponent advancedId = Component.literal(resourceLocation.toString())
                         .withStyle(ChatFormatting.DARK_GRAY);
                 tooltips.add(advancedId);
             }
             Optional<? extends ModContainer> container = ModList.get().getModContainerById(resourceLocation.getNamespace());
             Component modName;
-            if(container.isPresent())
+            if (container.isPresent())
             {
                 modName = Component.literal(container.get().getModInfo().getDisplayName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
             }
             else
             {
                 container = ModList.get().getModContainerById(resourceLocation.getNamespace().replace('_', '-'));
-                if (container.isPresent()) {
+                if (container.isPresent())
+                {
                     modName = Component.literal(container.get().getModInfo().getDisplayName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
                 }
                 else
@@ -435,7 +442,7 @@ public class FluidStackType implements IStackType<FluidStack>
             tooltips.add(modName);
         }
 
-        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.fluid",getStackAmount()));
+        tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.fluid", getStackAmount()));
         return tooltips;
     }
 
@@ -458,7 +465,7 @@ public class FluidStackType implements IStackType<FluidStack>
     @Override
     public boolean equals(Object other)
     {
-        if(other instanceof FluidStackType otherStack)
+        if (other instanceof FluidStackType otherStack)
         {
             return this.isSameTypeSameComponents(otherStack);
         }
@@ -466,9 +473,10 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         // 基于物品类型和组件生成哈希码
-        if(NeedRecalHash)
+        if (NeedRecalHash)
         {
             hashCodeCache = stack.hashCode();
             NeedRecalHash = false;

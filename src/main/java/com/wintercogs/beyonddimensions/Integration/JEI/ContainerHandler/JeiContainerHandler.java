@@ -16,9 +16,9 @@ public class JeiContainerHandler implements IGuiContainerHandler<BDBaseGUI<?>>
     public List<Rect2i> getGuiExtraAreas(BDBaseGUI<?> containerScreen)
     {
         List<Rect2i> areas = new ArrayList<>();
-        for(Renderable renderable : containerScreen.renderables)
+        for (Renderable renderable : containerScreen.renderables)
         {
-            if(renderable instanceof GuiElementAccess access)
+            if (renderable instanceof GuiElementAccess access)
             {
                 areas.add(access.getElementArea());
             }

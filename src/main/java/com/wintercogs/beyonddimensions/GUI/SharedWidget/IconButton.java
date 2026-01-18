@@ -46,9 +46,11 @@ public class IconButton extends Button implements GuiElementAccess
     }
 
     @Override
-    public void renderWidget(GuiGraphics st, int mouseX, int mouseY, float pt) {
+    public void renderWidget(GuiGraphics st, int mouseX, int mouseY, float pt)
+    {
 
-        if (this.visible) {
+        if (this.visible)
+        {
             int x = getX();
             int y = getY();
             st.setColor(1.0f, 1.0f, 1.0f, this.alpha);
@@ -56,10 +58,10 @@ public class IconButton extends Button implements GuiElementAccess
             RenderSystem.defaultBlendFunc();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             this.isHovered = mouseX >= x && mouseY >= y && mouseX < x + this.width && mouseY < y + this.height;
-            ResourceLocation texture = backgroundSprites.get(this.active,this.isHoveredOrFocused());
+            ResourceLocation texture = backgroundSprites.get(this.active, this.isHoveredOrFocused());
 
-            st.blit(texture, x, y, 0,0,this.width,this.height ,this.width ,this.height );
-            drawIcon(st,mouseX,mouseY,pt);
+            st.blit(texture, x, y, 0, 0, this.width, this.height, this.width, this.height);
+            drawIcon(st, mouseX, mouseY, pt);
             st.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
     }
@@ -70,8 +72,9 @@ public class IconButton extends Button implements GuiElementAccess
         setFocused(false);
     }
 
-    protected void drawIcon(GuiGraphics st, int mouseX, int mouseY, float pt) {
-        st.blit(getIcon(), iconX, iconY, 0,0,iconWidth, iconHeight, iconWidth, iconHeight);
+    protected void drawIcon(GuiGraphics st, int mouseX, int mouseY, float pt)
+    {
+        st.blit(getIcon(), iconX, iconY, 0, 0, iconWidth, iconHeight, iconWidth, iconHeight);
     }
 
     // 用于覆写背景
@@ -85,7 +88,8 @@ public class IconButton extends Button implements GuiElementAccess
         this.backgroundSprites = backgroundSprites;
     }
 
-    public ResourceLocation getIcon() {
+    public ResourceLocation getIcon()
+    {
         return icon;
     }
 

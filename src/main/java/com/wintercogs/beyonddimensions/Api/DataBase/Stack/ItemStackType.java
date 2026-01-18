@@ -30,7 +30,8 @@ import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemStackType implements IStackType<ItemStack> {
+public class ItemStackType implements IStackType<ItemStack>
+{
     public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/item");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
@@ -53,43 +54,59 @@ public class ItemStackType implements IStackType<ItemStack> {
     // https://github.com/AppliedEnergistics/Applied-Energistics-2/blob/forge/1.20.1/src/main/java/appeng/api/stacks/AEItemKey.java
     private static final MethodHandle SERIALIZE_CAPS_HANDLE;
     private static final MethodHandle DESERIALIZE_CAPS_HANDLE;
-    static {
-        try {
+
+    static
+    {
+        try
+        {
             var method = CapabilityProvider.class.getDeclaredMethod("serializeCaps");
             method.setAccessible(true);
             SERIALIZE_CAPS_HANDLE = MethodHandles.lookup().unreflect(method);
-        } catch (Exception exception) {
+        }
+        catch (Exception exception)
+        {
             throw new RuntimeException("Failed to create serializeCaps method handle", exception);
         }
-        try {
-            var method = CapabilityProvider.class.getDeclaredMethod("deserializeCaps",CompoundTag.class);
+        try
+        {
+            var method = CapabilityProvider.class.getDeclaredMethod("deserializeCaps", CompoundTag.class);
             method.setAccessible(true);
             DESERIALIZE_CAPS_HANDLE = MethodHandles.lookup().unreflect(method);
-        } catch (Exception exception) {
+        }
+        catch (Exception exception)
+        {
             throw new RuntimeException("Failed to create deserializeCaps method handle", exception);
         }
     }
 
     @Nullable
-    public static CompoundTag serializeStackCaps(ItemStack stack) {
-        try {
+    public static CompoundTag serializeStackCaps(ItemStack stack)
+    {
+        try
+        {
             var caps = (CompoundTag) SERIALIZE_CAPS_HANDLE.invokeExact((CapabilityProvider) stack);
             // Ensure stacks with no serializable cap providers are treated the same as stacks with no caps!
             return caps == null || caps.isEmpty() ? null : caps;
-        } catch (Throwable ex) {
+        }
+        catch (Throwable ex)
+        {
             throw new RuntimeException("Failed to call serializeCaps", ex);
         }
     }
 
     @Nullable
-    public static void deserializeStackCaps(ItemStack stack, CompoundTag caps) {
-        try {
-            if(caps != null && !caps.isEmpty())
+    public static void deserializeStackCaps(ItemStack stack, CompoundTag caps)
+    {
+        try
+        {
+            if (caps != null && !caps.isEmpty())
             {
                 DESERIALIZE_CAPS_HANDLE.invokeExact((CapabilityProvider) stack, caps);
             }
-            return ;
-        } catch (Throwable ex) {
+            return;
+        }
+        catch (Throwable ex)
+        {
             throw new RuntimeException("Failed to call serializeCaps", ex);
         }
     }
@@ -139,13 +156,13 @@ public class ItemStackType implements IStackType<ItemStack> {
     public IStackType<ItemStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
         // 先行置为ItemStack，再走统一接口
-        if(key instanceof Item item)
+        if (key instanceof Item item)
         {
             ItemStack itemStack;
             itemStack = new ItemStack(item, 1);
-            if(dataComponentPatch != null)
+            if (dataComponentPatch != null)
                 itemStack.tag = dataComponentPatch;
-            return new ItemStackType(itemStack,amount);
+            return new ItemStackType(itemStack, amount);
         }
         return null;
     }
@@ -153,7 +170,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public ItemStack getStack()
     {
-        if(serverCache == null)
+        if (serverCache == null)
             refreshCachedStack();
 
         serverCache.setCount(BDMath.clampLongToInt(stackSize));
@@ -175,7 +192,8 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public ResourceLocation getTypeId() {
+    public ResourceLocation getTypeId()
+    {
         return ID;
     }
 
@@ -186,7 +204,8 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public Class<ItemStack> getStackClass() {
+    public Class<ItemStack> getStackClass()
+    {
         return ItemStack.class;
     }
 
@@ -251,7 +270,7 @@ public class ItemStackType implements IStackType<ItemStack> {
         CompoundTag copyCaps = caps == null ? null : caps.copy();
         long copyStackSize = stackSize;
 
-        ItemStackType copy = new ItemStackType(copyItem,copyStackSize,copyTag,copyCaps);
+        ItemStackType copy = new ItemStackType(copyItem, copyStackSize, copyTag, copyCaps);
 
         copy.NeedRecalHash = this.NeedRecalHash;
         copy.hashCodeCache = this.hashCodeCache;
@@ -266,7 +285,7 @@ public class ItemStackType implements IStackType<ItemStack> {
         CompoundTag copyCaps = caps == null ? null : caps.copy();
         long copyStackSize = count;
 
-        ItemStackType copy = new ItemStackType(copyItem,copyStackSize,copyTag,copyCaps);
+        ItemStackType copy = new ItemStackType(copyItem, copyStackSize, copyTag, copyCaps);
 
         copy.NeedRecalHash = this.NeedRecalHash;
         copy.hashCodeCache = this.hashCodeCache;
@@ -288,7 +307,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public void grow(long amount)
     {
-        setStackAmount(getStackAmount()+amount);
+        setStackAmount(getStackAmount() + amount);
     }
 
     @Override
@@ -298,10 +317,11 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public long getVanillaMaxStackSize() {
-        if(vanillaStackSize<=0)
+    public long getVanillaMaxStackSize()
+    {
+        if (vanillaStackSize <= 0)
         {
-            if(serverCache == null)
+            if (serverCache == null)
                 refreshCachedStack();
             vanillaStackSize = serverCache.getMaxStackSize();
         }
@@ -309,13 +329,15 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public long getCustomMaxStackSize() {
+    public long getCustomMaxStackSize()
+    {
         // 可配置化的最大堆叠尺寸
         return CUSTOM_MAX_STACK_SIZE;
     }
 
     @Override
-    public ItemStack splitStack(long amount) {
+    public ItemStack splitStack(long amount)
+    {
         if (amount <= 0) return ItemStack.EMPTY;
 
         int splitAmount = BDMath.clampLongToInt(Math.min(amount, stackSize));
@@ -331,7 +353,7 @@ public class ItemStackType implements IStackType<ItemStack> {
         if (amount <= 0) return new ItemStackType();
 
         long splitAmount = Math.min(amount, stackSize);
-        ItemStackType split = (ItemStackType)copyWithCount(splitAmount);
+        ItemStackType split = (ItemStackType) copyWithCount(splitAmount);
         shrink(splitAmount);
         return split;
     }
@@ -342,7 +364,8 @@ public class ItemStackType implements IStackType<ItemStack> {
         if (tagKey == null) return false;
         if (this.item == null || this.item == Items.AIR) return false;
 
-        if (!tagKey.isFor(Registries.ITEM)) {
+        if (!tagKey.isFor(Registries.ITEM))
+        {
             return false;
         }
 
@@ -351,18 +374,20 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public boolean isSame(IStackType<?> other) {
+    public boolean isSame(IStackType<?> other)
+    {
         // 比较物品类型和基础NBT（如盔甲耐久等）
-        if(!other.getTypeId().equals(this.getTypeId()))
+        if (!other.getTypeId().equals(this.getTypeId()))
             return false;
-        return item == ((ItemStackType)other).item;
+        return item == ((ItemStackType) other).item;
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<?> other) {
-        if(!other.getTypeId().equals(this.getTypeId()))
+    public boolean isSameTypeSameComponents(IStackType<?> other)
+    {
+        if (!other.getTypeId().equals(this.getTypeId()))
             return false;
-        if(other instanceof ItemStackType otherStackType)
+        if (other instanceof ItemStackType otherStackType)
         {
             return otherStackType.item == item
                     && NbtEq.equalsRelaxed(this.tag, otherStackType.tag)
@@ -373,7 +398,8 @@ public class ItemStackType implements IStackType<ItemStack> {
 
     // 网络序列化
     @Override
-    public void serialize(FriendlyByteBuf buf) {
+    public void serialize(FriendlyByteBuf buf)
+    {
         // 始终写入类型ID
         buf.writeResourceLocation(getTypeId());
 
@@ -381,7 +407,8 @@ public class ItemStackType implements IStackType<ItemStack> {
         boolean hasItem = item != Items.AIR;
         buf.writeBoolean(hasItem);
 
-        if (hasItem) {
+        if (hasItem)
+        {
             buf.writeId(BuiltInRegistries.ITEM, item);
             buf.writeVarLong(stackSize);
             buf.writeNbt(tag);  //writeNbt会自己处理空占位，无需担心
@@ -390,18 +417,21 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public ItemStackType deserialize(FriendlyByteBuf buf,ResourceLocation typeId) {
-        if (!typeId.equals(getTypeId())) {
+    public ItemStackType deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
+    {
+        if (!typeId.equals(getTypeId()))
+        {
             return null;// 表示未能读取任何类型
         }
 
         // 读取是否存在物品的标志
         boolean hasItem = buf.readBoolean();
-        if (!hasItem) {
+        if (!hasItem)
+        {
             return new ItemStackType();
         }
 
-        Item item = (Item)buf.readById(BuiltInRegistries.ITEM);
+        Item item = (Item) buf.readById(BuiltInRegistries.ITEM);
         long count = buf.readVarLong();
         CompoundTag tag = buf.readNbt();
         CompoundTag caps = buf.readNbt();
@@ -410,7 +440,8 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT()
+    {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
         tag.putLong("Amount", getStackAmount());
@@ -418,34 +449,38 @@ public class ItemStackType implements IStackType<ItemStack> {
         CompoundTag stackTag = new CompoundTag();
         ResourceLocation resourcelocation = BuiltInRegistries.ITEM.getKey(item);
         stackTag.putString("id", resourcelocation == null ? "minecraft:air" : resourcelocation.toString());
-        if (this.tag != null) {
+        if (this.tag != null)
+        {
             stackTag.put("tag", this.tag.copy());
         }
-        if (this.caps != null && !this.caps.isEmpty()) { // 序列化时自动清除空能力（此操作与原版一致）
+        if (this.caps != null && !this.caps.isEmpty())
+        { // 序列化时自动清除空能力（此操作与原版一致）
             stackTag.put("ForgeCaps", this.caps);
         }
 
-        tag.put("Stack",stackTag);
+        tag.put("Stack", stackTag);
         return tag;
     }
 
     @Override
-    public ItemStackType deserializeNBT(CompoundTag nbt) {
+    public ItemStackType deserializeNBT(CompoundTag nbt)
+    {
         long amount = nbt.getLong("Amount"); // 数量直接从原始nbt中取
 
         CompoundTag stackTag = nbt.getCompound("Stack");
         CompoundTag caps = stackTag.contains("ForgeCaps") ? stackTag.getCompound("ForgeCaps") : null;
         CompoundTag tag = stackTag.contains("tag") ? stackTag.getCompound("tag") : null;
-        Item rawItem = (Item)BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(stackTag.getString("id")));
+        Item rawItem = (Item) BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(stackTag.getString("id")));
         Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(rawItem).get();
-        return new ItemStackType(item,amount,tag,caps);
+        return new ItemStackType(item, amount, tag, caps);
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void render(net.minecraft.client.gui.GuiGraphics gui,int x, int y) {
+    public void render(net.minecraft.client.gui.GuiGraphics gui, int x, int y)
+    {
 
-        if(clientCache == null)
+        if (clientCache == null)
             refreshCachedStack();
 
         // 渲染物品图标
@@ -461,24 +496,25 @@ public class ItemStackType implements IStackType<ItemStack> {
         float scale = 0.666f; // 文本缩放因数
         var poseStackText = gui.pose();
         poseStackText.pushPose();
-        poseStackText.translate(0,0,200); // 确保文本在顶层
-        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
+        poseStackText.translate(0, 0, 200); // 确保文本在顶层
+        poseStackText.scale(scale, scale, scale); // 文本整体缩放，便于查看
         RenderSystem.disableBlend(); // 禁用混合渲染模式
-        final int X = (int)(
+        final int X = (int) (
                 (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
                         * 1.0f / 0.666f
         );
-        final int Y = (int)(
+        final int Y = (int) (
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
-        if(!clientCache.isEmpty())
+        if (!clientCache.isEmpty())
             gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
         poseStackText.popPose();
     }
 
     @Override
-    public String getCountText(long count) {
+    public String getCountText(long count)
+    {
         if (count < 0) return "";
         return StringFormat.formatCount(count);
     }
@@ -486,7 +522,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public Component getDisplayName()
     {
-        if(clientCache == null)
+        if (clientCache == null)
             refreshCachedStack();
         return clientCache.getDisplayName();
     }
@@ -494,9 +530,9 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag)
     {
-        if(clientCache == null)
+        if (clientCache == null)
             refreshCachedStack();
-        List<Component> tooltips = clientCache.getTooltipLines(player,tooltipFlag);
+        List<Component> tooltips = clientCache.getTooltipLines(player, tooltipFlag);
         tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.item", getStackAmount()));
         return tooltips;
     }
@@ -504,14 +540,14 @@ public class ItemStackType implements IStackType<ItemStack> {
     @Override
     public Optional<TooltipComponent> getTooltipImage()
     {
-        if(clientCache == null)
+        if (clientCache == null)
             refreshCachedStack();
         return clientCache.getTooltipImage();
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void renderTooltip(net.minecraft.client.gui.GuiGraphics gui,net.minecraft.client.gui.Font font, int mouseX, int mouseY)
+    public void renderTooltip(net.minecraft.client.gui.GuiGraphics gui, net.minecraft.client.gui.Font font, int mouseX, int mouseY)
     {
         var minecraft = Minecraft.getInstance();
         gui.renderTooltip(minecraft.font, this.getTooltipLines(minecraft.player, minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL)
@@ -522,7 +558,7 @@ public class ItemStackType implements IStackType<ItemStack> {
     public boolean equals(Object other)
     {
         // 我知道我没做引用比较，等我统一整理代码时再处理
-        if(other instanceof ItemStackType otherStack)
+        if (other instanceof ItemStackType otherStack)
         {
             return this.isSameTypeSameComponents(otherStack);
         }
@@ -530,9 +566,10 @@ public class ItemStackType implements IStackType<ItemStack> {
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         // 基于物品类型和组件生成哈希码
-        if(NeedRecalHash)
+        if (NeedRecalHash)
         {
             int i = 31 + item.hashCode();
             i = i * 31 + NbtEq.hashRelaxed(tag); // 内部已处理null

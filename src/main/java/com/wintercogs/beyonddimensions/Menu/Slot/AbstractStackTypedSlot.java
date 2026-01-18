@@ -81,7 +81,6 @@ public abstract class AbstractStackTypedSlot extends Slot
     public abstract void loadChange(int where, IStackType newStack, long newAmount);
 
 
-
     // 其他有用的slot方法或者为slot运行所用的方法-------------------------------------------------------------------------------
 
     // 获取槽位容量
@@ -93,7 +92,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     public IStackType getTypedStackFromUnifiedStorage()
     {
         IStackType stackType = storage.getStackBySlot(getSlotIndex());
-        if(stackType != null)
+        if (stackType != null)
             return stackType.copy();
         else
             return new ItemStackType();
@@ -103,12 +102,12 @@ public abstract class AbstractStackTypedSlot extends Slot
     {
         //从当前槽索引取物品
         IStackType stackType = storage.getStackBySlot(getSlotIndex());
-        if(stackType == null)
+        if (stackType == null)
         {
             return ItemStack.EMPTY;
         }
 
-        if(stackType instanceof ItemStackType itemStackType)
+        if (stackType instanceof ItemStackType itemStackType)
         {
             return itemStackType.getStack();
         }
@@ -127,7 +126,7 @@ public abstract class AbstractStackTypedSlot extends Slot
             return stack;
         if (stack != null)
         {
-            if(stack.getStackAmount()>stack.getVanillaMaxStackSize())
+            if (stack.getStackAmount() > stack.getVanillaMaxStackSize())
             {
                 return stack.copyWithCount(stack.getVanillaMaxStackSize());
             }
@@ -156,7 +155,7 @@ public abstract class AbstractStackTypedSlot extends Slot
 
     public IStackType getStack()
     {
-        if(getSlotIndex()<0||getSlotIndex()>= storage.getSlots())
+        if (getSlotIndex() < 0 || getSlotIndex() >= storage.getSlots())
         {
             return new ItemStackType(ItemStack.EMPTY);
         }
@@ -197,7 +196,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     @Override
     public ItemStack getItem()
     {
-        if(getSlotIndex()<0)
+        if (getSlotIndex() < 0)
         {
             return ItemStack.EMPTY;
         }
@@ -257,7 +256,7 @@ public abstract class AbstractStackTypedSlot extends Slot
 
     public long getItemCount()
     {
-        if(getSlotIndex()<0)
+        if (getSlotIndex() < 0)
         {
             return -1;
         }

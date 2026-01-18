@@ -12,14 +12,14 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record CallSeverClickPacket(int slotIndex , IStackType clickItem, int button, boolean shiftDown)
+public record CallSeverClickPacket(int slotIndex, IStackType clickItem, int button, boolean shiftDown)
 {
     private void handleServer(NetworkEvent.Context context)
     {
         Player player = context.getSender();
         if (player.containerMenu instanceof BDBaseMenu menu)
         {
-            menu.customClickHandler(slotIndex(),clickItem(),button(),shiftDown());
+            menu.customClickHandler(slotIndex(), clickItem(), button(), shiftDown());
             menu.broadcastChanges();
         }
     }
@@ -33,17 +33,18 @@ public record CallSeverClickPacket(int slotIndex , IStackType clickItem, int but
 
     public static void handle(CallSeverClickPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
             NetworkDirection direction = context.getDirection();
-            if(direction == NetworkDirection.PLAY_TO_CLIENT)
+            if (direction == NetworkDirection.PLAY_TO_CLIENT)
             {
                 context.enqueueWork(() ->
                         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> packet.handleClient(context))
                 );
                 context.setPacketHandled(true);
             }
-            else if(direction == NetworkDirection.PLAY_TO_SERVER)
+            else if (direction == NetworkDirection.PLAY_TO_SERVER)
             {
                 context.enqueueWork(() -> packet.handleServer(context));
                 context.setPacketHandled(true);

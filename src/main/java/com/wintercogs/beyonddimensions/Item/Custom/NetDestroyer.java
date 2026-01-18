@@ -35,7 +35,8 @@ public class NetDestroyer extends NetedItem
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
         // 仅限主手且非潜行状态
-        if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown()) {
+        if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
+        {
             return InteractionResultHolder.fail(itemstack);
         }
         // 启动使用过程
@@ -50,23 +51,33 @@ public class NetDestroyer extends NetedItem
 
         if (!(livingEntity instanceof Player player)) return stack;
 
-        if (!level.isClientSide()) {
-            if (NetedItem.getNetId(stack) >= 0) {
+        if (!level.isClientSide())
+        {
+            if (NetedItem.getNetId(stack) >= 0)
+            {
                 DimensionsNet itemNet = DimensionsNet.getNetFromId(NetedItem.getNetId(stack), level.getServer());
-                if (itemNet != null) {
+                if (itemNet != null)
+                {
                     DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
                     // 只有网络主人能删除自己的网络
-                    if (playerNet != null && playerNet.getId() == itemNet.getId() && playerNet.isOwner(player)) {
+                    if (playerNet != null && playerNet.getId() == itemNet.getId() && playerNet.isOwner(player))
+                    {
                         playerNet.destroySelf();
                         stack.shrink(1);
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_destroyed"));
-                    } else {
+                    }
+                    else
+                    {
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.cant_delete_net"));
                     }
-                } else {
+                }
+                else
+                {
                     player.sendSystemMessage(Component.translatable("msg.beyonddimensions.error_item_net"));
                 }
-            } else {
+            }
+            else
+            {
                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
             }
         }

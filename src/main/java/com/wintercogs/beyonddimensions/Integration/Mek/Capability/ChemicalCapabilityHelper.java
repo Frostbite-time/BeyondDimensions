@@ -14,8 +14,10 @@ public class ChemicalCapabilityHelper
     public static Capability<Object> PIGMENT;
     public static Capability<Object> SLURRY;
 
-    static {
-        try {
+    static
+    {
+        try
+        {
             // 动态加载 IChemicalHandler 类
 
             // 获取目标类
@@ -36,7 +38,8 @@ public class ChemicalCapabilityHelper
             SLURRY = (Capability<Object>) slurryHandlerField.get(null);
 
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             throw new RuntimeException("Failed to initialize Mekanism capability", e);
         }
     }

@@ -22,9 +22,9 @@ public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackType 
         Player player = Minecraft.getInstance().player;
         AbstractContainerMenu menu = player.containerMenu;
 
-        if(menu != null)
+        if (menu != null)
         {
-            if(menu.slots.get(slotId()) instanceof AbstractStackTypedSlot slot)
+            if (menu.slots.get(slotId()) instanceof AbstractStackTypedSlot slot)
             {
                 slot.loadChange(slotIndex(), stack(), newAmount());
             }
@@ -33,10 +33,10 @@ public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackType 
     }
 
 
-
     public static void handle(OrderedStackTypedSlotPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
 
             context.enqueueWork(() ->

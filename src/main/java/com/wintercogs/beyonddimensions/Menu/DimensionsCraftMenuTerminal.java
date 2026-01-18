@@ -23,13 +23,13 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory,  new DimensionsNet(true), null, null, null);
+        this(id, playerInventory, new DimensionsNet(true), null, null, null);
     }
 
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, DimensionsNet data, NonNullList<ItemStack> craftItems, ItemStack terminalItem, BlockPos entityPos)
     {
-        super(UIRegister.Dimensions_Craft_Menu_Terminal.get(), id,playerInventory,data, craftItems,entityPos);
-        if(!player.level().isClientSide)
+        super(UIRegister.Dimensions_Craft_Menu_Terminal.get(), id, playerInventory, data, craftItems, entityPos);
+        if (!player.level().isClientSide)
         {
             this.terminalStack = terminalItem;
             this.entityPos = entityPos;
@@ -41,19 +41,24 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     {
         super.initCraftSlots(playerInventory, craftSlots);
         // 父函数处理完毕后更新一次结果槽
-        DimensionsCraftMenu.slotChangedCraftingGrid(this,player.level(),player,craftSlots,resultSlots,resultSlotIndex);
+        DimensionsCraftMenu.slotChangedCraftingGrid(this, player.level(), player, craftSlots, resultSlots, resultSlotIndex);
     }
 
     @Override
     public void removed(Player player)
     {
         // 处理光标物品
-        if (player instanceof ServerPlayer) {
+        if (player instanceof ServerPlayer)
+        {
             ItemStack itemstack = this.getCarried();
-            if (!itemstack.isEmpty()) {
-                if (player.isAlive() && !((ServerPlayer)player).hasDisconnected()) {
+            if (!itemstack.isEmpty())
+            {
+                if (player.isAlive() && !((ServerPlayer) player).hasDisconnected())
+                {
                     player.getInventory().placeItemBackInInventory(itemstack);
-                } else {
+                }
+                else
+                {
                     player.drop(itemstack, false);
                 }
 
@@ -61,22 +66,25 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
             }
         }
 
-        if(player instanceof ServerPlayer)
+        if (player instanceof ServerPlayer)
         {
             // 处理合成槽物品
             NonNullList<ItemStack> nonNullList = NonNullList.withSize(9, ItemStack.EMPTY);
-            for (int i = 0; i < craftSlots.getItems().size(); i++) {
+            for (int i = 0; i < craftSlots.getItems().size(); i++)
+            {
                 ItemStack stack = craftSlots.getItems().get(i);
                 nonNullList.set(i, stack);
             }
-            if(terminalStack != null && terminalStack.getItem() instanceof NetTerminalItem)
+            if (terminalStack != null && terminalStack.getItem() instanceof NetTerminalItem)
             {
                 // 将数据写入物品的 NBT
                 CompoundTag tag = terminalStack.getOrCreateTag();
                 ListTag slotsTag = new ListTag();
-                for (ItemStack stack : nonNullList) {
+                for (ItemStack stack : nonNullList)
+                {
                     CompoundTag itemTag = new CompoundTag();
-                    if (!stack.isEmpty()) {
+                    if (!stack.isEmpty())
+                    {
                         stack.save(itemTag); // 非空物品序列化为 CompoundTag
                     }
                     slotsTag.add(itemTag); // 空物品也会保存为空的 CompoundTag
@@ -95,7 +103,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     @Override
     public boolean stillValid(Player player)
     {
-        if(entityPos != null)
+        if (entityPos != null)
         {
             BlockEntity be = player.level().getBlockEntity(entityPos);
             return be != null && !be.isRemoved();

@@ -22,7 +22,7 @@ public record RecipeFillC2SPacket(List<ItemStack> inputs)
         //获取玩家上下文
         Player player = context.getSender();
 
-        if(player.containerMenu instanceof DimensionsCraftMenu menu)
+        if (player.containerMenu instanceof DimensionsCraftMenu menu)
         {
             //服务端处理示意
             //1.解析数组
@@ -35,7 +35,8 @@ public record RecipeFillC2SPacket(List<ItemStack> inputs)
 
     public static void handle(RecipeFillC2SPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
             context.enqueueWork(() -> packet.handle(context));
             context.setPacketHandled(true);
@@ -45,7 +46,8 @@ public record RecipeFillC2SPacket(List<ItemStack> inputs)
     public static void encode(RecipeFillC2SPacket packet, FriendlyByteBuf buf)
     {
         buf.writeInt(packet.inputs().size());  // 先写入列表长度
-        for (ItemStack stack : packet.inputs()) {
+        for (ItemStack stack : packet.inputs())
+        {
             buf.writeItem(stack);
             buf.writeNbt(serializeStackCaps(stack));
         }
@@ -55,7 +57,8 @@ public record RecipeFillC2SPacket(List<ItemStack> inputs)
     {
         int size = buf.readInt();
         List<ItemStack> stacks = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++)
+        {
             ItemStack stack = buf.readItem();
             CompoundTag capNBTTag = buf.readNbt();
             deserializeStackCaps(stack, capNBTTag); // 内部检查null和空

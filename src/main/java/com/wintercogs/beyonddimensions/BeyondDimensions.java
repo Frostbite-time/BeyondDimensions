@@ -54,7 +54,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
@@ -140,7 +139,7 @@ public class BeyondDimensions
         // 注册方块实体
         ModBlockEntities.register(modEventBus);
 
-        if(FMLEnvironment.dist == Dist.CLIENT)
+        if (FMLEnvironment.dist == Dist.CLIENT)
         {
             // 注册方块实体渲染
             modEventBus.addListener(ModBlockRenders::onRegisterRenderers);
@@ -150,58 +149,58 @@ public class BeyondDimensions
 
     private void constructMod(final FMLConstructModEvent event)
     {
-        if(ModList.get().isLoaded(MekanismMODID))
+        if (ModList.get().isLoaded(MekanismMODID))
         {
             MekLoaded = true;
         }
-        if(ModList.get().isLoaded(AE2MODID))
+        if (ModList.get().isLoaded(AE2MODID))
         {
             AELoaded = true;
         }
-        if(ModList.get().isLoaded(EMI_MODID))
+        if (ModList.get().isLoaded(EMI_MODID))
         {
             EMILoaded = true;
         }
-        if(ModList.get().isLoaded(JEI2MODID))
+        if (ModList.get().isLoaded(JEI2MODID))
         {
             JEILoaded = true;
         }
-        if(ModList.get().isLoaded(PolymorphModId))
+        if (ModList.get().isLoaded(PolymorphModId))
         {
             PolymorphLoaded = true;
         }
-        if(ModList.get().isLoaded(AEMEK2MODID))
+        if (ModList.get().isLoaded(AEMEK2MODID))
         {
             AEMEKLoaded = true;
         }
-        if(ModList.get().isLoaded(AEFlux2MODID))
+        if (ModList.get().isLoaded(AEFlux2MODID))
         {
             AEFluxLoaded = true;
         }
-        if(ModList.get().isLoaded(CuriosModId))
+        if (ModList.get().isLoaded(CuriosModId))
         {
             CuriosLoaded = true;
             MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, BD_CuriosPlugin::registerCapabilities);
         }
-        if(ModList.get().isLoaded(JECharactersModId))
+        if (ModList.get().isLoaded(JECharactersModId))
         {
             JECharactersLoaded = true;
         }
-        if(ModList.get().isLoaded(ARS_ModId))
+        if (ModList.get().isLoaded(ARS_ModId))
         {
             ARS_Loaded = true;
             BD_ArsCaps.registerCapability(MOD_EVENT_BUS);
         }
-        if(ModList.get().isLoaded(AE_ARS_ModId))
+        if (ModList.get().isLoaded(AE_ARS_ModId))
         {
             AE_ARS_Loaded = true;
         }
-        if(ModList.get().isLoaded(Botania_ModId))
+        if (ModList.get().isLoaded(Botania_ModId))
         {
             Botania_Loaded = true;
-            MinecraftForge.EVENT_BUS.addGenericListener(BlockEntity.class,BD_BotaniaPlugin::attachBlockEntityCaps); // 为网络通道和网络接口手动注册火花附着
+            MinecraftForge.EVENT_BUS.addGenericListener(BlockEntity.class, BD_BotaniaPlugin::attachBlockEntityCaps); // 为网络通道和网络接口手动注册火花附着
         }
-        if(ModList.get().isLoaded(AE_Botania_ModId))
+        if (ModList.get().isLoaded(AE_Botania_ModId))
         {
             AE_Botania_Loaded = true;
         }
@@ -209,7 +208,7 @@ public class BeyondDimensions
         {
             RS_Loaded = true;
         }
-        if(ModList.get().isLoaded(Create_ModId))
+        if (ModList.get().isLoaded(Create_ModId))
         {
             Create_Loaded = true;
         }
@@ -227,13 +226,13 @@ public class BeyondDimensions
 
         // 注册方块能力类型，用于动态为方块注册能力
         CapabilityHelper.BlockCapabilityMap.put(ItemStackType.ID, ForgeCapabilities.ITEM_HANDLER);
-        CapabilityHelper.BlockCapabilityMap.put(FluidStackType.ID,ForgeCapabilities.FLUID_HANDLER);
-        CapabilityHelper.BlockCapabilityMap.put(EnergyStackType.ID,ForgeCapabilities.ENERGY);
+        CapabilityHelper.BlockCapabilityMap.put(FluidStackType.ID, ForgeCapabilities.FLUID_HANDLER);
+        CapabilityHelper.BlockCapabilityMap.put(EnergyStackType.ID, ForgeCapabilities.ENERGY);
 
         // 注册物品能力类型
         CapabilityHelper.ItemCapabilityMap.put(ItemStackType.ID, ForgeCapabilities.ITEM_HANDLER);
         CapabilityHelper.ItemCapabilityMap.put(FluidStackType.ID, ForgeCapabilities.FLUID_HANDLER_ITEM);
-        CapabilityHelper.ItemCapabilityMap.put(EnergyStackType.ID,ForgeCapabilities.ENERGY);
+        CapabilityHelper.ItemCapabilityMap.put(EnergyStackType.ID, ForgeCapabilities.ENERGY);
 
         // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
         CapabilityHelper.registerUSHandler(new ItemStackType(), ItemUnifiedStorageHandler::new);
@@ -250,7 +249,7 @@ public class BeyondDimensions
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackType.ID, FluidHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(EnergyStackType.ID, EnergyHandlerWrapper::new);
 
-        if(MekLoaded)
+        if (MekLoaded)
         {
             // 注册化学品堆叠
             StackTypeRegistry.registerType(new GasStackType());
@@ -260,7 +259,7 @@ public class BeyondDimensions
             // 注册化学品方块能力
             CapabilityHelper.BlockCapabilityMap.put(GasStackType.ID, ChemicalCapabilityHelper.GAS);
             CapabilityHelper.BlockCapabilityMap.put(InfusionStackType.ID, ChemicalCapabilityHelper.INFUSION);
-            CapabilityHelper.BlockCapabilityMap.put(PigmentStackType.ID,ChemicalCapabilityHelper.PIGMENT);
+            CapabilityHelper.BlockCapabilityMap.put(PigmentStackType.ID, ChemicalCapabilityHelper.PIGMENT);
             CapabilityHelper.BlockCapabilityMap.put(SlurryStackType.ID, ChemicalCapabilityHelper.SLURRY);
             // 注册化学品物品能力
             CapabilityHelper.ItemCapabilityMap.put(GasStackType.ID, ChemicalCapabilityHelper.GAS);
@@ -289,7 +288,7 @@ public class BeyondDimensions
 
         }
 
-        if(ARS_Loaded)
+        if (ARS_Loaded)
         {
             // 注册魔源
             StackTypeRegistry.registerType(new SourceStackType());
@@ -301,7 +300,7 @@ public class BeyondDimensions
             StackHandlerWrapperHelper.stackWrappers.put(SourceStackType.ID, SourceHandlerWrapper::new);
         }
 
-        if(Botania_Loaded)
+        if (Botania_Loaded)
         {
             // 注册Mana（魔力）
             StackTypeRegistry.registerType(new ManaStackType());
@@ -316,34 +315,34 @@ public class BeyondDimensions
         // 为维度ME硬盘注册，其中BD_AEPlugin用于注册存储元件
         // BD_AEMEKPlugin与BD_AEFluxPlugin分别注册IStackType与AEKey之间的转换。
         // 物品、流体的转换由AEHelper的静态块负责
-        if(AELoaded)
+        if (AELoaded)
         {
             BD_AEPlugin.register();
         }
-        if(AEMEKLoaded)
+        if (AEMEKLoaded)
         {
             BD_AEMEKPlugin.register();
         }
-        if(AEFluxLoaded)
+        if (AEFluxLoaded)
         {
             BD_AEFluxPlugin.register();
         }
-        if(AE_ARS_Loaded)
+        if (AE_ARS_Loaded)
         {
             BD_AE_ArsPlugin.register();
         }
-        if(AE_Botania_Loaded)
+        if (AE_Botania_Loaded)
         {
             BD_AE_BotaniaPlugin.register();
         }
 
-        if(RS_Loaded)
+        if (RS_Loaded)
         {
             BD_RSPlugin.register();
         }
 
         // 注册物品能力交互黑名单
-        if(Botania_Loaded)
+        if (Botania_Loaded)
         {
             BD_BotaniaPlugin.registerItemCapBlackList();
         }
@@ -367,11 +366,11 @@ public class BeyondDimensions
             LOGGER.info("维度网络初始化完成(客户端)");
             UIRegister.registerScreens(event);
 
-            if(PolymorphLoaded)
+            if (PolymorphLoaded)
             {
                 PolymorphPlug.register();
             }
-            if(Botania_Loaded)
+            if (Botania_Loaded)
             {
                 MinecraftForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);
             }

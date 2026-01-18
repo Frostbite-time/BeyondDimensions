@@ -25,9 +25,9 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
     {
         List<Target<I>> targets = new ArrayList<>();
 
-        for(Slot slot: screen.getMenu().slots)
+        for (Slot slot : screen.getMenu().slots)
         {
-            if(slot instanceof AbstractStackTypedSlot sSlot && sSlot.isActive() && sSlot.isFake())
+            if (slot instanceof AbstractStackTypedSlot sSlot && sSlot.isActive() && sSlot.isFake())
             {
                 targets.add(new IStackTarget<>(sSlot, screen));
             }
@@ -50,7 +50,7 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
         public IStackTarget(AbstractStackTypedSlot slot, BDBaseGUI screen)
         {
             this.slot = slot;
-            this.area = new Rect2i(screen.getGuiLeft() + slot.x, screen.getGuiTop() + slot.y,16 ,16);
+            this.area = new Rect2i(screen.getGuiLeft() + slot.x, screen.getGuiTop() + slot.y, 16, 16);
         }
 
         @Override
@@ -65,9 +65,9 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
         {
             Object stackKey = ingredient;
             IStackType dragging = new ItemStackType();
-            for(IStackType type : StackTypeRegistry.getAllTypes())
+            for (IStackType type : StackTypeRegistry.getAllTypes())
             {
-                if(type.getStackClass().isAssignableFrom(stackKey.getClass()))
+                if (type.getStackClass().isAssignableFrom(stackKey.getClass()))
                 {
 
                     dragging = type.getEmpty();
@@ -77,13 +77,13 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
             }
 
             // AE2通用包裹支持
-            if(BeyondDimensions.AELoaded)
+            if (BeyondDimensions.AELoaded)
             {
-                if(dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
+                if (dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
                 {
                     appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
 
-                    if(genericContent != null)
+                    if (genericContent != null)
                     {
                         dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
                     }
@@ -91,7 +91,7 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
                 }
             }
 
-            PacketRegister.INSTANCE.sendToServer(new SetSlotDirectlyPacket(slot.index,dragging));
+            PacketRegister.INSTANCE.sendToServer(new SetSlotDirectlyPacket(slot.index, dragging));
 
         }
     }

@@ -22,7 +22,6 @@ public class NetEnergyMenu extends BDBaseMenu
     public long lastEnergySpeedState = 0;
 
 
-
     /**
      * 客户端构造函数
      *
@@ -36,11 +35,11 @@ public class NetEnergyMenu extends BDBaseMenu
     /**
      * 服务端构造函数
      *
-     * @param playerInventory  玩家背包
+     * @param playerInventory 玩家背包
      */
     public NetEnergyMenu(int id, Inventory playerInventory, NetEnergyPathwayBlockEntity be)
     {
-        super(UIRegister.Net_Energy_Menu.get(), id,playerInventory);
+        super(UIRegister.Net_Energy_Menu.get(), id, playerInventory);
 
         this.be = be;
 
@@ -64,10 +63,10 @@ public class NetEnergyMenu extends BDBaseMenu
     protected boolean shouldSendQuickData()
     {
         DimensionsNet netCache = be.getNet();
-        if(netCache != null)
+        if (netCache != null)
         {
             UnifiedStorage storage = netCache.getUnifiedStorage();
-            if(lastEnergyStored != storage.getEnergyStored()
+            if (lastEnergyStored != storage.getEnergyStored()
                     || lastEnergyCapacity != storage.getSlotCapacity(0)
                     || lastEnergySpeedState != storage.getEnergyStored() - lastEnergyStored)
             {
@@ -79,7 +78,7 @@ public class NetEnergyMenu extends BDBaseMenu
         }
         else
         {
-            if(lastEnergyStored != 0
+            if (lastEnergyStored != 0
                     || lastEnergyCapacity != 0
                     || lastEnergySpeedState != 0)
             {
@@ -108,7 +107,7 @@ public class NetEnergyMenu extends BDBaseMenu
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        if(player.level().isClientSide())
+        if (player.level().isClientSide())
         {
             this.lastEnergyStored = tag.getLong("lastEnergyStored");
             this.lastEnergyCapacity = tag.getLong("lastEnergyCapacity");
@@ -120,7 +119,7 @@ public class NetEnergyMenu extends BDBaseMenu
             be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
             player.level().blockEntityChanged(be.getBlockPos());
             be.invalidateCaps();
-            player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
+            player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
         }
     }
 

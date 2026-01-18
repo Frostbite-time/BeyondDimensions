@@ -10,7 +10,8 @@ import java.util.function.IntConsumer;
 
 public class BigScroller extends ScrollBar
 {
-    public static final ResourceLocation sprite = ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/scroller.png");
+    public static final ResourceLocation sprite = ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/scroller.png");
+
     public BigScroller(int x, int y, int maxScrollLength, int currentPosition, int maxPosition, @Nullable IntConsumer onScroll)
     {
         super(x, y, 12, 15, sprite, maxScrollLength, currentPosition, maxPosition, onScroll, Component.empty());

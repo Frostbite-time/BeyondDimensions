@@ -30,7 +30,7 @@ public class NetStorage implements MEStorage
     @Override
     public long insert(AEKey what, long amount, Actionable mode, IActionSource source)
     {
-        return AEHelper.fromAEKeyToIStack(what,amount)
+        return AEHelper.fromAEKeyToIStack(what, amount)
                 .map(stack -> amount - storage.insert(stack, mode.isSimulate()).getStackAmount())
                 .orElse(0L);
     }
@@ -47,9 +47,9 @@ public class NetStorage implements MEStorage
     @Override
     public void getAvailableStacks(KeyCounter out)
     {
-        for(IStackType stack : storage.getStorage())
+        for (IStackType stack : storage.getStorage())
         {
-            AEHelper.fromIStackToAEKey(stack).ifPresent(aeKey -> out.add(aeKey,stack.getStackAmount()));
+            AEHelper.fromIStackToAEKey(stack).ifPresent(aeKey -> out.add(aeKey, stack.getStackAmount()));
         }
     }
 

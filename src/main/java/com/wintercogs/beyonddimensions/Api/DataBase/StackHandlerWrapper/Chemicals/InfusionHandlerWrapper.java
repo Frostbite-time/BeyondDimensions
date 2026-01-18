@@ -49,16 +49,16 @@ public class InfusionHandlerWrapper implements IStackHandlerWrapper<InfusionStac
     @Override
     public long insert(int slot, InfusionStack Stack, boolean sim)
     {
-        if(sim)
-            return chemicalHandler.insertChemical(slot,Stack, Action.SIMULATE).getAmount();
+        if (sim)
+            return chemicalHandler.insertChemical(slot, Stack, Action.SIMULATE).getAmount();
         else
-            return chemicalHandler.insertChemical(slot,Stack, Action.EXECUTE).getAmount();
+            return chemicalHandler.insertChemical(slot, Stack, Action.EXECUTE).getAmount();
     }
 
     @Override
     public long insert(InfusionStack stack, boolean sim)
     {
-        if(sim)
+        if (sim)
             return chemicalHandler.insertChemical(stack, Action.SIMULATE).getAmount();
         else
             return chemicalHandler.insertChemical(stack, Action.EXECUTE).getAmount();
@@ -67,7 +67,7 @@ public class InfusionHandlerWrapper implements IStackHandlerWrapper<InfusionStac
     @Override
     public long extract(int slot, long amount, boolean sim)
     {
-        if(sim)
+        if (sim)
             return chemicalHandler.extractChemical(slot, amount, Action.SIMULATE).getAmount();
         else
             return chemicalHandler.extractChemical(slot, amount, Action.EXECUTE).getAmount();
@@ -76,7 +76,7 @@ public class InfusionHandlerWrapper implements IStackHandlerWrapper<InfusionStac
     @Override
     public long extract(InfusionStack stack, boolean sim)
     {
-        if(sim)
+        if (sim)
             return chemicalHandler.extractChemical(stack, Action.SIMULATE).getAmount();
         else
             return chemicalHandler.extractChemical(stack, Action.EXECUTE).getAmount();

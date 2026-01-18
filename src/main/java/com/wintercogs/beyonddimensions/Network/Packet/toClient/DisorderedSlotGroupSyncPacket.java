@@ -22,10 +22,10 @@ public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackType> stacks
     private void handle(NetworkEvent.Context context)
     {
         Player player = Minecraft.getInstance().player;
-        if(player.containerMenu instanceof BDBaseMenu menu)
+        if (player.containerMenu instanceof BDBaseMenu menu)
         {
             SlotGroupSync sync = menu.slotGroupSyncs.get(groupId());
-            if(sync != null)
+            if (sync != null)
             {
                 sync.loadChange(stacks(), newCount());
                 sync.afterLoadChange();
@@ -37,7 +37,8 @@ public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackType> stacks
 
     public static void handle(DisorderedSlotGroupSyncPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
 
             context.enqueueWork(() ->
@@ -53,13 +54,15 @@ public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackType> stacks
 
         // 序列化stacks列表
         buf.writeInt(packet.stacks().size());
-        for (IStackType stack : packet.stacks()) {
+        for (IStackType stack : packet.stacks())
+        {
             stack.serialize(buf);
         }
 
         // 序列化changedCounts列表（长整型）
         buf.writeInt(packet.newCount().size());
-        for (long count : packet.newCount()) {
+        for (long count : packet.newCount())
+        {
             buf.writeLong(count);
         }
 
@@ -72,17 +75,19 @@ public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackType> stacks
         // 反序列化stacks列表
         int stacksSize = buf.readInt();
         List<IStackType> stacks = new ArrayList<>(stacksSize);
-        for (int i = 0; i < stacksSize; i++) {
+        for (int i = 0; i < stacksSize; i++)
+        {
             stacks.add(IStackType.deserializeCommon(buf));
         }
 
         // 反序列化changedCounts列表
         int countsSize = buf.readInt();
         List<Long> changedCounts = new ArrayList<>(countsSize);
-        for (int i = 0; i < countsSize; i++) {
+        for (int i = 0; i < countsSize; i++)
+        {
             changedCounts.add(buf.readLong());
         }
 
-        return new DisorderedSlotGroupSyncPacket(groupId ,stacks, changedCounts);
+        return new DisorderedSlotGroupSyncPacket(groupId, stacks, changedCounts);
     }
 }

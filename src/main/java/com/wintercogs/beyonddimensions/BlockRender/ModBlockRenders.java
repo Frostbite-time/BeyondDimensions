@@ -9,8 +9,9 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 
 public class ModBlockRenders
 {
-    public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        if(BeyondDimensions.Botania_Loaded)
+    public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event)
+    {
+        if (BeyondDimensions.Botania_Loaded)
         {
             event.registerBlockEntityRenderer(
                     (BlockEntityType<ManaPoolPathwayBlockEntity>) ModBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),

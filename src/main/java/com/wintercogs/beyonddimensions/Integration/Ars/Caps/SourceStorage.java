@@ -9,101 +9,128 @@ public class SourceStorage implements ISourceCap
     protected int maxReceive;
     protected int maxExtract;
 
-    public SourceStorage(int capacity) {
+    public SourceStorage(int capacity)
+    {
         this(capacity, capacity, capacity, 0);
     }
 
-    public SourceStorage(int capacity, int maxTransfer) {
+    public SourceStorage(int capacity, int maxTransfer)
+    {
         this(capacity, maxTransfer, maxTransfer, 0);
     }
 
-    public SourceStorage(int capacity, int maxReceive, int maxExtract) {
+    public SourceStorage(int capacity, int maxReceive, int maxExtract)
+    {
         this(capacity, maxReceive, maxExtract, 0);
     }
 
-    public SourceStorage(int capacity, int maxReceive, int maxExtract, int source) {
+    public SourceStorage(int capacity, int maxReceive, int maxExtract, int source)
+    {
         this.capacity = capacity;
         this.maxReceive = maxReceive;
         this.maxExtract = maxExtract;
         this.source = Math.max(0, Math.min(capacity, source));
     }
 
-    public void setMaxExtract(int maxExtract) {
+    public void setMaxExtract(int maxExtract)
+    {
         this.maxExtract = maxExtract;
     }
 
-    public void setMaxReceive(int maxReceive) {
+    public void setMaxReceive(int maxReceive)
+    {
         this.maxReceive = maxReceive;
     }
 
-    public int getMaxExtract() {
+    public int getMaxExtract()
+    {
         return this.maxExtract;
     }
 
-    public int getMaxReceive() {
+    public int getMaxReceive()
+    {
         return this.maxReceive;
     }
 
-    public void setSource(int source) {
-        this.source = Math.max(0,Math.min(source,this.capacity));
+    public void setSource(int source)
+    {
+        this.source = Math.max(0, Math.min(source, this.capacity));
     }
 
-    public int receiveSource(int toReceive, boolean simulate) {
-        if (this.canReceive() && toReceive > 0) {
+    public int receiveSource(int toReceive, boolean simulate)
+    {
+        if (this.canReceive() && toReceive > 0)
+        {
             int sourceReceived = Mth.clamp(this.capacity - this.source, 0, Math.min(this.maxReceive, toReceive));
-            if (!simulate) {
+            if (!simulate)
+            {
                 this.source += sourceReceived;
                 this.onContentsChanged();
             }
 
             return sourceReceived;
-        } else {
+        }
+        else
+        {
             return 0;
         }
     }
 
-    public int extractSource(int toExtract, boolean simulate) {
-        if (this.canExtract() && toExtract > 0) {
+    public int extractSource(int toExtract, boolean simulate)
+    {
+        if (this.canExtract() && toExtract > 0)
+        {
             int sourceExtracted = Math.min(this.source, Math.min(this.maxExtract, toExtract));
-            if (!simulate) {
+            if (!simulate)
+            {
                 this.source -= sourceExtracted;
                 this.onContentsChanged();
             }
 
             return sourceExtracted;
-        } else {
+        }
+        else
+        {
             return 0;
         }
     }
 
-    public int getSource() {
+    public int getSource()
+    {
         return this.source;
     }
 
-    public void setMaxSource(int max) {
+    public void setMaxSource(int max)
+    {
         this.capacity = max;
     }
 
-    public int getSourceCapacity() {
+    public int getSourceCapacity()
+    {
         return this.capacity;
     }
 
-    public boolean canAcceptSource(int source) {
+    public boolean canAcceptSource(int source)
+    {
         return this.receiveSource(source, true) > 0;
     }
 
-    public boolean canProvideSource(int source) {
+    public boolean canProvideSource(int source)
+    {
         return this.extractSource(source, true) > 0;
     }
 
-    public boolean canReceive() {
+    public boolean canReceive()
+    {
         return this.maxReceive > 0;
     }
 
-    public boolean canExtract() {
+    public boolean canExtract()
+    {
         return this.maxExtract > 0;
     }
 
-    public void onContentsChanged() {
+    public void onContentsChanged()
+    {
     }
 }

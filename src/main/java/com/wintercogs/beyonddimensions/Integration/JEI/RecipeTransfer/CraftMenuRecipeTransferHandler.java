@@ -61,26 +61,31 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
         List<ItemStack> availableItems = new ArrayList<>();
 
         // 收集合成槽物品
-        for (Slot slot : craftingSlots) {
-            if (slot.hasItem()) {
+        for (Slot slot : craftingSlots)
+        {
+            if (slot.hasItem())
+            {
                 availableItems.add(slot.getItem());
             }
         }
 
         // 收集存储槽物品
-        for (IStackType<?> stackType : storageSlots) {
-            if (stackType instanceof ItemStackType itemStackType) {
+        for (IStackType<?> stackType : storageSlots)
+        {
+            if (stackType instanceof ItemStackType itemStackType)
+            {
                 ItemStack stack = itemStackType.getStack();
-                if (!stack.isEmpty()) {
+                if (!stack.isEmpty())
+                {
                     availableItems.add(stack);
                 }
             }
         }
 
         // 收集背包物品
-        for(ItemStack itemStack : container.player.getInventory().items)
+        for (ItemStack itemStack : container.player.getInventory().items)
         {
-            if(!itemStack.isEmpty())
+            if (!itemStack.isEmpty())
                 availableItems.add(itemStack);
         }
 
@@ -89,9 +94,9 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
         List<IRecipeSlotView> missingSlots = new ArrayList<>(); // 记录缺失材料的槽位，仅记录缺失部分
         List<ItemStack> inputElements = new ArrayList<>(); // 记录输入的原料，包括空气
 
-        for(IRecipeSlotView slotView: recipeSlots.getSlotViews(RecipeIngredientRole.INPUT))
+        for (IRecipeSlotView slotView : recipeSlots.getSlotViews(RecipeIngredientRole.INPUT))
         {
-            if(slotView.getRole() == RecipeIngredientRole.INPUT)
+            if (slotView.getRole() == RecipeIngredientRole.INPUT)
             {
                 // 将多个选项合并为一个复合Ingredient
                 Ingredient mergedIngredient = Ingredient.of(slotView.getIngredients(VanillaTypes.ITEM_STACK));
@@ -99,7 +104,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
                 // 实际检测
 
                 // 空位处理
-                if(mergedIngredient.isEmpty())
+                if (mergedIngredient.isEmpty())
                 {
                     inputElements.add(ItemStack.EMPTY);
                     continue;
@@ -107,28 +112,34 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
                 // 检查仓库物品
                 int required = 1; // 原版材料在每个合成槽需要一个
                 List<ItemStack> matching = new ArrayList<>();
-                for (ItemStack stack : availableItems) { // 统计全部可用物
-                    if (!stack.isEmpty() && mergedIngredient.test(stack)) {
+                for (ItemStack stack : availableItems)
+                { // 统计全部可用物
+                    if (!stack.isEmpty() && mergedIngredient.test(stack))
+                    {
                         matching.add(stack.copy()); // 匹配的物品进行copy
                     }
                 }
 
                 // 计算可用数量
                 int available = matching.stream().mapToInt(ItemStack::getCount).sum();
-                if (available >= required) {
+                if (available >= required)
+                {
                     // 创建合并堆栈并扣除库存
                     ItemStack merged = matching.isEmpty() ? ItemStack.EMPTY :
                             matching.get(0).copyWithCount(required); //因为仅需要一个，所以使用第一个即可
                     inputElements.add(merged);
 
                     int remaining = required;
-                    for (ItemStack stack : matching) {
+                    for (ItemStack stack : matching)
+                    {
                         int deduct = Math.min(remaining, stack.getCount());
                         stack.shrink(deduct);
                         remaining -= deduct;
                         if (remaining <= 0) break;
                     }
-                } else {
+                }
+                else
+                {
                     inputElements.add(ItemStack.EMPTY); // 材料不足的时候添加空位
                     missingSlots.add(slotView);
                 }
@@ -137,11 +148,11 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
         }
 
         // 处理结果----------------------------------------------------------------------------------------------------------
-        if(doTransfer) //无论如何，允许执行转移操作，即使材料不足
+        if (doTransfer) //无论如何，允许执行转移操作，即使材料不足
         {
             PacketRegister.INSTANCE.sendToServer(new RecipeFillC2SPacket(inputElements));
         }
-        if(!missingSlots.isEmpty())
+        if (!missingSlots.isEmpty())
         {
             return new MissStackError(missingSlots);
         }
@@ -150,9 +161,11 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
     }
 
     // 获取合成输入槽位（需根据实际容器实现）
-    private List<Slot> getInputSources(DimensionsCraftMenu menu) {
+    private List<Slot> getInputSources(DimensionsCraftMenu menu)
+    {
         List<Slot> slots = new ArrayList<>();
-        for (int i = menu.craftSlotStartIndex; i < menu.craftSlotEndIndex; i++) {
+        for (int i = menu.craftSlotStartIndex; i < menu.craftSlotEndIndex; i++)
+        {
             slots.add(menu.getSlot(i));
         }
         return slots;

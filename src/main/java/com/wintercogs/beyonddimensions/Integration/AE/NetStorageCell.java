@@ -73,7 +73,7 @@ public class NetStorageCell implements StorageCell
     @Override
     public long insert(AEKey what, long amount, Actionable mode, IActionSource source)
     {
-        return AEHelper.fromAEKeyToIStack(what,amount)
+        return AEHelper.fromAEKeyToIStack(what, amount)
                 .map(stack -> amount - storage.insert(stack, mode.isSimulate()).getStackAmount())
                 .orElse(0L);
     }
@@ -100,8 +100,11 @@ public class NetStorageCell implements StorageCell
 
     // ========== 快照维护 ==========
 
-    /** 增量补丁：O(1) 更新 KeyCounter（避免留下 0 项） */
-    private void applyDelta(IStackType<?> type, long size, boolean insert) {
+    /**
+     * 增量补丁：O(1) 更新 KeyCounter（避免留下 0 项）
+     */
+    private void applyDelta(IStackType<?> type, long size, boolean insert)
+    {
         Optional<AEKey> keyOpt = AEHelper.fromIStackToAEKey(type);
         if (keyOpt.isEmpty()) return;
         AEKey key = keyOpt.get();
@@ -109,19 +112,26 @@ public class NetStorageCell implements StorageCell
         long cur = snapshot.get(key);
         long next = insert ? (cur + size) : (cur - size);
 
-        if (next > 0) {
+        if (next > 0)
+        {
             // set 比 add/remove 更直接，且不会留下 0 项
             snapshot.set(key, next);
-        } else {
+        }
+        else
+        {
             // 删除该键
             snapshot.remove(key);
         }
     }
 
-    /** 全量重建（仅在绑定/any 兜底时调用） */
-    private void fullRebuildSnapshot() {
+    /**
+     * 全量重建（仅在绑定/any 兜底时调用）
+     */
+    private void fullRebuildSnapshot()
+    {
         snapshot.clear();
-        for (IStackType<?> stack : storage.getStorage()) {
+        for (IStackType<?> stack : storage.getStorage())
+        {
             if (stack.isEmpty()) continue;
             AEHelper.fromIStackToAEKey(stack).ifPresent(aeKey -> {
                 snapshot.add(aeKey, stack.getStackAmount());
@@ -132,9 +142,22 @@ public class NetStorageCell implements StorageCell
 
     // 实际无需主动清理，仅保留此方法，该类生命周期会在被移除出驱动器的时候结束
     // 等待UnifiedStorage对其清理后进入GC
-    public void close() {
-        try { if (deltaSub != null) deltaSub.close(); } catch (Exception ignored) {}
-        try { if (anySub != null) anySub.close(); } catch (Exception ignored) {}
+    public void close()
+    {
+        try
+        {
+            if (deltaSub != null) deltaSub.close();
+        }
+        catch (Exception ignored)
+        {
+        }
+        try
+        {
+            if (anySub != null) anySub.close();
+        }
+        catch (Exception ignored)
+        {
+        }
         deltaSub = anySub = null;
     }
 

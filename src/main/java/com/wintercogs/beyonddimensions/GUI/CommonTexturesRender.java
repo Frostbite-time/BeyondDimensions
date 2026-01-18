@@ -6,14 +6,16 @@ import net.minecraft.util.Mth;
 public class CommonTexturesRender
 {
     // TOP_BASE_COMMON 渲染方法
-    public static void renderTopBaseCommon(GuiGraphics guiGraphics, int leftPos, int[] yPosRef) {
+    public static void renderTopBaseCommon(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    {
         renderTopBaseCommon(guiGraphics, leftPos, yPosRef,
                 CommonTextures.TOP_BASE_COMMON_WIDTH,
                 CommonTextures.TOP_BASE_COMMON_HEIGHT);
     }
 
     public static void renderTopBaseCommon(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
-                                           int width, int height) {
+                                           int width, int height)
+    {
         guiGraphics.blit(CommonTextures.TOP_BASE_COMMON, leftPos, yPosRef[0],
                 width, height,
                 0, 0,
@@ -23,15 +25,18 @@ public class CommonTexturesRender
                 CommonTextures.TOP_BASE_COMMON_HEIGHT);
         yPosRef[0] += height;
     }
+
     // COMMON_CONNECTION 渲染方法
-    public static void renderCommonConnection(GuiGraphics guiGraphics, int leftPos, int[] yPosRef) {
+    public static void renderCommonConnection(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    {
         renderCommonConnection(guiGraphics, leftPos, yPosRef,
                 CommonTextures.COMMON_CONNECTION_WIDTH,
                 CommonTextures.COMMON_CONNECTION_HEIGHT);
     }
 
     public static void renderCommonConnection(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
-                                              int width, int height) {
+                                              int width, int height)
+    {
         guiGraphics.blit(CommonTextures.COMMON_CONNECTION, leftPos, yPosRef[0],
                 width, height,
                 0, 0,
@@ -41,15 +46,18 @@ public class CommonTexturesRender
                 CommonTextures.COMMON_CONNECTION_HEIGHT);
         yPosRef[0] += height;
     }
+
     // COMMON_SLOTS 渲染方法
-    public static void renderCommonSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef) {
+    public static void renderCommonSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    {
         renderCommonSlots(guiGraphics, leftPos, yPosRef,
                 CommonTextures.COMMON_SLOTS_WIDTH,
                 CommonTextures.COMMON_SLOTS_HEIGHT);
     }
 
     public static void renderCommonSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
-                                         int width, int height) {
+                                         int width, int height)
+    {
         guiGraphics.blit(CommonTextures.COMMON_SLOTS, leftPos, yPosRef[0],
                 width, height,
                 0, 0,
@@ -59,15 +67,18 @@ public class CommonTexturesRender
                 CommonTextures.COMMON_SLOTS_HEIGHT);
         yPosRef[0] += height;
     }
+
     // FILTER_SLOTS 渲染方法
-    public static void renderFilterSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef) {
+    public static void renderFilterSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    {
         renderFilterSlots(guiGraphics, leftPos, yPosRef,
                 CommonTextures.FILTER_SLOTS_WIDTH,
                 CommonTextures.FILTER_SLOTS_HEIGHT);
     }
 
     public static void renderFilterSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
-                                         int width, int height) {
+                                         int width, int height)
+    {
         guiGraphics.blit(CommonTextures.FILTER_SLOTS, leftPos, yPosRef[0],
                 width, height,
                 0, 0,
@@ -77,15 +88,18 @@ public class CommonTexturesRender
                 CommonTextures.FILTER_SLOTS_HEIGHT);
         yPosRef[0] += height;
     }
+
     // PLAYER_INV 渲染方法
-    public static void renderPlayerInv(GuiGraphics guiGraphics, int leftPos, int[] yPosRef) {
+    public static void renderPlayerInv(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    {
         renderPlayerInv(guiGraphics, leftPos, yPosRef,
                 CommonTextures.PLAYER_INV_WIDTH,
                 CommonTextures.PLAYER_INV_HEIGHT);
     }
 
     public static void renderPlayerInv(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
-                                       int width, int height) {
+                                       int width, int height)
+    {
         guiGraphics.blit(CommonTextures.GUI_TEXTURE_PLAYER_INV, leftPos, yPosRef[0],
                 width, height,
                 0, 0,
@@ -97,14 +111,16 @@ public class CommonTexturesRender
     }
 
     // 右标签渲染
-    public static void renderRightTab(GuiGraphics guiGraphics, int leftPos, int[] yPosRef) {
+    public static void renderRightTab(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    {
         renderRightTab(guiGraphics, leftPos, yPosRef,
                 CommonTextures.RIGHT_TAB_WIDTH,
                 CommonTextures.RIGHT_TAB_HEIGHT);
     }
 
     public static void renderRightTab(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
-                                      int width, int height) {
+                                      int width, int height)
+    {
         guiGraphics.blit(CommonTextures.RIGHT_TAB, leftPos, yPosRef[0],
                 width, height,
                 0, 0,
@@ -173,8 +189,8 @@ public class CommonTexturesRender
                 CommonTextures.WORK_DONE_V,           // atlasLocation
                 leftPos, yPosRef[0],                  // 目标 X,Y
                 width, (int) (height * progress),
-                0,0,
-                CommonTextures.WORK_DONE_V_WIDTH,vHeight,
+                0, 0,
+                CommonTextures.WORK_DONE_V_WIDTH, vHeight,
                 CommonTextures.WORK_DONE_V_WIDTH,
                 CommonTextures.WORK_DONE_V_HEIGHT);                              // VHeight = 截掉剩余 (1‑progress)
     }
@@ -218,9 +234,9 @@ public class CommonTexturesRender
         guiGraphics.blit(
                 CommonTextures.FURNACE_WORK_V,           // atlasLocation
                 leftPos, drawY,                  // 目标 X,Y
-                width, (int)(height * progress),
-                0,vOffset,
-                CommonTextures.FURNACE_WORK_V_WIDTH,vHeight,
+                width, (int) (height * progress),
+                0, vOffset,
+                CommonTextures.FURNACE_WORK_V_WIDTH, vHeight,
                 CommonTextures.FURNACE_WORK_V_WIDTH,
                 CommonTextures.FURNACE_WORK_V_HEIGHT);                              // VHeight = 截掉剩余 (1‑progress)
     }

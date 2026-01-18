@@ -20,9 +20,9 @@ public record SetSlotDirectlyPacket(int slotId, IStackType stack)
     {
         Player player = context.getSender();
         AbstractContainerMenu menu = player.containerMenu;
-        if(menu != null)
+        if (menu != null)
         {
-            if(menu.slots.get(slotId()) instanceof AbstractStackTypedSlot slot)
+            if (menu.slots.get(slotId()) instanceof AbstractStackTypedSlot slot)
             {
                 slot.setStackDirectly(stack());
             }
@@ -34,9 +34,9 @@ public record SetSlotDirectlyPacket(int slotId, IStackType stack)
     {
         Player player = Minecraft.getInstance().player;
         AbstractContainerMenu menu = player.containerMenu;
-        if(menu != null)
+        if (menu != null)
         {
-            if(menu.slots.get(slotId()) instanceof AbstractStackTypedSlot slot)
+            if (menu.slots.get(slotId()) instanceof AbstractStackTypedSlot slot)
             {
                 slot.setStackDirectly(stack());
             }
@@ -46,17 +46,18 @@ public record SetSlotDirectlyPacket(int slotId, IStackType stack)
 
     public static void handle(SetSlotDirectlyPacket packet, Supplier<NetworkEvent.Context> cxt)
     {
-        if (packet != null) {
+        if (packet != null)
+        {
             NetworkEvent.Context context = cxt.get();
             NetworkDirection direction = context.getDirection();
-            if(direction == NetworkDirection.PLAY_TO_CLIENT)
+            if (direction == NetworkDirection.PLAY_TO_CLIENT)
             {
                 context.enqueueWork(() ->
                         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> packet.handleClient(context))
                 );
                 context.setPacketHandled(true);
             }
-            else if(direction == NetworkDirection.PLAY_TO_SERVER)
+            else if (direction == NetworkDirection.PLAY_TO_SERVER)
             {
                 context.enqueueWork(() -> packet.handleServer(context));
                 context.setPacketHandled(true);

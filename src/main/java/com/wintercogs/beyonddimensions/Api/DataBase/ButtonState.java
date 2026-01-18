@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase;
 
-public enum ButtonState {
+public enum ButtonState
+{
     ENABLED,        // 按钮启用-用于二值类按钮
     DISABLED,       // 按钮禁用-用于二值类按钮
     //-------------------------------------------------------------------

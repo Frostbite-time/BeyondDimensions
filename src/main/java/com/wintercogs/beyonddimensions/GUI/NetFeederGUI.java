@@ -30,11 +30,11 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
         this.imageWidth = 176;
         this.imageHeight = rebuildImageHeight();
         rebuildLabelHeight();
-        this.leftPos = (this.width - imageWidth)/2;
-        this.topPos = (this.height - imageHeight)/2;
+        this.leftPos = (this.width - imageWidth) / 2;
+        this.topPos = (this.height - imageHeight) / 2;
 
-        feederModeButton = new RightTabButton(leftPos + 176, topPos +6, 23,26 ,
-                leftPos + 176 +3 , topPos +6 +4, 16,16,button -> {
+        feederModeButton = new RightTabButton(leftPos + 176, topPos + 6, 23, 26,
+                leftPos + 176 + 3, topPos + 6 + 4, 16, 16, button -> {
             feederModeButton.toggleState();
             BaseMachineItem.setFeederMode(menu.menuStack, (FeederMode) feederModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -43,10 +43,10 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FeederMode.HUNGER_TO_EAT, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/feeder_mode_hunger_to_eat.png"));
-                iconMap.put(FeederMode.NORMAL, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/feeder_mode_normal.png"));
-                iconMap.put(FeederMode.SATURATION_KEEP, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/feeder_mode_saturation_keep.png"));
-                iconMap.put(FeederMode.CRAZY, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/feeder_mode_crazy.png"));
+                iconMap.put(FeederMode.HUNGER_TO_EAT, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/feeder_mode_hunger_to_eat.png"));
+                iconMap.put(FeederMode.NORMAL, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/feeder_mode_normal.png"));
+                iconMap.put(FeederMode.SATURATION_KEEP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/feeder_mode_saturation_keep.png"));
+                iconMap.put(FeederMode.CRAZY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/feeder_mode_crazy.png"));
 
                 tooltipMap.put(FeederMode.HUNGER_TO_EAT, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.feeder_mode_hunger_to_eat")));
                 tooltipMap.put(FeederMode.NORMAL, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.feeder_mode_normal")));
@@ -54,7 +54,7 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
                 tooltipMap.put(FeederMode.CRAZY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.feeder_mode_crazy")));
 
 
-                for(Enum<?> state : iconMap.keySet())
+                for (Enum<?> state : iconMap.keySet())
                 {
                     this.states.add(state);
                 }
@@ -63,8 +63,8 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
         };
         addRenderableWidget(feederModeButton);
 
-        controlModeButton = new RightTabButton(leftPos + 176, topPos +36, 23,26 ,
-                leftPos + 176 +2 , topPos +36 +5, 16,16,button -> {
+        controlModeButton = new RightTabButton(leftPos + 176, topPos + 36, 23, 26,
+                leftPos + 176 + 2, topPos + 36 + 5, 16, 16, button -> {
             controlModeButton.toggleState();
             BaseMachineItem.setControlMode(menu.menuStack, (RedStoneControlMode) controlModeButton.currentState);
             menu.writeAndSendQuickData();
@@ -73,14 +73,14 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/control_mode_ignore.png"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID,"textures/gui/sprites/widget/control_mode_not_working.png"));
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_ignore.png"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_not_working.png"));
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
                 tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
 
 
-                for(Enum<?> state : iconMap.keySet())
+                for (Enum<?> state : iconMap.keySet())
                 {
                     this.states.add(state);
                 }
@@ -91,7 +91,6 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
         addRenderableWidget(controlModeButton);
 
 
-
     }
 
     @Override
@@ -99,10 +98,10 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
     {
         super.containerTick();
 
-        if(controlModeButton.currentState != BaseMachineItem.getControlModeOrDefault(menu.menuStack, RedStoneControlMode.IGNORE))
+        if (controlModeButton.currentState != BaseMachineItem.getControlModeOrDefault(menu.menuStack, RedStoneControlMode.IGNORE))
             controlModeButton.setState(BaseMachineItem.getControlModeOrDefault(menu.menuStack, RedStoneControlMode.IGNORE));
 
-        if(feederModeButton.currentState != BaseMachineItem.getFeederModeOrDefault(menu.menuStack, FeederMode.NORMAL))
+        if (feederModeButton.currentState != BaseMachineItem.getFeederModeOrDefault(menu.menuStack, FeederMode.NORMAL))
             feederModeButton.setState(BaseMachineItem.getFeederModeOrDefault(menu.menuStack, FeederMode.NORMAL));
 
     }
@@ -113,31 +112,31 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        CommonTexturesRender.renderTopBaseCommon(guiGraphics,this.leftPos,drawY);
-        CommonTexturesRender.renderFilterSlots(guiGraphics,this.leftPos,drawY);
-        CommonTexturesRender.renderFilterSlots(guiGraphics,this.leftPos,drawY);
-        CommonTexturesRender.renderFilterSlots(guiGraphics,this.leftPos,drawY);
-        CommonTexturesRender.renderFilterSlots(guiGraphics,this.leftPos,drawY);
-        CommonTexturesRender.renderCommonConnection(guiGraphics,this.leftPos,drawY);
-        CommonTexturesRender.renderPlayerInv(guiGraphics,this.leftPos,drawY);
+        CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
+        CommonTexturesRender.renderFilterSlots(guiGraphics, this.leftPos, drawY);
+        CommonTexturesRender.renderFilterSlots(guiGraphics, this.leftPos, drawY);
+        CommonTexturesRender.renderFilterSlots(guiGraphics, this.leftPos, drawY);
+        CommonTexturesRender.renderFilterSlots(guiGraphics, this.leftPos, drawY);
+        CommonTexturesRender.renderCommonConnection(guiGraphics, this.leftPos, drawY);
+        CommonTexturesRender.renderPlayerInv(guiGraphics, this.leftPos, drawY);
     }
 
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752,false);
-        GuiRenderHelper.drawRightAnchoredText(guiGraphics,this.font, Component.translatable("menu.label.beyonddimensions.filter_slots"), imageWidth-6, this.titleLabelY+3, 4210752,false);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752,false);
+        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
+        GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.filter_slots"), imageWidth - 6, this.titleLabelY + 3, 4210752, false);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752, false);
     }
 
     protected int rebuildImageHeight()
     {
-        return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT*4 + CommonTextures.COMMON_CONNECTION_HEIGHT + CommonTextures.PLAYER_INV_HEIGHT;
+        return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + CommonTextures.PLAYER_INV_HEIGHT;
     }
 
     protected void rebuildLabelHeight()
     {
         this.titleLabelY = 8;
-        this.inventoryLabelY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT*4+4;
+        this.inventoryLabelY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + 4;
     }
 }
