@@ -1,110 +1,162 @@
 package com.wintercogs.beyonddimensions;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
+import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 
-// An example config class. This is not required, but it's a good idea to have one to keep your config organized.
-// Demonstrates how to use Forge's config APIs
-@Mod.EventBusSubscriber(modid = BeyondDimensions.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Config
 {
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    public final Config.CommonConfig commonConfig = new Config.CommonConfig();
+    public final Config.ServerConfig serverConfig = new Config.ServerConfig();
 
+    public static Config INSTANCE;
 
-
-    public static final ForgeConfigSpec.EnumValue<ButtonState> UI_SORT_BUTTON = BUILDER
-            .comment("存储UI搜索按钮值 (除非你知道你在做什么，否则不要手动修改)")
-            .defineEnum("ui_sort_button", ButtonState.SORT_NAME);
-
-    public static final ForgeConfigSpec.EnumValue<ButtonState> UI_REVERSE_BUTTON = BUILDER
-            .comment("存储UI倒序按钮值 (除非你知道你在做什么，否则不要手动修改)")
-            .defineEnum("ui_reverse_button", ButtonState.DISABLED);
-
-    public static final ForgeConfigSpec.EnumValue<ButtonState> UI_SEARCH_BUTTON = BUILDER
-            .comment("存储UI搜索按钮值 (除非你知道你在做什么，否则不要手动修改)")
-            .defineEnum("ui_search_button", ButtonState.DISABLED);
-
-    public static final ForgeConfigSpec.EnumValue<ButtonState> UI_CRAFT_BUTTON = BUILDER
-            .comment("决定打开菜单时是否显示合成槽")
-            .defineEnum("ui_craft_button", ButtonState.DISABLED);
-
-    public static final ForgeConfigSpec.EnumValue<ButtonState> UI_CRAFT_RETURN_BUTTON = BUILDER
-            .comment("决定工艺菜单关闭时，物品优先转移的方向；启用则优先向存储，关闭则优先向背包")
-            .defineEnum("ui_craft_return_button", ButtonState.DISABLED);
-
-    public static final ForgeConfigSpec.IntValue UI_PAGE_NUM = BUILDER
-            .comment("存储UI当前显示的总页数 (除非你知道你在做什么，否则不要手动修改)")
-            .defineInRange("ui_page_num", 5, 2, 99);
-
-    public static final ForgeConfigSpec.ConfigValue<String> UI_SEARCH = BUILDER
-            .comment("存储UI搜索框内容 (除非你知道你在做什么，否则不要手动修改)")
-            .define("ui_search",
-                    "");
-
-    public static final ForgeConfigSpec.BooleanValue GENERATE_TIME_CRYSTALLIZATION = BUILDER
-            .comment("是否自动生成破碎的时空结晶？")
-            .define("generate_time_crystallization", true);
-
-    public static final ForgeConfigSpec.BooleanValue INTERFACE_CAN_RECEIVE_RESOURCE = BUILDER
-            .comment("是否允许网络接口将资源送入网络")
-            .define("interface_can_receive_resource", true);
-
-    public static final ForgeConfigSpec.BooleanValue INTERFACE_CAN_OUTPUT_RESOURCE = BUILDER
-            .comment("是否允许网络接口从网络提取标记的资源")
-            .define("interface_can_output_resource", true);
-
-    public static final ForgeConfigSpec.BooleanValue INTERFACE_CAN_POP_RESOURCE = BUILDER
-            .comment("是否允许网络接口将内容物弹出到附近容器")
-            .define("interface_can_pop_resource", true);
-
-    public static final ForgeConfigSpec.IntValue INTERFACE_USABLE_CAPACITY = BUILDER
-            .comment("网络接口有多少个槽位实际可用？")
-            .comment("注意：仅在确定需要时使用，后续版本更新会将其移除并添加其他替代方案，会保证存档兼容。")
-            .defineInRange("interface_usable_capacity", 27, 1, 27);
-
-    public static final ForgeConfigSpec.BooleanValue SEARCH_TEXT_WITH_JEI_EMI = BUILDER
-            .comment("是否与JEI或EMI同步搜索")
-            .define("search_text_with_jei_emi", true);
-
-    public static ButtonState uiSortButton;
-    public static ButtonState uiReverseButton;
-    public static ButtonState uiSearchButton;
-    public static ButtonState uiCraftButton;
-    public static ButtonState uiCraftReturnButton;
-    public static int uiPageNum;
-    public static String uiSearch;
-    public static boolean generateTimeCrystallization;
-    public static boolean interfaceCanReceiveResource;
-    public static boolean interfaceCanOutputResource;
-    public static boolean interfaceCanPopResource;
-    public static int interfaceUsableCapacity;
-    public static boolean searchTextWithJEIEMI;
-
-
-    // 一定放到最后进行静态初始化
-    static final ForgeConfigSpec SPEC = BUILDER.build();
-
-
-
-    @SubscribeEvent
-    static void onLoad(final ModConfigEvent event)
+    private Config(ModLoadingContext container, IEventBus modEventBus)
     {
-        uiSortButton = UI_SORT_BUTTON.get();
-        uiReverseButton = UI_REVERSE_BUTTON.get();
-        uiSearchButton = UI_SEARCH_BUTTON.get();
-        uiPageNum = UI_PAGE_NUM.get();
-        uiSearch = UI_SEARCH.get();
-        uiCraftButton = UI_CRAFT_BUTTON.get();
-        uiCraftReturnButton = UI_CRAFT_RETURN_BUTTON.get();
-        generateTimeCrystallization = GENERATE_TIME_CRYSTALLIZATION.get();
-        interfaceCanReceiveResource = INTERFACE_CAN_RECEIVE_RESOURCE.get();
-        interfaceCanOutputResource = INTERFACE_CAN_OUTPUT_RESOURCE.get();
-        interfaceCanPopResource = INTERFACE_CAN_POP_RESOURCE.get();
-        interfaceUsableCapacity = INTERFACE_USABLE_CAPACITY.get();
-        searchTextWithJEIEMI = SEARCH_TEXT_WITH_JEI_EMI.get();
+        container.registerConfig(ModConfig.Type.COMMON, commonConfig.spec);
+        container.registerConfig(ModConfig.Type.SERVER, serverConfig.spec);
+        modEventBus.addListener((ModConfigEvent.Loading evt) ->
+        {
+            if (evt.getConfig().getSpec() == commonConfig.spec)
+            {
+                commonConfig.onLoaded();
+            }
+            if(evt.getConfig().getSpec() == serverConfig.spec)
+            {
+                serverConfig.onLoaded();
+            }
+        });
+        modEventBus.addListener((ModConfigEvent.Reloading evt) ->
+        {
+            if (evt.getConfig().getSpec() == commonConfig.spec)
+            {
+                commonConfig.onLoaded();
+            }
+            if(evt.getConfig().getSpec() == serverConfig.spec)
+            {
+                serverConfig.onLoaded();
+            }
+        });
+    }
+
+    public static void register(ModLoadingContext container, IEventBus modEventBus)
+    {
+        INSTANCE = new Config(container, modEventBus);
+    }
+
+    public static class CommonConfig
+    {
+        public final ForgeConfigSpec spec;
+
+        public final ForgeConfigSpec.EnumValue<ButtonState> UI_SORT_BUTTON;
+        public final ForgeConfigSpec.EnumValue<ButtonState> UI_REVERSE_BUTTON;
+        public final ForgeConfigSpec.EnumValue<ButtonState> UI_SEARCH_BUTTON;
+        public final ForgeConfigSpec.EnumValue<ButtonState> UI_CRAFT_BUTTON;
+        public final ForgeConfigSpec.EnumValue<ButtonState> UI_CRAFT_RETURN_BUTTON;
+        public final ForgeConfigSpec.IntValue UI_PAGE_NUM;
+        public final ForgeConfigSpec.ConfigValue<String> UI_SEARCH;
+        public final ForgeConfigSpec.BooleanValue SEARCH_TEXT_WITH_JEI_EMI;
+
+        public final ForgeConfigSpec.BooleanValue INTERFACE_CAN_RECEIVE_RESOURCE;
+        public final ForgeConfigSpec.BooleanValue INTERFACE_CAN_OUTPUT_RESOURCE;
+        public final ForgeConfigSpec.BooleanValue INTERFACE_CAN_POP_RESOURCE;
+        public final ForgeConfigSpec.IntValue INTERFACE_USABLE_CAPACITY;
+
+        public CommonConfig()
+        {
+            ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+
+            UI_SORT_BUTTON = builder
+                    .comment("存储UI搜索按钮值 (除非你知道你在做什么，否则不要手动修改)")
+                    .defineEnum("ui_sort_button", ButtonState.SORT_NAME);
+            UI_REVERSE_BUTTON = builder
+                    .comment("存储UI倒序按钮值 (除非你知道你在做什么，否则不要手动修改)")
+                    .defineEnum("ui_reverse_button", ButtonState.DISABLED);
+            UI_SEARCH_BUTTON = builder
+                    .comment("存储UI搜索按钮值 (除非你知道你在做什么，否则不要手动修改)")
+                    .defineEnum("ui_search_button", ButtonState.DISABLED);
+            UI_CRAFT_BUTTON = builder
+                    .comment("决定打开菜单时是否显示合成槽")
+                    .defineEnum("ui_craft_button", ButtonState.DISABLED);
+            UI_CRAFT_RETURN_BUTTON = builder
+                    .comment("决定工艺菜单关闭时，物品优先转移的方向；启用则优先向存储，关闭则优先向背包")
+                    .defineEnum("ui_craft_return_button", ButtonState.DISABLED);
+            UI_PAGE_NUM = builder
+                    .comment("存储UI当前显示的总页数 (除非你知道你在做什么，否则不要手动修改)")
+                    .defineInRange("ui_page_num", 5, 2, 99);
+            UI_SEARCH = builder
+                    .comment("存储UI搜索框内容 (除非你知道你在做什么，否则不要手动修改)")
+                    .define("ui_search", "");
+            SEARCH_TEXT_WITH_JEI_EMI = builder
+                    .comment("是否与JEI或EMI同步搜索")
+                    .define("search_text_with_jei_emi", true);
+
+            INTERFACE_CAN_RECEIVE_RESOURCE = builder
+                    .comment("是否允许网络接口将资源送入网络")
+                    .define("interface_can_receive_resource", true);
+            INTERFACE_CAN_OUTPUT_RESOURCE = builder
+                    .comment("是否允许网络接口从网络提取标记的资源")
+                    .define("interface_can_output_resource", true);
+            INTERFACE_CAN_POP_RESOURCE = builder
+                    .comment("是否允许网络接口将内容物弹出到附近容器")
+                    .define("interface_can_pop_resource", true);
+            INTERFACE_USABLE_CAPACITY = builder
+                    .comment("网络接口有多少个槽位实际可用？")
+                    .comment("注意：仅在确定需要时使用，后续版本更新会将其移除并添加其他替代方案，会保证存档兼容。")
+                    .defineInRange("interface_usable_capacity", 27, 1, 27);
+
+            this.spec = builder.build();
+        }
+
+        public void onLoaded()
+        {
+            CommonConfigRuntime.uiSortButton = UI_SORT_BUTTON.get();
+            CommonConfigRuntime.uiReverseButton = UI_REVERSE_BUTTON.get();
+            CommonConfigRuntime.uiSearchButton = UI_SEARCH_BUTTON.get();
+            CommonConfigRuntime.uiCraftButton = UI_CRAFT_BUTTON.get();
+            CommonConfigRuntime.uiCraftReturnButton = UI_CRAFT_RETURN_BUTTON.get();
+            CommonConfigRuntime.uiPageNum = UI_PAGE_NUM.get();
+            CommonConfigRuntime.uiSearch = UI_SEARCH.get();
+            CommonConfigRuntime.searchTextWithJEIEMI = SEARCH_TEXT_WITH_JEI_EMI.get();
+
+            CommonConfigRuntime.interfaceCanReceiveResource = INTERFACE_CAN_RECEIVE_RESOURCE.get();
+            CommonConfigRuntime.interfaceCanOutputResource = INTERFACE_CAN_OUTPUT_RESOURCE.get();
+            CommonConfigRuntime.interfaceCanPopResource = INTERFACE_CAN_POP_RESOURCE.get();
+            CommonConfigRuntime.interfaceUsableCapacity = INTERFACE_USABLE_CAPACITY.get();
+        }
+    }
+
+    public static class ServerConfig
+    {
+        public final ForgeConfigSpec spec;
+
+        public final ForgeConfigSpec.LongValue UNSTABLE_SPACE_TIME_FRAGMENT_TRANSFER_TIME;
+        public final ForgeConfigSpec.IntValue SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME;
+
+        public ServerConfig()
+        {
+            ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+
+            UNSTABLE_SPACE_TIME_FRAGMENT_TRANSFER_TIME = builder
+                    .comment("碎片转化间隔")
+                    .defineInRange("fragmentTransferTime", 3600L, 1L, Long.MAX_VALUE);
+            SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME = builder
+                    .comment("结晶生成间隔（0代表不生成）")
+                    .defineInRange("crystalGenerateTime", 600, 0, Integer.MAX_VALUE);
+
+            this.spec = builder.build();
+        }
+
+        public void onLoaded()
+        {
+            ServerConfigRuntime.fragmentTransferTime = UNSTABLE_SPACE_TIME_FRAGMENT_TRANSFER_TIME.get();
+            ServerConfigRuntime.crystalGenerateTime = SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME.get();
+        }
     }
 }

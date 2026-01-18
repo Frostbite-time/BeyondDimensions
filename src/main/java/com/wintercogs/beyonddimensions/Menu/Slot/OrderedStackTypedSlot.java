@@ -476,7 +476,8 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
         if(currentStack == null)
         {
             lastStack = new ItemStackType();
-            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()->(ServerPlayer)menu.player), new OrderedStackTypedSlotPacket(index,theSlot,lastStack,0));
+            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()->(ServerPlayer)menu.player),
+                    new OrderedStackTypedSlotPacket(index,theSlot,lastStack,0));
         }
         else if(currentStack.isEmpty() && lastStack.isEmpty())
         {
@@ -486,7 +487,8 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                 ||!lastStack.isSameTypeSameComponents(currentStack))
         {
             lastStack = currentStack;
-            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()->(ServerPlayer)menu.player), new OrderedStackTypedSlotPacket(index,theSlot,lastStack,lastStack.getStackAmount()));
+            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(()->(ServerPlayer)menu.player),
+                    new OrderedStackTypedSlotPacket(index,theSlot,lastStack,lastStack.getStackAmount()));
         }
     }
 

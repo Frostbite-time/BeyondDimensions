@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.ShortCutKey;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.NetMenuType;
+import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
@@ -69,11 +70,11 @@ public class DimensionsShortKeys
                 return;
             }
 
-            if(Config.uiCraftButton == ButtonState.ENABLED)
+            if(CommonConfigRuntime.uiCraftButton == ButtonState.ENABLED)
             {
                 PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
             }
-            else if(Config.uiCraftButton == ButtonState.DISABLED)
+            else if(CommonConfigRuntime.uiCraftButton == ButtonState.DISABLED)
             {
                 PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),NetMenuType.NET_MENU));
             }

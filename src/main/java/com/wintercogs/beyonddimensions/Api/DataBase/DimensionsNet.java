@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
@@ -77,8 +78,7 @@ public class DimensionsNet extends SavedData
      * <p>
      * holdTime是固定的时间间隔，用于确定多久生成一次时间间隔，每当currentTime归零，holdTime会为它赋值
      */
-    private int currentTime = 600*20;
-    private int holdTime = 600*20;
+    private int currentTime = 0;
 
     /**
      * 构造函数
@@ -515,17 +515,17 @@ public class DimensionsNet extends SavedData
     public void onServerTick(TickEvent.ServerTickEvent event)
     {
         // 不对临时网络执行倒计时
-        if(temporary || !Config.generateTimeCrystallization)
+        if (temporary || ServerConfigRuntime.crystalGenerateTime <= 0)
             return;
 
-        currentTime--;
+        currentTime++;
         setDirty();
-        if(currentTime <= 0)
+        if (currentTime >= ServerConfigRuntime.crystalGenerateTime * 20)
         {
             ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(),1);
             IStackType stackType = new ItemStackType(stack);
             this.unifiedStorage.insert(stackType,false);
-            currentTime = holdTime;
+            currentTime = 0;
         }
 
     }

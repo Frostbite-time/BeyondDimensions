@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.NetMenuType;
+import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.IconButton;
@@ -127,9 +128,9 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         sortButton = new SortMethodButton(this.leftPos-18,this.topPos+6,button ->
         {
             sortButton.toggleState();
-            Config.uiSortButton = (ButtonState) sortButton.currentState;
-            Config.UI_SORT_BUTTON.set((ButtonState) sortButton.currentState);
-            Config.UI_SORT_BUTTON.save();
+            CommonConfigRuntime.uiSortButton = (ButtonState) sortButton.currentState;
+            Config.INSTANCE.commonConfig.UI_SORT_BUTTON.set((ButtonState) sortButton.currentState);
+            Config.INSTANCE.commonConfig.UI_SORT_BUTTON.save();
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
         });
         addRenderableWidget(sortButton);
@@ -137,9 +138,9 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         reverseButton = new ReverseButton(this.leftPos-18,this.topPos+6+18,button ->
         {
             reverseButton.toggleState();
-            Config.uiReverseButton = (ButtonState) reverseButton.currentState;
-            Config.UI_REVERSE_BUTTON.set((ButtonState) reverseButton.currentState);
-            Config.UI_REVERSE_BUTTON.save();
+            CommonConfigRuntime.uiReverseButton = (ButtonState) reverseButton.currentState;
+            Config.INSTANCE.commonConfig.UI_REVERSE_BUTTON.set((ButtonState) reverseButton.currentState);
+            Config.INSTANCE.commonConfig.UI_REVERSE_BUTTON.save();
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
         });
         addRenderableWidget(reverseButton);
@@ -147,9 +148,9 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         // 搜索切换按钮
         searchToggleButton = new SearchToggleButton(this.leftPos-18,this.topPos+6+18*2,button ->{
             searchToggleButton.toggleState();
-            Config.uiSearchButton = (ButtonState) searchToggleButton.currentState;
-            Config.UI_SEARCH_BUTTON.set((ButtonState) searchToggleButton.currentState);
-            Config.UI_SEARCH_BUTTON.save();
+            CommonConfigRuntime.uiSearchButton = (ButtonState) searchToggleButton.currentState;
+            Config.INSTANCE.commonConfig.UI_SEARCH_BUTTON.set((ButtonState) searchToggleButton.currentState);
+            Config.INSTANCE.commonConfig.UI_SEARCH_BUTTON.save();
         });
         addRenderableWidget(searchToggleButton);
 
@@ -163,10 +164,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 return;
             }
             menu.addLines();
-            Config.uiPageNum = menu.getLines();
-            Config.UI_PAGE_NUM.set(menu.getLines());
-            Config.UI_PAGE_NUM.save();
-            Config.uiSearch = searchField.getValue();
+            CommonConfigRuntime.uiPageNum = menu.getLines();
+            Config.INSTANCE.commonConfig.UI_PAGE_NUM.set(menu.getLines());
+            Config.INSTANCE.commonConfig.UI_PAGE_NUM.save();
+            CommonConfigRuntime.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
@@ -180,10 +181,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             if(menu.getLines()<=2)
                 return;
             menu.reduceLines();
-            Config.uiPageNum = menu.getLines();
-            Config.UI_PAGE_NUM.set(menu.getLines());
-            Config.UI_PAGE_NUM.save();
-            Config.uiSearch = searchField.getValue();
+            CommonConfigRuntime.uiPageNum = menu.getLines();
+            Config.INSTANCE.commonConfig.UI_PAGE_NUM.set(menu.getLines());
+            Config.INSTANCE.commonConfig.UI_PAGE_NUM.save();
+            CommonConfigRuntime.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()),true);
@@ -200,7 +201,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         this.searchField.setBordered(true);
         this.searchField.setVisible(true);
         this.searchField.setTextColor(16777215);
-        this.searchField.setValue(Config.uiSearch);
+        this.searchField.setValue(CommonConfigRuntime.uiSearch);
         this.searchField.setTooltip(Tooltip.create(Component.translatable("tooltip.editbox.beyonddimensions.search")));
         this.searchField.setResponder(text -> {
             if (text.isEmpty()) {
@@ -210,12 +211,12 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 searchField.setSuggestion(null);
             }
             menu.loadSearchText(text);
-            Config.uiSearch = text;
+            CommonConfigRuntime.uiSearch = text;
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
             lastSearchText = text;
 
             // 文本同步
-            if(Config.searchTextWithJEIEMI)
+            if(CommonConfigRuntime.searchTextWithJEIEMI)
             {
                 // JEI
                 if(BeyondDimensions.JEILoaded)
@@ -278,7 +279,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         super.containerTick();
 
         // 每tick从emi或jei同步一次文本
-        if(Config.searchTextWithJEIEMI)
+        if(CommonConfigRuntime.searchTextWithJEIEMI)
         {
             if(BeyondDimensions.JEILoaded)
             {
@@ -323,16 +324,16 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
             if(menu instanceof DimensionsCraftMenu)
             {
-                Config.uiCraftButton = ButtonState.DISABLED;
-                Config.UI_CRAFT_BUTTON.set(ButtonState.DISABLED);
-                Config.UI_CRAFT_BUTTON.save();
+                CommonConfigRuntime.uiCraftButton = ButtonState.DISABLED;
+                Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.set(ButtonState.DISABLED);
+                Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.save();
                 PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_MENU));
             }
             else
             {
-                Config.uiCraftButton = ButtonState.ENABLED;
-                Config.UI_CRAFT_BUTTON.set(ButtonState.ENABLED);
-                Config.UI_CRAFT_BUTTON.save();
+                CommonConfigRuntime.uiCraftButton = ButtonState.ENABLED;
+                Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.set(ButtonState.ENABLED);
+                Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.save();
                 PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(),NetMenuType.NET_CRAFT_MENU));
             }
         });
@@ -455,10 +456,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         // 处理shift + z切换
         if(hasShiftDown() && mouseKey.getValue() == GLFW.GLFW_KEY_Z)
         {
-            boolean current = Config.searchTextWithJEIEMI;
-            Config.searchTextWithJEIEMI = !current;
-            Config.SEARCH_TEXT_WITH_JEI_EMI.set(!current);
-            Config.SEARCH_TEXT_WITH_JEI_EMI.save();
+            boolean current = CommonConfigRuntime.searchTextWithJEIEMI;
+            CommonConfigRuntime.searchTextWithJEIEMI = !current;
+            Config.INSTANCE.commonConfig.SEARCH_TEXT_WITH_JEI_EMI.set(!current);
+            Config.INSTANCE.commonConfig.SEARCH_TEXT_WITH_JEI_EMI.save();
             return true;
         }
 
@@ -494,17 +495,17 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         if(searchField != null)
         {
-            if(searchField.getValue().length() > 0 && Config.uiSearchButton == ButtonState.ENABLED)
+            if(searchField.getValue().length() > 0 && CommonConfigRuntime.uiSearchButton == ButtonState.ENABLED)
             {
-                Config.uiSearch = searchField.getValue();
-                Config.UI_SEARCH.set(searchField.getValue());
-                Config.UI_SEARCH.save();
+                CommonConfigRuntime.uiSearch = searchField.getValue();
+                Config.INSTANCE.commonConfig.UI_SEARCH.set(searchField.getValue());
+                Config.INSTANCE.commonConfig.UI_SEARCH.save();
             }
             else
             {
-                Config.uiSearch = "";
-                Config.UI_SEARCH.set("");
-                Config.UI_SEARCH.save();
+                CommonConfigRuntime.uiSearch = "";
+                Config.INSTANCE.commonConfig.UI_SEARCH.set("");
+                Config.INSTANCE.commonConfig.UI_SEARCH.save();
             }
         }
 

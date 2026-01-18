@@ -114,17 +114,13 @@ public class BeyondDimensions
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         MOD_EVENT_BUS = modEventBus;
+        MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
+        Config.register(ModLoadingContext.get(), modEventBus);
 
         modEventBus.addListener(this::constructMod);
         modEventBus.addListener(this::commonSetup);
         //为存储网络的接口方块注册物品交互能力
 
-
-        // 注册事件
-        MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
-
-        // 注册模组的ForgeConfigSpec以便Forge可以创建和加载配置文件
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
         // 调用UIRegister的构造函数，从而注册所有UI
         UIRegister.register(modEventBus);

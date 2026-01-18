@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Integration.JECharacters.PinInMatches;
@@ -77,8 +78,8 @@ public class DimensionsNetMenu extends BDBaseMenu
         // 初始化搜索方案
         if(player.level().isClientSide())
         {
-            this.maxLines = Config.uiPageNum;
-            this.searchText = Config.uiSearch;
+            this.maxLines = CommonConfigRuntime.uiPageNum;
+            this.searchText = CommonConfigRuntime.uiSearch;
         }
 
         // 初始化维度网络容器
@@ -365,7 +366,7 @@ public class DimensionsNetMenu extends BDBaseMenu
         }
 
         // 排序
-        final ButtonState sortState = Config.uiSortButton;
+        final ButtonState sortState = CommonConfigRuntime.uiSortButton;
 
         Comparator<Keyed> cmp;
         if (sortState == ButtonState.SORT_NAME)
@@ -392,7 +393,7 @@ public class DimensionsNetMenu extends BDBaseMenu
         }
 
         // 倒序
-        if (Config.uiReverseButton == ButtonState.ENABLED)
+        if (CommonConfigRuntime.uiReverseButton == ButtonState.ENABLED)
         {
             cmp = cmp.reversed();
         }
