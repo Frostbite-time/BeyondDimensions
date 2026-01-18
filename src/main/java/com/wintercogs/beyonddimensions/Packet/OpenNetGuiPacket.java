@@ -22,18 +22,18 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
             StreamCodec.composite(
                     ByteBufCodecs.STRING_UTF8,
                     OpenNetGuiPacket::uuid,
-                    new StreamCodec<ByteBuf,NetMenuType>()
+                    new StreamCodec<ByteBuf, NetMenuType>()
                     {
                         @Override
                         public void encode(ByteBuf buf, NetMenuType netMenuType)
                         {
-                            Utf8String.write(buf,netMenuType.toString(),32000);
+                            Utf8String.write(buf, netMenuType.toString(), 32000);
                         }
 
                         @Override
                         public NetMenuType decode(ByteBuf buf)
                         {
-                            return NetMenuType.valueOf(Utf8String.read(buf,32000));
+                            return NetMenuType.valueOf(Utf8String.read(buf, 32000));
                         }
                     },
                     OpenNetGuiPacket::target,

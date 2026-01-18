@@ -28,7 +28,7 @@ public class NetPumpMenu extends BDBaseMenu
 
 
     private static final int slotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + 1;
-    private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT*4 + CommonTextures.COMMON_CONNECTION_HEIGHT +7;
+    private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + 7;
 
     private final IStackHandler storage;
 
@@ -45,7 +45,7 @@ public class NetPumpMenu extends BDBaseMenu
 
         this.be = be;
 
-        if(playerInventory.player.level().isClientSide())
+        if (playerInventory.player.level().isClientSide())
         {
             this.storage = new StackHandler(36);
         }
@@ -61,11 +61,11 @@ public class NetPumpMenu extends BDBaseMenu
 
     private void addFlagSlots()
     {
-        for(int row = 0; row < 4; row++)
+        for (int row = 0; row < 4; row++)
         {
             for (int col = 0; col < 9; col++)
             {
-                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row*9+col, 8 + col * 18, slotStartY + row * 18);
+                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row * 9 + col, 8 + col * 18, slotStartY + row * 18);
                 this.addSlot(flagSlot);
             }
         }
@@ -84,7 +84,7 @@ public class NetPumpMenu extends BDBaseMenu
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18,  4+invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 4 + invSlotStartY + 3 * 18));
         }
         inventoryEndIndex = slots.size();
     }
@@ -105,8 +105,8 @@ public class NetPumpMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putString("filter_type",be.filterMode.name());
-        tag.putString("control_mode",be.controlMode.name());
+        tag.putString("filter_type", be.filterMode.name());
+        tag.putString("control_mode", be.controlMode.name());
     }
 
     @Override
@@ -115,11 +115,11 @@ public class NetPumpMenu extends BDBaseMenu
         super.readQuickDataTag(tag);
         be.filterMode = FilterMode.valueOf(tag.getString("filter_type"));
         be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
-        if(!player.level().isClientSide())
+        if (!player.level().isClientSide())
         {
             // 服务端接收到更新信息后立刻通知保存
             player.level().blockEntityChanged(be.getBlockPos());
-            player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
+            player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
         }
     }
 }

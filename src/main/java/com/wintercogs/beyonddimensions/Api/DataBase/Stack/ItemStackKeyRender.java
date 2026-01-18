@@ -25,7 +25,7 @@ public class ItemStackKeyRender implements IStackRender
     @Override
     public void render(GuiGraphics gui, IStackKey<?> key, int x, int y)
     {
-        if(key instanceof ItemStackKey itemKey)
+        if (key instanceof ItemStackKey itemKey)
         {
             // 渲染物品图标
             var poseStack = gui.pose(); // 获取渲染的变换矩阵
@@ -42,19 +42,19 @@ public class ItemStackKeyRender implements IStackRender
     {
         // 渲染数量文本
         String countText = getCountText(amount);
-        if(countText.isEmpty()) return;
+        if (countText.isEmpty()) return;
 
         float scale = 0.666f; // 文本缩放因数
         var poseStackText = gui.pose();
         poseStackText.pushPose();
-        poseStackText.translate(0,0,200); // 确保文本在顶层
-        poseStackText.scale(scale,scale,scale); // 文本整体缩放，便于查看
+        poseStackText.translate(0, 0, 200); // 确保文本在顶层
+        poseStackText.scale(scale, scale, scale); // 文本整体缩放，便于查看
         RenderSystem.disableBlend(); // 禁用混合渲染模式
-        final int X = (int)(
+        final int X = (int) (
                 (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
                         * 1.0f / 0.666f
         );
-        final int Y = (int)(
+        final int Y = (int) (
                 (y + -1 + 16.0f - 5.0f * 0.666f)
                         * 1.0f / 0.666f
         );
@@ -73,7 +73,7 @@ public class ItemStackKeyRender implements IStackRender
     @Override
     public Component getDisplayName(IStackKey<?> key)
     {
-        if(key instanceof ItemStackKey itemKey)
+        if (key instanceof ItemStackKey itemKey)
         {
             ItemStack renderStack = itemKey.getRenderStack();
             return renderStack.getDisplayName();
@@ -84,10 +84,10 @@ public class ItemStackKeyRender implements IStackRender
     @Override
     public List<Component> getTooltipLines(IStackKey<?> key, long amount, Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag)
     {
-        if(key instanceof ItemStackKey itemKey)
+        if (key instanceof ItemStackKey itemKey)
         {
             ItemStack renderStack = itemKey.getRenderStack();
-            List<Component> tooltips = renderStack.getTooltipLines(tooltipContext,player,tooltipFlag);
+            List<Component> tooltips = renderStack.getTooltipLines(tooltipContext, player, tooltipFlag);
             tooltips.add(Component.translatable("istack.beyonddimensions.storage_num.item", amount));
             return tooltips;
         }
@@ -97,7 +97,7 @@ public class ItemStackKeyRender implements IStackRender
     @Override
     public Optional<TooltipComponent> getTooltipImage(IStackKey<?> key)
     {
-        if(key instanceof ItemStackKey itemKey)
+        if (key instanceof ItemStackKey itemKey)
         {
             ItemStack renderStack = itemKey.getRenderStack();
             return renderStack.getTooltipImage();
@@ -110,7 +110,7 @@ public class ItemStackKeyRender implements IStackRender
     {
         var minecraft = Minecraft.getInstance();
         var ctx = minecraft.level != null ? Item.TooltipContext.of(minecraft.level) : Item.TooltipContext.EMPTY;
-        gui.renderTooltip(minecraft.font, this.getTooltipLines(key,amount,ctx,minecraft.player, ClientTooltipFlag.of(minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL))
+        gui.renderTooltip(minecraft.font, this.getTooltipLines(key, amount, ctx, minecraft.player, ClientTooltipFlag.of(minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL))
                 , getTooltipImage(key), ItemStack.EMPTY, mouseX, mouseY);
     }
 }

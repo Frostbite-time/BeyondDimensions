@@ -19,13 +19,13 @@ public class ClientPayloadHandler
     // 实现单例
     private static final ClientPayloadHandler INSTANCE = new ClientPayloadHandler();
 
-    public static ClientPayloadHandler getInstance() {
+    public static ClientPayloadHandler getInstance()
+    {
         return INSTANCE;
     }
 
 
-
-    public void handleOpenNetGuiPacket(final OpenNetGuiPacket packet,final IPayloadContext context)
+    public void handleOpenNetGuiPacket(final OpenNetGuiPacket packet, final IPayloadContext context)
     {
         context.enqueueWork(
                 () ->
@@ -74,7 +74,6 @@ public class ClientPayloadHandler
 
         );
     }
-
 
 
     public void handleRecipeFillC2SPacket(final RecipeFillC2SPacket packet, final IPayloadContext context)
@@ -135,9 +134,9 @@ public class ClientPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    if(player.containerMenu instanceof AbstractContainerMenu menu)
+                    if (player.containerMenu instanceof AbstractContainerMenu menu)
                     {
-                        if(menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
+                        if (menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
                         {
                             slot.loadChange(packet.slotIndex(), packet.stack(), packet.newAmount());
                         }
@@ -152,11 +151,11 @@ public class ClientPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    if(player.containerMenu instanceof AbstractContainerMenu menu)
+                    if (player.containerMenu instanceof AbstractContainerMenu menu)
                     {
-                        if(menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
+                        if (menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
                         {
-                            slot.setStackDirectly(packet.stack().key(),packet.stack().amount());
+                            slot.setStackDirectly(packet.stack().key(), packet.stack().amount());
                         }
                     }
                 }
@@ -169,12 +168,12 @@ public class ClientPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    if(player.containerMenu instanceof BDBaseMenu menu)
+                    if (player.containerMenu instanceof BDBaseMenu menu)
                     {
                         SlotGroupSync sync = menu.slotGroupSyncs.get(packet.groupId());
-                        if(sync != null)
+                        if (sync != null)
                         {
-                            sync.loadChange(packet.keys(),packet.newCounts(), packet.newModifiedTime(), packet.newInsertedTime());
+                            sync.loadChange(packet.keys(), packet.newCounts(), packet.newModifiedTime(), packet.newInsertedTime());
                             sync.afterLoadChange();
 
                         }
@@ -189,7 +188,7 @@ public class ClientPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    if(player.containerMenu instanceof BDBaseMenu menu)
+                    if (player.containerMenu instanceof BDBaseMenu menu)
                     {
                         menu.readQuickDataTag(packet.tag());
                     }

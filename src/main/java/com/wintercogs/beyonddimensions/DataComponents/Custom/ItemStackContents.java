@@ -13,10 +13,10 @@ public record ItemStackContents(NonNullList<ItemStack> contents)
     public static final Codec<ItemStackContents> CODEC = CodecHelper.nonNullListMutableCodecOf(ItemStack.OPTIONAL_CODEC, ItemStack.EMPTY)
             .xmap(ItemStackContents::new, ItemStackContents::contents);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf,ItemStackContents> STREAM_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, ItemStackContents> STREAM_CODEC =
             ByteBufCodecs.collection(
-                NonNullList::createWithCapacity,
-                ItemStack.OPTIONAL_STREAM_CODEC
+                    NonNullList::createWithCapacity,
+                    ItemStack.OPTIONAL_STREAM_CODEC
             ).map(ItemStackContents::new, ItemStackContents::contents);
 
     @Override

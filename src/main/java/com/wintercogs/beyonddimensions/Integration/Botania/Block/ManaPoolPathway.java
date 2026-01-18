@@ -21,7 +21,9 @@ public class ManaPoolPathway extends NetedBlock implements EntityBlock
 {
     private static final VoxelShape SHAPE;
     private static final VoxelShape SHAPE_INTERACT;
-    static {
+
+    static
+    {
         SHAPE_INTERACT = box(0, 0, 0, 16, 8, 16);
         VoxelShape cutout = box(2, 2, 2, 14, 16, 14);
         SHAPE = Shapes.join(SHAPE_INTERACT, cutout, BooleanOp.ONLY_FIRST);
@@ -34,17 +36,20 @@ public class ManaPoolPathway extends NetedBlock implements EntityBlock
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext ctx) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext ctx)
+    {
         return SHAPE;
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context)
+    {
         return SHAPE;
     }
 
     @Override
-    public VoxelShape getInteractionShape(BlockState state, BlockGetter level, BlockPos pos) {
+    public VoxelShape getInteractionShape(BlockState state, BlockGetter level, BlockPos pos)
+    {
         return SHAPE;
     }
 
@@ -54,21 +59,23 @@ public class ManaPoolPathway extends NetedBlock implements EntityBlock
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
     {
         return (level1, blockPos, blockState, blockEntity) -> {
-            if(blockEntity instanceof ManaPoolPathwayBlockEntity pool)
+            if (blockEntity instanceof ManaPoolPathwayBlockEntity pool)
             {
-                if(level1.isClientSide())
-                    ManaPoolPathwayBlockEntity.clientTick(level1,blockPos,blockState,pool);
-                else if(!level1.isClientSide())
-                    ManaPoolPathwayBlockEntity.serverTick(level1,blockPos,blockState,pool);
+                if (level1.isClientSide())
+                    ManaPoolPathwayBlockEntity.clientTick(level1, blockPos, blockState, pool);
+                else if (!level1.isClientSide())
+                    ManaPoolPathwayBlockEntity.serverTick(level1, blockPos, blockState, pool);
             }
         };
     }
 
     // 调用collideEntityItem来合成配方
     @Override
-    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (entity instanceof ItemEntity item) {
-            if(level.getBlockEntity(pos) instanceof ManaPoolPathwayBlockEntity manaBe)
+    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity)
+    {
+        if (entity instanceof ItemEntity item)
+        {
+            if (level.getBlockEntity(pos) instanceof ManaPoolPathwayBlockEntity manaBe)
                 manaBe.collideEntityItem(item);
         }
     }

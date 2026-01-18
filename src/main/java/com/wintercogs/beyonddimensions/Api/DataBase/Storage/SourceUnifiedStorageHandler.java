@@ -86,12 +86,12 @@ public class SourceUnifiedStorageHandler implements ISourceCap
         int wanted = BDMath.clampLongToInt(storage.getSlotCapacity(0));
         long actualInside = getSource();
 
-        long operation = wanted-actualInside;
-        BeyondDimensions.LOGGER.info("某个网络的魔源数量被外界强行设置，可能导致错误，最终魔源数量被设置为：{}",operation);
-        if(operation>0)
-            storage.insert(SourceStackKey.INSTANCE, operation,false);
+        long operation = wanted - actualInside;
+        BeyondDimensions.LOGGER.info("某个网络的魔源数量被外界强行设置，可能导致错误，最终魔源数量被设置为：{}", operation);
+        if (operation > 0)
+            storage.insert(SourceStackKey.INSTANCE, operation, false);
         else
-            storage.extract(SourceStackKey.INSTANCE, -operation,false);
+            storage.extract(SourceStackKey.INSTANCE, -operation, false);
     }
 
     // 强行设置最大值，不生效，因为UnifiedStorage的容量仅由容器决定（新生魔艺并未使用过这个方法，可以放心）
@@ -105,13 +105,13 @@ public class SourceUnifiedStorageHandler implements ISourceCap
     @Override
     public int receiveSource(int amount, boolean sim)
     {
-        return (int) (amount - storage.insert(SourceStackKey.INSTANCE,amount,sim).amount());
+        return (int) (amount - storage.insert(SourceStackKey.INSTANCE, amount, sim).amount());
     }
 
     // 返回导出量
     @Override
     public int extractSource(int amount, boolean sim)
     {
-        return (int) storage.extract(SourceStackKey.INSTANCE,amount,sim).amount();
+        return (int) storage.extract(SourceStackKey.INSTANCE, amount, sim).amount();
     }
 }

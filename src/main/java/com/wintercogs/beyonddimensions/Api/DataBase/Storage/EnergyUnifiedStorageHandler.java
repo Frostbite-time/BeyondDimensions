@@ -8,7 +8,8 @@ public class EnergyUnifiedStorageHandler implements IEnergyStorage
 {
     private final UnifiedStorage storage;
 
-    public EnergyUnifiedStorageHandler(UnifiedStorage storage) {
+    public EnergyUnifiedStorageHandler(UnifiedStorage storage)
+    {
         this.storage = storage;
     }
 

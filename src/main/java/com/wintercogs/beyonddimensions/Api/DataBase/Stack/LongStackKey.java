@@ -11,6 +11,7 @@ public abstract class LongStackKey<T extends LongType<T>> implements IStackKey<T
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
     public abstract ResourceLocation getTypeID();
+
     protected T stack;
 
     protected int hashCodeCache = 0; // 哈希码缓存
@@ -65,7 +66,7 @@ public abstract class LongStackKey<T extends LongType<T>> implements IStackKey<T
     @Override
     public T copyStackWithCount(long count)
     {
-        return (T)stack.copyWithAmount(count);
+        return (T) stack.copyWithAmount(count);
     }
 
     @Override
@@ -81,27 +82,31 @@ public abstract class LongStackKey<T extends LongType<T>> implements IStackKey<T
     }
 
     @Override
-    public boolean isSame(IStackKey<?> other) {
+    public boolean isSame(IStackKey<?> other)
+    {
         return other != null && Objects.equals(other.getTypeId(), this.getTypeId());
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackKey<?> other) {
+    public boolean isSameTypeSameComponents(IStackKey<?> other)
+    {
         // LongType Key 无组件，语义与 isSame 相同
         return isSame(other);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (this == o) return true;
         if (!(o instanceof IStackKey<?> k)) return false;
         return Objects.equals(k.getTypeId(), this.getTypeId());
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         // 基于物品类型和组件生成哈希码
-        if(hashCodeCache == 0)
+        if (hashCodeCache == 0)
         {
             hashCodeCache = 31 + Objects.hashCode(getTypeId());
         }

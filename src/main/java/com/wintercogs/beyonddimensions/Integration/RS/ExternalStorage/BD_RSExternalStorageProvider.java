@@ -26,24 +26,37 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
     private final ServerLevel level;
     private final BlockPos pos;
 
-    /** 资源 → 数量 */
+    /**
+     * 资源 → 数量
+     */
     private final Object2LongOpenHashMap<ResourceKey> counts = new Object2LongOpenHashMap<>();
-    /** 资源 → 在 all 的下标（-1 表示不存在） */
+    /**
+     * 资源 → 在 all 的下标（-1 表示不存在）
+     */
     private final Object2IntOpenHashMap<ResourceKey> index = new Object2IntOpenHashMap<>();
-    /** 扁平列表视图（顺序不保证） */
+    /**
+     * 扁平列表视图（顺序不保证）
+     */
     private final ArrayList<ResourceAmount> all = new ArrayList<>();
 
-    /** 当前已订阅到的 UnifiedStorage（按对象身份判断），用于幂等重绑 */
+    /**
+     * 当前已订阅到的 UnifiedStorage（按对象身份判断），用于幂等重绑
+     */
     private @Nullable UnifiedStorage subscribedUnified = null;
-    /** 当前订阅的关闭句柄 */
+    /**
+     * 当前订阅的关闭句柄
+     */
     private @Nullable AutoCloseable unifiedDeltaSub = null;
     private @Nullable AutoCloseable unifiedAnySub = null;
 
-    /** 可选：定期全量校准（tick），0 关闭 */
+    /**
+     * 可选：定期全量校准（tick），0 关闭
+     */
     private static final int FULL_REBUILD_INTERVAL_TICKS = 0;
     private long lastFullBuildGt = Long.MIN_VALUE;
 
-    public BD_RSExternalStorageProvider(ServerLevel level, BlockPos pos) {
+    public BD_RSExternalStorageProvider(ServerLevel level, BlockPos pos)
+    {
         this.level = level;
         this.pos = pos;
         index.defaultReturnValue(-1);
@@ -52,7 +65,8 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
         fullRebuildSnapshot();
         // 尽量在网络变化时触发一次重绑（但真正兜底逻辑在 iterator()）
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof RSNetPathwayBlockEntity rsBe) {
+        if (be instanceof RSNetPathwayBlockEntity rsBe)
+        {
             rsBe.addNetChangeTask(() -> level.getServer().execute(this::refreshBindingIfNeeded));
         }
         // 首次绑定订阅（幂等）
@@ -62,7 +76,8 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
     // ================= ExternalStorageProvider =================
 
     @Override
-    public Iterator<ResourceAmount> iterator() {
+    public Iterator<ResourceAmount> iterator()
+    {
         // 兜底：每 tick 被 RS 轮询时，轻量检测是否需要重绑
         refreshBindingIfNeeded();
         maybePeriodicFullRebuild();
@@ -70,27 +85,32 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
     }
 
     @Override
-    public long extract(ResourceKey resourceKey, long amount, Action action, Actor actor) {
+    public long extract(ResourceKey resourceKey, long amount, Action action, Actor actor)
+    {
         UnifiedStorage us = currentUnified();
         if (us == null || amount <= 0) return 0L;
         return RSHelper.fromRSKeyToIStack(resourceKey)
-                .map(s -> us.extract(s,amount, action == Action.SIMULATE).amount())
+                .map(s -> us.extract(s, amount, action == Action.SIMULATE).amount())
                 .orElse(0L);
     }
 
     @Override
-    public long insert(ResourceKey resourceKey, long amount, Action action, Actor actor) {
+    public long insert(ResourceKey resourceKey, long amount, Action action, Actor actor)
+    {
         UnifiedStorage us = currentUnified();
         if (us == null || amount <= 0) return 0L;
         return RSHelper.fromRSKeyToIStack(resourceKey)
-                .map(s -> amount - us.insert(s,amount, action == Action.SIMULATE).amount())
+                .map(s -> amount - us.insert(s, amount, action == Action.SIMULATE).amount())
                 .orElse(0L);
     }
 
     // ================= 绑定 / 订阅 =================
 
-    /** 幂等重绑：当目标 UnifiedStorage 发生变化（或从/到 null）时，取消旧订阅并订阅新目标。 */
-    private void refreshBindingIfNeeded() {
+    /**
+     * 幂等重绑：当目标 UnifiedStorage 发生变化（或从/到 null）时，取消旧订阅并订阅新目标。
+     */
+    private void refreshBindingIfNeeded()
+    {
         UnifiedStorage current = currentUnified();
 
         // 若对象身份相同（含均为 null）则无需动作
@@ -102,7 +122,8 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
         // 记录新目标
         subscribedUnified = current;
 
-        if (current == null) {
+        if (current == null)
+        {
             // 目标消失：清空一次视图，避免 RS 继续看到旧数据
             clearSnapshot();
             return;
@@ -124,40 +145,66 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
         fullRebuildSnapshot();
     }
 
-    /** 取消当前订阅（若存在），并把句柄置空。 */
-    private void cancelUnifiedSub() {
-        if (unifiedDeltaSub != null) {
-            try { unifiedDeltaSub.close(); } catch (Exception ignored) {}
+    /**
+     * 取消当前订阅（若存在），并把句柄置空。
+     */
+    private void cancelUnifiedSub()
+    {
+        if (unifiedDeltaSub != null)
+        {
+            try
+            {
+                unifiedDeltaSub.close();
+            }
+            catch (Exception ignored)
+            {
+            }
             unifiedDeltaSub = null;
         }
-        if(unifiedAnySub != null) {
-            try { unifiedAnySub.close(); } catch (Exception ignored) {}
+        if (unifiedAnySub != null)
+        {
+            try
+            {
+                unifiedAnySub.close();
+            }
+            catch (Exception ignored)
+            {
+            }
             unifiedAnySub = null;
         }
     }
 
     // ================= 快照维护（O(1) 增量） =================
 
-    private void applyDelta(ResourceKey key, long diff) {
+    private void applyDelta(ResourceKey key, long diff)
+    {
         if (diff == 0) return;
         long old = counts.getLong(key);
         long now = old + diff;
 
-        if (now > 0) {
+        if (now > 0)
+        {
             counts.put(key, now);
             int i = index.getInt(key);
-            if (i >= 0) {
+            if (i >= 0)
+            {
                 all.set(i, new ResourceAmount(key, now));
-            } else {
+            }
+            else
+            {
                 index.put(key, all.size());
                 all.add(new ResourceAmount(key, now));
             }
-        } else {
+        }
+        else
+        {
             counts.removeLong(key);
             int i = index.getInt(key);
-            if (i >= 0) {
+            if (i >= 0)
+            {
                 int last = all.size() - 1;
-                if (i != last) {
+                if (i != last)
+                {
                     ResourceAmount tail = all.get(last);
                     all.set(i, tail);
                     index.put(tail.resource(), i);
@@ -168,36 +215,48 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
         }
     }
 
-    private void clearSnapshot() {
+    private void clearSnapshot()
+    {
         counts.clear();
         index.clear();
         all.clear();
         lastFullBuildGt = level.getGameTime();
     }
 
-    /** 全量重建一次（仅在绑定/兜底/校准时调用） */
-    private void fullRebuildSnapshot() {
+    /**
+     * 全量重建一次（仅在绑定/兜底/校准时调用）
+     */
+    private void fullRebuildSnapshot()
+    {
         counts.clear();
         index.clear();
         all.clear();
 
         UnifiedStorage us = currentUnified();
-        if (us != null) {
-            for (KeyAmount s : us.getStorage()) {
+        if (us != null)
+        {
+            for (KeyAmount s : us.getStorage())
+            {
                 if (s.isEmpty()) continue;
                 RSHelper.fromIStackToRSKey(s.key()).ifPresent(k -> {
                     long prev = counts.getLong(k);
                     long now = prev + s.amount();
-                    if (prev == 0) {
+                    if (prev == 0)
+                    {
                         counts.put(k, now);
                         index.put(k, all.size());
                         all.add(new ResourceAmount(k, now));
-                    } else {
+                    }
+                    else
+                    {
                         counts.put(k, now);
                         int i = index.getInt(k);
-                        if (i >= 0) {
+                        if (i >= 0)
+                        {
                             all.set(i, new ResourceAmount(k, now));
-                        } else {
+                        }
+                        else
+                        {
                             index.put(k, all.size());
                             all.add(new ResourceAmount(k, now));
                         }
@@ -208,20 +267,26 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
         lastFullBuildGt = level.getGameTime();
     }
 
-    /** 可选：定期校准 */
-    private void maybePeriodicFullRebuild() {
+    /**
+     * 可选：定期校准
+     */
+    private void maybePeriodicFullRebuild()
+    {
         if (FULL_REBUILD_INTERVAL_TICKS <= 0) return;
         long gt = level.getGameTime();
-        if (gt - lastFullBuildGt >= FULL_REBUILD_INTERVAL_TICKS) {
+        if (gt - lastFullBuildGt >= FULL_REBUILD_INTERVAL_TICKS)
+        {
             fullRebuildSnapshot();
         }
     }
 
     // ================= 辅助 =================
 
-    private @Nullable UnifiedStorage currentUnified() {
+    private @Nullable UnifiedStorage currentUnified()
+    {
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof RSNetPathwayBlockEntity rsBe) {
+        if (be instanceof RSNetPathwayBlockEntity rsBe)
+        {
             DimensionsNet net = rsBe.getNet();
             if (net != null) return net.getUnifiedStorage();
         }

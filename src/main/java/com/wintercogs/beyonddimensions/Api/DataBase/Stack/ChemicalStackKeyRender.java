@@ -29,8 +29,9 @@ public class ChemicalStackKeyRender implements IStackRender
     public static final ChemicalStackKeyRender INSTANCE = new ChemicalStackKeyRender();
 
     @Override
-    public void render(GuiGraphics gui, IStackKey<?> key, int x, int y) {
-        if(key instanceof ChemicalStackKey chemicalKey)
+    public void render(GuiGraphics gui, IStackKey<?> key, int x, int y)
+    {
+        if (key instanceof ChemicalStackKey chemicalKey)
         {
             var pose = gui.pose();
             pose.pushPose();
@@ -42,7 +43,8 @@ public class ChemicalStackKeyRender implements IStackRender
                 ResourceLocation icon = chem.getIcon();
                 TextureAtlasSprite sprite = icon == null ? null :
                         Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(icon);
-                if (sprite != null && sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation()) {
+                if (sprite != null && sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation())
+                {
                     int tint = chem.getTint();
                     com.wintercogs.beyonddimensions.Render.IngredientRenderer
                             .drawTiledSprite(gui, 16, 16, tint, 16, sprite, x, y);
@@ -54,7 +56,8 @@ public class ChemicalStackKeyRender implements IStackRender
     }
 
     @Override
-    public void renderAmount(GuiGraphics gui, long amount, int x, int y) {
+    public void renderAmount(GuiGraphics gui, long amount, int x, int y)
+    {
         String text = getCountText(amount);
         if (text.isEmpty()) return;
 
@@ -73,14 +76,16 @@ public class ChemicalStackKeyRender implements IStackRender
     }
 
     @Override
-    public String getCountText(long count) {
+    public String getCountText(long count)
+    {
         if (count < 0) return "";
         return StringFormat.formatBucket(count);
     }
 
     @Override
-    public Component getDisplayName(IStackKey<?>  key) {
-        if(key instanceof ChemicalStackKey chemicalKey)
+    public Component getDisplayName(IStackKey<?> key)
+    {
+        if (key instanceof ChemicalStackKey chemicalKey)
         {
             ChemicalStack s = chemicalKey.getRenderStack();
             return s.isEmpty() ? Component.empty() : s.getTextComponent();
@@ -89,9 +94,10 @@ public class ChemicalStackKeyRender implements IStackRender
     }
 
     @Override
-    public List<Component> getTooltipLines(IStackKey<?>  key, long amount, Item.TooltipContext tooltipContext,
+    public List<Component> getTooltipLines(IStackKey<?> key, long amount, Item.TooltipContext tooltipContext,
                                            @Nullable net.minecraft.world.entity.player.Player player,
-                                           TooltipFlag tooltipFlag) {
+                                           TooltipFlag tooltipFlag)
+    {
         List<Component> lines = new ArrayList<>();
         lines.add(getDisplayName(key));
         lines.add(Component.translatable("istack.beyonddimensions.storage_num.fluid", amount));
@@ -99,12 +105,14 @@ public class ChemicalStackKeyRender implements IStackRender
     }
 
     @Override
-    public Optional<TooltipComponent> getTooltipImage(IStackKey<?>  key) {
+    public Optional<TooltipComponent> getTooltipImage(IStackKey<?> key)
+    {
         return Optional.empty();
     }
 
     @Override
-    public void renderTooltip(GuiGraphics gui, Font font, IStackKey<?>  key, long amount, int mouseX, int mouseY) {
+    public void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY)
+    {
         var mc = Minecraft.getInstance();
         var ctx = mc.level != null ? Item.TooltipContext.of(mc.level) : Item.TooltipContext.EMPTY;
         gui.renderTooltip(

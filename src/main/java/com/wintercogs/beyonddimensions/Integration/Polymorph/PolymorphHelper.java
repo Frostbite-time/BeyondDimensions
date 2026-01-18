@@ -12,7 +12,8 @@ import java.util.Optional;
 
 public class PolymorphHelper
 {
-    public static Optional<RecipeHolder<CraftingRecipe>> getRecipe(Player player, RecipeType<CraftingRecipe> crafting, CraftingInput input, Level level) {
+    public static Optional<RecipeHolder<CraftingRecipe>> getRecipe(Player player, RecipeType<CraftingRecipe> crafting, CraftingInput input, Level level)
+    {
         return PolymorphApi.getInstance().getRecipeManager().getPlayerRecipe(player.containerMenu, crafting, input, level, player);
     }
 }

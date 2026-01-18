@@ -23,14 +23,14 @@ public class CellHandler implements ICellHandler
     @Override
     public @Nullable StorageCell getCellInventory(ItemStack itemstack, @Nullable ISaveProvider host)
     {
-        if(!itemstack.has(ModDataComponents.NET_ID_DATA))
+        if (!itemstack.has(ModDataComponents.NET_ID_DATA))
             return null;
 
         int netId = itemstack.getOrDefault(ModDataComponents.NET_ID_DATA, -1);
-        if(netId < 0) return null;
+        if (netId < 0) return null;
 
         DimensionsNet net = DimensionsNet.getNetFromId(netId);
-        if(net == null) return null;
+        if (net == null) return null;
 
         return new NetStorageCell(net.getUnifiedStorage());
     }

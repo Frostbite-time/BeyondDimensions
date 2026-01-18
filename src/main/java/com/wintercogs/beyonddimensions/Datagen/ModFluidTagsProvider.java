@@ -19,7 +19,8 @@ public class ModFluidTagsProvider extends FluidTagsProvider
     }
 
     @Override
-    protected void addTags(HolderLookup.Provider provider) {
+    protected void addTags(HolderLookup.Provider provider)
+    {
         // 把源体 + 流动体都塞进 c:experience
         tag(ModFluidTags.C_EXPERIENCE)
                 .add(ModFluids.XP_FLUID.source().get())
@@ -27,7 +28,8 @@ public class ModFluidTagsProvider extends FluidTagsProvider
     }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return "BeyondDimensions Fluid Tags";
     }
 }

@@ -13,5 +13,5 @@ import java.util.function.Function;
 public class StackHandlerWrapperHelper
 {
     // 资源类型 -> 包装器
-    public static final Map<ResourceLocation, Function<?,IStackHandlerWrapper<?>>> stackWrappers = new HashMap<>();
+    public static final Map<ResourceLocation, Function<?, IStackHandlerWrapper<?>>> stackWrappers = new HashMap<>();
 }

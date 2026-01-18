@@ -54,10 +54,10 @@ public class ItemHandlerWrapper implements IStackHandlerWrapper<ItemStack>
     public long insert(ItemStack stack, boolean sim)
     {
         // 遍历每个槽位进行插入
-        for(int i = 0; i < getSlots(); i++)
+        for (int i = 0; i < getSlots(); i++)
         {
             stack = itemHandler.insertItem(i, stack, sim);
-            if(stack.isEmpty())
+            if (stack.isEmpty())
                 return 0;
         }
         return stack.getCount();
@@ -66,7 +66,7 @@ public class ItemHandlerWrapper implements IStackHandlerWrapper<ItemStack>
     @Override
     public long extract(int slot, long amount, boolean sim)
     {
-        return itemHandler.extractItem(slot,(int)Math.min(amount,Integer.MAX_VALUE),sim).getCount();
+        return itemHandler.extractItem(slot, (int) Math.min(amount, Integer.MAX_VALUE), sim).getCount();
     }
 
     @Override
@@ -77,12 +77,12 @@ public class ItemHandlerWrapper implements IStackHandlerWrapper<ItemStack>
         //最后返回实际提取的副本
         for (int i = 0; i < getSlots(); i++)
         {
-            if(ItemStack.isSameItemSameComponents(itemHandler.getStackInSlot(i), stack))
+            if (ItemStack.isSameItemSameComponents(itemHandler.getStackInSlot(i), stack))
             {
-                int extracting = itemHandler.extractItem(i,stack.getCount(),sim).getCount();
+                int extracting = itemHandler.extractItem(i, stack.getCount(), sim).getCount();
                 stack.shrink(extracting);
                 currentNum += extracting;
-                if(stack.isEmpty())
+                if (stack.isEmpty())
                     break;
             }
         }

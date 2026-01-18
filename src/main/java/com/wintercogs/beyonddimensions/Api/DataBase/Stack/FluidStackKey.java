@@ -47,34 +47,37 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     );
 
     // —— 最终产出的 MapCodec：编码总是走新格式；解码按代次兼容 —— //
-    public static final MapCodec<FluidStackKey> TYPE_CODEC = new MapCodec<>() {
+    public static final MapCodec<FluidStackKey> TYPE_CODEC = new MapCodec<>()
+    {
 
         // 统一键名
-        private static final String K_FLUID       = "fluid";
-        private static final String K_COMPS       = "components";
+        private static final String K_FLUID = "fluid";
+        private static final String K_COMPS = "components";
         // 【兼容 G1】旧别名键（大写）
-        private static final String K_FLUID_OLD   = "Fluid";
-        private static final String K_COMPS_OLD   = "Components";
+        private static final String K_FLUID_OLD = "Fluid";
+        private static final String K_COMPS_OLD = "Components";
         // 【兼容 G0】早期直接内嵌 FluidStack 的形态
-        private static final String K_LEGACY      = "internal_stack"; // 旧 JSON/Codec
-        private static final String K_STACK       = "Stack";          // 旧 NBT 写法
+        private static final String K_LEGACY = "internal_stack"; // 旧 JSON/Codec
+        private static final String K_STACK = "Stack";          // 旧 NBT 写法
         // 旧数量键（Key 层不需要，读到即忽略）
-        private static final String K_AMOUNT      = "amount";
-        private static final String K_AMOUNT_OLD  = "Amount";
+        private static final String K_AMOUNT = "amount";
+        private static final String K_AMOUNT_OLD = "Amount";
 
         @Override
-        public <T> DataResult<FluidStackKey> decode(DynamicOps<T> ops, MapLike<T> input) {
-            final T kFluid     = ops.createString(K_FLUID);
-            final T kComps     = ops.createString(K_COMPS);
-            final T kFluidOld  = ops.createString(K_FLUID_OLD);
-            final T kCompsOld  = ops.createString(K_COMPS_OLD);
-            final T kLegacy    = ops.createString(K_LEGACY);
-            final T kStack     = ops.createString(K_STACK);
-            final T kAmt       = ops.createString(K_AMOUNT);
-            final T kAmtOld    = ops.createString(K_AMOUNT_OLD);
+        public <T> DataResult<FluidStackKey> decode(DynamicOps<T> ops, MapLike<T> input)
+        {
+            final T kFluid = ops.createString(K_FLUID);
+            final T kComps = ops.createString(K_COMPS);
+            final T kFluidOld = ops.createString(K_FLUID_OLD);
+            final T kCompsOld = ops.createString(K_COMPS_OLD);
+            final T kLegacy = ops.createString(K_LEGACY);
+            final T kStack = ops.createString(K_STACK);
+            final T kAmt = ops.createString(K_AMOUNT);
+            final T kAmtOld = ops.createString(K_AMOUNT_OLD);
 
             // 新格式
-            if (input.get(kFluid) != null) {
+            if (input.get(kFluid) != null)
+            {
                 DataResult<FluidStackKey> r = NEW_FMT.decode(ops, input);
                 if (r.result().isPresent()) return r;
 
@@ -89,14 +92,16 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
 
             // 大写键名模式
-            if (input.get(kFluidOld) != null || input.get(kCompsOld) != null) {
+            if (input.get(kFluidOld) != null || input.get(kCompsOld) != null)
+            {
                 java.util.Map<T, T> map = new java.util.LinkedHashMap<>();
                 input.entries().forEach(p -> {
                     T key = p.getFirst();
-                    if (key.equals(kFluidOld))      key = kFluid;  // Fluid -> fluid
+                    if (key.equals(kFluidOld)) key = kFluid;  // Fluid -> fluid
                     else if (key.equals(kCompsOld)) key = kComps;  // Components -> components
                     // 忽略 amount/Amount
-                    if (!key.equals(kAmt) && !key.equals(kAmtOld)) {
+                    if (!key.equals(kAmt) && !key.equals(kAmtOld))
+                    {
                         map.put(key, p.getSecond());
                     }
                 });
@@ -109,7 +114,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             // 内嵌模式
             T legacyNode = input.get(kLegacy);
             if (legacyNode == null) legacyNode = input.get(kStack);
-            if (legacyNode != null) {
+            if (legacyNode != null)
+            {
                 return FluidStack.OPTIONAL_CODEC.parse(ops, legacyNode)
                         .map(FluidStackKey::new);
             }
@@ -119,13 +125,15 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         }
 
         @Override
-        public <T> RecordBuilder<T> encode(FluidStackKey value, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+        public <T> RecordBuilder<T> encode(FluidStackKey value, DynamicOps<T> ops, RecordBuilder<T> prefix)
+        {
             // 仅写新格式（fluid / components）
             return NEW_FMT.encode(value, ops, prefix);
         }
 
         @Override
-        public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops) {
+        public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops)
+        {
             // 对外暴露新格式键集合
             return java.util.stream.Stream.of(K_FLUID, K_COMPS).map(ops::createString);
         }
@@ -153,7 +161,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     public FluidStackKey(FluidStack stack)
     {
-        this(stack.getFluid(),stack.getComponentsPatch());
+        this(stack.getFluid(), stack.getComponentsPatch());
     }
 
     private FluidStackKey(Fluid fluid, DataComponentPatch patch)
@@ -165,19 +173,21 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     // ===== IStackKey =====
 
     @Override
-    public ResourceLocation getTypeId() {
+    public ResourceLocation getTypeId()
+    {
         return ID;
     }
 
     @Override
-    public MapCodec<FluidStackKey> codec() {
+    public MapCodec<FluidStackKey> codec()
+    {
         return TYPE_CODEC;
     }
 
     @Override
     public @Nullable KeyAmount fromStackObject(Object stack)
     {
-        if(stack instanceof FluidStack fluidStack)
+        if (stack instanceof FluidStack fluidStack)
             return new KeyAmount(new FluidStackKey(fluidStack), fluidStack.getAmount());
         return null;
     }
@@ -196,20 +206,23 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     @Override
     public FluidStack getReadOnlyStack()
     {
-        if(this.severCache == null)
+        if (this.severCache == null)
         {
             this.severCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
         }
 
-        if (this.fluid == Fluids.EMPTY) {
-            if (!this.severCache.isEmpty()) {
+        if (this.fluid == Fluids.EMPTY)
+        {
+            if (!this.severCache.isEmpty())
+            {
                 this.severCache = FluidStack.EMPTY;
             }
             return FluidStack.EMPTY;
         }
 
         FluidStack cache = this.severCache;
-        if (cache.isEmpty() || cache.getFluid() != this.fluid) {
+        if (cache.isEmpty() || cache.getFluid() != this.fluid)
+        {
             this.severCache = new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
             return this.severCache;
         }
@@ -220,7 +233,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     }
 
     @Override
-    public Class<FluidStack> getStackClass() {
+    public Class<FluidStack> getStackClass()
+    {
         return FluidStack.class;
     }
 
@@ -320,7 +334,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             o.ensureByte();
 
             if (this.patchByte != null && this.patchByte.length > 0
-                    && o.patchByte != null && o.patchByte.length > 0) {
+                    && o.patchByte != null && o.patchByte.length > 0)
+            {
                 return Arrays.equals(this.patchByte, o.patchByte);
             }
             // 兜底：Provider 未就绪/异常，退回值语义
@@ -332,7 +347,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     // ===== 网络序列化（新形态：类型ID + hasFluid + fluid RL + components）=====
 
     @Override
-    public void serialize(RegistryFriendlyByteBuf buf) {
+    public void serialize(RegistryFriendlyByteBuf buf)
+    {
 
         boolean hasFluid = this.fluid != Fluids.EMPTY;
         buf.writeBoolean(hasFluid);
@@ -357,8 +373,10 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     // ===== NBT 序列化：仅写新格式（fluid / components），无额外兜底 =====
     @Override
-    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess) {
-        try {
+    public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
+    {
+        try
+        {
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.encodeStart(ops, this)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
@@ -371,7 +389,9 @@ public final class FluidStackKey implements IStackKey<FluidStack>
                         return new CompoundTag();
                     })
                     .orElseGet(CompoundTag::new); // 编码失败 -> 空 Compound
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             BeyondDimensions.LOGGER.error("FluidStackKey 序列化时出错: {}", t.getMessage(), t);
             return new CompoundTag();
         }
@@ -379,14 +399,18 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     // ===== NBT 反序列化：直接交给 CODEC（TYPE_CODEC 内部已做新旧兼容）=====
     @Override
-    public @NotNull FluidStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
-        try {
+    public @NotNull FluidStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
+    {
+        try
+        {
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.parse(ops, nbt)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
                             "FluidStackKey 反序列化(Codec)出错: {} | Keys={}", err, nbt.getAllKeys()))
                     .orElse(FluidStackKey.EMPTY);
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             BeyondDimensions.LOGGER.error("FluidStackKey 反序列化错误。Keys={} Error={}",
                     nbt.getAllKeys(), t.getMessage(), t);
             return FluidStackKey.EMPTY;
@@ -396,27 +420,32 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     // ===== 渲染支持：交给外部渲染器；仅提供一个稳定的最小量副本 =====
 
     @Override
-    public @NotNull IStackRender getRender() {
+    public @NotNull IStackRender getRender()
+    {
         // 与 ItemStackKey 一致，采用单独渲染器（请在你的渲染模块提供 FluidStackKeyRender.INSTANCE）
         return FluidStackKeyRender.INSTANCE;
     }
 
     @Override
-    public @NotNull FluidStack getRenderStack() {
-        if(this.clientCache == null)
+    public @NotNull FluidStack getRenderStack()
+    {
+        if (this.clientCache == null)
         {
             this.clientCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
         }
 
-        if (this.fluid == Fluids.EMPTY) {
-            if (!this.clientCache.isEmpty()) {
+        if (this.fluid == Fluids.EMPTY)
+        {
+            if (!this.clientCache.isEmpty())
+            {
                 this.clientCache = FluidStack.EMPTY;
             }
             return FluidStack.EMPTY;
         }
 
         FluidStack cache = this.clientCache;
-        if (cache.isEmpty() || cache.getFluid() != this.fluid) {
+        if (cache.isEmpty() || cache.getFluid() != this.fluid)
+        {
             this.clientCache = new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
             return this.clientCache;
         }
@@ -429,9 +458,11 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     // ===== equals/hashCode：以 fluid + 规范化 components 为准（不含数量）=====
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(Object other)
+    {
         if (this == other) return true;
-        if (other instanceof FluidStackKey o) {
+        if (other instanceof FluidStackKey o)
+        {
             return isSameTypeSameComponents(o);
         }
         return false;
@@ -454,30 +485,41 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     // ===== 规范化快照计算 =====
 
-    private void ensureByte() {
+    private void ensureByte()
+    {
         HolderLookup.Provider current = null;
-        try {
+        try
+        {
             current = RegistryAccessResolver.resolve();
-        } catch (Throwable ignored) {}
+        }
+        catch (Throwable ignored)
+        {
+        }
 
         HolderLookup.Provider cached = (equalsByteProviderRef != null) ? equalsByteProviderRef.get() : null;
-        if (this.patchByte != null && this.patchByte.length > 0 && cached != null && cached == current) {
+        if (this.patchByte != null && this.patchByte.length > 0 && cached != null && cached == current)
+        {
             return;
         }
 
-        try {
+        try
+        {
             HolderLookup.Provider use = (current != null) ? current : RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
             byte[] out = DataComponentPatchHelper.toCanonicalBytes(this.patch, use);
 
             // 客户端兜底：若失败再尝试连接提供者
-            if (out.length == 0 && FMLEnvironment.dist == Dist.CLIENT) {
+            if (out.length == 0 && FMLEnvironment.dist == Dist.CLIENT)
+            {
                 var mc = net.minecraft.client.Minecraft.getInstance();
                 var conn = mc.getConnection();
-                if (conn != null) {
+                if (conn != null)
+                {
                     HolderLookup.Provider connProv = conn.registryAccess();
-                    if (connProv != use) {
+                    if (connProv != use)
+                    {
                         byte[] retry = DataComponentPatchHelper.toCanonicalBytes(this.patch, connProv);
-                        if (retry.length > 0) {
+                        if (retry.length > 0)
+                        {
                             out = retry;
                             use = connProv;
                         }
@@ -487,7 +529,9 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
             this.patchByte = out;
             this.equalsByteProviderRef = (out.length > 0) ? new WeakReference<>(use) : null;
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             BeyondDimensions.LOGGER.warn("FluidStackKey 组件规范化失败: {}", t.toString());
             this.patchByte = new byte[0];
             this.equalsByteProviderRef = null;

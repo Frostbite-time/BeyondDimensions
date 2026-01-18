@@ -19,17 +19,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class WardenSoulStackKeyRender implements IStackRender {
+public class WardenSoulStackKeyRender implements IStackRender
+{
     public static final WardenSoulStackKeyRender INSTANCE = new WardenSoulStackKeyRender();
 
     // 粒子状态（静态，避免频繁分配）
     private static long lastCheckedForParticle = 0L;
     private static final List<GuiParticle> particleList = new ArrayList<>();
 
-    private WardenSoulStackKeyRender() {}
+    private WardenSoulStackKeyRender()
+    {
+    }
 
     @Override
-    public void render(GuiGraphics gui, IStackKey<?> key, int x, int y) {
+    public void render(GuiGraphics gui, IStackKey<?> key, int x, int y)
+    {
         var mc = Minecraft.getInstance();
         if (mc.level == null) return;
 
@@ -41,7 +45,7 @@ public class WardenSoulStackKeyRender implements IStackRender {
 
         gui.pose().pushPose();
         float heart_timing_total = 30.0F;
-        float heart_phase = 1.0F - (mc.level.getGameTime() % (long)heart_timing_total) / heart_timing_total;
+        float heart_phase = 1.0F - (mc.level.getGameTime() % (long) heart_timing_total) / heart_timing_total;
         RenderSystem.setShaderColor(heart_phase, heart_phase, heart_phase, heart_phase);
         gui.blit(warden_hear, x - 1, y - 1, 11.0F, 13.0F, 18, 18, 128, 128);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
@@ -69,8 +73,10 @@ public class WardenSoulStackKeyRender implements IStackRender {
         int ySize = 6;
         long now = mc.level.getGameTime();
 
-        if (lastCheckedForParticle != now) {
-            if (mc.level.random.nextDouble() <= spawnChance) {
+        if (lastCheckedForParticle != now)
+        {
+            if (mc.level.random.nextDouble() <= spawnChance)
+            {
                 particleList.add(new GuiParticle(mc.level.random.nextInt(xSize),
                         ySize - mc.level.random.nextInt(3), now));
             }
@@ -78,12 +84,14 @@ public class WardenSoulStackKeyRender implements IStackRender {
         }
 
         int ageTick = 3;
-        if (now % ageTick == 0L) {
+        if (now % ageTick == 0L)
+        {
             particleList.removeIf(p -> (now - p.age) / ageTick > 10L);
         }
 
         gui.pose().translate(0.0F, 0.0F, 200.0F);
-        for (GuiParticle p : particleList.reversed()) {
+        for (GuiParticle p : particleList.reversed())
+        {
             double age = (double) (now - p.age) / (double) ageTick;
             double extraY = (double) (ySize - 32) / 20.0F * age;
             int frame = Math.max(0, Math.min(10, (int) age));
@@ -100,9 +108,10 @@ public class WardenSoulStackKeyRender implements IStackRender {
     }
 
     @Override
-    public void renderAmount(GuiGraphics gui, long amount, int x, int y) {
+    public void renderAmount(GuiGraphics gui, long amount, int x, int y)
+    {
         String text = getCountText(amount);
-        if(text.isEmpty()) return;
+        if (text.isEmpty()) return;
 
         float scale = 0.666f;
         var pose = gui.pose();
@@ -122,20 +131,23 @@ public class WardenSoulStackKeyRender implements IStackRender {
     }
 
     @Override
-    public String getCountText(long count) {
+    public String getCountText(long count)
+    {
         if (count < 0) return "";
         return StringFormat.formatCount(count);
     }
 
     @Override
-    public Component getDisplayName(IStackKey<?> key) {
+    public Component getDisplayName(IStackKey<?> key)
+    {
         return WardenSoulStackKey.INSTANCE.getRenderStack().getName();
     }
 
     @Override
     public List<Component> getTooltipLines(IStackKey<?> key, long amount, Item.TooltipContext tooltipContext,
                                            @Nullable net.minecraft.world.entity.player.Player player,
-                                           TooltipFlag tooltipFlag) {
+                                           TooltipFlag tooltipFlag)
+    {
         return List.of(
                 getDisplayName(key),
                 Component.translatable("istack.beyonddimensions.storage_num.long_type", amount)
@@ -143,12 +155,14 @@ public class WardenSoulStackKeyRender implements IStackRender {
     }
 
     @Override
-    public Optional<TooltipComponent> getTooltipImage(IStackKey<?> key) {
+    public Optional<TooltipComponent> getTooltipImage(IStackKey<?> key)
+    {
         return Optional.empty();
     }
 
     @Override
-    public void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY) {
+    public void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY)
+    {
         var mc = Minecraft.getInstance();
         var ctx = mc.level != null ? Item.TooltipContext.of(mc.level) : Item.TooltipContext.EMPTY;
         gui.renderTooltip(
@@ -163,12 +177,14 @@ public class WardenSoulStackKeyRender implements IStackRender {
     }
 
     // 粒子结构
-    private static final class GuiParticle {
+    private static final class GuiParticle
+    {
         final int x;
         final int y;
         final long age;
 
-        GuiParticle(int x, int y, long age) {
+        GuiParticle(int x, int y, long age)
+        {
             this.x = x;
             this.y = y;
             this.age = age;

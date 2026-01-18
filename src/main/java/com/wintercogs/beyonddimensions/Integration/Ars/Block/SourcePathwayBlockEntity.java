@@ -41,10 +41,10 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
     public int getSource()
     {
         DimensionsNet net = getNet();
-        if(net != null)
+        if (net != null)
         {
             KeyAmount stack = net.getUnifiedStorage().getStackByKey(SourceStackKey.INSTANCE);
-            if(stack.key() == SourceStackKey.INSTANCE)
+            if (stack.key() == SourceStackKey.INSTANCE)
             {
                 return BDMath.clampLongToInt(stack.amount());
             }
@@ -72,10 +72,10 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
     public int addSource(int amount, boolean simulate)
     {
         DimensionsNet net = getNet();
-        if(net != null)
+        if (net != null)
         {
             // 此处转换安全
-            return amount - (int) net.getUnifiedStorage().insert(SourceStackKey.INSTANCE,amount,simulate).amount();
+            return amount - (int) net.getUnifiedStorage().insert(SourceStackKey.INSTANCE, amount, simulate).amount();
         }
         return 0;
     }
@@ -97,10 +97,10 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
     public int removeSource(int amount, boolean simulate)
     {
         DimensionsNet net = getNet();
-        if(net != null)
+        if (net != null)
         {
             // 此处转换安全
-            return (int) net.getUnifiedStorage().extract(SourceStackKey.INSTANCE ,amount,simulate).amount();
+            return (int) net.getUnifiedStorage().extract(SourceStackKey.INSTANCE, amount, simulate).amount();
         }
         return 0;
     }
@@ -109,9 +109,9 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
     public void onLoad()
     {
         super.onLoad();
-        if(!level.isClientSide() && getNet() != null)
+        if (!level.isClientSide() && getNet() != null)
         {
-            SourceManager.INSTANCE.addInterface(level,new SourcePathwayProvider(this));
+            SourceManager.INSTANCE.addInterface(level, new SourcePathwayProvider(this));
         }
 
     }
@@ -120,7 +120,7 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
     public void setChanged()
     {
         super.setChanged(); // 防止level触发NPE
-        if(level != null && !level.isClientSide() && getNet() != null)
-            SourceManager.INSTANCE.addInterface(level,new SourcePathwayProvider(this));
+        if (level != null && !level.isClientSide() && getNet() != null)
+            SourceManager.INSTANCE.addInterface(level, new SourcePathwayProvider(this));
     }
 }

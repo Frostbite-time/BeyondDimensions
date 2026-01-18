@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BD_ArsCaps
 {
-    public static final ItemCapability<ISourceCap, @Nullable Void> ITEM_SOURCE = ItemCapability.createVoid(ResourceLocation.tryBuild(BeyondDimensions.MODID,"caps/ars_source"), ISourceCap.class);
+    public static final ItemCapability<ISourceCap, @Nullable Void> ITEM_SOURCE = ItemCapability.createVoid(ResourceLocation.tryBuild(BeyondDimensions.MODID, "caps/ars_source"), ISourceCap.class);
 
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {

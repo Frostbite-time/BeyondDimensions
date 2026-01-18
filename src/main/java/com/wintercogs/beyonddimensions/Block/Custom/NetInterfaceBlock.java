@@ -26,10 +26,10 @@ public class NetInterfaceBlock extends BaseMachineBlock
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
     {
-        super.useWithoutItem(state,level,pos,player,hitResult);
-        if(!level.isClientSide()&&!player.isShiftKeyDown())
+        super.useWithoutItem(state, level, pos, player, hitResult);
+        if (!level.isClientSide() && !player.isShiftKeyDown())
         {
-            player.openMenu((NetInterfaceBlockEntity)level.getBlockEntity(pos),pos);
+            player.openMenu((NetInterfaceBlockEntity) level.getBlockEntity(pos), pos);
         }
         return InteractionResult.SUCCESS_NO_ITEM_USED;
     }
@@ -37,8 +37,10 @@ public class NetInterfaceBlock extends BaseMachineBlock
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
     {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity) {
+        if (!state.is(newState.getBlock()))
+        {
+            if (level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity)
+            {
                 level.updateNeighbourForOutputSignal(pos, this);
                 blockEntity.dropContent();
             }
@@ -50,20 +52,24 @@ public class NetInterfaceBlock extends BaseMachineBlock
     public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor)
     {
         super.onNeighborChange(state, level, pos, neighbor);
-        if (level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity) {
+        if (level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity)
+        {
             blockEntity.setNeedsCapabilityUpdate();
         }
     }
 
     @Override
-    public boolean hasAnalogOutputSignal(BlockState state) {
+    public boolean hasAnalogOutputSignal(BlockState state)
+    {
         return true;
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos)
+    {
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof NetInterfaceBlockEntity ce) {
+        if (be instanceof NetInterfaceBlockEntity ce)
+        {
             return ce.getRedstoneLevel(); // 0..15
         }
         return 0;
@@ -72,6 +78,6 @@ public class NetInterfaceBlock extends BaseMachineBlock
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
     {
-        return new NetInterfaceBlockEntity(blockPos,blockState);
+        return new NetInterfaceBlockEntity(blockPos, blockState);
     }
 }

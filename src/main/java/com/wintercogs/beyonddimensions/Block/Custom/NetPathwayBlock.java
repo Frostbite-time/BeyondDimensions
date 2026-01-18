@@ -14,18 +14,20 @@ import org.jetbrains.annotations.Nullable;
 public class NetPathwayBlock extends NetedBlock implements EntityBlock
 {
 
-    public NetPathwayBlock(Properties properties) {
+    public NetPathwayBlock(Properties properties)
+    {
         super(properties);
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new NetPathwayBlockEntity(blockPos,blockState);
+    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
+    {
+        return new NetPathwayBlockEntity(blockPos, blockState);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
     {
-        return super.useWithoutItem(state,level,pos,player,hitResult);
+        return super.useWithoutItem(state, level, pos, player, hitResult);
     }
 }

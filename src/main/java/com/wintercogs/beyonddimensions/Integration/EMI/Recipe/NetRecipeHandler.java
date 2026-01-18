@@ -36,9 +36,9 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
     public List<Slot> getInputSources(T handler)
     {
         List<Slot> inputSlots = new ArrayList<>();
-        for(Slot slot : handler.slots)
+        for (Slot slot : handler.slots)
         {
-            if(!(slot instanceof ResultSlot) && !(slot instanceof AbstractStackTypedSlot))
+            if (!(slot instanceof ResultSlot) && !(slot instanceof AbstractStackTypedSlot))
             {
                 inputSlots.add(slot);
             }
@@ -50,7 +50,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
     public List<Slot> getCraftingSlots(T handler)
     {
         List<Slot> craftingSlots = new ArrayList<>();
-        for(int i = handler.craftSlotStartIndex; i < handler.craftSlotEndIndex; ++i)
+        for (int i = handler.craftSlotStartIndex; i < handler.craftSlotEndIndex; ++i)
         {
             craftingSlots.add(handler.slots.get(i));
         }
@@ -67,12 +67,12 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
     public EmiPlayerInventory getInventory(AbstractContainerScreen<T> screen)
     {
         List<EmiStack> stacks = getInputSources(screen.getMenu()).stream().map(Slot::getItem).map(EmiStack::of).collect(Collectors.toCollection(ArrayList::new));
-        if(screen.getMenu().storage.getStorage() != null)
+        if (screen.getMenu().storage.getStorage() != null)
         {
-            for(KeyAmount stack : screen.getMenu().storage.getStorage())
+            for (KeyAmount stack : screen.getMenu().storage.getStorage())
             {
-                if(stack.isEmpty()) continue;
-                if(stack.key() instanceof ItemStackKey itemStackKey)
+                if (stack.isEmpty()) continue;
+                if (stack.key() instanceof ItemStackKey itemStackKey)
                 {
                     stacks.add(EmiStack.of(itemStackKey.getReadOnlyStack(), stack.amount()));
                 }
@@ -103,36 +103,44 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         };
 
         // 合成输入槽
-        for (Slot slot : getInputSources(menu)) {
-            if (slot.hasItem()) {
+        for (Slot slot : getInputSources(menu))
+        {
+            if (slot.hasItem())
+            {
                 ItemStack s = slot.getItem();
                 add.accept(new ItemStackKey(s), (long) s.getCount());
             }
         }
 
         // 存储（只接受 ItemStackKey）
-        for (KeyAmount ka : menu.storage.getStorage()) {
+        for (KeyAmount ka : menu.storage.getStorage())
+        {
             if (ka == null || ka.isEmpty()) continue;
-            if (ka.key() instanceof ItemStackKey isk) {
+            if (ka.key() instanceof ItemStackKey isk)
+            {
                 add.accept(isk, ka.amount());
             }
         }
 
         // 玩家背包
-        for (ItemStack s : menu.player.getInventory().items) {
-            if (!s.isEmpty()) {
+        for (ItemStack s : menu.player.getInventory().items)
+        {
+            if (!s.isEmpty())
+            {
                 add.accept(new ItemStackKey(s), (long) s.getCount());
             }
         }
 
         // 3) 逐一匹配配方输入，构建要发送的 keys & amounts（顺序即为槽位）
         final ArrayList<IStackKey<?>> outKeys = new ArrayList<>(inputs.size());
-        final ArrayList<Long>        outAmts = new ArrayList<>(inputs.size());
+        final ArrayList<Long> outAmts = new ArrayList<>(inputs.size());
 
-        for (EmiIngredient ing : inputs) {
+        for (EmiIngredient ing : inputs)
+        {
 
             // 空位：放空键
-            if (ing.isEmpty()) {
+            if (ing.isEmpty())
+            {
                 outKeys.add(EmptyStackKey.INSTANCE);
                 outAmts.add(0L);
                 continue;
@@ -142,7 +150,8 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
             boolean satisfied = false;
 
             // 该 Ingredient 可能有多个可选（如标签展开后的多种物品），择一满足的
-            for (EmiStack alt : ing.getEmiStacks()) {
+            for (EmiStack alt : ing.getEmiStacks())
+            {
                 final Item candidateItem = alt.getItemStack().getItem();
                 final List<Avail> list = pool.get(candidateItem);
                 if (list == null || list.isEmpty()) continue;
@@ -153,17 +162,24 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
 
                 // 选择一个代表性 Key：优先选 remain>0 的那一个
                 ItemStackKey repKey = null;
-                for (Avail a : list) {
-                    if (a.remain > 0) { repKey = a.key; break; }
+                for (Avail a : list)
+                {
+                    if (a.remain > 0)
+                    {
+                        repKey = a.key;
+                        break;
+                    }
                 }
                 if (repKey == null) continue; // 理论上不会发生，因为 available>=required
 
                 // 在池中扣减数量（客户端本地模拟，不触碰真实物品）
                 int left = required;
-                for (Avail a : list) {
+                for (Avail a : list)
+                {
                     if (left <= 0) break;
                     long take = Math.min(a.remain, left);
-                    if (take > 0) {
+                    if (take > 0)
+                    {
                         a.remain -= take;
                         left -= (int) take;
                     }
@@ -176,7 +192,8 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
                 break; // 该槽位已满足，进入下一个槽位
             }
 
-            if (!satisfied) {
+            if (!satisfied)
+            {
                 // 材料不足
                 Minecraft.getInstance().player.displayClientMessage(
                         Component.translatable("beyonddimensions.message.insufficient_materials"),
@@ -192,11 +209,19 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         return true;
     }
 
-    /** 本地可用条目：避免拷贝 ItemStack，仅记录 Key 与剩余数量 */
-    private static final class Avail {
+    /**
+     * 本地可用条目：避免拷贝 ItemStack，仅记录 Key 与剩余数量
+     */
+    private static final class Avail
+    {
         final ItemStackKey key;
         long remain;
-        Avail(ItemStackKey key, long remain) { this.key = key; this.remain = remain; }
+
+        Avail(ItemStackKey key, long remain)
+        {
+            this.key = key;
+            this.remain = remain;
+        }
     }
 
 }

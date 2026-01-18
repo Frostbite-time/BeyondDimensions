@@ -8,7 +8,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public record CallSeverClickPacket(int slotIndex , KeyAmount clickItem, int button, boolean shiftDown) implements CustomPacketPayload
+public record CallSeverClickPacket(int slotIndex, KeyAmount clickItem, int button,
+                                   boolean shiftDown) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final Type<CallSeverClickPacket> TYPE =

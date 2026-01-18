@@ -16,7 +16,7 @@ public class NetStorage implements MEStorage
 
     public NetStorage(UnifiedStorage storage)
     {
-       this.storage = storage;
+        this.storage = storage;
     }
 
     // 将BD网络作为同优先级下的优先存储单元
@@ -31,7 +31,7 @@ public class NetStorage implements MEStorage
     public long insert(AEKey what, long amount, Actionable mode, IActionSource source)
     {
         return AEHelper.fromAEKeyToIStack(what)
-                .map(stack -> amount - storage.insert(stack,amount, mode.isSimulate()).amount())
+                .map(stack -> amount - storage.insert(stack, amount, mode.isSimulate()).amount())
                 .orElse(0L);
     }
 
@@ -40,16 +40,16 @@ public class NetStorage implements MEStorage
     public long extract(AEKey what, long amount, Actionable mode, IActionSource source)
     {
         return AEHelper.fromAEKeyToIStack(what)
-                .map(stack -> storage.extract(stack,amount, mode.isSimulate()).amount())
+                .map(stack -> storage.extract(stack, amount, mode.isSimulate()).amount())
                 .orElse(0L);
     }
 
     @Override
     public void getAvailableStacks(KeyCounter out)
     {
-        for(KeyAmount stack : storage.getStorage())
+        for (KeyAmount stack : storage.getStorage())
         {
-            AEHelper.fromIStackToAEKey(stack.key()).ifPresent(aeKey -> out.add(aeKey,stack.amount()));
+            AEHelper.fromIStackToAEKey(stack.key()).ifPresent(aeKey -> out.add(aeKey, stack.amount()));
         }
     }
 

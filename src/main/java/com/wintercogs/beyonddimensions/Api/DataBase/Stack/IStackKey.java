@@ -34,9 +34,11 @@ public interface IStackKey<T>
     /*
      * 流编码器定义，根据StackKeyRegistry分发到对应子类
      */
-    public static final StreamCodec<RegistryFriendlyByteBuf, IStackKey<?>> STREAM_CODEC = new StreamCodec<>() {
+    public static final StreamCodec<RegistryFriendlyByteBuf, IStackKey<?>> STREAM_CODEC = new StreamCodec<>()
+    {
         @Override
-        public void encode(RegistryFriendlyByteBuf buf, IStackKey<?> key) {
+        public void encode(RegistryFriendlyByteBuf buf, IStackKey<?> key)
+        {
             // 先写类型 id
             buf.writeResourceLocation(key.getTypeId());
             // 再写负载（各子类自己实现，注意不再写 typeId）
@@ -44,7 +46,8 @@ public interface IStackKey<T>
         }
 
         @Override
-        public @NotNull IStackKey<?> decode(RegistryFriendlyByteBuf buf) {
+        public @NotNull IStackKey<?> decode(RegistryFriendlyByteBuf buf)
+        {
             // 先读类型 id
             ResourceLocation typeId = buf.readResourceLocation();
             // 通过注册表找到对应的“类型原型/工厂”
@@ -73,7 +76,8 @@ public interface IStackKey<T>
 
     /**
      * 从未知源Object构建实例，如果Object不合法，则返回null
-     * @param key 类似Item
+     *
+     * @param key                类似Item
      * @param dataComponentPatch 数据组件
      * @return 类似ItemStack
      */

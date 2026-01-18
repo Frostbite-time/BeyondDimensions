@@ -51,9 +51,9 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public KeyAmount safeInsert(IStackKey<?> key, long amount)
     {
-        if(key != null)
+        if (key != null)
         {
-            setStackDirectly(key,amount);
+            setStackDirectly(key, amount);
         }
         return new KeyAmount(key, amount);
     }
@@ -61,7 +61,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public KeyAmount safeExtract(IStackKey<?> key, long amount)
     {
-        setStackDirectly(ItemStackKey.EMPTY ,amount);
+        setStackDirectly(ItemStackKey.EMPTY, amount);
         return new KeyAmount(ItemStackKey.EMPTY, amount); // 标记槽永远取出空
     }
 
@@ -76,15 +76,15 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
             if (!carriedItem.isEmpty())
             {   //槽位物品为空，携带物品存在，将携带物品插入标记
 
-                if(button==0)
+                if (button == 0)
                 {
                     setStackDirectly(new ItemStackKey(carriedItem), 1);
                 }
-                else if(button==1)
+                else if (button == 1)
                 {
-                    if(carriedItem.getItem() instanceof XpExchangeItem)
+                    if (carriedItem.getItem() instanceof XpExchangeItem)
                     {
-                        setStackDirectly(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(),1)) ,1);
+                        setStackDirectly(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(), 1)), 1);
                     }
                     else
                     {
@@ -92,25 +92,25 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                         copy.setCount(1);
                         // 注: 通用机械物品必须在堆叠数量为1时才暴露能力。
                         // 这种做法看起来是很有益的。可以防止其他模组错误消耗过多的存储资源
-                        CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap)->{
+                        CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap) -> {
                             Object handler = copy.getCapability(cap);
-                            if(handler != null)
+                            if (handler != null)
                             {
                                 Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
                                 IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
 
-                                if(stackHandlerWrapper.getSlots()>0)
+                                if (stackHandlerWrapper.getSlots() > 0)
                                 {
-                                    for(int index=0;index<stackHandlerWrapper.getSlots();index++)
+                                    for (int index = 0; index < stackHandlerWrapper.getSlots(); index++)
                                     {
                                         IStackKey<?> typeKey = StackKeyRegistry.getType(typeId);
                                         KeyAmount typeStack = typeKey.fromStackObject(stackHandlerWrapper.getStackInSlot(0));
-                                        if(typeStack != null)
+                                        if (typeStack != null)
                                         {
                                             KeyAmount stack = new KeyAmount(typeStack.key(), 1);
-                                            if(stack.key()!=null&& !stack.isEmpty())
+                                            if (stack.key() != null && !stack.isEmpty())
                                             {
-                                                setStackDirectly(stack.key(),stack.amount());
+                                                setStackDirectly(stack.key(), stack.amount());
                                                 break;
                                             }
                                         }
@@ -158,25 +158,25 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     public void updateChange()
     {
         KeyAmount currentStack = storage.getStackBySlot(this.getSlotIndex());
-        if(currentStack.key() == null)
+        if (currentStack.key() == null)
         {
             lastStack = new KeyAmount(ItemStackKey.EMPTY, 0);
-            PacketDistributor.sendToPlayer((ServerPlayer) menu.player,new OrderedStackTypedSlotPacket(index,theSlot,lastStack.key(),lastStack.amount()));
+            PacketDistributor.sendToPlayer((ServerPlayer) menu.player, new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
         }
-        else if(currentStack.isEmpty() && lastStack.isEmpty())
+        else if (currentStack.isEmpty() && lastStack.isEmpty())
         {
         }
-        else if(lastStack.amount() != currentStack.amount()
-                ||!lastStack.key().getTypeId().equals(currentStack.key().getTypeId())
-                ||!lastStack.key().isSameTypeSameComponents(currentStack.key()))
+        else if (lastStack.amount() != currentStack.amount()
+                || !lastStack.key().getTypeId().equals(currentStack.key().getTypeId())
+                || !lastStack.key().isSameTypeSameComponents(currentStack.key()))
         {
             lastStack = currentStack;
-            PacketDistributor.sendToPlayer((ServerPlayer) menu.player,new OrderedStackTypedSlotPacket(index,theSlot,lastStack.key(),lastStack.amount()));
+            PacketDistributor.sendToPlayer((ServerPlayer) menu.player, new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
         }
     }
 
     @Override
-    public void loadChange(int where ,IStackKey<?> newKey, long newAmount)
+    public void loadChange(int where, IStackKey<?> newKey, long newAmount)
     {
         // 同步读取仍直接操作storage
         storage.setStackDirectly(where, newKey, newAmount);

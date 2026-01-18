@@ -100,7 +100,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
                 BotaniaForgeCapabilities.MANA_RECEIVER,
                 ModBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
-                    if(be instanceof ManaPoolPathwayBlockEntity pool)
+                    if (be instanceof ManaPoolPathwayBlockEntity pool)
                         return pool;
                     else
                         return null;
@@ -111,7 +111,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
                 BotaniaForgeCapabilities.SPARK_ATTACHABLE,
                 ModBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
-                    if(be instanceof ManaPoolPathwayBlockEntity pool)
+                    if (be instanceof ManaPoolPathwayBlockEntity pool)
                         return pool;
                     else
                         return null;
@@ -122,7 +122,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
                 BotaniaForgeClientCapabilities.BLOCK_WAND_HUD,
                 ModBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
-                    if(be instanceof ManaPoolPathwayBlockEntity pool)
+                    if (be instanceof ManaPoolPathwayBlockEntity pool)
                         return new WandHud(pool);
                     return null;
                 }
@@ -132,7 +132,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
                 BotaniaForgeCapabilities.WANDABLE,
                 ModBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
-                    if(be instanceof ManaPoolPathwayBlockEntity pool)
+                    if (be instanceof ManaPoolPathwayBlockEntity pool)
                         return pool;
                     else
                         return null;
@@ -144,7 +144,8 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     public static void clientTick(Level level, BlockPos pos, BlockState state, ManaPoolPathwayBlockEntity be)
     {
         double particleChance = 1F - 0.1;
-        if (Math.random() > particleChance) {
+        if (Math.random() > particleChance)
+        {
             WispParticleData data = WispParticleData.wisp((float) Math.random() / 3F,
                     ManaPoolBlockEntity.PARTICLE_COLOR_RED, ManaPoolBlockEntity.PARTICLE_COLOR_GREEN, ManaPoolBlockEntity.PARTICLE_COLOR_BLUE, 2F);
             level.addParticle(data, pos.getX() + 0.3 + Math.random() * 0.5,
@@ -160,19 +161,23 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     {
         be.initManaCapAndNetwork();
 
-        if (be.soundTicks > 0) {
+        if (be.soundTicks > 0)
+        {
             be.soundTicks--;
         }
 
         List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, new AABB(pos));
-        for (ItemEntity item : items) {
-            if (!item.isAlive()) {
+        for (ItemEntity item : items)
+        {
+            if (!item.isAlive())
+            {
                 continue;
             }
 
             ItemStack stack = item.getItem();
             ManaItem mana = XplatAbstractions.INSTANCE.findManaItem(stack);
-            if (!stack.isEmpty() && mana != null) {
+            if (!stack.isEmpty() && mana != null)
+            {
                 if (be.isOutPutting && mana.canReceiveManaFromPool(be) || !be.isOutPutting && mana.canExportManaToPool(be))
                 {
                     boolean didSomething = false;
@@ -190,10 +195,12 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
                     }
                     else // 从石板接收
                     {
-                        if (mana.getMana() > 0 && !be.isFull()) {
+                        if (mana.getMana() > 0 && !be.isFull())
+                        {
                             didSomething = true;
                             int manaVal = Math.min(transfRate, Math.min(BDMath.clampLongToInt(be.getActualMaxMana() - be.getActualCurrentMana()), mana.getMana()));
-                            if (manaVal == 0 && be.level.getBlockState(pos.below()).is(BotaniaBlocks.manaVoid)) {
+                            if (manaVal == 0 && be.level.getBlockState(pos.below()).is(BotaniaBlocks.manaVoid))
+                            {
                                 manaVal = Math.min(transfRate, mana.getMana());
                             }
                             mana.addMana(-manaVal);
@@ -203,7 +210,8 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
 
                     if (didSomething)
                     {
-                        if (BotaniaConfig.common().chargingAnimationEnabled() && be.ticks % 10 == 0) {
+                        if (BotaniaConfig.common().chargingAnimationEnabled() && be.ticks % 10 == 0)
+                        {
                             level.blockEvent(pos, state.getBlock(),
                                     be.isOutPutting ? CHARGE_EFFECT_EVENT : DRAIN_EFFECT_EVENT,
                                     encodeRelativeItemPosition(pos, item));
@@ -216,7 +224,8 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         be.ticks++;
     }
 
-    private static int encodeRelativeItemPosition(BlockPos worldPosition, ItemEntity item) {
+    private static int encodeRelativeItemPosition(BlockPos worldPosition, ItemEntity item)
+    {
         double relX = Mth.clamp(item.position().x() - worldPosition.getX(), 0, 1);
         double relY = Mth.clamp(0.125 + 0.875 * (item.position().y() - worldPosition.getY()), 0.125, 0.9);
         double relZ = Mth.clamp(item.position().z() - worldPosition.getZ(), 0, 1);
@@ -229,16 +238,19 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     }
 
     // 供 配方重载 调用
-    public static void onRecipesReloaded() {
+    public static void onRecipesReloaded()
+    {
         GLOBAL_RECIPE_CACHE_VERSION++;
     }
 
     @Nullable
-    public RecipeHolder<ManaInfusionRecipe> getMatchingRecipe(ItemStack stack, BlockState below) {
+    public RecipeHolder<ManaInfusionRecipe> getMatchingRecipe(ItemStack stack, BlockState below)
+    {
         if (level == null || stack.isEmpty()) return null;
 
         // 版本变化 → 清缓存
-        if (recipeCacheVersionSeen != GLOBAL_RECIPE_CACHE_VERSION) {
+        if (recipeCacheVersionSeen != GLOBAL_RECIPE_CACHE_VERSION)
+        {
             recipeCache.clear();
             recipeCacheVersionSeen = GLOBAL_RECIPE_CACHE_VERSION;
         }
@@ -248,34 +260,44 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         final long key = ((long) itemId << 32) | (blockId & 0xFFFFFFFFL);
 
         var cached = recipeCache.get(key);
-        if (cached != null) {
+        if (cached != null)
+        {
             var r = cached.value();
             // 二次校验，防止属性型催化剂不匹配
-            if (r.matches(stack) && (r.getRecipeCatalyst() == StateIngredients.NONE || r.getRecipeCatalyst().test(below))) {
+            if (r.matches(stack) && (r.getRecipeCatalyst() == StateIngredients.NONE || r.getRecipeCatalyst().test(below)))
+            {
                 return cached;
-            } else {
+            }
+            else
+            {
                 recipeCache.remove(key); // 失效
             }
         }
 
         // 没命中 → 走“档 A”逻辑
         RecipeHolder<ManaInfusionRecipe> best = null, firstNonCat = null;
-        for (var rh : BotaniaRecipeTypes.getRecipes(level, BotaniaRecipeTypes.MANA_INFUSION_TYPE)) {
+        for (var rh : BotaniaRecipeTypes.getRecipes(level, BotaniaRecipeTypes.MANA_INFUSION_TYPE))
+        {
             var r = rh.value();
             if (!r.matches(stack)) continue;
 
-            if (r.getRecipeCatalyst() != StateIngredients.NONE) {
-                if (r.getRecipeCatalyst().test(below)) {
+            if (r.getRecipeCatalyst() != StateIngredients.NONE)
+            {
+                if (r.getRecipeCatalyst().test(below))
+                {
                     best = rh; // 最高优先级，直接确定
                     break;
                 }
-            } else if (firstNonCat == null) {
+            }
+            else if (firstNonCat == null)
+            {
                 firstNonCat = rh;
             }
         }
         if (best == null) best = firstNonCat;
 
-        if (best != null) {
+        if (best != null)
+        {
             if (recipeCache.size() > 256) recipeCache.clear(); // 简易限流
             recipeCache.put(key, best);
         }
@@ -283,26 +305,32 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     }
 
     // 用于配方合成
-    public boolean collideEntityItem(ItemEntity item) {
-        if (level.isClientSide || !item.isAlive() || item.getItem().isEmpty()) {
+    public boolean collideEntityItem(ItemEntity item)
+    {
+        if (level.isClientSide || !item.isAlive() || item.getItem().isEmpty())
+        {
             return false;
         }
 
         ItemStack stack = item.getItem();
 
-        if (stack.getItem() instanceof ManaDissolvable dissolvable) {
+        if (stack.getItem() instanceof ManaDissolvable dissolvable)
+        {
             dissolvable.onDissolveTick(this, item);
         }
 
-        if (XplatAbstractions.INSTANCE.itemFlagsComponent(item).manaInfusionSpawned) {
+        if (XplatAbstractions.INSTANCE.itemFlagsComponent(item).manaInfusionSpawned)
+        {
             return false;
         }
 
         RecipeHolder<ManaInfusionRecipe> recipe = getMatchingRecipe(stack, level.getBlockState(worldPosition.below()));
 
-        if (recipe != null) {
+        if (recipe != null)
+        {
             int mana = recipe.value().getManaToConsume();
-            if (getCurrentMana() >= mana) {
+            if (getCurrentMana() >= mana)
+            {
                 receiveMana(-mana);
 
                 ItemStack output = recipe.value().getRecipeOutput(level.registryAccess(), stack);
@@ -311,10 +339,13 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
 
                 ItemEntity outputItem = new ItemEntity(level, worldPosition.getX() + 0.5, worldPosition.getY() + 1.5, worldPosition.getZ() + 0.5, output);
                 XplatAbstractions.INSTANCE.itemFlagsComponent(outputItem).manaInfusionSpawned = true;
-                if (item.getOwner() instanceof Player player) {
+                if (item.getOwner() instanceof Player player)
+                {
                     player.triggerRecipeCrafted(recipe, List.of(output));
                     output.onCraftedBy(level, player, output.getCount());
-                } else {
+                }
+                else
+                {
                     output.onCraftedBySystem(level);
                 }
                 level.addFreshEntity(outputItem);
@@ -328,8 +359,10 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     }
 
     // 播放配方合成后的粒子特效和声音
-    public void craftingEffect(boolean playSound) {
-        if (playSound && soundTicks == 0) {
+    public void craftingEffect(boolean playSound)
+    {
+        if (playSound && soundTicks == 0)
+        {
             level.playSound(null, worldPosition, BotaniaSounds.manaPoolCraft, SoundSource.BLOCKS, 1F, 1F);
             soundTicks = 6;
         }
@@ -340,7 +373,8 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
 
 
     @Override
-    public boolean triggerEvent(int event, int param) {
+    public boolean triggerEvent(int event, int param)
+    {
         return switch (event)
         {
             case 0 ->
@@ -381,49 +415,61 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
 
 
     private static void displayChargingParticles(Level level, BlockPos worldPosition, ManaPoolPathwayBlockEntity be,
-                                                 Int2ObjectMap<MutableInt> particles, boolean charging) {
+                                                 Int2ObjectMap<MutableInt> particles, boolean charging)
+    {
         int bellowCount = charging ? getBellowCount(level, worldPosition, be) : 0;
         int max = be.getMaxMana();
         float relativeMana = (max > 0) ? (float) be.getCurrentMana() / max : 0f;
         var particlesIterator = particles.int2ObjectEntrySet().iterator();
-        while (particlesIterator.hasNext()) {
+        while (particlesIterator.hasNext())
+        {
             var entry = particlesIterator.next();
             int ticksRemaining = entry.getValue().decrementAndGet();
-            if (ticksRemaining % 2 == 0) {
+            if (ticksRemaining % 2 == 0)
+            {
                 int encodedPos = entry.getIntKey();
                 Vec3 itemPosRelBase = decodeRelativeItemPosition(encodedPos, relativeMana);
-                if (charging) {
-                    for (int i = 0; i <= bellowCount; i++) {
+                if (charging)
+                {
+                    for (int i = 0; i <= bellowCount; i++)
+                    {
                         Vec3 itemPosRel = randomizeItemPos(itemPosRelBase);
                         Vec3 poolPosRel = new Vec3(0.1 + 0.8 * Math.random(), 0.1 + 0.4 * relativeMana,
                                 0.1 + 0.8 * Math.random());
                         addManaFlowParticle(level, worldPosition, poolPosRel, itemPosRel);
                     }
-                } else {
+                }
+                else
+                {
                     Vec3 itemPosRel = randomizeItemPos(itemPosRelBase);
                     Vec3 poolPosRel =
                             new Vec3(0.05 + 0.9 * Math.random(), 0.35 * relativeMana, 0.05 + 0.9 * Math.random());
                     addManaFlowParticle(level, worldPosition, itemPosRel, poolPosRel);
                 }
             }
-            if (ticksRemaining <= 0) {
+            if (ticksRemaining <= 0)
+            {
                 particlesIterator.remove();
             }
         }
     }
 
-    private static int getBellowCount(Level level, BlockPos worldPosition, ManaPoolPathwayBlockEntity be) {
+    private static int getBellowCount(Level level, BlockPos worldPosition, ManaPoolPathwayBlockEntity be)
+    {
         int bellowCount = 0;
-        for (Direction dir : Direction.Plane.HORIZONTAL) {
+        for (Direction dir : Direction.Plane.HORIZONTAL)
+        {
             BlockEntity tile = level.getBlockEntity(worldPosition.relative(dir));
-            if (tile instanceof BellowsBlockEntity bellows && bellows.getLinkedTile() == be) {
+            if (tile instanceof BellowsBlockEntity bellows && bellows.getLinkedTile() == be)
+            {
                 bellowCount++;
             }
         }
         return bellowCount;
     }
 
-    private static Vec3 decodeRelativeItemPosition(int param, float relativeMana) {
+    private static Vec3 decodeRelativeItemPosition(int param, float relativeMana)
+    {
         int compressedX = param & 0x7;
         int compressedY = param >> 3 & 0x3;
         int compressedZ = param >> 5 & 0x7;
@@ -435,15 +481,18 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         return new Vec3(relX, Math.max(relY, 0.5 * relativeMana), relZ);
     }
 
-    private static Vec3 randomizeItemPos(Vec3 itemPosRelBase) {
+    private static Vec3 randomizeItemPos(Vec3 itemPosRelBase)
+    {
         return itemPosRelBase.add(0.1 * Math.random() - 0.05, 0.1 * Math.random() + 0.25, 0.1 * Math.random() - 0.05);
     }
 
-    private static void addManaFlowParticle(Level level, BlockPos worldPosition, Vec3 startPos, Vec3 endPos) {
+    private static void addManaFlowParticle(Level level, BlockPos worldPosition, Vec3 startPos, Vec3 endPos)
+    {
         double maxHeight = Math.max(startPos.y, endPos.y) - endPos.y + 0.05 * Math.random();
         Vec3 horizontalDiff = new Vec3(endPos.x - startPos.x, 0, endPos.z - startPos.z);
         double horizontalDistance = horizontalDiff.horizontalDistance();
-        if (horizontalDistance < 1.0e-6) {
+        if (horizontalDistance < 1.0e-6)
+        {
             // 退化处理：轻微随机偏移，避免除零
             horizontalDiff = new Vec3((Math.random() - 0.5) * 0.01, 0, (Math.random() - 0.5) * 0.01);
             horizontalDistance = horizontalDiff.horizontalDistance();
@@ -463,8 +512,10 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     }
 
 
-    private void initManaCapAndNetwork() {
-        if (!ManaNetworkHandler.instance.isPoolIn(level, this) && !isRemoved()) {
+    private void initManaCapAndNetwork()
+    {
+        if (!ManaNetworkHandler.instance.isPoolIn(level, this) && !isRemoved())
+        {
             BotaniaAPI.instance().getManaNetworkInstance().fireManaNetworkEvent(this, ManaBlockType.POOL, ManaNetworkAction.ADD);
         }
     }
@@ -472,13 +523,13 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     public boolean refreshHandler()
     {
         // net存在、handler存在、且存储的引用一致，跳过刷新，返回真
-        if(getNet() != null && handler != null && getNet().getUnifiedStorage() == handler.getStorage())
+        if (getNet() != null && handler != null && getNet().getUnifiedStorage() == handler.getStorage())
         {
             return true;
         }
-        else if(getNet() != null) // 上述任一不存在，则刷新
+        else if (getNet() != null) // 上述任一不存在，则刷新
         {
-            handler = new ManaUnifiedStorageHandler(getNet().getUnifiedStorage(), new CapCtx(level,getBlockPos(),this));
+            handler = new ManaUnifiedStorageHandler(getNet().getUnifiedStorage(), new CapCtx(level, getBlockPos(), this));
             return true;
         }
         return false; // net不存在则false
@@ -486,7 +537,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
 
     public long getActualCurrentMana()
     {
-        if(refreshHandler())
+        if (refreshHandler())
             return handler.getActualCurrentMana();
         else
             return 0;
@@ -494,7 +545,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
 
     public long getActualMaxMana()
     {
-        if(refreshHandler())
+        if (refreshHandler())
             return handler.getActualMaxMana();
         else
             return 0;
@@ -522,7 +573,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     @Override
     public int getMaxMana()
     {
-        if(refreshHandler())
+        if (refreshHandler())
             return handler.getMaxMana();
         else
             return 0;
@@ -555,7 +606,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     @Override
     public int getCurrentMana()
     {
-        if(refreshHandler())
+        if (refreshHandler())
             return handler.getCurrentMana();
         else
             return 0;
@@ -564,7 +615,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     @Override
     public boolean isFull()
     {
-        if(refreshHandler())
+        if (refreshHandler())
             return handler.isFull();
         else
             return true; // 如果handler不存在，返回true，防止插入
@@ -573,7 +624,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     @Override
     public void receiveMana(int mana)
     {
-        if(refreshHandler())
+        if (refreshHandler())
             handler.receiveMana(mana);
     }
 
@@ -587,7 +638,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     @Override
     public boolean canAttachSpark(ItemStack stack)
     {
-        if(refreshHandler())
+        if (refreshHandler())
             return handler.canAttachSpark(stack);
         return false;
     }
@@ -595,7 +646,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     @Override
     public int getAvailableSpaceForMana()
     {
-        if(refreshHandler())
+        if (refreshHandler())
             return handler.getAvailableSpaceForMana();
         return 0;
     }
@@ -603,7 +654,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     @Override
     public boolean areIncomingTransfersDone()
     {
-        if(refreshHandler())
+        if (refreshHandler())
             return handler.areIncomingTransfersDone();
         return false;
     }
@@ -611,7 +662,8 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     @Override
     public boolean onUsedByWand(@Nullable Player player, ItemStack stack, Direction side)
     {
-        if ((player == null || player.isShiftKeyDown()) && !level.isClientSide()) {
+        if ((player == null || player.isShiftKeyDown()) && !level.isClientSide())
+        {
             isOutPutting = !isOutPutting;
             setChanged();
             VanillaPacketDispatcher.dispatchTEToNearbyPlayers(this);
@@ -623,13 +675,15 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
     {
         private final ManaPoolPathwayBlockEntity pool;
 
-        public WandHud(ManaPoolPathwayBlockEntity pool) {
+        public WandHud(ManaPoolPathwayBlockEntity pool)
+        {
             this.pool = pool;
         }
 
         @OnlyIn(Dist.CLIENT)
         @Override
-        public void renderHUD(net.minecraft.client.gui.GuiGraphics gui, Minecraft mc) {
+        public void renderHUD(net.minecraft.client.gui.GuiGraphics gui, Minecraft mc)
+        {
             ItemStack poolStack = new ItemStack(pool.getBlockState().getBlock());
             String name = poolStack.getHoverName().getString();
 

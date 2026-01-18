@@ -11,7 +11,8 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
 
     private final UnifiedStorage storage;
 
-    public ChemicalUnifiedStorageHandler(UnifiedStorage storage) {
+    public ChemicalUnifiedStorageHandler(UnifiedStorage storage)
+    {
         this.storage = storage;
     }
 
@@ -19,7 +20,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     public int getChemicalTanks()
     {
         return storage.getBucket(ChemicalStackKey.ID)
-                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size()+1)
+                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
@@ -27,13 +28,13 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     public @NotNull ChemicalStack getChemicalInTank(int slot)
     {
         return storage.getBucket(ChemicalStackKey.ID)
-                .filter(slots -> slot>=0 && slot<slots.size())
+                .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
                 .map(key -> {
                     Object outStack = storage.getOutStackByKey(key);
-                    if(outStack instanceof ChemicalStack chemicalStack)
+                    if (outStack instanceof ChemicalStack chemicalStack)
                     {
-                        if(!chemicalStack.isEmpty())
+                        if (!chemicalStack.isEmpty())
                             chemicalStack.setAmount(storage.getStackByKey(key).amount());
                         return chemicalStack;
                     }
@@ -46,8 +47,8 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     public void setChemicalInTank(int tank, ChemicalStack stack)
     {
         // 凡通过handler机械化输入的物品无论以何方法，全部为自动插入
-        if(stack.isEmpty())
-            return ;
+        if (stack.isEmpty())
+            return;
         storage.insert(new ChemicalStackKey(stack), stack.getAmount(), false);
     }
 
@@ -67,10 +68,10 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public @NotNull ChemicalStack insertChemical(int tank, ChemicalStack stack, @NotNull Action action)
     {
-        if(stack.isEmpty())
+        if (stack.isEmpty())
             return ChemicalStack.EMPTY;
         long remaining = storage.insert(new ChemicalStackKey(stack), stack.getAmount(), action.simulate()).amount();
-        if(remaining>0)
+        if (remaining > 0)
             return stack.copyWithAmount(remaining);
         return ChemicalStack.EMPTY;// 始终全部插入
     }
@@ -79,7 +80,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public @NotNull ChemicalStack extractChemical(int tank, long amount, Action action)
     {
-        if(storage.extract(new ChemicalStackKey(getChemicalInTank(tank)), amount,action.simulate()).toStack() instanceof ChemicalStack result)
+        if (storage.extract(new ChemicalStackKey(getChemicalInTank(tank)), amount, action.simulate()).toStack() instanceof ChemicalStack result)
             return result;
         else
             return ChemicalStack.EMPTY;
@@ -88,10 +89,10 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public @NotNull ChemicalStack insertChemical(ChemicalStack stack, @NotNull Action action)
     {
-        if(stack.isEmpty())
+        if (stack.isEmpty())
             return ChemicalStack.EMPTY;
-        long remaining = storage.insert(new ChemicalStackKey(stack), stack.getAmount(),action.simulate()).amount();
-        if(remaining>0)
+        long remaining = storage.insert(new ChemicalStackKey(stack), stack.getAmount(), action.simulate()).amount();
+        if (remaining > 0)
             return stack.copyWithAmount(remaining);
         return ChemicalStack.EMPTY;// 始终全部插入
     }
@@ -100,7 +101,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public @NotNull ChemicalStack extractChemical(long amount, Action action)
     {
-        if(storage.extract(new ChemicalStackKey(getChemicalInTank(0)), amount,action.simulate()).toStack() instanceof ChemicalStack result)
+        if (storage.extract(new ChemicalStackKey(getChemicalInTank(0)), amount, action.simulate()).toStack() instanceof ChemicalStack result)
             return result;
         else
             return ChemicalStack.EMPTY;
@@ -110,7 +111,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public @NotNull ChemicalStack extractChemical(@NotNull ChemicalStack stack, Action action)
     {
-        if(storage.extract(new ChemicalStackKey(stack), stack.getAmount(),action.simulate()).toStack() instanceof ChemicalStack result)
+        if (storage.extract(new ChemicalStackKey(stack), stack.getAmount(), action.simulate()).toStack() instanceof ChemicalStack result)
             return result;
         else
             return ChemicalStack.EMPTY;

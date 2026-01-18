@@ -14,6 +14,6 @@ public class BD_AEMEKPlugin
     {
         AEHelper.ISTACK_TO_AEKEY_MAP.put(ChemicalStackKey.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack) stackType.copyStack())));
 
-        AEHelper.AEKEY_TO_STACK_TYPE_MAP.put(MekanismKeyType.TYPE, key -> Optional.of(new ChemicalStackKey(((MekanismKey)key).withAmount(1))));
+        AEHelper.AEKEY_TO_STACK_TYPE_MAP.put(MekanismKeyType.TYPE, key -> Optional.of(new ChemicalStackKey(((MekanismKey) key).withAmount(1))));
     }
 }

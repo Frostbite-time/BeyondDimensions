@@ -13,23 +13,25 @@ import org.jetbrains.annotations.Nullable;
 
 public class NetPumpBlock extends BaseMachineBlock
 {
-    public NetPumpBlock(Properties properties) {
+    public NetPumpBlock(Properties properties)
+    {
         super(properties.noOcclusion());
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new NetPumpBlockEntity(blockPos,blockState);
+    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
+    {
+        return new NetPumpBlockEntity(blockPos, blockState);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
     {
-        super.useWithoutItem(state,level,pos,player,hitResult);
-        if(!level.isClientSide()&&!player.isShiftKeyDown())
+        super.useWithoutItem(state, level, pos, player, hitResult);
+        if (!level.isClientSide() && !player.isShiftKeyDown())
         {
             NetPumpBlockEntity blockEntity = (NetPumpBlockEntity) level.getBlockEntity(pos);
-            player.openMenu(blockEntity,pos);
+            player.openMenu(blockEntity, pos);
         }
         return InteractionResult.SUCCESS_NO_ITEM_USED;
     }
@@ -38,7 +40,8 @@ public class NetPumpBlock extends BaseMachineBlock
     public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor)
     {
         super.onNeighborChange(state, level, pos, neighbor);
-        if (level.getBlockEntity(pos) instanceof NetPumpBlockEntity blockEntity) {
+        if (level.getBlockEntity(pos) instanceof NetPumpBlockEntity blockEntity)
+        {
             blockEntity.setNeedsCapabilityUpdate();
         }
     }

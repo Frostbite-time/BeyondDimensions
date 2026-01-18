@@ -42,35 +42,45 @@ public class AutoRefillResultSlot extends ResultSlot
                 .getRemainingItemsFor(RecipeType.CRAFTING, craftingGrid, player.level());
         CommonHooks.setCraftingPlayer(null);
 
-        for (int gridRow = 0; gridRow < craftingGrid.height(); gridRow++) {
-            for (int gridCol = 0; gridCol < craftingGrid.width(); gridCol++) {
+        for (int gridRow = 0; gridRow < craftingGrid.height(); gridRow++)
+        {
+            for (int gridCol = 0; gridCol < craftingGrid.width(); gridCol++)
+            {
                 int slotIndex = gridCol + gridStartX + (gridRow + gridStartY) * this.craftSlots.getWidth();
                 ItemStack slotStack = this.craftSlots.getItem(slotIndex);
                 ItemStack recipeRemainder = remainingItems.get(gridCol + gridRow * craftingGrid.width());
 
-                if (!slotStack.isEmpty()) {
+                if (!slotStack.isEmpty())
+                {
                     int itemsToRemove = 1;
 
-                    if (slotStack.getCount() == 1) {
+                    if (slotStack.getCount() == 1)
+                    {
                         ItemStack singleItem = slotStack.copyWithCount(1);
                         boolean consumed = false;
 
                         // 优先尝试存储系统
-                        long extracted = menu.storage.extract(new ItemStackKey(singleItem),singleItem.getCount(), true).amount();
-                        if (extracted >= 1) {
-                            if (!player.level().isClientSide()) {
-                                menu.storage.extract(new ItemStackKey(singleItem),singleItem.getCount(), false);
+                        long extracted = menu.storage.extract(new ItemStackKey(singleItem), singleItem.getCount(), true).amount();
+                        if (extracted >= 1)
+                        {
+                            if (!player.level().isClientSide())
+                            {
+                                menu.storage.extract(new ItemStackKey(singleItem), singleItem.getCount(), false);
                             }
                             itemsToRemove = 0;
                             consumed = true;
                         }
 
                         // 存储系统不足时尝试玩家背包
-                        if (!consumed) {
-                            for (int i = 0; i < player.getInventory().items.size(); i++) {
+                        if (!consumed)
+                        {
+                            for (int i = 0; i < player.getInventory().items.size(); i++)
+                            {
                                 ItemStack invStack = player.getInventory().items.get(i);
-                                if (ItemStack.isSameItemSameComponents(invStack, singleItem) && invStack.getCount() >= 1) {
-                                    if (!player.level().isClientSide()) {
+                                if (ItemStack.isSameItemSameComponents(invStack, singleItem) && invStack.getCount() >= 1)
+                                {
+                                    if (!player.level().isClientSide())
+                                    {
                                         invStack.shrink(1);
                                         player.getInventory().setItem(i, invStack.isEmpty() ? ItemStack.EMPTY : invStack);
                                     }
@@ -82,7 +92,8 @@ public class AutoRefillResultSlot extends ResultSlot
                         }
                     }
 
-                    if (itemsToRemove > 0) {
+                    if (itemsToRemove > 0)
+                    {
                         this.craftSlots.removeItem(slotIndex, itemsToRemove);
                     }
 
@@ -90,20 +101,25 @@ public class AutoRefillResultSlot extends ResultSlot
                 }
 
 
-                if (!recipeRemainder.isEmpty()) {
-                    if (slotStack.isEmpty()) {
+                if (!recipeRemainder.isEmpty())
+                {
+                    if (slotStack.isEmpty())
+                    {
                         this.craftSlots.setItem(slotIndex, recipeRemainder);
-                    } else if (ItemStack.isSameItemSameComponents(slotStack, recipeRemainder)) {
+                    }
+                    else if (ItemStack.isSameItemSameComponents(slotStack, recipeRemainder))
+                    {
                         recipeRemainder.grow(slotStack.getCount());
                         this.craftSlots.setItem(slotIndex, recipeRemainder);
-                    } else if (!this.player.getInventory().add(recipeRemainder)) {
+                    }
+                    else if (!this.player.getInventory().add(recipeRemainder))
+                    {
                         this.player.drop(recipeRemainder, false);
                     }
                 }
             }
         }
-        menu.slotChangedCraftingGrid(menu, player.level(), player, craftSlots, (ResultContainer) this.container,  this.index);
-
+        menu.slotChangedCraftingGrid(menu, player.level(), player, craftSlots, (ResultContainer) this.container, this.index);
 
 
     }

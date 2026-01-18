@@ -17,9 +17,11 @@ import org.slf4j.Logger;
 
 public class NetedItem extends Item
 {
-    public NetedItem(Properties properties) {
+    public NetedItem(Properties properties)
+    {
         super(properties.component(ModDataComponents.NET_ID_DATA, -1));
     }
+
     public static final Logger LOGGER = LogUtils.getLogger();
 
 
@@ -27,17 +29,17 @@ public class NetedItem extends Item
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
     {
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND || !player.isShiftKeyDown())
+        if (usedHand != InteractionHand.MAIN_HAND || !player.isShiftKeyDown())
         {
             return InteractionResultHolder.fail(itemstack);
         }
 
-        if(!level.isClientSide())
+        if (!level.isClientSide())
         {
             DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
             if (net != null)
             {
-                setNet(itemstack,net,player);
+                setNet(itemstack, net, player);
             }
             else
             {
@@ -45,7 +47,7 @@ public class NetedItem extends Item
             }
         }
 
-        return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
     @Override
@@ -53,20 +55,20 @@ public class NetedItem extends Item
     {
         super.onCraftedBy(stack, level, player);
 
-        if(level.isClientSide())
+        if (level.isClientSide())
             return;
 
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-        if(net != null)
+        if (net != null)
         {
-            setNet(stack,net,player);
+            setNet(stack, net, player);
         }
     }
 
     public static @Nullable DimensionsNet getNet(ItemStack stack)
     {
-        int netId = stack.getOrDefault(ModDataComponents.NET_ID_DATA,-1);
-        if(netId >= 0)
+        int netId = stack.getOrDefault(ModDataComponents.NET_ID_DATA, -1);
+        if (netId >= 0)
         {
             return DimensionsNet.getNetFromId(netId);
         }
@@ -77,22 +79,22 @@ public class NetedItem extends Item
     public static boolean setNet(ItemStack itemstack, DimensionsNet net, Player player)
     {
         // 确保仅对网络化物品赋值
-        if(itemstack.getItem() instanceof NetedItem item)
+        if (itemstack.getItem() instanceof NetedItem item)
         {
             Level level = player.level();
-            if(item.validToReWrite(net,player))
+            if (item.validToReWrite(net, player))
             {
-                if(itemstack.getOrDefault(ModDataComponents.NET_ID_DATA,-1) != net.getId())
+                if (itemstack.getOrDefault(ModDataComponents.NET_ID_DATA, -1) != net.getId())
                 {
-                    itemstack.set(ModDataComponents.NET_ID_DATA,net.getId());
-                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound",net.getId()));
+                    itemstack.set(ModDataComponents.NET_ID_DATA, net.getId());
+                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound", net.getId()));
                 }
                 else
                 {
-                    itemstack.set(ModDataComponents.NET_ID_DATA,-1);
-                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,0.8F,1.0F);
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound",net.getId()));
+                    itemstack.set(ModDataComponents.NET_ID_DATA, -1);
+                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound", net.getId()));
                 }
                 return true;
             }

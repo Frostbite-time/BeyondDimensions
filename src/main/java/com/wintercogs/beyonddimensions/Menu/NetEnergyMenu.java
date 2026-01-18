@@ -50,11 +50,11 @@ public class NetEnergyMenu extends BDBaseMenu
     /**
      * 服务端构造函数
      *
-     * @param playerInventory  玩家背包
+     * @param playerInventory 玩家背包
      */
     public NetEnergyMenu(int id, Inventory playerInventory, NetEnergyPathwayBlockEntity be)
     {
-        super(Net_Energy_Menu.get(), id,playerInventory);
+        super(Net_Energy_Menu.get(), id, playerInventory);
 
         this.be = be;
 
@@ -78,12 +78,12 @@ public class NetEnergyMenu extends BDBaseMenu
     protected boolean shouldSendQuickData()
     {
         DimensionsNet netCache = be.getNet();
-        if(netCache != null)
+        if (netCache != null)
         {
             UnifiedStorage storage = netCache.getUnifiedStorage();
-            if(lastEnergyStored != getEnergyStored(storage)
-                || lastEnergyCapacity != storage.getSlotCapacity(0)
-                || lastEnergySpeedState != getEnergyStored(storage) - lastEnergyStored)
+            if (lastEnergyStored != getEnergyStored(storage)
+                    || lastEnergyCapacity != storage.getSlotCapacity(0)
+                    || lastEnergySpeedState != getEnergyStored(storage) - lastEnergyStored)
             {
                 lastEnergySpeedState = getEnergyStored(storage) - lastEnergyStored;
                 lastEnergyStored = getEnergyStored(storage);
@@ -93,7 +93,7 @@ public class NetEnergyMenu extends BDBaseMenu
         }
         else
         {
-            if(lastEnergyStored != 0
+            if (lastEnergyStored != 0
                     || lastEnergyCapacity != 0
                     || lastEnergySpeedState != 0)
             {
@@ -121,7 +121,7 @@ public class NetEnergyMenu extends BDBaseMenu
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        if(player.level().isClientSide())
+        if (player.level().isClientSide())
         {
             this.lastEnergyStored = tag.getLong("lastEnergyStored");
             this.lastEnergyCapacity = tag.getLong("lastEnergyCapacity");
@@ -133,7 +133,7 @@ public class NetEnergyMenu extends BDBaseMenu
             be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
             player.level().blockEntityChanged(be.getBlockPos());
             player.level().invalidateCapabilities(be.getBlockPos()); // 改变弹出模式后重新确定是否暴露内部能量存储
-            player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
+            player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
         }
     }
 

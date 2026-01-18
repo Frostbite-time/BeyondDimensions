@@ -52,38 +52,38 @@ public class NetMagnetItem extends BaseMachineItem
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
+        if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
         {
             return InteractionResultHolder.fail(itemstack);
         }
 
-        if(!level.isClientSide())
+        if (!level.isClientSide())
         {
-            player.openMenu(new SimpleMenuProvider((containerId,inv,ServerPlayer) ->
-                    new NetMagnetMenu(containerId,inv,itemstack),
-                    Component.translatable("menu.title.beyonddimensions.magnet_menu")),
+            player.openMenu(new SimpleMenuProvider((containerId, inv, ServerPlayer) ->
+                            new NetMagnetMenu(containerId, inv, itemstack),
+                            Component.translatable("menu.title.beyonddimensions.magnet_menu")),
                     buf -> buf.writeEnum(usedHand));
         }
-        return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
     @Override
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
-        if(!stack.has(ModDataComponents.ISTACK_SLOTS))
-            stack.set(ModDataComponents.ISTACK_SLOTS,new ArrayList<>(Collections.nCopies(capacity,new KeyAmount(ItemStackKey.EMPTY,0))));
-        if(!stack.has(ModDataComponents.FILTER_MODE))
-            stack.set(ModDataComponents.FILTER_MODE,FilterMode.BLACK);
-        if(!stack.has(ModDataComponents.HOPPER_ITEM_MODE))
+        if (!stack.has(ModDataComponents.ISTACK_SLOTS))
+            stack.set(ModDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
+        if (!stack.has(ModDataComponents.FILTER_MODE))
+            stack.set(ModDataComponents.FILTER_MODE, FilterMode.BLACK);
+        if (!stack.has(ModDataComponents.HOPPER_ITEM_MODE))
             stack.set(ModDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
-        if(!stack.has(ModDataComponents.HOPPER_XP_MODE))
+        if (!stack.has(ModDataComponents.HOPPER_XP_MODE))
             stack.set(ModDataComponents.HOPPER_XP_MODE, HopperXpMode.DENY);
-        if(!stack.has(ModDataComponents.HOPPER_NBT_MODE))
+        if (!stack.has(ModDataComponents.HOPPER_NBT_MODE))
             stack.set(ModDataComponents.HOPPER_NBT_MODE, HopperNBTMode.DENY);
-        if(!stack.has(ModDataComponents.HOPPER_FLUID_MODE))
+        if (!stack.has(ModDataComponents.HOPPER_FLUID_MODE))
             stack.set(ModDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
-        if(!stack.has(ModDataComponents.HOPPER_RANGE_MODE))
+        if (!stack.has(ModDataComponents.HOPPER_RANGE_MODE))
             stack.set(ModDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
     }
 
@@ -99,78 +99,78 @@ public class NetMagnetItem extends BaseMachineItem
     {
         super.workContent(stack, level, holder, slotId, isSelected);
 
-        FilterMode filterMode = stack.getOrDefault(ModDataComponents.FILTER_MODE,FilterMode.BLACK);
+        FilterMode filterMode = stack.getOrDefault(ModDataComponents.FILTER_MODE, FilterMode.BLACK);
         HopperItemMode hopperItemMode = stack.getOrDefault(ModDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
         HopperXpMode hopperXpMode = stack.getOrDefault(ModDataComponents.HOPPER_XP_MODE, HopperXpMode.DENY);
-        HopperNBTMode hopperNBTMode = stack.getOrDefault(ModDataComponents.HOPPER_NBT_MODE,HopperNBTMode.DENY);
-        HopperFluidMode hopperFluidMode = stack.getOrDefault(ModDataComponents.HOPPER_FLUID_MODE,HopperFluidMode.DENY);
-        HopperRangeMode hopperRangeMode = stack.getOrDefault(ModDataComponents.HOPPER_RANGE_MODE,HopperRangeMode.RADIUS_MID);
-        List<KeyAmount> filterSlots = stack.getOrDefault(ModDataComponents.ISTACK_SLOTS,new ArrayList<>());
+        HopperNBTMode hopperNBTMode = stack.getOrDefault(ModDataComponents.HOPPER_NBT_MODE, HopperNBTMode.DENY);
+        HopperFluidMode hopperFluidMode = stack.getOrDefault(ModDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
+        HopperRangeMode hopperRangeMode = stack.getOrDefault(ModDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
+        List<KeyAmount> filterSlots = stack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
 
-        AABB searchArea = getSearchArea(hopperRangeMode,level,holder.getOnPos());
+        AABB searchArea = getSearchArea(hopperRangeMode, level, holder.getOnPos());
 
-        List<ItemEntity> itemEntities = hopperItemMode == HopperItemMode.ALLOW ? refreshItemEntityCache(hopperNBTMode,level,searchArea) : new ArrayList<>();
-        List<ExperienceOrb> xpEntities = hopperXpMode == HopperXpMode.ALLOW ? refreshXpEntityCache(level,searchArea) : new ArrayList<>();
+        List<ItemEntity> itemEntities = hopperItemMode == HopperItemMode.ALLOW ? refreshItemEntityCache(hopperNBTMode, level, searchArea) : new ArrayList<>();
+        List<ExperienceOrb> xpEntities = hopperXpMode == HopperXpMode.ALLOW ? refreshXpEntityCache(level, searchArea) : new ArrayList<>();
 
         UnifiedStorage storage = NetedItem.getNet(stack).getUnifiedStorage();
 
         // 开始收集物品
-        if(hopperItemMode == HopperItemMode.ALLOW)
+        if (hopperItemMode == HopperItemMode.ALLOW)
         {
-            for(ItemEntity itemEntity : itemEntities)
+            for (ItemEntity itemEntity : itemEntities)
             {
-                if(itemEntity != null && !itemEntity.isRemoved())
+                if (itemEntity != null && !itemEntity.isRemoved())
                 {
                     ItemStack itemStack = itemEntity.getItem();
                     ItemStackKey itemKey = new ItemStackKey(itemStack);
-                    if(matchesFilter(filterMode,filterSlots,itemKey))
+                    if (matchesFilter(filterMode, filterSlots, itemKey))
                     {
 
-                        if(storage.insert(itemKey,itemStack.getCount(),true).isEmpty()) // 表示能成功插入
+                        if (storage.insert(itemKey, itemStack.getCount(), true).isEmpty()) // 表示能成功插入
                         {
                             itemEntity.discard();
                             // workContent之前已经由shouldWork检查过net的存在性
-                            storage.insert(itemKey,itemStack.getCount(),false);
+                            storage.insert(itemKey, itemStack.getCount(), false);
                         }
                     }
                 }
             }
         }
         // 开始收集经验球
-        if(hopperXpMode == HopperXpMode.ALLOW)
+        if (hopperXpMode == HopperXpMode.ALLOW)
         {
-            for(ExperienceOrb orb : xpEntities)
+            for (ExperienceOrb orb : xpEntities)
             {
-                if(orb != null && !orb.isRemoved())
+                if (orb != null && !orb.isRemoved())
                 {
                     int xp = orb.getValue();
-                    if(xp > 0 )
+                    if (xp > 0)
                     {
                         long xpFluid = xp * 20L;
-                        FluidStackKey xpStack = new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(),1));
+                        FluidStackKey xpStack = new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(), 1));
 
-                        if(storage.insert(xpStack,xpFluid,true).isEmpty())
+                        if (storage.insert(xpStack, xpFluid, true).isEmpty())
                         {
                             orb.discard();
-                            storage.insert(xpStack,xpFluid,false);
+                            storage.insert(xpStack, xpFluid, false);
                         }
                     }
                 }
             }
         }
         // 开始抽取流体
-        if(hopperFluidMode == HopperFluidMode.ALLOW)
+        if (hopperFluidMode == HopperFluidMode.ALLOW)
         {
-            fluidCollect(filterMode,filterSlots,storage,level,searchArea);
+            fluidCollect(filterMode, filterSlots, storage, level, searchArea);
         }
     }
 
     @Override
     public int getTicksPerWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
-        HopperRangeMode hopperRangeMode = stack.getOrDefault(ModDataComponents.HOPPER_RANGE_MODE,HopperRangeMode.RADIUS_MID);
-        HopperFluidMode hopperFluidMode = stack.getOrDefault(ModDataComponents.HOPPER_FLUID_MODE,HopperFluidMode.DENY);
-        if(hopperFluidMode == HopperFluidMode.ALLOW)
+        HopperRangeMode hopperRangeMode = stack.getOrDefault(ModDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
+        HopperFluidMode hopperFluidMode = stack.getOrDefault(ModDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
+        if (hopperFluidMode == HopperFluidMode.ALLOW)
         {
             return switch (hopperRangeMode)
             {
@@ -198,7 +198,7 @@ public class NetMagnetItem extends BaseMachineItem
 
     private AABB getSearchArea(HopperRangeMode hopperRangeMode, Level level, Vec3i pos)
     {
-        if(hopperRangeMode != HopperRangeMode.CHUNK_MODE)
+        if (hopperRangeMode != HopperRangeMode.CHUNK_MODE)
         {
             //更正半径
             int radius = switch (hopperRangeMode)
@@ -241,14 +241,14 @@ public class NetMagnetItem extends BaseMachineItem
 
     // 接收一个搜索范围，更新物品掉落物表单
     // 刷新后itemEntities即为完成了是否接收NBT过滤的物品实体
-    private List<ItemEntity> refreshItemEntityCache(HopperNBTMode hopperNBTMode,Level level,AABB searchArea)
+    private List<ItemEntity> refreshItemEntityCache(HopperNBTMode hopperNBTMode, Level level, AABB searchArea)
     {
         return level.getEntitiesOfClass(
                 ItemEntity.class,
                 searchArea,
                 itemEntity -> {
                     // NBT过滤
-                    if(hopperNBTMode == HopperNBTMode.DENY)
+                    if (hopperNBTMode == HopperNBTMode.DENY)
                     {
                         return !ItemStackHelper.hasExtraComponents(itemEntity.getItem());
                     }
@@ -260,7 +260,7 @@ public class NetMagnetItem extends BaseMachineItem
         );
     }
 
-    private List<ExperienceOrb> refreshXpEntityCache(Level level , AABB searchArea)
+    private List<ExperienceOrb> refreshXpEntityCache(Level level, AABB searchArea)
     {
         return level.getEntitiesOfClass(
                 ExperienceOrb.class,
@@ -270,7 +270,7 @@ public class NetMagnetItem extends BaseMachineItem
     }
 
     // 收集区域流体
-    private void fluidCollect(FilterMode filterMode,List<KeyAmount> filterSlots,UnifiedStorage storage,Level level,AABB searchArea)
+    private void fluidCollect(FilterMode filterMode, List<KeyAmount> filterSlots, UnifiedStorage storage, Level level, AABB searchArea)
     {
 
         int minX = Mth.floor(searchArea.minX);
@@ -282,9 +282,12 @@ public class NetMagnetItem extends BaseMachineItem
 
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
-        for (int x = minX; x <= maxX; ++x) {
-            for (int y = minY; y <= maxY; ++y) {
-                for (int z = minZ; z <= maxZ; ++z) {
+        for (int x = minX; x <= maxX; ++x)
+        {
+            for (int y = minY; y <= maxY; ++y)
+            {
+                for (int z = minZ; z <= maxZ; ++z)
+                {
                     pos.set(x, y, z);
 
                     // 使用原始数据计算提取量
@@ -304,11 +307,11 @@ public class NetMagnetItem extends BaseMachineItem
 
                     // 进行存储交互
                     FluidStackKey fluidKey = new FluidStackKey(extracted);
-                    if(matchesFilter(filterMode,filterSlots,fluidKey))
+                    if (matchesFilter(filterMode, filterSlots, fluidKey))
                     {
-                        if(storage.insert(fluidKey,amount,true).isEmpty())
+                        if (storage.insert(fluidKey, amount, true).isEmpty())
                         {
-                            storage.insert(fluidKey,amount,false);
+                            storage.insert(fluidKey, amount, false);
                             // 清空方块 & 通知客户端
                             level.setBlock(pos, Blocks.AIR.defaultBlockState(),
                                     Block.UPDATE_ALL_IMMEDIATE);  // 立即更新并刷新渲染
@@ -319,28 +322,31 @@ public class NetMagnetItem extends BaseMachineItem
         }
     }
 
-    private boolean matchesFilter(FilterMode filterMode,List<KeyAmount> filterSlots,IStackKey<?> otherStack)
+    private boolean matchesFilter(FilterMode filterMode, List<KeyAmount> filterSlots, IStackKey<?> otherStack)
     {
         switch (filterMode)
         {
 
-            case BLACK -> {
-                for(KeyAmount stack : filterSlots)
+            case BLACK ->
+            {
+                for (KeyAmount stack : filterSlots)
                 {
-                    if(stack.key().isSame(otherStack))
+                    if (stack.key().isSame(otherStack))
                         return false;
                 }
                 return true;
             }
-            case WHITE -> {
-                for(KeyAmount stack : filterSlots)
+            case WHITE ->
+            {
+                for (KeyAmount stack : filterSlots)
                 {
-                    if(stack.key().isSame(otherStack))
+                    if (stack.key().isSame(otherStack))
                         return true;
                 }
                 return false;
             }
-            case IGNORE -> {
+            case IGNORE ->
+            {
                 return true;
             }
 

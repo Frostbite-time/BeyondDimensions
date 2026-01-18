@@ -22,16 +22,18 @@ public class ManaPoolPathwayOverlay
         var mc = Minecraft.getInstance();
         if (mc == null || mc.player == null || mc.level == null || mc.options.hideGui) return;
 
-        if(!BeyondDimensions.Botania_Loaded) return;
+        if (!BeyondDimensions.Botania_Loaded) return;
 
         HitResult hit = mc.hitResult;
         if (!(hit instanceof BlockHitResult bhr)) return;
 
         BlockEntity be = mc.level.getBlockEntity(bhr.getBlockPos());
-        if (!(be instanceof com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity pool)) return;
+        if (!(be instanceof com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity pool))
+            return;
 
         ItemStack held = mc.player.getMainHandItem();
-        if (held.isEmpty() || held.getItem() instanceof vazkii.botania.common.item.WandOfTheForestItem) return; // 法杖交由植魔自己的逻辑处理
+        if (held.isEmpty() || held.getItem() instanceof vazkii.botania.common.item.WandOfTheForestItem)
+            return; // 法杖交由植魔自己的逻辑处理
 
         BlockState below = mc.level.getBlockState(bhr.getBlockPos().below());
         RecipeHolder<vazkii.botania.api.recipe.ManaInfusionRecipe> recipe = pool.getMatchingRecipe(held, below);

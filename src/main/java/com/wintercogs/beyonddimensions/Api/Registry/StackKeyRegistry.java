@@ -12,17 +12,21 @@ public class StackKeyRegistry
 {
     private static final Map<ResourceLocation, IStackKey<?>> TYPES = new HashMap<>();
 
-    public static <T> void registerType(IStackKey<T> type) {
-        if (TYPES.containsKey(type.getTypeId())) {
+    public static <T> void registerType(IStackKey<T> type)
+    {
+        if (TYPES.containsKey(type.getTypeId()))
+        {
             throw new IllegalStateException("尝试注册重复类型的Key: " + type.getTypeId());
         }
         TYPES.put(type.getTypeId(), type);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> @NotNull IStackKey<T> getType(ResourceLocation id) {
+    public static <T> @NotNull IStackKey<T> getType(ResourceLocation id)
+    {
         IStackKey<?> type = TYPES.get(id);
-        if (type == null) {
+        if (type == null)
+        {
             throw new IllegalArgumentException("注册表中不存在此类型的Key，请先注册再使用: " + id);
         }
         return (IStackKey<T>) type;

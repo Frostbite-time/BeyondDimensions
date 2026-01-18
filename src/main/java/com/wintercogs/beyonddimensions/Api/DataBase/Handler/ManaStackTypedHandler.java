@@ -49,14 +49,16 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
         return storageHandler.getBucket(ManaStackKey.ID)
                 .map(bucket -> {
                     long sum = 0L;
-                    for (int slot : bucket.snapshot()) {
+                    for (int slot : bucket.snapshot())
+                    {
                         if (slot < 0) continue;
                         long amt = storageHandler.getStackBySlot(slot).amount();
                         if (amt <= 0) continue;
 
                         // 保证sum <= Integer.MAX_VALUE，不会溢出
                         long remain = (long) Integer.MAX_VALUE - sum;
-                        if (amt > remain) {
+                        if (amt > remain)
+                        {
                             return Integer.MAX_VALUE;
                         }
                         sum += amt;
@@ -70,11 +72,11 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     @Override
     public boolean isFull()
     {
-        for(KeyAmount keyAmount : storageHandler.getStorage())
+        for (KeyAmount keyAmount : storageHandler.getStorage())
         {
-            if(keyAmount.isEmpty())
+            if (keyAmount.isEmpty())
                 return false;
-            if(keyAmount.key() instanceof ManaStackKey && keyAmount.amount() < keyAmount.key().getVanillaMaxStackSize())
+            if (keyAmount.key() instanceof ManaStackKey && keyAmount.amount() < keyAmount.key().getVanillaMaxStackSize())
                 return false;
         }
         return true;
@@ -83,10 +85,10 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     @Override
     public void receiveMana(int mana)
     {
-        if(mana > 0)
-            storageHandler.insert(ManaStackKey.INSTANCE, mana,false);
+        if (mana > 0)
+            storageHandler.insert(ManaStackKey.INSTANCE, mana, false);
         else
-            storageHandler.extract(ManaStackKey.INSTANCE, -mana,false);
+            storageHandler.extract(ManaStackKey.INSTANCE, -mana, false);
     }
 
     @Override
@@ -118,7 +120,7 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     @Override
     public int getMaxMana()
     {
-        int manaSlots  = storageHandler.getBucket(ManaStackKey.ID)
+        int manaSlots = storageHandler.getBucket(ManaStackKey.ID)
                 .map(StackHandler.SlotBucket::size)
                 .orElse(0);
         int emptySlots = storageHandler.getBucket(EmptyStackKey.INSTANCE)

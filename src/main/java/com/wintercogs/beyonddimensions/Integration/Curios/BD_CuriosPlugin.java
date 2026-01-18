@@ -17,13 +17,17 @@ public class BD_CuriosPlugin
         // 终端
         evt.registerItem(
                 CuriosCapability.ITEM,
-                (stack, context) -> new ICurio() {
+                (stack, context) -> new ICurio()
+                {
                     @Override
-                    public ItemStack getStack() {
+                    public ItemStack getStack()
+                    {
                         return stack; // 必须返回传入的stack
                     }
+
                     @Override
-                    public void curioTick(SlotContext slotContext) {
+                    public void curioTick(SlotContext slotContext)
+                    {
                         // 在此添加持续生效逻辑
                     }
                 },
@@ -32,18 +36,22 @@ public class BD_CuriosPlugin
         // 磁铁
         evt.registerItem(
                 CuriosCapability.ITEM,
-                (stack, context) -> new ICurio() {
+                (stack, context) -> new ICurio()
+                {
                     @Override
-                    public ItemStack getStack() {
+                    public ItemStack getStack()
+                    {
                         return stack; // 必须返回传入的stack
                     }
+
                     @Override
-                    public void curioTick(SlotContext slotContext) {
+                    public void curioTick(SlotContext slotContext)
+                    {
                         // 在此添加持续生效逻辑
-                        if(stack.getItem() == ModItems.NET_MAGNET_ITEM.get())
+                        if (stack.getItem() == ModItems.NET_MAGNET_ITEM.get())
                         {
                             NetMagnetItem item = (NetMagnetItem) stack.getItem();
-                            item.inventoryTick(stack,slotContext.entity().level(), slotContext.entity(),slotContext.index(),false);
+                            item.inventoryTick(stack, slotContext.entity().level(), slotContext.entity(), slotContext.index(), false);
                         }
                     }
                 },
@@ -52,18 +60,22 @@ public class BD_CuriosPlugin
         // 喂食器
         evt.registerItem(
                 CuriosCapability.ITEM,
-                (stack, context) -> new ICurio() {
+                (stack, context) -> new ICurio()
+                {
                     @Override
-                    public ItemStack getStack() {
+                    public ItemStack getStack()
+                    {
                         return stack; // 必须返回传入的stack
                     }
+
                     @Override
-                    public void curioTick(SlotContext slotContext) {
+                    public void curioTick(SlotContext slotContext)
+                    {
                         // 在此添加持续生效逻辑
-                        if(stack.getItem() == ModItems.NET_FEEDER_ITEM.get())
+                        if (stack.getItem() == ModItems.NET_FEEDER_ITEM.get())
                         {
                             NetFeederItem item = (NetFeederItem) stack.getItem();
-                            item.inventoryTick(stack,slotContext.entity().level(), slotContext.entity(),slotContext.index(),false);
+                            item.inventoryTick(stack, slotContext.entity().level(), slotContext.entity(), slotContext.index(), false);
                         }
                     }
                 },

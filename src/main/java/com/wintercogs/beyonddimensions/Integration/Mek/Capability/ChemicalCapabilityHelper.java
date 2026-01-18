@@ -16,8 +16,10 @@ public class ChemicalCapabilityHelper
     public static ItemCapability<Object, @Nullable Void> CHEMICAL_ITEM;
     //public static Class<?> CHEMICAL_HANDLER_CLASS; // 化学品处理类
 
-    static {
-        try {
+    static
+    {
+        try
+        {
             // 动态加载 IChemicalHandler 类
             //CHEMICAL_HANDLER_CLASS = Class.forName("mekanism.api.chemical.IChemicalHandler");
 
@@ -31,7 +33,8 @@ public class ChemicalCapabilityHelper
                     .getMethod("createVoid", ResourceLocation.class, Class.class)
                     .invoke(null, location, mekanism.api.chemical.IChemicalHandler.class);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             throw new RuntimeException("Failed to initialize Mekanism capability", e);
         }
     }

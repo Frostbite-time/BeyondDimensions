@@ -63,7 +63,7 @@ public class NetFurnaceMenu extends BDBaseMenu
 
         this.be = be;
 
-        if(playerInventory.player.level().isClientSide())
+        if (playerInventory.player.level().isClientSide())
         {
             this.inputFilterSlots = new StackHandler(be.getFilterCapacity());
             this.fuelFilterSlots = new StackHandler(be.getFilterCapacity());
@@ -83,7 +83,6 @@ public class NetFurnaceMenu extends BDBaseMenu
         }
 
 
-
         addPlayerInv(playerInventory);
         addFilterSlots();
         addStorageSlots();
@@ -92,14 +91,14 @@ public class NetFurnaceMenu extends BDBaseMenu
 
     private void addFilterSlots()
     {
-        for(int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
-            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, inputFilterSlots, i, 7, 38 + i*18 );
+            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, inputFilterSlots, i, 7, 38 + i * 18);
             this.addSlot(flagSlot);
         }
-        for(int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
-            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, fuelFilterSlots, i, 207, 38 + i*18);
+            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, fuelFilterSlots, i, 207, 38 + i * 18);
             this.addSlot(flagSlot);
         }
     }
@@ -107,20 +106,20 @@ public class NetFurnaceMenu extends BDBaseMenu
     private void addStorageSlots()
     {
         vanillaQuickMoveStartIndex = slots.size();
-        for(int i = 0; i < 9; i++)
+        for (int i = 0; i < 9; i++)
         {
-            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this,inputStorageSlots, i,inventoryStartIndex,inventoryEndIndex, 31 + i*19, 38);
+            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this, inputStorageSlots, i, inventoryStartIndex, inventoryEndIndex, 31 + i * 19, 38);
             this.addSlot(storageSlot);
         }
         //燃料
-        this.addSlot(new OrderedStackTypedSlot(this,fuelStorageSlots, 0,inventoryStartIndex,inventoryEndIndex, 207, 186));
+        this.addSlot(new OrderedStackTypedSlot(this, fuelStorageSlots, 0, inventoryStartIndex, inventoryEndIndex, 207, 186));
         vanillaQuickMoveEndIndex = slots.size();
         // 燃料返回物槽
-        this.addSlot(new OrderedStackTypedSlot(this,fuelReturnSlots, 0,inventoryStartIndex,inventoryEndIndex, 7, 186));
+        this.addSlot(new OrderedStackTypedSlot(this, fuelReturnSlots, 0, inventoryStartIndex, inventoryEndIndex, 7, 186));
         // 输出槽
-        for(int i = 0; i < 9; i++)
+        for (int i = 0; i < 9; i++)
         {
-            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this,outputStorageSlots, i,inventoryStartIndex,inventoryEndIndex, 31 + i * 19, 90);
+            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this, outputStorageSlots, i, inventoryStartIndex, inventoryEndIndex, 31 + i * 19, 90);
             this.addSlot(storageSlot);
         }
     }
@@ -138,7 +137,7 @@ public class NetFurnaceMenu extends BDBaseMenu
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 35 + col * 18,  4+invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 35 + col * 18, 4 + invSlotStartY + 3 * 18));
         }
         inventoryEndIndex = slots.size();
     }
@@ -158,7 +157,7 @@ public class NetFurnaceMenu extends BDBaseMenu
                 || !Objects.equals(lastLitDuration, be.getLitDuration())
                 || !Objects.equals(lastCookTime, be.getCookTime())
                 || !Objects.equals(lastCookTimeTotal, be.getCookTimeTotal());
-        if(shouldSendQuickData)
+        if (shouldSendQuickData)
         {
             lastLitTime = new ArrayList<>(be.getLitTime());
             lastLitDuration = new ArrayList<>(be.getLitDuration());
@@ -172,31 +171,31 @@ public class NetFurnaceMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putString("pop_mode",be.popMode.name());
-        tag.putString("receive_mode",be.receiveMode.name());
-        tag.putString("control_mode",be.controlMode.name());
-        tag.putString("sort_mode",be.sortMode.name());
-        tag.putIntArray("lit_time",be.getLitTime());
-        tag.putIntArray("lit_duration",be.getLitDuration());
-        tag.putIntArray("cook_time",be.getCookTime());
-        tag.putIntArray("cook_time_total",be.getCookTimeTotal());
+        tag.putString("pop_mode", be.popMode.name());
+        tag.putString("receive_mode", be.receiveMode.name());
+        tag.putString("control_mode", be.controlMode.name());
+        tag.putString("sort_mode", be.sortMode.name());
+        tag.putIntArray("lit_time", be.getLitTime());
+        tag.putIntArray("lit_duration", be.getLitDuration());
+        tag.putIntArray("cook_time", be.getCookTime());
+        tag.putIntArray("cook_time_total", be.getCookTimeTotal());
     }
 
     @Override
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        if(!player.level().isClientSide()) // 服务端读取按钮信息并广播到所有玩家
+        if (!player.level().isClientSide()) // 服务端读取按钮信息并广播到所有玩家
         {
             be.popMode = PopMode.valueOf(tag.getString("pop_mode"));
             be.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
             be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
             be.sortMode = AutoSortMode.valueOf(tag.getString("sort_mode"));
-            if(!player.level().isClientSide())
+            if (!player.level().isClientSide())
             {
                 // 服务端接收到更新信息后立刻通知保存
                 player.level().blockEntityChanged(be.getBlockPos());
-                player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
+                player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
             }
         }
         else // 客户端读取全部信息

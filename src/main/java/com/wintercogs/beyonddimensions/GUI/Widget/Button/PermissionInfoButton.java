@@ -11,7 +11,7 @@ public class PermissionInfoButton extends Button
     private UUID playerId;
     private PlayerPermissionInfo permissionInfo;
 
-    public PermissionInfoButton(int x, int y, int width, int height, UUID playerId, PlayerPermissionInfo playerPermissionInfo,Component message, OnPress onPress)
+    public PermissionInfoButton(int x, int y, int width, int height, UUID playerId, PlayerPermissionInfo playerPermissionInfo, Component message, OnPress onPress)
     {
         super(x, y, width, height, message, onPress, Button.DEFAULT_NARRATION);
         this.playerId = playerId;

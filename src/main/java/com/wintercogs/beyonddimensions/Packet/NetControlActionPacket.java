@@ -39,12 +39,15 @@ public record NetControlActionPacket(UUID receiver, NetControlAction action) imp
 
     static StreamCodec<ByteBuf, NetControlAction> netControlActionStreamCodec()
     {
-        return new StreamCodec<ByteBuf, NetControlAction>() {
-            public NetControlAction decode(ByteBuf buf) {
-                return NetControlAction.valueOf(Utf8String.read(buf,32000));
+        return new StreamCodec<ByteBuf, NetControlAction>()
+        {
+            public NetControlAction decode(ByteBuf buf)
+            {
+                return NetControlAction.valueOf(Utf8String.read(buf, 32000));
             }
 
-            public void encode(ByteBuf buf, NetControlAction permissionlevel) {
+            public void encode(ByteBuf buf, NetControlAction permissionlevel)
+            {
                 Utf8String.write(buf, permissionlevel.toString(), 32000);
             }
         };

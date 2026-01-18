@@ -35,7 +35,7 @@ public class UIRegister
         event.register(NetControlMenu.Net_Control_Menu.get(), NetControlGUI::new);
         event.register(NetInterfaceBaseMenu.Net_Interface_Menu.get(), NetInterfaceBaseGUI::new);
         event.register(NetEnergyMenu.Net_Energy_Menu.get(), NetEnergyGUI::new);
-        event.<DimensionsCraftMenu,DimensionsCraftGUI<DimensionsCraftMenu>>register(DimensionsCraftMenu.Dimensions_Craft_Menu.get(), DimensionsCraftGUI::new);
+        event.<DimensionsCraftMenu, DimensionsCraftGUI<DimensionsCraftMenu>>register(DimensionsCraftMenu.Dimensions_Craft_Menu.get(), DimensionsCraftGUI::new);
         event.register(DimensionsCraftMenuTerminal.Dimensions_Craft_Menu_Terminal.get(), DimensionsTerminalCraftGUI::new);
         event.register(NetPumpMenu.Net_Pump_Menu.get(), NetPumpGUI::new);
         event.register(NetHopperMenu.Net_Hopper_Menu.get(), NetHopperGUI::new);

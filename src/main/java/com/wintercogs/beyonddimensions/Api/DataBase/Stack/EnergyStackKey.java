@@ -14,31 +14,40 @@ import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class EnergyStackKey extends LongStackKey<EnergyType> {
+public class EnergyStackKey extends LongStackKey<EnergyType>
+{
 
     public static final ResourceLocation ID =
             ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/energy");
 
-    /** 唯一实例（不区分空/非空） */
+    /**
+     * 唯一实例（不区分空/非空）
+     */
     public static final EnergyStackKey INSTANCE = new EnergyStackKey();
 
-    /** 无字段的新格式：decode 直接返回单例，encode 不写任何键 */
-    public static final MapCodec<EnergyStackKey> TYPE_CODEC = new MapCodec<>() {
+    /**
+     * 无字段的新格式：decode 直接返回单例，encode 不写任何键
+     */
+    public static final MapCodec<EnergyStackKey> TYPE_CODEC = new MapCodec<>()
+    {
         @Override
         public <T> DataResult<EnergyStackKey> decode(com.mojang.serialization.DynamicOps<T> ops,
-                                                     com.mojang.serialization.MapLike<T> input) {
+                                                     com.mojang.serialization.MapLike<T> input)
+        {
             return DataResult.success(EnergyStackKey.INSTANCE);
         }
 
         @Override
         public <T> com.mojang.serialization.RecordBuilder<T> encode(EnergyStackKey value,
                                                                     com.mojang.serialization.DynamicOps<T> ops,
-                                                                    com.mojang.serialization.RecordBuilder<T> prefix) {
+                                                                    com.mojang.serialization.RecordBuilder<T> prefix)
+        {
             return prefix; // 不写任何字段
         }
 
         @Override
-        public <T> java.util.stream.Stream<T> keys(com.mojang.serialization.DynamicOps<T> ops) {
+        public <T> java.util.stream.Stream<T> keys(com.mojang.serialization.DynamicOps<T> ops)
+        {
             return java.util.stream.Stream.empty();
         }
     };
@@ -53,14 +62,15 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     // ---------------- IStackKey 必要实现 ----------------
 
     @Override
-    public MapCodec<EnergyStackKey> codec() {
+    public MapCodec<EnergyStackKey> codec()
+    {
         return TYPE_CODEC;
     }
 
     @Override
     public @Nullable KeyAmount fromStackObject(Object stack)
     {
-        if(stack instanceof EnergyType energyType)
+        if (stack instanceof EnergyType energyType)
             return new KeyAmount(EnergyStackKey.INSTANCE, energyType.getStackCount());
         return null;
     }
@@ -71,11 +81,14 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
         return ID;
     }
 
-    /** 允许从 EnergyType/数字（数量无意义）转换为同一个 Key 实例 */
+    /**
+     * 允许从 EnergyType/数字（数量无意义）转换为同一个 Key 实例
+     */
     @Override
     public @Nullable EnergyStackKey fromSourceObject(Object key, DataComponentPatch ignored)
     {
-        if (key instanceof EnergyType || key instanceof Number) {
+        if (key instanceof EnergyType || key instanceof Number)
+        {
             return INSTANCE;
         }
         return null;
@@ -115,7 +128,9 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     // 只写入 typeId；deserialize 时直接返回单例
 
     @Override
-    public void serialize(RegistryFriendlyByteBuf buf) {}
+    public void serialize(RegistryFriendlyByteBuf buf)
+    {
+    }
 
     @Override
     public @NotNull EnergyStackKey deserialize(RegistryFriendlyByteBuf buf)
@@ -133,7 +148,8 @@ public class EnergyStackKey extends LongStackKey<EnergyType> {
     }
 
     @Override
-    public @NotNull EnergyStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess) {
+    public @NotNull EnergyStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
+    {
         // 无论旧/新，都统一成单例 Key（旧数据里的 Amount 属于值层，不参与 Key）
         return INSTANCE;
     }

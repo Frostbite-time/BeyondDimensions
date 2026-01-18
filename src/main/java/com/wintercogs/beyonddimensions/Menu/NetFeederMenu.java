@@ -34,7 +34,7 @@ public class NetFeederMenu extends BDBaseMenu
 
 
     private static final int slotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + 1;
-    private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT*4 + CommonTextures.COMMON_CONNECTION_HEIGHT +7;
+    private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + 7;
 
     // storage的初始数据由itemStack提供，随后storage每次变化都重新向其中写入数据
     private final IStackHandler storage = new StackHandler(36)
@@ -43,8 +43,8 @@ public class NetFeederMenu extends BDBaseMenu
         public void onChange()
         {
             super.onChange();
-            if(!player.level().isClientSide() && initialized)
-                menuStack.set(ModDataComponents.ISTACK_SLOTS,new ArrayList<>(storage.getStorage()));
+            if (!player.level().isClientSide() && initialized)
+                menuStack.set(ModDataComponents.ISTACK_SLOTS, new ArrayList<>(storage.getStorage()));
 
         }
 
@@ -76,16 +76,15 @@ public class NetFeederMenu extends BDBaseMenu
 
         initialized = false;
         // 为服务端注入真实数据，客户端由槽位同步
-        if(!playerInventory.player.level().isClientSide())
+        if (!playerInventory.player.level().isClientSide())
         {
-            List<KeyAmount> stacks = menuStack.getOrDefault(ModDataComponents.ISTACK_SLOTS,new ArrayList<>());
-            for(int i =0; i<stacks.size(); i++)
+            List<KeyAmount> stacks = menuStack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
+            for (int i = 0; i < stacks.size(); i++)
             {
-                storage.insert(i,stacks.get(i).key(),stacks.get(i).amount(),false);
+                storage.insert(i, stacks.get(i).key(), stacks.get(i).amount(), false);
             }
         }
         initialized = true;
-
 
 
         addPlayerInv(playerInventory);
@@ -95,11 +94,11 @@ public class NetFeederMenu extends BDBaseMenu
 
     private void addFlagSlots()
     {
-        for(int row = 0; row < 4; row++)
+        for (int row = 0; row < 4; row++)
         {
             for (int col = 0; col < 9; col++)
             {
-                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row*9+col, 8 + col * 18, slotStartY + row * 18);
+                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row * 9 + col, 8 + col * 18, slotStartY + row * 18);
                 this.addSlot(flagSlot);
             }
         }
@@ -118,7 +117,7 @@ public class NetFeederMenu extends BDBaseMenu
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18,  4+invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 4 + invSlotStartY + 3 * 18));
         }
         inventoryEndIndex = slots.size();
     }
@@ -136,7 +135,7 @@ public class NetFeederMenu extends BDBaseMenu
                 || lastControlMode != menuStack.get(ModDataComponents.CONTROL_MODE)
                 || lastFeederMode != menuStack.get(ModDataComponents.FEEDER_MODE);
 
-        if(result)
+        if (result)
         {
             lastControlMode = menuStack.get(ModDataComponents.CONTROL_MODE);
             lastFeederMode = menuStack.get(ModDataComponents.FEEDER_MODE);
@@ -149,15 +148,15 @@ public class NetFeederMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putString("control_mode",menuStack.get(ModDataComponents.CONTROL_MODE).name());
-        tag.putString("feeder_mode",menuStack.get(ModDataComponents.FEEDER_MODE).name());
+        tag.putString("control_mode", menuStack.get(ModDataComponents.CONTROL_MODE).name());
+        tag.putString("feeder_mode", menuStack.get(ModDataComponents.FEEDER_MODE).name());
     }
 
     @Override
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        menuStack.set(ModDataComponents.CONTROL_MODE,RedStoneControlMode.valueOf(tag.getString("control_mode")));
-        menuStack.set(ModDataComponents.FEEDER_MODE,FeederMode.valueOf(tag.getString("feeder_mode")));
+        menuStack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode")));
+        menuStack.set(ModDataComponents.FEEDER_MODE, FeederMode.valueOf(tag.getString("feeder_mode")));
     }
 }

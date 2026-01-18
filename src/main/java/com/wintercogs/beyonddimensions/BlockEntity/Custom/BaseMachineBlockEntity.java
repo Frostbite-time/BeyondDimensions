@@ -22,7 +22,7 @@ public abstract class BaseMachineBlockEntity extends NetedBlockEntity implements
 
     public static void tick(Level level, BlockPos pos, BlockState state, BaseMachineBlockEntity blockEntity)
     {
-        if(level.isClientSide())
+        if (level.isClientSide())
             return;
 
         blockEntity.working();

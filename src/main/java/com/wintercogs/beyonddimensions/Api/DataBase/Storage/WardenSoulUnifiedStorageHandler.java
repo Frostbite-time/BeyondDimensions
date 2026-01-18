@@ -10,7 +10,8 @@ public class WardenSoulUnifiedStorageHandler implements ISoulHandler
 
     private UnifiedStorage storage;
 
-    public WardenSoulUnifiedStorageHandler(UnifiedStorage storage) {
+    public WardenSoulUnifiedStorageHandler(UnifiedStorage storage)
+    {
         this.storage = storage;
     }
 
@@ -19,7 +20,7 @@ public class WardenSoulUnifiedStorageHandler implements ISoulHandler
     public int getSoulTanks()
     {
         return storage.getBucket(WardenSoulStackKey.ID)
-                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size()+1)
+                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
@@ -27,7 +28,7 @@ public class WardenSoulUnifiedStorageHandler implements ISoulHandler
     public int getSoulInTank(int slot)
     {
         return storage.getBucket(WardenSoulStackKey.ID)
-                .filter(slots -> slot>=0 && slot<slots.size())
+                .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
                 .map(key -> {
                     KeyAmount keyAmount = storage.getStackByKey(key);
@@ -47,7 +48,7 @@ public class WardenSoulUnifiedStorageHandler implements ISoulHandler
     @Override
     public int fill(int amount, Action action)
     {
-        return (int) (amount - storage.insert(WardenSoulStackKey.INSTANCE, amount,action.simulate()).amount());
+        return (int) (amount - storage.insert(WardenSoulStackKey.INSTANCE, amount, action.simulate()).amount());
     }
 
     // 返回提取量

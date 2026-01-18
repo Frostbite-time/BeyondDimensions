@@ -5,39 +5,46 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 
-public class EnergyStackTypedHandler implements IEnergyStorage {
+public class EnergyStackTypedHandler implements IEnergyStorage
+{
 
     private StackHandler handlerStorage;
 
-    public EnergyStackTypedHandler(StackHandler handlerStorage) {
+    public EnergyStackTypedHandler(StackHandler handlerStorage)
+    {
         this.handlerStorage = handlerStorage;
     }
 
     @Override
-    public int receiveEnergy(int count, boolean simulate) {
+    public int receiveEnergy(int count, boolean simulate)
+    {
         return (int) (count - handlerStorage.insert(EnergyStackKey.INSTANCE, count, simulate).amount());
     }
 
     @Override
-    public int extractEnergy(int count, boolean simulate) {
+    public int extractEnergy(int count, boolean simulate)
+    {
         return (int) handlerStorage.extract(EnergyStackKey.INSTANCE, count, simulate).amount();
     }
 
     @Override
-    public int getEnergyStored() {
+    public int getEnergyStored()
+    {
         // 汇总“已使用能量的槽位”（EnergyStackKey.ID 桶）的当前总量
         return handlerStorage.getBucket(EnergyStackKey.ID)
                 .map(bucket -> {
                     long sum = 0L;
                     final int n = bucket.size();
-                    for (int i = 0; i < n; i++) {
+                    for (int i = 0; i < n; i++)
+                    {
                         final int slot = bucket.get(i);
                         // 理论上桶内槽位都是有效的，这里不做额外校验
                         long amt = handlerStorage.getStackBySlot(slot).amount();
                         if (amt <= 0) continue;
 
                         long remain = (long) Integer.MAX_VALUE - sum;
-                        if (amt >= remain) {
+                        if (amt >= remain)
+                        {
                             return Integer.MAX_VALUE; // 提前截断，避免溢出与无谓循环
                         }
                         sum += amt;
@@ -56,13 +63,15 @@ public class EnergyStackTypedHandler implements IEnergyStorage {
 
         // 1) 能量桶
         var energyBucketOpt = handlerStorage.getBucket(EnergyStackKey.ID);
-        if (energyBucketOpt.isPresent()) {
+        if (energyBucketOpt.isPresent())
+        {
             sumSlot += energyBucketOpt.get().size();
         }
 
         // 2) 空桶
         var emptyBucketOpt = handlerStorage.getBucket(EmptyStackKey.INSTANCE);
-        if (emptyBucketOpt.isPresent()) {
+        if (emptyBucketOpt.isPresent())
+        {
             sumSlot += emptyBucketOpt.get().size();
         }
 
@@ -70,12 +79,14 @@ public class EnergyStackTypedHandler implements IEnergyStorage {
     }
 
     @Override
-    public boolean canExtract() {
+    public boolean canExtract()
+    {
         return true;
     }
 
     @Override
-    public boolean canReceive() {
+    public boolean canReceive()
+    {
         return true;
     }
 }

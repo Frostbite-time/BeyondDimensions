@@ -15,39 +15,51 @@ import org.jetbrains.annotations.NotNull;
  * - 可视槽位 = ItemStackKey 桶槽位 + EmptyStackKey 桶槽位（顺序：先 Item，后 Empty）。
  * - getStackInSlot 直接使用缓存对象并设数量（高频无拷贝）；若缓存为空/为空栈则返回 EMPTY。
  */
-public class ItemStackTypedHandler implements IItemHandler {
+public class ItemStackTypedHandler implements IItemHandler
+{
     private static final ResourceLocation ITEM_TYPE = ItemStackKey.ID;
 
     private final StackHandler handlerStorage;
 
-    public ItemStackTypedHandler(StackHandler handlerStorage) {
+    public ItemStackTypedHandler(StackHandler handlerStorage)
+    {
         this.handlerStorage = handlerStorage;
     }
 
     // ---- 小工具：纯 Optional 计算，避免 orElse(null) ----
 
-    /** Item 桶的槽位数量（非空的 ItemStackKey 槽）。 */
-    private int itemCount() {
+    /**
+     * Item 桶的槽位数量（非空的 ItemStackKey 槽）。
+     */
+    private int itemCount()
+    {
         return handlerStorage.getBucket(ITEM_TYPE)
                 .map(StackHandler.SlotBucket::size)
                 .orElse(0);
     }
 
-    /** 空桶的槽位数量（EmptyStackKey 槽）。 */
-    private int emptyCount() {
+    /**
+     * 空桶的槽位数量（EmptyStackKey 槽）。
+     */
+    private int emptyCount()
+    {
         return handlerStorage.getBucket(EmptyStackKey.INSTANCE)
                 .map(StackHandler.SlotBucket::size)
                 .orElse(0);
     }
 
-    /** 可视槽位是否处于 Item 区域（非 Empty 区域）。 */
+    /**
+     * 可视槽位是否处于 Item 区域（非 Empty 区域）。
+     */
     private boolean inItemRegion(int visibleSlot)
     {
         int items = itemCount();
         return visibleSlot >= 0 && visibleSlot < items;
     }
 
-    /** 取 Item 桶中第 index 个槽的真实索引；若不存在返回 -1。 */
+    /**
+     * 取 Item 桶中第 index 个槽的真实索引；若不存在返回 -1。
+     */
     private int getItemSlotAt(int index)
     {
         if (index < 0) return -1;
@@ -56,7 +68,9 @@ public class ItemStackTypedHandler implements IItemHandler {
                 .orElse(-1);
     }
 
-    /** 取空桶中第 index 个槽的真实索引；若不存在返回 -1。 */
+    /**
+     * 取空桶中第 index 个槽的真实索引；若不存在返回 -1。
+     */
     private int getEmptySlotAt(int index)
     {
         if (index < 0) return -1;
@@ -65,12 +79,15 @@ public class ItemStackTypedHandler implements IItemHandler {
                 .orElse(-1);
     }
 
-    /** 将“可视槽位”映射为真实槽位；无效则 -1。 */
+    /**
+     * 将“可视槽位”映射为真实槽位；无效则 -1。
+     */
     private int resolveActualIndex(int visibleSlot)
     {
         if (visibleSlot < 0) return -1;
         int items = itemCount();
-        if (visibleSlot < items) {
+        if (visibleSlot < items)
+        {
             return getItemSlotAt(visibleSlot);
         }
         int rest = visibleSlot - items;
@@ -79,9 +96,12 @@ public class ItemStackTypedHandler implements IItemHandler {
 
     // ---- IItemHandler ----
 
-    /** 可视槽位 = Item 桶 + 空桶；全空时也会 > 0。 */
+    /**
+     * 可视槽位 = Item 桶 + 空桶；全空时也会 > 0。
+     */
     @Override
-    public int getSlots() {
+    public int getSlots()
+    {
         return itemCount() + emptyCount();
     }
 
@@ -111,7 +131,9 @@ public class ItemStackTypedHandler implements IItemHandler {
         return item;
     }
 
-    /** 插入：可落在空槽区或 Item 区，内部 insert 会做校验与容量约束。 */
+    /**
+     * 插入：可落在空槽区或 Item 区，内部 insert 会做校验与容量约束。
+     */
     @Override
     public @NotNull ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
     {
@@ -125,7 +147,9 @@ public class ItemStackTypedHandler implements IItemHandler {
         return (leftover instanceof ItemStack is) ? is : stack.copy(); // 与源断开
     }
 
-    /** 仅 Item 区可抽取；空槽区恒 EMPTY。 */
+    /**
+     * 仅 Item 区可抽取；空槽区恒 EMPTY。
+     */
     @Override
     public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate)
     {
@@ -140,7 +164,9 @@ public class ItemStackTypedHandler implements IItemHandler {
         return (out instanceof ItemStack is) ? is : ItemStack.EMPTY;
     }
 
-    /** 空槽区返回默认 99；Item 区返回 min(物品上限, 槽位容量)。 */
+    /**
+     * 空槽区返回默认 99；Item 区返回 min(物品上限, 槽位容量)。
+     */
     @Override
     public int getSlotLimit(int slot)
     {

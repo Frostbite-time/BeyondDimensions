@@ -47,8 +47,10 @@ public class IconButton extends Button implements GuiElementAccess
     }
 
     @Override
-    public void renderWidget(GuiGraphics st, int mouseX, int mouseY, float pt) {
-        if (this.visible) {
+    public void renderWidget(GuiGraphics st, int mouseX, int mouseY, float pt)
+    {
+        if (this.visible)
+        {
             int x = getX();
             int y = getY();
             st.setColor(1.0f, 1.0f, 1.0f, this.alpha);
@@ -68,7 +70,8 @@ public class IconButton extends Button implements GuiElementAccess
         setFocused(false);
     }
 
-    protected void drawIcon(GuiGraphics st, int mouseX, int mouseY, float pt) {
+    protected void drawIcon(GuiGraphics st, int mouseX, int mouseY, float pt)
+    {
         st.blitSprite(getIcon(), iconX, iconY, iconWidth, iconHeight);
     }
 
@@ -83,7 +86,8 @@ public class IconButton extends Button implements GuiElementAccess
         this.backgroundSprites = backgroundSprites;
     }
 
-    public ResourceLocation getIcon() {
+    public ResourceLocation getIcon()
+    {
         return icon;
     }
 

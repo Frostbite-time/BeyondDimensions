@@ -12,7 +12,8 @@ public class ItemUnifiedStorageHandler implements IItemHandler
 {
     private final UnifiedStorage storage;
 
-    public ItemUnifiedStorageHandler(UnifiedStorage storage) {
+    public ItemUnifiedStorageHandler(UnifiedStorage storage)
+    {
         this.storage = storage;
     }
 
@@ -24,7 +25,7 @@ public class ItemUnifiedStorageHandler implements IItemHandler
         // 最后，UnifiedStorage实际并无槽位数限制且自动合并同类物品，除了读取信息和提取指定槽位物品都无需索引参与，对于超出索引的读取返回EMPTY即可
         // 所以，这样做是安全的
         return storage.getBucket(ItemStackKey.ID)
-                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size()+1)
+                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
@@ -33,13 +34,13 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     {
         // 此处的slot参数是基于特化类型ItemStackType的索引
         return storage.getBucket(ItemStackKey.ID)
-                .filter(slots -> slot>=0 && slot<slots.size())
+                .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
                 .map(key -> {
                     Object outStack = storage.getOutStackByKey(key);
-                    if(outStack instanceof ItemStack itemStack)
+                    if (outStack instanceof ItemStack itemStack)
                     {
-                        if(!itemStack.isEmpty())
+                        if (!itemStack.isEmpty())
                             itemStack.setCount(BDMath.clampLongToInt(storage.getStackByKey(key).amount()));
                         return itemStack;
                     }
@@ -51,8 +52,8 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     @Override
     public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack itemStack, boolean sim)
     {
-        KeyAmount remaining = storage.insert(new ItemStackKey(itemStack),itemStack.getCount(),sim);
-        if(!remaining.isEmpty() && remaining.toStack() instanceof ItemStack stack)
+        KeyAmount remaining = storage.insert(new ItemStackKey(itemStack), itemStack.getCount(), sim);
+        if (!remaining.isEmpty() && remaining.toStack() instanceof ItemStack stack)
             return stack;
         return ItemStack.EMPTY; // 无剩余则返回空
     }
@@ -61,13 +62,13 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
     {
         return storage.getBucket(ItemStackKey.ID)
-                .filter(slots -> slot>=0 && slot<slots.size())
+                .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
-                .map(key -> storage.extract(key,count,sim))
+                .map(key -> storage.extract(key, count, sim))
                 .filter(keyAmount -> !keyAmount.isEmpty())
                 .map(keyAmount -> {
                     Object outStack = keyAmount.toStack();
-                    if(outStack instanceof ItemStack itemStack)
+                    if (outStack instanceof ItemStack itemStack)
                         return itemStack;
                     return ItemStack.EMPTY;
                 })

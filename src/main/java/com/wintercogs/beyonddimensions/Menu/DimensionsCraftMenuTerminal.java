@@ -34,13 +34,13 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory,  new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE), null, null, null);
+        this(id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE), null, null, null);
     }
 
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, AbstractUnorderedStackHandler data, NonNullList<ItemStack> craftItems, @Nullable ItemStack terminalItem, @Nullable BlockPos entityPos)
     {
-        super(Dimensions_Craft_Menu_Terminal.get(), id,playerInventory,data, craftItems, entityPos);
-        if(!player.level().isClientSide)
+        super(Dimensions_Craft_Menu_Terminal.get(), id, playerInventory, data, craftItems, entityPos);
+        if (!player.level().isClientSide)
         {
             this.terminalStack = terminalItem;
             this.entityPos = entityPos;
@@ -52,19 +52,24 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     {
         super.initCraftSlots(playerInventory, craftSlots);
         // 父函数处理完毕后更新一次结果槽
-        DimensionsCraftMenu.slotChangedCraftingGrid(this,player.level(),player,craftSlots,resultSlots,resultSlotIndex);
+        DimensionsCraftMenu.slotChangedCraftingGrid(this, player.level(), player, craftSlots, resultSlots, resultSlotIndex);
     }
 
     @Override
     public void removed(Player player)
     {
         // 处理光标物品
-        if (player instanceof ServerPlayer) {
+        if (player instanceof ServerPlayer)
+        {
             ItemStack itemstack = this.getCarried();
-            if (!itemstack.isEmpty()) {
-                if (player.isAlive() && !((ServerPlayer)player).hasDisconnected()) {
+            if (!itemstack.isEmpty())
+            {
+                if (player.isAlive() && !((ServerPlayer) player).hasDisconnected())
+                {
                     player.getInventory().placeItemBackInInventory(itemstack);
-                } else {
+                }
+                else
+                {
                     player.drop(itemstack, false);
                 }
 
@@ -72,15 +77,16 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
             }
         }
 
-        if(player instanceof ServerPlayer)
+        if (player instanceof ServerPlayer)
         {
             // 处理合成槽物品
             NonNullList<ItemStack> nonNullList = NonNullList.withSize(9, ItemStack.EMPTY);
-            for (int i = 0; i < craftSlots.getItems().size(); i++) {
+            for (int i = 0; i < craftSlots.getItems().size(); i++)
+            {
                 ItemStack stack = craftSlots.getItems().get(i);
                 nonNullList.set(i, stack);
             }
-            if(terminalStack != null && terminalStack.getItem() instanceof NetTerminalItem)
+            if (terminalStack != null && terminalStack.getItem() instanceof NetTerminalItem)
                 terminalStack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(nonNullList));
         }
 
@@ -89,7 +95,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     @Override
     public boolean stillValid(Player player)
     {
-        if(entityPos != null)
+        if (entityPos != null)
         {
             BlockEntity be = player.level().getBlockEntity(entityPos);
             return be != null && !be.isRemoved();

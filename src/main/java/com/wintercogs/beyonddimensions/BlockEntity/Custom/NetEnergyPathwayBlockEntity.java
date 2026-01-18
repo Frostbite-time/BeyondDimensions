@@ -30,26 +30,28 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     private PopMode popMode = PopMode.STOP;
     private final Direction[] directions = Direction.values();
 
-    public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState) {
+    public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState)
+    {
         super(ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     //--- 能力注册 (通过事件) ---
-    public static void registerCapability(RegisterCapabilitiesEvent event) {
+    public static void registerCapability(RegisterCapabilitiesEvent event)
+    {
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK, // 标准物品能力
                 ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
-                    if(be.popMode == PopMode.OPEN)
+                    if (be.popMode == PopMode.OPEN)
                     {
                         return new EnergyStorage(0);
                     }
-                    if(be.getNetId()<0)
+                    if (be.getNetId() < 0)
                     {
                         return new EnergyStorage(0);
                     }
                     DimensionsNet net = be.getNet();
-                    if(net != null)
+                    if (net != null)
                     {
                         return new EnergyUnifiedStorageHandler(net.getUnifiedStorage());
                     }
@@ -65,7 +67,8 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
 
     public void setPopMode(PopMode newMode)
     {
-        if (this.popMode != newMode) {
+        if (this.popMode != newMode)
+        {
             this.popMode = newMode;
             setChanged();
         }
@@ -87,7 +90,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     public void workContent()
     {
         super.workContent();
-        if(popMode == PopMode.OPEN)
+        if (popMode == PopMode.OPEN)
         {
             popEnergy();
         }
@@ -97,13 +100,13 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     {
         DimensionsNet net = getNet();
 
-        if(net==null)
+        if (net == null)
         {
             return; //虽然getNet已经被shouldWork检查过，但是此处仍然进行防御性编程
         }
 
 
-        for(Direction dir: directions)
+        for (Direction dir : directions)
         {
             BlockPos targetPos = this.getBlockPos().relative(dir);
             BlockEntity neighbor = level.getBlockEntity(targetPos);
@@ -116,7 +119,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
                     int maxExtract = BDMath.clampLongToInt(net.getUnifiedStorage().getStackByKey(EnergyStackKey.INSTANCE).amount());
                     int receive = otherStorage.receiveEnergy(maxExtract, false);
-                    net.getUnifiedStorage().extract(EnergyStackKey.INSTANCE,receive,false);
+                    net.getUnifiedStorage().extract(EnergyStackKey.INSTANCE, receive, false);
                 }
             }
         }
@@ -125,15 +128,15 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
-        super.loadAdditional(tag,registries);
+        super.loadAdditional(tag, registries);
 
         // 旧数据兼容
         String popModeNew = tag.getString("popMode");
-        if(!popModeNew.isEmpty())
+        if (!popModeNew.isEmpty())
         {
             this.popMode = PopMode.valueOf(popModeNew);
         }
-        else if(tag.getBoolean("popMode"))
+        else if (tag.getBoolean("popMode"))
         {
             this.popMode = PopMode.OPEN;
         }
@@ -147,7 +150,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.saveAdditional(tag, registries);
-        tag.putString("popMode",this.popMode.name());
+        tag.putString("popMode", this.popMode.name());
     }
 
     @Override

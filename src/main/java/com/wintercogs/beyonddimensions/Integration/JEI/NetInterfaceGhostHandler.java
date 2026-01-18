@@ -27,9 +27,9 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
     {
         List<Target<I>> targets = new ArrayList<>();
 
-        for(Slot slot: screen.getMenu().slots)
+        for (Slot slot : screen.getMenu().slots)
         {
-            if(slot.isActive() && slot.isFake() && slot instanceof AbstractStackTypedSlot sSlot)
+            if (slot.isActive() && slot.isFake() && slot instanceof AbstractStackTypedSlot sSlot)
             {
                 targets.add(new IStackTarget<>(sSlot, screen));
             }
@@ -52,7 +52,7 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
         public IStackTarget(AbstractStackTypedSlot slot, BDBaseGUI screen)
         {
             this.slot = slot;
-            this.area = new Rect2i(screen.getGuiLeft() + slot.x, screen.getGuiTop() + slot.y,16 ,16);
+            this.area = new Rect2i(screen.getGuiLeft() + slot.x, screen.getGuiTop() + slot.y, 16, 16);
         }
 
         @Override
@@ -67,12 +67,12 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
         {
             Object stackKey = ingredient;
             IStackKey<?> dragging = ItemStackKey.EMPTY;
-            for(IStackKey<?> type : StackKeyRegistry.getAllTypes())
+            for (IStackKey<?> type : StackKeyRegistry.getAllTypes())
             {
-                if(type.getStackClass().isAssignableFrom(stackKey.getClass()))
+                if (type.getStackClass().isAssignableFrom(stackKey.getClass()))
                 {
                     KeyAmount ka = type.fromStackObject(ingredient);
-                    if(ka != null)
+                    if (ka != null)
                     {
                         dragging = ka.key();
                     }
@@ -82,13 +82,13 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
             }
 
             // AE2通用包裹支持
-            if(BeyondDimensions.AELoaded)
+            if (BeyondDimensions.AELoaded)
             {
-                if(dragging instanceof ItemStackKey draggingItemKey && !dragging.isEmpty())
+                if (dragging instanceof ItemStackKey draggingItemKey && !dragging.isEmpty())
                 {
                     appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItemKey.copyStack());
 
-                    if(genericContent != null)
+                    if (genericContent != null)
                     {
                         dragging = AEHelper.fromAEKeyToIStack(genericContent.what()).orElse(ItemStackKey.EMPTY);
                     }
@@ -96,7 +96,7 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
                 }
             }
 
-            PacketDistributor.sendToServer(new SetSlotDirectlyPacket(slot.index,new KeyAmount(dragging,1)));
+            PacketDistributor.sendToServer(new SetSlotDirectlyPacket(slot.index, new KeyAmount(dragging, 1)));
 
         }
     }

@@ -61,32 +61,32 @@ public class ServerPayloadHandler
                     if (net != null)
                     {
                         NetMenuType targetMenu = packet.target();
-                        if(targetMenu == NetMenuType.NET_CRAFT_MENU)
+                        if (targetMenu == NetMenuType.NET_CRAFT_MENU)
                         {
                             player.openMenu(new SimpleMenuProvider(
-                                    (containerId, playerInventory, _player) -> new DimensionsCraftMenu(DimensionsCraftMenu.Dimensions_Craft_Menu.get(),containerId, playerInventory, net.getUnifiedStorage(),null,null),
+                                    (containerId, playerInventory, _player) -> new DimensionsCraftMenu(DimensionsCraftMenu.Dimensions_Craft_Menu.get(), containerId, playerInventory, net.getUnifiedStorage(), null, null),
                                     Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                             ));
                         }
-                        else if(targetMenu == NetMenuType.NET_MENU)
+                        else if (targetMenu == NetMenuType.NET_MENU)
                         {
                             player.openMenu(new SimpleMenuProvider(
-                                    (containerId, playerInventory, _player) -> new DimensionsNetMenu(DimensionsNetMenu.Dimensions_Net_Menu.get(),containerId, playerInventory, net.getUnifiedStorage()),
+                                    (containerId, playerInventory, _player) -> new DimensionsNetMenu(DimensionsNetMenu.Dimensions_Net_Menu.get(), containerId, playerInventory, net.getUnifiedStorage()),
                                     Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                             ));
                         }
-                        else if(targetMenu == NetMenuType.NET_CRAFT_TERMINAL)
+                        else if (targetMenu == NetMenuType.NET_CRAFT_TERMINAL)
                         {
                             ItemStack terminalStack = null;
-                            if(player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof NetTerminalItem)
+                            if (player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof NetTerminalItem)
                                 terminalStack = player.getItemInHand(InteractionHand.MAIN_HAND);
-                            else if(player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof NetTerminalItem)
+                            else if (player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof NetTerminalItem)
                                 terminalStack = player.getItemInHand(InteractionHand.OFF_HAND);
                             else
                             {
-                                for(ItemStack itemStack : player.getInventory().items)
+                                for (ItemStack itemStack : player.getInventory().items)
                                 {
-                                    if(itemStack.getItem() instanceof NetTerminalItem)
+                                    if (itemStack.getItem() instanceof NetTerminalItem)
                                     {
                                         terminalStack = itemStack;
                                         break;
@@ -94,7 +94,7 @@ public class ServerPayloadHandler
 
                                 }
 
-                                if(terminalStack == null && BeyondDimensions.CuriosLoaded)
+                                if (terminalStack == null && BeyondDimensions.CuriosLoaded)
                                 {
                                     terminalStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
                                             .flatMap(iCuriosItemHandler ->
@@ -109,13 +109,13 @@ public class ServerPayloadHandler
                                 }
                             }
 
-                            if(terminalStack != null)
+                            if (terminalStack != null)
                             {
-                                if(terminalStack.get(ModDataComponents.CRAFT_SLOTS)==null)
-                                    terminalStack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9,ItemStack.EMPTY)));
+                                if (terminalStack.get(ModDataComponents.CRAFT_SLOTS) == null)
+                                    terminalStack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9, ItemStack.EMPTY)));
 
                                 NetTerminalItem.contextMap.put(player, new NetTerminalItem.MenuTriggerContext(InteractionHand.MAIN_HAND, terminalStack));
-                                player.openMenu((NetTerminalItem)terminalStack.getItem());
+                                player.openMenu((NetTerminalItem) terminalStack.getItem());
                             }
                         }
                     }
@@ -133,10 +133,10 @@ public class ServerPayloadHandler
                     Player player = context.player();
                     if (player.containerMenu instanceof BDBaseMenu menu)
                     {
-                        menu.customClickHandler(packet.slotIndex(),packet.clickItem(),packet.button(),packet.shiftDown());
+                        menu.customClickHandler(packet.slotIndex(), packet.clickItem(), packet.button(), packet.shiftDown());
                         menu.broadcastChanges();
                         // 这里发包不是让客户端执行操作，而是解除锁定
-                        PacketDistributor.sendToPlayer((ServerPlayer) player,new CallSeverClickPacket(1, new KeyAmount(ItemStackKey.EMPTY,0),1,false));
+                        PacketDistributor.sendToPlayer((ServerPlayer) player, new CallSeverClickPacket(1, new KeyAmount(ItemStackKey.EMPTY, 0), 1, false));
                     }
                 }
 
@@ -166,7 +166,7 @@ public class ServerPayloadHandler
                         return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
                     }
                     menu = (NetControlMenu) player.containerMenu;
-                    menu.handlePlayerAction(packet.receiver(),packet.action());
+                    menu.handlePlayerAction(packet.receiver(), packet.action());
                 }
 
         );
@@ -179,12 +179,12 @@ public class ServerPayloadHandler
                 {
                     Player player = context.player();
 
-                    if(player.containerMenu instanceof DimensionsCraftMenu menu)
+                    if (player.containerMenu instanceof DimensionsCraftMenu menu)
                     {
                         //服务端处理示意
                         //1.解析数组
                         //2.为每一个槽位在背包和存储中寻找资源填入
-                        menu.transferRecipe(packet.keys(),packet.amount());
+                        menu.transferRecipe(packet.keys(), packet.amount());
                     }
                 }
 
@@ -198,7 +198,7 @@ public class ServerPayloadHandler
                 {
                     Player player = context.player();
 
-                    if(player.containerMenu instanceof DimensionsCraftMenu menu)
+                    if (player.containerMenu instanceof DimensionsCraftMenu menu)
                     {
                         //服务端处理示意
                         //1.解析数组
@@ -215,45 +215,45 @@ public class ServerPayloadHandler
         context.enqueueWork(
                 () ->
                 {
-                    if(packet.clickStack().key() instanceof ItemStackKey clickItem)
+                    if (packet.clickStack().key() instanceof ItemStackKey clickItem)
                     {
                         Player player = context.player();
 
-                        if(player.containerMenu instanceof BDBaseMenu menu)
+                        if (player.containerMenu instanceof BDBaseMenu menu)
                         {
                             // 批量转移到存储
-                            if(packet.dirToStorage())
+                            if (packet.dirToStorage())
                             {
-                                for(Slot invSlot : menu.slots)
+                                for (Slot invSlot : menu.slots)
                                 {
-                                    if(menu.inventoryStartIndex<=invSlot.index&& invSlot.index<menu.inventoryEndIndex)
+                                    if (menu.inventoryStartIndex <= invSlot.index && invSlot.index < menu.inventoryEndIndex)
                                     {
-                                        if(clickItem.equals(new ItemStackKey(invSlot.getItem())))
-                                            menu.customClickHandler(invSlot.index, new KeyAmount(new ItemStackKey(invSlot.getItem()),invSlot.getItem().getCount()), 0, true);
+                                        if (clickItem.equals(new ItemStackKey(invSlot.getItem())))
+                                            menu.customClickHandler(invSlot.index, new KeyAmount(new ItemStackKey(invSlot.getItem()), invSlot.getItem().getCount()), 0, true);
                                     }
                                 }
                             }
                             // 存储到背包
-                            else if(menu instanceof DimensionsNetMenu netMenu)
+                            else if (menu instanceof DimensionsNetMenu netMenu)
                             {
                                 if (!packet.clickStack().isEmpty())
                                 {
                                     AbstractUnorderedStackHandler storage = netMenu.storage;
 
                                     // 遍历目标槽位
-                                    for(int targetSlotIndex=menu.inventoryStartIndex; targetSlotIndex<menu.inventoryEndIndex && storage.hasStack(clickItem); targetSlotIndex++)
+                                    for (int targetSlotIndex = menu.inventoryStartIndex; targetSlotIndex < menu.inventoryEndIndex && storage.hasStack(clickItem); targetSlotIndex++)
                                     {
                                         Slot slot = menu.slots.get(targetSlotIndex);
 
-                                        KeyAmount extract = storage.extract(clickItem, Integer.MAX_VALUE,false); // 防止数量过多无法回插
-                                        if(extract.toStack() instanceof ItemStack extractedStack)
+                                        KeyAmount extract = storage.extract(clickItem, Integer.MAX_VALUE, false); // 防止数量过多无法回插
+                                        if (extract.toStack() instanceof ItemStack extractedStack)
                                         {
                                             ItemStack remaining = slot.safeInsert(extractedStack);
-                                            if(!remaining.isEmpty())
-                                                storage.insert(new ItemStackKey(remaining), remaining.getCount(),false);
+                                            if (!remaining.isEmpty())
+                                                storage.insert(new ItemStackKey(remaining), remaining.getCount(), false);
                                         }
                                         else  // 防御操作，如果不是物品堆，整个回插
-                                            storage.insert(extract.key(), extract.amount(),false);
+                                            storage.insert(extract.key(), extract.amount(), false);
                                     }
                                 }
                             }
@@ -271,17 +271,17 @@ public class ServerPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    if(!player.getMainHandItem().isEmpty()) return;
+                    if (!player.getMainHandItem().isEmpty()) return;
                     DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-                    if(net == null) return;
+                    if (net == null) return;
                     UnifiedStorage storage = net.getUnifiedStorage();
 
                     IStackKey<?> target = null;
-                    for(KeyAmount stack : storage.getStorage())
+                    for (KeyAmount stack : storage.getStorage())
                     {
-                        if(stack.key() instanceof ItemStackKey itemStackKey)
+                        if (stack.key() instanceof ItemStackKey itemStackKey)
                         {
-                            if(itemStackKey.getSource() == packet.targetStack().getItem())
+                            if (itemStackKey.getSource() == packet.targetStack().getItem())
                             {
                                 target = itemStackKey;
                                 break;
@@ -289,10 +289,10 @@ public class ServerPayloadHandler
                         }
                     }
 
-                    if(target != null && player.getMainHandItem().isEmpty())
+                    if (target != null && player.getMainHandItem().isEmpty())
                     {
-                        ItemStack extract = (ItemStack) storage.extract(target,target.getVanillaMaxStackSize(),false).toStack();
-                        player.setItemInHand(InteractionHand.MAIN_HAND,extract);
+                        ItemStack extract = (ItemStack) storage.extract(target, target.getVanillaMaxStackSize(), false).toStack();
+                        player.setItemInHand(InteractionHand.MAIN_HAND, extract);
                     }
                 }
         );
@@ -304,11 +304,11 @@ public class ServerPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    if(player.getMainHandItem().isEmpty()) return;
+                    if (player.getMainHandItem().isEmpty()) return;
                     DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-                    if(net == null) return;
+                    if (net == null) return;
                     UnifiedStorage storage = net.getUnifiedStorage();
-                    KeyAmount remaining = storage.insert(new ItemStackKey(player.getMainHandItem()),player.getMainHandItem().getCount(),false);
+                    KeyAmount remaining = storage.insert(new ItemStackKey(player.getMainHandItem()), player.getMainHandItem().getCount(), false);
                     player.getMainHandItem().setCount((BDMath.clampLongToInt(remaining.amount())));
                 }
         );
@@ -330,9 +330,9 @@ public class ServerPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    if(player.containerMenu instanceof AbstractContainerMenu menu)
+                    if (player.containerMenu instanceof AbstractContainerMenu menu)
                     {
-                        if(menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
+                        if (menu.slots.get(packet.slotId()) instanceof AbstractStackTypedSlot slot)
                         {
                             slot.setStackDirectly(packet.stack().key(), packet.stack().amount());
                         }
@@ -357,7 +357,7 @@ public class ServerPayloadHandler
                 () ->
                 {
                     Player player = context.player();
-                    if(player.containerMenu instanceof BDBaseMenu menu)
+                    if (player.containerMenu instanceof BDBaseMenu menu)
                     {
                         menu.readQuickDataTag(packet.tag());
                     }
@@ -372,18 +372,18 @@ public class ServerPayloadHandler
                 {
                     Player player = context.player();
 
-                    for(ItemStack stack: player.getInventory().items)
+                    for (ItemStack stack : player.getInventory().items)
                     {
-                        if(stack.getItem() instanceof NetMagnetItem)
+                        if (stack.getItem() instanceof NetMagnetItem)
                         {
-                            if(stack.has(ModDataComponents.CONTROL_MODE))
+                            if (stack.has(ModDataComponents.CONTROL_MODE))
                             {
-                                if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                                if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
                                 {
                                     stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
                                     player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
                                 }
-                                else if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                                else if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
                                 {
                                     stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
                                     player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
@@ -391,24 +391,24 @@ public class ServerPayloadHandler
                             }
                         }
                     }
-                    top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler ->{
+                    top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
                         List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
                                 .stream()
                                 .map(SlotResult::stack)
                                 .toList();
 
-                        for(ItemStack stack: curios)
+                        for (ItemStack stack : curios)
                         {
-                            if(stack.getItem() instanceof NetMagnetItem)
+                            if (stack.getItem() instanceof NetMagnetItem)
                             {
-                                if(stack.has(ModDataComponents.CONTROL_MODE))
+                                if (stack.has(ModDataComponents.CONTROL_MODE))
                                 {
-                                    if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                                    if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
                                     {
                                         stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
                                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
                                     }
-                                    else if(stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                                    else if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
                                     {
                                         stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
                                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));

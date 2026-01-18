@@ -20,7 +20,9 @@ public class EmptyStackKeyRender implements IStackRender
 {
     public static final EmptyStackKeyRender INSTANCE = new EmptyStackKeyRender();
 
-    private EmptyStackKeyRender() {}
+    private EmptyStackKeyRender()
+    {
+    }
 
     @Override
     public void render(GuiGraphics gui, IStackKey<?> key, int x, int y)

@@ -46,17 +46,20 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
 
     // 注册方块状态属性
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+    {
         builder.add(FACING);
     }
 
     @Override
-    public BlockState rotate(BlockState state, Rotation rot) {
+    public BlockState rotate(BlockState state, Rotation rot)
+    {
         return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
     }
 
     @Override
-    public BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror)
+    {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
@@ -70,7 +73,8 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
     {
         Direction facing = state.getValue(FACING);
-        return switch (facing) {
+        return switch (facing)
+        {
             case NORTH -> COLLISION_NORTH;
             case SOUTH -> COLLISION_SOUTH;
             case EAST -> COLLISION_EAST;
@@ -93,11 +97,11 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
     {
         super.useWithoutItem(state, level, pos, player, hitResult);
-        if(!level.isClientSide()&&!player.isShiftKeyDown())
+        if (!level.isClientSide() && !player.isShiftKeyDown())
         {
             NetTerminalBlockEntity blockEntity = (NetTerminalBlockEntity) level.getBlockEntity(pos);
-            if(blockEntity.getNet() != null)
-                player.openMenu((NetTerminalBlockEntity)level.getBlockEntity(pos));
+            if (blockEntity.getNet() != null)
+                player.openMenu((NetTerminalBlockEntity) level.getBlockEntity(pos));
             else
                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
         }
@@ -113,8 +117,10 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
     {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof NetTerminalBlockEntity blockEntity) {
+        if (!state.is(newState.getBlock()))
+        {
+            if (level.getBlockEntity(pos) instanceof NetTerminalBlockEntity blockEntity)
+            {
                 level.updateNeighbourForOutputSignal(pos, this);
                 blockEntity.dropContent();
             }

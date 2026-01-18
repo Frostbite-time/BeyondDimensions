@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.GUI.NetMenuType;
 import com.wintercogs.beyonddimensions.Packet.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.Packet.ToggleMagnetPacket;
@@ -31,9 +30,9 @@ public class DimensionsShortKeys
     );
 
     public static final KeyMapping OPEN_TERMINAL_QUICK_KEY = new KeyMapping(
-      "key.beyonddimensions.open_terminal_quick_key",
-      GLFW.GLFW_KEY_P,
-      "key.categories.beyonddimensions"
+            "key.beyonddimensions.open_terminal_quick_key",
+            GLFW.GLFW_KEY_P,
+            "key.categories.beyonddimensions"
     );
 
     public static final KeyMapping MAIN_HAND_ITEM_TRANSFER_KEY = new KeyMapping(
@@ -70,13 +69,13 @@ public class DimensionsShortKeys
                 return;
             }
 
-            if(CommonConfigRuntime.uiCraftButton == ButtonState.ENABLED)
+            if (CommonConfigRuntime.uiCraftButton == ButtonState.ENABLED)
             {
                 PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
             }
-            else if(CommonConfigRuntime.uiCraftButton == ButtonState.DISABLED)
+            else if (CommonConfigRuntime.uiCraftButton == ButtonState.DISABLED)
             {
-                PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),NetMenuType.NET_MENU));
+                PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_MENU));
             }
 
 
@@ -91,7 +90,7 @@ public class DimensionsShortKeys
                 return;
             }
 
-            PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(),NetMenuType.NET_CRAFT_TERMINAL));
+            PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_CRAFT_TERMINAL));
         }
 
         while (TOGGLE_MAGNET_KEY.consumeClick())

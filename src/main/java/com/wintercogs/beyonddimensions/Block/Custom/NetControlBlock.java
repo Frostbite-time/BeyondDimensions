@@ -22,13 +22,13 @@ public class NetControlBlock extends Block
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
     {
-        super.useWithoutItem(state,level,pos,player,hitResult);
-        if(!level.isClientSide())
+        super.useWithoutItem(state, level, pos, player, hitResult);
+        if (!level.isClientSide())
         {
-            if(DimensionsNet.getNetFromPlayer(player)!=null)
+            if (DimensionsNet.getNetFromPlayer(player) != null)
             {
                 player.openMenu(new SimpleMenuProvider(
-                        (containerId, playerInventory, _player) -> new NetControlMenu(containerId,playerInventory),
+                        (containerId, playerInventory, _player) -> new NetControlMenu(containerId, playerInventory),
                         Component.translatable("menu.title.beyonddimensions.net_control_menu")
                 ));
             }

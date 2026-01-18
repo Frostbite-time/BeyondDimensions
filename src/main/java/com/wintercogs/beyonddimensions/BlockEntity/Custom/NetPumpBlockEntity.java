@@ -34,7 +34,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
 {
     // 存储相邻方块的能力
     // 按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
-    private final Multimap<ResourceLocation,Object> handlerCache = ArrayListMultimap.create();
+    private final Multimap<ResourceLocation, Object> handlerCache = ArrayListMultimap.create();
     private boolean needsCapabilityUpdate = true;
     private final Direction[] directions = Direction.values();
 
@@ -44,7 +44,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
         @Override
         public void onChange()
         {
-            if(level != null && !level.isClientSide())
+            if (level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -75,15 +75,18 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
 
         handlerCache.clear();
 
-        for (Direction dir : directions) {
+        for (Direction dir : directions)
+        {
             BlockPos targetPos = this.getBlockPos().relative(dir);
             BlockEntity neighbor = level.getBlockEntity(targetPos);
-            if (neighbor != null && !(neighbor instanceof NetedBlockEntity)) {
+            if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
+            {
 
                 CapabilityHelper.BlockCapabilityMap.forEach(
                         (resourceLocation, cap) -> {
-                            Object handler = level.getCapability(cap,targetPos, dir.getOpposite());
-                            if (handler != null) {
+                            Object handler = level.getCapability(cap, targetPos, dir.getOpposite());
+                            if (handler != null)
+                            {
                                 handlerCache.put(resourceLocation, handler);
                             }
                         }
@@ -102,24 +105,24 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
                 (typeId, handler) -> {
                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
 
-                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper)handlerGetter.apply(handler);
+                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
 
-                    for(int slot= 0;slot< stackHandlerWrapper.getSlots();slot++)
+                    for (int slot = 0; slot < stackHandlerWrapper.getSlots(); slot++)
                     {
                         Object stack = stackHandlerWrapper.getStackInSlot(slot);
                         IStackKey<?> typeKey = StackKeyRegistry.getType(typeId);
                         KeyAmount ka = typeKey.fromStackObject(stack);
-                        if(ka != null && !ka.key().isEmpty() && matchesFilter(ka.key()))
+                        if (ka != null && !ka.key().isEmpty() && matchesFilter(ka.key()))
                         {
                             DimensionsNet net = getNet();
-                            if(net != null)
+                            if (net != null)
                             {
                                 UnifiedStorage storage = net.getUnifiedStorage();
 
-                                long canInsert = ka.amount() - storage.insert(ka.key(),ka.amount(),true).amount();
-                                canInsert = Math.min(canInsert,ka.amount());
-                                long extract = stackHandlerWrapper.extract(slot,canInsert,false);
-                                net.getUnifiedStorage().insert(ka.key(),extract,false);
+                                long canInsert = ka.amount() - storage.insert(ka.key(), ka.amount(), true).amount();
+                                canInsert = Math.min(canInsert, ka.amount());
+                                long extract = stackHandlerWrapper.extract(slot, canInsert, false);
+                                net.getUnifiedStorage().insert(ka.key(), extract, false);
                             }
                         }
                     }
@@ -131,23 +134,26 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     {
         switch (filterMode)
         {
-            case BLACK -> {
-                for(KeyAmount stack : filterSlots.getStorage())
+            case BLACK ->
+            {
+                for (KeyAmount stack : filterSlots.getStorage())
                 {
-                    if(stack.key().isSame(otherStack))
+                    if (stack.key().isSame(otherStack))
                         return false;
                 }
                 return true;
             }
-            case WHITE -> {
-                for(KeyAmount stack : filterSlots.getStorage())
+            case WHITE ->
+            {
+                for (KeyAmount stack : filterSlots.getStorage())
                 {
-                    if(stack.key().isSame(otherStack))
+                    if (stack.key().isSame(otherStack))
                         return true;
                 }
                 return false;
             }
-            case IGNORE -> {
+            case IGNORE ->
+            {
                 return true;
             }
 
@@ -193,6 +199,6 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     @Override
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
-        return new NetPumpMenu(containerId,inventory, filterSlots, this);
+        return new NetPumpMenu(containerId, inventory, filterSlots, this);
     }
 }

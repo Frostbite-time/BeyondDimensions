@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.Integration.RS.ExternalStorage.BD_RSExter
 public class BD_RSPlugin
 {
     private static final RefinedStorageApi api = RefinedStorageApi.INSTANCE;
+
     public static void register()
     {
         // 对于RS的存储元件而言，目前没有看到除修改模组本体以外的方式能将非RS主动操作导致的变化推送回RS

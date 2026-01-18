@@ -26,16 +26,16 @@ public class RSHelper
 
     static
     {
-        ISTACK_TO_RSKEY_MAP.put(ItemStackKey.ID, stackType -> Optional.of(ItemResource.ofItemStack((ItemStack)stackType.copyStack())));
+        ISTACK_TO_RSKEY_MAP.put(ItemStackKey.ID, stackType -> Optional.of(ItemResource.ofItemStack((ItemStack) stackType.copyStack())));
         ISTACK_TO_RSKEY_MAP.put(FluidStackKey.ID, stackType -> {
             FluidStack stack = (FluidStack) stackType.copyStack();
             return Optional.of(new FluidResource(stack.getFluid(), stack.getComponentsPatch()));
         });
 
-        RSKEY_TO_STACK_TYPE_MAP.put(ResourceTypes.ITEM, key -> Optional.of(new ItemStackKey(((ItemResource)key).toItemStack())));
+        RSKEY_TO_STACK_TYPE_MAP.put(ResourceTypes.ITEM, key -> Optional.of(new ItemStackKey(((ItemResource) key).toItemStack())));
         RSKEY_TO_STACK_TYPE_MAP.put(ResourceTypes.FLUID, key -> {
             FluidResource fluidKey = (FluidResource) key;
-            FluidStack stack = new FluidStack(BuiltInRegistries.FLUID.wrapAsHolder(fluidKey.fluid()),1,fluidKey.components());
+            FluidStack stack = new FluidStack(BuiltInRegistries.FLUID.wrapAsHolder(fluidKey.fluid()), 1, fluidKey.components());
             return Optional.of(new FluidStackKey(stack));
         });
     }
@@ -43,9 +43,9 @@ public class RSHelper
 
     public static Optional<IStackKey<?>> fromRSKeyToIStack(ResourceKey key)
     {
-        if(key instanceof PlatformResourceKey pKey)
+        if (key instanceof PlatformResourceKey pKey)
         {
-            if(RSKEY_TO_STACK_TYPE_MAP.containsKey(pKey.getResourceType()))
+            if (RSKEY_TO_STACK_TYPE_MAP.containsKey(pKey.getResourceType()))
             {
                 return RSKEY_TO_STACK_TYPE_MAP.get(pKey.getResourceType()).apply(pKey);
             }
@@ -56,7 +56,7 @@ public class RSHelper
 
     public static Optional<ResourceKey> fromIStackToRSKey(IStackKey<?> stack)
     {
-        if(ISTACK_TO_RSKEY_MAP.containsKey(stack.getTypeId()))
+        if (ISTACK_TO_RSKEY_MAP.containsKey(stack.getTypeId()))
         {
             return ISTACK_TO_RSKEY_MAP.get(stack.getTypeId()).apply(stack);
         }

@@ -10,7 +10,8 @@ import java.util.function.Function;
  */
 public abstract class LongType<T>
 {
-    protected static <C extends LongType<C>> Codec<C> createCodec(Function<Long, C> constructor) {
+    protected static <C extends LongType<C>> Codec<C> createCodec(Function<Long, C> constructor)
+    {
         return Codec.LONG.xmap(constructor, LongType::getStackCount);
     }
 
@@ -28,7 +29,7 @@ public abstract class LongType<T>
 
     public void grow(long amount)
     {
-        setStackCount(getStackCount()+amount);
+        setStackCount(getStackCount() + amount);
     }
 
     public void shrink(long amount)
@@ -51,7 +52,8 @@ public abstract class LongType<T>
 
     public boolean isSame(LongType<?> other)
     {
-        if (other == null) {
+        if (other == null)
+        {
             return false;
         }
         return getClass() == other.getClass();

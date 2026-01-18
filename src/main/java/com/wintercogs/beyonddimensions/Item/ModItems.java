@@ -76,7 +76,7 @@ public class ModItems
     // 工业先锋：灵魂涌动联动 - 灵魂标记器
     public static final DeferredItem<Item> WARDEN_SOUL_TAG_ITEM = ITEMS.register("warden_soul_tag_item",
             () -> {
-                if(BeyondDimensions.IFS_Loaded)
+                if (BeyondDimensions.IFS_Loaded)
                     return new WardenSoulTagItem(new Item.Properties());
                 else
                     return new Item(new Item.Properties());
@@ -86,7 +86,7 @@ public class ModItems
     // AE存储磁盘 对于一个没有安装AE的游戏
     public static final DeferredItem<Item> NET_AE_STORAGE_CELL = ITEMS.register("net_ae_storage_cell",
             () -> {
-                if(BeyondDimensions.AELoaded)
+                if (BeyondDimensions.AELoaded)
                     return new NetAEStorageCell(new Item.Properties());
                 else
                     return new Item(new Item.Properties());

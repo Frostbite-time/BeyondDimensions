@@ -39,12 +39,12 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
         DimensionsNet net = getNet();
-        if(net != null)
+        if (net != null)
         {
             // 在服务端中craftItems作为直接引用传递。保证为同一个列表
             // 而后，craftItems会在Menu被包装，并通过Menu的包装类完成网络同步
             // 最后，利用方块实体进行持久保存
-            return new DimensionsCraftMenuTerminal(containerId,inventory,net.getUnifiedStorage(), craftItems, null, this.getBlockPos());
+            return new DimensionsCraftMenuTerminal(containerId, inventory, net.getUnifiedStorage(), craftItems, null, this.getBlockPos());
         }
         return null;
     }
@@ -54,7 +54,8 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
     {
         super.loadAdditional(tag, registries);
         ListTag itemsList = tag.getList("CraftItems", Tag.TAG_COMPOUND);
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
+        {
             CompoundTag itemTag = i < itemsList.size() ? itemsList.getCompound(i) : new CompoundTag();
             ItemStack stack = ItemStack.parseOptional(registries, itemTag);
             craftItems.set(i, stack);
@@ -66,7 +67,8 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
     {
         super.saveAdditional(tag, registries);
         ListTag itemsList = new ListTag();
-        for (ItemStack stack : craftItems) {
+        for (ItemStack stack : craftItems)
+        {
             CompoundTag itemTag = (CompoundTag) stack.saveOptional(registries);
             itemsList.add(itemTag);
         }
@@ -75,11 +77,11 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
 
     public void dropContent()
     {
-        for(ItemStack stack : craftItems)
+        for (ItemStack stack : craftItems)
         {
-            if(!stack.isEmpty())
+            if (!stack.isEmpty())
             {
-                Block.popResource(level,getBlockPos(),stack.copy());
+                Block.popResource(level, getBlockPos(), stack.copy());
             }
         }
     }

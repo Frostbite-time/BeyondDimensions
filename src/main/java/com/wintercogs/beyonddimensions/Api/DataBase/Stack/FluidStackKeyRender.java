@@ -23,26 +23,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class FluidStackKeyRender implements IStackRender {
+public class FluidStackKeyRender implements IStackRender
+{
     public static final FluidStackKeyRender INSTANCE = new FluidStackKeyRender();
 
     @Override
-    public void render(GuiGraphics gui, IStackKey<?> key, int x, int y) {
-        if(key instanceof FluidStackKey fluidKey)
+    public void render(GuiGraphics gui, IStackKey<?> key, int x, int y)
+    {
+        if (key instanceof FluidStackKey fluidKey)
         {
             // 渲染流体图标（16×16）
             var pose = gui.pose();
             pose.pushPose();
 
             FluidStack stack = fluidKey.getRenderStack();
-            if (!stack.isEmpty()) {
+            if (!stack.isEmpty())
+            {
                 var fluid = stack.getFluid();
                 IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluid);
                 ResourceLocation still = props.getStillTexture(stack);
                 TextureAtlasSprite sprite = still == null ? null :
                         Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(still);
 
-                if (sprite != null && sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation()) {
+                if (sprite != null && sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation())
+                {
                     int tint = IClientFluidTypeExtensions.of(fluid).getTintColor();
                     // 复用项目现有的绘制工具
                     com.wintercogs.beyonddimensions.Render.IngredientRenderer
@@ -56,10 +60,11 @@ public class FluidStackKeyRender implements IStackRender {
     }
 
     @Override
-    public void renderAmount(GuiGraphics gui, long amount, int x, int y) {
+    public void renderAmount(GuiGraphics gui, long amount, int x, int y)
+    {
         // 渲染数量文本（右下角）
         String text = getCountText(amount);
-        if(text.isEmpty()) return;
+        if (text.isEmpty()) return;
 
         float scale = 0.666f;
 
@@ -78,14 +83,16 @@ public class FluidStackKeyRender implements IStackRender {
     }
 
     @Override
-    public String getCountText(long count) {
+    public String getCountText(long count)
+    {
         if (count < 0) return "";
         return StringFormat.formatBucket(count);
     }
 
     @Override
-    public Component getDisplayName(IStackKey<?> key) {
-        if(key instanceof FluidStackKey fluidKey)
+    public Component getDisplayName(IStackKey<?> key)
+    {
+        if (key instanceof FluidStackKey fluidKey)
         {
             FluidStack stack = fluidKey.getRenderStack();
             return stack.isEmpty() ? Component.empty() : stack.getHoverName();
@@ -96,7 +103,8 @@ public class FluidStackKeyRender implements IStackRender {
     @Override
     public List<Component> getTooltipLines(IStackKey<?> key, long amount, Item.TooltipContext tooltipContext,
                                            @Nullable net.minecraft.world.entity.player.Player player,
-                                           TooltipFlag tooltipFlag) {
+                                           TooltipFlag tooltipFlag)
+    {
         List<Component> lines = new ArrayList<>();
         lines.add(getDisplayName(key));
         lines.add(Component.translatable("istack.beyonddimensions.storage_num.fluid", amount));
@@ -104,13 +112,15 @@ public class FluidStackKeyRender implements IStackRender {
     }
 
     @Override
-    public Optional<TooltipComponent> getTooltipImage(IStackKey<?> key) {
+    public Optional<TooltipComponent> getTooltipImage(IStackKey<?> key)
+    {
         // 流体默认无额外 TooltipComponent
         return Optional.empty();
     }
 
     @Override
-    public void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY) {
+    public void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY)
+    {
         var mc = Minecraft.getInstance();
         var ctx = mc.level != null ? Item.TooltipContext.of(mc.level) : Item.TooltipContext.EMPTY;
         gui.renderTooltip(

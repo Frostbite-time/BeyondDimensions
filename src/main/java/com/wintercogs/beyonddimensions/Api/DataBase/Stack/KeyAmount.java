@@ -16,24 +16,26 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
 {
 
     // 用于兼容旧版本的数量
-    public static final MapCodec<Long> AMOUNT_COMPAT = new MapCodec<>() {
+    public static final MapCodec<Long> AMOUNT_COMPAT = new MapCodec<>()
+    {
         // 外层键
-        private static final String K_AMOUNT      = "amount";
-        private static final String K_AMOUNT_OLD  = "Amount";
-        private static final String K_KEY         = "key";
+        private static final String K_AMOUNT = "amount";
+        private static final String K_AMOUNT_OLD = "Amount";
+        private static final String K_KEY = "key";
         // key 内部旧形态：完整栈位置
-        private static final String K_INTERNAL    = "internal_stack";
-        private static final String K_STACK       = "Stack";
+        private static final String K_INTERNAL = "internal_stack";
+        private static final String K_STACK = "Stack";
         // 完整栈内部的数量候选键
-        private static final String[] INNER_NUM_KEYS = { "count", "Count", "amount", "Amount" };
+        private static final String[] INNER_NUM_KEYS = {"count", "Count", "amount", "Amount"};
 
         @Override
-        public <T> DataResult<Long> decode(DynamicOps<T> ops, MapLike<T> input) {
-            final T kAmount    = ops.createString(K_AMOUNT);
+        public <T> DataResult<Long> decode(DynamicOps<T> ops, MapLike<T> input)
+        {
+            final T kAmount = ops.createString(K_AMOUNT);
             final T kAmountOld = ops.createString(K_AMOUNT_OLD);
-            final T kKey       = ops.createString(K_KEY);
-            final T kInternal  = ops.createString(K_INTERNAL);
-            final T kStack     = ops.createString(K_STACK);
+            final T kKey = ops.createString(K_KEY);
+            final T kInternal = ops.createString(K_INTERNAL);
+            final T kStack = ops.createString(K_STACK);
 
             // 1) 外部 amount
             T v = input.get(kAmount);
@@ -45,20 +47,26 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
 
             // 3) 从 key 的内部完整栈提取数量，查节点，不看具体类型
             T keyNode = input.get(kKey);
-            if (keyNode != null) {
+            if (keyNode != null)
+            {
                 var keyMapDR = ops.getMap(keyNode);
-                if (keyMapDR.result().isPresent()) {
+                if (keyMapDR.result().isPresent())
+                {
                     MapLike<T> keyMap = keyMapDR.result().get();
                     T stackNode = keyMap.get(kInternal);
                     if (stackNode == null) stackNode = keyMap.get(kStack);
-                    if (stackNode != null) {
+                    if (stackNode != null)
+                    {
                         var stackMapDR = ops.getMap(stackNode);
-                        if (stackMapDR.result().isPresent()) {
+                        if (stackMapDR.result().isPresent())
+                        {
                             MapLike<T> stackMap = stackMapDR.result().get();
-                            for (String inner : INNER_NUM_KEYS) {
+                            for (String inner : INNER_NUM_KEYS)
+                            {
                                 T innerKey = ops.createString(inner);
                                 T numNode = stackMap.get(innerKey);
-                                if (numNode != null) {
+                                if (numNode != null)
+                                {
                                     // 优先用 getNumberValue；不行再尝试 Codec.LONG 解析
                                     var numDR = ops.getNumberValue(numNode).map(n -> n.longValue());
                                     if (numDR.result().isPresent()) return numDR;
@@ -76,13 +84,15 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
         }
 
         @Override
-        public <T> RecordBuilder<T> encode(Long value, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+        public <T> RecordBuilder<T> encode(Long value, DynamicOps<T> ops, RecordBuilder<T> prefix)
+        {
             // 仅写小写 amount
             return prefix.add(ops.createString(K_AMOUNT), ops.createLong(value));
         }
 
         @Override
-        public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops) {
+        public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops)
+        {
             return java.util.stream.Stream.of(ops.createString(K_AMOUNT));
         }
     };
@@ -104,19 +114,22 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
     //   - 旧占位：Type == "Empty" → KeyAmount(ItemStackKey.EMPTY, 0)
     //   - 数量：外层 amount/Amount → 若无再从 key 内部完整栈的 count/Count/amount/Amount
     // ─────────────────────────────────────────────────────────────
-    public static final MapCodec<KeyAmount> TYPE_CODEC = new MapCodec<>() {
-        private static final String K_KEY   = "key";
-        private static final String K_type  = "type";   // 新：IStackKey 分发字段
-        private static final String K_Type  = "Type";   // 旧：大写
-        private static final String K_amt   = "amount";
-        private static final String K_Amt   = "Amount";
+    public static final MapCodec<KeyAmount> TYPE_CODEC = new MapCodec<>()
+    {
+        private static final String K_KEY = "key";
+        private static final String K_type = "type";   // 新：IStackKey 分发字段
+        private static final String K_Type = "Type";   // 旧：大写
+        private static final String K_amt = "amount";
+        private static final String K_Amt = "Amount";
 
         @Override
-        public <T> DataResult<KeyAmount> decode(DynamicOps<T> ops, MapLike<T> input) {
+        public <T> DataResult<KeyAmount> decode(DynamicOps<T> ops, MapLike<T> input)
+        {
             final T kKey = ops.createString(K_KEY);
 
             // 1) 新格式：{ key, amount }
-            if (input.get(kKey) != null) {
+            if (input.get(kKey) != null)
+            {
                 return NEW_FMT.decode(ops, input);
             }
 
@@ -126,14 +139,16 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
             String typeStr = (typeNode == null) ? null : ops.getStringValue(typeNode).result().orElse(null);
 
             // 2.1 占位 "Empty"
-            if ("Empty".equals(typeStr)) {
+            if ("Empty".equals(typeStr))
+            {
                 return DataResult.success(new KeyAmount(ItemStackKey.EMPTY, 0L));
             }
 
             // 2.2 构造“兼容 key 对象”：把旧 Type -> 新 type，其余字段原样保留
             java.util.Map<T, T> compatKeyMap = new java.util.LinkedHashMap<>();
             input.entries().forEach(p -> compatKeyMap.put(p.getFirst(), p.getSecond()));
-            if (typeNode != null) {
+            if (typeNode != null)
+            {
                 compatKeyMap.put(ops.createString(K_type), typeNode); // 注入小写 type 以便 IStackKey 分发
             }
             T compatKeyNode = ops.createMap(compatKeyMap);
@@ -160,13 +175,15 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
         }
 
         @Override
-        public <T> RecordBuilder<T> encode(KeyAmount value, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+        public <T> RecordBuilder<T> encode(KeyAmount value, DynamicOps<T> ops, RecordBuilder<T> prefix)
+        {
             // 写：始终写新格式（key + amount）
             return NEW_FMT.encode(value, ops, prefix);
         }
 
         @Override
-        public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops) {
+        public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops)
+        {
             return java.util.stream.Stream.of(ops.createString(K_KEY), ops.createString("amount"));
         }
     };
@@ -188,7 +205,9 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
         return amount <= 0L || key.isEmpty();
     }
 
-    /** 给出当前kv对所代表的实际stack副本，不支持long数量的stack可能会被内部实现自动限制到int上限 */
+    /**
+     * 给出当前kv对所代表的实际stack副本，不支持long数量的stack可能会被内部实现自动限制到int上限
+     */
     public Object toStack()
     {
         return key.copyStackWithCount(amount);

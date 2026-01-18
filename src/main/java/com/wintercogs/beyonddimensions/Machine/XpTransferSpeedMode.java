@@ -8,7 +8,8 @@ public enum XpTransferSpeedMode
     HIGHEST, // 100级
     OVER_HIGHEST; // 150级
 
-    public XpTransferSpeedMode next() {
+    public XpTransferSpeedMode next()
+    {
         XpTransferSpeedMode[] v = values();
         return v[(this.ordinal() + 1) % v.length];
     }

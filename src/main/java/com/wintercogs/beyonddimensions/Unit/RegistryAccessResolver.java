@@ -21,7 +21,8 @@ public final class RegistryAccessResolver
         if (srv != null && srv.isSameThread()) return srv.registryAccess();
 
         // 2) 客户端优先用 Connection（与网络来的 Holder 同 owner）
-        if (net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT) {
+        if (net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT)
+        {
             var mc = net.minecraft.client.Minecraft.getInstance();
             var conn = mc.getConnection();
             if (conn != null) return conn.registryAccess();

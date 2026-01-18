@@ -46,33 +46,34 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     );
 
     // 最终产出的 MapCodec（编码始终走新格式；解码按代次兼容）
-    public static final MapCodec<ItemStackKey> TYPE_CODEC = new MapCodec<>() {
+    public static final MapCodec<ItemStackKey> TYPE_CODEC = new MapCodec<>()
+    {
 
         // —— 统一键名，便于维护 —— //
-        private static final String K_ITEM        = "item";
-        private static final String K_COMPS       = "components";
+        private static final String K_ITEM = "item";
+        private static final String K_COMPS = "components";
         // 1代旧键名
-        private static final String K_ITEM_OLD    = "Item";
-        private static final String K_COMPS_OLD   = "Components";
+        private static final String K_ITEM_OLD = "Item";
+        private static final String K_COMPS_OLD = "Components";
         // 2代旧键名
-        private static final String K_STACK       = "Stack";
+        private static final String K_STACK = "Stack";
         // 3代旧键名
-        private static final String K_LEGACY      = "internal_stack";
+        private static final String K_LEGACY = "internal_stack";
         // 注意：旧数据中可能还有 amount/Amount；Key 层面不需要，读取时**忽略**即可
-        private static final String K_AMOUNT      = "amount";
-        private static final String K_AMOUNT_OLD  = "Amount";
+        private static final String K_AMOUNT = "amount";
+        private static final String K_AMOUNT_OLD = "Amount";
 
         @Override
         public <T> DataResult<ItemStackKey> decode(DynamicOps<T> ops, MapLike<T> input)
         {
-            final T kItem      = ops.createString(K_ITEM);
-            final T kComps     = ops.createString(K_COMPS);
-            final T kItemOld   = ops.createString(K_ITEM_OLD);
-            final T kCompsOld  = ops.createString(K_COMPS_OLD);
-            final T kStack     = ops.createString(K_STACK);
-            final T kLegacy    = ops.createString(K_LEGACY);
-            final T kAmt       = ops.createString(K_AMOUNT);
-            final T kAmtOld    = ops.createString(K_AMOUNT_OLD);
+            final T kItem = ops.createString(K_ITEM);
+            final T kComps = ops.createString(K_COMPS);
+            final T kItemOld = ops.createString(K_ITEM_OLD);
+            final T kCompsOld = ops.createString(K_COMPS_OLD);
+            final T kStack = ops.createString(K_STACK);
+            final T kLegacy = ops.createString(K_LEGACY);
+            final T kAmt = ops.createString(K_AMOUNT);
+            final T kAmtOld = ops.createString(K_AMOUNT_OLD);
 
             // 新格式 item + components
             if (input.get(kItem) != null)
@@ -83,7 +84,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
                 // 失败时使用Items.AIR的宽松回退
                 DataComponentPatch patch = DataComponentPatch.EMPTY;
                 T compsNode = input.get(kComps);
-                if (compsNode != null) {
+                if (compsNode != null)
+                {
                     patch = DataComponentPatch.CODEC.parse(ops, compsNode)
                             .result().orElse(DataComponentPatch.EMPTY);
                 }
@@ -96,10 +98,11 @@ public final class ItemStackKey implements IStackKey<ItemStack>
                 java.util.Map<T, T> map = new java.util.LinkedHashMap<>();
                 input.entries().forEach(p -> {
                     T key = p.getFirst();
-                    if (key.equals(kItemOld))      key = kItem;   // Item -> item
+                    if (key.equals(kItemOld)) key = kItem;   // Item -> item
                     else if (key.equals(kCompsOld)) key = kComps; // Components -> components
                     // Key 层忽略 amount/Amount
-                    if (!key.equals(kAmt) && !key.equals(kAmtOld)) {
+                    if (!key.equals(kAmt) && !key.equals(kAmtOld))
+                    {
                         map.put(key, p.getSecond());
                     }
                 });
@@ -154,7 +157,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
 
     public ItemStackKey(ItemStack stack)
     {
-        this(stack.getItem(),stack.getComponentsPatch());
+        this(stack.getItem(), stack.getComponentsPatch());
     }
 
     // 仅供内部使用，不直接对外暴露
@@ -179,7 +182,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public @Nullable KeyAmount fromStackObject(Object stack)
     {
-        if(stack instanceof ItemStack itemStack)
+        if (stack instanceof ItemStack itemStack)
             return new KeyAmount(new ItemStackKey(itemStack), itemStack.getCount());
         return null;
     }
@@ -187,9 +190,10 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public @Nullable ItemStackKey fromSourceObject(Object key, DataComponentPatch dataComponentPatch)
     {
-        if (key instanceof Item it) {
+        if (key instanceof Item it)
+        {
             // 未知路径的清洗一遍后再送入
-            DataComponentPatch p = dataComponentPatch != null && !dataComponentPatch.isEmpty() ? PatchedDataComponentMap.fromPatch(it.components(),dataComponentPatch).asPatch() : DataComponentPatch.EMPTY;
+            DataComponentPatch p = dataComponentPatch != null && !dataComponentPatch.isEmpty() ? PatchedDataComponentMap.fromPatch(it.components(), dataComponentPatch).asPatch() : DataComponentPatch.EMPTY;
             return new ItemStackKey(it, p);
         }
         return null;
@@ -198,7 +202,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public ItemStack getReadOnlyStack()
     {
-        if(this.severCache == null)
+        if (this.severCache == null)
         {
             this.severCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         }
@@ -214,7 +218,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
 
         // 非AIR：若为空或物品被外界改了，则重建（数量直接置 1）
         ItemStack cache = this.severCache;
-        if (cache.isEmpty() || cache.getItem() != this.item) {
+        if (cache.isEmpty() || cache.getItem() != this.item)
+        {
             this.severCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
             return this.severCache;
         }
@@ -284,7 +289,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     {
         // 此处已经判过AIR，如果不是，不可能继续往后走，故后续只要是isEmpty则证明需要重设
         if (this.item == Items.AIR) return 1; // 返回1，与原版行为一致，且不会使外部认为无法输入
-        if(vanillaMaxSize <=0)
+        if (vanillaMaxSize <= 0)
         {
             vanillaMaxSize = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch).getMaxStackSize();
         }
@@ -311,8 +316,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public boolean isSame(IStackKey<?> other)
     {
-        if(this == other) return true; // 额外做一次引用对比
-        if(other instanceof ItemStackKey otherItemStackKey) // 顺手处理空
+        if (this == other) return true; // 额外做一次引用对比
+        if (other instanceof ItemStackKey otherItemStackKey) // 顺手处理空
         {
             return this.item == otherItemStackKey.item; // 直接比对
         }
@@ -322,8 +327,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public boolean isSameTypeSameComponents(IStackKey<?> other)
     {
-        if(this == other) return true; // 额外做一次引用对比
-        if(other instanceof ItemStackKey otherKey) // 会顺带处理null
+        if (this == other) return true; // 额外做一次引用对比
+        if (other instanceof ItemStackKey otherKey) // 会顺带处理null
         {
             if (this.item != otherKey.item) return false;
 
@@ -380,16 +385,20 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public @NotNull CompoundTag serializeNBT(HolderLookup.Provider levelRegistryAccess)
     {
-        try {
+        try
+        {
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.encodeStart(ops, this)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
                             "ItemStackKey 在序列化(Codec)时出错: {}", err))
                     .map(nbt -> {
-                        if (nbt instanceof CompoundTag ct) {
+                        if (nbt instanceof CompoundTag ct)
+                        {
                             // 直接返回编码结果；避免无意义的再包装
                             return ct;
-                        } else {
+                        }
+                        else
+                        {
                             // 理论上不应发生：MapCodec 在 NbtOps 下应产生 CompoundTag
                             BeyondDimensions.LOGGER.error(
                                     "ItemStackKey 序列化得到的 NBT 非 CompoundTag，已丢弃该结果: {}",
@@ -398,7 +407,9 @@ public final class ItemStackKey implements IStackKey<ItemStack>
                         }
                     })
                     .orElseGet(CompoundTag::new); // 编码失败：给空 CompoundTag
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             BeyondDimensions.LOGGER.error("ItemStackKey 在序列化时异常: {}", t.getMessage(), t);
             return new CompoundTag();
         }
@@ -407,13 +418,16 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public @NotNull ItemStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider levelRegistryAccess)
     {
-        try {
+        try
+        {
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.parse(ops, nbt)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
                             "ItemStackKey 在反序列化(Codec)时出错: {} | Keys={}", err, nbt.getAllKeys()))
                     .orElse(ItemStackKey.EMPTY);
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             BeyondDimensions.LOGGER.error("ItemStackKey 反序列化异常。Keys={} Error={}",
                     nbt.getAllKeys(), t.getMessage(), t);
             return ItemStackKey.EMPTY;
@@ -430,7 +444,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public @NotNull ItemStack getRenderStack()
     {
-        if(this.clientCache == null)
+        if (this.clientCache == null)
         {
             this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
         }
@@ -446,7 +460,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
 
         // 非AIR：若为空或物品被外界改了，则重建（数量直接置 1）
         ItemStack cache = this.clientCache;
-        if (cache.isEmpty() || cache.getItem() != this.item) {
+        if (cache.isEmpty() || cache.getItem() != this.item)
+        {
             this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
             return this.clientCache;
         }
@@ -459,8 +474,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     @Override
     public boolean equals(Object other)
     {
-        if(this == other) return true;
-        if(other instanceof ItemStackKey otherKey) // 此处会顺带处理null
+        if (this == other) return true;
+        if (other instanceof ItemStackKey otherKey) // 此处会顺带处理null
         {
             return this.isSameTypeSameComponents(otherKey);
         }
@@ -486,20 +501,25 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     {
         // 优先使用最优提供者（Server→Connection→Level→Builtin）
         HolderLookup.Provider current = null;
-        try {
+        try
+        {
             current = RegistryAccessResolver.resolve();
-        } catch (Throwable ignored) {
+        }
+        catch (Throwable ignored)
+        {
             // 保持null，后面会兜底
         }
 
         // 如果已有有效缓存，且提供者身份不变，则保持不继续计算，直接使用缓存
         HolderLookup.Provider cached = (equalsByteProviderRef != null) ? equalsByteProviderRef.get() : null;
         if (this.patchByte != null && this.patchByte.length > 0 // 字节已经计算完毕
-                && cached != null && cached == current) { // 注册表提供者身份不变
+                && cached != null && cached == current)
+        { // 注册表提供者身份不变
             return;
         }
 
-        try { // 客户端断线重连后可能会为了缓存tooltip的IStackType有一次cached导致的计算，这是正常的
+        try
+        { // 客户端断线重连后可能会为了缓存tooltip的IStackType有一次cached导致的计算，这是正常的
 
             // 1) 用当前 Provider 先算一次（空补丁会得到稳定的非空 EMPTY_BYTES，length不会为0，仅有失败时为0）
             // 若当前provider不可用，则用内建表
@@ -507,14 +527,18 @@ public final class ItemStackKey implements IStackKey<ItemStack>
             byte[] out = DataComponentPatchHelper.toCanonicalBytes(this.patch, use);
 
             // 2) 客户端兜底：若失败（返回长度==0），再强制用 Connection 的 Provider 重试一次
-            if (out.length == 0 && net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT) {
+            if (out.length == 0 && net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT)
+            {
                 var mc = net.minecraft.client.Minecraft.getInstance();
                 var conn = mc.getConnection();
-                if (conn != null) {
+                if (conn != null)
+                {
                     HolderLookup.Provider connProv = conn.registryAccess();
-                    if (connProv != use) { // 提供者和已经失败的提供者不应为同一人
+                    if (connProv != use)
+                    { // 提供者和已经失败的提供者不应为同一人
                         byte[] retry = DataComponentPatchHelper.toCanonicalBytes(this.patch, connProv);
-                        if (retry.length > 0) {
+                        if (retry.length > 0)
+                        {
                             out = retry;
                             use = connProv;
                         }
@@ -524,12 +548,17 @@ public final class ItemStackKey implements IStackKey<ItemStack>
 
             // 3) 写入缓存；失败则清空 Provider 绑定
             this.patchByte = out;
-            if (out.length > 0) {
+            if (out.length > 0)
+            {
                 this.equalsByteProviderRef = new java.lang.ref.WeakReference<>(use);
-            } else {
+            }
+            else
+            {
                 this.equalsByteProviderRef = null;
             }
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             // 不让逻辑中断，留给 equals/hashCode 回退到 patch.equals/hash
             BeyondDimensions.LOGGER.warn("ItemStackKey字节序列化失败: {}", t.toString());
             this.patchByte = new byte[0];

@@ -30,7 +30,7 @@ public class PickBlockFromNet
             if (player == null || player.isCreative()) return; // 不影响原版创造模式
             if (!player.getMainHandItem().isEmpty())
             {
-                if(player.isShiftKeyDown())
+                if (player.isShiftKeyDown())
                 {
                     PacketDistributor.sendToServer(new PutHandItemToNetPacket(InteractionHand.MAIN_HAND));
                 }
@@ -40,7 +40,7 @@ public class PickBlockFromNet
             {
                 HitResult hit = Minecraft.getInstance().hitResult;
                 if (hit == null || hit.getType() != HitResult.Type.BLOCK) return;
-                Block targetBlock = player.level().getBlockState(((BlockHitResult)hit).getBlockPos()).getBlock();
+                Block targetBlock = player.level().getBlockState(((BlockHitResult) hit).getBlockPos()).getBlock();
                 Item targetBlockItem = targetBlock.asItem();
                 ItemStack targetStack = new ItemStack(targetBlockItem);
                 PacketDistributor.sendToServer(new PickBlockFromNetPacket(targetStack));

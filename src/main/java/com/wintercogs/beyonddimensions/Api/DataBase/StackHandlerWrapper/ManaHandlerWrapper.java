@@ -54,7 +54,7 @@ public class ManaHandlerWrapper implements IStackHandlerWrapper<ManaType>
     {
         long manaInsert = Math.min(stack.getStackCount(), getCapacity(0) - getStackInSlot(0).getStackCount());
         int actInsert = BDMath.clampLongToInt(manaInsert);
-        if(!sim)
+        if (!sim)
             container.receiveMana(actInsert);
         return stack.getStackCount() - actInsert;
     }
@@ -64,7 +64,7 @@ public class ManaHandlerWrapper implements IStackHandlerWrapper<ManaType>
     {
         long manaInsert = Math.min(stack.getStackCount(), getCapacity(0) - getStackInSlot(0).getStackCount());
         int actInsert = BDMath.clampLongToInt(manaInsert);
-        if(!sim)
+        if (!sim)
             container.receiveMana(actInsert);
         return stack.getStackCount() - actInsert; // 我也不知道插入了多少，但总之，就算有浪费也反不回来
     }
@@ -73,7 +73,7 @@ public class ManaHandlerWrapper implements IStackHandlerWrapper<ManaType>
     public long extract(int slot, long amount, boolean sim)
     {
         int actExtract = BDMath.clampLongToInt(Math.min(amount, getStackInSlot(0).getStackCount()));
-        if(!sim)
+        if (!sim)
             container.receiveMana(-actExtract);
         return actExtract;
     }
@@ -82,7 +82,7 @@ public class ManaHandlerWrapper implements IStackHandlerWrapper<ManaType>
     public long extract(ManaType stack, boolean sim)
     {
         int actExtract = BDMath.clampLongToInt(Math.min(stack.getStackCount(), getStackInSlot(0).getStackCount()));
-        if(!sim)
+        if (!sim)
             container.receiveMana(-actExtract);
         return actExtract;
     }
@@ -94,12 +94,12 @@ public class ManaHandlerWrapper implements IStackHandlerWrapper<ManaType>
 
         public ManaContainerWrapper(Object handler)
         {
-            if(handler instanceof ManaReceiver)
+            if (handler instanceof ManaReceiver)
             {
                 receiver = (ManaReceiver) handler;
                 itemReceiver = null;
             }
-            else if(handler instanceof ManaItem)
+            else if (handler instanceof ManaItem)
             {
                 receiver = null;
                 itemReceiver = (ManaItem) handler;
@@ -113,9 +113,9 @@ public class ManaHandlerWrapper implements IStackHandlerWrapper<ManaType>
 
         public int getMana()
         {
-            if(receiver != null)
+            if (receiver != null)
                 return receiver.getCurrentMana();
-            else if(itemReceiver != null)
+            else if (itemReceiver != null)
                 return itemReceiver.getMana();
             else
                 return 0;
@@ -123,9 +123,9 @@ public class ManaHandlerWrapper implements IStackHandlerWrapper<ManaType>
 
         public int getMaxMana()
         {
-            if(itemReceiver != null)
+            if (itemReceiver != null)
                 return itemReceiver.getMaxMana();
-            else if(receiver != null)
+            else if (receiver != null)
             {
                 if (receiver instanceof ManaPool pool) // 魔力池
                 {
@@ -149,9 +149,9 @@ public class ManaHandlerWrapper implements IStackHandlerWrapper<ManaType>
 
         public void receiveMana(int mana)
         {
-            if(receiver != null)
+            if (receiver != null)
                 receiver.receiveMana(mana);
-            else if(itemReceiver != null)
+            else if (itemReceiver != null)
                 itemReceiver.addMana(mana);
         }
     }

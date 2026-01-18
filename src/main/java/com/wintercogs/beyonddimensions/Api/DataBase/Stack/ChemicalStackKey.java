@@ -420,7 +420,9 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
         return hashCodeCache;
     }
 
-    /** 确保当前holder已经进入注册表 */
+    /**
+     * 确保当前holder已经进入注册表
+     */
     private static Holder<Chemical> resolveBound(Holder<Chemical> h)
     {
         if (h.unwrapKey().isPresent()) return h; // 已绑定

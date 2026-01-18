@@ -11,21 +11,25 @@ import java.util.UUID;
 public class PlayerNameHelper
 {
     // 在线/离线玩家均可查询（优先返回缓存名称）
-    public static String getPlayerNameByUUID(UUID uuid, MinecraftServer infoProvider) {
+    public static String getPlayerNameByUUID(UUID uuid, MinecraftServer infoProvider)
+    {
 
         MinecraftServer server = infoProvider;
         // 1. 优先检查在线玩家（即时获取）
         ServerPlayer onlinePlayer = server.getPlayerList().getPlayer(uuid);
-        if (onlinePlayer != null) {
+        if (onlinePlayer != null)
+        {
             return onlinePlayer.getGameProfile().getName(); // 实时名称可能包含昵称插件修改
         }
 
         // 2. 若不在线，查询服务端的缓存（ProfileCache）
         GameProfileCache profileCache = server.getProfileCache();
-        if (profileCache != null) {
+        if (profileCache != null)
+        {
             Optional<GameProfile> profileInfo =
                     profileCache.get(uuid);
-            if (profileInfo.isPresent()) {
+            if (profileInfo.isPresent())
+            {
                 return profileInfo.get().getName();
             }
         }

@@ -16,9 +16,9 @@ public class BD_RSMekPlugin
 {
     public static void register()
     {
-        RSHelper.ISTACK_TO_RSKEY_MAP.put(ChemicalStackKey.ID, stackType -> Optional.of(new ChemicalResource(((ChemicalStackKey)stackType).getSource())));
+        RSHelper.ISTACK_TO_RSKEY_MAP.put(ChemicalStackKey.ID, stackType -> Optional.of(new ChemicalResource(((ChemicalStackKey) stackType).getSource())));
 
-        RSHelper.RSKEY_TO_STACK_TYPE_MAP.put(ChemicalResourceType.INSTANCE, key -> Optional.of(new ChemicalStackKey(getStackFromChemical(((ChemicalResource)key).chemical()))));
+        RSHelper.RSKEY_TO_STACK_TYPE_MAP.put(ChemicalResourceType.INSTANCE, key -> Optional.of(new ChemicalStackKey(getStackFromChemical(((ChemicalResource) key).chemical()))));
     }
 
     private static ChemicalStack getStackFromChemical(Chemical chemical)

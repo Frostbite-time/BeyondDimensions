@@ -20,7 +20,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 // 存放一些用于性能测试的函数
-public class GameTester {
+public class GameTester
+{
 
     public static void OnSeverStartTester(MinecraftServer server)
     {
@@ -42,7 +43,8 @@ public class GameTester {
         List<List<KeyAmount>> allInsertData = new ArrayList<>(totalTestTimes);
         List<int[]> allExtractData = new ArrayList<>(totalTestTimes);
 
-        for (int i = 0; i < totalTestTimes; i++) {
+        for (int i = 0; i < totalTestTimes; i++)
+        {
             // 为每一轮构造独立 RNG，保证可复现同时又避免共享状态干扰
             Random roundRng = new Random(masterRandom.nextLong());
 
@@ -52,12 +54,14 @@ public class GameTester {
 
             // 生成插入数据：100~300；10% 的条目附带随机 Data Components
             List<KeyAmount> insertList = new ArrayList<>(shuffled.size());
-            for (Item item : shuffled) {
+            for (Item item : shuffled)
+            {
                 int amount = 100 + roundRng.nextInt(201);
 
                 ItemStack stack = new ItemStack(item, amount);
                 // 10% 概率：给该条目附带随机数据组件（1~3 个）
-                if (roundRng.nextDouble() < 0.10) {
+                if (roundRng.nextDouble() < 0.10)
+                {
                     applyRandomComponents(stack, roundRng);
                 }
 
@@ -67,14 +71,16 @@ public class GameTester {
 
             // 生成提取数据：每槽位尝试提取 0~399
             int[] extractArr = new int[shuffled.size()];
-            for (int j = 0; j < extractArr.length; j++) {
+            for (int j = 0; j < extractArr.length; j++)
+            {
                 extractArr[j] = roundRng.nextInt(400);
             }
             allExtractData.add(extractArr);
         }
 
         // ========== 预热（不记录结果；避免 clearStorage() 依赖差异） ==========
-        for (int i = 0; i < warmupIters; i++) {
+        for (int i = 0; i < warmupIters; i++)
+        {
             UnifiedStorage storage = new DimensionsNet(true).getUnifiedStorage();
             List<KeyAmount> data = allInsertData.get(i % allInsertData.size());
             int[] extData = allExtractData.get(i % allExtractData.size());
@@ -92,7 +98,8 @@ public class GameTester {
         long[] extractTimes = new long[totalTestTimes];
         long[] combinedTimes = new long[totalTestTimes];
 
-        for (int t = 0; t < totalTestTimes; t++) {
+        for (int t = 0; t < totalTestTimes; t++)
+        {
             List<KeyAmount> insertData = allInsertData.get(t);
             int[] extractData = allExtractData.get(t);
 
@@ -130,11 +137,14 @@ public class GameTester {
      * 给 10% 的条目随机附加 1~3 个数据组件。
      * 注意：以下示例只使用了在多版本中最稳定的组件类型；如某组件在你版本不存在，直接删掉对应分支即可。
      */
-    private static void applyRandomComponents(ItemStack stack, Random rng) {
+    private static void applyRandomComponents(ItemStack stack, Random rng)
+    {
         int howMany = 1 + rng.nextInt(3); // 1~3
-        for (int i = 0; i < howMany; i++) {
+        for (int i = 0; i < howMany; i++)
+        {
             int pick = rng.nextInt(3);
-            switch (pick) {
+            switch (pick)
+            {
                 case 0:
                     // 自定义名称：一定存在且最安全
                     stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME,
@@ -142,17 +152,23 @@ public class GameTester {
                     break;
                 case 1:
                     // 是否不可破坏（若你版本没有 UNBREAKABLE，删掉该分支即可）
-                    try {
-                        stack.set(DataComponents.UNBREAKABLE,new Unbreakable(true));
-                    } catch (Throwable ignored) {
+                    try
+                    {
+                        stack.set(DataComponents.UNBREAKABLE, new Unbreakable(true));
+                    }
+                    catch (Throwable ignored)
+                    {
                         // 某些版本没有该组件时，静默跳过即可
                     }
                     break;
                 case 2:
                     // 修复花费（若你版本没有 REPAIR_COST，删掉该分支即可）
-                    try {
+                    try
+                    {
                         stack.set(net.minecraft.core.component.DataComponents.REPAIR_COST, rng.nextInt(16));
-                    } catch (Throwable ignored) {
+                    }
+                    catch (Throwable ignored)
+                    {
                     }
                     break;
             }
@@ -160,15 +176,16 @@ public class GameTester {
     }
 
     // ========== 统计 & 报告 ==========
-    private static void reportPerformance(String name, long[] timingsNanos, int opsPerRun) {
+    private static void reportPerformance(String name, long[] timingsNanos, int opsPerRun)
+    {
         long[] arr = timingsNanos.clone();
         java.util.Arrays.sort(arr);
 
-        double meanMs      = nanosToMs(mean(timingsNanos));
-        double p50Ms       = nanosToMs(percentile(arr, 50));
-        double p90Ms       = nanosToMs(percentile(arr, 90));
-        double p99Ms       = nanosToMs(percentile(arr, 99));
-        double trimmed5Ms  = nanosToMs(trimmedMean(arr, 0.05));
+        double meanMs = nanosToMs(mean(timingsNanos));
+        double p50Ms = nanosToMs(percentile(arr, 50));
+        double p90Ms = nanosToMs(percentile(arr, 90));
+        double p99Ms = nanosToMs(percentile(arr, 99));
+        double trimmed5Ms = nanosToMs(trimmedMean(arr, 0.05));
         double meanNsPerOp = mean(timingsNanos) / Math.max(1, opsPerRun);
 
         String msg = String.format(
@@ -178,17 +195,22 @@ public class GameTester {
         );
         BeyondDimensions.LOGGER.info(msg);
     }
+
     // ========== 简单统计工具 ==========
-    private static double nanosToMs(double nanos) {
+    private static double nanosToMs(double nanos)
+    {
         return nanos / 1_000_000.0;
     }
 
-    private static double mean(long[] a) {
+    private static double mean(long[] a)
+    {
         long sum = 0;
         for (long v : a) sum += v;
         return (double) sum / a.length;
     }
-    private static double percentile(long[] sorted, int p) {
+
+    private static double percentile(long[] sorted, int p)
+    {
         if (sorted.length == 0) return 0;
         double pos = (p / 100.0) * (sorted.length - 1);
         int i = (int) Math.floor(pos);
@@ -197,7 +219,8 @@ public class GameTester {
         return sorted[i] * (1.0 - frac) + sorted[j] * frac;
     }
 
-    private static double trimmedMean(long[] sorted, double trimRatio) {
+    private static double trimmedMean(long[] sorted, double trimRatio)
+    {
         int n = sorted.length;
         int cut = (int) Math.floor(n * trimRatio);
         int from = cut;
@@ -205,7 +228,11 @@ public class GameTester {
         if (from >= to) return mean(sorted);
         long sum = 0;
         int cnt = 0;
-        for (int i = from; i < to; i++) { sum += sorted[i]; cnt++; }
+        for (int i = from; i < to; i++)
+        {
+            sum += sorted[i];
+            cnt++;
+        }
         return (double) sum / Math.max(cnt, 1);
     }
 }

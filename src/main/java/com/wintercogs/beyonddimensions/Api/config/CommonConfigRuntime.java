@@ -4,7 +4,9 @@ import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 
 public final class CommonConfigRuntime
 {
-    private CommonConfigRuntime() {}
+    private CommonConfigRuntime()
+    {
+    }
 
     public static ButtonState uiSortButton;
     public static ButtonState uiSecondSortButton;

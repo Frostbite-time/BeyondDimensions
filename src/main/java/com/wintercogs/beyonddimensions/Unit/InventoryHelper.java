@@ -6,16 +6,20 @@ import net.minecraft.world.item.ItemStack;
 
 public class InventoryHelper
 {
-    public static ItemStack transferToPlayerInventory(Player player, ItemStack stack) {
+    public static ItemStack transferToPlayerInventory(Player player, ItemStack stack)
+    {
         Inventory inventory = player.getInventory();
         int maxStackSize = stack.getMaxStackSize();
 
         // 第一阶段：合并已有堆叠
-        for (int i = 0; i < 36 && !stack.isEmpty(); i++) {
+        for (int i = 0; i < 36 && !stack.isEmpty(); i++)
+        {
             ItemStack slotStack = inventory.getItem(i);
-            if (ItemStack.isSameItemSameComponents(slotStack, stack)) {
+            if (ItemStack.isSameItemSameComponents(slotStack, stack))
+            {
                 int transferable = Math.min(maxStackSize - slotStack.getCount(), stack.getCount());
-                if (transferable > 0) {
+                if (transferable > 0)
+                {
                     slotStack.grow(transferable);
                     stack.shrink(transferable);
                     inventory.setItem(i, slotStack); // 更新槽位
@@ -24,9 +28,12 @@ public class InventoryHelper
         }
 
         // 第二阶段：填充空槽
-        if (!stack.isEmpty()) {
-            for (int i = 0; i < 36 && !stack.isEmpty(); i++) {
-                if (inventory.getItem(i).isEmpty()) {
+        if (!stack.isEmpty())
+        {
+            for (int i = 0; i < 36 && !stack.isEmpty(); i++)
+            {
+                if (inventory.getItem(i).isEmpty())
+                {
                     ItemStack cloned = stack.copy();
                     cloned.setCount(Math.min(stack.getCount(), maxStackSize));
                     inventory.setItem(i, cloned);
@@ -46,9 +53,11 @@ public class InventoryHelper
         Inventory inventory = player.getInventory();
 
         // 遍历背包主槽位（0-35）
-        for (int i = 0; i < 36 && extract < aim; i++) {
+        for (int i = 0; i < 36 && extract < aim; i++)
+        {
             ItemStack invStack = inventory.getItem(i);
-            if (ItemStack.isSameItemSameComponents(invStack, stack)) {
+            if (ItemStack.isSameItemSameComponents(invStack, stack))
+            {
                 int tryExtract = Math.min(aim - extract, invStack.getCount());
                 invStack.shrink(tryExtract);
                 extract += tryExtract;

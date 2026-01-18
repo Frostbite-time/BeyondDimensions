@@ -37,18 +37,19 @@ public class NetHopperBlock extends BaseMachineBlock
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new NetHopperBlockEntity(blockPos,blockState);
+    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
+    {
+        return new NetHopperBlockEntity(blockPos, blockState);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
     {
-        super.useWithoutItem(state,level,pos,player,hitResult);
-        if(!level.isClientSide()&&!player.isShiftKeyDown())
+        super.useWithoutItem(state, level, pos, player, hitResult);
+        if (!level.isClientSide() && !player.isShiftKeyDown())
         {
             NetHopperBlockEntity blockEntity = (NetHopperBlockEntity) level.getBlockEntity(pos);
-            player.openMenu(blockEntity,pos);
+            player.openMenu(blockEntity, pos);
         }
         return InteractionResult.SUCCESS_NO_ITEM_USED;
     }

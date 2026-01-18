@@ -26,12 +26,12 @@ public class NetCreater extends Item
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
     {
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND)
+        if (usedHand != InteractionHand.MAIN_HAND)
         {
             return InteractionResultHolder.fail(itemstack);
         }
 
-        if(!level.isClientSide())
+        if (!level.isClientSide())
         {
             DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
             if (net != null)
@@ -39,9 +39,9 @@ public class NetCreater extends Item
                 return InteractionResultHolder.fail(itemstack);
             }
 
-            DimensionsNet newNet = DimensionsNet.createNewNetForPlayer(player,Long.MAX_VALUE, Integer.MAX_VALUE);
+            DimensionsNet newNet = DimensionsNet.createNewNetForPlayer(player, Long.MAX_VALUE, Integer.MAX_VALUE);
 
-            itemstack.consume(1,player);
+            itemstack.consume(1, player);
 
             // 在成功创建网络后添加
             level.playSound(null,
@@ -56,14 +56,14 @@ public class NetCreater extends Item
             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.network_created"));
 
             // 为新网络添加一些时空碎片
-            if(newNet != null)
+            if (newNet != null)
             {
                 ItemStack timeCrystal = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
                 newNet.getUnifiedStorage().insert(new ItemStackKey(timeCrystal), 64, false);
             }
         }
 
-        return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
 }

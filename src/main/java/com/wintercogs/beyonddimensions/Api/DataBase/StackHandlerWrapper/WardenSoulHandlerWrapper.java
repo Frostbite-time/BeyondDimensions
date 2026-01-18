@@ -51,7 +51,7 @@ public class WardenSoulHandlerWrapper implements IStackHandlerWrapper<WardenSoul
         long amount = stack.getStackCount();
         // 确保请求的插入量在int范围内（Max: 2,147,483,647）
         int insertAmount = (amount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) amount;
-        ISoulHandler.Action action = sim ?  ISoulHandler.Action.SIMULATE : ISoulHandler.Action.EXECUTE;
+        ISoulHandler.Action action = sim ? ISoulHandler.Action.SIMULATE : ISoulHandler.Action.EXECUTE;
 
         // 获取实际接受量
         int accepted = soulHandler.fill(insertAmount, action);
@@ -66,7 +66,7 @@ public class WardenSoulHandlerWrapper implements IStackHandlerWrapper<WardenSoul
         long amount = stack.getStackCount();
         // 确保请求的插入量在int范围内（Max: 2,147,483,647）
         int insertAmount = (amount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) amount;
-        ISoulHandler.Action action = sim ?  ISoulHandler.Action.SIMULATE : ISoulHandler.Action.EXECUTE;
+        ISoulHandler.Action action = sim ? ISoulHandler.Action.SIMULATE : ISoulHandler.Action.EXECUTE;
 
         // 获取实际接受量
         int accepted = soulHandler.fill(insertAmount, action);
@@ -80,7 +80,7 @@ public class WardenSoulHandlerWrapper implements IStackHandlerWrapper<WardenSoul
     {
         int extractAmount = (amount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) amount;
         if (extractAmount < 0) extractAmount = 0;
-        ISoulHandler.Action action = sim ?  ISoulHandler.Action.SIMULATE : ISoulHandler.Action.EXECUTE;
+        ISoulHandler.Action action = sim ? ISoulHandler.Action.SIMULATE : ISoulHandler.Action.EXECUTE;
         return soulHandler.drain(extractAmount, action);
     }
 
@@ -89,7 +89,7 @@ public class WardenSoulHandlerWrapper implements IStackHandlerWrapper<WardenSoul
     {
         int extractAmount = (stack.getStackCount() > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) stack.getStackCount();
         if (extractAmount < 0) extractAmount = 0;
-        ISoulHandler.Action action = sim ?  ISoulHandler.Action.SIMULATE : ISoulHandler.Action.EXECUTE;
+        ISoulHandler.Action action = sim ? ISoulHandler.Action.SIMULATE : ISoulHandler.Action.EXECUTE;
         return soulHandler.drain(extractAmount, action);
     }
 }

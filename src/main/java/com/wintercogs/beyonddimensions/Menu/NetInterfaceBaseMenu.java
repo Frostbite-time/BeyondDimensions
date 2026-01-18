@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 public class NetInterfaceBaseMenu extends BDBaseMenu
 {
     private static final int slotStartY = 1 + CommonTextures.TOP_BASE_COMMON_HEIGHT;
-    private static final int invSlotStartY = 6 + slotStartY + CommonTextures.COMMON_SLOTS_HEIGHT*3 + CommonTextures.FILTER_SLOTS_HEIGHT*3 + CommonTextures.COMMON_CONNECTION_HEIGHT;
+    private static final int invSlotStartY = 6 + slotStartY + CommonTextures.COMMON_SLOTS_HEIGHT * 3 + CommonTextures.FILTER_SLOTS_HEIGHT * 3 + CommonTextures.COMMON_CONNECTION_HEIGHT;
 
 
     public final StackHandler storage;
@@ -40,6 +40,7 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
 
     /**
      * 客户端构造函数
+     *
      * @param playerInventory 玩家背包
      */
     public NetInterfaceBaseMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
@@ -49,11 +50,12 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
 
     /**
      * 服务端构造函数
+     *
      * @param playerInventory 玩家背包
      */
     public NetInterfaceBaseMenu(int id, Inventory playerInventory, NetInterfaceBlockEntity be)
     {
-        super(Net_Interface_Menu.get(), id,playerInventory);
+        super(Net_Interface_Menu.get(), id, playerInventory);
 
         // 初始化标记容器（slot负责同步）
         this.storage = be.getStackHandler();
@@ -79,7 +81,8 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         final int dx = 18;                 // 横向间距
         final int dy = 36;                 // 纵向间距（保持原来的 36）
 
-        for (int i = 0; i < slotCount; i++) {
+        for (int i = 0; i < slotCount; i++)
+        {
             int col = i % cols;
             int row = i / cols;
             int x = x0 + col * dx;
@@ -108,7 +111,8 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         final int dx = 18;              // 横向间距
         final int dy = 36;              // 纵向间距
 
-        for (int i = 0; i < slotCount; i++) {
+        for (int i = 0; i < slotCount; i++)
+        {
             int col = i % cols;
             int row = i / cols;
             int x = x0 + col * dx;
@@ -131,7 +135,7 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18,  4+invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 4 + invSlotStartY + 3 * 18));
         }
         inventoryEndIndex = slots.size();
     }
@@ -158,13 +162,12 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         be.popMode = PopMode.valueOf(tag.getString("popMode"));
         be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
         // 服务端读取新数据之后利用sendBlockUpdated将数据发送给附近所有玩家
-        if(!player.level().isClientSide())
+        if (!player.level().isClientSide())
         {
             player.level().blockEntityChanged(be.getBlockPos());
-            player.level().sendBlockUpdated(be.getBlockPos(),be.getBlockState(),be.getBlockState(),2);
+            player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
         }
     }
-
 
 
     @Override

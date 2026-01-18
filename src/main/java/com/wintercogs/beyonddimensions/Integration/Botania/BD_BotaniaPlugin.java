@@ -25,7 +25,7 @@ public class BD_BotaniaPlugin
                 ModBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     DimensionsNet net = be.getNet();
-                    if(net != null)
+                    if (net != null)
                     {
                         return new ManaUnifiedStorageHandler(net.getUnifiedStorage(), new CapCtx(be.getLevel(), be.getBlockPos(), be));
                     }

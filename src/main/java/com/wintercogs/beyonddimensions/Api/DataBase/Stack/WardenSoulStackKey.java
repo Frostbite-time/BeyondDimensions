@@ -13,30 +13,39 @@ import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
+public class WardenSoulStackKey extends LongStackKey<WardenSoulType>
+{
     public static final ResourceLocation ID =
             ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/warden_soul");
 
-    /** 唯一实例 */
+    /**
+     * 唯一实例
+     */
     public static final WardenSoulStackKey INSTANCE = new WardenSoulStackKey();
 
-    /** 新格式：不写字段；decode 直接返回单例 */
-    public static final MapCodec<WardenSoulStackKey> TYPE_CODEC = new MapCodec<>() {
+    /**
+     * 新格式：不写字段；decode 直接返回单例
+     */
+    public static final MapCodec<WardenSoulStackKey> TYPE_CODEC = new MapCodec<>()
+    {
         @Override
         public <T> DataResult<WardenSoulStackKey> decode(com.mojang.serialization.DynamicOps<T> ops,
-                                                         com.mojang.serialization.MapLike<T> input) {
+                                                         com.mojang.serialization.MapLike<T> input)
+        {
             return DataResult.success(WardenSoulStackKey.INSTANCE);
         }
 
         @Override
         public <T> com.mojang.serialization.RecordBuilder<T> encode(WardenSoulStackKey value,
                                                                     com.mojang.serialization.DynamicOps<T> ops,
-                                                                    com.mojang.serialization.RecordBuilder<T> prefix) {
+                                                                    com.mojang.serialization.RecordBuilder<T> prefix)
+        {
             return prefix;
         }
 
         @Override
-        public <T> java.util.stream.Stream<T> keys(com.mojang.serialization.DynamicOps<T> ops) {
+        public <T> java.util.stream.Stream<T> keys(com.mojang.serialization.DynamicOps<T> ops)
+        {
             return java.util.stream.Stream.empty();
         }
     };
@@ -49,25 +58,28 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
     }
 
     @Override
-    public MapCodec<WardenSoulStackKey> codec() {
+    public MapCodec<WardenSoulStackKey> codec()
+    {
         return TYPE_CODEC;
     }
 
     @Override
     public @Nullable KeyAmount fromStackObject(Object stack)
     {
-        if(stack instanceof WardenSoulType wardenSoulType)
+        if (stack instanceof WardenSoulType wardenSoulType)
             return new KeyAmount(WardenSoulStackKey.INSTANCE, wardenSoulType.getStackCount());
         return null;
     }
 
     @Override
-    public ResourceLocation getTypeID() {
+    public ResourceLocation getTypeID()
+    {
         return ID;
     }
 
     @Override
-    public String getModId() {
+    public String getModId()
+    {
         return BeyondDimensions.IFS_ModId;
     }
 
@@ -78,18 +90,21 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
     }
 
     @Override
-    public @Nullable WardenSoulStackKey fromSourceObject(Object key, net.minecraft.core.component.DataComponentPatch ignored) {
+    public @Nullable WardenSoulStackKey fromSourceObject(Object key, net.minecraft.core.component.DataComponentPatch ignored)
+    {
         if (key instanceof WardenSoulType || key instanceof Number) return INSTANCE;
         return null;
     }
 
     @Override
-    public @NotNull WardenSoulType getSource() {
+    public @NotNull WardenSoulType getSource()
+    {
         return this.stack;
     }
 
     @Override
-    public WardenSoulType getEmptyStack() {
+    public WardenSoulType getEmptyStack()
+    {
         return new WardenSoulType(0);
     }
 
@@ -100,13 +115,16 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
     }
 
     @Override
-    public @NotNull IStackRender getRender() {
+    public @NotNull IStackRender getRender()
+    {
         return WardenSoulStackKeyRender.INSTANCE;
     }
 
     // —— 网络：仅写 typeId；读回单例 —— //
     @Override
-    public void serialize(RegistryFriendlyByteBuf buf) {}
+    public void serialize(RegistryFriendlyByteBuf buf)
+    {
+    }
 
     @Override
     public @NotNull WardenSoulStackKey deserialize(RegistryFriendlyByteBuf buf)
@@ -122,7 +140,8 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType> {
     }
 
     @Override
-    public @NotNull WardenSoulStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider access) {
+    public @NotNull WardenSoulStackKey deserializeNBT(CompoundTag nbt, HolderLookup.Provider access)
+    {
         return INSTANCE;
     }
 }

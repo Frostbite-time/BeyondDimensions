@@ -40,11 +40,11 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .save(recipeOutput);
 
         SimpleCookingRecipeBuilder.smelting(
-                Ingredient.of(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get()),
-                RecipeCategory.MISC,
-                ModItems.SPACE_TIME_BAR.get(),
-                1f,
-                600)
+                        Ingredient.of(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get()),
+                        RecipeCategory.MISC,
+                        ModItems.SPACE_TIME_BAR.get(),
+                        1f,
+                        600)
                 .unlockedBy("unlock_space_time_bar", has(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get()))
                 .save(recipeOutput);
 
@@ -247,7 +247,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("unlock_xp_exchange_item", has(ModItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
 
-        if(BeyondDimensions.AELoaded)
+        if (BeyondDimensions.AELoaded)
         {
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_AE_STORAGE_CELL.get())
                     .pattern("ABA")
@@ -261,7 +261,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.AE2MODID)));
         }
 
-        if(BeyondDimensions.RS_Loaded)
+        if (BeyondDimensions.RS_Loaded)
         {
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.RS_NET_PATHWAY.get())
                     .pattern("ABA")
@@ -275,7 +275,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.RSModId)));
         }
 
-        if(BeyondDimensions.IFS_Loaded)
+        if (BeyondDimensions.IFS_Loaded)
         {
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.WARDEN_SOUL_TAG_ITEM.get())
                     .pattern("AAA")
@@ -288,7 +288,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.IFS_ModId)));
         }
 
-        if(BeyondDimensions.ARS_Loaded)
+        if (BeyondDimensions.ARS_Loaded)
         {
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.ARS_SOURCE_PATHWAY.get())
                     .pattern("ABA")
@@ -302,7 +302,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                     .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.ARS_ModId)));
         }
 
-        if(BeyondDimensions.Botania_Loaded)
+        if (BeyondDimensions.Botania_Loaded)
         {
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.MANA_POOL_PATHWAY.get())
                     .pattern("ABA")

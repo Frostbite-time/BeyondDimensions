@@ -12,7 +12,7 @@ public interface BaseMachine extends IMachine
     @Override
     default void working()
     {
-        if(shouldWork())
+        if (shouldWork())
         {
             workStart();
             workContent();
@@ -23,7 +23,7 @@ public interface BaseMachine extends IMachine
     @Override
     default void working(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
-        if(shouldWork(stack, level, holder, slotId, isSelected))
+        if (shouldWork(stack, level, holder, slotId, isSelected))
         {
             workStart(stack, level, holder, slotId, isSelected);
             workContent(stack, level, holder, slotId, isSelected);
@@ -36,16 +36,16 @@ public interface BaseMachine extends IMachine
     default boolean shouldWork()
     {
         // 检测前增加步进时间，确保检测值为当前tick
-        setStepTick(getStepTick()+1); // 步进时间+1
+        setStepTick(getStepTick() + 1); // 步进时间+1
 
         // 同时确保getTicksPerWork为0时可以每tick触发
-        if(getStepTick() >= getTicksPerWork())
+        if (getStepTick() >= getTicksPerWork())
         {
             setStepTick(0); // 重置步进时间
             RedStoneControlMode controlMode = getControlMode();
-            if(controlMode == null)
+            if (controlMode == null)
                 return true;
-            switch(controlMode)
+            switch (controlMode)
             {
                 case IGNORE ->
                 {
@@ -74,9 +74,9 @@ public interface BaseMachine extends IMachine
     default boolean shouldWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
         RedStoneControlMode controlMode = getControlMode(stack);
-        if(controlMode == null) // 防止初始状态出错
+        if (controlMode == null) // 防止初始状态出错
             return true;
-        switch(controlMode)
+        switch (controlMode)
         {
             case IGNORE ->
             {
@@ -107,19 +107,42 @@ public interface BaseMachine extends IMachine
 
     boolean hasRedStoneSignal();
 
-    default int getTicksPerWork(){ return 0; }
-    default int getTicksPerWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected){ return 0; }
+    default int getTicksPerWork()
+    {
+        return 0;
+    }
+
+    default int getTicksPerWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    {
+        return 0;
+    }
 
     int getStepTick();
 
     void setStepTick(int newTick);
 
-    default void workStart(){}
-    default void workContent(){}
-    default void workEnd(){}
+    default void workStart()
+    {
+    }
+
+    default void workContent()
+    {
+    }
+
+    default void workEnd()
+    {
+    }
 
     // workStart应该始终检查
-    default void workStart(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected){}
-    default void workContent(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected){}
-    default void workEnd(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected){}
+    default void workStart(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    {
+    }
+
+    default void workContent(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    {
+    }
+
+    default void workEnd(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    {
+    }
 }

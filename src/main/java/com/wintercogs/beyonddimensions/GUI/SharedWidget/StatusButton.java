@@ -12,7 +12,7 @@ public abstract class StatusButton extends IconButton
 {
     protected ArrayList<Enum<?>> states = new ArrayList<>();
     // 保证按钮切换顺序按照插入顺序
-    protected Map<Enum<?>,ResourceLocation> iconMap = new LinkedHashMap<>();
+    protected Map<Enum<?>, ResourceLocation> iconMap = new LinkedHashMap<>();
     protected Map<Enum<?>, Tooltip> tooltipMap = new LinkedHashMap<>(); // 需要添加可变工具提示则添加 需要固定工具提示则直接setTooltip，此处留空
     public Enum<?> currentState;
 
@@ -22,7 +22,7 @@ public abstract class StatusButton extends IconButton
                            OnPress onPress)
     {
         // 给予一个默认图片用于构造父类
-        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/unkonw_thing"),iconX,iconY,iconWidth,iconHeight, onPress);
+        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/unkonw_thing"), iconX, iconY, iconWidth, iconHeight, onPress);
         initButton();
         setIcon(iconMap.get(currentState));
     }
@@ -31,7 +31,7 @@ public abstract class StatusButton extends IconButton
                            OnPress onPress)
     {
         // 给予一个默认图片用于构造父类
-        this(x, y, width, height, x,y,width,height, onPress);
+        this(x, y, width, height, x, y, width, height, onPress);
     }
 
     // 用于子类初始化状态、状态图片映射表、当前状态
@@ -41,7 +41,8 @@ public abstract class StatusButton extends IconButton
     public void toggleState()
     {
         // 确保状态列表不为空
-        if (states == null || states.isEmpty()) {
+        if (states == null || states.isEmpty())
+        {
             throw new IllegalStateException("Button states are not initialized.");
         }
 
@@ -49,7 +50,8 @@ public abstract class StatusButton extends IconButton
         int currentIndex = states.indexOf(currentState);
 
         // 如果当前状态不在列表中，抛出异常
-        if (currentIndex == -1) {
+        if (currentIndex == -1)
+        {
             throw new IllegalStateException("Current state is not in the states list.");
         }
 
@@ -63,9 +65,9 @@ public abstract class StatusButton extends IconButton
         setIcon(iconMap.get(currentState));
 
         // 更新工具提示
-        if(!(tooltipMap == null))
+        if (!(tooltipMap == null))
         {
-            if(tooltipMap.containsKey(currentState) && tooltipMap.get(currentState)!=null)
+            if (tooltipMap.containsKey(currentState) && tooltipMap.get(currentState) != null)
             {
                 setTooltip(tooltipMap.get(currentState));
             }
@@ -79,9 +81,9 @@ public abstract class StatusButton extends IconButton
         setIcon(iconMap.get(currentState));
 
         // 更新工具提示
-        if(!(tooltipMap == null))
+        if (!(tooltipMap == null))
         {
-            if(tooltipMap.containsKey(currentState) && tooltipMap.get(currentState)!=null)
+            if (tooltipMap.containsKey(currentState) && tooltipMap.get(currentState) != null)
             {
                 setTooltip(tooltipMap.get(currentState));
             }

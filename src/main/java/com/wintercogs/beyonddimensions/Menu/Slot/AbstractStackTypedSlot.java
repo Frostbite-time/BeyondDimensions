@@ -81,8 +81,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 如何读取同步所用的数据包
     // where表示要newStack应当覆盖的位置
     // 绝大部分情况下，where是用不到的，这里只是提供给你一个额外的数据，用来验证或者放着不管都可以
-    public abstract void loadChange(int where ,IStackKey<?> newKey, long newAmount);
-
+    public abstract void loadChange(int where, IStackKey<?> newKey, long newAmount);
 
 
     // 其他有用的slot方法或者为slot运行所用的方法-------------------------------------------------------------------------------
@@ -103,7 +102,7 @@ public abstract class AbstractStackTypedSlot extends Slot
         //从当前槽索引取物品
         KeyAmount stackType = storage.getStackBySlot(getSlotIndex());
 
-        if(stackType.key() instanceof ItemStackKey itemStackType)
+        if (stackType.key() instanceof ItemStackKey itemStackType)
         {
             ItemStack readOnlyStack = itemStackType.getReadOnlyStack();
             readOnlyStack.setCount(BDMath.clampLongToInt(stackType.amount()));
@@ -145,7 +144,7 @@ public abstract class AbstractStackTypedSlot extends Slot
 
     public @NotNull KeyAmount getStack()
     {
-        if(getSlotIndex()<0||getSlotIndex()>= storage.getSlots())
+        if (getSlotIndex() < 0 || getSlotIndex() >= storage.getSlots())
         {
             return new KeyAmount(EmptyStackKey.INSTANCE, 0);
         }
@@ -178,7 +177,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     @Override
     public @NotNull ItemStack getItem()
     {
-        if(getSlotIndex()<0)
+        if (getSlotIndex() < 0)
         {
             return ItemStack.EMPTY;
         }
@@ -234,7 +233,7 @@ public abstract class AbstractStackTypedSlot extends Slot
 
     public long getItemCount()
     {
-        if(getSlotIndex()<0)
+        if (getSlotIndex() < 0)
         {
             return -1;
         }

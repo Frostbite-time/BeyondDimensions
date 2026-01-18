@@ -16,33 +16,41 @@ import org.jetbrains.annotations.Nullable;
 public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackType>
 {
 
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID,"stack_type/empty");
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/empty");
     public static final EmptyStackKey INSTANCE = new EmptyStackKey();
 
-    /** 无字段的新格式：decode 直接返回单例，encode 不写任何键 */
-    public static final MapCodec<EmptyStackKey> TYPE_CODEC = new MapCodec<>() {
+    /**
+     * 无字段的新格式：decode 直接返回单例，encode 不写任何键
+     */
+    public static final MapCodec<EmptyStackKey> TYPE_CODEC = new MapCodec<>()
+    {
         @Override
         public <T> DataResult<EmptyStackKey> decode(com.mojang.serialization.DynamicOps<T> ops,
-                                                     com.mojang.serialization.MapLike<T> input) {
+                                                    com.mojang.serialization.MapLike<T> input)
+        {
             return DataResult.success(EmptyStackKey.INSTANCE);
         }
 
         @Override
         public <T> com.mojang.serialization.RecordBuilder<T> encode(EmptyStackKey value,
                                                                     com.mojang.serialization.DynamicOps<T> ops,
-                                                                    com.mojang.serialization.RecordBuilder<T> prefix) {
+                                                                    com.mojang.serialization.RecordBuilder<T> prefix)
+        {
             return prefix; // 不写任何字段
         }
 
         @Override
-        public <T> java.util.stream.Stream<T> keys(com.mojang.serialization.DynamicOps<T> ops) {
+        public <T> java.util.stream.Stream<T> keys(com.mojang.serialization.DynamicOps<T> ops)
+        {
             return java.util.stream.Stream.empty();
         }
     };
 
     public static final Codec<EmptyStackKey> CODEC = TYPE_CODEC.codec();
 
-    private EmptyStackKey() {}
+    private EmptyStackKey()
+    {
+    }
 
     @Override
     public ResourceLocation getTypeId()
@@ -59,15 +67,15 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     @Override
     public @Nullable KeyAmount fromStackObject(Object stack)
     {
-        if(stack instanceof EmptyStackType)
-            return new KeyAmount(INSTANCE,0);
+        if (stack instanceof EmptyStackType)
+            return new KeyAmount(INSTANCE, 0);
         return null;
     }
 
     @Override
     public @Nullable EmptyStackKey fromSourceObject(Object key, DataComponentPatch dataComponentPatch)
     {
-        if(key instanceof EmptyStackType)
+        if (key instanceof EmptyStackType)
             return INSTANCE;
         return null;
     }
@@ -163,7 +171,9 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     }
 
     @Override
-    public void serialize(RegistryFriendlyByteBuf buf) {}
+    public void serialize(RegistryFriendlyByteBuf buf)
+    {
+    }
 
     @Override
     public @NotNull EmptyStackKey deserialize(RegistryFriendlyByteBuf buf)
@@ -200,6 +210,8 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     {
         public static final EmptyStackType INSTANCE = new EmptyStackType();
 
-        private EmptyStackType() {}
+        private EmptyStackType()
+        {
+        }
     }
 }

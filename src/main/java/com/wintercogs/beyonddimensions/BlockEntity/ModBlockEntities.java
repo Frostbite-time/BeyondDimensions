@@ -64,7 +64,7 @@ public class ModBlockEntities
     );
 
     public static final Supplier<BlockEntityType<NetTerminalBlockEntity>> NET_TERMINAL_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
-      "net_terminal_block_entity",
+            "net_terminal_block_entity",
             () -> BlockEntityType.Builder.of(
                     NetTerminalBlockEntity::new,
                     ModBlocks.NET_TERMINAL_BLOCK.get()
@@ -101,9 +101,10 @@ public class ModBlockEntities
     public static Supplier<BlockEntityType<?>> ARS_SOURCE_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> MANA_POOL_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> SCHEMATICANNON_PATHWAY_BLOCK_ENTITY;
+
     public static void IntegrationRegister()
     {
-        if(BeyondDimensions.RS_Loaded)
+        if (BeyondDimensions.RS_Loaded)
         {
             RS_NET_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
                     "rs_net_pathway_block_entity",
@@ -113,7 +114,7 @@ public class ModBlockEntities
                     ).build(null)
             );
         }
-        if(BeyondDimensions.ARS_Loaded)
+        if (BeyondDimensions.ARS_Loaded)
         {
             ARS_SOURCE_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
                     "ars_source_pathway_block_entity",
@@ -123,7 +124,7 @@ public class ModBlockEntities
                     ).build(null)
             );
         }
-        if(BeyondDimensions.Botania_Loaded)
+        if (BeyondDimensions.Botania_Loaded)
         {
             MANA_POOL_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
                     "mana_pool_pathway_block_entity",
@@ -133,7 +134,7 @@ public class ModBlockEntities
                     ).build(null)
             );
         }
-        if(BeyondDimensions.Create_Loaded)
+        if (BeyondDimensions.Create_Loaded)
         {
             SCHEMATICANNON_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
                     "schematicannon_pathway_block_entity",

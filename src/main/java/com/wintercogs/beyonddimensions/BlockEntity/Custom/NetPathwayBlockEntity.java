@@ -15,12 +15,14 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
 public class NetPathwayBlockEntity extends NetedBlockEntity
 {
-    public NetPathwayBlockEntity(BlockPos pos, BlockState blockState) {
+    public NetPathwayBlockEntity(BlockPos pos, BlockState blockState)
+    {
         super(ModBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     //--- 能力注册 (通过事件) ---
-    public static void registerCapability(RegisterCapabilitiesEvent event) {
+    public static void registerCapability(RegisterCapabilitiesEvent event)
+    {
 
         CapabilityHelper.BlockCapabilityMap.forEach(
                 (resourceLocation, directionBlockCapability) -> {
@@ -30,10 +32,10 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
                             ModBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
                             (be, side) -> {
                                 DimensionsNet net = be.getNet(); // getNet已经在基类中完成缓存处理
-                                if(net != null && handler != null)
+                                if (net != null && handler != null)
                                 {
-                                    if(handler.isContextual())
-                                        return handler.apply(net.getUnifiedStorage(), new CapCtx(be.level,be.getBlockPos(),be));
+                                    if (handler.isContextual())
+                                        return handler.apply(net.getUnifiedStorage(), new CapCtx(be.level, be.getBlockPos(), be));
                                     else
                                         return handler.apply(net.getUnifiedStorage(), null);
                                 }
@@ -53,7 +55,7 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
-        super.loadAdditional(tag,registries);
+        super.loadAdditional(tag, registries);
     }
 
     @Override

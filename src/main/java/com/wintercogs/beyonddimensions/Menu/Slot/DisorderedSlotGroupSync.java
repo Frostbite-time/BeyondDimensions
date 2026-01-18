@@ -35,17 +35,23 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     private AutoCloseable anySub;
     private AutoCloseable deltaSub;
 
-    /** 等待发送的“最新绝对状态”缓存（同一 key 多次更新仅保留最后一次）
-     *  保证每tick最多统一发送一次，防止客户端接收到过多刷新包 */
+    /**
+     * 等待发送的“最新绝对状态”缓存（同一 key 多次更新仅保留最后一次）
+     * 保证每tick最多统一发送一次，防止客户端接收到过多刷新包
+     */
     private final Map<IStackKey<?>, PendingRecord> pending = new HashMap<>();
 
-    /** 标记：需要在下一次 tick 做一次全量对比（Any 触发） */
+    /**
+     * 标记：需要在下一次 tick 做一次全量对比（Any 触发）
+     */
     private boolean dirtyFullRescan = false;
 
     /**
      * 缓存条目：绝对数量 + UI 用时间戳
      */
-    private record PendingRecord(long count, long modified, long inserted) {}
+    private record PendingRecord(long count, long modified, long inserted)
+    {
+    }
 
     public DisorderedSlotGroupSync(BDBaseMenu menu, int id, AbstractUnorderedStackHandler storage)
     {
@@ -63,11 +69,25 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         }
     }
 
-    /** 在菜单关闭时调用，主动解订阅，避免句柄悬挂 */
+    /**
+     * 在菜单关闭时调用，主动解订阅，避免句柄悬挂
+     */
     public void dispose()
     {
-        try { if (anySub != null) anySub.close(); } catch (Throwable ignored) {}
-        try { if (deltaSub != null) deltaSub.close(); } catch (Throwable ignored) {}
+        try
+        {
+            if (anySub != null) anySub.close();
+        }
+        catch (Throwable ignored)
+        {
+        }
+        try
+        {
+            if (deltaSub != null) deltaSub.close();
+        }
+        catch (Throwable ignored)
+        {
+        }
         anySub = null;
         deltaSub = null;
     }
@@ -78,18 +98,25 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     }
 
     @Override
-    public int getGroupId() { return groupId; }
+    public int getGroupId()
+    {
+        return groupId;
+    }
 
     /* -------------------- 事件回调（仅服务端执行，不立刻发送） -------------------- */
 
-    /** Any 回调：标记需要一次全量对比；真正的对比与发送放到下一次 tick */
+    /**
+     * Any 回调：标记需要一次全量对比；真正的对比与发送放到下一次 tick
+     */
     private void onAnyChange()
     {
         if (!isServerSide()) return;
         dirtyFullRescan = true;
     }
 
-    /** Delta 回调：仅缓存该 key 的“当前绝对状态”，不立刻发送 */
+    /**
+     * Delta 回调：仅缓存该 key 的“当前绝对状态”，不立刻发送
+     */
     private void onDeltaChange(IStackKey<?> key, long size, boolean insert)
     {
         if (!isServerSide() || key == null) return;
@@ -110,7 +137,8 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         if (!isServerSide()) return;
 
         // 首次：做一次全量对比（但也放在本 tick 发送逻辑里处理）
-        if (!initialized) {
+        if (!initialized)
+        {
             initialized = true;
             dirtyFullRescan = true;
         }
@@ -119,7 +147,9 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         drainAndSend();
     }
 
-    /** 汇总待发更新（full-rescan 或 pending）-> 分包发送 -> 推进基线 */
+    /**
+     * 汇总待发更新（full-rescan 或 pending）-> 分包发送 -> 推进基线
+     */
     private void drainAndSend()
     {
         if (!dirtyFullRescan && pending.isEmpty()) return;
@@ -130,11 +160,13 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         {
             // === 仅做全量对比 ===
             Map<IStackKey<?>, Long> lastMap = new HashMap<>();
-            for (KeyAmount ka : this.lastStorage) {
+            for (KeyAmount ka : this.lastStorage)
+            {
                 lastMap.merge(ka.key(), ka.amount(), Long::sum);
             }
             Map<IStackKey<?>, Long> nowMap = new HashMap<>();
-            for (KeyAmount ka : this.storage.getStorage()) {
+            for (KeyAmount ka : this.storage.getStorage())
+            {
                 nowMap.merge(ka.key(), ka.amount(), Long::sum);
             }
 
@@ -142,10 +174,12 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
             allKeys.addAll(lastMap.keySet());
             allKeys.addAll(nowMap.keySet());
 
-            for (IStackKey<?> key : allKeys) {
+            for (IStackKey<?> key : allKeys)
+            {
                 long lastCount = lastMap.getOrDefault(key, 0L);
-                long nowCount  = nowMap.getOrDefault(key, 0L);
-                if (nowCount != lastCount) {
+                long nowCount = nowMap.getOrDefault(key, 0L);
+                if (nowCount != lastCount)
+                {
                     long mtime = getLastModifiedOrZero(key);
                     long ctime = getCreationOrZero(key);
                     toSend.put(key, new PendingRecord(nowCount, mtime, ctime));
@@ -155,7 +189,9 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
             // 本轮 full-rescan 权威，丢弃本轮 pending；下一 tick 再积累新的事件
             pending.clear();
             dirtyFullRescan = false;
-        } else {
+        }
+        else
+        {
             // === 仅发送 pending ===
             toSend.putAll(pending);
             pending.clear();
@@ -164,12 +200,13 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         if (toSend.isEmpty()) return;
 
         // 转列表并分包发送
-        List<IStackKey<?>> keys  = new ArrayList<>(toSend.size());
-        List<Long> counts        = new ArrayList<>(toSend.size());
+        List<IStackKey<?>> keys = new ArrayList<>(toSend.size());
+        List<Long> counts = new ArrayList<>(toSend.size());
         List<Long> modifiedTimes = new ArrayList<>(toSend.size());
         List<Long> insertedTimes = new ArrayList<>(toSend.size());
 
-        for (Map.Entry<IStackKey<?>, PendingRecord> e : toSend.entrySet()) {
+        for (Map.Entry<IStackKey<?>, PendingRecord> e : toSend.entrySet())
+        {
             keys.add(e.getKey());
             counts.add(e.getValue().count);
             modifiedTimes.add(e.getValue().modified);
@@ -178,7 +215,8 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
 
         List<DisorderedSlotGroupSyncPacket> packets =
                 buildBatchedPackets(keys, counts, modifiedTimes, insertedTimes);
-        for (DisorderedSlotGroupSyncPacket packet : packets) {
+        for (DisorderedSlotGroupSyncPacket packet : packets)
+        {
             PacketDistributor.sendToPlayer((ServerPlayer) menu.player, packet);
         }
 
@@ -186,7 +224,9 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         refreshLast();
     }
 
-    /** 估算每条记录字节大小并按 MAX_PACKET_SIZE 分包（key + count + lastModified + inserted） */
+    /**
+     * 估算每条记录字节大小并按 MAX_PACKET_SIZE 分包（key + count + lastModified + inserted）
+     */
     private List<DisorderedSlotGroupSyncPacket> buildBatchedPackets(
             List<IStackKey<?>> keys,
             List<Long> counts,
@@ -199,7 +239,8 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         List<Integer> entrySizes = new ArrayList<>(n);
 
         // 预估单条大小（真实序列化到临时buf测字节数）
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++)
+        {
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(
                     buf,
@@ -216,14 +257,16 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
 
         // 动态分包
         List<IStackKey<?>> batchKeys = new ArrayList<>();
-        List<Long> batchCounts       = new ArrayList<>();
-        List<Long> batchModified     = new ArrayList<>();
-        List<Long> batchInserted     = new ArrayList<>();
+        List<Long> batchCounts = new ArrayList<>();
+        List<Long> batchModified = new ArrayList<>();
+        List<Long> batchInserted = new ArrayList<>();
         int currentSize = 0;
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++)
+        {
             int entrySize = entrySizes.get(i);
-            if (currentSize + entrySize > MAX_PACKET_SIZE && !batchKeys.isEmpty()) {
+            if (currentSize + entrySize > MAX_PACKET_SIZE && !batchKeys.isEmpty())
+            {
                 packets.add(new DisorderedSlotGroupSyncPacket(
                         groupId,
                         new ArrayList<>(batchKeys),
@@ -243,7 +286,8 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
             batchInserted.add(insertedTimes.get(i));
             currentSize += entrySize;
         }
-        if (!batchKeys.isEmpty()) {
+        if (!batchKeys.isEmpty())
+        {
             packets.add(new DisorderedSlotGroupSyncPacket(
                     groupId,
                     batchKeys,
@@ -255,12 +299,14 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         return packets;
     }
 
-    private long getLastModifiedOrZero(IStackKey<?> key) {
+    private long getLastModifiedOrZero(IStackKey<?> key)
+    {
         Long v = storage.getLastModifiedTimeMap().get(key);
         return v == null ? 0L : v;
     }
 
-    private long getCreationOrZero(IStackKey<?> key) {
+    private long getCreationOrZero(IStackKey<?> key)
+    {
         Long v = storage.getCreationTimeMap().get(key);
         return v == null ? 0L : v;
     }
@@ -278,19 +324,21 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         final int n = keys.size();
 
         // 容错：保证四个列表等长
-        if (newCounts.size() != n || newModifiedTime.size() != n || newInsertedTime.size() != n) {
+        if (newCounts.size() != n || newModifiedTime.size() != n || newInsertedTime.size() != n)
+        {
             // 简单保护：只按 keys 的长度处理
         }
 
         for (int i = 0; i < n; i++)
         {
             IStackKey<?> key = keys.get(i);
-            long count       = (i < newCounts.size()) ? newCounts.get(i) : 0L;
-            long mtime       = (i < newModifiedTime.size()) ? newModifiedTime.get(i) : 0L;
-            long ctime       = (i < newInsertedTime.size()) ? newInsertedTime.get(i) : 0L;
+            long count = (i < newCounts.size()) ? newCounts.get(i) : 0L;
+            long mtime = (i < newModifiedTime.size()) ? newModifiedTime.get(i) : 0L;
+            long ctime = (i < newInsertedTime.size()) ? newInsertedTime.get(i) : 0L;
 
             // 直接设置绝对数量（0 会按策略移除或保留）
-            if (key != null) {
+            if (key != null)
+            {
                 clientStorage.setAmountByKey(key, count);
 
                 // 写 UI 时间戳（这两个 Map 在抽象类中始终存在）
@@ -303,7 +351,9 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
 
     // 仅客户端，用于后处理，建议去实际应用场景重写（比如刷新屏幕、聚焦位置等）
     @Override
-    public void afterLoadChange() { }
+    public void afterLoadChange()
+    {
+    }
 
     // 仅服务端：推进基线（每次实际发送后调用）
     public void refreshLast()

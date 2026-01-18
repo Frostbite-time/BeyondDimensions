@@ -34,20 +34,20 @@ public class DataGenerators
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
         // 生成方块战利品表
-        generator.addProvider(event.includeServer(),new LootTableProvider(packOutput, Collections.emptySet(),
-                List.of(new LootTableProvider.SubProviderEntry(ModBlockLootTableProvider::new, LootContextParamSets.BLOCK)),lookupProvider));
+        generator.addProvider(event.includeServer(), new LootTableProvider(packOutput, Collections.emptySet(),
+                List.of(new LootTableProvider.SubProviderEntry(ModBlockLootTableProvider::new, LootContextParamSets.BLOCK)), lookupProvider));
         // 生成物品和方块模型
-        generator.addProvider(event.includeClient(),new ModItemModelProvider(packOutput,existingFileHelper));
-        generator.addProvider(event.includeClient(),new ModBlockStateProvider(packOutput,existingFileHelper));
+        generator.addProvider(event.includeClient(), new ModItemModelProvider(packOutput, existingFileHelper));
+        generator.addProvider(event.includeClient(), new ModBlockStateProvider(packOutput, existingFileHelper));
 
         // 生成方块、物品、流体标签
-        BlockTagsProvider blockTagsProvider = new ModBlockTagProvider(packOutput,lookupProvider,existingFileHelper);
+        BlockTagsProvider blockTagsProvider = new ModBlockTagProvider(packOutput, lookupProvider, existingFileHelper);
         generator.addProvider(event.includeServer(), blockTagsProvider);
-        generator.addProvider(event.includeServer(), new ModItemTagProvider(packOutput,lookupProvider,blockTagsProvider.contentsGetter(),existingFileHelper));
-        generator.addProvider(event.includeServer(), new ModFluidTagsProvider(packOutput,lookupProvider,existingFileHelper));
+        generator.addProvider(event.includeServer(), new ModItemTagProvider(packOutput, lookupProvider, blockTagsProvider.contentsGetter(), existingFileHelper));
+        generator.addProvider(event.includeServer(), new ModFluidTagsProvider(packOutput, lookupProvider, existingFileHelper));
 
         // 生成配方表
-        generator.addProvider(event.includeServer(),new ModRecipeProvider(packOutput,lookupProvider));
+        generator.addProvider(event.includeServer(), new ModRecipeProvider(packOutput, lookupProvider));
 
     }
 }

@@ -35,19 +35,19 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if(usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
+        if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
         {
             return InteractionResultHolder.fail(itemstack);
         }
 
-        if(!level.isClientSide())
+        if (!level.isClientSide())
         {
-            if(itemstack.get(ModDataComponents.CRAFT_SLOTS)==null)
-                itemstack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9,ItemStack.EMPTY)));
+            if (itemstack.get(ModDataComponents.CRAFT_SLOTS) == null)
+                itemstack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9, ItemStack.EMPTY)));
 
-            if(itemstack.getOrDefault(ModDataComponents.NET_ID_DATA,-1)>=0)
+            if (itemstack.getOrDefault(ModDataComponents.NET_ID_DATA, -1) >= 0)
             {
-                DimensionsNet net = DimensionsNet.getNetFromId(itemstack.getOrDefault(ModDataComponents.NET_ID_DATA,-1));
+                DimensionsNet net = DimensionsNet.getNetFromId(itemstack.getOrDefault(ModDataComponents.NET_ID_DATA, -1));
                 if (net != null)
                 {
                     contextMap.put(player, new MenuTriggerContext(usedHand, itemstack));
@@ -60,7 +60,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
             }
 
         }
-        return InteractionResultHolder.sidedSuccess(itemstack,level.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
     @Override
@@ -70,22 +70,24 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
     }
 
     @Override
-    public @Nullable AbstractContainerMenu createMenu(int containerId,Inventory inventory, Player player)
+    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
 
         // 从上下文映射中获取触发时的物品
         MenuTriggerContext ctx = contextMap.remove(player);
-        if (ctx == null) {
+        if (ctx == null)
+        {
             // 没有上下文记录，则退回到原始方法
             ctx = new MenuTriggerContext(player.getUsedItemHand(), player.getItemInHand(player.getUsedItemHand()));
         }
         // 验证物品是否仍是有效的NetTerminalItem
-        if (ctx.stack.getItem() != this || !ctx.stack.has(ModDataComponents.NET_ID_DATA)) {
+        if (ctx.stack.getItem() != this || !ctx.stack.has(ModDataComponents.NET_ID_DATA))
+        {
             return null;
         }
         // 使用上下文中的物品栈
-        DimensionsNet net = DimensionsNet.getNetFromId(ctx.stack.getOrDefault(ModDataComponents.NET_ID_DATA,-1));
-        if(net==null) return null;
+        DimensionsNet net = DimensionsNet.getNetFromId(ctx.stack.getOrDefault(ModDataComponents.NET_ID_DATA, -1));
+        if (net == null) return null;
         return new DimensionsCraftMenuTerminal(
                 containerId,
                 inventory,
@@ -103,10 +105,13 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
     }
 
     // 创建一个内部类来存储触发时的上下文
-    public static class MenuTriggerContext {
+    public static class MenuTriggerContext
+    {
         public final InteractionHand hand;
         public final ItemStack stack;
-        public MenuTriggerContext(InteractionHand hand, ItemStack stack) {
+
+        public MenuTriggerContext(InteractionHand hand, ItemStack stack)
+        {
             this.hand = hand;
             this.stack = stack;
         }

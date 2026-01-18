@@ -40,7 +40,7 @@ public class ModFluids
 
     public static final List<FluidEntry> ALL = new ArrayList<>();
 
-    public static final FluidEntry XP_FLUID =  registerFluid(
+    public static final FluidEntry XP_FLUID = registerFluid(
             "xp_fluid",
             FluidType.Properties.create()
                     .lightLevel(10)
@@ -61,7 +61,8 @@ public class ModFluids
             int lightlevel,
             Function<BaseFlowingFluid.Properties, S> sourceCtor,
             Function<BaseFlowingFluid.Properties, F> flowingCtor
-    ) {
+    )
+    {
         // 1) FluidType
         DeferredHolder<FluidType, FluidType> type = FLUID_TYPES.register(name, () -> new FluidType(typeProps));
 
@@ -99,7 +100,8 @@ public class ModFluids
     }
 
     // 使用基础的 BaseFlowingFluid
-    public static FluidEntry registerSimpleFluid(String name, FluidType.Properties typeProps, int argbTint, int lightlevel) {
+    public static FluidEntry registerSimpleFluid(String name, FluidType.Properties typeProps, int argbTint, int lightlevel)
+    {
         return registerFluid(
                 name, typeProps, argbTint, lightlevel,
                 BaseFlowingFluid.Source::new,
@@ -107,7 +109,8 @@ public class ModFluids
         );
     }
 
-    public static void register(IEventBus modBus) {
+    public static void register(IEventBus modBus)
+    {
         FLUID_TYPES.register(modBus);
         FLUIDS.register(modBus);
     }
@@ -120,30 +123,51 @@ public class ModFluids
             DeferredHolder<Block, LiquidBlock> block,
             DeferredHolder<Item, Item> bucket,
             int argbTint
-    ) {}
+    )
+    {
+    }
 
     //注册每个 FluidType 的贴图 & 颜色（替代 initializeClient）
     @SubscribeEvent
-    public static void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
-        for (var e : ModFluids.ALL) {
+    public static void onRegisterClientExtensions(RegisterClientExtensionsEvent event)
+    {
+        for (var e : ModFluids.ALL)
+        {
             final ResourceLocation still = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + e.name() + "_still");
-            final ResourceLocation flow  = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + e.name() + "_flow");
+            final ResourceLocation flow = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + e.name() + "_flow");
             final int tint = e.argbTint();
 
-            event.registerFluidType(new IClientFluidTypeExtensions() {
-                @Override public ResourceLocation getStillTexture()   { return still; }
-                @Override public ResourceLocation getFlowingTexture() { return flow; }
-                @Override public int getTintColor()                   { return tint; }
+            event.registerFluidType(new IClientFluidTypeExtensions()
+            {
+                @Override
+                public ResourceLocation getStillTexture()
+                {
+                    return still;
+                }
+
+                @Override
+                public ResourceLocation getFlowingTexture()
+                {
+                    return flow;
+                }
+
+                @Override
+                public int getTintColor()
+                {
+                    return tint;
+                }
             }, e.type().get());
         }
     }
 
     //渲染层（半透明）
     @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent evt) {
+    public static void onClientSetup(FMLClientSetupEvent evt)
+    {
         evt.enqueueWork(() -> {
-            for (var e : ModFluids.ALL) {
-                net.minecraft.client.renderer.ItemBlockRenderTypes.setRenderLayer(e.source().get(),  net.minecraft.client.renderer.RenderType.translucent());
+            for (var e : ModFluids.ALL)
+            {
+                net.minecraft.client.renderer.ItemBlockRenderTypes.setRenderLayer(e.source().get(), net.minecraft.client.renderer.RenderType.translucent());
                 net.minecraft.client.renderer.ItemBlockRenderTypes.setRenderLayer(e.flowing().get(), net.minecraft.client.renderer.RenderType.translucent());
             }
         });
