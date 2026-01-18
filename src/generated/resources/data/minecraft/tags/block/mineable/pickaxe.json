@@ -1,0 +1,17 @@
+{
+  "values": [
+    "beyonddimensions:net_control",
+    "beyonddimensions:net_interface",
+    "beyonddimensions:net_pathway",
+    "beyonddimensions:net_energy_pathway",
+    "beyonddimensions:net_terminal_block",
+    "beyonddimensions:net_pump_block",
+    "beyonddimensions:net_hopper_block",
+    "beyonddimensions:net_furnace_block",
+    "beyonddimensions:dimensional_connect_block",
+    "beyonddimensions:rs_net_pathway",
+    "beyonddimensions:ars_source_pathway",
+    "beyonddimensions:mana_pool_pathway",
+    "beyonddimensions:schematicannon_pathway"
+  ]
+}

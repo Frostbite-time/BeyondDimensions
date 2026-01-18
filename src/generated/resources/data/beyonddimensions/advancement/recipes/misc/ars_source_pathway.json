@@ -1,0 +1,38 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ars_nouveau"
+    }
+  ],
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "beyonddimensions:ars_source_pathway"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "unlock_ars_source_pathway": {
+      "conditions": {
+        "items": [
+          {
+            "items": "beyonddimensions:space_time_bar"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "unlock_ars_source_pathway"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "beyonddimensions:ars_source_pathway"
+    ]
+  }
+}
