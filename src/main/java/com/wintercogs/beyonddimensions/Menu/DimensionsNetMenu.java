@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandle
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Integration.JECharacters.PinInMatches;
@@ -84,8 +85,8 @@ public class DimensionsNetMenu extends BDBaseMenu
         // 初始化搜索方案
         if (player.level().isClientSide())
         {
-            this.maxLines = Config.uiPageNum;
-            this.searchText = Config.uiSearch;
+            this.maxLines = CommonConfigRuntime.uiPageNum;
+            this.searchText = CommonConfigRuntime.uiSearch;
         }
 
         // 初始化维度网络容器
@@ -347,8 +348,8 @@ public class DimensionsNetMenu extends BDBaseMenu
         final boolean needTooltipFilter = hasSearch && (hasSymbol ? !tipPart.isEmpty() : !namePart.isEmpty());
 
         // ---- 决定排序需求（只在需要时准备对应字段）----
-        ButtonState primaryState = Config.uiSortButton;
-        ButtonState secondaryState = Config.uiSecondSortButton;
+        ButtonState primaryState = CommonConfigRuntime.uiSortButton;
+        ButtonState secondaryState = CommonConfigRuntime.uiSecondSortButton;
         if (primaryState == null) primaryState = ButtonState.SORT_NAME;
         final boolean useSecondary = (secondaryState != null && secondaryState != primaryState);
 
@@ -453,7 +454,7 @@ public class DimensionsNetMenu extends BDBaseMenu
             {
                 rows.sort(primary);
             }
-            if (Config.uiReverseButton == ButtonState.ENABLED)
+            if (CommonConfigRuntime.uiReverseButton == ButtonState.ENABLED)
             {
                 Collections.reverse(rows);
             }

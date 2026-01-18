@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandle
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
@@ -390,7 +391,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     {
         super.writeQuickDataTag(tag);
         if(player.level().isClientSide())
-            firstCraftReturnDir = Config.uiCraftReturnButton == ButtonState.ENABLED;
+            firstCraftReturnDir = CommonConfigRuntime.uiCraftReturnButton == ButtonState.ENABLED;
         tag.putBoolean("firstCraftReturnDir", firstCraftReturnDir);
     }
 

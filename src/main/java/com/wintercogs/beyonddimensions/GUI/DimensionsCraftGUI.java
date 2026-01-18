@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
+import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.IconButton;
@@ -58,9 +59,9 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         menu.writeAndSendQuickData();
         craftReturnButton = new StatusButton(this.leftPos+99,this.topPos+ TOP_BASE_HEIGHT + menu.getLines()*18+10 ,8,8, button -> {
             craftReturnButton.toggleState();
-            Config.uiCraftReturnButton = (ButtonState) craftReturnButton.currentState;
-            Config.UI_CRAFT_RETURN_BUTTON.set((ButtonState) craftReturnButton.currentState);
-            Config.UI_CRAFT_RETURN_BUTTON.save();
+            CommonConfigRuntime.uiCraftReturnButton = (ButtonState) craftReturnButton.currentState;
+            Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.set((ButtonState) craftReturnButton.currentState);
+            Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.save();
             menu.writeAndSendQuickData();
         })
         {
@@ -78,7 +79,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
                 {
                     this.states.add(state);
                 }
-                setState(Config.uiCraftReturnButton);
+                setState(CommonConfigRuntime.uiCraftReturnButton);
             }
         };
         addRenderableWidget(craftReturnButton);

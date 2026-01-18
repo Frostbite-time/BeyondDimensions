@@ -45,7 +45,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
@@ -105,6 +104,8 @@ public class BeyondDimensions
     public BeyondDimensions(IEventBus modEventBus, ModContainer modContainer)
     {
         MOD_EVENT_BUS = modEventBus;
+        NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
+        Config.register(modContainer);
 
         modEventBus.addListener(this::constructMod);
         modEventBus.addListener(this::commonSetup);
@@ -114,12 +115,6 @@ public class BeyondDimensions
         modEventBus.addListener(NetPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetEnergyPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetFurnaceBlockEntity::registerCapability);
-
-        // 注册事件
-        NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
-
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
-        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
 
         // 调用UIRegister的构造函数，从而注册所有UI
         UIRegister.register(modEventBus);

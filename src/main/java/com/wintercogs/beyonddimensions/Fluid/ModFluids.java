@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
 public class ModFluids
 {
     public static final DeferredRegister<FluidType> FLUID_TYPES = DeferredRegister.create(NeoForgeRegistries.FLUID_TYPES, BeyondDimensions.MODID);

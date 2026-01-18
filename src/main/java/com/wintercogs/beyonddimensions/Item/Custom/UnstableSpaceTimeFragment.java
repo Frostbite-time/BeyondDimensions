@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
+import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.ModItems;
-import com.wintercogs.beyonddimensions.ServerConfig;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -36,7 +36,7 @@ public class UnstableSpaceTimeFragment extends Item {
             final long currentTick = level.getGameTime();
             final long lastProcessed = stack.get(ModDataComponents.TIME_LINE);
             if (!stack.has(ModDataComponents.LONG_DATA)) {
-                stack.set(ModDataComponents.LONG_DATA, ServerConfig.FRAGMENT_TRANSFER_TIME);
+                stack.set(ModDataComponents.LONG_DATA, ServerConfigRuntime.fragmentTransferTime);
             }
             if (currentTick - lastProcessed > 20L) {
                 if (stack.get(ModDataComponents.LONG_DATA) > 0) {

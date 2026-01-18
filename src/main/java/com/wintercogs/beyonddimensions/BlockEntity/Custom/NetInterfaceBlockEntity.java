@@ -12,6 +12,7 @@ import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Api.Util.CommonHandler;
+import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
@@ -44,7 +45,7 @@ import java.util.function.Function;
 public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
 
-    private static final int capacity = Config.interfaceUsableCapacity;
+    private static final int capacity = CommonConfigRuntime.interfaceUsableCapacity;
 
     // 用来标记物品或者流体的槽位，只由UI控制
     private final StackHandler fakeStackHandler = new StackHandler(capacity)
@@ -124,13 +125,13 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
         if(getNet() != null)
         {
-            if(Config.interfaceCanReceiveResource)
+            if(CommonConfigRuntime.interfaceCanReceiveResource)
                 transferToNet();
-            if(Config.interfaceCanOutputResource)
+            if(CommonConfigRuntime.interfaceCanOutputResource)
                 transferFromNet();
         }
 
-        if(Config.interfaceCanPopResource)
+        if(CommonConfigRuntime.interfaceCanPopResource)
         {
             // 尝试输出物品到周围
             if(popMode == PopMode.OPEN)

@@ -12,7 +12,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
 public class ShortCutKeyRegister
 {
     private static final List<KeyMapping> KEY_MAPPINGS = new ArrayList<>();
