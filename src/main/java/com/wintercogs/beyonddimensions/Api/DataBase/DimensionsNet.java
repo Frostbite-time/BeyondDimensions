@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Api.Registry.UnifiedStorageBeforeInsertHandler;
 import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
@@ -86,7 +87,26 @@ public class DimensionsNet extends SavedData
      */
     public DimensionsNet(boolean temporary)
     {
-        unifiedStorage = new UnifiedStorage(this);
+        unifiedStorage = new UnifiedStorage(this)
+        {
+            @Override
+            public IStackType<?> insert(IStackType<?> stack, boolean simulate)
+            {
+                IStackType<?> input = Objects.requireNonNullElse(stack, new ItemStackType());
+
+                var info = UnifiedStorageBeforeInsertHandler.onBeforeInsert(input, this.getNet());
+
+                if (info.cancel())
+                    return input;
+
+                IStackType<?> adjusted = info.beforeInsert();
+
+                if (adjusted.isEmpty())
+                    return adjusted;
+
+                return super.insert(adjusted, simulate);
+            }
+        };
         MinecraftForge.EVENT_BUS.addListener(this::onServerTick);
         this.temporary = temporary;
     }

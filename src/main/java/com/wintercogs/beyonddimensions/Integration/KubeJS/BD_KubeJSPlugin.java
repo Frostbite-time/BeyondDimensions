@@ -12,6 +12,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Api.Registry.UnifiedStorageBeforeInsertHandler;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 
@@ -22,6 +23,7 @@ public class BD_KubeJSPlugin extends KubeJSPlugin
     public void registerBindings(BindingsEvent bindings)
     {
         bindings.add("UnifiedStorage", UnifiedStorage.class);
+        bindings.add("UnifiedStorageBeforeInsertHandler", UnifiedStorageBeforeInsertHandler.class);
         bindings.add("IStackTypedHandler", IStackTypedHandler.class);
         bindings.add("StackTypedHandler", StackTypedHandler.class);
         bindings.add("LongType", LongType.class);

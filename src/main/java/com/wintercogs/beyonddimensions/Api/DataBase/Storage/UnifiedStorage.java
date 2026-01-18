@@ -300,6 +300,10 @@ public class UnifiedStorage implements IStackTypedHandler
         fireDelta(type, size, insert); // 发送增量广播
     }
 
+    public DimensionsNet getNet()
+    {
+        return net;
+    }
 
     @Override
     public int getSlots()
