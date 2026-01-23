@@ -372,6 +372,12 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         {
             this.popMode = PopMode.STOP;
         }
+
+        String fuzzyModeNew = tag.getString("fuzzy_mode");
+        if (!fuzzyModeNew.isEmpty())
+        {
+            this.fuzzyMode = FuzzyMode.valueOf(fuzzyModeNew);
+        }
         // 加载后需要更新缓存
         setNeedsCapabilityUpdate();
     }
@@ -383,6 +389,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         tag.put("inventory", stackHandler.serializeNBT(registries));
         tag.put("flags", fakeStackHandler.serializeNBT(registries));
         tag.putString("popMode", this.popMode.name());
+        tag.putString("fuzzy_mode", this.fuzzyMode.name());
     }
 
     @Override

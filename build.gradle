@@ -237,8 +237,8 @@ dependencies {
     runtimeOnly "maven.modrinth:patchouli:1.21.1-92-neoforge" // 帕秋莎
 
     // 植物魔法支持 - 后续需要更新
-    compileOnly files("libs/botania-neoforge-1.21.1-451-SNAPSHOT.jar")
-    runtimeOnly files("libs/botania-neoforge-1.21.1-451-SNAPSHOT.jar")
+    compileOnly "dev.local:botania-neoforge:1.21.1-451-SNAPSHOT"
+    runtimeOnly "dev.local:botania-neoforge:1.21.1-451-SNAPSHOT"
 
     // 机械动力支持 - 蓝图炮
     compileOnly "maven.modrinth:create:mc1.21.1-6.0.8"
