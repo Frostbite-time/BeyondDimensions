@@ -125,7 +125,7 @@ public class SourceStackTypedHandler implements ISourceCap
         }
         else if (delta < 0)
         {
-            handlerStorage.extract(SourceStackKey.INSTANCE, -delta, false);
+            handlerStorage.extract(SourceStackKey.INSTANCE, -delta, false, false);
         }
     }
 
@@ -150,7 +150,7 @@ public class SourceStackTypedHandler implements ISourceCap
     public int extractSource(int amount, boolean sim)
     {
         if (amount <= 0) return 0;
-        long out = handlerStorage.extract(SourceStackKey.INSTANCE, amount, sim).amount();
+        long out = handlerStorage.extract(SourceStackKey.INSTANCE, amount, sim, false).amount();
         return out <= 0 ? 0 : (int) out;
     }
 }

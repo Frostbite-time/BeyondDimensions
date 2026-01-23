@@ -64,7 +64,7 @@ public class ItemUnifiedStorageHandler implements IItemHandler
         return storage.getBucket(ItemStackKey.ID)
                 .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
-                .map(key -> storage.extract(key, count, sim))
+                .map(key -> storage.extract(key, count, sim, false))
                 .filter(keyAmount -> !keyAmount.isEmpty())
                 .map(keyAmount -> {
                     Object outStack = keyAmount.toStack();

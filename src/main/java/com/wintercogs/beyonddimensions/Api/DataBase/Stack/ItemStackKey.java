@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public final class ItemStackKey implements IStackKey<ItemStack>
 {
@@ -311,6 +312,11 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         @SuppressWarnings("unchecked")
         TagKey<Item> itemTag = (TagKey<Item>) tagKey;
         return RegistryUtil.holderOf(this.item).is(itemTag);
+    }
+
+    @Override
+    public Stream<? extends TagKey<?>> getTags() {
+        return RegistryUtil.holderOf(this.item).tags();
     }
 
     @Override

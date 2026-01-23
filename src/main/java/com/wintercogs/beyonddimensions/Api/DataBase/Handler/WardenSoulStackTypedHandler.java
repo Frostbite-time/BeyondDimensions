@@ -145,7 +145,7 @@ public class WardenSoulStackTypedHandler implements ISoulHandler
     public int drain(int amount, Action action)
     {
         if (amount <= 0) return 0;
-        long taken = handlerStorage.extract(WardenSoulStackKey.INSTANCE, amount, action.simulate()).amount();
+        long taken = handlerStorage.extract(WardenSoulStackKey.INSTANCE, amount, action.simulate(), false).amount();
         return BDMath.clampLongToInt(taken);
     }
 }

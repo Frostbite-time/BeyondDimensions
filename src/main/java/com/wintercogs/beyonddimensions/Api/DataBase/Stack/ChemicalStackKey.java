@@ -18,6 +18,8 @@ import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.stream.Stream;
+
 public class ChemicalStackKey implements IStackKey<ChemicalStack>
 {
 
@@ -279,6 +281,11 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
         @SuppressWarnings("unchecked")
         TagKey<Chemical> chemicalTag = (TagKey<Chemical>) tagKey;
         return chemical.is(chemicalTag);
+    }
+
+    @Override
+    public Stream<? extends TagKey<?>> getTags() {
+        return chemical.tags();
     }
 
     @Override

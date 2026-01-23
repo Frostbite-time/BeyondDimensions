@@ -53,6 +53,8 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "현재: 레드스톤 신호 수신시 작동",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "현재: 레드스톤 신호 수신시 정지",
   "tooltip.button.beyonddimensions.control_mode_not_working": "현재: 작업 중지됨",
+  "tooltip.button.beyonddimensions.fuzzy_mode_disable": "현재: 퍼지 모드 비활성",
+  "tooltip.button.beyonddimensions.fuzzy_mode_enable": "현재: 퍼지 모드 활성",
   "tooltip.button.beyonddimensions.hopper_item_mode_deny": "현재: 아이템 수집 안 함",
   "tooltip.button.beyonddimensions.hopper_item_mode_allow": "현재: 아이템 수집 함",
   "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "현재: 경험치 수집 안 함",

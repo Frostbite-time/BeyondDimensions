@@ -17,6 +17,7 @@ import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.Machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import net.minecraft.core.BlockPos;
@@ -69,6 +70,8 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     };
 
     public PopMode popMode = PopMode.STOP;
+
+    public FuzzyMode fuzzyMode = FuzzyMode.DISABLE;
 
     private final Direction[] directions = Direction.values();
 
@@ -266,7 +269,12 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                     }
 
                     // 插入逻辑
-                    KeyAmount stack = net.getUnifiedStorage().extract(flag.key(), flag.key().getVanillaMaxStackSize(), false);
+                    KeyAmount stack = net.getUnifiedStorage().extract(
+                            flag.key(),
+                            flag.key().getVanillaMaxStackSize(),
+                            false,
+                            fuzzyMode == FuzzyMode.ENABLE
+                    );
                     if (!stack.isEmpty())
                     {
                         KeyAmount remaining = stackHandler.insert(i, stack.key(), stack.amount(), false);

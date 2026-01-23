@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -92,20 +93,22 @@ public interface IStackHandler
      * 此方法会在索引越界时直接返回空的ItemStackType，因此对于类型要求严格的方法。在使用其返回值时需要检测typeId或者其实例是否为空。
      *
      * @param slot     槽位索引
-     * @param count    指定的数量
+     * @param amount    指定的数量
      * @param simulate 是否为模拟操作
      * @return 实际能提取的堆叠
      */
-    @NotNull KeyAmount extract(int slot, long count, boolean simulate);
+    @NotNull KeyAmount extract(int slot, long amount, boolean simulate);
 
     /**
      * 按类型导出堆叠，并返回提取的堆叠
      *
-     * @param key      堆叠类型，精确匹配
-     * @param simulate 是否为模拟操作
-     * @return 实际能提取的堆叠
+     * @param key       堆叠类型
+     * @param amount    指定的数量
+     * @param simulate  是否为模拟操作
+     * @param fuzzy     是否模糊匹配
+     * @return          实际能提取的堆叠
      */
-    @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate);
+    @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy);
 
     /**
      * 指定的槽位最大容量是多少？

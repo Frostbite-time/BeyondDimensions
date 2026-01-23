@@ -427,7 +427,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                             break;
                         }
 
-                        KeyAmount bucket = storage.extract(new ItemStackKey(new ItemStack(Items.BUCKET)), 1, false);
+                        KeyAmount bucket = storage.extract(new ItemStackKey(new ItemStack(Items.BUCKET)), 1, false, false);
                         if (bucket.isEmpty())
                         {
                             safeInsert(extract.key(), extract.amount());

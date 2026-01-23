@@ -24,7 +24,7 @@ public class EnergyStackTypedHandler implements IEnergyStorage
     @Override
     public int extractEnergy(int count, boolean simulate)
     {
-        return (int) handlerStorage.extract(EnergyStackKey.INSTANCE, count, simulate).amount();
+        return (int) handlerStorage.extract(EnergyStackKey.INSTANCE, count, simulate, false).amount();
     }
 
     @Override

@@ -90,7 +90,7 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
         UnifiedStorage us = currentUnified();
         if (us == null || amount <= 0) return 0L;
         return RSHelper.fromRSKeyToIStack(resourceKey)
-                .map(s -> us.extract(s, amount, action == Action.SIMULATE).amount())
+                .map(s -> us.extract(s, amount, action == Action.SIMULATE, false).amount())
                 .orElse(0L);
     }
 

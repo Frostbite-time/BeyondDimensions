@@ -80,7 +80,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public @NotNull ChemicalStack extractChemical(int tank, long amount, Action action)
     {
-        if (storage.extract(new ChemicalStackKey(getChemicalInTank(tank)), amount, action.simulate()).toStack() instanceof ChemicalStack result)
+        if (storage.extract(new ChemicalStackKey(getChemicalInTank(tank)), amount, action.simulate(), false).toStack() instanceof ChemicalStack result)
             return result;
         else
             return ChemicalStack.EMPTY;
@@ -101,7 +101,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public @NotNull ChemicalStack extractChemical(long amount, Action action)
     {
-        if (storage.extract(new ChemicalStackKey(getChemicalInTank(0)), amount, action.simulate()).toStack() instanceof ChemicalStack result)
+        if (storage.extract(new ChemicalStackKey(getChemicalInTank(0)), amount, action.simulate(), false).toStack() instanceof ChemicalStack result)
             return result;
         else
             return ChemicalStack.EMPTY;
@@ -111,7 +111,7 @@ public class ChemicalUnifiedStorageHandler implements IChemicalHandler
     @Override
     public @NotNull ChemicalStack extractChemical(@NotNull ChemicalStack stack, Action action)
     {
-        if (storage.extract(new ChemicalStackKey(stack), stack.getAmount(), action.simulate()).toStack() instanceof ChemicalStack result)
+        if (storage.extract(new ChemicalStackKey(stack), stack.getAmount(), action.simulate(), false).toStack() instanceof ChemicalStack result)
             return result;
         else
             return ChemicalStack.EMPTY;

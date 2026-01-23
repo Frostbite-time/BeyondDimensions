@@ -161,6 +161,7 @@ public class XpExchangeItem extends Item
                 KeyAmount extracted = storage.extract(
                         new FluidStackKey(new FluidStack(f, 1)),
                         wantUnits,
+                        false,
                         false
                 );
 

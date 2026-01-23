@@ -13,6 +13,8 @@ import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.stream.Stream;
+
 public class WardenSoulStackKey extends LongStackKey<WardenSoulType>
 {
     public static final ResourceLocation ID =
@@ -112,6 +114,11 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType>
     public boolean hasTag(TagKey<?> tagKey)
     {
         return false;
+    }
+
+    @Override
+    public Stream<? extends TagKey<?>> getTags() {
+        return Stream.empty();
     }
 
     @Override

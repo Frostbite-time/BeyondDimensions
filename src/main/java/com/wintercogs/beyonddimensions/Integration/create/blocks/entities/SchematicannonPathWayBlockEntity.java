@@ -302,7 +302,7 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
         {
             if (slot < 0 || slot >= stacksSnapshot.size() || count <= 0) return ItemStack.EMPTY;
 
-            KeyAmount extracted = net.getUnifiedStorage().extract(new ItemStackKey(stacksSnapshot.get(slot)), count, simulate);
+            KeyAmount extracted = net.getUnifiedStorage().extract(new ItemStackKey(stacksSnapshot.get(slot)), count, simulate, false);
             if (extracted.isEmpty()) return ItemStack.EMPTY;
             if (!(extracted.key() instanceof ItemStackKey itemKey)) return ItemStack.EMPTY;
 

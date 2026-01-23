@@ -13,6 +13,8 @@ import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.stream.Stream;
+
 /**
  * 资源Key，对一种资源的唯一标识，其实现必须是不可变对象
  */
@@ -151,6 +153,11 @@ public interface IStackKey<T>
      * 当前堆叠是否有此标签？
      */
     boolean hasTag(TagKey<?> tagKey);
+
+    /**
+     * 当前堆叠标签
+     */
+    Stream<? extends TagKey<?>> getTags();
 
     /**
      * 检查2个实例是否能模糊匹配，即：2个物品，是否为同一种物品，不管NBT等数据

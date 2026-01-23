@@ -70,7 +70,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public @NotNull FluidStack drain(@NotNull FluidStack fluidStack, FluidAction fluidAction)
     {
-        if (storage.extract(new FluidStackKey(fluidStack), fluidStack.getAmount(), fluidAction.simulate()).toStack() instanceof FluidStack result)
+        if (storage.extract(new FluidStackKey(fluidStack), fluidStack.getAmount(), fluidAction.simulate(), false).toStack() instanceof FluidStack result)
             return result;
         else
             return FluidStack.EMPTY;
@@ -82,7 +82,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public @NotNull FluidStack drain(int count, FluidAction fluidAction)
     {
-        if (storage.extract(new FluidStackKey(getFluidInTank(0)), count, fluidAction.simulate()).toStack() instanceof FluidStack result)
+        if (storage.extract(new FluidStackKey(getFluidInTank(0)), count, fluidAction.simulate(), false).toStack() instanceof FluidStack result)
             return result;
         else
             return FluidStack.EMPTY;

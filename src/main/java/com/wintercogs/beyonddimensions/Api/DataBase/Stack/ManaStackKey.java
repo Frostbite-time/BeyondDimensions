@@ -13,6 +13,8 @@ import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.stream.Stream;
+
 public class ManaStackKey extends LongStackKey<ManaType>
 {
 
@@ -119,6 +121,11 @@ public class ManaStackKey extends LongStackKey<ManaType>
     public boolean hasTag(TagKey<?> tagKey)
     {
         return false;
+    }
+
+    @Override
+    public Stream<? extends TagKey<?>> getTags() {
+        return Stream.empty();
     }
 
     // ------- 网络序列化：仅写 typeId；读回单例 -------

@@ -13,6 +13,8 @@ import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.stream.Stream;
+
 public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackType>
 {
 
@@ -156,6 +158,11 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     public boolean hasTag(TagKey<?> tagKey)
     {
         return false;
+    }
+
+    @Override
+    public Stream<? extends TagKey<?>> getTags() {
+        return Stream.empty();
     }
 
     @Override
