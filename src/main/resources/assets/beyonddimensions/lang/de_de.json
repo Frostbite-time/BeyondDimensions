@@ -53,6 +53,8 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "Aktuell: Bei Redstone-Signal arbeiten",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "Aktuell: Bei Redstone-Signal stoppen",
   "tooltip.button.beyonddimensions.control_mode_not_working": "Aktuell: Arbeit gestoppt",
+  "tooltip.button.beyonddimensions.fuzzy_mode_disable": "Aktuell: Fuzzy-Modus deaktiviert ",
+  "tooltip.button.beyonddimensions.fuzzy_mode_enable": "Aktuell: Fuzzy-Modus aktiviert ",
   "tooltip.button.beyonddimensions.hopper_item_mode_deny": "Aktuell: Keine Gegenstände sammeln",
   "tooltip.button.beyonddimensions.hopper_item_mode_allow": "Aktuell: Gegenstände sammeln",
   "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "Aktuell: Keine XP sammeln",

@@ -53,6 +53,8 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "当前：收到红石信号时工作",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "当前：收到红石信号时停止工作",
   "tooltip.button.beyonddimensions.control_mode_not_working": "当前：停止工作",
+  "tooltip.button.beyonddimensions.fuzzy_mode_disable": "当前：模糊模式禁用",
+  "tooltip.button.beyonddimensions.fuzzy_mode_enable": "当前：模糊模式启用",
   "tooltip.button.beyonddimensions.hopper_item_mode_deny": "当前：不收集掉落物",
   "tooltip.button.beyonddimensions.hopper_item_mode_allow": "当前：收集掉落物",
   "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "当前：不收集经验球",

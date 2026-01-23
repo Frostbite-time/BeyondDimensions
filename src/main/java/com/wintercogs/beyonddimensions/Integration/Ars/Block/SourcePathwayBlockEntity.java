@@ -100,7 +100,7 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         if (net != null)
         {
             // 此处转换安全
-            return (int) net.getUnifiedStorage().extract(SourceStackKey.INSTANCE, amount, simulate).amount();
+            return (int) net.getUnifiedStorage().extract(SourceStackKey.INSTANCE, amount, simulate, false).amount();
         }
         return 0;
     }

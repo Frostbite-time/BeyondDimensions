@@ -91,7 +91,7 @@ public class SourceUnifiedStorageHandler implements ISourceCap
         if (operation > 0)
             storage.insert(SourceStackKey.INSTANCE, operation, false);
         else
-            storage.extract(SourceStackKey.INSTANCE, -operation, false);
+            storage.extract(SourceStackKey.INSTANCE, -operation, false, false);
     }
 
     // 强行设置最大值，不生效，因为UnifiedStorage的容量仅由容器决定（新生魔艺并未使用过这个方法，可以放心）
@@ -112,6 +112,6 @@ public class SourceUnifiedStorageHandler implements ISourceCap
     @Override
     public int extractSource(int amount, boolean sim)
     {
-        return (int) storage.extract(SourceStackKey.INSTANCE, amount, sim).amount();
+        return (int) storage.extract(SourceStackKey.INSTANCE, amount, sim, false).amount();
     }
 }

@@ -119,7 +119,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
                     int maxExtract = BDMath.clampLongToInt(net.getUnifiedStorage().getStackByKey(EnergyStackKey.INSTANCE).amount());
                     int receive = otherStorage.receiveEnergy(maxExtract, false);
-                    net.getUnifiedStorage().extract(EnergyStackKey.INSTANCE, receive, false);
+                    net.getUnifiedStorage().extract(EnergyStackKey.INSTANCE, receive, false, false);
                 }
             }
         }

@@ -245,7 +245,7 @@ public class ServerPayloadHandler
                                     {
                                         Slot slot = menu.slots.get(targetSlotIndex);
 
-                                        KeyAmount extract = storage.extract(clickItem, Integer.MAX_VALUE, false); // 防止数量过多无法回插
+                                        KeyAmount extract = storage.extract(clickItem, Integer.MAX_VALUE, false, false); // 防止数量过多无法回插
                                         if (extract.toStack() instanceof ItemStack extractedStack)
                                         {
                                             ItemStack remaining = slot.safeInsert(extractedStack);
@@ -291,7 +291,7 @@ public class ServerPayloadHandler
 
                     if (target != null && player.getMainHandItem().isEmpty())
                     {
-                        ItemStack extract = (ItemStack) storage.extract(target, target.getVanillaMaxStackSize(), false).toStack();
+                        ItemStack extract = (ItemStack) storage.extract(target, target.getVanillaMaxStackSize(), false, false).toStack();
                         player.setItemInHand(InteractionHand.MAIN_HAND, extract);
                     }
                 }

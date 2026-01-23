@@ -88,7 +88,7 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
         if (mana > 0)
             storageHandler.insert(ManaStackKey.INSTANCE, mana, false);
         else
-            storageHandler.extract(ManaStackKey.INSTANCE, -mana, false);
+            storageHandler.extract(ManaStackKey.INSTANCE, -mana, false, false);
     }
 
     @Override

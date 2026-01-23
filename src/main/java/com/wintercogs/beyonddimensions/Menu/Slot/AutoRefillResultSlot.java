@@ -60,12 +60,12 @@ public class AutoRefillResultSlot extends ResultSlot
                         boolean consumed = false;
 
                         // 优先尝试存储系统
-                        long extracted = menu.storage.extract(new ItemStackKey(singleItem), singleItem.getCount(), true).amount();
+                        long extracted = menu.storage.extract(new ItemStackKey(singleItem), singleItem.getCount(), true, false).amount();
                         if (extracted >= 1)
                         {
                             if (!player.level().isClientSide())
                             {
-                                menu.storage.extract(new ItemStackKey(singleItem), singleItem.getCount(), false);
+                                menu.storage.extract(new ItemStackKey(singleItem), singleItem.getCount(), false, false);
                             }
                             itemsToRemove = 0;
                             consumed = true;

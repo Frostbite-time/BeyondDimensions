@@ -1,5 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
@@ -17,7 +19,9 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.ReferenceQueue;
@@ -51,6 +55,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     protected final Map<IStackKey<?>, Integer> posMap = new HashMap<>();
     protected final Map<IStackKey<?>, Object> key2stackMap = new HashMap<>();
     protected final Map<ResourceLocation, TypeBucket> type2buckets = new HashMap<>();
+    protected final Multimap<TagKey<?>, IStackKey<?>> tag2stackMap = HashMultimap.create();
 
     /* ---------- 新增：仅供 UI 使用的时间表 ---------- */
     /**
@@ -334,6 +339,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         posMap.clear();
         key2stackMap.clear();
         type2buckets.clear();
+        tag2stackMap.clear();
         // 新增：清空 UI 时间表
         creationTimeMap.clear();
         lastModifiedTimeMap.clear();
@@ -384,7 +390,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                     }
                     onContentChanged(key, current, false);
                 }
-                return 0L;
             }
             else
             { // KEEP_ZERO
@@ -396,8 +401,8 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 }
                 long delta = current; // 全部减少
                 if (delta > 0L) onContentChanged(key, delta, false);
-                return 0L;
             }
+            return 0L;
         }
 
         // target > 0
@@ -496,7 +501,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         long actual = Math.min(room, add);
         long leftover = add - actual;
 
-        if (!simulate && actual > 0L)
+        if (!simulate)
         {
             storage.put(key, current + actual);
             ensureInIndex(key);
@@ -563,7 +568,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 for (int i = applied.size() - 1; i >= 0; i--)
                 {
                     KeyAmount a = applied.get(i);
-                    extract(a.key(), a.amount(), false);
+                    extract(a.key(), a.amount(), false, false);
                 }
                 return new KeyAmount(ballKey, ballCount);
             }
@@ -575,7 +580,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 for (int i = applied.size() - 1; i >= 0; i--)
                 {
                     KeyAmount a = applied.get(i);
-                    extract(a.key(), a.amount(), false);
+                    extract(a.key(), a.amount(), false, false);
                 }
                 return new KeyAmount(ballKey, ballCount);
             }
@@ -583,14 +588,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         return new KeyAmount(ballKey, 0L);
     }
 
-    @Override
-    public @NotNull KeyAmount extract(int slot, long count, boolean simulate)
-    {
-        if (slot < 0 || slot >= slotIndex.size() || count <= 0L)
-        {
-            return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
-        }
-        IStackKey<?> key = slotIndex.get(slot);
+    private @NotNull KeyAmount extractByKey(IStackKey<?> key, long count, boolean simulate) {
         long current = storage.getOrDefault(key, 0L);
         if (current <= 0L) return new KeyAmount(key, 0L);
 
@@ -629,44 +627,28 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     @Override
-    public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate)
-    {
-        if (key == null || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
-        long current = storage.getOrDefault(key, 0L);
-        if (current <= 0L) return new KeyAmount(key, 0L);
-
-        long take = Math.min(amount, current);
-        if (!simulate)
-        {
-            long left = current - take;
-            if (left == 0L)
-            {
-                if (uiTimestampPolicy == UiTimestampPolicy.AUTO)
-                {
-                    lastModifiedTimeMap.put(key, nowMillis());
-                }
-                if (zeroPolicy == ZeroPolicy.REMOVE_ON_ZERO)
-                {
-                    storage.remove(key);
-                    removeFromIndex(key);
-                }
-                else
-                {
-                    storage.put(key, 0L);
-                    ensureInIndex(key);
-                }
-            }
-            else
-            {
-                storage.put(key, left);
-                if (uiTimestampPolicy == UiTimestampPolicy.AUTO)
-                {
-                    lastModifiedTimeMap.put(key, nowMillis());
-                }
-            }
-            onContentChanged(key, take, false);
+    public @NotNull KeyAmount extract(int slot, long count, boolean simulate) {
+        if (slot < 0 || slot >= slotIndex.size() || count <= 0L) {
+            return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         }
-        return new KeyAmount(key, take);
+        IStackKey<?> key = slotIndex.get(slot);
+        return extractByKey(key, count, simulate);
+    }
+
+    @Override
+    public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy) {
+        if (fuzzy) {
+            var fuzzyKey = key;
+            key = slotIndex.stream().filter(x -> x.isSame(fuzzyKey)).findFirst().orElse(null);
+        }
+        if (key == null || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
+        return extractByKey(key, amount, simulate);
+    }
+
+    public @NotNull KeyAmount extract(TagKey<?> tagKey, long amount, boolean simulate) {
+        var key = tag2stackMap.get(tagKey).stream().findFirst();
+        if (key.isEmpty() || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
+        return extractByKey(key.get(), amount, simulate);
     }
 
     @Override
@@ -696,6 +678,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         posMap.put(key, idx);
         bucketOf(key.getTypeId()).add(key);
         if (!key2stackMap.containsKey(key)) key2stackMap.put(key, key.copyStack());
+        key.getTags().forEach(tag -> {
+            tag2stackMap.put(tag, key);
+        });
         // 新建槽位时间
         if (uiTimestampPolicy == UiTimestampPolicy.AUTO)
         {
@@ -717,6 +702,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         slotIndex.remove(last);
         bucketOf(key.getTypeId()).remove(key);
         key2stackMap.remove(key);
+        key.getTags().forEach(tag -> {
+            tag2stackMap.remove(tag, key);
+        });
         // 为避免无上限增长，这里选择在移除槽位时一并清理时间记录
         creationTimeMap.remove(key);
         lastModifiedTimeMap.remove(key);

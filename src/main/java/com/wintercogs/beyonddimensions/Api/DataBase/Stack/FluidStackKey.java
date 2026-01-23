@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public final class FluidStackKey implements IStackKey<FluidStack>
 {
@@ -308,6 +309,11 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         @SuppressWarnings("unchecked")
         TagKey<Fluid> fluidTag = (TagKey<Fluid>) tagKey;
         return RegistryUtil.holderOf(this.fluid).is(fluidTag);
+    }
+
+    @Override
+    public Stream<? extends TagKey<?>> getTags() {
+        return RegistryUtil.holderOf(this.fluid).tags();
     }
 
     @Override

@@ -280,7 +280,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     // 从存储提取物品
     private int extractFromStorage(IStackHandler storage, IStackKey<?> type, int amount)
     {
-        KeyAmount extraction = storage.extract(type, amount, false);
+        KeyAmount extraction = storage.extract(type, amount, false, false);
         if (extraction.amount() > 0)
         {
             return amount - (int) extraction.amount();

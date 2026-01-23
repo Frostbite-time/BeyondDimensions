@@ -349,7 +349,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                             break; //如果已经插入过则直接跳过
                         if (filterStack.key() instanceof ItemStackKey filterItem && !filterItem.isEmpty())
                         {
-                            KeyAmount extracted = storage.extract(filterItem, filterItem.getVanillaMaxStackSize(), false);
+                            KeyAmount extracted = storage.extract(filterItem, filterItem.getVanillaMaxStackSize(), false, false);
                             KeyAmount remaining = inputStorageSlots.insert(inputSlot, extracted.key(), extracted.amount(), false);
                             if (!remaining.isEmpty())
                             {
@@ -472,7 +472,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                         if (!fuelStorageSlots.getStackBySlot(fuelSlot).isEmpty())
                             break; //如果已经插入过则直接跳过
 
-                        KeyAmount extracted = storage.extract(filterStack.key(), filterStack.key().getVanillaMaxStackSize(), false);
+                        KeyAmount extracted = storage.extract(filterStack.key(), filterStack.key().getVanillaMaxStackSize(), false, false);
                         KeyAmount remaining = fuelStorageSlots.insert(fuelSlot, extracted.key(), extracted.amount(), false);
                         if (!remaining.isEmpty())
                         {
@@ -498,7 +498,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                             int burnTime = (int) Math.min(fuelStack.amount(), 20000);
                             if (burnTime > 0)
                             {
-                                fuelStorageSlots.extract(fuelStack.key(), burnTime, false);
+                                fuelStorageSlots.extract(fuelStack.key(), burnTime, false, false);
                                 litTime.set(litSlot, burnTime);
                                 litDuration.set(litSlot, burnTime);
                             }
@@ -510,7 +510,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                             int burnTime = burnNum * 20;
                             if (burnTime > 0)
                             {
-                                fuelStorageSlots.extract(fuelFluid, burnNum, false);
+                                fuelStorageSlots.extract(fuelFluid, burnNum, false, false);
                                 litTime.set(litSlot, burnTime);
                                 litDuration.set(litSlot, burnTime);
                             }
@@ -523,7 +523,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                                 ItemStack returnItem = fuelItem.getReadOnlyStack().getCraftingRemainingItem();
                                 if (returnItem.isEmpty())
                                 {
-                                    fuelStorageSlots.extract(fuelItem, 1, false);
+                                    fuelStorageSlots.extract(fuelItem, 1, false, false);
                                     litTime.set(litSlot, burnTime);
                                     litDuration.set(litSlot, burnTime);
                                 }
@@ -535,7 +535,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                                     if (fuelReturnSlots.insert(returnKey, returnCount, true).isEmpty())
                                     {
                                         fuelReturnSlots.insert(returnKey, returnCount, false);
-                                        fuelStorageSlots.extract(fuelItem, 1, false);
+                                        fuelStorageSlots.extract(fuelItem, 1, false, false);
                                         litTime.set(litSlot, burnTime);
                                         litDuration.set(litSlot, burnTime);
                                     }

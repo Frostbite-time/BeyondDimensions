@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
+import com.wintercogs.beyonddimensions.Machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.Slot.FlagStackTypedSlot;
@@ -153,6 +154,7 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         super.writeQuickDataTag(tag);
         tag.putString("popMode", be.popMode.name());
         tag.putString("controlMode", be.controlMode.name());
+        tag.putString("fuzzyMode", be.fuzzyMode.name());
     }
 
     @Override
@@ -161,6 +163,7 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         super.readQuickDataTag(tag);
         be.popMode = PopMode.valueOf(tag.getString("popMode"));
         be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
+        be.fuzzyMode = FuzzyMode.valueOf(tag.getString("fuzzyMode"));
         // 服务端读取新数据之后利用sendBlockUpdated将数据发送给附近所有玩家
         if (!player.level().isClientSide())
         {

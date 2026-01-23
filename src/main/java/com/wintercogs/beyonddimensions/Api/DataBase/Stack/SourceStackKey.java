@@ -13,6 +13,8 @@ import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.stream.Stream;
+
 public class SourceStackKey extends LongStackKey<SourceType>
 {
 
@@ -116,6 +118,11 @@ public class SourceStackKey extends LongStackKey<SourceType>
     public boolean hasTag(TagKey<?> tagKey)
     {
         return false;
+    }
+
+    @Override
+    public Stream<? extends TagKey<?>> getTags() {
+        return Stream.empty();
     }
 
     @Override

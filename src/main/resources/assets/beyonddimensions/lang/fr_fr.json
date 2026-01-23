@@ -53,6 +53,8 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "Actuel : Actif avec redstone",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "Actuel : Inactif avec redstone",
   "tooltip.button.beyonddimensions.control_mode_not_working": "Actuel : Désactivé",
+  "tooltip.button.beyonddimensions.fuzzy_mode_disable": "Actuel : Mode flou désactivé",
+  "tooltip.button.beyonddimensions.fuzzy_mode_enable": "Actuel : Mode flou activé",
   "tooltip.button.beyonddimensions.hopper_item_mode_deny": "Actuel : Ne pas collecter les objets",
   "tooltip.button.beyonddimensions.hopper_item_mode_allow": "Actuel : Collecter les objets",
   "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "Actuel : Ne pas collecter l'XP",

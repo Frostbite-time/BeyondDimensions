@@ -159,7 +159,7 @@ public class FluidStackTypedHandler implements IFluidHandler
     public @NotNull FluidStack drain(FluidStack fluidStack, FluidAction action)
     {
         if (fluidStack.isEmpty()) return FluidStack.EMPTY;
-        Object out = handlerStorage.extract(new FluidStackKey(fluidStack), fluidStack.getAmount(), action.simulate()).toStack();
+        Object out = handlerStorage.extract(new FluidStackKey(fluidStack), fluidStack.getAmount(), action.simulate(), false).toStack();
         return (out instanceof FluidStack fs) ? fs : FluidStack.EMPTY;
     }
 
@@ -179,7 +179,7 @@ public class FluidStackTypedHandler implements IFluidHandler
         KeyAmount ka = handlerStorage.getStackBySlot(firstFluidSlot);
         if (ka.isEmpty()) return FluidStack.EMPTY;
 
-        Object out = handlerStorage.extract(ka.key(), amount, action.simulate()).toStack();
+        Object out = handlerStorage.extract(ka.key(), amount, action.simulate(), false).toStack();
         return (out instanceof FluidStack fs) ? fs : FluidStack.EMPTY;
     }
 }

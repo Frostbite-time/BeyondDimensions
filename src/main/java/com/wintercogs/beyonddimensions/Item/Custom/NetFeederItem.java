@@ -108,7 +108,7 @@ public class NetFeederItem extends BaseMachineItem
 
                 if (foodCache != null)
                 {
-                    KeyAmount foodToFeed = storage.extract(foodCache.key(), foodCache.amount(), false);
+                    KeyAmount foodToFeed = storage.extract(foodCache.key(), foodCache.amount(), false, false);
                     if (!foodToFeed.isEmpty())
                     {
                         ItemStack foodStack = (ItemStack) foodToFeed.toStack();

@@ -210,7 +210,7 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
         KeyAmount ka = handlerStorage.getStackBySlot(firstChemSlot);
         if (ka.isEmpty()) return ChemicalStack.EMPTY;
 
-        Object out = handlerStorage.extract(ka.key(), amount, action.simulate()).toStack();
+        Object out = handlerStorage.extract(ka.key(), amount, action.simulate(), false).toStack();
         return (out instanceof ChemicalStack cs) ? cs : ChemicalStack.EMPTY;
     }
 
@@ -221,7 +221,7 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
     public ChemicalStack extractChemical(ChemicalStack stack, Action action)
     {
         if (stack.isEmpty()) return ChemicalStack.EMPTY;
-        Object out = handlerStorage.extract(new ChemicalStackKey(stack), stack.getAmount(), action.simulate()).toStack();
+        Object out = handlerStorage.extract(new ChemicalStackKey(stack), stack.getAmount(), action.simulate(), false).toStack();
         return (out instanceof ChemicalStack cs) ? cs : ChemicalStack.EMPTY;
     }
 }

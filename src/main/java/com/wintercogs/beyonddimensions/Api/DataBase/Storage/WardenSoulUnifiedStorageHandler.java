@@ -55,6 +55,6 @@ public class WardenSoulUnifiedStorageHandler implements ISoulHandler
     @Override
     public int drain(int amount, Action action)
     {
-        return (int) storage.extract(WardenSoulStackKey.INSTANCE, amount, action.simulate()).amount();
+        return (int) storage.extract(WardenSoulStackKey.INSTANCE, amount, action.simulate(), false).amount();
     }
 }

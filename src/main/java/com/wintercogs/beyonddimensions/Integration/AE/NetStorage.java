@@ -40,7 +40,7 @@ public class NetStorage implements MEStorage
     public long extract(AEKey what, long amount, Actionable mode, IActionSource source)
     {
         return AEHelper.fromAEKeyToIStack(what)
-                .map(stack -> storage.extract(stack, amount, mode.isSimulate()).amount())
+                .map(stack -> storage.extract(stack, amount, mode.isSimulate(), false).amount())
                 .orElse(0L);
     }
 

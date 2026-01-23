@@ -22,7 +22,7 @@ public class EnergyUnifiedStorageHandler implements IEnergyStorage
     @Override
     public int extractEnergy(int count, boolean simulate)
     {
-        return (int) storage.extract(EnergyStackKey.INSTANCE, count, simulate).amount();
+        return (int) storage.extract(EnergyStackKey.INSTANCE, count, simulate, false).amount();
     }
 
     @Override

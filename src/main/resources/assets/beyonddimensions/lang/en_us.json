@@ -53,6 +53,8 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "Current: Active with Redstone",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "Current: Inactive with Redstone",
   "tooltip.button.beyonddimensions.control_mode_not_working": "Current: Disabled",
+  "tooltip.button.beyonddimensions.fuzzy_mode_disable": "Current: Fuzzy Mode Disabled",
+  "tooltip.button.beyonddimensions.fuzzy_mode_enable": "Current: Fuzzy Mode Enabled",
   "tooltip.button.beyonddimensions.hopper_item_mode_deny": "Current: Deny Item Collection",
   "tooltip.button.beyonddimensions.hopper_item_mode_allow": "Current: Allow Item Collection",
   "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "Current: Deny XP Collection",

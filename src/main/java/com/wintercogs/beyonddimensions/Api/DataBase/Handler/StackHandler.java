@@ -148,11 +148,9 @@ public class StackHandler implements IStackHandler
 
     /* ================= 只读视图 ================= */
 
-    private final List<KeyAmount> entriesView = Collections.unmodifiableList(new AbstractList<KeyAmount>()
-    {
+    private final List<KeyAmount> entriesView = Collections.unmodifiableList(new AbstractList<>() {
         @Override
-        public KeyAmount get(int index)
-        {
+        public KeyAmount get(int index) {
             if (index < 0 || index >= size) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
             IStackKey<?> k = keys[index];
             long amt = (k == EmptyStackKey.INSTANCE) ? 0L : amounts[index];
@@ -160,8 +158,7 @@ public class StackHandler implements IStackHandler
         }
 
         @Override
-        public int size()
-        {
+        public int size() {
             return size;
         }
     });
@@ -387,7 +384,7 @@ public class StackHandler implements IStackHandler
         }
 
         long clamped = Math.max(0L, Math.min(amount, getSlotCapacity(slot)));
-        if (clamped <= 0L)
+        if (clamped == 0L)
         {
             keys[slot] = EmptyStackKey.INSTANCE;
             amounts[slot] = 0L;
@@ -503,15 +500,10 @@ public class StackHandler implements IStackHandler
                 long room = Math.max(0L, cap - amounts[slot]);
                 if (room <= 0) continue;
                 long ins = Math.min(left, room);
-                if (simulate)
-                {
-                    left -= ins;
-                }
-                else
-                {
+                if (!simulate) {
                     amounts[slot] += ins;
-                    left -= ins;
                 }
+                left -= ins;
             }
         }
 
@@ -605,12 +597,19 @@ public class StackHandler implements IStackHandler
     }
 
     @Override
-    public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate)
+    public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy)
     {
-        if (key == null || key == EmptyStackKey.INSTANCE || amount <= 0L)
+        var realKey = key;
+        if (fuzzy) {
+            realKey = keyBuckets.keySet().stream()
+                    .filter(x -> x.isSame(key))
+                    .findFirst().orElse(null);
+        }
+        if (realKey == null || realKey == EmptyStackKey.INSTANCE || amount <= 0L) {
             return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
-        SlotBucket exact = keyBuckets.get(key);
-        if (exact == null || exact.size() == 0) return new KeyAmount(key, 0L);
+        }
+        SlotBucket exact = keyBuckets.get(realKey);
+        if (exact == null || exact.size() == 0) return new KeyAmount(realKey, 0L);
 
         long need = amount;
         long taken = 0L;
@@ -623,7 +622,6 @@ public class StackHandler implements IStackHandler
             long have = amounts[slot];
             if (have <= 0) continue;
             long t = Math.min(need, have);
-            if (t <= 0) continue;
 
             if (!simulate)
             {
@@ -631,17 +629,17 @@ public class StackHandler implements IStackHandler
                 if (left == 0L)
                 {
                     // 删除槽位映射
-                    SlotBucket tb = typeBuckets.get(key.getTypeId());
+                    SlotBucket tb = typeBuckets.get(realKey.getTypeId());
                     if (tb != null)
                     {
                         tb.remove(slot);
-                        if (tb.size() == 0) typeBuckets.remove(key.getTypeId());
+                        if (tb.size() == 0) typeBuckets.remove(realKey.getTypeId());
                     }
-                    SlotBucket kb = keyBuckets.get(key);
+                    SlotBucket kb = keyBuckets.get(realKey);
                     if (kb != null)
                     {
                         kb.remove(slot);
-                        if (kb.size() == 0) keyBuckets.remove(key);
+                        if (kb.size() == 0) keyBuckets.remove(realKey);
                     }
                     keys[slot] = EmptyStackKey.INSTANCE;
                     amounts[slot] = 0L;
@@ -650,7 +648,7 @@ public class StackHandler implements IStackHandler
                     bucketOf(EmptyStackKey.INSTANCE).add(slot);
 
                     // ★ 仅当容器已无该键时才移除缓存
-                    removeFromIndex(key);
+                    removeFromIndex(realKey);
                 }
                 else
                 {
@@ -662,7 +660,7 @@ public class StackHandler implements IStackHandler
         }
 
         if (!simulate && taken > 0) onChange();
-        return new KeyAmount(key, taken);
+        return new KeyAmount(realKey, taken);
     }
 
     @Override

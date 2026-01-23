@@ -53,6 +53,8 @@
   "tooltip.button.beyonddimensions.control_mode_powered": "現在：レッドストーン信号時に動作",
   "tooltip.button.beyonddimensions.control_mode_unpowered": "現在：レッドストーン信号時に停止",
   "tooltip.button.beyonddimensions.control_mode_not_working": "現在：動作停止中",
+  "tooltip.button.beyonddimensions.fuzzy_mode_disable": "現在：ファジーモード無効",
+  "tooltip.button.beyonddimensions.fuzzy_mode_enable": "現在：ファジーモード有効",
   "tooltip.button.beyonddimensions.hopper_item_mode_deny": "現在：アイテム回収無効",
   "tooltip.button.beyonddimensions.hopper_item_mode_allow": "現在：アイテム回収有効",
   "tooltip.button.beyonddimensions.hopper_xp_mode_deny": "現在：XP回収無効",

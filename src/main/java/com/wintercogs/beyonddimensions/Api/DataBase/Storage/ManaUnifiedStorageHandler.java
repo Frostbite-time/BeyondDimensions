@@ -77,7 +77,7 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
         if (mana > 0)
             storage.insert(ManaStackKey.INSTANCE, mana, false);
         else
-            storage.extract(ManaStackKey.INSTANCE, -mana, false);
+            storage.extract(ManaStackKey.INSTANCE, -mana, false, false);
     }
 
     @Override
