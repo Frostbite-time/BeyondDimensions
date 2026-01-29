@@ -1,8 +1,8 @@
 plugins {
-    id 'idea'
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.76'
+    id 'net.neoforged.moddev' version '2.0.116'
+    id 'idea'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -67,7 +67,7 @@ base {
     archivesName = mod_id
 }
 
-// Mojang ships Java 21 to end users starting in 1.20.5, so mods should target Java 21.
+// Mojang ships Java 21 to end users in 1.21.1, so mods should target Java 21.
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 neoForge {
@@ -136,8 +136,7 @@ neoForge {
     mods {
         // define mod <-> source bindings
         // these are used to tell the game which sources are for which mod
-        // mostly optional in a single mod project
-        // but multi mod projects should define one per mod
+        // multi mod projects should define one per mod
         "${mod_id}" {
             sourceSet(sourceSets.main)
         }
@@ -160,11 +159,8 @@ dependencies {
     // 引入对拼音库的依赖 并将其打包到模组
     jarJar(implementation group: 'com.github.promeg', name: 'tinypinyin', version: '2.0.3'){
         version {
-            // 您的模组实际兼容的版本范围。
-            // 注意，您可能会收到一个**低于您首选版本**的版本。例如，如果另一个模组只兼容到 1.7.24，
-            // 那么在运行时，您的模组可能会使用 1.7.24 版本。
-            strictly '[2.0.3,)' //表示，大于等于2.5.0版本即可
-            prefer '2.0.3' // 在您的开发环境中实际使用的版本
+            strictly '[2.0.3,)'
+            prefer '2.0.3'
         }
     }
     // 必须要在此显式声明依赖，否则在运行时会找不到
@@ -259,7 +255,6 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
     var replaceProperties = [
             minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,
-            neo_version            : neo_version,
             neo_version_range      : neo_version_range,
             loader_version_range   : loader_version_range,
             mod_id                 : mod_id,
