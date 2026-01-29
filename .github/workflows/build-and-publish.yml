@@ -1,0 +1,120 @@
+name: Build & Publish
+
+on: [workflow_dispatch]
+
+env:
+  MINECRAFT_VERSION: "1.21.1"
+  JAVA_VERSION: "21"
+  LOADER: "neoforge"
+
+  CURSEFORGE_ID: "1222890"
+  MODRINTH_ID: "6zGxpbt7"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: publish
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle Wrapper Executable
+        shell: bash
+        run: chmod +x ./gradlew
+
+      - name: Read gradle.properties (mod_id/mod_version/mod_name)
+        id: props
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mod_id="$(grep -m1 -E '^\s*mod_id\s*=' gradle.properties | sed -E 's/^\s*mod_id\s*=\s*//; s/\r$//')"
+          mod_version="$(grep -m1 -E '^\s*mod_version\s*=' gradle.properties | sed -E 's/^\s*mod_version\s*=\s*//; s/\r$//')"
+          mod_name="$(grep -m1 -E '^\s*mod_name\s*=' gradle.properties | sed -E 's/^\s*mod_name\s*=\s*//; s/\r$//')"
+
+          if [[ -z "$mod_id" || -z "$mod_version" || -z "$mod_name" ]]; then
+            echo "mod_id / mod_version / mod_name not found in gradle.properties" >&2
+            exit 1
+          fi
+
+          jar_name="${mod_id}-${mod_version}.jar"
+          display_name="${mod_name} ${mod_version}"
+
+          {
+            echo "mod_id=$mod_id"
+            echo "mod_version=$mod_version"
+            echo "jar_name=$jar_name"
+
+            echo "mod_name<<EOF"
+            echo "$mod_name"
+            echo "EOF"
+
+            echo "display_name<<EOF"
+            echo "$display_name"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Verify jar exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          ls -lah build/libs
+          test -f "build/libs/${{ steps.props.outputs.jar_name }}"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.props.outputs.jar_name }}
+          path: build/libs/${{ steps.props.outputs.jar_name }}
+          if-no-files-found: error
+
+      - name: Publish (GitHub / CurseForge / Modrinth)
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          # CurseForge
+          curseforge-id: ${{ env.CURSEFORGE_ID }}
+          curseforge-token: ${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}
+
+          # Modrinth
+          modrinth-id: ${{ env.MODRINTH_ID }}
+          modrinth-token: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
+
+          # GitHub Release
+          github-tag: v${{ steps.props.outputs.mod_version }}
+          github-token: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+
+          name: ${{ steps.props.outputs.display_name }}
+          version: ${{ steps.props.outputs.mod_version }}
+          version-type: release
+          changelog-file: docs/CHANGELOG.md
+
+          files: |
+            build/libs/${{ steps.props.outputs.jar_name }}
+
+          loaders: |
+            ${{ env.LOADER }}
+
+          game-versions: |
+            ${{ env.MINECRAFT_VERSION }}
+
+          java: |
+            ${{ env.JAVA_VERSION }}
