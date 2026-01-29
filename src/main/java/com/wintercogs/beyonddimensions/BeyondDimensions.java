@@ -23,9 +23,6 @@ import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.Integration.AE_Ars.BD_AE_ArsPlugin;
 import com.wintercogs.beyonddimensions.Integration.AE_IFS.BD_AE_IFS_Plugin;
 import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
-import com.wintercogs.beyonddimensions.Integration.Botania.BD_BotaniaPlugin;
-import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Integration.Botania.HudOverlay.ManaPoolPathwayOverlay;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.IFS.BD_SoulCaps;
 import com.wintercogs.beyonddimensions.Integration.IFS.Item.WardenSoulTagItem;
@@ -213,9 +210,9 @@ public class BeyondDimensions
         }
         if (ModList.get().isLoaded(Botania_ModId))
         {
-            Botania_Loaded = true;
-            MOD_EVENT_BUS.addListener(ManaPoolPathwayBlockEntity::registerCapability);
-            MOD_EVENT_BUS.addListener(BD_BotaniaPlugin::registerCapability); // 为网络通道和网络接口手动注册火花附着
+//            Botania_Loaded = true;
+//            MOD_EVENT_BUS.addListener(ManaPoolPathwayBlockEntity::registerCapability);
+//            MOD_EVENT_BUS.addListener(BD_BotaniaPlugin::registerCapability); // 为网络通道和网络接口手动注册火花附着
         }
         if (ModList.get().isLoaded(RSTypesModId))
         {
@@ -308,12 +305,12 @@ public class BeyondDimensions
         if (Botania_Loaded)
         {
             // 注册Mana（魔力）
-            StackKeyRegistry.registerType(ManaStackKey.INSTANCE);
-            CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_RECEIVER);
-            CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_ITEM);
-            CapabilityHelper.registerUSHandler(ManaStackKey.INSTANCE, ManaUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
-            StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
+//            StackKeyRegistry.registerType(ManaStackKey.INSTANCE);
+//            CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_RECEIVER);
+//            CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_ITEM);
+//            CapabilityHelper.registerUSHandler(ManaStackKey.INSTANCE, ManaUnifiedStorageHandler::new);
+//            CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
+//            StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
 
         }
 
@@ -356,7 +353,7 @@ public class BeyondDimensions
         // 注册物品能力交互黑名单
         if (Botania_Loaded)
         {
-            BD_BotaniaPlugin.registerItemCapBlackList();
+//            BD_BotaniaPlugin.registerItemCapBlackList();
         }
     }
 
@@ -390,7 +387,7 @@ public class BeyondDimensions
             }
             if (Botania_Loaded)
             {
-                NeoForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);
+//                NeoForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);
             }
         }
     }

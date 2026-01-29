@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.EventListener;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -18,7 +17,7 @@ public final class ReloadHooks
         {
             if (BeyondDimensions.Botania_Loaded)
             {
-                ManaPoolPathwayBlockEntity.onRecipesReloaded();
+//                ManaPoolPathwayBlockEntity.onRecipesReloaded();
             }
         }
     }
@@ -31,7 +30,7 @@ public final class ReloadHooks
         {
             if (BeyondDimensions.Botania_Loaded)
             {
-                ManaPoolPathwayBlockEntity.onRecipesReloaded();
+//                ManaPoolPathwayBlockEntity.onRecipesReloaded();
             }
         }
     }

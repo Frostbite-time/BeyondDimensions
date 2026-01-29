@@ -4,7 +4,6 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.*;
 import com.wintercogs.beyonddimensions.Integration.Ars.Block.SourcePathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Integration.create.blocks.entities.SchematicannonPathWayBlockEntity;
 import net.minecraft.core.registries.Registries;
@@ -126,13 +125,13 @@ public class ModBlockEntities
         }
         if (BeyondDimensions.Botania_Loaded)
         {
-            MANA_POOL_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
-                    "mana_pool_pathway_block_entity",
-                    () -> BlockEntityType.Builder.of(
-                            ManaPoolPathwayBlockEntity::new,
-                            ModBlocks.MANA_POOL_PATHWAY.get()
-                    ).build(null)
-            );
+//            MANA_POOL_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+//                    "mana_pool_pathway_block_entity",
+//                    () -> BlockEntityType.Builder.of(
+//                            ManaPoolPathwayBlockEntity::new,
+//                            ModBlocks.MANA_POOL_PATHWAY.get()
+//                    ).build(null)
+//            );
         }
         if (BeyondDimensions.Create_Loaded)
         {

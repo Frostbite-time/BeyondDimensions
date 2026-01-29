@@ -14,7 +14,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.conditions.IConditionBuilder;
 import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
-import vazkii.botania.common.block.BotaniaBlocks;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -304,13 +303,13 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
 
         if (BeyondDimensions.Botania_Loaded)
         {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.MANA_POOL_PATHWAY.get())
-                    .pattern("ABA")
-                    .pattern("AAA")
-                    .define('A', BotaniaBlocks.livingrock)
-                    .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
-                    .unlockedBy("unlock_mana_pool_pathway", has(ModItems.SPACE_TIME_STABLE_FRAME.get()))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.Botania_ModId)));
+//            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.MANA_POOL_PATHWAY.get())
+//                    .pattern("ABA")
+//                    .pattern("AAA")
+//                    .define('A', BotaniaBlocks.livingrock)
+//                    .define('B', ModItems.SPACE_TIME_STABLE_FRAME.get())
+//                    .unlockedBy("unlock_mana_pool_pathway", has(ModItems.SPACE_TIME_STABLE_FRAME.get()))
+//                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.Botania_ModId)));
         }
 
     }
