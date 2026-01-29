@@ -111,6 +111,19 @@ public interface IStackHandler
     @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy);
 
     /**
+     * 按类型导出堆叠，并返回提取的堆叠（进行精确匹配）
+     *
+     * @param key       堆叠类型
+     * @param amount    指定的数量
+     * @param simulate  是否为模拟操作
+     * @return          实际能提取的堆叠
+     */
+    default @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate)
+    {
+        return extract(key, amount, simulate, false);
+    }
+
+    /**
      * 指定的槽位最大容量是多少？
      * <p>
      * 一般处理此函数时只考虑指定槽位和存储容器本身的状态，而不考虑指定槽位的内容物。如果你要按内容物限制单格存储上限，你应当修改insert方法。
