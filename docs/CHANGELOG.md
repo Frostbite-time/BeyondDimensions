@@ -1,1 +1,1 @@
-* Added an overloaded version of the `extract` function to fix compatibility issues.
+* Fix texture size issue
