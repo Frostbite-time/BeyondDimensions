@@ -183,7 +183,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
         for (int i = 0; i < menu.be.getCapacity(); i++)
         {
             float progress = (float) menu.be.getLitTime().get(i) / menu.be.getLitDuration().get(i);
-            CommonTexturesRender.renderFurnaceWorkV_AsProgress(guiGraphics, leftPos + 33 + i * 19, new int[]{topPos + 109}, CommonTextures.FURNACE_WORK_V_WIDTH, CommonTextures.FURNACE_WORK_V_HEIGHT, progress);
+            CommonTexturesRender.renderFurnaceWorkV_AsProgress(guiGraphics, leftPos + 31 + i * 19, new int[]{topPos + 109}, CommonTextures.FURNACE_WORK_V_WIDTH, CommonTextures.FURNACE_WORK_V_HEIGHT, progress);
         }
     }
 

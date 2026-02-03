@@ -43,6 +43,6 @@ public class CommonTextures
 
     // 原版火焰贴图
     public static final ResourceLocation FURNACE_WORK_V = ResourceLocation.parse("beyonddimensions:widget/furnace_work_v");
-    public static final int FURNACE_WORK_V_WIDTH = 12;
-    public static final int FURNACE_WORK_V_HEIGHT = 12;
+    public static final int FURNACE_WORK_V_WIDTH = 14;
+    public static final int FURNACE_WORK_V_HEIGHT = 14;
 }
