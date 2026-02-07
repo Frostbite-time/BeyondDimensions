@@ -32,6 +32,8 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
     @Override
     protected void init()
     {
+        super.init();
+
         this.imageWidth = 176;
         this.imageHeight = rebuildImageHeight();
         rebuildLabelHeight();

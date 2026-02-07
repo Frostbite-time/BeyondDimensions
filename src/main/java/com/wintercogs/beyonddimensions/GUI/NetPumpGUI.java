@@ -26,6 +26,8 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
     @Override
     protected void init()
     {
+        super.init();
+
         this.imageWidth = 176;
         this.imageHeight = rebuildImageHeight();
         rebuildLabelHeight();

@@ -27,6 +27,8 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
     @Override
     protected void init()
     {
+        super.init();
+
         this.imageWidth = 176;
         this.imageHeight = rebuildImageHeight();
         rebuildLabelHeight();

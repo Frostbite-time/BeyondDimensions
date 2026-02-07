@@ -33,6 +33,8 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     @Override
     protected void init()
     {
+        super.init();
+
         // 如果以后图片大小有变，显示中心所期望的大小仍然是x:176,y:235用于计算
         this.imageWidth = 176;
         this.imageHeight = rebuildImageHeight();
