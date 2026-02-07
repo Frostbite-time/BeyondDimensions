@@ -121,6 +121,8 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
     @Override
     protected void init()
     {
+        super.init();
+
         this.leftPos = (this.width - 256) / 2;
         this.topPos = (this.height - 235) / 2;
 

@@ -30,6 +30,8 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
     @Override
     protected void init()
     {
+        super.init();
+
         this.imageWidth = 230;
         this.imageHeight = 210;
         rebuildLabelHeight();

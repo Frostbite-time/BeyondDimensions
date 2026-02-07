@@ -1,1 +1,1 @@
-* Fix texture size issue
+* Call `super.init()` in the GUI’s init method to fix compatibility issues with other mods’ mixins.

@@ -31,6 +31,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
     @Override
     protected void init()
     {
+        super.init();
+
         this.imageWidth = 176;
         this.imageHeight = rebuildImageHeight();
         rebuildLabelHeight();

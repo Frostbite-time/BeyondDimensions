@@ -76,6 +76,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     @Override
     protected void init()
     {
+        super.init();
 
         clearWidgets();
 
