@@ -1,1 +1,1 @@
-* Call `super.init()` in the GUI’s init method to fix compatibility issues with other mods’ mixins.
+* Define the maximum capacity per slot for each key to prevent draining the entire inventory in a single operation.
