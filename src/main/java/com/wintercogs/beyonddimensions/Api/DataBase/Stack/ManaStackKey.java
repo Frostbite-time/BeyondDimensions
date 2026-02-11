@@ -87,6 +87,12 @@ public class ManaStackKey extends LongStackKey<ManaType>
     }
 
     @Override
+    public long getVanillaMaxStackSize()
+    {
+        return 1000000;
+    }
+
+    @Override
     public ManaStackKey getEmpty()
     {
         return ManaStackKey.INSTANCE;

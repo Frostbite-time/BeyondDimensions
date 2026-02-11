@@ -81,6 +81,12 @@ public class SourceStackKey extends LongStackKey<SourceType>
     }
 
     @Override
+    public long getVanillaMaxStackSize()
+    {
+        return 10000;
+    }
+
+    @Override
     public String getModId()
     {
         return BeyondDimensions.ARS_ModId;

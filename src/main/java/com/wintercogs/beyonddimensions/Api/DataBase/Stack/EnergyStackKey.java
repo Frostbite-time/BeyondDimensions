@@ -83,6 +83,12 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
         return ID;
     }
 
+    @Override
+    public long getVanillaMaxStackSize()
+    {
+        return 1000000;
+    }
+
     /**
      * 允许从 EnergyType/数字（数量无意义）转换为同一个 Key 实例
      */

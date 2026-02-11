@@ -80,6 +80,12 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType>
     }
 
     @Override
+    public long getVanillaMaxStackSize()
+    {
+        return 1000;
+    }
+
+    @Override
     public String getModId()
     {
         return BeyondDimensions.IFS_ModId;
