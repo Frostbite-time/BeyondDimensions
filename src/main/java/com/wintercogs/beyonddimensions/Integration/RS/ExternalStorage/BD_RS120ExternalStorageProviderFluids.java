@@ -3,15 +3,16 @@ package com.wintercogs.beyonddimensions.Integration.RS.ExternalStorage;
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorage;
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorageContext;
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorageProvider;
-import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.fluids.FluidStack;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.List;
 
 public class BD_RS120ExternalStorageProviderFluids implements IExternalStorageProvider<FluidStack>
 {
@@ -25,144 +26,89 @@ public class BD_RS120ExternalStorageProviderFluids implements IExternalStoragePr
     @Override
     public IExternalStorage<FluidStack> provide(IExternalStorageContext ctx, BlockEntity externalBe, Direction direction)
     {
-        if (!(externalBe.getLevel() instanceof ServerLevel serverLevel))
+        if (!(externalBe.getLevel() instanceof ServerLevel))
         {
-            // 客户端容错：返回一个“空实现”，避免 NPE
-            return new IExternalStorage<>()
-            {
-                @Override
-                public void update(com.refinedmods.refinedstorage.api.network.INetwork network)
-                {
-                }
-
-                @Override
-                public long getCapacity()
-                {
-                    return 0;
-                }
-
-                @Override
-                public java.util.List<FluidStack> getStacks()
-                {
-                    return java.util.Collections.emptyList();
-                }
-
-                @Override
-                public FluidStack insert(FluidStack prototype, int size, com.refinedmods.refinedstorage.api.util.Action action)
-                {
-                    return prototype.copy();
-                }
-
-                @Override
-                public FluidStack extract(FluidStack prototype, int size, int flags, com.refinedmods.refinedstorage.api.util.Action action)
-                {
-                    return FluidStack.EMPTY;
-                }
-
-                @Override
-                public int getStored()
-                {
-                    return 0;
-                }
-
-                @Override
-                public int getPriority()
-                {
-                    return ctx.getPriority();
-                }
-
-                @Override
-                public com.refinedmods.refinedstorage.api.storage.AccessType getAccessType()
-                {
-                    return ctx.getAccessType();
-                }
-
-                @Override
-                public int getCacheDelta(int storedPreInsertion, int size, FluidStack remainder)
-                {
-                    int rem = remainder == null ? 0 : remainder.getAmount();
-                    int delta = size - rem;
-                    return Math.max(0, Math.min(delta, Integer.MAX_VALUE));
-                }
-            };
+            // 客户端容错：返回一个空实现
+            return new NoOpExternalStorageFluids(ctx);
         }
 
         if (externalBe instanceof RSNetPathwayBlockEntity rsBe)
         {
-            DimensionsNet net = rsBe.getNet();
-            UnifiedStorage us = (net != null) ? net.getUnifiedStorage() : UnifiedStorage.getEmpty();
-
-            BD_RS120ExternalStorageFluids storage =
-                    new BD_RS120ExternalStorageFluids(ctx, serverLevel, externalBe.getBlockPos(), us);
-
-            storage.attachTo(rsBe);
-            return storage;
+            // BE 负责订阅/解绑/视图增量；adapter 仅实现 RS 接口
+            return new BD_RS120ExternalStorageFluidsAdapter(ctx, rsBe);
         }
 
-        // 理论上不会到这里：仍然返回一个空实现兜底
-        return new IExternalStorage<>()
-        {
-            @Override
-            public void update(com.refinedmods.refinedstorage.api.network.INetwork network)
-            {
-            }
-
-            @Override
-            public long getCapacity()
-            {
-                return 0;
-            }
-
-            @Override
-            public java.util.List<FluidStack> getStacks()
-            {
-                return java.util.Collections.emptyList();
-            }
-
-            @Override
-            public FluidStack insert(FluidStack prototype, int size, com.refinedmods.refinedstorage.api.util.Action action)
-            {
-                return prototype.copy();
-            }
-
-            @Override
-            public FluidStack extract(FluidStack prototype, int size, int flags, com.refinedmods.refinedstorage.api.util.Action action)
-            {
-                return FluidStack.EMPTY;
-            }
-
-            @Override
-            public int getStored()
-            {
-                return 0;
-            }
-
-            @Override
-            public int getPriority()
-            {
-                return ctx.getPriority();
-            }
-
-            @Override
-            public com.refinedmods.refinedstorage.api.storage.AccessType getAccessType()
-            {
-                return ctx.getAccessType();
-            }
-
-            @Override
-            public int getCacheDelta(int storedPreInsertion, int size, FluidStack remainder)
-            {
-                int rem = remainder == null ? 0 : remainder.getAmount();
-                int delta = size - rem;
-                return Math.max(0, Math.min(delta, Integer.MAX_VALUE));
-            }
-        };
+        return new NoOpExternalStorageFluids(ctx);
     }
 
     @Override
     public int getPriority()
     {
-        // 同物品版，给一个很高的固定优先级
         return 27_543_908;
+    }
+
+    private static final class NoOpExternalStorageFluids implements IExternalStorage<FluidStack>
+    {
+        private final IExternalStorageContext ctx;
+
+        private NoOpExternalStorageFluids(IExternalStorageContext ctx)
+        {
+            this.ctx = ctx;
+        }
+
+        @Override
+        public void update(com.refinedmods.refinedstorage.api.network.INetwork network)
+        {
+        }
+
+        @Override
+        public long getCapacity()
+        {
+            return 0;
+        }
+
+        @Override
+        public List<FluidStack> getStacks()
+        {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public @NotNull FluidStack insert(FluidStack prototype, int size, com.refinedmods.refinedstorage.api.util.Action action)
+        {
+            return prototype.copy();
+        }
+
+        @Override
+        public @NotNull FluidStack extract(@NotNull FluidStack prototype, int size, int flags, com.refinedmods.refinedstorage.api.util.Action action)
+        {
+            return FluidStack.EMPTY;
+        }
+
+        @Override
+        public int getStored()
+        {
+            return 0;
+        }
+
+        @Override
+        public int getPriority()
+        {
+            return ctx.getPriority();
+        }
+
+        @Override
+        public com.refinedmods.refinedstorage.api.storage.AccessType getAccessType()
+        {
+            return ctx.getAccessType();
+        }
+
+        @Override
+        public int getCacheDelta(int storedPreInsertion, int size, FluidStack remainder)
+        {
+            int rem = remainder == null ? 0 : remainder.getAmount();
+            int delta = size - rem;
+            return Math.max(0, delta);
+        }
     }
 }

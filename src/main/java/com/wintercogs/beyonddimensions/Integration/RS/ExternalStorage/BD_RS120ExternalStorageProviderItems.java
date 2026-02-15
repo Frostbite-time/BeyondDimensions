@@ -6,13 +6,12 @@ import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStora
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorageContext;
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorageProvider;
 import com.refinedmods.refinedstorage.api.util.Action;
-import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,11 +20,9 @@ import java.util.List;
 
 public class BD_RS120ExternalStorageProviderItems implements IExternalStorageProvider<ItemStack>
 {
-
     @Override
     public boolean canProvide(BlockEntity be, Direction direction)
     {
-        // 具体逻辑下放
         return be instanceof RSNetPathwayBlockEntity;
     }
 
@@ -33,23 +30,15 @@ public class BD_RS120ExternalStorageProviderItems implements IExternalStoragePro
     @Override
     public IExternalStorage<ItemStack> provide(IExternalStorageContext ctx, BlockEntity externalBe, Direction direction)
     {
-        if (!(externalBe.getLevel() instanceof ServerLevel serverLevel))
+        if (!(externalBe.getLevel() instanceof ServerLevel))
         {
-            // 客户端/容错：返回 No-Op 实现，避免 NPE
             return new NoOpExternalStorageItems(ctx);
         }
 
         if (externalBe instanceof RSNetPathwayBlockEntity rsBe)
         {
-            DimensionsNet net = rsBe.getNet();
-            UnifiedStorage us = net != null ? net.getUnifiedStorage() : UnifiedStorage.getEmpty();
-
-            BD_RS120ExternalStorageItems storage =
-                    new BD_RS120ExternalStorageItems(ctx, serverLevel, externalBe.getBlockPos(), us);
-
-            // 无论初始是否有网，都挂监听；由 storage 内部负责激活/解绑/基线推送
-            storage.attachTo(rsBe);
-            return storage;
+            // BE 负责订阅/解绑与视图增量；adapter 仅负责 RS 接口
+            return new BD_RS120ExternalStorageItemsAdapter(ctx, rsBe);
         }
 
         return new NoOpExternalStorageItems(ctx);
@@ -85,13 +74,13 @@ public class BD_RS120ExternalStorageProviderItems implements IExternalStoragePro
         }
 
         @Override
-        public ItemStack insert(ItemStack prototype, int size, Action action)
+        public @NotNull ItemStack insert(ItemStack prototype, int size, Action action)
         {
             return prototype.copy();
         }
 
         @Override
-        public ItemStack extract(ItemStack prototype, int size, int flags, Action action)
+        public @NotNull ItemStack extract(@NotNull ItemStack prototype, int size, int flags, Action action)
         {
             return ItemStack.EMPTY;
         }
@@ -119,7 +108,7 @@ public class BD_RS120ExternalStorageProviderItems implements IExternalStoragePro
         {
             int rem = remainder == null ? 0 : remainder.getCount();
             int delta = size - rem;
-            return Math.max(0, Math.min(delta, Integer.MAX_VALUE));
+            return Math.max(0, delta);
         }
     }
 
@@ -128,10 +117,5 @@ public class BD_RS120ExternalStorageProviderItems implements IExternalStoragePro
     {
         // 固定高优先级，避免被 RS 内置 provider（0）或其他同优先级的 provider 覆盖
         return 15_624_380;
-    }
-
-    private static ServerLevel serverLevel(BlockEntity be)
-    {
-        return (ServerLevel) be.getLevel();
     }
 }
