@@ -1,1 +1,1 @@
-* Define the maximum capacity per slot for each key to prevent draining the entire inventory in a single operation.
+* add botania compat for 1.21.1-SNAPSHOT-451
