@@ -1,6 +1,7 @@
-// 1.21.1	2026-01-30T00:03:22.8346053	Recipes
+// 1.21.1	2026-02-15T19:01:48.3949228	Recipes
 3943b952a737761005f7dbf8afae3c475e4ec748 data/beyonddimensions/advancement/recipes/misc/ars_source_pathway.json
 f2f81aa5da13b86924679caf7f4fdfa51eeb7d01 data/beyonddimensions/advancement/recipes/misc/dimensional_connect_block.json
+b4960070e69228f49a21004a96be143c6d05e7e0 data/beyonddimensions/advancement/recipes/misc/mana_pool_pathway.json
 ccf9ab2d66e71b9569cd62024ee01ec0c589a6c8 data/beyonddimensions/advancement/recipes/misc/net_ae_storage_cell.json
 7737ce35e20d3af33a6399680199dcf9235d4d39 data/beyonddimensions/advancement/recipes/misc/net_control.json
 26ef3139564ef85ccb40bb57231f020ba2bb79b6 data/beyonddimensions/advancement/recipes/misc/net_creater.json
@@ -26,6 +27,7 @@ e6f924a81adbaaff68f953aa637fbc03d856274f data/beyonddimensions/advancement/recip
 0c6da3e3e48b496f209578bc0be228ca366b1a48 data/beyonddimensions/advancement/recipes/misc/xp_exchange_item.json
 016a41f2f577289c77e72efc414f8702a6de2265 data/beyonddimensions/recipe/ars_source_pathway.json
 91a399b5a902f983b885d1dbe5e56cf75224c9fd data/beyonddimensions/recipe/dimensional_connect_block.json
+3dd6917cf3e5e2ecfd8e62076c109fccfe8f0d1b data/beyonddimensions/recipe/mana_pool_pathway.json
 643aef13adb7ead892d4098c28c5ea5e059b973a data/beyonddimensions/recipe/net_ae_storage_cell.json
 c979e9cb8c840ae816df40ea5005ab21d5d1f842 data/beyonddimensions/recipe/net_control.json
 a62cf4774925040de2d7cff1bae2e31a920dcb62 data/beyonddimensions/recipe/net_creater.json

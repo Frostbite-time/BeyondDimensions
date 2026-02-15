@@ -35,7 +35,7 @@ public class ModBlockTagProvider extends BlockTagsProvider
                 .add(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
                 .add(ModBlocks.RS_NET_PATHWAY.get())
                 .add(ModBlocks.ARS_SOURCE_PATHWAY.get())
-//                .add(ModBlocks.MANA_POOL_PATHWAY.get())
+                .add(ModBlocks.MANA_POOL_PATHWAY.get())
                 .add(ModBlocks.SCHEMATICANNON_PATHWAY.get());
 
     }

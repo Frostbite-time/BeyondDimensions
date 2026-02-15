@@ -230,8 +230,9 @@ dependencies {
     runtimeOnly "maven.modrinth:geckolib:RVIo5f6E" // geckolib
     runtimeOnly "maven.modrinth:patchouli:1.21.1-92-neoforge" // 帕秋莎
 
-    // 植物魔法支持
+    // 植物魔法以及其ae附属
     implementation "vazkii.botania:botania-neoforge-1.21.1:451-SNAPSHOT"
+    implementation "curse.maven:applied-botanics-addon-610632:7234122"
 
     // 机械动力支持 - 蓝图炮
     compileOnly "maven.modrinth:create:mc1.21.1-6.0.9"

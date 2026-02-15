@@ -1,6 +1,7 @@
-// 1.21.1	2026-01-30T00:03:22.8300569	Loot Tables
+// 1.21.1	2026-02-15T19:01:48.3906503	Loot Tables
 100314e967bf75f4ba4c06b0cf4c7fdd3aca7be3 data/beyonddimensions/loot_table/blocks/ars_source_pathway.json
 84c4afd3f6d07608f95ebf2b0fe894a1073e3f3e data/beyonddimensions/loot_table/blocks/dimensional_connect_block.json
+c9b72075bd8319de5e438bc0db8b890735f4242b data/beyonddimensions/loot_table/blocks/mana_pool_pathway.json
 b76ce05befe12b9d31a73cc46d5f9cb5c4368099 data/beyonddimensions/loot_table/blocks/net_control.json
 8d9400c72c06dc9c3a24471e8e54dcb69cf62bb8 data/beyonddimensions/loot_table/blocks/net_energy_pathway.json
 cb330c36112104ce66451029e90130be48bdc6e3 data/beyonddimensions/loot_table/blocks/net_furnace_block.json

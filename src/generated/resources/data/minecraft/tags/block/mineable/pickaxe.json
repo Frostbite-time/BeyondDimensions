@@ -11,6 +11,7 @@
     "beyonddimensions:dimensional_connect_block",
     "beyonddimensions:rs_net_pathway",
     "beyonddimensions:ars_source_pathway",
+    "beyonddimensions:mana_pool_pathway",
     "beyonddimensions:schematicannon_pathway"
   ]
 }
