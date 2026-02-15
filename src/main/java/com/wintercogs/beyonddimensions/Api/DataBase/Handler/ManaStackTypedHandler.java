@@ -6,7 +6,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackKey;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -15,8 +14,6 @@ import vazkii.botania.api.internal.ManaBurst;
 import vazkii.botania.api.mana.ManaCollector;
 import vazkii.botania.api.mana.ManaPool;
 import vazkii.botania.api.mana.spark.SparkAttachable;
-
-import java.util.Optional;
 
 public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAttachable
 {

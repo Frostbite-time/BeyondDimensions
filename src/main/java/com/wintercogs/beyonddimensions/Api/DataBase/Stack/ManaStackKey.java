@@ -130,7 +130,8 @@ public class ManaStackKey extends LongStackKey<ManaType>
     }
 
     @Override
-    public Stream<? extends TagKey<?>> getTags() {
+    public Stream<? extends TagKey<?>> getTags()
+    {
         return Stream.empty();
     }
 

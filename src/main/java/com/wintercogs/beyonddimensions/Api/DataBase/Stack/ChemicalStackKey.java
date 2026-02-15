@@ -284,7 +284,8 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
     }
 
     @Override
-    public Stream<? extends TagKey<?>> getTags() {
+    public Stream<? extends TagKey<?>> getTags()
+    {
         return chemical.tags();
     }
 

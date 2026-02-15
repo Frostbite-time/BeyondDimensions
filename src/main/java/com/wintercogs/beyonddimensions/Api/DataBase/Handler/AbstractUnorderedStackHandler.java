@@ -21,7 +21,6 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.ReferenceQueue;
@@ -588,7 +587,8 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         return new KeyAmount(ballKey, 0L);
     }
 
-    private @NotNull KeyAmount extractByKey(IStackKey<?> key, long count, boolean simulate) {
+    private @NotNull KeyAmount extractByKey(IStackKey<?> key, long count, boolean simulate)
+    {
         long current = storage.getOrDefault(key, 0L);
         if (current <= 0L) return new KeyAmount(key, 0L);
 
@@ -627,8 +627,10 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     @Override
-    public @NotNull KeyAmount extract(int slot, long count, boolean simulate) {
-        if (slot < 0 || slot >= slotIndex.size() || count <= 0L) {
+    public @NotNull KeyAmount extract(int slot, long count, boolean simulate)
+    {
+        if (slot < 0 || slot >= slotIndex.size() || count <= 0L)
+        {
             return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         }
         IStackKey<?> key = slotIndex.get(slot);
@@ -636,8 +638,10 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     @Override
-    public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy) {
-        if (fuzzy) {
+    public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy)
+    {
+        if (fuzzy)
+        {
             var fuzzyKey = key;
             key = slotIndex.stream().filter(x -> x.isSame(fuzzyKey)).findFirst().orElse(null);
         }
@@ -645,7 +649,8 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         return extractByKey(key, amount, simulate);
     }
 
-    public @NotNull KeyAmount extract(TagKey<?> tagKey, long amount, boolean simulate) {
+    public @NotNull KeyAmount extract(TagKey<?> tagKey, long amount, boolean simulate)
+    {
         var key = tag2stackMap.get(tagKey).stream().findFirst();
         if (key.isEmpty() || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         return extractByKey(key.get(), amount, simulate);

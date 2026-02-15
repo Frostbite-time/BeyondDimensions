@@ -133,7 +133,8 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
     }
 
     @Override
-    public Stream<? extends TagKey<?>> getTags() {
+    public Stream<? extends TagKey<?>> getTags()
+    {
         return Stream.empty();
     }
 

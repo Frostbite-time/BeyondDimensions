@@ -123,7 +123,8 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType>
     }
 
     @Override
-    public Stream<? extends TagKey<?>> getTags() {
+    public Stream<? extends TagKey<?>> getTags()
+    {
         return Stream.empty();
     }
 

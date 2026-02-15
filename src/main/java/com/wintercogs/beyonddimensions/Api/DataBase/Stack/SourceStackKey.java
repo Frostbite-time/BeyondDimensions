@@ -127,7 +127,8 @@ public class SourceStackKey extends LongStackKey<SourceType>
     }
 
     @Override
-    public Stream<? extends TagKey<?>> getTags() {
+    public Stream<? extends TagKey<?>> getTags()
+    {
         return Stream.empty();
     }
 

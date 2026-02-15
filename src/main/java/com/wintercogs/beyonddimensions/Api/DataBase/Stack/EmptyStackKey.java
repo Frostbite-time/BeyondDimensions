@@ -161,7 +161,8 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     }
 
     @Override
-    public Stream<? extends TagKey<?>> getTags() {
+    public Stream<? extends TagKey<?>> getTags()
+    {
         return Stream.empty();
     }
 

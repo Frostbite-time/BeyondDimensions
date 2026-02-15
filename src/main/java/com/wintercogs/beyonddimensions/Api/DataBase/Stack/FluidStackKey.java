@@ -312,7 +312,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     }
 
     @Override
-    public Stream<? extends TagKey<?>> getTags() {
+    public Stream<? extends TagKey<?>> getTags()
+    {
         return RegistryUtil.holderOf(this.fluid).tags();
     }
 

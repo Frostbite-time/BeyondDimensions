@@ -148,9 +148,11 @@ public class StackHandler implements IStackHandler
 
     /* ================= 只读视图 ================= */
 
-    private final List<KeyAmount> entriesView = Collections.unmodifiableList(new AbstractList<>() {
+    private final List<KeyAmount> entriesView = Collections.unmodifiableList(new AbstractList<>()
+    {
         @Override
-        public KeyAmount get(int index) {
+        public KeyAmount get(int index)
+        {
             if (index < 0 || index >= size) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
             IStackKey<?> k = keys[index];
             long amt = (k == EmptyStackKey.INSTANCE) ? 0L : amounts[index];
@@ -158,7 +160,8 @@ public class StackHandler implements IStackHandler
         }
 
         @Override
-        public int size() {
+        public int size()
+        {
             return size;
         }
     });
@@ -500,7 +503,8 @@ public class StackHandler implements IStackHandler
                 long room = Math.max(0L, cap - amounts[slot]);
                 if (room <= 0) continue;
                 long ins = Math.min(left, room);
-                if (!simulate) {
+                if (!simulate)
+                {
                     amounts[slot] += ins;
                 }
                 left -= ins;
@@ -600,12 +604,14 @@ public class StackHandler implements IStackHandler
     public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy)
     {
         var realKey = key;
-        if (fuzzy) {
+        if (fuzzy)
+        {
             realKey = keyBuckets.keySet().stream()
                     .filter(x -> x.isSame(key))
                     .findFirst().orElse(null);
         }
-        if (realKey == null || realKey == EmptyStackKey.INSTANCE || amount <= 0L) {
+        if (realKey == null || realKey == EmptyStackKey.INSTANCE || amount <= 0L)
+        {
             return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         }
         SlotBucket exact = keyBuckets.get(realKey);

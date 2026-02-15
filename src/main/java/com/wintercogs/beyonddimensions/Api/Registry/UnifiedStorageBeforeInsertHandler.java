@@ -45,7 +45,9 @@ public final class UnifiedStorageBeforeInsertHandler
         }
     }
 
-    /** 调用此函数以添加处理 */
+    /**
+     * 调用此函数以添加处理
+     */
     public static void addHandler(BeforeInsertHandler handler)
     {
         handlers.add(handler);
@@ -53,14 +55,12 @@ public final class UnifiedStorageBeforeInsertHandler
 
     /**
      * @param tryInsert 本次尝试插入的原始堆叠
-     * @param net 携带的网络信息，可为空
-     *
+     * @param net       携带的网络信息，可为空
      * @return 维度网络最终实际处理的堆叠
-     *
+     * <p>
      * 会对handlers表进行链式调用，每一次处理完的insert会被传递给下一次调用，
      * 最终返回时，如果cancel，则网络不接受此次任何输入，将原始堆叠返回给玩家或机器，
      * 如果不为cancel，则尝试将最后一次调用得到的输入给维度网络
-     *
      */
     @NotNull
     public static BeforeInsertHandlerReturnInfo onBeforeInsert(@Nullable KeyAmount tryInsert, @Nullable DimensionsNet net)

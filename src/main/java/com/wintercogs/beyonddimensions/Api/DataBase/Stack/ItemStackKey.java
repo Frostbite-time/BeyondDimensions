@@ -315,7 +315,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
-    public Stream<? extends TagKey<?>> getTags() {
+    public Stream<? extends TagKey<?>> getTags()
+    {
         return RegistryUtil.holderOf(this.item).tags();
     }
 

@@ -2,8 +2,12 @@ package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+
+import java.util.Optional;
 
 public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
 {
@@ -89,5 +93,13 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
             return fluidHandler.drain(stack, IFluidHandler.FluidAction.SIMULATE).getAmount();
         else
             return fluidHandler.drain(stack, IFluidHandler.FluidAction.EXECUTE).getAmount();
+    }
+
+    @Override
+    public Optional<ItemStack> getContainer()
+    {
+        if (fluidHandler instanceof IFluidHandlerItem fluidHandlerItem)
+            return Optional.of(fluidHandlerItem.getContainer());
+        return Optional.empty();
     }
 }

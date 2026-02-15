@@ -120,7 +120,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                             if (handler != null)
                             {
                                 Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                                IStackHandlerWrapper<Object> stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
 
                                 if (stackHandlerWrapper.getSlots() > 0)
                                 {
@@ -142,7 +142,11 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                                     // 对此进行一个回调
                                                     storage.extract(getSlotIndex(), actualInsert - actualExtracts, false);
                                                 }
-                                                menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                // 重设持有物以应用修改后的handler
+                                                stackHandlerWrapper.getContainer()
+                                                        .ifPresentOrElse(
+                                                                container -> menu.setCarried(container.copy()),
+                                                                () -> menu.setCarried(carriedItem.copy()));
                                                 handled.set(true);
                                                 break;
                                             }
@@ -342,7 +346,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                     if (handler != null)
                                     {
                                         Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                        IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                                        IStackHandlerWrapper<Object> stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
                                         if (stackHandlerWrapper.getSlots() > 0)
                                         {
                                             // 获取真实最大值 防止数据包伪造
@@ -356,7 +360,11 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                             int remaining = (int) stackHandlerWrapper.insert(clickStack.toStack(), false);
                                             int actualInsert = changedCount - remaining;
                                             storage.extract(getSlotIndex(), actualInsert, false);
-                                            menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                            // 重设持有物以应用修改后的handler
+                                            stackHandlerWrapper.getContainer()
+                                                    .ifPresentOrElse(
+                                                            container -> menu.setCarried(container.copy()),
+                                                            () -> menu.setCarried(carriedItem.copy()));
                                         }
                                     }
                                 }

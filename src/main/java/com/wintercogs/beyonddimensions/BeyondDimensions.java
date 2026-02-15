@@ -29,7 +29,6 @@ import com.wintercogs.beyonddimensions.Integration.Botania.HudOverlay.ManaPoolPa
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.IFS.BD_SoulCaps;
 import com.wintercogs.beyonddimensions.Integration.IFS.Item.WardenSoulTagItem;
-import com.wintercogs.beyonddimensions.Integration.Mek.Capability.ChemicalCapabilityHelper;
 import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.Integration.RS.BD_RSPlugin;
 import com.wintercogs.beyonddimensions.Integration.RSMek.BD_RSMekPlugin;
@@ -39,6 +38,7 @@ import com.wintercogs.beyonddimensions.Integration.create.blocks.entities.Schema
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
+import me.ramidzkh.mekae2.MekCapabilities;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -221,7 +221,7 @@ public class BeyondDimensions
             MOD_EVENT_BUS.addListener(ManaPoolPathwayBlockEntity::registerCapability);
             MOD_EVENT_BUS.addListener(BD_BotaniaPlugin::registerCapability); // 为网络通道和网络接口手动注册火花附着
         }
-        if(ModList.get().isLoaded(AE_Botania_ModId))
+        if (ModList.get().isLoaded(AE_Botania_ModId))
         {
             AE_Botania_Loaded = true;
         }
@@ -276,9 +276,9 @@ public class BeyondDimensions
             // 注册化学品堆叠
             StackKeyRegistry.registerType(ChemicalStackKey.EMPTY);
             // 注册化学品方块能力
-            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackKey.ID, ChemicalCapabilityHelper.CHEMICAL_BLOCK);
+            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackKey.ID, MekCapabilities.CHEMICAL.block());
             // 注册化学品物品能力
-            CapabilityHelper.ItemCapabilityMap.put(ChemicalStackKey.ID, ChemicalCapabilityHelper.CHEMICAL_ITEM);
+            CapabilityHelper.ItemCapabilityMap.put(ChemicalStackKey.ID, MekCapabilities.CHEMICAL.item());
             // 注册分化包装
             CapabilityHelper.registerUSHandler(ChemicalStackKey.EMPTY, ChemicalUnifiedStorageHandler::new);
             CapabilityHelper.registerStackTypedHandler(ChemicalStackKey.EMPTY, ChemicalStackTypedHandler::new);
@@ -359,7 +359,7 @@ public class BeyondDimensions
         {
             BD_AE_ArsPlugin.register();
         }
-        if(AE_Botania_Loaded)
+        if (AE_Botania_Loaded)
         {
             BD_AEBotaniaPlugin.register();
         }

@@ -166,8 +166,7 @@ dependencies {
 
 
     // 编译通用机械的api 以便使用化学品存储
-    compileOnly "mekanism:Mekanism:${mekanism_version}:api"
-    runtimeOnly "mekanism:Mekanism:${mekanism_version}"
+    implementation "mekanism:Mekanism:${mekanism_version}"
 
     // EMI支持
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
