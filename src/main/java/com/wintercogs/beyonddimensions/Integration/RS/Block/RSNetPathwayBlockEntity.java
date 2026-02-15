@@ -17,7 +17,6 @@ import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -122,20 +121,11 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
     }
 
     // --- items ---
-    public List<ItemStack> getItemsForContext(IExternalStorageContext ctx)
+    public List<ItemStack> getItemsForContext()
     {
         List<ItemStack> base = itemMirror.getAllView();
         if (base.isEmpty()) return Collections.emptyList();
-
-        ArrayList<ItemStack> out = new ArrayList<>();
-        for (ItemStack s : base)
-        {
-            if (!s.isEmpty() && s.getCount() > 0 && ctx.acceptsItem(s))
-            {
-                out.add(s);
-            }
-        }
-        return out;
+        return base;
     }
 
     public void flushItemsToRsCache(IStorageCache<ItemStack> cache, IExternalStorageContext ctx)
@@ -144,20 +134,11 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
     }
 
     // --- fluids ---
-    public List<FluidStack> getFluidsForContext(IExternalStorageContext ctx)
+    public List<FluidStack> getFluidsForContext()
     {
         List<FluidStack> base = fluidMirror.getAllView();
         if (base.isEmpty()) return Collections.emptyList();
-
-        ArrayList<FluidStack> out = new ArrayList<>();
-        for (FluidStack s : base)
-        {
-            if (!s.isEmpty() && s.getAmount() > 0 && ctx.acceptsFluid(s))
-            {
-                out.add(s);
-            }
-        }
-        return out;
+        return base;
     }
 
     public void flushFluidsToRsCache(IStorageCache<FluidStack> cache, IExternalStorageContext ctx)

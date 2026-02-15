@@ -45,7 +45,7 @@ public class BD_RS120ExternalStorageFluidsAdapter implements IExternalStorage<Fl
     @Override
     public List<FluidStack> getStacks()
     {
-        return be.getFluidsForContext(ctx);
+        return be.getFluidsForContext();
     }
 
     @Override

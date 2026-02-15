@@ -45,7 +45,7 @@ public class BD_RS120ExternalStorageItemsAdapter implements IExternalStorage<Ite
     @Override
     public List<ItemStack> getStacks()
     {
-        return be.getItemsForContext(ctx);
+        return be.getItemsForContext();
     }
 
     @Override
