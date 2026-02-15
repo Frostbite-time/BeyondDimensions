@@ -117,7 +117,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             if (handler.isPresent())
                             {
                                 Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
+                                IStackHandlerWrapper<Object> stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
 
                                 if (stackHandlerWrapper.getSlots() > 0)
                                 {
@@ -138,7 +138,11 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                                     // 对此进行一个回调
                                                     storage.extract(stack.copyWithCount(actualInsert - actualExtracts), false);
                                                 }
-                                                menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                // 重设持有物以应用修改后的handler
+                                                stackHandlerWrapper.getContainer()
+                                                        .ifPresentOrElse(
+                                                                container -> menu.setCarried(container.copy()),
+                                                                () -> menu.setCarried(carriedItem.copy()));
                                                 handled.set(true);
                                                 break;
                                             }
@@ -321,7 +325,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                     if (handler.isPresent())
                                     {
                                         Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                        IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
+                                        IStackHandlerWrapper<Object> stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
                                         if (stackHandlerWrapper.getSlots() > 0)
                                         {
                                             IStackType actualClickStack = storage.getStackByStack(clickStack);// 防止客户端假消息
@@ -333,7 +337,11 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                                 if (actualInsert > 0)
                                                 {
                                                     storage.extract(actualClickStack.copyWithCount(actualInsert), false);
-                                                    menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                    // 重设持有物以应用修改后的handler
+                                                    stackHandlerWrapper.getContainer()
+                                                            .ifPresentOrElse(
+                                                                    container -> menu.setCarried(container.copy()),
+                                                                    () -> menu.setCarried(carriedItem.copy()));
                                                     handled.set(true);
                                                 }
                                             }
@@ -351,7 +359,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                     if (handler.isPresent())
                                     {
                                         Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
-                                        IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
+                                        IStackHandlerWrapper<Object> stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler.resolve().get());
 
                                         if (stackHandlerWrapper.getSlots() > 0)
                                         {
@@ -373,7 +381,11 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                                             // 对此进行一个回调
                                                             storage.extract(stack.copyWithCount(actualInsert - actualExtracts), false);
                                                         }
-                                                        menu.setCarried(carriedItem.copy()); // 重设持有物以应用修改后的handler
+                                                        // 重设持有物以应用修改后的handler
+                                                        stackHandlerWrapper.getContainer()
+                                                                .ifPresentOrElse(
+                                                                        container -> menu.setCarried(container.copy()),
+                                                                        () -> menu.setCarried(carriedItem.copy()));
                                                         handled.set(true);
                                                         break;
                                                     }
