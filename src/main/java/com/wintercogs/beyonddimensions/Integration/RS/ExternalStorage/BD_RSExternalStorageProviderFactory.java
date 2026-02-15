@@ -5,12 +5,13 @@ import com.refinedmods.refinedstorage.common.api.storage.externalstorage.Externa
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import org.jetbrains.annotations.NotNull;
 
 public class BD_RSExternalStorageProviderFactory implements ExternalStorageProviderFactory
 {
 
     @Override
-    public ExternalStorageProvider create(ServerLevel serverLevel, BlockPos blockPos, Direction direction)
+    public @NotNull ExternalStorageProvider create(@NotNull ServerLevel serverLevel, @NotNull BlockPos blockPos, @NotNull Direction direction)
     {
         return new BD_RSExternalStorageProvider(serverLevel, blockPos);
     }
