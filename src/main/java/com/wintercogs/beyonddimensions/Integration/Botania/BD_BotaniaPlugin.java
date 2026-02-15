@@ -10,7 +10,9 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import vazkii.botania.api.BotaniaForgeCapabilities;
 import vazkii.botania.common.item.BotaniaItems;
 
-/** 为网络通道和网络接口注册火花附着 */
+/**
+ * 为网络通道和网络接口注册火花附着
+ */
 public class BD_BotaniaPlugin
 {
     public static void registerItemCapBlackList()
