@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
@@ -44,8 +44,8 @@ public class StackTypedHandler implements IStackTypedHandler
         // 保证非空
         for (int i = 0; i < size; i++)
         {
-            storage.add(new ItemStackType());
-            typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(i);
+            storage.add(new ItemStackKey());
+            typeIdIndex.computeIfAbsent(ItemStackKey.ID, k -> new ArrayList<>()).add(i);
         }
     }
 
@@ -64,8 +64,8 @@ public class StackTypedHandler implements IStackTypedHandler
             }
             else
             {
-                storage.add(new ItemStackType());
-                typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(i);
+                storage.add(new ItemStackKey());
+                typeIdIndex.computeIfAbsent(ItemStackKey.ID, k -> new ArrayList<>()).add(i);
             }
         }
     }
@@ -96,8 +96,8 @@ public class StackTypedHandler implements IStackTypedHandler
         typeIdIndex.clear();
         for (int i = 0; i < size; i++)
         {
-            storage.add(new ItemStackType());
-            typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(i);
+            storage.add(new ItemStackKey());
+            typeIdIndex.computeIfAbsent(ItemStackKey.ID, k -> new ArrayList<>()).add(i);
         }
         onChange();
     }
@@ -312,7 +312,7 @@ public class StackTypedHandler implements IStackTypedHandler
     {
         if (slot < 0 || slot >= getSlots())
         {
-            return new ItemStackType(); // 以不带参数 ItemStackType 作为空体
+            return new ItemStackKey(); // 以不带参数 ItemStackType 作为空体
         }
 
         IStackKey<?> current = storage.get(slot);
@@ -331,7 +331,7 @@ public class StackTypedHandler implements IStackTypedHandler
             if (current.isEmpty())
             {
                 // 更新索引，移除旧类型索引，添加到空类型索引
-                storage.set(slot, new ItemStackType());
+                storage.set(slot, new ItemStackKey());
                 List<Integer> oldList = typeIdIndex.get(oldTypeId);
                 if (oldList != null)
                 {
@@ -341,7 +341,7 @@ public class StackTypedHandler implements IStackTypedHandler
                         typeIdIndex.remove(oldTypeId);
                     }
                 }
-                typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(slot);
+                typeIdIndex.computeIfAbsent(ItemStackKey.ID, k -> new ArrayList<>()).add(slot);
             }
             onChange();
         }
@@ -475,8 +475,8 @@ public class StackTypedHandler implements IStackTypedHandler
                 String type = stackTag.getString("Type");
                 if (type.equals("Empty"))
                 {
-                    storage.add(new ItemStackType()); // 为空体添加空体占位
-                    typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(storage.size() - 1);
+                    storage.add(new ItemStackKey()); // 为空体添加空体占位
+                    typeIdIndex.computeIfAbsent(ItemStackKey.ID, k -> new ArrayList<>()).add(storage.size() - 1);
                 }
                 else
                 {
@@ -489,8 +489,8 @@ public class StackTypedHandler implements IStackTypedHandler
             }
             else // 兼容旧数据的扩容处理
             {
-                storage.add(new ItemStackType());
-                typeIdIndex.computeIfAbsent(ItemStackType.ID, k -> new ArrayList<>()).add(storage.size() - 1);
+                storage.add(new ItemStackKey());
+                typeIdIndex.computeIfAbsent(ItemStackKey.ID, k -> new ArrayList<>()).add(storage.size() - 1);
             }
         }
     }

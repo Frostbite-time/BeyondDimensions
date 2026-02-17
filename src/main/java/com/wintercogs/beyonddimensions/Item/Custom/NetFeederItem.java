@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Machine.FeederMode;
 import com.wintercogs.beyonddimensions.Machine.FilterMode;
@@ -59,7 +59,7 @@ public class NetFeederItem extends BaseMachineItem
     {
         super.checkComponents(stack);
         if (!hasFilterSlots(stack))
-            setFilterSlots(stack, new ArrayList<>(Collections.nCopies(capacity, new ItemStackType())));
+            setFilterSlots(stack, new ArrayList<>(Collections.nCopies(capacity, new ItemStackKey())));
         if (!hasFeederMode(stack))
             setFeederMode(stack, FeederMode.NORMAL);
 
@@ -96,9 +96,9 @@ public class NetFeederItem extends BaseMachineItem
                     for (IStackKey<?> storedStack : storage.getStorage())
                     {
                         // isSame会在最后变为引用比较，所以无需担心，这个比较即使对于大存储来说也非常迅速
-                        if (storedStack instanceof ItemStackType itemStackType
-                                && itemStackType.isSame(filter)
-                                && itemStackType.getStack().getFoodProperties(player) != null)
+                        if (storedStack instanceof ItemStackKey itemStackKey
+                                && itemStackKey.isSame(filter)
+                                && itemStackKey.getStack().getFoodProperties(player) != null)
                         {
                             foodCache = storedStack.copyWithCount(1);
                             break;
@@ -108,7 +108,7 @@ public class NetFeederItem extends BaseMachineItem
 
                 if (foodCache != null)
                 {
-                    ItemStackType foodToFeed = (ItemStackType) storage.extract(foodCache, false);
+                    ItemStackKey foodToFeed = (ItemStackKey) storage.extract(foodCache, false);
                     if (!foodToFeed.isEmpty())
                     {
                         ItemStack foodStack = foodToFeed.copyStack();
@@ -124,7 +124,7 @@ public class NetFeederItem extends BaseMachineItem
                                 if (!remaining.isEmpty())
                                 {
                                     // 剩余堆叠插送回去
-                                    if (storage.insert(new ItemStackType(remaining), false) instanceof ItemStackType remainingAgain)
+                                    if (storage.insert(new ItemStackKey(remaining), false) instanceof ItemStackKey remainingAgain)
                                     {
                                         if (!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
                                         {

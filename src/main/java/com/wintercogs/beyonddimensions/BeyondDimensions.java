@@ -219,32 +219,32 @@ public class BeyondDimensions
     {
 
         // 注册堆叠类型，使得网络能够存储相关堆叠
-        StackKeyRegistry.registerType(new ItemStackType());
+        StackKeyRegistry.registerType(new ItemStackKey());
         StackKeyRegistry.registerType(new FluidStackType());
         StackKeyRegistry.registerType(new EnergyStackType());
 
         // 注册方块能力类型，用于动态为方块注册能力
-        CapabilityHelper.BlockCapabilityMap.put(ItemStackType.ID, ForgeCapabilities.ITEM_HANDLER);
+        CapabilityHelper.BlockCapabilityMap.put(ItemStackKey.ID, ForgeCapabilities.ITEM_HANDLER);
         CapabilityHelper.BlockCapabilityMap.put(FluidStackType.ID, ForgeCapabilities.FLUID_HANDLER);
         CapabilityHelper.BlockCapabilityMap.put(EnergyStackType.ID, ForgeCapabilities.ENERGY);
 
         // 注册物品能力类型
-        CapabilityHelper.ItemCapabilityMap.put(ItemStackType.ID, ForgeCapabilities.ITEM_HANDLER);
+        CapabilityHelper.ItemCapabilityMap.put(ItemStackKey.ID, ForgeCapabilities.ITEM_HANDLER);
         CapabilityHelper.ItemCapabilityMap.put(FluidStackType.ID, ForgeCapabilities.FLUID_HANDLER_ITEM);
         CapabilityHelper.ItemCapabilityMap.put(EnergyStackType.ID, ForgeCapabilities.ENERGY);
 
         // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-        CapabilityHelper.registerUSHandler(new ItemStackType(), ItemUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(new ItemStackKey(), ItemUnifiedStorageHandler::new);
         CapabilityHelper.registerUSHandler(new FluidStackType(), FluidUnifiedStorageHandler::new);
         CapabilityHelper.registerUSHandler(new EnergyStackType(), EnergyUnifiedStorageHandler::new);
 
         // 注册存储分化包装
-        CapabilityHelper.registerStackTypedHandler(new ItemStackType(), ItemStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(new ItemStackKey(), ItemStackTypedHandler::new);
         CapabilityHelper.registerStackTypedHandler(new FluidStackType(), FluidStackTypedHandler::new);
         CapabilityHelper.registerStackTypedHandler(new EnergyStackType(), EnergyStackTypedHandler::new);
 
         // 注册堆叠处理包装，用于动态包装来自其他模组的handler (如原版的IItemHandler)
-        StackHandlerWrapperHelper.stackWrappers.put(ItemStackType.ID, ItemHandlerWrapper::new);
+        StackHandlerWrapperHelper.stackWrappers.put(ItemStackKey.ID, ItemHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackType.ID, FluidHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(EnergyStackType.ID, EnergyHandlerWrapper::new);
 

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,7 +18,7 @@ public record BatchTransferPacket(IStackKey clickStack, boolean dirToStorage)
 
     private void handle(NetworkEvent.Context context)
     {
-        if (clickStack() instanceof ItemStackType clickItem)
+        if (clickStack() instanceof ItemStackKey clickItem)
         {
             Player player = context.getSender();
 
@@ -32,7 +32,7 @@ public record BatchTransferPacket(IStackKey clickStack, boolean dirToStorage)
                         if (menu.inventoryStartIndex <= invSlot.index && invSlot.index < menu.inventoryEndIndex)
                         {
                             if (ItemStack.isSameItemSameTags(clickItem.getStack(), invSlot.getItem()))
-                                menu.customClickHandler(invSlot.index, new ItemStackType(invSlot.getItem()), 0, true);
+                                menu.customClickHandler(invSlot.index, new ItemStackKey(invSlot.getItem()), 0, true);
                         }
                     }
                 }
@@ -50,13 +50,13 @@ public record BatchTransferPacket(IStackKey clickStack, boolean dirToStorage)
                         {
                             Slot slot = menu.slots.get(targetSlotIndex);
 
-                            if (trueStack instanceof ItemStackType trueItemTypedStack)
+                            if (trueStack instanceof ItemStackKey trueItemTypedStack)
                             {
                                 ItemStack extract = (ItemStack) storage.extract(trueItemTypedStack, false).getStack();
                                 ItemStack remaining = slot.safeInsert(extract);
                                 if (!remaining.isEmpty())
-                                    storage.insert(new ItemStackType(remaining), false);
-                                trueStack = new ItemStackType(remaining.copy());
+                                    storage.insert(new ItemStackKey(remaining), false);
+                                trueStack = new ItemStackKey(remaining.copy());
                             }
                         }
                     }

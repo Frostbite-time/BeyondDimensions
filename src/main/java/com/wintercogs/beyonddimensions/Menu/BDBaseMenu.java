@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.google.common.base.Suppliers;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedSlotGroupSync;
@@ -244,7 +244,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                         {
                             // 此处是安全的转换，remaining不会超出int
                             // AbstractStackTypedSlot槽位的safeInsert是安全的，并且new ItemStackType会进行被动copy
-                            newSize = (int) aTargetSlot.safeInsert(new ItemStackType(remaining)).getStackAmount();
+                            newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining)).getStackAmount();
                         }
                         else
                         {
@@ -272,7 +272,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                             Slot afterSlot = slots.get(entry.getKey());
                             if (afterSlot instanceof AbstractStackTypedSlot aSlot)
                             {
-                                aSlot.safeExtract(new ItemStackType(cacheStack.copyWithCount(entry.getValue())));
+                                aSlot.safeExtract(new ItemStackKey(cacheStack.copyWithCount(entry.getValue())));
                             }
                             else
                             {
@@ -295,7 +295,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                     if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
                     {
                         // 此处是安全的转换，remaining不会超出int
-                        newSize = (int) aTargetSlot.safeInsert(new ItemStackType(remaining)).getStackAmount();
+                        newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining)).getStackAmount();
                     }
                     else
                     {

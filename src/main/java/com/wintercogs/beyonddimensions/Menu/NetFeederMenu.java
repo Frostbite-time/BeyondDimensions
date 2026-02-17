@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Menu;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Item.Custom.BaseMachineItem;
 import com.wintercogs.beyonddimensions.Machine.FeederMode;
@@ -44,8 +44,8 @@ public class NetFeederMenu extends BDBaseMenu
         public boolean isStackValid(int slot, IStackKey stack)
         {
             return super.isStackValid(slot, stack)
-                    && stack instanceof ItemStackType itemStackType
-                    && itemStackType.getStack().getFoodProperties(player) != null;
+                    && stack instanceof ItemStackKey itemStackKey
+                    && itemStackKey.getStack().getFoodProperties(player) != null;
         }
     };
     private boolean initialized; //initialized必须在初始数据提供完成之后才能设置为true

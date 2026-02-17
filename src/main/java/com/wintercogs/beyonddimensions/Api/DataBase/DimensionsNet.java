@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Registry.UnifiedStorageBeforeInsertHandler;
 import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
@@ -92,7 +92,7 @@ public class DimensionsNet extends SavedData
             @Override
             public IStackKey<?> insert(IStackKey<?> stack, boolean simulate)
             {
-                IStackKey<?> input = Objects.requireNonNullElse(stack, new ItemStackType());
+                IStackKey<?> input = Objects.requireNonNullElse(stack, new ItemStackKey());
 
                 var info = UnifiedStorageBeforeInsertHandler.onBeforeInsert(input, this.getNet());
 
@@ -552,7 +552,7 @@ public class DimensionsNet extends SavedData
         if (currentTime >= ServerConfigRuntime.crystalGenerateTime * 20)
         {
             ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(), 1);
-            IStackKey stackType = new ItemStackType(stack);
+            IStackKey stackType = new ItemStackKey(stack);
             this.unifiedStorage.insert(stackType, false);
             currentTime = 0;
         }

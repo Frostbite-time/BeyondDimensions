@@ -5,7 +5,7 @@ import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
@@ -368,10 +368,10 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
             if (!stack.isEmpty())
             {
                 // 如果内含物质球，直接弹出，防止NBT套娃
-                if (stack instanceof ItemStackType itemStackType)
+                if (stack instanceof ItemStackKey itemStackKey)
                 {
-                    if (itemStackType.getStack().getItem() instanceof MatterCompressionBall)
-                        Block.popResource(level, getBlockPos(), itemStackType.copyStack());
+                    if (itemStackKey.getStack().getItem() instanceof MatterCompressionBall)
+                        Block.popResource(level, getBlockPos(), itemStackKey.copyStack());
                     else
                         dropList.add(stack.copy());
                 }

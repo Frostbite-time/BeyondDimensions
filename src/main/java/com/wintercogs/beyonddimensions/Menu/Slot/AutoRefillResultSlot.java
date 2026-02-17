@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
@@ -53,12 +53,12 @@ public class AutoRefillResultSlot extends ResultSlot
                     // 优先尝试存储系统
                     if (menu.storage != null)
                     {
-                        long extracted = menu.storage.extract(new ItemStackType(singleItem), true).getStackAmount();
+                        long extracted = menu.storage.extract(new ItemStackKey(singleItem), true).getStackAmount();
                         if (extracted >= 1)
                         {
                             if (!player.level().isClientSide())
                             {
-                                menu.storage.extract(new ItemStackType(singleItem), false);
+                                menu.storage.extract(new ItemStackKey(singleItem), false);
                             }
                             itemsToRemove = 0;
                             consumed = true;

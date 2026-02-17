@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Integration.EMI.Recipe;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.RecipeFillC2SPacket;
@@ -67,10 +67,10 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         {
             for (IStackKey stackType : screen.getMenu().storage.getStorage())
             {
-                if (stackType instanceof ItemStackType itemStackType)
+                if (stackType instanceof ItemStackKey itemStackKey)
                 {
-                    if (!itemStackType.isEmpty())
-                        stacks.add(EmiStack.of(itemStackType.getStack()));
+                    if (!itemStackKey.isEmpty())
+                        stacks.add(EmiStack.of(itemStackKey.getStack()));
                 }
             }
         }
@@ -110,9 +110,9 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         // 收集存储槽物品
         for (IStackKey stackType : storageSlots)
         {
-            if (stackType instanceof ItemStackType itemStackType)
+            if (stackType instanceof ItemStackKey itemStackKey)
             {
-                ItemStack stack = itemStackType.getStack();
+                ItemStack stack = itemStackKey.getStack();
                 if (!stack.isEmpty())
                 {
                     availableItems.add(stack);

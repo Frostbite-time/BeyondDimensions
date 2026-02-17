@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.Registry;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,7 +66,7 @@ public final class UnifiedStorageBeforeInsertHandler
     public static BeforeInsertHandlerReturnInfo onBeforeInsert(@Nullable IStackKey<?> tryInsert, @Nullable DimensionsNet net)
     {
         final IStackKey<?> original = (tryInsert == null)
-                ? new ItemStackType()
+                ? new ItemStackKey()
                 : tryInsert;
 
         if (tryInsert == null)

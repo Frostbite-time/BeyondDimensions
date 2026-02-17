@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType.deserializeStackCaps;
-import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType.serializeStackCaps;
+import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey.deserializeStackCaps;
+import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey.serializeStackCaps;
 
 public record RecipeFillC2SPacket(List<ItemStack> inputs)
 {

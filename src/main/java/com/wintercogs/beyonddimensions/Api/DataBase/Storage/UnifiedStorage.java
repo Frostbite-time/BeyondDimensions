@@ -5,7 +5,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.Api.Util.HashBPlusList;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
@@ -432,11 +432,11 @@ public class UnifiedStorage implements IStackTypedHandler
         if (stack.isEmpty()) return stack.getEmpty();
 
         // 对物质压缩球的特殊处理
-        if (stack instanceof ItemStackType itemStackType)
+        if (stack instanceof ItemStackKey itemStackKey)
         {
-            if (itemStackType.getStack().getItem() instanceof MatterCompressionBall)
+            if (itemStackKey.getStack().getItem() instanceof MatterCompressionBall)
             {
-                return unzipMatterBall(itemStackType, simulate);
+                return unzipMatterBall(itemStackKey, simulate);
             }
         }
 
@@ -492,7 +492,7 @@ public class UnifiedStorage implements IStackTypedHandler
      * <p>
      * 输出一个物质球堆叠 输出的目的是，如果能完全解压，返回空，否则返回物质球堆叠本身
      */
-    protected IStackKey<?> unzipMatterBall(ItemStackType stack, boolean simulate)
+    protected IStackKey<?> unzipMatterBall(ItemStackKey stack, boolean simulate)
     {
         ItemStack ballStack = stack.copyStack();
         List<IStackKey<?>> ballStorage;
@@ -528,7 +528,7 @@ public class UnifiedStorage implements IStackTypedHandler
             if (newBallStorageIsEmpty)
             {
                 if (simulate)
-                    return new ItemStackType();
+                    return new ItemStackKey();
                 else
                 {
                     for (IStackKey<?> stackType : ballStorage)
@@ -536,7 +536,7 @@ public class UnifiedStorage implements IStackTypedHandler
                         stackType.setStackAmount(stackType.getStackAmount() * ballNum);
                         insert(stackType, false);
                     }
-                    return new ItemStackType();
+                    return new ItemStackKey();
                 }
             }
             else //如果球不为空，则不进行插入操作，原路返回
@@ -545,7 +545,7 @@ public class UnifiedStorage implements IStackTypedHandler
             }
         }
         // 如果物质球内未存储堆叠，则直接消耗球
-        return new ItemStackType();
+        return new ItemStackKey();
     }
 
     // 尝试按类型导出，返回实际导出量
@@ -652,7 +652,7 @@ public class UnifiedStorage implements IStackTypedHandler
         IStackKey<?> existing = storage.get(slot);
         if (existing == null || existing.isEmpty())
         {
-            return (existing != null) ? existing.getEmpty() : new ItemStackType(); // 如果为null，最终保底返回一个空物品实现，绝对不能返回null
+            return (existing != null) ? existing.getEmpty() : new ItemStackKey(); // 如果为null，最终保底返回一个空物品实现，绝对不能返回null
         }
 
         long available = existing.getStackAmount();

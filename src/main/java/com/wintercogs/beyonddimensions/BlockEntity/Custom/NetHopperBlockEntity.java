@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
@@ -105,7 +105,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                 if (itemEntity != null && !itemEntity.isRemoved())
                 {
                     ItemStack itemStack = itemEntity.getItem().copy();
-                    ItemStackType typedStack = new ItemStackType(itemStack);
+                    ItemStackKey typedStack = new ItemStackKey(itemStack);
                     if (matchesFilter(typedStack))
                     {
                         if (storage.insert(typedStack, true).isEmpty()) // 表示能成功插入

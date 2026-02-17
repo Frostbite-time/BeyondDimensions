@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -36,9 +36,9 @@ public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiab
         }
 
         IStackKey<?> stack = handlerStorage.getStackBySlot(slot);
-        if (stack instanceof ItemStackType itemStackType && !itemStackType.isEmpty())
+        if (stack instanceof ItemStackKey itemStackKey && !itemStackKey.isEmpty())
         {
-            return (ItemStack) itemStackType.copyStack();
+            return (ItemStack) itemStackKey.copyStack();
         }
 
         // 槽位不是 ItemStackType 或为空，视为 EMPTY
@@ -62,7 +62,7 @@ public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiab
         // 统一存储会处理空占位 -> ItemStackType 以及索引更新
         IStackKey<?> remainingStack = handlerStorage.insert(
                 slot,
-                new ItemStackType(itemStack.copy()),
+                new ItemStackKey(itemStack.copy()),
                 simulate
         );
 
@@ -84,13 +84,13 @@ public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiab
         }
 
         IStackKey<?> current = handlerStorage.getStackBySlot(slot);
-        if (!(current instanceof ItemStackType) || current.isEmpty())
+        if (!(current instanceof ItemStackKey) || current.isEmpty())
         {
             return ItemStack.EMPTY;
         }
 
         IStackKey<?> extracted = handlerStorage.extract(slot, count, simulate);
-        if (extracted instanceof ItemStackType itemExtract && !itemExtract.isEmpty())
+        if (extracted instanceof ItemStackKey itemExtract && !itemExtract.isEmpty())
         {
             return itemExtract.copyStack();
         }
@@ -106,10 +106,10 @@ public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiab
         }
 
         IStackKey<?> stack = handlerStorage.getStackBySlot(slot);
-        if (stack instanceof ItemStackType itemStackType)
+        if (stack instanceof ItemStackKey itemStackKey)
         {
             // 使用该槽位当前物品类型的原版最大堆叠上限
-            return (int) itemStackType.getVanillaMaxStackSize();
+            return (int) itemStackKey.getVanillaMaxStackSize();
         }
 
         // 槽位目前不是物品类型时，给一个合理的默认值-99也是原版实现的值

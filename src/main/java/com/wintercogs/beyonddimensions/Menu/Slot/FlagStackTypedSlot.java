@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Menu.Slot;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
@@ -25,7 +25,7 @@ import java.util.function.Function;
 public class FlagStackTypedSlot extends AbstractStackTypedSlot
 {
 
-    private IStackKey lastStack = new ItemStackType();
+    private IStackKey lastStack = new ItemStackKey();
 
     public FlagStackTypedSlot(BDBaseMenu menu, IStackTypedHandler storage, int slotIndex, int xPosition, int yPosition)
     {
@@ -45,7 +45,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public void setStackDirectly(IStackKey stack)
     {
-        storage.setStackDirectly(theSlot, new ItemStackType());
+        storage.setStackDirectly(theSlot, new ItemStackKey());
         storage.insert(theSlot, stack, false);
     }
 
@@ -62,7 +62,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public IStackKey safeExtract(IStackKey stack)
     {
-        setStackDirectly(new ItemStackType());
+        setStackDirectly(new ItemStackKey());
         return stack;
     }
 
@@ -81,7 +81,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                 {
                     ItemStack copy = carriedItem.copy();
                     copy.setCount(1);
-                    setStackDirectly(new ItemStackType(copy));
+                    setStackDirectly(new ItemStackKey(copy));
                 }
                 else if (button == 1)
                 {
@@ -126,13 +126,13 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
             if (carriedItem.isEmpty())
             {
                 //槽位物品存在，携带物品为空，尝试清空标记
-                setStackDirectly(new ItemStackType());
+                setStackDirectly(new ItemStackKey());
             }
             else if (true)
             {   //槽位物品存在，携带物品存在，物品可以放置，取消标记
-                setStackDirectly(new ItemStackType());
+                setStackDirectly(new ItemStackKey());
             }
-            else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
+            else if (clickStack.isSameTypeSameComponents(new ItemStackKey(carriedItem.copy())))
             {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
 
             }
@@ -157,7 +157,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
         IStackKey currentStack = storage.getStackBySlot(this.getSlotIndex());
         if (currentStack == null)
         {
-            lastStack = new ItemStackType();
+            lastStack = new ItemStackKey();
             PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) menu.player), new OrderedStackTypedSlotPacket(index, theSlot, lastStack, 0));
         }
         else if (currentStack.isEmpty() && lastStack.isEmpty())

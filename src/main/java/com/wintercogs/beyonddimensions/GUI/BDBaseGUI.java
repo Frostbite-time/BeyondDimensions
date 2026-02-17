@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;
@@ -28,7 +28,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
 
     // 用于 shift双击加左键的效果
     ItemStack lastInvClickedStack = ItemStack.EMPTY;
-    ItemStackType lastStorageClickedStack = new ItemStackType();
+    ItemStackKey lastStorageClickedStack = new ItemStackKey();
     int lastInvClickedSlot = -1;
     int cleanHold = 10; // 给予半秒时间
 
@@ -99,7 +99,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         {
             lastInvClickedStack = ItemStack.EMPTY;
             lastInvClickedSlot = -1;
-            lastStorageClickedStack = new ItemStackType();
+            lastStorageClickedStack = new ItemStackKey();
             cleanHold = 10;
         }
 
@@ -165,18 +165,18 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 {
                     PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(lastStorageClickedStack.copyWithCount(Long.MAX_VALUE), false));
                 }
-                else if (!clickItem.isEmpty() && clickItem instanceof ItemStackType itemStackType)
+                else if (!clickItem.isEmpty() && clickItem instanceof ItemStackKey itemStackKey)
                 {
-                    this.lastStorageClickedStack = (ItemStackType) itemStackType.copy();
+                    this.lastStorageClickedStack = (ItemStackKey) itemStackKey.copy();
                 }
             }
             else
             {
-                clickItem = new ItemStackType(slot.getItem());
+                clickItem = new ItemStackKey(slot.getItem());
 
                 if (lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
                 {
-                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(new ItemStackType(lastInvClickedStack), true));
+                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(new ItemStackKey(lastInvClickedStack), true));
                 }
                 else if (menu.inventoryStartIndex <= slotId && slotId < menu.inventoryEndIndex)
                 {

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Integration.JEI;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.BDBaseGUI;
@@ -64,7 +64,7 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
         public void accept(I ingredient)
         {
             Object stackKey = ingredient;
-            IStackKey dragging = new ItemStackType();
+            IStackKey dragging = new ItemStackKey();
             for (IStackKey type : StackKeyRegistry.getAllTypes())
             {
                 if (type.getStackClass().isAssignableFrom(stackKey.getClass()))
@@ -79,13 +79,13 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
             // AE2通用包裹支持
             if (BeyondDimensions.AELoaded)
             {
-                if (dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
+                if (dragging instanceof ItemStackKey draggingItem && !dragging.isEmpty())
                 {
                     appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
 
                     if (genericContent != null)
                     {
-                        dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
+                        dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackKey());
                     }
 
                 }

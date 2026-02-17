@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
@@ -53,7 +53,7 @@ public class TestItem_ItemGenerate extends Item
                     Item item = allItems.get(i);
                     int amount = 100 + random.nextInt(201); // 生成100-300之间的随机数量
 
-                    ItemStackType stack = new ItemStackType(new ItemStack(item, amount));
+                    ItemStackKey stack = new ItemStackKey(new ItemStack(item, amount));
 
                     storage.insert(stack, false);
                 }

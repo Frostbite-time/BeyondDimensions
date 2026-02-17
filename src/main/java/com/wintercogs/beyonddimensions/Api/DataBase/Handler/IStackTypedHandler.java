@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 
 import java.util.List;
 
@@ -231,7 +231,7 @@ public interface IStackTypedHandler
         List<IStackKey<?>> storage = getStorage();
         if (slot < 0 || slot >= storage.size())
         {
-            return new ItemStackType(); // 以不带参数ItemStackType作为空体
+            return new ItemStackKey(); // 以不带参数ItemStackType作为空体
         }
 
         IStackKey<?> current = storage.get(slot);

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
@@ -23,7 +23,7 @@ public class ItemUnifiedStorageHandler implements IItemHandler
         // 此类封装性良好，只需内部方法对使用的索引进行二次检查，即可避免NPE问题
         // 最后，UnifiedStorage实际并无槽位数限制且自动合并同类物品，除了读取信息和提取指定槽位物品都无需索引参与，对于超出索引的读取返回EMPTY即可
         // 所以，这样做是安全的
-        return storage.getTypeIdIndexList(ItemStackType.ID)
+        return storage.getTypeIdIndexList(ItemStackKey.ID)
                 .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
@@ -32,19 +32,19 @@ public class ItemUnifiedStorageHandler implements IItemHandler
     public ItemStack getStackInSlot(int slot)
     {
         // 此处的slot参数是基于特化类型ItemStackType的索引
-        return storage.getTypeIdIndexList(ItemStackType.ID)
+        return storage.getTypeIdIndexList(ItemStackKey.ID)
                 .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
                 .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (ItemStackType) storage.getStackBySlot(actualIndex))
-                .map(ItemStackType::getStack)
+                .map(actualIndex -> (ItemStackKey) storage.getStackBySlot(actualIndex))
+                .map(ItemStackKey::getStack)
                 .orElse(ItemStack.EMPTY);
     }
 
     @Override
     public ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
     {
-        ItemStackType typedStack = (ItemStackType) storage.insert(new ItemStackType(itemStack), sim);
+        ItemStackKey typedStack = (ItemStackKey) storage.insert(new ItemStackKey(itemStack), sim);
         return typedStack.getStack();
     }
 
@@ -55,7 +55,7 @@ public class ItemUnifiedStorageHandler implements IItemHandler
         // 1.专为物品提供的假列表中获取指定物品并转为IStackType
         // 2.使用存储器导出
         // 3.获取返回值的Stack，然后转为ItemStack再返回
-        return (ItemStack) storage.extract(new ItemStackType(getStackInSlot(slot).copyWithCount(count)), sim)
+        return (ItemStack) storage.extract(new ItemStackKey(getStackInSlot(slot).copyWithCount(count)), sim)
                 .getStack();
     }
 

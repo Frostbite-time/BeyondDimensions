@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.*;
@@ -72,7 +72,7 @@ public class NetMagnetItem extends BaseMachineItem
     {
         super.checkComponents(stack);
         if (!hasFilterSlots(stack))
-            setFilterSlots(stack, new ArrayList<>(Collections.nCopies(capacity, new ItemStackType())));
+            setFilterSlots(stack, new ArrayList<>(Collections.nCopies(capacity, new ItemStackKey())));
         if (!hasFilterMode(stack))
             setFilterMode(stack, FilterMode.BLACK);
         if (!hasHopperItemMode(stack))
@@ -123,7 +123,7 @@ public class NetMagnetItem extends BaseMachineItem
                 if (itemEntity != null && !itemEntity.isRemoved())
                 {
                     ItemStack itemStack = itemEntity.getItem().copy();
-                    ItemStackType typedStack = new ItemStackType(itemStack);
+                    ItemStackKey typedStack = new ItemStackKey(itemStack);
                     if (matchesFilter(filterMode, filterSlots, typedStack))
                     {
 

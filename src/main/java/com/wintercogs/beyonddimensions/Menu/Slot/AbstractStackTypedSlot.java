@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import net.minecraft.world.Container;
@@ -95,7 +95,7 @@ public abstract class AbstractStackTypedSlot extends Slot
         if (stackType != null)
             return stackType.copy();
         else
-            return new ItemStackType();
+            return new ItemStackKey();
     }
 
     public ItemStack getItemStackFromUnifiedStorage()
@@ -107,9 +107,9 @@ public abstract class AbstractStackTypedSlot extends Slot
             return ItemStack.EMPTY;
         }
 
-        if (stackType instanceof ItemStackType itemStackType)
+        if (stackType instanceof ItemStackKey itemStackKey)
         {
-            return itemStackType.getStack();
+            return itemStackKey.getStack();
         }
         else
         {
@@ -136,7 +136,7 @@ public abstract class AbstractStackTypedSlot extends Slot
             }
 
         }
-        return new ItemStackType();
+        return new ItemStackKey();
     }
 
     // 获取原版最大堆叠数的Stack，一般仅用于GUI类，可以保留Item实现
@@ -150,14 +150,14 @@ public abstract class AbstractStackTypedSlot extends Slot
         {
             return stack.copyWithCount(stack.getVanillaMaxStackSize());
         }
-        return new ItemStackType();
+        return new ItemStackKey();
     }
 
     public IStackKey getStack()
     {
         if (getSlotIndex() < 0 || getSlotIndex() >= storage.getSlots())
         {
-            return new ItemStackType(ItemStack.EMPTY);
+            return new ItemStackKey(ItemStack.EMPTY);
         }
         //从当前槽索引取物品
         IStackKey stack = storage.getStackBySlot(getSlotIndex());
@@ -167,7 +167,7 @@ public abstract class AbstractStackTypedSlot extends Slot
         {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
             return stack.copy();
         }
-        return new ItemStackType(ItemStack.EMPTY);
+        return new ItemStackKey(ItemStack.EMPTY);
     }
 
 

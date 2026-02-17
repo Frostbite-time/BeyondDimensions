@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import mekanism.api.Action;
 import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.SlurryStack;
@@ -60,7 +60,7 @@ public class SlurryStackTypedHandler implements ISlurryHandler
 
         if (stack.isEmpty())
         {
-            handlerStorage.setStackDirectly(tank, new ItemStackType());
+            handlerStorage.setStackDirectly(tank, new ItemStackKey());
         }
         else
         {

@@ -5,7 +5,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Util.CombinedItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.Block.Custom.NetFurnaceBlock;
@@ -142,7 +142,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         public boolean isStackValid(int slot, IStackKey stack)
         {
             // 仅接收可以熔炼的物品
-            return stack instanceof ItemStackType itemInput && quickChecks.get(slot).getRecipeFor(new SimpleContainer(itemInput.copyStack()), level).isPresent();
+            return stack instanceof ItemStackKey itemInput && quickChecks.get(slot).getRecipeFor(new SimpleContainer(itemInput.copyStack()), level).isPresent();
         }
     };
 
@@ -167,7 +167,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 能量或者可以燃烧的物品能作为燃料标记
             return (stack instanceof EnergyStackType)
                     || (stack instanceof FluidStackType fluidStack && fluidStack.copyStack().getFluid() == Fluids.LAVA)
-                    || (stack instanceof ItemStackType itemFuel && ForgeHooks.getBurnTime(itemFuel.getStack(), RecipeType.SMELTING) > 0);
+                    || (stack instanceof ItemStackKey itemFuel && ForgeHooks.getBurnTime(itemFuel.getStack(), RecipeType.SMELTING) > 0);
         }
 
     };
@@ -192,7 +192,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         public boolean isStackValid(int slot, IStackKey stack)
         {
             // 仅接收可以熔炼的物品
-            return stack instanceof ItemStackType itemInput && quickChecks.get(slot).getRecipeFor(new SimpleContainer(itemInput.copyStack()), level).isPresent();
+            return stack instanceof ItemStackKey itemInput && quickChecks.get(slot).getRecipeFor(new SimpleContainer(itemInput.copyStack()), level).isPresent();
         }
     };
 
@@ -234,7 +234,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 能量或者可以燃烧的物品能作为燃料标记
             return (stack instanceof EnergyStackType)
                     || (stack instanceof FluidStackType fluidStack && fluidStack.copyStack().getFluid() == Fluids.LAVA)
-                    || (stack instanceof ItemStackType itemFuel && ForgeHooks.getBurnTime(itemFuel.getStack(), RecipeType.SMELTING) > 0);
+                    || (stack instanceof ItemStackKey itemFuel && ForgeHooks.getBurnTime(itemFuel.getStack(), RecipeType.SMELTING) > 0);
         }
     };
 
@@ -373,7 +373,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     {
                         if (!inputStorageSlots.getStackBySlot(inputSlot).isEmpty())
                             break; //如果已经插入过则直接跳过
-                        if (filterStack instanceof ItemStackType filterItem && !filterItem.isEmpty())
+                        if (filterStack instanceof ItemStackKey filterItem && !filterItem.isEmpty())
                         {
                             IStackKey extracted = storage.extract(filterItem.copyWithCount(filterItem.getVanillaMaxStackSize()), false);
                             IStackKey remaining = inputStorageSlots.insert(inputSlot, extracted, false);
@@ -542,7 +542,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                                 litDuration.set(litSlot, burnTime);
                             }
                         }
-                        else if (fuelStack instanceof ItemStackType fuelItem)
+                        else if (fuelStack instanceof ItemStackKey fuelItem)
                         {
                             int burnTime = ForgeHooks.getBurnTime(fuelItem.getStack(), RecipeType.SMELTING);
                             if (burnTime > 0)
@@ -557,9 +557,9 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                                 else // 先尝试插入returnItem，如果能插入再消耗
                                 {
                                     // 模拟插入陈功
-                                    if (fuelReturnSlots.insert(new ItemStackType(returnItem), true).isEmpty())
+                                    if (fuelReturnSlots.insert(new ItemStackKey(returnItem), true).isEmpty())
                                     {
-                                        fuelReturnSlots.insert(new ItemStackType(returnItem), false);
+                                        fuelReturnSlots.insert(new ItemStackKey(returnItem), false);
                                         fuelStorageSlots.extract(fuelItem.copyWithCount(1), false);
                                         litTime.set(litSlot, burnTime);
                                         litDuration.set(litSlot, burnTime);
@@ -590,7 +590,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             if (litTime.get(inputSlot) <= 0)
                 continue; // 必须有燃烧才能熔炼
 
-            if (inputStorageSlots.getStackBySlot(inputSlot) instanceof ItemStackType inputItem
+            if (inputStorageSlots.getStackBySlot(inputSlot) instanceof ItemStackKey inputItem
                     && !inputItem.isEmpty())
             {
                 SmeltingRecipe recipeHolder = quickChecks.get(inputSlot)
@@ -602,7 +602,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     // 熔炼时间正常，并且能正常输出
                     if (cookTime.get(inputSlot) >= cookTimeTotal.get(inputSlot))
                     {
-                        ItemStackType resultItem = new ItemStackType(recipeHolder.getResultItem(level.registryAccess()));
+                        ItemStackKey resultItem = new ItemStackKey(recipeHolder.getResultItem(level.registryAccess()));
 
                         // 如果能完全输出，则输出，并重设熔炼时间
                         if (outputStorageSlots.insert(inputSlot, resultItem, true).isEmpty())
@@ -776,10 +776,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             if (!stack.isEmpty())
             {
                 // 如果内含物质球，直接弹出，防止NBT套娃
-                if (stack instanceof ItemStackType itemStackType)
+                if (stack instanceof ItemStackKey itemStackKey)
                 {
-                    if (itemStackType.getStack().getItem() instanceof MatterCompressionBall)
-                        Block.popResource(level, getBlockPos(), itemStackType.copyStack());
+                    if (itemStackKey.getStack().getItem() instanceof MatterCompressionBall)
+                        Block.popResource(level, getBlockPos(), itemStackKey.copyStack());
                     else
                         dropList.add(stack.copy());
                 }
@@ -794,10 +794,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             if (!stack.isEmpty())
             {
                 // 如果内含物质球，直接弹出，防止NBT套娃
-                if (stack instanceof ItemStackType itemStackType)
+                if (stack instanceof ItemStackKey itemStackKey)
                 {
-                    if (itemStackType.getStack().getItem() instanceof MatterCompressionBall)
-                        Block.popResource(level, getBlockPos(), itemStackType.copyStack());
+                    if (itemStackKey.getStack().getItem() instanceof MatterCompressionBall)
+                        Block.popResource(level, getBlockPos(), itemStackKey.copyStack());
                     else
                         dropList.add(stack.copy());
                 }
@@ -812,10 +812,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             if (!stack.isEmpty())
             {
                 // 如果内含物质球，直接弹出，防止NBT套娃
-                if (stack instanceof ItemStackType itemStackType)
+                if (stack instanceof ItemStackKey itemStackKey)
                 {
-                    if (itemStackType.getStack().getItem() instanceof MatterCompressionBall)
-                        Block.popResource(level, getBlockPos(), itemStackType.copyStack());
+                    if (itemStackKey.getStack().getItem() instanceof MatterCompressionBall)
+                        Block.popResource(level, getBlockPos(), itemStackKey.copyStack());
                     else
                         dropList.add(stack.copy());
                 }
@@ -830,10 +830,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             if (!stack.isEmpty())
             {
                 // 如果内含物质球，直接弹出，防止NBT套娃
-                if (stack instanceof ItemStackType itemStackType)
+                if (stack instanceof ItemStackKey itemStackKey)
                 {
-                    if (itemStackType.getStack().getItem() instanceof MatterCompressionBall)
-                        Block.popResource(level, getBlockPos(), itemStackType.copyStack());
+                    if (itemStackKey.getStack().getItem() instanceof MatterCompressionBall)
+                        Block.popResource(level, getBlockPos(), itemStackKey.copyStack());
                     else
                         dropList.add(stack.copy());
                 }

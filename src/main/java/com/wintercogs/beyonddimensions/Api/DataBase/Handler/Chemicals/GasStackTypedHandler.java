@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import mekanism.api.Action;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
@@ -66,7 +66,7 @@ public class GasStackTypedHandler implements IGasHandler
         if (stack.isEmpty())
         {
             // 清空槽位，恢复成通用空占位
-            handlerStorage.setStackDirectly(tank, new ItemStackType());
+            handlerStorage.setStackDirectly(tank, new ItemStackKey());
         }
         else
         {

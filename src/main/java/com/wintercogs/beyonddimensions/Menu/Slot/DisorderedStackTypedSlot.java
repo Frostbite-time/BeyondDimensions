@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Menu.Slot;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
@@ -157,7 +157,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 if (!handled.get())
                 {
                     int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                    int actualInsert = (int) (changedCount - storage.insert(StackCreater.Create(ItemStackType.ID, carriedItem.copyWithCount(changedCount), changedCount), false).getStackAmount());
+                    int actualInsert = (int) (changedCount - storage.insert(StackCreater.Create(ItemStackKey.ID, carriedItem.copyWithCount(changedCount), changedCount), false).getStackAmount());
                     int newCount = carriedItem.getCount() - actualInsert;
                     if (newCount <= 0)
                     {
@@ -177,13 +177,13 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
 
             if (carriedItem.isEmpty())
             {
-                if (clickStack instanceof ItemStackType clickItem)
+                if (clickStack instanceof ItemStackKey clickItem)
                 {
                     //槽位物品存在，携带物品为空，尝试取出槽位物品
                     // 确保一次取出最大不得超过原版数量
                     int woundChangeNum = BDMath.clampLongToInt(Math.min(clickItem.getStackAmount(), clickItem.getVanillaMaxStackSize()));
                     int actualChangeNum = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
-                    ItemStack takenItem = ((ItemStack) storage.extract(new ItemStackType(clickItem.copyStackWithCount(actualChangeNum)), false).getStack()).copy();
+                    ItemStack takenItem = ((ItemStack) storage.extract(new ItemStackKey(clickItem.copyStackWithCount(actualChangeNum)), false).getStack()).copy();
                     if (takenItem != null)
                     {
                         menu.setCarried(takenItem);
@@ -404,7 +404,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 if (!handled.get())
                 {
                     int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
-                    int actualInsert = (int) (changedCount - storage.insert(StackCreater.Create(ItemStackType.ID, carriedItem.copyWithCount(changedCount), changedCount), false).getStackAmount());
+                    int actualInsert = (int) (changedCount - storage.insert(StackCreater.Create(ItemStackKey.ID, carriedItem.copyWithCount(changedCount), changedCount), false).getStackAmount());
                     int newCount = carriedItem.getCount() - actualInsert;
                     if (newCount <= 0)
                     {
@@ -418,7 +418,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     }
                 }
             }
-            else if (clickStack.isSameTypeSameComponents(new ItemStackType(carriedItem.copy())))
+            else if (clickStack.isSameTypeSameComponents(new ItemStackKey(carriedItem.copy())))
             {   // 槽位物品存在，携带物品存在，物品不可放置，为完全相同的物品
                 // 此情况在点击维度存储槽时永远不可能发生，如果发生，无需处理
                 // 原版逻辑为取出物品到最大上限
@@ -458,13 +458,13 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 else // 目标slot为非StackTypedSlot时
                 {
                     // 普通Slot将只处理物品转移
-                    if (trueStack instanceof ItemStackType trueItemTypedStack)
+                    if (trueStack instanceof ItemStackKey trueItemTypedStack)
                     {
                         ItemStack extract = (ItemStack) storage.extract(trueItemTypedStack, false).getStack();
                         ItemStack remaining = slot.safeInsert(extract);
                         if (!remaining.isEmpty())
-                            storage.insert(new ItemStackType(remaining), false);
-                        trueStack = new ItemStackType(remaining.copy());
+                            storage.insert(new ItemStackKey(remaining), false);
+                        trueStack = new ItemStackKey(remaining.copy());
                     }
                     // 移动流体并装桶
                     else if (trueStack instanceof FluidStackType trueFluidTypedKey && trueFluidTypedKey.getSource().getBucket() != Items.AIR)
@@ -476,7 +476,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             break;
                         }
 
-                        IStackKey<?> bucket = storage.extract(new ItemStackType(new ItemStack(Items.BUCKET)), false);
+                        IStackKey<?> bucket = storage.extract(new ItemStackKey(new ItemStack(Items.BUCKET)), false);
                         if (bucket.isEmpty())
                         {
                             storage.insert(extract, false);
@@ -508,7 +508,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
         {
             return storage.insert(stack, false);
         }
-        return new ItemStackType();
+        return new ItemStackKey();
 
     }
 
@@ -519,7 +519,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
         {
             return storage.extract(stack, false);
         }
-        return new ItemStackType();
+        return new ItemStackKey();
     }
 
     // 无序槽位由槽位组负责处理同步
