@@ -165,7 +165,7 @@ dependencies {
     additionalRuntimeClasspath "com.github.promeg:tinypinyin:2.0.3"
 
 
-    // 编译通用机械的api 以便使用化学品存储
+    // 通用机械 以便使用化学品存储
     implementation "mekanism:Mekanism:${mekanism_version}"
 
     // EMI支持

@@ -38,7 +38,6 @@ import com.wintercogs.beyonddimensions.Integration.create.blocks.entities.Schema
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
-import me.ramidzkh.mekae2.MekCapabilities;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -276,9 +275,9 @@ public class BeyondDimensions
             // 注册化学品堆叠
             StackKeyRegistry.registerType(ChemicalStackKey.EMPTY);
             // 注册化学品方块能力
-            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackKey.ID, MekCapabilities.CHEMICAL.block());
+            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackKey.ID, mekanism.common.capabilities.Capabilities.CHEMICAL.block());
             // 注册化学品物品能力
-            CapabilityHelper.ItemCapabilityMap.put(ChemicalStackKey.ID, MekCapabilities.CHEMICAL.item());
+            CapabilityHelper.ItemCapabilityMap.put(ChemicalStackKey.ID, mekanism.common.capabilities.Capabilities.CHEMICAL.item());
             // 注册分化包装
             CapabilityHelper.registerUSHandler(ChemicalStackKey.EMPTY, ChemicalUnifiedStorageHandler::new);
             CapabilityHelper.registerStackTypedHandler(ChemicalStackKey.EMPTY, ChemicalStackTypedHandler::new);
