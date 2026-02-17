@@ -42,7 +42,6 @@ import com.wintercogs.beyonddimensions.Integration.RS.BD_RSPlugin;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
-import me.ramidzkh.mekae2.MekCapabilities;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -257,15 +256,15 @@ public class BeyondDimensions
             StackTypeRegistry.registerType(new PigmentStackType());
             StackTypeRegistry.registerType(new SlurryStackType());
             // 注册化学品方块能力
-            CapabilityHelper.BlockCapabilityMap.put(GasStackType.ID, MekCapabilities.GAS_HANDLER_CAPABILITY);
-            CapabilityHelper.BlockCapabilityMap.put(InfusionStackType.ID, MekCapabilities.INFUSION_HANDLER_CAPABILITY);
-            CapabilityHelper.BlockCapabilityMap.put(PigmentStackType.ID, MekCapabilities.PIGMENT_HANDLER_CAPABILITY);
-            CapabilityHelper.BlockCapabilityMap.put(SlurryStackType.ID, MekCapabilities.SLURRY_HANDLER_CAPABILITY);
+            CapabilityHelper.BlockCapabilityMap.put(GasStackType.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
+            CapabilityHelper.BlockCapabilityMap.put(InfusionStackType.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
+            CapabilityHelper.BlockCapabilityMap.put(PigmentStackType.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
+            CapabilityHelper.BlockCapabilityMap.put(SlurryStackType.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
             // 注册化学品物品能力
-            CapabilityHelper.ItemCapabilityMap.put(GasStackType.ID, MekCapabilities.GAS_HANDLER_CAPABILITY);
-            CapabilityHelper.ItemCapabilityMap.put(InfusionStackType.ID, MekCapabilities.INFUSION_HANDLER_CAPABILITY);
-            CapabilityHelper.ItemCapabilityMap.put(PigmentStackType.ID, MekCapabilities.PIGMENT_HANDLER_CAPABILITY);
-            CapabilityHelper.ItemCapabilityMap.put(SlurryStackType.ID, MekCapabilities.SLURRY_HANDLER_CAPABILITY);
+            CapabilityHelper.ItemCapabilityMap.put(GasStackType.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
+            CapabilityHelper.ItemCapabilityMap.put(InfusionStackType.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
+            CapabilityHelper.ItemCapabilityMap.put(PigmentStackType.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
+            CapabilityHelper.ItemCapabilityMap.put(SlurryStackType.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
 
             // 注册分化包装
             // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
