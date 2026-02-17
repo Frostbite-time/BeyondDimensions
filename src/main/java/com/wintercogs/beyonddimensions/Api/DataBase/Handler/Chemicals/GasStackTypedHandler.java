@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.gas.GasStack;
@@ -39,7 +39,7 @@ public class GasStackTypedHandler implements IGasHandler
             return GasStack.EMPTY;
         }
 
-        IStackType<?> stack = handlerStorage.getStackBySlot(tank);
+        IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
         if (stack instanceof GasStackType gasStack && !gasStack.isEmpty())
         {
             // 返回一份气体副本
@@ -113,7 +113,7 @@ public class GasStackTypedHandler implements IGasHandler
         }
 
         // 统一存储会处理“空占位 -> GasStackType”的转化和索引更新
-        IStackType<?> remainingStack = handlerStorage.insert(tank, new GasStackType(stack.copy()), action.simulate());
+        IStackKey<?> remainingStack = handlerStorage.insert(tank, new GasStackType(stack.copy()), action.simulate());
 
         long remaining = remainingStack.getStackAmount();
         if (remaining <= 0)
@@ -135,13 +135,13 @@ public class GasStackTypedHandler implements IGasHandler
             return GasStack.EMPTY;
         }
 
-        IStackType<?> current = handlerStorage.getStackBySlot(tank);
+        IStackKey<?> current = handlerStorage.getStackBySlot(tank);
         if (!(current instanceof GasStackType) || current.isEmpty())
         {
             return GasStack.EMPTY;
         }
 
-        IStackType<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
+        IStackKey<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
         if (extracted instanceof GasStackType gasExtract && !gasExtract.isEmpty())
         {
             return gasExtract.copyStack();

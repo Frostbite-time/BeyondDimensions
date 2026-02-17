@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ public interface SlotGroupSync
 
     void updateChange();
 
-    void loadChange(List<IStackType> stacks, List<Long> changedCounts);
+    void loadChange(List<IStackKey> stacks, List<Long> changedCounts);
 
     void afterLoadChange();
 }

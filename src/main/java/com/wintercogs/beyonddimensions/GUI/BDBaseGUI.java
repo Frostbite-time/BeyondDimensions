@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
@@ -52,7 +52,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         {
             if (this.hoveredSlot instanceof AbstractStackTypedSlot sSlot)
             {
-                IStackType stack = sSlot.getStack();
+                IStackKey stack = sSlot.getStack();
                 stack.renderTooltip(guiGraphics, minecraft.font, mouseX, mouseY);
             }
             else
@@ -71,7 +71,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
             // 获取stack
             int x = slot.x;
             int y = slot.y;
-            IStackType stack = sSlot.getStack();
+            IStackKey stack = sSlot.getStack();
 
             if (stack != null)
             {
@@ -155,7 +155,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         if (slot == null) return; // 这里绝对可能为null，不可移除此行
 
         int slotId = slot.index;
-        IStackType<?> clickItem;
+        IStackKey<?> clickItem;
         if (hasShiftDown())
         {
             if (slot instanceof AbstractStackTypedSlot sSlot)

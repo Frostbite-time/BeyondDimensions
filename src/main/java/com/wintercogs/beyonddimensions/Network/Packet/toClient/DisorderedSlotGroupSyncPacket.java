@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toClient;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.SlotGroupSync;
 import net.minecraft.client.Minecraft;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackType> stacks, List<Long> newCount)
+public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackKey> stacks, List<Long> newCount)
 {
 
     @OnlyIn(Dist.CLIENT)
@@ -54,7 +54,7 @@ public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackType> stacks
 
         // 序列化stacks列表
         buf.writeInt(packet.stacks().size());
-        for (IStackType stack : packet.stacks())
+        for (IStackKey stack : packet.stacks())
         {
             stack.serialize(buf);
         }
@@ -74,10 +74,10 @@ public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackType> stacks
 
         // 反序列化stacks列表
         int stacksSize = buf.readInt();
-        List<IStackType> stacks = new ArrayList<>(stacksSize);
+        List<IStackKey> stacks = new ArrayList<>(stacksSize);
         for (int i = 0; i < stacksSize; i++)
         {
-            stacks.add(IStackType.deserializeCommon(buf));
+            stacks.add(IStackKey.deserializeCommon(buf));
         }
 
         // 反序列化changedCounts列表

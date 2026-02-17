@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -24,9 +24,9 @@ public class MatterCompressionBall extends Item
                 !tag.getList("StackList", Tag.TAG_COMPOUND).isEmpty();
     }
 
-    public static List<IStackType<?>> getIStackList(ItemStack stack)
+    public static List<IStackKey<?>> getIStackList(ItemStack stack)
     {
-        List<IStackType<?>> result = new ArrayList<>();
+        List<IStackKey<?>> result = new ArrayList<>();
         CompoundTag tag = stack.getTag();
         if (tag == null || !tag.contains("StackList", Tag.TAG_LIST))
             return result;
@@ -35,7 +35,7 @@ public class MatterCompressionBall extends Item
         for (Tag element : listTag)
         {
             CompoundTag elementTag = (CompoundTag) element;
-            IStackType<?> stackType = IStackType.deserializeNBTCommon(elementTag);
+            IStackKey<?> stackType = IStackKey.deserializeNBTCommon(elementTag);
             if (stackType != null)
             {
                 result.add(stackType);
@@ -44,10 +44,10 @@ public class MatterCompressionBall extends Item
         return result;
     }
 
-    public static void setIStackList(ItemStack stack, List<IStackType<?>> stackList)
+    public static void setIStackList(ItemStack stack, List<IStackKey<?>> stackList)
     {
         ListTag listTag = new ListTag();
-        for (IStackType<?> stackType : stackList)
+        for (IStackKey<?> stackType : stackList)
         {
             CompoundTag elementTag = stackType.serializeNBT();
             // 确保序列化后包含类型标识

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
@@ -13,7 +13,7 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 // 批量转移物品的数据包，仅记载需要转移的物品本身和转移方向
-public record BatchTransferPacket(IStackType clickStack, boolean dirToStorage)
+public record BatchTransferPacket(IStackKey clickStack, boolean dirToStorage)
 {
 
     private void handle(NetworkEvent.Context context)
@@ -43,7 +43,7 @@ public record BatchTransferPacket(IStackType clickStack, boolean dirToStorage)
                     {
                         UnifiedStorage storage = menu.storage;
                         // 防止数据包伪造，然后赋予trueStack需要提取的数量
-                        IStackType trueStack = storage.getStackByStack(clickStack).copyWithCount(clickStack.getStackAmount());
+                        IStackKey trueStack = storage.getStackByStack(clickStack).copyWithCount(clickStack.getStackAmount());
 
                         // 遍历目标槽位
                         for (int targetSlotIndex = menu.inventoryStartIndex; targetSlotIndex < menu.inventoryEndIndex && !trueStack.isEmpty(); targetSlotIndex++)
@@ -87,7 +87,7 @@ public record BatchTransferPacket(IStackType clickStack, boolean dirToStorage)
 
     public static BatchTransferPacket decode(FriendlyByteBuf buf)
     {
-        IStackType clickStack = IStackType.deserializeCommon(buf);
+        IStackKey clickStack = IStackKey.deserializeCommon(buf);
         boolean dirToStorage = buf.readBoolean();
         return new BatchTransferPacket(clickStack, dirToStorage);
     }

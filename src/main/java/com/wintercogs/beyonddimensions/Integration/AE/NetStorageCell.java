@@ -6,7 +6,7 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.cells.CellState;
 import appeng.api.storage.cells.StorageCell;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import net.minecraft.network.chat.Component;
 
@@ -103,7 +103,7 @@ public class NetStorageCell implements StorageCell
     /**
      * 增量补丁：O(1) 更新 KeyCounter（避免留下 0 项）
      */
-    private void applyDelta(IStackType<?> type, long size, boolean insert)
+    private void applyDelta(IStackKey<?> type, long size, boolean insert)
     {
         Optional<AEKey> keyOpt = AEHelper.fromIStackToAEKey(type);
         if (keyOpt.isEmpty()) return;
@@ -130,7 +130,7 @@ public class NetStorageCell implements StorageCell
     private void fullRebuildSnapshot()
     {
         snapshot.clear();
-        for (IStackType<?> stack : storage.getStorage())
+        for (IStackKey<?> stack : storage.getStorage())
         {
             if (stack.isEmpty()) continue;
             AEHelper.fromIStackToAEKey(stack).ifPresent(aeKey -> {

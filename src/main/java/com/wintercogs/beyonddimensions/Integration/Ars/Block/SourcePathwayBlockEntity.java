@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Integration.Ars.Block;
 import com.hollingsworth.arsnouveau.api.source.ISourceTile;
 import com.hollingsworth.arsnouveau.api.source.SourceManager;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackType;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
@@ -37,7 +37,7 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         DimensionsNet net = getNet();
         if (net != null)
         {
-            IStackType stack = net.getUnifiedStorage().getStackByStack(new SourceStackType(0));
+            IStackKey stack = net.getUnifiedStorage().getStackByStack(new SourceStackType(0));
             if (stack != null)
             {
                 return BDMath.clampLongToInt(stack.getStackAmount());

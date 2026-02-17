@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 public class ManaStackType extends LongStackType<ManaType>
 {
@@ -46,7 +47,7 @@ public class ManaStackType extends LongStackType<ManaType>
     }
 
     @Override
-    public IStackType<ManaType> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
+    public IStackKey<ManaType> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
         if (key instanceof ManaType)
         {
@@ -56,13 +57,13 @@ public class ManaStackType extends LongStackType<ManaType>
     }
 
     @Override
-    public IStackType<ManaType> getEmpty()
+    public IStackKey<ManaType> getEmpty()
     {
         return new ManaStackType(0);
     }
 
     @Override
-    public ManaType getSource()
+    public @NotNull ManaType getSource()
     {
         return this.stack;
     }
@@ -74,7 +75,7 @@ public class ManaStackType extends LongStackType<ManaType>
     }
 
     @Override
-    public IStackType<ManaType> copy()
+    public IStackKey<ManaType> copy()
     {
         // copy时将哈希码状态一起带上，最大程度降低hash计算负担
         ManaStackType copy = new ManaStackType(stack.getStackCount());
@@ -84,7 +85,7 @@ public class ManaStackType extends LongStackType<ManaType>
     }
 
     @Override
-    public IStackType<ManaType> copyWithCount(long count)
+    public IStackKey<ManaType> copyWithCount(long count)
     {
         ManaStackType copy = new ManaStackType(count);
         copy.NeedRecalHash = this.NeedRecalHash;
@@ -93,7 +94,7 @@ public class ManaStackType extends LongStackType<ManaType>
     }
 
     @Override
-    public IStackType<ManaType> split(long amount)
+    public IStackKey<ManaType> split(long amount)
     {
         if (amount <= 0) return new ManaStackType();
 
@@ -124,7 +125,7 @@ public class ManaStackType extends LongStackType<ManaType>
     }
 
     @Override
-    public IStackType<ManaType> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
+    public IStackKey<ManaType> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
         if (!typeId.equals(getTypeId()))
         {
@@ -136,7 +137,7 @@ public class ManaStackType extends LongStackType<ManaType>
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public @NotNull CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
@@ -145,7 +146,7 @@ public class ManaStackType extends LongStackType<ManaType>
     }
 
     @Override
-    public IStackType<ManaType> deserializeNBT(CompoundTag nbt)
+    public @NotNull IStackKey<ManaType> deserializeNBT(CompoundTag nbt)
     {
         return new ManaStackType(nbt.getLong("Amount"));
     }

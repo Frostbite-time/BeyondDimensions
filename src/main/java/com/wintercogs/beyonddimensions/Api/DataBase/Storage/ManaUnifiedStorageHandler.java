@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
 import com.google.common.base.Predicates;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackType;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
@@ -80,7 +80,7 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
     public boolean isFull()
     {
         // 尽可能轻量的方式来检查
-        IStackType stack = storage.getStackByStack(new ManaStackType(0));
+        IStackKey stack = storage.getStackByStack(new ManaStackType(0));
         long currentMana = stack == null ? 0 : stack.getStackAmount();
         return currentMana >= storage.getSlotCapacity(0) || (currentMana < storage.getSlotCapacity(0) && storage.isFullSlotsSize());
     }

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import mekanism.api.MekanismAPI;
@@ -26,13 +26,14 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import org.apache.commons.lang3.text.WordUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 // 用于处理通用机械的化学品类
-public final class PigmentStackType implements IStackType<PigmentStack>
+public final class PigmentStackType implements IStackKey<PigmentStack>
 {
 
     public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemicals/pigment");
@@ -56,7 +57,7 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public IStackType<PigmentStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
+    public IStackKey<PigmentStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
         if (key instanceof Pigment chemical)
         {
@@ -73,7 +74,7 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public IStackType<PigmentStack> getEmpty()
+    public IStackKey<PigmentStack> getEmpty()
     {
         return new PigmentStackType();
     }
@@ -104,7 +105,7 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public Pigment getSource()
+    public @NotNull Pigment getSource()
     {
         return stack.getType();
     }
@@ -147,7 +148,7 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public IStackType<PigmentStack> copy()
+    public IStackKey<PigmentStack> copy()
     {
         PigmentStackType copy = new PigmentStackType(stack.copy());
         copy.NeedRecalHash = this.NeedRecalHash;
@@ -156,7 +157,7 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public IStackType<PigmentStack> copyWithCount(long count)
+    public IStackKey<PigmentStack> copyWithCount(long count)
     {
         PigmentStackType copy = new PigmentStackType(new PigmentStack(stack, count));
         copy.NeedRecalHash = this.NeedRecalHash;
@@ -217,7 +218,7 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public IStackType<PigmentStack> split(long amount)
+    public IStackKey<PigmentStack> split(long amount)
     {
         if (amount <= 0 || isEmpty()) return new PigmentStackType();
 
@@ -245,7 +246,7 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public boolean isSame(IStackType<?> other)
+    public boolean isSame(IStackKey<?> other)
     {
         if (!other.getTypeId().equals(this.getTypeId()))
             return false;
@@ -253,7 +254,7 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<?> other)
+    public boolean isSameTypeSameComponents(IStackKey<?> other)
     {
         if (!other.getTypeId().equals(this.getTypeId()))
             return false;
@@ -282,7 +283,7 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public IStackType<PigmentStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
+    public IStackKey<PigmentStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
         if (!typeId.equals(getTypeId()))
         {
@@ -304,7 +305,7 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public @NotNull CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
@@ -314,7 +315,7 @@ public final class PigmentStackType implements IStackType<PigmentStack>
     }
 
     @Override
-    public IStackType<PigmentStack> deserializeNBT(CompoundTag nbt)
+    public @NotNull IStackKey<PigmentStack> deserializeNBT(CompoundTag nbt)
     {
         PigmentStackType stack = new PigmentStackType(PigmentStack.readFromNBT(nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));

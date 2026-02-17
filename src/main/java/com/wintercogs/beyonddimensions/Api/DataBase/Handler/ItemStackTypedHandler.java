@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
@@ -35,7 +35,7 @@ public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiab
             return ItemStack.EMPTY;
         }
 
-        IStackType<?> stack = handlerStorage.getStackBySlot(slot);
+        IStackKey<?> stack = handlerStorage.getStackBySlot(slot);
         if (stack instanceof ItemStackType itemStackType && !itemStackType.isEmpty())
         {
             return (ItemStack) itemStackType.copyStack();
@@ -60,7 +60,7 @@ public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiab
         }
 
         // 统一存储会处理空占位 -> ItemStackType 以及索引更新
-        IStackType<?> remainingStack = handlerStorage.insert(
+        IStackKey<?> remainingStack = handlerStorage.insert(
                 slot,
                 new ItemStackType(itemStack.copy()),
                 simulate
@@ -83,13 +83,13 @@ public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiab
             return ItemStack.EMPTY;
         }
 
-        IStackType<?> current = handlerStorage.getStackBySlot(slot);
+        IStackKey<?> current = handlerStorage.getStackBySlot(slot);
         if (!(current instanceof ItemStackType) || current.isEmpty())
         {
             return ItemStack.EMPTY;
         }
 
-        IStackType<?> extracted = handlerStorage.extract(slot, count, simulate);
+        IStackKey<?> extracted = handlerStorage.extract(slot, count, simulate);
         if (extracted instanceof ItemStackType itemExtract && !itemExtract.isEmpty())
         {
             return itemExtract.copyStack();
@@ -105,7 +105,7 @@ public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiab
             return 0;
         }
 
-        IStackType<?> stack = handlerStorage.getStackBySlot(slot);
+        IStackKey<?> stack = handlerStorage.getStackBySlot(slot);
         if (stack instanceof ItemStackType itemStackType)
         {
             // 使用该槽位当前物品类型的原版最大堆叠上限

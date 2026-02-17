@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Unit.StringFormat;
 import mekanism.api.MekanismAPI;
@@ -26,13 +26,14 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import org.apache.commons.lang3.text.WordUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 // 用于处理通用机械的化学品类
-public final class GasStackType implements IStackType<GasStack>
+public final class GasStackType implements IStackKey<GasStack>
 {
 
     public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemicals/gas");
@@ -56,7 +57,7 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public IStackType<GasStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
+    public IStackKey<GasStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
         if (key instanceof Gas chemical)
         {
@@ -73,7 +74,7 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public IStackType<GasStack> getEmpty()
+    public IStackKey<GasStack> getEmpty()
     {
         return new GasStackType();
     }
@@ -104,7 +105,7 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public Gas getSource()
+    public @NotNull Gas getSource()
     {
         return stack.getType();
     }
@@ -147,7 +148,7 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public IStackType<GasStack> copy()
+    public IStackKey<GasStack> copy()
     {
         GasStackType copy = new GasStackType(stack.copy());
         copy.NeedRecalHash = this.NeedRecalHash;
@@ -156,7 +157,7 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public IStackType<GasStack> copyWithCount(long count)
+    public IStackKey<GasStack> copyWithCount(long count)
     {
         GasStackType copy = new GasStackType(new GasStack(stack, count));
         copy.NeedRecalHash = this.NeedRecalHash;
@@ -217,7 +218,7 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public IStackType<GasStack> split(long amount)
+    public IStackKey<GasStack> split(long amount)
     {
         if (amount <= 0 || isEmpty()) return new GasStackType();
 
@@ -245,7 +246,7 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public boolean isSame(IStackType<?> other)
+    public boolean isSame(IStackKey<?> other)
     {
         if (!other.getTypeId().equals(this.getTypeId()))
             return false;
@@ -253,7 +254,7 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<?> other)
+    public boolean isSameTypeSameComponents(IStackKey<?> other)
     {
         if (!other.getTypeId().equals(this.getTypeId()))
             return false;
@@ -282,7 +283,7 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public IStackType<GasStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
+    public IStackKey<GasStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
         if (!typeId.equals(getTypeId()))
         {
@@ -304,7 +305,7 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public @NotNull CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
@@ -314,7 +315,7 @@ public final class GasStackType implements IStackType<GasStack>
     }
 
     @Override
-    public IStackType<GasStack> deserializeNBT(CompoundTag nbt)
+    public @NotNull IStackKey<GasStack> deserializeNBT(CompoundTag nbt)
     {
         GasStackType stack = new GasStackType(GasStack.readFromNBT(nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));

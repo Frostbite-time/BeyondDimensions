@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +33,7 @@ public class FluidStackTypedHandler implements IFluidHandler
             return FluidStack.EMPTY;
         }
 
-        IStackType<?> stack = handlerStorage.getStackBySlot(tank);
+        IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
         if (stack instanceof FluidStackType fluidStackType && !fluidStackType.isEmpty())
         {
             return fluidStackType.copyStack();
@@ -94,7 +94,7 @@ public class FluidStackTypedHandler implements IFluidHandler
             return FluidStack.EMPTY;
         }
 
-        IStackType<?> extracted = handlerStorage.extract(
+        IStackKey<?> extracted = handlerStorage.extract(
                 new FluidStackType(fluidStack.copy()),
                 fluidAction.simulate()
         );

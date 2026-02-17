@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
@@ -41,10 +41,10 @@ public class DimensionsNetMenu extends BDBaseMenu
 
     // 客户端用搜索缓存
     private static final int NAME_CACHE_MAX = 10_000;
-    private static final LinkedHashMap<IStackType<?>, String> NAME_CACHE = new LinkedHashMap<>(4096, 0.75f, true)
+    private static final LinkedHashMap<IStackKey<?>, String> NAME_CACHE = new LinkedHashMap<>(4096, 0.75f, true)
     {
         @Override
-        protected boolean removeEldestEntry(Map.Entry<IStackType<?>, String> eldest)
+        protected boolean removeEldestEntry(Map.Entry<IStackKey<?>, String> eldest)
         {
             return size() > NAME_CACHE_MAX;
         }
@@ -236,7 +236,7 @@ public class DimensionsNetMenu extends BDBaseMenu
     public void updateViewerStorage()
     {
         viewerStorage.clearStorage();
-        for (IStackType stack : this.storage.getStorage())
+        for (IStackKey stack : this.storage.getStorage())
         {
             this.viewerStorage.insert(stack.copy(), false);
         }
@@ -250,15 +250,15 @@ public class DimensionsNetMenu extends BDBaseMenu
         // 由于viewerStorage的对象来自storage。而storage不会被随意清空
         // hashCode将能被自定义的copy函数一并传递，无需过多性能
 
-        Map<IStackType, Long> storageMap = new HashMap<>();
+        Map<IStackKey, Long> storageMap = new HashMap<>();
 
         // 填充主存储物品数量 (O(n))
-        for (IStackType stack : storage.getStorage())
+        for (IStackKey stack : storage.getStorage())
         {
             storageMap.put(stack, stack.getStackAmount());
         }
         // 更新查看者存储的数量 (O(m))
-        for (IStackType viewerStack : viewerStorage.getStorage())
+        for (IStackKey viewerStack : viewerStorage.getStorage())
         {
             // 使用哈希表直接查找数量，不存在时默认为0
             long amount = storageMap.getOrDefault(viewerStack, 0L);
@@ -267,7 +267,7 @@ public class DimensionsNetMenu extends BDBaseMenu
     }
 
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList(ArrayList<IStackType<?>> itemStorage, boolean needsUpdateCacheIndex)
+    public void buildIndexList(ArrayList<IStackKey<?>> itemStorage, boolean needsUpdateCacheIndex)
     {
         if (!this.player.level().isClientSide())
         {
@@ -327,7 +327,7 @@ public class DimensionsNetMenu extends BDBaseMenu
      * @param unifiedStorage 要排序的存储
      * @return 完成排序的索引列表
      */
-    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackType<?>> unifiedStorage)
+    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackKey<?>> unifiedStorage)
     {
         // 过滤（合并空气与搜索）
         final ArrayList<Keyed> filtered = new ArrayList<>(unifiedStorage.size());
@@ -339,7 +339,7 @@ public class DimensionsNetMenu extends BDBaseMenu
 
         for (int i = 0; i < unifiedStorage.size(); i++)
         {
-            IStackType<?> s = unifiedStorage.get(i);
+            IStackKey<?> s = unifiedStorage.get(i);
             if (s == null || s.isEmpty()) continue;
 
             // 预计算一次 key（名字走缓存）
@@ -451,7 +451,7 @@ public class DimensionsNetMenu extends BDBaseMenu
      * @param matchText 文本
      * @return 结果为真则意味存在
      */
-    private boolean checkTooltipMatches(IStackType stack, String matchText)
+    private boolean checkTooltipMatches(IStackKey stack, String matchText)
     {
         List<Component> toolTips = TooltipHelper.getTooltipLines(stack,
                 player,
@@ -540,13 +540,13 @@ public class DimensionsNetMenu extends BDBaseMenu
     // 仅用于排序/过滤的快照，避免在比较器里反复取重名信息
     private static final class Keyed
     {
-        final IStackType<?> stack;
+        final IStackKey<?> stack;
         final int origIndex; // 原始索引，用来回填到 cacheIndex
         final String nameKey; // 排序/匹配用的“名字key”
         final String modIdKey;
         final long amount;
 
-        Keyed(IStackType<?> s, int idx, String nameKey, String modIdKey, long amount)
+        Keyed(IStackKey<?> s, int idx, String nameKey, String modIdKey, long amount)
         {
             this.stack = s;
             this.origIndex = idx;
@@ -556,7 +556,7 @@ public class DimensionsNetMenu extends BDBaseMenu
         }
     }
 
-    private static String getDisplayNameKeyCached(IStackType<?> key)
+    private static String getDisplayNameKeyCached(IStackKey<?> key)
     {
         String val = NAME_CACHE.get(key);
         if (val != null) return val;

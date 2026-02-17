@@ -23,6 +23,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
@@ -30,7 +31,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemStackType implements IStackType<ItemStack>
+public class ItemStackType implements IStackKey<ItemStack>
 {
     public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/item");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
@@ -153,7 +154,7 @@ public class ItemStackType implements IStackType<ItemStack>
     }
 
     @Override
-    public IStackType<ItemStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
+    public IStackKey<ItemStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
         // 先行置为ItemStack，再走统一接口
         if (key instanceof Item item)
@@ -198,7 +199,7 @@ public class ItemStackType implements IStackType<ItemStack>
     }
 
     @Override
-    public IStackType<ItemStack> getEmpty()
+    public IStackKey<ItemStack> getEmpty()
     {
         return new ItemStackType();
     }
@@ -216,7 +217,7 @@ public class ItemStackType implements IStackType<ItemStack>
     }
 
     @Override
-    public Item getSource()
+    public @NotNull Item getSource()
     {
         return item;
     }
@@ -263,7 +264,7 @@ public class ItemStackType implements IStackType<ItemStack>
     }
 
     @Override
-    public IStackType<ItemStack> copy()
+    public IStackKey<ItemStack> copy()
     {
         Item copyItem = item;
         CompoundTag copyTag = tag == null ? null : tag.copy();
@@ -278,7 +279,7 @@ public class ItemStackType implements IStackType<ItemStack>
     }
 
     @Override
-    public IStackType<ItemStack> copyWithCount(long count)
+    public IStackKey<ItemStack> copyWithCount(long count)
     {
         Item copyItem = item;
         CompoundTag copyTag = tag == null ? null : tag.copy();
@@ -348,7 +349,7 @@ public class ItemStackType implements IStackType<ItemStack>
     }
 
     @Override
-    public IStackType<ItemStack> split(long amount)
+    public IStackKey<ItemStack> split(long amount)
     {
         if (amount <= 0) return new ItemStackType();
 
@@ -374,7 +375,7 @@ public class ItemStackType implements IStackType<ItemStack>
     }
 
     @Override
-    public boolean isSame(IStackType<?> other)
+    public boolean isSame(IStackKey<?> other)
     {
         // 比较物品类型和基础NBT（如盔甲耐久等）
         if (!other.getTypeId().equals(this.getTypeId()))
@@ -383,7 +384,7 @@ public class ItemStackType implements IStackType<ItemStack>
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<?> other)
+    public boolean isSameTypeSameComponents(IStackKey<?> other)
     {
         if (!other.getTypeId().equals(this.getTypeId()))
             return false;
@@ -440,7 +441,7 @@ public class ItemStackType implements IStackType<ItemStack>
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public @NotNull CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
@@ -463,7 +464,7 @@ public class ItemStackType implements IStackType<ItemStack>
     }
 
     @Override
-    public ItemStackType deserializeNBT(CompoundTag nbt)
+    public @NotNull ItemStackType deserializeNBT(CompoundTag nbt)
     {
         long amount = nbt.getLong("Amount"); // 数量直接从原始nbt中取
 

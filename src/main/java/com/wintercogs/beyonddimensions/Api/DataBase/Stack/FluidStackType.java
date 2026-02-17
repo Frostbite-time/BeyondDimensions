@@ -30,12 +30,13 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.text.WordUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class FluidStackType implements IStackType<FluidStack>
+public class FluidStackType implements IStackKey<FluidStack>
 {
     public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/fluid");
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
@@ -68,7 +69,7 @@ public class FluidStackType implements IStackType<FluidStack>
 
 
     @Override
-    public IStackType<FluidStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
+    public IStackKey<FluidStack> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
         if (key instanceof Fluid fluid)
         {
@@ -89,7 +90,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public IStackType<FluidStack> getEmpty()
+    public IStackKey<FluidStack> getEmpty()
     {
         return new FluidStackType();
     }
@@ -123,7 +124,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public Fluid getSource()
+    public @NotNull Fluid getSource()
     {
         return stack.getFluid();
     }
@@ -166,7 +167,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public IStackType<FluidStack> copy()
+    public IStackKey<FluidStack> copy()
     {
         FluidStackType copy = new FluidStackType(new FluidStack(stack, stack.getAmount()), stackSize);
         copy.NeedRecalHash = this.NeedRecalHash;
@@ -175,7 +176,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public IStackType<FluidStack> copyWithCount(long count)
+    public IStackKey<FluidStack> copyWithCount(long count)
     {
         FluidStackType copy = new FluidStackType(new FluidStack(stack, stack.getAmount()), count);
         copy.NeedRecalHash = this.NeedRecalHash;
@@ -234,7 +235,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public IStackType<FluidStack> split(long amount)
+    public IStackKey<FluidStack> split(long amount)
     {
         if (amount <= 0 || isEmpty()) return new FluidStackType();
 
@@ -261,7 +262,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public boolean isSame(IStackType<?> other)
+    public boolean isSame(IStackKey<?> other)
     {
         if (!other.getTypeId().equals(this.getTypeId()))
             return false;
@@ -269,7 +270,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<?> other)
+    public boolean isSameTypeSameComponents(IStackKey<?> other)
     {
         if (!other.getTypeId().equals(this.getTypeId()))
             return false;
@@ -298,7 +299,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public IStackType<FluidStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
+    public IStackKey<FluidStack> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
         if (!typeId.equals(getTypeId()))
         {
@@ -320,7 +321,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public @NotNull CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
@@ -330,7 +331,7 @@ public class FluidStackType implements IStackType<FluidStack>
     }
 
     @Override
-    public IStackType<FluidStack> deserializeNBT(CompoundTag nbt)
+    public @NotNull IStackKey<FluidStack> deserializeNBT(CompoundTag nbt)
     {
         FluidStackType stack = new FluidStackType(FluidStack.loadFluidStackFromNBT(nbt.getCompound("Stack")));
         stack.setStackAmount(nbt.getLong("Amount"));

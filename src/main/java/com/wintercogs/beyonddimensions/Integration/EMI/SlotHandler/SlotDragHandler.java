@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.BDBaseGUI;
 import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
@@ -64,8 +64,8 @@ public class SlotDragHandler implements EmiDragDropHandler<Screen>
                     Object stackKey = ingredient.getEmiStacks().get(0).getKey();
                     CompoundTag dataComponentPatch = ingredient.getEmiStacks().get(0).getNbt();
 
-                    IStackType dragging = new ItemStackType();
-                    for (IStackType type : StackTypeRegistry.getAllTypes())
+                    IStackKey dragging = new ItemStackType();
+                    for (IStackKey type : StackKeyRegistry.getAllTypes())
                     {
                         if (type.getSourceClass().isAssignableFrom(stackKey.getClass()))
                         {

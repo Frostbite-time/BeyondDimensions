@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -41,7 +41,7 @@ public interface IStackHandlerWrapper<T>
     /**
      * 指定的堆叠是否允许被插入槽位
      * <p>
-     * 此接口用于读取其他模组的内容，因此不要用{@link com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler#isStackValid(int, IStackType)}的描述来看待
+     * 此接口用于读取其他模组的内容，因此不要用{@link com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler#isStackValid(int, IStackKey)}的描述来看待
      *
      * @param slot  槽位索引
      * @param stack 指定的堆叠

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
@@ -105,7 +105,7 @@ public class NetMagnetItem extends BaseMachineItem
         HopperNBTMode hopperNBTMode = getHopperNBTModeOrDefault(stack, HopperNBTMode.DENY);
         HopperFluidMode hopperFluidMode = getHopperFluidModeOrDefault(stack, HopperFluidMode.DENY);
         HopperRangeMode hopperRangeMode = getHopperRangeModeOrDefault(stack, HopperRangeMode.RADIUS_MID);
-        List<IStackType<?>> filterSlots = getFilterSlotsOrDefault(stack, new ArrayList<>());
+        List<IStackKey<?>> filterSlots = getFilterSlotsOrDefault(stack, new ArrayList<>());
 
         AABB searchArea = getSearchArea(hopperRangeMode, level, holder.getOnPos());
 
@@ -271,7 +271,7 @@ public class NetMagnetItem extends BaseMachineItem
     }
 
     // 收集区域流体
-    private void fluidCollect(FilterMode filterMode, List<IStackType<?>> filterSlots, UnifiedStorage storage, Level level, AABB searchArea)
+    private void fluidCollect(FilterMode filterMode, List<IStackKey<?>> filterSlots, UnifiedStorage storage, Level level, AABB searchArea)
     {
 
         int minX = Mth.floor(searchArea.minX);
@@ -324,14 +324,14 @@ public class NetMagnetItem extends BaseMachineItem
         }
     }
 
-    private boolean matchesFilter(FilterMode filterMode, List<IStackType<?>> filterSlots, IStackType<?> otherStack)
+    private boolean matchesFilter(FilterMode filterMode, List<IStackKey<?>> filterSlots, IStackKey<?> otherStack)
     {
         switch (filterMode)
         {
 
             case BLACK ->
             {
-                for (IStackType<?> stack : filterSlots)
+                for (IStackKey<?> stack : filterSlots)
                 {
                     if (stack.isSame(otherStack))
                         return false;
@@ -340,7 +340,7 @@ public class NetMagnetItem extends BaseMachineItem
             }
             case WHITE ->
             {
-                for (IStackType<?> stack : filterSlots)
+                for (IStackKey<?> stack : filterSlots)
                 {
                     if (stack.isSame(otherStack))
                         return true;

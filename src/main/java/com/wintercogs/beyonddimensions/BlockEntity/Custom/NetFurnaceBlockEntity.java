@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.ItemStackTypedHandle
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Util.CombinedItemHandlerWrapper;
@@ -139,7 +139,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         }
 
         @Override
-        public boolean isStackValid(int slot, IStackType stack)
+        public boolean isStackValid(int slot, IStackKey stack)
         {
             // 仅接收可以熔炼的物品
             return stack instanceof ItemStackType itemInput && quickChecks.get(slot).getRecipeFor(new SimpleContainer(itemInput.copyStack()), level).isPresent();
@@ -162,7 +162,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         }
 
         @Override
-        public boolean isStackValid(int slot, IStackType stack)
+        public boolean isStackValid(int slot, IStackKey stack)
         {
             // 能量或者可以燃烧的物品能作为燃料标记
             return (stack instanceof EnergyStackType)
@@ -189,7 +189,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
 
         // 熔炉的特性，只能输入物品
         @Override
-        public boolean isStackValid(int slot, IStackType stack)
+        public boolean isStackValid(int slot, IStackKey stack)
         {
             // 仅接收可以熔炼的物品
             return stack instanceof ItemStackType itemInput && quickChecks.get(slot).getRecipeFor(new SimpleContainer(itemInput.copyStack()), level).isPresent();
@@ -229,7 +229,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         }
 
         @Override
-        public boolean isStackValid(int slot, IStackType stack)
+        public boolean isStackValid(int slot, IStackKey stack)
         {
             // 能量或者可以燃烧的物品能作为燃料标记
             return (stack instanceof EnergyStackType)
@@ -369,14 +369,14 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             {
                 if (inputStorageSlots.getStackBySlot(inputSlot).isEmpty())
                 {
-                    for (IStackType filterStack : inputFilterSlots.getStorage())
+                    for (IStackKey filterStack : inputFilterSlots.getStorage())
                     {
                         if (!inputStorageSlots.getStackBySlot(inputSlot).isEmpty())
                             break; //如果已经插入过则直接跳过
                         if (filterStack instanceof ItemStackType filterItem && !filterItem.isEmpty())
                         {
-                            IStackType extracted = storage.extract(filterItem.copyWithCount(filterItem.getVanillaMaxStackSize()), false);
-                            IStackType remaining = inputStorageSlots.insert(inputSlot, extracted, false);
+                            IStackKey extracted = storage.extract(filterItem.copyWithCount(filterItem.getVanillaMaxStackSize()), false);
+                            IStackKey remaining = inputStorageSlots.insert(inputSlot, extracted, false);
                             if (!remaining.isEmpty())
                             {
                                 storage.insert(remaining, false);
@@ -388,17 +388,17 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 2.如果开启了自动整理，则每tick进行一次快速整理
             if (sortMode == AutoSortMode.OPEN)
             {
-                IStackType[] stacks = new IStackType[capacity]; // 种类引用 每tick重新获取，无隐藏问题
+                IStackKey[] stacks = new IStackKey[capacity]; // 种类引用 每tick重新获取，无隐藏问题
                 long[] amounts = new long[capacity]; //种类数量
 
-                java.util.Map<IStackType, java.util.List<Integer>> groupSlots = new java.util.HashMap<>(); // 所属槽位
-                java.util.Map<IStackType, Long> groupTotal = new java.util.HashMap<>(); // 种类总数
+                java.util.Map<IStackKey, java.util.List<Integer>> groupSlots = new java.util.HashMap<>(); // 所属槽位
+                java.util.Map<IStackKey, Long> groupTotal = new java.util.HashMap<>(); // 种类总数
 
                 java.util.List<Integer> emptySlots = new java.util.ArrayList<>(); // 标记可用的空槽位
 
                 for (int i = 0; i < capacity; i++)
                 {
-                    IStackType s = inputStorageSlots.getStackBySlot(i);
+                    IStackKey s = inputStorageSlots.getStackBySlot(i);
                     stacks[i] = s;
 
                     if (s == null || s.isEmpty())
@@ -415,10 +415,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     groupTotal.put(s, groupTotal.getOrDefault(s, 0L) + amt);
                 }
                 // 为不同的种类再分配，循环次数小于种类数量，即小于capacity
-                for (java.util.Map.Entry<IStackType, java.util.List<Integer>> entry : groupSlots.entrySet())
+                for (java.util.Map.Entry<IStackKey, java.util.List<Integer>> entry : groupSlots.entrySet())
                 {
 
-                    IStackType type = entry.getKey();
+                    IStackKey type = entry.getKey();
                     java.util.List<Integer> typedSlots = entry.getValue();
                     long total = groupTotal.get(type);
 
@@ -471,8 +471,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                         long move = Math.min(surplus, deficit); // 实际搬运量
 
                         // 真正提取 & 插入
-                        IStackType moved = inputStorageSlots.extract(from, move, false);
-                        IStackType leftover = inputStorageSlots.insert(to, moved, false);
+                        IStackKey moved = inputStorageSlots.extract(from, move, false);
+                        IStackKey leftover = inputStorageSlots.insert(to, moved, false);
                         if (!leftover.isEmpty())
                         {
                             inputStorageSlots.insert(from, leftover, false);
@@ -490,7 +490,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             {
                 if (fuelStorageSlots.getStackBySlot(fuelSlot).isEmpty())
                 {
-                    for (IStackType filterStack : fuelFilterSlots.getStorage())
+                    for (IStackKey filterStack : fuelFilterSlots.getStorage())
                     {
                         if (filterStack.isEmpty())
                             continue;
@@ -498,8 +498,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                         if (!fuelStorageSlots.getStackBySlot(fuelSlot).isEmpty())
                             break; //如果已经插入过则直接跳过
 
-                        IStackType extracted = storage.extract(filterStack.copyWithCount(filterStack.getVanillaMaxStackSize()), false);
-                        IStackType remaining = fuelStorageSlots.insert(fuelSlot, extracted, false);
+                        IStackKey extracted = storage.extract(filterStack.copyWithCount(filterStack.getVanillaMaxStackSize()), false);
+                        IStackKey remaining = fuelStorageSlots.insert(fuelSlot, extracted, false);
                         if (!remaining.isEmpty())
                         {
                             storage.insert(remaining, false);
@@ -515,7 +515,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 燃料已经烧完，并且对应槽位仍然有需要冶炼的物品
             if (litTime.get(litSlot) <= 0 && !inputStorageSlots.getStackBySlot(litSlot).isEmpty())
             {
-                for (IStackType fuelStack : fuelStorageSlots.getStorage())
+                for (IStackKey fuelStack : fuelStorageSlots.getStorage())
                 {
                     if (!fuelStack.isEmpty())
                     {
@@ -666,7 +666,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         // 输出槽处理
         for (int outputSlot = 0; outputSlot < capacity; outputSlot++)
         {
-            IStackType outputStack = outputStorageSlots.getStackBySlot(outputSlot);
+            IStackKey outputStack = outputStorageSlots.getStackBySlot(outputSlot);
             if (outputStack != null && !outputStack.isEmpty())
             {
                 // 弹出模式（如果弹出模式关闭，这里会由迭代器安全的离开）
@@ -675,7 +675,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
                     for (int otherSlot = 0; otherSlot < otherStorage.getSlots(); otherSlot++)
                     {
-                        IStackType extracted = outputStorageSlots.extract(outputSlot, outputStack.getVanillaMaxStackSize(), false);
+                        IStackKey extracted = outputStorageSlots.extract(outputSlot, outputStack.getVanillaMaxStackSize(), false);
                         int remaining = otherStorage.insertItem(otherSlot, (ItemStack) extracted.copyStack(), false).getCount();
                         if (remaining > 0)
                         {
@@ -690,8 +690,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     if (getNet() != null)
                     {
                         UnifiedStorage storage = getNet().getUnifiedStorage();
-                        IStackType extracted = outputStorageSlots.extract(outputSlot, outputStack.getStackAmount(), false);
-                        IStackType remaining = storage.insert(outputSlot, extracted, false);
+                        IStackKey extracted = outputStorageSlots.extract(outputSlot, outputStack.getStackAmount(), false);
+                        IStackKey remaining = storage.insert(outputSlot, extracted, false);
                         if (!remaining.isEmpty())
                         {
                             outputStorageSlots.insert(outputSlot, remaining, false);
@@ -704,7 +704,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         // 燃料返回槽处理
         for (int returnSlot = 0; returnSlot < fuelCapacity; returnSlot++)
         {
-            IStackType returnStack = fuelReturnSlots.getStackBySlot(returnSlot);
+            IStackKey returnStack = fuelReturnSlots.getStackBySlot(returnSlot);
             if (returnStack != null && !returnStack.isEmpty())
             {
                 // 弹出模式（如果弹出模式关闭，这里会由迭代器安全的离开）
@@ -713,7 +713,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
                     for (int otherSlot = 0; otherSlot < otherStorage.getSlots(); otherSlot++)
                     {
-                        IStackType extracted = fuelReturnSlots.extract(returnSlot, returnStack.getVanillaMaxStackSize(), false);
+                        IStackKey extracted = fuelReturnSlots.extract(returnSlot, returnStack.getVanillaMaxStackSize(), false);
                         int remaining = otherStorage.insertItem(otherSlot, (ItemStack) extracted.copyStack(), false).getCount();
                         if (remaining > 0)
                         {
@@ -728,8 +728,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     if (getNet() != null)
                     {
                         UnifiedStorage storage = getNet().getUnifiedStorage();
-                        IStackType extracted = fuelReturnSlots.extract(returnSlot, returnStack.getStackAmount(), false);
-                        IStackType remaining = storage.insert(returnSlot, extracted, false);
+                        IStackKey extracted = fuelReturnSlots.extract(returnSlot, returnStack.getStackAmount(), false);
+                        IStackKey remaining = storage.insert(returnSlot, extracted, false);
                         if (!remaining.isEmpty())
                         {
                             fuelReturnSlots.insert(returnSlot, remaining, false);
@@ -743,7 +743,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         // 这会防止能量堵塞在燃料口
         for (int fuelSlot = 0; fuelSlot < fuelCapacity; fuelSlot++)
         {
-            IStackType fuelStack = fuelStorageSlots.getStackBySlot(fuelSlot);
+            IStackKey fuelStack = fuelStorageSlots.getStackBySlot(fuelSlot);
             if (fuelStack != null && !fuelStack.isEmpty()
                     && (fuelStack instanceof EnergyStackType || fuelStack instanceof FluidStackType))
             {
@@ -755,8 +755,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                         if (!fuelFilterSlots.hasStackType(fuelStack))
                         {
                             UnifiedStorage storage = getNet().getUnifiedStorage();
-                            IStackType extracted = fuelStorageSlots.extract(fuelSlot, fuelStack.getStackAmount(), false);
-                            IStackType remaining = storage.insert(fuelSlot, extracted, false);
+                            IStackKey extracted = fuelStorageSlots.extract(fuelSlot, fuelStack.getStackAmount(), false);
+                            IStackKey remaining = storage.insert(fuelSlot, extracted, false);
                             if (!remaining.isEmpty())
                             {
                                 fuelStorageSlots.insert(fuelSlot, remaining, false);
@@ -770,8 +770,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
 
     public void dropContent()
     {
-        List<IStackType<?>> dropList = new ArrayList<>();
-        for (IStackType<?> stack : inputStorageSlots.getStorage())
+        List<IStackKey<?>> dropList = new ArrayList<>();
+        for (IStackKey<?> stack : inputStorageSlots.getStorage())
         {
             if (!stack.isEmpty())
             {
@@ -789,7 +789,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                 }
             }
         }
-        for (IStackType stack : outputStorageSlots.getStorage())
+        for (IStackKey stack : outputStorageSlots.getStorage())
         {
             if (!stack.isEmpty())
             {
@@ -807,7 +807,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                 }
             }
         }
-        for (IStackType stack : fuelStorageSlots.getStorage())
+        for (IStackKey stack : fuelStorageSlots.getStorage())
         {
             if (!stack.isEmpty())
             {
@@ -825,7 +825,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                 }
             }
         }
-        for (IStackType stack : fuelReturnSlots.getStorage())
+        for (IStackKey stack : fuelReturnSlots.getStorage())
         {
             if (!stack.isEmpty())
             {

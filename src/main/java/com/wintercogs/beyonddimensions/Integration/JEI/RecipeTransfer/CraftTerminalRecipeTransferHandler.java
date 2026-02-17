@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Integration.JEI.RecipeTransfer;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenuTerminal;
 import com.wintercogs.beyonddimensions.Network.Packet.toServer.RecipeFillC2SPacket;
@@ -57,7 +57,7 @@ public class CraftTerminalRecipeTransferHandler implements IRecipeTransferHandle
 
         // 收集所有可用物品来源（合成槽+存储槽）
         List<Slot> craftingSlots = getInputSources(container);
-        List<IStackType<?>> storageSlots = container.storage.getStorage();
+        List<IStackKey<?>> storageSlots = container.storage.getStorage();
         List<ItemStack> availableItems = new ArrayList<>();
 
         // 收集合成槽物品
@@ -70,7 +70,7 @@ public class CraftTerminalRecipeTransferHandler implements IRecipeTransferHandle
         }
 
         // 收集存储槽物品
-        for (IStackType<?> stackType : storageSlots)
+        for (IStackKey<?> stackType : storageSlots)
         {
             if (stackType instanceof ItemStackType itemStackType)
             {

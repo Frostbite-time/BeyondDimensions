@@ -4,7 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
@@ -109,7 +109,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
                     for (int slot = 0; slot < stackHandlerWrapper.getSlots(); slot++)
                     {
                         Object stack = stackHandlerWrapper.getStackInSlot(slot);
-                        IStackType typedStack = StackCreater.CreateEmpty(typeId);
+                        IStackKey typedStack = StackCreater.CreateEmpty(typeId);
                         typedStack.setStack(stack);
                         if (!typedStack.isEmpty() && matchesFilter(typedStack))
                         {
@@ -130,13 +130,13 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
         );
     }
 
-    private boolean matchesFilter(IStackType otherStack)
+    private boolean matchesFilter(IStackKey otherStack)
     {
         switch (filterMode)
         {
             case BLACK ->
             {
-                for (IStackType stack : filterSlots.getStorage())
+                for (IStackKey stack : filterSlots.getStorage())
                 {
                     if (stack.isSame(otherStack))
                         return false;
@@ -145,7 +145,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
             }
             case WHITE ->
             {
-                for (IStackType stack : filterSlots.getStorage())
+                for (IStackKey stack : filterSlots.getStorage())
                 {
                     if (stack.isSame(otherStack))
                         return true;

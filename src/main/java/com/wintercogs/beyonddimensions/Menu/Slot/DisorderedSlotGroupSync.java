@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Network.Packet.toClient.DisorderedSlotGroupSyncPacket;
@@ -25,7 +25,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     private final UnifiedStorage storage;
 
     // 基线缓存：key 不含数量语义 -> 直接可做 map 的 key；value 为绝对数量
-    private final Map<IStackType, Long> lastMap = new HashMap<>();
+    private final Map<IStackKey, Long> lastMap = new HashMap<>();
 
     private boolean initialized = false;
 
@@ -35,7 +35,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     /**
      * 本 tick 待发的“最终绝对值”缓存：同一 key 仅保留最后状态
      */
-    private final Map<IStackType, Long> pendingAbsolute = new HashMap<>();
+    private final Map<IStackKey, Long> pendingAbsolute = new HashMap<>();
 
     /**
      * Any 事件置脏：下一 tick 做一次全量
@@ -97,7 +97,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     /**
      * 将 delta 累加到“基线 + 本 tick 已缓存的绝对值”上，得到该 key 的最终绝对值
      */
-    private void onDeltaChange(IStackType key, long size, boolean insert)
+    private void onDeltaChange(IStackKey key, long size, boolean insert)
     {
         if (!isServerSide() || key == null || size == 0) return;
 
@@ -127,19 +127,19 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     {
         if (!dirtyFullRescan && pendingAbsolute.isEmpty()) return;
 
-        List<IStackType> keys = new ArrayList<>();
+        List<IStackKey> keys = new ArrayList<>();
         List<Long> counts = new ArrayList<>();
 
         if (dirtyFullRescan)
         {
             // ===== 全量：构建 nowMap，比较 lastMap 差异，发送绝对值 =====
-            Map<IStackType, Long> nowMap = buildNowMapFromStorage();
+            Map<IStackKey, Long> nowMap = buildNowMapFromStorage();
 
             // 合并 key 集
-            Set<IStackType> all = new HashSet<>(lastMap.keySet());
+            Set<IStackKey> all = new HashSet<>(lastMap.keySet());
             all.addAll(nowMap.keySet());
 
-            for (IStackType k : all)
+            for (IStackKey k : all)
             {
                 long last = lastMap.getOrDefault(k, 0L);
                 long now = nowMap.getOrDefault(k, 0L);
@@ -160,7 +160,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         {
             // ===== 非全量：仅发送本 tick 的最终绝对值 =====
 
-            for (Map.Entry<IStackType, Long> e : pendingAbsolute.entrySet())
+            for (Map.Entry<IStackKey, Long> e : pendingAbsolute.entrySet())
             {
                 keys.add(e.getKey().copy());
                 counts.add(e.getValue());
@@ -181,10 +181,10 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         }
     }
 
-    private Map<IStackType, Long> buildNowMapFromStorage()
+    private Map<IStackKey, Long> buildNowMapFromStorage()
     {
-        Map<IStackType, Long> now = new HashMap<>();
-        for (IStackType st : this.storage.getStorage())
+        Map<IStackKey, Long> now = new HashMap<>();
+        for (IStackKey st : this.storage.getStorage())
         {
             long amt = st.getStackAmount();
             if (amt <= 0) continue;
@@ -196,11 +196,11 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     /**
      * 非全量发送后把变更直接打到基线：0→remove, >0→put
      */
-    private void applyIncrementalToBaseline(Map<IStackType, Long> applied)
+    private void applyIncrementalToBaseline(Map<IStackKey, Long> applied)
     {
-        for (Map.Entry<IStackType, Long> e : applied.entrySet())
+        for (Map.Entry<IStackKey, Long> e : applied.entrySet())
         {
-            IStackType k = e.getKey();
+            IStackKey k = e.getKey();
             long v = e.getValue();
             if (v == 0L)
             {
@@ -217,7 +217,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
      * 分包估算：IStackType + long(绝对数量)
      */
     private List<DisorderedSlotGroupSyncPacket> buildBatchedPackets(
-            List<IStackType> keys,
+            List<IStackKey> keys,
             List<Long> counts
     )
     {
@@ -228,13 +228,13 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         for (int i = 0; i < n; i++)
         {
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-            IStackType k = keys.get(i);
+            IStackKey k = keys.get(i);
             if (k != null) k.serialize(buf);
             buf.writeLong(counts.get(i));
             entrySizes.add(buf.readableBytes());
         }
 
-        List<IStackType> batchKeys = new ArrayList<>();
+        List<IStackKey> batchKeys = new ArrayList<>();
         List<Long> batchCounts = new ArrayList<>();
         int currentSize = 0;
 
@@ -266,13 +266,13 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     /* -------------------- 客户端：覆盖式应用 -------------------- */
 
     @Override
-    public void loadChange(List<IStackType> stacks, List<Long> absoluteCounts)
+    public void loadChange(List<IStackKey> stacks, List<Long> absoluteCounts)
     {
         UnifiedStorage clientStorage = storage;
         int n = Math.min(stacks.size(), absoluteCounts.size());
         for (int i = 0; i < n; i++)
         {
-            IStackType key = stacks.get(i);
+            IStackKey key = stacks.get(i);
             long absolute = absoluteCounts.get(i);
             if (key == null) continue;
             clientStorage.setStackAmount(key, absolute); // 覆盖

@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.XpTransferSpeedMode;
@@ -132,7 +132,7 @@ public class XpExchangeItem extends Item
             int toRemoveXp = BDMath.clampLongToInt(needRemoveXp);
 
             long toInsertUnits = (long) toRemoveXp * conversionRate;
-            IStackType remaining = storage.insert(
+            IStackKey remaining = storage.insert(
                     new FluidStackType(new FluidStack(canonicalXp, 1), toInsertUnits),
                     false
             );
@@ -164,7 +164,7 @@ public class XpExchangeItem extends Item
                 long wantUnits = (long) remainingXp * conversionRate;
                 if (wantUnits <= 0) break;
 
-                IStackType extracted = storage.extract(
+                IStackKey extracted = storage.extract(
                         new FluidStackType(new FluidStack(f, 1), wantUnits),
                         false
                 );

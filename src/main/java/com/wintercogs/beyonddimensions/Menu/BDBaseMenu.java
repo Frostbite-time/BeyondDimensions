@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.google.common.base.Suppliers;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
@@ -176,7 +176,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     // 自定义点击操作
-    public void customClickHandler(int slotIndex, IStackType clickedStack, int button, boolean shiftDown)
+    public void customClickHandler(int slotIndex, IStackKey clickedStack, int button, boolean shiftDown)
     {
 
         if (inventoryStartIndex < 0 || inventoryEndIndex < 0)
@@ -207,7 +207,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     // 处理非AbstractStackTypedSlot槽位的快速转移
-    protected ItemStack quickMoveHandle(Player player, int slotIndex, IStackType clickStack, int targetStartIndex, int targetEndIndex)
+    protected ItemStack quickMoveHandle(Player player, int slotIndex, IStackKey clickStack, int targetStartIndex, int targetEndIndex)
     {
         Slot slot = this.slots.get(slotIndex);
         if (slot != null && !clickStack.isEmpty()) // 根据客户端信息，无视空槽或者null

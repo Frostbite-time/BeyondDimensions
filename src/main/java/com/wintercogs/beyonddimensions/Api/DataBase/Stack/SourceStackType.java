@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 public class SourceStackType extends LongStackType<SourceType>
 {
@@ -44,7 +45,7 @@ public class SourceStackType extends LongStackType<SourceType>
     }
 
     @Override
-    public IStackType<SourceType> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
+    public IStackKey<SourceType> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
         if (key instanceof SourceType)
         {
@@ -54,13 +55,13 @@ public class SourceStackType extends LongStackType<SourceType>
     }
 
     @Override
-    public IStackType<SourceType> getEmpty()
+    public IStackKey<SourceType> getEmpty()
     {
         return new SourceStackType();
     }
 
     @Override
-    public SourceType getSource()
+    public @NotNull SourceType getSource()
     {
         return this.stack;
     }
@@ -72,7 +73,7 @@ public class SourceStackType extends LongStackType<SourceType>
     }
 
     @Override
-    public IStackType<SourceType> copy()
+    public IStackKey<SourceType> copy()
     {
         // copy时将哈希码状态一起带上，最大程度降低hash计算负担
         SourceStackType copy = new SourceStackType(stack.getStackCount());
@@ -82,7 +83,7 @@ public class SourceStackType extends LongStackType<SourceType>
     }
 
     @Override
-    public IStackType<SourceType> copyWithCount(long count)
+    public IStackKey<SourceType> copyWithCount(long count)
     {
         SourceStackType copy = new SourceStackType(count);
         copy.NeedRecalHash = this.NeedRecalHash;
@@ -91,7 +92,7 @@ public class SourceStackType extends LongStackType<SourceType>
     }
 
     @Override
-    public IStackType<SourceType> split(long amount)
+    public IStackKey<SourceType> split(long amount)
     {
         if (amount <= 0) return new SourceStackType();
 
@@ -122,7 +123,7 @@ public class SourceStackType extends LongStackType<SourceType>
     }
 
     @Override
-    public IStackType<SourceType> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
+    public IStackKey<SourceType> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
         if (!typeId.equals(getTypeId()))
         {
@@ -134,7 +135,7 @@ public class SourceStackType extends LongStackType<SourceType>
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public @NotNull CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
@@ -143,7 +144,7 @@ public class SourceStackType extends LongStackType<SourceType>
     }
 
     @Override
-    public IStackType<SourceType> deserializeNBT(CompoundTag nbt)
+    public @NotNull IStackKey<SourceType> deserializeNBT(CompoundTag nbt)
     {
         return new SourceStackType(nbt.getLong("Amount"));
     }

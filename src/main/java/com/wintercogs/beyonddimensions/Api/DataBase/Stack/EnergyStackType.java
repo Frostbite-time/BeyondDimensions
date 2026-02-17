@@ -12,6 +12,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -48,7 +49,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     }
 
     @Override
-    public IStackType<EnergyType> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
+    public IStackKey<EnergyType> fromObject(Object key, long amount, CompoundTag dataComponentPatch)
     {
         if (key instanceof EnergyType)
         {
@@ -58,13 +59,13 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     }
 
     @Override
-    public IStackType<EnergyType> getEmpty()
+    public IStackKey<EnergyType> getEmpty()
     {
         return new EnergyStackType();
     }
 
     @Override
-    public EnergyType getSource()
+    public @NotNull EnergyType getSource()
     {
         return this.stack;
     }
@@ -76,7 +77,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     }
 
     @Override
-    public IStackType<EnergyType> copy()
+    public IStackKey<EnergyType> copy()
     {
         // copy时将哈希码状态一起带上，最大程度降低hash计算负担
         EnergyStackType copy = new EnergyStackType(stack.getStackCount());
@@ -86,7 +87,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     }
 
     @Override
-    public IStackType<EnergyType> copyWithCount(long count)
+    public IStackKey<EnergyType> copyWithCount(long count)
     {
         EnergyStackType copy = new EnergyStackType(count);
         if (count == stack.getStackCount())
@@ -98,7 +99,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     }
 
     @Override
-    public IStackType<EnergyType> split(long amount)
+    public IStackKey<EnergyType> split(long amount)
     {
         if (amount <= 0) return new EnergyStackType();
 
@@ -123,7 +124,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     }
 
     @Override
-    public IStackType<EnergyType> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
+    public IStackKey<EnergyType> deserialize(FriendlyByteBuf buf, ResourceLocation typeId)
     {
         if (!typeId.equals(getTypeId()))
         {
@@ -135,7 +136,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public @NotNull CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
         tag.putString("Type", ID.toString());
@@ -144,7 +145,7 @@ public final class EnergyStackType extends LongStackType<EnergyType>
     }
 
     @Override
-    public IStackType<EnergyType> deserializeNBT(CompoundTag nbt)
+    public @NotNull IStackKey<EnergyType> deserializeNBT(CompoundTag nbt)
     {
         return new EnergyStackType(nbt.getLong("Amount"));
     }

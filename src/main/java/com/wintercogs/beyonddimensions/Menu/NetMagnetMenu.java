@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Item.Custom.BaseMachineItem;
 import com.wintercogs.beyonddimensions.Machine.*;
@@ -64,7 +64,7 @@ public class NetMagnetMenu extends BDBaseMenu
         // 为服务端注入真实数据，客户端由槽位同步
         if (!playerInventory.player.level().isClientSide())
         {
-            List<IStackType<?>> stacks = BaseMachineItem.getFilterSlotsOrDefault(menuStack, new ArrayList<>());
+            List<IStackKey<?>> stacks = BaseMachineItem.getFilterSlotsOrDefault(menuStack, new ArrayList<>());
             for (int i = 0; i < stacks.size(); i++)
             {
                 storage.insert(i, stacks.get(i).copy(), false);

@@ -23,7 +23,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.SlurryUnif
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.*;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
-import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.BlockRender.ModBlockRenders;
@@ -219,9 +219,9 @@ public class BeyondDimensions
     {
 
         // 注册堆叠类型，使得网络能够存储相关堆叠
-        StackTypeRegistry.registerType(new ItemStackType());
-        StackTypeRegistry.registerType(new FluidStackType());
-        StackTypeRegistry.registerType(new EnergyStackType());
+        StackKeyRegistry.registerType(new ItemStackType());
+        StackKeyRegistry.registerType(new FluidStackType());
+        StackKeyRegistry.registerType(new EnergyStackType());
 
         // 注册方块能力类型，用于动态为方块注册能力
         CapabilityHelper.BlockCapabilityMap.put(ItemStackType.ID, ForgeCapabilities.ITEM_HANDLER);
@@ -251,10 +251,10 @@ public class BeyondDimensions
         if (MekLoaded)
         {
             // 注册化学品堆叠
-            StackTypeRegistry.registerType(new GasStackType());
-            StackTypeRegistry.registerType(new InfusionStackType());
-            StackTypeRegistry.registerType(new PigmentStackType());
-            StackTypeRegistry.registerType(new SlurryStackType());
+            StackKeyRegistry.registerType(new GasStackType());
+            StackKeyRegistry.registerType(new InfusionStackType());
+            StackKeyRegistry.registerType(new PigmentStackType());
+            StackKeyRegistry.registerType(new SlurryStackType());
             // 注册化学品方块能力
             CapabilityHelper.BlockCapabilityMap.put(GasStackType.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
             CapabilityHelper.BlockCapabilityMap.put(InfusionStackType.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
@@ -290,7 +290,7 @@ public class BeyondDimensions
         if (ARS_Loaded)
         {
             // 注册魔源
-            StackTypeRegistry.registerType(new SourceStackType());
+            StackKeyRegistry.registerType(new SourceStackType());
             // 自己注册能力作为代替，随后为新生魔艺的方块做包装注册
             CapabilityHelper.BlockCapabilityMap.put(SourceStackType.ID, BD_ArsCaps.SOURCE_CAP);
             CapabilityHelper.ItemCapabilityMap.put(SourceStackType.ID, BD_ArsCaps.SOURCE_CAP);
@@ -302,7 +302,7 @@ public class BeyondDimensions
         if (Botania_Loaded)
         {
             // 注册Mana（魔力）
-            StackTypeRegistry.registerType(new ManaStackType());
+            StackKeyRegistry.registerType(new ManaStackType());
             CapabilityHelper.BlockCapabilityMap.put(ManaStackType.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_RECEIVER);
             CapabilityHelper.ItemCapabilityMap.put(ManaStackType.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_ITEM);
             CapabilityHelper.registerUSHandler(new ManaStackType(), ManaUnifiedStorageHandler::new);

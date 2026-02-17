@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Util.BytebufHelper;
@@ -25,7 +25,7 @@ public record PickBlockFromNetPacket(ItemStack targetStack)
         UnifiedStorage storage = net.getUnifiedStorage();
 
         ItemStackType target = null;
-        for (IStackType stack : storage.getStorage())
+        for (IStackKey stack : storage.getStorage())
         {
             if (stack instanceof ItemStackType itemStackType)
             {

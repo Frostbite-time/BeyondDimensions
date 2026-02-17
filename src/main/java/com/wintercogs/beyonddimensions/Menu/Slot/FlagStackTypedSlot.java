@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
@@ -25,7 +25,7 @@ import java.util.function.Function;
 public class FlagStackTypedSlot extends AbstractStackTypedSlot
 {
 
-    private IStackType lastStack = new ItemStackType();
+    private IStackKey lastStack = new ItemStackType();
 
     public FlagStackTypedSlot(BDBaseMenu menu, IStackTypedHandler storage, int slotIndex, int xPosition, int yPosition)
     {
@@ -43,14 +43,14 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     // 内部会copy这个stack，因此无需再次操作
     // Flag实际上会通过insert插入，这样能考虑内部的isStackValid，从而限制标记类型
     @Override
-    public void setStackDirectly(IStackType stack)
+    public void setStackDirectly(IStackKey stack)
     {
         storage.setStackDirectly(theSlot, new ItemStackType());
         storage.insert(theSlot, stack, false);
     }
 
     @Override
-    public IStackType safeInsert(IStackType stack)
+    public IStackKey safeInsert(IStackKey stack)
     {
         if (stack != null)
         {
@@ -60,14 +60,14 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public IStackType safeExtract(IStackType stack)
+    public IStackKey safeExtract(IStackKey stack)
     {
         setStackDirectly(new ItemStackType());
         return stack;
     }
 
     @Override
-    public void click(IStackType clickStack, int button, Player player)
+    public void click(IStackKey clickStack, int button, Player player)
     {
         // 获取光标物品
         ItemStack carriedItem = menu.getCarried().copy();
@@ -106,7 +106,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                                 {
                                     for (int index = 0; index < stackHandlerWrapper.getSlots(); index++)
                                     {
-                                        IStackType stack = StackCreater.Create(typeId, stackHandlerWrapper.getStackInSlot(0), 1);
+                                        IStackKey stack = StackCreater.Create(typeId, stackHandlerWrapper.getStackInSlot(0), 1);
                                         if (stack != null && !stack.isEmpty())
                                         {
                                             setStackDirectly(stack);
@@ -143,7 +143,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     // 标记性槽位不能进行快速转移
     // 任何快速转移的意图直接移交给click处理
     @Override
-    public void quickMove(IStackType clickStack, int button, Player player)
+    public void quickMove(IStackKey clickStack, int button, Player player)
     {
         // flag的quickMove和click走统一通道，因此无需额外检查，此处保留注释，防止某一天忘记
         // if(!(quickMoveSlotStartIndex >= 0 && quickMoveSlotEndIndex >= 0 && quickMoveSlotStartIndex < quickMoveSlotEndIndex))
@@ -154,7 +154,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public void updateChange()
     {
-        IStackType currentStack = storage.getStackBySlot(this.getSlotIndex());
+        IStackKey currentStack = storage.getStackBySlot(this.getSlotIndex());
         if (currentStack == null)
         {
             lastStack = new ItemStackType();
@@ -173,7 +173,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public void loadChange(int where, IStackType newStack, long newAmount)
+    public void loadChange(int where, IStackKey newStack, long newAmount)
     {
         // 同步读取仍直接操作storage
         storage.setStackDirectly(where, newStack);

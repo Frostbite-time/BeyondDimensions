@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.infuse.IInfusionHandler;
@@ -36,7 +36,7 @@ public class InfusionStackTypedHandler implements IInfusionHandler
             return InfusionStack.EMPTY;
         }
 
-        IStackType<?> stack = handlerStorage.getStackBySlot(tank);
+        IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
         if (stack instanceof InfusionStackType infusionStack && !infusionStack.isEmpty())
         {
             return infusionStack.copyStack();
@@ -105,7 +105,7 @@ public class InfusionStackTypedHandler implements IInfusionHandler
             return stack.copy();
         }
 
-        IStackType<?> remainingStack = handlerStorage.insert(
+        IStackKey<?> remainingStack = handlerStorage.insert(
                 tank,
                 new InfusionStackType(stack.copy()),
                 action.simulate()
@@ -130,13 +130,13 @@ public class InfusionStackTypedHandler implements IInfusionHandler
             return InfusionStack.EMPTY;
         }
 
-        IStackType<?> current = handlerStorage.getStackBySlot(tank);
+        IStackKey<?> current = handlerStorage.getStackBySlot(tank);
         if (!(current instanceof InfusionStackType) || current.isEmpty())
         {
             return InfusionStack.EMPTY;
         }
 
-        IStackType<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
+        IStackKey<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
         if (extracted instanceof InfusionStackType infusionExtract && !infusionExtract.isEmpty())
         {
             return infusionExtract.copyStack();

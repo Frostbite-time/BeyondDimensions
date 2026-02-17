@@ -5,7 +5,7 @@ import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.AEKeyType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -20,8 +20,8 @@ import java.util.function.Function;
 public class AEHelper
 {
     // 类型转换函数 在任何时间点注册都可
-    public static final Map<ResourceLocation, Function<IStackType, Optional<AEKey>>> ISTACK_TO_AEKEY_MAP = new HashMap<>();
-    public static final Map<AEKeyType, BiFunction<AEKey, Long, Optional<IStackType<?>>>> AEKEY_TO_STACK_TYPE_MAP = new HashMap<>();
+    public static final Map<ResourceLocation, Function<IStackKey, Optional<AEKey>>> ISTACK_TO_AEKEY_MAP = new HashMap<>();
+    public static final Map<AEKeyType, BiFunction<AEKey, Long, Optional<IStackKey<?>>>> AEKEY_TO_STACK_TYPE_MAP = new HashMap<>();
 
     static
     {
@@ -33,7 +33,7 @@ public class AEHelper
     }
 
 
-    public static Optional<IStackType<?>> fromAEKeyToIStack(AEKey key, long amount)
+    public static Optional<IStackKey<?>> fromAEKeyToIStack(AEKey key, long amount)
     {
         if (AEKEY_TO_STACK_TYPE_MAP.containsKey(key.getType()))
         {
@@ -43,7 +43,7 @@ public class AEHelper
     }
 
 
-    public static Optional<AEKey> fromIStackToAEKey(IStackType stack)
+    public static Optional<AEKey> fromIStackToAEKey(IStackKey stack)
     {
         if (ISTACK_TO_AEKEY_MAP.containsKey(stack.getTypeId()))
         {

@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.slurry.ISlurryHandler;
@@ -36,7 +36,7 @@ public class SlurryStackTypedHandler implements ISlurryHandler
             return SlurryStack.EMPTY;
         }
 
-        IStackType<?> stack = handlerStorage.getStackBySlot(tank);
+        IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
         if (stack instanceof SlurryStackType slurryStack && !slurryStack.isEmpty())
         {
             return slurryStack.copyStack();
@@ -105,7 +105,7 @@ public class SlurryStackTypedHandler implements ISlurryHandler
             return stack.copy();
         }
 
-        IStackType<?> remainingStack = handlerStorage.insert(
+        IStackKey<?> remainingStack = handlerStorage.insert(
                 tank,
                 new SlurryStackType(stack.copy()),
                 action.simulate()
@@ -130,13 +130,13 @@ public class SlurryStackTypedHandler implements ISlurryHandler
             return SlurryStack.EMPTY;
         }
 
-        IStackType<?> current = handlerStorage.getStackBySlot(tank);
+        IStackKey<?> current = handlerStorage.getStackBySlot(tank);
         if (!(current instanceof SlurryStackType) || current.isEmpty())
         {
             return SlurryStack.EMPTY;
         }
 
-        IStackType<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
+        IStackKey<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
         if (extracted instanceof SlurryStackType slurryExtract && !slurryExtract.isEmpty())
         {
             return slurryExtract.copyStack();

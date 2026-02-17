@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
@@ -277,13 +277,13 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         }
     }
 
-    private boolean matchesFilter(IStackType otherStack)
+    private boolean matchesFilter(IStackKey otherStack)
     {
         switch (filterMode)
         {
             case BLACK ->
             {
-                for (IStackType stack : filterSlots.getStorage())
+                for (IStackKey stack : filterSlots.getStorage())
                 {
                     if (stack.isSame(otherStack))
                         return false;
@@ -292,7 +292,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
             }
             case WHITE ->
             {
-                for (IStackType stack : filterSlots.getStorage())
+                for (IStackKey stack : filterSlots.getStorage())
                 {
                     if (stack.isSame(otherStack))
                         return true;

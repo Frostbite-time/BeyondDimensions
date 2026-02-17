@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Menu;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
@@ -273,9 +273,9 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     }
 
     // 从存储提取物品
-    private int extractFromStorage(IStackTypedHandler storage, IStackType type, int amount)
+    private int extractFromStorage(IStackTypedHandler storage, IStackKey type, int amount)
     {
-        IStackType extraction = storage.extract(type.copyWithCount(amount), false);
+        IStackKey extraction = storage.extract(type.copyWithCount(amount), false);
         if (extraction.getStackAmount() > 0)
         {
             return amount - (int) extraction.getStackAmount();

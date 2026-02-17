@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class LongStackType<T extends LongType<T>> implements IStackType<T>
+public abstract class LongStackType<T extends LongType<T>> implements IStackKey<T>
 {
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
@@ -147,7 +147,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     }
 
     @Override
-    public boolean isSame(IStackType<?> other)
+    public boolean isSame(IStackKey<?> other)
     {
         if (!other.getTypeId().equals(this.getTypeId()))
             return false;
@@ -155,7 +155,7 @@ public abstract class LongStackType<T extends LongType<T>> implements IStackType
     }
 
     @Override
-    public boolean isSameTypeSameComponents(IStackType<?> other)
+    public boolean isSameTypeSameComponents(IStackKey<?> other)
     {
         if (!other.getTypeId().equals(this.getTypeId()))
             return false;

@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import mekanism.api.Action;
 import mekanism.api.chemical.pigment.IPigmentHandler;
@@ -36,7 +36,7 @@ public class PigmentStackTypedHandler implements IPigmentHandler
             return PigmentStack.EMPTY;
         }
 
-        IStackType<?> stack = handlerStorage.getStackBySlot(tank);
+        IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
         if (stack instanceof PigmentStackType pigmentStack && !pigmentStack.isEmpty())
         {
             return pigmentStack.copyStack();
@@ -105,7 +105,7 @@ public class PigmentStackTypedHandler implements IPigmentHandler
             return stack.copy();
         }
 
-        IStackType<?> remainingStack = handlerStorage.insert(
+        IStackKey<?> remainingStack = handlerStorage.insert(
                 tank,
                 new PigmentStackType(stack.copy()),
                 action.simulate()
@@ -130,13 +130,13 @@ public class PigmentStackTypedHandler implements IPigmentHandler
             return PigmentStack.EMPTY;
         }
 
-        IStackType<?> current = handlerStorage.getStackBySlot(tank);
+        IStackKey<?> current = handlerStorage.getStackBySlot(tank);
         if (!(current instanceof PigmentStackType) || current.isEmpty())
         {
             return PigmentStack.EMPTY;
         }
 
-        IStackType<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
+        IStackKey<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
         if (extracted instanceof PigmentStackType pigmentExtract && !pigmentExtract.isEmpty())
         {
             return pigmentExtract.copyStack();

@@ -7,7 +7,7 @@ import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStora
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorageContext;
 import com.refinedmods.refinedstorage.api.util.Action;
 import com.refinedmods.refinedstorage.api.util.IComparer;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Integration.RS.RSHelper;
@@ -81,7 +81,7 @@ public class BD_RS120ExternalStorageItemsAdapter implements IExternalStorage<Ite
         var reqOpt = RSHelper.fromItemStackToIStack(prototype, size);
         if (reqOpt.isEmpty()) return ItemStack.EMPTY;
 
-        IStackType<?> req = reqOpt.get();
+        IStackKey<?> req = reqOpt.get();
 
         long can = unified.extract(req, true).getStackAmount();
         if (can <= 0) return ItemStack.EMPTY;

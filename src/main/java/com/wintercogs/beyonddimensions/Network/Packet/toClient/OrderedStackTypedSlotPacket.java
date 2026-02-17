@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toClient;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,7 +13,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackType stack, long newAmount)
+public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackKey stack, long newAmount)
 {
 
     @OnlyIn(Dist.CLIENT)
@@ -58,7 +58,7 @@ public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackType 
     {
         int slotId = buf.readVarInt();
         int slotIndex = buf.readVarInt();
-        IStackType stack = IStackType.deserializeCommon(buf);
+        IStackKey stack = IStackKey.deserializeCommon(buf);
         long newAmount = buf.readVarLong();
 
         return new OrderedStackTypedSlotPacket(slotId, slotIndex, stack, newAmount);

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,7 +14,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record SetSlotDirectlyPacket(int slotId, IStackType stack)
+public record SetSlotDirectlyPacket(int slotId, IStackKey stack)
 {
     private void handleServer(NetworkEvent.Context context)
     {
@@ -74,7 +74,7 @@ public record SetSlotDirectlyPacket(int slotId, IStackType stack)
     public static SetSlotDirectlyPacket decode(FriendlyByteBuf buf)
     {
         int slotId = buf.readVarInt();
-        IStackType stack = IStackType.deserializeCommon(buf);
+        IStackKey stack = IStackKey.deserializeCommon(buf);
 
         return new SetSlotDirectlyPacket(slotId, stack);
     }

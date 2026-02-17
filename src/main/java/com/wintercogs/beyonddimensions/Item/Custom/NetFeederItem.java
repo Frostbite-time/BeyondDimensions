@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Machine.FeederMode;
@@ -80,7 +80,7 @@ public class NetFeederItem extends BaseMachineItem
         if (holder instanceof Player player) // 只喂食玩家（实际上是其他实体没有FoodData 2333）
         {
             FeederMode feederMode = getFeederModeOrDefault(stack, FeederMode.NORMAL);
-            List<IStackType<?>> filterSlots = getFilterSlotsOrDefault(stack, new ArrayList<>());
+            List<IStackKey<?>> filterSlots = getFilterSlotsOrDefault(stack, new ArrayList<>());
 
             FoodData playerFoodState = player.getFoodData();
 
@@ -90,10 +90,10 @@ public class NetFeederItem extends BaseMachineItem
                 UnifiedStorage storage = NetedItem.getNet(stack, level.getServer()).getUnifiedStorage();
 
                 // 尝试取出一个Food
-                IStackType<?> foodCache = null;
-                for (IStackType<?> filter : filterSlots)
+                IStackKey<?> foodCache = null;
+                for (IStackKey<?> filter : filterSlots)
                 {
-                    for (IStackType<?> storedStack : storage.getStorage())
+                    for (IStackKey<?> storedStack : storage.getStorage())
                     {
                         // isSame会在最后变为引用比较，所以无需担心，这个比较即使对于大存储来说也非常迅速
                         if (storedStack instanceof ItemStackType itemStackType
@@ -155,14 +155,14 @@ public class NetFeederItem extends BaseMachineItem
         };
     }
 
-    private boolean matchesFilter(List<IStackType<?>> filterSlots, IStackType<?> otherStack)
+    private boolean matchesFilter(List<IStackKey<?>> filterSlots, IStackKey<?> otherStack)
     {
         switch (FilterMode.WHITE) //喂食器始终白名单
         {
 
             case BLACK ->
             {
-                for (IStackType<?> stack : filterSlots)
+                for (IStackKey<?> stack : filterSlots)
                 {
                     if (stack.isSame(otherStack))
                         return false;
@@ -171,7 +171,7 @@ public class NetFeederItem extends BaseMachineItem
             }
             case WHITE ->
             {
-                for (IStackType<?> stack : filterSlots)
+                for (IStackKey<?> stack : filterSlots)
                 {
                     if (stack.isSame(otherStack))
                         return true;

@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
@@ -33,7 +33,7 @@ import java.util.function.Function;
 
 public class OrderedStackTypedSlot extends AbstractStackTypedSlot
 {
-    private IStackType lastStack = new ItemStackType();
+    private IStackKey lastStack = new ItemStackType();
 
     public OrderedStackTypedSlot(BDBaseMenu menu, IStackTypedHandler stackTypedHandler, int slotIndex, int xPosition, int yPosition)
     {
@@ -52,7 +52,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public void click(IStackType clickStack, int button, Player player)
+    public void click(IStackKey clickStack, int button, Player player)
     {
         ItemStack carriedItem = menu.getCarried().copy();// getCarried方法获取直接引用，所以需要copy防止误操作
 
@@ -77,7 +77,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                         // 插入当前经验流体
-                        IStackType remaining = storage.insert(getSlotIndex(), new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), actualInsertFluid), false);
+                        IStackKey remaining = storage.insert(getSlotIndex(), new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), actualInsertFluid), false);
                         if (!remaining.isEmpty())
                         {
                             int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount() / 20); // 由于前面从int*20，这里除回去
@@ -128,7 +128,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                 {
                                     for (int index = 0; index < stackHandlerWrapper.getSlots(); index++)
                                     {
-                                        IStackType stack = StackCreater.Create(typeId, stackHandlerWrapper.getStackInSlot(index));
+                                        IStackKey stack = StackCreater.Create(typeId, stackHandlerWrapper.getStackInSlot(index));
                                         if (stack != null && !stack.isEmpty())
                                         {
                                             int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(), stack.getVanillaMaxStackSize()));
@@ -221,7 +221,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     // 先检查是否为经验棒交互
                     if (carriedItem.getItem() instanceof XpExchangeItem && button != GLFW.GLFW_MOUSE_BUTTON_LEFT)
                     {
-                        IStackType actualStack = getStack();
+                        IStackKey actualStack = getStack();
 
                         int conversionRate = XpExchangeItem.getConversionRate();
                         double currentLevel = XpUtil.levelAsDouble(player);
@@ -236,7 +236,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                 long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                                 // 插入当前经验流体
-                                IStackType remaining = storage.insert(getSlotIndex(), new FluidStackType(fluidStackType.copyStack(), actualInsertFluid), false);
+                                IStackKey remaining = storage.insert(getSlotIndex(), new FluidStackType(fluidStackType.copyStack(), actualInsertFluid), false);
                                 if (!remaining.isEmpty())
                                 {
                                     int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount() / 20); // 由于前面从int*20，这里除回去
@@ -252,7 +252,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                 long actualRemoveFluid = actualInsertPlayerXp * conversionRate;
 
                                 // 首先尝试提取指定数量的经验流体
-                                IStackType extracted = storage.extract(getSlotIndex(), actualRemoveFluid, false);
+                                IStackKey extracted = storage.extract(getSlotIndex(), actualRemoveFluid, false);
                                 actualInsertPlayerXp = BDMath.clampLongToInt(extracted.getStackAmount() / 20);
                                 if (actualInsertPlayerXp > 0)
                                 {
@@ -264,7 +264,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     // 再检查是否为物品交换
                     else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
                     {
-                        IStackType actualStack = getStack();
+                        IStackKey actualStack = getStack();
                         if (actualStack instanceof ItemStackType)
                         {
                             if (carriedItem.getCount() <= getSlotCap() && actualStack.getStackAmount() <= actualStack.getVanillaMaxStackSize())
@@ -272,7 +272,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                 // 鼠标携带的数量，小于等于槽位容量
                                 // 槽位当前物品数量，小于等于其原版最大数量
                                 ItemStackType extract = (ItemStackType) storage.extract(getSlotIndex(), actualStack.getStackAmount(), false);
-                                IStackType remaining = storage.insert(getSlotIndex(), new ItemStackType(carriedItem), true);
+                                IStackKey remaining = storage.insert(getSlotIndex(), new ItemStackType(carriedItem), true);
                                 if (remaining.isEmpty())
                                 {
                                     // 全部插入时则完成交换
@@ -351,7 +351,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                         if (stackHandlerWrapper.getSlots() > 0)
                                         {
                                             // 获取真实最大值 防止数据包伪造
-                                            IStackType trueStack = storage.getStackBySlot(getSlotIndex());
+                                            IStackKey trueStack = storage.getStackBySlot(getSlotIndex());
                                             long tureCount = 0;
                                             if (trueStack.isSameTypeSameComponents(clickStack))
                                             {
@@ -384,7 +384,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public void quickMove(IStackType clickStack, int button, Player player)
+    public void quickMove(IStackKey clickStack, int button, Player player)
     {
         // 虽然当前的默认值不会导致出现问题，但还是添加执行前检查，防止某一天遗漏
         if (!(quickMoveSlotStartIndex >= 0 && quickMoveSlotEndIndex >= 0 && quickMoveSlotStartIndex < quickMoveSlotEndIndex))
@@ -392,7 +392,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
         if (!clickStack.isEmpty())
         {
             // 防止数据包伪造，然后赋予trueStack需要提取的数量
-            IStackType trueStack = storage.getStackBySlot(theSlot).copyWithCount(clickStack.getStackAmount());
+            IStackKey trueStack = storage.getStackBySlot(theSlot).copyWithCount(clickStack.getStackAmount());
 
             // 遍历目标槽位
             for (int targetSlotIndex = quickMoveSlotStartIndex; targetSlotIndex < quickMoveSlotEndIndex && !trueStack.isEmpty(); targetSlotIndex++)
@@ -403,8 +403,8 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     // aSlot处理任何情况
 
                     //首先尝试从存储提取指定堆叠
-                    IStackType extract = safeExtract(trueStack);
-                    IStackType remaining = aSlot.safeInsert(extract); // 然后插入到其他堆叠并获取余量
+                    IStackKey extract = safeExtract(trueStack);
+                    IStackKey remaining = aSlot.safeInsert(extract); // 然后插入到其他堆叠并获取余量
                     if (!remaining.isEmpty())
                         safeInsert(remaining); // 最后将余量返回
                     trueStack = remaining.copy();
@@ -424,14 +424,14 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     // 移动流体并装桶
                     else if (trueStack instanceof FluidStackType trueFluidTypedKey && trueFluidTypedKey.getSource().getBucket() != Items.AIR)
                     {
-                        IStackType<?> extract = safeExtract(trueFluidTypedKey.copyWithCount(1000));
+                        IStackKey<?> extract = safeExtract(trueFluidTypedKey.copyWithCount(1000));
                         if (extract.getStackAmount() != 1000)
                         {
                             safeInsert(extract);
                             break;
                         }
 
-                        IStackType<?> bucket = storage.extract(new ItemStackType(new ItemStack(Items.BUCKET)), false);
+                        IStackKey<?> bucket = storage.extract(new ItemStackType(new ItemStack(Items.BUCKET)), false);
                         if (bucket.isEmpty())
                         {
                             safeInsert(extract);
@@ -457,7 +457,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public IStackType safeInsert(IStackType stack)
+    public IStackKey safeInsert(IStackKey stack)
     {
         if (stack != null)
         {
@@ -468,7 +468,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public IStackType safeExtract(IStackType stack)
+    public IStackKey safeExtract(IStackKey stack)
     {
         if (stack != null && getStack() != null && stack.getTypeId().equals(getStack().getTypeId()) && stack.isSameTypeSameComponents(getStack()))
         {
@@ -480,7 +480,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public void updateChange()
     {
-        IStackType currentStack = storage.getStackBySlot(this.getSlotIndex());
+        IStackKey currentStack = storage.getStackBySlot(this.getSlotIndex());
         if (currentStack == null)
         {
             lastStack = new ItemStackType();
@@ -501,7 +501,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public void loadChange(int where, IStackType newStack, long newAmount)
+    public void loadChange(int where, IStackKey newStack, long newAmount)
     {
         storage.setStackDirectly(where, newStack);
     }

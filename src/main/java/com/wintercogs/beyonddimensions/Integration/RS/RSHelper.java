@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Integration.RS;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public class RSHelper
 {
-    public static Optional<ItemStack> fromIStackToItemStack(IStackType<?> stackType)
+    public static Optional<ItemStack> fromIStackToItemStack(IStackKey<?> stackType)
     {
         if (stackType instanceof ItemStackType itemStackType)
             return Optional.of(itemStackType.getStack());
@@ -22,7 +22,7 @@ public class RSHelper
         return Optional.of(new ItemStackType(stack, size));
     }
 
-    public static Optional<FluidStack> fromIStackToFluidStack(IStackType<?> stackType)
+    public static Optional<FluidStack> fromIStackToFluidStack(IStackKey<?> stackType)
     {
         if (stackType instanceof FluidStackType fluidStackType)
             return Optional.of(fluidStackType.getStack());

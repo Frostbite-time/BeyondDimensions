@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Item.Custom.BaseMachineItem;
@@ -36,12 +36,12 @@ public class NetFeederMenu extends BDBaseMenu
         {
             super.onChange();
             if (!player.level().isClientSide() && initialized)
-                BaseMachineItem.setFilterSlots(menuStack, new ArrayList<IStackType<?>>(storage.getStorage()));
+                BaseMachineItem.setFilterSlots(menuStack, new ArrayList<IStackKey<?>>(storage.getStorage()));
 
         }
 
         @Override
-        public boolean isStackValid(int slot, IStackType stack)
+        public boolean isStackValid(int slot, IStackKey stack)
         {
             return super.isStackValid(slot, stack)
                     && stack instanceof ItemStackType itemStackType
@@ -70,7 +70,7 @@ public class NetFeederMenu extends BDBaseMenu
         // 为服务端注入真实数据，客户端由槽位同步
         if (!playerInventory.player.level().isClientSide())
         {
-            List<IStackType<?>> stacks = BaseMachineItem.getFilterSlotsOrDefault(menuStack, new ArrayList<>());
+            List<IStackKey<?>> stacks = BaseMachineItem.getFilterSlotsOrDefault(menuStack, new ArrayList<>());
             for (int i = 0; i < stacks.size(); i++)
             {
                 storage.insert(i, stacks.get(i).copy(), false);

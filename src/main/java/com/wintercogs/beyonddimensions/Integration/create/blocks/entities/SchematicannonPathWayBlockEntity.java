@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Integration.create.blocks.entities;
 import com.simibubi.create.content.schematics.cannon.MaterialChecklist;
 import com.simibubi.create.content.schematics.cannon.SchematicannonBlockEntity;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
@@ -294,7 +294,7 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
         {
             if (slot < 0 || slot >= stacksSnapshot.size()) return ItemStack.EMPTY;
             ItemStack snapStack = stacksSnapshot.get(slot);
-            IStackType<?> ka = net.getUnifiedStorage().getStackByStack(new ItemStackType(snapStack));
+            IStackKey<?> ka = net.getUnifiedStorage().getStackByStack(new ItemStackType(snapStack));
             if (ka.isEmpty()) return ItemStack.EMPTY;
             if (!(ka instanceof ItemStackType itemKey)) return ItemStack.EMPTY;
 
@@ -304,7 +304,7 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
         @Override
         public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack itemStack, boolean simulate)
         {
-            IStackType<?> remaining = net.getUnifiedStorage().insert(new ItemStackType(itemStack, itemStack.getCount()), simulate);
+            IStackKey<?> remaining = net.getUnifiedStorage().insert(new ItemStackType(itemStack, itemStack.getCount()), simulate);
             if (remaining.isEmpty()) return ItemStack.EMPTY;
             if (!(remaining instanceof ItemStackType itemKey)) return ItemStack.EMPTY;
 
@@ -316,7 +316,7 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
         {
             if (slot < 0 || slot >= stacksSnapshot.size() || count <= 0) return ItemStack.EMPTY;
 
-            IStackType<?> extracted = net.getUnifiedStorage().extract(new ItemStackType(stacksSnapshot.get(slot), count), simulate);
+            IStackKey<?> extracted = net.getUnifiedStorage().extract(new ItemStackType(stacksSnapshot.get(slot), count), simulate);
             if (extracted.isEmpty()) return ItemStack.EMPTY;
             if (!(extracted instanceof ItemStackType itemKey)) return ItemStack.EMPTY;
 

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.google.common.base.Predicates;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackType;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
@@ -65,7 +65,7 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     @Override
     public boolean isFull()
     {
-        for (IStackType stack : storageHandler.getStorage())
+        for (IStackKey stack : storageHandler.getStorage())
         {
             if (stack.isEmpty())
                 return false;
@@ -115,7 +115,7 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     {
         long maxMana = 0;
         ManaStackType stackType = new ManaStackType();
-        for (IStackType stack : storageHandler.getStorage())
+        for (IStackKey stack : storageHandler.getStorage())
         {
             if (stack.isEmpty())
                 maxMana += stackType.getVanillaMaxStackSize();

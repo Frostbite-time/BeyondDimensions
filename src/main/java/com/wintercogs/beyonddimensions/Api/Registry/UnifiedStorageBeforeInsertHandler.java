@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.Registry;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,13 +26,13 @@ public final class UnifiedStorageBeforeInsertHandler
          */
         @NotNull
         BeforeInsertHandlerReturnInfo beforeInsert(
-                @NotNull IStackType<?> originalInsert,
-                @NotNull IStackType<?> tryInsert,
+                @NotNull IStackKey<?> originalInsert,
+                @NotNull IStackKey<?> tryInsert,
                 @Nullable DimensionsNet net
         );
     }
 
-    public record BeforeInsertHandlerReturnInfo(@NotNull IStackType<?> beforeInsert, boolean cancel)
+    public record BeforeInsertHandlerReturnInfo(@NotNull IStackKey<?> beforeInsert, boolean cancel)
     {
         boolean isEmpty()
         {
@@ -63,9 +63,9 @@ public final class UnifiedStorageBeforeInsertHandler
      * 如果不为cancel，则尝试将最后一次调用得到的输入给维度网络
      */
     @NotNull
-    public static BeforeInsertHandlerReturnInfo onBeforeInsert(@Nullable IStackType<?> tryInsert, @Nullable DimensionsNet net)
+    public static BeforeInsertHandlerReturnInfo onBeforeInsert(@Nullable IStackKey<?> tryInsert, @Nullable DimensionsNet net)
     {
-        final IStackType<?> original = (tryInsert == null)
+        final IStackKey<?> original = (tryInsert == null)
                 ? new ItemStackType()
                 : tryInsert;
 
@@ -75,7 +75,7 @@ public final class UnifiedStorageBeforeInsertHandler
         if (tryInsert.isEmpty())
             return new BeforeInsertHandlerReturnInfo(tryInsert, true);
 
-        IStackType<?> current = tryInsert;
+        IStackKey<?> current = tryInsert;
 
         for (var handler : handlers)
         {

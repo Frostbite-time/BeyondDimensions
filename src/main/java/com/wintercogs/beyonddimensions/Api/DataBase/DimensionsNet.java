@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Registry.UnifiedStorageBeforeInsertHandler;
@@ -62,7 +62,7 @@ public class DimensionsNet extends SavedData
     private final Set<UUID> players = new HashSet<>();
 
     /**
-     * 通用存储空间，存储任何实现了{@link IStackType}的资源类型
+     * 通用存储空间，存储任何实现了{@link IStackKey}的资源类型
      */
     private UnifiedStorage unifiedStorage;
 
@@ -90,16 +90,16 @@ public class DimensionsNet extends SavedData
         unifiedStorage = new UnifiedStorage(this)
         {
             @Override
-            public IStackType<?> insert(IStackType<?> stack, boolean simulate)
+            public IStackKey<?> insert(IStackKey<?> stack, boolean simulate)
             {
-                IStackType<?> input = Objects.requireNonNullElse(stack, new ItemStackType());
+                IStackKey<?> input = Objects.requireNonNullElse(stack, new ItemStackType());
 
                 var info = UnifiedStorageBeforeInsertHandler.onBeforeInsert(input, this.getNet());
 
                 if (info.cancel())
                     return input;
 
-                IStackType<?> adjusted = info.beforeInsert();
+                IStackKey<?> adjusted = info.beforeInsert();
 
                 if (adjusted.isEmpty())
                     return adjusted;
@@ -477,7 +477,7 @@ public class DimensionsNet extends SavedData
                 addPlayer(entry.getKey());
         }
         // 合并统一存储系统
-        for (IStackType stack : otherNet.getUnifiedStorage().getStorage())
+        for (IStackKey stack : otherNet.getUnifiedStorage().getStorage())
         {
             unifiedStorage.insert(stack, false);
         }
@@ -552,7 +552,7 @@ public class DimensionsNet extends SavedData
         if (currentTime >= ServerConfigRuntime.crystalGenerateTime * 20)
         {
             ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(), 1);
-            IStackType stackType = new ItemStackType(stack);
+            IStackKey stackType = new ItemStackType(stack);
             this.unifiedStorage.insert(stackType, false);
             currentTime = 0;
         }

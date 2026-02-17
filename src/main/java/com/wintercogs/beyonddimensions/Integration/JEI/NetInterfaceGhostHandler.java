@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Integration.JEI;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.BDBaseGUI;
 import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
@@ -64,8 +64,8 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
         public void accept(I ingredient)
         {
             Object stackKey = ingredient;
-            IStackType dragging = new ItemStackType();
-            for (IStackType type : StackTypeRegistry.getAllTypes())
+            IStackKey dragging = new ItemStackType();
+            for (IStackKey type : StackKeyRegistry.getAllTypes())
             {
                 if (type.getStackClass().isAssignableFrom(stackKey.getClass()))
                 {

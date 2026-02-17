@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
@@ -20,7 +20,7 @@ public class StackTypedHandler implements IStackTypedHandler
     /**
      * 实际存储的数据结构（永远保持 size 个元素，不存 null）
      */
-    private final List<IStackType<?>> storage;
+    private final List<IStackKey<?>> storage;
 
     /**
      * 为构建分化包装提供良好的性能，其结构为 [资源种类id：对应资源类型的索引列表]
@@ -49,14 +49,14 @@ public class StackTypedHandler implements IStackTypedHandler
         }
     }
 
-    public StackTypedHandler(List<IStackType<?>> other)
+    public StackTypedHandler(List<IStackKey<?>> other)
     {
         this.size = other.size();
         this.storage = new ArrayList<>(other.size());
 
         for (int i = 0; i < size; i++)
         {
-            IStackType<?> stack = other.get(i);
+            IStackKey<?> stack = other.get(i);
             if (stack != null)
             {
                 storage.add(stack.copy());
@@ -71,7 +71,7 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     @Override
-    public List<IStackType<?>> getStorage()
+    public List<IStackKey<?>> getStorage()
     {
         return Collections.unmodifiableList(this.storage);
     }
@@ -103,14 +103,14 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     @Override
-    public IStackType<?> getStackBySlot(int slot)
+    public IStackKey<?> getStackBySlot(int slot)
     {
         return IStackTypedHandler.super.getStackBySlot(slot);
     }
 
     // 返回找到的第一个对应 Stack
     @Override
-    public IStackType<?> getStackByStack(IStackType<?> stackType)
+    public IStackKey<?> getStackByStack(IStackKey<?> stackType)
     {
         ResourceLocation typeId = stackType.getTypeId();
         List<Integer> indices = typeIdIndex.get(typeId);
@@ -119,7 +119,7 @@ public class StackTypedHandler implements IStackTypedHandler
         {
             for (Integer index : indices)
             {
-                IStackType<?> existing = storage.get(index);
+                IStackKey<?> existing = storage.get(index);
                 if (existing.isSameTypeSameComponents(stackType))
                 {
                     return existing;
@@ -130,20 +130,20 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     @Override
-    public boolean hasStackType(IStackType<?> other)
+    public boolean hasStackType(IStackKey<?> other)
     {
         return getStackByStack(other) != null;
     }
 
     @Override
-    public void setStackDirectly(int slot, IStackType<?> stack)
+    public void setStackDirectly(int slot, IStackKey<?> stack)
     {
         if (slot < 0 || slot >= getSlots())
         {
             return;
         }
 
-        IStackType<?> oldStack = storage.get(slot);
+        IStackKey<?> oldStack = storage.get(slot);
         ResourceLocation oldTypeId = oldStack.getTypeId();
         ResourceLocation newTypeId = stack.getTypeId();
 
@@ -166,13 +166,13 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     @Override
-    public void addStackDirectly(IStackType<?> stack)
+    public void addStackDirectly(IStackKey<?> stack)
     {
         // 为了保持 storage.size() == size，不再向后扩容，
         // 而是寻找第一个空槽位进行写入
         for (int i = 0; i < getSlots(); i++)
         {
-            IStackType<?> current = storage.get(i);
+            IStackKey<?> current = storage.get(i);
             if (current.isEmpty())
             {
                 setStackDirectly(i, stack);
@@ -183,7 +183,7 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     @Override
-    public IStackType<?> insert(int slot, IStackType<?> stack, boolean simulate)
+    public IStackKey<?> insert(int slot, IStackKey<?> stack, boolean simulate)
     {
         // 检查槽位有效性
         if (slot < 0 || slot >= getSlots())
@@ -196,9 +196,9 @@ public class StackTypedHandler implements IStackTypedHandler
             return stack.copy();
         }
 
-        IStackType<?> current = storage.get(slot);
+        IStackKey<?> current = storage.get(slot);
         long maxInsert;
-        IStackType<?> remaining;
+        IStackKey<?> remaining;
 
         if (current.isEmpty())
         {
@@ -213,7 +213,7 @@ public class StackTypedHandler implements IStackTypedHandler
             remaining = stack.copyWithCount(stack.getStackAmount() - maxInsert);
             if (!simulate)
             {
-                IStackType<?> newStack = stack.copyWithCount(maxInsert);
+                IStackKey<?> newStack = stack.copyWithCount(maxInsert);
 
                 // 更新索引表 - 移除空槽位索引
                 ResourceLocation emptyTypeId = current.getTypeId();
@@ -264,9 +264,9 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     @Override
-    public IStackType<?> insert(IStackType<?> stack, boolean simulate)
+    public IStackKey<?> insert(IStackKey<?> stack, boolean simulate)
     {
-        IStackType<?> remaining = stack.copy();
+        IStackKey<?> remaining = stack.copy();
         ResourceLocation typeId = stack.getTypeId();
 
         // 第一阶段：利用 typeIdIndex 快速定位相同类型的槽位进行合并
@@ -275,7 +275,7 @@ public class StackTypedHandler implements IStackTypedHandler
         {
             for (Integer slot : matchingSlots)
             {
-                IStackType<?> current = storage.get(slot);
+                IStackKey<?> current = storage.get(slot);
                 if (!current.isEmpty() && current.isSameTypeSameComponents(stack))
                 {
                     remaining = insert(slot, remaining, simulate);
@@ -292,7 +292,7 @@ public class StackTypedHandler implements IStackTypedHandler
         {
             for (int slot = 0; slot < getSlots(); slot++)
             {
-                IStackType<?> current = storage.get(slot);
+                IStackKey<?> current = storage.get(slot);
                 if (current.isEmpty())
                 {
                     remaining = insert(slot, remaining, simulate);
@@ -308,21 +308,21 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     @Override
-    public IStackType<?> extract(int slot, long count, boolean simulate)
+    public IStackKey<?> extract(int slot, long count, boolean simulate)
     {
         if (slot < 0 || slot >= getSlots())
         {
             return new ItemStackType(); // 以不带参数 ItemStackType 作为空体
         }
 
-        IStackType<?> current = storage.get(slot);
+        IStackKey<?> current = storage.get(slot);
         if (current.isEmpty())
         {
             return current.getEmpty();
         }
 
         long extractable = Math.min(count, current.getStackAmount());
-        IStackType<?> extracted = current.copyWithCount(extractable);
+        IStackKey<?> extracted = current.copyWithCount(extractable);
 
         if (!simulate)
         {
@@ -350,9 +350,9 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     @Override
-    public IStackType<?> extract(IStackType<?> stack, boolean simulate)
+    public IStackKey<?> extract(IStackKey<?> stack, boolean simulate)
     {
-        IStackType<?> result = stack.getEmpty();
+        IStackKey<?> result = stack.getEmpty();
         long remaining = stack.getStackAmount();
         ResourceLocation typeId = stack.getTypeId();
 
@@ -369,7 +369,7 @@ public class StackTypedHandler implements IStackTypedHandler
         // 只遍历匹配类型的槽位
         for (Integer slot : slotsToIterate)
         {
-            IStackType<?> current = storage.get(slot);
+            IStackKey<?> current = storage.get(slot);
             if (current.isEmpty() || !current.isSameTypeSameComponents(stack))
             {
                 continue;
@@ -384,7 +384,7 @@ public class StackTypedHandler implements IStackTypedHandler
             }
 
             // 执行提取操作
-            IStackType<?> extracted = extract(slot, toExtract, simulate);
+            IStackKey<?> extracted = extract(slot, toExtract, simulate);
             if (!extracted.isEmpty())
             {
                 if (result.isEmpty())
@@ -414,7 +414,7 @@ public class StackTypedHandler implements IStackTypedHandler
     }
 
     @Override
-    public boolean isStackValid(int slot, IStackType<?> stack)
+    public boolean isStackValid(int slot, IStackKey<?> stack)
     {
         return true;
     }
@@ -422,7 +422,7 @@ public class StackTypedHandler implements IStackTypedHandler
     @Override
     public boolean isEmpty()
     {
-        for (IStackType<?> stack : storage)
+        for (IStackKey<?> stack : storage)
         {
             if (!stack.isEmpty())
             {
@@ -440,7 +440,7 @@ public class StackTypedHandler implements IStackTypedHandler
 
         for (int i = 0; i < getStorage().size(); i++)
         {
-            IStackType<?> stack = getStorage().get(i);
+            IStackKey<?> stack = getStorage().get(i);
 
             CompoundTag stackTag = new CompoundTag();
             if (stack.isEmpty()) // 为空物品执行占位机制
@@ -481,8 +481,8 @@ public class StackTypedHandler implements IStackTypedHandler
                 else
                 {
                     ResourceLocation typeId = ResourceLocation.tryParse(type);
-                    IStackType<?> stackEmpty = StackTypeRegistry.getType(typeId).copy();
-                    IStackType<?> stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"));
+                    IStackKey<?> stackEmpty = StackKeyRegistry.getType(typeId).copy();
+                    IStackKey<?> stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"));
                     storage.add(stackActual); // 无论是不是空体，都添加
                     typeIdIndex.computeIfAbsent(stackActual.getTypeId(), k -> new ArrayList<>()).add(storage.size() - 1);
                 }
