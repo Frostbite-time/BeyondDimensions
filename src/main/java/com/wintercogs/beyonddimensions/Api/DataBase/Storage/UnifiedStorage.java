@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
@@ -795,7 +795,7 @@ public class UnifiedStorage implements IStackTypedHandler
 
             // 旧版本兼容
             if (typeId.equals(ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemical")))
-                typeId = GasStackType.ID;
+                typeId = GasStackKey.ID;
 
             IStackKey stackEmpty = StackKeyRegistry.getType(typeId).copy();
             IStackKey stackActual = stackEmpty.deserializeNBT(stackTag.getCompound("TypedStack"));

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import mekanism.api.Action;
@@ -37,7 +37,7 @@ public class SlurryStackTypedHandler implements ISlurryHandler
         }
 
         IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
-        if (stack instanceof SlurryStackType slurryStack && !slurryStack.isEmpty())
+        if (stack instanceof SlurryStackKey slurryStack && !slurryStack.isEmpty())
         {
             return slurryStack.copyStack();
         }
@@ -64,7 +64,7 @@ public class SlurryStackTypedHandler implements ISlurryHandler
         }
         else
         {
-            handlerStorage.setStackDirectly(tank, new SlurryStackType(stack.copy()));
+            handlerStorage.setStackDirectly(tank, new SlurryStackKey(stack.copy()));
         }
     }
 
@@ -107,7 +107,7 @@ public class SlurryStackTypedHandler implements ISlurryHandler
 
         IStackKey<?> remainingStack = handlerStorage.insert(
                 tank,
-                new SlurryStackType(stack.copy()),
+                new SlurryStackKey(stack.copy()),
                 action.simulate()
         );
 
@@ -131,13 +131,13 @@ public class SlurryStackTypedHandler implements ISlurryHandler
         }
 
         IStackKey<?> current = handlerStorage.getStackBySlot(tank);
-        if (!(current instanceof SlurryStackType) || current.isEmpty())
+        if (!(current instanceof SlurryStackKey) || current.isEmpty())
         {
             return SlurryStack.EMPTY;
         }
 
         IStackKey<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
-        if (extracted instanceof SlurryStackType slurryExtract && !slurryExtract.isEmpty())
+        if (extracted instanceof SlurryStackKey slurryExtract && !slurryExtract.isEmpty())
         {
             return slurryExtract.copyStack();
         }
@@ -156,7 +156,7 @@ public class SlurryStackTypedHandler implements ISlurryHandler
         }
 
         long remaining = handlerStorage
-                .insert(new SlurryStackType(stack.copy()), action.simulate())
+                .insert(new SlurryStackKey(stack.copy()), action.simulate())
                 .getStackAmount();
 
         if (remaining > 0)
@@ -177,11 +177,11 @@ public class SlurryStackTypedHandler implements ISlurryHandler
             return SlurryStack.EMPTY;
         }
 
-        return handlerStorage.getTypeIdIndexList(SlurryStackType.ID)
+        return handlerStorage.getTypeIdIndexList(SlurryStackKey.ID)
                 .map(slots -> slots.get(0))
                 .filter(actualIndex -> actualIndex >= 0)
                 .map(actualIndex -> handlerStorage.extract(actualIndex, amount, action.simulate()))
-                .map(extracts -> ((SlurryStackType) extracts).copyStack())
+                .map(extracts -> ((SlurryStackKey) extracts).copyStack())
                 .orElse(SlurryStack.EMPTY);
     }
 
@@ -192,8 +192,8 @@ public class SlurryStackTypedHandler implements ISlurryHandler
         {
             return SlurryStack.EMPTY;
         }
-        return ((SlurryStackType) handlerStorage.extract(
-                new SlurryStackType(stack.copy()),
+        return ((SlurryStackKey) handlerStorage.extract(
+                new SlurryStackKey(stack.copy()),
                 action.simulate()
         )).copyStack();
     }

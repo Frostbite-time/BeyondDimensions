@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.Integration.AEMEK;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackKey;
 import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
 import me.ramidzkh.mekae2.ae2.MekanismKey;
 import me.ramidzkh.mekae2.ae2.MekanismKeyType;
@@ -19,10 +19,10 @@ public class BD_AEMEKPlugin
 {
     public static void register()
     {
-        AEHelper.ISTACK_TO_AEKEY_MAP.put(GasStackType.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
-        AEHelper.ISTACK_TO_AEKEY_MAP.put(InfusionStackType.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
-        AEHelper.ISTACK_TO_AEKEY_MAP.put(PigmentStackType.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
-        AEHelper.ISTACK_TO_AEKEY_MAP.put(SlurryStackType.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
+        AEHelper.ISTACK_TO_AEKEY_MAP.put(GasStackKey.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
+        AEHelper.ISTACK_TO_AEKEY_MAP.put(InfusionStackKey.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
+        AEHelper.ISTACK_TO_AEKEY_MAP.put(PigmentStackKey.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
+        AEHelper.ISTACK_TO_AEKEY_MAP.put(SlurryStackKey.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
 
         AEHelper.AEKEY_TO_STACK_TYPE_MAP.put(
                 MekanismKeyType.TYPE,
@@ -32,10 +32,10 @@ public class BD_AEMEKPlugin
 
                     return switch (mekKey.getForm())
                     {
-                        case 0 -> Optional.of(new GasStackType((GasStack) chemical));
-                        case 1 -> Optional.of(new InfusionStackType((InfusionStack) chemical));
-                        case 2 -> Optional.of(new PigmentStackType((PigmentStack) chemical));
-                        case 3 -> Optional.of(new SlurryStackType((SlurryStack) chemical));
+                        case 0 -> Optional.of(new GasStackKey((GasStack) chemical));
+                        case 1 -> Optional.of(new InfusionStackKey((InfusionStack) chemical));
+                        case 2 -> Optional.of(new PigmentStackKey((PigmentStack) chemical));
+                        case 3 -> Optional.of(new SlurryStackKey((SlurryStack) chemical));
                         default -> throw new UnsupportedOperationException(
                                 "Unsupported chemical type: " + mekKey.getForm()
                         );

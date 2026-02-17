@@ -6,10 +6,10 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.InfusionSt
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.PigmentStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.SlurryStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.*;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals.GasHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals.InfusionHandlerWrapper;
@@ -251,39 +251,39 @@ public class BeyondDimensions
         if (MekLoaded)
         {
             // 注册化学品堆叠
-            StackKeyRegistry.registerType(new GasStackType());
-            StackKeyRegistry.registerType(new InfusionStackType());
-            StackKeyRegistry.registerType(new PigmentStackType());
-            StackKeyRegistry.registerType(new SlurryStackType());
+            StackKeyRegistry.registerType(new GasStackKey());
+            StackKeyRegistry.registerType(new InfusionStackKey());
+            StackKeyRegistry.registerType(new PigmentStackKey());
+            StackKeyRegistry.registerType(new SlurryStackKey());
             // 注册化学品方块能力
-            CapabilityHelper.BlockCapabilityMap.put(GasStackType.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
-            CapabilityHelper.BlockCapabilityMap.put(InfusionStackType.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
-            CapabilityHelper.BlockCapabilityMap.put(PigmentStackType.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
-            CapabilityHelper.BlockCapabilityMap.put(SlurryStackType.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
+            CapabilityHelper.BlockCapabilityMap.put(GasStackKey.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
+            CapabilityHelper.BlockCapabilityMap.put(InfusionStackKey.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
+            CapabilityHelper.BlockCapabilityMap.put(PigmentStackKey.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
+            CapabilityHelper.BlockCapabilityMap.put(SlurryStackKey.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
             // 注册化学品物品能力
-            CapabilityHelper.ItemCapabilityMap.put(GasStackType.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
-            CapabilityHelper.ItemCapabilityMap.put(InfusionStackType.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
-            CapabilityHelper.ItemCapabilityMap.put(PigmentStackType.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
-            CapabilityHelper.ItemCapabilityMap.put(SlurryStackType.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
+            CapabilityHelper.ItemCapabilityMap.put(GasStackKey.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
+            CapabilityHelper.ItemCapabilityMap.put(InfusionStackKey.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
+            CapabilityHelper.ItemCapabilityMap.put(PigmentStackKey.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
+            CapabilityHelper.ItemCapabilityMap.put(SlurryStackKey.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
 
             // 注册分化包装
             // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-            CapabilityHelper.registerUSHandler(new GasStackType(), GasUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(new InfusionStackType(), InfusionUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(new PigmentStackType(), PigmentUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(new SlurryStackType(), SlurryUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(new GasStackKey(), GasUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(new InfusionStackKey(), InfusionUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(new PigmentStackKey(), PigmentUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(new SlurryStackKey(), SlurryUnifiedStorageHandler::new);
 
             // 注册存储分化包装
-            CapabilityHelper.registerStackTypedHandler(new GasStackType(), GasStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new InfusionStackType(), InfusionStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new PigmentStackType(), PigmentStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new SlurryStackType(), SlurryStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new GasStackKey(), GasStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new InfusionStackKey(), InfusionStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new PigmentStackKey(), PigmentStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(new SlurryStackKey(), SlurryStackTypedHandler::new);
 
             // 注册堆叠处理包装
-            StackHandlerWrapperHelper.stackWrappers.put(GasStackType.ID, GasHandlerWrapper::new);
-            StackHandlerWrapperHelper.stackWrappers.put(InfusionStackType.ID, InfusionHandlerWrapper::new);
-            StackHandlerWrapperHelper.stackWrappers.put(PigmentStackType.ID, PigmentHandlerWrapper::new);
-            StackHandlerWrapperHelper.stackWrappers.put(SlurryStackType.ID, SlurryHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(GasStackKey.ID, GasHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(InfusionStackKey.ID, InfusionHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(PigmentStackKey.ID, PigmentHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(SlurryStackKey.ID, SlurryHandlerWrapper::new);
 
         }
 

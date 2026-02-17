@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import mekanism.api.Action;
@@ -37,7 +37,7 @@ public class PigmentStackTypedHandler implements IPigmentHandler
         }
 
         IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
-        if (stack instanceof PigmentStackType pigmentStack && !pigmentStack.isEmpty())
+        if (stack instanceof PigmentStackKey pigmentStack && !pigmentStack.isEmpty())
         {
             return pigmentStack.copyStack();
         }
@@ -64,7 +64,7 @@ public class PigmentStackTypedHandler implements IPigmentHandler
         }
         else
         {
-            handlerStorage.setStackDirectly(tank, new PigmentStackType(stack.copy()));
+            handlerStorage.setStackDirectly(tank, new PigmentStackKey(stack.copy()));
         }
     }
 
@@ -107,7 +107,7 @@ public class PigmentStackTypedHandler implements IPigmentHandler
 
         IStackKey<?> remainingStack = handlerStorage.insert(
                 tank,
-                new PigmentStackType(stack.copy()),
+                new PigmentStackKey(stack.copy()),
                 action.simulate()
         );
 
@@ -131,13 +131,13 @@ public class PigmentStackTypedHandler implements IPigmentHandler
         }
 
         IStackKey<?> current = handlerStorage.getStackBySlot(tank);
-        if (!(current instanceof PigmentStackType) || current.isEmpty())
+        if (!(current instanceof PigmentStackKey) || current.isEmpty())
         {
             return PigmentStack.EMPTY;
         }
 
         IStackKey<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
-        if (extracted instanceof PigmentStackType pigmentExtract && !pigmentExtract.isEmpty())
+        if (extracted instanceof PigmentStackKey pigmentExtract && !pigmentExtract.isEmpty())
         {
             return pigmentExtract.copyStack();
         }
@@ -156,7 +156,7 @@ public class PigmentStackTypedHandler implements IPigmentHandler
         }
 
         long remaining = handlerStorage
-                .insert(new PigmentStackType(stack.copy()), action.simulate())
+                .insert(new PigmentStackKey(stack.copy()), action.simulate())
                 .getStackAmount();
 
         if (remaining > 0)
@@ -177,11 +177,11 @@ public class PigmentStackTypedHandler implements IPigmentHandler
             return PigmentStack.EMPTY;
         }
 
-        return handlerStorage.getTypeIdIndexList(PigmentStackType.ID)
+        return handlerStorage.getTypeIdIndexList(PigmentStackKey.ID)
                 .map(slots -> slots.get(0))
                 .filter(actualIndex -> actualIndex >= 0)
                 .map(actualIndex -> handlerStorage.extract(actualIndex, amount, action.simulate()))
-                .map(extracts -> ((PigmentStackType) extracts).copyStack())
+                .map(extracts -> ((PigmentStackKey) extracts).copyStack())
                 .orElse(PigmentStack.EMPTY);
     }
 
@@ -192,8 +192,8 @@ public class PigmentStackTypedHandler implements IPigmentHandler
         {
             return PigmentStack.EMPTY;
         }
-        return ((PigmentStackType) handlerStorage.extract(
-                new PigmentStackType(stack.copy()),
+        return ((PigmentStackKey) handlerStorage.extract(
+                new PigmentStackKey(stack.copy()),
                 action.simulate()
         )).copyStack();
     }

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import mekanism.api.Action;
 import mekanism.api.chemical.slurry.ISlurryHandler;
@@ -19,7 +19,7 @@ public class SlurryUnifiedStorageHandler implements ISlurryHandler
     @Override
     public int getTanks()
     {
-        return storage.getTypeIdIndexList(SlurryStackType.ID)
+        return storage.getTypeIdIndexList(SlurryStackKey.ID)
                 .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
@@ -27,12 +27,12 @@ public class SlurryUnifiedStorageHandler implements ISlurryHandler
     @Override
     public SlurryStack getChemicalInTank(int slot)
     {
-        return storage.getTypeIdIndexList(SlurryStackType.ID)
+        return storage.getTypeIdIndexList(SlurryStackKey.ID)
                 .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
                 .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (SlurryStackType) storage.getStackBySlot(actualIndex))
-                .map(SlurryStackType::getStack)
+                .map(actualIndex -> (SlurryStackKey) storage.getStackBySlot(actualIndex))
+                .map(SlurryStackKey::getStack)
                 .orElse(SlurryStack.EMPTY);
     }
 
@@ -42,7 +42,7 @@ public class SlurryUnifiedStorageHandler implements ISlurryHandler
         // 凡通过handler机械化输入的物品无论以何方法，全部为自动插入
         if (stack.isEmpty())
             return;
-        storage.insert(new SlurryStackType(stack.copy()), false);
+        storage.insert(new SlurryStackKey(stack.copy()), false);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class SlurryUnifiedStorageHandler implements ISlurryHandler
     {
         if (stack.isEmpty())
             return SlurryStack.EMPTY;
-        long remaining = storage.insert(new SlurryStackType(stack.copy()), action.simulate()).getStackAmount();
+        long remaining = storage.insert(new SlurryStackKey(stack.copy()), action.simulate()).getStackAmount();
         if (remaining > 0)
             return new SlurryStack(stack, remaining);
         return SlurryStack.EMPTY;// 始终全部插入
@@ -73,7 +73,7 @@ public class SlurryUnifiedStorageHandler implements ISlurryHandler
     @Override
     public SlurryStack extractChemical(int tank, long amount, Action action)
     {
-        return ((SlurryStackType) storage.extract(new SlurryStackType(new SlurryStack(getChemicalInTank(tank), amount)), action.simulate()))
+        return ((SlurryStackKey) storage.extract(new SlurryStackKey(new SlurryStack(getChemicalInTank(tank), amount)), action.simulate()))
                 .copyStack();
     }
 
@@ -82,7 +82,7 @@ public class SlurryUnifiedStorageHandler implements ISlurryHandler
     {
         if (stack.isEmpty())
             return SlurryStack.EMPTY;
-        long remaining = storage.insert(new SlurryStackType(stack.copy()), action.simulate()).getStackAmount();
+        long remaining = storage.insert(new SlurryStackKey(stack.copy()), action.simulate()).getStackAmount();
         if (remaining > 0)
             return new SlurryStack(stack, remaining);
         return SlurryStack.EMPTY;// 始终全部插入
@@ -92,7 +92,7 @@ public class SlurryUnifiedStorageHandler implements ISlurryHandler
     @Override
     public SlurryStack extractChemical(long amount, Action action)
     {
-        return ((SlurryStackType) storage.extract(new SlurryStackType(new SlurryStack(getChemicalInTank(0), amount)), action.simulate()))
+        return ((SlurryStackKey) storage.extract(new SlurryStackKey(new SlurryStack(getChemicalInTank(0), amount)), action.simulate()))
                 .copyStack();
     }
 
@@ -100,7 +100,7 @@ public class SlurryUnifiedStorageHandler implements ISlurryHandler
     @Override
     public SlurryStack extractChemical(SlurryStack stack, Action action)
     {
-        return ((SlurryStackType) storage.extract(new SlurryStackType(stack.copy()), action.simulate()))
+        return ((SlurryStackKey) storage.extract(new SlurryStackKey(stack.copy()), action.simulate()))
                 .copyStack();
     }
 }

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import mekanism.api.Action;
@@ -37,7 +37,7 @@ public class InfusionStackTypedHandler implements IInfusionHandler
         }
 
         IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
-        if (stack instanceof InfusionStackType infusionStack && !infusionStack.isEmpty())
+        if (stack instanceof InfusionStackKey infusionStack && !infusionStack.isEmpty())
         {
             return infusionStack.copyStack();
         }
@@ -64,7 +64,7 @@ public class InfusionStackTypedHandler implements IInfusionHandler
         }
         else
         {
-            handlerStorage.setStackDirectly(tank, new InfusionStackType(stack.copy()));
+            handlerStorage.setStackDirectly(tank, new InfusionStackKey(stack.copy()));
         }
     }
 
@@ -107,7 +107,7 @@ public class InfusionStackTypedHandler implements IInfusionHandler
 
         IStackKey<?> remainingStack = handlerStorage.insert(
                 tank,
-                new InfusionStackType(stack.copy()),
+                new InfusionStackKey(stack.copy()),
                 action.simulate()
         );
 
@@ -131,13 +131,13 @@ public class InfusionStackTypedHandler implements IInfusionHandler
         }
 
         IStackKey<?> current = handlerStorage.getStackBySlot(tank);
-        if (!(current instanceof InfusionStackType) || current.isEmpty())
+        if (!(current instanceof InfusionStackKey) || current.isEmpty())
         {
             return InfusionStack.EMPTY;
         }
 
         IStackKey<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
-        if (extracted instanceof InfusionStackType infusionExtract && !infusionExtract.isEmpty())
+        if (extracted instanceof InfusionStackKey infusionExtract && !infusionExtract.isEmpty())
         {
             return infusionExtract.copyStack();
         }
@@ -156,7 +156,7 @@ public class InfusionStackTypedHandler implements IInfusionHandler
         }
 
         long remaining = handlerStorage
-                .insert(new InfusionStackType(stack.copy()), action.simulate())
+                .insert(new InfusionStackKey(stack.copy()), action.simulate())
                 .getStackAmount();
 
         if (remaining > 0)
@@ -177,11 +177,11 @@ public class InfusionStackTypedHandler implements IInfusionHandler
             return InfusionStack.EMPTY;
         }
 
-        return handlerStorage.getTypeIdIndexList(InfusionStackType.ID)
+        return handlerStorage.getTypeIdIndexList(InfusionStackKey.ID)
                 .map(slots -> slots.get(0))
                 .filter(actualIndex -> actualIndex >= 0)
                 .map(actualIndex -> handlerStorage.extract(actualIndex, amount, action.simulate()))
-                .map(extracts -> ((InfusionStackType) extracts).copyStack())
+                .map(extracts -> ((InfusionStackKey) extracts).copyStack())
                 .orElse(InfusionStack.EMPTY);
     }
 
@@ -192,8 +192,8 @@ public class InfusionStackTypedHandler implements IInfusionHandler
         {
             return InfusionStack.EMPTY;
         }
-        return ((InfusionStackType) handlerStorage.extract(
-                new InfusionStackType(stack.copy()),
+        return ((InfusionStackKey) handlerStorage.extract(
+                new InfusionStackKey(stack.copy()),
                 action.simulate()
         )).copyStack();
     }

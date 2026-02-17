@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import mekanism.api.Action;
 import mekanism.api.chemical.gas.GasStack;
@@ -19,7 +19,7 @@ public class GasHandlerWrapper implements IStackHandlerWrapper<GasStack>
     @Override
     public ResourceLocation getTypeId()
     {
-        return GasStackType.ID;
+        return GasStackKey.ID;
     }
 
     @Override

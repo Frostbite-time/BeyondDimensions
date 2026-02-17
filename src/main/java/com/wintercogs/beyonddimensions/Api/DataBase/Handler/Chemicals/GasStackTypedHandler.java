@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import mekanism.api.Action;
@@ -40,7 +40,7 @@ public class GasStackTypedHandler implements IGasHandler
         }
 
         IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
-        if (stack instanceof GasStackType gasStack && !gasStack.isEmpty())
+        if (stack instanceof GasStackKey gasStack && !gasStack.isEmpty())
         {
             // 返回一份气体副本
             return gasStack.copyStack();
@@ -70,7 +70,7 @@ public class GasStackTypedHandler implements IGasHandler
         }
         else
         {
-            handlerStorage.setStackDirectly(tank, new GasStackType(stack.copy()));
+            handlerStorage.setStackDirectly(tank, new GasStackKey(stack.copy()));
         }
     }
 
@@ -113,7 +113,7 @@ public class GasStackTypedHandler implements IGasHandler
         }
 
         // 统一存储会处理“空占位 -> GasStackType”的转化和索引更新
-        IStackKey<?> remainingStack = handlerStorage.insert(tank, new GasStackType(stack.copy()), action.simulate());
+        IStackKey<?> remainingStack = handlerStorage.insert(tank, new GasStackKey(stack.copy()), action.simulate());
 
         long remaining = remainingStack.getStackAmount();
         if (remaining <= 0)
@@ -136,13 +136,13 @@ public class GasStackTypedHandler implements IGasHandler
         }
 
         IStackKey<?> current = handlerStorage.getStackBySlot(tank);
-        if (!(current instanceof GasStackType) || current.isEmpty())
+        if (!(current instanceof GasStackKey) || current.isEmpty())
         {
             return GasStack.EMPTY;
         }
 
         IStackKey<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
-        if (extracted instanceof GasStackType gasExtract && !gasExtract.isEmpty())
+        if (extracted instanceof GasStackKey gasExtract && !gasExtract.isEmpty())
         {
             return gasExtract.copyStack();
         }
@@ -161,7 +161,7 @@ public class GasStackTypedHandler implements IGasHandler
         }
 
         long remaining = handlerStorage
-                .insert(new GasStackType(stack.copy()), action.simulate())
+                .insert(new GasStackKey(stack.copy()), action.simulate())
                 .getStackAmount();
 
         if (remaining > 0)
@@ -182,11 +182,11 @@ public class GasStackTypedHandler implements IGasHandler
             return GasStack.EMPTY;
         }
 
-        return handlerStorage.getTypeIdIndexList(GasStackType.ID)
+        return handlerStorage.getTypeIdIndexList(GasStackKey.ID)
                 .map(slots -> slots.get(0))
                 .filter(actualIndex -> actualIndex >= 0)
                 .map(actualIndex -> handlerStorage.extract(actualIndex, amount, action.simulate()))
-                .map(extracts -> ((GasStackType) extracts).copyStack())
+                .map(extracts -> ((GasStackKey) extracts).copyStack())
                 .orElse(GasStack.EMPTY);
     }
 
@@ -197,7 +197,7 @@ public class GasStackTypedHandler implements IGasHandler
         {
             return GasStack.EMPTY;
         }
-        return ((GasStackType) handlerStorage.extract(new GasStackType(stack.copy()), action.simulate())).copyStack();
+        return ((GasStackKey) handlerStorage.extract(new GasStackKey(stack.copy()), action.simulate())).copyStack();
     }
 
     @Override
