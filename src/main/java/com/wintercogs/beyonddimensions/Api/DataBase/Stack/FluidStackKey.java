@@ -151,7 +151,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     private transient volatile WeakReference<HolderLookup.Provider> equalsByteProviderRef = null;
 
     // 渲染/便捷复制用的客户端缓存（amount 仅用于渲染，不参与 key 语义）
-    private FluidStack severCache; // （懒加载）
+    private FluidStack serverCache; // （懒加载）
     private FluidStack clientCache; // （懒加载）
     private int hashCodeCache = 0;
 
@@ -207,25 +207,25 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     @Override
     public FluidStack getReadOnlyStack()
     {
-        if (this.severCache == null)
+        if (this.serverCache == null)
         {
-            this.severCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
+            this.serverCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
         }
 
         if (this.fluid == Fluids.EMPTY)
         {
-            if (!this.severCache.isEmpty())
+            if (!this.serverCache.isEmpty())
             {
-                this.severCache = FluidStack.EMPTY;
+                this.serverCache = FluidStack.EMPTY;
             }
             return FluidStack.EMPTY;
         }
 
-        FluidStack cache = this.severCache;
+        FluidStack cache = this.serverCache;
         if (cache.isEmpty() || cache.getFluid() != this.fluid)
         {
-            this.severCache = new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
-            return this.severCache;
+            this.serverCache = new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
+            return this.serverCache;
         }
 
         // 非 EMPTY：返回前保证 amount >= 1（部分版本对 EMPTY.setAmount 会抛错）
