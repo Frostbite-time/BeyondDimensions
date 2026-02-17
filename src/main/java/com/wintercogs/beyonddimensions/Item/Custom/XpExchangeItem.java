@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
@@ -133,7 +133,7 @@ public class XpExchangeItem extends Item
 
             long toInsertUnits = (long) toRemoveXp * conversionRate;
             IStackKey remaining = storage.insert(
-                    new FluidStackType(new FluidStack(canonicalXp, 1), toInsertUnits),
+                    new FluidStackKey(new FluidStack(canonicalXp, 1), toInsertUnits),
                     false
             );
 
@@ -165,7 +165,7 @@ public class XpExchangeItem extends Item
                 if (wantUnits <= 0) break;
 
                 IStackKey extracted = storage.extract(
-                        new FluidStackType(new FluidStack(f, 1), wantUnits),
+                        new FluidStackKey(new FluidStack(f, 1), wantUnits),
                         false
                 );
 
@@ -176,7 +176,7 @@ public class XpExchangeItem extends Item
                 if (gainedXp <= 0)
                 {
                     // 抽到了不足 1 XP 的零头，原样放回，继续尝试其它流体
-                    storage.insert(new FluidStackType(new FluidStack(f, 1), units), false);
+                    storage.insert(new FluidStackKey(new FluidStack(f, 1), units), false);
                     continue;
                 }
 
@@ -186,7 +186,7 @@ public class XpExchangeItem extends Item
                 // 多抽出来但不足 1 XP 的部分回滚
                 if (remainderUnits > 0)
                 {
-                    storage.insert(new FluidStackType(new FluidStack(f, 1), remainderUnits), false);
+                    storage.insert(new FluidStackKey(new FluidStack(f, 1), remainderUnits), false);
                 }
 
                 gainedXpTotal += gainedXp;

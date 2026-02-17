@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
@@ -148,7 +148,7 @@ public class NetMagnetItem extends BaseMachineItem
                     if (xp > 0)
                     {
                         long xpFluid = xp * 20L;
-                        FluidStackType xpStack = new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), xpFluid);
+                        FluidStackKey xpStack = new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), xpFluid);
 
                         if (storage.insert(xpStack, true).isEmpty())
                         {
@@ -307,7 +307,7 @@ public class NetMagnetItem extends BaseMachineItem
                     FluidStack extracted = new FluidStack(stillFluid, 1);
 
                     // 进行存储交互
-                    FluidStackType typedFluid = new FluidStackType(extracted);
+                    FluidStackKey typedFluid = new FluidStackKey(extracted);
                     if (matchesFilter(filterMode, filterSlots, typedFluid))
                     {
                         typedFluid.setStackAmount(amount); // 执行逻辑前将数量设为正确值

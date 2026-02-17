@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
@@ -130,7 +130,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                     if (xp > 0)
                     {
                         long xpFluid = xp * 20L;
-                        FluidStackType xpStack = new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), xpFluid);
+                        FluidStackKey xpStack = new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), xpFluid);
 
                         if (storage.insert(xpStack, true).isEmpty())
                         {
@@ -261,7 +261,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
 
                     // ⑤ 交给你的逻辑（存槽、推网络、合并等）
                     UnifiedStorage storage = getNet().getUnifiedStorage();
-                    FluidStackType typedFluid = new FluidStackType(extracted);
+                    FluidStackKey typedFluid = new FluidStackKey(extracted);
                     if (matchesFilter(typedFluid))
                     {
                         if (storage.insert(typedFluid, true).isEmpty())

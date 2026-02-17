@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
@@ -87,7 +87,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                 {
                     if (carriedItem.getItem() instanceof XpExchangeItem)
                     {
-                        setStackDirectly(new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), 1));
+                        setStackDirectly(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), 1));
                     }
                     else
                     {

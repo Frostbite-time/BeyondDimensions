@@ -4,7 +4,7 @@ import appeng.api.stacks.AEFluidKey;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.AEKeyType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import net.minecraft.resources.ResourceLocation;
@@ -26,10 +26,10 @@ public class AEHelper
     static
     {
         ISTACK_TO_AEKEY_MAP.put(ItemStackKey.ID, stackType -> Optional.ofNullable(AEItemKey.of((ItemStack) stackType.copyStack())));
-        ISTACK_TO_AEKEY_MAP.put(FluidStackType.ID, stackType -> Optional.ofNullable(AEFluidKey.of((FluidStack) stackType.copyStack())));
+        ISTACK_TO_AEKEY_MAP.put(FluidStackKey.ID, stackType -> Optional.ofNullable(AEFluidKey.of((FluidStack) stackType.copyStack())));
 
         AEKEY_TO_STACK_TYPE_MAP.put(AEKeyType.items(), (key, amount) -> Optional.of(new ItemStackKey(((AEItemKey) key).toStack(1), amount)));
-        AEKEY_TO_STACK_TYPE_MAP.put(AEKeyType.fluids(), (key, amount) -> Optional.of(new FluidStackType(((AEFluidKey) key).toStack(1), amount)));
+        AEKEY_TO_STACK_TYPE_MAP.put(AEKeyType.fluids(), (key, amount) -> Optional.of(new FluidStackKey(((AEFluidKey) key).toStack(1), amount)));
     }
 
 

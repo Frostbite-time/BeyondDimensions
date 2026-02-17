@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
@@ -77,7 +77,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                         // 插入当前经验流体
-                        IStackKey remaining = storage.insert(getSlotIndex(), new FluidStackType(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), actualInsertFluid), false);
+                        IStackKey remaining = storage.insert(getSlotIndex(), new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), actualInsertFluid), false);
                         if (!remaining.isEmpty())
                         {
                             int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount() / 20); // 由于前面从int*20，这里除回去
@@ -98,7 +98,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
 
                             if (stackHandlerWrapper.getSlots() > 0)
                             {
-                                FluidStackType stack = new FluidStackType(stackHandlerWrapper.getStackInSlot(0));
+                                FluidStackKey stack = new FluidStackKey(stackHandlerWrapper.getStackInSlot(0));
                                 if (stack != null && !stack.isEmpty())
                                 {
                                     int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(), stack.getVanillaMaxStackSize()));
@@ -227,7 +227,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         double currentLevel = XpUtil.levelAsDouble(player);
                         int wantConversionLevel = XpExchangeItem.getXpLevelPerAction(carriedItem);
 
-                        if (actualStack instanceof FluidStackType fluidStackType && fluidStackType.hasTag(ModFluidTags.C_EXPERIENCE))
+                        if (actualStack instanceof FluidStackKey fluidStackKey && fluidStackKey.hasTag(ModFluidTags.C_EXPERIENCE))
                         {
                             if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
                             {
@@ -236,7 +236,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                 long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                                 // 插入当前经验流体
-                                IStackKey remaining = storage.insert(getSlotIndex(), new FluidStackType(fluidStackType.copyStack(), actualInsertFluid), false);
+                                IStackKey remaining = storage.insert(getSlotIndex(), new FluidStackKey(fluidStackKey.copyStack(), actualInsertFluid), false);
                                 if (!remaining.isEmpty())
                                 {
                                     int needReturnXp = BDMath.clampLongToInt(remaining.getStackAmount() / 20); // 由于前面从int*20，这里除回去
@@ -297,12 +297,12 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                             // 2.桶向原有区域继续投放
                             if (carriedItem.getItem() == Items.BUCKET) // 空桶接受
                             {
-                                if (clickStack instanceof FluidStackType fluidStackType)
+                                if (clickStack instanceof FluidStackKey fluidStackKey)
                                 {
-                                    Item filledBucket = fluidStackType.getStack().getFluid().getBucket();
+                                    Item filledBucket = fluidStackKey.getStack().getFluid().getBucket();
 
                                     if (filledBucket != null && filledBucket != Items.AIR
-                                            && fluidStackType.getStackAmount() >= 1000)
+                                            && fluidStackKey.getStackAmount() >= 1000)
                                     {
                                         // 执行操作
                                         storage.extract(getSlotIndex(), 1000, false);
@@ -319,7 +319,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
 
                                     if (stackHandlerWrapper.getSlots() > 0)
                                     {
-                                        FluidStackType stack = new FluidStackType(stackHandlerWrapper.getStackInSlot(0));
+                                        FluidStackKey stack = new FluidStackKey(stackHandlerWrapper.getStackInSlot(0));
                                         if (stack != null && !stack.isEmpty())
                                         {
                                             int changedCount = BDMath.clampLongToInt(Math.min(stack.getStackAmount(), stack.getVanillaMaxStackSize()));
@@ -422,7 +422,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         trueStack = new ItemStackKey(remaining.copy());
                     }
                     // 移动流体并装桶
-                    else if (trueStack instanceof FluidStackType trueFluidTypedKey && trueFluidTypedKey.getSource().getBucket() != Items.AIR)
+                    else if (trueStack instanceof FluidStackKey trueFluidTypedKey && trueFluidTypedKey.getSource().getBucket() != Items.AIR)
                     {
                         IStackKey<?> extract = safeExtract(trueFluidTypedKey.copyWithCount(1000));
                         if (extract.getStackAmount() != 1000)

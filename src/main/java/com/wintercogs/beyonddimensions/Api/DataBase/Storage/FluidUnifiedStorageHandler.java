@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -18,7 +18,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public int getTanks()
     {
-        return storage.getTypeIdIndexList(FluidStackType.ID)
+        return storage.getTypeIdIndexList(FluidStackKey.ID)
                 .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
@@ -26,12 +26,12 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public FluidStack getFluidInTank(int slot)
     {
-        return storage.getTypeIdIndexList(FluidStackType.ID)
+        return storage.getTypeIdIndexList(FluidStackKey.ID)
                 .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
                 .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (FluidStackType) storage.getStackBySlot(actualIndex))
-                .map(FluidStackType::getStack)
+                .map(actualIndex -> (FluidStackKey) storage.getStackBySlot(actualIndex))
+                .map(FluidStackKey::getStack)
                 .orElse(FluidStack.EMPTY);
     }
 
@@ -54,7 +54,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
         if (fluidStack.isEmpty())
             return 0;
         int allAmount = fluidStack.getAmount();
-        int remaining = (int) storage.insert(new FluidStackType(fluidStack.copy()), fluidAction.simulate()).getStackAmount();
+        int remaining = (int) storage.insert(new FluidStackKey(fluidStack.copy()), fluidAction.simulate()).getStackAmount();
         return allAmount - remaining;// 实际插入量
     }
 
@@ -62,7 +62,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
     {
-        return ((FluidStackType) storage.extract(new FluidStackType(fluidStack.copy()), fluidAction.simulate()))
+        return ((FluidStackKey) storage.extract(new FluidStackKey(fluidStack.copy()), fluidAction.simulate()))
                 .copyStack();
     }
 
@@ -72,7 +72,7 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public FluidStack drain(int count, FluidAction fluidAction)
     {
-        return ((FluidStackType) storage.extract(new FluidStackType(new FluidStack(getFluidInTank(0), count)), fluidAction.simulate()))
+        return ((FluidStackKey) storage.extract(new FluidStackKey(new FluidStack(getFluidInTank(0), count)), fluidAction.simulate()))
                 .copyStack();
     }
 }

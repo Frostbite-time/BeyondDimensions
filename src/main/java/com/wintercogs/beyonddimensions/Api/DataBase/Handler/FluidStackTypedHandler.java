@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -34,9 +34,9 @@ public class FluidStackTypedHandler implements IFluidHandler
         }
 
         IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
-        if (stack instanceof FluidStackType fluidStackType && !fluidStackType.isEmpty())
+        if (stack instanceof FluidStackKey fluidStackKey && !fluidStackKey.isEmpty())
         {
-            return fluidStackType.copyStack();
+            return fluidStackKey.copyStack();
         }
 
         return FluidStack.EMPTY;
@@ -76,7 +76,7 @@ public class FluidStackTypedHandler implements IFluidHandler
 
         int requested = fluidStack.getAmount();
         long remaining = handlerStorage
-                .insert(new FluidStackType(fluidStack.copy()), fluidAction.simulate())
+                .insert(new FluidStackKey(fluidStack.copy()), fluidAction.simulate())
                 .getStackAmount();
 
         int actuallyFilled = requested - (int) remaining;
@@ -95,11 +95,11 @@ public class FluidStackTypedHandler implements IFluidHandler
         }
 
         IStackKey<?> extracted = handlerStorage.extract(
-                new FluidStackType(fluidStack.copy()),
+                new FluidStackKey(fluidStack.copy()),
                 fluidAction.simulate()
         );
 
-        if (extracted instanceof FluidStackType fluidExtract && !fluidExtract.isEmpty())
+        if (extracted instanceof FluidStackKey fluidExtract && !fluidExtract.isEmpty())
         {
             return fluidExtract.copyStack();
         }
@@ -118,13 +118,13 @@ public class FluidStackTypedHandler implements IFluidHandler
             return FluidStack.EMPTY;
         }
 
-        return handlerStorage.getTypeIdIndexList(FluidStackType.ID)
+        return handlerStorage.getTypeIdIndexList(FluidStackKey.ID)
                 .map(slots -> slots.get(0))                     // 第一个流体槽位
                 .filter(actualIndex -> actualIndex >= 0)
                 .map(handlerStorage::getStackBySlot)
                 .map(stack -> stack.copyWithCount(count))
                 .map(stack -> handlerStorage.extract(stack, fluidAction.simulate()))
-                .map(extracts -> ((FluidStackType) extracts).copyStack())
+                .map(extracts -> ((FluidStackKey) extracts).copyStack())
                 .orElse(FluidStack.EMPTY);
     }
 }
