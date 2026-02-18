@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.Machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
@@ -27,12 +27,12 @@ public class NetFurnaceMenu extends BDBaseMenu
 
     private static final int invSlotStartY = 128;
 
-    private final IStackTypedHandler inputFilterSlots;
-    private final IStackTypedHandler fuelFilterSlots;
-    private final IStackTypedHandler inputStorageSlots;
-    private final IStackTypedHandler outputStorageSlots;
-    private final IStackTypedHandler fuelStorageSlots;
-    private final IStackTypedHandler fuelReturnSlots;
+    private final IStackHandler inputFilterSlots;
+    private final IStackHandler fuelFilterSlots;
+    private final IStackHandler inputStorageSlots;
+    private final IStackHandler outputStorageSlots;
+    private final IStackHandler fuelStorageSlots;
+    private final IStackHandler fuelReturnSlots;
 
     // 用于对比上一tick所用的信息缓存
     private List<Integer> lastLitTime = new ArrayList<>();
@@ -55,12 +55,12 @@ public class NetFurnaceMenu extends BDBaseMenu
 
         if (playerInventory.player.level().isClientSide())
         {
-            this.inputFilterSlots = new StackTypedHandler(be.getFilterCapacity());
-            this.fuelFilterSlots = new StackTypedHandler(be.getFilterCapacity());
-            this.inputStorageSlots = new StackTypedHandler(be.getCapacity());
-            this.outputStorageSlots = new StackTypedHandler(be.getCapacity());
-            this.fuelStorageSlots = new StackTypedHandler(be.getFuelCapacity());
-            this.fuelReturnSlots = new StackTypedHandler(be.getFuelCapacity());
+            this.inputFilterSlots = new StackHandler(be.getFilterCapacity());
+            this.fuelFilterSlots = new StackHandler(be.getFilterCapacity());
+            this.inputStorageSlots = new StackHandler(be.getCapacity());
+            this.outputStorageSlots = new StackHandler(be.getCapacity());
+            this.fuelStorageSlots = new StackHandler(be.getFuelCapacity());
+            this.fuelReturnSlots = new StackHandler(be.getFuelCapacity());
         }
         else
         {

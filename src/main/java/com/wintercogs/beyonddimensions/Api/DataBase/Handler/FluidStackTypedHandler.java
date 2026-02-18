@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 public class FluidStackTypedHandler implements IFluidHandler
 {
 
-    private final StackTypedHandler handlerStorage;
+    private final StackHandler handlerStorage;
 
-    public FluidStackTypedHandler(StackTypedHandler handlerStorage)
+    public FluidStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
     }

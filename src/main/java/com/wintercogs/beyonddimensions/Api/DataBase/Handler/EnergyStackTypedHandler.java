@@ -7,9 +7,9 @@ import net.minecraftforge.energy.IEnergyStorage;
 public class EnergyStackTypedHandler implements IEnergyStorage
 {
 
-    private StackTypedHandler handlerStorage;
+    private StackHandler handlerStorage;
 
-    public EnergyStackTypedHandler(StackTypedHandler handlerStorage)
+    public EnergyStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
     }

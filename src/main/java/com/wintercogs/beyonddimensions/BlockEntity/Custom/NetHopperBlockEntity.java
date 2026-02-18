@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
@@ -36,7 +36,7 @@ import java.util.List;
 public class NetHopperBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
     private static final int capacity = 36;
-    private final StackTypedHandler filterSlots = new StackTypedHandler(capacity)
+    private final StackHandler filterSlots = new StackHandler(capacity)
     {
         @Override
         public void onChange()

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
@@ -21,7 +21,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     private static final Container empty_inv = new SimpleContainer(0);
     // 如果双端不用同一套逻辑的stackTypedHandler处理，请确保服务端使用的stackTypedHandler可以直接操作数据
     // 因为服务端需要处理数据同步和鼠标点击，而客户端只需要显示数据
-    protected final IStackTypedHandler storage;
+    protected final IStackHandler storage;
 
     // 这两行int信息用来标注快速物品转移的目标区间，这将借助BDBaseMenu从中获得的slots列表来辅助完成
     // 其使用前会进行数据校验，不正确的数值应当阻止quickMove函数调用（请自行实现）
@@ -34,7 +34,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     protected final BDBaseMenu menu;
 
 
-    public AbstractStackTypedSlot(BDBaseMenu menu, IStackTypedHandler storage, int slotIndex, int xPosition, int yPosition)
+    public AbstractStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex, int xPosition, int yPosition)
     {
         super(empty_inv, slotIndex, xPosition, yPosition);
         this.theSlot = slotIndex;
@@ -44,7 +44,7 @@ public abstract class AbstractStackTypedSlot extends Slot
         this.quickMoveSlotEndIndex = -1;
     }
 
-    public AbstractStackTypedSlot(BDBaseMenu menu, IStackTypedHandler storage, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
+    public AbstractStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
     {
         super(empty_inv, slotIndex, xPosition, yPosition);
         this.theSlot = slotIndex;
@@ -58,7 +58,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 注意，此处的函数除loadChange外请仅在服务端调用，重写时也只考虑服务端逻辑
     // 客户端请通过loadChange从服务端接收数据，然后处理
 
-    public IStackTypedHandler getStorage()
+    public IStackHandler getStorage()
     {
         return storage;
     }

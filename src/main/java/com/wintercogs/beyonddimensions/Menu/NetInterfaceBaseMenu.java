@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
@@ -21,8 +21,8 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
     private static final int slotStartY = 1 + CommonTextures.TOP_BASE_COMMON_HEIGHT;
     private static final int invSlotStartY = 6 + slotStartY + CommonTextures.COMMON_SLOTS_HEIGHT * 3 + CommonTextures.FILTER_SLOTS_HEIGHT * 3 + CommonTextures.COMMON_CONNECTION_HEIGHT;
 
-    public final StackTypedHandler storage;
-    public final StackTypedHandler flagStorage;
+    public final StackHandler storage;
+    public final StackHandler flagStorage;
 
     public NetInterfaceBlockEntity be;
 

@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Integration.KubeJS;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.LongType;
 import com.wintercogs.beyonddimensions.Api.DataBase.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.Api.DataBase.PlayerPermissionInfo;
@@ -24,8 +24,8 @@ public class BD_KubeJSPlugin extends KubeJSPlugin
     {
         bindings.add("UnifiedStorage", UnifiedStorage.class);
         bindings.add("UnifiedStorageBeforeInsertHandler", UnifiedStorageBeforeInsertHandler.class);
-        bindings.add("IStackTypedHandler", IStackTypedHandler.class);
-        bindings.add("StackTypedHandler", StackTypedHandler.class);
+        bindings.add("IStackTypedHandler", IStackHandler.class);
+        bindings.add("StackTypedHandler", StackHandler.class);
         bindings.add("LongType", LongType.class);
         bindings.add("IStackType", IStackKey.class);
         bindings.add("ItemStackType", ItemStackKey.class);

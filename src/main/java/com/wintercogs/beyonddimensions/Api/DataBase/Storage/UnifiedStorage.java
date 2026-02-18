@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
@@ -15,6 +15,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -22,7 +23,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * 基于{@link IStackTypedHandler}接口的无序存储实现。
+ * 基于{@link IStackHandler}接口的无序存储实现。
  * <p>
  * 具有以下特点：
  * <ul>
@@ -33,7 +34,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * <p>
  * 虽然需要一个DimensionsNet作为参数进行构造，但仅用于onChange方法通知数据保存。你可以复制代码，移除DimensionsNet参数，以获得一个可以自定义的无序存储实现
  */
-public class UnifiedStorage implements IStackTypedHandler
+public class UnifiedStorage implements IStackHandler
 {
     /**
      * 对应的维度网络
@@ -313,9 +314,9 @@ public class UnifiedStorage implements IStackTypedHandler
 
     // 返回副本
     @Override
-    public IStackKey<?> getStackBySlot(int slot)
+    public @NotNull IStackKey<?> getStackBySlot(int slot)
     {
-        return IStackTypedHandler.super.getStackBySlot(slot);
+        return IStackHandler.super.getStackBySlot(slot);
     }
 
     // 外部不可修改
@@ -642,7 +643,7 @@ public class UnifiedStorage implements IStackTypedHandler
 
     // 尝试按槽位导出 返回实际导出量
     @Override
-    public IStackKey<?> extract(int slot, long amount, boolean simulate)
+    public @NotNull IStackKey<?> extract(int slot, long amount, boolean simulate)
     {
         if (slot < 0 || slot >= storage.size())
         {

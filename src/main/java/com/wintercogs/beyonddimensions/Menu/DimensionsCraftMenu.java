@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
@@ -273,7 +273,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     }
 
     // 从存储提取物品
-    private int extractFromStorage(IStackTypedHandler storage, IStackKey type, int amount)
+    private int extractFromStorage(IStackHandler storage, IStackKey type, int amount)
     {
         IStackKey extraction = storage.extract(type.copyWithCount(amount), false);
         if (extraction.getStackAmount() > 0)

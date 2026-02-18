@@ -11,9 +11,9 @@ import org.jetbrains.annotations.NotNull;
 public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiable
 {
 
-    private final StackTypedHandler handlerStorage;
+    private final StackHandler handlerStorage;
 
-    public ItemStackTypedHandler(StackTypedHandler handlerStorage)
+    public ItemStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
     }

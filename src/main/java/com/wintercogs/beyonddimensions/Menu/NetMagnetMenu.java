@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Item.Custom.BaseMachineItem;
@@ -26,7 +26,7 @@ public class NetMagnetMenu extends BDBaseMenu
     private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + 7;
 
     // storage的初始数据由itemStack提供，随后storage每次变化都重新向其中写入数据
-    private final IStackTypedHandler storage = new StackTypedHandler(36)
+    private final IStackHandler storage = new StackHandler(36)
     {
         @Override
         public void onChange()

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
@@ -12,9 +12,9 @@ import org.jetbrains.annotations.NotNull;
 public class PigmentStackTypedHandler implements IPigmentHandler
 {
 
-    private final StackTypedHandler handlerStorage;
+    private final StackHandler handlerStorage;
 
-    public PigmentStackTypedHandler(StackTypedHandler handlerStorage)
+    public PigmentStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
     }

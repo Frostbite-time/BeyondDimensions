@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
@@ -38,7 +38,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     private final Direction[] directions = Direction.values();
 
     private static final int capacity = 36;
-    private final StackTypedHandler filterSlots = new StackTypedHandler(capacity)
+    private final StackHandler filterSlots = new StackHandler(capacity)
     {
         @Override
         public void onChange()

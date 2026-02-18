@@ -22,11 +22,11 @@ import java.util.Optional;
 
 public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAttachable
 {
-    private StackTypedHandler storageHandler;
+    private StackHandler storageHandler;
     private Level level;
     private BlockPos pos;
 
-    public ManaStackTypedHandler(StackTypedHandler storageHandler, CapCtx ctx)
+    public ManaStackTypedHandler(StackHandler storageHandler, CapCtx ctx)
     {
         this.storageHandler = storageHandler;
         this.level = ctx.level();

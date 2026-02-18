@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.ItemStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
@@ -129,7 +129,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
     }
 
     // 输入标记
-    private final StackTypedHandler inputFilterSlots = new StackTypedHandler(filterCapacity)
+    private final StackHandler inputFilterSlots = new StackHandler(filterCapacity)
     {
         @Override
         public void onChange()
@@ -146,13 +146,13 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         }
     };
 
-    public StackTypedHandler getInputFilterSlots()
+    public StackHandler getInputFilterSlots()
     {
         return inputFilterSlots;
     }
 
     // 燃料标记
-    private final StackTypedHandler fuelFilterSlots = new StackTypedHandler(filterCapacity)
+    private final StackHandler fuelFilterSlots = new StackHandler(filterCapacity)
     {
         @Override
         public void onChange()
@@ -172,13 +172,13 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
 
     };
 
-    public StackTypedHandler getFuelFilterSlots()
+    public StackHandler getFuelFilterSlots()
     {
         return fuelFilterSlots;
     }
 
     // 输入存储
-    private final StackTypedHandler inputStorageSlots = new StackTypedHandler(capacity)
+    private final StackHandler inputStorageSlots = new StackHandler(capacity)
     {
         @Override
         public void onChange()
@@ -196,13 +196,13 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         }
     };
 
-    public StackTypedHandler getInputStorageSlots()
+    public StackHandler getInputStorageSlots()
     {
         return inputStorageSlots;
     }
 
     // 输出存储
-    private final StackTypedHandler outputStorageSlots = new StackTypedHandler(capacity)
+    private final StackHandler outputStorageSlots = new StackHandler(capacity)
     {
         @Override
         public void onChange()
@@ -213,13 +213,13 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
 
     };
 
-    public StackTypedHandler getOutputStorageSlots()
+    public StackHandler getOutputStorageSlots()
     {
         return outputStorageSlots;
     }
 
     // 燃料存储
-    private final StackTypedHandler fuelStorageSlots = new StackTypedHandler(fuelCapacity)
+    private final StackHandler fuelStorageSlots = new StackHandler(fuelCapacity)
     {
         @Override
         public void onChange()
@@ -238,13 +238,13 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         }
     };
 
-    public StackTypedHandler getFuelStorageSlots()
+    public StackHandler getFuelStorageSlots()
     {
         return fuelStorageSlots;
     }
 
     // 燃料返回物存储
-    private final StackTypedHandler fuelReturnSlots = new StackTypedHandler(fuelCapacity)
+    private final StackHandler fuelReturnSlots = new StackHandler(fuelCapacity)
     {
         @Override
         public void onChange()
@@ -254,7 +254,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         }
     };
 
-    public StackTypedHandler getFuelReturnSlots()
+    public StackHandler getFuelReturnSlots()
     {
         return fuelReturnSlots;
     }

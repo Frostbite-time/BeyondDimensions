@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
@@ -49,7 +49,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     private static final int capacity = CommonConfigRuntime.interfaceUsableCapacity;
 
     // 用来标记物品或者流体的槽位，只由UI控制
-    private final StackTypedHandler fakeStackHandler = new StackTypedHandler(capacity)
+    private final StackHandler fakeStackHandler = new StackHandler(capacity)
     {
         // 只触发方块自身的保存，但是不向周围发信
         @Override
@@ -60,7 +60,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         }
     };
 
-    private final StackTypedHandler stackHandler = new StackTypedHandler(capacity)
+    private final StackHandler stackHandler = new StackHandler(capacity)
     {
         @Override
         public void onChange()
@@ -82,12 +82,12 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     private final Multimap<ResourceLocation, Object> handlerCache = ArrayListMultimap.create();
     private boolean needsCapabilityUpdate = true;
 
-    public StackTypedHandler getStackHandler()
+    public StackHandler getStackHandler()
     {
         return this.stackHandler;
     }
 
-    public StackTypedHandler getFakeStackHandler()
+    public StackHandler getFakeStackHandler()
     {
         return this.fakeStackHandler;
     }

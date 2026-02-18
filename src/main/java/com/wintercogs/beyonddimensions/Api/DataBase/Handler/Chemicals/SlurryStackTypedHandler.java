@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
@@ -12,9 +12,9 @@ import org.jetbrains.annotations.NotNull;
 public class SlurryStackTypedHandler implements ISlurryHandler
 {
 
-    private final StackTypedHandler handlerStorage;
+    private final StackHandler handlerStorage;
 
-    public SlurryStackTypedHandler(StackTypedHandler handlerStorage)
+    public SlurryStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
     }

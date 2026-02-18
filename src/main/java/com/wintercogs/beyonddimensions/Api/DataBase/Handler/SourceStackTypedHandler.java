@@ -7,9 +7,9 @@ import com.wintercogs.beyonddimensions.Unit.BDMath;
 
 public class SourceStackTypedHandler implements ISourceCap
 {
-    private StackTypedHandler handlerStorage;
+    private StackHandler handlerStorage;
 
-    public SourceStackTypedHandler(StackTypedHandler handlerStorage)
+    public SourceStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
     }

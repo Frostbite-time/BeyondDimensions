@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
@@ -15,9 +15,9 @@ public class GasStackTypedHandler implements IGasHandler
     /**
      * 统一存储后端
      */
-    private final StackTypedHandler handlerStorage;
+    private final StackHandler handlerStorage;
 
-    public GasStackTypedHandler(StackTypedHandler handlerStorage)
+    public GasStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
     }
