@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.LongType;
 import com.wintercogs.beyonddimensions.Api.DataBase.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.Api.DataBase.PlayerPermissionInfo;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
@@ -30,7 +30,7 @@ public class BD_KubeJSPlugin extends KubeJSPlugin
         bindings.add("IStackType", IStackKey.class);
         bindings.add("ItemStackType", ItemStackKey.class);
         bindings.add("FluidStackType", FluidStackKey.class);
-        bindings.add("EnergyStackType", EnergyStackType.class);
+        bindings.add("EnergyStackType", EnergyStackKey.class);
         bindings.add("IStackHandlerWrapper", IStackHandlerWrapper.class);
         bindings.add("DimensionsNet", DimensionsNet.class);
         bindings.add("PlayerPermissionInfo", PlayerPermissionInfo.class);

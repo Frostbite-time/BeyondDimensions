@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
@@ -828,7 +828,7 @@ public class UnifiedStorage implements IStackTypedHandler
      */
     public long getEnergyStored()
     {
-        IStackKey<?> stack = getStackByStack(EnergyStackType.EMPTY);
+        IStackKey<?> stack = getStackByStack(EnergyStackKey.EMPTY);
         if (stack != null)
             return stack.getStackAmount();
         return 0;

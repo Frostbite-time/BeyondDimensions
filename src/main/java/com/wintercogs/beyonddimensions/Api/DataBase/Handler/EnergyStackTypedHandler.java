@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraftforge.energy.IEnergyStorage;
 
@@ -17,22 +17,22 @@ public class EnergyStackTypedHandler implements IEnergyStorage
     @Override
     public int receiveEnergy(int count, boolean simulate)
     {
-        return (int) (count - handlerStorage.insert(new EnergyStackType(count), simulate).getStackAmount());
+        return (int) (count - handlerStorage.insert(new EnergyStackKey(count), simulate).getStackAmount());
     }
 
     @Override
     public int extractEnergy(int count, boolean simulate)
     {
-        return (int) handlerStorage.extract(new EnergyStackType(count), simulate).getStackAmount();
+        return (int) handlerStorage.extract(new EnergyStackKey(count), simulate).getStackAmount();
     }
 
     @Override
     public int getEnergyStored()
     {
-        return handlerStorage.getTypeIdIndexList(EnergyStackType.ID)
+        return handlerStorage.getTypeIdIndexList(EnergyStackKey.ID)
                 .map(slots -> slots.get(0))
                 .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (EnergyStackType) handlerStorage.getStackBySlot(actualIndex))
+                .map(actualIndex -> (EnergyStackKey) handlerStorage.getStackBySlot(actualIndex))
                 .map(energyStackType -> BDMath.clampLongToInt(energyStackType.getStackAmount()))
                 .orElse(0);
     }

@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.ItemStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
@@ -165,7 +165,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         public boolean isStackValid(int slot, IStackKey stack)
         {
             // 能量或者可以燃烧的物品能作为燃料标记
-            return (stack instanceof EnergyStackType)
+            return (stack instanceof EnergyStackKey)
                     || (stack instanceof FluidStackKey fluidStack && fluidStack.copyStack().getFluid() == Fluids.LAVA)
                     || (stack instanceof ItemStackKey itemFuel && ForgeHooks.getBurnTime(itemFuel.getStack(), RecipeType.SMELTING) > 0);
         }
@@ -232,7 +232,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         public boolean isStackValid(int slot, IStackKey stack)
         {
             // 能量或者可以燃烧的物品能作为燃料标记
-            return (stack instanceof EnergyStackType)
+            return (stack instanceof EnergyStackKey)
                     || (stack instanceof FluidStackKey fluidStack && fluidStack.copyStack().getFluid() == Fluids.LAVA)
                     || (stack instanceof ItemStackKey itemFuel && ForgeHooks.getBurnTime(itemFuel.getStack(), RecipeType.SMELTING) > 0);
         }
@@ -519,7 +519,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                 {
                     if (!fuelStack.isEmpty())
                     {
-                        if (fuelStack instanceof EnergyStackType fuelEnergy)
+                        if (fuelStack instanceof EnergyStackKey fuelEnergy)
                         {
                             // 每个fe对应1tick燃烧时间
                             int burnTime = (int) Math.min(fuelEnergy.getStackAmount(), 20000);
@@ -745,7 +745,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         {
             IStackKey fuelStack = fuelStorageSlots.getStackBySlot(fuelSlot);
             if (fuelStack != null && !fuelStack.isEmpty()
-                    && (fuelStack instanceof EnergyStackType || fuelStack instanceof FluidStackKey))
+                    && (fuelStack instanceof EnergyStackKey || fuelStack instanceof FluidStackKey))
             {
                 // 转移至网络
                 if (receiveMode == ReceiveMode.OPEN)

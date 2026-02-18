@@ -4,7 +4,7 @@ import com.hollingsworth.arsnouveau.api.source.ISourceTile;
 import com.hollingsworth.arsnouveau.api.source.SourceManager;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackKey;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Integration.Ars.Caps.SourcePathwayProvider;
@@ -37,7 +37,7 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         DimensionsNet net = getNet();
         if (net != null)
         {
-            IStackKey stack = net.getUnifiedStorage().getStackByStack(new SourceStackType(0));
+            IStackKey stack = net.getUnifiedStorage().getStackByStack(new SourceStackKey(0));
             if (stack != null)
             {
                 return BDMath.clampLongToInt(stack.getStackAmount());
@@ -76,7 +76,7 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         DimensionsNet net = getNet();
         if (net != null)
         {
-            net.getUnifiedStorage().insert(new SourceStackType(amount), false).getStackAmount();
+            net.getUnifiedStorage().insert(new SourceStackKey(amount), false).getStackAmount();
         }
         return getSource(); // 无论如何，最后返回总量
     }
@@ -88,7 +88,7 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         DimensionsNet net = getNet();
         if (net != null)
         {
-            net.getUnifiedStorage().extract(new SourceStackType(amount), false).getStackAmount();
+            net.getUnifiedStorage().extract(new SourceStackKey(amount), false).getStackAmount();
         }
         return getSource(); // 无论如何，最后返回总量
     }

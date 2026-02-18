@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.google.common.base.Predicates;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackKey;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.core.BlockPos;
@@ -49,13 +49,13 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     @Override
     public int getCurrentMana()
     {
-        return storageHandler.getTypeIdIndexList(ManaStackType.ID)
+        return storageHandler.getTypeIdIndexList(ManaStackKey.ID)
                 .map(list -> list.stream()
                         .filter(idx -> idx >= 0)
                         .map(storageHandler::getStackBySlot)
-                        .filter(ManaStackType.class::isInstance)
-                        .map(ManaStackType.class::cast)
-                        .mapToLong(ManaStackType::getStackAmount)
+                        .filter(ManaStackKey.class::isInstance)
+                        .map(ManaStackKey.class::cast)
+                        .mapToLong(ManaStackKey::getStackAmount)
                         .sum())
                 .map(BDMath::clampLongToInt)
                 .orElse(0);
@@ -69,7 +69,7 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
         {
             if (stack.isEmpty())
                 return false;
-            if (stack instanceof ManaStackType && stack.getStackAmount() < stack.getVanillaMaxStackSize())
+            if (stack instanceof ManaStackKey && stack.getStackAmount() < stack.getVanillaMaxStackSize())
                 return false;
         }
         return true;
@@ -79,9 +79,9 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     public void receiveMana(int mana)
     {
         if (mana > 0)
-            storageHandler.insert(new ManaStackType(mana), false);
+            storageHandler.insert(new ManaStackKey(mana), false);
         else
-            storageHandler.extract(new ManaStackType(-mana), false);
+            storageHandler.extract(new ManaStackKey(-mana), false);
     }
 
     @Override
@@ -114,12 +114,12 @@ public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAtta
     public int getMaxMana()
     {
         long maxMana = 0;
-        ManaStackType stackType = new ManaStackType();
+        ManaStackKey stackType = new ManaStackKey();
         for (IStackKey stack : storageHandler.getStorage())
         {
             if (stack.isEmpty())
                 maxMana += stackType.getVanillaMaxStackSize();
-            if (stack instanceof ManaStackType && stack.getStackAmount() < stack.getVanillaMaxStackSize())
+            if (stack instanceof ManaStackKey && stack.getStackAmount() < stack.getVanillaMaxStackSize())
                 maxMana += stack.getVanillaMaxStackSize() - stack.getStackAmount();
         }
         return BDMath.clampLongToInt(maxMana);

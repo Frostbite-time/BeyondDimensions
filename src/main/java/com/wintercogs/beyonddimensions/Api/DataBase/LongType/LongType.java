@@ -64,4 +64,3 @@ public abstract class LongType<T>
         return this.getClass().hashCode();
     }
 }
-

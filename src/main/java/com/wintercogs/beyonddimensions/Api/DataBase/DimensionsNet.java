@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
@@ -240,7 +240,7 @@ public class DimensionsNet extends SavedData
             CompoundTag energyTag = tag.getCompound("EnergyStorage");
             if (energyTag.contains("Energy"))
             {
-                net.unifiedStorage.insert(new EnergyStackType(energyTag.getLong("Energy")), false);
+                net.unifiedStorage.insert(new EnergyStackKey(energyTag.getLong("Energy")), false);
             }
         }
 
