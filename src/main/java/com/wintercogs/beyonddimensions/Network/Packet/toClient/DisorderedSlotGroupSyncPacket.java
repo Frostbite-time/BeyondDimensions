@@ -15,19 +15,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackKey> stacks, List<Long> newCount)
+public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackKey<?>> keys, List<Long> newCounts,
+                                            List<Long> newModifiedTime,
+                                            List<Long> newInsertedTime)
 {
 
     @OnlyIn(Dist.CLIENT)
     private void handle(NetworkEvent.Context context)
     {
         Player player = Minecraft.getInstance().player;
+        if (player == null) return;
         if (player.containerMenu instanceof BDBaseMenu menu)
         {
             SlotGroupSync sync = menu.slotGroupSyncs.get(groupId());
             if (sync != null)
             {
-                sync.loadChange(stacks(), newCount());
+                sync.loadChange(keys(), newCounts(), newModifiedTime(), newInsertedTime());
                 sync.afterLoadChange();
 
             }
@@ -50,44 +53,73 @@ public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackKey> stacks,
 
     public static void encode(DisorderedSlotGroupSyncPacket packet, FriendlyByteBuf buf)
     {
-        buf.writeVarInt(packet.groupId);
+        buf.writeVarInt(packet.groupId());
 
-        // 序列化stacks列表
-        buf.writeInt(packet.stacks().size());
-        for (IStackKey stack : packet.stacks())
+        // keys
+        buf.writeVarInt(packet.keys().size());
+        for (IStackKey<?> key : packet.keys())
         {
-            stack.serialize(buf);
+            key.serialize(buf);
         }
 
-        // 序列化changedCounts列表（长整型）
-        buf.writeInt(packet.newCount().size());
-        for (long count : packet.newCount())
+        // newCounts
+        buf.writeVarInt(packet.newCounts().size());
+        for (long v : packet.newCounts())
         {
-            buf.writeLong(count);
+            buf.writeLong(v);
         }
 
+        // newModifiedTime
+        buf.writeVarInt(packet.newModifiedTime().size());
+        for (long v : packet.newModifiedTime())
+        {
+            buf.writeLong(v);
+        }
+
+        // newInsertedTime
+        buf.writeVarInt(packet.newInsertedTime().size());
+        for (long v : packet.newInsertedTime())
+        {
+            buf.writeLong(v);
+        }
     }
 
     public static DisorderedSlotGroupSyncPacket decode(FriendlyByteBuf buf)
     {
         int groupId = buf.readVarInt();
 
-        // 反序列化stacks列表
-        int stacksSize = buf.readInt();
-        List<IStackKey> stacks = new ArrayList<>(stacksSize);
-        for (int i = 0; i < stacksSize; i++)
+        // keys
+        int keysSize = buf.readVarInt();
+        List<IStackKey<?>> keys = new ArrayList<>(keysSize);
+        for (int i = 0; i < keysSize; i++)
         {
-            stacks.add(IStackKey.deserializeCommon(buf));
+            keys.add(IStackKey.deserializeCommon(buf));
         }
 
-        // 反序列化changedCounts列表
-        int countsSize = buf.readInt();
-        List<Long> changedCounts = new ArrayList<>(countsSize);
+        // newCounts
+        int countsSize = buf.readVarInt();
+        List<Long> newCounts = new ArrayList<>(countsSize);
         for (int i = 0; i < countsSize; i++)
         {
-            changedCounts.add(buf.readLong());
+            newCounts.add(buf.readLong());
         }
 
-        return new DisorderedSlotGroupSyncPacket(groupId, stacks, changedCounts);
+        // newModifiedTime
+        int modifiedSize = buf.readVarInt();
+        List<Long> newModifiedTime = new ArrayList<>(modifiedSize);
+        for (int i = 0; i < modifiedSize; i++)
+        {
+            newModifiedTime.add(buf.readLong());
+        }
+
+        // newInsertedTime
+        int insertedSize = buf.readVarInt();
+        List<Long> newInsertedTime = new ArrayList<>(insertedSize);
+        for (int i = 0; i < insertedSize; i++)
+        {
+            newInsertedTime.add(buf.readLong());
+        }
+
+        return new DisorderedSlotGroupSyncPacket(groupId, keys, newCounts, newModifiedTime, newInsertedTime);
     }
 }

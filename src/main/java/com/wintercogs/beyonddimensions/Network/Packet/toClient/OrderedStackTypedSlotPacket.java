@@ -13,7 +13,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackKey stack, long newAmount)
+public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackKey<?> stack, long newAmount)
 {
 
     @OnlyIn(Dist.CLIENT)
@@ -58,7 +58,7 @@ public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackKey s
     {
         int slotId = buf.readVarInt();
         int slotIndex = buf.readVarInt();
-        IStackKey stack = IStackKey.deserializeCommon(buf);
+        IStackKey<?> stack = IStackKey.deserializeCommon(buf);
         long newAmount = buf.readVarLong();
 
         return new OrderedStackTypedSlotPacket(slotId, slotIndex, stack, newAmount);

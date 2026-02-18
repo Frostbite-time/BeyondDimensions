@@ -11,13 +11,14 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.common.ForgeHooks;
+import org.jetbrains.annotations.NotNull;
 
 public class AutoRefillResultSlot extends ResultSlot
 {
 
     private final CraftingContainer craftSlots;
     private final Player player;
-    private DimensionsCraftMenu menu;
+    private final DimensionsCraftMenu menu;
 
     public AutoRefillResultSlot(DimensionsCraftMenu menu, Player player, CraftingContainer craftSlots, Container container, int slot, int xPosition, int yPosition)
     {
@@ -28,7 +29,7 @@ public class AutoRefillResultSlot extends ResultSlot
     }
 
     @Override
-    public void onTake(Player player, ItemStack stack)
+    public void onTake(@NotNull Player player, @NotNull ItemStack stack)
     {
         this.checkTakeAchievements(stack);
         ForgeHooks.setCraftingPlayer(player);
@@ -51,18 +52,15 @@ public class AutoRefillResultSlot extends ResultSlot
                     boolean consumed = false;
 
                     // 优先尝试存储系统
-                    if (menu.storage != null)
+                    long extracted = menu.storage.extract(new ItemStackKey(singleItem), singleItem.getCount(), true, false).amount();
+                    if (extracted >= 1)
                     {
-                        long extracted = menu.storage.extract(new ItemStackKey(singleItem), true).getStackAmount();
-                        if (extracted >= 1)
+                        if (!player.level().isClientSide())
                         {
-                            if (!player.level().isClientSide())
-                            {
-                                menu.storage.extract(new ItemStackKey(singleItem), false);
-                            }
-                            itemsToRemove = 0;
-                            consumed = true;
+                            menu.storage.extract(new ItemStackKey(singleItem), singleItem.getCount(), false, false);
                         }
+                        itemsToRemove = 0;
+                        consumed = true;
                     }
 
                     // 存储系统不足时尝试玩家背包

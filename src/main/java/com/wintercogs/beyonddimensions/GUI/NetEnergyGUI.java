@@ -13,6 +13,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import org.jetbrains.annotations.NotNull;
 
 public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
 {
@@ -121,7 +122,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         popButton.render(guiGraphics, mouseX, mouseY, partialTicks);

@@ -30,6 +30,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.Vec2;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -396,7 +397,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
     }
