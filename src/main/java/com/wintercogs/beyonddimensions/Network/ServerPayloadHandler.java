@@ -135,8 +135,6 @@ public class ServerPayloadHandler
                     {
                         menu.customClickHandler(packet.slotIndex(), packet.clickItem(), packet.button(), packet.shiftDown());
                         menu.broadcastChanges();
-                        // 这里发包不是让客户端执行操作，而是解除锁定
-                        PacketDistributor.sendToPlayer((ServerPlayer) player, new CallSeverClickPacket(1, new KeyAmount(ItemStackKey.EMPTY, 0), 1, false));
                     }
                 }
 

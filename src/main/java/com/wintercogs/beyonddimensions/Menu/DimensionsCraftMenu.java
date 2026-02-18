@@ -33,6 +33,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -219,7 +220,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     }
 
     @Override
-    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot)
+    public boolean canTakeItemForPickAll(@NotNull ItemStack stack, @NotNull Slot slot)
     {
         return slot.container != resultSlots && super.canTakeItemForPickAll(stack, slot);
     }
@@ -426,7 +427,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     }
 
     @Override
-    public void removed(Player player)
+    public void removed(@NotNull Player player)
     {
         super.removed(player);
         // 将合成槽物品优先放入玩家背包 否则掉落

@@ -12,13 +12,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.common.CommonHooks;
+import org.jetbrains.annotations.NotNull;
 
 public class AutoRefillResultSlot extends ResultSlot
 {
 
     private final CraftingContainer craftSlots;
     private final Player player;
-    private DimensionsCraftMenu menu;
+    private final DimensionsCraftMenu menu;
 
     public AutoRefillResultSlot(DimensionsCraftMenu menu, Player player, CraftingContainer craftSlots, Container container, int slot, int xPosition, int yPosition)
     {
@@ -29,7 +30,7 @@ public class AutoRefillResultSlot extends ResultSlot
     }
 
     @Override
-    public void onTake(Player player, ItemStack stack)
+    public void onTake(@NotNull Player player, @NotNull ItemStack stack)
     {
         this.checkTakeAchievements(stack);
         CraftingInput.Positioned positionedInput = this.craftSlots.asPositionedCraftInput();

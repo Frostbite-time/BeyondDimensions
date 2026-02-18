@@ -22,6 +22,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +124,7 @@ public class NetFeederMenu extends BDBaseMenu
     }
 
     @Override
-    public boolean stillValid(Player player)
+    public boolean stillValid(@NotNull Player player)
     {
         return menuStack != null && !menuStack.isEmpty();
     }

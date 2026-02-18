@@ -1,10 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
@@ -97,7 +94,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                             {
                                 FluidStack fluidStack = stackHandlerWrapper.getStackInSlot(0);
                                 KeyAmount stack = new KeyAmount(new FluidStackKey(fluidStack), fluidStack.getAmount());
-                                if (stack.key() != null && !stack.isEmpty())
+                                if (!stack.isEmpty())
                                 {
                                     int changedCount = BDMath.clampLongToInt(Math.min(stack.amount(), stack.key().getVanillaMaxStackSize()));
                                     // 进行模拟，桶必须完全清空才被允许操作
@@ -105,7 +102,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                     if (remaining <= 0)
                                     {
                                         // 执行实际逻辑
-                                        storage.insert(getSlotIndex(), stack.key(), changedCount, false).amount();
+                                        storage.insert(getSlotIndex(), stack.key(), changedCount, false);
                                         menu.setCarried(new ItemStack(Items.BUCKET));
                                         handled.set(true);
                                     }
@@ -319,7 +316,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                     {
                                         FluidStack typeStack = stackHandlerWrapper.getStackInSlot(0);
                                         KeyAmount stack = new KeyAmount(new FluidStackKey(typeStack), typeStack.getAmount());
-                                        if (stack.key() != null && !stack.isEmpty())
+                                        if (!stack.isEmpty())
                                         {
                                             int changedCount = BDMath.clampLongToInt(Math.min(stack.amount(), stack.key().getVanillaMaxStackSize()));
                                             // 进行模拟，桶必须完全清空才被允许操作
@@ -475,11 +472,11 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public KeyAmount safeExtract(IStackKey<?> key, long amount)
     {
-        if (key != null && getStack() != null && key.getTypeId().equals(getStack().key().getTypeId()) && key.isSameTypeSameComponents(getStack().key()))
+        if (key != null && key.getTypeId().equals(getStack().key().getTypeId()) && key.isSameTypeSameComponents(getStack().key()))
         {
             return storage.extract(theSlot, amount, false);
         }
-        return new KeyAmount(key, amount);
+        return new KeyAmount(EmptyStackKey.INSTANCE, amount);
     }
 
     @Override

@@ -26,6 +26,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -623,7 +624,7 @@ public class DimensionsNetMenu extends BDBaseMenu
 
 
     @Override
-    public boolean stillValid(Player player)
+    public boolean stillValid(@NotNull Player player)
     {
         return true; // 可根据需求修改条件
     }

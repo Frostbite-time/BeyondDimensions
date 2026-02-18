@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -211,7 +212,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         nowShowPlayer = 0;

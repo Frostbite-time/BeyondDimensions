@@ -26,6 +26,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -191,13 +192,13 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     }
 
     @Override
-    public Component getDisplayName()
+    public @NotNull Component getDisplayName()
     {
         return Component.translatable("menu.title.beyonddimensions.pump_menu");
     }
 
     @Override
-    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player)
     {
         return new NetPumpMenu(containerId, inventory, filterSlots, this);
     }

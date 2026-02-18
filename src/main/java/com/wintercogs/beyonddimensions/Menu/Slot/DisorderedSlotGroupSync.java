@@ -238,7 +238,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         List<DisorderedSlotGroupSyncPacket> packets = new ArrayList<>(Math.max(1, n / 128));
         List<Integer> entrySizes = new ArrayList<>(n);
 
-        // 预估单条大小（真实序列化到临时buf测字节数）
+        // 预估单条大小
         for (int i = 0; i < n; i++)
         {
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
@@ -322,12 +322,6 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
     {
         AbstractUnorderedStackHandler clientStorage = storage; // 同一实现，但客户端侧不订阅事件回环
         final int n = keys.size();
-
-        // 容错：保证四个列表等长
-        if (newCounts.size() != n || newModifiedTime.size() != n || newInsertedTime.size() != n)
-        {
-            // 简单保护：只按 keys 的长度处理
-        }
 
         for (int i = 0; i < n; i++)
         {

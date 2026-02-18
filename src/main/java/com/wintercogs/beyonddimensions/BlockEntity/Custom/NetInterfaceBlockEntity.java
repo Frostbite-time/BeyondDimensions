@@ -36,6 +36,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -105,8 +106,9 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     @Override
     public boolean shouldWork()
     {
-        // 无论接口是否工作，更新红石信号
+        if(level == null) return false;
 
+        // 无论接口是否工作，更新红石信号
         int empty = stackHandler.getBucket(EmptyStackKey.INSTANCE).map(StackHandler.SlotBucket::size).orElse(stackHandler.getSlots());
         int notEmpty = stackHandler.getSlots() - empty;
 
@@ -296,7 +298,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                 (typeId, handler) -> {
                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
 
-                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                    IStackHandlerWrapper<Object> stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
 
                     for (int i = 0; i < capacity; i++)
                     {
@@ -324,6 +326,8 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
     public void dropContent()
     {
+        if(level == null) return;
+
         List<KeyAmount> dropList = new ArrayList<>();
         for (KeyAmount stack : stackHandler.getStorage())
         {
@@ -359,10 +363,14 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         this.fakeStackHandler.deserializeNBT(registries, tag.getCompound("flags"));
 
         // 旧数据兼容
-        String popModeNew = tag.getString("popMode");
+        String popModeNew = tag.getString("pop_mode");
         if (!popModeNew.isEmpty())
         {
             this.popMode = PopMode.valueOf(popModeNew);
+        }
+        else if(!tag.getString("popMode").isEmpty())
+        {
+            this.popMode = PopMode.valueOf(tag.getString("popMode"));
         }
         else if (tag.getBoolean("popMode"))
         {
@@ -388,18 +396,18 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         super.saveAdditional(tag, registries);
         tag.put("inventory", stackHandler.serializeNBT(registries));
         tag.put("flags", fakeStackHandler.serializeNBT(registries));
-        tag.putString("popMode", this.popMode.name());
+        tag.putString("pop_mode", this.popMode.name());
         tag.putString("fuzzy_mode", this.fuzzyMode.name());
     }
 
     @Override
-    public Component getDisplayName()
+    public @NotNull Component getDisplayName()
     {
         return Component.translatable("menu.title.beyonddimensions.net_interface_menu");
     }
 
     @Override
-    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, Player player)
     {
         return new NetInterfaceBaseMenu(containerId, player.getInventory(), this);
     }

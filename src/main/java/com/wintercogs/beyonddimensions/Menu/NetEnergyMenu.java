@@ -16,6 +16,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
@@ -138,7 +139,7 @@ public class NetEnergyMenu extends BDBaseMenu
     }
 
     @Override
-    public boolean stillValid(Player player)
+    public boolean stillValid(@NotNull Player player)
     {
         return be != null && !be.isRemoved();
     }

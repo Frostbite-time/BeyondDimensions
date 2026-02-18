@@ -1,10 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu.Slot;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
@@ -55,7 +52,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
         {
             setStackDirectly(key, amount);
         }
-        return new KeyAmount(key, amount);
+        return new KeyAmount(EmptyStackKey.INSTANCE, amount);
     }
 
     @Override
@@ -108,7 +105,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                                         if (typeStack != null)
                                         {
                                             KeyAmount stack = new KeyAmount(typeStack.key(), 1);
-                                            if (stack.key() != null && !stack.isEmpty())
+                                            if (!stack.isEmpty())
                                             {
                                                 setStackDirectly(stack.key(), stack.amount());
                                                 break;
@@ -158,15 +155,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     public void updateChange()
     {
         KeyAmount currentStack = storage.getStackBySlot(this.getSlotIndex());
-        if (currentStack.key() == null)
-        {
-            lastStack = new KeyAmount(ItemStackKey.EMPTY, 0);
-            PacketDistributor.sendToPlayer((ServerPlayer) menu.player, new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
-        }
-        else if (currentStack.isEmpty() && lastStack.isEmpty())
-        {
-        }
-        else if (lastStack.amount() != currentStack.amount()
+        if (lastStack.amount() != currentStack.amount()
                 || !lastStack.key().getTypeId().equals(currentStack.key().getTypeId())
                 || !lastStack.key().isSameTypeSameComponents(currentStack.key()))
         {

@@ -16,6 +16,7 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.anti_ad.mc.ipn.api.IPNIgnore;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -52,7 +53,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     @Override
-    protected Slot addSlot(Slot slot)
+    protected @NotNull Slot addSlot(@NotNull Slot slot)
     {
         if (slot instanceof AbstractStackTypedSlot sSlot)
             updatedSlots.add(sSlot);
@@ -312,23 +313,23 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
 
     // 完全重写快速移动方案
     @Override
-    public ItemStack quickMoveStack(Player player, int slotIndex)
+    public @NotNull ItemStack quickMoveStack(@NotNull Player player, int slotIndex)
     {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean moveItemStackTo(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
+    public boolean moveItemStackTo(@NotNull ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
     {
         return false;
     }
 
     // 重写
     @Override
-    public abstract boolean stillValid(Player player);
+    public abstract boolean stillValid(@NotNull Player player);
 
     @Override
-    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot)
+    public boolean canTakeItemForPickAll(@NotNull ItemStack stack, @NotNull Slot slot)
     {
         if (!(slot instanceof AbstractStackTypedSlot))
             return super.canTakeItemForPickAll(stack, slot);
@@ -336,7 +337,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     @Override
-    public void removed(Player player)
+    public void removed(@NotNull Player player)
     {
         super.removed(player);
         for (SlotGroupSync slotGroupSync : slotGroupSyncs)

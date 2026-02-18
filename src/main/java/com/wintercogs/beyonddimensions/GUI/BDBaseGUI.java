@@ -18,6 +18,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.anti_ad.mc.ipn.api.IPNIgnore;
+import org.jetbrains.annotations.NotNull;
 
 
 // 更改渲染以及点击事件，以适配StoredStackSlot
@@ -37,14 +38,14 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
     @Override
-    protected void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY)
+    protected void renderTooltip(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
         if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem())
         {

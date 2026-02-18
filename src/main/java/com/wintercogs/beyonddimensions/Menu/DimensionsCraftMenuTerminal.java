@@ -19,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
@@ -56,7 +57,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     }
 
     @Override
-    public void removed(Player player)
+    public void removed(@NotNull Player player)
     {
         // 处理光标物品
         if (player instanceof ServerPlayer)
@@ -93,7 +94,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     }
 
     @Override
-    public boolean stillValid(Player player)
+    public boolean stillValid(@NotNull Player player)
     {
         if (entityPos != null)
         {

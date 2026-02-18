@@ -95,7 +95,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             {
                                 FluidStack typeStack = stackHandlerWrapper.getStackInSlot(0);
                                 KeyAmount stack = new KeyAmount(new FluidStackKey(typeStack), typeStack.getAmount());
-                                if (stack.key() != null && !stack.isEmpty())
+                                if (!stack.isEmpty())
                                 {
                                     int changedCount = BDMath.clampLongToInt(Math.min(stack.amount(), stack.key().getVanillaMaxStackSize()));
                                     // 进行模拟，桶必须完全清空才被允许操作
@@ -103,7 +103,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                     if (remaining <= 0)
                                     {
                                         // 执行实际逻辑
-                                        storage.insert(stack.key(), changedCount, false).amount();
+                                        storage.insert(stack.key(), changedCount, false);
                                         menu.setCarried(new ItemStack(Items.BUCKET));
                                         handled.set(true);
                                     }
@@ -301,7 +301,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                                     {
                                         FluidStack typeStack = stackHandlerWrapper.getStackInSlot(0);
                                         KeyAmount stack = new KeyAmount(new FluidStackKey(typeStack), typeStack.getAmount());
-                                        if (stack.key() != null && !stack.isEmpty())
+                                        if (!stack.isEmpty())
                                         {
                                             int changedCount = BDMath.clampLongToInt(Math.min(stack.amount(), stack.key().getVanillaMaxStackSize()));
                                             // 进行模拟，桶必须完全清空才被允许操作

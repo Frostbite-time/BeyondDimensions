@@ -31,6 +31,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -228,10 +229,9 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     // 收集区域流体
     private void fluidCollect(AABB searchArea)
     {
-        // ① 安全性检查
         if (level == null || level.isClientSide)
         {
-            return;                       // 只在服务器端执行
+            return;
         }
 
 
@@ -253,16 +253,16 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                     pos.set(x, y, z);
 
                     FluidState fluidState = level.getFluidState(pos);
-                    if (fluidState.isEmpty()) continue;          // 不是流体
+                    if (fluidState.isEmpty()) continue;
 
-                    // ④ 计算提取量（mB）
+                    // 计算提取量（mB）
                     int amount = fluidState.isSource()
                             ? FluidType.BUCKET_VOLUME
                             : 0;
 
                     FluidStack extracted = new FluidStack(fluidState.getType(), amount);
 
-                    // ⑤ 交给你的逻辑（存槽、推网络、合并等）
+                    // 流体收集
                     UnifiedStorage storage = getNet().getUnifiedStorage();
                     FluidStackKey fluidKey = new FluidStackKey(extracted);
                     if (matchesFilter(fluidKey))
@@ -270,9 +270,8 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                         if (storage.insert(fluidKey, extracted.getAmount(), true).isEmpty())
                         {
                             storage.insert(fluidKey, extracted.getAmount(), false);
-                            // ⑥ 清空方块 & 通知客户端
                             level.setBlock(pos, Blocks.AIR.defaultBlockState(),
-                                    Block.UPDATE_ALL_IMMEDIATE);  // 立即更新并刷新渲染
+                                    Block.UPDATE_ALL_IMMEDIATE);
                         }
                     }
                 }
@@ -338,13 +337,13 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     }
 
     @Override
-    public Component getDisplayName()
+    public @NotNull Component getDisplayName()
     {
         return Component.translatable("menu.title.beyonddimensions.hopper_menu");
     }
 
     @Override
-    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player)
     {
         return new NetHopperMenu(containerId, inventory, filterSlots, this);
     }
