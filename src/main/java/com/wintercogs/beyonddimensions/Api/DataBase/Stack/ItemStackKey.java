@@ -2,9 +2,9 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.Api.Util.NbtEq;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
-import com.wintercogs.beyonddimensions.Unit.NbtCanonicalBytesHelper;
-import com.wintercogs.beyonddimensions.Unit.RegistryUtil;
+import com.wintercogs.beyonddimensions.Util.BDMath;
+import com.wintercogs.beyonddimensions.Util.NbtCanonicalBytesHelper;
+import com.wintercogs.beyonddimensions.Util.RegistryUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;

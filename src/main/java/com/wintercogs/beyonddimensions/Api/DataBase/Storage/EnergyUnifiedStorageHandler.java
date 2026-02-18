@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 import net.minecraftforge.energy.IEnergyStorage;
 
 public class EnergyUnifiedStorageHandler implements IEnergyStorage

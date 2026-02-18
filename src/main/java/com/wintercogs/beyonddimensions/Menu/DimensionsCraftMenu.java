@@ -13,10 +13,9 @@ import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedStackTypedSlot;
-import com.wintercogs.beyonddimensions.Unit.InventoryHelper;
+import com.wintercogs.beyonddimensions.Util.InventoryHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
@@ -35,7 +34,6 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import static com.wintercogs.beyonddimensions.Registry.UIRegister.Dimensions_Craft_Menu;
 

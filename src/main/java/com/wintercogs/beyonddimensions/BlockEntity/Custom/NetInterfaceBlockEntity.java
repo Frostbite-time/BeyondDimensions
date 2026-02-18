@@ -19,7 +19,7 @@ import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
-import com.wintercogs.beyonddimensions.Unit.SidedCapId;
+import com.wintercogs.beyonddimensions.Util.SidedCapId;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;

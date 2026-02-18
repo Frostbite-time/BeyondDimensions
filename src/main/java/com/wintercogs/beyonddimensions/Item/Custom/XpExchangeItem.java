@@ -2,14 +2,13 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.XpTransferSpeedMode;
 import com.wintercogs.beyonddimensions.Tags.ModFluidTags;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
-import com.wintercogs.beyonddimensions.Unit.XpUtil;
+import com.wintercogs.beyonddimensions.Util.BDMath;
+import com.wintercogs.beyonddimensions.Util.XpUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;

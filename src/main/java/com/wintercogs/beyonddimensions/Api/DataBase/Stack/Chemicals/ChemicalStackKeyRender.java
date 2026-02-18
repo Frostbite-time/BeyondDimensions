@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackRender;
 import com.wintercogs.beyonddimensions.Render.IngredientRenderer;
-import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import com.wintercogs.beyonddimensions.Util.StringFormat;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.client.Minecraft;
