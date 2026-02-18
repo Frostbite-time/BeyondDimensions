@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.google.common.base.Suppliers;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedSlotGroupSync;
@@ -17,14 +17,15 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.PacketDistributor;
 import org.anti_ad.mc.ipn.api.IPNIgnore;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
 
 // 定义一些用于 超越维度 模组的ui界面的基本方法。
 // 主要是重写网络同步和点击事件，确保父类机制不处理StoredStackSlot的相关内容
-@IPNIgnore // 禁止IPN操作本模组的UI，防止出现bug
+@IPNIgnore
 public abstract class BDBaseMenu extends AbstractContainerMenu
 {
 
@@ -41,7 +42,6 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     protected List<AbstractStackTypedSlot> updatedSlots = new ArrayList<>(); // 用于槽位更新
     public List<SlotGroupSync> slotGroupSyncs = new ArrayList<>();
 
-
     protected BDBaseMenu(@Nullable MenuType<?> menuType, int containerId, Inventory playerInventory)
     {
         super(menuType, containerId);
@@ -54,7 +54,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     @Override
-    protected Slot addSlot(Slot slot)
+    protected @NotNull Slot addSlot(@NotNull Slot slot)
     {
         if (slot instanceof AbstractStackTypedSlot sSlot)
             updatedSlots.add(sSlot);
@@ -91,6 +91,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
             this.synchronizeDataSlotToRemote(j, k);
         }
 
+        // 确保自定义同步不会被客户端调用
         if (!player.level().isClientSide())
         {
             if (!init)
@@ -176,9 +177,8 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     // 自定义点击操作
-    public void customClickHandler(int slotIndex, IStackKey clickedStack, int button, boolean shiftDown)
+    public void customClickHandler(int slotIndex, KeyAmount clickedStack, int button, boolean shiftDown)
     {
-
         if (inventoryStartIndex < 0 || inventoryEndIndex < 0)
             BeyondDimensions.LOGGER.info("警告:背包索引设置错误！！！");
 
@@ -199,15 +199,8 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         }
     }
 
-    // 仅标记，需要时重写
-    @Override
-    public void broadcastFullState()
-    {
-        super.broadcastFullState();
-    }
-
     // 处理非AbstractStackTypedSlot槽位的快速转移
-    protected ItemStack quickMoveHandle(Player player, int slotIndex, IStackKey clickStack, int targetStartIndex, int targetEndIndex)
+    protected ItemStack quickMoveHandle(Player player, int slotIndex, KeyAmount clickStack, int targetStartIndex, int targetEndIndex)
     {
         Slot slot = this.slots.get(slotIndex);
         if (slot != null && !clickStack.isEmpty()) // 根据客户端信息，无视空槽或者null
@@ -244,7 +237,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                         {
                             // 此处是安全的转换，remaining不会超出int
                             // AbstractStackTypedSlot槽位的safeInsert是安全的，并且new ItemStackType会进行被动copy
-                            newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining)).getStackAmount();
+                            newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining), remaining.getCount()).amount();
                         }
                         else
                         {
@@ -272,7 +265,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                             Slot afterSlot = slots.get(entry.getKey());
                             if (afterSlot instanceof AbstractStackTypedSlot aSlot)
                             {
-                                aSlot.safeExtract(new ItemStackKey(cacheStack.copyWithCount(entry.getValue())));
+                                aSlot.safeExtract(new ItemStackKey(cacheStack), entry.getValue());
                             }
                             else
                             {
@@ -295,7 +288,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                     if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
                     {
                         // 此处是安全的转换，remaining不会超出int
-                        newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining)).getStackAmount();
+                        newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining), remaining.getCount()).amount();
                     }
                     else
                     {
@@ -311,24 +304,33 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         return ItemStack.EMPTY;
     }
 
+
+    // 仅标记，需要时重写
     @Override
-    public ItemStack quickMoveStack(Player player, int slotIndex)
+    public void broadcastFullState()
+    {
+        super.broadcastFullState();
+    }
+
+    // 完全重写快速移动方案
+    @Override
+    public @NotNull ItemStack quickMoveStack(@NotNull Player player, int slotIndex)
     {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean moveItemStackTo(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
+    public boolean moveItemStackTo(@NotNull ItemStack stack, int startIndex, int endIndex, boolean reverseDirection)
     {
         return false;
     }
 
     // 重写
     @Override
-    public abstract boolean stillValid(Player player);
+    public abstract boolean stillValid(@NotNull Player player);
 
     @Override
-    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot)
+    public boolean canTakeItemForPickAll(@NotNull ItemStack stack, @NotNull Slot slot)
     {
         if (!(slot instanceof AbstractStackTypedSlot))
             return super.canTakeItemForPickAll(stack, slot);
@@ -336,7 +338,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     @Override
-    public void removed(Player player)
+    public void removed(@NotNull Player player)
     {
         super.removed(player);
         for (SlotGroupSync slotGroupSync : slotGroupSyncs)

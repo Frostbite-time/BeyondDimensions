@@ -1,8 +1,9 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
@@ -13,51 +14,50 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 // 批量转移物品的数据包，仅记载需要转移的物品本身和转移方向
-public record BatchTransferPacket(IStackKey clickStack, boolean dirToStorage)
+public record BatchTransferPacket(KeyAmount clickStack, boolean dirToStorage)
 {
 
     private void handle(NetworkEvent.Context context)
     {
-        if (clickStack() instanceof ItemStackKey clickItem)
+        if (clickStack().key() instanceof ItemStackKey clickItem)
         {
             Player player = context.getSender();
 
-            if (player.containerMenu instanceof DimensionsNetMenu menu)
+            if (player.containerMenu instanceof BDBaseMenu menu)
             {
                 // 批量转移到存储
-                if (dirToStorage)
+                if (dirToStorage())
                 {
                     for (Slot invSlot : menu.slots)
                     {
                         if (menu.inventoryStartIndex <= invSlot.index && invSlot.index < menu.inventoryEndIndex)
                         {
-                            if (ItemStack.isSameItemSameTags(clickItem.getStack(), invSlot.getItem()))
-                                menu.customClickHandler(invSlot.index, new ItemStackKey(invSlot.getItem()), 0, true);
+                            if (clickItem.equals(new ItemStackKey(invSlot.getItem())))
+                                menu.customClickHandler(invSlot.index, new KeyAmount(new ItemStackKey(invSlot.getItem()), invSlot.getItem().getCount()), 0, true);
                         }
                     }
                 }
-                //到背包 暂时留空，以后如果需要再写
-                else
+                // 存储到背包
+                else if (menu instanceof DimensionsNetMenu netMenu)
                 {
-                    if (!clickStack.isEmpty())
+                    if (!clickStack().isEmpty())
                     {
-                        UnifiedStorage storage = menu.storage;
-                        // 防止数据包伪造，然后赋予trueStack需要提取的数量
-                        IStackKey trueStack = storage.getStackByStack(clickStack).copyWithCount(clickStack.getStackAmount());
+                        AbstractUnorderedStackHandler storage = netMenu.storage;
 
                         // 遍历目标槽位
-                        for (int targetSlotIndex = menu.inventoryStartIndex; targetSlotIndex < menu.inventoryEndIndex && !trueStack.isEmpty(); targetSlotIndex++)
+                        for (int targetSlotIndex = menu.inventoryStartIndex; targetSlotIndex < menu.inventoryEndIndex && storage.hasStack(clickItem); targetSlotIndex++)
                         {
                             Slot slot = menu.slots.get(targetSlotIndex);
 
-                            if (trueStack instanceof ItemStackKey trueItemTypedStack)
+                            KeyAmount extract = storage.extract(clickItem, Integer.MAX_VALUE, false, false); // 防止数量过多无法回插
+                            if (extract.toStack() instanceof ItemStack extractedStack)
                             {
-                                ItemStack extract = (ItemStack) storage.extract(trueItemTypedStack, false).getStack();
-                                ItemStack remaining = slot.safeInsert(extract);
+                                ItemStack remaining = slot.safeInsert(extractedStack);
                                 if (!remaining.isEmpty())
-                                    storage.insert(new ItemStackKey(remaining), false);
-                                trueStack = new ItemStackKey(remaining.copy());
+                                    storage.insert(new ItemStackKey(remaining), remaining.getCount(), false);
                             }
+                            else  // 防御操作，如果不是物品堆，整个回插
+                                storage.insert(extract.key(), extract.amount(), false);
                         }
                     }
                 }
@@ -81,13 +81,13 @@ public record BatchTransferPacket(IStackKey clickStack, boolean dirToStorage)
 
     public static void encode(BatchTransferPacket packet, FriendlyByteBuf buf)
     {
-        packet.clickStack.serialize(buf);
+        KeyAmount.serialize(buf, packet.clickStack());
         buf.writeBoolean(packet.dirToStorage);
     }
 
     public static BatchTransferPacket decode(FriendlyByteBuf buf)
     {
-        IStackKey clickStack = IStackKey.deserializeCommon(buf);
+        KeyAmount clickStack = KeyAmount.deserialize(buf);
         boolean dirToStorage = buf.readBoolean();
         return new BatchTransferPacket(clickStack, dirToStorage);
     }

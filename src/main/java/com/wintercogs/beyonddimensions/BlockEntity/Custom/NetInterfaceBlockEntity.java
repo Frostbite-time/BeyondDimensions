@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
@@ -112,7 +111,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     @Override
     public boolean shouldWork()
     {
-        if(level == null) return false;
+        if (level == null) return false;
 
         // 无论接口是否工作，更新红石信号
         int empty = stackHandler.getBucket(EmptyStackKey.INSTANCE).map(StackHandler.SlotBucket::size).orElse(stackHandler.getSlots());
@@ -366,7 +365,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
     public void dropContent()
     {
-        if(level == null) return;
+        if (level == null) return;
 
         List<KeyAmount> dropList = new ArrayList<>();
         for (KeyAmount stack : stackHandler.getStorage())
@@ -408,7 +407,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         {
             this.popMode = PopMode.valueOf(popModeNew);
         }
-        else if(!tag.getString("popMode").isEmpty())
+        else if (!tag.getString("popMode").isEmpty())
         {
             this.popMode = PopMode.valueOf(tag.getString("popMode"));
         }

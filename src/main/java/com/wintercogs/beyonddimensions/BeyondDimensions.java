@@ -19,8 +19,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.GasUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.InfusionUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.*;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.PigmentUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.SlurryUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;

@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jetbrains.annotations.NotNull;
 
 public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 {
@@ -45,7 +46,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     }
 
     @Override
-    public void removed(Player player)
+    public void removed(@NotNull Player player)
     {
         // 处理光标物品
         if (player instanceof ServerPlayer)
@@ -101,7 +102,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     }
 
     @Override
-    public boolean stillValid(Player player)
+    public boolean stillValid(@NotNull Player player)
     {
         if (entityPos != null)
         {

@@ -13,6 +13,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
+import org.jetbrains.annotations.NotNull;
 
 // 网络接口的UI
 // 管理一组虚拟槽、以及一组
@@ -160,7 +161,7 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
 
 
     @Override
-    public boolean stillValid(Player player)
+    public boolean stillValid(@NotNull Player player)
     {
         return be != null && !be.isRemoved(); // 可根据需求修改条件
     }

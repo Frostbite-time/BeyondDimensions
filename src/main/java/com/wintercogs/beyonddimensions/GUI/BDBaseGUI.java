@@ -5,6 +5,9 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;
+import com.wintercogs.beyonddimensions.Network.Packet.toServer.BatchTransferPacket;
+import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -60,7 +63,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
     @Override
-    protected void renderSlot(GuiGraphics guiGraphics, Slot slot)
+    public void renderSlot(@NotNull GuiGraphics guiGraphics, @NotNull Slot slot)
     {
         if (slot instanceof AbstractStackTypedSlot sSlot)
         {
@@ -137,7 +140,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
     @Override
-    protected void slotClicked(Slot slot, int slotIndex, int mouseButton, ClickType type)
+    protected void slotClicked(@NotNull Slot slot, int slotIndex, int mouseButton, @NotNull ClickType type)
     {
         if (!(slot instanceof AbstractStackTypedSlot))
             super.slotClicked(slot, slotIndex, mouseButton, type);
@@ -154,7 +157,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 clickItem = sSlot.getVanillaActualStack();
                 if (!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem.key()))
                 {
-                    PacketDistributor.sendToServer(new BatchTransferPacket(clickItem, false));
+                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(clickItem, false));
                 }
                 else if (!clickItem.isEmpty() && clickItem.key() instanceof ItemStackKey itemStackKey)
                 {
@@ -171,7 +174,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 // 因为操作基本全由服务端处理
                 if (lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
                 {
-                    PacketDistributor.sendToServer(new BatchTransferPacket(new KeyAmount(new ItemStackKey(lastInvClickedStack), lastInvClickedStack.getCount()), true));
+                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(new KeyAmount(new ItemStackKey(lastInvClickedStack), lastInvClickedStack.getCount()), true));
                 }
                 else if (menu.inventoryStartIndex <= slotId && slotId < menu.inventoryEndIndex)
                 {
@@ -180,7 +183,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 }
 
             }
-            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, true));
+            PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, true));
         }
         else
         {
@@ -190,12 +193,12 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 {
                     // 对于标记槽位
                     clickItem = sSlot.getVanillaActualStack();
-                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
+                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
                 }
                 else
                 {
                     clickItem = sSlot.getVanillaActualStack();
-                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
+                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
                 }
             }
         }

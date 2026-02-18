@@ -27,6 +27,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -204,7 +205,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     }
 
     @Override
-    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot)
+    public boolean canTakeItemForPickAll(@NotNull ItemStack stack, @NotNull Slot slot)
     {
         return slot.container != resultSlots && super.canTakeItemForPickAll(stack, slot);
     }
@@ -421,7 +422,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     }
 
     @Override
-    public void removed(Player player)
+    public void removed(@NotNull Player player)
     {
         super.removed(player);
         cleanCraftSlots(firstCraftReturnDir);
