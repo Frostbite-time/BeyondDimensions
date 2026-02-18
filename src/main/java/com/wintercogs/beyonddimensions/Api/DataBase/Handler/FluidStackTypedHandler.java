@@ -1,13 +1,18 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 
 public class FluidStackTypedHandler implements IFluidHandler
 {
+
+    private static final ResourceLocation FLUID_TYPE = FluidStackKey.ID;
 
     private final StackHandler handlerStorage;
 
@@ -16,115 +21,165 @@ public class FluidStackTypedHandler implements IFluidHandler
         this.handlerStorage = handlerStorage;
     }
 
+    // ---------- 工具方法：纯 Optional，返回基本类型/哨兵值 ----------
+
     /**
-     * 将统一存储中的所有槽位视为潜在的流体槽位。
+     * Fluid 桶的槽位数量（非空的 FluidStackKey 槽）。
+     */
+    private int fluidCount()
+    {
+        return handlerStorage.getBucket(FLUID_TYPE)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+    }
+
+    /**
+     * 空桶（EmptyStackKey）的槽位数量。
+     */
+    private int emptyCount()
+    {
+        return handlerStorage.getBucket(EmptyStackKey.INSTANCE)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+    }
+
+    /**
+     * 可视槽位是否处于 Fluid 区域（非 Empty 区域）。
+     */
+    private boolean inFluidRegion(int visibleSlot)
+    {
+        int fluids = fluidCount();
+        return visibleSlot >= 0 && visibleSlot < fluids;
+    }
+
+    /**
+     * 取 Fluid 桶中第 index 个槽的真实索引；若不存在返回 -1。
+     */
+    private int getFluidSlotAt(int index)
+    {
+        if (index < 0) return -1;
+        return handlerStorage.getBucket(FLUID_TYPE)
+                .map(b -> (index < b.size()) ? b.get(index) : -1)
+                .orElse(-1);
+    }
+
+    /**
+     * 取空桶中第 index 个槽的真实索引；若不存在返回 -1。
+     */
+    private int getEmptySlotAt(int index)
+    {
+        if (index < 0) return -1;
+        return handlerStorage.getBucket(EmptyStackKey.INSTANCE)
+                .map(b -> (index < b.size()) ? b.get(index) : -1)
+                .orElse(-1);
+    }
+
+    /**
+     * 将“可视槽位”映射为真实槽位；无效则 -1。
+     */
+    private int resolveActualIndex(int visibleSlot)
+    {
+        if (visibleSlot < 0) return -1;
+        int fluids = fluidCount();
+        if (visibleSlot < fluids)
+        {
+            return getFluidSlotAt(visibleSlot);
+        }
+        int rest = visibleSlot - fluids;
+        return getEmptySlotAt(rest);
+    }
+
+    // ================= IFluidHandler =================
+
+    /**
+     * 可视槽位 = Fluid 桶 + 空桶；全空时也会 > 0。
      */
     @Override
     public int getTanks()
     {
-        return handlerStorage.getSlots();
+        return fluidCount() + emptyCount();
     }
 
+    /**
+     * 高频：直接使用缓存对象并设数量（不 copy）。
+     * 若缓存不存在/为空，或该槽处于空区域，则返回 FluidStack.EMPTY。
+     * 注意：对外展示量不限制到 tank 容量（与 Item 视图一致策略）。
+     */
     @Override
-    public @NotNull FluidStack getFluidInTank(int tank)
+    public @NotNull FluidStack getFluidInTank(int slot)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return FluidStack.EMPTY;
-        }
+        if (!inFluidRegion(slot)) return FluidStack.EMPTY;
 
-        IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
-        if (stack instanceof FluidStackKey fluidStackKey && !fluidStackKey.isEmpty())
-        {
-            return fluidStackKey.copyStack();
-        }
+        int actualIndex = resolveActualIndex(slot);
+        if (actualIndex < 0) return FluidStack.EMPTY;
 
-        return FluidStack.EMPTY;
+        KeyAmount ka = handlerStorage.getStackBySlot(actualIndex);
+        if (ka.isEmpty()) return FluidStack.EMPTY;
+
+        Object cached = handlerStorage.getOutStackByKey(ka.key());
+        if (!(cached instanceof FluidStack fluid)) return FluidStack.EMPTY;
+        if (fluid.isEmpty()) return FluidStack.EMPTY; // 避免对空栈 setAmount
+
+        int shown = BDMath.clampLongToInt(ka.amount());
+        if (shown <= 0) return FluidStack.EMPTY;
+
+        fluid.setAmount(shown); // 直接改缓存数量
+        return fluid;
     }
 
     @Override
     public int getTankCapacity(int tank)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return 0;
-        }
-        // 对外宣称的单 tank 容量；实际内部容量由 StackTypedHandler 控制
-        return 64_000;
+        return 64000;
     }
 
     @Override
     public boolean isFluidValid(int tank, @NotNull FluidStack fluidStack)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return false;
-        }
+        // 放宽；最终由 insert/extract 决定
         return true;
     }
 
     /**
-     * 无指定 tank 的填充，由统一存储自己决定放到哪些槽里。
+     * 聚合填充：不区分具体 tank，交给底层存储按 Key 合并/分配。
      */
     @Override
-    public int fill(FluidStack fluidStack, FluidAction fluidAction)
+    public int fill(FluidStack fluidStack, @NotNull FluidAction action)
     {
-        if (fluidStack.isEmpty())
-        {
-            return 0;
-        }
-
+        if (fluidStack.isEmpty()) return 0;
         int requested = fluidStack.getAmount();
-        long remaining = handlerStorage
-                .insert(new FluidStackKey(fluidStack.copy()), fluidAction.simulate())
-                .getStackAmount();
-
-        int actuallyFilled = requested - (int) remaining;
-        return Math.max(actuallyFilled, 0);
+        long remaining = handlerStorage.insert(new FluidStackKey(fluidStack), requested, action.simulate()).amount();
+        return requested - BDMath.clampLongToInt(remaining); // 实际插入量
     }
 
     /**
-     * 按指定流体类型抽取，由统一存储自己决定从哪些槽扣。
+     * 按 Key 精确抽取（不区分具体 tank）。
      */
     @Override
-    public @NotNull FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
+    public @NotNull FluidStack drain(FluidStack fluidStack, FluidAction action)
     {
-        if (fluidStack.isEmpty())
-        {
-            return FluidStack.EMPTY;
-        }
-
-        IStackKey<?> extracted = handlerStorage.extract(
-                new FluidStackKey(fluidStack.copy()),
-                fluidAction.simulate()
-        );
-
-        if (extracted instanceof FluidStackKey fluidExtract && !fluidExtract.isEmpty())
-        {
-            return fluidExtract.copyStack();
-        }
-        return FluidStack.EMPTY;
+        if (fluidStack.isEmpty()) return FluidStack.EMPTY;
+        Object out = handlerStorage.extract(new FluidStackKey(fluidStack), fluidStack.getAmount(), action.simulate(), false).toStack();
+        return (out instanceof FluidStack fs) ? fs : FluidStack.EMPTY;
     }
 
     /**
-     * 按数量抽取：从第一个流体槽位开始，
-     * 以该槽中的流体类型构造“请求堆叠”，让存储进行扣减。
+     * 无指定 Key 的抽取：从第一个 Fluid 槽尝试抽取。
      */
     @Override
-    public @NotNull FluidStack drain(int count, FluidAction fluidAction)
+    public @NotNull FluidStack drain(int amount, FluidAction action)
     {
-        if (count <= 0)
-        {
-            return FluidStack.EMPTY;
-        }
+        if (amount <= 0) return FluidStack.EMPTY;
 
-        return handlerStorage.getTypeIdIndexList(FluidStackKey.ID)
-                .map(slots -> slots.get(0))                     // 第一个流体槽位
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(handlerStorage::getStackBySlot)
-                .map(stack -> stack.copyWithCount(count))
-                .map(stack -> handlerStorage.extract(stack, fluidAction.simulate()))
-                .map(extracts -> ((FluidStackKey) extracts).copyStack())
-                .orElse(FluidStack.EMPTY);
+        int firstFluidSlot = handlerStorage.getBucket(FLUID_TYPE)
+                .map(b -> (b.size() > 0) ? b.get(0) : -1)
+                .orElse(-1);
+        if (firstFluidSlot < 0) return FluidStack.EMPTY;
+
+        KeyAmount ka = handlerStorage.getStackBySlot(firstFluidSlot);
+        if (ka.isEmpty()) return FluidStack.EMPTY;
+
+        Object out = handlerStorage.extract(ka.key(), amount, action.simulate(), false).toStack();
+        return (out instanceof FluidStack fs) ? fs : FluidStack.EMPTY;
     }
 }

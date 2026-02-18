@@ -2,15 +2,18 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import mekanism.api.Action;
 import mekanism.api.chemical.pigment.IPigmentHandler;
 import mekanism.api.chemical.pigment.PigmentStack;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public class PigmentStackTypedHandler implements IPigmentHandler
 {
+
+    private static final ResourceLocation GAS_TYPE = PigmentStackKey.ID;
 
     private final StackHandler handlerStorage;
 
@@ -19,183 +22,237 @@ public class PigmentStackTypedHandler implements IPigmentHandler
         this.handlerStorage = handlerStorage;
     }
 
+    // ---------- bucket / slot 映射 ----------
+
+    private int gasCount()
+    {
+        return handlerStorage.getBucket(GAS_TYPE)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+    }
+
+    private int emptyCount()
+    {
+        return handlerStorage.getBucket(EmptyStackKey.INSTANCE)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+    }
+
+    private boolean inGasRegion(int visibleSlot)
+    {
+        int gases = gasCount();
+        return visibleSlot >= 0 && visibleSlot < gases;
+    }
+
+    private int getGasSlotAt(int index)
+    {
+        if (index < 0) return -1;
+        return handlerStorage.getBucket(GAS_TYPE)
+                .map(b -> (index < b.size()) ? b.get(index) : -1)
+                .orElse(-1);
+    }
+
+    private int getEmptySlotAt(int index)
+    {
+        if (index < 0) return -1;
+        return handlerStorage.getBucket(EmptyStackKey.INSTANCE)
+                .map(b -> (index < b.size()) ? b.get(index) : -1)
+                .orElse(-1);
+    }
+
+    private int resolveActualIndex(int visibleSlot)
+    {
+        if (visibleSlot < 0) return -1;
+
+        int gases = gasCount();
+        if (visibleSlot < gases)
+        {
+            return getGasSlotAt(visibleSlot);
+        }
+        int rest = visibleSlot - gases;
+        return getEmptySlotAt(rest);
+    }
+
+    // ================= IPigmentHandler =================
+
     /**
-     * 将统一存储中的所有槽位视为潜在的 Pigment 槽位。
+     * 可视槽位 = Gas 桶 + Empty 桶
      */
     @Override
     public int getTanks()
     {
-        return handlerStorage.getSlots();
-    }
-
-    @Override
-    public @NotNull PigmentStack getChemicalInTank(int tank)
-    {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return PigmentStack.EMPTY;
-        }
-
-        IStackKey<?> stack = handlerStorage.getStackBySlot(tank);
-        if (stack instanceof PigmentStackKey pigmentStack && !pigmentStack.isEmpty())
-        {
-            return pigmentStack.copyStack();
-        }
-
-        return PigmentStack.EMPTY;
+        return gasCount() + emptyCount();
     }
 
     /**
-     * 直接设置指定槽位的 Pigment：
-     * - EMPTY => 槽位重置为 ItemStackType 空占位；
-     * - 非空 => 写入 PigmentStackType。
+     * 返回一个带数量的缓存对象给对方读取
      */
     @Override
-    public void setChemicalInTank(int tank, @NotNull PigmentStack stack)
+    public @NotNull PigmentStack getChemicalInTank(int tank)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return;
-        }
+        if (!inGasRegion(tank)) return PigmentStack.EMPTY;
 
-        if (stack.isEmpty())
-        {
-            handlerStorage.setStackDirectly(tank, new ItemStackKey());
-        }
-        else
-        {
-            handlerStorage.setStackDirectly(tank, new PigmentStackKey(stack.copy()));
-        }
+        int actualIndex = resolveActualIndex(tank);
+        if (actualIndex < 0 || actualIndex >= handlerStorage.getSlots()) return PigmentStack.EMPTY;
+
+        KeyAmount ka = handlerStorage.getStackBySlot(actualIndex);
+        if (ka.isEmpty()) return PigmentStack.EMPTY;
+
+        Object cached = handlerStorage.getOutStackByKey(ka.key());
+        if (!(cached instanceof PigmentStack gas)) return PigmentStack.EMPTY;
+        if (gas.isEmpty()) return PigmentStack.EMPTY;
+
+        long shown = ka.amount();
+        if (shown <= 0) return PigmentStack.EMPTY;
+
+        gas.setAmount(shown);
+        return gas;
     }
 
     @Override
     public long getTankCapacity(int tank)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return 0L;
-        }
         return 64_000L;
     }
 
     @Override
     public boolean isValid(int tank, @NotNull PigmentStack stack)
     {
+        // 放宽；最终由 insert/extract 决定（与 Fluid 版策略一致）
         return true;
     }
 
     /**
-     * 单 tank 插入：
-     * - 槽位越界/无效 => 返回原 stack 副本；
-     * - 槽位为空或已有 Pigment => 委托统一存储 insert(slot, ...)。
+     * setChemicalInTank：只允许改 “空 / 气体槽”，避免误删其它类型槽位内容。
      */
     @Override
-    public @NotNull PigmentStack insertChemical(int tank, PigmentStack stack, @NotNull Action action)
+    public void setChemicalInTank(int tank, @NotNull PigmentStack stack)
     {
+        int actualIndex = resolveActualIndex(tank);
+        if (actualIndex < 0 || actualIndex >= handlerStorage.getSlots()) return;
+
+        KeyAmount current = handlerStorage.getStackBySlot(actualIndex);
+        boolean canMutate = current.isEmpty() || current.key() instanceof PigmentStackKey;
+        if (!canMutate)
+        {
+            return;
+        }
+
         if (stack.isEmpty())
         {
-            return PigmentStack.EMPTY;
+            handlerStorage.setStackDirectly(actualIndex, EmptyStackKey.INSTANCE, 0);
         }
-        if (tank < 0 || tank >= handlerStorage.getSlots())
+        else
         {
-            return stack.copy();
+            handlerStorage.setStackDirectly(actualIndex, new PigmentStackKey(stack), stack.getAmount());
         }
-        if (!isValid(tank, stack))
+    }
+
+    /**
+     * 指定 tank 插入：返回剩余（IPigmentHandler 约定）
+     */
+    @Override
+    public @NotNull PigmentStack insertChemical(int tank, @NotNull PigmentStack stack, @NotNull Action action)
+    {
+        if (stack.isEmpty()) return PigmentStack.EMPTY;
+
+        int actualIndex = resolveActualIndex(tank);
+        if (actualIndex < 0 || actualIndex >= handlerStorage.getSlots()) return stack.copy();
+        if (!isValid(tank, stack)) return stack.copy();
+
+        long requested = stack.getAmount();
+
+        // 优先使用“按槽位插入”（如果您 StackHandler 支持）
+        KeyAmount rem;
+        try
         {
-            return stack.copy();
+            rem = handlerStorage.insert(actualIndex, new PigmentStackKey(stack), requested, action.simulate());
+        }
+        catch (Throwable t)
+        {
+            // fallback：如果没有 slot 版本，就退化为全局插入（注意：这会忽略 tank 指定）
+            rem = handlerStorage.insert(new PigmentStackKey(stack), requested, action.simulate());
         }
 
-        IStackKey<?> remainingStack = handlerStorage.insert(
-                tank,
-                new PigmentStackKey(stack.copy()),
-                action.simulate()
-        );
-
-        long remaining = remainingStack.getStackAmount();
-        if (remaining <= 0)
-        {
-            return PigmentStack.EMPTY;
-        }
+        long remaining = rem.amount();
+        if (remaining <= 0) return PigmentStack.EMPTY;
         return new PigmentStack(stack, remaining);
     }
 
     /**
-     * 单 tank 抽取，仅当该槽位当前为 PigmentStackType 且非空时有效。
+     * 指定 tank 抽取：返回抽出的量（IPigmentHandler 约定）
      */
     @Override
     public @NotNull PigmentStack extractChemical(int tank, long amount, @NotNull Action action)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots() || amount <= 0)
-        {
-            return PigmentStack.EMPTY;
-        }
+        if (amount <= 0) return PigmentStack.EMPTY;
 
-        IStackKey<?> current = handlerStorage.getStackBySlot(tank);
-        if (!(current instanceof PigmentStackKey) || current.isEmpty())
-        {
-            return PigmentStack.EMPTY;
-        }
+        int actualIndex = resolveActualIndex(tank);
+        if (actualIndex < 0 || actualIndex >= handlerStorage.getSlots()) return PigmentStack.EMPTY;
 
-        IStackKey<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
-        if (extracted instanceof PigmentStackKey pigmentExtract && !pigmentExtract.isEmpty())
-        {
-            return pigmentExtract.copyStack();
-        }
-        return PigmentStack.EMPTY;
+        // 若该槽不是 gas 槽，直接空
+        KeyAmount current = handlerStorage.getStackBySlot(actualIndex);
+        if (current.isEmpty() || !(current.key() instanceof PigmentStackKey)) return PigmentStack.EMPTY;
+
+        KeyAmount extracted = handlerStorage.extract(actualIndex, amount, action.simulate());
+
+        if (extracted.isEmpty()) return PigmentStack.EMPTY;
+
+        Object out = extracted.toStack();
+        return (out instanceof PigmentStack gs) ? gs : PigmentStack.EMPTY;
     }
 
     /**
-     * 无指定 tank 的插入
+     * 无指定 tank 插入：交给底层按 key 合并/分配；返回剩余
      */
     @Override
-    public @NotNull PigmentStack insertChemical(PigmentStack stack, @NotNull Action action)
+    public @NotNull PigmentStack insertChemical(@NotNull PigmentStack stack, @NotNull Action action)
     {
-        if (stack.isEmpty())
-        {
-            return PigmentStack.EMPTY;
-        }
+        if (stack.isEmpty()) return PigmentStack.EMPTY;
 
-        long remaining = handlerStorage
-                .insert(new PigmentStackKey(stack.copy()), action.simulate())
-                .getStackAmount();
+        long requested = stack.getAmount();
+        long remaining = handlerStorage.insert(new PigmentStackKey(stack), requested, action.simulate()).amount();
 
-        if (remaining > 0)
-        {
-            return new PigmentStack(stack, remaining);
-        }
+        if (remaining > 0) return new PigmentStack(stack, remaining);
         return PigmentStack.EMPTY;
     }
 
     /**
-     * 无指定 tank 的抽取
+     * 无指定 tank 抽取：从第一个 Gas 槽尝试抽取；返回抽出的量
      */
     @Override
     public @NotNull PigmentStack extractChemical(long amount, @NotNull Action action)
     {
-        if (amount <= 0)
-        {
-            return PigmentStack.EMPTY;
-        }
+        if (amount <= 0) return PigmentStack.EMPTY;
 
-        return handlerStorage.getTypeIdIndexList(PigmentStackKey.ID)
-                .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> handlerStorage.extract(actualIndex, amount, action.simulate()))
-                .map(extracts -> ((PigmentStackKey) extracts).copyStack())
-                .orElse(PigmentStack.EMPTY);
+        int firstGasSlot = handlerStorage.getBucket(GAS_TYPE)
+                .map(b -> (b.size() > 0) ? b.get(0) : -1)
+                .orElse(-1);
+        if (firstGasSlot < 0) return PigmentStack.EMPTY;
+
+        KeyAmount ka = handlerStorage.getStackBySlot(firstGasSlot);
+        if (ka.isEmpty()) return PigmentStack.EMPTY;
+
+        KeyAmount extracted = handlerStorage.extract(firstGasSlot, amount, action.simulate());
+        if (extracted.isEmpty()) return PigmentStack.EMPTY;
+
+        Object out = extracted.toStack();
+        return (out instanceof PigmentStack gs) ? gs : PigmentStack.EMPTY;
     }
 
+    /**
+     * 按 key 精确抽取：返回抽出的量
+     */
     @Override
-    public @NotNull PigmentStack extractChemical(PigmentStack stack, @NotNull Action action)
+    public @NotNull PigmentStack extractChemical(@NotNull PigmentStack stack, @NotNull Action action)
     {
-        if (stack.isEmpty())
-        {
-            return PigmentStack.EMPTY;
-        }
-        return ((PigmentStackKey) handlerStorage.extract(
-                new PigmentStackKey(stack.copy()),
-                action.simulate()
-        )).copyStack();
+        if (stack.isEmpty()) return PigmentStack.EMPTY;
+
+        KeyAmount extracted = handlerStorage.extract(new PigmentStackKey(stack), stack.getAmount(), action.simulate(), false);
+        if (extracted.isEmpty()) return PigmentStack.EMPTY;
+
+        Object out = extracted.toStack();
+        return (out instanceof PigmentStack gs) ? gs : PigmentStack.EMPTY;
     }
 
     @Override
