@@ -4,8 +4,10 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
@@ -15,6 +17,7 @@ import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.Machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.Unit.SidedCapId;
@@ -55,7 +58,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         @Override
         public void onChange()
         {
-            if (!level.isClientSide())
+            if (level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -65,12 +68,14 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         @Override
         public void onChange()
         {
-            if (!level.isClientSide())
+            if (level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
 
     public PopMode popMode = PopMode.STOP;
+
+    public FuzzyMode fuzzyMode = FuzzyMode.DISABLE;
 
     private final Direction[] directions = Direction.values();
 
@@ -107,14 +112,11 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     @Override
     public boolean shouldWork()
     {
-        // 无论接口是否工作，更新红石信号
+        if(level == null) return false;
 
-        int notEmpty = 0;
-        for (IStackKey<?> stackType : stackHandler.getStorage())
-        {
-            if (stackType != null && !stackType.isEmpty())
-                notEmpty++;
-        }
+        // 无论接口是否工作，更新红石信号
+        int empty = stackHandler.getBucket(EmptyStackKey.INSTANCE).map(StackHandler.SlotBucket::size).orElse(stackHandler.getSlots());
+        int notEmpty = stackHandler.getSlots() - empty;
 
         int newRedstoneLevel = (int) (((float) notEmpty / stackHandler.getSlots()) * 15);
         if (redstoneLevel != newRedstoneLevel)
@@ -167,11 +169,8 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
                 CapabilityHelper.BlockCapabilityMap.forEach(
                         (resourceLocation, cap) -> {
-                            LazyOptional handler = neighbor.getCapability(cap, dir.getOpposite());
-                            if (handler.isPresent())
-                            {
-                                handlerCache.put(resourceLocation, handler.resolve().get());
-                            }
+                            LazyOptional<?> handler = neighbor.getCapability(cap, dir.getOpposite());
+                            handler.ifPresent(delegate -> handlerCache.put(resourceLocation, delegate));
                         }
                 );
 
@@ -211,7 +210,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side)
+    public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side)
     {
         // 遍历注册的能力映射表
         for (Map.Entry<ResourceLocation, Capability<?>> entry : CapabilityHelper.BlockCapabilityMap.entrySet())
@@ -264,19 +263,19 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         {
             for (int i = 0; i < capacity; i++)
             {
-                IStackKey<?> flag = fakeStackHandler.getStackBySlot(i);
-                if (flag != null && !flag.isEmpty())
+                KeyAmount flag = fakeStackHandler.getStackBySlot(i);
+                if (!flag.isEmpty())
                 {
-                    if (flag.isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
+                    if (flag.key().isSameTypeSameComponents(stackHandler.getStackBySlot(i).key()))
                         continue;
                 }
-                IStackKey<?> stack = stackHandler.getStackBySlot(i);
-                if (stack != null && !stack.isEmpty())
+                KeyAmount stack = stackHandler.getStackBySlot(i);
+                if (!stack.isEmpty())
                 {
-                    IStackKey<?> extracted = stackHandler.extract(i, stack.getStackAmount(), false);
-                    IStackKey<?> remaining = net.getUnifiedStorage().insert(extracted, false);
+                    KeyAmount extracted = stackHandler.extract(i, stack.amount(), false);
+                    KeyAmount remaining = net.getUnifiedStorage().insert(extracted.key(), extracted.amount(), false);
                     if (!remaining.isEmpty())
-                        stackHandler.insert(i, remaining, false);
+                        stackHandler.insert(i, remaining.key(), remaining.amount(), false);
                 }
             }
         }
@@ -294,31 +293,36 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         {
             for (int i = 0; i < capacity; i++)
             {
-                IStackKey<?> flag = fakeStackHandler.getStackBySlot(i);
-                if (flag != null && !flag.isEmpty())
+                KeyAmount flag = fakeStackHandler.getStackBySlot(i);
+                if (!flag.isEmpty())
                 {
                     // 到达数量上限或者是不同物品则不尝试插入
-                    IStackKey<?> current = stackHandler.getStackBySlot(i);
-                    if (current != null && !current.isEmpty())
+                    KeyAmount current = stackHandler.getStackBySlot(i);
+                    if (!current.isEmpty())
                     {
-                        if (current.getVanillaMaxStackSize() >= current.getStackAmount())
+                        if (current.key().getVanillaMaxStackSize() >= current.amount())
                         {
                             continue;
                         }
-                        if (!current.isSameTypeSameComponents(flag.copy()))
+                        if (!current.key().isSameTypeSameComponents(flag.key()))
                         {
                             continue;
                         }
                     }
 
                     // 插入逻辑
-                    IStackKey stack = net.getUnifiedStorage().extract(flag.copyWithCount(flag.getVanillaMaxStackSize()), false);
-                    if (stack != null && !stack.isEmpty())
+                    KeyAmount stack = net.getUnifiedStorage().extract(
+                            flag.key(),
+                            flag.key().getVanillaMaxStackSize(),
+                            false,
+                            fuzzyMode == FuzzyMode.ENABLE
+                    );
+                    if (!stack.isEmpty())
                     {
-                        IStackKey remaining = stackHandler.insert(i, stack.copy(), false);
+                        KeyAmount remaining = stackHandler.insert(i, stack.key(), stack.amount(), false);
                         if (!remaining.isEmpty())
                         {
-                            net.getUnifiedStorage().insert(remaining.copy(), false);
+                            net.getUnifiedStorage().insert(remaining.key(), remaining.amount(), false);
                         }
                     }
                 }
@@ -334,21 +338,21 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                 (typeId, handler) -> {
                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
 
-                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                    IStackHandlerWrapper<Object> stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
 
                     for (int i = 0; i < capacity; i++)
                     {
-                        if (fakeStackHandler.getStackBySlot(i).getTypeId().equals(typeId))
+                        if (fakeStackHandler.getStackBySlot(i).key().getTypeId().equals(typeId))
                         {
-                            if (fakeStackHandler.getStackBySlot(i).isSameTypeSameComponents(stackHandler.getStackBySlot(i)))
+                            if (fakeStackHandler.getStackBySlot(i).key().isSameTypeSameComponents(stackHandler.getStackBySlot(i).key()))
                             {
-                                IStackKey current = stackHandler.getStackBySlot(i).copy();
+                                KeyAmount current = stackHandler.getStackBySlot(i);
                                 for (int slot = 0; slot < stackHandlerWrapper.getSlots(); slot++)
                                 {
-                                    long remainging = stackHandlerWrapper.insert(slot, current.copyStack(), false);
-                                    long extract = current.getStackAmount() - remainging;
+                                    long remainging = stackHandlerWrapper.insert(slot, current.toStack(), false);
+                                    long extract = current.amount() - remainging;
                                     stackHandler.extract(i, extract, false);
-                                    current.shrink(extract);
+                                    current = new KeyAmount(current.key(), current.amount() - extract);
                                     if (current.isEmpty())
                                         break;
                                 }
@@ -362,22 +366,24 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
     public void dropContent()
     {
-        List<IStackKey<?>> dropList = new ArrayList<>();
-        for (IStackKey<?> stack : stackHandler.getStorage())
+        if(level == null) return;
+
+        List<KeyAmount> dropList = new ArrayList<>();
+        for (KeyAmount stack : stackHandler.getStorage())
         {
             if (!stack.isEmpty())
             {
                 // 如果内含物质球，直接弹出，防止NBT套娃
-                if (stack instanceof ItemStackKey itemStackKey)
+                if (stack.key() instanceof ItemStackKey itemStackKey)
                 {
-                    if (itemStackKey.getStack().getItem() instanceof MatterCompressionBall)
-                        Block.popResource(level, getBlockPos(), itemStackKey.copyStack());
+                    if (itemStackKey.getSource() instanceof MatterCompressionBall)
+                        Block.popResource(level, getBlockPos(), itemStackKey.copyStackWithCount(stack.amount()));
                     else
-                        dropList.add(stack.copy());
+                        dropList.add(stack);
                 }
                 else
                 {
-                    dropList.add(stack.copy());
+                    dropList.add(stack);
                 }
             }
         }
@@ -397,10 +403,14 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         this.fakeStackHandler.deserializeNBT(tag.getCompound("flags"));
 
         // 旧数据兼容
-        String popModeNew = tag.getString("popMode");
+        String popModeNew = tag.getString("pop_mode");
         if (!popModeNew.isEmpty())
         {
             this.popMode = PopMode.valueOf(popModeNew);
+        }
+        else if(!tag.getString("popMode").isEmpty())
+        {
+            this.popMode = PopMode.valueOf(tag.getString("popMode"));
         }
         else if (tag.getBoolean("popMode"))
         {
@@ -409,6 +419,12 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         else
         {
             this.popMode = PopMode.STOP;
+        }
+
+        String fuzzyModeNew = tag.getString("fuzzy_mode");
+        if (!fuzzyModeNew.isEmpty())
+        {
+            this.fuzzyMode = FuzzyMode.valueOf(fuzzyModeNew);
         }
         // 加载后需要更新缓存
         setNeedsCapabilityUpdate();
@@ -420,17 +436,18 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         super.saveAdditional(tag);
         tag.put("inventory", stackHandler.serializeNBT());
         tag.put("flags", fakeStackHandler.serializeNBT());
-        tag.putString("popMode", this.popMode.name());
+        tag.putString("pop_mode", this.popMode.name());
+        tag.putString("fuzzy_mode", this.fuzzyMode.name());
     }
 
     @Override
-    public Component getDisplayName()
+    public @NotNull Component getDisplayName()
     {
         return Component.translatable("menu.title.beyonddimensions.net_interface_menu");
     }
 
     @Override
-    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, Player player)
     {
         return new NetInterfaceBaseMenu(containerId, player.getInventory(), this);
     }

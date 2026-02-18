@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -41,7 +43,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         @Override
         public void onChange()
         {
-            if (!level.isClientSide())
+            if (level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -104,15 +106,15 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
             {
                 if (itemEntity != null && !itemEntity.isRemoved())
                 {
-                    ItemStack itemStack = itemEntity.getItem().copy();
-                    ItemStackKey typedStack = new ItemStackKey(itemStack);
-                    if (matchesFilter(typedStack))
+                    ItemStack itemStack = itemEntity.getItem();
+                    IStackKey<?> itemKey = new ItemStackKey(itemStack);
+                    if (matchesFilter(itemKey))
                     {
-                        if (storage.insert(typedStack, true).isEmpty()) // 表示能成功插入
+                        if (storage.insert(itemKey, itemStack.getCount(), true).isEmpty()) // 表示能成功插入
                         {
                             itemEntity.discard();
                             // workContent之前已经由shouldWork检查过net的存在性
-                            storage.insert(typedStack, false);
+                            storage.insert(itemKey, itemStack.getCount(), false);
                         }
                     }
                 }
@@ -130,12 +132,12 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                     if (xp > 0)
                     {
                         long xpFluid = xp * 20L;
-                        FluidStackKey xpStack = new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source().get(), 1), xpFluid);
+                        FluidStackKey xpKey = new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source().get(), 1));
 
-                        if (storage.insert(xpStack, true).isEmpty())
+                        if (storage.insert(xpKey, xpFluid, true).isEmpty())
                         {
                             orb.discard();
-                            storage.insert(xpStack, false);
+                            storage.insert(xpKey, xpFluid, false);
                         }
                     }
                 }
@@ -225,10 +227,9 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     // 收集区域流体
     private void fluidCollect(AABB searchArea)
     {
-        // ① 安全性检查
         if (level == null || level.isClientSide)
         {
-            return;                       // 只在服务器端执行
+            return;
         }
 
 
@@ -250,26 +251,25 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                     pos.set(x, y, z);
 
                     FluidState fluidState = level.getFluidState(pos);
-                    if (fluidState.isEmpty()) continue;          // 不是流体
+                    if (fluidState.isEmpty()) continue;
 
-                    // ④ 计算提取量（mB）
+                    // 计算提取量（mB）
                     int amount = fluidState.isSource()
                             ? FluidType.BUCKET_VOLUME
                             : 0;
 
                     FluidStack extracted = new FluidStack(fluidState.getType(), amount);
 
-                    // ⑤ 交给你的逻辑（存槽、推网络、合并等）
+                    // 流体收集
                     UnifiedStorage storage = getNet().getUnifiedStorage();
-                    FluidStackKey typedFluid = new FluidStackKey(extracted);
-                    if (matchesFilter(typedFluid))
+                    FluidStackKey fluidKey = new FluidStackKey(extracted);
+                    if (matchesFilter(fluidKey))
                     {
-                        if (storage.insert(typedFluid, true).isEmpty())
+                        if (storage.insert(fluidKey, extracted.getAmount(), true).isEmpty())
                         {
-                            storage.insert(typedFluid, false);
-                            // ⑥ 清空方块 & 通知客户端
+                            storage.insert(fluidKey, extracted.getAmount(), false);
                             level.setBlock(pos, Blocks.AIR.defaultBlockState(),
-                                    Block.UPDATE_ALL_IMMEDIATE);  // 立即更新并刷新渲染
+                                    Block.UPDATE_ALL_IMMEDIATE);
                         }
                     }
                 }
@@ -277,24 +277,24 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         }
     }
 
-    private boolean matchesFilter(IStackKey otherStack)
+    private boolean matchesFilter(IStackKey<?> otherStack)
     {
         switch (filterMode)
         {
             case BLACK ->
             {
-                for (IStackKey stack : filterSlots.getStorage())
+                for (KeyAmount stack : filterSlots.getStorage())
                 {
-                    if (stack.isSame(otherStack))
+                    if (stack.key().isSame(otherStack))
                         return false;
                 }
                 return true;
             }
             case WHITE ->
             {
-                for (IStackKey stack : filterSlots.getStorage())
+                for (KeyAmount stack : filterSlots.getStorage())
                 {
-                    if (stack.isSame(otherStack))
+                    if (stack.key().isSame(otherStack))
                         return true;
                 }
                 return false;
@@ -335,13 +335,13 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     }
 
     @Override
-    public Component getDisplayName()
+    public @NotNull Component getDisplayName()
     {
         return Component.translatable("menu.title.beyonddimensions.hopper_menu");
     }
 
     @Override
-    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player)
     {
         return new NetHopperMenu(containerId, inventory, filterSlots, this);
     }

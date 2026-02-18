@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Storage.EnergyUnifiedStorage
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
+import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -129,15 +130,14 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
             BlockEntity neighbor = level.getBlockEntity(targetPos);
             if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
             {
-                // 开始查询能力 记住，你获取你上方的方块，一定是获取其下方的能力
                 LazyOptional<IEnergyStorage> otherStorageOptional = neighbor.getCapability(ForgeCapabilities.ENERGY, dir.getOpposite());
                 if (otherStorageOptional.isPresent())
                 {
                     IEnergyStorage otherStorage = otherStorageOptional.resolve().get();
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
-                    int maxExtract = (int) Math.min(net.getUnifiedStorage().getEnergyStored(), Integer.MAX_VALUE);
+                    int maxExtract = BDMath.clampLongToInt(net.getUnifiedStorage().getStackByKey(EnergyStackKey.INSTANCE).amount());
                     int receive = otherStorage.receiveEnergy(maxExtract, false);
-                    net.getUnifiedStorage().extract(new EnergyStackKey(receive), false);
+                    net.getUnifiedStorage().extract(EnergyStackKey.INSTANCE, receive, false, false);
                 }
             }
         }

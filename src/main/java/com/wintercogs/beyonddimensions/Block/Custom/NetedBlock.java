@@ -89,7 +89,7 @@ public class NetedBlock extends Block
                     DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
                     if (net != null)
                     {
-                        if (net.getId() == blockEntity.getNetId() || DimensionsNet.getNetFromId(blockEntity.getNetId(), player.getServer()) == null)
+                        if (net.getId() == blockEntity.getNetId() || DimensionsNet.getNetFromId(blockEntity.getNetId()) == null)
                         {
                             if (net.isManager(player))
                             {

@@ -5,10 +5,12 @@ import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Machine.FilterMode;
 import com.wintercogs.beyonddimensions.Menu.NetPumpMenu;
@@ -24,6 +26,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.function.Function;
@@ -42,7 +45,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
         @Override
         public void onChange()
         {
-            if (!level.isClientSide())
+            if (level != null && !level.isClientSide())
                 level.blockEntityChanged(worldPosition);
         }
     };
@@ -82,11 +85,8 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
 
                 CapabilityHelper.BlockCapabilityMap.forEach(
                         (resourceLocation, cap) -> {
-                            LazyOptional handler = neighbor.getCapability(cap, dir.getOpposite());
-                            if (handler.isPresent())
-                            {
-                                handlerCache.put(resourceLocation, handler.resolve().get());
-                            }
+                            LazyOptional<?> handler = neighbor.getCapability(cap, dir.getOpposite());
+                            handler.ifPresent(delegate -> handlerCache.put(resourceLocation, delegate));
                         }
                 );
 
@@ -103,25 +103,24 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
                 (typeId, handler) -> {
                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
 
-                    IStackHandlerWrapper stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
+                    IStackHandlerWrapper<Object> stackHandlerWrapper = (IStackHandlerWrapper) handlerGetter.apply(handler);
 
                     for (int slot = 0; slot < stackHandlerWrapper.getSlots(); slot++)
                     {
                         Object stack = stackHandlerWrapper.getStackInSlot(slot);
-                        IStackKey typedStack = StackCreater.CreateEmpty(typeId);
-                        typedStack.setStack(stack);
-                        if (!typedStack.isEmpty() && matchesFilter(typedStack))
+                        IStackKey<?> typeKey = StackKeyRegistry.getType(typeId);
+                        KeyAmount ka = typeKey.fromStackObject(stack);
+                        if (ka != null && !ka.key().isEmpty() && matchesFilter(ka.key()))
                         {
                             DimensionsNet net = getNet();
                             if (net != null)
                             {
                                 UnifiedStorage storage = net.getUnifiedStorage();
 
-                                long canInsert = typedStack.getStackAmount() - storage.insert(typedStack, true).getStackAmount();
-                                canInsert = Math.min(canInsert, typedStack.getStackAmount());
+                                long canInsert = ka.amount() - storage.insert(ka.key(), ka.amount(), true).amount();
+                                canInsert = Math.min(canInsert, ka.amount());
                                 long extract = stackHandlerWrapper.extract(slot, canInsert, false);
-                                typedStack.setStackAmount(extract);
-                                net.getUnifiedStorage().insert(typedStack, false);
+                                net.getUnifiedStorage().insert(ka.key(), extract, false);
                             }
                         }
                     }
@@ -129,24 +128,24 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
         );
     }
 
-    private boolean matchesFilter(IStackKey otherStack)
+    private boolean matchesFilter(IStackKey<?> otherStack)
     {
         switch (filterMode)
         {
             case BLACK ->
             {
-                for (IStackKey stack : filterSlots.getStorage())
+                for (KeyAmount stack : filterSlots.getStorage())
                 {
-                    if (stack.isSame(otherStack))
+                    if (stack.key().isSame(otherStack))
                         return false;
                 }
                 return true;
             }
             case WHITE ->
             {
-                for (IStackKey stack : filterSlots.getStorage())
+                for (KeyAmount stack : filterSlots.getStorage())
                 {
-                    if (stack.isSame(otherStack))
+                    if (stack.key().isSame(otherStack))
                         return true;
                 }
                 return false;
@@ -190,13 +189,13 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     }
 
     @Override
-    public Component getDisplayName()
+    public @NotNull Component getDisplayName()
     {
         return Component.translatable("menu.title.beyonddimensions.pump_menu");
     }
 
     @Override
-    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player)
     {
         return new NetPumpMenu(containerId, inventory, filterSlots, this);
     }
