@@ -4,7 +4,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;

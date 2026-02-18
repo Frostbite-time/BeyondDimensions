@@ -255,11 +255,42 @@ public final class SlurryStackKey implements IStackKey<SlurryStack>
     {
         if (nbt == null) return EMPTY;
 
+        // 旧
+        if (nbt.contains("Stack", net.minecraft.nbt.Tag.TAG_COMPOUND))
+        {
+            return fromLegacyTypedStack(nbt.getCompound("Stack"));
+        }
+        // 新
+        return readNewFmt(nbt);
+    }
+
+    private @NotNull IStackKey<SlurryStack> readNewFmt(@NotNull CompoundTag nbt)
+    {
         ResourceLocation id = ResourceLocation.tryParse(nbt.getString("slurry"));
         Slurry s = (id == null) ? MekanismAPI.EMPTY_SLURRY : MekanismAPI.slurryRegistry().getValue(id);
         if (s == null) s = MekanismAPI.EMPTY_SLURRY;
         return new SlurryStackKey(s);
     }
+
+    private @NotNull IStackKey<SlurryStack> fromLegacyTypedStack(@NotNull CompoundTag stackNbt)
+    {
+        try
+        {
+            SlurryStack ss = SlurryStack.readFromNBT(stackNbt);
+            if (ss.isEmpty())
+            {
+                return EMPTY;
+            }
+
+            Slurry s = ss.getType();
+            return new SlurryStackKey(s);
+        }
+        catch (Throwable t)
+        {
+            return EMPTY;
+        }
+    }
+
 
     @Override
     public @NotNull IStackRender getRender()

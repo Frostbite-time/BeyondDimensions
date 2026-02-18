@@ -254,11 +254,42 @@ public final class PigmentStackKey implements IStackKey<PigmentStack>
     {
         if (nbt == null) return EMPTY;
 
+        // 旧
+        if (nbt.contains("Stack", net.minecraft.nbt.Tag.TAG_COMPOUND))
+        {
+            return fromLegacyTypedStack(nbt.getCompound("Stack"));
+        }
+        // 新
+        return readNewFmt(nbt);
+    }
+
+    private @NotNull IStackKey<PigmentStack> readNewFmt(@NotNull CompoundTag nbt)
+    {
         ResourceLocation id = ResourceLocation.tryParse(nbt.getString("pigment"));
         Pigment p = (id == null) ? MekanismAPI.EMPTY_PIGMENT : MekanismAPI.pigmentRegistry().getValue(id);
         if (p == null) p = MekanismAPI.EMPTY_PIGMENT;
         return new PigmentStackKey(p);
     }
+
+    private @NotNull IStackKey<PigmentStack> fromLegacyTypedStack(@NotNull CompoundTag stackNbt)
+    {
+        try
+        {
+            PigmentStack ps = PigmentStack.readFromNBT(stackNbt);
+            if (ps.isEmpty())
+            {
+                return EMPTY;
+            }
+
+            Pigment p = ps.getType();
+            return new PigmentStackKey(p);
+        }
+        catch (Throwable t)
+        {
+            return EMPTY;
+        }
+    }
+
 
     @Override
     public @NotNull IStackRender getRender()

@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.Unit.RegistryUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -279,24 +281,52 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     {
         if (nbt == null) return EMPTY;
 
+        // 新
+        if (nbt.contains("fluid", net.minecraft.nbt.Tag.TAG_STRING))
+        {
+            return readNewFmt(nbt);
+        }
+        //旧
+        if (nbt.contains("Stack", net.minecraft.nbt.Tag.TAG_COMPOUND))
+        {
+            return fromLegacyTypedStack(nbt.getCompound("Stack"));
+        }
+        return readNewFmt(nbt);
+    }
+
+    private @NotNull IStackKey<FluidStack> readNewFmt(@NotNull CompoundTag nbt)
+    {
         ResourceLocation id = ResourceLocation.tryParse(nbt.getString("fluid"));
         Fluid f = Fluids.EMPTY;
+
         if (id != null)
         {
             Fluid fromForge = ForgeRegistries.FLUIDS.getValue(id);
-            if (fromForge != null)
-            {
-                f = fromForge;
-            }
-            else
-            {
-                Fluid fromBuiltin = BuiltInRegistries.FLUID.get(id);
-                f = fromBuiltin;
-            }
+            f = Objects.requireNonNullElseGet(fromForge, () -> BuiltInRegistries.FLUID.get(id));
         }
 
-        CompoundTag tag = nbt.contains("tag") ? nbt.getCompound("tag") : null;
+        CompoundTag tag = nbt.contains("tag", Tag.TAG_COMPOUND) ? nbt.getCompound("tag") : null;
         return new FluidStackKey(f, tag);
+    }
+
+    private @NotNull IStackKey<FluidStack> fromLegacyTypedStack(@NotNull CompoundTag stackNbt)
+    {
+        try
+        {
+            FluidStack fs = FluidStack.loadFluidStackFromNBT(stackNbt);
+            if (fs == null || fs.isEmpty())
+            {
+                return EMPTY;
+            }
+
+            Fluid f = fs.getFluid();
+            CompoundTag tag = fs.hasTag() ? fs.getTag() : null;
+            return new FluidStackKey(f, tag);
+        }
+        catch (Throwable t)
+        {
+            return EMPTY;
+        }
     }
 
     @Override

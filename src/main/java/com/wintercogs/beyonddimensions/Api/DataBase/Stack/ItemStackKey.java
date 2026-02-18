@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.Unit.RegistryUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -321,8 +322,66 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     {
         if (nbt == null) return EMPTY;
 
-        ResourceLocation id = ResourceLocation.tryParse(nbt.getString("item"));
+        // 新格式：{ item, tag?, caps? }
+        if (nbt.contains("item", Tag.TAG_STRING))
+        {
+            return readNewFmt(nbt);
+        }
+
+        // 旧 1.20.1 TypedStack 形状：{ Type, Amount, Stack:{id, tag, ForgeCaps} }
+        if (nbt.contains("Stack", Tag.TAG_COMPOUND))
+        {
+            return fromLegacyTypedStack(nbt);
+        }
+
+        // 2) 其他未知形状：兜底为空
+        return EMPTY;
+    }
+
+    private @NotNull IStackKey<ItemStack> fromLegacyTypedStack(@NotNull CompoundTag typed)
+    {
+        try
+        {
+            CompoundTag stackTag = typed.getCompound("Stack");
+
+            // 旧字段：ForgeCaps
+            CompoundTag caps = stackTag.contains("ForgeCaps", net.minecraft.nbt.Tag.TAG_COMPOUND)
+                    ? stackTag.getCompound("ForgeCaps")
+                    : null;
+
+            // 标准字段：tag
+            CompoundTag tag = stackTag.contains("tag", net.minecraft.nbt.Tag.TAG_COMPOUND)
+                    ? stackTag.getCompound("tag")
+                    : null;
+
+            // 物品 id
+            var id = net.minecraft.resources.ResourceLocation.tryParse(stackTag.getString("id"));
+            Item raw = (id == null) ? Items.AIR : BuiltInRegistries.ITEM.get(id);
+
+            Item it;
+            try
+            {
+                it = ForgeRegistries.ITEMS.getDelegateOrThrow(raw).get();
+            }
+            catch (Throwable ignored)
+            {
+                it = raw;
+            }
+
+            return new ItemStackKey(it, tag, caps);
+        }
+        catch (Throwable t)
+        {
+            BeyondDimensions.LOGGER.warn("ItemStackKey: failed to decode legacy typed stack. Keys={}", typed.getAllKeys());
+            return EMPTY;
+        }
+    }
+
+    private @NotNull IStackKey<ItemStack> readNewFmt(@NotNull CompoundTag nbt)
+    {
+        var id = net.minecraft.resources.ResourceLocation.tryParse(nbt.getString("item"));
         Item raw = id == null ? Items.AIR : BuiltInRegistries.ITEM.get(id);
+
         Item it;
         try
         {
@@ -333,8 +392,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
             it = raw;
         }
 
-        CompoundTag tag = nbt.contains("tag") ? nbt.getCompound("tag") : null;
-        CompoundTag cap = nbt.contains("caps") ? nbt.getCompound("caps") : null;
+        CompoundTag tag = nbt.contains("tag", net.minecraft.nbt.Tag.TAG_COMPOUND) ? nbt.getCompound("tag") : null;
+        CompoundTag cap = nbt.contains("caps", net.minecraft.nbt.Tag.TAG_COMPOUND) ? nbt.getCompound("caps") : null;
 
         return new ItemStackKey(it, tag, cap);
     }

@@ -8,6 +8,7 @@ import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -255,11 +256,43 @@ public final class GasStackKey implements IStackKey<GasStack>
     {
         if (nbt == null) return EMPTY;
 
+        // 旧
+        if (nbt.contains("Stack", Tag.TAG_COMPOUND))
+        {
+            return fromLegacyTypedStack(nbt.getCompound("Stack"));
+        }
+
+        // 新
+        return readNewFmt(nbt);
+    }
+
+    private @NotNull IStackKey<GasStack> readNewFmt(@NotNull CompoundTag nbt)
+    {
         ResourceLocation id = ResourceLocation.tryParse(nbt.getString("gas"));
         Gas g = (id == null) ? MekanismAPI.EMPTY_GAS : MekanismAPI.gasRegistry().getValue(id);
         if (g == null) g = MekanismAPI.EMPTY_GAS;
         return new GasStackKey(g);
     }
+
+    private @NotNull IStackKey<GasStack> fromLegacyTypedStack(@NotNull CompoundTag stackNbt)
+    {
+        try
+        {
+            GasStack gs = GasStack.readFromNBT(stackNbt);
+            if (gs.isEmpty())
+            {
+                return EMPTY;
+            }
+
+            Gas g = gs.getType();
+            return new GasStackKey(g);
+        }
+        catch (Throwable t)
+        {
+            return EMPTY;
+        }
+    }
+
 
     @Override
     public @NotNull IStackRender getRender()

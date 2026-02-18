@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.Menu.Slot;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.StackCreater;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;

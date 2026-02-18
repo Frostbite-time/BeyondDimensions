@@ -254,10 +254,40 @@ public final class InfusionStackKey implements IStackKey<InfusionStack>
     {
         if (nbt == null) return EMPTY;
 
+        // 旧
+        if (nbt.contains("Stack", net.minecraft.nbt.Tag.TAG_COMPOUND))
+        {
+            return fromLegacyTypedStack(nbt.getCompound("Stack"));
+        }
+        // 新
+        return readNewFmt(nbt);
+    }
+
+    private @NotNull IStackKey<InfusionStack> readNewFmt(@NotNull CompoundTag nbt)
+    {
         ResourceLocation id = ResourceLocation.tryParse(nbt.getString("infuse_type"));
         InfuseType t = (id == null) ? MekanismAPI.EMPTY_INFUSE_TYPE : MekanismAPI.infuseTypeRegistry().getValue(id);
         if (t == null) t = MekanismAPI.EMPTY_INFUSE_TYPE;
         return new InfusionStackKey(t);
+    }
+
+    private @NotNull IStackKey<InfusionStack> fromLegacyTypedStack(@NotNull CompoundTag stackNbt)
+    {
+        try
+        {
+            InfusionStack is = InfusionStack.readFromNBT(stackNbt);
+            if (is.isEmpty())
+            {
+                return EMPTY;
+            }
+
+            InfuseType t = is.getType();
+            return new InfusionStackKey(t);
+        }
+        catch (Throwable t)
+        {
+            return EMPTY;
+        }
     }
 
     @Override
