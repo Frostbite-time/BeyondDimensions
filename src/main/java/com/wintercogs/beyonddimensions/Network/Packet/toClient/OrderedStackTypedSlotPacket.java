@@ -50,7 +50,7 @@ public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackKey<?
     {
         buf.writeVarInt(packet.slotId);
         buf.writeVarInt(packet.slotIndex);
-        packet.stack.serialize(buf);
+        IStackKey.serializeCommon(buf, packet.stack);
         buf.writeVarLong(packet.newAmount);
     }
 

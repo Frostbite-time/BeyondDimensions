@@ -14,7 +14,6 @@ public class BD_AEFluxPlugin
     {
         AEHelper.ISTACK_TO_AEKEY_MAP.put(EnergyStackKey.ID, stackType -> Optional.of(FluxKey.of(EnergyType.FE)));
 
-        AEHelper.AEKEY_TO_STACK_TYPE_MAP.put(FluxKeyType.TYPE, (key, amount) -> Optional.of(new EnergyStackKey(amount)));
+        AEHelper.AEKEY_TO_STACK_TYPE_MAP.put(FluxKeyType.TYPE, key -> Optional.of(EnergyStackKey.INSTANCE));
     }
 }
-

@@ -11,7 +11,7 @@ public class BD_AE_ArsPlugin
 {
     public static void register()
     {
-        AEHelper.ISTACK_TO_AEKEY_MAP.put(SourceStackKey.ID, stackType -> Optional.ofNullable(SourceKey.KEY));
-        AEHelper.AEKEY_TO_STACK_TYPE_MAP.put(SourceKeyType.TYPE, (key, amount) -> Optional.of(new SourceStackKey(amount)));
+        AEHelper.ISTACK_TO_AEKEY_MAP.put(SourceStackKey.ID, stackType -> Optional.of(SourceKey.KEY));
+        AEHelper.AEKEY_TO_STACK_TYPE_MAP.put(SourceKeyType.TYPE, key -> Optional.of(SourceStackKey.INSTANCE));
     }
 }

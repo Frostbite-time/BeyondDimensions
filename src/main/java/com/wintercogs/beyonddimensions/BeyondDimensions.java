@@ -30,7 +30,7 @@ import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEFlux.BD_AEFluxPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.Integration.AE_Ars.BD_AE_ArsPlugin;
-import com.wintercogs.beyonddimensions.Integration.AE_Botania.BD_AE_BotaniaPlugin;
+import com.wintercogs.beyonddimensions.Integration.botania_ae.BD_AEBotaniaPlugin;
 import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.Integration.Botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.Integration.Botania.HudOverlay.ManaPoolPathwayOverlay;
@@ -331,7 +331,7 @@ public class BeyondDimensions
         }
         if (AE_Botania_Loaded)
         {
-            BD_AE_BotaniaPlugin.register();
+            BD_AEBotaniaPlugin.register();
         }
 
         if (RS_Loaded)

@@ -26,6 +26,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
     public NetEnergyGUI(NetEnergyMenu container, Inventory playerInventory, Component title)
     {
         super(container, playerInventory, title);
+        // 去除空白的真实部分，用于计算图片显示的最佳位置
     }
 
 
@@ -52,8 +53,8 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(PopMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/popmode_up.png"));
-                iconMap.put(PopMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/popmode_down.png"));
+                iconMap.put(PopMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/popmode_up"));
+                iconMap.put(PopMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/popmode_down"));
 
                 tooltipMap.put(PopMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
                 tooltipMap.put(PopMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
@@ -79,10 +80,10 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_ignore.png"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_not_working.png"));
-                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_powered.png"));
-                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_unpowered.png"));
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_powered"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_unpowered"));
 
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));

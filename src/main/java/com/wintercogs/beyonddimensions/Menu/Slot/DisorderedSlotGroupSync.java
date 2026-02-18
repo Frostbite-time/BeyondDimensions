@@ -242,7 +242,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         {
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             IStackKey<?> k = keys.get(i);
-            if (k != null) k.serialize(buf);
+            if (k != null) IStackKey.serializeCommon(buf, k);
             buf.writeLong(counts.get(i));
             buf.writeLong(modifiedTimes.get(i));
             buf.writeLong(insertedTimes.get(i));

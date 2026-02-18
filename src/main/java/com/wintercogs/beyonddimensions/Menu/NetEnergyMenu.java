@@ -1,11 +1,11 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
-import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,15 +13,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
 
+import static com.wintercogs.beyonddimensions.Registry.UIRegister.Net_Energy_Menu;
+
 public class NetEnergyMenu extends BDBaseMenu
 {
-
     public NetEnergyPathwayBlockEntity be;
 
     public long lastEnergyCapacity = 0;
     public long lastEnergyStored = 0;
     public long lastEnergySpeedState = 0;
-
 
     /**
      * 客户端构造函数
@@ -40,7 +40,7 @@ public class NetEnergyMenu extends BDBaseMenu
      */
     public NetEnergyMenu(int id, Inventory playerInventory, NetEnergyPathwayBlockEntity be)
     {
-        super(UIRegister.Net_Energy_Menu.get(), id, playerInventory);
+        super(Net_Energy_Menu.get(), id, playerInventory);
 
         this.be = be;
 
@@ -67,12 +67,12 @@ public class NetEnergyMenu extends BDBaseMenu
         if (netCache != null)
         {
             UnifiedStorage storage = netCache.getUnifiedStorage();
-            if (lastEnergyStored != storage.getEnergyStored()
+            if (lastEnergyStored != getEnergyStored(storage)
                     || lastEnergyCapacity != storage.getSlotCapacity(0)
-                    || lastEnergySpeedState != storage.getEnergyStored() - lastEnergyStored)
+                    || lastEnergySpeedState != getEnergyStored(storage) - lastEnergyStored)
             {
-                lastEnergySpeedState = storage.getEnergyStored() - lastEnergyStored;
-                lastEnergyStored = storage.getEnergyStored();
+                lastEnergySpeedState = getEnergyStored(storage) - lastEnergyStored;
+                lastEnergyStored = getEnergyStored(storage);
                 lastEnergyCapacity = storage.getSlotCapacity(0);
                 return true;
             }
@@ -91,7 +91,6 @@ public class NetEnergyMenu extends BDBaseMenu
         }
         return false;
     }
-
 
     @Override
     protected void writeQuickDataTag(CompoundTag tag)
@@ -128,5 +127,10 @@ public class NetEnergyMenu extends BDBaseMenu
     public boolean stillValid(@NotNull Player player)
     {
         return be != null && !be.isRemoved();
+    }
+
+    long getEnergyStored(UnifiedStorage storage)
+    {
+        return storage.getStackByKey(EnergyStackKey.INSTANCE).amount();
     }
 }

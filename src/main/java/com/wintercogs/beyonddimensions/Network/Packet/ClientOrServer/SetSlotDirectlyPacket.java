@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,7 +15,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record SetSlotDirectlyPacket(int slotId, IStackKey stack)
+public record SetSlotDirectlyPacket(int slotId, KeyAmount stack)
 {
     private void handleServer(NetworkEvent.Context context)
     {
@@ -24,7 +25,7 @@ public record SetSlotDirectlyPacket(int slotId, IStackKey stack)
         {
             if (menu.slots.get(slotId()) instanceof AbstractStackTypedSlot slot)
             {
-                slot.setStackDirectly(stack());
+                slot.setStackDirectly(stack().key(), stack().amount());
             }
         }
     }
@@ -38,7 +39,7 @@ public record SetSlotDirectlyPacket(int slotId, IStackKey stack)
         {
             if (menu.slots.get(slotId()) instanceof AbstractStackTypedSlot slot)
             {
-                slot.setStackDirectly(stack());
+                slot.setStackDirectly(stack().key(), stack().amount());
             }
         }
     }
@@ -68,13 +69,13 @@ public record SetSlotDirectlyPacket(int slotId, IStackKey stack)
     public static void encode(SetSlotDirectlyPacket packet, FriendlyByteBuf buf)
     {
         buf.writeVarInt(packet.slotId);
-        packet.stack.serialize(buf);
+        KeyAmount.serialize(buf, packet.stack);
     }
 
     public static SetSlotDirectlyPacket decode(FriendlyByteBuf buf)
     {
         int slotId = buf.readVarInt();
-        IStackKey stack = IStackKey.deserializeCommon(buf);
+        KeyAmount stack = KeyAmount.deserialize(buf);
 
         return new SetSlotDirectlyPacket(slotId, stack);
     }

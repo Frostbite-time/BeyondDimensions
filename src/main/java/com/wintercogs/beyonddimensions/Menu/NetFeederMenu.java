@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Item.Custom.BaseMachineItem;
 import com.wintercogs.beyonddimensions.Machine.FeederMode;
@@ -37,16 +38,16 @@ public class NetFeederMenu extends BDBaseMenu
         {
             super.onChange();
             if (!player.level().isClientSide() && initialized)
-                BaseMachineItem.setFilterSlots(menuStack, new ArrayList<IStackKey<?>>(storage.getStorage()));
+                BaseMachineItem.setFilterSlots(menuStack, new ArrayList<>(storage.getStorage()));
 
         }
 
         @Override
-        public boolean isStackValid(int slot, IStackKey stack)
+        public boolean isStackValid(int slot, IStackKey<?> stack)
         {
             return super.isStackValid(slot, stack)
                     && stack instanceof ItemStackKey itemStackKey
-                    && itemStackKey.getStack().getFoodProperties(player) != null;
+                    && itemStackKey.getReadOnlyStack().getFoodProperties(player) != null;
         }
     };
     private boolean initialized; //initialized必须在初始数据提供完成之后才能设置为true
@@ -71,10 +72,10 @@ public class NetFeederMenu extends BDBaseMenu
         // 为服务端注入真实数据，客户端由槽位同步
         if (!playerInventory.player.level().isClientSide())
         {
-            List<IStackKey<?>> stacks = BaseMachineItem.getFilterSlotsOrDefault(menuStack, new ArrayList<>());
+            List<KeyAmount> stacks = BaseMachineItem.getFilterSlotsOrDefault(menuStack, new ArrayList<>());
             for (int i = 0; i < stacks.size(); i++)
             {
-                storage.insert(i, stacks.get(i).copy(), false);
+                storage.insert(i, stacks.get(i).key(), stacks.get(i).amount(), false);
             }
         }
         initialized = true;

@@ -5,6 +5,8 @@ import com.simibubi.create.content.schematics.cannon.SchematicannonBlockEntity;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackKey;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -294,21 +296,21 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
         {
             if (slot < 0 || slot >= stacksSnapshot.size()) return ItemStack.EMPTY;
             ItemStack snapStack = stacksSnapshot.get(slot);
-            IStackKey<?> ka = net.getUnifiedStorage().getStackByStack(new ItemStackKey(snapStack));
+            KeyAmount ka = net.getUnifiedStorage().getStackByKey(new ItemStackKey(snapStack));
             if (ka.isEmpty()) return ItemStack.EMPTY;
-            if (!(ka instanceof ItemStackKey itemKey)) return ItemStack.EMPTY;
+            if (!(ka.key() instanceof ItemStackKey itemKey)) return ItemStack.EMPTY;
 
-            return itemKey.copyStack();
+            return itemKey.copyStackWithCount(ka.amount());
         }
 
         @Override
         public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack itemStack, boolean simulate)
         {
-            IStackKey<?> remaining = net.getUnifiedStorage().insert(new ItemStackKey(itemStack, itemStack.getCount()), simulate);
+            KeyAmount remaining = net.getUnifiedStorage().insert(new ItemStackKey(itemStack), itemStack.getCount(), simulate);
             if (remaining.isEmpty()) return ItemStack.EMPTY;
-            if (!(remaining instanceof ItemStackKey itemKey)) return ItemStack.EMPTY;
+            if (!(remaining.key() instanceof ItemStackKey itemKey)) return ItemStack.EMPTY;
 
-            return itemKey.copyStack();
+            return itemKey.copyStackWithCount(remaining.amount());
         }
 
         @Override
@@ -316,11 +318,11 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
         {
             if (slot < 0 || slot >= stacksSnapshot.size() || count <= 0) return ItemStack.EMPTY;
 
-            IStackKey<?> extracted = net.getUnifiedStorage().extract(new ItemStackKey(stacksSnapshot.get(slot), count), simulate);
+            KeyAmount extracted = net.getUnifiedStorage().extract(new ItemStackKey(stacksSnapshot.get(slot)), count, simulate, false);
             if (extracted.isEmpty()) return ItemStack.EMPTY;
-            if (!(extracted instanceof ItemStackKey itemKey)) return ItemStack.EMPTY;
+            if (!(extracted.key() instanceof ItemStackKey itemKey)) return ItemStack.EMPTY;
 
-            return itemKey.copyStack();
+            return itemKey.copyStackWithCount(extracted.amount());
         }
 
         @Override

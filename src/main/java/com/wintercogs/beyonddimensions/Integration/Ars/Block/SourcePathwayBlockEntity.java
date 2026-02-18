@@ -4,6 +4,7 @@ import com.hollingsworth.arsnouveau.api.source.ISourceTile;
 import com.hollingsworth.arsnouveau.api.source.SourceManager;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackKey;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
@@ -37,10 +38,10 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         DimensionsNet net = getNet();
         if (net != null)
         {
-            IStackKey stack = net.getUnifiedStorage().getStackByStack(new SourceStackKey(0));
-            if (stack != null)
+            KeyAmount stack = net.getUnifiedStorage().getStackByKey(SourceStackKey.INSTANCE);
+            if (stack.key() == SourceStackKey.INSTANCE)
             {
-                return BDMath.clampLongToInt(stack.getStackAmount());
+                return BDMath.clampLongToInt(stack.amount());
             }
         }
         return 0;
@@ -76,19 +77,21 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         DimensionsNet net = getNet();
         if (net != null)
         {
-            net.getUnifiedStorage().insert(new SourceStackKey(amount), false).getStackAmount();
+            net.getUnifiedStorage().insert(SourceStackKey.INSTANCE, amount, false);
         }
         return getSource(); // 无论如何，最后返回总量
     }
 
-    // 返回导出的
+    // 返回总量
+    // 1.20.1的新生魔艺接口实现如此
+    // 1.21.1的实现改为返回增量
     @Override
     public int removeSource(int amount)
     {
         DimensionsNet net = getNet();
         if (net != null)
         {
-            net.getUnifiedStorage().extract(new SourceStackKey(amount), false).getStackAmount();
+            net.getUnifiedStorage().extract(SourceStackKey.INSTANCE, amount, false);
         }
         return getSource(); // 无论如何，最后返回总量
     }

@@ -59,7 +59,7 @@ public record DisorderedSlotGroupSyncPacket(int groupId, List<IStackKey<?>> keys
         buf.writeVarInt(packet.keys().size());
         for (IStackKey<?> key : packet.keys())
         {
-            key.serialize(buf);
+            IStackKey.serializeCommon(buf, key);
         }
 
         // newCounts
