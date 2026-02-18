@@ -109,9 +109,9 @@ public class NetFeederItem extends BaseMachineItem
                 if (foodCache != null)
                 {
                     KeyAmount foodToFeed = storage.extract(foodCache.key(), foodCache.amount(), false, false);
-                    if (!foodToFeed.isEmpty())
+                    if (!foodToFeed.isEmpty() && foodToFeed.key() instanceof ItemStackKey foodKey)
                     {
-                        ItemStack foodStack = (ItemStack) foodToFeed.toStack();
+                        ItemStack foodStack = foodKey.copyStackWithCount(foodCache.amount());
                         Item foodItem = foodStack.getItem();
                         FoodProperties foodProperties = foodItem.getFoodProperties(foodStack, player);
                         // 实际执行效果前对饱食度和饱和度进行二次判断
