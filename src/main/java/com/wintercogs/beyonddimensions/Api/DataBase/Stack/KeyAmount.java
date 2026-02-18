@@ -57,7 +57,6 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
     }
 
 
-
     /**
      * 尽力从旧 TypedStack NBT 中读取数量。
      */

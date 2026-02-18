@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -20,46 +20,38 @@ public class MatterCompressionBall extends Item
     public static boolean hasIStackList(ItemStack stack)
     {
         CompoundTag tag = stack.getTag();
-        return tag != null && tag.contains("StackList", Tag.TAG_LIST) &&
-                !tag.getList("StackList", Tag.TAG_COMPOUND).isEmpty();
+        return tag != null && tag.contains("stack_list", Tag.TAG_LIST) &&
+                !tag.getList("stack_list", Tag.TAG_COMPOUND).isEmpty();
     }
 
-    public static List<IStackKey<?>> getIStackList(ItemStack stack)
+    public static List<KeyAmount> getIStackList(ItemStack stack)
     {
-        List<IStackKey<?>> result = new ArrayList<>();
+        List<KeyAmount> result = new ArrayList<>();
         CompoundTag tag = stack.getTag();
-        if (tag == null || !tag.contains("StackList", Tag.TAG_LIST))
+        if (tag == null || !tag.contains("stack_list", Tag.TAG_LIST))
             return result;
 
-        ListTag listTag = tag.getList("StackList", Tag.TAG_COMPOUND);
+        ListTag listTag = tag.getList("stack_list", Tag.TAG_COMPOUND);
         for (Tag element : listTag)
         {
             CompoundTag elementTag = (CompoundTag) element;
-            IStackKey<?> stackType = IStackKey.deserializeNBTCommon(elementTag);
-            if (stackType != null)
-            {
-                result.add(stackType);
-            }
+            KeyAmount stackType = KeyAmount.deserializeNBT(elementTag);
+            result.add(stackType);
         }
         return result;
     }
 
-    public static void setIStackList(ItemStack stack, List<IStackKey<?>> stackList)
+    public static void setIStackList(ItemStack stack, List<KeyAmount> stackList)
     {
         ListTag listTag = new ListTag();
-        for (IStackKey<?> stackType : stackList)
+        for (KeyAmount stackType : stackList)
         {
-            CompoundTag elementTag = stackType.serializeNBT();
-            // 确保序列化后包含类型标识
-            if (!elementTag.contains("Type"))
-            {
-                elementTag.putString("Type", stackType.getTypeId().toString());
-            }
+            CompoundTag elementTag = KeyAmount.serializeNBT(stackType);
             listTag.add(elementTag);
         }
 
         CompoundTag tag = stack.getOrCreateTag();
-        tag.put("StackList", listTag);
+        tag.put("stack_list", listTag);
     }
 
 }

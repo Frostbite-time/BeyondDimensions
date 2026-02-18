@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.Api.DataBase;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.Api.Registry.UnifiedStorageBeforeInsertHandler;
 import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
@@ -87,26 +87,7 @@ public class DimensionsNet extends SavedData
      */
     public DimensionsNet(boolean temporary)
     {
-        unifiedStorage = new UnifiedStorage(this)
-        {
-            @Override
-            public IStackKey<?> insert(IStackKey<?> stack, boolean simulate)
-            {
-                IStackKey<?> input = Objects.requireNonNullElse(stack, new ItemStackKey());
-
-                var info = UnifiedStorageBeforeInsertHandler.onBeforeInsert(input, this.getNet());
-
-                if (info.cancel())
-                    return input;
-
-                IStackKey<?> adjusted = info.beforeInsert();
-
-                if (adjusted.isEmpty())
-                    return adjusted;
-
-                return super.insert(adjusted, simulate);
-            }
-        };
+        unifiedStorage = new UnifiedStorage(this, AbstractUnorderedStackHandler.UiTimestampPolicy.AUTO);
         MinecraftForge.EVENT_BUS.addListener(this::onServerTick);
         this.temporary = temporary;
     }
