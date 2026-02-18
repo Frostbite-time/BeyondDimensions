@@ -2,12 +2,13 @@ package com.wintercogs.beyonddimensions.Api.DataBase;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Unit.PlayerNameHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -20,9 +21,11 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
+
 
 /**
  * 此类即模组概念中的“维度网络”，并实际负责存储和持久化数据
@@ -32,6 +35,7 @@ import java.util.*;
  */
 public class DimensionsNet extends SavedData
 {
+
     /**
      * 作为网络的唯一标识符，id从0开始，小于0的id均可以认为是无效网络
      * <p>
@@ -62,9 +66,9 @@ public class DimensionsNet extends SavedData
     private final Set<UUID> players = new HashSet<>();
 
     /**
-     * 通用存储空间，存储任何实现了{@link IStackKey}的资源类型
+     * 通用存储空间，存储任何实现了{@link com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey}的资源类型
      */
-    private UnifiedStorage unifiedStorage;
+    private final @NotNull UnifiedStorage unifiedStorage;
 
     /**
      * 标记网络是否为一个临时网络，临时网络通常用于客户端菜单的同步中，作为资源容器使用
@@ -110,14 +114,17 @@ public class DimensionsNet extends SavedData
      * @param defaultSlotMaxSize    新网络所拥有的槽位数量
      * @return 返回新创建的维度网络，但如果传入的player加入了一个网络，只会返回其当前所在的网络
      */
-    public static DimensionsNet createNewNetForPlayer(Player player, long defaultSlotCapability, int defaultSlotMaxSize)
+    public static @Nullable DimensionsNet createNewNetForPlayer(Player player, long defaultSlotCapability, int defaultSlotMaxSize)
     {
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-        if (net == null)    // 提前检查
+        if (net != null) return net;
+
+        MinecraftServer server = player.getServer();
+        if (server != null)
         {
-            String netId = DimensionsNet.buildNewNetName(player.getServer());
+            String netId = DimensionsNet.buildNewNetName(server);
             String numId = netId.replace("BDNet_", "");
-            DimensionsNet newNet = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().computeIfAbsent(DimensionsNet::load, DimensionsNet::create, netId);
+            DimensionsNet newNet = server.overworld().getDataStorage().computeIfAbsent(DimensionsNet::load, DimensionsNet::create, netId);
             newNet.setId(Integer.parseInt(numId));
             newNet.setOwner(player.getUUID());
             newNet.addManager(player.getUUID());
@@ -128,7 +135,7 @@ public class DimensionsNet extends SavedData
 
             return newNet;
         }
-        return net;
+        return null;
     }
 
     /**
@@ -137,14 +144,14 @@ public class DimensionsNet extends SavedData
      * @param dataProvider 用于获取SavedData
      * @return 最新可用的网络名称，内容为字符串："BDNet_<数字id>"
      */
-    public static String buildNewNetName(MinecraftServer dataProvider)
+    public static String buildNewNetName(@NotNull MinecraftServer dataProvider)
     {
         int netId;
         // 接下来按照"BDNet_" + netId从0查找网络，直到找到不存在的网络，此时netId为新网络id
         // 后续可以做一个废弃网络回收处理，但是暂时不着急
         for (netId = 0; netId < 10000; netId++)
         {
-            if (dataProvider.getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + netId) == null)
+            if (dataProvider.overworld().getDataStorage().get(DimensionsNet::load, "BDNet_" + netId) == null)
             {
                 break;
             }
@@ -155,17 +162,16 @@ public class DimensionsNet extends SavedData
     /**
      * 尝试从数字id获取一个维度网络，仅在服务端调用
      *
-     * @param id           数字id
-     * @param dataProvider 用于获取SavedData
+     * @param id 数字id
      * @return 返回找到的网络，如果数字id对应的网络不存在或者不合法(例如被删除)，则直接返回null
      */
-    public static @Nullable DimensionsNet getNetFromId(int id, MinecraftServer dataProvider)
+    public static @Nullable DimensionsNet getNetFromId(int id)
     {
-        if (id < 0)
-        {
-            return null;
-        }
-        DimensionsNet net = dataProvider.getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + id);
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null) return null;
+        if (id < 0) return null;
+
+        DimensionsNet net = server.overworld().getDataStorage().get(DimensionsNet::load, "BDNet_" + id);
         if (net != null && !net.deleted)
         {
             return net;
@@ -181,10 +187,13 @@ public class DimensionsNet extends SavedData
      */
     public static @Nullable DimensionsNet getNetFromPlayer(Player player)
     {
+        MinecraftServer server = player.getServer();
+        if (server == null) return null;
+
         int netId;
         for (netId = 0; netId < 10000; netId++)
         {
-            DimensionsNet net = player.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(DimensionsNet::load, "BDNet_" + netId);
+            DimensionsNet net = server.overworld().getDataStorage().get(DimensionsNet::load, "BDNet_" + netId);
             if (net != null && !net.deleted)
             {
                 if (net.players.contains(player.getUUID()))
@@ -221,7 +230,7 @@ public class DimensionsNet extends SavedData
             CompoundTag energyTag = tag.getCompound("EnergyStorage");
             if (energyTag.contains("Energy"))
             {
-                net.unifiedStorage.insert(new EnergyStackKey(energyTag.getLong("Energy")), false);
+                net.unifiedStorage.insert(EnergyStackKey.INSTANCE, energyTag.getLong("Energy"), false);
             }
         }
 
@@ -250,7 +259,7 @@ public class DimensionsNet extends SavedData
      * 把维度网络序列化，以保存到硬盘
      */
     @Override
-    public CompoundTag save(CompoundTag tag)
+    public @NotNull CompoundTag save(CompoundTag tag)
     {
         // 保存 ID
         tag.putInt("Id", this.id);
@@ -390,15 +399,12 @@ public class DimensionsNet extends SavedData
      */
     public void removePlayer(UUID playerId)
     {
-        if (playerId == owner)
+        if (playerId.equals(owner))
         {
             return;
         }
         players.remove(playerId);
-        if (managers.contains(playerId))
-        {
-            managers.remove(playerId);
-        }
+        managers.remove(playerId);
         setDirty();
     }
 
@@ -458,9 +464,9 @@ public class DimensionsNet extends SavedData
                 addPlayer(entry.getKey());
         }
         // 合并统一存储系统
-        for (IStackKey stack : otherNet.getUnifiedStorage().getStorage())
+        for (KeyAmount stack : otherNet.getUnifiedStorage().getStorage())
         {
-            unifiedStorage.insert(stack, false);
+            unifiedStorage.insert(stack.key(), stack.amount(), false);
         }
 
         // 销毁另一个网络
@@ -483,10 +489,11 @@ public class DimensionsNet extends SavedData
         this.deleted = true;
     }
 
+
     /**
      * 获取一份当前网络所有玩家的UUID以及其对应的最高权限等级的映射
      */
-    public HashMap<UUID, PlayerPermissionInfo> getPlayerPermissionInfoMap(MinecraftServer dataProvider)
+    public HashMap<UUID, PlayerPermissionInfo> getPlayerPermissionInfoMap(@NotNull MinecraftServer dataProvider)
     {
 
         HashMap<UUID, PlayerPermissionInfo> infoMap = new HashMap<>();
@@ -513,7 +520,7 @@ public class DimensionsNet extends SavedData
      *
      * @return 当前网络的统一存储空间
      */
-    public UnifiedStorage getUnifiedStorage()
+    public @NotNull UnifiedStorage getUnifiedStorage()
     {
         return this.unifiedStorage;
     }
@@ -533,11 +540,9 @@ public class DimensionsNet extends SavedData
         if (currentTime >= ServerConfigRuntime.crystalGenerateTime * 20)
         {
             ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(), 1);
-            IStackKey stackType = new ItemStackKey(stack);
-            this.unifiedStorage.insert(stackType, false);
+            this.unifiedStorage.insert(new ItemStackKey(stack), stack.getCount(), false);
             currentTime = 0;
         }
 
     }
 }
-
