@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.GUI;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
+import com.wintercogs.beyonddimensions.Machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
@@ -20,11 +21,13 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 
     public RightTabButton popButton; // 弹出模式
     public RightTabButton controlModeButton; // 红石控制模式按钮
-
+    public RightTabButton fuzzyModelButton; //模糊匹配模式
 
     public NetInterfaceBaseGUI(NetInterfaceBaseMenu container, Inventory playerInventory, Component title)
     {
         super(container, playerInventory, title);
+        // 去除空白的真实部分，用于计算图片显示的最佳位置
+
     }
 
 
@@ -52,17 +55,14 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(PopMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/popmode_up.png"));
-                iconMap.put(PopMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/popmode_down.png"));
+                iconMap.put(PopMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/popmode_up"));
+                iconMap.put(PopMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/popmode_down"));
 
                 tooltipMap.put(PopMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
                 tooltipMap.put(PopMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
-                    this.states.add(state);
-                }
+                this.states.addAll(iconMap.keySet());
 
                 setState(menu.be.popMode);
             }
@@ -79,26 +79,45 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_ignore.png"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_not_working.png"));
-                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_powered.png"));
-                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_unpowered.png"));
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_powered"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_unpowered"));
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
                 tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
                 tooltipMap.put(RedStoneControlMode.POWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_powered")));
                 tooltipMap.put(RedStoneControlMode.UNPOWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_unpowered")));
 
-                for (Enum<?> state : iconMap.keySet())
-                {
-                    this.states.add(state);
-                }
+                this.states.addAll(iconMap.keySet());
 
                 setState(menu.be.controlMode);
             }
         };
         addRenderableWidget(controlModeButton);
 
+        fuzzyModelButton = new RightTabButton(leftPos + 176, topPos + 66, 23, 26,
+                leftPos + 176 + 3, topPos + 66 + 4, 16, 16, button -> {
+            fuzzyModelButton.toggleState();
+            menu.be.fuzzyMode = (FuzzyMode) fuzzyModelButton.currentState;
+            menu.writeAndSendQuickData();
+        })
+        {
+            @Override
+            protected void initButton()
+            {
+                iconMap.put(FuzzyMode.DISABLE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_allow"));
+                iconMap.put(FuzzyMode.ENABLE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_deny"));
+
+                tooltipMap.put(FuzzyMode.DISABLE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.fuzzy_mode_disable")));
+                tooltipMap.put(FuzzyMode.ENABLE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.fuzzy_mode_enable")));
+
+                this.states.addAll(iconMap.keySet());
+
+                setState(menu.be.fuzzyMode);
+            }
+        };
+        addRenderableWidget(fuzzyModelButton);
     }
 
     protected int rebuildImageHeight()
@@ -116,12 +135,15 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     protected void containerTick()
     {
         super.containerTick();
-
+        //父类无操作
+        //每tick自动更新搜索方案
 
         if (popButton.currentState != menu.be.popMode)
             popButton.setState(menu.be.popMode);
         if (controlModeButton.currentState != menu.be.controlMode)
             controlModeButton.setState(menu.be.controlMode);
+        if (fuzzyModelButton.currentState != menu.be.fuzzyMode)
+            fuzzyModelButton.setState(menu.be.fuzzyMode);
     }
 
     @Override
