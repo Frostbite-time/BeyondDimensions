@@ -6,7 +6,7 @@ import net.minecraftforge.energy.IEnergyStorage;
 
 public class EnergyUnifiedStorageHandler implements IEnergyStorage
 {
-    private UnifiedStorage storage;
+    private final UnifiedStorage storage;
 
     public EnergyUnifiedStorageHandler(UnifiedStorage storage)
     {
@@ -16,24 +16,19 @@ public class EnergyUnifiedStorageHandler implements IEnergyStorage
     @Override
     public int receiveEnergy(int count, boolean simulate)
     {
-        return (int) (count - storage.insert(new EnergyStackKey(count), simulate).getStackAmount());
+        return (int) (count - storage.insert(EnergyStackKey.INSTANCE, count, simulate).amount());
     }
 
     @Override
     public int extractEnergy(int count, boolean simulate)
     {
-        return (int) storage.extract(new EnergyStackKey(count), simulate).getStackAmount();
+        return (int) storage.extract(EnergyStackKey.INSTANCE, count, simulate, false).amount();
     }
 
     @Override
     public int getEnergyStored()
     {
-        return storage.getTypeIdIndexList(EnergyStackKey.ID)
-                .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (EnergyStackKey) storage.getStackBySlot(actualIndex))
-                .map(energyStackType -> BDMath.clampLongToInt(energyStackType.getStackAmount()))
-                .orElse(0);
+        return BDMath.clampLongToInt(storage.getStackByKey(EnergyStackKey.INSTANCE).amount());
     }
 
     @Override

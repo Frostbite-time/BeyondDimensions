@@ -22,8 +22,6 @@ public class GasStackTypedHandler implements IGasHandler
         this.handlerStorage = handlerStorage;
     }
 
-    // ---------- bucket / slot 映射 ----------
-
     private int gasCount()
     {
         return handlerStorage.getBucket(GAS_TYPE)
@@ -63,7 +61,6 @@ public class GasStackTypedHandler implements IGasHandler
     private int resolveActualIndex(int visibleSlot)
     {
         if (visibleSlot < 0) return -1;
-
         int gases = gasCount();
         if (visibleSlot < gases)
         {
@@ -73,27 +70,19 @@ public class GasStackTypedHandler implements IGasHandler
         return getEmptySlotAt(rest);
     }
 
-    // ================= IGasHandler =================
-
-    /**
-     * 可视槽位 = Gas 桶 + Empty 桶
-     */
     @Override
     public int getTanks()
     {
         return gasCount() + emptyCount();
     }
 
-    /**
-     * 返回一个带数量的缓存对象给对方读取
-     */
     @Override
-    public @NotNull GasStack getChemicalInTank(int tank)
+    public @NotNull GasStack getChemicalInTank(int slot)
     {
-        if (!inGasRegion(tank)) return GasStack.EMPTY;
+        if (!inGasRegion(slot)) return GasStack.EMPTY;
 
-        int actualIndex = resolveActualIndex(tank);
-        if (actualIndex < 0 || actualIndex >= handlerStorage.getSlots()) return GasStack.EMPTY;
+        int actualIndex = resolveActualIndex(slot);
+        if (actualIndex < 0) return GasStack.EMPTY;
 
         KeyAmount ka = handlerStorage.getStackBySlot(actualIndex);
         if (ka.isEmpty()) return GasStack.EMPTY;
@@ -110,6 +99,14 @@ public class GasStackTypedHandler implements IGasHandler
     }
 
     @Override
+    public void setChemicalInTank(int tank, @NotNull GasStack stack)
+    {
+        int actualIndex = resolveActualIndex(tank);
+        if (actualIndex < 0) return;
+        handlerStorage.setStackDirectly(actualIndex, new GasStackKey(stack), stack.getAmount());
+    }
+
+    @Override
     public long getTankCapacity(int tank)
     {
         return 64_000L;
@@ -118,108 +115,43 @@ public class GasStackTypedHandler implements IGasHandler
     @Override
     public boolean isValid(int tank, @NotNull GasStack stack)
     {
-        // 放宽；最终由 insert/extract 决定（与 Fluid 版策略一致）
         return true;
     }
 
-    /**
-     * setChemicalInTank：只允许改 “空 / 气体槽”，避免误删其它类型槽位内容。
-     */
-    @Override
-    public void setChemicalInTank(int tank, @NotNull GasStack stack)
-    {
-        int actualIndex = resolveActualIndex(tank);
-        if (actualIndex < 0 || actualIndex >= handlerStorage.getSlots()) return;
-
-        KeyAmount current = handlerStorage.getStackBySlot(actualIndex);
-        boolean canMutate = current.isEmpty() || current.key() instanceof GasStackKey;
-        if (!canMutate)
-        {
-            return;
-        }
-
-        if (stack.isEmpty())
-        {
-            handlerStorage.setStackDirectly(actualIndex, EmptyStackKey.INSTANCE, 0);
-        }
-        else
-        {
-            handlerStorage.setStackDirectly(actualIndex, new GasStackKey(stack), stack.getAmount());
-        }
-    }
-
-    /**
-     * 指定 tank 插入：返回剩余（IGasHandler 约定）
-     */
     @Override
     public @NotNull GasStack insertChemical(int tank, @NotNull GasStack stack, @NotNull Action action)
     {
         if (stack.isEmpty()) return GasStack.EMPTY;
 
         int actualIndex = resolveActualIndex(tank);
-        if (actualIndex < 0 || actualIndex >= handlerStorage.getSlots()) return stack.copy();
-        if (!isValid(tank, stack)) return stack.copy();
+        if (actualIndex < 0) return stack.copy();
 
-        long requested = stack.getAmount();
-
-        // 优先使用“按槽位插入”（如果您 StackHandler 支持）
-        KeyAmount rem;
-        try
-        {
-            rem = handlerStorage.insert(actualIndex, new GasStackKey(stack), requested, action.simulate());
-        }
-        catch (Throwable t)
-        {
-            // fallback：如果没有 slot 版本，就退化为全局插入（注意：这会忽略 tank 指定）
-            rem = handlerStorage.insert(new GasStackKey(stack), requested, action.simulate());
-        }
-
-        long remaining = rem.amount();
-        if (remaining <= 0) return GasStack.EMPTY;
-        return new GasStack(stack, remaining);
+        KeyAmount remaining = handlerStorage.insert(actualIndex, new GasStackKey(stack), stack.getAmount(), action.simulate());
+        long rem = remaining.amount();
+        return (rem > 0) ? new GasStack(stack, rem) : GasStack.EMPTY;
     }
 
-    /**
-     * 指定 tank 抽取：返回抽出的量（IGasHandler 约定）
-     */
     @Override
     public @NotNull GasStack extractChemical(int tank, long amount, @NotNull Action action)
     {
         if (amount <= 0) return GasStack.EMPTY;
+        if (!inGasRegion(tank)) return GasStack.EMPTY;
 
         int actualIndex = resolveActualIndex(tank);
-        if (actualIndex < 0 || actualIndex >= handlerStorage.getSlots()) return GasStack.EMPTY;
+        if (actualIndex < 0) return GasStack.EMPTY;
 
-        // 若该槽不是 gas 槽，直接空
-        KeyAmount current = handlerStorage.getStackBySlot(actualIndex);
-        if (current.isEmpty() || !(current.key() instanceof GasStackKey)) return GasStack.EMPTY;
-
-        KeyAmount extracted = handlerStorage.extract(actualIndex, amount, action.simulate());
-
-        if (extracted.isEmpty()) return GasStack.EMPTY;
-
-        Object out = extracted.toStack();
+        Object out = handlerStorage.extract(actualIndex, amount, action.simulate()).toStack();
         return (out instanceof GasStack gs) ? gs : GasStack.EMPTY;
     }
 
-    /**
-     * 无指定 tank 插入：交给底层按 key 合并/分配；返回剩余
-     */
     @Override
     public @NotNull GasStack insertChemical(@NotNull GasStack stack, @NotNull Action action)
     {
         if (stack.isEmpty()) return GasStack.EMPTY;
-
-        long requested = stack.getAmount();
-        long remaining = handlerStorage.insert(new GasStackKey(stack), requested, action.simulate()).amount();
-
-        if (remaining > 0) return new GasStack(stack, remaining);
-        return GasStack.EMPTY;
+        long remaining = handlerStorage.insert(new GasStackKey(stack), stack.getAmount(), action.simulate()).amount();
+        return (remaining > 0) ? new GasStack(stack, remaining) : GasStack.EMPTY;
     }
 
-    /**
-     * 无指定 tank 抽取：从第一个 Gas 槽尝试抽取；返回抽出的量
-     */
     @Override
     public @NotNull GasStack extractChemical(long amount, @NotNull Action action)
     {
@@ -233,25 +165,15 @@ public class GasStackTypedHandler implements IGasHandler
         KeyAmount ka = handlerStorage.getStackBySlot(firstGasSlot);
         if (ka.isEmpty()) return GasStack.EMPTY;
 
-        KeyAmount extracted = handlerStorage.extract(firstGasSlot, amount, action.simulate());
-        if (extracted.isEmpty()) return GasStack.EMPTY;
-
-        Object out = extracted.toStack();
+        Object out = handlerStorage.extract(ka.key(), amount, action.simulate(), false).toStack();
         return (out instanceof GasStack gs) ? gs : GasStack.EMPTY;
     }
 
-    /**
-     * 按 key 精确抽取：返回抽出的量
-     */
     @Override
     public @NotNull GasStack extractChemical(@NotNull GasStack stack, @NotNull Action action)
     {
         if (stack.isEmpty()) return GasStack.EMPTY;
-
-        KeyAmount extracted = handlerStorage.extract(new GasStackKey(stack), stack.getAmount(), action.simulate(), false);
-        if (extracted.isEmpty()) return GasStack.EMPTY;
-
-        Object out = extracted.toStack();
+        Object out = handlerStorage.extract(new GasStackKey(stack), stack.getAmount(), action.simulate(), false).toStack();
         return (out instanceof GasStack gs) ? gs : GasStack.EMPTY;
     }
 

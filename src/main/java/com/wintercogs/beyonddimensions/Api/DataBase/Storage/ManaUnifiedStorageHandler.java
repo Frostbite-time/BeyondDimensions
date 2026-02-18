@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
 import com.google.common.base.Predicates;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackKey;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
@@ -11,6 +10,8 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 import vazkii.botania.api.internal.ManaBurst;
 import vazkii.botania.api.mana.ManaCollector;
 import vazkii.botania.api.mana.ManaPool;
@@ -20,11 +21,12 @@ import vazkii.botania.api.mana.spark.SparkAttachable;
 import java.util.List;
 import java.util.Optional;
 
+// 默认实现作为魔力收集器-可以从产能花收集魔力
 public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, SparkAttachable
 {
-    private UnifiedStorage storage;
-    private Level level;
-    private BlockPos pos;
+    private final UnifiedStorage storage;
+    private final Level level;
+    private final BlockPos pos;
 
     public ManaUnifiedStorageHandler(UnifiedStorage storage, CapCtx ctx)
     {
@@ -39,25 +41,20 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
     }
 
     @Override
-    public Level getManaReceiverLevel()
+    public @UnknownNullability Level getManaReceiverLevel()
     {
         return level;
     }
 
     @Override
-    public BlockPos getManaReceiverPos()
+    public @NotNull BlockPos getManaReceiverPos()
     {
         return pos;
     }
 
     public long getActualCurrentMana()
     {
-        return storage.getTypeIdIndexList(ManaStackKey.ID)
-                .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (ManaStackKey) storage.getStackBySlot(actualIndex))
-                .map(stack -> stack.getStackAmount())
-                .orElse(0L);
+        return storage.getStackByKey(ManaStackKey.INSTANCE).amount();
     }
 
     public long getActualMaxMana()
@@ -68,20 +65,14 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
     @Override
     public int getCurrentMana()
     {
-        return storage.getTypeIdIndexList(ManaStackKey.ID)
-                .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (ManaStackKey) storage.getStackBySlot(actualIndex))
-                .map(stack -> BDMath.clampLongToInt(stack.getStackAmount()))
-                .orElse(0);
+        return BDMath.clampLongToInt(getActualCurrentMana());
     }
 
     @Override
     public boolean isFull()
     {
         // 尽可能轻量的方式来检查
-        IStackKey stack = storage.getStackByStack(new ManaStackKey(0));
-        long currentMana = stack == null ? 0 : stack.getStackAmount();
+        long currentMana = getActualCurrentMana();
         return currentMana >= storage.getSlotCapacity(0) || (currentMana < storage.getSlotCapacity(0) && storage.isFullSlotsSize());
     }
 
@@ -89,9 +80,9 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
     public void receiveMana(int mana)
     {
         if (mana > 0)
-            storage.insert(new ManaStackKey(mana), false);
+            storage.insert(ManaStackKey.INSTANCE, mana, false);
         else
-            storage.extract(new ManaStackKey(-mana), false);
+            storage.extract(ManaStackKey.INSTANCE, -mana, false, false);
     }
 
     @Override
@@ -107,7 +98,7 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
     }
 
     @Override
-    public float getManaYieldMultiplier(ManaBurst burst)
+    public float getManaYieldMultiplier(@NotNull ManaBurst burst)
     {
         return 1f; // 始终完整接收所有脉冲
     }
@@ -137,7 +128,7 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
     }
 
     @Override
-    public boolean canAttachSpark(ItemStack stack)
+    public boolean canAttachSpark(@NotNull ItemStack stack)
     {
         return true;
     }
@@ -166,6 +157,4 @@ public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, Spark
     {
         return isFull();
     }
-
 }
-

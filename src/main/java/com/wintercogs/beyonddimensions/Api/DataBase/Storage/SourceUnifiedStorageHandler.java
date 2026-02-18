@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Integration.Ars.Caps.ISourceCap;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 
+// 对ISourceCap的适配器，由于ISource类本身注释不完善，方法实现具体使用按照SourceStorage的实现和注释推测
 public class SourceUnifiedStorageHandler implements ISourceCap
 {
     private UnifiedStorage storage;
@@ -46,12 +47,7 @@ public class SourceUnifiedStorageHandler implements ISourceCap
     @Override
     public int getSource()
     {
-        return storage.getTypeIdIndexList(SourceStackKey.ID)
-                .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (SourceStackKey) storage.getStackBySlot(actualIndex))
-                .map(stack -> BDMath.clampLongToInt(stack.getStackAmount()))
-                .orElse(0);
+        return BDMath.clampLongToInt(storage.getStackByKey(SourceStackKey.INSTANCE).amount());
     }
 
     // 获取魔源容量，用于getMaxSource即可
@@ -92,9 +88,9 @@ public class SourceUnifiedStorageHandler implements ISourceCap
         long operation = wanted - actualInside;
         BeyondDimensions.LOGGER.info("某个网络的魔源数量被外界强行设置，可能导致错误，最终魔源数量被设置为：{}", operation);
         if (operation > 0)
-            storage.insert(new SourceStackKey(operation), false);
+            storage.insert(SourceStackKey.INSTANCE, operation, false);
         else
-            storage.extract(new SourceStackKey(-operation), false);
+            storage.extract(SourceStackKey.INSTANCE, -operation, false, false);
     }
 
     // 强行设置最大值，不生效，因为UnifiedStorage的容量仅由容器决定（新生魔艺并未使用过这个方法，可以放心）
@@ -108,13 +104,13 @@ public class SourceUnifiedStorageHandler implements ISourceCap
     @Override
     public int receiveSource(int amount, boolean sim)
     {
-        return (int) (amount - storage.insert(new SourceStackKey(amount), sim).getStackAmount());
+        return (int) (amount - storage.insert(SourceStackKey.INSTANCE, amount, sim).amount());
     }
 
     // 返回导出量
     @Override
     public int extractSource(int amount, boolean sim)
     {
-        return (int) storage.extract(new SourceStackKey(amount), sim).getStackAmount();
+        return (int) storage.extract(SourceStackKey.INSTANCE, amount, sim, false).amount();
     }
 }

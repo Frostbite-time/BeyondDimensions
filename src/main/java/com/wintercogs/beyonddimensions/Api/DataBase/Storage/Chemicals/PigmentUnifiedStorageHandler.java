@@ -1,15 +1,15 @@
-package com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals;
+package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import mekanism.api.Action;
 import mekanism.api.chemical.pigment.IPigmentHandler;
 import mekanism.api.chemical.pigment.PigmentStack;
+import org.jetbrains.annotations.NotNull;
 
 public class PigmentUnifiedStorageHandler implements IPigmentHandler
 {
 
-    private UnifiedStorage storage;
+    private final UnifiedStorage storage;
 
     public PigmentUnifiedStorageHandler(UnifiedStorage storage)
     {
@@ -19,30 +19,36 @@ public class PigmentUnifiedStorageHandler implements IPigmentHandler
     @Override
     public int getTanks()
     {
-        return storage.getTypeIdIndexList(PigmentStackKey.ID)
+        return storage.getBucket(PigmentStackKey.ID)
                 .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
     @Override
-    public PigmentStack getChemicalInTank(int slot)
+    public @NotNull PigmentStack getChemicalInTank(int slot)
     {
-        return storage.getTypeIdIndexList(PigmentStackKey.ID)
+        return storage.getBucket(PigmentStackKey.ID)
                 .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (PigmentStackKey) storage.getStackBySlot(actualIndex))
-                .map(PigmentStackKey::getStack)
+                .map(key -> {
+                    Object outStack = storage.getOutStackByKey(key);
+                    if (outStack instanceof PigmentStack pigmentStack)
+                    {
+                        if (!pigmentStack.isEmpty())
+                            pigmentStack.setAmount(storage.getStackByKey(key).amount());
+                        return pigmentStack;
+                    }
+                    return null;
+                })
                 .orElse(PigmentStack.EMPTY);
     }
 
     @Override
     public void setChemicalInTank(int tank, PigmentStack stack)
     {
-        // 凡通过handler机械化输入的物品无论以何方法，全部为自动插入
         if (stack.isEmpty())
             return;
-        storage.insert(new PigmentStackKey(stack.copy()), false);
+        storage.insert(new PigmentStackKey(stack), stack.getAmount(), false);
     }
 
     @Override
@@ -52,55 +58,63 @@ public class PigmentUnifiedStorageHandler implements IPigmentHandler
     }
 
     @Override
-    public boolean isValid(int tank, PigmentStack stack)
+    public boolean isValid(int tank, @NotNull PigmentStack stack)
     {
         return true;
     }
 
-    // 返回剩余量，与Fluid的返回插入量不同
     @Override
-    public PigmentStack insertChemical(int tank, PigmentStack stack, Action action)
+    public @NotNull PigmentStack insertChemical(int tank, PigmentStack stack, @NotNull Action action)
     {
         if (stack.isEmpty())
             return PigmentStack.EMPTY;
-        long remaining = storage.insert(new PigmentStackKey(stack.copy()), action.simulate()).getStackAmount();
+        long remaining = storage.insert(new PigmentStackKey(stack), stack.getAmount(), action.simulate()).amount();
         if (remaining > 0)
             return new PigmentStack(stack, remaining);
-        return PigmentStack.EMPTY;// 始终全部插入
+        return PigmentStack.EMPTY;
     }
 
-    // 尝试从指定槽位提取指定数量化学品
     @Override
-    public PigmentStack extractChemical(int tank, long amount, Action action)
+    public @NotNull PigmentStack extractChemical(int tank, long amount, Action action)
     {
-        return ((PigmentStackKey) storage.extract(new PigmentStackKey(new PigmentStack(getChemicalInTank(tank), amount)), action.simulate()))
-                .copyStack();
+        if (storage.extract(new PigmentStackKey(getChemicalInTank(tank)), amount, action.simulate(), false).toStack() instanceof PigmentStack result)
+            return result;
+        else
+            return PigmentStack.EMPTY;
     }
 
     @Override
-    public PigmentStack insertChemical(PigmentStack stack, Action action)
+    public @NotNull PigmentStack insertChemical(PigmentStack stack, @NotNull Action action)
     {
         if (stack.isEmpty())
             return PigmentStack.EMPTY;
-        long remaining = storage.insert(new PigmentStackKey(stack.copy()), action.simulate()).getStackAmount();
+        long remaining = storage.insert(new PigmentStackKey(stack), stack.getAmount(), action.simulate()).amount();
         if (remaining > 0)
             return new PigmentStack(stack, remaining);
-        return PigmentStack.EMPTY;// 始终全部插入
+        return PigmentStack.EMPTY;
     }
 
-    // 从第一个槽位提取指定化学品
     @Override
-    public PigmentStack extractChemical(long amount, Action action)
+    public @NotNull PigmentStack extractChemical(long amount, Action action)
     {
-        return ((PigmentStackKey) storage.extract(new PigmentStackKey(new PigmentStack(getChemicalInTank(0), amount)), action.simulate()))
-                .copyStack();
+        if (storage.extract(new PigmentStackKey(getChemicalInTank(0)), amount, action.simulate(), false).toStack() instanceof PigmentStack result)
+            return result;
+        else
+            return PigmentStack.EMPTY;
     }
 
-    // 按类型提取化学品
     @Override
-    public PigmentStack extractChemical(PigmentStack stack, Action action)
+    public @NotNull PigmentStack extractChemical(@NotNull PigmentStack stack, Action action)
     {
-        return ((PigmentStackKey) storage.extract(new PigmentStackKey(stack.copy()), action.simulate()))
-                .copyStack();
+        if (storage.extract(new PigmentStackKey(stack), stack.getAmount(), action.simulate(), false).toStack() instanceof PigmentStack result)
+            return result;
+        else
+            return PigmentStack.EMPTY;
+    }
+
+    @Override
+    public @NotNull PigmentStack getEmptyStack()
+    {
+        return PigmentStack.EMPTY;
     }
 }

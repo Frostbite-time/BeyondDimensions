@@ -5,11 +5,12 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import mekanism.api.Action;
 import mekanism.api.chemical.infuse.IInfusionHandler;
 import mekanism.api.chemical.infuse.InfusionStack;
+import org.jetbrains.annotations.NotNull;
 
 public class InfusionUnifiedStorageHandler implements IInfusionHandler
 {
 
-    private UnifiedStorage storage;
+    private final UnifiedStorage storage;
 
     public InfusionUnifiedStorageHandler(UnifiedStorage storage)
     {
@@ -19,30 +20,36 @@ public class InfusionUnifiedStorageHandler implements IInfusionHandler
     @Override
     public int getTanks()
     {
-        return storage.getTypeIdIndexList(InfusionStackKey.ID)
+        return storage.getBucket(InfusionStackKey.ID)
                 .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
     @Override
-    public InfusionStack getChemicalInTank(int slot)
+    public @NotNull InfusionStack getChemicalInTank(int slot)
     {
-        return storage.getTypeIdIndexList(InfusionStackKey.ID)
+        return storage.getBucket(InfusionStackKey.ID)
                 .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (InfusionStackKey) storage.getStackBySlot(actualIndex))
-                .map(InfusionStackKey::getStack)
+                .map(key -> {
+                    Object outStack = storage.getOutStackByKey(key);
+                    if (outStack instanceof InfusionStack infuseStack)
+                    {
+                        if (!infuseStack.isEmpty())
+                            infuseStack.setAmount(storage.getStackByKey(key).amount());
+                        return infuseStack;
+                    }
+                    return null;
+                })
                 .orElse(InfusionStack.EMPTY);
     }
 
     @Override
     public void setChemicalInTank(int tank, InfusionStack stack)
     {
-        // 凡通过handler机械化输入的物品无论以何方法，全部为自动插入
         if (stack.isEmpty())
             return;
-        storage.insert(new InfusionStackKey(stack.copy()), false);
+        storage.insert(new InfusionStackKey(stack), stack.getAmount(), false);
     }
 
     @Override
@@ -52,55 +59,63 @@ public class InfusionUnifiedStorageHandler implements IInfusionHandler
     }
 
     @Override
-    public boolean isValid(int tank, InfusionStack stack)
+    public boolean isValid(int tank, @NotNull InfusionStack stack)
     {
         return true;
     }
 
-    // 返回剩余量，与Fluid的返回插入量不同
     @Override
-    public InfusionStack insertChemical(int tank, InfusionStack stack, Action action)
+    public @NotNull InfusionStack insertChemical(int tank, InfusionStack stack, @NotNull Action action)
     {
         if (stack.isEmpty())
             return InfusionStack.EMPTY;
-        long remaining = storage.insert(new InfusionStackKey(stack.copy()), action.simulate()).getStackAmount();
+        long remaining = storage.insert(new InfusionStackKey(stack), stack.getAmount(), action.simulate()).amount();
         if (remaining > 0)
             return new InfusionStack(stack, remaining);
-        return InfusionStack.EMPTY;// 始终全部插入
+        return InfusionStack.EMPTY;
     }
 
-    // 尝试从指定槽位提取指定数量化学品
     @Override
-    public InfusionStack extractChemical(int tank, long amount, Action action)
+    public @NotNull InfusionStack extractChemical(int tank, long amount, Action action)
     {
-        return ((InfusionStackKey) storage.extract(new InfusionStackKey(new InfusionStack(getChemicalInTank(tank), amount)), action.simulate()))
-                .copyStack();
+        if (storage.extract(new InfusionStackKey(getChemicalInTank(tank)), amount, action.simulate(), false).toStack() instanceof InfusionStack result)
+            return result;
+        else
+            return InfusionStack.EMPTY;
     }
 
     @Override
-    public InfusionStack insertChemical(InfusionStack stack, Action action)
+    public @NotNull InfusionStack insertChemical(InfusionStack stack, @NotNull Action action)
     {
         if (stack.isEmpty())
             return InfusionStack.EMPTY;
-        long remaining = storage.insert(new InfusionStackKey(stack.copy()), action.simulate()).getStackAmount();
+        long remaining = storage.insert(new InfusionStackKey(stack), stack.getAmount(), action.simulate()).amount();
         if (remaining > 0)
             return new InfusionStack(stack, remaining);
-        return InfusionStack.EMPTY;// 始终全部插入
+        return InfusionStack.EMPTY;
     }
 
-    // 从第一个槽位提取指定化学品
     @Override
-    public InfusionStack extractChemical(long amount, Action action)
+    public @NotNull InfusionStack extractChemical(long amount, Action action)
     {
-        return ((InfusionStackKey) storage.extract(new InfusionStackKey(new InfusionStack(getChemicalInTank(0), amount)), action.simulate()))
-                .copyStack();
+        if (storage.extract(new InfusionStackKey(getChemicalInTank(0)), amount, action.simulate(), false).toStack() instanceof InfusionStack result)
+            return result;
+        else
+            return InfusionStack.EMPTY;
     }
 
-    // 按类型提取化学品
     @Override
-    public InfusionStack extractChemical(InfusionStack stack, Action action)
+    public @NotNull InfusionStack extractChemical(@NotNull InfusionStack stack, Action action)
     {
-        return ((InfusionStackKey) storage.extract(new InfusionStackKey(stack.copy()), action.simulate()))
-                .copyStack();
+        if (storage.extract(new InfusionStackKey(stack), stack.getAmount(), action.simulate(), false).toStack() instanceof InfusionStack result)
+            return result;
+        else
+            return InfusionStack.EMPTY;
+    }
+
+    @Override
+    public @NotNull InfusionStack getEmptyStack()
+    {
+        return InfusionStack.EMPTY;
     }
 }

@@ -4,11 +4,12 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Unit.BDMath;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import org.jetbrains.annotations.NotNull;
 
 public class FluidUnifiedStorageHandler implements IFluidHandler
 {
 
-    private UnifiedStorage storage;
+    private final UnifiedStorage storage;
 
     public FluidUnifiedStorageHandler(UnifiedStorage storage)
     {
@@ -18,61 +19,72 @@ public class FluidUnifiedStorageHandler implements IFluidHandler
     @Override
     public int getTanks()
     {
-        return storage.getTypeIdIndexList(FluidStackKey.ID)
+        return storage.getBucket(FluidStackKey.ID)
                 .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
     @Override
-    public FluidStack getFluidInTank(int slot)
+    public @NotNull FluidStack getFluidInTank(int slot)
     {
-        return storage.getTypeIdIndexList(FluidStackKey.ID)
+        return storage.getBucket(FluidStackKey.ID)
                 .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (FluidStackKey) storage.getStackBySlot(actualIndex))
-                .map(FluidStackKey::getStack)
+                .map(key -> {
+                    Object outStack = storage.getOutStackByKey(key);
+                    if (outStack instanceof FluidStack fluidStack)
+                    {
+                        if (!fluidStack.isEmpty())
+                            fluidStack.setAmount(BDMath.clampLongToInt(storage.getStackByKey(key).amount()));
+                        return fluidStack;
+                    }
+                    return null;
+                })
                 .orElse(FluidStack.EMPTY);
     }
 
     @Override
-    public int getTankCapacity(int i)
+    public int getTankCapacity(int tank)
     {
         return BDMath.clampLongToInt(storage.getSlotCapacity(0));
     }
 
     @Override
-    public boolean isFluidValid(int slot, FluidStack fluidStack)
+    public boolean isFluidValid(int slot, @NotNull FluidStack fluidStack)
     {
         return true;
     }
 
     // 返回实际插入数量
     @Override
-    public int fill(FluidStack fluidStack, FluidAction fluidAction)
+    public int fill(FluidStack fluidStack, @NotNull FluidAction fluidAction)
     {
         if (fluidStack.isEmpty())
             return 0;
         int allAmount = fluidStack.getAmount();
-        int remaining = (int) storage.insert(new FluidStackKey(fluidStack.copy()), fluidAction.simulate()).getStackAmount();
+        int remaining = (int) storage.insert(new FluidStackKey(fluidStack), fluidStack.getAmount(), fluidAction.simulate()).amount();
         return allAmount - remaining;// 实际插入量
     }
 
     // 返回实际导出数量
     @Override
-    public FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
+    public @NotNull FluidStack drain(@NotNull FluidStack fluidStack, FluidAction fluidAction)
     {
-        return ((FluidStackKey) storage.extract(new FluidStackKey(fluidStack.copy()), fluidAction.simulate()))
-                .copyStack();
+        if (storage.extract(new FluidStackKey(fluidStack), fluidStack.getAmount(), fluidAction.simulate(), false).toStack() instanceof FluidStack result)
+            return result;
+        else
+            return FluidStack.EMPTY;
     }
 
     // 按数量导出流体
     // 此处处理为，尝试按数量导出第一个槽位的流体
     // 返回实际导出数量
     @Override
-    public FluidStack drain(int count, FluidAction fluidAction)
+    public @NotNull FluidStack drain(int count, FluidAction fluidAction)
     {
-        return ((FluidStackKey) storage.extract(new FluidStackKey(new FluidStack(getFluidInTank(0), count)), fluidAction.simulate()))
-                .copyStack();
+        if (storage.extract(new FluidStackKey(getFluidInTank(0)), count, fluidAction.simulate(), false).toStack() instanceof FluidStack result)
+            return result;
+        else
+            return FluidStack.EMPTY;
     }
 }
