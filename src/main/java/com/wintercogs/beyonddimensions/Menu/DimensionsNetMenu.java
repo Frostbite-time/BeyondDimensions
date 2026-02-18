@@ -1,16 +1,17 @@
 package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerKeepZero;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Integration.JECharacters.PinInMatches;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedSlotGroupSync;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedStackTypedSlot;
-import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.Unit.TinyPinyinUtils;
 import com.wintercogs.beyonddimensions.Unit.TooltipHelper;
 import net.minecraft.client.Minecraft;
@@ -25,6 +26,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+import static com.wintercogs.beyonddimensions.Registry.UIRegister.Dimensions_Net_Menu;
+
 /**
  * 打开维度网络时候所用到的Menu，处理了网络同步以及点击操作等问题
  */
@@ -35,21 +38,10 @@ public class DimensionsNetMenu extends BDBaseMenu
     public int lineData = 0;//从第几行开始渲染？
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
-    public UnifiedStorage storage;
-    public UnifiedStorage viewerStorage; // 在客户端，用于显示物品
+    public AbstractUnorderedStackHandler storage; // 客户端与服务端都使用RemoveZero版本作为实际存储
+    public AbstractUnorderedStackHandler viewerStorage; // 在客户端，用于显示物品，允许保留0堆叠
     private ArrayList<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
-    private boolean cacheTooltip = false; //客户端使用，用于记录打开UI后的第一次同步是否缓存了工具提示（用于搜索，且第一次同步通常为全量同步，此时处理较好）
 
-    // 客户端用搜索缓存
-    private static final int NAME_CACHE_MAX = 10_000;
-    private static final LinkedHashMap<IStackKey<?>, String> NAME_CACHE = new LinkedHashMap<>(4096, 0.75f, true)
-    {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<IStackKey<?>, String> eldest)
-        {
-            return size() > NAME_CACHE_MAX;
-        }
-    };
 
     public boolean hasShiftDown = false;
 
@@ -64,16 +56,16 @@ public class DimensionsNetMenu extends BDBaseMenu
     public DimensionsNetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
-        this(UIRegister.Dimensions_Net_Menu.get(), id, playerInventory, new DimensionsNet(true));
+        this(Dimensions_Net_Menu.get(), id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE));
     }
 
     /**
      * 服务端构造函数
      *
      * @param playerInventory 玩家背包
-     * @param data            维度网络信息，包含了存储信息
+     * @param data            存储信息
      */
-    public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, DimensionsNet data)
+    public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, AbstractUnorderedStackHandler data)
     {
         super(menuType, id, playerInventory);
 
@@ -85,8 +77,8 @@ public class DimensionsNetMenu extends BDBaseMenu
         }
 
         // 初始化维度网络容器
-        storage = data.getUnifiedStorage();
-        viewerStorage = new DimensionsNet(true).getUnifiedStorage(); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
+        storage = data; // 此处，客户端使用可移0堆叠，不维护时间对的版本，服务端传入维度网络携带的版本
+        viewerStorage = new UnorderedStackHandlerKeepZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE); // 由于服务端不实际需要这个，所以双端都给一个无数据用于初始化即可
 
         addSlotGroupSync(new DisorderedSlotGroupSync(this, slotGroupSyncs.size(), storage)
         {
@@ -99,45 +91,19 @@ public class DimensionsNetMenu extends BDBaseMenu
                 else
                     updateOnlyCountAndNewViewer();
 
-                if (!cacheTooltip)
-                {
-                    // 调用异步缓存
-                    TooltipHelper.readAsCache(storage.getStorage(), player, TooltipFlag.Default.NORMAL);
-                    TooltipHelper.readAsCache(storage.getStorage(), player, TooltipFlag.Default.ADVANCED);
-                }
+                TooltipHelper.readAsCache(storage.getStorage(), player, TooltipFlag.Default.NORMAL);
+                TooltipHelper.readAsCache(storage.getStorage(), player, TooltipFlag.Default.ADVANCED);
             }
         });
-
 
         // 添加玩家背包和快捷栏
         addPlayerInv(playerInventory);
 
         // 添加存储槽
         addStorageSlots();
-
     }
 
-
-    public int getLines()
-    {
-        return maxLines;
-    }
-
-    public void reduceLines()
-    {
-        maxLines--;
-    }
-
-    public void addLines()
-    {
-        maxLines++;
-    }
-
-    public void setLines(int lines)
-    {
-        this.maxLines = lines;
-    }
-
+    // 添加存储槽位
     protected void addStorageSlots()
     {
         // 默认添加99行，但将99之外的行全部设置为不激活状态，以实现动态增加和减少行数
@@ -173,6 +139,7 @@ public class DimensionsNetMenu extends BDBaseMenu
         vanillaQuickMoveEndIndex = storageEndIndex;
     }
 
+    // 添加玩家背包
     protected void addPlayerInv(Inventory playerInventory)
     {
         inventoryStartIndex = slots.size();
@@ -190,7 +157,6 @@ public class DimensionsNetMenu extends BDBaseMenu
         inventoryEndIndex = slots.size();
     }
 
-
     // 放大和缩小UI所使用的函数，用于重新确定槽位的激活状态以及槽位的位置
     public void rebuildSlots()
     {
@@ -199,10 +165,8 @@ public class DimensionsNetMenu extends BDBaseMenu
         {
             if (slot instanceof AbstractStackTypedSlot sSlot)
             {
-                if (sSlotNum / 9 < getLines())
-                    sSlot.setActive(true);
-                else
-                    sSlot.setActive(false);
+                // 仅激活当前应当显示的槽位
+                sSlot.setActive(sSlotNum / 9 < getLines());
                 sSlotNum++; // 先处理再加数，可以防止最后一个槽位出现问题
             }
         }
@@ -211,23 +175,43 @@ public class DimensionsNetMenu extends BDBaseMenu
         for (int i = inventoryStartIndex; i < inventoryEndIndex; ++i)
         {
             Slot slot = slots.get(i);
-            if (slot != null)
+            // slot不为null
+            if (slotNum / 9 < 3)
             {
-                if (slotNum / 9 < 3)
-                {
-                    slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + slotNum / 9 * 18;
-                }
-                else
-                {
-                    slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4;
-                }
-
-
-                slotNum++;
+                slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + slotNum / 9 * 18;
             }
+            else
+            {
+                slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4;
+            }
+
+
+            slotNum++;
         }
     }
 
+
+    // 指示可渲染的最大行数
+    // 便于子类重写
+    public int getLines()
+    {
+        return maxLines;
+    }
+
+    public void reduceLines()
+    {
+        maxLines--;
+    }
+
+    public void addLines()
+    {
+        maxLines++;
+    }
+
+    public void setLines(int lines)
+    {
+        this.maxLines = lines;
+    }
 
     /**
      * 客户端专用函数，服务端请勿调用<br>
@@ -237,9 +221,9 @@ public class DimensionsNetMenu extends BDBaseMenu
     public void updateViewerStorage()
     {
         viewerStorage.clearStorage();
-        for (IStackKey stack : this.storage.getStorage())
+        for (KeyAmount stack : this.storage.getStorage())
         {
-            this.viewerStorage.insert(stack.copy(), false);
+            this.viewerStorage.insert(stack.key(), stack.amount(), false);
         }
         buildIndexList(new ArrayList<>(viewerStorage.getStorage()), true);
     }
@@ -251,24 +235,27 @@ public class DimensionsNetMenu extends BDBaseMenu
         // 由于viewerStorage的对象来自storage。而storage不会被随意清空
         // hashCode将能被自定义的copy函数一并传递，无需过多性能
 
-        Map<IStackKey, Long> storageMap = new HashMap<>();
+        Map<IStackKey<?>, Long> storageMap = new HashMap<>();
 
         // 填充主存储物品数量 (O(n))
-        for (IStackKey stack : storage.getStorage())
+        for (KeyAmount stack : storage.getStorage())
         {
-            storageMap.put(stack, stack.getStackAmount());
+            storageMap.put(stack.key(), stack.amount());
         }
         // 更新查看者存储的数量 (O(m))
-        for (IStackKey viewerStack : viewerStorage.getStorage())
+        for (KeyAmount viewerStack : viewerStorage.getStorage())
         {
             // 使用哈希表直接查找数量，不存在时默认为0
-            long amount = storageMap.getOrDefault(viewerStack, 0L);
-            viewerStack.setStackAmount(amount);
+            long amount = storageMap.getOrDefault(viewerStack.key(), 0L);
+            // 这里内部会移除数量为0的情况，到时候再修改为锁定情况，现在先放着不管
+            viewerStorage.setAmountByKey(viewerStack.key(), amount);
         }
+
     }
 
+
     // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList(ArrayList<IStackKey<?>> itemStorage, boolean needsUpdateCacheIndex)
+    public void buildIndexList(ArrayList<KeyAmount> itemStorage, boolean needsUpdateCacheIndex)
     {
         if (!this.player.level().isClientSide())
         {
@@ -301,6 +288,7 @@ public class DimensionsNetMenu extends BDBaseMenu
     }
 
     // 双端函数，根据传入列表构建索引
+    // 此函数实际并不安全，其生效的重要条件是 存储槽位必须首先完全添加
     public void loadIndexList(ArrayList<Integer> list)
     {
         int listIndex = 0;
@@ -321,99 +309,184 @@ public class DimensionsNetMenu extends BDBaseMenu
         this.searchText = text.toLowerCase(Locale.ENGLISH);
     }
 
-
     /**
      * 根据当前的搜索状态、按钮状态对存储进行排序
-     *
-     * @param unifiedStorage 要排序的存储
-     * @return 完成排序的索引列表
+     * - 仅按需收集字段（显示名/模组ID/Tooltip/时间戳/数量）
+     * - 比较器只比较已准备好的字段，不再做昂贵取值
+     * - 不做 viewerIndex 兜底（避免额外开销，也避免在“换尾删除”下产生误导）
      */
-    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<IStackKey<?>> unifiedStorage)
+    public ArrayList<Integer> buildStorageWithCurrentState(ArrayList<KeyAmount> unifiedStorage)
     {
-        // 过滤（合并空气与搜索）
-        final ArrayList<Keyed> filtered = new ArrayList<>(unifiedStorage.size());
-        final boolean needSearch = this.searchText != null && !this.searchText.isEmpty();
-        final String lowerSearch = needSearch ? this.searchText.toLowerCase(Locale.ENGLISH) : "";
-        final String[] parts = needSearch ? splitSearch(lowerSearch) : new String[]{"", "", ""};
-        final String namePart = parts[0], idPart = parts[1], tipPart = parts[2];
-        final boolean hasSymbol = needSearch && !(idPart.isEmpty() && tipPart.isEmpty());
+        if (!this.player.level().isClientSide()) return new ArrayList<>();
 
+        // ---- 解析搜索串并确定过滤需求 ----
+        final String s = (searchText == null) ? "" : searchText.toLowerCase(Locale.ENGLISH);
+        final boolean hasSearch = !s.isEmpty();
+        final String[] parts = splitSearch(s);
+        final String namePart = parts[0];  // 名称
+        final String idPart = parts[1];  // @modid
+        final String tipPart = parts[2];  // #tooltip
+        final boolean hasSymbol = !(idPart.isEmpty() && tipPart.isEmpty());
+
+        final boolean needNameFilter = hasSearch && (!namePart.isEmpty());
+        final boolean needModFilter = hasSearch && (hasSymbol ? !idPart.isEmpty() : !namePart.isEmpty());
+        final boolean needTooltipFilter = hasSearch && (hasSymbol ? !tipPart.isEmpty() : !namePart.isEmpty());
+
+        // ---- 决定排序需求（只在需要时准备对应字段）----
+        ButtonState primaryState = CommonConfigRuntime.uiSortButton;
+        ButtonState secondaryState = CommonConfigRuntime.uiSecondSortButton;
+        if (primaryState == null) primaryState = ButtonState.SORT_NAME;
+        final boolean useSecondary = (secondaryState != null && secondaryState != primaryState);
+
+        final boolean needNameSort = (primaryState == ButtonState.SORT_NAME) || (useSecondary && secondaryState == ButtonState.SORT_NAME);
+        final boolean needModidSort = (primaryState == ButtonState.SORT_MODID) || (useSecondary && secondaryState == ButtonState.SORT_MODID);
+        final boolean needQtySort = (primaryState == ButtonState.SORT_QUANTITY) || (useSecondary && secondaryState == ButtonState.SORT_QUANTITY);
+        final boolean needCTimeSort = (primaryState == ButtonState.SORT_INSERTED_TIME) || (useSecondary && secondaryState == ButtonState.SORT_INSERTED_TIME);
+        final boolean needMTimeSort = (primaryState == ButtonState.SORT_MODIFIED_TIME) || (useSecondary && secondaryState == ButtonState.SORT_MODIFIED_TIME);
+
+        // 只有在需要时才拿时间戳 map
+        final Map<IStackKey<?>, Long> ctimeMap = needCTimeSort ? storage.getCreationTimeMap() : null;
+        final Map<IStackKey<?>, Long> mtimeMap = needMTimeSort ? storage.getLastModifiedTimeMap() : null;
+
+        final ArrayList<Row> rows = new ArrayList<>(unifiedStorage.size());
+
+        // ---- 过滤 + 收集排序键（按需取值，尽量短路）----
         for (int i = 0; i < unifiedStorage.size(); i++)
         {
-            IStackKey<?> s = unifiedStorage.get(i);
-            if (s == null || s.isEmpty()) continue;
+            KeyAmount ka = unifiedStorage.get(i);
+            if (ka == null || ka.isEmpty()) continue;
 
-            // 预计算一次 key（名字走缓存）
-            final String nameKey = getDisplayNameKeyCached(s);
-            final String modIdKey = s.getModId() == null ? "" : s.getModId().toLowerCase(Locale.ENGLISH);
+            IStackKey<?> key = ka.key();
 
-            // 搜索匹配
-            if (!needSearch)
+            String displayName = null;   // 仅在需要按名称过滤/排序时取
+            String modIdLower = null;   // 过滤用小写
+            String modIdSort = null;   // 排序用原字符串
+
+            boolean matched;
+            if (!hasSearch)
             {
-                filtered.add(new Keyed(s, i, nameKey, modIdKey, s.getStackAmount()));
-                continue;
+                matched = true;
+            }
+            else if (hasSymbol)
+            {
+                matched = true;
+                if (needNameFilter)
+                {
+                    displayName = key.getRender().getDisplayName(key).getString();
+                    if (!checkTextMatches(displayName, namePart)) matched = false;
+                }
+                if (matched && !idPart.isEmpty())
+                {
+                    modIdLower = key.getModId().toLowerCase(Locale.ENGLISH);
+                    if (!modIdLower.contains(idPart)) matched = false;
+                }
+                if (matched && !tipPart.isEmpty())
+                {
+                    if (!checkTooltipMatches(ka, tipPart)) matched = false;
+                }
+            }
+            else
+            {
+                boolean any = false;
+                if (!namePart.isEmpty())
+                {
+                    if (needNameFilter)
+                    {
+                        displayName = key.getRender().getDisplayName(key).getString();
+                        any |= checkTextMatches(displayName, namePart);
+                    }
+                    if (!any && needModFilter)
+                    {
+                        modIdLower = key.getModId().toLowerCase(Locale.ENGLISH);
+                        any |= modIdLower.contains(namePart);
+                    }
+                    if (!any && needTooltipFilter)
+                    {
+                        any |= checkTooltipMatches(ka, namePart);
+                    }
+                }
+                matched = any;
+            }
+            if (!matched) continue;
+
+            // 进入排序键收集：仅在需要时取
+            if (needNameSort && displayName == null)
+            {
+                displayName = key.getRender().getDisplayName(key).getString();
+            }
+            if (needModidSort)
+            {
+                modIdSort = key.getModId();
             }
 
-            if (hasSymbol) // AND 规则
+            long amt = needQtySort ? ka.amount() : 0L;
+            long ctime = (needCTimeSort && ctimeMap != null) ? ctimeMap.getOrDefault(key, 0L) : 0L;
+            long mtime = (needMTimeSort && mtimeMap != null) ? mtimeMap.getOrDefault(key, 0L) : 0L;
+
+            rows.add(new Row(i, displayName, modIdSort, amt, ctime, mtime));
+        }
+
+        // ---- 排序（无 viewerIndex 兜底）----
+        if (!rows.isEmpty())
+        {
+            final Comparator<Row> primary = buildRowComparator(primaryState);
+            if (useSecondary)
             {
-                if (!namePart.isEmpty() && !checkTextMatches(nameKey, namePart)) continue;
-                if (!idPart.isEmpty() && !modIdKey.contains(idPart)) continue;
-                if (!tipPart.isEmpty() && !checkTooltipMatches(s, tipPart)) continue;
-                filtered.add(new Keyed(s, i, nameKey, modIdKey, s.getStackAmount()));
+                final Comparator<Row> secondary = buildRowComparator(secondaryState);
+                rows.sort(primary.thenComparing(secondary));
             }
-            else // OR 规则
+            else
             {
-                boolean matched = false;
-                if (!namePart.isEmpty() && checkTextMatches(nameKey, namePart)) matched = true;
-                if (!matched && modIdKey.contains(namePart)) matched = true;
-                if (!matched && checkTooltipMatches(s, namePart)) matched = true;
-                if (matched) filtered.add(new Keyed(s, i, nameKey, modIdKey, s.getStackAmount()));
+                rows.sort(primary);
+            }
+            if (CommonConfigRuntime.uiReverseButton == ButtonState.ENABLED)
+            {
+                Collections.reverse(rows);
             }
         }
 
-        // 排序
-        final ButtonState sortState = CommonConfigRuntime.uiSortButton;
-
-        Comparator<Keyed> cmp;
-        if (sortState == ButtonState.SORT_NAME)
+        // ---- 产出“视觉存储下标”列表 ----
+        ArrayList<Integer> result = new ArrayList<>(rows.size());
+        for (Row row : rows)
         {
-            cmp = Comparator.comparing((Keyed k) -> k.nameKey)
-                    .thenComparing(k -> k.modIdKey)
-                    .thenComparingLong(k -> k.amount);
+            result.add(row.idx);
         }
-        else if (sortState == ButtonState.SORT_QUANTITY)
-        {
-            cmp = Comparator.comparingLong((Keyed k) -> k.amount)
-                    .thenComparing((Keyed k) -> k.nameKey)
-                    .thenComparing(k -> k.modIdKey);
-        }
-        else if (sortState == ButtonState.SORT_MODID)
-        {
-            cmp = Comparator.comparing((Keyed k) -> k.modIdKey)
-                    .thenComparing(k -> k.nameKey)
-                    .thenComparingLong(k -> k.amount);
-        }
-        else // 默认：名字
-        {
-            cmp = Comparator.comparing((Keyed k) -> k.nameKey);
-        }
-
-        // 倒序
-        if (CommonConfigRuntime.uiReverseButton == ButtonState.ENABLED)
-        {
-            cmp = cmp.reversed();
-        }
-
-        filtered.sort(cmp);
-
-        // 回填索引
-        ArrayList<Integer> cacheIndex = new ArrayList<>(filtered.size());
-        for (Keyed k : filtered)
-        {
-            cacheIndex.add(k.origIndex);
-        }
-        return cacheIndex;
+        return result;
     }
+
+    /**
+     * @param idx       指向 unifiedStorage（即 viewerStorage）的下标
+     * @param name      显示名（仅在需要时非 null）
+     * @param modIdSort 模组ID（排序用原字符串；仅在需要时非 null）
+     * @param amount    数量（仅在需要时有意义）
+     * @param ctime     插入时间（仅在需要时有意义）
+     * @param mtime     修改时间（仅在需要时有意义）
+     */ // 局部行结构：仅保存排序所需键
+    private record Row(int idx, String name, String modIdSort, long amount, long ctime, long mtime)
+    {
+    }
+
+    /**
+     * 仅比较 Row 中已准备好的字段；不做任何额外取值或 viewerIndex 兜底
+     */
+    private Comparator<Row> buildRowComparator(ButtonState state)
+    {
+        if (state == null)
+        {
+            // 与旧逻辑一致：默认按名称（这里假定需要时我们已填充了 name）
+            return Comparator.comparing((Row r) -> r.name, String::compareTo);
+        }
+        return switch (state)
+        {
+            case SORT_QUANTITY -> Comparator.comparingLong((Row r) -> r.amount);
+            case SORT_NAME -> Comparator.comparing((Row r) -> r.name, String::compareTo);
+            case SORT_MODID -> Comparator.comparing((Row r) -> r.modIdSort, String::compareTo);
+            case SORT_INSERTED_TIME -> Comparator.comparingLong((Row r) -> r.ctime);
+            case SORT_MODIFIED_TIME -> Comparator.comparingLong((Row r) -> r.mtime);
+            default -> Comparator.comparing((Row r) -> r.name, String::compareTo);
+        };
+    }
+
 
     /**
      * 检查文本是否匹配名称（同时检查拼音以及原文本）
@@ -452,7 +525,7 @@ public class DimensionsNetMenu extends BDBaseMenu
      * @param matchText 文本
      * @return 结果为真则意味存在
      */
-    private boolean checkTooltipMatches(IStackKey stack, String matchText)
+    private boolean checkTooltipMatches(KeyAmount stack, String matchText)
     {
         List<Component> toolTips = TooltipHelper.getTooltipLines(stack,
                 player,
@@ -538,34 +611,4 @@ public class DimensionsNetMenu extends BDBaseMenu
         return true; // 可根据需求修改条件
     }
 
-    // 仅用于排序/过滤的快照，避免在比较器里反复取重名信息
-    private static final class Keyed
-    {
-        final IStackKey<?> stack;
-        final int origIndex; // 原始索引，用来回填到 cacheIndex
-        final String nameKey; // 排序/匹配用的“名字key”
-        final String modIdKey;
-        final long amount;
-
-        Keyed(IStackKey<?> s, int idx, String nameKey, String modIdKey, long amount)
-        {
-            this.stack = s;
-            this.origIndex = idx;
-            this.nameKey = nameKey;
-            this.modIdKey = modIdKey;
-            this.amount = amount;
-        }
-    }
-
-    private static String getDisplayNameKeyCached(IStackKey<?> key)
-    {
-        String val = NAME_CACHE.get(key);
-        if (val != null) return val;
-        String computed = key.getDisplayName().getString();
-        computed = computed.toLowerCase(Locale.ENGLISH);
-        // 如果未命中，做一个copy，理论上每次打开UI仅一次全量，后续增量，不会有过多负载
-        NAME_CACHE.put(key.copy(), computed);
-        return computed;
-    }
 }
-

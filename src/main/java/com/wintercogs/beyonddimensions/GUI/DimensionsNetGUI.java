@@ -56,23 +56,21 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     protected static final int PLAYER_INV_WIDTH = 176;
     protected static final int PLAYER_INV_HEIGHT = 89;
 
-
     protected EditBox searchField;
     protected String lastSearchText = "";
     protected ReverseButton reverseButton;
     protected SortMethodButton sortButton;
+    protected SortMethodButton secondSortButton;
+    protected SearchToggleButton searchToggleButton;
     protected IconButton addPageButton;
     protected IconButton removePageButton;
-    protected SearchToggleButton searchToggleButton;
     protected IconButton craftButton;
     protected BigScroller scroller;
 
     public DimensionsNetGUI(T container, Inventory playerInventory, Component title)
     {
         super(container, playerInventory, title);
-
     }
-
 
     @Override
     protected void init()
@@ -84,7 +82,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         if (UIDataHelper.isTransfer)
         {
             menu.lineData = UIDataHelper.currentPage;
-
             if (UIDataHelper.lastMousePos != null)
             {
                 Window window = Minecraft.getInstance().getWindow();
@@ -105,7 +102,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             // 自动计算不主动持久化参数
             if (maxLines < 2)
                 maxLines = 2;
-
             menu.setLines(maxLines);
             menu.rebuildSlots();
         }
@@ -114,7 +110,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         this.imageWidth = 194;
         // 计算真实高度
         this.imageHeight = rebuildImageHeight();
-
 
         // 用于计算期望的起点位置
         // 宽按176 高按235可以得到一个较好的效果
@@ -136,8 +131,41 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
         });
         addRenderableWidget(sortButton);
-        //倒序按钮
-        reverseButton = new ReverseButton(this.leftPos - 18, this.topPos + 6 + 18, button ->
+        // 第二搜索策略按钮
+        secondSortButton = new SortMethodButton(this.leftPos - 18, this.topPos + 6 + 18, button ->
+        {
+            secondSortButton.toggleState();
+            CommonConfigRuntime.uiSecondSortButton = (ButtonState) secondSortButton.currentState;
+            Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.set((ButtonState) secondSortButton.currentState);
+            Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.save();
+            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+        })
+        {
+            @Override
+            protected void initButton()
+            {
+                iconMap.put(ButtonState.SORT_QUANTITY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_quantity"));
+                iconMap.put(ButtonState.SORT_NAME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_name"));
+                iconMap.put(ButtonState.SORT_MODID, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_modid"));
+                iconMap.put(ButtonState.SORT_INSERTED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_inserted_time"));
+                iconMap.put(ButtonState.SORT_MODIFIED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_modified_time"));
+
+                tooltipMap.put(ButtonState.SORT_QUANTITY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_quantity_second")));
+                tooltipMap.put(ButtonState.SORT_NAME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_name_second")));
+                tooltipMap.put(ButtonState.SORT_MODID, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_modid_second")));
+                tooltipMap.put(ButtonState.SORT_INSERTED_TIME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_inserted_time_second")));
+                tooltipMap.put(ButtonState.SORT_MODIFIED_TIME, Tooltip.create(Component.translatable(("tooltip.button.beyonddimensions.sort_modified_time_second"))));
+
+                for (Enum<?> state : iconMap.keySet())
+                {
+                    this.states.add(state);
+                }
+                setState(CommonConfigRuntime.uiSecondSortButton);
+            }
+        };
+        addRenderableWidget(secondSortButton);
+        // 倒序切换按钮
+        reverseButton = new ReverseButton(this.leftPos - 18, this.topPos + 6 + 18 * 2, button ->
         {
             reverseButton.toggleState();
             CommonConfigRuntime.uiReverseButton = (ButtonState) reverseButton.currentState;
@@ -146,9 +174,8 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
         });
         addRenderableWidget(reverseButton);
-
         // 搜索切换按钮
-        searchToggleButton = new SearchToggleButton(this.leftPos - 18, this.topPos + 6 + 18 * 2, button -> {
+        searchToggleButton = new SearchToggleButton(this.leftPos - 18, this.topPos + 6 + 18 * 3, button -> {
             searchToggleButton.toggleState();
             CommonConfigRuntime.uiSearchButton = (ButtonState) searchToggleButton.currentState;
             Config.INSTANCE.commonConfig.UI_SEARCH_BUTTON.set((ButtonState) searchToggleButton.currentState);
@@ -156,9 +183,8 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         });
         addRenderableWidget(searchToggleButton);
 
-
         //页面增减按钮
-        addPageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 3, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/up_arrow.png"), button ->
+        addPageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 4, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/up_arrow"), button ->
         {
             if (this.height - 36 <= (rebuildImageHeight() + MID_SLOTS_HEIGHT)
                     || menu.getLines() >= 99)
@@ -178,7 +204,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addPageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.add_page")));
         addRenderableWidget(addPageButton);
 
-        removePageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 4, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/down_arrow.png"), button ->
+        removePageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 5, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/down_arrow"), button ->
         {
             if (menu.getLines() <= 2)
                 return;
@@ -197,6 +223,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         addCraftButton();
 
+
         // 初始化搜索方案
         this.searchField = new EditBox(getFont(), this.leftPos + 60, this.topPos + 7, 120, this.getFont().lineHeight + 5, Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch"));
         this.searchField.setMaxLength(200);
@@ -208,8 +235,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         this.searchField.setResponder(text -> {
             if (text.isEmpty())
             {
-                searchField.setSuggestion(Component.translatable(
-                        "wintercogs.beyonddimensions.dimensionsguisearch").getString());
+                searchField.setSuggestion(Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch").getString());
             }
             else
             {
@@ -284,7 +310,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     protected void containerTick()
     {
         super.containerTick();
-
         // 每tick从emi或jei同步一次文本
         if (CommonConfigRuntime.searchTextWithJEIEMI)
         {
@@ -317,7 +342,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     // 用于让子类重写工艺槽位按钮的函数
     protected void addCraftButton()
     {
-        craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 5, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/craft_button.png"), button ->
+        craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/craft_button"), button ->
         {
             UIDataHelper.currentPage = menu.lineData;
 

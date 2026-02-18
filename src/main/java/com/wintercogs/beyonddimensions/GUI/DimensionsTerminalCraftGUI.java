@@ -6,6 +6,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class DimensionsTerminalCraftGUI extends DimensionsCraftGUI<DimensionsCraftMenuTerminal>
 {
+
     public DimensionsTerminalCraftGUI(DimensionsCraftMenuTerminal container, Inventory playerInventory, Component title)
     {
         super(container, playerInventory, title);
