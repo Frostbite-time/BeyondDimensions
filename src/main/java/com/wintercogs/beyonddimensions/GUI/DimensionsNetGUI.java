@@ -144,11 +144,11 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             @Override
             protected void initButton()
             {
-                iconMap.put(ButtonState.SORT_QUANTITY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_quantity"));
-                iconMap.put(ButtonState.SORT_NAME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_name"));
-                iconMap.put(ButtonState.SORT_MODID, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_modid"));
-                iconMap.put(ButtonState.SORT_INSERTED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_inserted_time"));
-                iconMap.put(ButtonState.SORT_MODIFIED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_modified_time"));
+                iconMap.put(ButtonState.SORT_QUANTITY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_quantity.png"));
+                iconMap.put(ButtonState.SORT_NAME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_name.png"));
+                iconMap.put(ButtonState.SORT_MODID, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_modid.png"));
+                iconMap.put(ButtonState.SORT_INSERTED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_inserted_time.png"));
+                iconMap.put(ButtonState.SORT_MODIFIED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_modified_time.png"));
 
                 tooltipMap.put(ButtonState.SORT_QUANTITY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_quantity_second")));
                 tooltipMap.put(ButtonState.SORT_NAME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_name_second")));
@@ -184,7 +184,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addRenderableWidget(searchToggleButton);
 
         //页面增减按钮
-        addPageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 4, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/up_arrow"), button ->
+        addPageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 4, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/up_arrow.png"), button ->
         {
             if (this.height - 36 <= (rebuildImageHeight() + MID_SLOTS_HEIGHT)
                     || menu.getLines() >= 99)
@@ -204,7 +204,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addPageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.add_page")));
         addRenderableWidget(addPageButton);
 
-        removePageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 5, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/down_arrow"), button ->
+        removePageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 5, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/down_arrow.png"), button ->
         {
             if (menu.getLines() <= 2)
                 return;
@@ -342,7 +342,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     // 用于让子类重写工艺槽位按钮的函数
     protected void addCraftButton()
     {
-        craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/craft_button"), button ->
+        craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/craft_button.png"), button ->
         {
             UIDataHelper.currentPage = menu.lineData;
 

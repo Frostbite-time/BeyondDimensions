@@ -41,7 +41,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         super.init();
 
         //槽位转移按钮
-        transferCraftToInvButton = new IconButton(this.leftPos + 90, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/down_arrow"), button ->
+        transferCraftToInvButton = new IconButton(this.leftPos + 90, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/down_arrow.png"), button ->
         {
             PacketRegister.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(false));
         });
@@ -49,7 +49,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         addRenderableWidget(transferCraftToInvButton);
 
 
-        transferCraftToStorageButton = new IconButton(this.leftPos + 81, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/up_arrow"), button ->
+        transferCraftToStorageButton = new IconButton(this.leftPos + 81, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/up_arrow.png"), button ->
         {
             PacketRegister.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(true));
         });
@@ -70,8 +70,8 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
             @Override
             protected void initButton()
             {
-                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_asc"));
-                iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_desc"));
+                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_asc.png"));
+                iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_desc.png"));
 
                 tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_storage")));
                 tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_inv")));

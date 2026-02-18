@@ -121,6 +121,7 @@ public class Config
         public void onLoaded()
         {
             CommonConfigRuntime.uiSortButton = UI_SORT_BUTTON.get();
+            CommonConfigRuntime.uiSecondSortButton = UI_SECOND_SORT_BUTTON.get();
             CommonConfigRuntime.uiReverseButton = UI_REVERSE_BUTTON.get();
             CommonConfigRuntime.uiSearchButton = UI_SEARCH_BUTTON.get();
             CommonConfigRuntime.uiCraftButton = UI_CRAFT_BUTTON.get();

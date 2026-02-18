@@ -18,15 +18,17 @@ public class SortMethodButton extends StatusButton
     @Override
     protected void initButton()
     {
-        iconMap.put(ButtonState.SORT_DEFAULT, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_default.png"));
         iconMap.put(ButtonState.SORT_QUANTITY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_quantity.png"));
         iconMap.put(ButtonState.SORT_NAME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_name.png"));
         iconMap.put(ButtonState.SORT_MODID, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_modid.png"));
+        iconMap.put(ButtonState.SORT_INSERTED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_inserted_time.png"));
+        iconMap.put(ButtonState.SORT_MODIFIED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_modified_time.png"));
 
-        tooltipMap.put(ButtonState.SORT_DEFAULT, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_default")));
         tooltipMap.put(ButtonState.SORT_QUANTITY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_quantity")));
         tooltipMap.put(ButtonState.SORT_NAME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_name")));
         tooltipMap.put(ButtonState.SORT_MODID, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_modid")));
+        tooltipMap.put(ButtonState.SORT_INSERTED_TIME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_inserted_time")));
+        tooltipMap.put(ButtonState.SORT_MODIFIED_TIME, Tooltip.create(Component.translatable(("tooltip.button.beyonddimensions.sort_modified_time"))));
 
         for (Enum<?> state : iconMap.keySet())
         {
