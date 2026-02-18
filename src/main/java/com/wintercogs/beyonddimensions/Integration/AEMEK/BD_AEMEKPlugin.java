@@ -19,16 +19,16 @@ public class BD_AEMEKPlugin
 {
     public static void register()
     {
-        AEHelper.ISTACK_TO_AEKEY_MAP.put(GasStackKey.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
-        AEHelper.ISTACK_TO_AEKEY_MAP.put(InfusionStackKey.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
-        AEHelper.ISTACK_TO_AEKEY_MAP.put(PigmentStackKey.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
-        AEHelper.ISTACK_TO_AEKEY_MAP.put(SlurryStackKey.ID, stackType -> Optional.of(MekanismKey.of((ChemicalStack<?>) stackType.copyStack())));
+        AEHelper.ISTACK_TO_AEKEY_MAP.put(GasStackKey.ID, stackType -> Optional.ofNullable(MekanismKey.of((GasStack) stackType.copyStack())));
+        AEHelper.ISTACK_TO_AEKEY_MAP.put(InfusionStackKey.ID, stackType -> Optional.ofNullable(MekanismKey.of((InfusionStack) stackType.copyStack())));
+        AEHelper.ISTACK_TO_AEKEY_MAP.put(PigmentStackKey.ID, stackType -> Optional.ofNullable(MekanismKey.of((PigmentStack) stackType.copyStack())));
+        AEHelper.ISTACK_TO_AEKEY_MAP.put(SlurryStackKey.ID, stackType -> Optional.ofNullable(MekanismKey.of((SlurryStack) stackType.copyStack())));
 
         AEHelper.AEKEY_TO_STACK_TYPE_MAP.put(
                 MekanismKeyType.TYPE,
-                (key, amount) -> {
+                (key) -> {
                     MekanismKey mekKey = (MekanismKey) key;
-                    ChemicalStack<?> chemical = mekKey.withAmount(amount);
+                    ChemicalStack<?> chemical = mekKey.withAmount(1);
 
                     return switch (mekKey.getForm())
                     {

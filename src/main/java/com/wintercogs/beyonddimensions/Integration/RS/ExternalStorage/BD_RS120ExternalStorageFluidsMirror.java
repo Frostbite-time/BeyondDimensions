@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Integration.RS.ExternalStorage;
 
 import com.refinedmods.refinedstorage.api.storage.cache.IStorageCache;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.RS.RSHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -94,14 +95,14 @@ public class BD_RS120ExternalStorageFluidsMirror
 
         if (unified == null) return;
 
-        for (IStackKey<?> s : unified.getStorage())
+        for (KeyAmount ka : unified.getStorage())
         {
-            if (s == null || s.isEmpty()) continue;
+            if (ka == null || ka.isEmpty()) continue;
 
-            RSHelper.fromIStackToFluidStack(s).ifPresent(fs -> {
+            RSHelper.fromIStackToFluidStack(ka).ifPresent(fs -> {
                 if (fs.isEmpty()) return;
 
-                long amt = s.getStackAmount();
+                long amt = ka.amount();
                 FluidKey key = FluidKey.from(fs);
                 int idx = indexByKey.getInt(key);
 

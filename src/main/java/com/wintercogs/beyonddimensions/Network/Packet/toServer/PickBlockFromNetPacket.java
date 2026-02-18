@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Util.BytebufHelper;
 import net.minecraft.network.FriendlyByteBuf;
@@ -24,14 +25,14 @@ public record PickBlockFromNetPacket(ItemStack targetStack)
         if (net == null) return;
         UnifiedStorage storage = net.getUnifiedStorage();
 
-        ItemStackKey target = null;
-        for (IStackKey stack : storage.getStorage())
+        IStackKey<?> target = null;
+        for (KeyAmount stack : storage.getStorage())
         {
-            if (stack instanceof ItemStackKey itemStackKey)
+            if (stack.key() instanceof ItemStackKey itemStackKey)
             {
-                if (itemStackKey.getStack().getItem() == targetStack().getItem())
+                if (itemStackKey.getSource() == targetStack().getItem())
                 {
-                    target = (ItemStackKey) itemStackKey.copyWithCount(itemStackKey.getVanillaMaxStackSize());
+                    target = itemStackKey;
                     break;
                 }
             }
@@ -39,7 +40,7 @@ public record PickBlockFromNetPacket(ItemStack targetStack)
 
         if (target != null && player.getMainHandItem().isEmpty())
         {
-            ItemStack extract = ((ItemStackKey) storage.extract(target, false)).copyStack();
+            ItemStack extract = (ItemStack) storage.extract(target, target.getVanillaMaxStackSize(), false, false).toStack();
             player.setItemInHand(InteractionHand.MAIN_HAND, extract);
         }
     }

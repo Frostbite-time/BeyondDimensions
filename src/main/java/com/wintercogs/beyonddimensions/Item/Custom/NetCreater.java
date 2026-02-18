@@ -57,8 +57,11 @@ public class NetCreater extends Item
             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.network_created"));
 
             // 为新网络添加一些时空碎片
-            ItemStack timeCrystal = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(), 64);
-            newNet.getUnifiedStorage().insert(new ItemStackKey(timeCrystal), false);
+            if (newNet != null)
+            {
+                ItemStack timeCrystal = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
+                newNet.getUnifiedStorage().insert(new ItemStackKey(timeCrystal), 64, false);
+            }
         }
 
         return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());

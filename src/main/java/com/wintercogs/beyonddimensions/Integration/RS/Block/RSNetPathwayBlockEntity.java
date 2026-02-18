@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Integration.RS.Block;
 import com.refinedmods.refinedstorage.api.storage.cache.IStorageCache;
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorageContext;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
@@ -204,10 +205,10 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
                 long diff = insert ? size : -size;
 
                 // 物品
-                RSHelper.fromIStackToItemStack(type).ifPresent(stk -> be.itemMirror.onDelta(stk, diff));
+                RSHelper.fromIStackToItemStack(new KeyAmount(type, size)).ifPresent(stk -> be.itemMirror.onDelta(stk, diff));
 
                 // 流体
-                RSHelper.fromIStackToFluidStack(type).ifPresent(fs -> be.fluidMirror.onDelta(fs, diff));
+                RSHelper.fromIStackToFluidStack(new KeyAmount(type, size)).ifPresent(fs -> be.fluidMirror.onDelta(fs, diff));
             });
         });
     }

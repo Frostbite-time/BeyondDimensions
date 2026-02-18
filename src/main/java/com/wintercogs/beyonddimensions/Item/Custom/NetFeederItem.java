@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Machine.FeederMode;
 import com.wintercogs.beyonddimensions.Machine.FilterMode;
@@ -59,7 +60,7 @@ public class NetFeederItem extends BaseMachineItem
     {
         super.checkComponents(stack);
         if (!hasFilterSlots(stack))
-            setFilterSlots(stack, new ArrayList<>(Collections.nCopies(capacity, new ItemStackKey())));
+            setFilterSlots(stack, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
         if (!hasFeederMode(stack))
             setFeederMode(stack, FeederMode.NORMAL);
 
@@ -69,7 +70,7 @@ public class NetFeederItem extends BaseMachineItem
     public boolean shouldWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
         return super.shouldWork(stack, level, holder, slotId, isSelected)
-                && NetedItem.getNet(stack, level.getServer()) != null;
+                && NetedItem.getNet(stack) != null;
     }
 
     @Override
@@ -80,27 +81,27 @@ public class NetFeederItem extends BaseMachineItem
         if (holder instanceof Player player) // 只喂食玩家（实际上是其他实体没有FoodData 2333）
         {
             FeederMode feederMode = getFeederModeOrDefault(stack, FeederMode.NORMAL);
-            List<IStackKey<?>> filterSlots = getFilterSlotsOrDefault(stack, new ArrayList<>());
+            List<KeyAmount> filterSlots = getFilterSlotsOrDefault(stack, new ArrayList<>());
 
             FoodData playerFoodState = player.getFoodData();
 
             // feederModeMatch会进行一次饥饿值判定，决定要不要实际执行
             if (feederModeMatch(playerFoodState, feederMode))
             {
-                UnifiedStorage storage = NetedItem.getNet(stack, level.getServer()).getUnifiedStorage();
+                UnifiedStorage storage = NetedItem.getNet(stack).getUnifiedStorage();
 
                 // 尝试取出一个Food
-                IStackKey<?> foodCache = null;
-                for (IStackKey<?> filter : filterSlots)
+                KeyAmount foodCache = null;
+                for (KeyAmount filter : filterSlots)
                 {
-                    for (IStackKey<?> storedStack : storage.getStorage())
+                    for (KeyAmount storedStack : storage.getStorage())
                     {
                         // isSame会在最后变为引用比较，所以无需担心，这个比较即使对于大存储来说也非常迅速
-                        if (storedStack instanceof ItemStackKey itemStackKey
-                                && itemStackKey.isSame(filter)
-                                && itemStackKey.getStack().getFoodProperties(player) != null)
+                        if (storedStack.key() instanceof ItemStackKey itemStackKey
+                                && itemStackKey.isSame(filter.key())
+                                && itemStackKey.getReadOnlyStack().getFoodProperties(player) != null)
                         {
-                            foodCache = storedStack.copyWithCount(1);
+                            foodCache = new KeyAmount(storedStack.key(), 1);
                             break;
                         }
                     }
@@ -108,10 +109,10 @@ public class NetFeederItem extends BaseMachineItem
 
                 if (foodCache != null)
                 {
-                    ItemStackKey foodToFeed = (ItemStackKey) storage.extract(foodCache, false);
-                    if (!foodToFeed.isEmpty())
+                    KeyAmount foodToFeed = storage.extract(foodCache.key(), foodCache.amount(), false, false);
+                    if (!foodToFeed.isEmpty() && foodToFeed.key() instanceof ItemStackKey foodKey)
                     {
-                        ItemStack foodStack = foodToFeed.copyStack();
+                        ItemStack foodStack = foodKey.copyStackWithCount(foodCache.amount());
                         Item foodItem = foodStack.getItem();
                         FoodProperties foodProperties = foodItem.getFoodProperties(foodStack, player);
                         // 实际执行效果前对饱食度和饱和度进行二次判断
@@ -124,18 +125,16 @@ public class NetFeederItem extends BaseMachineItem
                                 if (!remaining.isEmpty())
                                 {
                                     // 剩余堆叠插送回去
-                                    if (storage.insert(new ItemStackKey(remaining), false) instanceof ItemStackKey remainingAgain)
+                                    KeyAmount remainingAgain = storage.insert(new ItemStackKey(remaining), remaining.getCount(), false);
+                                    if (!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
                                     {
-                                        if (!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
-                                        {
-                                            player.drop(remainingAgain.copyStack(), false);
-                                        }
+                                        player.drop((ItemStack) remainingAgain.toStack(), false);
                                     }
                                 }
                                 return;
                             }
                         }
-                        storage.insert(foodToFeed, false); // 如果没能步入食用，则在此处将堆叠插回
+                        storage.insert(foodToFeed.key(), foodToFeed.amount(), false); // 如果没能步入食用，则在此处将堆叠插回
                     }
                 }
 

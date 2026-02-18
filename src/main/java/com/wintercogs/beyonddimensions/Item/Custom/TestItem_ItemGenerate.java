@@ -53,9 +53,9 @@ public class TestItem_ItemGenerate extends Item
                     Item item = allItems.get(i);
                     int amount = 100 + random.nextInt(201); // 生成100-300之间的随机数量
 
-                    ItemStackKey stack = new ItemStackKey(new ItemStack(item, amount));
+                    ItemStackKey stack = new ItemStackKey(new ItemStack(item, 1));
 
-                    storage.insert(stack, false);
+                    storage.insert(stack, amount, false);
                 }
             }
         }

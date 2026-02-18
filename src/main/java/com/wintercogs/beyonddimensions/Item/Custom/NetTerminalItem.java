@@ -45,7 +45,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
             if (NetedItem.getNetId(itemstack) >= 0)
             {
-                DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack), level.getServer());
+                DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack));
                 if (net != null)
                 {
                     contextMap.put(player, new MenuTriggerContext(usedHand, itemstack));
@@ -84,8 +84,8 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
             return null;
         }
         // 使用上下文中的物品栈
-        DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(ctx.stack), player.getServer());
-
+        DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(ctx.stack));
+        if(net == null) return null;
 
         // 从NBT获取合成槽位
         CompoundTag tag = ctx.stack.getOrCreateTag();
@@ -105,7 +105,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
         {
             craftSlots.set(i, ItemStack.of(slotsTag.getCompound(i)));
         }
-        return new DimensionsCraftMenuTerminal(containerId, inventory, net, craftSlots, ctx.stack, null);
+        return new DimensionsCraftMenuTerminal(containerId, inventory, net.getUnifiedStorage(), craftSlots, ctx.stack, null);
     }
 
 

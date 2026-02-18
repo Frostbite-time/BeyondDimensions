@@ -55,7 +55,7 @@ public class NetDestroyer extends NetedItem
         {
             if (NetedItem.getNetId(stack) >= 0)
             {
-                DimensionsNet itemNet = DimensionsNet.getNetFromId(NetedItem.getNetId(stack), level.getServer());
+                DimensionsNet itemNet = DimensionsNet.getNetFromId(NetedItem.getNetId(stack));
                 if (itemNet != null)
                 {
                     DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
