@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;

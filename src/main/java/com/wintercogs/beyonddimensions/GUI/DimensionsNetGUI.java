@@ -17,7 +17,7 @@ import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Packet.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
-import com.wintercogs.beyonddimensions.Unit.UIDataHelper;
+import com.wintercogs.beyonddimensions.Util.UIDataHelper;
 import dev.emi.emi.api.EmiApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

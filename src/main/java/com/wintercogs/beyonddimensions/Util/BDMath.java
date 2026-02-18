@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Unit;
+package com.wintercogs.beyonddimensions.Util;
 
 // 记录一些十分常用的数学方法
 public class BDMath

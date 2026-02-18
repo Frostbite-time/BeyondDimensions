@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 
 public class EnergyStackTypedHandler implements IEnergyStorage

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.DataComponents.Custom;
 
 import com.mojang.serialization.Codec;
-import com.wintercogs.beyonddimensions.Unit.CodecHelper;
+import com.wintercogs.beyonddimensions.Util.CodecHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

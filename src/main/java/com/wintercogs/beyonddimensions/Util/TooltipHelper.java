@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Unit;
+package com.wintercogs.beyonddimensions.Util;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;

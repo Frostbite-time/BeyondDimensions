@@ -4,7 +4,7 @@ import com.buuz135.industrialforegoingsouls.capabilities.ISoulHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.WardenSoulStackKey;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 import net.minecraft.resources.ResourceLocation;
 
 public class WardenSoulStackTypedHandler implements ISoulHandler

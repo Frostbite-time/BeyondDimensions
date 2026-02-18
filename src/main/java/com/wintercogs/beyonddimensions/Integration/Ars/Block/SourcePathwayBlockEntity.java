@@ -8,7 +8,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackKey;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Integration.Ars.Caps.SourcePathwayProvider;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 

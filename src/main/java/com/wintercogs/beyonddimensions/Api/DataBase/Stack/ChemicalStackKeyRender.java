@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import com.wintercogs.beyonddimensions.Util.StringFormat;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;

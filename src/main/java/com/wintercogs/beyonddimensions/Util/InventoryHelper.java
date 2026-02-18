@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Unit;
+package com.wintercogs.beyonddimensions.Util;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;

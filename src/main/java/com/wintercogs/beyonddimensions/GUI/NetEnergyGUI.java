@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
-import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import com.wintercogs.beyonddimensions.Util.StringFormat;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;

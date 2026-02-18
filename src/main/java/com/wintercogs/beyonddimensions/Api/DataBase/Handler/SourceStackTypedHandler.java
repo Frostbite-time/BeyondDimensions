@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 import com.hollingsworth.arsnouveau.api.source.ISourceCap;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackKey;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 
 public class SourceStackTypedHandler implements ISourceCap
 {

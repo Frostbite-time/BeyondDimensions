@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Commands;
 
 import com.mojang.brigadier.Command;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Unit.TooltipHelper;
+import com.wintercogs.beyonddimensions.Util.TooltipHelper;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;

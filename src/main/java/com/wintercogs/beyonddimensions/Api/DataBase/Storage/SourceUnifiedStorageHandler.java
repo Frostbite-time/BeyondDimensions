@@ -4,7 +4,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 import com.hollingsworth.arsnouveau.api.source.ISourceCap;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackKey;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 
 // 对ISourceCap的适配器，由于ISource类本身注释不完善，方法实现具体使用按照SourceStorage的实现和注释推测
 public class SourceUnifiedStorageHandler implements ISourceCap

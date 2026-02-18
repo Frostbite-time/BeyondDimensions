@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Unit;
+package com.wintercogs.beyonddimensions.Util;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;

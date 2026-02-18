@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
-import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import com.wintercogs.beyonddimensions.Util.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;

@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.ManaType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackKey;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 import net.minecraft.resources.ResourceLocation;
 import vazkii.botania.api.mana.ManaCollector;
 import vazkii.botania.api.mana.ManaItem;

@@ -10,7 +10,7 @@ import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.*;
 import com.wintercogs.beyonddimensions.Menu.NetHopperMenu;
-import com.wintercogs.beyonddimensions.Unit.ItemStackHelper;
+import com.wintercogs.beyonddimensions.Util.ItemStackHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.SectionPos;

@@ -13,7 +13,7 @@ import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedStackTypedSlot;
-import com.wintercogs.beyonddimensions.Unit.InventoryHelper;
+import com.wintercogs.beyonddimensions.Util.InventoryHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;

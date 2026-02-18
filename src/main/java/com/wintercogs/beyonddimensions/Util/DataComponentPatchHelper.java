@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Unit;
+package com.wintercogs.beyonddimensions.Util;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Unit;
+package com.wintercogs.beyonddimensions.Util;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.NonNullList;

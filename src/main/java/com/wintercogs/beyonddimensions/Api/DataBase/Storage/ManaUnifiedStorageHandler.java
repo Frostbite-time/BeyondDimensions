@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackKey;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;

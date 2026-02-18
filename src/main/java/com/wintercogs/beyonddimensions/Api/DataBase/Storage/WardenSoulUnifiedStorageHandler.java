@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 import com.buuz135.industrialforegoingsouls.capabilities.ISoulHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.WardenSoulStackKey;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 
 public class WardenSoulUnifiedStorageHandler implements ISoulHandler
 {

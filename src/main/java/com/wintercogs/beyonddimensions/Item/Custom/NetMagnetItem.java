@@ -9,7 +9,7 @@ import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.*;
 import com.wintercogs.beyonddimensions.Menu.NetMagnetMenu;
-import com.wintercogs.beyonddimensions.Unit.ItemStackHelper;
+import com.wintercogs.beyonddimensions.Util.ItemStackHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
