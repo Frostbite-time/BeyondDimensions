@@ -138,16 +138,21 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
     {
         if (tag == null) return;
 
-        if (tag.contains("Stack") && !tag.contains("stack"))
+        if (tag.contains("stack")) return;
+
+        if (tag.contains("Stack"))
         {
             Tag legacy = tag.get("Stack");
+            CompoundTag wrapper = new CompoundTag();
             if (legacy != null)
             {
-                CompoundTag wrapper = new CompoundTag();
                 wrapper.put("Stack", legacy);
-                tag.put("stack", wrapper);
             }
+            tag.put("stack", wrapper);
+            return;
         }
+
+        tag.put("stack", new CompoundTag());
     }
 
 }
