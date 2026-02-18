@@ -398,7 +398,7 @@ public class DimensionsNet extends SavedData
      */
     public void removePlayer(UUID playerId)
     {
-        if (playerId == owner)
+        if (playerId.equals(owner))
         {
             return;
         }
