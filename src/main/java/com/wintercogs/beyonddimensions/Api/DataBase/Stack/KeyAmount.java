@@ -51,7 +51,7 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
     @NotNull
     public static KeyAmount deserializeNBT(CompoundTag nbt)
     {
-        // 1) 新格式：有 key
+        // 新
         if (nbt.contains("key", Tag.TAG_COMPOUND))
         {
             CompoundTag keyTag = nbt.getCompound("key");
@@ -61,23 +61,20 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
             return new KeyAmount(key, amount);
         }
 
-        // 2) 旧格式：TypedStack 顶层形状（无 key）
+        // 旧
         if (nbt.contains("Type", Tag.TAG_STRING))
         {
             String typeStr = nbt.getString("Type");
 
-            // 2.1 旧占位 Empty
             if ("Empty".equals(typeStr))
             {
                 return new KeyAmount(ItemStackKey.EMPTY, 0L);
             }
 
-            // 2.2 构造 compat key：拷贝旧顶层所有字段，注入小写 "type"
             CompoundTag compatKey = nbt.copy();
             compatKey.putString("type", typeStr);
 
-            // 避免旧数量字段污染 key 反序列化
-            stripLegacyAmountFields(compatKey);
+            aliasLegacyStackKey(compatKey);
 
             IStackKey<?> key = IStackKey.deserializeNBTCommon(compatKey);
 
@@ -85,7 +82,7 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
             return new KeyAmount(key, amount);
         }
 
-        // 3) 兜底（尽量不炸存档）
+        // 兜底
         return new KeyAmount(ItemStackKey.EMPTY, 0L);
     }
 
@@ -137,14 +134,20 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
         return 0L;
     }
 
-    /**
-     * 从旧 TypedStack 中剔除可能的数量字段，避免当前版本 key 反序列化被旧字段污染。
-     */
-    private static void stripLegacyAmountFields(CompoundTag typedStack)
+    private static void aliasLegacyStackKey(CompoundTag tag)
     {
-        typedStack.remove("amount");
-        typedStack.remove("Amount");
-        typedStack.remove("count");
-        typedStack.remove("Count");
+        if (tag == null) return;
+
+        if (tag.contains("Stack") && !tag.contains("stack"))
+        {
+            Tag legacy = tag.get("Stack");
+            if (legacy != null)
+            {
+                CompoundTag wrapper = new CompoundTag();
+                wrapper.put("Stack", legacy);
+                tag.put("stack", wrapper);
+            }
+        }
     }
+
 }
