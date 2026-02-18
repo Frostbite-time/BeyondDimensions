@@ -18,9 +18,9 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemical
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.GasUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.InfusionUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.PigmentUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.SlurryUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.*;
+import com.wintercogs.beyonddimensions.Api.DataBase.Storage.PigmentUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Storage.SlurryUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
@@ -219,9 +219,10 @@ public class BeyondDimensions
     {
 
         // 注册堆叠类型，使得网络能够存储相关堆叠
-        StackKeyRegistry.registerType(new ItemStackKey());
-        StackKeyRegistry.registerType(new FluidStackKey());
-        StackKeyRegistry.registerType(new EnergyStackKey());
+        StackKeyRegistry.registerType(EmptyStackKey.INSTANCE); // 全空堆叠，用于避免使用null
+        StackKeyRegistry.registerType(ItemStackKey.EMPTY);
+        StackKeyRegistry.registerType(FluidStackKey.EMPTY);
+        StackKeyRegistry.registerType(EnergyStackKey.INSTANCE);
 
         // 注册方块能力类型，用于动态为方块注册能力
         CapabilityHelper.BlockCapabilityMap.put(ItemStackKey.ID, ForgeCapabilities.ITEM_HANDLER);
@@ -234,14 +235,14 @@ public class BeyondDimensions
         CapabilityHelper.ItemCapabilityMap.put(EnergyStackKey.ID, ForgeCapabilities.ENERGY);
 
         // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-        CapabilityHelper.registerUSHandler(new ItemStackKey(), ItemUnifiedStorageHandler::new);
-        CapabilityHelper.registerUSHandler(new FluidStackKey(), FluidUnifiedStorageHandler::new);
-        CapabilityHelper.registerUSHandler(new EnergyStackKey(), EnergyUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(ItemStackKey.EMPTY, ItemUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(FluidStackKey.EMPTY, FluidUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(EnergyStackKey.INSTANCE, EnergyUnifiedStorageHandler::new);
 
         // 注册存储分化包装
-        CapabilityHelper.registerStackTypedHandler(new ItemStackKey(), ItemStackTypedHandler::new);
-        CapabilityHelper.registerStackTypedHandler(new FluidStackKey(), FluidStackTypedHandler::new);
-        CapabilityHelper.registerStackTypedHandler(new EnergyStackKey(), EnergyStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(ItemStackKey.EMPTY, ItemStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(FluidStackKey.EMPTY, FluidStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(EnergyStackKey.INSTANCE, EnergyStackTypedHandler::new);
 
         // 注册堆叠处理包装，用于动态包装来自其他模组的handler (如原版的IItemHandler)
         StackHandlerWrapperHelper.stackWrappers.put(ItemStackKey.ID, ItemHandlerWrapper::new);
@@ -251,10 +252,10 @@ public class BeyondDimensions
         if (MekLoaded)
         {
             // 注册化学品堆叠
-            StackKeyRegistry.registerType(new GasStackKey());
-            StackKeyRegistry.registerType(new InfusionStackKey());
-            StackKeyRegistry.registerType(new PigmentStackKey());
-            StackKeyRegistry.registerType(new SlurryStackKey());
+            StackKeyRegistry.registerType(GasStackKey.EMPTY);
+            StackKeyRegistry.registerType(InfusionStackKey.EMPTY);
+            StackKeyRegistry.registerType(PigmentStackKey.EMPTY);
+            StackKeyRegistry.registerType(SlurryStackKey.EMPTY);
             // 注册化学品方块能力
             CapabilityHelper.BlockCapabilityMap.put(GasStackKey.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
             CapabilityHelper.BlockCapabilityMap.put(InfusionStackKey.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
@@ -268,16 +269,16 @@ public class BeyondDimensions
 
             // 注册分化包装
             // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-            CapabilityHelper.registerUSHandler(new GasStackKey(), GasUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(new InfusionStackKey(), InfusionUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(new PigmentStackKey(), PigmentUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(new SlurryStackKey(), SlurryUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(GasStackKey.EMPTY, GasUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(InfusionStackKey.EMPTY, InfusionUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(PigmentStackKey.EMPTY, PigmentUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(SlurryStackKey.EMPTY, SlurryUnifiedStorageHandler::new);
 
             // 注册存储分化包装
-            CapabilityHelper.registerStackTypedHandler(new GasStackKey(), GasStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new InfusionStackKey(), InfusionStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new PigmentStackKey(), PigmentStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new SlurryStackKey(), SlurryStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(GasStackKey.EMPTY, GasStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(InfusionStackKey.EMPTY, InfusionStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(PigmentStackKey.EMPTY, PigmentStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(SlurryStackKey.EMPTY, SlurryStackTypedHandler::new);
 
             // 注册堆叠处理包装
             StackHandlerWrapperHelper.stackWrappers.put(GasStackKey.ID, GasHandlerWrapper::new);
@@ -290,23 +291,23 @@ public class BeyondDimensions
         if (ARS_Loaded)
         {
             // 注册魔源
-            StackKeyRegistry.registerType(new SourceStackKey());
+            StackKeyRegistry.registerType(SourceStackKey.INSTANCE);
             // 自己注册能力作为代替，随后为新生魔艺的方块做包装注册
             CapabilityHelper.BlockCapabilityMap.put(SourceStackKey.ID, BD_ArsCaps.SOURCE_CAP);
             CapabilityHelper.ItemCapabilityMap.put(SourceStackKey.ID, BD_ArsCaps.SOURCE_CAP);
-            CapabilityHelper.registerUSHandler(new SourceStackKey(), SourceUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new SourceStackKey(), SourceStackTypedHandler::new);
+            CapabilityHelper.registerUSHandler(SourceStackKey.INSTANCE, SourceUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(SourceStackKey.INSTANCE, SourceStackTypedHandler::new);
             StackHandlerWrapperHelper.stackWrappers.put(SourceStackKey.ID, SourceHandlerWrapper::new);
         }
 
         if (Botania_Loaded)
         {
             // 注册Mana（魔力）
-            StackKeyRegistry.registerType(new ManaStackKey());
+            StackKeyRegistry.registerType(ManaStackKey.INSTANCE);
             CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_RECEIVER);
             CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_ITEM);
-            CapabilityHelper.registerUSHandler(new ManaStackKey(), ManaUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new ManaStackKey(), ManaStackTypedHandler::new);
+            CapabilityHelper.registerUSHandler(ManaStackKey.INSTANCE, ManaUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
             StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
 
         }
