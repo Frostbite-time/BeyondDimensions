@@ -486,6 +486,7 @@ public class DimensionsNet extends SavedData
         this.id = -99; // 用-99作为被删除的特殊标记
         this.unifiedStorage.clearStorage();
         this.deleted = true;
+        setDirty();
     }
 
 
