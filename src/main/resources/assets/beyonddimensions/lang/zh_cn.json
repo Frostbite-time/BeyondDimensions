@@ -23,6 +23,7 @@
   "menu.label.beyonddimensions.input_filter_slots": "输入",
   "menu.label.beyonddimensions.fuel_filter_slots": "燃料",
 
+  "tooltip.beyonddimensions.network_open_key": "按【%s】打开维度网络",
   "tooltip.button.beyonddimensions.sort_asc": "当前：顺序排序",
   "tooltip.button.beyonddimensions.sort_desc": "当前：倒序排序",
   "tooltip.button.beyonddimensions.search_disable": "关闭时清空搜索框",
@@ -139,7 +140,7 @@
 
   "beyonddimensions.message.insufficient_materials": "缺少足够材料",
 
-  "msg.beyonddimensions.network_created": "你从宇宙中撕开了一个裂隙...\n提示：默认按【O】打开维度网络",
+  "msg.beyonddimensions.network_created": "你从宇宙中撕开了一个裂隙...",
   "msg.beyonddimensions.item_net_bound": "物品被绑定到%d号网络",
   "msg.beyonddimensions.item_net_unbound": "物品从%d号网络解绑",
   "msg.beyonddimensions.block_net_bound": "方块被绑定到%d号网络",

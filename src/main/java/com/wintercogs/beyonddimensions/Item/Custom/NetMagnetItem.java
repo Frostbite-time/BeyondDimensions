@@ -13,6 +13,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -29,6 +30,7 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.network.NetworkHooks;
@@ -127,12 +129,24 @@ public class NetMagnetItem extends BaseMachineItem
                     ItemStackKey itemKey = new ItemStackKey(itemStack);
                     if (matchesFilter(filterMode, filterSlots, itemKey))
                     {
+                        int count = itemStack.getCount();
 
-                        if (storage.insert(itemKey, itemStack.getCount(), true).isEmpty()) // 表示能成功插入
+                        if (storage.insert(itemKey, count, true).isEmpty())
                         {
+                            if (holder instanceof Player player)
+                            {
+                                ItemStack originalCopy = itemStack.copy();
+                                // 发送事件
+                                itemStack.setCount(0);
+                                ForgeEventFactory.firePlayerItemPickupEvent(player, itemEntity, originalCopy);
+                                // 成就信息
+                                itemStack.setCount(count);
+                                player.awardStat(Stats.ITEM_PICKED_UP.get(originalCopy.getItem()), count);
+                                player.onItemPickup(itemEntity);
+                            }
+
                             itemEntity.discard();
-                            // workContent之前已经由shouldWork检查过net的存在性
-                            storage.insert(itemKey, itemStack.getCount(), false);
+                            storage.insert(itemKey, count, false);
                         }
                     }
                 }
