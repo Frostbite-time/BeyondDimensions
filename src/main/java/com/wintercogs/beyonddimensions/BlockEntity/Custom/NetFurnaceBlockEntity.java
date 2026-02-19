@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
@@ -160,7 +161,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 能量或者可以燃烧的物品能作为燃料标记
             return (key instanceof EnergyStackKey)
                     || (key instanceof FluidStackKey fluidKey && fluidKey.getSource() == Fluids.LAVA)
-                    || (key instanceof ItemStackKey itemKey && itemKey.getReadOnlyStack().getBurnTime(RecipeType.SMELTING) > 0);
+                    || (key instanceof ItemStackKey itemKey && ForgeHooks.getBurnTime(itemKey.getReadOnlyStack(), RecipeType.SMELTING) > 0);
         }
 
     };
@@ -227,7 +228,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 能量或者可以燃烧的物品能作为燃料标记
             return (key instanceof EnergyStackKey)
                     || (key instanceof FluidStackKey fluidKey && fluidKey.getSource() == Fluids.LAVA)
-                    || (key instanceof ItemStackKey itemKey && itemKey.getReadOnlyStack().getBurnTime(RecipeType.SMELTING) > 0);
+                    || (key instanceof ItemStackKey itemKey && ForgeHooks.getBurnTime(itemKey.getReadOnlyStack(), RecipeType.SMELTING) > 0);
         }
     };
 
@@ -536,7 +537,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                         }
                         else if (fuelStack.key() instanceof ItemStackKey fuelItem)
                         {
-                            int burnTime = fuelItem.getReadOnlyStack().getBurnTime(RecipeType.SMELTING);
+                            int burnTime = ForgeHooks.getBurnTime(fuelItem.getReadOnlyStack(), RecipeType.SMELTING);
                             if (burnTime > 0)
                             {
                                 ItemStack returnItem = fuelItem.getReadOnlyStack().getCraftingRemainingItem();
