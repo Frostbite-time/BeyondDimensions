@@ -4,6 +4,8 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -12,7 +14,11 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class NetCreater extends Item
 {
@@ -20,6 +26,20 @@ public class NetCreater extends Item
     public NetCreater(Properties properties)
     {
         super(properties.stacksTo(1));
+    }
+
+    @Override
+    public void appendHoverText(@NotNull ItemStack stack,
+                                @NotNull TooltipContext context,
+                                @NotNull List<Component> tooltipComponents,
+                                @NotNull TooltipFlag tooltipFlag)
+    {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        tooltipComponents.add(
+                Component.translatable("tooltip.beyonddimensions.network_open_key",
+                        DimensionsShortKeys.OPEN_GUI_KEY.getKey().getDisplayName())
+                        .withStyle(ChatFormatting.DARK_GRAY)
+        );
     }
 
     @Override

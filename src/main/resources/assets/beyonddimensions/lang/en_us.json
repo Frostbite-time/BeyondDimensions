@@ -23,6 +23,7 @@
   "menu.label.beyonddimensions.input_filter_slots": "Input",
   "menu.label.beyonddimensions.fuel_filter_slots": "Fuel",
 
+  "tooltip.beyonddimensions.network_open_key": "Press [%s] to open dimension network",
   "tooltip.button.beyonddimensions.sort_asc": "Current: Ascending Order",
   "tooltip.button.beyonddimensions.sort_desc": "Current: Descending Order",
   "tooltip.button.beyonddimensions.search_disable": "Clear search when disabled",
@@ -139,7 +140,7 @@
 
   "beyonddimensions.message.insufficient_materials": "Lack of sufficient materials",
 
-  "msg.beyonddimensions.network_created": "You ripped a rift through the cosmos...\nTip: Default press [O] to open dimension network",
+  "msg.beyonddimensions.network_created": "You ripped a rift through the cosmos...",
   "msg.beyonddimensions.item_net_bound": "Item bound to network #%d",
   "msg.beyonddimensions.item_net_unbound": "Item unbound from network #%d",
   "msg.beyonddimensions.block_net_bound": "Block bound to network #%d",
