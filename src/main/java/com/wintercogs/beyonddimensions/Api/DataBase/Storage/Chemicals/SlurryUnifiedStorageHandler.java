@@ -1,6 +1,7 @@
-package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
+package com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import mekanism.api.Action;
 import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.SlurryStack;
