@@ -1,8 +1,10 @@
 package com.wintercogs.beyonddimensions.Integration.EMI.SlotHandler;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
-import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
+import appeng.api.stacks.GenericStack;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.BDBaseGUI;
 import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
@@ -16,6 +18,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.Slot;
+
 
 public class SlotDragHandler implements EmiDragDropHandler<Screen>
 {
@@ -64,13 +67,13 @@ public class SlotDragHandler implements EmiDragDropHandler<Screen>
                     Object stackKey = ingredient.getEmiStacks().get(0).getKey();
                     CompoundTag dataComponentPatch = ingredient.getEmiStacks().get(0).getNbt();
 
-                    IStackType dragging = new ItemStackType();
-                    for (IStackType type : StackTypeRegistry.getAllTypes())
+                    IStackKey<?> dragging = ItemStackKey.EMPTY;
+                    for (IStackKey<?> type : StackKeyRegistry.getAllTypes())
                     {
                         if (type.getSourceClass().isAssignableFrom(stackKey.getClass()))
                         {
 
-                            dragging = type.fromObject(stackKey, 1, dataComponentPatch);
+                            dragging = type.fromSourceObject(stackKey, dataComponentPatch);
                             break;
 
                         }
@@ -79,19 +82,19 @@ public class SlotDragHandler implements EmiDragDropHandler<Screen>
                     // AE2通用包裹支持
                     if (BeyondDimensions.AELoaded)
                     {
-                        if (dragging instanceof ItemStackType draggingItem && !dragging.isEmpty())
+                        if (dragging instanceof ItemStackKey draggingItemKey && !dragging.isEmpty())
                         {
-                            appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItem.getStack());
+                            GenericStack genericContent = GenericStack.fromItemStack(draggingItemKey.copyStack());
 
                             if (genericContent != null)
                             {
-                                dragging = AEHelper.fromAEKeyToIStack(genericContent.what(), 1).orElse(new ItemStackType());
+                                dragging = AEHelper.fromAEKeyToIStack(genericContent.what()).orElse(ItemStackKey.EMPTY);
                             }
 
                         }
                     }
 
-                    PacketRegister.INSTANCE.sendToServer(new SetSlotDirectlyPacket(slot.index, dragging));
+                    PacketRegister.INSTANCE.sendToServer(new SetSlotDirectlyPacket(slot.index, new KeyAmount(dragging, 1)));
 
                     return true; // 走到发包即表示完成
                 }

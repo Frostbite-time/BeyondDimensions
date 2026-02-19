@@ -1,7 +1,8 @@
 package com.wintercogs.beyonddimensions.Integration.RS.ExternalStorage;
 
 import com.refinedmods.refinedstorage.api.storage.cache.IStorageCache;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.RS.RSHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -103,13 +104,13 @@ public class BD_RS120ExternalStorageItemsMirror
 
         if (unified == null) return;
 
-        for (IStackType<?> s : unified.getStorage())
+        for (KeyAmount ka : unified.getStorage())
         {
-            if (s == null || s.isEmpty()) continue;
-            RSHelper.fromIStackToItemStack(s).ifPresent(stk -> {
+            if (ka == null || ka.isEmpty()) continue;
+            RSHelper.fromIStackToItemStack(ka).ifPresent(stk -> {
                 if (stk.isEmpty()) return;
 
-                long amt = s.getStackAmount();
+                long amt = ka.amount();
                 ItemKey key = ItemKey.from(stk);
                 int idx = indexByKey.getInt(key);
 

@@ -30,7 +30,7 @@ public class NetManagerInviter extends NetedItem implements IAddNetMemberHandler
             {
                 if (NetedItem.getNetId(itemstack) >= 0)
                 {
-                    boolean flag = AddPlayerToNet(DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack), level.getServer()), player);
+                    boolean flag = AddPlayerToNet(DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack)), player);
                     if (flag)
                     {
                         itemstack.shrink(1);

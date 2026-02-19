@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetHopperBlockEntity;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Machine.*;
@@ -12,6 +12,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -21,16 +22,16 @@ public class NetHopperMenu extends BDBaseMenu
     private static final int slotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + 1;
     private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + 7;
 
-    private final IStackTypedHandler storage;
+    private final IStackHandler storage;
 
     public final NetHopperBlockEntity be;
 
     public NetHopperMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, new StackTypedHandler(36), (NetHopperBlockEntity) playerInventory.player.level().getBlockEntity(data.readBlockPos()));
+        this(id, playerInventory, new StackHandler(36), (NetHopperBlockEntity) playerInventory.player.level().getBlockEntity(data.readBlockPos()));
     }
 
-    public NetHopperMenu(int containerId, Inventory playerInventory, @Nullable IStackTypedHandler storage, NetHopperBlockEntity be)
+    public NetHopperMenu(int containerId, Inventory playerInventory, @Nullable IStackHandler storage, NetHopperBlockEntity be)
     {
         super(UIRegister.Net_Hopper_Menu.get(), containerId, playerInventory);
 
@@ -38,7 +39,7 @@ public class NetHopperMenu extends BDBaseMenu
 
         if (playerInventory.player.level().isClientSide())
         {
-            this.storage = new StackTypedHandler(36);
+            this.storage = new StackHandler(36);
         }
         else
         {
@@ -81,7 +82,7 @@ public class NetHopperMenu extends BDBaseMenu
     }
 
     @Override
-    public boolean stillValid(Player player)
+    public boolean stillValid(@NotNull Player player)
     {
         return be != null && !be.isRemoved();
     }

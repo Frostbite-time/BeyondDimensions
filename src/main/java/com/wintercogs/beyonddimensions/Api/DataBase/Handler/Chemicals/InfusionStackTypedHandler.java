@@ -1,80 +1,114 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import mekanism.api.Action;
 import mekanism.api.chemical.infuse.IInfusionHandler;
 import mekanism.api.chemical.infuse.InfusionStack;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public class InfusionStackTypedHandler implements IInfusionHandler
 {
 
-    private final StackTypedHandler handlerStorage;
+    private static final ResourceLocation GAS_TYPE = InfusionStackKey.ID;
 
-    public InfusionStackTypedHandler(StackTypedHandler handlerStorage)
+    private final StackHandler handlerStorage;
+
+    public InfusionStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
     }
 
-    /**
-     * 将所有统一存储的槽位视为潜在可用的 Infusion 槽位。
-     */
+    private int gasCount()
+    {
+        return handlerStorage.getBucket(GAS_TYPE)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+    }
+
+    private int emptyCount()
+    {
+        return handlerStorage.getBucket(EmptyStackKey.INSTANCE)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+    }
+
+    private boolean inGasRegion(int visibleSlot)
+    {
+        int gases = gasCount();
+        return visibleSlot >= 0 && visibleSlot < gases;
+    }
+
+    private int getGasSlotAt(int index)
+    {
+        if (index < 0) return -1;
+        return handlerStorage.getBucket(GAS_TYPE)
+                .map(b -> (index < b.size()) ? b.get(index) : -1)
+                .orElse(-1);
+    }
+
+    private int getEmptySlotAt(int index)
+    {
+        if (index < 0) return -1;
+        return handlerStorage.getBucket(EmptyStackKey.INSTANCE)
+                .map(b -> (index < b.size()) ? b.get(index) : -1)
+                .orElse(-1);
+    }
+
+    private int resolveActualIndex(int visibleSlot)
+    {
+        if (visibleSlot < 0) return -1;
+        int gases = gasCount();
+        if (visibleSlot < gases)
+        {
+            return getGasSlotAt(visibleSlot);
+        }
+        int rest = visibleSlot - gases;
+        return getEmptySlotAt(rest);
+    }
+
     @Override
     public int getTanks()
     {
-        return handlerStorage.getSlots();
+        return gasCount() + emptyCount();
     }
 
     @Override
-    public @NotNull InfusionStack getChemicalInTank(int tank)
+    public @NotNull InfusionStack getChemicalInTank(int slot)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return InfusionStack.EMPTY;
-        }
+        if (!inGasRegion(slot)) return InfusionStack.EMPTY;
 
-        IStackType<?> stack = handlerStorage.getStackBySlot(tank);
-        if (stack instanceof InfusionStackType infusionStack && !infusionStack.isEmpty())
-        {
-            return infusionStack.copyStack();
-        }
+        int actualIndex = resolveActualIndex(slot);
+        if (actualIndex < 0) return InfusionStack.EMPTY;
 
-        return InfusionStack.EMPTY;
+        KeyAmount ka = handlerStorage.getStackBySlot(actualIndex);
+        if (ka.isEmpty()) return InfusionStack.EMPTY;
+
+        Object cached = handlerStorage.getOutStackByKey(ka.key());
+        if (!(cached instanceof InfusionStack gas)) return InfusionStack.EMPTY;
+        if (gas.isEmpty()) return InfusionStack.EMPTY;
+
+        long shown = ka.amount();
+        if (shown <= 0) return InfusionStack.EMPTY;
+
+        gas.setAmount(shown);
+        return gas;
     }
 
-    /**
-     * 直接设置指定槽位化学品：
-     * - EMPTY => 还原为 ItemStackType 空占位；
-     * - 非空 => 写入 InfusionStackType。
-     */
     @Override
     public void setChemicalInTank(int tank, @NotNull InfusionStack stack)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return;
-        }
-
-        if (stack.isEmpty())
-        {
-            handlerStorage.setStackDirectly(tank, new ItemStackType());
-        }
-        else
-        {
-            handlerStorage.setStackDirectly(tank, new InfusionStackType(stack.copy()));
-        }
+        int actualIndex = resolveActualIndex(tank);
+        if (actualIndex < 0) return;
+        handlerStorage.setStackDirectly(actualIndex, new InfusionStackKey(stack), stack.getAmount());
     }
 
     @Override
     public long getTankCapacity(int tank)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return 0L;
-        }
         return 64_000L;
     }
 
@@ -84,123 +118,62 @@ public class InfusionStackTypedHandler implements IInfusionHandler
         return true;
     }
 
-    /**
-     * 单 tank 插入：
-     * - 槽位越界/无效 => 返回原 stack 副本；
-     * - 槽位为空或已有 Infusion => 委托统一存储 insert(slot, ...)。
-     */
     @Override
-    public @NotNull InfusionStack insertChemical(int tank, InfusionStack stack, @NotNull Action action)
+    public @NotNull InfusionStack insertChemical(int tank, @NotNull InfusionStack stack, @NotNull Action action)
     {
-        if (stack.isEmpty())
-        {
-            return InfusionStack.EMPTY;
-        }
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return stack.copy();
-        }
-        if (!isValid(tank, stack))
-        {
-            return stack.copy();
-        }
+        if (stack.isEmpty()) return InfusionStack.EMPTY;
 
-        IStackType<?> remainingStack = handlerStorage.insert(
-                tank,
-                new InfusionStackType(stack.copy()),
-                action.simulate()
-        );
+        int actualIndex = resolveActualIndex(tank);
+        if (actualIndex < 0) return stack.copy();
 
-        long remaining = remainingStack.getStackAmount();
-        if (remaining <= 0)
-        {
-            return InfusionStack.EMPTY;
-        }
-        return new InfusionStack(stack, remaining);
+        KeyAmount remaining = handlerStorage.insert(actualIndex, new InfusionStackKey(stack), stack.getAmount(), action.simulate());
+        long rem = remaining.amount();
+        return (rem > 0) ? new InfusionStack(stack, rem) : InfusionStack.EMPTY;
     }
 
-    /**
-     * 单 tank 抽取，仅当该槽位当前为 InfusionStackType 且非空时有效。
-     */
     @Override
     public @NotNull InfusionStack extractChemical(int tank, long amount, @NotNull Action action)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots() || amount <= 0)
-        {
-            return InfusionStack.EMPTY;
-        }
+        if (amount <= 0) return InfusionStack.EMPTY;
+        if (!inGasRegion(tank)) return InfusionStack.EMPTY;
 
-        IStackType<?> current = handlerStorage.getStackBySlot(tank);
-        if (!(current instanceof InfusionStackType) || current.isEmpty())
-        {
-            return InfusionStack.EMPTY;
-        }
+        int actualIndex = resolveActualIndex(tank);
+        if (actualIndex < 0) return InfusionStack.EMPTY;
 
-        IStackType<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
-        if (extracted instanceof InfusionStackType infusionExtract && !infusionExtract.isEmpty())
-        {
-            return infusionExtract.copyStack();
-        }
-        return InfusionStack.EMPTY;
+        Object out = handlerStorage.extract(actualIndex, amount, action.simulate()).toStack();
+        return (out instanceof InfusionStack gs) ? gs : InfusionStack.EMPTY;
     }
 
-    /**
-     * 无指定 tank 的插入
-     */
     @Override
-    public @NotNull InfusionStack insertChemical(InfusionStack stack, @NotNull Action action)
+    public @NotNull InfusionStack insertChemical(@NotNull InfusionStack stack, @NotNull Action action)
     {
-        if (stack.isEmpty())
-        {
-            return InfusionStack.EMPTY;
-        }
-
-        long remaining = handlerStorage
-                .insert(new InfusionStackType(stack.copy()), action.simulate())
-                .getStackAmount();
-
-        if (remaining > 0)
-        {
-            return new InfusionStack(stack, remaining);
-        }
-        return InfusionStack.EMPTY;
+        if (stack.isEmpty()) return InfusionStack.EMPTY;
+        long remaining = handlerStorage.insert(new InfusionStackKey(stack), stack.getAmount(), action.simulate()).amount();
+        return (remaining > 0) ? new InfusionStack(stack, remaining) : InfusionStack.EMPTY;
     }
 
-    /**
-     * 无指定 tank 的抽取
-     */
     @Override
     public @NotNull InfusionStack extractChemical(long amount, @NotNull Action action)
     {
-        if (amount <= 0)
-        {
-            return InfusionStack.EMPTY;
-        }
+        if (amount <= 0) return InfusionStack.EMPTY;
 
-        return handlerStorage.getTypeIdIndexList(InfusionStackType.ID)
-                .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> handlerStorage.extract(actualIndex, amount, action.simulate()))
-                .map(extracts -> ((InfusionStackType) extracts).copyStack())
-                .orElse(InfusionStack.EMPTY);
+        int firstGasSlot = handlerStorage.getBucket(GAS_TYPE)
+                .map(b -> (b.size() > 0) ? b.get(0) : -1)
+                .orElse(-1);
+        if (firstGasSlot < 0) return InfusionStack.EMPTY;
+
+        KeyAmount ka = handlerStorage.getStackBySlot(firstGasSlot);
+        if (ka.isEmpty()) return InfusionStack.EMPTY;
+
+        Object out = handlerStorage.extract(ka.key(), amount, action.simulate(), false).toStack();
+        return (out instanceof InfusionStack gs) ? gs : InfusionStack.EMPTY;
     }
 
     @Override
-    public @NotNull InfusionStack extractChemical(InfusionStack stack, @NotNull Action action)
+    public @NotNull InfusionStack extractChemical(@NotNull InfusionStack stack, @NotNull Action action)
     {
-        if (stack.isEmpty())
-        {
-            return InfusionStack.EMPTY;
-        }
-        return ((InfusionStackType) handlerStorage.extract(
-                new InfusionStackType(stack.copy()),
-                action.simulate()
-        )).copyStack();
-    }
-
-    @Override
-    public @NotNull InfusionStack getEmptyStack()
-    {
-        return InfusionStack.EMPTY;
+        if (stack.isEmpty()) return InfusionStack.EMPTY;
+        Object out = handlerStorage.extract(new InfusionStackKey(stack), stack.getAmount(), action.simulate(), false).toStack();
+        return (out instanceof InfusionStack gs) ? gs : InfusionStack.EMPTY;
     }
 }

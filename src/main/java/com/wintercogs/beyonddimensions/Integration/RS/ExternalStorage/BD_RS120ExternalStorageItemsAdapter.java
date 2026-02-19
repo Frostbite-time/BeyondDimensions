@@ -7,7 +7,8 @@ import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStora
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorageContext;
 import com.refinedmods.refinedstorage.api.util.Action;
 import com.refinedmods.refinedstorage.api.util.IComparer;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Integration.RS.RSHelper;
@@ -59,7 +60,7 @@ public class BD_RS120ExternalStorageItemsAdapter implements IExternalStorage<Ite
 
         long before = size;
         long inserted = RSHelper.fromItemStackToIStack(prototype, size)
-                .map(s -> size - unified.insert(s, action == Action.SIMULATE).getStackAmount())
+                .map(ka -> size - unified.insert(ka.key(), ka.amount(), action == Action.SIMULATE).amount())
                 .orElse(0L);
 
         long remainder = before - inserted;
@@ -81,9 +82,9 @@ public class BD_RS120ExternalStorageItemsAdapter implements IExternalStorage<Ite
         var reqOpt = RSHelper.fromItemStackToIStack(prototype, size);
         if (reqOpt.isEmpty()) return ItemStack.EMPTY;
 
-        IStackType<?> req = reqOpt.get();
+        KeyAmount req = reqOpt.get();
 
-        long can = unified.extract(req, true).getStackAmount();
+        long can = unified.extract(req.key(), req.amount(), true).amount();
         if (can <= 0) return ItemStack.EMPTY;
 
         boolean quantityStrict = (flags & IComparer.COMPARE_QUANTITY) == IComparer.COMPARE_QUANTITY;
@@ -101,7 +102,7 @@ public class BD_RS120ExternalStorageItemsAdapter implements IExternalStorage<Ite
             return out;
         }
 
-        long took = unified.extract(req.copyWithCount(want), false).getStackAmount();
+        long took = unified.extract(req.key(), want, false).amount();
         if (took <= 0) return ItemStack.EMPTY;
 
         ItemStack out = prototype.copy();

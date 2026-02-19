@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import mekanism.api.Action;
 import mekanism.api.chemical.slurry.ISlurryHandler;
@@ -19,7 +19,7 @@ public class SlurryHandlerWrapper implements IStackHandlerWrapper<SlurryStack>
     @Override
     public ResourceLocation getTypeId()
     {
-        return SlurryStackType.ID;
+        return SlurryStackKey.ID;
     }
 
     @Override

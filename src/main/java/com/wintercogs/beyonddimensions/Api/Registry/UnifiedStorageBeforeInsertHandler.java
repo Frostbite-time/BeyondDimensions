@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Api.Registry;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,13 +26,13 @@ public final class UnifiedStorageBeforeInsertHandler
          */
         @NotNull
         BeforeInsertHandlerReturnInfo beforeInsert(
-                @NotNull IStackType<?> originalInsert,
-                @NotNull IStackType<?> tryInsert,
+                @NotNull KeyAmount originalInsert,
+                @NotNull KeyAmount tryInsert,
                 @Nullable DimensionsNet net
         );
     }
 
-    public record BeforeInsertHandlerReturnInfo(@NotNull IStackType<?> beforeInsert, boolean cancel)
+    public record BeforeInsertHandlerReturnInfo(@NotNull KeyAmount beforeInsert, boolean cancel)
     {
         boolean isEmpty()
         {
@@ -63,10 +63,10 @@ public final class UnifiedStorageBeforeInsertHandler
      * 如果不为cancel，则尝试将最后一次调用得到的输入给维度网络
      */
     @NotNull
-    public static BeforeInsertHandlerReturnInfo onBeforeInsert(@Nullable IStackType<?> tryInsert, @Nullable DimensionsNet net)
+    public static BeforeInsertHandlerReturnInfo onBeforeInsert(@Nullable KeyAmount tryInsert, @Nullable DimensionsNet net)
     {
-        final IStackType<?> original = (tryInsert == null)
-                ? new ItemStackType()
+        final KeyAmount original = (tryInsert == null)
+                ? new KeyAmount(EmptyStackKey.INSTANCE, 0)
                 : tryInsert;
 
         if (tryInsert == null)
@@ -75,7 +75,7 @@ public final class UnifiedStorageBeforeInsertHandler
         if (tryInsert.isEmpty())
             return new BeforeInsertHandlerReturnInfo(tryInsert, true);
 
-        IStackType<?> current = tryInsert;
+        KeyAmount current = tryInsert;
 
         for (var handler : handlers)
         {

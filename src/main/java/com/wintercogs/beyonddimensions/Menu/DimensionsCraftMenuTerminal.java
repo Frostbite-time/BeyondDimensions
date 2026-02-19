@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.core.BlockPos;
@@ -14,19 +15,20 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 {
     private ItemStack terminalStack = null;
     private BlockPos entityPos = null;
 
-
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, new DimensionsNet(true), null, null, null);
+        this(id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE), null, null, null);
     }
 
-    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, DimensionsNet data, NonNullList<ItemStack> craftItems, ItemStack terminalItem, BlockPos entityPos)
+    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, AbstractUnorderedStackHandler data, NonNullList<ItemStack> craftItems, @Nullable ItemStack terminalItem, @Nullable BlockPos entityPos)
     {
         super(UIRegister.Dimensions_Craft_Menu_Terminal.get(), id, playerInventory, data, craftItems, entityPos);
         if (!player.level().isClientSide)
@@ -37,7 +39,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     }
 
     @Override
-    protected void initCraftSlots(Inventory playerInventory, TransientCraftingContainer craftSlots)
+    protected void initCraftSlots(Inventory playerInventory, @Nullable TransientCraftingContainer craftSlots)
     {
         super.initCraftSlots(playerInventory, craftSlots);
         // 父函数处理完毕后更新一次结果槽
@@ -45,7 +47,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     }
 
     @Override
-    public void removed(Player player)
+    public void removed(@NotNull Player player)
     {
         // 处理光标物品
         if (player instanceof ServerPlayer)
@@ -94,14 +96,12 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
                 // 同步更新玩家手中的物品
                 player.getInventory().setChanged();
             }
-
-
         }
 
     }
 
     @Override
-    public boolean stillValid(Player player)
+    public boolean stillValid(@NotNull Player player)
     {
         if (entityPos != null)
         {

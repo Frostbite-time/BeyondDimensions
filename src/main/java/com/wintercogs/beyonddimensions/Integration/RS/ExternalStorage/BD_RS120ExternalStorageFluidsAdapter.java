@@ -7,7 +7,8 @@ import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStora
 import com.refinedmods.refinedstorage.api.storage.externalstorage.IExternalStorageContext;
 import com.refinedmods.refinedstorage.api.util.Action;
 import com.refinedmods.refinedstorage.api.util.IComparer;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Integration.RS.RSHelper;
@@ -60,7 +61,7 @@ public class BD_RS120ExternalStorageFluidsAdapter implements IExternalStorage<Fl
         long before = size;
 
         long inserted = RSHelper.fromFluidStackToIStack(prototype, size)
-                .map(s -> before - unified.insert(s, action == Action.SIMULATE).getStackAmount())
+                .map(ka -> before - unified.insert(ka.key(), ka.amount(), action == Action.SIMULATE).amount())
                 .orElse(0L);
 
         long remainder = before - inserted;
@@ -82,9 +83,9 @@ public class BD_RS120ExternalStorageFluidsAdapter implements IExternalStorage<Fl
         var reqOpt = RSHelper.fromFluidStackToIStack(prototype, size);
         if (reqOpt.isEmpty()) return FluidStack.EMPTY;
 
-        IStackType<?> req = reqOpt.get();
+        KeyAmount req = reqOpt.get();
 
-        long can = unified.extract(req, true).getStackAmount();
+        long can = unified.extract(req.key(), req.amount(), true).amount();
         if (can <= 0) return FluidStack.EMPTY;
 
         boolean quantityStrict = (flags & IComparer.COMPARE_QUANTITY) == IComparer.COMPARE_QUANTITY;
@@ -102,7 +103,7 @@ public class BD_RS120ExternalStorageFluidsAdapter implements IExternalStorage<Fl
             return out;
         }
 
-        long took = unified.extract(req.copyWithCount(want), false).getStackAmount();
+        long took = unified.extract(req.key(), want, false).amount();
         if (took <= 0) return FluidStack.EMPTY;
 
         FluidStack out = prototype.copy();

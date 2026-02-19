@@ -31,7 +31,7 @@ public class NetGifter extends NetedItem
 
             if (NetedItem.getNetId(itemstack) >= 0)
             {
-                DimensionsNet itemNet = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack), level.getServer());
+                DimensionsNet itemNet = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack));
                 if (itemNet != null)
                 {
                     DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);

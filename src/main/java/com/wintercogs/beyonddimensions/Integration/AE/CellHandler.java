@@ -7,7 +7,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Integration.AE.Item.NetAEStorageCell;
 import com.wintercogs.beyonddimensions.Item.Custom.NetedItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
 
@@ -30,7 +29,7 @@ public class CellHandler implements ICellHandler
         int netId = NetedItem.getNetId(itemstack);
         if (netId >= 0)
         {
-            DimensionsNet net = DimensionsNet.getNetFromId(netId, ServerLifecycleHooks.getCurrentServer());
+            DimensionsNet net = DimensionsNet.getNetFromId(netId);
             if (net != null)
             {
                 return new NetStorageCell(net.getUnifiedStorage());

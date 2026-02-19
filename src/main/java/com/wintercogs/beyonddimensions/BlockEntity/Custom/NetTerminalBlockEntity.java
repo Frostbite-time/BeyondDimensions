@@ -16,6 +16,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProvider
 {
@@ -28,13 +29,13 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
     }
 
     @Override
-    public Component getDisplayName()
+    public @NotNull Component getDisplayName()
     {
         return Component.translatable("menu.title.beyonddimensions.dimensionnetmenu");
     }
 
     @Override
-    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player)
     {
         DimensionsNet net = getNet();
         if (net != null)
@@ -42,7 +43,7 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
             // 在服务端中craftItems作为直接引用传递。保证为同一个列表
             // 而后，craftItems会在Menu被包装，并通过Menu的包装类完成网络同步
             // 最后，利用方块实体进行持久保存
-            return new DimensionsCraftMenuTerminal(containerId, inventory, net, craftItems, null, this.getBlockPos());
+            return new DimensionsCraftMenuTerminal(containerId, inventory, net.getUnifiedStorage(), craftItems, null, this.getBlockPos());
         }
         return null;
     }

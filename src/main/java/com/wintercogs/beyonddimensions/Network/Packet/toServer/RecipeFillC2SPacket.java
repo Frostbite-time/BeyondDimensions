@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -11,10 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType.deserializeStackCaps;
-import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType.serializeStackCaps;
+import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey.deserializeStackCaps;
+import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey.serializeStackCaps;
 
-public record RecipeFillC2SPacket(List<ItemStack> inputs)
+public record RecipeFillC2SPacket(List<IStackKey<?>> keys, List<Long> amount)
 {
 
     private void handle(NetworkEvent.Context context)
@@ -24,11 +25,7 @@ public record RecipeFillC2SPacket(List<ItemStack> inputs)
 
         if (player.containerMenu instanceof DimensionsCraftMenu menu)
         {
-            //服务端处理示意
-            //1.解析数组
-            //2.为每一个槽位在背包和存储中寻找资源填入
-
-            menu.transferRecipe(inputs());
+            menu.transferRecipe(keys(), amount());
         }
     }
 
@@ -45,25 +42,39 @@ public record RecipeFillC2SPacket(List<ItemStack> inputs)
 
     public static void encode(RecipeFillC2SPacket packet, FriendlyByteBuf buf)
     {
-        buf.writeInt(packet.inputs().size());  // 先写入列表长度
-        for (ItemStack stack : packet.inputs())
+        // keys
+        buf.writeVarInt(packet.keys().size());
+        for (IStackKey<?> key : packet.keys())
         {
-            buf.writeItem(stack);
-            buf.writeNbt(serializeStackCaps(stack));
+            IStackKey.serializeCommon(buf, key);
+        }
+
+        // amount
+        buf.writeVarInt(packet.amount().size());
+        for (long v : packet.amount())
+        {
+            buf.writeLong(v);
         }
     }
 
     public static RecipeFillC2SPacket decode(FriendlyByteBuf buf)
     {
-        int size = buf.readInt();
-        List<ItemStack> stacks = new ArrayList<>(size);
-        for (int i = 0; i < size; i++)
+        // keys
+        int keysSize = buf.readVarInt();
+        List<IStackKey<?>> keys = new ArrayList<>(keysSize);
+        for (int i = 0; i < keysSize; i++)
         {
-            ItemStack stack = buf.readItem();
-            CompoundTag capNBTTag = buf.readNbt();
-            deserializeStackCaps(stack, capNBTTag); // 内部检查null和空
-            stacks.add(stack);
+            keys.add(IStackKey.deserializeCommon(buf));
         }
-        return new RecipeFillC2SPacket(stacks);
+
+        // amount
+        int amtSize = buf.readVarInt();
+        List<Long> amount = new ArrayList<>(amtSize);
+        for (int i = 0; i < amtSize; i++)
+        {
+            amount.add(buf.readLong());
+        }
+
+        return new RecipeFillC2SPacket(keys, amount);
     }
 }

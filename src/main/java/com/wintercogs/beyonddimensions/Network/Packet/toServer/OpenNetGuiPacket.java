@@ -34,14 +34,14 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target)
             if (targetMenu == NetMenuType.NET_CRAFT_MENU)
             {
                 player.openMenu(new SimpleMenuProvider(
-                        (containerId, playerInventory, _player) -> new DimensionsCraftMenu(UIRegister.Dimensions_Craft_Menu.get(), containerId, playerInventory, net, null, null),
+                        (containerId, playerInventory, _player) -> new DimensionsCraftMenu(UIRegister.Dimensions_Craft_Menu.get(), containerId, playerInventory, net.getUnifiedStorage(), null, null),
                         Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                 ));
             }
             else if (targetMenu == NetMenuType.NET_MENU)
             {
                 player.openMenu(new SimpleMenuProvider(
-                        (containerId, playerInventory, _player) -> new DimensionsNetMenu(UIRegister.Dimensions_Net_Menu.get(), containerId, playerInventory, net),
+                        (containerId, playerInventory, _player) -> new DimensionsNetMenu(UIRegister.Dimensions_Net_Menu.get(), containerId, playerInventory, net.getUnifiedStorage()),
                         Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                 ));
             }

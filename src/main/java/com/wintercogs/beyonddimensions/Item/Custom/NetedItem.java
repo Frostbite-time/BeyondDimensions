@@ -57,12 +57,12 @@ public class NetedItem extends Item
         }
     }
 
-    public static DimensionsNet getNet(ItemStack stack, MinecraftServer dataProvider)
+    public static DimensionsNet getNet(ItemStack stack)
     {
         int netId = getNetId(stack);
         if (netId >= 0)
         {
-            return DimensionsNet.getNetFromId(netId, dataProvider);
+            return DimensionsNet.getNetFromId(netId);
         }
         return null;
     }

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
@@ -12,7 +12,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record CallSeverClickPacket(int slotIndex, IStackType clickItem, int button, boolean shiftDown)
+public record CallSeverClickPacket(int slotIndex, KeyAmount clickItem, int button, boolean shiftDown)
 {
     private void handleServer(NetworkEvent.Context context)
     {
@@ -54,29 +54,18 @@ public record CallSeverClickPacket(int slotIndex, IStackType clickItem, int butt
 
     public static void encode(CallSeverClickPacket packet, FriendlyByteBuf buf)
     {
-        // 按字段声明顺序写入数据
         buf.writeInt(packet.slotIndex());
-
-        // 显式序列化 IStackType（不直接调用其encode方法）
-        IStackType stackType = packet.clickItem();
-        stackType.serialize(buf); // 直接调用接口的序列化方法
-
+        KeyAmount.serialize(buf, packet.clickItem());
         buf.writeInt(packet.button());
         buf.writeBoolean(packet.shiftDown());
-
     }
 
     public static CallSeverClickPacket decode(FriendlyByteBuf buf)
     {
-        // 按字段声明顺序读取数据
         int slotIndex = buf.readInt();
-
-        // 显式反序列化 IStackType（不直接调用其decode方法）
-        IStackType clickItem = IStackType.deserializeCommon(buf); // 直接调用接口的反序列化方法
-
+        KeyAmount clickItem = KeyAmount.deserialize(buf);
         int button = buf.readInt();
         boolean shiftDown = buf.readBoolean();
-
         return new CallSeverClickPacket(slotIndex, clickItem, button, shiftDown);
     }
 }

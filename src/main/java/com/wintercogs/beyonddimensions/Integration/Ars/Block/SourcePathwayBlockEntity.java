@@ -3,12 +3,12 @@ package com.wintercogs.beyonddimensions.Integration.Ars.Block;
 import com.hollingsworth.arsnouveau.api.source.ISourceTile;
 import com.hollingsworth.arsnouveau.api.source.SourceManager;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackKey;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.Integration.Ars.Caps.SourcePathwayProvider;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -37,10 +37,10 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         DimensionsNet net = getNet();
         if (net != null)
         {
-            IStackType stack = net.getUnifiedStorage().getStackByStack(new SourceStackType(0));
-            if (stack != null)
+            KeyAmount stack = net.getUnifiedStorage().getStackByKey(SourceStackKey.INSTANCE);
+            if (stack.key() == SourceStackKey.INSTANCE)
             {
-                return BDMath.clampLongToInt(stack.getStackAmount());
+                return BDMath.clampLongToInt(stack.amount());
             }
         }
         return 0;
@@ -76,19 +76,21 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
         DimensionsNet net = getNet();
         if (net != null)
         {
-            net.getUnifiedStorage().insert(new SourceStackType(amount), false).getStackAmount();
+            net.getUnifiedStorage().insert(SourceStackKey.INSTANCE, amount, false);
         }
         return getSource(); // 无论如何，最后返回总量
     }
 
-    // 返回导出的
+    // 返回总量
+    // 1.20.1的新生魔艺接口实现如此
+    // 1.21.1的实现改为返回增量
     @Override
     public int removeSource(int amount)
     {
         DimensionsNet net = getNet();
         if (net != null)
         {
-            net.getUnifiedStorage().extract(new SourceStackType(amount), false).getStackAmount();
+            net.getUnifiedStorage().extract(SourceStackKey.INSTANCE, amount, false);
         }
         return getSource(); // 无论如何，最后返回总量
     }

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import mekanism.api.Action;
 import mekanism.api.chemical.infuse.IInfusionHandler;
@@ -19,7 +19,7 @@ public class InfusionHandlerWrapper implements IStackHandlerWrapper<InfusionStac
     @Override
     public ResourceLocation getTypeId()
     {
-        return InfusionStackType.ID;
+        return InfusionStackKey.ID;
     }
 
     @Override

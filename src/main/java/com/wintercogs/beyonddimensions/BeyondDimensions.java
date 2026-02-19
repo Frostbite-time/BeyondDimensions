@@ -6,10 +6,10 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.InfusionSt
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.PigmentStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals.SlurryStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.*;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.InfusionStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals.GasHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals.InfusionHandlerWrapper;
@@ -18,12 +18,10 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemical
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.*;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.GasUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.InfusionUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.PigmentUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals.SlurryUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.*;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
-import com.wintercogs.beyonddimensions.Api.Registry.StackTypeRegistry;
+import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.BlockRender.ModBlockRenders;
@@ -32,7 +30,7 @@ import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEFlux.BD_AEFluxPlugin;
 import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.Integration.AE_Ars.BD_AE_ArsPlugin;
-import com.wintercogs.beyonddimensions.Integration.AE_Botania.BD_AE_BotaniaPlugin;
+import com.wintercogs.beyonddimensions.Integration.botania_ae.BD_AEBotaniaPlugin;
 import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.Integration.Botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.Integration.Botania.HudOverlay.ManaPoolPathwayOverlay;
@@ -219,95 +217,96 @@ public class BeyondDimensions
     {
 
         // 注册堆叠类型，使得网络能够存储相关堆叠
-        StackTypeRegistry.registerType(new ItemStackType());
-        StackTypeRegistry.registerType(new FluidStackType());
-        StackTypeRegistry.registerType(new EnergyStackType());
+        StackKeyRegistry.registerType(EmptyStackKey.INSTANCE); // 全空堆叠，用于避免使用null
+        StackKeyRegistry.registerType(ItemStackKey.EMPTY);
+        StackKeyRegistry.registerType(FluidStackKey.EMPTY);
+        StackKeyRegistry.registerType(EnergyStackKey.INSTANCE);
 
         // 注册方块能力类型，用于动态为方块注册能力
-        CapabilityHelper.BlockCapabilityMap.put(ItemStackType.ID, ForgeCapabilities.ITEM_HANDLER);
-        CapabilityHelper.BlockCapabilityMap.put(FluidStackType.ID, ForgeCapabilities.FLUID_HANDLER);
-        CapabilityHelper.BlockCapabilityMap.put(EnergyStackType.ID, ForgeCapabilities.ENERGY);
+        CapabilityHelper.BlockCapabilityMap.put(ItemStackKey.ID, ForgeCapabilities.ITEM_HANDLER);
+        CapabilityHelper.BlockCapabilityMap.put(FluidStackKey.ID, ForgeCapabilities.FLUID_HANDLER);
+        CapabilityHelper.BlockCapabilityMap.put(EnergyStackKey.ID, ForgeCapabilities.ENERGY);
 
         // 注册物品能力类型
-        CapabilityHelper.ItemCapabilityMap.put(ItemStackType.ID, ForgeCapabilities.ITEM_HANDLER);
-        CapabilityHelper.ItemCapabilityMap.put(FluidStackType.ID, ForgeCapabilities.FLUID_HANDLER_ITEM);
-        CapabilityHelper.ItemCapabilityMap.put(EnergyStackType.ID, ForgeCapabilities.ENERGY);
+        CapabilityHelper.ItemCapabilityMap.put(ItemStackKey.ID, ForgeCapabilities.ITEM_HANDLER);
+        CapabilityHelper.ItemCapabilityMap.put(FluidStackKey.ID, ForgeCapabilities.FLUID_HANDLER_ITEM);
+        CapabilityHelper.ItemCapabilityMap.put(EnergyStackKey.ID, ForgeCapabilities.ENERGY);
 
         // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-        CapabilityHelper.registerUSHandler(new ItemStackType(), ItemUnifiedStorageHandler::new);
-        CapabilityHelper.registerUSHandler(new FluidStackType(), FluidUnifiedStorageHandler::new);
-        CapabilityHelper.registerUSHandler(new EnergyStackType(), EnergyUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(ItemStackKey.EMPTY, ItemUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(FluidStackKey.EMPTY, FluidUnifiedStorageHandler::new);
+        CapabilityHelper.registerUSHandler(EnergyStackKey.INSTANCE, EnergyUnifiedStorageHandler::new);
 
         // 注册存储分化包装
-        CapabilityHelper.registerStackTypedHandler(new ItemStackType(), ItemStackTypedHandler::new);
-        CapabilityHelper.registerStackTypedHandler(new FluidStackType(), FluidStackTypedHandler::new);
-        CapabilityHelper.registerStackTypedHandler(new EnergyStackType(), EnergyStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(ItemStackKey.EMPTY, ItemStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(FluidStackKey.EMPTY, FluidStackTypedHandler::new);
+        CapabilityHelper.registerStackTypedHandler(EnergyStackKey.INSTANCE, EnergyStackTypedHandler::new);
 
         // 注册堆叠处理包装，用于动态包装来自其他模组的handler (如原版的IItemHandler)
-        StackHandlerWrapperHelper.stackWrappers.put(ItemStackType.ID, ItemHandlerWrapper::new);
-        StackHandlerWrapperHelper.stackWrappers.put(FluidStackType.ID, FluidHandlerWrapper::new);
-        StackHandlerWrapperHelper.stackWrappers.put(EnergyStackType.ID, EnergyHandlerWrapper::new);
+        StackHandlerWrapperHelper.stackWrappers.put(ItemStackKey.ID, ItemHandlerWrapper::new);
+        StackHandlerWrapperHelper.stackWrappers.put(FluidStackKey.ID, FluidHandlerWrapper::new);
+        StackHandlerWrapperHelper.stackWrappers.put(EnergyStackKey.ID, EnergyHandlerWrapper::new);
 
         if (MekLoaded)
         {
             // 注册化学品堆叠
-            StackTypeRegistry.registerType(new GasStackType());
-            StackTypeRegistry.registerType(new InfusionStackType());
-            StackTypeRegistry.registerType(new PigmentStackType());
-            StackTypeRegistry.registerType(new SlurryStackType());
+            StackKeyRegistry.registerType(GasStackKey.EMPTY);
+            StackKeyRegistry.registerType(InfusionStackKey.EMPTY);
+            StackKeyRegistry.registerType(PigmentStackKey.EMPTY);
+            StackKeyRegistry.registerType(SlurryStackKey.EMPTY);
             // 注册化学品方块能力
-            CapabilityHelper.BlockCapabilityMap.put(GasStackType.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
-            CapabilityHelper.BlockCapabilityMap.put(InfusionStackType.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
-            CapabilityHelper.BlockCapabilityMap.put(PigmentStackType.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
-            CapabilityHelper.BlockCapabilityMap.put(SlurryStackType.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
+            CapabilityHelper.BlockCapabilityMap.put(GasStackKey.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
+            CapabilityHelper.BlockCapabilityMap.put(InfusionStackKey.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
+            CapabilityHelper.BlockCapabilityMap.put(PigmentStackKey.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
+            CapabilityHelper.BlockCapabilityMap.put(SlurryStackKey.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
             // 注册化学品物品能力
-            CapabilityHelper.ItemCapabilityMap.put(GasStackType.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
-            CapabilityHelper.ItemCapabilityMap.put(InfusionStackType.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
-            CapabilityHelper.ItemCapabilityMap.put(PigmentStackType.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
-            CapabilityHelper.ItemCapabilityMap.put(SlurryStackType.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
+            CapabilityHelper.ItemCapabilityMap.put(GasStackKey.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
+            CapabilityHelper.ItemCapabilityMap.put(InfusionStackKey.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
+            CapabilityHelper.ItemCapabilityMap.put(PigmentStackKey.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
+            CapabilityHelper.ItemCapabilityMap.put(SlurryStackKey.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
 
             // 注册分化包装
             // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-            CapabilityHelper.registerUSHandler(new GasStackType(), GasUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(new InfusionStackType(), InfusionUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(new PigmentStackType(), PigmentUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(new SlurryStackType(), SlurryUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(GasStackKey.EMPTY, GasUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(InfusionStackKey.EMPTY, InfusionUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(PigmentStackKey.EMPTY, PigmentUnifiedStorageHandler::new);
+            CapabilityHelper.registerUSHandler(SlurryStackKey.EMPTY, SlurryUnifiedStorageHandler::new);
 
             // 注册存储分化包装
-            CapabilityHelper.registerStackTypedHandler(new GasStackType(), GasStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new InfusionStackType(), InfusionStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new PigmentStackType(), PigmentStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new SlurryStackType(), SlurryStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(GasStackKey.EMPTY, GasStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(InfusionStackKey.EMPTY, InfusionStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(PigmentStackKey.EMPTY, PigmentStackTypedHandler::new);
+            CapabilityHelper.registerStackTypedHandler(SlurryStackKey.EMPTY, SlurryStackTypedHandler::new);
 
             // 注册堆叠处理包装
-            StackHandlerWrapperHelper.stackWrappers.put(GasStackType.ID, GasHandlerWrapper::new);
-            StackHandlerWrapperHelper.stackWrappers.put(InfusionStackType.ID, InfusionHandlerWrapper::new);
-            StackHandlerWrapperHelper.stackWrappers.put(PigmentStackType.ID, PigmentHandlerWrapper::new);
-            StackHandlerWrapperHelper.stackWrappers.put(SlurryStackType.ID, SlurryHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(GasStackKey.ID, GasHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(InfusionStackKey.ID, InfusionHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(PigmentStackKey.ID, PigmentHandlerWrapper::new);
+            StackHandlerWrapperHelper.stackWrappers.put(SlurryStackKey.ID, SlurryHandlerWrapper::new);
 
         }
 
         if (ARS_Loaded)
         {
             // 注册魔源
-            StackTypeRegistry.registerType(new SourceStackType());
+            StackKeyRegistry.registerType(SourceStackKey.INSTANCE);
             // 自己注册能力作为代替，随后为新生魔艺的方块做包装注册
-            CapabilityHelper.BlockCapabilityMap.put(SourceStackType.ID, BD_ArsCaps.SOURCE_CAP);
-            CapabilityHelper.ItemCapabilityMap.put(SourceStackType.ID, BD_ArsCaps.SOURCE_CAP);
-            CapabilityHelper.registerUSHandler(new SourceStackType(), SourceUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new SourceStackType(), SourceStackTypedHandler::new);
-            StackHandlerWrapperHelper.stackWrappers.put(SourceStackType.ID, SourceHandlerWrapper::new);
+            CapabilityHelper.BlockCapabilityMap.put(SourceStackKey.ID, BD_ArsCaps.SOURCE_CAP);
+            CapabilityHelper.ItemCapabilityMap.put(SourceStackKey.ID, BD_ArsCaps.SOURCE_CAP);
+            CapabilityHelper.registerUSHandler(SourceStackKey.INSTANCE, SourceUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(SourceStackKey.INSTANCE, SourceStackTypedHandler::new);
+            StackHandlerWrapperHelper.stackWrappers.put(SourceStackKey.ID, SourceHandlerWrapper::new);
         }
 
         if (Botania_Loaded)
         {
             // 注册Mana（魔力）
-            StackTypeRegistry.registerType(new ManaStackType());
-            CapabilityHelper.BlockCapabilityMap.put(ManaStackType.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_RECEIVER);
-            CapabilityHelper.ItemCapabilityMap.put(ManaStackType.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_ITEM);
-            CapabilityHelper.registerUSHandler(new ManaStackType(), ManaUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(new ManaStackType(), ManaStackTypedHandler::new);
-            StackHandlerWrapperHelper.stackWrappers.put(ManaStackType.ID, ManaHandlerWrapper::new);
+            StackKeyRegistry.registerType(ManaStackKey.INSTANCE);
+            CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_RECEIVER);
+            CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_ITEM);
+            CapabilityHelper.registerUSHandler(ManaStackKey.INSTANCE, ManaUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
+            StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
 
         }
 
@@ -332,7 +331,7 @@ public class BeyondDimensions
         }
         if (AE_Botania_Loaded)
         {
-            BD_AE_BotaniaPlugin.register();
+            BD_AEBotaniaPlugin.register();
         }
 
         if (RS_Loaded)

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.Chemicals;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.PigmentStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
 import mekanism.api.Action;
 import mekanism.api.chemical.pigment.IPigmentHandler;
@@ -19,7 +19,7 @@ public class PigmentHandlerWrapper implements IStackHandlerWrapper<PigmentStack>
     @Override
     public ResourceLocation getTypeId()
     {
-        return PigmentStackType.ID;
+        return PigmentStackKey.ID;
     }
 
     @Override

@@ -1,8 +1,9 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Util.BytebufHelper;
 import net.minecraft.network.FriendlyByteBuf;
@@ -24,14 +25,14 @@ public record PickBlockFromNetPacket(ItemStack targetStack)
         if (net == null) return;
         UnifiedStorage storage = net.getUnifiedStorage();
 
-        ItemStackType target = null;
-        for (IStackType stack : storage.getStorage())
+        IStackKey<?> target = null;
+        for (KeyAmount stack : storage.getStorage())
         {
-            if (stack instanceof ItemStackType itemStackType)
+            if (stack.key() instanceof ItemStackKey itemStackKey)
             {
-                if (itemStackType.getStack().getItem() == targetStack().getItem())
+                if (itemStackKey.getSource() == targetStack().getItem())
                 {
-                    target = (ItemStackType) itemStackType.copyWithCount(itemStackType.getVanillaMaxStackSize());
+                    target = itemStackKey;
                     break;
                 }
             }
@@ -39,7 +40,7 @@ public record PickBlockFromNetPacket(ItemStack targetStack)
 
         if (target != null && player.getMainHandItem().isEmpty())
         {
-            ItemStack extract = ((ItemStackType) storage.extract(target, false)).copyStack();
+            ItemStack extract = (ItemStack) storage.extract(target, target.getVanillaMaxStackSize(), false, false).toStack();
             player.setItemInHand(InteractionHand.MAIN_HAND, extract);
         }
     }

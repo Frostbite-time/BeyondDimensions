@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;
@@ -28,7 +28,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
 
     // 用于 shift双击加左键的效果
     ItemStack lastInvClickedStack = ItemStack.EMPTY;
-    ItemStackType lastStorageClickedStack = new ItemStackType();
+    ItemStackKey lastStorageClickedStack = ItemStackKey.EMPTY;
     int lastInvClickedSlot = -1;
     int cleanHold = 10; // 给予半秒时间
 
@@ -38,22 +38,21 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(guiGraphics);
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
     @Override
-    protected void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY)
+    protected void renderTooltip(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
         if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem())
         {
             if (this.hoveredSlot instanceof AbstractStackTypedSlot sSlot)
             {
-                IStackType stack = sSlot.getStack();
-                stack.renderTooltip(guiGraphics, minecraft.font, mouseX, mouseY);
+                KeyAmount stack = sSlot.getStack();
+                stack.key().getRender().renderTooltip(guiGraphics, minecraft.font, stack.key(), stack.amount(), mouseX, mouseY);
             }
             else
             {
@@ -64,19 +63,18 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
     @Override
-    public void renderSlot(GuiGraphics guiGraphics, Slot slot)
+    public void renderSlot(@NotNull GuiGraphics guiGraphics, @NotNull Slot slot)
     {
         if (slot instanceof AbstractStackTypedSlot sSlot)
         {
             // 获取stack
             int x = slot.x;
             int y = slot.y;
-            IStackType stack = sSlot.getStack();
+            KeyAmount stack = sSlot.getStack();
 
-            if (stack != null)
-            {
-                stack.render(guiGraphics, x, y);
-            }
+            if (stack.key().isEmpty()) return; // 不绘制空键
+            stack.key().getRender().render(guiGraphics, stack.key(), x, y);
+            stack.key().getRender().renderAmount(guiGraphics, stack.amount(), x, y);
 
         }
         else
@@ -98,8 +96,8 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         else
         {
             lastInvClickedStack = ItemStack.EMPTY;
+            lastStorageClickedStack = ItemStackKey.EMPTY;
             lastInvClickedSlot = -1;
-            lastStorageClickedStack = new ItemStackType();
             cleanHold = 10;
         }
 
@@ -136,47 +134,47 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
-        // 帮助调用focused的Release，剩余逻辑交给super
-        // 在这个版本中，super会取消dragging，并调用所在位置的release（所以这里我要额外调用focused的）
-        GuiEventListener focused = this.getFocused();
-        if (focused != null && this.isDragging())
-        {
-            focused.mouseReleased(mouseX, mouseY, button);
-        }
+        // AbstractContainerScreen的drag没有调用组件drag，但是Release却调用了，不需要手动重复处理
+        // 在此注释，防止我某一天忘记了
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
-    protected void slotClicked(Slot slot, int slotIndex, int mouseButton, @NotNull ClickType type)
+    protected void slotClicked(@NotNull Slot slot, int slotIndex, int mouseButton, @NotNull ClickType type)
     {
         if (!(slot instanceof AbstractStackTypedSlot))
             super.slotClicked(slot, slotIndex, mouseButton, type);
 
-        if (slot == null) return; // 这里绝对可能为null，不可移除此行
+
+        if (slot == null) return; // slot绝对可能为null，不可移除此行
 
         int slotId = slot.index;
-        IStackType<?> clickItem;
+        KeyAmount clickItem;
         if (hasShiftDown())
         {
             if (slot instanceof AbstractStackTypedSlot sSlot)
             {
                 clickItem = sSlot.getVanillaActualStack();
-                if (!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem))
+                if (!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem.key()))
                 {
-                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(lastStorageClickedStack.copyWithCount(Long.MAX_VALUE), false));
+                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(clickItem, false));
                 }
-                else if (!clickItem.isEmpty() && clickItem instanceof ItemStackType itemStackType)
+                else if (!clickItem.isEmpty() && clickItem.key() instanceof ItemStackKey itemStackKey)
                 {
-                    this.lastStorageClickedStack = (ItemStackType) itemStackType.copy();
+                    this.lastStorageClickedStack = itemStackKey;
                 }
             }
             else
             {
-                clickItem = new ItemStackType(slot.getItem());
+                clickItem = new KeyAmount(new ItemStackKey(slot.getItem()), slot.getItem().getCount());
 
+                // 快速移动仓库物品
+                // 原版会处理一部分快速移动 此处处理原版未能正常处理的部分
+                // 理论上说，这俩者即使同时操作一个槽位也不会导致物品复制等bug
+                // 因为操作基本全由服务端处理
                 if (lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
                 {
-                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(new ItemStackType(lastInvClickedStack), true));
+                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(new KeyAmount(new ItemStackKey(lastInvClickedStack), lastInvClickedStack.getCount()), true));
                 }
                 else if (menu.inventoryStartIndex <= slotId && slotId < menu.inventoryEndIndex)
                 {
@@ -204,6 +202,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 }
             }
         }
+
     }
 
 

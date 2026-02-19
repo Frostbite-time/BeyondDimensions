@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Api.Util;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -8,7 +8,7 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface CommonHandler
 {
-    Object apply(StackTypedHandler us, CapCtx ctx);  // 唯一抽象方法
+    Object apply(StackHandler us, CapCtx ctx);  // 唯一抽象方法
 
     // —— 对外暴露：是否带上下文 —— //
     default boolean isContextual()
@@ -17,18 +17,18 @@ public interface CommonHandler
     }
 
     // —— 工厂方法 —— //
-    static CommonHandler contextual(BiFunction<StackTypedHandler, CapCtx, ?> f)
+    static CommonHandler contextual(BiFunction<StackHandler, CapCtx, ?> f)
     {
         // 使用默认 isContextual()=true 即可
         return (us, ctx) -> f.apply(us, ctx);
     }
 
-    static CommonHandler contextless(Function<StackTypedHandler, ?> f)
+    static CommonHandler contextless(Function<StackHandler, ?> f)
     {
         return new CommonHandler()
         {
             @Override
-            public Object apply(StackTypedHandler us, CapCtx ctx)
+            public Object apply(StackHandler us, CapCtx ctx)
             {
                 return f.apply(us);               // 忽略 ctx
             }

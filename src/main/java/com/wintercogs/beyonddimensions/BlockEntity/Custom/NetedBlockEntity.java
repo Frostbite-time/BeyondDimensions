@@ -107,7 +107,7 @@ public abstract class NetedBlockEntity extends BlockEntity
     {
         if (getLevel() instanceof ServerLevel)
         {
-            DimensionsNet netCache = DimensionsNet.getNetFromId(netId, getLevel().getServer());
+            DimensionsNet netCache = DimensionsNet.getNetFromId(netId);
             if (netCache != null && !netCache.deleted)
             {
                 net = netCache;

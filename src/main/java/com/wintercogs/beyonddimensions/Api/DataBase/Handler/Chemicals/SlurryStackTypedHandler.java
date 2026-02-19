@@ -1,80 +1,114 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler.Chemicals;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.SlurryStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import mekanism.api.Action;
 import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.SlurryStack;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public class SlurryStackTypedHandler implements ISlurryHandler
 {
 
-    private final StackTypedHandler handlerStorage;
+    private static final ResourceLocation GAS_TYPE = SlurryStackKey.ID;
 
-    public SlurryStackTypedHandler(StackTypedHandler handlerStorage)
+    private final StackHandler handlerStorage;
+
+    public SlurryStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
     }
 
-    /**
-     * 将统一存储中的所有槽位视为潜在的 Slurry 槽位。
-     */
+    private int gasCount()
+    {
+        return handlerStorage.getBucket(GAS_TYPE)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+    }
+
+    private int emptyCount()
+    {
+        return handlerStorage.getBucket(EmptyStackKey.INSTANCE)
+                .map(StackHandler.SlotBucket::size)
+                .orElse(0);
+    }
+
+    private boolean inGasRegion(int visibleSlot)
+    {
+        int gases = gasCount();
+        return visibleSlot >= 0 && visibleSlot < gases;
+    }
+
+    private int getGasSlotAt(int index)
+    {
+        if (index < 0) return -1;
+        return handlerStorage.getBucket(GAS_TYPE)
+                .map(b -> (index < b.size()) ? b.get(index) : -1)
+                .orElse(-1);
+    }
+
+    private int getEmptySlotAt(int index)
+    {
+        if (index < 0) return -1;
+        return handlerStorage.getBucket(EmptyStackKey.INSTANCE)
+                .map(b -> (index < b.size()) ? b.get(index) : -1)
+                .orElse(-1);
+    }
+
+    private int resolveActualIndex(int visibleSlot)
+    {
+        if (visibleSlot < 0) return -1;
+        int gases = gasCount();
+        if (visibleSlot < gases)
+        {
+            return getGasSlotAt(visibleSlot);
+        }
+        int rest = visibleSlot - gases;
+        return getEmptySlotAt(rest);
+    }
+
     @Override
     public int getTanks()
     {
-        return handlerStorage.getSlots();
+        return gasCount() + emptyCount();
     }
 
     @Override
-    public @NotNull SlurryStack getChemicalInTank(int tank)
+    public @NotNull SlurryStack getChemicalInTank(int slot)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return SlurryStack.EMPTY;
-        }
+        if (!inGasRegion(slot)) return SlurryStack.EMPTY;
 
-        IStackType<?> stack = handlerStorage.getStackBySlot(tank);
-        if (stack instanceof SlurryStackType slurryStack && !slurryStack.isEmpty())
-        {
-            return slurryStack.copyStack();
-        }
+        int actualIndex = resolveActualIndex(slot);
+        if (actualIndex < 0) return SlurryStack.EMPTY;
 
-        return SlurryStack.EMPTY;
+        KeyAmount ka = handlerStorage.getStackBySlot(actualIndex);
+        if (ka.isEmpty()) return SlurryStack.EMPTY;
+
+        Object cached = handlerStorage.getOutStackByKey(ka.key());
+        if (!(cached instanceof SlurryStack gas)) return SlurryStack.EMPTY;
+        if (gas.isEmpty()) return SlurryStack.EMPTY;
+
+        long shown = ka.amount();
+        if (shown <= 0) return SlurryStack.EMPTY;
+
+        gas.setAmount(shown);
+        return gas;
     }
 
-    /**
-     * 直接设置指定槽位的 Slurry：
-     * - EMPTY => 槽位重置为 ItemStackType 空占位；
-     * - 非空 => 写入 SlurryStackType。
-     */
     @Override
     public void setChemicalInTank(int tank, @NotNull SlurryStack stack)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return;
-        }
-
-        if (stack.isEmpty())
-        {
-            handlerStorage.setStackDirectly(tank, new ItemStackType());
-        }
-        else
-        {
-            handlerStorage.setStackDirectly(tank, new SlurryStackType(stack.copy()));
-        }
+        int actualIndex = resolveActualIndex(tank);
+        if (actualIndex < 0) return;
+        handlerStorage.setStackDirectly(actualIndex, new SlurryStackKey(stack), stack.getAmount());
     }
 
     @Override
     public long getTankCapacity(int tank)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return 0L;
-        }
         return 64_000L;
     }
 
@@ -84,123 +118,62 @@ public class SlurryStackTypedHandler implements ISlurryHandler
         return true;
     }
 
-    /**
-     * 单 tank 插入：
-     * - 槽位越界/无效 => 返回原 stack 副本；
-     * - 槽位为空或已有 Slurry => 委托统一存储 insert(slot, ...)。
-     */
     @Override
-    public @NotNull SlurryStack insertChemical(int tank, SlurryStack stack, @NotNull Action action)
+    public @NotNull SlurryStack insertChemical(int tank, @NotNull SlurryStack stack, @NotNull Action action)
     {
-        if (stack.isEmpty())
-        {
-            return SlurryStack.EMPTY;
-        }
-        if (tank < 0 || tank >= handlerStorage.getSlots())
-        {
-            return stack.copy();
-        }
-        if (!isValid(tank, stack))
-        {
-            return stack.copy();
-        }
+        if (stack.isEmpty()) return SlurryStack.EMPTY;
 
-        IStackType<?> remainingStack = handlerStorage.insert(
-                tank,
-                new SlurryStackType(stack.copy()),
-                action.simulate()
-        );
+        int actualIndex = resolveActualIndex(tank);
+        if (actualIndex < 0) return stack.copy();
 
-        long remaining = remainingStack.getStackAmount();
-        if (remaining <= 0)
-        {
-            return SlurryStack.EMPTY;
-        }
-        return new SlurryStack(stack, remaining);
+        KeyAmount remaining = handlerStorage.insert(actualIndex, new SlurryStackKey(stack), stack.getAmount(), action.simulate());
+        long rem = remaining.amount();
+        return (rem > 0) ? new SlurryStack(stack, rem) : SlurryStack.EMPTY;
     }
 
-    /**
-     * 单 tank 抽取，仅当该槽位当前为 SlurryStackType 且非空时有效。
-     */
     @Override
     public @NotNull SlurryStack extractChemical(int tank, long amount, @NotNull Action action)
     {
-        if (tank < 0 || tank >= handlerStorage.getSlots() || amount <= 0)
-        {
-            return SlurryStack.EMPTY;
-        }
+        if (amount <= 0) return SlurryStack.EMPTY;
+        if (!inGasRegion(tank)) return SlurryStack.EMPTY;
 
-        IStackType<?> current = handlerStorage.getStackBySlot(tank);
-        if (!(current instanceof SlurryStackType) || current.isEmpty())
-        {
-            return SlurryStack.EMPTY;
-        }
+        int actualIndex = resolveActualIndex(tank);
+        if (actualIndex < 0) return SlurryStack.EMPTY;
 
-        IStackType<?> extracted = handlerStorage.extract(tank, amount, action.simulate());
-        if (extracted instanceof SlurryStackType slurryExtract && !slurryExtract.isEmpty())
-        {
-            return slurryExtract.copyStack();
-        }
-        return SlurryStack.EMPTY;
+        Object out = handlerStorage.extract(actualIndex, amount, action.simulate()).toStack();
+        return (out instanceof SlurryStack gs) ? gs : SlurryStack.EMPTY;
     }
 
-    /**
-     * 无指定 tank 的插入：交给统一存储按自身策略寻找合适槽位。
-     */
     @Override
-    public @NotNull SlurryStack insertChemical(SlurryStack stack, @NotNull Action action)
+    public @NotNull SlurryStack insertChemical(@NotNull SlurryStack stack, @NotNull Action action)
     {
-        if (stack.isEmpty())
-        {
-            return SlurryStack.EMPTY;
-        }
-
-        long remaining = handlerStorage
-                .insert(new SlurryStackType(stack.copy()), action.simulate())
-                .getStackAmount();
-
-        if (remaining > 0)
-        {
-            return new SlurryStack(stack, remaining);
-        }
-        return SlurryStack.EMPTY;
+        if (stack.isEmpty()) return SlurryStack.EMPTY;
+        long remaining = handlerStorage.insert(new SlurryStackKey(stack), stack.getAmount(), action.simulate()).amount();
+        return (remaining > 0) ? new SlurryStack(stack, remaining) : SlurryStack.EMPTY;
     }
 
-    /**
-     * 无指定 tank 的抽取
-     */
     @Override
     public @NotNull SlurryStack extractChemical(long amount, @NotNull Action action)
     {
-        if (amount <= 0)
-        {
-            return SlurryStack.EMPTY;
-        }
+        if (amount <= 0) return SlurryStack.EMPTY;
 
-        return handlerStorage.getTypeIdIndexList(SlurryStackType.ID)
-                .map(slots -> slots.get(0))
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> handlerStorage.extract(actualIndex, amount, action.simulate()))
-                .map(extracts -> ((SlurryStackType) extracts).copyStack())
-                .orElse(SlurryStack.EMPTY);
+        int firstGasSlot = handlerStorage.getBucket(GAS_TYPE)
+                .map(b -> (b.size() > 0) ? b.get(0) : -1)
+                .orElse(-1);
+        if (firstGasSlot < 0) return SlurryStack.EMPTY;
+
+        KeyAmount ka = handlerStorage.getStackBySlot(firstGasSlot);
+        if (ka.isEmpty()) return SlurryStack.EMPTY;
+
+        Object out = handlerStorage.extract(ka.key(), amount, action.simulate(), false).toStack();
+        return (out instanceof SlurryStack gs) ? gs : SlurryStack.EMPTY;
     }
 
     @Override
-    public @NotNull SlurryStack extractChemical(SlurryStack stack, @NotNull Action action)
+    public @NotNull SlurryStack extractChemical(@NotNull SlurryStack stack, @NotNull Action action)
     {
-        if (stack.isEmpty())
-        {
-            return SlurryStack.EMPTY;
-        }
-        return ((SlurryStackType) handlerStorage.extract(
-                new SlurryStackType(stack.copy()),
-                action.simulate()
-        )).copyStack();
-    }
-
-    @Override
-    public @NotNull SlurryStack getEmptyStack()
-    {
-        return SlurryStack.EMPTY;
+        if (stack.isEmpty()) return SlurryStack.EMPTY;
+        Object out = handlerStorage.extract(new SlurryStackKey(stack), stack.getAmount(), action.simulate(), false).toStack();
+        return (out instanceof SlurryStack gs) ? gs : SlurryStack.EMPTY;
     }
 }

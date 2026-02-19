@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Machine.*;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -244,27 +245,27 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
     }
 
     // 标记槽位：IStackType的列表
-    public static List<IStackType<?>> getFilterSlotsOrDefault(ItemStack stack, @Nullable List<IStackType<?>> defaultValue)
+    public static List<KeyAmount> getFilterSlotsOrDefault(ItemStack stack, @Nullable List<KeyAmount> defaultValue)
     {
         if (stack.hasTag() && stack.getTag().contains("filter_slots"))
         {
             ListTag tags = stack.getTag().getList("filter_slots", Tag.TAG_COMPOUND);
-            List<IStackType<?>> filterSlots = new ArrayList<>();
+            List<KeyAmount> filterSlots = new ArrayList<>();
             for (int i = 0; i < tags.size(); i++)
             {
-                filterSlots.add(IStackType.deserializeNBTCommon(tags.getCompound(i)));
+                filterSlots.add(KeyAmount.deserializeNBT(tags.getCompound(i)));
             }
             return filterSlots;
         }
         return defaultValue;
     }
 
-    public static void setFilterSlots(ItemStack stack, List<IStackType<?>> filterSlots)
+    public static void setFilterSlots(ItemStack stack, List<KeyAmount> filterSlots)
     {
         ListTag tags = new ListTag();
         for (int i = 0; i < filterSlots.size(); i++)
         {
-            tags.add(filterSlots.get(i).serializeNBT());
+            tags.add(KeyAmount.serializeNBT(filterSlots.get(i)));
         }
         stack.getOrCreateTag().put("filter_slots", tags);
     }

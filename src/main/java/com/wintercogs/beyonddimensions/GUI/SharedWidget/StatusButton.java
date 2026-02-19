@@ -90,4 +90,10 @@ public abstract class StatusButton extends IconButton
             }
         }
     }
+
+    @Override
+    public ResourceLocation getIcon()
+    {
+        return super.getIcon();
+    }
 }

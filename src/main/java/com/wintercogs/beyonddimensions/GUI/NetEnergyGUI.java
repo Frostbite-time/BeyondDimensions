@@ -6,13 +6,14 @@ import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
-import com.wintercogs.beyonddimensions.Unit.StringFormat;
+import com.wintercogs.beyonddimensions.Util.StringFormat;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import org.jetbrains.annotations.NotNull;
 
 public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
 {
@@ -25,6 +26,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
     public NetEnergyGUI(NetEnergyMenu container, Inventory playerInventory, Component title)
     {
         super(container, playerInventory, title);
+        // 去除空白的真实部分，用于计算图片显示的最佳位置
     }
 
 
@@ -121,7 +123,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         popButton.render(guiGraphics, mouseX, mouseY, partialTicks);

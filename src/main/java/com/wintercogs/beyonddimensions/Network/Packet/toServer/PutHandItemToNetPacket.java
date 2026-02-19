@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -22,8 +22,8 @@ public record PutHandItemToNetPacket(InteractionHand hand)
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
         if (net == null) return;
         UnifiedStorage storage = net.getUnifiedStorage();
-        IStackType remaining = storage.insert(new ItemStackType(player.getMainHandItem()), false);
-        player.getMainHandItem().setCount((BDMath.clampLongToInt(remaining.getStackAmount())));
+        KeyAmount remaining = storage.insert(new ItemStackKey(player.getMainHandItem()), player.getMainHandItem().getCount(), false);
+        player.getMainHandItem().setCount((BDMath.clampLongToInt(remaining.amount())));
     }
 
 

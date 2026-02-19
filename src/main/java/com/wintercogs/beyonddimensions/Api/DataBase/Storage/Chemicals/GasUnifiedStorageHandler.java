@@ -1,15 +1,16 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Storage.Chemicals;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.Chemicals.GasStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import mekanism.api.Action;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
+import org.jetbrains.annotations.NotNull;
 
 public class GasUnifiedStorageHandler implements IGasHandler
 {
 
-    private UnifiedStorage storage;
+    private final UnifiedStorage storage;
 
     public GasUnifiedStorageHandler(UnifiedStorage storage)
     {
@@ -19,30 +20,36 @@ public class GasUnifiedStorageHandler implements IGasHandler
     @Override
     public int getTanks()
     {
-        return storage.getTypeIdIndexList(GasStackType.ID)
+        return storage.getBucket(GasStackKey.ID)
                 .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
                 .orElse(storage.isFullSlotsSize() ? 0 : 1);
     }
 
     @Override
-    public GasStack getChemicalInTank(int slot)
+    public @NotNull GasStack getChemicalInTank(int slot)
     {
-        return storage.getTypeIdIndexList(GasStackType.ID)
+        return storage.getBucket(GasStackKey.ID)
                 .filter(slots -> slot >= 0 && slot < slots.size())
                 .map(slots -> slots.get(slot))
-                .filter(actualIndex -> actualIndex >= 0)
-                .map(actualIndex -> (GasStackType) storage.getStackBySlot(actualIndex))
-                .map(GasStackType::getStack)
+                .map(key -> {
+                    Object outStack = storage.getOutStackByKey(key);
+                    if (outStack instanceof GasStack gasStack)
+                    {
+                        if (!gasStack.isEmpty())
+                            gasStack.setAmount(storage.getStackByKey(key).amount());
+                        return gasStack;
+                    }
+                    return null;
+                })
                 .orElse(GasStack.EMPTY);
     }
 
     @Override
     public void setChemicalInTank(int tank, GasStack stack)
     {
-        // 凡通过handler机械化输入的物品无论以何方法，全部为自动插入
         if (stack.isEmpty())
             return;
-        storage.insert(new GasStackType(stack.copy()), false);
+        storage.insert(new GasStackKey(stack), stack.getAmount(), false);
     }
 
     @Override
@@ -52,55 +59,63 @@ public class GasUnifiedStorageHandler implements IGasHandler
     }
 
     @Override
-    public boolean isValid(int tank, GasStack stack)
+    public boolean isValid(int tank, @NotNull GasStack stack)
     {
         return true;
     }
 
-    // 返回剩余量，与Fluid的返回插入量不同
     @Override
-    public GasStack insertChemical(int tank, GasStack stack, Action action)
+    public @NotNull GasStack insertChemical(int tank, GasStack stack, @NotNull Action action)
     {
         if (stack.isEmpty())
             return GasStack.EMPTY;
-        long remaining = storage.insert(new GasStackType(stack.copy()), action.simulate()).getStackAmount();
+        long remaining = storage.insert(new GasStackKey(stack), stack.getAmount(), action.simulate()).amount();
         if (remaining > 0)
             return new GasStack(stack, remaining);
-        return GasStack.EMPTY;// 始终全部插入
+        return GasStack.EMPTY;
     }
 
-    // 尝试从指定槽位提取指定数量化学品
     @Override
-    public GasStack extractChemical(int tank, long amount, Action action)
+    public @NotNull GasStack extractChemical(int tank, long amount, Action action)
     {
-        return ((GasStackType) storage.extract(new GasStackType(new GasStack(getChemicalInTank(tank), amount)), action.simulate()))
-                .copyStack();
+        if (storage.extract(new GasStackKey(getChemicalInTank(tank)), amount, action.simulate(), false).toStack() instanceof GasStack result)
+            return result;
+        else
+            return GasStack.EMPTY;
     }
 
     @Override
-    public GasStack insertChemical(GasStack stack, Action action)
+    public @NotNull GasStack insertChemical(GasStack stack, @NotNull Action action)
     {
         if (stack.isEmpty())
             return GasStack.EMPTY;
-        long remaining = storage.insert(new GasStackType(stack.copy()), action.simulate()).getStackAmount();
+        long remaining = storage.insert(new GasStackKey(stack), stack.getAmount(), action.simulate()).amount();
         if (remaining > 0)
             return new GasStack(stack, remaining);
-        return GasStack.EMPTY;// 始终全部插入
+        return GasStack.EMPTY;
     }
 
-    // 从第一个槽位提取指定化学品
     @Override
-    public GasStack extractChemical(long amount, Action action)
+    public @NotNull GasStack extractChemical(long amount, Action action)
     {
-        return ((GasStackType) storage.extract(new GasStackType(new GasStack(getChemicalInTank(0), amount)), action.simulate()))
-                .copyStack();
+        if (storage.extract(new GasStackKey(getChemicalInTank(0)), amount, action.simulate(), false).toStack() instanceof GasStack result)
+            return result;
+        else
+            return GasStack.EMPTY;
     }
 
-    // 按类型提取化学品
     @Override
-    public GasStack extractChemical(GasStack stack, Action action)
+    public @NotNull GasStack extractChemical(@NotNull GasStack stack, Action action)
     {
-        return ((GasStackType) storage.extract(new GasStackType(stack.copy()), action.simulate()))
-                .copyStack();
+        if (storage.extract(new GasStackKey(stack), stack.getAmount(), action.simulate(), false).toStack() instanceof GasStack result)
+            return result;
+        else
+            return GasStack.EMPTY;
+    }
+
+    @Override
+    public @NotNull GasStack getEmptyStack()
+    {
+        return GasStack.EMPTY;
     }
 }

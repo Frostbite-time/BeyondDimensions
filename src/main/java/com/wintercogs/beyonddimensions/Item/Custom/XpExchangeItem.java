@@ -1,14 +1,14 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackType;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.XpTransferSpeedMode;
 import com.wintercogs.beyonddimensions.Tags.ModFluidTags;
-import com.wintercogs.beyonddimensions.Unit.BDMath;
-import com.wintercogs.beyonddimensions.Unit.XpUtil;
+import com.wintercogs.beyonddimensions.Util.BDMath;
+import com.wintercogs.beyonddimensions.Util.XpUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -132,15 +132,16 @@ public class XpExchangeItem extends Item
             int toRemoveXp = BDMath.clampLongToInt(needRemoveXp);
 
             long toInsertUnits = (long) toRemoveXp * conversionRate;
-            IStackType remaining = storage.insert(
-                    new FluidStackType(new FluidStack(canonicalXp, 1), toInsertUnits),
+            KeyAmount remaining = storage.insert(
+                    new FluidStackKey(new FluidStack(canonicalXp, 1)),
+                    toInsertUnits,
                     false
             );
 
             if (!remaining.isEmpty())
             {
                 // 有剩余（仓库放不下），把这部分折算回 XP，不再扣玩家
-                int overflowXp = BDMath.clampLongToInt(remaining.getStackAmount() / conversionRate);
+                int overflowXp = BDMath.clampLongToInt(remaining.amount() / conversionRate);
                 toRemoveXp -= overflowXp;
             }
 
@@ -164,19 +165,21 @@ public class XpExchangeItem extends Item
                 long wantUnits = (long) remainingXp * conversionRate;
                 if (wantUnits <= 0) break;
 
-                IStackType extracted = storage.extract(
-                        new FluidStackType(new FluidStack(f, 1), wantUnits),
+                KeyAmount extracted = storage.extract(
+                        new FluidStackKey(new FluidStack(f, 1)),
+                        wantUnits,
+                        false,
                         false
                 );
 
                 if (extracted.isEmpty()) continue;
 
-                long units = extracted.getStackAmount();
+                long units = extracted.amount();
                 int gainedXp = BDMath.clampLongToInt(units / conversionRate);
                 if (gainedXp <= 0)
                 {
                     // 抽到了不足 1 XP 的零头，原样放回，继续尝试其它流体
-                    storage.insert(new FluidStackType(new FluidStack(f, 1), units), false);
+                    storage.insert(new FluidStackKey(new FluidStack(f, 1)), units, false);
                     continue;
                 }
 
@@ -186,7 +189,7 @@ public class XpExchangeItem extends Item
                 // 多抽出来但不足 1 XP 的部分回滚
                 if (remainderUnits > 0)
                 {
-                    storage.insert(new FluidStackType(new FluidStack(f, 1), remainderUnits), false);
+                    storage.insert(new FluidStackKey(new FluidStack(f, 1)), remainderUnits, false);
                 }
 
                 gainedXpTotal += gainedXp;
