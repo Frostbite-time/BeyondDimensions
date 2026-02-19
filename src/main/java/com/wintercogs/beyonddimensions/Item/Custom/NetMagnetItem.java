@@ -9,11 +9,13 @@ import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.*;
 import com.wintercogs.beyonddimensions.Menu.NetMagnetMenu;
+import com.wintercogs.beyonddimensions.Util.BDMath;
 import com.wintercogs.beyonddimensions.Util.ItemStackHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -30,6 +32,8 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.common.util.TriState;
+import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
@@ -125,12 +129,24 @@ public class NetMagnetItem extends BaseMachineItem
                     ItemStackKey itemKey = new ItemStackKey(itemStack);
                     if (matchesFilter(filterMode, filterSlots, itemKey))
                     {
+                        int count = itemStack.getCount();
 
-                        if (storage.insert(itemKey, itemStack.getCount(), true).isEmpty()) // 表示能成功插入
+                        if (storage.insert(itemKey, count, true).isEmpty())
                         {
+                            if (holder instanceof Player player)
+                            {
+                                ItemStack originalCopy = itemStack.copy();
+                                // 发送事件
+                                itemStack.setCount(0);
+                                EventHooks.fireItemPickupPost(itemEntity, player, originalCopy);
+                                // 成就信息
+                                itemStack.setCount(count);
+                                player.awardStat(Stats.ITEM_PICKED_UP.get(originalCopy.getItem()), count);
+                                player.onItemPickup(itemEntity);
+                            }
+
                             itemEntity.discard();
-                            // workContent之前已经由shouldWork检查过net的存在性
-                            storage.insert(itemKey, itemStack.getCount(), false);
+                            storage.insert(itemKey, count, false);
                         }
                     }
                 }
