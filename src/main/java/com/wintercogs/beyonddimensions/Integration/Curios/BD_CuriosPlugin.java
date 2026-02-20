@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Integration.Curios;
 
 import com.wintercogs.beyonddimensions.Item.Custom.NetFeederItem;
 import com.wintercogs.beyonddimensions.Item.Custom.NetMagnetItem;
+import com.wintercogs.beyonddimensions.Item.Custom.NetRestockerItem;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -80,6 +81,29 @@ public class BD_CuriosPlugin
                     }
                 },
                 ModItems.NET_FEEDER_ITEM // 目标物品
+        );
+        // 补货器
+        evt.registerItem(
+                CuriosCapability.ITEM,
+                (stack, context) -> new ICurio()
+                {
+                    @Override
+                    public ItemStack getStack()
+                    {
+                        return stack;
+                    }
+
+                    @Override
+                    public void curioTick(SlotContext slotContext)
+                    {
+                        if (stack.getItem() == ModItems.NET_RESTOCKER_ITEM.get())
+                        {
+                            NetRestockerItem item = (NetRestockerItem) stack.getItem();
+                            item.inventoryTick(stack, slotContext.entity().level(), slotContext.entity(), slotContext.index(), false);
+                        }
+                    }
+                },
+                ModItems.NET_RESTOCKER_ITEM
         );
     }
 }
