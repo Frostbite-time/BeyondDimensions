@@ -69,6 +69,10 @@ public class ModItems
     public static final DeferredItem<Item> NET_FEEDER_ITEM = ITEMS.register("net_feeder_item",
             () -> new NetFeederItem(new Item.Properties()));
 
+    // 网络补货器
+    public static final DeferredItem<Item> NET_RESTOCKER_ITEM = ITEMS.register("net_restocker_item",
+            () -> new NetRestockerItem(new Item.Properties()));
+
     // 经验交换棒
     public static final DeferredItem<Item> XP_EXCHANGE_ITEM = ITEMS.register("xp_exchange_item",
             () -> new XpExchangeItem(new Item.Properties()));

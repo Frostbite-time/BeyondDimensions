@@ -1,4 +1,4 @@
-// 1.21.1	2026-02-15T19:01:48.3949228	Recipes
+// 1.21.1	2026-02-20T20:09:19.7911903	Recipes
 3943b952a737761005f7dbf8afae3c475e4ec748 data/beyonddimensions/advancement/recipes/misc/ars_source_pathway.json
 f2f81aa5da13b86924679caf7f4fdfa51eeb7d01 data/beyonddimensions/advancement/recipes/misc/dimensional_connect_block.json
 b4960070e69228f49a21004a96be143c6d05e7e0 data/beyonddimensions/advancement/recipes/misc/mana_pool_pathway.json
@@ -17,6 +17,7 @@ a0d9020ec74a481d6343e159da3a99273667e353 data/beyonddimensions/advancement/recip
 c38ef88327f422faf95cbeb5bb4dc00b26de66c3 data/beyonddimensions/advancement/recipes/misc/net_member_inviter.json
 32a00e2cff2e85740c9da8b4aaed892e1294e22f data/beyonddimensions/advancement/recipes/misc/net_pathway.json
 47fffbe390ca1baab790619b7a78adf4302d9a90 data/beyonddimensions/advancement/recipes/misc/net_pump_block.json
+9b2d1a23a2bf29999030b32f11928b7e560a0e48 data/beyonddimensions/advancement/recipes/misc/net_restocker_item.json
 fececf6d6dfaa8fd1e815737a78012943fd34726 data/beyonddimensions/advancement/recipes/misc/net_terminal_block.json
 2045f8151d19a6428d2f77e3435521c960e96ca4 data/beyonddimensions/advancement/recipes/misc/net_terminal_item.json
 336d5ce6208be0b52255276d1f85ba6876751904 data/beyonddimensions/advancement/recipes/misc/rs_net_pathway.json
@@ -43,6 +44,7 @@ a4728443bd5768431e8a6d27cd85f6a6c7495ff4 data/beyonddimensions/recipe/net_furnac
 2b4a2736884adb115b8b295072cf25f33dcf3e97 data/beyonddimensions/recipe/net_member_inviter.json
 265afd96426610e954d48a062d0c0576b79c373b data/beyonddimensions/recipe/net_pathway.json
 d226628cb551e16f070385b0d5acd38212669fab data/beyonddimensions/recipe/net_pump_block.json
+92aba9904c14f97bd45fee75be46e9a8fd34e499 data/beyonddimensions/recipe/net_restocker_item.json
 dd1b8921b0f2855bc46be9822639a4eb7f45430e data/beyonddimensions/recipe/net_terminal_block.json
 6f8cdb6d304695b7a1ef3439b77b949b7e5057ad data/beyonddimensions/recipe/net_terminal_item.json
 7ff92441da2f44dd44d4f2515ebede49b6bf3f18 data/beyonddimensions/recipe/rs_net_pathway.json

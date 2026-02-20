@@ -83,6 +83,34 @@ public class ModDataComponents
             )
     );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<FuzzyMode>> FUZZY_MODE = register(
+            "fuzzy_mode", builder -> builder.persistent(
+                    Codec.STRING.xmap(
+                            FuzzyMode::valueOf,
+                            FuzzyMode::name
+                    )
+            ).networkSynchronized(
+                    ByteBufCodecs.STRING_UTF8.map(
+                            FuzzyMode::valueOf,
+                            FuzzyMode::name
+                    )
+            )
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ReceiveMode>> RECEIVE_MODE = register(
+            "receive_mode", builder -> builder.persistent(
+                    Codec.STRING.xmap(
+                            ReceiveMode::valueOf,
+                            ReceiveMode::name
+                    )
+            ).networkSynchronized(
+                    ByteBufCodecs.STRING_UTF8.map(
+                            ReceiveMode::valueOf,
+                            ReceiveMode::name
+                    )
+            )
+    );
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<HopperNBTMode>> HOPPER_NBT_MODE = register(
             "hopper_nbt_mode", builder -> builder.persistent(
                     Codec.STRING.xmap(

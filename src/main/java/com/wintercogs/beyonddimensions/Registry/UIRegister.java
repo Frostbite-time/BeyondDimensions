@@ -25,6 +25,7 @@ public class UIRegister
         NetFurnaceMenu.MENU_TYPES.register(eventBus);
         NetMagnetMenu.MENU_TYPES.register(eventBus);
         NetFeederMenu.MENU_TYPES.register(eventBus);
+        NetRestockerMenu.MENU_TYPES.register(eventBus);
     }
 
     @SubscribeEvent
@@ -42,5 +43,6 @@ public class UIRegister
         event.register(NetFurnaceMenu.Net_Furnace_Menu.get(), NetFurnaceGUI::new);
         event.register(NetMagnetMenu.Net_Magnet_Menu.get(), NetMagnetGUI::new);
         event.register(NetFeederMenu.Net_Feeder_Menu.get(), NetFeederGUI::new);
+        event.register(NetRestockerMenu.Net_Restocker_Menu.get(), NetRestockerGUI::new);
     }
 }

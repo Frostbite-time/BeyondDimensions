@@ -39,6 +39,7 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.MATTER_COMPRESS_BALL);
                         output.accept(ModItems.NET_MAGNET_ITEM);
                         output.accept(ModItems.NET_FEEDER_ITEM);
+                        output.accept(ModItems.NET_RESTOCKER_ITEM);
                         output.accept(ModItems.XP_EXCHANGE_ITEM);
 
                         for (ModFluids.FluidEntry e : ModFluids.ALL)

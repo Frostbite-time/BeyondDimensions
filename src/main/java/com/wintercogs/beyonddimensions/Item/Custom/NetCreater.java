@@ -37,7 +37,7 @@ public class NetCreater extends Item
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
         tooltipComponents.add(
                 Component.translatable("tooltip.beyonddimensions.network_open_key",
-                        DimensionsShortKeys.OPEN_GUI_KEY.getKey().getDisplayName())
+                                DimensionsShortKeys.OPEN_GUI_KEY.getKey().getDisplayName())
                         .withStyle(ChatFormatting.DARK_GRAY)
         );
     }
