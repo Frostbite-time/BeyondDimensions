@@ -244,6 +244,46 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
         return stack.hasTag() && stack.getTag().contains("feeder_mode");
     }
 
+    // 补货器：模糊模式
+    public static FuzzyMode getFuzzyModeOrDefault(ItemStack stack, @Nullable FuzzyMode defaultValue)
+    {
+        if (stack.hasTag() && stack.getTag().contains("fuzzy_mode"))
+        {
+            return FuzzyMode.valueOf(stack.getTag().getString("fuzzy_mode"));
+        }
+        return defaultValue;
+    }
+
+    public static void setFuzzyMode(ItemStack stack, FuzzyMode newMode)
+    {
+        stack.getOrCreateTag().putString("fuzzy_mode", newMode.name());
+    }
+
+    public static boolean hasFuzzyMode(ItemStack stack)
+    {
+        return stack.hasTag() && stack.getTag().contains("fuzzy_mode");
+    }
+
+    // 补货器：回收模式
+    public static ReceiveMode getReceiveModeOrDefault(ItemStack stack, @Nullable ReceiveMode defaultValue)
+    {
+        if (stack.hasTag() && stack.getTag().contains("receive_mode"))
+        {
+            return ReceiveMode.valueOf(stack.getTag().getString("receive_mode"));
+        }
+        return defaultValue;
+    }
+
+    public static void setReceiveMode(ItemStack stack, ReceiveMode newMode)
+    {
+        stack.getOrCreateTag().putString("receive_mode", newMode.name());
+    }
+
+    public static boolean hasReceiveMode(ItemStack stack)
+    {
+        return stack.hasTag() && stack.getTag().contains("receive_mode");
+    }
+
     // 标记槽位：IStackType的列表
     public static List<KeyAmount> getFilterSlotsOrDefault(ItemStack stack, @Nullable List<KeyAmount> defaultValue)
     {

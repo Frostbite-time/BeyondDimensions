@@ -1,4 +1,4 @@
-// 1.20.1	2025-09-28T17:31:49.4849234	Item Models: beyonddimensions
+// 1.20.1	2026-02-20T22:35:49.7525048	Item Models: beyonddimensions
 2b3b336bfa26120070185cc7712958d1a9d13ed6 assets/beyonddimensions/models/item/matter_compress_ball.json
 6f5724767848fe696f8436fa15c33d346246ba04 assets/beyonddimensions/models/item/net_ae_storage_cell.json
 5bfaace5b1ba69c0d46d0d93a8321f138128d6ba assets/beyonddimensions/models/item/net_creater.json
@@ -8,6 +8,7 @@
 d54fb36c36a8c82d569e207a166455459c6aad44 assets/beyonddimensions/models/item/net_magnet_item.json
 44a3f7d215b50a4a828b1bcce49c3c7bbac964ea assets/beyonddimensions/models/item/net_manager_inviter.json
 9b6622e45c1738aeea2adb00f3ba6f2e910bf876 assets/beyonddimensions/models/item/net_member_inviter.json
+b5f037721f07772d1ec7046455230de8718eb5da assets/beyonddimensions/models/item/net_restocker_item.json
 7b123def3d854e3ca50aee6f1121e65a380b958e assets/beyonddimensions/models/item/net_terminal_item.json
 de7dea2e9f35828368e24c539f6bc0c6e13294ec assets/beyonddimensions/models/item/shattered_space_time_crystallization.json
 5e4b9395e4a6c70f5a45bfecb075ae39670d7f9a assets/beyonddimensions/models/item/space_time_bar.json

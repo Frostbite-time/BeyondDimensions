@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "beyonddimensions:space_time_bar"
+    },
+    "B": {
+      "item": "minecraft:chest"
+    },
+    "C": {
+      "item": "beyonddimensions:space_time_stable_frame"
+    }
+  },
+  "pattern": [
+    " AA",
+    "ABC",
+    " AA"
+  ],
+  "result": {
+    "item": "beyonddimensions:net_restocker_item"
+  },
+  "show_notification": true
+}

@@ -12,6 +12,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
@@ -73,7 +74,16 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
             int y = slot.y;
             KeyAmount stack = sSlot.getStack();
 
-            if (stack.key().isEmpty()) return; // 不绘制空键
+            if (stack.key().isEmpty())
+            {
+                var noItemIcon = slot.getNoItemIcon();
+                if (noItemIcon != null && this.minecraft != null)
+                {
+                    TextureAtlasSprite textureatlassprite = this.minecraft.getTextureAtlas(noItemIcon.getFirst()).apply(noItemIcon.getSecond());
+                    guiGraphics.blit(x, y, 0, 16, 16, textureatlassprite);
+                }
+                return;
+            }
             stack.key().getRender().render(guiGraphics, stack.key(), x, y);
             stack.key().getRender().renderAmount(guiGraphics, stack.amount(), x, y);
 

@@ -30,6 +30,7 @@ public class UIRegister
     public static final Supplier<MenuType<NetFurnaceMenu>> Net_Furnace_Menu = UIRegister.MENU_TYPES.register("net_furnace_menu", () -> IForgeMenuType.create(NetFurnaceMenu::new));
     public static final Supplier<MenuType<NetMagnetMenu>> Net_Magnet_Menu = UIRegister.MENU_TYPES.register("net_magnet_menu", () -> IForgeMenuType.create(NetMagnetMenu::new));
     public static final Supplier<MenuType<NetFeederMenu>> Net_Feeder_Menu = UIRegister.MENU_TYPES.register("net_feeder_menu", () -> IForgeMenuType.create(NetFeederMenu::new));
+    public static final Supplier<MenuType<NetRestockerMenu>> Net_Restocker_Menu = UIRegister.MENU_TYPES.register("net_restocker_menu", () -> IForgeMenuType.create(NetRestockerMenu::new));
 
     public static void register(IEventBus eventBus)
     {
@@ -54,6 +55,7 @@ public class UIRegister
                     MenuScreens.register(Net_Furnace_Menu.get(), NetFurnaceGUI::new);
                     MenuScreens.register(Net_Magnet_Menu.get(), NetMagnetGUI::new);
                     MenuScreens.register(Net_Feeder_Menu.get(), NetFeederGUI::new);
+                    MenuScreens.register(Net_Restocker_Menu.get(), NetRestockerGUI::new);
                 }
         );
     }

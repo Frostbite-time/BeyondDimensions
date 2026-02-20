@@ -40,6 +40,7 @@ public class ModCreativeModeTabs
                         output.accept(ModItems.MATTER_COMPRESS_BALL.get());
                         output.accept(ModItems.NET_MAGNET_ITEM.get());
                         output.accept(ModItems.NET_FEEDER_ITEM.get());
+                        output.accept(ModItems.NET_RESTOCKER_ITEM.get());
                         output.accept(ModItems.XP_EXCHANGE_ITEM.get());
 
                         if (BeyondDimensions.AELoaded)

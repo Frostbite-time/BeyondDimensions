@@ -233,6 +233,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("unlock_net_feeder_item", has(ModItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_RESTOCKER_ITEM.get())
+                .pattern(" AA")
+                .pattern("ABC")
+                .pattern(" AA")
+                .define('A', ModItems.SPACE_TIME_BAR.get())
+                .define('B', Items.CHEST)
+                .define('C', ModItems.SPACE_TIME_STABLE_FRAME.get())
+                .unlockedBy("unlock_net_restocker_item", has(ModItems.SPACE_TIME_BAR.get()))
+                .save(recipeOutput);
+
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.XP_EXCHANGE_ITEM.get())
                 .pattern("  A")
                 .pattern(" B ")
