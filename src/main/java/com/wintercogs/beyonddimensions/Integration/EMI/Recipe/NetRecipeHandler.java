@@ -77,10 +77,8 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
     @Override
     public boolean canCraft(EmiRecipe recipe, EmiCraftContext<T> context)
     {
-        if (Screen.hasShiftDown()) return true;
-
-        EmiPlayerInventory actualInventory = collectInventory(context.getScreen().getMenu(), true);
-        return actualInventory.canCraft(recipe);
+        // 始终返回true，谁让EMI只检查一次呢
+        return true;
     }
 
     @Override
@@ -112,9 +110,8 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
     {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.setScreen(context.getScreen());
-        final boolean forcePartialRequest = Screen.hasShiftDown();
 
-        // 1) 取配方与菜单
+        // 取配方与菜单
         final List<EmiIngredient> inputs = recipe.getInputs();
         final T menu = context.getScreen().getMenu();
 
@@ -204,7 +201,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
             if (!satisfied)
             {
                 hasMissing = true;
-                if (forcePartialRequest && bestRepKey != null && bestPartialAvail != null && bestAvailable > 0)
+                if (bestRepKey != null)
                 {
                     consume(bestPartialAvail, bestAvailable);
                     outKeys.add(bestRepKey);
@@ -219,13 +216,12 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         }
 
         Player player = minecraft.player;
-        if (hasMissing && !forcePartialRequest && player != null)
+        if (hasMissing && player != null)
         {
             player.displayClientMessage(
                     Component.translatable("beyonddimensions.message.insufficient_materials"),
                     true
             );
-            return true;
         }
 
         // 发包请求物品
