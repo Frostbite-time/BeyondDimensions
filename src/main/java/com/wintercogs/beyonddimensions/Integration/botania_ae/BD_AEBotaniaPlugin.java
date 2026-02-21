@@ -9,7 +9,9 @@ import java.util.Optional;
 
 public class BD_AEBotaniaPlugin
 {
-    private BD_AEBotaniaPlugin() {}
+    private BD_AEBotaniaPlugin()
+    {
+    }
 
     public static void register()
     {

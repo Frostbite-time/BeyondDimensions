@@ -17,6 +17,7 @@ public final class CommonConfigRuntime
     public static int uiPageNum;
     public static String uiSearch;
     public static boolean searchTextWithJEIEMI;
+    public static boolean emiAllowNetworkStorageInfo;
 
     public static boolean interfaceCanReceiveResource;
     public static boolean interfaceCanOutputResource;

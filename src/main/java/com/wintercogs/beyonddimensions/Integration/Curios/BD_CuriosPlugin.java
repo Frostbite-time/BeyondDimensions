@@ -75,7 +75,7 @@ public class BD_CuriosPlugin
                 }
             }));
         }
-        else if(item instanceof NetRestockerItem)
+        else if (item instanceof NetRestockerItem)
         {
             evt.addCapability(CuriosCapability.ID_ITEM, CuriosApi.createCurioProvider(new ICurio()
             {

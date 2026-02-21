@@ -63,6 +63,7 @@ public class Config
         public final ForgeConfigSpec.IntValue UI_PAGE_NUM;
         public final ForgeConfigSpec.ConfigValue<String> UI_SEARCH;
         public final ForgeConfigSpec.BooleanValue SEARCH_TEXT_WITH_JEI_EMI;
+        public final ForgeConfigSpec.BooleanValue EMI_ALLOW_NETWORK_STORAGE_INFO;
 
         public final ForgeConfigSpec.BooleanValue INTERFACE_CAN_RECEIVE_RESOURCE;
         public final ForgeConfigSpec.BooleanValue INTERFACE_CAN_OUTPUT_RESOURCE;
@@ -100,6 +101,9 @@ public class Config
             SEARCH_TEXT_WITH_JEI_EMI = builder
                     .comment("是否与JEI或EMI同步搜索")
                     .define("search_text_with_jei_emi", true);
+            EMI_ALLOW_NETWORK_STORAGE_INFO = builder
+                    .comment("是否允许EMI获取维度网络内全部物品信息")
+                    .define("emi_allow_network_storage_info", false);
 
             INTERFACE_CAN_RECEIVE_RESOURCE = builder
                     .comment("是否允许网络接口将资源送入网络")
@@ -129,6 +133,7 @@ public class Config
             CommonConfigRuntime.uiPageNum = UI_PAGE_NUM.get();
             CommonConfigRuntime.uiSearch = UI_SEARCH.get();
             CommonConfigRuntime.searchTextWithJEIEMI = SEARCH_TEXT_WITH_JEI_EMI.get();
+            CommonConfigRuntime.emiAllowNetworkStorageInfo = EMI_ALLOW_NETWORK_STORAGE_INFO.get();
 
             CommonConfigRuntime.interfaceCanReceiveResource = INTERFACE_CAN_RECEIVE_RESOURCE.get();
             CommonConfigRuntime.interfaceCanOutputResource = INTERFACE_CAN_OUTPUT_RESOURCE.get();

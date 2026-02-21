@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.Integration.RS;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import net.minecraft.world.item.ItemStack;

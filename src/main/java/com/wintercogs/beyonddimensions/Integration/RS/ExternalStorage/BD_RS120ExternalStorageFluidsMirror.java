@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.Integration.RS.ExternalStorage;
 
 import com.refinedmods.refinedstorage.api.storage.cache.IStorageCache;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Integration.RS.RSHelper;
