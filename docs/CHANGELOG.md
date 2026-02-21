@@ -1,1 +1,1 @@
-* Added NetRestocker
+* Update JEI and EMI compat.
