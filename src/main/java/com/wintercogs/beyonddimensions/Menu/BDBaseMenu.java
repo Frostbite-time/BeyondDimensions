@@ -249,9 +249,30 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                     }
 
 
-                    if (remaining.isEmpty()) // 如果产物被完整取出，则通知resultSlot槽位进行onTake，以移除工艺槽上的原料，并执行后续操作
+                    if (remaining.isEmpty()) // 如果产物被完整取出，则通过safeTake执行一次完整取出流程
                     {
-                        resultSlot.onTake(player, slot.getItem().copy());
+                        ItemStack crafted = resultSlot.safeTake(cacheStack.getCount(), Integer.MAX_VALUE, player);
+                        // 如果未取出任何合成物，则执行回滚
+                        if (crafted.isEmpty())
+                        {
+                            for (Map.Entry<Integer, Integer> entry : insertedToInv.entrySet())
+                            {
+                                Slot afterSlot = slots.get(entry.getKey());
+                                afterSlot.safeTake(entry.getValue(), Integer.MAX_VALUE, player);
+                            }
+                            for (Map.Entry<Integer, Integer> entry : insertedToSlots.entrySet())
+                            {
+                                Slot afterSlot = slots.get(entry.getKey());
+                                if (afterSlot instanceof AbstractStackTypedSlot aSlot)
+                                {
+                                    aSlot.safeExtract(new ItemStackKey(cacheStack), entry.getValue());
+                                }
+                                else
+                                {
+                                    afterSlot.safeTake(entry.getValue(), Integer.MAX_VALUE, player);
+                                }
+                            }
+                        }
                     }
                     else // 没能完整取出所有产物，则将之前插入仓库的物品进行回滚
                     {
