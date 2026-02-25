@@ -30,9 +30,11 @@ public class AutoRefillResultSlot extends ResultSlot
     }
 
     @Override
-    public void onTake(@NotNull Player player, @NotNull ItemStack stack)
+    public void onTake(@NotNull Player player, @NotNull ItemStack craftedStack)
     {
-        this.checkTakeAchievements(stack);
+        if (player.level().isClientSide()) return;
+
+        this.checkTakeAchievements(craftedStack);
         CraftingInput.Positioned positionedInput = this.craftSlots.asPositionedCraftInput();
         CraftingInput craftingGrid = positionedInput.input();
         int gridStartX = positionedInput.left();
@@ -42,6 +44,9 @@ public class AutoRefillResultSlot extends ResultSlot
         NonNullList<ItemStack> remainingItems = player.level().getRecipeManager()
                 .getRemainingItemsFor(RecipeType.CRAFTING, craftingGrid, player.level());
         CommonHooks.setCraftingPlayer(null);
+
+        // 一般而言，此函数每次调用最多完成一次合成
+        int craftTimes = 1;
 
         for (int gridRow = 0; gridRow < craftingGrid.height(); gridRow++)
         {
@@ -53,75 +58,75 @@ public class AutoRefillResultSlot extends ResultSlot
 
                 if (!slotStack.isEmpty())
                 {
-                    int itemsToRemove = 1;
+                    int itemsToRemove = craftTimes;
 
-                    if (slotStack.getCount() == 1)
+                    // 如果完成本次合成，会导致合成槽槽位原料耗尽，我们优先从其他地方取
+                    if (slotStack.getCount() <= itemsToRemove)
                     {
-                        ItemStack singleItem = slotStack.copyWithCount(1);
-                        boolean consumed = false;
+                        ItemStackKey toRemoveKey = new ItemStackKey(slotStack);
 
                         // 优先尝试存储系统
-                        long extracted = menu.storage.extract(new ItemStackKey(singleItem), singleItem.getCount(), true, false).amount();
-                        if (extracted >= 1)
-                        {
-                            if (!player.level().isClientSide())
-                            {
-                                menu.storage.extract(new ItemStackKey(singleItem), singleItem.getCount(), false, false);
-                            }
-                            itemsToRemove = 0;
-                            consumed = true;
-                        }
+                        int extracted = (int) menu.storage.extract(toRemoveKey, itemsToRemove, false, false).amount();
+                        itemsToRemove -= extracted;
 
                         // 存储系统不足时尝试玩家背包
-                        if (!consumed)
+                        for (int i = 0; i < player.getInventory().items.size() && itemsToRemove > 0; i++)
                         {
-                            for (int i = 0; i < player.getInventory().items.size(); i++)
+                            ItemStack invStack = player.getInventory().items.get(i);
+                            if (ItemStack.isSameItemSameComponents(invStack, toRemoveKey.getReadOnlyStack()))
                             {
-                                ItemStack invStack = player.getInventory().items.get(i);
-                                if (ItemStack.isSameItemSameComponents(invStack, singleItem) && invStack.getCount() >= 1)
-                                {
-                                    if (!player.level().isClientSide())
-                                    {
-                                        invStack.shrink(1);
-                                        player.getInventory().setItem(i, invStack.isEmpty() ? ItemStack.EMPTY : invStack);
-                                    }
-                                    itemsToRemove = 0;
-                                    consumed = true;
-                                    break;
-                                }
+                                int shrinkAmount = Math.min(itemsToRemove, invStack.getCount());
+                                invStack.shrink(shrinkAmount);
+                                player.getInventory().items.set(i, invStack.isEmpty() ? ItemStack.EMPTY : invStack);
+                                itemsToRemove -= shrinkAmount;
                             }
                         }
                     }
 
+                    // 如果此时itemsToRemove仍然大于0，消耗槽位物品，
+                    // 由于槽位是先验原料量再显示产物的机制，所以此处必然能补全最后剩余的开销
                     if (itemsToRemove > 0)
                     {
                         this.craftSlots.removeItem(slotIndex, itemsToRemove);
                     }
-
                     slotStack = this.craftSlots.getItem(slotIndex);
                 }
 
-
+                // 如果有原料返回物，则填充
                 if (!recipeRemainder.isEmpty())
                 {
-                    if (slotStack.isEmpty())
+                    // 返回物的量，必然等于次数（也许可能会有某些时候一个物品返回多个产物？不过我还没见过）
+                    // 况且目前有些受限，getRemainingItemsFor返回的count受到输入量影响，不能直接用
+                    // 如果后续出现问题再改
+                    int remainderCount = craftTimes;
+                    ItemStackKey remainderKey = new ItemStackKey(recipeRemainder);
+
+                    // 首先往槽位最多填充一个
+                    if (slotStack.isEmpty() && remainderCount > 0)
                     {
-                        this.craftSlots.setItem(slotIndex, recipeRemainder);
+                        this.craftSlots.setItem(slotIndex, remainderKey.copyStackWithCount(1));
+                        remainderCount--;
                     }
-                    else if (ItemStack.isSameItemSameComponents(slotStack, recipeRemainder))
+                    // 继续填入存储
+                    if (remainderCount > 0)
                     {
-                        recipeRemainder.grow(slotStack.getCount());
-                        this.craftSlots.setItem(slotIndex, recipeRemainder);
+                        remainderCount = (int) menu.storage.insert(remainderKey, remainderCount, false).amount();
                     }
-                    else if (!this.player.getInventory().add(recipeRemainder))
+                    // 随后填充玩家背包
+                    if (remainderCount > 0)
                     {
-                        this.player.drop(recipeRemainder, false);
+                        ItemStack insertStack = remainderKey.copyStackWithCount(remainderCount);
+                        this.player.getInventory().add(insertStack);
+                        remainderCount = insertStack.getCount();
+                    }
+                    // 如果仍然有剩余，直接掉落
+                    if (remainderCount > 0)
+                    {
+                        this.player.drop(remainderKey.copyStackWithCount(remainderCount), false);
                     }
                 }
             }
         }
         menu.slotChangedCraftingGrid(menu, player.level(), player, craftSlots, (ResultContainer) this.container, this.index);
-
-
     }
 }
