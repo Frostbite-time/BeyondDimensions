@@ -26,6 +26,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -329,8 +332,16 @@ public class NetMagnetItem extends BaseMachineItem
                         {
                             storage.insert(fluidKey, amount, false);
                             // 清空方块 & 通知客户端
-                            level.setBlock(pos, Blocks.AIR.defaultBlockState(),
-                                    Block.UPDATE_ALL_IMMEDIATE);  // 立即更新并刷新渲染
+                            BlockState state = level.getBlockState(pos);
+                            if (state.getBlock() instanceof BucketPickup pickup && !(state.getBlock() instanceof LiquidBlock))
+                            {
+                                pickup.pickupBlock(level, pos, state);
+                            }
+                            else
+                            {
+                                level.setBlock(pos, Blocks.AIR.defaultBlockState(),
+                                        Block.UPDATE_ALL_IMMEDIATE);
+                            }
                         }
                     }
                 }

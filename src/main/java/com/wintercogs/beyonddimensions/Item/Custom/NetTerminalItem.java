@@ -85,7 +85,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
         }
         // 使用上下文中的物品栈
         DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(ctx.stack));
-        if(net == null) return null;
+        if (net == null) return null;
 
         // 从NBT获取合成槽位
         CompoundTag tag = ctx.stack.getOrCreateTag();

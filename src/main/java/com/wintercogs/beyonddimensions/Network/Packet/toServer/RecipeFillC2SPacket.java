@@ -2,18 +2,13 @@ package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-
-import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey.deserializeStackCaps;
-import static com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey.serializeStackCaps;
 
 public record RecipeFillC2SPacket(List<IStackKey<?>> keys, List<Long> amount)
 {

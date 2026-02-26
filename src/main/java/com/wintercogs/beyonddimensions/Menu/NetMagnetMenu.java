@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.Menu;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Item.Custom.BaseMachineItem;

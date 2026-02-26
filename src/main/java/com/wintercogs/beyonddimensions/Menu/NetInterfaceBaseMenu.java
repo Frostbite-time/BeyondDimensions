@@ -15,7 +15,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
 
-
 import static com.wintercogs.beyonddimensions.Registry.UIRegister.Net_Interface_Menu;
 
 // 网络接口的UI

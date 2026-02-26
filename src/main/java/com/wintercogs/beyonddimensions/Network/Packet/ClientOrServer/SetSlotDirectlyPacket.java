@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import net.minecraft.client.Minecraft;
