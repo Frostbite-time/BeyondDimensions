@@ -1,2 +1,1 @@
-* Update JEI and EMI compat.
-* Fix some crafting issues.
+* Fix the magnet’s behavior on waterlogged blocks.

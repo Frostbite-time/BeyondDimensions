@@ -26,6 +26,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
@@ -270,8 +272,17 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                         if (storage.insert(fluidKey, extracted.getAmount(), true).isEmpty())
                         {
                             storage.insert(fluidKey, extracted.getAmount(), false);
-                            level.setBlock(pos, Blocks.AIR.defaultBlockState(),
-                                    Block.UPDATE_ALL_IMMEDIATE);
+                            // 清空方块 & 通知客户端
+                            BlockState state = level.getBlockState(pos);
+                            if(state.getBlock() instanceof BucketPickup pickup && !(state.getBlock() instanceof LiquidBlock))
+                            {
+                                pickup.pickupBlock(null, level, pos, state);
+                            }
+                            else
+                            {
+                                level.setBlock(pos, Blocks.AIR.defaultBlockState(),
+                                        Block.UPDATE_ALL_IMMEDIATE);
+                            }
                         }
                     }
                 }
