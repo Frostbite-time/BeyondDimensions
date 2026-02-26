@@ -274,7 +274,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                             storage.insert(fluidKey, extracted.getAmount(), false);
                             // 清空方块 & 通知客户端
                             BlockState state = level.getBlockState(pos);
-                            if(state.getBlock() instanceof BucketPickup pickup && !(state.getBlock() instanceof LiquidBlock))
+                            if (state.getBlock() instanceof BucketPickup pickup && !(state.getBlock() instanceof LiquidBlock))
                             {
                                 pickup.pickupBlock(null, level, pos, state);
                             }

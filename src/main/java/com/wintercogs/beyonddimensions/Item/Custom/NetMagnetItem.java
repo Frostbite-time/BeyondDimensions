@@ -30,11 +30,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -333,7 +331,7 @@ public class NetMagnetItem extends BaseMachineItem
                             storage.insert(fluidKey, amount, false);
                             // 清空方块 & 通知客户端
                             BlockState state = level.getBlockState(pos);
-                            if(state.getBlock() instanceof BucketPickup pickup && !(state.getBlock() instanceof LiquidBlock))
+                            if (state.getBlock() instanceof BucketPickup pickup && !(state.getBlock() instanceof LiquidBlock))
                             {
                                 pickup.pickupBlock(null, level, pos, state);
                             }
