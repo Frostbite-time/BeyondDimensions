@@ -205,7 +205,10 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
      */
     public void setUiTimestampPolicy(@NotNull UiTimestampPolicy policy)
     {
-        this.uiTimestampPolicy = Objects.requireNonNull(policy);
+        Objects.requireNonNull(policy);
+        if(this.uiTimestampPolicy == policy) return;
+
+        this.uiTimestampPolicy = policy;
     }
 
     @NotNull
@@ -216,13 +219,43 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
 
     public void setZeroPolicy(@NotNull ZeroPolicy policy)
     {
-        this.zeroPolicy = Objects.requireNonNull(policy);
+        Objects.requireNonNull(policy);
+        if (this.zeroPolicy == policy) return;
+
+        this.zeroPolicy = policy;
+        reconcileAfterZeroPolicyChange();
     }
 
     @NotNull
     public ZeroPolicy getZeroPolicy()
     {
         return this.zeroPolicy;
+    }
+
+    /**
+     * 在状态切换到remove zero时，做一个零键清理
+     */
+    private void reconcileAfterZeroPolicyChange()
+    {
+        if (this.zeroPolicy != ZeroPolicy.REMOVE_ON_ZERO) return;
+
+        boolean anyChange = false;
+        for (Iterator<Map.Entry<IStackKey<?>, Long>> it = storage.entrySet().iterator(); it.hasNext(); )
+        {
+            Map.Entry<IStackKey<?>, Long> e = it.next();
+            if (e.getValue() <= 0L)
+            {
+                anyChange = true;
+                IStackKey<?> key = e.getKey();
+                it.remove();
+                removeFromIndex(key);
+            }
+        }
+
+        if (anyChange)
+        {
+            onChange();
+        }
     }
 
     /* ================= 公共订阅 API（放在抽象基类里） ================= */
