@@ -32,15 +32,15 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
 {
 
     /* ---------- 策略：是否保留 amount==0 的键 ---------- */
-    protected enum ZeroPolicy
+    public enum ZeroPolicy
     {KEEP_ZERO, REMOVE_ON_ZERO}
 
     /* ---------- 新增：UI 时间戳维护策略 ---------- */
     public enum UiTimestampPolicy
     {NONE, AUTO} // NONE: 不主动维护；AUTO: 自动维护
 
-    private final ZeroPolicy zeroPolicy;
-    private UiTimestampPolicy uiTimestampPolicy; // 默认自动维护（可通过 setter 修改）
+    private @NotNull ZeroPolicy zeroPolicy;
+    private @NotNull UiTimestampPolicy uiTimestampPolicy; // 默认自动维护（可通过 setter 修改）
 
     protected AbstractUnorderedStackHandler(ZeroPolicy policy, UiTimestampPolicy uiTimestampPolicy)
     {
@@ -203,14 +203,26 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     /**
      * 切换 UI 时间戳策略
      */
-    public void setUiTimestampPolicy(UiTimestampPolicy policy)
+    public void setUiTimestampPolicy(@NotNull UiTimestampPolicy policy)
     {
-        this.uiTimestampPolicy = (policy == null ? UiTimestampPolicy.NONE : policy);
+        this.uiTimestampPolicy = Objects.requireNonNull(policy);
     }
 
+    @NotNull
     public UiTimestampPolicy getUiTimestampPolicy()
     {
-        return uiTimestampPolicy;
+        return this.uiTimestampPolicy;
+    }
+
+    public void setZeroPolicy(@NotNull ZeroPolicy policy)
+    {
+        this.zeroPolicy = Objects.requireNonNull(policy);
+    }
+
+    @NotNull
+    public ZeroPolicy getZeroPolicy()
+    {
+        return this.zeroPolicy;
     }
 
     /* ================= 公共订阅 API（放在抽象基类里） ================= */
