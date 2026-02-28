@@ -33,7 +33,6 @@ import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 
@@ -128,7 +127,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             CommonConfigRuntime.uiSortButton = (ButtonState) sortButton.currentState;
             Config.INSTANCE.commonConfig.UI_SORT_BUTTON.set((ButtonState) sortButton.currentState);
             Config.INSTANCE.commonConfig.UI_SORT_BUTTON.save();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.buildIndexList();
         });
         addRenderableWidget(sortButton);
         // 第二搜索策略按钮
@@ -138,7 +137,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             CommonConfigRuntime.uiSecondSortButton = (ButtonState) secondSortButton.currentState;
             Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.set((ButtonState) secondSortButton.currentState);
             Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.save();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.buildIndexList();
         })
         {
             @Override
@@ -171,7 +170,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             CommonConfigRuntime.uiReverseButton = (ButtonState) reverseButton.currentState;
             Config.INSTANCE.commonConfig.UI_REVERSE_BUTTON.set((ButtonState) reverseButton.currentState);
             Config.INSTANCE.commonConfig.UI_REVERSE_BUTTON.save();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.buildIndexList();
         });
         addRenderableWidget(reverseButton);
         // 搜索切换按钮
@@ -198,7 +197,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             CommonConfigRuntime.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.buildIndexList();
             init();
         });
         addPageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.add_page")));
@@ -215,7 +214,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             CommonConfigRuntime.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.buildIndexList();
             init();
         });
         removePageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.remove_page")));
@@ -230,7 +229,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         this.searchField.setBordered(true);
         this.searchField.setVisible(true);
         this.searchField.setTextColor(16777215);
-        this.searchField.setValue(CommonConfigRuntime.uiSearch);
         this.searchField.setTooltip(Tooltip.create(Component.translatable("tooltip.editbox.beyonddimensions.search")));
         this.searchField.setResponder(text -> {
             if (text.isEmpty())
@@ -243,7 +241,8 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             }
             menu.loadSearchText(text);
             CommonConfigRuntime.uiSearch = text;
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.markForceAllUpdateClientView();
+            menu.updateViewerStorage(false);
             lastSearchText = text;
 
             // 文本同步
@@ -280,6 +279,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         {
             searchField.setSuggestion(Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch").getString());
         }
+        this.searchField.setValue(CommonConfigRuntime.uiSearch);
         addRenderableWidget(searchField);
 
         // 初始化滚动条
@@ -295,7 +295,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                     if (menu.lineData != pos)
                     {
                         menu.lineData = pos;
-                        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), false);
+                        menu.buildIndexList();
                     }
                 }
         );
@@ -515,7 +515,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
         {
-            menu.updateViewerStorage();
+            menu.updateViewerStorage(false);
             menu.hasShiftDown = false;
         }
 
