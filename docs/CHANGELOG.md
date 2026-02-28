@@ -1,1 +1,1 @@
-* Fix the magnet’s behavior on waterlogged blocks.
+* Improve search performance
