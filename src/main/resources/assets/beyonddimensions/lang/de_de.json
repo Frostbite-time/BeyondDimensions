@@ -85,7 +85,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "Aktuell: Sortierung deaktiviert",
   "tooltip.item.unstable_space_time.long_data": "Raumzeit stabilisiert sich noch, %s Stabilisierungszyklen benötigt. Bitte stets bei sich tragen.",
   "tooltip.beyonddimensions.item.xp_exchange": "Im GUI: Rechtsklick zum Speichern von XP, Mittlere Maustaste zum Abrufen von XP\nIn der Hand: Rechtsklick zum Wechseln des Arbeitsmodus, Umschalt+Rechtsklick zum Ändern der XP-Interaktionsrate",
-  "tooltip.editbox.beyonddimensions.search": "Drücke '#' um Tooltip-Inhalte zu filtern\nDrücke '@' um Mod-IDs zu filtern\nDrücke Shift+Z um JEI/EMI-Suchfeldverknüpfung umzuschalten",
+  "tooltip.editbox.beyonddimensions.search": "Gib Text ein, um nach Namen zu suchen\nGib '@' ein, um Mod-IDs zu filtern\nGib '$' ein, um Tooltip-Inhalte zu filtern\nGib '#' ein, um Tags zu filtern\nTrenne mehrere Filter mit Leerzeichen; mit Anführungszeichen kannst du Leerzeichen suchen\nVerwende '|' für ODER-Treffer und '-' zum Ausschließen von Treffern\nDrücke Shift+Z, um die Verknüpfung mit dem JEI/EMI-Suchfeld umzuschalten",
 
   "istack.beyonddimensions.storage_num.item": "Gespeichert: %s Stück",
   "istack.beyonddimensions.storage_num.fluid": "Gespeichert: %s mB",

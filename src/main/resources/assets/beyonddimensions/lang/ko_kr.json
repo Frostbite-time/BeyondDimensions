@@ -85,7 +85,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "현재: 자동 정렬 비활성화됨",
   "tooltip.item.unstable_space_time.long_data": "시공간 안정화 중, %s회의 안정화 주기 남음. 항상 휴대하십시오.",
   "tooltip.beyonddimensions.item.xp_exchange": "GUI에서: 우클릭 시 경험치 저장, 휠 클릭 시 경험치 회수\n손에 들었을 때: 우클릭으로 작업 모드 전환, 쉬프트+우클릭으로 경험치 상호작용 속도 변경",
-  "tooltip.editbox.beyonddimensions.search": "도구 설명 내용 필터링: '#' 입력\n모드 ID 필터링: '@' 입력\nJEI/EMI 검색창 연동 전환: Shift+Z 누름",
+  "tooltip.editbox.beyonddimensions.search": "텍스트를 입력해 이름으로 검색\n'@'를 입력해 모드 ID 필터링\n'$'를 입력해 툴팁 내용 필터링\n'#'를 입력해 태그 필터링\n여러 필터는 공백으로 구분하고, 공백 문자를 검색하려면 따옴표로 감싸기\n'|'는 OR 매칭, '-'는 매칭 제외\nShift+Z를 눌러 JEI/EMI 검색창 연동 전환",
 
   "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
   "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",
