@@ -425,8 +425,14 @@ public class DimensionsNetMenu extends BDBaseMenu
     @Override
     public boolean stillValid(@NotNull Player player)
     {
-        return true; // 可根据需求修改条件
+        return true;
     }
 
+    @Override
+    public void removed(@NotNull Player player)
+    {
+        super.removed(player);
+        this.clientNetStorage.closeSubscription();
+    }
 }
 

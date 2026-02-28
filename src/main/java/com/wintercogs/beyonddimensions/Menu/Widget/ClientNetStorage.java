@@ -34,6 +34,11 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
 
     private @NotNull String searchText = "";
 
+    private @Nullable List<Integer> cacheIndexes = null;
+
+    // 初始值给一个不可能出现的按钮值防止命中
+    private SortProperties lastSortProperties = new SortProperties(ButtonState.DISABLED, ButtonState.DISABLED, false);
+
     public ClientNetStorage(@NotNull AbstractUnorderedStackHandler sourceStorage)
     {
         // 这里初始化为KEEP_ZERO，但是后续调用时，应当在必要时手动设置
@@ -72,11 +77,13 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
 
     public void resolvePendingOrAllUpdate(boolean onlyAmountUpdate)
     {
+        boolean anyChanged = false;
         if (mustUpdateAllFromSource)
         {
             pendingCache.clear();
             updateViewFromStorage(onlyAmountUpdate);
             this.mustUpdateAllFromSource = false;
+            anyChanged = true;
         }
         else
         {
@@ -90,15 +97,22 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
 
                 if (keyAmount.amount() > 0)
                 {
+                    anyChanged = true;
                     this.insert(keyAmount.key(), keyAmount.amount(), false);
                 }
                 else
                 {
+                    anyChanged = true;
                     this.extract(keyAmount.key(), -keyAmount.amount(), false);
                 }
 
                 it.remove();
             }
+        }
+
+        if (anyChanged)
+        {
+            this.cacheIndexes = null;
         }
     }
 
@@ -135,6 +149,12 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
      */
     public List<Integer> buildSortedIndex(ButtonState primarySortPolicy, ButtonState secondarySortPolicy, boolean reverse)
     {
+        if(cacheIndexes != null
+                && primarySortPolicy == lastSortProperties.primarySortPolicy()
+                && secondarySortPolicy == lastSortProperties.secondarySortPolicy()
+                && reverse == lastSortProperties.reverse())
+            return cacheIndexes;
+
         if (primarySortPolicy == null) primarySortPolicy = ButtonState.SORT_NAME;
         final boolean useSecondary = (secondarySortPolicy != null && secondarySortPolicy != primarySortPolicy);
 
@@ -198,6 +218,8 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
         {
             result.add(row.idx);
         }
+        this.cacheIndexes = result;
+        this.lastSortProperties = new SortProperties(primarySortPolicy, secondarySortPolicy, reverse);
         return result;
     }
 
@@ -207,21 +229,10 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
      */
     private boolean matchFilter(IStackKey<?> key)
     {
-        if(this.searchText.isEmpty()) return true;
+        if (this.searchText.isEmpty()) return true;
         return key.getRender().getDisplayName(key).getString().contains(this.searchText);
     }
 
-    /**
-     * @param idx       指向视觉存储的下标
-     * @param name      显示名（仅在需要时非 null）
-     * @param modIdSort 模组ID（排序用原字符串；仅在需要时非 null）
-     * @param amount    数量（仅在需要时有意义）
-     * @param ctime     插入时间（仅在需要时有意义）
-     * @param mtime     修改时间（仅在需要时有意义）
-     */
-    private record Row(int idx, @Nullable String name, @Nullable String modIdSort, long amount, long ctime, long mtime)
-    {
-    }
 
     /**
      * 比较 Row 中已准备好的字段
@@ -256,5 +267,21 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
         catch (Throwable ignored)
         {
         }
+    }
+
+    /**
+     * @param idx       指向视觉存储的下标
+     * @param name      显示名（仅在需要时非 null）
+     * @param modIdSort 模组ID（排序用原字符串；仅在需要时非 null）
+     * @param amount    数量（仅在需要时有意义）
+     * @param ctime     插入时间（仅在需要时有意义）
+     * @param mtime     修改时间（仅在需要时有意义）
+     */
+    private record Row(int idx, @Nullable String name, @Nullable String modIdSort, long amount, long ctime, long mtime)
+    {
+    }
+
+    private record SortProperties(ButtonState primarySortPolicy, ButtonState secondarySortPolicy, boolean reverse)
+    {
     }
 }
