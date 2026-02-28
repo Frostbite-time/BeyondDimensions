@@ -206,7 +206,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     public void setUiTimestampPolicy(@NotNull UiTimestampPolicy policy)
     {
         Objects.requireNonNull(policy);
-        if(this.uiTimestampPolicy == policy) return;
+        if (this.uiTimestampPolicy == policy) return;
 
         this.uiTimestampPolicy = policy;
     }
@@ -408,7 +408,12 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     @Override
     public boolean hasStack(IStackKey<?> key)
     {
-        return key != null && storage.getOrDefault(key, 0L) > 0L;
+        if (key == null) return false;
+        if (this.zeroPolicy == ZeroPolicy.KEEP_ZERO)
+        {
+            return storage.containsKey(key);
+        }
+        return storage.getOrDefault(key, 0L) > 0L;
     }
 
     public long setAmountByKey(IStackKey<?> key, long amount)

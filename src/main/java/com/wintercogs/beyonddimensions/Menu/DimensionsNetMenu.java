@@ -3,21 +3,15 @@ package com.wintercogs.beyonddimensions.Menu;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerRemoveZero;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Integration.JECharacters.PinInMatches;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedSlotGroupSync;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Widget.ClientNetStorage;
-import com.wintercogs.beyonddimensions.Util.TinyPinyinUtils;
 import com.wintercogs.beyonddimensions.Util.TooltipHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
@@ -28,7 +22,9 @@ import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.function.Supplier;
 
 /**
@@ -99,8 +95,7 @@ public class DimensionsNetMenu extends BDBaseMenu
             @Override
             public void afterLoadChange()
             {
-                clientNetStorage.resolvePendingOrAllUpdate(hasShiftDown);
-                buildIndexList(false);
+                updateViewerStorage(hasShiftDown);
                 TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.NORMAL);
                 TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.ADVANCED);
             }
@@ -233,12 +228,14 @@ public class DimensionsNetMenu extends BDBaseMenu
     public void updateViewerStorage(boolean onlyAmountUpdate)
     {
         clientNetStorage.resolvePendingOrAllUpdate(onlyAmountUpdate);
-        buildIndexList(true);
+        if (!onlyAmountUpdate) buildIndexList();
     }
 
 
-    // 客户端函数，根据存储构建索引表 用于在动态搜索以及其他
-    public void buildIndexList(boolean needsUpdateCacheIndex)
+    /**
+     * 当确定真存储不会变化，但是排序可能发生变化时，调用这个
+     */
+    public void buildIndexList()
     {
         if (!this.player.level().isClientSide())
         {
@@ -299,60 +296,6 @@ public class DimensionsNetMenu extends BDBaseMenu
         this.clientNetStorage.markForceAllUpdate();
     }
 
-    /**
-     * 检查文本是否匹配名称（同时检查拼音以及原文本）
-     * 内部自动统一为小写
-     */
-    private boolean checkTextMatches(String srcText, String inputText)
-    {
-        srcText = srcText.toLowerCase(Locale.ENGLISH);
-        inputText = inputText.toLowerCase(Locale.ENGLISH);
-
-        boolean matchText = srcText.contains(inputText);
-
-        boolean matchPinyin;
-
-        if (!Minecraft.getInstance().options.languageCode.startsWith("zh"))
-        {
-            matchPinyin = false; // 非中文地区默认不匹配
-        }
-        else if (BeyondDimensions.JECharactersLoaded)
-        {
-            matchPinyin = PinInMatches.contains(srcText, inputText);
-        }
-        else
-        {
-            String allPinyin = TinyPinyinUtils.getAllPinyin(srcText, false).toLowerCase(Locale.ENGLISH);
-            String firstPinyin = TinyPinyinUtils.getFirstPinYin(srcText).toLowerCase(Locale.ENGLISH);
-            matchPinyin = allPinyin.contains(inputText) || firstPinyin.contains(inputText);
-        }
-        return matchText || matchPinyin;
-    }
-
-    /**
-     * 检查文本是否存在于目标物品堆叠
-     *
-     * @param stack     目标物品堆叠
-     * @param matchText 文本
-     * @return 结果为真则意味存在
-     */
-    private boolean checkTooltipMatches(KeyAmount stack, String matchText)
-    {
-        List<Component> toolTips = TooltipHelper.getTooltipLines(stack,
-                Item.TooltipContext.of(player.level()),
-                player,
-                Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
-
-        return toolTips.stream()
-                .anyMatch(tooltip -> {
-
-                    // 获取原始tooltip文本（小写）
-                    String tooltipText = tooltip.getString().toLowerCase(Locale.ENGLISH);
-                    return checkTextMatches(tooltipText, matchText);
-
-                });
-    }
-
     public void updateScrollLineData(int dataSize)
     {
         maxLineData = dataSize / 9;
@@ -371,13 +314,6 @@ public class DimensionsNetMenu extends BDBaseMenu
     public boolean stillValid(@NotNull Player player)
     {
         return true;
-    }
-
-    @Override
-    public void removed(@NotNull Player player)
-    {
-        super.removed(player);
-        this.clientNetStorage.closeSubscription();
     }
 }
 

@@ -25,7 +25,7 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
      */
     private final AbstractUnorderedStackHandler sourceStorage;
 
-    private final List<KeyAmount> pendingCache = new ArrayList<>();
+    private final Set<IStackKey<?>> pendingCache = new HashSet<>();
 
     private boolean mustUpdateAllFromSource = true;
 
@@ -69,10 +69,10 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
             return;
         }
 
-        if (delta > 0)
-            pendingCache.add(new KeyAmount(key, delta));
-        else if (delta < 0)
-            pendingCache.add(new KeyAmount(key, -delta));
+        if (delta != 0)
+        {
+            pendingCache.add(key);
+        }
     }
 
     public void resolvePendingOrAllUpdate(boolean onlyAmountUpdate)
@@ -87,23 +87,24 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
         }
         else
         {
-            Iterator<KeyAmount> it = pendingCache.iterator();
+            Iterator<IStackKey<?>> it = pendingCache.iterator();
             while (it.hasNext())
             {
-                KeyAmount keyAmount = it.next();
-                if (keyAmount.isEmpty() || keyAmount.amount() == 0) continue;
+                IStackKey<?> key = it.next();
+                if (key.isEmpty()) continue;
 
-                if (onlyAmountUpdate && !this.hasStack(keyAmount.key())) continue;
-
-                if (keyAmount.amount() > 0)
+                long newAmount = sourceStorage.getStackByKey(key).amount();
+                if (this.hasStack(key))
                 {
+                    // 视图内已经有这个键，则说明其符合过滤器，直接设置数量
                     anyChanged = true;
-                    this.insert(keyAmount.key(), keyAmount.amount(), false);
+                    this.setAmountByKey(key, newAmount);
                 }
-                else
+                else if (!onlyAmountUpdate && matchFilter(key))
                 {
+                    // 否则，我们要求符合过滤器，且不处于仅数量更新的情况下，才允许向视图内增加新键
                     anyChanged = true;
-                    this.extract(keyAmount.key(), -keyAmount.amount(), false);
+                    this.setAmountByKey(key, newAmount);
                 }
 
                 it.remove();
@@ -246,25 +247,6 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
             case SORT_MODIFIED_TIME -> Comparator.comparingLong((Row r) -> r.mtime);
             default -> Comparator.comparing((Row r) -> r.name, String::compareTo);
         };
-    }
-
-    public void closeSubscription()
-    {
-        try
-        {
-            this.anySubscriber.close();
-        }
-        catch (Throwable ignored)
-        {
-        }
-
-        try
-        {
-            this.deltaSubscriber.close();
-        }
-        catch (Throwable ignored)
-        {
-        }
     }
 
     /**
