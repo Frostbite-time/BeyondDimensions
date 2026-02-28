@@ -31,11 +31,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class AbstractUnorderedStackHandler implements IStackHandler
 {
 
-    /* ---------- 策略：是否保留 amount==0 的键 ---------- */
+    /* ---------- 是否保留 amount==0 的键 ---------- */
     public enum ZeroPolicy
     {KEEP_ZERO, REMOVE_ON_ZERO}
 
-    /* ---------- 新增：UI 时间戳维护策略 ---------- */
+    /* ---------- UI 时间戳维护策略 ---------- */
     public enum UiTimestampPolicy
     {NONE, AUTO} // NONE: 不主动维护；AUTO: 自动维护
 
@@ -56,7 +56,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     protected final Map<ResourceLocation, TypeBucket> type2buckets = new HashMap<>();
     protected final Multimap<TagKey<?>, IStackKey<?>> tag2stackMap = HashMultimap.create();
 
-    /* ---------- 新增：仅供 UI 使用的时间表 ---------- */
+    /* ---------- 仅供 UI 使用的时间表 ---------- */
     /**
      * 记录该 Key 最近一次“从无到有建槽位”的时间（毫秒时间戳）。仅供 UI 展示，无其他语义。
      */
@@ -258,7 +258,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         }
     }
 
-    /* ================= 公共订阅 API（放在抽象基类里） ================= */
+    /* ================= 公共订阅 API ================= */
     public AutoCloseable subscribeAny(Object owner, AnyChangeListener onAny)
     {
         if (owner == null || onAny == null) throw new IllegalArgumentException();
@@ -384,7 +384,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         key2stackMap.clear();
         type2buckets.clear();
         tag2stackMap.clear();
-        // 新增：清空 UI 时间表
         creationTimeMap.clear();
         lastModifiedTimeMap.clear();
         onChange();
