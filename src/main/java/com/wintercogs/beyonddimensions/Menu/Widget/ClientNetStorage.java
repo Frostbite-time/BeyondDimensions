@@ -32,7 +32,7 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
     private final AutoCloseable anySubscriber;
     private final AutoCloseable deltaSubscriber;
 
-    private @NotNull String searchText = "";
+    private final ClientNetStorageSearchHelper searchHelper = new ClientNetStorageSearchHelper();
 
     private @Nullable List<Integer> cacheIndexes = null;
 
@@ -58,7 +58,7 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
     public void setSearchText(@NotNull String newSearchText)
     {
         Objects.requireNonNull(newSearchText);
-        this.searchText = newSearchText;
+        this.searchHelper.loadTexts(newSearchText);
     }
 
     private void loadFromDeltaSubscription(IStackKey<?> key, long delta, boolean insert)
@@ -149,7 +149,7 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
      */
     public List<Integer> buildSortedIndex(ButtonState primarySortPolicy, ButtonState secondarySortPolicy, boolean reverse)
     {
-        if(cacheIndexes != null
+        if (cacheIndexes != null
                 && primarySortPolicy == lastSortProperties.primarySortPolicy()
                 && secondarySortPolicy == lastSortProperties.secondarySortPolicy()
                 && reverse == lastSortProperties.reverse())
@@ -229,10 +229,8 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
      */
     private boolean matchFilter(IStackKey<?> key)
     {
-        if (this.searchText.isEmpty()) return true;
-        return key.getRender().getDisplayName(key).getString().contains(this.searchText);
+        return this.searchHelper.matches(key);
     }
-
 
     /**
      * 比较 Row 中已准备好的字段

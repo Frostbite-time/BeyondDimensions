@@ -2,6 +2,9 @@ package com.wintercogs.beyonddimensions.Menu.Widget;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Integration.JECharacters.PinInMatches;
+import com.wintercogs.beyonddimensions.Util.TinyPinyinUtils;
 import com.wintercogs.beyonddimensions.Util.TooltipHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -40,6 +43,8 @@ public class ClientNetStorageSearchHelper
     public void loadTexts(@NotNull String text)
     {
         Objects.requireNonNull(text, "searchText cannot be null");
+        if (this.originalSearchText.equals(text)) return;
+
         this.originalSearchText = text;
         this.searchTexts.clear();
         this.matchCache.clear();
@@ -213,14 +218,14 @@ public class ClientNetStorageSearchHelper
 
     private boolean matchesModId(@NotNull KeyAmount keyAmount, @NotNull String needle)
     {
-        return getModId(keyAmount.key()).contains(needle);
+        return checkTextMatches(getModId(keyAmount.key()), needle);
     }
 
     private boolean matchesTooltip(@NotNull KeyAmount keyAmount, @NotNull String needle)
     {
         for (String line : getTooltips(keyAmount))
         {
-            if (line.contains(needle))
+            if (checkTextMatches(line, needle))
             {
                 return true;
             }
@@ -232,7 +237,7 @@ public class ClientNetStorageSearchHelper
     {
         for (String tag : getTags(keyAmount.key()))
         {
-            if (tag.contains(needle))
+            if (checkTextMatches(tag, needle))
             {
                 return true;
             }
@@ -242,7 +247,39 @@ public class ClientNetStorageSearchHelper
 
     private boolean matchesName(@NotNull KeyAmount keyAmount, @NotNull String needle)
     {
-        return getName(keyAmount.key()).contains(needle);
+        return checkTextMatches(getName(keyAmount.key()), needle);
+    }
+
+    /**
+     * 检查文本是否匹配名称
+     */
+    private boolean checkTextMatches(String srcText, String inputText)
+    {
+        // 在这个类内部我们已经确保所有调用链都传入小写文本了，无需再处理
+        // 但以注释形式保留这部分，以免后续忘记
+        // srcText = srcText.toLowerCase(Locale.ENGLISH);
+        // inputText = inputText.toLowerCase(Locale.ENGLISH);
+
+        boolean matchText = srcText.contains(inputText);
+
+        boolean matchPinyin;
+
+        if (!Minecraft.getInstance().options.languageCode.startsWith("zh"))
+        {
+            matchPinyin = false; // 非中文地区默认不匹配
+        }
+        else if (BeyondDimensions.JECharactersLoaded)
+        {
+            matchPinyin = PinInMatches.contains(srcText, inputText);
+        }
+        else
+        {
+            String allPinyin = TinyPinyinUtils.getAllPinyin(srcText, false).toLowerCase(Locale.ENGLISH);
+            String firstPinyin = TinyPinyinUtils.getFirstPinYin(srcText).toLowerCase(Locale.ENGLISH);
+            matchPinyin = allPinyin.contains(inputText) || firstPinyin.contains(inputText);
+        }
+
+        return matchText || matchPinyin;
     }
 
     private @NotNull String getName(@NotNull IStackKey<?> key)
