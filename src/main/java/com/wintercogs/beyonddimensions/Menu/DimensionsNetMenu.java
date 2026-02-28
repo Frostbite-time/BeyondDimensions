@@ -43,9 +43,6 @@ public class DimensionsNetMenu extends BDBaseMenu
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
     public AbstractUnorderedStackHandler storage; // 客户端与服务端都使用RemoveZero版本作为实际存储
     public ClientNetStorage clientNetStorage;
-    // TODO 将缓存存放到ClientNetStorage内部
-    // private ArrayList<Integer> cacheIndex; // 在客户端存储搜索和排序建立的索引结果 降低性能消耗
-
 
     public boolean hasShiftDown = false;
 
@@ -355,58 +352,6 @@ public class DimensionsNetMenu extends BDBaseMenu
 
                 });
     }
-
-    /**
-     * 把搜索串拆成 “名称 / 模组ID / Tooltip” 三段，顺序任意。
-     * 返回 String[3] ⇒ [namePart, idPart, tooltipPart]，不存在则为空串。
-     */
-    private static String[] splitSearch(String s)
-    {
-        if (s == null) return new String[]{"", "", ""};
-
-        s = s.toLowerCase(Locale.ENGLISH);
-        int at = s.indexOf('@');
-        int hash = s.indexOf('#');
-
-        // 都没有特殊符号
-        if (at < 0 && hash < 0) return new String[]{s, "", ""};
-
-        String namePart = "";
-        String idPart = "";
-        String tipPart = "";
-
-        // 三种情况：只含@、只含#、都含且顺序不定
-        if (at >= 0 && hash >= 0)
-        {
-            // 同时存在：先找较小的索引拆 namePart
-            int first = Math.min(at, hash);
-            namePart = s.substring(0, first);
-
-            if (at < hash)
-            {                    //  @ ... #
-                idPart = s.substring(at + 1, hash);
-                tipPart = s.substring(hash + 1);
-            }
-            else
-            {                            //  # ... @
-                tipPart = s.substring(hash + 1, at);
-                idPart = s.substring(at + 1);
-            }
-        }
-        else if (at >= 0)
-        {                   // 只含 @
-            namePart = s.substring(0, at);
-            idPart = s.substring(at + 1);
-        }
-        else
-        {                                // 只含 #
-            namePart = s.substring(0, hash);
-            tipPart = s.substring(hash + 1);
-        }
-
-        return new String[]{namePart, idPart, tipPart};
-    }
-
 
     public void updateScrollLineData(int dataSize)
     {
