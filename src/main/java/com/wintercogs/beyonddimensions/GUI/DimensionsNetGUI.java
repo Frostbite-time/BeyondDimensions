@@ -127,7 +127,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             CommonConfigRuntime.uiSortButton = (ButtonState) sortButton.currentState;
             Config.INSTANCE.commonConfig.UI_SORT_BUTTON.set((ButtonState) sortButton.currentState);
             Config.INSTANCE.commonConfig.UI_SORT_BUTTON.save();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.buildIndexList(true);
         });
         addRenderableWidget(sortButton);
         // 第二搜索策略按钮
@@ -137,7 +137,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             CommonConfigRuntime.uiSecondSortButton = (ButtonState) secondSortButton.currentState;
             Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.set((ButtonState) secondSortButton.currentState);
             Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.save();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.buildIndexList(true);
         })
         {
             @Override
@@ -170,7 +170,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             CommonConfigRuntime.uiReverseButton = (ButtonState) reverseButton.currentState;
             Config.INSTANCE.commonConfig.UI_REVERSE_BUTTON.set((ButtonState) reverseButton.currentState);
             Config.INSTANCE.commonConfig.UI_REVERSE_BUTTON.save();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.buildIndexList(true);
         });
         addRenderableWidget(reverseButton);
         // 搜索切换按钮
@@ -197,7 +197,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             CommonConfigRuntime.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.buildIndexList(true);
             init();
         });
         addPageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.add_page")));
@@ -214,7 +214,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             CommonConfigRuntime.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.buildIndexList(true);
             init();
         });
         removePageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.remove_page")));
@@ -242,7 +242,8 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             }
             menu.loadSearchText(text);
             CommonConfigRuntime.uiSearch = text;
-            menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), true);
+            menu.markForceAllUpdateClientView();
+            menu.updateViewerStorage(false);
             lastSearchText = text;
 
             // 文本同步
@@ -294,7 +295,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                     if (menu.lineData != pos)
                     {
                         menu.lineData = pos;
-                        menu.buildIndexList(new ArrayList<>(menu.viewerStorage.getStorage()), false);
+                        menu.buildIndexList(false);
                     }
                 }
         );
@@ -514,7 +515,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
         {
-            menu.updateViewerStorage();
+            menu.updateViewerStorage(false);
             menu.hasShiftDown = false;
         }
 

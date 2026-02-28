@@ -123,7 +123,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
             {
                 for (int col = 0; col < 9; ++col)
                 {
-                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, viewerStorage, -1, inventoryStartIndex, inventoryEndIndex, 8 + col * 18, 25 + row * 18);
+                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, clientNetStorage, -1, inventoryStartIndex, inventoryEndIndex, 8 + col * 18, 25 + row * 18);
                     if (row >= getLines())
                         newSlot.setActive(false);
                     this.addSlot(newSlot);

@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.Menu.Widget;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerKeepZero;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import org.jetbrains.annotations.NotNull;
@@ -17,12 +18,21 @@ import java.util.*;
  */
 public class ClientNetStorage extends AbstractUnorderedStackHandler
 {
+    public static final ClientNetStorage EMPTY_INSTANCE = new ClientNetStorage(new UnorderedStackHandlerKeepZero(UiTimestampPolicy.NONE));
 
     /**
      * 原有的，对客户端而言绝对真实的存储
      */
-    AbstractUnorderedStackHandler sourceStorage;
+    private final AbstractUnorderedStackHandler sourceStorage;
 
+    private final List<KeyAmount> pendingCache = new ArrayList<>();
+
+    private boolean mustUpdateAllFromSource = true;
+
+    private final AutoCloseable anySubscriber;
+    private final AutoCloseable deltaSubscriber;
+
+    private @NotNull String searchText = "";
 
     public ClientNetStorage(@NotNull AbstractUnorderedStackHandler sourceStorage)
     {
@@ -30,6 +40,66 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
         super(ZeroPolicy.KEEP_ZERO, UiTimestampPolicy.NONE);
 
         this.sourceStorage = sourceStorage;
+
+        this.anySubscriber = this.sourceStorage.subscribeAnyWeak(this, ClientNetStorage::markForceAllUpdate);
+        this.deltaSubscriber = this.sourceStorage.subscribeDeltaWeak(this, ClientNetStorage::loadFromDeltaSubscription);
+    }
+
+    public void markForceAllUpdate()
+    {
+        this.mustUpdateAllFromSource = true;
+    }
+
+    public void setSearchText(@NotNull String newSearchText)
+    {
+        Objects.requireNonNull(newSearchText);
+        this.searchText = newSearchText;
+    }
+
+    private void loadFromDeltaSubscription(IStackKey<?> key, long delta, boolean insert)
+    {
+        if (mustUpdateAllFromSource)
+        {
+            pendingCache.clear();
+            return;
+        }
+
+        if (delta > 0)
+            pendingCache.add(new KeyAmount(key, delta));
+        else if (delta < 0)
+            pendingCache.add(new KeyAmount(key, -delta));
+    }
+
+    public void resolvePendingOrAllUpdate(boolean onlyAmountUpdate)
+    {
+        if (mustUpdateAllFromSource)
+        {
+            pendingCache.clear();
+            updateViewFromStorage(onlyAmountUpdate);
+            this.mustUpdateAllFromSource = false;
+        }
+        else
+        {
+            Iterator<KeyAmount> it = pendingCache.iterator();
+            while (it.hasNext())
+            {
+                KeyAmount keyAmount = it.next();
+                if (keyAmount.isEmpty() || keyAmount.amount() == 0) continue;
+
+                if (onlyAmountUpdate && !this.hasStack(keyAmount.key())) continue;
+
+                if (keyAmount.amount() > 0)
+                {
+                    this.insert(keyAmount.key(), keyAmount.amount(), false);
+                }
+                else
+                {
+                    this.extract(keyAmount.key(), -keyAmount.amount(), false);
+                }
+
+                it.remove();
+            }
+        }
     }
 
     /**
@@ -137,7 +207,8 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
      */
     private boolean matchFilter(IStackKey<?> key)
     {
-        return false;
+        if(this.searchText.isEmpty()) return true;
+        return key.getRender().getDisplayName(key).getString().contains(this.searchText);
     }
 
     /**
@@ -166,5 +237,24 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
             case SORT_MODIFIED_TIME -> Comparator.comparingLong((Row r) -> r.mtime);
             default -> Comparator.comparing((Row r) -> r.name, String::compareTo);
         };
+    }
+
+    public void closeSubscription()
+    {
+        try
+        {
+            this.anySubscriber.close();
+        }
+        catch (Throwable ignored)
+        {
+        }
+
+        try
+        {
+            this.deltaSubscriber.close();
+        }
+        catch (Throwable ignored)
+        {
+        }
     }
 }
