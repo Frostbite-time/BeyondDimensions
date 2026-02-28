@@ -88,7 +88,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "Current: Auto-sort disabled",
   "tooltip.item.unstable_space_time.long_data": "Spacetime is stabilizing, requires %s more stabilization cycles. Please keep it on your person.",
   "tooltip.beyonddimensions.item.xp_exchange": "In GUI: Right-click to store XP, Middle-click to retrieve XP\nWhen held: Right-click to switch work mode, Shift+Right-click to change XP interaction rate",
-  "tooltip.editbox.beyonddimensions.search": "Type '#' to filter tooltip contents\nType '@' to filter mod IDs\nPress Shift+Z to toggle JEI/EMI search box linking",
+  "tooltip.editbox.beyonddimensions.search": "Type text to search by name\nType '@' to filter mod IDs\nType '$' to filter tooltip contents\nType '#' to filter tags\nUse spaces to separate multiple filters; wrap in quotes to search spaces\nUse '|' for OR matches and '-' to exclude matches\nPress Shift+Z to toggle JEI/EMI search box linking",
 
   "istack.beyonddimensions.storage_num.item": "Stored: %s Items",
   "istack.beyonddimensions.storage_num.fluid": "Stored: %s mB",
