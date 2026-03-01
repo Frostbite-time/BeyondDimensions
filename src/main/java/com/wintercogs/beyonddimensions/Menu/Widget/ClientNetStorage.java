@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.Menu.Widget;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerKeepZero;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +17,6 @@ import java.util.*;
  */
 public class ClientNetStorage extends AbstractUnorderedStackHandler
 {
-    public static final ClientNetStorage EMPTY_INSTANCE = new ClientNetStorage(new UnorderedStackHandlerKeepZero(UiTimestampPolicy.NONE));
-
     /**
      * 原有的，对客户端而言绝对真实的存储
      */

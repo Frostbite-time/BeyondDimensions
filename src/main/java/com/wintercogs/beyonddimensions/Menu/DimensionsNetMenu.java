@@ -21,6 +21,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ public class DimensionsNetMenu extends BDBaseMenu
     public int maxLineData = 0;// 用于记录可以渲染的最大行数，即翻页到底时 当前页面 的第一行位置
     private String searchText = ""; // 客户端搜索框的输入，由GUI管理，需要确保传入时已经小写化
     public AbstractUnorderedStackHandler storage; // 客户端与服务端都使用RemoveZero版本作为实际存储
-    public ClientNetStorage clientNetStorage;
+    public @Nullable ClientNetStorage clientNetStorage;
 
     public boolean hasShiftDown = false;
 
@@ -86,8 +87,8 @@ public class DimensionsNetMenu extends BDBaseMenu
         }
         else
         {
-            // 服务端传入空实现空挂
-            clientNetStorage = ClientNetStorage.EMPTY_INSTANCE;
+            // 服务端传入空挂
+            clientNetStorage = null;
         }
 
         addSlotGroupSync(new DisorderedSlotGroupSync(this, slotGroupSyncs.size(), storage)
@@ -227,6 +228,8 @@ public class DimensionsNetMenu extends BDBaseMenu
      */
     public void updateViewerStorage(boolean onlyAmountUpdate)
     {
+        if (clientNetStorage == null) return;
+
         clientNetStorage.resolvePendingOrAllUpdate(onlyAmountUpdate);
         if (!onlyAmountUpdate) buildIndexList();
     }
@@ -237,7 +240,7 @@ public class DimensionsNetMenu extends BDBaseMenu
      */
     public void buildIndexList()
     {
-        if (!this.player.level().isClientSide())
+        if (!this.player.level().isClientSide() || clientNetStorage == null)
         {
             return;
         }
@@ -287,12 +290,16 @@ public class DimensionsNetMenu extends BDBaseMenu
      */
     public void loadSearchText(String text)
     {
+        if (clientNetStorage == null) return;
+
         this.searchText = text.toLowerCase(Locale.ENGLISH);
         this.clientNetStorage.setSearchText(searchText);
     }
 
     public void markForceAllUpdateClientView()
     {
+        if (clientNetStorage == null) return;
+
         this.clientNetStorage.markForceAllUpdate();
     }
 
