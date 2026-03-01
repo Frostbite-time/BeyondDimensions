@@ -343,18 +343,26 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                     {
                         if (fakeStackHandler.getStackBySlot(i).key().getTypeId().equals(typeId))
                         {
-                            if (fakeStackHandler.getStackBySlot(i).key().isSameTypeSameComponents(stackHandler.getStackBySlot(i).key()))
+                            if (this.fuzzyMode == FuzzyMode.ENABLE
+                                    && !fakeStackHandler.getStackBySlot(i).key().isSame(stackHandler.getStackBySlot(i).key()))
                             {
-                                KeyAmount current = stackHandler.getStackBySlot(i);
-                                for (int slot = 0; slot < stackHandlerWrapper.getSlots(); slot++)
-                                {
-                                    long remainging = stackHandlerWrapper.insert(slot, current.toStack(), false);
-                                    long extract = current.amount() - remainging;
-                                    stackHandler.extract(i, extract, false);
-                                    current = new KeyAmount(current.key(), current.amount() - extract);
-                                    if (current.isEmpty())
-                                        break;
-                                }
+                                continue;
+                            }
+                            if (this.fuzzyMode == FuzzyMode.DISABLE
+                                    && !fakeStackHandler.getStackBySlot(i).key().isSameTypeSameComponents(stackHandler.getStackBySlot(i).key()))
+                            {
+                                continue;
+                            }
+
+                            KeyAmount current = stackHandler.getStackBySlot(i);
+                            for (int slot = 0; slot < stackHandlerWrapper.getSlots(); slot++)
+                            {
+                                long remainging = stackHandlerWrapper.insert(slot, current.toStack(), false);
+                                long extract = current.amount() - remainging;
+                                stackHandler.extract(i, extract, false);
+                                current = new KeyAmount(current.key(), current.amount() - extract);
+                                if (current.isEmpty())
+                                    break;
                             }
                         }
                     }
