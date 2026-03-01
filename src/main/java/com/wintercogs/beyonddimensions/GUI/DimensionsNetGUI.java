@@ -514,6 +514,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
         {
+            menu.markForceAllUpdateClientView();
             menu.updateViewerStorage(false);
             menu.hasShiftDown = false;
         }
