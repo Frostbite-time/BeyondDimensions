@@ -1,19 +1,17 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Util.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.client.ClientTooltipFlag;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -32,29 +30,13 @@ public class FluidStackKeyRender implements IStackRender
     {
         if (key instanceof FluidStackKey fluidKey)
         {
-            // 渲染流体图标（16×16）
-            var pose = gui.pose();
-            pose.pushPose();
-
             FluidStack stack = fluidKey.getRenderStack();
             if (!stack.isEmpty())
             {
-                var fluid = stack.getFluid();
-                IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluid);
-                Identifier still = props.getStillTexture(stack);
-                TextureAtlasSprite sprite = still == null ? null :
-                        Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(still);
-
-                if (sprite != null && sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation())
-                {
-                    int tint = IClientFluidTypeExtensions.of(fluid).getTintColor();
-                    // 复用项目现有的绘制工具
-                    com.wintercogs.beyonddimensions.Render.IngredientRenderer
-                            .drawTiledSprite(gui, 16, 16, tint, 16, sprite, x, y);
-                }
+                int tint = IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor(stack);
+                int argb = tint | 0xFF000000;
+                gui.fill(x, y, x + 16, y + 16, argb);
             }
-
-            pose.popPose();
         }
 
     }
@@ -67,19 +49,16 @@ public class FluidStackKeyRender implements IStackRender
         if (text.isEmpty()) return;
 
         float scale = 0.666f;
-
         var pose = gui.pose();
-        pose.pushPose();
-        pose.translate(0, 0, 200);
-        pose.scale(scale, scale, scale);
-        RenderSystem.disableBlend();
+        pose.pushMatrix();
+        pose.scale(scale, scale);
 
         int w = Minecraft.getInstance().font.width(text);
         final int X = (int) ((x - 1 + 16.0f + 2.0f - w * 0.666f) / 0.666f);
         final int Y = (int) ((y - 1 + 16.0f - 5.0f * 0.666f) / 0.666f);
 
         gui.drawString(Minecraft.getInstance().font, text, X, Y, 0xFFFFFF);
-        pose.popPose();
+        pose.popMatrix();
     }
 
     @Override
@@ -123,13 +102,20 @@ public class FluidStackKeyRender implements IStackRender
     {
         var mc = Minecraft.getInstance();
         var ctx = mc.level != null ? Item.TooltipContext.of(mc.level) : Item.TooltipContext.EMPTY;
+        var tooltips = getTooltipLines(key, amount, ctx, mc.player, ClientTooltipFlag.of(mc.options.advancedItemTooltips
+                ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL));
+        var visualTooltipComponent = getTooltipImage(key);
+
+        List<ClientTooltipComponent> clientTooltips =
+                ClientHooks.gatherTooltipComponents(
+                        ItemStack.EMPTY, tooltips, visualTooltipComponent, mouseX, gui.guiWidth(), gui.guiHeight(), font);
+
         gui.renderTooltip(
                 mc.font,
-                getTooltipLines(key, amount, ctx, mc.player,
-                        ClientTooltipFlag.of(mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL)),
-                getTooltipImage(key),
-                ItemStack.EMPTY,
-                mouseX, mouseY
+                clientTooltips,
+                mouseX, mouseY,
+                DefaultTooltipPositioner.INSTANCE,
+                null
         );
     }
 }
