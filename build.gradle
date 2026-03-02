@@ -269,6 +269,22 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
 // Include the output of "generateModMetadata" as an input directory for the build
 // this works with both building through Gradle and the IDE.
 sourceSets.main.resources.srcDir generateModMetadata
+
+// Include Licenses
+tasks.named('processResources', ProcessResources).configure {
+    from(rootProject.file('LICENSE')) {
+        into 'META-INF'
+    }
+
+    from(rootProject.file('THIRD_PARTY_NOTICES.md')) {
+        into 'META-INF'
+    }
+
+    from(rootProject.file('licenses')) {
+        into 'META-INF/licenses'
+    }
+}
+
 // To avoid having to run "generateModMetadata" manually, make it run on every project reload
 neoForge.ideSyncTask generateModMetadata
 
