@@ -7,9 +7,10 @@ import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Api.Util.CommonHandler;
 import com.wintercogs.beyonddimensions.Api.Util.USHandler;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.ItemCapability;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,22 +35,22 @@ public class CapabilityHelper
     /**
      * 存储类型 -> 方块能力
      */
-    public static final Map<ResourceLocation, BlockCapability<?, Direction>> BlockCapabilityMap = new HashMap<>();
+    public static final Map<Identifier, BlockCapability<?, Direction>> BlockCapabilityMap = new HashMap<>();
 
     /**
      * 存储类型 -> 物品能力
      */
-    public static final Map<ResourceLocation, ItemCapability<?, Void>> ItemCapabilityMap = new HashMap<>();
+    public static final Map<Identifier, ItemCapability<?, ItemAccess>> ItemCapabilityMap = new HashMap<>();
 
     /**
      * 存储类型 -> 分化包装
      */
-    public static final Map<ResourceLocation, USHandler> USHandlerMap = new HashMap<>();
+    public static final Map<Identifier, USHandler> USHandlerMap = new HashMap<>();
 
     /**
      * 存储类型 -> 分化包装
      */
-    public static final Map<ResourceLocation, CommonHandler> CommonHandlerMap = new HashMap<>();
+    public static final Map<Identifier, CommonHandler> CommonHandlerMap = new HashMap<>();
 
     public static <T> void registerUSHandler(IStackKey<?> type, Function<UnifiedStorage, T> handler)
     {

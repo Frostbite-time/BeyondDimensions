@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.Util.BDMath;
 import com.wintercogs.beyonddimensions.Util.DataComponentPatchHelper;
 import com.wintercogs.beyonddimensions.Util.RegistryAccessResolver;
 import com.wintercogs.beyonddimensions.Util.RegistryUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentPatch;
@@ -16,11 +17,13 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,13 +34,12 @@ import java.util.stream.Stream;
 
 public final class ItemStackKey implements IStackKey<ItemStack>
 {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
     public static final ItemStackKey EMPTY = new ItemStackKey();
 
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
-    // 新的CODEC，写入时使用
-    private static final MapCodec<ItemStackKey> NEW_FMT = RecordCodecBuilder.mapCodec(instance ->
+    private static final MapCodec<ItemStackKey> TYPE_CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("item")
                             .forGetter(t -> RegistryUtil.holderOf(t.item)),
@@ -45,95 +47,6 @@ public final class ItemStackKey implements IStackKey<ItemStack>
                             .forGetter(t -> t.patch)
             ).apply(instance, (holder, patch) -> new ItemStackKey(holder.value(), patch))
     );
-
-    // 最终产出的 MapCodec（编码始终走新格式；解码按代次兼容）
-    public static final MapCodec<ItemStackKey> TYPE_CODEC = new MapCodec<>()
-    {
-
-        // —— 统一键名，便于维护 —— //
-        private static final String K_ITEM = "item";
-        private static final String K_COMPS = "components";
-        // 1代旧键名
-        private static final String K_ITEM_OLD = "Item";
-        private static final String K_COMPS_OLD = "Components";
-        // 2代旧键名
-        private static final String K_STACK = "Stack";
-        // 3代旧键名
-        private static final String K_LEGACY = "internal_stack";
-        // 注意：旧数据中可能还有 amount/Amount；Key 层面不需要，读取时**忽略**即可
-        private static final String K_AMOUNT = "amount";
-        private static final String K_AMOUNT_OLD = "Amount";
-
-        @Override
-        public <T> DataResult<ItemStackKey> decode(DynamicOps<T> ops, MapLike<T> input)
-        {
-            final T kItem = ops.createString(K_ITEM);
-            final T kComps = ops.createString(K_COMPS);
-            final T kItemOld = ops.createString(K_ITEM_OLD);
-            final T kCompsOld = ops.createString(K_COMPS_OLD);
-            final T kStack = ops.createString(K_STACK);
-            final T kLegacy = ops.createString(K_LEGACY);
-            final T kAmt = ops.createString(K_AMOUNT);
-            final T kAmtOld = ops.createString(K_AMOUNT_OLD);
-
-            // 新格式 item + components
-            if (input.get(kItem) != null)
-            {
-                DataResult<ItemStackKey> r = NEW_FMT.decode(ops, input);
-                if (r.result().isPresent()) return r;
-
-                // 失败时使用Items.AIR的宽松回退
-                DataComponentPatch patch = DataComponentPatch.EMPTY;
-                T compsNode = input.get(kComps);
-                if (compsNode != null)
-                {
-                    patch = DataComponentPatch.CODEC.parse(ops, compsNode)
-                            .result().orElse(DataComponentPatch.EMPTY);
-                }
-                return DataResult.success(new ItemStackKey(Items.AIR, patch));
-            }
-
-            // 旧格式 Item + Components 转为新格式然后转交给新版本解码
-            if (input.get(kItemOld) != null || input.get(kCompsOld) != null)
-            {
-                java.util.Map<T, T> map = new java.util.LinkedHashMap<>();
-                input.entries().forEach(p -> {
-                    T key = p.getFirst();
-                    if (key.equals(kItemOld)) key = kItem;   // Item -> item
-                    else if (key.equals(kCompsOld)) key = kComps; // Components -> components
-                    // Key 层忽略 amount/Amount
-                    if (!key.equals(kAmt) && !key.equals(kAmtOld))
-                    {
-                        map.put(key, p.getSecond());
-                    }
-                });
-                T remapped = ops.createMap(map);
-                return NEW_FMT.codec().decode(ops, remapped).map(com.mojang.datafixers.util.Pair::getFirst);
-            }
-
-            // internal_stack 或 Stack 直接内嵌ItemStack的型态，解析ItemStack后转交给ItemStackKey构造
-            T legacyNode = input.get(kLegacy);
-            if (legacyNode == null) legacyNode = input.get(kStack);
-            if (legacyNode != null) return ItemStack.OPTIONAL_CODEC.parse(ops, legacyNode).map(ItemStackKey::new);
-
-            // 如果上述都不符合，最终仍给新格式
-            return NEW_FMT.decode(ops, input);
-        }
-
-        @Override
-        public <T> RecordBuilder<T> encode(ItemStackKey value, DynamicOps<T> ops, RecordBuilder<T> prefix)
-        {
-            // 仅写新格式
-            return NEW_FMT.encode(value, ops, prefix);
-        }
-
-        @Override
-        public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops)
-        {
-            // 对外暴露新格式键集合
-            return java.util.stream.Stream.of(K_ITEM, K_COMPS).map(ops::createString);
-        }
-    };
 
     public static final Codec<ItemStackKey> CODEC = TYPE_CODEC.codec();
 
@@ -169,7 +82,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
-    public ResourceLocation getTypeId()
+    public Identifier getTypeId()
     {
         return ID;
     }
@@ -364,9 +277,9 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         buf.writeBoolean(hasItem);
         if (!hasItem) return;
 
-        // 3) 物品 ID（ResourceLocation）
-        ResourceLocation key = BuiltInRegistries.ITEM.getKey(this.item);
-        buf.writeResourceLocation(key);
+        // 3) 物品 ID（Identifier）
+        Identifier key = BuiltInRegistries.ITEM.getKey(this.item);
+        buf.writeIdentifier(key);
 
         // 差异组件
         DataComponentPatch.STREAM_CODEC.encode(buf, patch);
@@ -380,8 +293,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         if (!hasItem) return new ItemStackKey(ItemStack.EMPTY);
 
         // 2) 物品 ID（未知或已移除 → 回退 AIR）
-        ResourceLocation key = buf.readResourceLocation();
-        Item it = BuiltInRegistries.ITEM.get(key); // 内部实现已经处理了null清空，未注册项目返回Items.AIR
+        Identifier key = buf.readIdentifier();
+        Item it = BuiltInRegistries.ITEM.getOptional(key).orElse(Items.AIR);
 
         // 3) 组件差异
         DataComponentPatch patch = DataComponentPatch.STREAM_CODEC.decode(buf);
@@ -430,13 +343,13 @@ public final class ItemStackKey implements IStackKey<ItemStack>
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.parse(ops, nbt)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                            "ItemStackKey 在反序列化(Codec)时出错: {} | Keys={}", err, nbt.getAllKeys()))
+                            "ItemStackKey 在反序列化(Codec)时出错: {} | Keys={}", err, nbt.keySet()))
                     .orElse(ItemStackKey.EMPTY);
         }
         catch (Throwable t)
         {
             BeyondDimensions.LOGGER.error("ItemStackKey 反序列化异常。Keys={} Error={}",
-                    nbt.getAllKeys(), t.getMessage(), t);
+                    nbt.keySet(), t.getMessage(), t);
             return ItemStackKey.EMPTY;
         }
     }
@@ -534,9 +447,9 @@ public final class ItemStackKey implements IStackKey<ItemStack>
             byte[] out = DataComponentPatchHelper.toCanonicalBytes(this.patch, use);
 
             // 2) 客户端兜底：若失败（返回长度==0），再强制用 Connection 的 Provider 重试一次
-            if (out.length == 0 && net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT)
+            if (out.length == 0 && FMLEnvironment.getDist() == Dist.CLIENT)
             {
-                var mc = net.minecraft.client.Minecraft.getInstance();
+                var mc = Minecraft.getInstance();
                 var conn = mc.getConnection();
                 if (conn != null)
                 {

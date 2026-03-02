@@ -8,7 +8,7 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +23,7 @@ public interface IStackKey<T>
     /**
      * CODEC定义，根据StackKeyRegistry分发到对应子类
      */
-    public static final Codec<IStackKey<?>> CODEC = ResourceLocation.CODEC
+    public static final Codec<IStackKey<?>> CODEC = Identifier.CODEC
             .dispatch(
                     "type",
                     IStackKey::getTypeId,  // 分发到具体实现的编解码器
@@ -42,7 +42,7 @@ public interface IStackKey<T>
         public void encode(RegistryFriendlyByteBuf buf, IStackKey<?> key)
         {
             // 先写类型 id
-            buf.writeResourceLocation(key.getTypeId());
+            buf.writeIdentifier(key.getTypeId());
             // 再写负载（各子类自己实现，注意不再写 typeId）
             key.serialize(buf);
         }
@@ -51,7 +51,7 @@ public interface IStackKey<T>
         public @NotNull IStackKey<?> decode(RegistryFriendlyByteBuf buf)
         {
             // 先读类型 id
-            ResourceLocation typeId = buf.readResourceLocation();
+            Identifier typeId = buf.readIdentifier();
             // 通过注册表找到对应的“类型原型/工厂”
             IStackKey<?> typePrototype = StackKeyRegistry.getType(typeId);
             // 让对应类型去读取负载并返回具体实例
@@ -62,7 +62,7 @@ public interface IStackKey<T>
     /**
      * 获取类型的唯一标识符 如(beyonddimension:stack_type/item) beyonddimension为本modID，提供对原版Item的支持，Item为要支持的Stack类型
      */
-    ResourceLocation getTypeId();
+    Identifier getTypeId();
 
     /*
      * 用于向IStackKey的Codec提供具体编解码器

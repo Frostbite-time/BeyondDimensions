@@ -1,1 +1,0 @@
-* Fixed an issue where the network interface could not correctly eject items in fuzzy mode.

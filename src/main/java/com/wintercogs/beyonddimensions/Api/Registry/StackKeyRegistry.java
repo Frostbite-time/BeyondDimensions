@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.Registry;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class StackKeyRegistry
 {
-    private static final Map<ResourceLocation, IStackKey<?>> TYPES = new HashMap<>();
+    private static final Map<Identifier, IStackKey<?>> TYPES = new HashMap<>();
 
     public static <T> void registerType(IStackKey<T> type)
     {
@@ -22,7 +22,7 @@ public class StackKeyRegistry
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> @NotNull IStackKey<T> getType(ResourceLocation id)
+    public static <T> @NotNull IStackKey<T> getType(Identifier id)
     {
         IStackKey<?> type = TYPES.get(id);
         if (type == null)

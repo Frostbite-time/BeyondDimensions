@@ -1,5 +1,0 @@
-{
-  "parent": "neoforge:item/bucket",
-  "fluid": "beyonddimensions:xp_fluid",
-  "loader": "neoforge:fluid_container"
-}
