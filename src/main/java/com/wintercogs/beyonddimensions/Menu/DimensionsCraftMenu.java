@@ -9,7 +9,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedStackTypedSlot;
@@ -20,6 +19,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -190,12 +191,12 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     // 工艺槽实现
     public static void slotChangedCraftingGrid(AbstractContainerMenu menu, Level level, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, int resultSlotIndex)
     {
-        if (!level.isClientSide)
+        if (!level.isClientSide())
         {
             CraftingInput craftinginput = craftSlots.asCraftInput();
             ServerPlayer serverplayer = (ServerPlayer) player;
             ItemStack itemstack = ItemStack.EMPTY;
-            Optional<RecipeHolder<CraftingRecipe>> optional = getRecipe(player, craftinginput, level);
+            Optional<RecipeHolder<CraftingRecipe>> optional = getRecipe(player, craftinginput, Objects.requireNonNull(level.getServer()));
             if (optional.isPresent())
             {
 
@@ -225,13 +226,13 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         return slot.container != resultSlots && super.canTakeItemForPickAll(stack, slot);
     }
 
-    public static Optional<RecipeHolder<CraftingRecipe>> getRecipe(Player player, CraftingInput input, Level level)
+    public static Optional<RecipeHolder<CraftingRecipe>> getRecipe(Player player, CraftingInput input, MinecraftServer server)
     {
-        if (BeyondDimensions.PolymorphLoaded && player != null)
-        {
-            return PolymorphHelper.getRecipe(player, RecipeType.CRAFTING, input, level);
-        }
-        return level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
+//        if (BeyondDimensions.PolymorphLoaded && player != null)
+//        {
+//            return PolymorphHelper.getRecipe(player, RecipeType.CRAFTING, input, level);
+//        }
+        return server.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
     }
 
     public void transferRecipe(List<IStackKey<?>> inputKeys, List<Long> amount)

@@ -10,7 +10,7 @@ import com.wintercogs.beyonddimensions.Packet.NetControlActionPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +36,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
     private int nowShowPlayer = 0;
     private int nowTopShowPlayer = 0;
 
-    private static final ResourceLocation GUI_TEXTURE = ResourceLocation.parse("beyonddimensions:textures/gui/net_control.png");
+    private static final Identifier GUI_TEXTURE = Identifier.parse("beyonddimensions:textures/gui/net_control.png");
 
     public NetControlGUI(NetControlMenu menu, Inventory playerInventory, Component title)
     {

@@ -5,7 +5,7 @@ import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.Fluid.Custom.XpFluid;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -133,20 +133,20 @@ public class ModFluids
     {
         for (var e : ModFluids.ALL)
         {
-            final ResourceLocation still = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + e.name() + "_still");
-            final ResourceLocation flow = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + e.name() + "_flow");
+            final Identifier still = Identifier.tryBuild(BeyondDimensions.MODID, "block/" + e.name() + "_still");
+            final Identifier flow = Identifier.tryBuild(BeyondDimensions.MODID, "block/" + e.name() + "_flow");
             final int tint = e.argbTint();
 
             event.registerFluidType(new IClientFluidTypeExtensions()
             {
                 @Override
-                public ResourceLocation getStillTexture()
+                public Identifier getStillTexture()
                 {
                     return still;
                 }
 
                 @Override
-                public ResourceLocation getFlowingTexture()
+                public Identifier getFlowingTexture()
                 {
                     return flow;
                 }

@@ -10,7 +10,7 @@ import com.wintercogs.beyonddimensions.Render.GuiRenderHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
@@ -49,9 +49,9 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FilterMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/ignore_filter"));
-                iconMap.put(FilterMode.WHITE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/white_filter"));
-                iconMap.put(FilterMode.BLACK, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/black_filter"));
+                iconMap.put(FilterMode.IGNORE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/ignore_filter"));
+                iconMap.put(FilterMode.WHITE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/white_filter"));
+                iconMap.put(FilterMode.BLACK, Identifier.tryBuild(BeyondDimensions.MODID, "widget/black_filter"));
 
                 tooltipMap.put(FilterMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_ignore")));
                 tooltipMap.put(FilterMode.WHITE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_white")));
@@ -77,10 +77,10 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
-                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_powered"));
-                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_unpowered"));
+                iconMap.put(RedStoneControlMode.IGNORE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.POWERED, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_powered"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_unpowered"));
 
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
@@ -109,8 +109,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(HopperItemMode.DENY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_item_mode_deny"));
-                iconMap.put(HopperItemMode.ALLOW, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_item_mode_allow"));
+                iconMap.put(HopperItemMode.DENY, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_item_mode_deny"));
+                iconMap.put(HopperItemMode.ALLOW, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_item_mode_allow"));
 
 
                 tooltipMap.put(HopperItemMode.DENY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_item_mode_deny")));
@@ -137,8 +137,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(HopperXpMode.DENY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_xp_mode_deny"));
-                iconMap.put(HopperXpMode.ALLOW, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_xp_mode_allow"));
+                iconMap.put(HopperXpMode.DENY, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_xp_mode_deny"));
+                iconMap.put(HopperXpMode.ALLOW, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_xp_mode_allow"));
 
 
                 tooltipMap.put(HopperXpMode.DENY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_xp_mode_deny")));
@@ -165,8 +165,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(HopperNBTMode.DENY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_deny"));
-                iconMap.put(HopperNBTMode.ALLOW, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_allow"));
+                iconMap.put(HopperNBTMode.DENY, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_deny"));
+                iconMap.put(HopperNBTMode.ALLOW, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_allow"));
 
 
                 tooltipMap.put(HopperNBTMode.DENY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_nbt_mode_deny")));
@@ -193,8 +193,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(HopperFluidMode.DENY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_fluid_mode_deny"));
-                iconMap.put(HopperFluidMode.ALLOW, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_fluid_mode_allow"));
+                iconMap.put(HopperFluidMode.DENY, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_fluid_mode_deny"));
+                iconMap.put(HopperFluidMode.ALLOW, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_fluid_mode_allow"));
 
                 tooltipMap.put(HopperFluidMode.DENY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_fluid_mode_deny")));
                 tooltipMap.put(HopperFluidMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_fluid_mode_allow")));
@@ -220,12 +220,12 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(HopperRangeMode.RADIUS_LOWEST, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_lowest"));
-                iconMap.put(HopperRangeMode.RADIUS_LOW, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_low"));
-                iconMap.put(HopperRangeMode.RADIUS_MID, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_mid"));
-                iconMap.put(HopperRangeMode.RADIUS_HIGH, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_high"));
-                iconMap.put(HopperRangeMode.RADIUS_HIGHEST, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_highest"));
-                iconMap.put(HopperRangeMode.CHUNK_MODE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_chunk"));
+                iconMap.put(HopperRangeMode.RADIUS_LOWEST, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_lowest"));
+                iconMap.put(HopperRangeMode.RADIUS_LOW, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_low"));
+                iconMap.put(HopperRangeMode.RADIUS_MID, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_mid"));
+                iconMap.put(HopperRangeMode.RADIUS_HIGH, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_high"));
+                iconMap.put(HopperRangeMode.RADIUS_HIGHEST, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_highest"));
+                iconMap.put(HopperRangeMode.CHUNK_MODE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_range_mode_chunk"));
 
                 tooltipMap.put(HopperRangeMode.RADIUS_LOWEST, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_range_mode_lowest")));
                 tooltipMap.put(HopperRangeMode.RADIUS_LOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_range_mode_low")));

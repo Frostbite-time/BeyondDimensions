@@ -6,7 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 // 用于在任何种类的有序Slot中用于网络传输
 // slotId表示其在Menu的Slots列表中的索引，用于确定Slot本身
@@ -19,7 +19,7 @@ public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackKey<?
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<OrderedStackTypedSlotPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(
                     BeyondDimensions.MODID,
                     "ordered_stack_typed_slot")); //path中不要有大写字母 仅数字 小写字母 下划线
 

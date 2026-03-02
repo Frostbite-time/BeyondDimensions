@@ -6,13 +6,13 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public record BatchTransferPacket(KeyAmount clickStack, boolean dirToStorage) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<BatchTransferPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(
                     BeyondDimensions.MODID,
                     "batch_transfer_packet")); //path中不要有大写字母 仅数字 小写字母 下划线
 

@@ -8,11 +8,11 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class IconButton extends Button implements GuiElementAccess
 {
-    protected ResourceLocation icon;
+    protected Identifier icon;
 
     protected final int iconX;
     protected final int iconY;
@@ -20,14 +20,14 @@ public class IconButton extends Button implements GuiElementAccess
     protected final int iconHeight;
 
     protected WidgetSprites backgroundSprites = new WidgetSprites(
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/slot_button"),
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/slot_button_disabled"),
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/slot_button_hovered")
+            Identifier.tryBuild(BeyondDimensions.MODID, "widget/slot_button"),
+            Identifier.tryBuild(BeyondDimensions.MODID, "widget/slot_button_disabled"),
+            Identifier.tryBuild(BeyondDimensions.MODID, "widget/slot_button_hovered")
     );
 
     // 从左到右的含义分别为
     // x起始、y起始、宽、高、组件、按钮名称（父类为按钮上的字）、按下按钮后的行为、叙述（使用默认叙述即可）
-    public IconButton(int x, int y, int width, int height, ResourceLocation icon,
+    public IconButton(int x, int y, int width, int height, Identifier icon,
                       int iconX, int iconY, int iconWidth, int iconHeight,
                       OnPress onPress)
     {
@@ -40,7 +40,7 @@ public class IconButton extends Button implements GuiElementAccess
         initBackground();
     }
 
-    public IconButton(int x, int y, int width, int height, ResourceLocation icon,
+    public IconButton(int x, int y, int width, int height, Identifier icon,
                       OnPress onPress)
     {
         this(x, y, width, height, icon, x, y, width, height, onPress);
@@ -86,12 +86,12 @@ public class IconButton extends Button implements GuiElementAccess
         this.backgroundSprites = backgroundSprites;
     }
 
-    public ResourceLocation getIcon()
+    public Identifier getIcon()
     {
         return icon;
     }
 
-    public void setIcon(ResourceLocation icon)
+    public void setIcon(Identifier icon)
     {
         this.icon = icon;
     }

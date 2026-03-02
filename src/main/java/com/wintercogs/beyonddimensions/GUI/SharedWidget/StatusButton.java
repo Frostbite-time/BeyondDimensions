@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,7 +12,7 @@ public abstract class StatusButton extends IconButton
 {
     protected ArrayList<Enum<?>> states = new ArrayList<>();
     // 保证按钮切换顺序按照插入顺序
-    protected Map<Enum<?>, ResourceLocation> iconMap = new LinkedHashMap<>();
+    protected Map<Enum<?>, Identifier> iconMap = new LinkedHashMap<>();
     protected Map<Enum<?>, Tooltip> tooltipMap = new LinkedHashMap<>(); // 需要添加可变工具提示则添加 需要固定工具提示则直接setTooltip，此处留空
     public Enum<?> currentState;
 
@@ -22,7 +22,7 @@ public abstract class StatusButton extends IconButton
                            OnPress onPress)
     {
         // 给予一个默认图片用于构造父类
-        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/unkonw_thing"), iconX, iconY, iconWidth, iconHeight, onPress);
+        super(x, y, width, height, Identifier.tryBuild(BeyondDimensions.MODID, "widget/unkonw_thing"), iconX, iconY, iconWidth, iconHeight, onPress);
         initButton();
         setIcon(iconMap.get(currentState));
     }

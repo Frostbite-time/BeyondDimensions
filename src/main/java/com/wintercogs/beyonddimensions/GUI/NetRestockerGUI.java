@@ -12,13 +12,13 @@ import com.wintercogs.beyonddimensions.Render.GuiRenderHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
 {
-    private static final ResourceLocation VANILLA_SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot");
+    private static final Identifier VANILLA_SLOT_SPRITE = Identifier.withDefaultNamespace("container/slot");
 
     private RightTabButton fuzzyModeButton;
     private RightTabButton receiveModeButton;
@@ -50,8 +50,8 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FuzzyMode.DISABLE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_allow"));
-                iconMap.put(FuzzyMode.ENABLE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_deny"));
+                iconMap.put(FuzzyMode.DISABLE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_allow"));
+                iconMap.put(FuzzyMode.ENABLE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_deny"));
 
                 tooltipMap.put(FuzzyMode.DISABLE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.fuzzy_mode_disable")));
                 tooltipMap.put(FuzzyMode.ENABLE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.fuzzy_mode_enable")));
@@ -76,8 +76,8 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(ReceiveMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/net_disable"));
-                iconMap.put(ReceiveMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/net_absorb"));
+                iconMap.put(ReceiveMode.STOP, Identifier.tryBuild(BeyondDimensions.MODID, "widget/net_disable"));
+                iconMap.put(ReceiveMode.OPEN, Identifier.tryBuild(BeyondDimensions.MODID, "widget/net_absorb"));
 
                 tooltipMap.put(ReceiveMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.receive_mode_stop")));
                 tooltipMap.put(ReceiveMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.receive_mode_open")));
@@ -102,8 +102,8 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.IGNORE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
                 tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));

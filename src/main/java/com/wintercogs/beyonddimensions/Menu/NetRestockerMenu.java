@@ -14,7 +14,7 @@ import com.wintercogs.beyonddimensions.Menu.Slot.FlagStackTypedSlot;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -102,12 +102,12 @@ public class NetRestockerMenu extends BDBaseMenu
         this.addSlot(createExtraSlot(40, EXTRA_SLOT_START_X + 72, EXTRA_SLOT_Y, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD));
     }
 
-    private Slot createExtraSlot(int slotIndex, int x, int y, ResourceLocation noItemIcon)
+    private Slot createExtraSlot(int slotIndex, int x, int y, Identifier noItemIcon)
     {
         return new FlagStackTypedSlot(this, storage, slotIndex, x, y)
         {
             @Override
-            public Pair<ResourceLocation, ResourceLocation> getNoItemIcon()
+            public Pair<Identifier, Identifier> getNoItemIcon()
             {
                 return Pair.of(InventoryMenu.BLOCK_ATLAS, noItemIcon);
             }

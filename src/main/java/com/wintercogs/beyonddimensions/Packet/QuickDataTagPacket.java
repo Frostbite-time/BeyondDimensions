@@ -6,7 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 // 用于双端互相同步，无验证的数据包，不要用它传递重要信息
 // 一般用于传递方块或者物品的设置信息，且仅利用菜单进行读写，以防止被伪造数据包远程修改
@@ -15,7 +15,7 @@ public record QuickDataTagPacket(CompoundTag tag) implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<QuickDataTagPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(
                     BeyondDimensions.MODID,
                     "quick_data_tag_packet")); //path中不要有大写字母 仅数字 小写字母 下划线
 

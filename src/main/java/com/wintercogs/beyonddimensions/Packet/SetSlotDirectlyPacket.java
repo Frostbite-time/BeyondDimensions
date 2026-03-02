@@ -6,7 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 // 此记录的处理会调用对应slot的setStackDirectly
 // 不会有数据校验
@@ -15,7 +15,7 @@ public record SetSlotDirectlyPacket(int slotId, KeyAmount stack) implements Cust
 {
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<SetSlotDirectlyPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(
                     BeyondDimensions.MODID,
                     "set_slot_directly_packet")); //path中不要有大写字母 仅数字 小写字母 下划线
 

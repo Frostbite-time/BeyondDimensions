@@ -7,7 +7,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -23,7 +23,7 @@ public class ScrollBar extends AbstractWidget
     /**
      * 滑块贴图
      */
-    protected final ResourceLocation SPRITE;
+    protected final Identifier SPRITE;
 
     /**
      * 轨道可滑动像素长度（滑块“顶部”从0到末端的位移量）
@@ -78,7 +78,7 @@ public class ScrollBar extends AbstractWidget
      * @param message      读屏文本
      */
     public ScrollBar(int x, int y, int width, int height,
-                     ResourceLocation sprite,
+                     Identifier sprite,
                      int maxScrollLen,
                      int currentPos,
                      int maxPos,

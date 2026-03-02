@@ -18,14 +18,13 @@ import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Packet.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
 import com.wintercogs.beyonddimensions.Util.UIDataHelper;
-import dev.emi.emi.api.EmiApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -38,19 +37,19 @@ import java.util.Objects;
 public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 {
 
-    protected static final ResourceLocation GUI_TEXTURE_TOP_BASE = ResourceLocation.parse("beyonddimensions:textures/gui/top_base.png");
+    protected static final Identifier GUI_TEXTURE_TOP_BASE = Identifier.parse("beyonddimensions:textures/gui/top_base.png");
     protected static final int TOP_BASE_WIDTH = 194;
     protected static final int TOP_BASE_HEIGHT = 24;
-    protected static final ResourceLocation GUI_TEXTURE_TOP_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/top_slots.png");
+    protected static final Identifier GUI_TEXTURE_TOP_SLOTS = Identifier.parse("beyonddimensions:textures/gui/top_slots.png");
     protected static final int TOP_SLOTS_WIDTH = 194;
     protected static final int TOP_SLOTS_HEIGHT = 18;
-    protected static final ResourceLocation GUI_TEXTURE_MID_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/mid_slots.png");
+    protected static final Identifier GUI_TEXTURE_MID_SLOTS = Identifier.parse("beyonddimensions:textures/gui/mid_slots.png");
     protected static final int MID_SLOTS_WIDTH = 194;
     protected static final int MID_SLOTS_HEIGHT = 18;
-    protected static final ResourceLocation GUI_TEXTURE_BOTTOM_SLOTS = ResourceLocation.parse("beyonddimensions:textures/gui/bottom_slots.png");
+    protected static final Identifier GUI_TEXTURE_BOTTOM_SLOTS = Identifier.parse("beyonddimensions:textures/gui/bottom_slots.png");
     protected static final int BOTTOM_SLOTS_WIDTH = 194;
     protected static final int BOTTOM_SLOTS_HEIGHT = 26;
-    protected static final ResourceLocation GUI_TEXTURE_PLAYER_INV = ResourceLocation.parse("beyonddimensions:textures/gui/player_inv.png");
+    protected static final Identifier GUI_TEXTURE_PLAYER_INV = Identifier.parse("beyonddimensions:textures/gui/player_inv.png");
     protected static final int PLAYER_INV_WIDTH = 176;
     protected static final int PLAYER_INV_HEIGHT = 89;
 
@@ -142,11 +141,11 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             @Override
             protected void initButton()
             {
-                iconMap.put(ButtonState.SORT_QUANTITY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_quantity"));
-                iconMap.put(ButtonState.SORT_NAME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_name"));
-                iconMap.put(ButtonState.SORT_MODID, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_modid"));
-                iconMap.put(ButtonState.SORT_INSERTED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_inserted_time"));
-                iconMap.put(ButtonState.SORT_MODIFIED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_modified_time"));
+                iconMap.put(ButtonState.SORT_QUANTITY, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_quantity"));
+                iconMap.put(ButtonState.SORT_NAME, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_name"));
+                iconMap.put(ButtonState.SORT_MODID, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_modid"));
+                iconMap.put(ButtonState.SORT_INSERTED_TIME, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_inserted_time"));
+                iconMap.put(ButtonState.SORT_MODIFIED_TIME, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_modified_time"));
 
                 tooltipMap.put(ButtonState.SORT_QUANTITY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_quantity_second")));
                 tooltipMap.put(ButtonState.SORT_NAME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_name_second")));
@@ -182,7 +181,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addRenderableWidget(searchToggleButton);
 
         //页面增减按钮
-        addPageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 4, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/up_arrow"), button ->
+        addPageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 4, 16, 16, Identifier.tryBuild(BeyondDimensions.MODID, "widget/up_arrow"), button ->
         {
             if (this.height - 36 <= (rebuildImageHeight() + MID_SLOTS_HEIGHT)
                     || menu.getLines() >= 99)
@@ -202,7 +201,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addPageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.add_page")));
         addRenderableWidget(addPageButton);
 
-        removePageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 5, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/down_arrow"), button ->
+        removePageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 5, 16, 16, Identifier.tryBuild(BeyondDimensions.MODID, "widget/down_arrow"), button ->
         {
             if (menu.getLines() <= 2)
                 return;
@@ -341,7 +340,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     // 用于让子类重写工艺槽位按钮的函数
     protected void addCraftButton()
     {
-        craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/craft_button"), button ->
+        craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, Identifier.tryBuild(BeyondDimensions.MODID, "widget/craft_button"), button ->
         {
             UIDataHelper.currentPage = menu.lineData;
 

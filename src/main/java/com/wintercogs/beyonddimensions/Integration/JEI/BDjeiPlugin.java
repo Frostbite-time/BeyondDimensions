@@ -11,7 +11,7 @@ import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Optional;
 
@@ -21,9 +21,9 @@ public class BDjeiPlugin implements IModPlugin
     public static IJeiRuntime jeiRuntime;
 
     @Override
-    public ResourceLocation getPluginUid()
+    public Identifier getPluginUid()
     {
-        return ResourceLocation.tryBuild(BeyondDimensions.MODID, "jei_plugin");
+        return Identifier.tryBuild(BeyondDimensions.MODID, "jei_plugin");
     }
 
     @Override

@@ -10,7 +10,7 @@ import com.wintercogs.beyonddimensions.Render.GuiRenderHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
@@ -44,9 +44,9 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FilterMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/ignore_filter"));
-                iconMap.put(FilterMode.WHITE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/white_filter"));
-                iconMap.put(FilterMode.BLACK, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/black_filter"));
+                iconMap.put(FilterMode.IGNORE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/ignore_filter"));
+                iconMap.put(FilterMode.WHITE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/white_filter"));
+                iconMap.put(FilterMode.BLACK, Identifier.tryBuild(BeyondDimensions.MODID, "widget/black_filter"));
 
                 tooltipMap.put(FilterMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_ignore")));
                 tooltipMap.put(FilterMode.WHITE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_white")));
@@ -72,10 +72,10 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
-                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_powered"));
-                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_unpowered"));
+                iconMap.put(RedStoneControlMode.IGNORE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.POWERED, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_powered"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_unpowered"));
 
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));

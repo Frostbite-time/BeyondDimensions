@@ -4,13 +4,13 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public record ToggleMagnetPacket() implements CustomPacketPayload
 {
     // 定义数据包的类型 注册用
     public static final Type<ToggleMagnetPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
+            new Type<>(Identifier.fromNamespaceAndPath(
                     BeyondDimensions.MODID,
                     "toggle_magnet_packet")); //path中不要有大写字母 仅数字 小写字母 下划线
 

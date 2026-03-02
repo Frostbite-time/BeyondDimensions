@@ -7,7 +7,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Utf8String;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ public record NetControlActionPacket(UUID receiver, NetControlAction action) imp
 
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<NetControlActionPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(
                     BeyondDimensions.MODID,
                     "net_control_action_packet")); //path中不要有大写字母 仅数字 小写字母 下划线
 

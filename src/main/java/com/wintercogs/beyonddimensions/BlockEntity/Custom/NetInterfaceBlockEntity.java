@@ -25,7 +25,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -80,7 +80,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
     // 存储相邻方块的能力
     // 按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
-    private final Multimap<ResourceLocation, Object> handlerCache = ArrayListMultimap.create();
+    private final Multimap<Identifier, Object> handlerCache = ArrayListMultimap.create();
     private boolean needsCapabilityUpdate = true;
 
     public StackHandler getStackHandler()

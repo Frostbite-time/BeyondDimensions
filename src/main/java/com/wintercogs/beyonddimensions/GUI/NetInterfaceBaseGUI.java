@@ -11,7 +11,7 @@ import com.wintercogs.beyonddimensions.Render.GuiRenderHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,8 +55,8 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(PopMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/popmode_up"));
-                iconMap.put(PopMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/popmode_down"));
+                iconMap.put(PopMode.OPEN, Identifier.tryBuild(BeyondDimensions.MODID, "widget/popmode_up"));
+                iconMap.put(PopMode.STOP, Identifier.tryBuild(BeyondDimensions.MODID, "widget/popmode_down"));
 
                 tooltipMap.put(PopMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
                 tooltipMap.put(PopMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
@@ -79,10 +79,10 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
-                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_powered"));
-                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_unpowered"));
+                iconMap.put(RedStoneControlMode.IGNORE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.POWERED, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_powered"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_unpowered"));
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
                 tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
@@ -106,8 +106,8 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FuzzyMode.DISABLE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_allow"));
-                iconMap.put(FuzzyMode.ENABLE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_deny"));
+                iconMap.put(FuzzyMode.DISABLE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_allow"));
+                iconMap.put(FuzzyMode.ENABLE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_deny"));
 
                 tooltipMap.put(FuzzyMode.DISABLE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.fuzzy_mode_disable")));
                 tooltipMap.put(FuzzyMode.ENABLE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.fuzzy_mode_enable")));

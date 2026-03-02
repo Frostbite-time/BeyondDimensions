@@ -5,7 +5,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class GuiRenderHelper
 {
@@ -27,7 +27,7 @@ public class GuiRenderHelper
      */
     public static void renderBorderedPanel(
             GuiGraphics guiGraphics,
-            ResourceLocation texture,
+            Identifier texture,
             int x, int y,
             int width, int height,
             int borderTop, int borderBottom,
@@ -140,7 +140,7 @@ public class GuiRenderHelper
      */
     public static void renderFullTexture(
             GuiGraphics guiGraphics,
-            ResourceLocation texture,
+            Identifier texture,
             int x, int y,
             int width, int height,
             int originalWidth, int originalHeight)

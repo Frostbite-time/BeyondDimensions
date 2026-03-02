@@ -5,7 +5,7 @@ import com.wintercogs.beyonddimensions.Integration.RS.Tags.RSTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
@@ -24,8 +24,8 @@ public class ModItemTagProvider extends ItemTagsProvider
     {
         // 添加RS富铁石英和机器框架的合成表支持
         tag(RSTags.RS_QUARTZ_ENRICHED_IRON)
-                .addOptional(ResourceLocation.tryBuild(BeyondDimensions.RSModId, RSTags.QUARTZ_ENRICHED_IRON_NAME));
+                .addOptional(Identifier.tryBuild(BeyondDimensions.RSModId, RSTags.QUARTZ_ENRICHED_IRON_NAME));
         tag(RSTags.RS_MACHINE_CASING)
-                .addOptional(ResourceLocation.tryBuild(BeyondDimensions.RSModId, RSTags.MACHINE_CASING_NAME));
+                .addOptional(Identifier.tryBuild(BeyondDimensions.RSModId, RSTags.MACHINE_CASING_NAME));
     }
 }
