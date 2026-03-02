@@ -1,14 +1,23 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Storage;
 
+import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Util.BDMath;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.TransferPreconditions;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jetbrains.annotations.NotNull;
 
-// 以IStackType为基础实现IItemHandler的类
-public class ItemUnifiedStorageHandler implements IItemHandler
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> implements ResourceHandler<@NotNull ItemResource>
 {
     private final UnifiedStorage storage;
 
@@ -17,73 +26,179 @@ public class ItemUnifiedStorageHandler implements IItemHandler
         this.storage = storage;
     }
 
-    @Override
-    public int getSlots()
-    {
-        // 默认返回长度比实际大1，可以让其他模组不因为存储长度而无法插入物品
-        // 此类封装性良好，只需内部方法对使用的索引进行二次检查，即可避免NPE问题
-        // 最后，UnifiedStorage实际并无槽位数限制且自动合并同类物品，除了读取信息和提取指定槽位物品都无需索引参与，对于超出索引的读取返回EMPTY即可
-        // 所以，这样做是安全的
-        return storage.getBucket(ItemStackKey.ID)
-                .map(list -> storage.isFullSlotsSize() ? list.size() : list.size() + 1)
-                .orElse(storage.isFullSlotsSize() ? 0 : 1);
-    }
-
-    @Override
-    public @NotNull ItemStack getStackInSlot(int slot)
-    {
-        // 此处的slot参数是基于特化类型ItemStackType的索引
-        return storage.getBucket(ItemStackKey.ID)
-                .filter(slots -> slot >= 0 && slot < slots.size())
-                .map(slots -> slots.get(slot))
-                .map(key -> {
-                    Object outStack = storage.getOutStackByKey(key);
-                    if (outStack instanceof ItemStack itemStack)
-                    {
-                        if (!itemStack.isEmpty())
-                            itemStack.setCount(BDMath.clampLongToInt(storage.getStackByKey(key).amount()));
-                        return itemStack;
-                    }
-                    return null;
-                })
-                .orElse(ItemStack.EMPTY);
-    }
-
-    @Override
-    public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack itemStack, boolean sim)
-    {
-        KeyAmount remaining = storage.insert(new ItemStackKey(itemStack), itemStack.getCount(), sim);
-        if (!remaining.isEmpty() && remaining.toStack() instanceof ItemStack stack)
-            return stack;
-        return ItemStack.EMPTY; // 无剩余则返回空
-    }
-
-    @Override
-    public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
+    private int itemCount()
     {
         return storage.getBucket(ItemStackKey.ID)
-                .filter(slots -> slot >= 0 && slot < slots.size())
-                .map(slots -> slots.get(slot))
-                .map(key -> storage.extract(key, count, sim, false))
-                .filter(keyAmount -> !keyAmount.isEmpty())
-                .map(keyAmount -> {
-                    Object outStack = keyAmount.toStack();
-                    if (outStack instanceof ItemStack itemStack)
-                        return itemStack;
-                    return ItemStack.EMPTY;
-                })
-                .orElse(ItemStack.EMPTY);
+                .map(AbstractUnorderedStackHandler.TypeBucket::size)
+                .orElse(0);
+    }
+
+    private IStackKey<?> getItemKeyAt(int index)
+    {
+        if (index < 0) return null;
+        return storage.getBucket(ItemStackKey.ID)
+                .map(bucket -> index < bucket.size() ? bucket.get(index) : null)
+                .orElse(null);
+    }
+
+    private static ItemResource toResource(KeyAmount ka, UnifiedStorage storage)
+    {
+        if (ka == null || ka.isEmpty()) return ItemResource.EMPTY;
+
+        Object outStack = storage.getOutStackByKey(ka.key());
+        if (outStack instanceof ItemStack itemStack && !itemStack.isEmpty())
+        {
+            return ItemResource.of(itemStack);
+        }
+
+        Object stack = ka.toStack();
+        if (stack instanceof ItemStack itemStack && !itemStack.isEmpty())
+        {
+            return ItemResource.of(itemStack);
+        }
+
+        return ItemResource.EMPTY;
+    }
+
+    private static boolean matches(KeyAmount ka, ItemResource resource, UnifiedStorage storage)
+    {
+        if (ka == null || ka.isEmpty() || resource.isEmpty()) return false;
+
+        Object cached = storage.getOutStackByKey(ka.key());
+        if (cached instanceof ItemStack item && !item.isEmpty())
+        {
+            return resource.matches(item);
+        }
+
+        Object stack = ka.key().copyStack();
+        return stack instanceof ItemStack item && !item.isEmpty() && resource.matches(item);
+    }
+
+    private static ItemStackKey toKey(ItemResource resource)
+    {
+        return new ItemStackKey(resource.toStack(1));
     }
 
     @Override
-    public int getSlotLimit(int slot)
+    public int size()
     {
-        return BDMath.clampLongToInt(storage.getSlotCapacity(0));
+        int items = itemCount();
+        return storage.isFullSlotsSize() ? items : items + 1;
     }
 
     @Override
-    public boolean isItemValid(int slot, @NotNull ItemStack itemStack)
+    public ItemResource getResource(int index)
     {
+        Objects.checkIndex(index, size());
+
+        IStackKey<?> key = getItemKeyAt(index);
+        if (key == null) return ItemResource.EMPTY;
+
+        KeyAmount ka = storage.getStackByKey(key);
+        return toResource(ka, storage);
+    }
+
+    @Override
+    public long getAmountAsLong(int index)
+    {
+        Objects.checkIndex(index, size());
+
+        IStackKey<?> key = getItemKeyAt(index);
+        if (key == null) return 0L;
+
+        return Math.max(0L, storage.getStackByKey(key).amount());
+    }
+
+    @Override
+    public long getCapacityAsLong(int index, ItemResource resource)
+    {
+        Objects.checkIndex(index, size());
+
+        if (!resource.isEmpty() && !isValid(index, resource))
+        {
+            return 0L;
+        }
+
+        long cap = Math.max(0L, storage.getSlotCapacity(0));
+        if (resource.isEmpty()) return cap;
+        return Math.min(cap, resource.getMaxStackSize());
+    }
+
+    @Override
+    public boolean isValid(int index, ItemResource resource)
+    {
+        Objects.checkIndex(index, size());
+        TransferPreconditions.checkNonEmpty(resource);
         return true;
+    }
+
+    @Override
+    public int insert(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
+    {
+        Objects.checkIndex(index, size());
+        TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
+        if (amount == 0) return 0;
+
+        ItemStackKey key = toKey(resource);
+        KeyAmount simulatedLeft = storage.insert(key, amount, true);
+        long simulatedInserted = amount - simulatedLeft.amount();
+        if (simulatedInserted <= 0L) return 0;
+
+        updateSnapshots(transaction);
+
+        KeyAmount left = storage.insert(key, amount, false);
+        long inserted = amount - left.amount();
+        return BDMath.clampLongToInt(Math.max(0L, inserted));
+    }
+
+    @Override
+    public int extract(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
+    {
+        Objects.checkIndex(index, size());
+        TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
+        if (amount == 0) return 0;
+
+        IStackKey<?> key = getItemKeyAt(index);
+        if (key == null) return 0;
+
+        KeyAmount current = storage.getStackByKey(key);
+        if (!matches(current, resource, storage)) return 0;
+
+        KeyAmount simulated = storage.extract(key, amount, true, false);
+        if (simulated.isEmpty() || simulated.amount() <= 0L) return 0;
+
+        updateSnapshots(transaction);
+
+        KeyAmount taken = storage.extract(key, amount, false, false);
+        return BDMath.clampLongToInt(Math.max(0L, taken.amount()));
+    }
+
+    @Override
+    protected List<KeyAmount> createSnapshot()
+    {
+        List<KeyAmount> view = storage.getStorage();
+        ArrayList<KeyAmount> snapshot = new ArrayList<>(view.size());
+        for (int i = 0; i < view.size(); i++)
+        {
+            KeyAmount ka = view.get(i);
+            snapshot.add(new KeyAmount(ka.key(), ka.amount()));
+        }
+        return snapshot;
+    }
+
+    @Override
+    protected void revertToSnapshot(List<KeyAmount> snapshot)
+    {
+        if (snapshot == null) return;
+
+        storage.clearStorage();
+        for (int i = 0; i < snapshot.size(); i++)
+        {
+            KeyAmount ka = snapshot.get(i);
+            if (!ka.isEmpty())
+            {
+                storage.setAmountByKey(ka.key(), ka.amount());
+            }
+        }
     }
 }

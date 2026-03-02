@@ -1,23 +1,32 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
+import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Util.BDMath;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.TransferPreconditions;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 /**
- * 仅基于桶（Item 桶 + Empty 桶）进行索引映射的 IItemHandler 视图。
+ * 仅基于桶（Item 桶 + Empty 桶）进行索引映射的 Item 资源视图。
  * - 不做快照/镜像；单次调用内直接访问桶当前状态。
  * - 可视槽位 = ItemStackKey 桶槽位 + EmptyStackKey 桶槽位（顺序：先 Item，后 Empty）。
- * - getStackInSlot 直接使用缓存对象并设数量（高频无拷贝）；若缓存为空/为空栈则返回 EMPTY。
+ * - 对外实现 ResourceHandler<ItemResource>，并通过 SnapshotJournal 支持事务回滚。
  */
-public class ItemStackTypedHandler implements IItemHandler
+public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> implements ResourceHandler<@NotNull ItemResource>
 {
-    private static final ResourceLocation ITEM_TYPE = ItemStackKey.ID;
+    private static final Identifier ITEM_TYPE = ItemStackKey.ID;
 
     private final StackHandler handlerStorage;
 
@@ -94,13 +103,51 @@ public class ItemStackTypedHandler implements IItemHandler
         return getEmptySlotAt(rest);
     }
 
-    // ---- IItemHandler ----
+    private static ItemResource toResource(KeyAmount ka, StackHandler storage)
+    {
+        if (ka.isEmpty()) return ItemResource.EMPTY;
+
+        Object cached = storage.getOutStackByKey(ka.key());
+        if (cached instanceof ItemStack item && !item.isEmpty())
+        {
+            return ItemResource.of(item);
+        }
+
+        Object stack = ka.toStack();
+        if (stack instanceof ItemStack item && !item.isEmpty())
+        {
+            return ItemResource.of(item);
+        }
+
+        return ItemResource.EMPTY;
+    }
+
+    private static boolean matches(KeyAmount ka, ItemResource resource, StackHandler storage)
+    {
+        if (ka.isEmpty() || resource.isEmpty()) return false;
+
+        Object cached = storage.getOutStackByKey(ka.key());
+        if (cached instanceof ItemStack item && !item.isEmpty())
+        {
+            return resource.matches(item);
+        }
+
+        Object stack = ka.key().copyStack();
+        return stack instanceof ItemStack item && !item.isEmpty() && resource.matches(item);
+    }
+
+    private static ItemStackKey toKey(ItemResource resource)
+    {
+        return new ItemStackKey(resource.toStack(1));
+    }
+
+    // ---- ResourceHandler ----
 
     /**
      * 可视槽位 = Item 桶 + 空桶；全空时也会 > 0。
      */
     @Override
-    public int getSlots()
+    public int size()
     {
         return itemCount() + emptyCount();
     }
@@ -110,83 +157,155 @@ public class ItemStackTypedHandler implements IItemHandler
      * 若缓存不存在/为空，或该槽处于空区域，则返回 ItemStack.EMPTY。
      */
     @Override
-    public @NotNull ItemStack getStackInSlot(int slot)
+    public ItemResource getResource(int index)
     {
-        if (!inItemRegion(slot)) return ItemStack.EMPTY;
+        Objects.checkIndex(index, size());
+        if (!inItemRegion(index)) return ItemResource.EMPTY;
 
-        int actualIndex = resolveActualIndex(slot);
-        if (actualIndex < 0) return ItemStack.EMPTY;
+        int actualIndex = resolveActualIndex(index);
+        if (actualIndex < 0) return ItemResource.EMPTY;
 
         KeyAmount ka = handlerStorage.getStackBySlot(actualIndex);
-        if (ka.isEmpty()) return ItemStack.EMPTY;
-
-        Object cached = handlerStorage.getOutStackByKey(ka.key());
-        if (!(cached instanceof ItemStack item)) return ItemStack.EMPTY;
-        if (item.isEmpty()) return ItemStack.EMPTY; // 避免对空栈 setCount
-
-        int shown = BDMath.clampLongToInt(ka.amount());
-        if (shown <= 0) return ItemStack.EMPTY;
-
-        item.setCount(shown); // 直接改缓存数量并返回
-        return item;
+        return toResource(ka, handlerStorage);
     }
 
     /**
      * 插入：可落在空槽区或 Item 区，内部 insert 会做校验与容量约束。
      */
     @Override
-    public @NotNull ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
+    public long getAmountAsLong(int index)
     {
-        if (stack.isEmpty()) return ItemStack.EMPTY;
+        Objects.checkIndex(index, size());
+        if (!inItemRegion(index)) return 0L;
 
-        int actualIndex = resolveActualIndex(slot);
-        if (actualIndex < 0) return stack.copy(); // 槽位无效：全部剩余
+        int actualIndex = resolveActualIndex(index);
+        if (actualIndex < 0) return 0L;
 
-        KeyAmount rem = handlerStorage.insert(actualIndex, new ItemStackKey(stack), stack.getCount(), simulate);
-        Object leftover = rem.toStack();
-        return (leftover instanceof ItemStack is) ? is : stack.copy(); // 与源断开
+        KeyAmount ka = handlerStorage.getStackBySlot(actualIndex);
+        return ka.isEmpty() ? 0L : Math.max(0L, ka.amount());
+    }
+
+    @Override
+    public long getCapacityAsLong(int index, ItemResource resource)
+    {
+        Objects.checkIndex(index, size());
+
+        if (!resource.isEmpty() && !isValid(index, resource))
+        {
+            return 0L;
+        }
+
+        if (!inItemRegion(index))
+        {
+            return 99L;
+        }
+
+        int actualIndex = resolveActualIndex(index);
+        if (actualIndex < 0)
+        {
+            return 99L;
+        }
+
+        long byType = resource.isEmpty() ? 99L : resource.getMaxStackSize();
+        long byCap = handlerStorage.getSlotCapacity(actualIndex);
+        return Math.max(0L, Math.min(byType, byCap));
+    }
+
+    @Override
+    public boolean isValid(int index, ItemResource resource)
+    {
+        Objects.checkIndex(index, size());
+        TransferPreconditions.checkNonEmpty(resource);
+
+        int actualIndex = resolveActualIndex(index);
+        if (actualIndex < 0)
+        {
+            return false;
+        }
+
+        IStackKey<?> key = toKey(resource);
+        return handlerStorage.isStackValid(actualIndex, key);
+    }
+
+    @Override
+    public int insert(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
+    {
+        Objects.checkIndex(index, size());
+        TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
+
+        if (amount == 0) return 0;
+
+        int actualIndex = resolveActualIndex(index);
+        if (actualIndex < 0) return 0;
+
+        ItemStackKey key = toKey(resource);
+        KeyAmount simulatedLeft = handlerStorage.insert(actualIndex, key, amount, true);
+        long simulatedInserted = amount - simulatedLeft.amount();
+        if (simulatedInserted <= 0L) return 0;
+
+        updateSnapshots(transaction);
+
+        KeyAmount left = handlerStorage.insert(actualIndex, key, amount, false);
+        long inserted = amount - left.amount();
+        return BDMath.clampLongToInt(Math.max(0L, inserted));
     }
 
     /**
      * 仅 Item 区可抽取；空槽区恒 EMPTY。
      */
     @Override
-    public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate)
+    public int extract(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
     {
-        if (amount <= 0) return ItemStack.EMPTY;
-        if (!inItemRegion(slot)) return ItemStack.EMPTY;
+        Objects.checkIndex(index, size());
+        TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
 
-        int actualIndex = resolveActualIndex(slot);
-        if (actualIndex < 0) return ItemStack.EMPTY;
+        if (amount == 0) return 0;
+        if (!inItemRegion(index)) return 0;
 
-        KeyAmount taken = handlerStorage.extract(actualIndex, amount, simulate);
-        Object out = taken.toStack();
-        return (out instanceof ItemStack is) ? is : ItemStack.EMPTY;
-    }
+        int actualIndex = resolveActualIndex(index);
+        if (actualIndex < 0) return 0;
 
-    /**
-     * 空槽区返回默认 99；Item 区返回 min(物品上限, 槽位容量)。
-     */
-    @Override
-    public int getSlotLimit(int slot)
-    {
-        if (!inItemRegion(slot)) return 99;
+        KeyAmount current = handlerStorage.getStackBySlot(actualIndex);
+        if (!matches(current, resource, handlerStorage)) return 0;
 
-        int actualIndex = resolveActualIndex(slot);
-        if (actualIndex < 0) return 99;
+        KeyAmount simulated = handlerStorage.extract(actualIndex, amount, true);
+        if (simulated.isEmpty() || simulated.amount() <= 0L) return 0;
 
-        KeyAmount ka = handlerStorage.getStackBySlot(actualIndex);
-        long byType = (ka.isEmpty())
-                ? 99
-                : ka.key().getVanillaMaxStackSize();
-        long byCap = handlerStorage.getSlotCapacity(actualIndex);
-        return BDMath.clampLongToInt(Math.min(byType, byCap));
+        updateSnapshots(transaction);
+
+        KeyAmount taken = handlerStorage.extract(actualIndex, amount, false);
+        return BDMath.clampLongToInt(Math.max(0L, taken.amount()));
     }
 
     @Override
-    public boolean isItemValid(int slot, @NotNull ItemStack stack)
+    protected List<KeyAmount> createSnapshot()
     {
-        // 放宽；最终由 insert 决定
-        return true;
+        int total = handlerStorage.getSlots();
+        ArrayList<KeyAmount> snapshot = new ArrayList<>(total);
+        for (int i = 0; i < total; i++)
+        {
+            KeyAmount ka = handlerStorage.getStackBySlot(i);
+            snapshot.add(new KeyAmount(ka.key(), ka.amount()));
+        }
+        return snapshot;
+    }
+
+    @Override
+    protected void revertToSnapshot(List<KeyAmount> snapshot)
+    {
+        if (snapshot == null) return;
+
+        int total = handlerStorage.getSlots();
+        int restore = Math.min(total, snapshot.size());
+
+        for (int i = 0; i < restore; i++)
+        {
+            KeyAmount ka = snapshot.get(i);
+            handlerStorage.setStackDirectly(i, ka.key(), ka.amount());
+        }
+        for (int i = restore; i < total; i++)
+        {
+            handlerStorage.setStackDirectly(i, EmptyStackKey.INSTANCE, 0L);
+        }
     }
 }

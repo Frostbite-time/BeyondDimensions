@@ -3,16 +3,17 @@ package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.EnergyType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 public class EnergyHandlerWrapper implements IStackHandlerWrapper<EnergyType>
 {
 
-    private final IEnergyStorage energyStorage;
+    private final EnergyHandler energyStorage;
 
     public EnergyHandlerWrapper(Object energyStorage)
     {
-        this.energyStorage = (IEnergyStorage) energyStorage;
+        this.energyStorage = (EnergyHandler) energyStorage;
     }
 
     @Override
@@ -30,13 +31,15 @@ public class EnergyHandlerWrapper implements IStackHandlerWrapper<EnergyType>
     @Override
     public EnergyType getStackInSlot(int slot)
     {
-        return new EnergyType(energyStorage.getEnergyStored());
+        if (slot != 0) return new EnergyType(0);
+        return new EnergyType(energyStorage.getAmountAsLong());
     }
 
     @Override
     public long getCapacity(int slot)
     {
-        return energyStorage.getMaxEnergyStored();
+        if (slot != 0) return 0L;
+        return energyStorage.getCapacityAsLong();
     }
 
     @Override
@@ -48,45 +51,64 @@ public class EnergyHandlerWrapper implements IStackHandlerWrapper<EnergyType>
     @Override
     public long insert(int slot, EnergyType stack, boolean sim)
     {
-        long amount = stack.getStackCount();
-        // 确保请求的插入量在int范围内（Max: 2,147,483,647）
-        int insertAmount = (amount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) amount;
+        if (slot != 0 || stack == null) return stack == null ? 0L : Math.max(0L, stack.getStackCount());
 
-        // 接收能量并获取实际接受量
-        int accepted = energyStorage.receiveEnergy(insertAmount, sim);
+        long amount = Math.max(0L, stack.getStackCount());
+        if (amount == 0L) return 0L;
 
-        // 计算未接收的余量 = 请求总量 - 实际接受量
-        return amount - accepted;
+        int insertAmount = (int) Math.min(amount, Integer.MAX_VALUE);
+        try (Transaction tx = Transaction.openRoot())
+        {
+            int accepted = energyStorage.insert(insertAmount, tx);
+            if (!sim) tx.commit();
+            return Math.max(0L, amount - accepted);
+        }
     }
 
     @Override
     public long insert(EnergyType stack, boolean sim)
     {
-        long amount = stack.getStackCount();
-        // 确保请求的插入量在int范围内（Max: 2,147,483,647）
-        int insertAmount = (amount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) amount;
+        if (stack == null) return 0L;
 
-        // 接收能量并获取实际接受量
-        int accepted = energyStorage.receiveEnergy(insertAmount, sim);
+        long amount = Math.max(0L, stack.getStackCount());
+        if (amount == 0L) return 0L;
 
-        // 计算未接收的余量 = 请求总量 - 实际接受量
-        return amount - accepted;
+        int insertAmount = (int) Math.min(amount, Integer.MAX_VALUE);
+        try (Transaction tx = Transaction.openRoot())
+        {
+            int accepted = energyStorage.insert(insertAmount, tx);
+            if (!sim) tx.commit();
+            return Math.max(0L, amount - accepted);
+        }
     }
 
     @Override
     public long extract(int slot, long amount, boolean sim)
     {
+        if (slot != 0 || amount <= 0L) return 0L;
+
         int extractAmount = (amount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) amount;
         if (extractAmount < 0) extractAmount = 0;
-        return energyStorage.extractEnergy(extractAmount, sim);
+        try (Transaction tx = Transaction.openRoot())
+        {
+            int extracted = energyStorage.extract(extractAmount, tx);
+            if (!sim) tx.commit();
+            return Math.max(0L, extracted);
+        }
     }
 
     @Override
     public long extract(EnergyType stack, boolean sim)
     {
+        if (stack == null) return 0L;
 
         int extractAmount = (stack.getStackCount() > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) stack.getStackCount();
         if (extractAmount < 0) extractAmount = 0;
-        return energyStorage.extractEnergy(extractAmount, sim);
+        try (Transaction tx = Transaction.openRoot())
+        {
+            int extracted = energyStorage.extract(extractAmount, tx);
+            if (!sim) tx.commit();
+            return Math.max(0L, extracted);
+        }
     }
 }

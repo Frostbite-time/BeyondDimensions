@@ -3,15 +3,18 @@ package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import org.jetbrains.annotations.NotNull;
 
 public class ItemHandlerWrapper implements IStackHandlerWrapper<ItemStack>
 {
-    private final IItemHandler itemHandler;
+    private final ResourceHandler<@NotNull ItemResource> itemHandler;
 
     public ItemHandlerWrapper(Object itemHandler)
     {
-        this.itemHandler = (IItemHandler) itemHandler;
+        this.itemHandler = (ResourceHandler<ItemResource>) itemHandler;
     }
 
     @Override
@@ -23,69 +26,95 @@ public class ItemHandlerWrapper implements IStackHandlerWrapper<ItemStack>
     @Override
     public int getSlots()
     {
-        return itemHandler.getSlots();
+        return Math.max(0, itemHandler.size());
     }
 
     @Override
     public ItemStack getStackInSlot(int slot)
     {
-        return itemHandler.getStackInSlot(slot);
+        if (slot < 0 || slot >= getSlots()) return ItemStack.EMPTY;
+
+        ItemResource resource = itemHandler.getResource(slot);
+        int amount = itemHandler.getAmountAsInt(slot);
+        return resource.toStack(amount);
     }
 
     @Override
     public long getCapacity(int slot)
     {
-        return itemHandler.getSlotLimit(slot);
+        if (slot < 0 || slot >= getSlots()) return 0L;
+        return Math.max(0L, itemHandler.getCapacityAsLong(slot, itemHandler.getResource(slot)));
     }
 
     @Override
     public boolean isStackValid(int slot, ItemStack stack)
     {
-        return itemHandler.isItemValid(slot, stack);
+        if (slot < 0 || slot >= getSlots() || stack == null || stack.isEmpty()) return false;
+        return itemHandler.isValid(slot, ItemResource.of(stack));
     }
 
     @Override
-    public long insert(int slot, ItemStack Stack, boolean sim)
+    public long insert(int slot, ItemStack stack, boolean sim)
     {
-        return itemHandler.insertItem(slot, Stack, sim).getCount();
+        if (slot < 0 || slot >= getSlots() || stack == null || stack.isEmpty()) return 0L;
+
+        int request = Math.max(0, stack.getCount());
+        if (request == 0) return 0L;
+
+        try (Transaction tx = Transaction.openRoot())
+        {
+            int inserted = itemHandler.insert(slot, ItemResource.of(stack), request, tx);
+            if (!sim) tx.commit();
+            return Math.max(0L, (long) request - inserted);
+        }
     }
 
     @Override
     public long insert(ItemStack stack, boolean sim)
     {
-        // 遍历每个槽位进行插入
-        for (int i = 0; i < getSlots(); i++)
+        if (stack == null || stack.isEmpty()) return 0L;
+
+        int request = Math.max(0, stack.getCount());
+        if (request == 0) return 0L;
+
+        try (Transaction tx = Transaction.openRoot())
         {
-            stack = itemHandler.insertItem(i, stack, sim);
-            if (stack.isEmpty())
-                return 0;
+            int inserted = itemHandler.insert(ItemResource.of(stack), request, tx);
+            if (!sim) tx.commit();
+            return Math.max(0L, (long) request - inserted);
         }
-        return stack.getCount();
     }
 
     @Override
     public long extract(int slot, long amount, boolean sim)
     {
-        return itemHandler.extractItem(slot, (int) Math.min(amount, Integer.MAX_VALUE), sim).getCount();
+        if (slot < 0 || slot >= getSlots() || amount <= 0L) return 0L;
+
+        ItemResource resource = itemHandler.getResource(slot);
+        if (resource.isEmpty()) return 0L;
+
+        int request = (int) Math.min(amount, Integer.MAX_VALUE);
+        try (Transaction tx = Transaction.openRoot())
+        {
+            int extracted = itemHandler.extract(slot, resource, request, tx);
+            if (!sim) tx.commit();
+            return Math.max(0L, extracted);
+        }
     }
 
     @Override
     public long extract(ItemStack stack, boolean sim)
     {
-        int currentNum = 0;
-        //遍历每个对应槽位进行提取
-        //最后返回实际提取的副本
-        for (int i = 0; i < getSlots(); i++)
+        if (stack == null || stack.isEmpty()) return 0L;
+
+        int request = Math.max(0, stack.getCount());
+        if (request == 0) return 0L;
+
+        try (Transaction tx = Transaction.openRoot())
         {
-            if (ItemStack.isSameItemSameComponents(itemHandler.getStackInSlot(i), stack))
-            {
-                int extracting = itemHandler.extractItem(i, stack.getCount(), sim).getCount();
-                stack.shrink(extracting);
-                currentNum += extracting;
-                if (stack.isEmpty())
-                    break;
-            }
+            int extracted = itemHandler.extract(ItemResource.of(stack), request, tx);
+            if (!sim) tx.commit();
+            return Math.max(0L, extracted);
         }
-        return currentNum;
     }
 }
