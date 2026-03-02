@@ -8,7 +8,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackType>
 {
 
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/empty");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/empty");
     public static final EmptyStackKey INSTANCE = new EmptyStackKey();
 
     /**
@@ -55,7 +55,7 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     }
 
     @Override
-    public ResourceLocation getTypeId()
+    public Identifier getTypeId()
     {
         return ID;
     }

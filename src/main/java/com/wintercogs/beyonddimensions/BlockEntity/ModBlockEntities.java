@@ -3,10 +3,6 @@ package com.wintercogs.beyonddimensions.BlockEntity;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.*;
-import com.wintercogs.beyonddimensions.Integration.Ars.Block.SourcePathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Integration.create.blocks.entities.SchematicannonPathWayBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -94,57 +90,6 @@ public class ModBlockEntities
                     ModBlocks.NET_FURNACE_BLOCK.get()
             ).build(null)
     );
-
-    // 精致存储2---RS维度通道
-    // 仅在模组存在时才注册实体
-    public static Supplier<BlockEntityType<?>> RS_NET_PATHWAY_BLOCK_ENTITY;
-    public static Supplier<BlockEntityType<?>> ARS_SOURCE_PATHWAY_BLOCK_ENTITY;
-    public static Supplier<BlockEntityType<?>> MANA_POOL_PATHWAY_BLOCK_ENTITY;
-    public static Supplier<BlockEntityType<?>> SCHEMATICANNON_PATHWAY_BLOCK_ENTITY;
-
-    public static void IntegrationRegister()
-    {
-        if (BeyondDimensions.RS_Loaded)
-        {
-            RS_NET_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
-                    "rs_net_pathway_block_entity",
-                    () -> BlockEntityType.Builder.of(
-                            RSNetPathwayBlockEntity::new,
-                            ModBlocks.RS_NET_PATHWAY.get()
-                    ).build(null)
-            );
-        }
-        if (BeyondDimensions.ARS_Loaded)
-        {
-            ARS_SOURCE_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
-                    "ars_source_pathway_block_entity",
-                    () -> BlockEntityType.Builder.of(
-                            SourcePathwayBlockEntity::new,
-                            ModBlocks.ARS_SOURCE_PATHWAY.get()
-                    ).build(null)
-            );
-        }
-        if (BeyondDimensions.Botania_Loaded)
-        {
-            MANA_POOL_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
-                    "mana_pool_pathway_block_entity",
-                    () -> BlockEntityType.Builder.of(
-                            ManaPoolPathwayBlockEntity::new,
-                            ModBlocks.MANA_POOL_PATHWAY.get()
-                    ).build(null)
-            );
-        }
-        if (BeyondDimensions.Create_Loaded)
-        {
-            SCHEMATICANNON_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
-                    "schematicannon_pathway_block_entity",
-                    () -> BlockEntityType.Builder.of(
-                            SchematicannonPathWayBlockEntity::new,
-                            ModBlocks.SCHEMATICANNON_PATHWAY.get()
-                    ).build(null)
-            );
-        }
-    }
 
     public static void register(IEventBus eventBus)
     {

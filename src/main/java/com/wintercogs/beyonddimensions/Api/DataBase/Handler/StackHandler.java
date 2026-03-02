@@ -1,22 +1,21 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Handler;
 
-import com.mojang.serialization.*;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * 有序、固定槽位的堆叠容器实现（箱子类）。
@@ -28,7 +27,7 @@ import java.util.stream.Stream;
 public class StackHandler implements IStackHandler
 {
 
-    private static final MapCodec<StackHandler> NEW_FMT = RecordCodecBuilder.mapCodec(instance ->
+    private static final MapCodec<StackHandler> TYPE_CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     KeyAmount.CODEC.listOf().fieldOf("stacks")
                             .forGetter(sh -> {
@@ -41,89 +40,6 @@ public class StackHandler implements IStackHandler
                             })
             ).apply(instance, StackHandler::new)
     );
-
-    // === 兼容型 MapCodec：新优先，旧回退（写时永远写新） ===
-    public static final MapCodec<StackHandler> TYPE_CODEC = new MapCodec<>()
-    {
-        private static final String K_NEW_STACKS = "stacks";   // 新
-        private static final String K_OLD_STACKS = "Stacks";   // 旧（大写）
-        private static final String K_TYPED = "TypedStack";
-
-        @Override
-        public <T> DataResult<StackHandler> decode(DynamicOps<T> ops, MapLike<T> input)
-        {
-            final T kNewStacks = ops.createString(K_NEW_STACKS); // "stacks"
-            final T kOldStacks = ops.createString(K_OLD_STACKS); // "Stacks"
-            final T kTyped = ops.createString(K_TYPED);
-
-            // 1) 新格式优先：{ "stacks": [ KeyAmount, ... ] }
-            if (input.get(kNewStacks) != null)
-            {
-                return NEW_FMT.decode(ops, input);
-            }
-
-            // 2) 旧格式回退：{ "Stacks": [ { "TypedStack": <Compound or IntTag>, ... }, ... ] }
-            final T oldNode = input.get(kOldStacks);
-            if (oldNode == null)
-            {
-                // 让 NEW_FMT 报缺键错误（便于定位数据异常）
-                return NEW_FMT.decode(ops, input);
-            }
-
-            return ops.getStream(oldNode).flatMap((Stream<T> stream) -> {
-                ArrayList<KeyAmount> out = new ArrayList<>();
-
-                stream.forEach(elem -> {
-                    // 旧条目本身必须是个对象
-                    var entryML = ops.getMap(elem).result().orElse(null);
-                    if (entryML == null)
-                    {
-                        out.add(new KeyAmount(EmptyStackKey.INSTANCE, 0L));
-                        return;
-                    }
-
-                    // 取出 TypedStack 节点
-                    T typedNode = entryML.get(kTyped);
-                    if (typedNode == null)
-                    {
-                        // 丢失 TypedStack，判空占位
-                        out.add(new KeyAmount(EmptyStackKey.INSTANCE, 0L));
-                        return;
-                    }
-
-                    // 旧占位：TypedStack 不是 Compound（例如 IntTag(1)）
-                    if (ops.getMap(typedNode).result().isEmpty())
-                    {
-                        out.add(new KeyAmount(EmptyStackKey.INSTANCE, 0L));
-                        return;
-                    }
-
-                    // 关键点：直接把 TypedStack 本体交给 KeyAmount.CODEC
-                    KeyAmount ka = KeyAmount.CODEC.decode(ops, typedNode)
-                            .map(com.mojang.datafixers.util.Pair::getFirst)
-                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                                    "旧 Stacks -> KeyAmount(来自 TypedStack) 解码失败: {}", err))
-                            .orElse(new KeyAmount(EmptyStackKey.INSTANCE, 0L));
-
-                    out.add(ka);
-                });
-
-                return DataResult.success(new StackHandler(out));
-            });
-        }
-
-        @Override
-        public <T> RecordBuilder<T> encode(StackHandler value, DynamicOps<T> ops, RecordBuilder<T> prefix)
-        {
-            return NEW_FMT.encode(value, ops, prefix); // 只写新格式
-        }
-
-        @Override
-        public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops)
-        {
-            return java.util.stream.Stream.of(ops.createString(K_NEW_STACKS));
-        }
-    };
 
     public static final Codec<StackHandler> CODEC = TYPE_CODEC.codec();
 
@@ -212,14 +128,14 @@ public class StackHandler implements IStackHandler
     }
 
     // typeId -> 该类型下所有非空槽位（按换尾维护）【不包含 EmptyStackKey】
-    private final Map<ResourceLocation, SlotBucket> typeBuckets = new HashMap<>();
+    private final Map<Identifier, SlotBucket> typeBuckets = new HashMap<>();
 
-    private SlotBucket bucketOf(ResourceLocation typeId)
+    private SlotBucket bucketOf(Identifier typeId)
     {
         return typeBuckets.computeIfAbsent(typeId, t -> new SlotBucket());
     }
 
-    public Optional<SlotBucket> getBucket(ResourceLocation typeId)
+    public Optional<SlotBucket> getBucket(Identifier typeId)
     {
         return Optional.ofNullable(typeBuckets.get(typeId));
     }

@@ -15,7 +15,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 public final class FluidStackKey implements IStackKey<FluidStack>
 {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
     public static final FluidStackKey EMPTY = new FluidStackKey();
 
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
@@ -174,7 +174,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     // ===== IStackKey =====
 
     @Override
-    public ResourceLocation getTypeId()
+    public Identifier getTypeId()
     {
         return ID;
     }
@@ -361,8 +361,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         buf.writeBoolean(hasFluid);
         if (!hasFluid) return;
 
-        ResourceLocation key = BuiltInRegistries.FLUID.getKey(this.fluid);
-        buf.writeResourceLocation(key);
+        Identifier key = BuiltInRegistries.FLUID.getKey(this.fluid);
+        buf.writeIdentifier(key);
         DataComponentPatch.STREAM_CODEC.encode(buf, patch);
     }
 
@@ -372,8 +372,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         boolean hasFluid = buf.readBoolean();
         if (!hasFluid) return new FluidStackKey(Fluids.EMPTY, DataComponentPatch.EMPTY);
 
-        ResourceLocation key = buf.readResourceLocation();
-        Fluid f = BuiltInRegistries.FLUID.get(key); // 未注册时内部会回退到 EMPTY
+        Identifier key = buf.readIdentifier();
+        Fluid f = BuiltInRegistries.FLUID.getOptional(key).orElse(Fluids.EMPTY);
         DataComponentPatch p = DataComponentPatch.STREAM_CODEC.decode(buf);
         return new FluidStackKey(f, p);
     }
@@ -413,13 +413,13 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.parse(ops, nbt)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                            "FluidStackKey 反序列化(Codec)出错: {} | Keys={}", err, nbt.getAllKeys()))
+                            "FluidStackKey 反序列化(Codec)出错: {} | Keys={}", err, nbt.keySet()))
                     .orElse(FluidStackKey.EMPTY);
         }
         catch (Throwable t)
         {
             BeyondDimensions.LOGGER.error("FluidStackKey 反序列化错误。Keys={} Error={}",
-                    nbt.getAllKeys(), t.getMessage(), t);
+                    nbt.keySet(), t.getMessage(), t);
             return FluidStackKey.EMPTY;
         }
     }
@@ -515,7 +515,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             byte[] out = DataComponentPatchHelper.toCanonicalBytes(this.patch, use);
 
             // 客户端兜底：若失败再尝试连接提供者
-            if (out.length == 0 && FMLEnvironment.dist == Dist.CLIENT)
+            if (out.length == 0 && FMLEnvironment.getDist() == Dist.CLIENT)
             {
                 var mc = net.minecraft.client.Minecraft.getInstance();
                 var conn = mc.getConnection();

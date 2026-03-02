@@ -8,7 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
@@ -41,7 +41,7 @@ public class FluidStackKeyRender implements IStackRender
             {
                 var fluid = stack.getFluid();
                 IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluid);
-                ResourceLocation still = props.getStillTexture(stack);
+                Identifier still = props.getStillTexture(stack);
                 TextureAtlasSprite sprite = still == null ? null :
                         Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(still);
 

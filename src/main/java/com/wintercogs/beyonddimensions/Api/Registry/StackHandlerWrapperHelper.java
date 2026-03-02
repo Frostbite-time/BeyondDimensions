@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.Registry;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHandlerWrapper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,5 +13,5 @@ import java.util.function.Function;
 public class StackHandlerWrapperHelper
 {
     // 资源类型 -> 包装器
-    public static final Map<ResourceLocation, Function<?, IStackHandlerWrapper<?>>> stackWrappers = new HashMap<>();
+    public static final Map<Identifier, Function<?, IStackHandlerWrapper<?>>> stackWrappers = new HashMap<>();
 }

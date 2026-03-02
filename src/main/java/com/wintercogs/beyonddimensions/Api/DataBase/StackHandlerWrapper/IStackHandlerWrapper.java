@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
@@ -15,7 +15,7 @@ public interface IStackHandlerWrapper<T>
     /**
      * 处理器类型表示
      */
-    ResourceLocation getTypeId();
+    Identifier getTypeId();
 
     /**
      * 获取容器的槽位总数

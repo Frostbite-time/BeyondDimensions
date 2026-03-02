@@ -9,7 +9,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,8 +19,8 @@ import java.util.stream.Stream;
 public class EnergyStackKey extends LongStackKey<EnergyType>
 {
 
-    public static final ResourceLocation ID =
-            ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/energy");
+    public static final Identifier ID =
+            Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/energy");
 
     /**
      * 唯一实例（不区分空/非空）
@@ -78,7 +78,7 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
     }
 
     @Override
-    public ResourceLocation getTypeID()
+    public Identifier getTypeID()
     {
         return ID;
     }

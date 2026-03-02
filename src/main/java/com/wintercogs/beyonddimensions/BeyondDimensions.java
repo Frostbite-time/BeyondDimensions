@@ -26,8 +26,6 @@ import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
-import com.wintercogs.beyonddimensions.Integration.Botania.BD_BotaniaPlugin;
-import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.IFS.Item.WardenSoulTagItem;
 import com.wintercogs.beyonddimensions.Integration.create.blocks.entities.SchematicannonPathWayBlockEntity;
@@ -203,8 +201,6 @@ public class BeyondDimensions
         if (ModList.get().isLoaded(Botania_ModId))
         {
             Botania_Loaded = true;
-            MOD_EVENT_BUS.addListener(ManaPoolPathwayBlockEntity::registerCapability);
-            MOD_EVENT_BUS.addListener(BD_BotaniaPlugin::registerCapability); // 为网络通道和网络接口手动注册火花附着
         }
         if (ModList.get().isLoaded(AE_Botania_ModId))
         {

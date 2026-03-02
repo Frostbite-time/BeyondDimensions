@@ -8,7 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
@@ -35,7 +35,7 @@ public class EnergyStackKeyRender implements IStackRender
         pose.pushPose();
 
         // 占位图标：用水的静态贴图 + 绿色
-        ResourceLocation still = net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions
+        Identifier still = net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions
                 .of(net.minecraft.world.level.material.Fluids.WATER)
                 .getStillTexture();
         TextureAtlasSprite sprite = still == null ? null

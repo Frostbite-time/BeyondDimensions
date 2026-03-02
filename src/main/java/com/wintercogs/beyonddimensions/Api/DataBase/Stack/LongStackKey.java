@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.LongType.LongType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -10,14 +10,14 @@ public abstract class LongStackKey<T extends LongType<T>> implements IStackKey<T
 {
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
-    public abstract ResourceLocation getTypeID();
+    public abstract Identifier getTypeID();
 
     protected T stack;
 
     protected int hashCodeCache = 0; // 哈希码缓存
 
     @Override
-    public ResourceLocation getTypeId()
+    public Identifier getTypeId()
     {
         return getTypeID();
     }

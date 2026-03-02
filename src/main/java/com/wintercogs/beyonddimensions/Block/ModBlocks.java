@@ -2,10 +2,6 @@ package com.wintercogs.beyonddimensions.Block;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.Custom.*;
-import com.wintercogs.beyonddimensions.Integration.Ars.Block.SourcePathwayBlock;
-import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathway;
-import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlock;
-import com.wintercogs.beyonddimensions.Integration.create.blocks.SchematicannonPathWayBlock;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -50,49 +46,6 @@ public class ModBlocks
     // 合成材料-维度链接框架
     public static final DeferredBlock<Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock("dimensional_connect_block",
             () -> new Block(BlockBehaviour.Properties.of().strength(2f)));
-
-
-    // 精致存储2---RS维度通道
-    // 始终注册方块，防止数据包或其他问题出现
-    public static final DeferredBlock<Block> RS_NET_PATHWAY = registerBlock("rs_net_pathway",
-            () -> {
-                if (BeyondDimensions.RS_Loaded)
-                {
-                    return new RSNetPathwayBlock(BlockBehaviour.Properties.of().strength(2f));
-                }
-                else
-                {
-                    return new Block(BlockBehaviour.Properties.of().strength(2f));
-                }
-            });
-
-    public static final DeferredBlock<Block> ARS_SOURCE_PATHWAY = registerBlock("ars_source_pathway",
-            () -> {
-                if (BeyondDimensions.ARS_Loaded)
-                {
-                    return new SourcePathwayBlock(BlockBehaviour.Properties.of().strength(2f));
-                }
-                else
-                {
-                    return new Block(BlockBehaviour.Properties.of().strength(2f));
-                }
-            });
-
-    public static final DeferredBlock<Block> MANA_POOL_PATHWAY = registerBlock("mana_pool_pathway",
-            () -> {
-                if (BeyondDimensions.Botania_Loaded)
-                    return new ManaPoolPathway(BlockBehaviour.Properties.of().strength(2f));
-                else
-                    return new Block(BlockBehaviour.Properties.of().strength(2f));
-            });
-
-    public static final DeferredBlock<Block> SCHEMATICANNON_PATHWAY = registerBlock("schematicannon_pathway",
-            () -> {
-                if (BeyondDimensions.Create_Loaded)
-                    return new SchematicannonPathWayBlock(BlockBehaviour.Properties.of().strength(2f).noOcclusion());
-                else
-                    return new Block(BlockBehaviour.Properties.of().strength(2f).noOcclusion());
-            });
 
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block)
