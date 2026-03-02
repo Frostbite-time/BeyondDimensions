@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Api.Util.USHandler;
-import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -17,7 +17,7 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
 {
     public NetPathwayBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     //--- 能力注册 (通过事件) ---
@@ -29,7 +29,7 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
                     USHandler handler = CapabilityHelper.USHandlerMap.get(resourceLocation);
                     event.registerBlockEntity(
                             (BlockCapability<? super Object, ? extends Direction>) directionBlockCapability,
-                            ModBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
+                            BDBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
                             (be, side) -> {
                                 DimensionsNet net = be.getNet(); // getNet已经在基类中完成缓存处理
                                 if (net != null && handler != null)

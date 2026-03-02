@@ -9,9 +9,9 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
-import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -530,7 +530,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         long add = Math.max(0L, amount);
         if (add == 0L) return new KeyAmount(key, 0L);
 
-        if (key instanceof ItemStackKey itemKey && itemKey.getSource() == ModItems.MATTER_COMPRESS_BALL.get())
+        if (key instanceof ItemStackKey itemKey && itemKey.getSource() == BDItems.MATTER_COMPRESS_BALL.get())
         {
             return unzipMatterBall(itemKey, add, simulate);
         }
@@ -569,7 +569,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         {
             return new KeyAmount(ballKey, ballCount);
         }
-        List<KeyAmount> contents = ballStack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
+        List<KeyAmount> contents = ballStack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
         if (contents.isEmpty()) return new KeyAmount(ballKey, 0L);
 
         final Map<IStackKey<?>, Long> needMap = new HashMap<>();

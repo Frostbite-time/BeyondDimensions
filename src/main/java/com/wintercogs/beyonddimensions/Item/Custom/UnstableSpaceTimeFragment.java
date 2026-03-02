@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
-import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,7 +19,7 @@ public class UnstableSpaceTimeFragment extends Item
 {
     public UnstableSpaceTimeFragment(Properties properties)
     {
-        super(properties.component(ModDataComponents.TIME_LINE, 0L));
+        super(properties.component(BDDataComponents.TIME_LINE, 0L));
     }
 
     @Override
@@ -27,7 +27,7 @@ public class UnstableSpaceTimeFragment extends Item
     {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
 
-        Long longData = stack.get(ModDataComponents.LONG_DATA);
+        Long longData = stack.get(BDDataComponents.LONG_DATA);
         if (longData != null)
         {
             tooltipComponents.add(Component.translatable(
@@ -56,15 +56,15 @@ public class UnstableSpaceTimeFragment extends Item
             return;
         }
 
-        Long longDataObj = stack.get(ModDataComponents.LONG_DATA);
+        Long longDataObj = stack.get(BDDataComponents.LONG_DATA);
         if (longDataObj == null)
         {
-            stack.set(ModDataComponents.LONG_DATA, ServerConfigRuntime.fragmentTransferTime);
+            stack.set(BDDataComponents.LONG_DATA, ServerConfigRuntime.fragmentTransferTime);
             longDataObj = ServerConfigRuntime.fragmentTransferTime;
         }
 
         final long currentTick = level.getGameTime();
-        final long lastProcessed = stack.getOrDefault(ModDataComponents.TIME_LINE, currentTick);
+        final long lastProcessed = stack.getOrDefault(BDDataComponents.TIME_LINE, currentTick);
 
         // 每 200 tick（10 秒）处理一次，避免频繁同步
         if (currentTick - lastProcessed <= 200L)
@@ -76,8 +76,8 @@ public class UnstableSpaceTimeFragment extends Item
 
         if (longData > 10L)
         {
-            stack.set(ModDataComponents.LONG_DATA, longData - 10L);
-            stack.set(ModDataComponents.TIME_LINE, currentTick);
+            stack.set(BDDataComponents.LONG_DATA, longData - 10L);
+            stack.set(BDDataComponents.TIME_LINE, currentTick);
             return;
         }
 
@@ -85,11 +85,11 @@ public class UnstableSpaceTimeFragment extends Item
         int globalSlot = findGlobalSlotByReference(player.getInventory(), stack);
         if (globalSlot < 0)
         {
-            stack.set(ModDataComponents.TIME_LINE, currentTick);
+            stack.set(BDDataComponents.TIME_LINE, currentTick);
             return;
         }
 
-        ItemStack stable = new ItemStack(ModItems.STABLE_SPACE_TIME_FRAGMENT.get(), stack.getCount());
+        ItemStack stable = new ItemStack(BDItems.STABLE_SPACE_TIME_FRAGMENT.get(), stack.getCount());
         player.getInventory().setItem(globalSlot, stable);
     }
 

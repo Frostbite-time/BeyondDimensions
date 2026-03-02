@@ -5,7 +5,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.Machine.ReceiveMode;
@@ -48,7 +48,7 @@ public class NetRestockerMenu extends BDBaseMenu
         {
             super.onChange();
             if (!player.level().isClientSide() && initialized)
-                menuStack.set(ModDataComponents.ISTACK_SLOTS, new ArrayList<>(storage.getStorage()));
+                menuStack.set(BDDataComponents.ISTACK_SLOTS, new ArrayList<>(storage.getStorage()));
         }
     };
     private boolean initialized;
@@ -72,7 +72,7 @@ public class NetRestockerMenu extends BDBaseMenu
         initialized = false;
         if (!playerInventory.player.level().isClientSide())
         {
-            List<KeyAmount> stacks = menuStack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
+            List<KeyAmount> stacks = menuStack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
             for (int i = 0; i < stacks.size(); i++)
             {
                 storage.insert(i, stacks.get(i).key(), stacks.get(i).amount(), false);
@@ -141,15 +141,15 @@ public class NetRestockerMenu extends BDBaseMenu
     protected boolean shouldSendQuickData()
     {
         boolean result = super.shouldSendQuickData()
-                || lastControlMode != menuStack.get(ModDataComponents.CONTROL_MODE)
-                || lastFuzzyMode != menuStack.get(ModDataComponents.FUZZY_MODE)
-                || lastReceiveMode != menuStack.get(ModDataComponents.RECEIVE_MODE);
+                || lastControlMode != menuStack.get(BDDataComponents.CONTROL_MODE)
+                || lastFuzzyMode != menuStack.get(BDDataComponents.FUZZY_MODE)
+                || lastReceiveMode != menuStack.get(BDDataComponents.RECEIVE_MODE);
 
         if (result)
         {
-            lastControlMode = menuStack.get(ModDataComponents.CONTROL_MODE);
-            lastFuzzyMode = menuStack.get(ModDataComponents.FUZZY_MODE);
-            lastReceiveMode = menuStack.get(ModDataComponents.RECEIVE_MODE);
+            lastControlMode = menuStack.get(BDDataComponents.CONTROL_MODE);
+            lastFuzzyMode = menuStack.get(BDDataComponents.FUZZY_MODE);
+            lastReceiveMode = menuStack.get(BDDataComponents.RECEIVE_MODE);
         }
 
         return result;
@@ -159,17 +159,17 @@ public class NetRestockerMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putString("control_mode", menuStack.getOrDefault(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE).name());
-        tag.putString("fuzzy_mode", menuStack.getOrDefault(ModDataComponents.FUZZY_MODE, FuzzyMode.DISABLE).name());
-        tag.putString("receive_mode", menuStack.getOrDefault(ModDataComponents.RECEIVE_MODE, FuzzyMode.DISABLE).name());
+        tag.putString("control_mode", menuStack.getOrDefault(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE).name());
+        tag.putString("fuzzy_mode", menuStack.getOrDefault(BDDataComponents.FUZZY_MODE, FuzzyMode.DISABLE).name());
+        tag.putString("receive_mode", menuStack.getOrDefault(BDDataComponents.RECEIVE_MODE, FuzzyMode.DISABLE).name());
     }
 
     @Override
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        menuStack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode")));
-        menuStack.set(ModDataComponents.FUZZY_MODE, FuzzyMode.valueOf(tag.getString("fuzzy_mode")));
-        menuStack.set(ModDataComponents.RECEIVE_MODE, ReceiveMode.valueOf(tag.getString("receive_mode")));
+        menuStack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode")));
+        menuStack.set(BDDataComponents.FUZZY_MODE, FuzzyMode.valueOf(tag.getString("fuzzy_mode")));
+        menuStack.set(BDDataComponents.RECEIVE_MODE, ReceiveMode.valueOf(tag.getString("receive_mode")));
     }
 }

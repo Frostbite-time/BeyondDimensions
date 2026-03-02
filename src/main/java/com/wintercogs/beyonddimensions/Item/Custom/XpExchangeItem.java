@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.XpTransferSpeedMode;
 import com.wintercogs.beyonddimensions.Tags.ModFluidTags;
@@ -41,7 +41,7 @@ public class XpExchangeItem extends Item
 
     public XpExchangeItem(Properties properties)
     {
-        super(properties.stacksTo(1).component(ModDataComponents.XP_TRANSFER_SPEED_MODE, XpTransferSpeedMode.SLOW));
+        super(properties.stacksTo(1).component(BDDataComponents.XP_TRANSFER_SPEED_MODE, XpTransferSpeedMode.SLOW));
     }
 
     @Override
@@ -50,7 +50,7 @@ public class XpExchangeItem extends Item
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         if (xpFluids.isEmpty())
             xpFluids = getExperienceFluids(level);
-        if (entity instanceof Player player && !level.isClientSide() && stack.getOrDefault(ModDataComponents.XP_NET_KEEP_MODE, false))
+        if (entity instanceof Player player && !level.isClientSide() && stack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false))
             keepXpLevel(stack, player, level);
     }
 
@@ -90,9 +90,9 @@ public class XpExchangeItem extends Item
             }
             else
             {
-                boolean current = itemstack.getOrDefault(ModDataComponents.XP_NET_KEEP_MODE, false);
-                itemstack.set(ModDataComponents.XP_NET_KEEP_MODE, !current);
-                if (itemstack.getOrDefault(ModDataComponents.XP_NET_KEEP_MODE, false))
+                boolean current = itemstack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false);
+                itemstack.set(BDDataComponents.XP_NET_KEEP_MODE, !current);
+                if (itemstack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false))
                     player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.open"));
                 else
                     player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.close"));
@@ -220,7 +220,7 @@ public class XpExchangeItem extends Item
     {
         if (stack.getItem() instanceof XpExchangeItem)
         {
-            XpTransferSpeedMode xpMode = stack.getOrDefault(ModDataComponents.XP_TRANSFER_SPEED_MODE, XpTransferSpeedMode.SLOW);
+            XpTransferSpeedMode xpMode = stack.getOrDefault(BDDataComponents.XP_TRANSFER_SPEED_MODE, XpTransferSpeedMode.SLOW);
 
             return switch (xpMode)
             {
@@ -237,9 +237,9 @@ public class XpExchangeItem extends Item
     // 将经验模式切换到下一级
     private static void cycleMode(ItemStack stack, Player player, Level level)
     {
-        XpTransferSpeedMode cur = stack.getOrDefault(ModDataComponents.XP_TRANSFER_SPEED_MODE, XpTransferSpeedMode.SLOW);
+        XpTransferSpeedMode cur = stack.getOrDefault(BDDataComponents.XP_TRANSFER_SPEED_MODE, XpTransferSpeedMode.SLOW);
         XpTransferSpeedMode next = cur.next();
-        stack.set(ModDataComponents.XP_TRANSFER_SPEED_MODE, next); // 写回到该物品栈
+        stack.set(BDDataComponents.XP_TRANSFER_SPEED_MODE, next); // 写回到该物品栈
 
         // 提示切换
         // 键为 beyonddimensions.xp_mode.switch.<xpmode>

@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Datagen;
+package com.wintercogs.beyonddimensions.datagen;
 
 
 import com.mojang.logging.LogUtils;

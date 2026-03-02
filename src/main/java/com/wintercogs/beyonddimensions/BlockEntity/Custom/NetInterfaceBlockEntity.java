@@ -13,10 +13,10 @@ import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Util.CapCtx;
 import com.wintercogs.beyonddimensions.Api.Util.CommonHandler;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
-import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
-import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.Machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Menu.NetInterfaceBaseMenu;
@@ -100,7 +100,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
     public NetInterfaceBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                     CommonHandler handler = CapabilityHelper.CommonHandlerMap.get(resourceLocation);
                     event.registerBlockEntity(
                             (BlockCapability<? super Object, ? extends Direction>) directionBlockCapability,
-                            ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
+                            BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                             (be, side) -> {
                                 if (handler != null)
                                 {
@@ -355,10 +355,10 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                 }
             }
         }
-        ItemStack ball = new ItemStack(ModItems.MATTER_COMPRESS_BALL.get(), 1);
+        ItemStack ball = new ItemStack(BDItems.MATTER_COMPRESS_BALL.get(), 1);
         if (!dropList.isEmpty())
         {
-            ball.set(ModDataComponents.ISTACK_SLOTS, dropList);
+            ball.set(BDDataComponents.ISTACK_SLOTS, dropList);
             Block.popResource(level, getBlockPos(), ball);
         }
     }

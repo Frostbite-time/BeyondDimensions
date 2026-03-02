@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.EnergyUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.Util.BDMath;
@@ -32,7 +32,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
 
     public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     //--- 能力注册 (通过事件) ---
@@ -40,7 +40,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     {
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK, // 标准物品能力
-                ModBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
+                BDBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     if (be.popMode == PopMode.OPEN)
                     {

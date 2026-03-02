@@ -11,7 +11,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.Machine.FilterMode;
 import com.wintercogs.beyonddimensions.Menu.NetPumpMenu;
 import net.minecraft.core.BlockPos;
@@ -54,7 +54,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
 
     public NetPumpBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.NET_PUMP_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.NET_PUMP_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     @Override

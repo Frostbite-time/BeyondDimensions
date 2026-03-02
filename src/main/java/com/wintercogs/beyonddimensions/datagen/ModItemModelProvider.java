@@ -1,8 +1,8 @@
-package com.wintercogs.beyonddimensions.Datagen;
+package com.wintercogs.beyonddimensions.datagen;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
-import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
@@ -22,24 +22,24 @@ public class ModItemModelProvider extends ItemModelProvider
     @Override
     protected void registerModels()
     {
-        basicItem(ModItems.NET_CREATER.get());
-        basicItem(ModItems.NET_MEMBER_INVITER.get());
-        basicItem(ModItems.NET_MANAGER_INVITER.get());
-        basicItem(ModItems.UNSTABLE_SPACE_TIME_FRAGMENT.get());
-        basicItem(ModItems.STABLE_SPACE_TIME_FRAGMENT.get());
-        basicItem(ModItems.SPACE_TIME_STABLE_FRAME.get());
-        basicItem(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
-        basicItem(ModItems.SPACE_TIME_BAR.get());
-        basicItem(ModItems.NET_TERMINAL_ITEM.get());
-        basicItem(ModItems.NET_GIFTER.get());
-        basicItem(ModItems.NET_DESTROYER.get());
-        basicItem(ModItems.NET_AE_STORAGE_CELL.get());
-        basicItem(ModItems.MATTER_COMPRESS_BALL.get());
-        basicItem(ModItems.NET_MAGNET_ITEM.get());
-        basicItem(ModItems.NET_FEEDER_ITEM.get());
-        basicItem(ModItems.NET_RESTOCKER_ITEM.get());
-        basicItem(ModItems.XP_EXCHANGE_ITEM.get());
-        basicItem(ModItems.WARDEN_SOUL_TAG_ITEM.get());
+        basicItem(BDItems.NET_CREATER.get());
+        basicItem(BDItems.NET_MEMBER_INVITER.get());
+        basicItem(BDItems.NET_MANAGER_INVITER.get());
+        basicItem(BDItems.UNSTABLE_SPACE_TIME_FRAGMENT.get());
+        basicItem(BDItems.STABLE_SPACE_TIME_FRAGMENT.get());
+        basicItem(BDItems.SPACE_TIME_STABLE_FRAME.get());
+        basicItem(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
+        basicItem(BDItems.SPACE_TIME_BAR.get());
+        basicItem(BDItems.NET_TERMINAL_ITEM.get());
+        basicItem(BDItems.NET_GIFTER.get());
+        basicItem(BDItems.NET_DESTROYER.get());
+        basicItem(BDItems.NET_AE_STORAGE_CELL.get());
+        basicItem(BDItems.MATTER_COMPRESS_BALL.get());
+        basicItem(BDItems.NET_MAGNET_ITEM.get());
+        basicItem(BDItems.NET_FEEDER_ITEM.get());
+        basicItem(BDItems.NET_RESTOCKER_ITEM.get());
+        basicItem(BDItems.XP_EXCHANGE_ITEM.get());
+        basicItem(BDItems.WARDEN_SOUL_TAG_ITEM.get());
 
         generateFluidBucketModels();
     }

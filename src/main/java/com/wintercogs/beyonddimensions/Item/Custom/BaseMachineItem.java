@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Machine.BaseMachine;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import net.minecraft.world.entity.Entity;
@@ -32,8 +32,8 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
 
     public void checkComponents(ItemStack stack)
     {
-        if (!stack.has(ModDataComponents.CONTROL_MODE))
-            stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+        if (!stack.has(BDDataComponents.CONTROL_MODE))
+            stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
     }
 
     @Override
@@ -52,7 +52,7 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
     @Override
     public RedStoneControlMode getControlMode(ItemStack stack)
     {
-        return stack.has(ModDataComponents.CONTROL_MODE) ? stack.get(ModDataComponents.CONTROL_MODE) : RedStoneControlMode.IGNORE;
+        return stack.has(BDDataComponents.CONTROL_MODE) ? stack.get(BDDataComponents.CONTROL_MODE) : RedStoneControlMode.IGNORE;
     }
 
     @Override

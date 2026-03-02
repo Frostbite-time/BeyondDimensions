@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Item.Interface.IAddNetMemberHandler;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -29,9 +29,9 @@ public class NetMemberInviter extends NetedItem implements IAddNetMemberHandler
         {
             if (DimensionsNet.getNetFromPlayer(player) == null)
             {
-                if (itemstack.getOrDefault(ModDataComponents.NET_ID_DATA, -1) >= 0)
+                if (itemstack.getOrDefault(BDDataComponents.NET_ID_DATA, -1) >= 0)
                 {
-                    boolean flag = AddPlayerToNet(DimensionsNet.getNetFromId(itemstack.getOrDefault(ModDataComponents.NET_ID_DATA, -1)), player);
+                    boolean flag = AddPlayerToNet(DimensionsNet.getNetFromId(itemstack.getOrDefault(BDDataComponents.NET_ID_DATA, -1)), player);
                     if (flag)
                     {
                         itemstack.consume(1, player);

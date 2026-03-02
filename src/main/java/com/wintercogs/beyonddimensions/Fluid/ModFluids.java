@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.Fluid;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Block.ModBlocks;
+import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.Fluid.Custom.XpFluid;
-import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BucketItem;
@@ -77,13 +77,13 @@ public class ModFluids
 
         // 4) 方块 + 桶
         DeferredHolder<Block, LiquidBlock> block =
-                ModBlocks.BLOCKS.register(name, () ->
+                BDBlocks.BLOCKS.register(name, () ->
                         new LiquidBlock(source.get(),
                                 BlockBehaviour.Properties.ofFullCopy(Blocks.WATER)
                                         .lightLevel(s -> lightlevel)));
 
         DeferredHolder<Item, Item> bucket =
-                ModItems.ITEMS.register(name + "_bucket", () ->
+                BDItems.ITEMS.register(name + "_bucket", () ->
                         new BucketItem(source.get(),
                                 new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
 

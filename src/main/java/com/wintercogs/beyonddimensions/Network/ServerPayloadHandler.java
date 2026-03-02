@@ -9,7 +9,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.GUI.NetMenuType;
 import com.wintercogs.beyonddimensions.Item.Custom.NetMagnetItem;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
@@ -98,8 +98,8 @@ public class ServerPayloadHandler
                                             .flatMap(iCuriosItemHandler ->
                                                     iCuriosItemHandler.findFirstCurio(itemStack ->
                                                             itemStack.getItem() instanceof NetTerminalItem &&
-                                                                    itemStack.has(ModDataComponents.NET_ID_DATA) &&
-                                                                    itemStack.get(ModDataComponents.NET_ID_DATA) >= 0
+                                                                    itemStack.has(BDDataComponents.NET_ID_DATA) &&
+                                                                    itemStack.get(BDDataComponents.NET_ID_DATA) >= 0
                                                     )
                                             )
                                             .map(slotResult -> slotResult.stack())
@@ -109,8 +109,8 @@ public class ServerPayloadHandler
 
                             if (terminalStack != null)
                             {
-                                if (terminalStack.get(ModDataComponents.CRAFT_SLOTS) == null)
-                                    terminalStack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9, ItemStack.EMPTY)));
+                                if (terminalStack.get(BDDataComponents.CRAFT_SLOTS) == null)
+                                    terminalStack.set(BDDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9, ItemStack.EMPTY)));
 
                                 NetTerminalItem.contextMap.put(player, new NetTerminalItem.MenuTriggerContext(InteractionHand.MAIN_HAND, terminalStack));
                                 player.openMenu((NetTerminalItem) terminalStack.getItem());
@@ -372,16 +372,16 @@ public class ServerPayloadHandler
                     {
                         if (stack.getItem() instanceof NetMagnetItem)
                         {
-                            if (stack.has(ModDataComponents.CONTROL_MODE))
+                            if (stack.has(BDDataComponents.CONTROL_MODE))
                             {
-                                if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                                if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
                                 {
-                                    stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                                    stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
                                     player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
                                 }
-                                else if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                                else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
                                 {
-                                    stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                                    stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
                                     player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
                                 }
                             }
@@ -397,16 +397,16 @@ public class ServerPayloadHandler
                         {
                             if (stack.getItem() instanceof NetMagnetItem)
                             {
-                                if (stack.has(ModDataComponents.CONTROL_MODE))
+                                if (stack.has(BDDataComponents.CONTROL_MODE))
                                 {
-                                    if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                                    if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
                                     {
-                                        stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                                        stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
                                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
                                     }
-                                    else if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                                    else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
                                     {
-                                        stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                                        stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
                                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
                                     }
                                 }

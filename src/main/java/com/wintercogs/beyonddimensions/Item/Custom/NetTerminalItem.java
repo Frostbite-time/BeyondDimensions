@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenuTerminal;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -42,12 +42,12 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
         if (!level.isClientSide())
         {
-            if (itemstack.get(ModDataComponents.CRAFT_SLOTS) == null)
-                itemstack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9, ItemStack.EMPTY)));
+            if (itemstack.get(BDDataComponents.CRAFT_SLOTS) == null)
+                itemstack.set(BDDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9, ItemStack.EMPTY)));
 
-            if (itemstack.getOrDefault(ModDataComponents.NET_ID_DATA, -1) >= 0)
+            if (itemstack.getOrDefault(BDDataComponents.NET_ID_DATA, -1) >= 0)
             {
-                DimensionsNet net = DimensionsNet.getNetFromId(itemstack.getOrDefault(ModDataComponents.NET_ID_DATA, -1));
+                DimensionsNet net = DimensionsNet.getNetFromId(itemstack.getOrDefault(BDDataComponents.NET_ID_DATA, -1));
                 if (net != null)
                 {
                     contextMap.put(player, new MenuTriggerContext(usedHand, itemstack));
@@ -81,18 +81,18 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
             ctx = new MenuTriggerContext(player.getUsedItemHand(), player.getItemInHand(player.getUsedItemHand()));
         }
         // 验证物品是否仍是有效的NetTerminalItem
-        if (ctx.stack.getItem() != this || !ctx.stack.has(ModDataComponents.NET_ID_DATA))
+        if (ctx.stack.getItem() != this || !ctx.stack.has(BDDataComponents.NET_ID_DATA))
         {
             return null;
         }
         // 使用上下文中的物品栈
-        DimensionsNet net = DimensionsNet.getNetFromId(ctx.stack.getOrDefault(ModDataComponents.NET_ID_DATA, -1));
+        DimensionsNet net = DimensionsNet.getNetFromId(ctx.stack.getOrDefault(BDDataComponents.NET_ID_DATA, -1));
         if (net == null) return null;
         return new DimensionsCraftMenuTerminal(
                 containerId,
                 inventory,
                 net.getUnifiedStorage(),
-                ctx.stack.get(ModDataComponents.CRAFT_SLOTS).contents(),
+                ctx.stack.get(BDDataComponents.CRAFT_SLOTS).contents(),
                 ctx.stack,
                 null
         );

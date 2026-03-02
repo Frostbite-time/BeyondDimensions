@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
-import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -78,7 +78,7 @@ public class NetCreater extends Item
             // 为新网络添加一些时空碎片
             if (newNet != null)
             {
-                ItemStack timeCrystal = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
+                ItemStack timeCrystal = new ItemStack(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
                 newNet.getUnifiedStorage().insert(new ItemStackKey(timeCrystal), 64, false);
             }
         }

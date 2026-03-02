@@ -17,20 +17,20 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Storage.ItemUnifiedStorageHa
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.Block.ModBlocks;
+import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Integration.IFS.Item.WardenSoulTagItem;
 import com.wintercogs.beyonddimensions.Integration.create.blocks.entities.SchematicannonPathWayBlockEntity;
-import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
-import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.common.init.BDCreativeModeTabs;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -112,22 +112,22 @@ public class BeyondDimensions
         UIRegister.register(modEventBus);
 
         // 注册创造模式菜单
-        ModCreativeModeTabs.register(modEventBus);
+        BDCreativeModeTabs.register(modEventBus);
 
         // 注册物品组件
-        ModDataComponents.register(modEventBus);
+        BDDataComponents.register(modEventBus);
 
         // 注册物品
-        ModItems.register(modEventBus);
+        BDItems.register(modEventBus);
 
         // 注册方块
-        ModBlocks.register(modEventBus);
+        BDBlocks.register(modEventBus);
 
         // 注册流体
         ModFluids.register(modEventBus);
 
         // 注册方块实体
-        ModBlockEntities.register(modEventBus);
+        BDBlockEntities.register(modEventBus);
 
 
     }
@@ -183,7 +183,6 @@ public class BeyondDimensions
         if (ModList.get().isLoaded(IFS_ModId))
         {
             IFS_Loaded = true;
-            MOD_EVENT_BUS.addListener(WardenSoulTagItem::registerCapability);
         }
         if (ModList.get().isLoaded(AE_IFS_ModId))
         {
@@ -192,7 +191,6 @@ public class BeyondDimensions
         if (ModList.get().isLoaded(ARS_ModId))
         {
             ARS_Loaded = true;
-            MOD_EVENT_BUS.addListener(BD_ArsCaps::registerCapability);
         }
         if (ModList.get().isLoaded(AE_ARS_ModId))
         {
@@ -213,10 +211,7 @@ public class BeyondDimensions
         if (ModList.get().isLoaded(Create_ModId))
         {
             Create_Loaded = true;
-            MOD_EVENT_BUS.addListener(SchematicannonPathWayBlockEntity::registerCapability);
         }
-
-        ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)

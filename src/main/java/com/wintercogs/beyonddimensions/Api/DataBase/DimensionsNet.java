@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
-import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.Util.PlayerNameHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -539,7 +539,7 @@ public class DimensionsNet extends SavedData
         setDirty();
         if (currentTime >= ServerConfigRuntime.crystalGenerateTime * 20)
         {
-            ItemStack stack = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(), 1);
+            ItemStack stack = new ItemStack(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(), 1);
             this.unifiedStorage.insert(new ItemStackKey(stack), stack.getCount(), false);
             currentTime = 0;
         }

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenuTerminal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -27,7 +27,7 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
 
     public NetTerminalBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.NET_TERMINAL_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.NET_TERMINAL_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     @Override

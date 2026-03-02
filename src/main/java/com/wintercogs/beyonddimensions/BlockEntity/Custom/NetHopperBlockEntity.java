@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.*;
 import com.wintercogs.beyonddimensions.Menu.NetHopperMenu;
@@ -65,7 +65,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
 
     public NetHopperBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.NET_HOPPER_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.NET_HOPPER_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -19,7 +19,7 @@ public class NetedItem extends Item
 {
     public NetedItem(Properties properties)
     {
-        super(properties.component(ModDataComponents.NET_ID_DATA, -1));
+        super(properties.component(BDDataComponents.NET_ID_DATA, -1));
     }
 
     public static final Logger LOGGER = LogUtils.getLogger();
@@ -67,7 +67,7 @@ public class NetedItem extends Item
 
     public static @Nullable DimensionsNet getNet(ItemStack stack)
     {
-        int netId = stack.getOrDefault(ModDataComponents.NET_ID_DATA, -1);
+        int netId = stack.getOrDefault(BDDataComponents.NET_ID_DATA, -1);
         if (netId >= 0)
         {
             return DimensionsNet.getNetFromId(netId);
@@ -84,15 +84,15 @@ public class NetedItem extends Item
             Level level = player.level();
             if (item.validToReWrite(net, player))
             {
-                if (itemstack.getOrDefault(ModDataComponents.NET_ID_DATA, -1) != net.getId())
+                if (itemstack.getOrDefault(BDDataComponents.NET_ID_DATA, -1) != net.getId())
                 {
-                    itemstack.set(ModDataComponents.NET_ID_DATA, net.getId());
+                    itemstack.set(BDDataComponents.NET_ID_DATA, net.getId());
                     level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
                     player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound", net.getId()));
                 }
                 else
                 {
-                    itemstack.set(ModDataComponents.NET_ID_DATA, -1);
+                    itemstack.set(BDDataComponents.NET_ID_DATA, -1);
                     level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
                     player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound", net.getId()));
                 }

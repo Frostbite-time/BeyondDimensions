@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.Item.Custom;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.Machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.Menu.NetRestockerMenu;
@@ -66,12 +66,12 @@ public class NetRestockerItem extends BaseMachineItem
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
-        if (!stack.has(ModDataComponents.ISTACK_SLOTS))
-            stack.set(ModDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
-        if (!stack.has(ModDataComponents.FUZZY_MODE))
-            stack.set(ModDataComponents.FUZZY_MODE, FuzzyMode.DISABLE);
-        if (!stack.has(ModDataComponents.RECEIVE_MODE))
-            stack.set(ModDataComponents.RECEIVE_MODE, ReceiveMode.STOP);
+        if (!stack.has(BDDataComponents.ISTACK_SLOTS))
+            stack.set(BDDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
+        if (!stack.has(BDDataComponents.FUZZY_MODE))
+            stack.set(BDDataComponents.FUZZY_MODE, FuzzyMode.DISABLE);
+        if (!stack.has(BDDataComponents.RECEIVE_MODE))
+            stack.set(BDDataComponents.RECEIVE_MODE, ReceiveMode.STOP);
     }
 
     @Override
@@ -87,10 +87,10 @@ public class NetRestockerItem extends BaseMachineItem
         super.workContent(stack, level, holder, slotId, isSelected);
 
         UnifiedStorage storage = NetedItem.getNet(stack).getUnifiedStorage();
-        List<KeyAmount> templates = stack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
+        List<KeyAmount> templates = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
 
-        FuzzyMode fuzzyMode = stack.getOrDefault(ModDataComponents.FUZZY_MODE, FuzzyMode.DISABLE);
-        ReceiveMode receiveMode = stack.getOrDefault(ModDataComponents.RECEIVE_MODE, ReceiveMode.STOP);
+        FuzzyMode fuzzyMode = stack.getOrDefault(BDDataComponents.FUZZY_MODE, FuzzyMode.DISABLE);
+        ReceiveMode receiveMode = stack.getOrDefault(BDDataComponents.RECEIVE_MODE, ReceiveMode.STOP);
 
         if (holder instanceof Player player)
         {

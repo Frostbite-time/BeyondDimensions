@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.Datagen;
+package com.wintercogs.beyonddimensions.datagen;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Integration.RS.Tags.RSTags;

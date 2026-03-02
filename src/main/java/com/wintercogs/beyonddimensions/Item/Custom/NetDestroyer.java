@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
-import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -54,9 +54,9 @@ public class NetDestroyer extends NetedItem
 
         if (!level.isClientSide())
         {
-            if (stack.getOrDefault(ModDataComponents.NET_ID_DATA, -1) >= 0)
+            if (stack.getOrDefault(BDDataComponents.NET_ID_DATA, -1) >= 0)
             {
-                DimensionsNet itemNet = DimensionsNet.getNetFromId(stack.getOrDefault(ModDataComponents.NET_ID_DATA, -1));
+                DimensionsNet itemNet = DimensionsNet.getNetFromId(stack.getOrDefault(BDDataComponents.NET_ID_DATA, -1));
                 if (itemNet != null)
                 {
                     DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
