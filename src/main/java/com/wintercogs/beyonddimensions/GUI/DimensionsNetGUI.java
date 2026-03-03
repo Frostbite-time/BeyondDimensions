@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
@@ -80,6 +81,15 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         if (UIDataHelper.isTransfer)
         {
             menu.lineData = UIDataHelper.currentPage;
+            if (UIDataHelper.lastMousePos != null)
+            {
+                Window window = Minecraft.getInstance().getWindow();
+                GLFW.glfwSetCursorPos(
+                        window.handle(),
+                        UIDataHelper.lastMousePos.x,
+                        UIDataHelper.lastMousePos.y
+                );
+            }
 
             UIDataHelper.isTransfer = false;
         }
@@ -317,7 +327,14 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, Identifier.tryBuild(BeyondDimensions.MODID, "widget/craft_button"), button ->
         {
             UIDataHelper.currentPage = menu.lineData;
-            UIDataHelper.lastMousePos = new Vec2(0, 0);
+
+            double xpos[] = new double[1];
+            double ypos[] = new double[1];
+            GLFW.glfwGetCursorPos(Minecraft.getInstance().getWindow().handle(), xpos, ypos);
+            UIDataHelper.lastMousePos = new Vec2(
+                    (float) xpos[0],
+                    (float) ypos[0]
+            );
 
             UIDataHelper.isTransfer = true;
 
