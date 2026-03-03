@@ -1,13 +1,8 @@
 package com.wintercogs.beyonddimensions.Render;
 
-import mezz.jei.api.ingredients.IIngredientTypeWithSubtypes;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
 
 // 参考自jei的IIngredientRenderer接口以及FluidTankRenderer类
 public class IngredientRenderer

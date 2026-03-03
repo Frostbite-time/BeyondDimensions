@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
-import com.mojang.serialization.*;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Util.BDMath;
@@ -37,8 +38,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
 
-    // —— 新格式：fluid + components（不含 amount）——
-    private static final MapCodec<FluidStackKey> NEW_FMT = RecordCodecBuilder.mapCodec(instance ->
+    private static final MapCodec<FluidStackKey> TYPE_CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     BuiltInRegistries.FLUID.holderByNameCodec().fieldOf("fluid")
                             .forGetter(t -> RegistryUtil.holderOf(t.fluid)),
@@ -46,99 +46,6 @@ public final class FluidStackKey implements IStackKey<FluidStack>
                             .forGetter(t -> t.patch)
             ).apply(instance, (holder, patch) -> new FluidStackKey(holder.value(), patch))
     );
-
-    // —— 最终产出的 MapCodec：编码总是走新格式；解码按代次兼容 —— //
-    public static final MapCodec<FluidStackKey> TYPE_CODEC = new MapCodec<>()
-    {
-
-        // 统一键名
-        private static final String K_FLUID = "fluid";
-        private static final String K_COMPS = "components";
-        // 【兼容 G1】旧别名键（大写）
-        private static final String K_FLUID_OLD = "Fluid";
-        private static final String K_COMPS_OLD = "Components";
-        // 【兼容 G0】早期直接内嵌 FluidStack 的形态
-        private static final String K_LEGACY = "internal_stack"; // 旧 JSON/Codec
-        private static final String K_STACK = "Stack";          // 旧 NBT 写法
-        // 旧数量键（Key 层不需要，读到即忽略）
-        private static final String K_AMOUNT = "amount";
-        private static final String K_AMOUNT_OLD = "Amount";
-
-        @Override
-        public <T> DataResult<FluidStackKey> decode(DynamicOps<T> ops, MapLike<T> input)
-        {
-            final T kFluid = ops.createString(K_FLUID);
-            final T kComps = ops.createString(K_COMPS);
-            final T kFluidOld = ops.createString(K_FLUID_OLD);
-            final T kCompsOld = ops.createString(K_COMPS_OLD);
-            final T kLegacy = ops.createString(K_LEGACY);
-            final T kStack = ops.createString(K_STACK);
-            final T kAmt = ops.createString(K_AMOUNT);
-            final T kAmtOld = ops.createString(K_AMOUNT_OLD);
-
-            // 新格式
-            if (input.get(kFluid) != null)
-            {
-                DataResult<FluidStackKey> r = NEW_FMT.decode(ops, input);
-                if (r.result().isPresent()) return r;
-
-                // 宽松兜底：fluid 存在但解析失败 → 仅保留 components，回退 EMPTY
-                T compsNode = input.get(kComps);
-                if (compsNode == null) compsNode = input.get(kCompsOld); // 也兼容大写
-                DataComponentPatch patch = compsNode == null
-                        ? DataComponentPatch.EMPTY
-                        : DataComponentPatch.CODEC.parse(ops, compsNode).result().orElse(DataComponentPatch.EMPTY);
-                return DataResult.success(new FluidStackKey(Fluids.EMPTY, patch));
-            }
-
-
-            // 大写键名模式
-            if (input.get(kFluidOld) != null || input.get(kCompsOld) != null)
-            {
-                java.util.Map<T, T> map = new java.util.LinkedHashMap<>();
-                input.entries().forEach(p -> {
-                    T key = p.getFirst();
-                    if (key.equals(kFluidOld)) key = kFluid;  // Fluid -> fluid
-                    else if (key.equals(kCompsOld)) key = kComps;  // Components -> components
-                    // 忽略 amount/Amount
-                    if (!key.equals(kAmt) && !key.equals(kAmtOld))
-                    {
-                        map.put(key, p.getSecond());
-                    }
-                });
-                T remapped = ops.createMap(map);
-                return NEW_FMT.codec().decode(ops, remapped)
-                        .map(com.mojang.datafixers.util.Pair::getFirst);
-            }
-
-
-            // 内嵌模式
-            T legacyNode = input.get(kLegacy);
-            if (legacyNode == null) legacyNode = input.get(kStack);
-            if (legacyNode != null)
-            {
-                return FluidStack.OPTIONAL_CODEC.parse(ops, legacyNode)
-                        .map(FluidStackKey::new);
-            }
-
-            // 未匹配
-            return NEW_FMT.decode(ops, input);
-        }
-
-        @Override
-        public <T> RecordBuilder<T> encode(FluidStackKey value, DynamicOps<T> ops, RecordBuilder<T> prefix)
-        {
-            // 仅写新格式（fluid / components）
-            return NEW_FMT.encode(value, ops, prefix);
-        }
-
-        @Override
-        public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops)
-        {
-            // 对外暴露新格式键集合
-            return java.util.stream.Stream.of(K_FLUID, K_COMPS).map(ops::createString);
-        }
-    };
 
     public static final Codec<FluidStackKey> CODEC = TYPE_CODEC.codec();
 
