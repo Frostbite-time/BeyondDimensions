@@ -3,8 +3,8 @@ name: Build & Publish
 on: [workflow_dispatch]
 
 env:
-  MINECRAFT_VERSION: "1.21.11"
-  JAVA_VERSION: "21"
+  MINECRAFT_VERSION: "26.1"
+  JAVA_VERSION: "25"
   LOADER: "neoforge"
 
   CURSEFORGE_ID: "1222890"

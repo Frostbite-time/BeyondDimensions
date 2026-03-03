@@ -3,7 +3,7 @@ name: Build
 on: [workflow_dispatch]
 
 env:
-  JAVA_VERSION: "21"
+  JAVA_VERSION: "25"
 
 permissions:
   contents: write
