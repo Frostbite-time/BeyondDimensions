@@ -1,1 +1,1 @@
-* The 1.21.11 version is not maintained long-term, and no guarantees are made regarding any bug fixes or save compatibility.
+* init 26.1
