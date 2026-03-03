@@ -24,6 +24,7 @@ import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -86,9 +87,9 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                 // 堆叠数量为1 右键点击 尝试取出内容物并插入
                 else if (carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
                 {
-                    if (carriedItem.getItem() instanceof BucketItem bucketItem || carriedItem.getItem() instanceof MilkBucketItem)
+                    if (carriedItem.getItem() instanceof BucketItem bucketItem)
                     {
-                        Object handler = carriedItem.getCapability(Capabilities.FluidHandler.ITEM);
+                        Object handler = carriedItem.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forPlayerCursor(player, menu));
                         if (handler != null)
                         {
                             FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
@@ -116,7 +117,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     else
                     {
                         CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap) -> {
-                            Object handler = carriedItem.getCapability(cap);
+                            Object handler = carriedItem.getCapability(cap, ItemAccess.forPlayerCursor(player, menu));
                             if (handler != null)
                             {
                                 Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
@@ -289,7 +290,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     // 最后检查是否为能力系统交互
                     else if (carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
                     {
-                        if (carriedItem.getItem() instanceof BucketItem || carriedItem.getItem() instanceof MilkBucketItem)
+                        if (carriedItem.getItem() instanceof BucketItem)
                         {
                             // 需要分开处理，分别处理
                             // 1.空桶接受
@@ -310,7 +311,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                             }
                             else // 继续投放 insert模拟会自动解决类型不匹配等问题
                             {
-                                Object handler = carriedItem.getCapability(Capabilities.FluidHandler.ITEM);
+                                Object handler = carriedItem.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forPlayerCursor(player, menu));
                                 if (handler != null)
                                 {
                                     FluidHandlerWrapper stackHandlerWrapper = new FluidHandlerWrapper(handler);
@@ -342,7 +343,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                 if (clickStack.key().getTypeId().equals(typeId))
                                 {
                                     // 尝试获取对应能力
-                                    Object handler = carriedItem.getCapability(cap);
+                                    Object handler = carriedItem.getCapability(cap, ItemAccess.forPlayerCursor(player, menu));
                                     if (handler != null)
                                     {
                                         Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);

@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 
 import java.util.function.Function;
 
@@ -90,7 +91,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                         // 注: 通用机械物品必须在堆叠数量为1时才暴露能力。
                         // 这种做法看起来是很有益的。可以防止其他模组错误消耗过多的存储资源
                         CapabilityHelper.ItemCapabilityMap.forEach((typeId, cap) -> {
-                            Object handler = copy.getCapability(cap);
+                            Object handler = copy.getCapability(cap, ItemAccess.forStack(copy));
                             if (handler != null)
                             {
                                 Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
