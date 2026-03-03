@@ -131,11 +131,11 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY + 10, 4210752, false);
+        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY + 10, -12566464, false);
 
-        guiGraphics.drawString(this.font, StringFormat.formatCount(menu.lastEnergyStored) + "/" + StringFormat.formatCount(menu.lastEnergyCapacity), this.inventoryLabelX, this.inventoryLabelY - 20, 4210752, false);
-        guiGraphics.drawString(this.font, StringFormat.formatChange(menu.lastEnergySpeedState) + " FE/t", this.inventoryLabelX, this.inventoryLabelY - 10, 4210752, false);
+        guiGraphics.drawString(this.font, StringFormat.formatCount(menu.lastEnergyStored) + "/" + StringFormat.formatCount(menu.lastEnergyCapacity), this.inventoryLabelX, this.inventoryLabelY - 20, -12566464, false);
+        guiGraphics.drawString(this.font, StringFormat.formatChange(menu.lastEnergySpeedState) + " FE/t", this.inventoryLabelX, this.inventoryLabelY - 10, -12566464, false);
     }
 
     protected void renderEnergyBar(GuiGraphics guiGraphics, int xStart, int yStart)

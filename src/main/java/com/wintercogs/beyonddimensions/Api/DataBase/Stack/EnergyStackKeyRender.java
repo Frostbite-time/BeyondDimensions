@@ -47,7 +47,7 @@ public class EnergyStackKeyRender implements IStackRender
         int w = Minecraft.getInstance().font.width(text);
         final int X = (int) ((x - 1 + 16.0f + 2.0f - w * 0.666f) / 0.666f);
         final int Y = (int) ((y - 1 + 16.0f - 5.0f * 0.666f) / 0.666f);
-        gui.drawString(Minecraft.getInstance().font, text, X, Y, 0xFFFFFF);
+        gui.drawString(Minecraft.getInstance().font, text, X, Y, 0xFFFFFFFF);
         pose.popMatrix();
     }
 

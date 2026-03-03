@@ -190,9 +190,9 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
-        guiGraphics.drawString(this.font, Component.translatable("menu.label.beyonddimensions.input_filter_slots"), 6, 27, 4210752, false);
-        GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.fuel_filter_slots"), 224, 27, 4210752, false);
+        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
+        guiGraphics.drawString(this.font, Component.translatable("menu.label.beyonddimensions.input_filter_slots"), 6, 27, -12566464, false);
+        GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.fuel_filter_slots"), 224, 27, -12566464, false);
     }
 
     protected int rebuildImageHeight()

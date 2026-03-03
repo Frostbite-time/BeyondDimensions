@@ -162,9 +162,9 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
-        GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.restock_slots"), imageWidth - 6, this.titleLabelY + 3, 4210752, false);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752, false);
+        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
+        GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.restock_slots"), imageWidth - 6, this.titleLabelY + 3, -12566464, false);
+        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
     protected int rebuildImageHeight()

@@ -237,15 +237,15 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX + 3, this.titleLabelY, 4210752, false);
-        guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.name.player", Component.literal(currentPlayerName)), 110, 25, 4210752, false);
+        guiGraphics.drawString(this.font, this.title, this.titleLabelX + 3, this.titleLabelY, -12566464, false);
+        guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.name.player", Component.literal(currentPlayerName)), 110, 25, -12566464, false);
         if (currentPlayerPermissionLevel == null)
         {
-            guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.permission.level.zero"), 110, 10, 4210752, false);
+            guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.permission.level.zero"), 110, 10, -12566464, false);
         }
         else
         {
-            guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.permission.level.prefix", Component.literal(currentPlayerPermissionLevel.name())), 110, 10, 4210752, false);
+            guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.permission.level.prefix", Component.literal(currentPlayerPermissionLevel.name())), 110, 10, -12566464, false);
         }
 
 
