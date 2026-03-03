@@ -19,9 +19,9 @@ public class CommonTexturesRender
     public static void renderTopBaseCommon(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
                                            int width, int height)
     {
-        guiGraphics.blit(CommonTextures.TOP_BASE_COMMON, leftPos, yPosRef[0],
-                width, height,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.TOP_BASE_COMMON, leftPos, yPosRef[0],
                 0F, 0F,
+                width, height,
                 CommonTextures.TOP_BASE_COMMON_WIDTH,
                 CommonTextures.TOP_BASE_COMMON_HEIGHT);
         yPosRef[0] += height;
@@ -38,9 +38,9 @@ public class CommonTexturesRender
     public static void renderCommonConnection(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
                                               int width, int height)
     {
-        guiGraphics.blit(CommonTextures.COMMON_CONNECTION, leftPos, yPosRef[0],
-                width, height,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.COMMON_CONNECTION, leftPos, yPosRef[0],
                 0F, 0F,
+                width, height,
                 CommonTextures.COMMON_CONNECTION_WIDTH,
                 CommonTextures.COMMON_CONNECTION_HEIGHT);
         yPosRef[0] += height;
@@ -57,9 +57,9 @@ public class CommonTexturesRender
     public static void renderCommonSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
                                          int width, int height)
     {
-        guiGraphics.blit(CommonTextures.COMMON_SLOTS, leftPos, yPosRef[0],
-                width, height,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.COMMON_SLOTS, leftPos, yPosRef[0],
                 0F, 0F,
+                width, height,
                 CommonTextures.COMMON_SLOTS_WIDTH,
                 CommonTextures.COMMON_SLOTS_HEIGHT);
         yPosRef[0] += height;
@@ -76,9 +76,9 @@ public class CommonTexturesRender
     public static void renderFilterSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
                                          int width, int height)
     {
-        guiGraphics.blit(CommonTextures.FILTER_SLOTS, leftPos, yPosRef[0],
-                width, height,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.FILTER_SLOTS, leftPos, yPosRef[0],
                 0F, 0F,
+                width, height,
                 CommonTextures.FILTER_SLOTS_WIDTH,
                 CommonTextures.FILTER_SLOTS_HEIGHT);
         yPosRef[0] += height;
@@ -95,9 +95,9 @@ public class CommonTexturesRender
     public static void renderPlayerInv(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
                                        int width, int height)
     {
-        guiGraphics.blit(CommonTextures.GUI_TEXTURE_PLAYER_INV, leftPos, yPosRef[0],
-                width, height,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.GUI_TEXTURE_PLAYER_INV, leftPos, yPosRef[0],
                 0F, 0F,
+                width, height,
                 CommonTextures.PLAYER_INV_WIDTH,
                 CommonTextures.PLAYER_INV_HEIGHT);
         yPosRef[0] += height;
@@ -128,9 +128,9 @@ public class CommonTexturesRender
     public static void renderNetFurnaceBackground(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
                                                   int width, int height)
     {
-        guiGraphics.blit(CommonTextures.NET_FURNACE_BACKGROUND, leftPos, yPosRef[0],
-                width, height,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.NET_FURNACE_BACKGROUND, leftPos, yPosRef[0],
                 0F, 0F,
+                width, height,
                 CommonTextures.NET_FURNACE_BACKGROUND_WIDTH,
                 CommonTextures.NET_FURNACE_BACKGROUND_HEIGHT);
         yPosRef[0] += height;
