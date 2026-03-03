@@ -10,7 +10,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.Permissions;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -23,14 +23,12 @@ public final class ServerCommands
     {
     }
 
-    private static final int OP_LEVEL = 2;
-
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event)
     {
         event.getDispatcher().register(
                 Commands.literal("bdtools")
-                        .requires(src -> src.hasPermission(OP_LEVEL))
+                        .requires(src -> src.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
                         .then(
                                 Commands.literal("network")
                                         // --------------------
