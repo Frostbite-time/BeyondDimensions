@@ -1,8 +1,11 @@
 package com.wintercogs.beyonddimensions.Machine;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 // 物品机器的重写是可选的
 // 方块机器相关的必须重写
@@ -21,13 +24,13 @@ public interface BaseMachine extends IMachine
     }
 
     @Override
-    default void working(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    default void working(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot)
     {
-        if (shouldWork(stack, level, holder, slotId, isSelected))
+        if (shouldWork(stack, level, entity, slot))
         {
-            workStart(stack, level, holder, slotId, isSelected);
-            workContent(stack, level, holder, slotId, isSelected);
-            workEnd(stack, level, holder, slotId, isSelected);
+            workStart(stack, level, entity, slot);
+            workContent(stack, level, entity, slot);
+            workEnd(stack, level, entity, slot);
         }
     }
 
@@ -71,7 +74,7 @@ public interface BaseMachine extends IMachine
 
     // 物品的shouldWork需要自行处理步进时间
     @Override
-    default boolean shouldWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    default boolean shouldWork(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot)
     {
         RedStoneControlMode controlMode = getControlMode(stack);
         if (controlMode == null) // 防止初始状态出错
@@ -112,7 +115,7 @@ public interface BaseMachine extends IMachine
         return 0;
     }
 
-    default int getTicksPerWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    default int getTicksPerWork(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot)
     {
         return 0;
     }
@@ -134,15 +137,15 @@ public interface BaseMachine extends IMachine
     }
 
     // workStart应该始终检查
-    default void workStart(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    default void workStart(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot)
     {
     }
 
-    default void workContent(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    default void workContent(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot)
     {
     }
 
-    default void workEnd(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    default void workEnd(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot)
     {
     }
 }

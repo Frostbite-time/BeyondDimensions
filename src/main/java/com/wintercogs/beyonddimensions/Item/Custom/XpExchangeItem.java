@@ -4,14 +4,11 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.XpTransferSpeedMode;
-import com.wintercogs.beyonddimensions.Tags.ModFluidTags;
 import com.wintercogs.beyonddimensions.Util.BDMath;
 import com.wintercogs.beyonddimensions.Util.XpUtil;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -29,8 +26,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.fluids.FluidStack;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -207,14 +204,11 @@ public class XpExchangeItem extends Item
      */
     private List<Fluid> getExperienceFluids(Level level)
     {
-        final Registry<Fluid> reg = level.registryAccess().registryOrThrow(Registries.FLUID);
+        final Registry<Fluid> reg = level.registryAccess().lookupOrThrow(Registries.FLUID);
         final LinkedHashSet<Fluid> set = new LinkedHashSet<>();
         // 追加所有带 C_EXPERIENCE 标签的流体
-        reg.getTag(ModFluidTags.C_EXPERIENCE).ifPresent((HolderSet<Fluid> holders) -> {
-            for (Holder<Fluid> h : holders)
-            {
-                set.add(h.value());
-            }
+        reg.getTagOrEmpty(Tags.Fluids.EXPERIENCE).forEach(fluidHolder -> {
+            set.add(fluidHolder.value());
         });
 
         return new ArrayList<>(set);

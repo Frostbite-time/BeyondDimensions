@@ -1,11 +1,14 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Machine.BaseMachine;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 public abstract class BaseMachineItem extends NetedItem implements BaseMachine
 {
@@ -15,19 +18,19 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected)
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot)
     {
-        super.inventoryTick(stack, level, entity, slotId, isSelected);
+        super.inventoryTick(stack, level, entity, slot);
 
         checkComponents(stack);
 
         if (level.isClientSide()) return;
 
         // 同时确保getTicksPerWork为0时可以每tick触发
-        if (getTicksPerWork(stack, level, entity, slotId, isSelected) <= 0)
-            working(stack, level, entity, slotId, isSelected);
-        else if (level.getGameTime() % getTicksPerWork(stack, level, entity, slotId, isSelected) == 0)
-            working(stack, level, entity, slotId, isSelected);
+        if (getTicksPerWork(stack, level, entity, slot) <= 0)
+            working(stack, level, entity, slot);
+        else if (level.getGameTime() % getTicksPerWork(stack, level, entity, slot) == 0)
+            working(stack, level, entity, slot);
     }
 
     public void checkComponents(ItemStack stack)
@@ -37,10 +40,9 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
     }
 
     @Override
-    public void workStart(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    public void workStart(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot)
     {
-        BaseMachine.super.workStart(stack, level, holder, slotId, isSelected);
-
+        BaseMachine.super.workStart(stack, level, entity, slot);
     }
 
     @Override

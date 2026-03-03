@@ -4,16 +4,18 @@ import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.item.component.TooltipDisplay;
+import org.jspecify.annotations.Nullable;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public class UnstableSpaceTimeFragment extends Item
 {
@@ -22,15 +24,16 @@ public class UnstableSpaceTimeFragment extends Item
         super(properties.component(BDDataComponents.TIME_LINE, 0L));
     }
 
+
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @NotNull TooltipContext context, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag tooltipFlag)
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag flag)
     {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        super.appendHoverText(stack, context, tooltipDisplay, tooltipAdder, flag);
 
         Long longData = stack.get(BDDataComponents.LONG_DATA);
         if (longData != null)
         {
-            tooltipComponents.add(Component.translatable(
+            tooltipAdder.accept(Component.translatable(
                     "tooltip.item.unstable_space_time.long_data",
                     longData / 10
             ));
@@ -39,7 +42,7 @@ public class UnstableSpaceTimeFragment extends Item
         {
             // 没初始化时显示默认值
             long def = ServerConfigRuntime.fragmentTransferTime;
-            tooltipComponents.add(Component.translatable(
+            tooltipAdder.accept(Component.translatable(
                     "tooltip.item.unstable_space_time.long_data",
                     def / 10
             ));
@@ -47,11 +50,11 @@ public class UnstableSpaceTimeFragment extends Item
     }
 
     @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected)
+    public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot slot)
     {
-        super.inventoryTick(stack, level, entity, slotId, isSelected);
+        super.inventoryTick(stack, level, entity, slot);
 
-        if (level.isClientSide() || !(entity instanceof Player player))
+        if (!(entity instanceof Player player))
         {
             return;
         }
@@ -82,34 +85,29 @@ public class UnstableSpaceTimeFragment extends Item
         }
 
         // 剩余时间小于10直接转换
-        int globalSlot = findGlobalSlotByReference(player.getInventory(), stack);
-        if (globalSlot < 0)
+        ItemStack stable = new ItemStack(BDItems.STABLE_SPACE_TIME_FRAGMENT.get(), stack.getCount());
+        if (slot != null)
         {
-            stack.set(BDDataComponents.TIME_LINE, currentTick);
+            player.setItemSlot(slot, stable);
             return;
         }
 
-        ItemStack stable = new ItemStack(BDItems.STABLE_SPACE_TIME_FRAGMENT.get(), stack.getCount());
-        player.getInventory().setItem(globalSlot, stable);
+        if (!replaceInInventoryByReference(player.getInventory(), stack, stable))
+        {
+            stack.set(BDDataComponents.TIME_LINE, currentTick);
+        }
     }
 
-    private static int findGlobalSlotByReference(Inventory inv, ItemStack target)
+    private static boolean replaceInInventoryByReference(Inventory inv, ItemStack target, ItemStack replacement)
     {
-        // items: 0..35
-        for (int i = 0; i < inv.items.size(); i++)
+        for (int i = 0; i < inv.getContainerSize(); i++)
         {
-            if (inv.items.get(i) == target) return i;
+            if (inv.getItem(i) == target)
+            {
+                inv.setItem(i, replacement);
+                return true;
+            }
         }
-        // armor: 36..39
-        for (int i = 0; i < inv.armor.size(); i++)
-        {
-            if (inv.armor.get(i) == target) return 36 + i;
-        }
-        // offhand: 40
-        for (int i = 0; i < inv.offhand.size(); i++)
-        {
-            if (inv.offhand.get(i) == target) return 36 + 4 + i; // 40
-        }
-        return -1;
+        return false;
     }
 }

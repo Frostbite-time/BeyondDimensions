@@ -5,21 +5,23 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.*;
 import com.wintercogs.beyonddimensions.Menu.NetMagnetMenu;
 import com.wintercogs.beyonddimensions.Util.ItemStackHelper;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -38,6 +40,7 @@ import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -93,16 +96,16 @@ public class NetMagnetItem extends BaseMachineItem
     }
 
     @Override
-    public boolean shouldWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    public boolean shouldWork(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot)
     {
-        return super.shouldWork(stack, level, holder, slotId, isSelected)
+        return super.shouldWork(stack, level, entity, slot)
                 && NetedItem.getNet(stack) != null;
     }
 
     @Override
-    public void workContent(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    public void workContent(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot)
     {
-        super.workContent(stack, level, holder, slotId, isSelected);
+        super.workContent(stack, level, entity, slot);
 
         FilterMode filterMode = stack.getOrDefault(BDDataComponents.FILTER_MODE, FilterMode.BLACK);
         HopperItemMode hopperItemMode = stack.getOrDefault(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
@@ -112,7 +115,7 @@ public class NetMagnetItem extends BaseMachineItem
         HopperRangeMode hopperRangeMode = stack.getOrDefault(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
         List<KeyAmount> filterSlots = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
 
-        AABB searchArea = getSearchArea(hopperRangeMode, level, holder.getOnPos());
+        AABB searchArea = getSearchArea(hopperRangeMode, level, entity.getOnPos());
 
         List<ItemEntity> itemEntities = hopperItemMode == HopperItemMode.ALLOW ? refreshItemEntityCache(hopperNBTMode, level, searchArea) : new ArrayList<>();
         List<ExperienceOrb> xpEntities = hopperXpMode == HopperXpMode.ALLOW ? refreshXpEntityCache(level, searchArea) : new ArrayList<>();
@@ -134,7 +137,7 @@ public class NetMagnetItem extends BaseMachineItem
 
                         if (storage.insert(itemKey, count, true).isEmpty())
                         {
-                            if (holder instanceof Player player)
+                            if (entity instanceof Player player)
                             {
                                 ItemStack originalCopy = itemStack.copy();
                                 // 发送事件
@@ -183,7 +186,7 @@ public class NetMagnetItem extends BaseMachineItem
     }
 
     @Override
-    public int getTicksPerWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
+    public int getTicksPerWork(@NotNull ItemStack stack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot)
     {
         HopperRangeMode hopperRangeMode = stack.getOrDefault(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
         HopperFluidMode hopperFluidMode = stack.getOrDefault(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
