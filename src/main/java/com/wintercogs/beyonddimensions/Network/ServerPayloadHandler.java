@@ -31,6 +31,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
+import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotResult;
 
 import java.util.List;
@@ -387,32 +388,36 @@ public class ServerPayloadHandler
                             }
                         }
                     }
-                    top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
-                        List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
-                                .stream()
-                                .map(SlotResult::stack)
-                                .toList();
 
-                        for (ItemStack stack : curios)
-                        {
-                            if (stack.getItem() instanceof NetMagnetItem)
+                    if (BeyondDimensions.CuriosLoaded)
+                    {
+                        CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
+                            List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
+                                    .stream()
+                                    .map(SlotResult::stack)
+                                    .toList();
+
+                            for (ItemStack stack : curios)
                             {
-                                if (stack.has(ModDataComponents.CONTROL_MODE))
+                                if (stack.getItem() instanceof NetMagnetItem)
                                 {
-                                    if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                                    if (stack.has(ModDataComponents.CONTROL_MODE))
                                     {
-                                        stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
-                                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
-                                    }
-                                    else if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
-                                    {
-                                        stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
-                                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
+                                        if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                                        {
+                                            stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
+                                        }
+                                        else if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                                        {
+                                            stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
+                                        }
                                     }
                                 }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
         );
     }
