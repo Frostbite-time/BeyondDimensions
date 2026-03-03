@@ -22,8 +22,6 @@ import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.MenuProvider;
@@ -34,6 +32,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import org.jetbrains.annotations.NotNull;
@@ -364,23 +364,23 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(@NotNull ValueInput input)
     {
-        super.loadAdditional(tag, registries);
-        this.stackHandler.deserializeNBT(registries, tag.getCompound("inventory"));
-        this.fakeStackHandler.deserializeNBT(registries, tag.getCompound("flags"));
+        super.loadAdditional(input);
+        this.stackHandler.deserializeNBT(input.lookup(), input.read("inventory", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
+        this.fakeStackHandler.deserializeNBT(input.lookup(), input.read("flags", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
 
         // 旧数据兼容
-        String popModeNew = tag.getString("pop_mode");
+        String popModeNew = input.getStringOr("pop_mode", "");
         if (!popModeNew.isEmpty())
         {
             this.popMode = PopMode.valueOf(popModeNew);
         }
-        else if (!tag.getString("popMode").isEmpty())
+        else if (!input.getStringOr("popMode", "").isEmpty())
         {
-            this.popMode = PopMode.valueOf(tag.getString("popMode"));
+            this.popMode = PopMode.valueOf(input.getStringOr("popMode", PopMode.STOP.name()));
         }
-        else if (tag.getBoolean("popMode"))
+        else if (input.getBooleanOr("popMode", false))
         {
             this.popMode = PopMode.OPEN;
         }
@@ -389,7 +389,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
             this.popMode = PopMode.STOP;
         }
 
-        String fuzzyModeNew = tag.getString("fuzzy_mode");
+        String fuzzyModeNew = input.getStringOr("fuzzy_mode", "");
         if (!fuzzyModeNew.isEmpty())
         {
             this.fuzzyMode = FuzzyMode.valueOf(fuzzyModeNew);
@@ -399,13 +399,13 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(@NotNull ValueOutput output)
     {
-        super.saveAdditional(tag, registries);
-        tag.put("inventory", stackHandler.serializeNBT(registries));
-        tag.put("flags", fakeStackHandler.serializeNBT(registries));
-        tag.putString("pop_mode", this.popMode.name());
-        tag.putString("fuzzy_mode", this.fuzzyMode.name());
+        super.saveAdditional(output);
+        output.store("inventory", net.minecraft.nbt.CompoundTag.CODEC, stackHandler.serializeNBT(lookupProvider()));
+        output.store("flags", net.minecraft.nbt.CompoundTag.CODEC, fakeStackHandler.serializeNBT(lookupProvider()));
+        output.putString("pop_mode", this.popMode.name());
+        output.putString("fuzzy_mode", this.fuzzyMode.name());
     }
 
     @Override

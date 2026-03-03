@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.anti_ad.mc.ipn.api.IPNIgnore;
 import org.jetbrains.annotations.NotNull;
@@ -137,7 +138,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         writeQuickDataTag(updateTag);
         if (player.level().isClientSide())
         {
-            PacketDistributor.sendToServer(new QuickDataTagPacket(updateTag));
+            ClientPacketDistributor.sendToServer(new QuickDataTagPacket(updateTag));
         }
         else
         {

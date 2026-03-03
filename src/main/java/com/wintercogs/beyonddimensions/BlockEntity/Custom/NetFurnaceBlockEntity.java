@@ -16,8 +16,6 @@ import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
@@ -30,6 +28,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.transfer.CombinedResourceHandler;
@@ -878,43 +878,43 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
 
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(@NotNull ValueInput input)
     {
-        super.loadAdditional(tag, registries);
-        this.inputFilterSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("input_filter_slots"));
-        this.fuelFilterSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("fuel_filter_slots"));
-        this.inputStorageSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("input_storage_slots"));
-        this.outputStorageSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("output_storage_slots"));
-        this.fuelStorageSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("fuel_storage_slots"));
-        this.fuelReturnSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("fuel_return_slots"));
+        super.loadAdditional(input);
+        this.inputFilterSlots.deserializeNBT(input.lookup(), input.read("input_filter_slots", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
+        this.fuelFilterSlots.deserializeNBT(input.lookup(), input.read("fuel_filter_slots", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
+        this.inputStorageSlots.deserializeNBT(input.lookup(), input.read("input_storage_slots", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
+        this.outputStorageSlots.deserializeNBT(input.lookup(), input.read("output_storage_slots", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
+        this.fuelStorageSlots.deserializeNBT(input.lookup(), input.read("fuel_storage_slots", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
+        this.fuelReturnSlots.deserializeNBT(input.lookup(), input.read("fuel_return_slots", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
 
-        this.litTime = normalizeIntList(tag.getIntArray("lit_time").orElseGet(() -> new int[0]), capacity, 0);
-        this.litDuration = normalizeIntList(tag.getIntArray("lit_duration").orElseGet(() -> new int[0]), capacity, 0);
-        this.cookTime = normalizeIntList(tag.getIntArray("cook_time").orElseGet(() -> new int[0]), capacity, 0);
-        this.cookTimeTotal = normalizeIntList(tag.getIntArray("cook_time_total").orElseGet(() -> new int[0]), capacity, 0);
+        this.litTime = normalizeIntList(input.getIntArray("lit_time").orElseGet(() -> new int[0]), capacity, 0);
+        this.litDuration = normalizeIntList(input.getIntArray("lit_duration").orElseGet(() -> new int[0]), capacity, 0);
+        this.cookTime = normalizeIntList(input.getIntArray("cook_time").orElseGet(() -> new int[0]), capacity, 0);
+        this.cookTimeTotal = normalizeIntList(input.getIntArray("cook_time_total").orElseGet(() -> new int[0]), capacity, 0);
 
-        this.popMode = parseEnum(tag.getStringOr("pop_mode", PopMode.STOP.name()), PopMode.class, PopMode.STOP);
-        this.receiveMode = parseEnum(tag.getStringOr("receive_mode", ReceiveMode.STOP.name()), ReceiveMode.class, ReceiveMode.STOP);
-        this.sortMode = parseEnum(tag.getStringOr("sort_mode", AutoSortMode.STOP.name()), AutoSortMode.class, AutoSortMode.STOP);
+        this.popMode = parseEnum(input.getStringOr("pop_mode", PopMode.STOP.name()), PopMode.class, PopMode.STOP);
+        this.receiveMode = parseEnum(input.getStringOr("receive_mode", ReceiveMode.STOP.name()), ReceiveMode.class, ReceiveMode.STOP);
+        this.sortMode = parseEnum(input.getStringOr("sort_mode", AutoSortMode.STOP.name()), AutoSortMode.class, AutoSortMode.STOP);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(@NotNull ValueOutput output)
     {
-        super.saveAdditional(tag, registries);
-        tag.put("input_filter_slots", this.inputFilterSlots.serializeNBT(registries));
-        tag.put("fuel_filter_slots", this.fuelFilterSlots.serializeNBT(registries));
-        tag.put("input_storage_slots", this.inputStorageSlots.serializeNBT(registries));
-        tag.put("output_storage_slots", this.outputStorageSlots.serializeNBT(registries));
-        tag.put("fuel_storage_slots", this.fuelStorageSlots.serializeNBT(registries));
-        tag.put("fuel_return_slots", this.fuelReturnSlots.serializeNBT(registries));
-        tag.putIntArray("lit_time", toIntArray(litTime));
-        tag.putIntArray("lit_duration", toIntArray(litDuration));
-        tag.putIntArray("cook_time", toIntArray(cookTime));
-        tag.putIntArray("cook_time_total", toIntArray(cookTimeTotal));
-        tag.putString("pop_mode", this.popMode.name());
-        tag.putString("receive_mode", this.receiveMode.name());
-        tag.putString("sort_mode", this.sortMode.name());
+        super.saveAdditional(output);
+        output.store("input_filter_slots", net.minecraft.nbt.CompoundTag.CODEC, this.inputFilterSlots.serializeNBT(lookupProvider()));
+        output.store("fuel_filter_slots", net.minecraft.nbt.CompoundTag.CODEC, this.fuelFilterSlots.serializeNBT(lookupProvider()));
+        output.store("input_storage_slots", net.minecraft.nbt.CompoundTag.CODEC, this.inputStorageSlots.serializeNBT(lookupProvider()));
+        output.store("output_storage_slots", net.minecraft.nbt.CompoundTag.CODEC, this.outputStorageSlots.serializeNBT(lookupProvider()));
+        output.store("fuel_storage_slots", net.minecraft.nbt.CompoundTag.CODEC, this.fuelStorageSlots.serializeNBT(lookupProvider()));
+        output.store("fuel_return_slots", net.minecraft.nbt.CompoundTag.CODEC, this.fuelReturnSlots.serializeNBT(lookupProvider()));
+        output.putIntArray("lit_time", toIntArray(litTime));
+        output.putIntArray("lit_duration", toIntArray(litDuration));
+        output.putIntArray("cook_time", toIntArray(cookTime));
+        output.putIntArray("cook_time_total", toIntArray(cookTimeTotal));
+        output.putString("pop_mode", this.popMode.name());
+        output.putString("receive_mode", this.receiveMode.name());
+        output.putString("sort_mode", this.sortMode.name());
     }
 
     private static int[] toIntArray(List<Integer> values)

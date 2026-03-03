@@ -7,11 +7,12 @@ import com.wintercogs.beyonddimensions.Api.Util.USHandler;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import org.jetbrains.annotations.NotNull;
 
 public class NetPathwayBlockEntity extends NetedBlockEntity
 {
@@ -53,15 +54,15 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(@NotNull ValueInput input)
     {
-        super.loadAdditional(tag, registries);
+        super.loadAdditional(input);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(@NotNull ValueOutput output)
     {
-        super.saveAdditional(tag, registries);
+        super.saveAdditional(output);
     }
 
 }

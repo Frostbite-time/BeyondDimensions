@@ -16,8 +16,6 @@ import com.wintercogs.beyonddimensions.Menu.NetPumpMenu;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.MenuProvider;
@@ -26,6 +24,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -175,20 +175,20 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(@NotNull ValueInput input)
     {
-        super.loadAdditional(tag, registries);
-        filterSlots.deserializeNBT(registries, tag.getCompound("filter_slots"));
-        filterMode = FilterMode.valueOf(tag.getString("filter_type"));
+        super.loadAdditional(input);
+        filterSlots.deserializeNBT(input.lookup(), input.read("filter_slots", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
+        filterMode = FilterMode.valueOf(input.getStringOr("filter_type", FilterMode.BLACK.name()));
         setNeedsCapabilityUpdate();
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(@NotNull ValueOutput output)
     {
-        super.saveAdditional(tag, registries);
-        tag.put("filter_slots", filterSlots.serializeNBT(registries));
-        tag.putString("filter_type", filterMode.name());
+        super.saveAdditional(output);
+        output.store("filter_slots", net.minecraft.nbt.CompoundTag.CODEC, filterSlots.serializeNBT(lookupProvider()));
+        output.putString("filter_type", filterMode.name());
     }
 
     @Override

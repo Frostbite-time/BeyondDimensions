@@ -12,9 +12,7 @@ import com.wintercogs.beyonddimensions.Menu.NetHopperMenu;
 import com.wintercogs.beyonddimensions.Util.ItemStackHelper;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.SectionPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.MenuProvider;
@@ -30,6 +28,8 @@ import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -322,29 +322,29 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(@NotNull ValueInput input)
     {
-        super.loadAdditional(tag, registries);
-        filterSlots.deserializeNBT(registries, tag.getCompound("filter_slots"));
-        filterMode = FilterMode.valueOf(tag.getString("filter_type"));
-        hopperFluidMode = HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode"));
-        hopperNBTMode = HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode"));
-        hopperRangeMode = HopperRangeMode.valueOf(tag.getString("hopper_range_mode"));
-        hopperItemMode = tag.contains("hopper_item_model") ? HopperItemMode.valueOf(tag.getString("hopper_item_model")) : HopperItemMode.ALLOW;
-        hopperXpMode = tag.contains("hopper_xp_mode") ? HopperXpMode.valueOf(tag.getString("hopper_xp_mode")) : HopperXpMode.DENY;
+        super.loadAdditional(input);
+        filterSlots.deserializeNBT(input.lookup(), input.read("filter_slots", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
+        filterMode = FilterMode.valueOf(input.getStringOr("filter_type", FilterMode.BLACK.name()));
+        hopperFluidMode = HopperFluidMode.valueOf(input.getStringOr("hopper_fluid_mode", HopperFluidMode.DENY.name()));
+        hopperNBTMode = HopperNBTMode.valueOf(input.getStringOr("hopper_nbt_mode", HopperNBTMode.DENY.name()));
+        hopperRangeMode = HopperRangeMode.valueOf(input.getStringOr("hopper_range_mode", HopperRangeMode.RADIUS_MID.name()));
+        hopperItemMode = HopperItemMode.valueOf(input.getStringOr("hopper_item_model", HopperItemMode.ALLOW.name()));
+        hopperXpMode = HopperXpMode.valueOf(input.getStringOr("hopper_xp_mode", HopperXpMode.DENY.name()));
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(@NotNull ValueOutput output)
     {
-        super.saveAdditional(tag, registries);
-        tag.put("filter_slots", filterSlots.serializeNBT(registries));
-        tag.putString("filter_type", filterMode.name());
-        tag.putString("hopper_fluid_mode", hopperFluidMode.name());
-        tag.putString("hopper_nbt_mode", hopperNBTMode.name());
-        tag.putString("hopper_range_mode", hopperRangeMode.name());
-        tag.putString("hopper_item_model", hopperItemMode.name());
-        tag.putString("hopper_xp_mode", hopperXpMode.name());
+        super.saveAdditional(output);
+        output.store("filter_slots", net.minecraft.nbt.CompoundTag.CODEC, filterSlots.serializeNBT(lookupProvider()));
+        output.putString("filter_type", filterMode.name());
+        output.putString("hopper_fluid_mode", hopperFluidMode.name());
+        output.putString("hopper_nbt_mode", hopperNBTMode.name());
+        output.putString("hopper_range_mode", hopperRangeMode.name());
+        output.putString("hopper_item_model", hopperItemMode.name());
+        output.putString("hopper_xp_mode", hopperXpMode.name());
     }
 
     @Override

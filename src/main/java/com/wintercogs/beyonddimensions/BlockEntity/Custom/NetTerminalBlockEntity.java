@@ -4,11 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenuTerminal;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -17,6 +13,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,29 +49,34 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(@NotNull ValueInput input)
     {
-        super.loadAdditional(tag, registries);
-        ListTag itemsList = tag.getList("CraftItems", Tag.TAG_COMPOUND);
-        for (int i = 0; i < 9; i++)
+        super.loadAdditional(input);
+        int i = 0;
+        for (ItemStack stack : input.listOrEmpty("craft_items", ItemStack.OPTIONAL_CODEC))
         {
-            CompoundTag itemTag = i < itemsList.size() ? itemsList.getCompound(i) : new CompoundTag();
-            ItemStack stack = ItemStack.parseOptional(registries, itemTag);
+            if (i >= craftItems.size())
+            {
+                break;
+            }
             craftItems.set(i, stack);
+            i++;
+        }
+        for (; i < craftItems.size(); i++)
+        {
+            craftItems.set(i, ItemStack.EMPTY);
         }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(@NotNull ValueOutput output)
     {
-        super.saveAdditional(tag, registries);
-        ListTag itemsList = new ListTag();
+        super.saveAdditional(output);
+        ValueOutput.TypedOutputList<ItemStack> list = output.list("craft_items", ItemStack.OPTIONAL_CODEC);
         for (ItemStack stack : craftItems)
         {
-            CompoundTag itemTag = (CompoundTag) stack.saveOptional(registries);
-            itemsList.add(itemTag);
+            list.add(stack);
         }
-        tag.put("CraftItems", itemsList);
     }
 
     public void dropContent()

@@ -12,6 +12,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -139,17 +143,17 @@ public abstract class NetedBlockEntity extends BlockEntity
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(@NotNull ValueInput input)
     {
-        super.loadAdditional(tag, registries);
-        setNetId(tag.getInt("netId"));
+        super.loadAdditional(input);
+        setNetId(input.getIntOr("net_id", input.getIntOr("netId", -1)));
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(@NotNull ValueOutput output)
     {
-        super.saveAdditional(tag, registries);
-        tag.putInt("netId", this.netId);
+        super.saveAdditional(output);
+        output.putInt("net_id", this.netId);
     }
 
     @Override
@@ -160,18 +164,24 @@ public abstract class NetedBlockEntity extends BlockEntity
         refreshNetCache();
     }
 
-    // 为子类提供基础的网络同步，需要正确实现loadAdditional和saveAdditional
-    @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
-    {
-        CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, registries);
-        return tag;
-    }
-
     @Override
     public @Nullable Packet<ClientGamePacketListener> getUpdatePacket()
     {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    protected HolderLookup.Provider lookupProvider()
+    {
+        if (this.level != null)
+        {
+            return this.level.registryAccess();
+        }
+
+        if (ServerLifecycleHooks.getCurrentServer() != null)
+        {
+            return ServerLifecycleHooks.getCurrentServer().registryAccess();
+        }
+
+        throw new IllegalStateException("No registry lookup provider available for block entity serialization");
     }
 }

@@ -9,8 +9,6 @@ import com.wintercogs.beyonddimensions.Util.BDMath;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -18,11 +16,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.transfer.energy.EmptyEnergyHandler;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implements MenuProvider
@@ -138,17 +139,17 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void loadAdditional(@NotNull ValueInput input)
     {
-        super.loadAdditional(tag, registries);
+        super.loadAdditional(input);
 
         // 旧数据兼容
-        String popModeNew = tag.getStringOr("popMode", "");
+        String popModeNew = input.getStringOr("pop_mode", input.getStringOr("popMode", ""));
         if (!popModeNew.isEmpty())
         {
             this.popMode = PopMode.valueOf(popModeNew);
         }
-        else if (tag.getBooleanOr("popMode", false))
+        else if (input.getBooleanOr("popMode", false))
         {
             this.popMode = PopMode.OPEN;
         }
@@ -159,10 +160,10 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    protected void saveAdditional(@NotNull ValueOutput output)
     {
-        super.saveAdditional(tag, registries);
-        tag.putString("popMode", this.popMode.name());
+        super.saveAdditional(output);
+        output.putString("pop_mode", this.popMode.name());
     }
 
     @Override
