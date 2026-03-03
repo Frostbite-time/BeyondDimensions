@@ -1,11 +1,12 @@
 package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -216,16 +217,18 @@ public class ScrollBar extends AbstractWidget
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(@NotNull MouseButtonEvent buttonEvent, boolean isDoubleClick)
     {
         if (!this.active || !this.visible) return false;
-        if (!this.isValidClickButton(button)) return false;
+        if (!this.isValidClickButton(buttonEvent.buttonInfo())) return false;
 
         // 点击在整片轨道上都算：先将滑块跳到该位置，再进入拖拽
+        double mouseX = buttonEvent.x();
+        double mouseY = buttonEvent.y();
         if (this.isMouseOver(mouseX, mouseY))
         {
             this.playDownSound(Minecraft.getInstance().getSoundManager());
-            this.onClick(mouseX, mouseY);
+            this.onClick(buttonEvent, isDoubleClick);
             this.isDragging = true;
             scrollToMouse(mouseY);
             return true;
@@ -234,21 +237,17 @@ public class ScrollBar extends AbstractWidget
     }
 
     @Override
-    protected void onDrag(double mouseX, double mouseY, double dragX, double dragY)
+    protected void onDrag(@NotNull MouseButtonEvent event, double mouseX, double mouseY)
     {
+        super.onDrag(event, mouseX, mouseY);
         if (!isDragging) return;
         scrollToMouse(mouseY);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    public void onRelease(@NotNull MouseButtonEvent event)
     {
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
-    }
-
-    @Override
-    public void onRelease(double mouseX, double mouseY)
-    {
+        super.onRelease(event);
         this.isDragging = false;
     }
 
@@ -276,19 +275,14 @@ public class ScrollBar extends AbstractWidget
         // 组件自身x/y不变，只根据当前位置计算“渲染偏移”
         this.scrollerOffset = computeOffset();
 
-        gg.setColor(1.0F, 1.0F, 1.0F, this.alpha);
-        RenderSystem.enableBlend();
-        RenderSystem.enableDepthTest();
-
         // 在 (x, y + scrollerOffset) 处绘制“滑块”
         gg.blitSprite(
+                RenderPipelines.GUI_TEXTURED,
                 SPRITE,
                 this.getX(),
                 this.getY() + this.scrollerOffset,
                 this.getWidth(), this.getHeight()
         );
-
-        gg.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @Override

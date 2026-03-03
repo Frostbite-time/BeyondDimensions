@@ -1,14 +1,15 @@
 package com.wintercogs.beyonddimensions.GUI.SharedWidget;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.NotNull;
 
 public class IconButton extends Button implements GuiElementAccess
 {
@@ -47,32 +48,22 @@ public class IconButton extends Button implements GuiElementAccess
     }
 
     @Override
-    public void renderWidget(GuiGraphics st, int mouseX, int mouseY, float pt)
+    protected void renderContents(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
-        if (this.visible)
-        {
-            int x = getX();
-            int y = getY();
-            st.setColor(1.0f, 1.0f, 1.0f, this.alpha);
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            this.isHovered = mouseX >= x && mouseY >= y && mouseX < x + this.width && mouseY < y + this.height;
-            st.blitSprite(backgroundSprites.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
-            drawIcon(st, mouseX, mouseY, pt);
-            st.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-        }
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, backgroundSprites.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        drawIcon(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    public void onRelease(double mouseX, double mouseY)
+    public void onRelease(@NotNull MouseButtonEvent event)
     {
+        super.onRelease(event);
         setFocused(false);
     }
 
     protected void drawIcon(GuiGraphics st, int mouseX, int mouseY, float pt)
     {
-        st.blitSprite(getIcon(), iconX, iconY, iconWidth, iconHeight);
+        st.blitSprite(RenderPipelines.GUI_TEXTURED, getIcon(), iconX, iconY, iconWidth, iconHeight);
     }
 
     // 用于覆写背景
