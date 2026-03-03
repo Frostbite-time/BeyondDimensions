@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Network.Packet.toServer;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Item.Custom.BaseMachineItem;
 import com.wintercogs.beyonddimensions.Item.Custom.NetMagnetItem;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
@@ -38,32 +39,36 @@ public record ToggleMagnetPacket()
                 }
             }
         }
-        top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
-            List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
-                    .stream()
-                    .map(SlotResult::stack)
-                    .toList();
 
-            for (ItemStack stack : curios)
-            {
-                if (stack.getItem() instanceof NetMagnetItem)
+        if (BeyondDimensions.CuriosLoaded)
+        {
+            top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
+                List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
+                        .stream()
+                        .map(SlotResult::stack)
+                        .toList();
+
+                for (ItemStack stack : curios)
                 {
-                    if (BaseMachineItem.hasControlMode(stack))
+                    if (stack.getItem() instanceof NetMagnetItem)
                     {
-                        if (BaseMachineItem.getControlModeOrDefault(stack, RedStoneControlMode.IGNORE) == RedStoneControlMode.IGNORE)
+                        if (BaseMachineItem.hasControlMode(stack))
                         {
-                            BaseMachineItem.setControlMode(stack, RedStoneControlMode.NOT_WORKING);
-                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
-                        }
-                        else if (BaseMachineItem.getControlModeOrDefault(stack, RedStoneControlMode.IGNORE) == RedStoneControlMode.NOT_WORKING)
-                        {
-                            BaseMachineItem.setControlMode(stack, RedStoneControlMode.IGNORE);
-                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
+                            if (BaseMachineItem.getControlModeOrDefault(stack, RedStoneControlMode.IGNORE) == RedStoneControlMode.IGNORE)
+                            {
+                                BaseMachineItem.setControlMode(stack, RedStoneControlMode.NOT_WORKING);
+                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
+                            }
+                            else if (BaseMachineItem.getControlModeOrDefault(stack, RedStoneControlMode.IGNORE) == RedStoneControlMode.NOT_WORKING)
+                            {
+                                BaseMachineItem.setControlMode(stack, RedStoneControlMode.IGNORE);
+                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
 
