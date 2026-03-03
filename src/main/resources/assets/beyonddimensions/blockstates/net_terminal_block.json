@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "beyonddimensions:block/net_terminal_block",
+      "y": 180,
+      "x": 90
+    },
+    "facing=up": {
+      "model": "beyonddimensions:block/net_terminal_block",
+      "x": 270
+    },
+    "facing=north": {
+      "model": "beyonddimensions:block/net_terminal_block"
+    },
+    "facing=south": {
+      "model": "beyonddimensions:block/net_terminal_block",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "beyonddimensions:block/net_terminal_block",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "beyonddimensions:block/net_terminal_block",
+      "y": 90
+    }
+  }
+}

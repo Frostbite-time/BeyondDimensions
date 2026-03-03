@@ -1,0 +1,9 @@
+{
+  "parent": "botania:block/shapes/mana_pool",
+  "textures": {
+    "bottom": "beyonddimensions:block/mana_pool_bottom",
+    "inside": "beyonddimensions:block/mana_pool_inside",
+    "side": "beyonddimensions:block/mana_pool_side",
+    "top": "beyonddimensions:block/mana_pool_top"
+  }
+}

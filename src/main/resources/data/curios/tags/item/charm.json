@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["beyonddimensions:net_terminal_item","beyonddimensions:net_magnet_item","beyonddimensions:net_feeder_item", "beyonddimensions:net_restocker_item"]
+}
