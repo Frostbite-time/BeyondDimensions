@@ -23,11 +23,13 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.Vec2;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -258,15 +260,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                         }
                     });
                 }
-                // 同步到EMI
-                if (BeyondDimensions.EMILoaded)
-                {
-                    String current = EmiApi.getSearchText();
-                    if (!Objects.equals(current, text))
-                    {
-                        EmiApi.setSearchText(text);
-                    }
-                }
             }
         });
         if (!this.searchField.getValue().equals(""))
@@ -322,15 +315,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                     }
                 });
             }
-
-            if (BeyondDimensions.EMILoaded)
-            {
-                String current = EmiApi.getSearchText();
-                if (!Objects.equals(current, lastSearchText))
-                {
-                    searchField.setValue(current);
-                }
-            }
         }
 
         // 更新滑动条信息
@@ -359,14 +343,14 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 CommonConfigRuntime.uiCraftButton = ButtonState.DISABLED;
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.set(ButtonState.DISABLED);
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.save();
-                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_MENU));
+                ClientPacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_MENU));
             }
             else
             {
                 CommonConfigRuntime.uiCraftButton = ButtonState.ENABLED;
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.set(ButtonState.ENABLED);
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.save();
-                PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
+                ClientPacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
             }
         });
         craftButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.craft_toggle")));
@@ -442,9 +426,12 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleclick)
     {
-        boolean result = super.mouseClicked(mouseX, mouseY, button);
+        boolean result = super.mouseClicked(event, doubleclick);
+
+        double mouseX = event.x();
+        double mouseY = event.y();
 
         // 处理对搜索框的焦点取消
         boolean flag = searchField.active && searchField.visible && mouseX >= (double) searchField.getX() && mouseY >= (double) searchField.getY() && mouseX < (double) (searchField.getX() + searchField.getWidth()) && mouseY < (double) (searchField.getY() + searchField.getHeight());
@@ -459,7 +446,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 }
             }
         }
-        else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 右键点击搜索框则清空搜索框内容
+        else if (event.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 右键点击搜索框则清空搜索框内容
         {
             searchField.setValue("");
         }
@@ -468,25 +455,28 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(KeyEvent event)
     {
+        int keyCode = event.key();
+        int scanCode = event.scancode();
+
         // 先处理menu相关数据
         if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
             menu.hasShiftDown = true;
 
-        InputConstants.Key mouseKey = InputConstants.getKey(keyCode, scanCode);
+        InputConstants.Key mouseKey = InputConstants.getKey(event);
 
         // 如果搜索框有效，拦截，然后让搜索框接管处理
         if (searchField != null && searchField.canConsumeInput() && mouseKey.getValue() != GLFW.GLFW_KEY_ESCAPE)
         {
             // 无论如何都不继续后续逻辑
             // 等以后可能改为重写searchField以获得更稳定的效果
-            searchField.keyPressed(keyCode, scanCode, modifiers);
+            searchField.keyPressed(event);
             return true;
         }
 
         // 处理shift + z切换
-        if (hasShiftDown() && mouseKey.getValue() == GLFW.GLFW_KEY_Z)
+        if (Minecraft.getInstance().hasShiftDown() && mouseKey.getValue() == GLFW.GLFW_KEY_Z)
         {
             boolean current = CommonConfigRuntime.searchTextWithJEIEMI;
             CommonConfigRuntime.searchTextWithJEIEMI = !current;
@@ -503,13 +493,14 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers)
+    public boolean keyReleased(KeyEvent event)
     {
-        boolean result = super.keyReleased(keyCode, scanCode, modifiers);
+        int keyCode = event.key();
+        boolean result = super.keyReleased(event);
 
         if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
         {

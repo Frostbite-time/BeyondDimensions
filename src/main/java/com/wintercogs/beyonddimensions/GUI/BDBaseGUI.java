@@ -14,7 +14,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -82,8 +82,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 var noItemIcon = slot.getNoItemIcon();
                 if (noItemIcon != null)
                 {
-                    TextureAtlasSprite textureatlassprite = this.minecraft.getTextureAtlas(noItemIcon.getFirst()).apply(noItemIcon.getSecond());
-                    guiGraphics.blit(x, y, 0, 16, 16, textureatlassprite);
+                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, noItemIcon, x, y, 16, 16);
                 }
                 return;
             }

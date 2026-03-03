@@ -14,7 +14,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -43,7 +43,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         //槽位转移按钮
         transferCraftToInvButton = new IconButton(this.leftPos + 90, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, Identifier.tryBuild(BeyondDimensions.MODID, "widget/down_arrow"), button ->
         {
-            PacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(false));
+            ClientPacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(false));
         });
         transferCraftToInvButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.transfer_to_inv")));
         addRenderableWidget(transferCraftToInvButton);
@@ -51,7 +51,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
 
         transferCraftToStorageButton = new IconButton(this.leftPos + 81, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, Identifier.tryBuild(BeyondDimensions.MODID, "widget/up_arrow"), button ->
         {
-            PacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(true));
+            ClientPacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(true));
         });
         transferCraftToStorageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.transfer_to_storage")));
         addRenderableWidget(transferCraftToStorageButton);

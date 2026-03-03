@@ -12,7 +12,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -132,7 +132,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if (currentPlayerId != null)
                     {
-                        PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetOwner));
+                        ClientPacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetOwner));
                     }
                 }
         ).pos(leftPos + 110, topPos + 60).size(100, 20).build();
@@ -143,7 +143,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if (currentPlayerId != null)
                     {
-                        PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetManager));
+                        ClientPacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetManager));
                     }
                 }
         ).pos(leftPos + 110, topPos + 60 + 25).size(100, 20).build();
@@ -154,7 +154,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if (currentPlayerId != null)
                     {
-                        PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemoveManager));
+                        ClientPacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemoveManager));
                     }
                 }
         ).pos(leftPos + 110, topPos + 60 + 50).size(100, 20).build();
@@ -165,7 +165,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if (currentPlayerId != null)
                     {
-                        PacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemovePlayer));
+                        ClientPacketDistributor.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemovePlayer));
                     }
                 }
         ).pos(leftPos + 110, topPos + 60 + 75).size(100, 20).build();
