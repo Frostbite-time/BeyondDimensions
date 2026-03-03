@@ -548,7 +548,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                             int burnTime = fuelItem.getReadOnlyStack().getBurnTime(RecipeType.SMELTING, level.fuelValues());
                             if (burnTime > 0)
                             {
-                                ItemStack returnItem = fuelItem.getReadOnlyStack().getCraftingRemainder();
+                                ItemStack returnItem = fuelItem.getReadOnlyStack().getCraftingRemainder().create();
                                 if (returnItem.isEmpty())
                                 {
                                     fuelStorageSlots.extract(fuelItem, 1, false, false);
@@ -608,7 +608,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     if (cookTime.get(inputSlot) >= cookTimeTotal.get(inputSlot))
                     {
                         // assemble内部并不实际查看input
-                        ItemStack resultItem = recipeHolder.value().assemble(new SingleRecipeInput(ItemStack.EMPTY), level.registryAccess());
+                        ItemStack resultItem = recipeHolder.value().assemble(new SingleRecipeInput(ItemStack.EMPTY));
                         ItemStackKey resultKey = new ItemStackKey(resultItem);
                         int resultCount = resultItem.getCount();
 

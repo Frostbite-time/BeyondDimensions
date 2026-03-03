@@ -18,16 +18,14 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.anti_ad.mc.ipn.api.IPNIgnore;
 import org.jetbrains.annotations.NotNull;
 
 
 // 更改渲染以及点击事件，以适配StoredStackSlot
-@IPNIgnore
 public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerScreen<@NotNull T>
 {
 
@@ -147,10 +145,10 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
     @Override
-    protected void slotClicked(Slot slot, int slotIndex, int mouseButton, ClickType type)
+    protected void slotClicked(@NotNull Slot slot, int slotIndex, int mouseButton, @NotNull ContainerInput containerInput)
     {
         if (!(slot instanceof AbstractStackTypedSlot))
-            super.slotClicked(slot, slotIndex, mouseButton, type);
+            super.slotClicked(slot, slotIndex, mouseButton, containerInput);
 
 
         if (slot == null) return; // slot绝对可能为null，不可移除此行
@@ -227,14 +225,14 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 // 副手交换仅对于非存储槽才生效
                 if (this.minecraft.options.keySwapOffhand.isActiveAndMatches(InputConstants.getKey(event)))
                 {
-                    this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
+                    this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ContainerInput.SWAP);
                     return true;
                 }
                 for (int i = 0; i < 9; ++i)
                 {
                     if (this.minecraft.options.keyHotbarSlots[i].isActiveAndMatches(InputConstants.getKey(event)))
                     {
-                        this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, i, ClickType.SWAP);
+                        this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, i, ContainerInput.SWAP);
                         return true;
                     }
                 }

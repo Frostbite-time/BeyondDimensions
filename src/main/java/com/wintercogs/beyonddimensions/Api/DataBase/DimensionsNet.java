@@ -6,12 +6,14 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Util.PlayerNameHelper;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.player.Player;
@@ -36,7 +38,7 @@ import java.util.*;
  */
 public class DimensionsNet extends SavedData
 {
-    private static final String NET_NAME_PREFIX = "BDNet_";
+    private static final String NET_NAME_PREFIX = "bd_net_";
     private static final int MAX_NET_SCAN = 10000;
     private static final int DELETED_ID = -99;
 
@@ -122,7 +124,8 @@ public class DimensionsNet extends SavedData
 
     private static SavedDataType<@NotNull DimensionsNet> savedDataType(String netName)
     {
-        return new SavedDataType<>(netName, DimensionsNet::create, CODEC, DataFixTypes.SAVED_DATA_COMMAND_STORAGE);
+        return new SavedDataType<>(Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, netName),
+                DimensionsNet::create, CODEC, DataFixTypes.SAVED_DATA_COMMAND_STORAGE);
     }
 
     private static HolderLookup.Provider currentRegistryAccess()
@@ -171,12 +174,12 @@ public class DimensionsNet extends SavedData
      * 构建最新的，可用的网络名称，用于创建新网络时确定新网络的id，仅在服务端调用
      *
      * @param dataProvider 用于获取SavedData
-     * @return 最新可用的网络名称，内容为字符串："BDNet_<数字id>"
+     * @return 最新可用的网络名称，内容为字符串："bd_net_<数字id>"
      */
     public static String buildNewNetName(@NotNull MinecraftServer dataProvider)
     {
         int netId;
-        // 接下来按照"BDNet_" + netId从0查找网络，直到找到不存在的网络，此时netId为新网络id
+        // 接下来按照"bd_net_" + netId从0查找网络，直到找到不存在的网络，此时netId为新网络id
         // 后续可以做一个废弃网络回收处理，但是暂时不着急
         for (netId = 0; netId < MAX_NET_SCAN; netId++)
         {

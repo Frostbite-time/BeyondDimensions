@@ -65,17 +65,12 @@ base {
     archivesName = mod_id
 }
 
-// Mojang ships Java 21 to end users in 1.21.11, so mods should target Java 21.
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+// Minecraft 26.1 snapshots use Java 25.
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
     // Specify the version of NeoForge to use.
     version = project.neo_version
-
-    parchment {
-        mappingsVersion = project.parchment_mappings_version
-        minecraftVersion = project.parchment_minecraft_version
-    }
 
     // This line is optional. Access Transformers are automatically detected
     // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
@@ -159,27 +154,17 @@ dependencies {
             prefer '2.0.3'
         }
     }
-    // 必须要在此显式声明依赖，否则在运行时会找不到
-    // additionalRuntimeClasspath "com.github.promeg:tinypinyin:2.0.3"
 
     // JEI支持
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
     runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
     // 饰品栏支持
-    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}:api"
-    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}"
-
-    // 在本模组的UI禁用IPN 不启用runtime
-    compileOnly "curse.maven:inventory-profiles-next-495267:7395950"
+    //compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}:api"
+    //runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}"
 
     // 通用拼音搜索-在安装时优先使用它的拼音处理 不启用runtime：会导致runServer失败
-    compileOnly "curse.maven:just-enough-characters-250702:7320201"
-
-    // 精妙背包以及精妙存储调试
-    runtimeOnly "curse.maven:sophisticated-backpacks-422301:7692669"
-    runtimeOnly "curse.maven:sophisticated-storage-619320:7645325"
-    runtimeOnly "curse.maven:sophisticated-core-618298:7635160"
+    // compileOnly "curse.maven:just-enough-characters-250702:7320201"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

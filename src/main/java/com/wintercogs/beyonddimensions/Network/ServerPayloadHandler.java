@@ -31,7 +31,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
-import top.theillusivec4.curios.api.SlotResult;
 
 import java.util.List;
 
@@ -94,16 +93,16 @@ public class ServerPayloadHandler
 
                                 if (terminalStack == null && BeyondDimensions.CuriosLoaded)
                                 {
-                                    terminalStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
-                                            .flatMap(iCuriosItemHandler ->
-                                                    iCuriosItemHandler.findFirstCurio(itemStack ->
-                                                            itemStack.getItem() instanceof NetTerminalItem &&
-                                                                    itemStack.has(BDDataComponents.NET_ID_DATA) &&
-                                                                    itemStack.get(BDDataComponents.NET_ID_DATA) >= 0
-                                                    )
-                                            )
-                                            .map(slotResult -> slotResult.stack())
-                                            .orElse(null);
+//                                    terminalStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
+//                                            .flatMap(iCuriosItemHandler ->
+//                                                    iCuriosItemHandler.findFirstCurio(itemStack ->
+//                                                            itemStack.getItem() instanceof NetTerminalItem &&
+//                                                                    itemStack.has(BDDataComponents.NET_ID_DATA) &&
+//                                                                    itemStack.get(BDDataComponents.NET_ID_DATA) >= 0
+//                                                    )
+//                                            )
+//                                            .map(slotResult -> slotResult.stack())
+//                                            .orElse(null);
                                 }
                             }
 
@@ -387,32 +386,36 @@ public class ServerPayloadHandler
                             }
                         }
                     }
-                    top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
-                        List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
-                                .stream()
-                                .map(SlotResult::stack)
-                                .toList();
 
-                        for (ItemStack stack : curios)
-                        {
-                            if (stack.getItem() instanceof NetMagnetItem)
-                            {
-                                if (stack.has(BDDataComponents.CONTROL_MODE))
-                                {
-                                    if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
-                                    {
-                                        stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
-                                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.close"), false);
-                                    }
-                                    else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
-                                    {
-                                        stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
-                                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.open"), false);
-                                    }
-                                }
-                            }
-                        }
-                    });
+                    if(BeyondDimensions.CuriosLoaded)
+                    {
+//                        top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
+//                            List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
+//                                    .stream()
+//                                    .map(SlotResult::stack)
+//                                    .toList();
+//
+//                            for (ItemStack stack : curios)
+//                            {
+//                                if (stack.getItem() instanceof NetMagnetItem)
+//                                {
+//                                    if (stack.has(BDDataComponents.CONTROL_MODE))
+//                                    {
+//                                        if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+//                                        {
+//                                            stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+//                                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.close"), false);
+//                                        }
+//                                        else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+//                                        {
+//                                            stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+//                                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.open"), false);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        });
+                    }
                 }
         );
     }

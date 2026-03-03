@@ -6,6 +6,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,6 +36,7 @@ public class ModRecipeProvider extends RecipeProvider
         SimpleCookingRecipeBuilder.smelting(
                         Ingredient.of(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get()),
                         RecipeCategory.MISC,
+                        CookingBookCategory.MISC,
                         BDItems.SPACE_TIME_BAR.get(),
                         1f,
                         600)
