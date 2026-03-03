@@ -161,15 +161,15 @@ public class NetRestockerMenu extends BDBaseMenu
         super.writeQuickDataTag(tag);
         tag.putString("control_mode", menuStack.getOrDefault(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE).name());
         tag.putString("fuzzy_mode", menuStack.getOrDefault(BDDataComponents.FUZZY_MODE, FuzzyMode.DISABLE).name());
-        tag.putString("receive_mode", menuStack.getOrDefault(BDDataComponents.RECEIVE_MODE, FuzzyMode.DISABLE).name());
+        tag.putString("receive_mode", menuStack.getOrDefault(BDDataComponents.RECEIVE_MODE, ReceiveMode.STOP).name());
     }
 
     @Override
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        menuStack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode")));
-        menuStack.set(BDDataComponents.FUZZY_MODE, FuzzyMode.valueOf(tag.getString("fuzzy_mode")));
-        menuStack.set(BDDataComponents.RECEIVE_MODE, ReceiveMode.valueOf(tag.getString("receive_mode")));
+        menuStack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode").orElse(RedStoneControlMode.IGNORE.name())));
+        menuStack.set(BDDataComponents.FUZZY_MODE, FuzzyMode.valueOf(tag.getString("fuzzy_mode").orElse(FuzzyMode.DISABLE.name())));
+        menuStack.set(BDDataComponents.RECEIVE_MODE, ReceiveMode.valueOf(tag.getString("receive_mode").orElse(ReceiveMode.STOP.name())));
     }
 }

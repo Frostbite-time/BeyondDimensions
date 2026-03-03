@@ -162,9 +162,9 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        be.popMode = PopMode.valueOf(tag.getString("popMode"));
-        be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
-        be.fuzzyMode = FuzzyMode.valueOf(tag.getString("fuzzyMode"));
+        be.popMode = PopMode.valueOf(tag.getString("popMode").orElse(PopMode.STOP.name()));
+        be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode").orElse(RedStoneControlMode.IGNORE.name()));
+        be.fuzzyMode = FuzzyMode.valueOf(tag.getString("fuzzyMode").orElse(FuzzyMode.DISABLE.name()));
         // 服务端读取新数据之后利用sendBlockUpdated将数据发送给附近所有玩家
         if (!player.level().isClientSide())
         {

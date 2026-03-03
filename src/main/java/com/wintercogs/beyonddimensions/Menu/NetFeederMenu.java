@@ -158,7 +158,7 @@ public class NetFeederMenu extends BDBaseMenu
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        menuStack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode")));
-        menuStack.set(BDDataComponents.FEEDER_MODE, FeederMode.valueOf(tag.getString("feeder_mode")));
+        menuStack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode").orElse(RedStoneControlMode.IGNORE.name())));
+        menuStack.set(BDDataComponents.FEEDER_MODE, FeederMode.valueOf(tag.getString("feeder_mode").orElse(FeederMode.NORMAL.name())));
     }
 }

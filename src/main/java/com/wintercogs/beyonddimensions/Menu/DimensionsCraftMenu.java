@@ -428,7 +428,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         }
         else
         {
-            firstCraftReturnDir = tag.getBoolean("firstCraftReturnDir");
+            firstCraftReturnDir = tag.getBoolean("firstCraftReturnDir").orElse(false);
         }
     }
 

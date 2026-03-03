@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class NetFurnaceMenu extends BDBaseMenu
 {
@@ -176,10 +175,10 @@ public class NetFurnaceMenu extends BDBaseMenu
         tag.putString("receive_mode", be.receiveMode.name());
         tag.putString("control_mode", be.controlMode.name());
         tag.putString("sort_mode", be.sortMode.name());
-        tag.putIntArray("lit_time", be.getLitTime());
-        tag.putIntArray("lit_duration", be.getLitDuration());
-        tag.putIntArray("cook_time", be.getCookTime());
-        tag.putIntArray("cook_time_total", be.getCookTimeTotal());
+        tag.putIntArray("lit_time", be.getLitTime().stream().mapToInt(Integer::intValue).toArray());
+        tag.putIntArray("lit_duration", be.getLitDuration().stream().mapToInt(Integer::intValue).toArray());
+        tag.putIntArray("cook_time", be.getCookTime().stream().mapToInt(Integer::intValue).toArray());
+        tag.putIntArray("cook_time_total", be.getCookTimeTotal().stream().mapToInt(Integer::intValue).toArray());
     }
 
     @Override
@@ -188,27 +187,25 @@ public class NetFurnaceMenu extends BDBaseMenu
         super.readQuickDataTag(tag);
         if (!player.level().isClientSide()) // 服务端读取按钮信息并广播到所有玩家
         {
-            be.popMode = PopMode.valueOf(tag.getString("pop_mode"));
-            be.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
-            be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
-            be.sortMode = AutoSortMode.valueOf(tag.getString("sort_mode"));
-            if (!player.level().isClientSide())
-            {
-                // 服务端接收到更新信息后立刻通知保存
-                player.level().blockEntityChanged(be.getBlockPos());
-                player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
-            }
+            be.popMode = PopMode.valueOf(tag.getString("pop_mode").orElse(PopMode.STOP.name()));
+            be.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode").orElse(ReceiveMode.STOP.name()));
+            be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode").orElse(RedStoneControlMode.IGNORE.name()));
+            be.sortMode = AutoSortMode.valueOf(tag.getString("sort_mode").orElse(AutoSortMode.STOP.name()));
+
+            // 服务端接收到更新信息后立刻通知保存
+            player.level().blockEntityChanged(be.getBlockPos());
+            player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
         }
         else // 客户端读取全部信息
         {
-            be.popMode = PopMode.valueOf(tag.getString("pop_mode"));
-            be.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
-            be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
-            be.sortMode = AutoSortMode.valueOf(tag.getString("sort_mode"));
-            be.setLitTime(Arrays.stream(tag.getIntArray("lit_time")).boxed().collect(Collectors.toList()));
-            be.setLitDuration(Arrays.stream(tag.getIntArray("lit_duration")).boxed().collect(Collectors.toList()));
-            be.setCookTime(Arrays.stream(tag.getIntArray("cook_time")).boxed().collect(Collectors.toList()));
-            be.setCookTimeTotal(Arrays.stream(tag.getIntArray("cook_time_total")).boxed().collect(Collectors.toList()));
+            be.popMode = PopMode.valueOf(tag.getString("pop_mode").orElse(PopMode.STOP.name()));
+            be.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode").orElse(ReceiveMode.STOP.name()));
+            be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode").orElse(RedStoneControlMode.IGNORE.name()));
+            be.sortMode = AutoSortMode.valueOf(tag.getString("sort_mode").orElse(AutoSortMode.STOP.name()));
+            be.setLitTime(Arrays.stream(tag.getIntArray("lit_time").orElseGet(() -> new int[0])).boxed().toList());
+            be.setLitDuration(Arrays.stream(tag.getIntArray("lit_duration").orElseGet(() -> new int[0])).boxed().toList());
+            be.setCookTime(Arrays.stream(tag.getIntArray("cook_time").orElseGet(() -> new int[0])).boxed().toList());
+            be.setCookTimeTotal(Arrays.stream(tag.getIntArray("cook_time_total").orElseGet(() -> new int[0])).boxed().toList());
         }
 
     }

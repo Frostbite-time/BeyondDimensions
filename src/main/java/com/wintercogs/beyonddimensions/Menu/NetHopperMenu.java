@@ -120,13 +120,13 @@ public class NetHopperMenu extends BDBaseMenu
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        be.filterMode = FilterMode.valueOf(tag.getString("filter_type"));
-        be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
-        be.hopperItemMode = HopperItemMode.valueOf(tag.getString("hopper_item_mode"));
-        be.hopperXpMode = HopperXpMode.valueOf(tag.getString("hopper_xp_mode"));
-        be.hopperFluidMode = HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode"));
-        be.hopperNBTMode = HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode"));
-        be.hopperRangeMode = HopperRangeMode.valueOf(tag.getString("hopper_range_mode"));
+        be.filterMode = FilterMode.valueOf(tag.getString("filter_type").orElse(FilterMode.BLACK.name()));
+        be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode").orElse(RedStoneControlMode.IGNORE.name()));
+        be.hopperItemMode = HopperItemMode.valueOf(tag.getString("hopper_item_mode").orElse(HopperItemMode.ALLOW.name()));
+        be.hopperXpMode = HopperXpMode.valueOf(tag.getString("hopper_xp_mode").orElse(HopperXpMode.DENY.name()));
+        be.hopperFluidMode = HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode").orElse(HopperFluidMode.DENY.name()));
+        be.hopperNBTMode = HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode").orElse(HopperNBTMode.DENY.name()));
+        be.hopperRangeMode = HopperRangeMode.valueOf(tag.getString("hopper_range_mode").orElse(HopperRangeMode.RADIUS_MID.name()));
         if (!player.level().isClientSide())
         {
             // 服务端接收到更新信息后立刻通知保存

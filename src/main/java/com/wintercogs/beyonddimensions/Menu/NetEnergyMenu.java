@@ -124,14 +124,14 @@ public class NetEnergyMenu extends BDBaseMenu
         super.readQuickDataTag(tag);
         if (player.level().isClientSide())
         {
-            this.lastEnergyStored = tag.getLong("lastEnergyStored");
-            this.lastEnergyCapacity = tag.getLong("lastEnergyCapacity");
-            this.lastEnergySpeedState = tag.getLong("lastEnergySpeedState");
+            this.lastEnergyStored = tag.getLong("lastEnergyStored").orElse(0L);
+            this.lastEnergyCapacity = tag.getLong("lastEnergyCapacity").orElse(0L);
+            this.lastEnergySpeedState = tag.getLong("lastEnergySpeedState").orElse(0L);
         }
         else
         {
-            be.setPopMode(PopMode.valueOf(tag.getString("popMode")));
-            be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode"));
+            be.setPopMode(PopMode.valueOf(tag.getString("popMode").orElse(PopMode.STOP.name())));
+            be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode").orElse(RedStoneControlMode.IGNORE.name()));
             player.level().blockEntityChanged(be.getBlockPos());
             player.level().invalidateCapabilities(be.getBlockPos()); // 改变弹出模式后重新确定是否暴露内部能量存储
             player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);

@@ -114,8 +114,8 @@ public class NetPumpMenu extends BDBaseMenu
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        be.filterMode = FilterMode.valueOf(tag.getString("filter_type"));
-        be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
+        be.filterMode = FilterMode.valueOf(tag.getString("filter_type").orElse(FilterMode.BLACK.name()));
+        be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode").orElse(RedStoneControlMode.IGNORE.name()));
         if (!player.level().isClientSide())
         {
             // 服务端接收到更新信息后立刻通知保存

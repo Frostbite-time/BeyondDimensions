@@ -167,12 +167,12 @@ public class NetMagnetMenu extends BDBaseMenu
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        menuStack.set(BDDataComponents.FILTER_MODE, FilterMode.valueOf(tag.getString("filter_type")));
-        menuStack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode")));
-        menuStack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.valueOf(tag.getString("hopper_item_mode")));
-        menuStack.set(BDDataComponents.HOPPER_XP_MODE, HopperXpMode.valueOf(tag.getString("hopper_xp_mode")));
-        menuStack.set(BDDataComponents.HOPPER_NBT_MODE, HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode")));
-        menuStack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode")));
-        menuStack.set(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.valueOf(tag.getString("hopper_range_mode")));
+        menuStack.set(BDDataComponents.FILTER_MODE, FilterMode.valueOf(tag.getString("filter_type").orElse(FilterMode.BLACK.name())));
+        menuStack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode").orElse(RedStoneControlMode.IGNORE.name())));
+        menuStack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.valueOf(tag.getString("hopper_item_mode").orElse(HopperItemMode.ALLOW.name())));
+        menuStack.set(BDDataComponents.HOPPER_XP_MODE, HopperXpMode.valueOf(tag.getString("hopper_xp_mode").orElse(HopperXpMode.DENY.name())));
+        menuStack.set(BDDataComponents.HOPPER_NBT_MODE, HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode").orElse(HopperNBTMode.DENY.name())));
+        menuStack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode").orElse(HopperFluidMode.DENY.name())));
+        menuStack.set(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.valueOf(tag.getString("hopper_range_mode").orElse(HopperRangeMode.RADIUS_MID.name())));
     }
 }
