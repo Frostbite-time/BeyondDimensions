@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.Item.Custom.NetFeederItem;
 import com.wintercogs.beyonddimensions.Item.Custom.NetMagnetItem;
 import com.wintercogs.beyonddimensions.Item.Custom.NetRestockerItem;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import top.theillusivec4.curios.api.CuriosCapability;
@@ -48,11 +49,13 @@ public class BD_CuriosPlugin
                     @Override
                     public void curioTick(SlotContext slotContext)
                     {
+                        if (!(slotContext.entity().level() instanceof ServerLevel serverLevel)) return;
+
                         // 在此添加持续生效逻辑
                         if (stack.getItem() == BDItems.NET_MAGNET_ITEM.get())
                         {
                             NetMagnetItem item = (NetMagnetItem) stack.getItem();
-                            item.inventoryTick(stack, slotContext.entity().level(), slotContext.entity(), slotContext.index(), false);
+                            item.inventoryTick(stack, serverLevel, slotContext.entity(), null);
                         }
                     }
                 },
@@ -72,11 +75,12 @@ public class BD_CuriosPlugin
                     @Override
                     public void curioTick(SlotContext slotContext)
                     {
+                        if (!(slotContext.entity().level() instanceof ServerLevel serverLevel)) return;
                         // 在此添加持续生效逻辑
                         if (stack.getItem() == BDItems.NET_FEEDER_ITEM.get())
                         {
                             NetFeederItem item = (NetFeederItem) stack.getItem();
-                            item.inventoryTick(stack, slotContext.entity().level(), slotContext.entity(), slotContext.index(), false);
+                            item.inventoryTick(stack, serverLevel, slotContext.entity(), null);
                         }
                     }
                 },
@@ -96,10 +100,11 @@ public class BD_CuriosPlugin
                     @Override
                     public void curioTick(SlotContext slotContext)
                     {
+                        if (!(slotContext.entity().level() instanceof ServerLevel serverLevel)) return;
                         if (stack.getItem() == BDItems.NET_RESTOCKER_ITEM.get())
                         {
                             NetRestockerItem item = (NetRestockerItem) stack.getItem();
-                            item.inventoryTick(stack, slotContext.entity().level(), slotContext.entity(), slotContext.index(), false);
+                            item.inventoryTick(stack, serverLevel, slotContext.entity(), null);
                         }
                     }
                 },

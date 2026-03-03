@@ -11,41 +11,43 @@ import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 
 @EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
 public class DimensionsShortKeys
 {
+    public static final KeyMapping.Category BDShortCutKeyCategory = new KeyMapping.Category(Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "short_keys"));
 
     public static final KeyMapping OPEN_GUI_KEY = new KeyMapping(
             "key.beyonddimensions.open_gui", // 键位描述
             GLFW.GLFW_KEY_O,                 // 默认按键 "O"
-            "key.categories.beyonddimensions" // 键位分类
+            BDShortCutKeyCategory
     );
 
     public static final KeyMapping OPEN_TERMINAL_QUICK_KEY = new KeyMapping(
             "key.beyonddimensions.open_terminal_quick_key",
             GLFW.GLFW_KEY_P,
-            "key.categories.beyonddimensions"
+            BDShortCutKeyCategory
     );
 
     public static final KeyMapping MAIN_HAND_ITEM_TRANSFER_KEY = new KeyMapping(
             "key.beyonddimensions.main_hand_item_transfer_key",
             InputConstants.Type.MOUSE,
             GLFW.GLFW_MOUSE_BUTTON_MIDDLE,
-            "key.categories.beyonddimensions"
+            BDShortCutKeyCategory
     );
 
     public static final KeyMapping TOGGLE_MAGNET_KEY = new KeyMapping(
             "key.beyonddimensions.toggle_magnet_key",
             GLFW.GLFW_KEY_LEFT_BRACKET, // 对应[
-            "key.categories.beyonddimensions"
+            BDShortCutKeyCategory
     );
 
     public static void register()
@@ -71,11 +73,11 @@ public class DimensionsShortKeys
 
             if (CommonConfigRuntime.uiCraftButton == ButtonState.ENABLED)
             {
-                PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
+                ClientPacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
             }
             else if (CommonConfigRuntime.uiCraftButton == ButtonState.DISABLED)
             {
-                PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_MENU));
+                ClientPacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_MENU));
             }
 
 
@@ -90,7 +92,7 @@ public class DimensionsShortKeys
                 return;
             }
 
-            PacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_CRAFT_TERMINAL));
+            ClientPacketDistributor.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_CRAFT_TERMINAL));
         }
 
         while (TOGGLE_MAGNET_KEY.consumeClick())
@@ -102,7 +104,7 @@ public class DimensionsShortKeys
                 return;
             }
 
-            PacketDistributor.sendToServer(new ToggleMagnetPacket());
+            ClientPacketDistributor.sendToServer(new ToggleMagnetPacket());
         }
 
     }

@@ -10,12 +10,10 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.*;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.common.CommonHooks;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Optional;
 
 public class AutoRefillResultSlot extends ResultSlot
 {

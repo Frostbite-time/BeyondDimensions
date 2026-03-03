@@ -5,7 +5,6 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.Item;

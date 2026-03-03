@@ -116,7 +116,7 @@ public class DataComponentPatchHelper
     {
         if (in instanceof CompoundTag ct)
         {
-            List<String> keys = new ArrayList<>(ct.getAllKeys());
+            List<String> keys = new ArrayList<>(ct.keySet());
             Collections.sort(keys); // 字典序，消除写入顺序差异
             CompoundTag out = new CompoundTag();
             for (String k : keys)
