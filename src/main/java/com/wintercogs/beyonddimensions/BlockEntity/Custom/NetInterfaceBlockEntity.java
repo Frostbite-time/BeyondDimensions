@@ -22,6 +22,7 @@ import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -378,26 +379,13 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     protected void loadAdditional(@NotNull ValueInput input)
     {
         super.loadAdditional(input);
-        this.stackHandler.deserializeNBT(input.lookup(), input.read("inventory", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
-        this.fakeStackHandler.deserializeNBT(input.lookup(), input.read("flags", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
+        this.stackHandler.deserializeNBT(input.lookup(), input.read("inventory", CompoundTag.CODEC).orElseGet(CompoundTag::new));
+        this.fakeStackHandler.deserializeNBT(input.lookup(), input.read("flags", CompoundTag.CODEC).orElseGet(CompoundTag::new));
 
-        // 旧数据兼容
         String popModeNew = input.getStringOr("pop_mode", "");
         if (!popModeNew.isEmpty())
         {
             this.popMode = PopMode.valueOf(popModeNew);
-        }
-        else if (!input.getStringOr("popMode", "").isEmpty())
-        {
-            this.popMode = PopMode.valueOf(input.getStringOr("popMode", PopMode.STOP.name()));
-        }
-        else if (input.getBooleanOr("popMode", false))
-        {
-            this.popMode = PopMode.OPEN;
-        }
-        else
-        {
-            this.popMode = PopMode.STOP;
         }
 
         String fuzzyModeNew = input.getStringOr("fuzzy_mode", "");
@@ -413,8 +401,8 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     protected void saveAdditional(@NotNull ValueOutput output)
     {
         super.saveAdditional(output);
-        output.store("inventory", net.minecraft.nbt.CompoundTag.CODEC, stackHandler.serializeNBT(lookupProvider()));
-        output.store("flags", net.minecraft.nbt.CompoundTag.CODEC, fakeStackHandler.serializeNBT(lookupProvider()));
+        output.store("inventory", CompoundTag.CODEC, stackHandler.serializeNBT(lookupProvider()));
+        output.store("flags", CompoundTag.CODEC, fakeStackHandler.serializeNBT(lookupProvider()));
         output.putString("pop_mode", this.popMode.name());
         output.putString("fuzzy_mode", this.fuzzyMode.name());
     }

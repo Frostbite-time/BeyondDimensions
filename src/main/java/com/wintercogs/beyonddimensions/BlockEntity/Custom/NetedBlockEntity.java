@@ -3,6 +3,8 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -161,6 +163,12 @@ public abstract class NetedBlockEntity extends BlockEntity
         // 完成读取后刷新一次缓存
         super.onLoad();
         refreshNetCache();
+    }
+
+    @Override
+    public @NotNull CompoundTag getUpdateTag(@NotNull HolderLookup.Provider registries)
+    {
+        return saveCustomOnly(registries);
     }
 
     @Override

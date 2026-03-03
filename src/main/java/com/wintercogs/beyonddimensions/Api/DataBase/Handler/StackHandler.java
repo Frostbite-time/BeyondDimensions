@@ -614,6 +614,9 @@ public class StackHandler implements IStackHandler
 
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag)
     {
+        if(tag == null) return;
+        if(tag.isEmpty()) return;
+
         clearStorage();
         RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
         StackHandler decoded = CODEC.parse(ops, tag)
