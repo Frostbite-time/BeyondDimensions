@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.Integration.JEI.RecipeTransfer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
@@ -33,16 +32,16 @@ public class MissStackError implements IRecipeTransferError
     @Override
     public void showError(GuiGraphics guiGraphics, int mouseX, int mouseY, IRecipeSlotsView recipeSlotsView, int recipeX, int recipeY)
     {
-        PoseStack poseStack = guiGraphics.pose();
-        poseStack.pushPose();
-        poseStack.translate((float) recipeX, (float) recipeY, 0.0F);
+        var poseStack = guiGraphics.pose();
+        poseStack.pushMatrix();
+        poseStack.translate((float) recipeX, (float) recipeY);
 
         for (IRecipeSlotView slot : this.slots)
         {
             slot.drawHighlight(guiGraphics, HIGHLIGHT_COLOR);
         }
 
-        poseStack.popPose();
+        poseStack.popMatrix();
     }
 
     @Override
