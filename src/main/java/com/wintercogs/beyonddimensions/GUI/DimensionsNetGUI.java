@@ -218,7 +218,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         this.searchField.setMaxLength(200);
         this.searchField.setBordered(true);
         this.searchField.setVisible(true);
-        this.searchField.setTextColor(16777215);
+        this.searchField.setTextColor(0xFFFFFFFF);
         this.searchField.setTooltip(Tooltip.create(Component.translatable("tooltip.editbox.beyonddimensions.search")));
         this.searchField.setResponder(text -> {
             if (text.isEmpty())

@@ -55,7 +55,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
     // 构建注册用的信息
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
-    public static final Supplier<MenuType<DimensionsCraftMenu>> Dimensions_Craft_Menu = MENU_TYPES.register("dimensions_craft_menu", () -> IMenuTypeExtension.create(DimensionsCraftMenu::new));
+    public static final Supplier<MenuType<@NotNull DimensionsCraftMenu>> Dimensions_Craft_Menu = MENU_TYPES.register("dimensions_craft_menu", () -> IMenuTypeExtension.create(DimensionsCraftMenu::new));
 
 
     /**
@@ -83,7 +83,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         TransientCraftingContainer craftContainer;
         if (craftItems != null)
         {
-            craftContainer = new TransientCraftingContainer(this, 3, 3)
+            craftContainer = new TransientCraftingContainer(this, 3, 3, craftItems)
             {
                 @Override
                 public void setChanged()
@@ -110,14 +110,6 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                 }
             };
         initCraftSlots(playerInventory, craftContainer);
-
-        if (craftItems != null)
-        {
-            for (int i = 0; i < craftItems.size(); i++)
-            {
-                craftContainer.setItem(i, craftItems.get(i));
-            }
-        }
     }
 
 

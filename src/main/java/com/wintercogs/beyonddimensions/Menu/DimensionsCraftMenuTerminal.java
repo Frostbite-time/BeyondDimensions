@@ -31,7 +31,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 
     // 构建注册用的信息
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
-    public static final Supplier<MenuType<DimensionsCraftMenuTerminal>> Dimensions_Craft_Menu_Terminal = MENU_TYPES.register("dimensions_craft_menu_terminal", () -> IMenuTypeExtension.create(DimensionsCraftMenuTerminal::new));
+    public static final Supplier<MenuType<@NotNull DimensionsCraftMenuTerminal>> Dimensions_Craft_Menu_Terminal = MENU_TYPES.register("dimensions_craft_menu_terminal", () -> IMenuTypeExtension.create(DimensionsCraftMenuTerminal::new));
 
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
