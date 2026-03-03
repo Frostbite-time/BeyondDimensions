@@ -153,7 +153,7 @@ configurations {
 
 dependencies {
     // 引入对拼音库的依赖 并将其打包到模组
-    jarJar(implementation group: 'com.github.promeg', name: 'tinypinyin', version: '2.0.3'){
+    jarJar(implementation group: 'com.github.promeg', name: 'tinypinyin', version: '2.0.3') {
         version {
             strictly '[2.0.3,)'
             prefer '2.0.3'
@@ -193,6 +193,8 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_name               : mod_name,
             mod_license            : mod_license,
             mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description
     ]
     inputs.properties replaceProperties
     expand replaceProperties
@@ -202,6 +204,22 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
 // Include the output of "generateModMetadata" as an input directory for the build
 // this works with both building through Gradle and the IDE.
 sourceSets.main.resources.srcDir generateModMetadata
+
+// Include Licenses
+tasks.named('processResources', ProcessResources).configure {
+    from(rootProject.file('LICENSE')) {
+        into 'META-INF'
+    }
+
+    from(rootProject.file('THIRD_PARTY_NOTICES.md')) {
+        into 'META-INF'
+    }
+
+    from(rootProject.file('licenses')) {
+        into 'META-INF/licenses'
+    }
+}
+
 // To avoid having to run "generateModMetadata" manually, make it run on every project reload
 neoForge.ideSyncTask generateModMetadata
 
