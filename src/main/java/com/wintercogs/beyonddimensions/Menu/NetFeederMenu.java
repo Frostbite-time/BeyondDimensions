@@ -6,11 +6,12 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Machine.FeederMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.Slot.FlagStackTypedSlot;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -54,7 +55,7 @@ public class NetFeederMenu extends BDBaseMenu
         {
             return super.isStackValid(slot, stack)
                     && stack instanceof ItemStackKey itemStackKey
-                    && itemStackKey.getReadOnlyStack().getFoodProperties(player) != null;
+                    && itemStackKey.getReadOnlyStack().get(DataComponents.FOOD) != null;
         }
     };
     private boolean initialized; //initialized必须在初始数据提供完成之后才能设置为true

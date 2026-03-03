@@ -4,8 +4,8 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedSta
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.NetTerminalItem;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
@@ -41,7 +41,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, AbstractUnorderedStackHandler data, NonNullList<ItemStack> craftItems, @Nullable ItemStack terminalItem, @Nullable BlockPos entityPos)
     {
         super(Dimensions_Craft_Menu_Terminal.get(), id, playerInventory, data, craftItems, entityPos);
-        if (!player.level().isClientSide)
+        if (!player.level().isClientSide())
         {
             this.terminalStack = terminalItem;
             this.entityPos = entityPos;

@@ -19,7 +19,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -83,7 +82,8 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
         TransientCraftingContainer craftContainer;
         if (craftItems != null)
-            craftContainer = new TransientCraftingContainer(this, 3, 3, craftItems)
+        {
+            craftContainer = new TransientCraftingContainer(this, 3, 3)
             {
                 @Override
                 public void setChanged()
@@ -95,6 +95,11 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                     }
                 }
             };
+            for (int i = 0; i < craftItems.size(); i++)
+            {
+                craftContainer.setItem(i, craftItems.get(i));
+            }
+        }
         else
             craftContainer = new TransientCraftingContainer(this, 3, 3)
             {
@@ -196,14 +201,14 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
             CraftingInput craftinginput = craftSlots.asCraftInput();
             ServerPlayer serverplayer = (ServerPlayer) player;
             ItemStack itemstack = ItemStack.EMPTY;
-            Optional<RecipeHolder<CraftingRecipe>> optional = getRecipe(player, craftinginput, Objects.requireNonNull(level.getServer()));
+            Optional<RecipeHolder<@NotNull CraftingRecipe>> optional = getRecipe(player, craftinginput, Objects.requireNonNull(serverplayer.level()));
             if (optional.isPresent())
             {
 
                 // 原版过程
-                RecipeHolder<CraftingRecipe> recipeholder = (RecipeHolder) optional.get();
-                CraftingRecipe craftingrecipe = (CraftingRecipe) recipeholder.value();
-                if (resultSlots.setRecipeUsed(level, serverplayer, recipeholder))
+                RecipeHolder<@NotNull CraftingRecipe> recipeholder = optional.get();
+                CraftingRecipe craftingrecipe = recipeholder.value();
+                if (resultSlots.setRecipeUsed(serverplayer, recipeholder))
                 {
                     ItemStack itemstack1 = craftingrecipe.assemble(craftinginput, level.registryAccess());
                     if (itemstack1.isItemEnabled(level.enabledFeatures()))
@@ -226,13 +231,13 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         return slot.container != resultSlots && super.canTakeItemForPickAll(stack, slot);
     }
 
-    public static Optional<RecipeHolder<CraftingRecipe>> getRecipe(Player player, CraftingInput input, MinecraftServer server)
+    public static Optional<RecipeHolder<CraftingRecipe>> getRecipe(Player player, CraftingInput input, ServerLevel serverLevel)
     {
 //        if (BeyondDimensions.PolymorphLoaded && player != null)
 //        {
 //            return PolymorphHelper.getRecipe(player, RecipeType.CRAFTING, input, level);
 //        }
-        return server.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
+        return serverLevel.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, serverLevel);
     }
 
     public void transferRecipe(List<IStackKey<?>> inputKeys, List<Long> amount)

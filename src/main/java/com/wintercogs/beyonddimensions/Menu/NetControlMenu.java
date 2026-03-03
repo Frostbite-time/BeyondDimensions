@@ -45,14 +45,11 @@ public class NetControlMenu extends BDBaseMenu
     {
         super(Net_Control_Menu.get(), containerId, playerInventory);
 
-        if (!player.level().isClientSide())
+        if (player instanceof ServerPlayer serverPlayer)
         {
-            if (player.getServer() != null)
-            {
-                net = DimensionsNet.getNetFromPlayer(player);
-                if (net != null)
-                    playerInfo = net.getPlayerPermissionInfoMap(player.getServer());
-            }
+            net = DimensionsNet.getNetFromPlayer(serverPlayer);
+            if (net != null)
+                playerInfo = net.getPlayerPermissionInfoMap(serverPlayer.level().getServer());
         }
     }
 
@@ -103,11 +100,13 @@ public class NetControlMenu extends BDBaseMenu
     @Override
     protected void updateChange()
     {
-        if (!net.getPlayerPermissionInfoMap(player.getServer()).equals(this.playerInfo))
-        {
-            this.playerInfo = this.net.getPlayerPermissionInfoMap(player.getServer());
-            sendPlayerInfo();
-        }
+        if (player instanceof ServerPlayer serverPlayer)
+
+            if (!net.getPlayerPermissionInfoMap(serverPlayer.level().getServer()).equals(this.playerInfo))
+            {
+                this.playerInfo = this.net.getPlayerPermissionInfoMap(serverPlayer.level().getServer());
+                sendPlayerInfo();
+            }
     }
 
 

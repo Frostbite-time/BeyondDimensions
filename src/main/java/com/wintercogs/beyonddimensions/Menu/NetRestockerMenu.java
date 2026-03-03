@@ -1,16 +1,15 @@
 package com.wintercogs.beyonddimensions.Menu;
 
-import com.mojang.datafixers.util.Pair;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.IStackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.GUI.CommonTextures;
 import com.wintercogs.beyonddimensions.Machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.Machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.Slot.FlagStackTypedSlot;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -25,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,9 +107,9 @@ public class NetRestockerMenu extends BDBaseMenu
         return new FlagStackTypedSlot(this, storage, slotIndex, x, y)
         {
             @Override
-            public Pair<Identifier, Identifier> getNoItemIcon()
+            public @Nullable Identifier getNoItemIcon()
             {
-                return Pair.of(InventoryMenu.BLOCK_ATLAS, noItemIcon);
+                return noItemIcon;
             }
         };
     }
