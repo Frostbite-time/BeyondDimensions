@@ -1,21 +1,23 @@
 package com.wintercogs.beyonddimensions.Api.DataBase;
 
+import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.AbstractUnorderedStackHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
-import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.Util.PlayerNameHelper;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -34,6 +36,19 @@ import java.util.*;
  */
 public class DimensionsNet extends SavedData
 {
+    private static final String NET_NAME_PREFIX = "BDNet_";
+    private static final int MAX_NET_SCAN = 10000;
+    private static final int DELETED_ID = -99;
+
+    private static final String SAVE_KEY_ID = "id";
+    private static final String SAVE_KEY_OWNER = "owner";
+    private static final String SAVE_KEY_MANAGERS = "managers";
+    private static final String SAVE_KEY_PLAYERS = "players";
+    private static final String SAVE_KEY_UNIFIED_STORAGE = "unified_storage";
+    private static final String SAVE_KEY_CURRENT_TIME = "current_time";
+    private static final String SAVE_KEY_DELETED = "deleted";
+
+    private static final Codec<DimensionsNet> CODEC = CompoundTag.CODEC.xmap(DimensionsNet::fromTag, DimensionsNet::toTag);
 
     /**
      * 作为网络的唯一标识符，id从0开始，小于0的id均可以认为是无效网络
@@ -105,6 +120,21 @@ public class DimensionsNet extends SavedData
         return new DimensionsNet(false);
     }
 
+    private static SavedDataType<@NotNull DimensionsNet> savedDataType(String netName)
+    {
+        return new SavedDataType<>(netName, DimensionsNet::create, CODEC, DataFixTypes.SAVED_DATA_COMMAND_STORAGE);
+    }
+
+    private static HolderLookup.Provider currentRegistryAccess()
+    {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null)
+        {
+            throw new IllegalStateException("Cannot access registry provider when server is unavailable");
+        }
+        return server.registryAccess();
+    }
+
     /**
      * 用于创建一个维度网络，仅在服务端调用
      *
@@ -118,12 +148,12 @@ public class DimensionsNet extends SavedData
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
         if (net != null) return net;
 
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null)
         {
             String netId = DimensionsNet.buildNewNetName(server);
-            String numId = netId.replace("BDNet_", "");
-            DimensionsNet newNet = server.overworld().getDataStorage().computeIfAbsent(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), netId);
+            String numId = netId.replace(NET_NAME_PREFIX, "");
+            DimensionsNet newNet = server.overworld().getDataStorage().computeIfAbsent(savedDataType(netId));
             newNet.setId(Integer.parseInt(numId));
             newNet.setOwner(player.getUUID());
             newNet.addManager(player.getUUID());
@@ -148,14 +178,14 @@ public class DimensionsNet extends SavedData
         int netId;
         // 接下来按照"BDNet_" + netId从0查找网络，直到找到不存在的网络，此时netId为新网络id
         // 后续可以做一个废弃网络回收处理，但是暂时不着急
-        for (netId = 0; netId < 10000; netId++)
+        for (netId = 0; netId < MAX_NET_SCAN; netId++)
         {
-            if (dataProvider.overworld().getDataStorage().get(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), "BDNet_" + netId) == null)
+            if (dataProvider.overworld().getDataStorage().get(savedDataType(NET_NAME_PREFIX + netId)) == null)
             {
                 break;
             }
         }
-        return "BDNet_" + netId;
+        return NET_NAME_PREFIX + netId;
     }
 
     /**
@@ -170,7 +200,7 @@ public class DimensionsNet extends SavedData
         if (server == null) return null;
         if (id < 0) return null;
 
-        DimensionsNet net = server.overworld().getDataStorage().get(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), "BDNet_" + id);
+        DimensionsNet net = server.overworld().getDataStorage().get(savedDataType(NET_NAME_PREFIX + id));
         if (net != null && !net.deleted)
         {
             return net;
@@ -186,13 +216,13 @@ public class DimensionsNet extends SavedData
      */
     public static @Nullable DimensionsNet getNetFromPlayer(Player player)
     {
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return null;
 
         int netId;
-        for (netId = 0; netId < 10000; netId++)
+        for (netId = 0; netId < MAX_NET_SCAN; netId++)
         {
-            DimensionsNet net = server.overworld().getDataStorage().get(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), "BDNet_" + netId);
+            DimensionsNet net = server.overworld().getDataStorage().get(savedDataType(NET_NAME_PREFIX + netId));
             if (net != null && !net.deleted)
             {
                 if (net.players.contains(player.getUUID()))
@@ -208,97 +238,67 @@ public class DimensionsNet extends SavedData
         return null;
     }
 
-    /**
-     * 从硬盘反序列化维度网络，用于SavedData的工厂方法
-     */
-    public static DimensionsNet load(CompoundTag tag, HolderLookup.Provider registryAccess)
+    private static DimensionsNet fromTag(CompoundTag tag)
     {
         DimensionsNet net = new DimensionsNet(false);
 
-        net.id = tag.getInt("Id");
-        UUID owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
-        if (owner != null)
+        net.id = tag.getIntOr(SAVE_KEY_ID, DELETED_ID);
+        String owner = tag.getStringOr(SAVE_KEY_OWNER, "");
+        if (!owner.isEmpty())
         {
-            net.owner = owner;
+            net.owner = UUID.fromString(owner);
         }
 
-        net.unifiedStorage.deserializeNBT(registryAccess, tag.getCompound("UnifiedStorage"));
-        // 旧数据兼容
-        if (tag.contains("EnergyStorage"))
+        net.unifiedStorage.deserializeNBT(currentRegistryAccess(), tag.getCompoundOrEmpty(SAVE_KEY_UNIFIED_STORAGE));
+
+        if (tag.contains(SAVE_KEY_MANAGERS))
         {
-            CompoundTag energyTag = tag.getCompound("EnergyStorage");
-            if (energyTag.contains("Energy"))
-            {
-                net.unifiedStorage.insert(EnergyStackKey.INSTANCE, energyTag.getLong("Energy"), false);
-            }
+            ListTag managerList = tag.getListOrEmpty(SAVE_KEY_MANAGERS);
+            managerList.forEach(manager -> manager.asString().ifPresent(managerId -> net.managers.add(UUID.fromString(managerId))));
         }
 
-        if (tag.contains("Managers"))
+        if (tag.contains(SAVE_KEY_PLAYERS))
         {
-            ListTag managerList = tag.getList("Managers", 8);
-            managerList.forEach(manager -> net.managers.add(UUID.fromString(manager.getAsString())));
+            ListTag playerList = tag.getListOrEmpty(SAVE_KEY_PLAYERS);
+            playerList.forEach(player -> player.asString().ifPresent(playerId -> net.players.add(UUID.fromString(playerId))));
         }
 
-        if (tag.contains("Players"))
-        {
-            ListTag playerList = tag.getList("Players", 8); // 8 表示 StringTag
-            playerList.forEach(player -> net.players.add(UUID.fromString(player.getAsString())));
-        }
-
-        // 读取倒计时
-        net.currentTime = tag.getInt("currentTime");
-
-        if (tag.contains("Deleted"))
-            net.deleted = tag.getBoolean("Deleted");
+        net.currentTime = tag.getIntOr(SAVE_KEY_CURRENT_TIME, 0);
+        net.deleted = tag.getBooleanOr(SAVE_KEY_DELETED, false);
 
         return net;
     }
 
-    /**
-     * 把维度网络序列化，以保存到硬盘
-     */
-    @Override
-    public @NotNull CompoundTag save(CompoundTag tag, HolderLookup.Provider registryAccess)
+    private CompoundTag toTag()
     {
-        // 保存 ID
-        tag.putInt("Id", this.id);
-        // 保存网络所有者 UUID
-        if (this.owner != null)
-            tag.putUUID("Owner", this.owner);
+        CompoundTag tag = new CompoundTag();
 
-        if (!tag.contains("OldDataTag"))
+        tag.putInt(SAVE_KEY_ID, this.id);
+        if (this.owner != null)
         {
-            tag.putBoolean("OldDataTag", true);
+            tag.putString(SAVE_KEY_OWNER, this.owner.toString());
         }
 
-        // 保存网络管理者
         ListTag managerListTag = new ListTag();
         for (UUID manager : managers)
         {
             managerListTag.add(StringTag.valueOf(manager.toString()));
         }
-        tag.put("Managers", managerListTag);
+        tag.put(SAVE_KEY_MANAGERS, managerListTag);
 
-        // 保存绑定的玩家列表
         ListTag playerListTag = new ListTag();
         for (UUID player : players)
         {
             playerListTag.add(StringTag.valueOf(player.toString()));
         }
-        tag.put("Players", playerListTag);
+        tag.put(SAVE_KEY_PLAYERS, playerListTag);
 
-        // 保存存储
-        tag.put("UnifiedStorage", unifiedStorage.serializeNBT(registryAccess));
-
-        // 保存倒计时
-        tag.putInt("currentTime", this.currentTime);
-
-        // 保存删除状态
-        tag.putBoolean("Deleted", this.deleted);
+        tag.put(SAVE_KEY_UNIFIED_STORAGE, unifiedStorage.serializeNBT(currentRegistryAccess()));
+        tag.putInt(SAVE_KEY_CURRENT_TIME, this.currentTime);
+        tag.putBoolean(SAVE_KEY_DELETED, this.deleted);
 
         return tag;
     }
-
 
     // 功能函数
 
@@ -483,7 +483,7 @@ public class DimensionsNet extends SavedData
         this.owner = null;
         this.managers.clear();
         this.players.clear();
-        this.id = -99; // 用-99作为被删除的特殊标记
+        this.id = DELETED_ID; // 用-99作为被删除的特殊标记
         this.unifiedStorage.clearStorage();
         this.deleted = true;
         setDirty();
