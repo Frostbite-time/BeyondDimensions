@@ -3,9 +3,9 @@ package com.wintercogs.beyonddimensions.Integration.JEI.RecipeTransfer;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
-import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
+import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
@@ -38,7 +38,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
     }
 
     @Override
-    public RecipeType<RecipeHolder<CraftingRecipe>> getRecipeType()
+    public IRecipeType<RecipeHolder<CraftingRecipe>> getRecipeType()
     {
         return RecipeTypes.CRAFTING;
     }
@@ -46,7 +46,7 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
     @Override
     public @Nullable IRecipeTransferError transferRecipe(DimensionsCraftMenu container, RecipeHolder<CraftingRecipe> recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer)
     {
-        return TransferHelper.transferRecipe(getInputSources(container), container.storage.getStorage(), container.player.getInventory().items, recipeSlots, maxTransfer, doTransfer);
+        return TransferHelper.transferRecipe(getInputSources(container), container.storage.getStorage(), container.player.getInventory().getNonEquipmentItems(), recipeSlots, maxTransfer, doTransfer);
     }
 
     // 获取合成输入槽位（需根据实际容器实现）

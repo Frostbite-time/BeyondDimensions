@@ -13,6 +13,7 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
@@ -115,7 +116,7 @@ public class TransferHelper
 
         if (doTransfer)
         {
-            PacketDistributor.sendToServer(new RecipeFillC2SPacket(outKeys, outAmts));
+            ClientPacketDistributor.sendToServer(new RecipeFillC2SPacket(outKeys, outAmts));
         }
 
         if (hasMissing)
