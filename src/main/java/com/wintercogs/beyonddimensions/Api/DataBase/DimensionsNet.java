@@ -156,7 +156,7 @@ public class DimensionsNet extends SavedData
         {
             String netId = DimensionsNet.buildNewNetName(server);
             String numId = netId.replace(NET_NAME_PREFIX, "");
-            DimensionsNet newNet = server.overworld().getDataStorage().computeIfAbsent(savedDataType(netId));
+            DimensionsNet newNet = server.getDataStorage().computeIfAbsent(savedDataType(netId));
             newNet.setId(Integer.parseInt(numId));
             newNet.setOwner(player.getUUID());
             newNet.addManager(player.getUUID());
@@ -183,7 +183,7 @@ public class DimensionsNet extends SavedData
         // 后续可以做一个废弃网络回收处理，但是暂时不着急
         for (netId = 0; netId < MAX_NET_SCAN; netId++)
         {
-            if (dataProvider.overworld().getDataStorage().get(savedDataType(NET_NAME_PREFIX + netId)) == null)
+            if (dataProvider.getDataStorage().get(savedDataType(NET_NAME_PREFIX + netId)) == null)
             {
                 break;
             }
@@ -203,7 +203,7 @@ public class DimensionsNet extends SavedData
         if (server == null) return null;
         if (id < 0) return null;
 
-        DimensionsNet net = server.overworld().getDataStorage().get(savedDataType(NET_NAME_PREFIX + id));
+        DimensionsNet net = server.getDataStorage().get(savedDataType(NET_NAME_PREFIX + id));
         if (net != null && !net.deleted)
         {
             return net;
@@ -225,7 +225,7 @@ public class DimensionsNet extends SavedData
         int netId;
         for (netId = 0; netId < MAX_NET_SCAN; netId++)
         {
-            DimensionsNet net = server.overworld().getDataStorage().get(savedDataType(NET_NAME_PREFIX + netId));
+            DimensionsNet net = server.getDataStorage().get(savedDataType(NET_NAME_PREFIX + netId));
             if (net != null && !net.deleted)
             {
                 if (net.players.contains(player.getUUID()))
