@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "minecraft:netherite_ingot",
+    "B": "minecraft:ender_eye",
+    "C": "minecraft:ender_pearl",
+    "D": "beyonddimensions:stable_space_time_fragment"
+  },
+  "pattern": [
+    "ABA",
+    "CDC",
+    "ACA"
+  ],
+  "result": {
+    "count": 1,
+    "id": "beyonddimensions:net_creater"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "beyonddimensions:unstable_space_time_fragment"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "unlock_net_creater": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:nether_star"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "unlock_net_creater"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "beyonddimensions:unstable_space_time_fragment"
+    ]
+  }
+}

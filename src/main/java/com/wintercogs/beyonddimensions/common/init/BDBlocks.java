@@ -2,6 +2,8 @@ package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.Custom.*;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -11,7 +13,7 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public class BDBlocks
 {
@@ -19,45 +21,55 @@ public class BDBlocks
             DeferredRegister.createBlocks(BeyondDimensions.MODID);
 
     public static final DeferredBlock<@NotNull Block> NET_CONTROL = registerBlock("net_control",
-            () -> new NetControlBlock(BlockBehaviour.Properties.of()
-                    .strength(4f)));
+            NetControlBlock::new,
+            BlockBehaviour.Properties.of().strength(4f));
 
     public static final DeferredBlock<@NotNull Block> NET_INTERFACE = registerBlock("net_interface",
-            () -> new NetInterfaceBlock(BlockBehaviour.Properties.of().strength(2f)));
+            NetInterfaceBlock::new,
+            BlockBehaviour.Properties.of().strength(2f));
 
     public static final DeferredBlock<@NotNull Block> NET_PATHWAY = registerBlock("net_pathway",
-            () -> new NetPathwayBlock(BlockBehaviour.Properties.of().strength(2f)));
+            NetPathwayBlock::new,
+            BlockBehaviour.Properties.of().strength(2f));
 
     public static final DeferredBlock<@NotNull Block> NET_ENERGY_PATHWAY = registerBlock("net_energy_pathway",
-            () -> new NetEnergyPathwayBlock(BlockBehaviour.Properties.of().strength(2f)));
+            NetEnergyPathwayBlock::new,
+            BlockBehaviour.Properties.of().strength(2f));
 
     public static final DeferredBlock<@NotNull Block> NET_TERMINAL_BLOCK = registerBlock("net_terminal_block",
-            () -> new NetTerminalBlock(BlockBehaviour.Properties.of().strength(2f)));
+            NetTerminalBlock::new,
+            BlockBehaviour.Properties.of().strength(2f));
 
     public static final DeferredBlock<@NotNull Block> NET_PUMP_BLOCK = registerBlock("net_pump_block",
-            () -> new NetPumpBlock(BlockBehaviour.Properties.of().strength(2f)));
+            NetPumpBlock::new,
+            BlockBehaviour.Properties.of().strength(2f));
 
     public static final DeferredBlock<@NotNull Block> NET_HOPPER_BLOCK = registerBlock("net_hopper_block",
-            () -> new NetHopperBlock(BlockBehaviour.Properties.of().strength(2f)));
+            NetHopperBlock::new,
+            BlockBehaviour.Properties.of().strength(2f));
 
     public static final DeferredBlock<@NotNull Block> NET_FURNACE_BLOCK = registerBlock("net_furnace_block",
-            () -> new NetFurnaceBlock(BlockBehaviour.Properties.of().strength(2f)));
+            NetFurnaceBlock::new,
+            BlockBehaviour.Properties.of().strength(2f));
 
     // 合成材料-维度链接框架
     public static final DeferredBlock<@NotNull Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock("dimensional_connect_block",
-            () -> new Block(BlockBehaviour.Properties.of().strength(2f)));
+            Block::new,
+            BlockBehaviour.Properties.of().strength(2f));
 
 
-    private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block)
+    private static <T extends Block> DeferredBlock<T> registerBlock(String name, Function<BlockBehaviour.Properties, T> blockFactory, BlockBehaviour.Properties properties)
     {
-        DeferredBlock<T> toReturn = BLOCKS.register(name, block);
+        DeferredBlock<T> toReturn = BLOCKS.register(name,
+                id -> blockFactory.apply(properties.setId(ResourceKey.create(Registries.BLOCK, id))));
         registerBlockItem(name, toReturn);
         return toReturn;
     }
 
     private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block)
     {
-        BDItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
+        BDItems.ITEMS.register(name,
+                id -> new BlockItem(block.get(), new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id))));
     }
 
     public static void register(IEventBus eventBus)

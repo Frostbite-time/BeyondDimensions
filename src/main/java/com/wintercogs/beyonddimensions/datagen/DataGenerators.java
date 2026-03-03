@@ -27,8 +27,7 @@ public class DataGenerators
         event.createProvider((output, lookupProvider) -> new LootTableProvider(output, Collections.emptySet(),
                 List.of(new LootTableProvider.SubProviderEntry(ModBlockLootTableProvider::new, LootContextParamSets.BLOCK)), lookupProvider));
         // 生成物品和方块模型
-        event.createProvider(ModItemModelProvider::new);
-        event.createProvider(ModBlockModelProvider::new);
+        event.createProvider(ModModelProvider::new);
 
         // 生成方块、物品、流体标签
         event.createProvider(ModBlockTagProvider::new);

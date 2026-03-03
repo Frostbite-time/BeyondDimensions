@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "minecraft:iron_ingot",
+    "B": "minecraft:gold_ingot",
+    "D": "beyonddimensions:net_member_inviter"
+  },
+  "pattern": [
+    "ABA",
+    "BDB",
+    "ABA"
+  ],
+  "result": {
+    "count": 1,
+    "id": "beyonddimensions:net_terminal_item"
+  }
+}

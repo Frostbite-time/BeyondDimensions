@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -79,15 +80,19 @@ public class ModFluids
 
         // 4) 方块 + 桶
         DeferredHolder<Block, LiquidBlock> block =
-                BDBlocks.BLOCKS.register(name, () ->
+                BDBlocks.BLOCKS.register(name, id ->
                         new LiquidBlock(source.get(),
                                 BlockBehaviour.Properties.ofFullCopy(Blocks.WATER)
-                                        .lightLevel(s -> lightlevel)));
+                                        .lightLevel(s -> lightlevel)
+                                        .setId(ResourceKey.create(Registries.BLOCK, id))));
 
         DeferredHolder<Item, Item> bucket =
-                BDItems.ITEMS.register(name + "_bucket", () ->
+                BDItems.ITEMS.register(name + "_bucket", id ->
                         new BucketItem(source.get(),
-                                new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
+                                new Item.Properties()
+                                        .craftRemainder(Items.BUCKET)
+                                        .stacksTo(1)
+                                        .setId(ResourceKey.create(Registries.ITEM, id))));
 
         // 5) 回填 BaseFlowingFluid.Properties
         propsRef[0] = new BaseFlowingFluid.Properties(type, source, flowing)
