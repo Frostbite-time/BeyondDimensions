@@ -32,8 +32,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
 
-import java.util.List;
-
 public class ServerPayloadHandler
 {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -387,7 +385,7 @@ public class ServerPayloadHandler
                         }
                     }
 
-                    if(BeyondDimensions.CuriosLoaded)
+                    if (BeyondDimensions.CuriosLoaded)
                     {
 //                        top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
 //                            List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
