@@ -1,12 +1,16 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
+import com.wintercogs.beyonddimensions.Render.IngredientRenderer;
 import com.wintercogs.beyonddimensions.Util.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -30,13 +34,24 @@ public class FluidStackKeyRender implements IStackRender
     {
         if (key instanceof FluidStackKey fluidKey)
         {
+            var pose = gui.pose();
+            pose.pushMatrix();
+
             FluidStack stack = fluidKey.getRenderStack();
             if (!stack.isEmpty())
             {
-                int tint = IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor(stack);
-                int argb = tint | 0xFF000000;
-                gui.fill(x, y, x + 16, y + 16, argb);
+                var fluid = stack.getFluid();
+                IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluid);
+                Identifier still = props.getStillTexture(stack);
+                TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(ClientHooks.getBlockMaterial(still));
+                if (sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation())
+                {
+                    int tint = IClientFluidTypeExtensions.of(fluid).getTintColor();
+                    IngredientRenderer.drawTiledSprite(gui, 16, 16, tint, 16, sprite, x, y);
+                }
             }
+
+            pose.popMatrix();
         }
 
     }

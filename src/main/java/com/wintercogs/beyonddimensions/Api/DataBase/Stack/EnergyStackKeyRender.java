@@ -1,19 +1,25 @@
 package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 
+import com.wintercogs.beyonddimensions.Render.IngredientRenderer;
 import com.wintercogs.beyonddimensions.Util.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.client.ClientTooltipFlag;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -30,7 +36,22 @@ public class EnergyStackKeyRender implements IStackRender
     @Override
     public void render(GuiGraphics gui, IStackKey<?> key, int x, int y)
     {
-        gui.fill(x, y, x + 16, y + 16, 0xFF50F18E);
+        var pose = gui.pose();
+        pose.pushMatrix();
+
+        // 占位图标：用水的静态贴图 + 绿色
+        Identifier still = IClientFluidTypeExtensions
+                .of(Fluids.WATER)
+                .getStillTexture();
+        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(ClientHooks.getBlockMaterial(still));
+
+        if (sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation())
+        {
+            int tint = 0x50F18E; // 能量绿色
+            IngredientRenderer.drawTiledSprite(gui, 16, 16, tint, 16, sprite, x, y);
+        }
+
+        pose.popMatrix();
     }
 
     @Override
