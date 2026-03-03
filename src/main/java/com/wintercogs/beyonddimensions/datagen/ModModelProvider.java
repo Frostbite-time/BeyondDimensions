@@ -4,8 +4,8 @@ import com.mojang.math.Quadrant;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.Custom.NetFurnaceBlock;
 import com.wintercogs.beyonddimensions.Block.Custom.NetTerminalBlock;
-import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
@@ -47,7 +47,7 @@ public class ModModelProvider extends ModelProvider
         customTerminalBlockWithItem(blockModels);
         customFurnaceBlockWithItem(blockModels);
 
-        blockModels.createParticleOnlyBlock(ModFluids.XP_FLUID.block().get());
+        blockModels.createParticleOnlyBlock(BDFluids.XP_FLUID.block().get());
 
         itemModels.generateFlatItem(BDItems.NET_CREATER.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(BDItems.NET_MEMBER_INVITER.get(), ModelTemplates.FLAT_ITEM);
@@ -75,7 +75,7 @@ public class ModModelProvider extends ModelProvider
      */
     private void generateFluidBucketModels(ItemModelGenerators itemModels)
     {
-        for (ModFluids.FluidEntry e : ModFluids.ALL)
+        for (BDFluids.FluidEntry e : BDFluids.ALL)
         {
             fluidBucketModel(itemModels, e);
         }
@@ -89,7 +89,7 @@ public class ModModelProvider extends ModelProvider
      * "fluid": "<modid>:<fluidName>"
      * }
      */
-    private void fluidBucketModel(ItemModelGenerators itemModels, ModFluids.FluidEntry e)
+    private void fluidBucketModel(ItemModelGenerators itemModels, BDFluids.FluidEntry e)
     {
         itemModels.itemModelOutput.accept(
                 e.bucket().get(),

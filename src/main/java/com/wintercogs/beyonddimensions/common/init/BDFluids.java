@@ -1,9 +1,7 @@
-package com.wintercogs.beyonddimensions.Fluid;
+package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Fluid.Custom.XpFluid;
-import com.wintercogs.beyonddimensions.common.init.BDBlocks;
-import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.registries.Registries;
@@ -35,7 +33,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
-public class ModFluids
+public class BDFluids
 {
     public static final DeferredRegister<FluidType> FLUID_TYPES = DeferredRegister.create(NeoForgeRegistries.FLUID_TYPES, BeyondDimensions.MODID);
 
@@ -138,7 +136,7 @@ public class ModFluids
     @SubscribeEvent
     public static void onRegisterClientExtensions(RegisterClientExtensionsEvent event)
     {
-        for (var e : ModFluids.ALL)
+        for (var e : BDFluids.ALL)
         {
             final Identifier still = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "block/" + e.name() + "_still");
             final Identifier flow = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "block/" + e.name() + "_flow");
@@ -172,7 +170,7 @@ public class ModFluids
     public static void onClientSetup(FMLClientSetupEvent evt)
     {
         evt.enqueueWork(() -> {
-            for (var e : ModFluids.ALL)
+            for (var e : BDFluids.ALL)
             {
                 ItemBlockRenderTypes.setRenderLayer(e.source().get(), ChunkSectionLayer.TRANSLUCENT);
                 ItemBlockRenderTypes.setRenderLayer(e.flowing().get(), ChunkSectionLayer.TRANSLUCENT);

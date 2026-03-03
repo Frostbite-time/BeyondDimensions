@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -41,7 +40,7 @@ public class BDCreativeModeTabs
                         output.accept(BDItems.NET_RESTOCKER_ITEM);
                         output.accept(BDItems.XP_EXCHANGE_ITEM);
 
-                        for (ModFluids.FluidEntry e : ModFluids.ALL)
+                        for (BDFluids.FluidEntry e : BDFluids.ALL)
                         { //注册所有桶
                             output.accept(e.bucket().get());
                         }

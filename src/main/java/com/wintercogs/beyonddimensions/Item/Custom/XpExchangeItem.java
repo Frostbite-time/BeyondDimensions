@@ -4,11 +4,11 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.XpTransferSpeedMode;
 import com.wintercogs.beyonddimensions.Util.BDMath;
 import com.wintercogs.beyonddimensions.Util.XpUtil;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -118,7 +118,7 @@ public class XpExchangeItem extends Item
         final UnifiedStorage storage = net.getUnifiedStorage();
 
         // 经验流体候选列表：优先自家 XP 流体，其次为所有带 C_EXPERIENCE 标签的其它流体
-        final Fluid canonicalXp = ModFluids.XP_FLUID.source().get();
+        final Fluid canonicalXp = BDFluids.XP_FLUID.source().get();
 
         if (currentLevel > targetLevel)
         {

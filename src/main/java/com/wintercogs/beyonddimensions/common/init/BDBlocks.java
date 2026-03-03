@@ -2,10 +2,6 @@ package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.Custom.*;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
@@ -60,16 +56,14 @@ public class BDBlocks
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Function<BlockBehaviour.Properties, T> blockFactory, BlockBehaviour.Properties properties)
     {
-        DeferredBlock<T> toReturn = BLOCKS.register(name,
-                id -> blockFactory.apply(properties.setId(ResourceKey.create(Registries.BLOCK, id))));
+        DeferredBlock<T> toReturn = BLOCKS.registerBlock(name, blockFactory, () -> properties);
         registerBlockItem(name, toReturn);
         return toReturn;
     }
 
     private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block)
     {
-        BDItems.ITEMS.register(name,
-                id -> new BlockItem(block.get(), new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id))));
+        BDItems.ITEMS.registerSimpleBlockItem(name, block);
     }
 
     public static void register(IEventBus eventBus)

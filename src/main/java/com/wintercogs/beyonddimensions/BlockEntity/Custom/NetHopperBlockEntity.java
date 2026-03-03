@@ -6,11 +6,11 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.*;
 import com.wintercogs.beyonddimensions.Menu.NetHopperMenu;
 import com.wintercogs.beyonddimensions.Util.ItemStackHelper;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
@@ -136,7 +136,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                     if (xp > 0)
                     {
                         long xpFluid = xp * 20L;
-                        FluidStackKey xpKey = new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(), 1));
+                        FluidStackKey xpKey = new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source(), 1));
 
                         if (storage.insert(xpKey, xpFluid, true).isEmpty())
                         {

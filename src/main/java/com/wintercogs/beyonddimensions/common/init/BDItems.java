@@ -2,8 +2,6 @@ package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Item.Custom.*;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -70,11 +68,10 @@ public class BDItems
 
     private static <T extends Item> DeferredItem<T> registerItem(String name, Function<Item.Properties, T> factory)
     {
-        return ITEMS.register(name,
-                id -> factory.apply(new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id))));
+        return ITEMS.registerItem(name, factory);
     }
 
-    private static DeferredItem<Item> registerSimpleItem(String name)
+    private static DeferredItem<@NotNull Item> registerSimpleItem(String name)
     {
         return registerItem(name, Item::new);
     }

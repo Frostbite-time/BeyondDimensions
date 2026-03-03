@@ -5,11 +5,11 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.*;
 import com.wintercogs.beyonddimensions.Menu.NetMagnetMenu;
 import com.wintercogs.beyonddimensions.Util.ItemStackHelper;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
@@ -167,7 +167,7 @@ public class NetMagnetItem extends BaseMachineItem
                     if (xp > 0)
                     {
                         long xpFluid = xp * 20L;
-                        FluidStackKey xpStack = new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(), 1));
+                        FluidStackKey xpStack = new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source(), 1));
 
                         if (storage.insert(xpStack, xpFluid, true).isEmpty())
                         {

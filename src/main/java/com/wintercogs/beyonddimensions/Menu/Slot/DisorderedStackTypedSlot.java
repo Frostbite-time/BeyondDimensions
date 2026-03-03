@@ -10,12 +10,12 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHa
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Item.Custom.XpExchangeItem;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Tags.ModFluidTags;
 import com.wintercogs.beyonddimensions.Util.BDMath;
 import com.wintercogs.beyonddimensions.Util.XpUtil;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BucketItem;
@@ -76,7 +76,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                         long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                         // 插入当前经验流体
-                        KeyAmount remaining = storage.insert(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(), 1)), actualInsertFluid, false);
+                        KeyAmount remaining = storage.insert(new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source(), 1)), actualInsertFluid, false);
                         if (!remaining.isEmpty())
                         {
                             int needReturnXp = BDMath.clampLongToInt(remaining.amount() / 20); // 由于前面从int*20，这里除回去
@@ -254,7 +254,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                             // 插入当前经验流体
-                            KeyAmount remaining = storage.insert(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(), 1)), actualInsertFluid, false);
+                            KeyAmount remaining = storage.insert(new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source(), 1)), actualInsertFluid, false);
                             if (!remaining.isEmpty())
                             {
                                 int needReturnXp = BDMath.clampLongToInt(remaining.amount() / 20); // 由于前面从int*20，这里除回去

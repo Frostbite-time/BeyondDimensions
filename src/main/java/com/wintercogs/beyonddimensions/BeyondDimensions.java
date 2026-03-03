@@ -21,7 +21,6 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockE
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import com.wintercogs.beyonddimensions.common.init.*;
@@ -117,7 +116,7 @@ public class BeyondDimensions
         BDBlocks.register(modEventBus);
 
         // 注册流体
-        ModFluids.register(modEventBus);
+        BDFluids.register(modEventBus);
 
         // 注册方块实体
         BDBlockEntities.register(modEventBus);

@@ -6,10 +6,10 @@ import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.IStackHa
 import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Item.Custom.XpExchangeItem;
 import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Packet.OrderedStackTypedSlotPacket;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -82,7 +82,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                 {
                     if (carriedItem.getItem() instanceof XpExchangeItem)
                     {
-                        setStackDirectly(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(), 1)), 1);
+                        setStackDirectly(new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source(), 1)), 1);
                     }
                     else
                     {

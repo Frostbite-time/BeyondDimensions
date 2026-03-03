@@ -1,8 +1,10 @@
 {
   "loader": "neoforge:obj",
   "model": "beyonddimensions:models/block/net_terminal_block.obj",
+  "mtl_override": "beyonddimensions:models/block/net_terminal_block.mtl",
   "flip_v": true,
   "textures": {
+    "net_terminal_texture": "beyonddimensions:block/net_terminal_block_texture",
     "particle": "beyonddimensions:block/net_terminal_block_texture"
   },
   "display": {
