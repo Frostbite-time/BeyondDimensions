@@ -3,7 +3,7 @@ name: Build & Publish
 on: [workflow_dispatch]
 
 env:
-  MINECRAFT_VERSION: "1.21.1"
+  MINECRAFT_VERSION: "1.21.11"
   JAVA_VERSION: "21"
   LOADER: "neoforge"
 
@@ -104,7 +104,7 @@ jobs:
 
           name: ${{ steps.props.outputs.display_name }}
           version: ${{ steps.props.outputs.mod_version }}
-          version-type: release
+          version-type: alpha
           changelog-file: docs/CHANGELOG.md
 
           files: |
