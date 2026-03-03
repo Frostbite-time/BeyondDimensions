@@ -6,13 +6,13 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.BDBaseGUI;
-import com.wintercogs.beyonddimensions.Integration.AE.AEHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Packet.SetSlotDirectlyPacket;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.inventory.Slot;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -82,21 +82,21 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
             }
 
             // AE2通用包裹支持
-            if (BeyondDimensions.AELoaded)
-            {
-                if (dragging instanceof ItemStackKey draggingItemKey && !dragging.isEmpty())
-                {
-                    appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItemKey.copyStack());
+//            if (BeyondDimensions.AELoaded)
+//            {
+//                if (dragging instanceof ItemStackKey draggingItemKey && !dragging.isEmpty())
+//                {
+//                    appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItemKey.copyStack());
+//
+//                    if (genericContent != null)
+//                    {
+//                        dragging = AEHelper.fromAEKeyToIStack(genericContent.what()).orElse(ItemStackKey.EMPTY);
+//                    }
+//
+//                }
+//            }
 
-                    if (genericContent != null)
-                    {
-                        dragging = AEHelper.fromAEKeyToIStack(genericContent.what()).orElse(ItemStackKey.EMPTY);
-                    }
-
-                }
-            }
-
-            PacketDistributor.sendToServer(new SetSlotDirectlyPacket(slot.index, new KeyAmount(dragging, 1)));
+            ClientPacketDistributor.sendToServer(new SetSlotDirectlyPacket(slot.index, new KeyAmount(dragging, 1)));
 
         }
     }

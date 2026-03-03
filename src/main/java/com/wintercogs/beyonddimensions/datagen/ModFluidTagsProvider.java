@@ -6,20 +6,19 @@ import com.wintercogs.beyonddimensions.Tags.ModFluidTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.FluidTagsProvider;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
 public class ModFluidTagsProvider extends FluidTagsProvider
 {
-    public ModFluidTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider, @Nullable ExistingFileHelper existingFileHelper)
+    public ModFluidTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider)
     {
-        super(output, provider, BeyondDimensions.MODID, existingFileHelper);
+        super(output, provider, BeyondDimensions.MODID);
     }
 
     @Override
-    protected void addTags(HolderLookup.Provider provider)
+    protected void addTags(@NotNull HolderLookup.Provider provider)
     {
         // 把源体 + 流动体都塞进 c:experience
         tag(ModFluidTags.C_EXPERIENCE)
@@ -28,7 +27,7 @@ public class ModFluidTagsProvider extends FluidTagsProvider
     }
 
     @Override
-    public String getName()
+    public @NotNull String getName()
     {
         return "BeyondDimensions Fluid Tags";
     }

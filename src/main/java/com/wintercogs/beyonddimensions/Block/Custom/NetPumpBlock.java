@@ -33,7 +33,7 @@ public class NetPumpBlock extends BaseMachineBlock
             NetPumpBlockEntity blockEntity = (NetPumpBlockEntity) level.getBlockEntity(pos);
             player.openMenu(blockEntity, pos);
         }
-        return InteractionResult.SUCCESS_NO_ITEM_USED;
+        return InteractionResult.SUCCESS;
     }
 
     @Override

@@ -17,15 +17,17 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class NetTerminalBlock extends NetedBlock implements EntityBlock
 {
-    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+    public static final EnumProperty<@NotNull Direction> FACING = BlockStateProperties.FACING;
 
     // 定义6个方向的碰撞箱（单位：1/16方块）
     private static final VoxelShape COLLISION_NORTH = Block.box(0, 0, 0, 16, 16, 3);  // 北向：厚度4的板
@@ -103,9 +105,9 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
             if (blockEntity.getNet() != null)
                 player.openMenu((NetTerminalBlockEntity) level.getBlockEntity(pos));
             else
-                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
+                player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_need_bound"), false);
         }
-        return InteractionResult.SUCCESS_NO_ITEM_USED;
+        return InteractionResult.SUCCESS;
     }
 
     @Override

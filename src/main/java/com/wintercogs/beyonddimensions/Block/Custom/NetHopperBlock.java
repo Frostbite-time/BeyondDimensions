@@ -51,7 +51,7 @@ public class NetHopperBlock extends BaseMachineBlock
             NetHopperBlockEntity blockEntity = (NetHopperBlockEntity) level.getBlockEntity(pos);
             player.openMenu(blockEntity, pos);
         }
-        return InteractionResult.SUCCESS_NO_ITEM_USED;
+        return InteractionResult.SUCCESS;
     }
 
 }

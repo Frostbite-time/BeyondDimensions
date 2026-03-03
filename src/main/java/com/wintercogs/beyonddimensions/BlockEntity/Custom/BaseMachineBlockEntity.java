@@ -56,8 +56,8 @@ public abstract class BaseMachineBlockEntity extends NetedBlockEntity implements
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-        this.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
-        this.stepTick = tag.getInt("step_tick");
+        this.controlMode = RedStoneControlMode.valueOf(tag.getStringOr("control_mode", RedStoneControlMode.IGNORE.name()));
+        this.stepTick = tag.getIntOr("step_tick", 0);
     }
 
     @Override

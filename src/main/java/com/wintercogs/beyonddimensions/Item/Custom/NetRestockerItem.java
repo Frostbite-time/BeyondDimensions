@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Item.Custom;
 
+import com.mojang.blaze3d.resource.ResourceHandle;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
@@ -10,7 +11,7 @@ import com.wintercogs.beyonddimensions.Menu.NetRestockerMenu;
 import com.wintercogs.beyonddimensions.Util.BDMath;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -20,7 +21,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -37,13 +39,13 @@ public class NetRestockerItem extends BaseMachineItem
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
+    public @NotNull InteractionResult use(Level level, Player player, InteractionHand usedHand)
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
         if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
         {
-            return InteractionResultHolder.fail(itemstack);
+            return InteractionResult.FAIL;
         }
 
         if (!level.isClientSide())
@@ -53,7 +55,7 @@ public class NetRestockerItem extends BaseMachineItem
                             Component.translatable("menu.title.beyonddimensions.restocker_menu")),
                     buf -> buf.writeEnum(usedHand));
         }
-        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -200,16 +202,16 @@ public class NetRestockerItem extends BaseMachineItem
         if (!(holder instanceof LivingEntity living))
             return;
 
-        IItemHandler handler = living.getCapability(Capabilities.ItemHandler.ENTITY);
+        ResourceHandler<@NotNull ItemResource> handler = living.getCapability(Capabilities.Item.ENTITY);
         if (handler == null)
-            handler = living.getCapability(Capabilities.ItemHandler.ENTITY_AUTOMATION, null);
+            handler = living.getCapability(Capabilities.Item.ENTITY_AUTOMATION, null);
         if (handler == null)
             return;
 
-        for (int templateSlot = 0; templateSlot < Math.min(capacity, Math.min(templates.size(), handler.getSlots())); templateSlot++)
+        for (int templateSlot = 0; templateSlot < Math.min(capacity, Math.min(templates.size(), handler.size())); templateSlot++)
         {
             KeyAmount template = templates.get(templateSlot);
-            ItemStack currentStack = handler.getStackInSlot(templateSlot);
+            ItemResource currentStack = handler.getResource(templateSlot);
 
             if (receiveMode == ReceiveMode.OPEN
                     && !currentStack.isEmpty()
@@ -228,7 +230,7 @@ public class NetRestockerItem extends BaseMachineItem
                         if (!extracted.isEmpty())
                         {
                             storage.insert(new ItemStackKey(extracted), extracted.getCount(), false);
-                            currentStack = handler.getStackInSlot(templateSlot);
+                            currentStack = handler.getResource(templateSlot);
                         }
                     }
                 }
@@ -288,18 +290,18 @@ public class NetRestockerItem extends BaseMachineItem
         }
     }
 
-    private boolean slotMatchesTemplate(ItemStack stackInSlot, KeyAmount template, FuzzyMode fuzzyMode)
+    private boolean slotMatchesTemplate(ItemResource stackInSlot, KeyAmount template, FuzzyMode fuzzyMode)
     {
         if (stackInSlot.isEmpty() || template.isEmpty() || !(template.key() instanceof ItemStackKey templateKey))
             return false;
 
         if (fuzzyMode == FuzzyMode.ENABLE)
-            return templateKey.isSame(new ItemStackKey(stackInSlot));
+            return templateKey.isSame(new ItemStackKey(stackInSlot.toStack()));
 
-        return ItemStack.isSameItemSameComponents(stackInSlot, templateKey.getReadOnlyStack());
+        return ItemStack.isSameItemSameComponents(stackInSlot.toStack(), templateKey.getReadOnlyStack());
     }
 
-    private boolean canRecycle(ItemStack stack)
+    private boolean canRecycle(ItemResource stack)
     {
         return !(stack.getItem() instanceof NetRestockerItem);
     }

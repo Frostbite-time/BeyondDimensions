@@ -7,7 +7,7 @@ import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenuTerminal;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -31,13 +31,13 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
+    public @NotNull InteractionResult use(Level level, Player player, InteractionHand usedHand)
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
         if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
         {
-            return InteractionResultHolder.fail(itemstack);
+            return InteractionResult.FAIL;
         }
 
         if (!level.isClientSide())
@@ -56,11 +56,11 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
             }
             else
             {
-                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
+                player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_need_bound"), false);
             }
 
         }
-        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     @Override

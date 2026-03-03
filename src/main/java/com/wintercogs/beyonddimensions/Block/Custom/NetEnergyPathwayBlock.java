@@ -32,6 +32,6 @@ public class NetEnergyPathwayBlock extends BaseMachineBlock
         {
             player.openMenu((NetEnergyPathwayBlockEntity) level.getBlockEntity(pos), pos);
         }
-        return InteractionResult.SUCCESS_NO_ITEM_USED;
+        return InteractionResult.SUCCESS;
     }
 }

@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.Util;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.GameProfileCache;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -19,7 +18,7 @@ public class PlayerNameHelper
         ServerPlayer onlinePlayer = server.getPlayerList().getPlayer(uuid);
         if (onlinePlayer != null)
         {
-            return onlinePlayer.getGameProfile().getName(); // 实时名称可能包含昵称插件修改
+            return onlinePlayer.getGameProfile().name();
         }
 
         // 2. 若不在线，查询服务端的缓存（ProfileCache）

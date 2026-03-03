@@ -11,7 +11,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.Unbreakable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -154,7 +153,7 @@ public class GameTester
                     // 是否不可破坏（若你版本没有 UNBREAKABLE，删掉该分支即可）
                     try
                     {
-                        stack.set(DataComponents.UNBREAKABLE, new Unbreakable(true));
+
                     }
                     catch (Throwable ignored)
                     {

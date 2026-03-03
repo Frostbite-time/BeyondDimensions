@@ -4,11 +4,11 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
 
 public class NetDestroyer extends NetedItem
@@ -25,24 +25,24 @@ public class NetDestroyer extends NetedItem
     }
 
     @Override
-    public UseAnim getUseAnimation(ItemStack stack)
+    public ItemUseAnimation getUseAnimation(ItemStack stack)
     {
-        return UseAnim.BOW;
+        return ItemUseAnimation.BOW;
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
+    public InteractionResult use(Level level, Player player, InteractionHand usedHand)
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
         // 仅限主手且非潜行状态
         if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
         {
-            return InteractionResultHolder.fail(itemstack);
+            return InteractionResult.FAIL;
         }
         // 启动使用过程
         player.startUsingItem(usedHand);
-        return InteractionResultHolder.consume(itemstack);
+        return InteractionResult.CONSUME;
     }
 
     @Override
@@ -65,21 +65,21 @@ public class NetDestroyer extends NetedItem
                     {
                         playerNet.destroySelf();
                         stack.consume(1, player);
-                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_destroyed"));
+                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_net_destroyed"), false);
                     }
                     else
                     {
-                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.cant_delete_net"));
+                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.cant_delete_net"), false);
                     }
                 }
                 else
                 {
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.error_item_net"));
+                    player.displayClientMessage(Component.translatable("msg.beyonddimensions.error_item_net"), false);
                 }
             }
             else
             {
-                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
+                player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_need_bound"), false);
             }
         }
         return stack;

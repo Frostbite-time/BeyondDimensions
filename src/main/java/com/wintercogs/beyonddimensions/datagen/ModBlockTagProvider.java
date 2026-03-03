@@ -6,21 +6,20 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
 public class ModBlockTagProvider extends BlockTagsProvider
 {
 
-    public ModBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper)
+    public ModBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
     {
-        super(output, lookupProvider, BeyondDimensions.MODID, existingFileHelper);
+        super(output, lookupProvider, BeyondDimensions.MODID);
     }
 
     @Override
-    protected void addTags(HolderLookup.Provider provider)
+    protected void addTags(HolderLookup.@NotNull Provider provider)
     {
         // 标记以下方块使用镐子挖掘更快
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
@@ -32,11 +31,6 @@ public class ModBlockTagProvider extends BlockTagsProvider
                 .add(BDBlocks.NET_PUMP_BLOCK.get())
                 .add(BDBlocks.NET_HOPPER_BLOCK.get())
                 .add(BDBlocks.NET_FURNACE_BLOCK.get())
-                .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
-                .add(BDBlocks.RS_NET_PATHWAY.get())
-                .add(BDBlocks.ARS_SOURCE_PATHWAY.get())
-                .add(BDBlocks.MANA_POOL_PATHWAY.get())
-                .add(BDBlocks.SCHEMATICANNON_PATHWAY.get());
-
+                .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
     }
 }

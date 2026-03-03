@@ -7,11 +7,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -26,12 +27,12 @@ public class NetedItem extends Item
 
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
+    public InteractionResult use(Level level, Player player, InteractionHand usedHand)
     {
         ItemStack itemstack = player.getItemInHand(usedHand);
         if (usedHand != InteractionHand.MAIN_HAND || !player.isShiftKeyDown())
         {
-            return InteractionResultHolder.fail(itemstack);
+            return InteractionResult.FAIL;
         }
 
         if (!level.isClientSide())
@@ -43,19 +44,19 @@ public class NetedItem extends Item
             }
             else
             {
-                return InteractionResultHolder.fail(itemstack);
+                return InteractionResult.FAIL;
             }
         }
 
-        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void onCraftedBy(ItemStack stack, Level level, Player player)
+    public void onCraftedBy(@NotNull ItemStack stack, @NotNull Player player)
     {
-        super.onCraftedBy(stack, level, player);
+        super.onCraftedBy(stack, player);
 
-        if (level.isClientSide())
+        if (player.level().isClientSide())
             return;
 
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
@@ -88,19 +89,19 @@ public class NetedItem extends Item
                 {
                     itemstack.set(BDDataComponents.NET_ID_DATA, net.getId());
                     level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound", net.getId()));
+                    player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_net_bound", net.getId()), false);
                 }
                 else
                 {
                     itemstack.set(BDDataComponents.NET_ID_DATA, -1);
                     level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound", net.getId()));
+                    player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_net_unbound", net.getId()), false);
                 }
                 return true;
             }
             else
             {
-                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"));
+                player.displayClientMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"), false);
                 return false;
             }
         }

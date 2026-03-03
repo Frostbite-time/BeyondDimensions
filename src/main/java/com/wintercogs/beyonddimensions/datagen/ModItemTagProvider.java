@@ -1,31 +1,22 @@
 package com.wintercogs.beyonddimensions.datagen;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Integration.RS.Tags.RSTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.neoforge.common.data.ItemTagsProvider;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
 public class ModItemTagProvider extends ItemTagsProvider
 {
-    public ModItemTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagLookup<Block>> blockTags, @Nullable ExistingFileHelper existingFileHelper)
+    public ModItemTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
     {
-        super(output, lookupProvider, blockTags, BeyondDimensions.MODID, existingFileHelper);
+        super(output, lookupProvider, BeyondDimensions.MODID);
     }
 
     @Override
-    protected void addTags(HolderLookup.Provider provider)
+    protected void addTags(HolderLookup.@NotNull Provider provider)
     {
-        // 添加RS富铁石英和机器框架的合成表支持
-        tag(RSTags.RS_QUARTZ_ENRICHED_IRON)
-                .addOptional(Identifier.tryBuild(BeyondDimensions.RSModId, RSTags.QUARTZ_ENRICHED_IRON_NAME));
-        tag(RSTags.RS_MACHINE_CASING)
-                .addOptional(Identifier.tryBuild(BeyondDimensions.RSModId, RSTags.MACHINE_CASING_NAME));
     }
 }

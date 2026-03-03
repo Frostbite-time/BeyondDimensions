@@ -33,7 +33,7 @@ public class NetControlBlock extends Block
                 ));
             }
         }
-        return InteractionResult.SUCCESS_NO_ITEM_USED;
+        return InteractionResult.SUCCESS;
     }
 
 }

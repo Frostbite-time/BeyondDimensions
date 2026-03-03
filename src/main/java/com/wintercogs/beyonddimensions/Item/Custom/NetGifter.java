@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -19,13 +19,13 @@ public class NetGifter extends NetedItem
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
+    public InteractionResult use(Level level, Player player, InteractionHand usedHand)
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
         if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
         {
-            return InteractionResultHolder.fail(itemstack);
+            return InteractionResult.FAIL;
         }
 
         if (!level.isClientSide())
@@ -43,21 +43,21 @@ public class NetGifter extends NetedItem
                         int id = itemNet.getId();
                         playerNet.mergeOtherNet(itemNet);
                         itemstack.consume(1, player);
-                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.net_gift_done", id));
+                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.net_gift_done", id), false);
                     }
                     else
-                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.cant_merge_net"));
+                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.cant_merge_net"), false);
                 }
                 else
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.error_item_net"));
+                    player.displayClientMessage(Component.translatable("msg.beyonddimensions.error_item_net"), false);
             }
             else
             {
-                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
+                player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_need_bound"), false);
             }
 
         }
-        return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     @Override

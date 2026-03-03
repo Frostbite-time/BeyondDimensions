@@ -1,35 +1,28 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import appeng.core.definitions.AEBlocks;
-import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
-import com.refinedmods.refinedstorage.common.content.Blocks;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
-import com.wintercogs.beyonddimensions.Integration.RS.Tags.RSTags;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.conditions.IConditionBuilder;
-import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
-import vazkii.botania.common.block.BotaniaBlocks;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModRecipeProvider extends RecipeProvider implements IConditionBuilder
+public class ModRecipeProvider extends RecipeProvider
 {
 
-    public ModRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries)
+    public ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
     {
-        super(output, registries);
+        super(registries, output);
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput recipeOutput)
+    protected void buildRecipes()
     {
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.UNSTABLE_SPACE_TIME_FRAGMENT.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.UNSTABLE_SPACE_TIME_FRAGMENT.get())
                 .pattern("ABA")
                 .pattern("BCB")
                 .pattern("ABA")
@@ -37,7 +30,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.TNT)
                 .define('C', Items.NETHER_STAR)
                 .unlockedBy("unlock_net_creater", has(Items.NETHER_STAR))
-                .save(recipeOutput);
+                .save(this.output);
 
         SimpleCookingRecipeBuilder.smelting(
                         Ingredient.of(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get()),
@@ -46,9 +39,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                         1f,
                         600)
                 .unlockedBy("unlock_space_time_bar", has(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.NET_CREATER.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.NET_CREATER.get())
                 .pattern("ABA")
                 .pattern("CDC")
                 .pattern("ACA")
@@ -57,9 +50,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('C', Items.ENDER_PEARL)
                 .define('D', BDItems.STABLE_SPACE_TIME_FRAGMENT.get())
                 .unlockedBy("unlock_net_creater", has(BDItems.STABLE_SPACE_TIME_FRAGMENT.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.SPACE_TIME_STABLE_FRAME.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.SPACE_TIME_STABLE_FRAME.get())
                 .pattern("ABA")
                 .pattern("BCB")
                 .pattern("ABA")
@@ -67,9 +60,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.REDSTONE)
                 .define('C', Items.ENDER_EYE)
                 .unlockedBy("unlock_space_time_stable_frame", has(BDItems.SPACE_TIME_BAR.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.NET_MEMBER_INVITER.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.NET_MEMBER_INVITER.get())
                 .pattern(" A ")
                 .pattern("BCB")
                 .pattern(" B ")
@@ -77,9 +70,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.IRON_INGOT)
                 .define('C', BDItems.SPACE_TIME_STABLE_FRAME.get())
                 .unlockedBy("unlock_net_member_inviter", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.NET_MANAGER_INVITER.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.NET_MANAGER_INVITER.get())
                 .pattern(" A ")
                 .pattern("BCB")
                 .pattern(" B ")
@@ -87,9 +80,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.GOLD_INGOT)
                 .define('C', BDItems.SPACE_TIME_STABLE_FRAME.get())
                 .unlockedBy("unlock_net_manager_inviter", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_PATHWAY.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.NET_PATHWAY.get())
                 .pattern("ABA")
                 .pattern("CDC")
                 .pattern("ABA")
@@ -98,9 +91,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('C', Items.ENDER_PEARL)
                 .define('D', Items.ENDER_EYE)
                 .unlockedBy("unlock_net_pathway", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_INTERFACE.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.NET_INTERFACE.get())
                 .pattern("ABA")
                 .pattern("CDE")
                 .pattern("ABA")
@@ -110,9 +103,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('D', Items.REDSTONE_TORCH)
                 .define('E', Items.STICKY_PISTON)
                 .unlockedBy("unlock_net_interface", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_ENERGY_PATHWAY.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.NET_ENERGY_PATHWAY.get())
                 .pattern("ABA")
                 .pattern("CDC")
                 .pattern("ABA")
@@ -121,9 +114,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('C', Items.COPPER_INGOT)
                 .define('D', Items.ENDER_EYE)
                 .unlockedBy("unlock_net_energy_pathway", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_CONTROL.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.NET_CONTROL.get())
                 .pattern("ABA")
                 .pattern("CDC")
                 .pattern("ABA")
@@ -132,9 +125,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('C', Items.REPEATER)
                 .define('D', BDItems.SPACE_TIME_STABLE_FRAME.get())
                 .unlockedBy("unlock_net_control", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.NET_TERMINAL_ITEM.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.NET_TERMINAL_ITEM.get())
                 .pattern("ABA")
                 .pattern("BDB")
                 .pattern("ABA")
@@ -142,9 +135,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.GOLD_INGOT)
                 .define('D', BDItems.NET_MEMBER_INVITER.get())
                 .unlockedBy("unlock_net_terminal_item", has(BDItems.NET_MEMBER_INVITER.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_TERMINAL_BLOCK.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.NET_TERMINAL_BLOCK.get())
                 .pattern("ACA")
                 .pattern("BDB")
                 .pattern("ABA")
@@ -153,9 +146,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('C', Items.CRAFTING_TABLE)
                 .define('D', BDItems.NET_MEMBER_INVITER.get())
                 .unlockedBy("unlock_net_terminal_item", has(BDItems.NET_MEMBER_INVITER.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.NET_GIFTER.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.NET_GIFTER.get())
                 .pattern(" A ")
                 .pattern("BCB")
                 .pattern(" B ")
@@ -163,9 +156,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.GOLD_INGOT)
                 .define('C', BDItems.SPACE_TIME_STABLE_FRAME.get())
                 .unlockedBy("unlock_net_gifter", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.NET_DESTROYER.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.NET_DESTROYER.get())
                 .pattern(" A ")
                 .pattern("BCB")
                 .pattern(" B ")
@@ -173,9 +166,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.GOLD_INGOT)
                 .define('C', BDItems.SPACE_TIME_STABLE_FRAME.get())
                 .unlockedBy("unlock_net_destroyer", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
                 .pattern("ABA")
                 .pattern("BCB")
                 .pattern("ABA")
@@ -183,9 +176,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.IRON_INGOT)
                 .define('C', BDItems.SPACE_TIME_STABLE_FRAME.get())
                 .unlockedBy("unlock_dimensionsal_connect_block", has(BDItems.SPACE_TIME_BAR.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_FURNACE_BLOCK.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.NET_FURNACE_BLOCK.get())
                 .pattern("AAA")
                 .pattern("BCB")
                 .pattern("ADA")
@@ -194,9 +187,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('C', BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
                 .define('D', Items.REDSTONE_TORCH)
                 .unlockedBy("unlock_net_furnace_block", has(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_PUMP_BLOCK.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.NET_PUMP_BLOCK.get())
                 .pattern("ABA")
                 .pattern("BCB")
                 .pattern("ABA")
@@ -204,9 +197,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.STICKY_PISTON)
                 .define('C', BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
                 .unlockedBy("unlock_net_pump_block", has(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_HOPPER_BLOCK.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.NET_HOPPER_BLOCK.get())
                 .pattern("   ")
                 .pattern("ABC")
                 .pattern("DDD")
@@ -215,9 +208,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('C', Items.HOPPER)
                 .define('D', Items.COBBLESTONE)
                 .unlockedBy("unlock_net_hopper_block", has(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.NET_MAGNET_ITEM.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.NET_MAGNET_ITEM.get())
                 .pattern(" AB")
                 .pattern("A C")
                 .pattern(" AB")
@@ -225,9 +218,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.IRON_INGOT)
                 .define('C', BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get())
                 .unlockedBy("unlock_net_magnet_item", has(BDItems.SPACE_TIME_BAR.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.NET_FEEDER_ITEM.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.NET_FEEDER_ITEM.get())
                 .pattern(" AA")
                 .pattern("ABC")
                 .pattern(" AA")
@@ -235,9 +228,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.APPLE)
                 .define('C', BDItems.SPACE_TIME_STABLE_FRAME.get())
                 .unlockedBy("unlock_net_feeder_item", has(BDItems.SPACE_TIME_BAR.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.NET_RESTOCKER_ITEM.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.NET_RESTOCKER_ITEM.get())
                 .pattern(" AA")
                 .pattern("ABC")
                 .pattern(" AA")
@@ -245,9 +238,9 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.CHEST)
                 .define('C', BDItems.SPACE_TIME_STABLE_FRAME.get())
                 .unlockedBy("unlock_net_restocker_item", has(BDItems.SPACE_TIME_BAR.get()))
-                .save(recipeOutput);
+                .save(this.output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.XP_EXCHANGE_ITEM.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDItems.XP_EXCHANGE_ITEM.get())
                 .pattern("  A")
                 .pattern(" B ")
                 .pattern("C  ")
@@ -255,73 +248,26 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('B', Items.STICK)
                 .define('C', BDItems.SPACE_TIME_BAR.get())
                 .unlockedBy("unlock_xp_exchange_item", has(BDItems.SPACE_TIME_BAR.get()))
-                .save(recipeOutput);
+                .save(this.output);
+    }
 
-        if (BeyondDimensions.AELoaded)
+    public static class Runner extends RecipeProvider.Runner
+    {
+        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
         {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.NET_AE_STORAGE_CELL.get())
-                    .pattern("ABA")
-                    .pattern("BDB")
-                    .pattern("CCC")
-                    .define('A', AEBlocks.QUARTZ_GLASS)
-                    .define('B', Items.DIAMOND)
-                    .define('C', BDItems.SPACE_TIME_BAR.get())
-                    .define('D', BDItems.SPACE_TIME_STABLE_FRAME.get())
-                    .unlockedBy("unlock_net_ae_storage_cell", has(BDItems.SPACE_TIME_BAR.get()))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.AE2MODID)));
+            super(output, lookupProvider);
         }
 
-        if (BeyondDimensions.RS_Loaded)
+        @Override
+        protected @NotNull RecipeProvider createRecipeProvider(HolderLookup.@NotNull Provider provider, @NotNull RecipeOutput output)
         {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.RS_NET_PATHWAY.get())
-                    .pattern("ABA")
-                    .pattern("ACA")
-                    .pattern("ADA")
-                    .define('A', RSTags.RS_QUARTZ_ENRICHED_IRON)
-                    .define('B', BDItems.SPACE_TIME_STABLE_FRAME.get())
-                    .define('C', Blocks.INSTANCE.getMachineCasing())
-                    .define('D', Items.REDSTONE)
-                    .unlockedBy("unlock_rs_net_pathway", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.RSModId)));
+            return new ModRecipeProvider(provider, output);
         }
 
-        if (BeyondDimensions.IFS_Loaded)
+        @Override
+        public @NotNull String getName()
         {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.WARDEN_SOUL_TAG_ITEM.get())
-                    .pattern("AAA")
-                    .pattern("BCB")
-                    .pattern("AAA")
-                    .define('A', Items.AMETHYST_SHARD)
-                    .define('B', BDItems.SPACE_TIME_BAR.get())
-                    .define('C', Items.ECHO_SHARD)
-                    .unlockedBy("unlock_warden_soul_tag_item", has(Items.ECHO_SHARD))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.IFS_ModId)));
+            return "Beyond Dimensions Recipe";
         }
-
-        if (BeyondDimensions.ARS_Loaded)
-        {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.ARS_SOURCE_PATHWAY.get())
-                    .pattern("ABA")
-                    .pattern("CDC")
-                    .pattern("ABA")
-                    .define('A', BDItems.SPACE_TIME_BAR.get())
-                    .define('B', BDItems.SPACE_TIME_STABLE_FRAME.get())
-                    .define('C', BlockRegistry.SOURCE_JAR.get())
-                    .define('D', Items.ENDER_EYE)
-                    .unlockedBy("unlock_ars_source_pathway", has(BDItems.SPACE_TIME_BAR.get()))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.ARS_ModId)));
-        }
-
-        if (BeyondDimensions.Botania_Loaded)
-        {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.MANA_POOL_PATHWAY.get())
-                    .pattern("ABA")
-                    .pattern("AAA")
-                    .define('A', BotaniaBlocks.livingrock)
-                    .define('B', BDItems.SPACE_TIME_STABLE_FRAME.get())
-                    .unlockedBy("unlock_mana_pool_pathway", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.Botania_ModId)));
-        }
-
     }
 }
