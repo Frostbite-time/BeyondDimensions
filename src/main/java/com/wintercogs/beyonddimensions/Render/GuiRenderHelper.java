@@ -1,9 +1,8 @@
 package com.wintercogs.beyonddimensions.Render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -37,34 +36,34 @@ public class GuiRenderHelper
 
         // === 1. 四个角（不拉伸） ===
         // 左上
-        guiGraphics.blit(texture,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                 x, y,
+                0F, 0F,
                 borderLeft, borderTop,
-                0, 0,
                 borderLeft, borderTop,
                 origWidth, origHeight);
 
         // 右上
-        guiGraphics.blit(texture,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                 x + width - borderRight, y,
+                origWidth - borderRight, 0F,
                 borderRight, borderTop,
-                origWidth - borderRight, 0,
                 borderRight, borderTop,
                 origWidth, origHeight);
 
         // 左下
-        guiGraphics.blit(texture,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                 x, y + height - borderBottom,
+                0F, origHeight - borderBottom,
                 borderLeft, borderBottom,
-                0, origHeight - borderBottom,
                 borderLeft, borderBottom,
                 origWidth, origHeight);
 
         // 右下
-        guiGraphics.blit(texture,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                 x + width - borderRight, y + height - borderBottom,
-                borderRight, borderBottom,
                 origWidth - borderRight, origHeight - borderBottom,
+                borderRight, borderBottom,
                 borderRight, borderBottom,
                 origWidth, origHeight);
 
@@ -77,10 +76,10 @@ public class GuiRenderHelper
         // 上边
         if (borderTop > 0)
         {
-            guiGraphics.blit(texture,
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                     x + borderLeft, y,
+                    borderLeft, 0F,
                     dstEdgeW, borderTop,
-                    borderLeft, 0,
                     srcEdgeW, borderTop,
                     origWidth, origHeight);
         }
@@ -88,10 +87,10 @@ public class GuiRenderHelper
         // 下边
         if (borderBottom > 0)
         {
-            guiGraphics.blit(texture,
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                     x + borderLeft, y + height - borderBottom,
-                    dstEdgeW, borderBottom,
                     borderLeft, origHeight - borderBottom,
+                    dstEdgeW, borderBottom,
                     srcEdgeW, borderBottom,
                     origWidth, origHeight);
         }
@@ -99,10 +98,10 @@ public class GuiRenderHelper
         // 左边
         if (borderLeft > 0)
         {
-            guiGraphics.blit(texture,
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                     x, y + borderTop,
+                    0F, borderTop,
                     borderLeft, dstEdgeH,
-                    0, borderTop,
                     borderLeft, srcEdgeH,
                     origWidth, origHeight);
         }
@@ -110,19 +109,19 @@ public class GuiRenderHelper
         // 右边
         if (borderRight > 0)
         {
-            guiGraphics.blit(texture,
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                     x + width - borderRight, y + borderTop,
-                    borderRight, dstEdgeH,
                     origWidth - borderRight, borderTop,
+                    borderRight, dstEdgeH,
                     borderRight, srcEdgeH,
                     origWidth, origHeight);
         }
 
         // === 3. 中心（双向拉伸） ===
-        guiGraphics.blit(texture,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                 x + borderLeft, y + borderTop,
-                dstEdgeW, dstEdgeH,
                 borderLeft, borderTop,
+                dstEdgeW, dstEdgeH,
                 srcEdgeW, srcEdgeH,
                 origWidth, origHeight);
     }
@@ -145,16 +144,10 @@ public class GuiRenderHelper
             int width, int height,
             int originalWidth, int originalHeight)
     {
-
-        // 1. 绑定默认 PositionTex shader（同 blitSprite 内部做的事）
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, texture);
-
-        // 3. 把整张图 (0,0 → texW,texH) 按目标宽高拉伸
-        guiGraphics.blit(texture,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                 x, y,                     // 目标起点
+                0F, 0F,                   // 纹理起点 (u,v)
                 width, height,            // 目标尺寸
-                0, 0,                     // 纹理起点 (u,v)
                 originalWidth, originalHeight,               // 采样整张纹理
                 originalWidth, originalHeight);              // 纹理原尺寸（用于 UV 归一化）
     }

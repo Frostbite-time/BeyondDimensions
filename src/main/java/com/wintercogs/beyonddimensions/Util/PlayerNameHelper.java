@@ -21,16 +21,13 @@ public class PlayerNameHelper
             return onlinePlayer.getGameProfile().name();
         }
 
-        // 2. 若不在线，查询服务端的缓存（ProfileCache）
-        GameProfileCache profileCache = server.getProfileCache();
-        if (profileCache != null)
+        // 2. 若不在线，查询服务端的 profile resolver 缓存
+        var services = server.services();
+        Optional<GameProfile> profileInfo = services.profileResolver().fetchById(uuid);
+        if (profileInfo.isPresent())
         {
-            Optional<GameProfile> profileInfo =
-                    profileCache.get(uuid);
-            if (profileInfo.isPresent())
-            {
-                return profileInfo.get().getName();
-            }
+            GameProfile profile = profileInfo.get();
+            return profile.name();
         }
 
         // 3. 若缓存无记录，返回 null 或特定占位符（可扩展 Mojang API 异步查询）
