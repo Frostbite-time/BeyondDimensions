@@ -3,16 +3,19 @@ package com.wintercogs.beyonddimensions.Menu.Slot;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.CommonHooks;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public class AutoRefillResultSlot extends ResultSlot
 {
@@ -41,8 +44,16 @@ public class AutoRefillResultSlot extends ResultSlot
         int gridStartY = positionedInput.top();
 
         CommonHooks.setCraftingPlayer(player);
-        NonNullList<ItemStack> remainingItems = player.level().getRecipeManager()
-                .getRemainingItemsFor(RecipeType.CRAFTING, craftingGrid, player.level());
+        MinecraftServer server = player.level().getServer();
+        if (server == null)
+        {
+            CommonHooks.setCraftingPlayer(null);
+            return;
+        }
+        NonNullList<ItemStack> remainingItems = server.getRecipeManager()
+                .getRecipeFor(RecipeType.CRAFTING, craftingGrid, player.level())
+                .map(craftingRecipeRecipeHolder -> craftingRecipeRecipeHolder.value().getRemainingItems(craftingGrid))
+                .orElse(NonNullList.withSize(craftingGrid.size(), ItemStack.EMPTY));
         CommonHooks.setCraftingPlayer(null);
 
         // 一般而言，此函数每次调用最多完成一次合成
@@ -70,14 +81,14 @@ public class AutoRefillResultSlot extends ResultSlot
                         itemsToRemove -= extracted;
 
                         // 存储系统不足时尝试玩家背包
-                        for (int i = 0; i < player.getInventory().items.size() && itemsToRemove > 0; i++)
+                        for (int i = 0; i < player.getInventory().getContainerSize() && itemsToRemove > 0; i++)
                         {
-                            ItemStack invStack = player.getInventory().items.get(i);
+                            ItemStack invStack = player.getInventory().getItem(i);
                             if (ItemStack.isSameItemSameComponents(invStack, toRemoveKey.getReadOnlyStack()))
                             {
                                 int shrinkAmount = Math.min(itemsToRemove, invStack.getCount());
                                 invStack.shrink(shrinkAmount);
-                                player.getInventory().items.set(i, invStack.isEmpty() ? ItemStack.EMPTY : invStack);
+                                player.getInventory().setItem(i, invStack.isEmpty() ? ItemStack.EMPTY : invStack);
                                 itemsToRemove -= shrinkAmount;
                             }
                         }
