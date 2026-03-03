@@ -36,7 +36,6 @@ public class DataGenerators
         event.createProvider(ModFluidTagsProvider::new);
 
         // 生成配方表
-        generator.addProvider(event.includeServer(), new ModRecipeProvider(packOutput, lookupProvider));
-
+        event.createProvider(ModRecipeProvider.Runner::new);
     }
 }
