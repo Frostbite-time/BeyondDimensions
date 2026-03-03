@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -87,6 +88,16 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
             {
                 Block.popResource(level, getBlockPos(), stack.copy());
             }
+        }
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state)
+    {
+        super.preRemoveSideEffects(pos, state);
+        if (level instanceof ServerLevel)
+        {
+            dropContent();
         }
     }
 }

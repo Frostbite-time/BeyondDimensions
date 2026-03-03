@@ -3,6 +3,9 @@ package com.wintercogs.beyonddimensions.Block.Custom;
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -35,17 +38,10 @@ public class NetInterfaceBlock extends BaseMachineBlock
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston)
     {
-        if (!state.is(newState.getBlock()))
-        {
-            if (level.getBlockEntity(pos) instanceof NetInterfaceBlockEntity blockEntity)
-            {
-                level.updateNeighbourForOutputSignal(pos, this);
-                blockEntity.dropContent();
-            }
-            super.onRemove(state, level, pos, newState, movedByPiston);
-        }
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+        Containers.updateNeighboursAfterDestroy(state, level, pos);
     }
 
     @Override
@@ -65,7 +61,7 @@ public class NetInterfaceBlock extends BaseMachineBlock
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos)
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction side)
     {
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof NetInterfaceBlockEntity ce)

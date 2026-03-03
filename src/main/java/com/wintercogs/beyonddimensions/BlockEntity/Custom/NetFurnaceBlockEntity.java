@@ -876,6 +876,16 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         }
     }
 
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state)
+    {
+        super.preRemoveSideEffects(pos, state);
+        if (level instanceof ServerLevel)
+        {
+            dropContent();
+        }
+    }
+
 
     @Override
     protected void loadAdditional(@NotNull ValueInput input)

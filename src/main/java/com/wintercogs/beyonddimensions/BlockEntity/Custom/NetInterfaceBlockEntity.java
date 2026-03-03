@@ -24,6 +24,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -360,6 +361,16 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         {
             ball.set(BDDataComponents.ISTACK_SLOTS, dropList);
             Block.popResource(level, getBlockPos(), ball);
+        }
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state)
+    {
+        super.preRemoveSideEffects(pos, state);
+        if (level instanceof ServerLevel)
+        {
+            dropContent();
         }
     }
 

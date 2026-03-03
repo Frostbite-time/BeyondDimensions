@@ -16,6 +16,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 @EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
@@ -32,7 +33,7 @@ public class PickBlockFromNet
             {
                 if (player.isShiftKeyDown())
                 {
-                    PacketDistributor.sendToServer(new PutHandItemToNetPacket(InteractionHand.MAIN_HAND));
+                    ClientPacketDistributor.sendToServer(new PutHandItemToNetPacket(InteractionHand.MAIN_HAND));
                 }
 
             }
@@ -43,7 +44,7 @@ public class PickBlockFromNet
                 Block targetBlock = player.level().getBlockState(((BlockHitResult) hit).getBlockPos()).getBlock();
                 Item targetBlockItem = targetBlock.asItem();
                 ItemStack targetStack = new ItemStack(targetBlockItem);
-                PacketDistributor.sendToServer(new PickBlockFromNetPacket(targetStack));
+                ClientPacketDistributor.sendToServer(new PickBlockFromNetPacket(targetStack));
             }
         }
     }

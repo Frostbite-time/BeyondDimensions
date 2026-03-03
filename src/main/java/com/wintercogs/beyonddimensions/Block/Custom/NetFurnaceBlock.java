@@ -3,6 +3,8 @@ package com.wintercogs.beyonddimensions.Block.Custom;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetFurnaceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -79,18 +81,10 @@ public class NetFurnaceBlock extends BaseMachineBlock
         return InteractionResult.SUCCESS;
     }
 
-    // 处理掉落物
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston)
     {
-        if (!state.is(newState.getBlock()))
-        {
-            if (level.getBlockEntity(pos) instanceof NetFurnaceBlockEntity blockEntity)
-            {
-                level.updateNeighbourForOutputSignal(pos, this);
-                blockEntity.dropContent();
-            }
-            super.onRemove(state, level, pos, newState, movedByPiston);
-        }
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+        Containers.updateNeighboursAfterDestroy(state, level, pos);
     }
 }
