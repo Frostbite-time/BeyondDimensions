@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.GUI;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
 import com.wintercogs.beyonddimensions.Machine.FilterMode;
@@ -110,8 +109,6 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
         CommonTexturesRender.renderFilterSlots(guiGraphics, this.leftPos, drawY);
         CommonTexturesRender.renderFilterSlots(guiGraphics, this.leftPos, drawY);

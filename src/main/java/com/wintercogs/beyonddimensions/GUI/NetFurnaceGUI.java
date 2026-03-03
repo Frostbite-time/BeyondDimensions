@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.GUI;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
 import com.wintercogs.beyonddimensions.Machine.AutoSortMode;
@@ -172,7 +171,6 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         CommonTexturesRender.renderNetFurnaceBackground(guiGraphics, leftPos, new int[]{topPos});
 
         // 绘制熔炼进度 getCapacity为同时处理的任务数

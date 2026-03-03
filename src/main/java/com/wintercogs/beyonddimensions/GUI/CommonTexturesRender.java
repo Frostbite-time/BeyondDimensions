@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.util.Mth;
 
 // 提供便捷的，渲染CommonTextures中纹理的函数
@@ -20,9 +21,7 @@ public class CommonTexturesRender
     {
         guiGraphics.blit(CommonTextures.TOP_BASE_COMMON, leftPos, yPosRef[0],
                 width, height,
-                0, 0,
-                CommonTextures.TOP_BASE_COMMON_WIDTH,
-                CommonTextures.TOP_BASE_COMMON_HEIGHT,
+                0F, 0F,
                 CommonTextures.TOP_BASE_COMMON_WIDTH,
                 CommonTextures.TOP_BASE_COMMON_HEIGHT);
         yPosRef[0] += height;
@@ -41,9 +40,7 @@ public class CommonTexturesRender
     {
         guiGraphics.blit(CommonTextures.COMMON_CONNECTION, leftPos, yPosRef[0],
                 width, height,
-                0, 0,
-                CommonTextures.COMMON_CONNECTION_WIDTH,
-                CommonTextures.COMMON_CONNECTION_HEIGHT,
+                0F, 0F,
                 CommonTextures.COMMON_CONNECTION_WIDTH,
                 CommonTextures.COMMON_CONNECTION_HEIGHT);
         yPosRef[0] += height;
@@ -62,9 +59,7 @@ public class CommonTexturesRender
     {
         guiGraphics.blit(CommonTextures.COMMON_SLOTS, leftPos, yPosRef[0],
                 width, height,
-                0, 0,
-                CommonTextures.COMMON_SLOTS_WIDTH,
-                CommonTextures.COMMON_SLOTS_HEIGHT,
+                0F, 0F,
                 CommonTextures.COMMON_SLOTS_WIDTH,
                 CommonTextures.COMMON_SLOTS_HEIGHT);
         yPosRef[0] += height;
@@ -83,9 +78,7 @@ public class CommonTexturesRender
     {
         guiGraphics.blit(CommonTextures.FILTER_SLOTS, leftPos, yPosRef[0],
                 width, height,
-                0, 0,
-                CommonTextures.FILTER_SLOTS_WIDTH,
-                CommonTextures.FILTER_SLOTS_HEIGHT,
+                0F, 0F,
                 CommonTextures.FILTER_SLOTS_WIDTH,
                 CommonTextures.FILTER_SLOTS_HEIGHT);
         yPosRef[0] += height;
@@ -104,9 +97,7 @@ public class CommonTexturesRender
     {
         guiGraphics.blit(CommonTextures.GUI_TEXTURE_PLAYER_INV, leftPos, yPosRef[0],
                 width, height,
-                0, 0,
-                CommonTextures.PLAYER_INV_WIDTH,
-                CommonTextures.PLAYER_INV_HEIGHT,
+                0F, 0F,
                 CommonTextures.PLAYER_INV_WIDTH,
                 CommonTextures.PLAYER_INV_HEIGHT);
         yPosRef[0] += height;
@@ -123,7 +114,7 @@ public class CommonTexturesRender
     public static void renderRightTab(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
                                       int width, int height)
     {
-        guiGraphics.blitSprite(CommonTextures.RIGHT_TAB, leftPos, yPosRef[0], width, height);
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, CommonTextures.RIGHT_TAB, leftPos, yPosRef[0], width, height);
         yPosRef[0] += height;
     }
 
@@ -139,9 +130,7 @@ public class CommonTexturesRender
     {
         guiGraphics.blit(CommonTextures.NET_FURNACE_BACKGROUND, leftPos, yPosRef[0],
                 width, height,
-                0, 0,
-                CommonTextures.NET_FURNACE_BACKGROUND_WIDTH,
-                CommonTextures.NET_FURNACE_BACKGROUND_HEIGHT,
+                0F, 0F,
                 CommonTextures.NET_FURNACE_BACKGROUND_WIDTH,
                 CommonTextures.NET_FURNACE_BACKGROUND_HEIGHT);
         yPosRef[0] += height;
@@ -157,7 +146,7 @@ public class CommonTexturesRender
     public static void renderWorkDoneV(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
                                        int width, int height)
     {
-        guiGraphics.blitSprite(CommonTextures.WORK_DONE_V, leftPos, yPosRef[0], width, height);
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, CommonTextures.WORK_DONE_V, leftPos, yPosRef[0], width, height);
         yPosRef[0] += height;
     }
 
@@ -175,6 +164,7 @@ public class CommonTexturesRender
           ‑ 只画贴图的顶部 vHeight 像素；
           ‑ 目标区域从 (leftPos, yPos) 开始往下铺 drawH 像素 */
         guiGraphics.blitSprite(
+                RenderPipelines.GUI_TEXTURED,
                 CommonTextures.WORK_DONE_V,           // atlasLocation
                 CommonTextures.WORK_DONE_V_WIDTH,
                 CommonTextures.WORK_DONE_V_HEIGHT,
@@ -194,7 +184,7 @@ public class CommonTexturesRender
     public static void renderFurnaceWorkV(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
                                           int width, int height)
     {
-        guiGraphics.blitSprite(CommonTextures.FURNACE_WORK_V, leftPos, yPosRef[0], width, height);
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, CommonTextures.FURNACE_WORK_V, leftPos, yPosRef[0], width, height);
         yPosRef[0] += height;
     }
 
@@ -215,6 +205,7 @@ public class CommonTexturesRender
           ‑ 只画贴图的顶部 vHeight 像素；
           ‑ 目标区域从 (leftPos, yPos) 开始往下铺 drawH 像素 */
         guiGraphics.blitSprite(
+                RenderPipelines.GUI_TEXTURED,
                 CommonTextures.FURNACE_WORK_V,           // atlasLocation
                 CommonTextures.FURNACE_WORK_V_WIDTH,
                 CommonTextures.FURNACE_WORK_V_HEIGHT,

@@ -249,8 +249,8 @@ public class NetMagnetItem extends BaseMachineItem
             int minZ = chunkZ << 4;       // 区块最小Z
             int maxZ = minZ + 15;         // 区块最大Z
             // 获取整个世界的Y轴范围
-            int minY = level.getMinBuildHeight();
-            int maxY = level.getMaxBuildHeight();
+            int minY = level.getMinY();
+            int maxY = level.getMaxY();
             // 创建区块边界框
             return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
         }

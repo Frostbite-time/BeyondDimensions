@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.GUI;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Api.DataBase.NetControlAction;
 import com.wintercogs.beyonddimensions.Api.DataBase.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.Api.DataBase.PlayerPermissionInfo;
@@ -206,9 +205,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, GUI_TEXTURE);
-        guiGraphics.blit(GUI_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        guiGraphics.blit(GUI_TEXTURE, this.leftPos, this.topPos, this.imageWidth, this.imageHeight, 0F, 0F, this.imageWidth, this.imageHeight);
     }
 
     @Override

@@ -1,8 +1,6 @@
 package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
@@ -81,15 +79,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         if (UIDataHelper.isTransfer)
         {
             menu.lineData = UIDataHelper.currentPage;
-            if (UIDataHelper.lastMousePos != null)
-            {
-                Window window = Minecraft.getInstance().getWindow();
-                GLFW.glfwSetCursorPos(
-                        window.getWindow(),
-                        UIDataHelper.lastMousePos.x,
-                        UIDataHelper.lastMousePos.y
-                );
-            }
 
             UIDataHelper.isTransfer = false;
         }
@@ -327,14 +316,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, Identifier.tryBuild(BeyondDimensions.MODID, "widget/craft_button"), button ->
         {
             UIDataHelper.currentPage = menu.lineData;
-
-            double xpos[] = new double[1];
-            double ypos[] = new double[1];
-            GLFW.glfwGetCursorPos(Minecraft.getInstance().getWindow().getWindow(), xpos, ypos);
-            UIDataHelper.lastMousePos = new Vec2(
-                    (float) xpos[0],
-                    (float) ypos[0]
-            );
+            UIDataHelper.lastMousePos = new Vec2(0, 0);
 
             UIDataHelper.isTransfer = true;
 
@@ -377,29 +359,22 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
         int drawY = this.topPos; // 用于动态控制绘制
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
-        RenderSystem.setShaderTexture(0, GUI_TEXTURE_TOP_BASE);
-        guiGraphics.blit(GUI_TEXTURE_TOP_BASE, this.leftPos, drawY, 0, 0, TOP_BASE_WIDTH, TOP_BASE_HEIGHT, TOP_BASE_WIDTH, TOP_BASE_HEIGHT);
+        guiGraphics.blit(GUI_TEXTURE_TOP_BASE, this.leftPos, drawY, TOP_BASE_WIDTH, TOP_BASE_HEIGHT, 0F, 0F, TOP_BASE_WIDTH, TOP_BASE_HEIGHT);
         drawY += TOP_BASE_HEIGHT;
 
-        RenderSystem.setShaderTexture(0, GUI_TEXTURE_TOP_SLOTS);
-        guiGraphics.blit(GUI_TEXTURE_TOP_SLOTS, this.leftPos, drawY, 0, 0, TOP_SLOTS_WIDTH, TOP_SLOTS_HEIGHT, TOP_SLOTS_WIDTH, TOP_SLOTS_HEIGHT);
+        guiGraphics.blit(GUI_TEXTURE_TOP_SLOTS, this.leftPos, drawY, TOP_SLOTS_WIDTH, TOP_SLOTS_HEIGHT, 0F, 0F, TOP_SLOTS_WIDTH, TOP_SLOTS_HEIGHT);
         drawY += TOP_SLOTS_HEIGHT;
 
-        RenderSystem.setShaderTexture(0, GUI_TEXTURE_MID_SLOTS);
         for (int i = 0; i < menu.getLines() - 2; i++)
         {
-            guiGraphics.blit(GUI_TEXTURE_MID_SLOTS, this.leftPos, drawY, 0, 0, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT);
+            guiGraphics.blit(GUI_TEXTURE_MID_SLOTS, this.leftPos, drawY, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT, 0F, 0F, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT);
             drawY += MID_SLOTS_HEIGHT;
         }
 
-        RenderSystem.setShaderTexture(0, GUI_TEXTURE_BOTTOM_SLOTS);
-        guiGraphics.blit(GUI_TEXTURE_BOTTOM_SLOTS, this.leftPos, drawY, 0, 0, BOTTOM_SLOTS_WIDTH, BOTTOM_SLOTS_HEIGHT, BOTTOM_SLOTS_WIDTH, BOTTOM_SLOTS_HEIGHT);
+        guiGraphics.blit(GUI_TEXTURE_BOTTOM_SLOTS, this.leftPos, drawY, BOTTOM_SLOTS_WIDTH, BOTTOM_SLOTS_HEIGHT, 0F, 0F, BOTTOM_SLOTS_WIDTH, BOTTOM_SLOTS_HEIGHT);
         drawY += BOTTOM_SLOTS_HEIGHT;
 
-        RenderSystem.setShaderTexture(0, GUI_TEXTURE_PLAYER_INV);
-        guiGraphics.blit(GUI_TEXTURE_PLAYER_INV, this.leftPos, drawY, 0, 0, PLAYER_INV_WIDTH, PLAYER_INV_HEIGHT, PLAYER_INV_WIDTH, PLAYER_INV_HEIGHT);
+        guiGraphics.blit(GUI_TEXTURE_PLAYER_INV, this.leftPos, drawY, PLAYER_INV_WIDTH, PLAYER_INV_HEIGHT, 0F, 0F, PLAYER_INV_WIDTH, PLAYER_INV_HEIGHT);
         //drawY += PLAYER_INV_HEIGHT;
     }
 

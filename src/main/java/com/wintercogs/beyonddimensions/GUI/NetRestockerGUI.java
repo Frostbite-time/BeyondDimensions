@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.GUI;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
 import com.wintercogs.beyonddimensions.Machine.FuzzyMode;
@@ -11,6 +10,7 @@ import com.wintercogs.beyonddimensions.Render.GuiRenderHelper;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
@@ -138,7 +138,6 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
     protected void renderBg(@NotNull GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
         int[] drawY = new int[]{this.topPos};
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
         CommonTexturesRender.renderCommonConnection(guiGraphics, this.leftPos, drawY);
@@ -152,7 +151,7 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
 
         for (int i = 0; i < 5; i++)
         {
-            guiGraphics.blitSprite(VANILLA_SLOT_SPRITE,
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, VANILLA_SLOT_SPRITE,
                     this.leftPos + NetRestockerMenu.EXTRA_SLOT_START_X + i * 18 - 1,
                     this.topPos + NetRestockerMenu.EXTRA_SLOT_Y - 1,
                     18,
