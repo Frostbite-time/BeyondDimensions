@@ -3,22 +3,23 @@ package com.wintercogs.beyonddimensions.BlockEntity.Custom;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.ItemStackTypedHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Handler.StackHandler;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.*;
+import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.ItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.Api.Util.CombinedItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.Block.Custom.NetFurnaceBlock;
-import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.Item.Custom.MatterCompressionBall;
-import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.Machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.Machine.PopMode;
 import com.wintercogs.beyonddimensions.Machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.Menu.NetFurnaceMenu;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -31,12 +32,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.CombinedResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
@@ -130,7 +133,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         public boolean isStackValid(int slot, IStackKey<?> key)
         {
             // 仅接收可以熔炼的物品
-            return key instanceof ItemStackKey itemKey && level != null && quickChecks.get(slot).getRecipeFor(new SingleRecipeInput(itemKey.getReadOnlyStack()), level).isPresent();
+            return key instanceof ItemStackKey itemKey && level instanceof ServerLevel serverLevel && quickChecks.get(slot).getRecipeFor(new SingleRecipeInput(itemKey.getReadOnlyStack()), serverLevel).isPresent();
         }
     };
 
@@ -155,7 +158,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 能量或者可以燃烧的物品能作为燃料标记
             return (key instanceof EnergyStackKey)
                     || (key instanceof FluidStackKey fluidKey && fluidKey.getSource() == Fluids.LAVA)
-                    || (key instanceof ItemStackKey itemKey && itemKey.getReadOnlyStack().getBurnTime(RecipeType.SMELTING) > 0);
+                    || (key instanceof ItemStackKey itemKey && level != null && itemKey.getReadOnlyStack().getBurnTime(RecipeType.SMELTING, level.fuelValues()) > 0);
         }
 
     };
@@ -180,7 +183,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         public boolean isStackValid(int slot, IStackKey<?> key)
         {
             // 仅接收可以熔炼的物品
-            return key instanceof ItemStackKey itemKey && level != null && quickChecks.get(slot).getRecipeFor(new SingleRecipeInput(itemKey.getReadOnlyStack()), level).isPresent();
+            return key instanceof ItemStackKey itemKey && level instanceof ServerLevel serverLevel && quickChecks.get(slot).getRecipeFor(new SingleRecipeInput(itemKey.getReadOnlyStack()), serverLevel).isPresent();
         }
     };
 
@@ -222,7 +225,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             // 能量或者可以燃烧的物品能作为燃料标记
             return (key instanceof EnergyStackKey)
                     || (key instanceof FluidStackKey fluidKey && fluidKey.getSource() == Fluids.LAVA)
-                    || (key instanceof ItemStackKey itemKey && itemKey.getReadOnlyStack().getBurnTime(RecipeType.SMELTING) > 0);
+                    || (key instanceof ItemStackKey itemKey && level != null && itemKey.getReadOnlyStack().getBurnTime(RecipeType.SMELTING, level.fuelValues()) > 0);
         }
     };
 
@@ -256,46 +259,71 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK, // 标准物品能力
+                Capabilities.Item.BLOCK,
                 BDBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     //首先对所有实体槽位进行包装
                     ItemStackTypedHandler inputStorage = new ItemStackTypedHandler(be.inputStorageSlots)
                     {
                         @Override
-                        public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
+                        public int extract(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
                         {
-                            return ItemStack.EMPTY; //禁止提取
+                            return 0;
+                        }
+
+                        @Override
+                        public int extract(@NotNull ItemResource resource, int amount, TransactionContext transaction)
+                        {
+                            return 0;
                         }
                     };
 
                     ItemStackTypedHandler fuelStorage = new ItemStackTypedHandler(be.fuelStorageSlots)
                     {
                         @Override
-                        public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
+                        public int extract(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
                         {
-                            return ItemStack.EMPTY; //禁止提取
+                            return 0;
+                        }
+
+                        @Override
+                        public int extract(@NotNull ItemResource resource, int amount, TransactionContext transaction)
+                        {
+                            return 0;
                         }
                     };
 
                     ItemStackTypedHandler outputStorage = new ItemStackTypedHandler(be.outputStorageSlots)
                     {
                         @Override
-                        public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
+                        public int insert(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
                         {
-                            return itemStack; //禁止插入
+                            return 0;
+                        }
+
+                        @Override
+                        public int insert(@NotNull ItemResource resource, int amount, TransactionContext transaction)
+                        {
+                            return 0;
                         }
                     };
 
                     ItemStackTypedHandler fuelReturn = new ItemStackTypedHandler(be.fuelReturnSlots)
                     {
                         @Override
-                        public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
+                        public int insert(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
                         {
-                            return itemStack; //禁止插入
+                            return 0;
+                        }
+
+                        @Override
+                        public int insert(@NotNull ItemResource resource, int amount, TransactionContext transaction)
+                        {
+                            return 0;
                         }
                     };
-                    return new CombinedItemHandlerWrapper(new ItemStackTypedHandler[]{inputStorage, fuelStorage, outputStorage, fuelReturn});
+
+                    return new CombinedResourceHandler<>(new ItemStackTypedHandler[]{inputStorage, fuelStorage, outputStorage, fuelReturn});
                 }
         );
     }
@@ -517,10 +545,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                         }
                         else if (fuelStack.key() instanceof ItemStackKey fuelItem)
                         {
-                            int burnTime = fuelItem.getReadOnlyStack().getBurnTime(RecipeType.SMELTING);
+                            int burnTime = fuelItem.getReadOnlyStack().getBurnTime(RecipeType.SMELTING, level.fuelValues());
                             if (burnTime > 0)
                             {
-                                ItemStack returnItem = fuelItem.getReadOnlyStack().getCraftingRemainingItem();
+                                ItemStack returnItem = fuelItem.getReadOnlyStack().getCraftingRemainder();
                                 if (returnItem.isEmpty())
                                 {
                                     fuelStorageSlots.extract(fuelItem, 1, false, false);
@@ -559,7 +587,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
     public void workContent()
     {
         super.workContent();
-        if (level == null) return;
+        if (!(level instanceof ServerLevel serverLevel)) return;
 
         //开始熔炼
         for (int inputSlot = 0; inputSlot < capacity; inputSlot++)
@@ -571,15 +599,16 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                     && !inputItem.isEmpty())
             {
                 RecipeHolder<SmeltingRecipe> recipeHolder = quickChecks.get(inputSlot)
-                        .getRecipeFor(new SingleRecipeInput(inputItem.getReadOnlyStack()), level).orElse(null);
+                        .getRecipeFor(new SingleRecipeInput(inputItem.getReadOnlyStack()), serverLevel).orElse(null);
                 if (recipeHolder != null)
                 {
                     // 一旦找到配方，始终重设总时间，以防错误越过
-                    cookTimeTotal.set(inputSlot, recipeHolder.value().getCookingTime());
+                    cookTimeTotal.set(inputSlot, recipeHolder.value().cookingTime());
                     // 熔炼时间正常，并且能正常输出
                     if (cookTime.get(inputSlot) >= cookTimeTotal.get(inputSlot))
                     {
-                        ItemStack resultItem = recipeHolder.value().getResultItem(level.registryAccess());
+                        // assemble内部并不实际查看input
+                        ItemStack resultItem = recipeHolder.value().assemble(new SingleRecipeInput(ItemStack.EMPTY), level.registryAccess());
                         ItemStackKey resultKey = new ItemStackKey(resultItem);
                         int resultCount = resultItem.getCount();
 
@@ -589,7 +618,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                             outputStorageSlots.insert(inputSlot, resultKey, resultCount, false);
                             inputStorageSlots.extract(inputSlot, 1, false);
                             cookTime.set(inputSlot, 0);
-                            cookTimeTotal.set(inputSlot, recipeHolder.value().getCookingTime());
+                            cookTimeTotal.set(inputSlot, recipeHolder.value().cookingTime());
                         }
                     }
                     else // 存在recipe，且没有完全熔炼，减少熔炼时间 （与此同时，顺便重置总时间，以防万一）
@@ -617,10 +646,12 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
     public void workEnd()
     {
         super.workEnd();
+        if (level == null) return;
+
         // 应用转移模式与弹出模式的设置
         // 优先弹出，再转移
 
-        ArrayList<IItemHandler> otherStroages = new ArrayList<>();
+        ArrayList<ItemHandlerWrapper> otherStorages = new ArrayList<>();
         if (popMode == PopMode.OPEN)
         {
             for (Direction dir : Direction.values())
@@ -630,10 +661,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                 if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
                 {
                     // 开始查询能力 记住，你获取你上方的方块，一定是获取其下方的能力
-                    IItemHandler otherStorage = level.getCapability(Capabilities.ItemHandler.BLOCK, targetPos, dir.getOpposite());
+                    ResourceHandler<@NotNull ItemResource> otherStorage = level.getCapability(Capabilities.Item.BLOCK, targetPos, dir.getOpposite());
                     if (otherStorage != null)
                     {
-                        otherStroages.add(otherStorage);
+                        otherStorages.add(new ItemHandlerWrapper(otherStorage));
                     }
                 }
             }
@@ -646,15 +677,22 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             if (!outputStack.isEmpty())
             {
                 // 弹出模式（如果弹出模式关闭，这里会由迭代器安全的离开）
-                for (IItemHandler otherStorage : otherStroages)
+                for (ItemHandlerWrapper otherStorage : otherStorages)
                 {
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
                     for (int otherSlot = 0; otherSlot < otherStorage.getSlots(); otherSlot++)
                     {
-                        KeyAmount extracted = outputStorageSlots.extract(outputSlot, outputStack.key().getVanillaMaxStackSize(), false);
+                        KeyAmount slotNow = outputStorageSlots.getStackBySlot(outputSlot);
+                        if (slotNow.isEmpty() || !(slotNow.key() instanceof ItemStackKey itemKey))
+                        {
+                            break;
+                        }
+
+                        int moveCount = (int) Math.min(slotNow.amount(), itemKey.getVanillaMaxStackSize());
+                        KeyAmount extracted = outputStorageSlots.extract(outputSlot, moveCount, false);
                         if (!(extracted.key() instanceof ItemStackKey)) continue;
-                        int remaining = otherStorage.insertItem(otherSlot, (ItemStack) extracted.toStack(), false).getCount();
-                        if (remaining > 0)
+                        long remaining = otherStorage.insert(otherSlot, (ItemStack) extracted.toStack(), false);
+                        if (remaining > 0L)
                         {
                             outputStorageSlots.insert(outputSlot, extracted.key(), remaining, false);
                         }
@@ -685,14 +723,21 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             if (returnStack != null && !returnStack.isEmpty())
             {
                 // 弹出模式（如果弹出模式关闭，这里会由迭代器安全的离开）
-                for (IItemHandler otherStorage : otherStroages)
+                for (ItemHandlerWrapper otherStorage : otherStorages)
                 {
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
                     for (int otherSlot = 0; otherSlot < otherStorage.getSlots(); otherSlot++)
                     {
-                        KeyAmount extracted = fuelReturnSlots.extract(returnSlot, returnStack.key().getVanillaMaxStackSize(), false);
-                        int remaining = otherStorage.insertItem(otherSlot, (ItemStack) extracted.toStack(), false).getCount();
-                        if (remaining > 0)
+                        KeyAmount slotNow = fuelReturnSlots.getStackBySlot(returnSlot);
+                        if (slotNow.isEmpty() || !(slotNow.key() instanceof ItemStackKey itemKey))
+                        {
+                            break;
+                        }
+
+                        int moveCount = (int) Math.min(slotNow.amount(), itemKey.getVanillaMaxStackSize());
+                        KeyAmount extracted = fuelReturnSlots.extract(returnSlot, moveCount, false);
+                        long remaining = otherStorage.insert(otherSlot, (ItemStack) extracted.toStack(), false);
+                        if (remaining > 0L)
                         {
                             fuelReturnSlots.insert(returnSlot, extracted.key(), remaining, false);
                         }
@@ -836,19 +881,21 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-        this.inputFilterSlots.deserializeNBT(registries, tag.getCompound("input_filter_slots"));
-        this.fuelFilterSlots.deserializeNBT(registries, tag.getCompound("fuel_filter_slots"));
-        this.inputStorageSlots.deserializeNBT(registries, tag.getCompound("input_storage_slots"));
-        this.outputStorageSlots.deserializeNBT(registries, tag.getCompound("output_storage_slots"));
-        this.fuelStorageSlots.deserializeNBT(registries, tag.getCompound("fuel_storage_slots"));
-        this.fuelReturnSlots.deserializeNBT(registries, tag.getCompound("fuel_return_slots"));
-        this.litTime = Arrays.stream(tag.getIntArray("lit_time")).boxed().collect(Collectors.toList());
-        this.litDuration = Arrays.stream(tag.getIntArray("lit_duration")).boxed().collect(Collectors.toList());
-        this.cookTime = Arrays.stream(tag.getIntArray("cook_time")).boxed().collect(Collectors.toList());
-        this.cookTimeTotal = Arrays.stream(tag.getIntArray("cook_time_total")).boxed().collect(Collectors.toList());
-        this.popMode = PopMode.valueOf(tag.getString("pop_mode"));
-        this.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
-        this.sortMode = tag.contains("sort_mode") ? AutoSortMode.valueOf(tag.getString("sort_mode")) : AutoSortMode.STOP;
+        this.inputFilterSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("input_filter_slots"));
+        this.fuelFilterSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("fuel_filter_slots"));
+        this.inputStorageSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("input_storage_slots"));
+        this.outputStorageSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("output_storage_slots"));
+        this.fuelStorageSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("fuel_storage_slots"));
+        this.fuelReturnSlots.deserializeNBT(registries, tag.getCompoundOrEmpty("fuel_return_slots"));
+
+        this.litTime = normalizeIntList(tag.getIntArray("lit_time").orElseGet(() -> new int[0]), capacity, 0);
+        this.litDuration = normalizeIntList(tag.getIntArray("lit_duration").orElseGet(() -> new int[0]), capacity, 0);
+        this.cookTime = normalizeIntList(tag.getIntArray("cook_time").orElseGet(() -> new int[0]), capacity, 0);
+        this.cookTimeTotal = normalizeIntList(tag.getIntArray("cook_time_total").orElseGet(() -> new int[0]), capacity, 0);
+
+        this.popMode = parseEnum(tag.getStringOr("pop_mode", PopMode.STOP.name()), PopMode.class, PopMode.STOP);
+        this.receiveMode = parseEnum(tag.getStringOr("receive_mode", ReceiveMode.STOP.name()), ReceiveMode.class, ReceiveMode.STOP);
+        this.sortMode = parseEnum(tag.getStringOr("sort_mode", AutoSortMode.STOP.name()), AutoSortMode.class, AutoSortMode.STOP);
     }
 
     @Override
@@ -861,13 +908,40 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         tag.put("output_storage_slots", this.outputStorageSlots.serializeNBT(registries));
         tag.put("fuel_storage_slots", this.fuelStorageSlots.serializeNBT(registries));
         tag.put("fuel_return_slots", this.fuelReturnSlots.serializeNBT(registries));
-        tag.putIntArray("lit_time", litTime);
-        tag.putIntArray("lit_duration", litDuration);
-        tag.putIntArray("cook_time", cookTime);
-        tag.putIntArray("cook_time_total", cookTimeTotal);
+        tag.putIntArray("lit_time", toIntArray(litTime));
+        tag.putIntArray("lit_duration", toIntArray(litDuration));
+        tag.putIntArray("cook_time", toIntArray(cookTime));
+        tag.putIntArray("cook_time_total", toIntArray(cookTimeTotal));
         tag.putString("pop_mode", this.popMode.name());
         tag.putString("receive_mode", this.receiveMode.name());
         tag.putString("sort_mode", this.sortMode.name());
+    }
+
+    private static int[] toIntArray(List<Integer> values)
+    {
+        return values.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private static List<Integer> normalizeIntList(int[] source, int targetSize, int fillValue)
+    {
+        ArrayList<Integer> result = new ArrayList<>(targetSize);
+        for (int i = 0; i < targetSize; i++)
+        {
+            result.add(i < source.length ? source[i] : fillValue);
+        }
+        return result;
+    }
+
+    private static <E extends Enum<E>> E parseEnum(String name, Class<E> enumClass, E fallback)
+    {
+        try
+        {
+            return Enum.valueOf(enumClass, name);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            return fallback;
+        }
     }
 
     public void setLit(boolean lit)
@@ -880,16 +954,15 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             level.setBlock(
                     worldPosition,
                     state.setValue(NetFurnaceBlock.LIT, lit),
-                    Block.UPDATE_CLIENTS        // 仅通知客户端 + 保存到区块
+                    Block.UPDATE_CLIENTS
             );
-            // 如果方块附带其他 NBT 数据，也别忘了：
             setChanged(level, worldPosition, state);
         }
     }
 
 
     @Override
-    public Component getDisplayName()
+    public @NotNull Component getDisplayName()
     {
         return Component.translatable("menu.title.beyonddimensions.furnace_menu");
     }
