@@ -7,8 +7,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -24,7 +22,6 @@ public interface IStackRender
      * <p>
      * 必须以注解标注为仅客户端
      */
-    @OnlyIn(Dist.CLIENT)
     void render(GuiGraphics gui, IStackKey<?> key, int x, int y);
 
     /**
@@ -55,6 +52,5 @@ public interface IStackRender
     /**
      * 绘制工具提示，必须要标记为仅客户端
      */
-    @OnlyIn(Dist.CLIENT)
     void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY);
 }

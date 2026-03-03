@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.Integration.JEI.RecipeTransfer;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenuTerminal;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
-import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.types.IRecipeType;

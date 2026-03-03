@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.datagen;
 
+import com.mojang.math.Quadrant;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.Custom.NetFurnaceBlock;
 import com.wintercogs.beyonddimensions.Block.Custom.NetTerminalBlock;
@@ -18,7 +19,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
-import com.mojang.math.Quadrant;
 import net.neoforged.neoforge.client.model.item.DynamicFluidContainerModel;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import org.jetbrains.annotations.NotNull;

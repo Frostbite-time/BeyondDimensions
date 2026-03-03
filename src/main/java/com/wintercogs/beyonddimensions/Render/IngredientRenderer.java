@@ -3,14 +3,8 @@ package com.wintercogs.beyonddimensions.Render;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 // 参考自jei的IIngredientRenderer接口以及FluidTankRenderer类
-@OnlyIn(Dist.CLIENT)
 public class IngredientRenderer
 {
     private static final int TEXTURE_SIZE = 16;
