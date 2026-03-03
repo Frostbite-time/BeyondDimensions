@@ -6,11 +6,11 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
-import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
 import com.wintercogs.beyonddimensions.Machine.*;
 import com.wintercogs.beyonddimensions.Menu.NetHopperMenu;
 import com.wintercogs.beyonddimensions.Util.ItemStackHelper;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.SectionPos;
@@ -191,8 +191,8 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
             int minZ = chunkZ << 4;       // 区块最小Z
             int maxZ = minZ + 15;         // 区块最大Z
             // 获取整个世界的Y轴范围
-            int minY = level.getMinBuildHeight();
-            int maxY = level.getMaxBuildHeight();
+            int minY = level.getMinY();
+            int maxY = level.getMaxY();
             // 创建区块边界框
             return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
         }
@@ -231,7 +231,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     // 收集区域流体
     private void fluidCollect(AABB searchArea)
     {
-        if (level == null || level.isClientSide)
+        if (level == null || level.isClientSide())
         {
             return;
         }
