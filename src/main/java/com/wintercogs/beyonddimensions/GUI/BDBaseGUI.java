@@ -7,24 +7,28 @@ import com.wintercogs.beyonddimensions.Menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Packet.BatchTransferPacket;
 import com.wintercogs.beyonddimensions.Packet.CallSeverClickPacket;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.anti_ad.mc.ipn.api.IPNIgnore;
 import org.jetbrains.annotations.NotNull;
 
 
 // 更改渲染以及点击事件，以适配StoredStackSlot
 @IPNIgnore
-public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerScreen<T>
+public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerScreen<@NotNull T>
 {
 
     // 用于 shift双击加左键的效果
@@ -58,13 +62,13 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
             else
             {
                 ItemStack itemstack = this.hoveredSlot.getItem();
-                guiGraphics.renderTooltip(this.font, this.getTooltipFromContainerItem(itemstack), itemstack.getTooltipImage(), itemstack, mouseX, mouseY);
+                guiGraphics.setTooltipForNextFrame(this.font, this.getTooltipFromContainerItem(itemstack), itemstack.getTooltipImage(), itemstack, mouseX, mouseY, itemstack.get(DataComponents.TOOLTIP_STYLE));
             }
         }
     }
 
     @Override
-    protected void renderSlot(GuiGraphics guiGraphics, Slot slot)
+    protected void renderSlot(@NotNull GuiGraphics guiGraphics, @NotNull Slot slot, int mouseX, int mouseY)
     {
         if (slot instanceof AbstractStackTypedSlot sSlot)
         {
@@ -76,7 +80,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
             if (stack.key().isEmpty())
             {
                 var noItemIcon = slot.getNoItemIcon();
-                if (noItemIcon != null && this.minecraft != null)
+                if (noItemIcon != null)
                 {
                     TextureAtlasSprite textureatlassprite = this.minecraft.getTextureAtlas(noItemIcon.getFirst()).apply(noItemIcon.getSecond());
                     guiGraphics.blit(x, y, 0, 16, 16, textureatlassprite);
@@ -89,7 +93,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         }
         else
         {
-            super.renderSlot(guiGraphics, slot);
+            super.renderSlot(guiGraphics, slot, mouseX, mouseY);
         }
     }
 
@@ -114,19 +118,13 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
-    {
-        return super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    public boolean mouseDragged(@NotNull MouseButtonEvent event, double dragX, double dragY)
     {
         // 先把事件交给当前 focused 控件
         GuiEventListener focused = this.getFocused();
         if (focused != null && this.isDragging())
         {
-            if (focused.mouseDragged(mouseX, mouseY, button, dragX, dragY))
+            if (focused.mouseDragged(event, dragX, dragY))
             {
                 return true;
             }
@@ -134,19 +132,19 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         }
 
         // 命中自定义槽位：拦截容器 quick-craft，不让容器接管
-        Slot slot = this.findSlot(mouseX, mouseY);
+        Slot slot = this.getHoveredSlot(event.x(), event.y());
         if (slot instanceof AbstractStackTypedSlot) return true;
 
         // 其它情况：让容器逻辑处理
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    public boolean mouseReleased(@NotNull MouseButtonEvent event)
     {
         // AbstractContainerScreen的drag没有调用组件drag，但是Release却调用了，不需要手动重复处理
         // 在此注释，防止我某一天忘记了
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
 
     @Override
@@ -160,14 +158,14 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
 
         int slotId = slot.index;
         KeyAmount clickItem;
-        if (hasShiftDown())
+        if (Minecraft.getInstance().hasShiftDown())
         {
             if (slot instanceof AbstractStackTypedSlot sSlot)
             {
                 clickItem = sSlot.getVanillaActualStack();
                 if (!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem.key()))
                 {
-                    PacketDistributor.sendToServer(new BatchTransferPacket(clickItem, false));
+                    ClientPacketDistributor.sendToServer(new BatchTransferPacket(clickItem, false));
                 }
                 else if (!clickItem.isEmpty() && clickItem.key() instanceof ItemStackKey itemStackKey)
                 {
@@ -184,7 +182,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 // 因为操作基本全由服务端处理
                 if (lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
                 {
-                    PacketDistributor.sendToServer(new BatchTransferPacket(new KeyAmount(new ItemStackKey(lastInvClickedStack), lastInvClickedStack.getCount()), true));
+                    ClientPacketDistributor.sendToServer(new BatchTransferPacket(new KeyAmount(new ItemStackKey(lastInvClickedStack), lastInvClickedStack.getCount()), true));
                 }
                 else if (menu.inventoryStartIndex <= slotId && slotId < menu.inventoryEndIndex)
                 {
@@ -193,7 +191,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 }
 
             }
-            PacketDistributor.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, true));
+            ClientPacketDistributor.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, true));
         }
         else
         {
@@ -203,21 +201,20 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 {
                     // 对于标记槽位
                     clickItem = sSlot.getVanillaActualStack();
-                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
+                    ClientPacketDistributor.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
                 }
                 else
                 {
                     clickItem = sSlot.getVanillaActualStack();
-                    PacketDistributor.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
+                    ClientPacketDistributor.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
                 }
             }
         }
 
     }
 
-
     @Override
-    protected boolean checkHotbarKeyPressed(int keyCode, int scanCode)
+    protected boolean checkHotbarKeyPressed(@NotNull KeyEvent event)
     {
         if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null)
         {
@@ -229,14 +226,14 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
             else
             {
                 // 副手交换仅对于非存储槽才生效
-                if (this.minecraft.options.keySwapOffhand.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode)))
+                if (this.minecraft.options.keySwapOffhand.isActiveAndMatches(InputConstants.getKey(event)))
                 {
                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
                     return true;
                 }
                 for (int i = 0; i < 9; ++i)
                 {
-                    if (this.minecraft.options.keyHotbarSlots[i].isActiveAndMatches(InputConstants.getKey(keyCode, scanCode)))
+                    if (this.minecraft.options.keyHotbarSlots[i].isActiveAndMatches(InputConstants.getKey(event)))
                     {
                         this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, i, ClickType.SWAP);
                         return true;
@@ -249,7 +246,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
 
-    public Font getFont()
+    public @NotNull Font getFont()
     {
         return font;
     }

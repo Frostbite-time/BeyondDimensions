@@ -2,13 +2,13 @@ package com.wintercogs.beyonddimensions.GUI;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.GUI.SharedWidget.RightTabButton;
 import com.wintercogs.beyonddimensions.Machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.Machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.Machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.Menu.NetRestockerMenu;
 import com.wintercogs.beyonddimensions.Render.GuiRenderHelper;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;

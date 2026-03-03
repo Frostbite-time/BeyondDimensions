@@ -224,7 +224,7 @@ public final class ServerCommands
         net.setOwner(target.getUUID());
 
         source.sendSuccess(
-                () -> Component.literal("Set network owner: netId=" + netId + ", player=" + target.getGameProfile().getName()),
+                () -> Component.literal("Set network owner: netId=" + netId + ", player=" + target.getGameProfile().name()),
                 true
         );
         return Command.SINGLE_SUCCESS;
@@ -238,7 +238,7 @@ public final class ServerCommands
         net.addManager(target.getUUID());
 
         source.sendSuccess(
-                () -> Component.literal("Added manager: netId=" + netId + ", player=" + target.getGameProfile().getName()),
+                () -> Component.literal("Added manager: netId=" + netId + ", player=" + target.getGameProfile().name()),
                 true
         );
         return Command.SINGLE_SUCCESS;
@@ -252,7 +252,7 @@ public final class ServerCommands
         net.removeManager(target.getUUID());
 
         source.sendSuccess(
-                () -> Component.literal("Removed manager (downgraded to member): netId=" + netId + ", player=" + target.getGameProfile().getName()),
+                () -> Component.literal("Removed manager (downgraded to member): netId=" + netId + ", player=" + target.getGameProfile().name()),
                 true
         );
         return Command.SINGLE_SUCCESS;
@@ -266,7 +266,7 @@ public final class ServerCommands
         net.addPlayer(target.getUUID());
 
         source.sendSuccess(
-                () -> Component.literal("Added player to network: netId=" + netId + ", player=" + target.getGameProfile().getName()),
+                () -> Component.literal("Added player to network: netId=" + netId + ", player=" + target.getGameProfile().name()),
                 true
         );
         return Command.SINGLE_SUCCESS;
@@ -280,7 +280,7 @@ public final class ServerCommands
         net.removePlayer(target.getUUID());
 
         source.sendSuccess(
-                () -> Component.literal("Removed player from network: netId=" + netId + ", player=" + target.getGameProfile().getName()),
+                () -> Component.literal("Removed player from network: netId=" + netId + ", player=" + target.getGameProfile().name()),
                 true
         );
         return Command.SINGLE_SUCCESS;
@@ -298,7 +298,7 @@ public final class ServerCommands
         DimensionsNet existing = DimensionsNet.getNetFromPlayer(target);
         if (existing != null)
         {
-            source.sendFailure(Component.literal("Player already has a network: player=" + target.getGameProfile().getName() + ", netId=" + existing.getId()));
+            source.sendFailure(Component.literal("Player already has a network: player=" + target.getGameProfile().name() + ", netId=" + existing.getId()));
             return 0;
         }
 
@@ -319,7 +319,7 @@ public final class ServerCommands
 
         source.sendSuccess(
                 () -> Component.literal("Created network: netId=" + created.getId()
-                        + ", owner=" + target.getGameProfile().getName()
+                        + ", owner=" + target.getGameProfile().name()
                         + ", slotCapacity=" + slotCapacity
                         + ", slotMaxSize=" + slotMaxSize),
                 true
@@ -346,7 +346,7 @@ public final class ServerCommands
         DimensionsNet net = DimensionsNet.getNetFromPlayer(target);
         if (net == null)
         {
-            source.sendFailure(Component.literal("Player does not belong to any network: player=" + target.getGameProfile().getName()));
+            source.sendFailure(Component.literal("Player does not belong to any network: player=" + target.getGameProfile().name()));
             return 0;
         }
 
@@ -354,7 +354,7 @@ public final class ServerCommands
         net.destroySelf();
 
         source.sendSuccess(
-                () -> Component.literal("Deleted the network that the player belongs to: player=" + target.getGameProfile().getName() + ", netId=" + netId + "."),
+                () -> Component.literal("Deleted the network that the player belongs to: player=" + target.getGameProfile().name() + ", netId=" + netId + "."),
                 true
         );
         return Command.SINGLE_SUCCESS;

@@ -544,7 +544,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
     }
 
-    public Font getFont()
+    public @NotNull Font getFont()
     {
         return font;
     }

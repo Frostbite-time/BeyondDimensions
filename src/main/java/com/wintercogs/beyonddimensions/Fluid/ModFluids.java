@@ -4,6 +4,8 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.Fluid.Custom.XpFluid;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BucketItem;
@@ -133,8 +135,8 @@ public class ModFluids
     {
         for (var e : ModFluids.ALL)
         {
-            final Identifier still = Identifier.tryBuild(BeyondDimensions.MODID, "block/" + e.name() + "_still");
-            final Identifier flow = Identifier.tryBuild(BeyondDimensions.MODID, "block/" + e.name() + "_flow");
+            final Identifier still = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "block/" + e.name() + "_still");
+            final Identifier flow = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "block/" + e.name() + "_flow");
             final int tint = e.argbTint();
 
             event.registerFluidType(new IClientFluidTypeExtensions()
@@ -167,8 +169,8 @@ public class ModFluids
         evt.enqueueWork(() -> {
             for (var e : ModFluids.ALL)
             {
-                net.minecraft.client.renderer.ItemBlockRenderTypes.setRenderLayer(e.source().get(), net.minecraft.client.renderer.RenderType.translucent());
-                net.minecraft.client.renderer.ItemBlockRenderTypes.setRenderLayer(e.flowing().get(), net.minecraft.client.renderer.RenderType.translucent());
+                ItemBlockRenderTypes.setRenderLayer(e.source().get(), ChunkSectionLayer.TRANSLUCENT);
+                ItemBlockRenderTypes.setRenderLayer(e.flowing().get(), ChunkSectionLayer.TRANSLUCENT);
             }
         });
     }

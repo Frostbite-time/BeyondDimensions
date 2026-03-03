@@ -194,7 +194,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
     }
 
 
-    public Font getFont()
+    public @NotNull Font getFont()
     {
         return font;
     }

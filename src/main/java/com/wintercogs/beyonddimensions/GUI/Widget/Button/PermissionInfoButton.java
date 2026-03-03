@@ -6,7 +6,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.UUID;
 
-public class PermissionInfoButton extends Button
+public class PermissionInfoButton extends Button.Plain
 {
     private UUID playerId;
     private PlayerPermissionInfo permissionInfo;
