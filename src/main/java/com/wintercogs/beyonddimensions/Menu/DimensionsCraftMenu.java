@@ -95,10 +95,6 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                     }
                 }
             };
-            for (int i = 0; i < craftItems.size(); i++)
-            {
-                craftContainer.setItem(i, craftItems.get(i));
-            }
         }
         else
             craftContainer = new TransientCraftingContainer(this, 3, 3)
@@ -114,6 +110,14 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                 }
             };
         initCraftSlots(playerInventory, craftContainer);
+
+        if (craftItems != null)
+        {
+            for (int i = 0; i < craftItems.size(); i++)
+            {
+                craftContainer.setItem(i, craftItems.get(i));
+            }
+        }
     }
 
 
