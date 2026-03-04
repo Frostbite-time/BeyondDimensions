@@ -14,10 +14,13 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,12 +58,6 @@ public class NetRestockerItem extends BaseMachineItem
     }
 
     @Override
-    public int getStepTick()
-    {
-        return 5;
-    }
-
-    @Override
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
@@ -84,44 +81,153 @@ public class NetRestockerItem extends BaseMachineItem
     {
         super.workContent(stack, level, holder, slotId, isSelected);
 
-        if (!(holder instanceof Player player)) return;
-
         UnifiedStorage storage = NetedItem.getNet(stack).getUnifiedStorage();
         List<KeyAmount> templates = getFilterSlotsOrDefault(stack, new ArrayList<>());
 
         FuzzyMode fuzzyMode = getFuzzyModeOrDefault(stack, FuzzyMode.DISABLE);
         ReceiveMode receiveMode = getReceiveModeOrDefault(stack, ReceiveMode.STOP);
 
-        Inventory inventory = player.getInventory();
-        boolean inventoryChanged = false;
+        if (holder instanceof Player player)
+        {
+            Inventory inventory = player.getInventory();
+            boolean inventoryChanged = false;
 
-        for (int templateSlot = 0; templateSlot < capacity && templateSlot < templates.size(); templateSlot++)
+            for (int templateSlot = 0; templateSlot < capacity && templateSlot < templates.size(); templateSlot++)
+            {
+                KeyAmount template = templates.get(templateSlot);
+
+                ItemStack currentStack = getPlayerSlotStack(player, templateSlot);
+
+                if (receiveMode == ReceiveMode.OPEN
+                        && !currentStack.isEmpty()
+                        && canRecycle(currentStack)
+                        && !slotMatchesTemplate(currentStack, template, fuzzyMode))
+                {
+                    ItemStackKey currentKey = new ItemStackKey(currentStack);
+                    KeyAmount remainder = storage.insert(currentKey, currentStack.getCount(), false);
+                    int accepted = currentStack.getCount() - BDMath.clampLongToInt(remainder.amount());
+                    if (accepted > 0)
+                    {
+                        currentStack.shrink(accepted);
+                        setPlayerSlotStack(player, templateSlot, currentStack.isEmpty() ? ItemStack.EMPTY : currentStack);
+                        inventoryChanged = true;
+                        currentStack = getPlayerSlotStack(player, templateSlot);
+                    }
+                }
+
+                if (!(template.key() instanceof ItemStackKey targetKey) || template.isEmpty())
+                    continue;
+
+                if (currentStack.isEmpty() && !canPlaceInPlayerTemplateSlot(player, templateSlot, targetKey.getReadOnlyStack()))
+                    continue;
+
+                int targetCount = BDMath.clampLongToInt(targetKey.getVanillaMaxStackSize());
+                if (targetCount <= 0)
+                    continue;
+
+                int missing;
+                if (currentStack.isEmpty())
+                {
+                    missing = targetCount;
+                }
+                else if (ItemStack.isSameItemSameTags(currentStack, targetKey.getReadOnlyStack()))
+                {
+                    missing = targetCount - currentStack.getCount();
+                }
+                else
+                {
+                    continue;
+                }
+
+                if (missing <= 0)
+                    continue;
+
+                KeyAmount extracted = storage.extract(targetKey, missing, false, fuzzyMode == FuzzyMode.ENABLE);
+                if (extracted.isEmpty())
+                    continue;
+
+                if (!(extracted.key() instanceof ItemStackKey extractedItemKey))
+                {
+                    storage.insert(extracted.key(), extracted.amount(), false);
+                    continue;
+                }
+
+                int refillCount = BDMath.clampLongToInt(extracted.amount());
+                if (refillCount <= 0)
+                    continue;
+
+                ItemStack refill = extractedItemKey.copyStackWithCount(refillCount);
+
+                if (currentStack.isEmpty())
+                {
+                    if (setPlayerSlotStack(player, templateSlot, refill))
+                    {
+                        inventoryChanged = true;
+                    }
+                    else
+                    {
+                        storage.insert(extracted.key(), extracted.amount(), false);
+                    }
+                }
+                else
+                {
+                    if (!ItemStack.isSameItemSameTags(currentStack, refill))
+                    {
+                        storage.insert(extracted.key(), extracted.amount(), false);
+                        continue;
+                    }
+
+                    currentStack.grow(refillCount);
+                    if (setPlayerSlotStack(player, templateSlot, currentStack))
+                        inventoryChanged = true;
+                    else
+                        storage.insert(extracted.key(), extracted.amount(), false);
+                }
+            }
+
+            if (inventoryChanged)
+            {
+                inventory.setChanged();
+            }
+            return;
+        }
+
+        if (!(holder instanceof LivingEntity living))
+            return;
+
+        IItemHandler handler = living.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve().orElse(null);
+        if (handler == null)
+            return;
+
+        for (int templateSlot = 0; templateSlot < Math.min(capacity, Math.min(templates.size(), handler.getSlots())); templateSlot++)
         {
             KeyAmount template = templates.get(templateSlot);
-
-            ItemStack currentStack = getPlayerSlotStack(player, templateSlot);
+            ItemStack currentStack = handler.getStackInSlot(templateSlot);
 
             if (receiveMode == ReceiveMode.OPEN
                     && !currentStack.isEmpty()
                     && canRecycle(currentStack)
                     && !slotMatchesTemplate(currentStack, template, fuzzyMode))
             {
-                ItemStackKey currentKey = new ItemStackKey(currentStack);
-                KeyAmount remainder = storage.insert(currentKey, currentStack.getCount(), false);
-                int accepted = currentStack.getCount() - BDMath.clampLongToInt(remainder.amount());
-                if (accepted > 0)
+                ItemStack simulatedExtract = handler.extractItem(templateSlot, currentStack.getCount(), true);
+                if (!simulatedExtract.isEmpty())
                 {
-                    currentStack.shrink(accepted);
-                    setPlayerSlotStack(player, templateSlot, currentStack.isEmpty() ? ItemStack.EMPTY : currentStack);
-                    inventoryChanged = true;
-                    currentStack = getPlayerSlotStack(player, templateSlot);
+                    ItemStackKey currentKey = new ItemStackKey(simulatedExtract);
+                    KeyAmount remainder = storage.insert(currentKey, simulatedExtract.getCount(), true);
+                    int accepted = simulatedExtract.getCount() - BDMath.clampLongToInt(remainder.amount());
+                    if (accepted > 0)
+                    {
+                        ItemStack extracted = handler.extractItem(templateSlot, accepted, false);
+                        if (!extracted.isEmpty())
+                        {
+                            storage.insert(new ItemStackKey(extracted), extracted.getCount(), false);
+                            currentStack = handler.getStackInSlot(templateSlot);
+                        }
+                    }
                 }
             }
 
             if (!(template.key() instanceof ItemStackKey targetKey) || template.isEmpty())
-                continue;
-
-            if (currentStack.isEmpty() && !canPlaceInPlayerTemplateSlot(player, templateSlot, targetKey.getReadOnlyStack()))
                 continue;
 
             int targetCount = BDMath.clampLongToInt(targetKey.getVanillaMaxStackSize());
@@ -161,36 +267,17 @@ public class NetRestockerItem extends BaseMachineItem
 
             ItemStack refill = extractedItemKey.copyStackWithCount(refillCount);
 
-            if (currentStack.isEmpty())
+            if (!currentStack.isEmpty() && !ItemStack.isSameItemSameTags(currentStack, refill))
             {
-                if (setPlayerSlotStack(player, templateSlot, refill))
-                {
-                    inventoryChanged = true;
-                }
-                else
-                {
-                    storage.insert(extracted.key(), extracted.amount(), false);
-                }
+                storage.insert(extracted.key(), extracted.amount(), false);
+                continue;
             }
-            else
+
+            ItemStack leftover = handler.insertItem(templateSlot, refill, false);
+            if (!leftover.isEmpty())
             {
-                if (!ItemStack.isSameItemSameTags(currentStack, refill))
-                {
-                    storage.insert(extracted.key(), extracted.amount(), false);
-                    continue;
-                }
-
-                currentStack.grow(refillCount);
-                if (setPlayerSlotStack(player, templateSlot, currentStack))
-                    inventoryChanged = true;
-                else
-                    storage.insert(extracted.key(), extracted.amount(), false);
+                storage.insert(new ItemStackKey(leftover), leftover.getCount(), false);
             }
-        }
-
-        if (inventoryChanged)
-        {
-            inventory.setChanged();
         }
     }
 
