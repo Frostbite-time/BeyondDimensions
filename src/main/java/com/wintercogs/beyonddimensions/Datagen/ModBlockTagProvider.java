@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.Datagen;
 
+import com.simibubi.create.AllTags;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import net.minecraft.core.HolderLookup;
@@ -24,6 +25,23 @@ public class ModBlockTagProvider extends BlockTagsProvider
     {
         // 标记以下方块使用镐子挖掘更快
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
+                .add(ModBlocks.NET_CONTROL.get())
+                .add(ModBlocks.NET_INTERFACE.get())
+                .add(ModBlocks.NET_PATHWAY.get())
+                .add(ModBlocks.NET_ENERGY_PATHWAY.get())
+                .add(ModBlocks.NET_TERMINAL_BLOCK.get())
+                .add(ModBlocks.NET_PUMP_BLOCK.get())
+                .add(ModBlocks.NET_HOPPER_BLOCK.get())
+                .add(ModBlocks.NET_FURNACE_BLOCK.get())
+                .add(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .add(ModBlocks.RS_NET_PATHWAY.get())
+                .add(ModBlocks.ARS_SOURCE_PATHWAY.get())
+                .add(ModBlocks.MANA_POOL_PATHWAY.get())
+                .add(ModBlocks.SCHEMATICANNON_PATHWAY.get());
+
+        // 防止被机械动力识别为可用于移动式存储的方块
+        // （仅1.20.1用，应对机械动力本体的bug）
+        tag(AllTags.AllBlockTags.NON_MOVABLE.tag)
                 .add(ModBlocks.NET_CONTROL.get())
                 .add(ModBlocks.NET_INTERFACE.get())
                 .add(ModBlocks.NET_PATHWAY.get())
