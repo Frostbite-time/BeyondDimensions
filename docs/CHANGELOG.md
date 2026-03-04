@@ -1,1 +1,1 @@
-* Fixed a bug that could potentially cause a crash.
+* Fixed Net Restocker issues
