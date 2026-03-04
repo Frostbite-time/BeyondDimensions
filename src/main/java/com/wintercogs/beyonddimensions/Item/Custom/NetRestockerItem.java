@@ -57,12 +57,6 @@ public class NetRestockerItem extends BaseMachineItem
     }
 
     @Override
-    public int getStepTick()
-    {
-        return 5;
-    }
-
-    @Override
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
@@ -377,7 +371,7 @@ public class NetRestockerItem extends BaseMachineItem
     }
 
     @Override
-    public int getTicksPerWork()
+    public int getTicksPerWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
         return 10;
     }
