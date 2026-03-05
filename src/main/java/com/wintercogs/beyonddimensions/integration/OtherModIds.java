@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.integration;
 
-public final class IntegrationModIds
+public final class OtherModIds
 {
     public static final String MEKANISM = "mekanism";
     public static final String AE2 = "ae2";
@@ -22,7 +22,7 @@ public final class IntegrationModIds
     public static final String REFINED_TYPES = "refinedtypes";
     public static final String CREATE = "create";
 
-    private IntegrationModIds()
+    private OtherModIds()
     {
     }
 }
