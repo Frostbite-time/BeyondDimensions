@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.integration.curios;
 
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
-public class BD_CuriosPlugin
+public class BDCuriosPlugin
 {
     // 动态附加物品为饰品
     public static void registerCapabilities(final RegisterCapabilitiesEvent evt)
