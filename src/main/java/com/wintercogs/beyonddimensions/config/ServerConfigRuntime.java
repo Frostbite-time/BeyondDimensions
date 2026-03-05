@@ -7,6 +7,6 @@ public final class ServerConfigRuntime
     }
 
 
-    public static long fragmentTransferTime;
-    public static int crystalGenerateTime;
+    public static long fragmentTransferTime = 3600;
+    public static int crystalGenerateTime = 600;
 }
