@@ -7,11 +7,8 @@ public interface IIntegrationModule
 {
     String modId();
 
-    default void onBootstrap(IEventBus modBus, IEventBus gameBus)
-    {
-    }
+    void onBootstrap(IEventBus modBus, IEventBus gameBus);
 
-    default void onCommonSetup(FMLCommonSetupEvent event)
-    {
-    }
+    void onCommonSetup(FMLCommonSetupEvent event);
 }
+

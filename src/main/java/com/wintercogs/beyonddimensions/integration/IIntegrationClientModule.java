@@ -7,11 +7,8 @@ public interface IIntegrationClientModule
 {
     String modId();
 
-    default void onBootstrapClient(IEventBus modBus, IEventBus gameBus)
-    {
-    }
+    void onBootstrapClient(IEventBus modBus, IEventBus gameBus);
 
-    default void onClientSetup(FMLClientSetupEvent event)
-    {
-    }
+    void onClientSetup(FMLClientSetupEvent event);
 }
+
