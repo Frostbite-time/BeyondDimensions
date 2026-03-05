@@ -1,15 +1,9 @@
-package com.wintercogs.beyonddimensions.integration.AE;
+package com.wintercogs.beyonddimensions.integration.ae2;
 
-import appeng.api.stacks.AEFluidKey;
-import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.AEKeyType;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,16 +16,6 @@ public class AEHelper
     public static final Map<ResourceLocation, Function<IStackKey<?>, Optional<AEKey>>> ISTACK_TO_AEKEY_MAP = new HashMap<>();
     public static final Map<AEKeyType, Function<AEKey, Optional<IStackKey<?>>>> AEKEY_TO_STACK_TYPE_MAP = new HashMap<>();
 
-    static
-    {
-        ISTACK_TO_AEKEY_MAP.put(ItemStackKey.ID, stackType -> Optional.ofNullable(AEItemKey.of((ItemStack) stackType.copyStack())));
-        ISTACK_TO_AEKEY_MAP.put(FluidStackKey.ID, stackType -> Optional.ofNullable(AEFluidKey.of((FluidStack) stackType.copyStack())));
-
-        AEKEY_TO_STACK_TYPE_MAP.put(AEKeyType.items(), key -> Optional.of(new ItemStackKey(((AEItemKey) key).toStack(1))));
-        AEKEY_TO_STACK_TYPE_MAP.put(AEKeyType.fluids(), key -> Optional.of(new FluidStackKey(((AEFluidKey) key).toStack(1))));
-    }
-
-
     public static Optional<IStackKey<?>> fromAEKeyToIStack(AEKey key)
     {
         if (AEKEY_TO_STACK_TYPE_MAP.containsKey(key.getType()))
@@ -40,7 +24,6 @@ public class AEHelper
         }
         return Optional.empty();
     }
-
 
     public static Optional<AEKey> fromIStackToAEKey(IStackKey<?> stack)
     {

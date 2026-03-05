@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.appmek;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ChemicalStackKey;
-import com.wintercogs.beyonddimensions.integration.AE.AEHelper;
+import com.wintercogs.beyonddimensions.integration.ae2.AEHelper;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;

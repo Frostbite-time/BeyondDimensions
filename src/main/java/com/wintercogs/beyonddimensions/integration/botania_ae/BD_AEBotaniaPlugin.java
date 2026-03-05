@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.integration.botania_ae;
 import appbot.ae2.ManaKey;
 import appbot.ae2.ManaKeyType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ManaStackKey;
-import com.wintercogs.beyonddimensions.integration.AE.AEHelper;
+import com.wintercogs.beyonddimensions.integration.ae2.AEHelper;
 
 import java.util.Optional;
 

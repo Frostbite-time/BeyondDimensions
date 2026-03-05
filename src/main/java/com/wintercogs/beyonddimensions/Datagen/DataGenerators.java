@@ -3,8 +3,10 @@ package com.wintercogs.beyonddimensions.Datagen;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.Datagen.helpers.DataProviderEntry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -15,14 +17,18 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @EventBusSubscriber(modid = BeyondDimensions.MODID)
 public class DataGenerators
 {
     public static final Logger LOGGER = LogUtils.getLogger();
+    private static final List<DataProviderEntry> additionalProviders = new ArrayList<>();
 
     @SubscribeEvent
     public static void gatherData(GatherDataEvent event)
@@ -49,5 +55,20 @@ public class DataGenerators
         // 生成配方表
         generator.addProvider(event.includeServer(), new ModRecipeProvider(packOutput, lookupProvider));
 
+        // 添加额外provider，如各个集成模块下的数据生成
+        for(DataProviderEntry entry : additionalProviders)
+        {
+            boolean run = entry.condition().test(event);
+            DataProvider provider = entry.factory().apply(event);
+            if(provider != null)
+            {
+                generator.addProvider(run, provider);
+            }
+        }
+    }
+
+    public static void addAdditionalProvider(Predicate<GatherDataEvent> condition, Function<GatherDataEvent, DataProvider> factory)
+    {
+        additionalProviders.add(new DataProviderEntry(condition, factory));
     }
 }

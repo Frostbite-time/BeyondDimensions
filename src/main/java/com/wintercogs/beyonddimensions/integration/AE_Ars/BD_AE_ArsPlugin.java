@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.AE_Ars;
 
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.SourceStackKey;
-import com.wintercogs.beyonddimensions.integration.AE.AEHelper;
+import com.wintercogs.beyonddimensions.integration.ae2.AEHelper;
 import gripe._90.arseng.me.key.SourceKey;
 import gripe._90.arseng.me.key.SourceKeyType;
 

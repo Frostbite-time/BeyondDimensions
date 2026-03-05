@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.AE;
+package com.wintercogs.beyonddimensions.integration.ae2;
 
 import appeng.api.config.Actionable;
 import appeng.api.networking.security.IActionSource;
@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.IStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.DataBase.Storage.UnifiedStorage;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -17,13 +18,10 @@ public class NetStorageCell implements StorageCell
 {
 
     private final UnifiedStorage storage;
-
-    // ---- 缓存快照 ----
     private final KeyCounter snapshot = new KeyCounter();
 
-    // 订阅句柄（弱订阅已可自动清理，但保留以便需要时主动关闭）
-    private AutoCloseable deltaSub = null;
-    private AutoCloseable anySub = null;
+    private @Nullable AutoCloseable deltaSub = null;
+    private @Nullable AutoCloseable anySub = null;
 
     public NetStorageCell(UnifiedStorage storage)
     {
@@ -32,13 +30,8 @@ public class NetStorageCell implements StorageCell
         // 初次全量构建
         fullRebuildSnapshot();
 
-        // 订阅增量（弱订阅，不捕获强引用到 this）
-        this.deltaSub = storage.subscribeDeltaWeak(this, (self, type, size, insert) -> {
-            self.applyDelta(type, size, insert);
-        });
-
-        // 订阅 any（兜底：仅当拿不到明细时，做一次全量重建）
-        this.anySub = storage.subscribeAnyWeak(this, self -> self.fullRebuildSnapshot());
+        this.deltaSub = storage.subscribeDeltaWeak(this, NetStorageCell::applyDelta);
+        this.anySub = storage.subscribeAnyWeak(this, NetStorageCell::fullRebuildSnapshot);
     }
 
     @Override
@@ -56,7 +49,7 @@ public class NetStorageCell implements StorageCell
     @Override
     public boolean canFitInsideCell()
     {
-        return true; // 允许其放入其他存储元件，因为此物品本身极其轻量，仅仅作为一个转接器
+        return true;
     }
 
     @Override
@@ -103,7 +96,7 @@ public class NetStorageCell implements StorageCell
     // ========== 快照维护 ==========
 
     /**
-     * 增量补丁：O(1) 更新 KeyCounter（避免留下 0 项）
+     * 增量补丁：O(1) 更新 KeyCounter
      */
     private void applyDelta(IStackKey<?> type, long size, boolean insert)
     {
@@ -116,12 +109,10 @@ public class NetStorageCell implements StorageCell
 
         if (next > 0)
         {
-            // set 比 add/remove 更直接，且不会留下 0 项
             snapshot.set(key, next);
         }
         else
         {
-            // 删除该键
             snapshot.remove(key);
         }
     }

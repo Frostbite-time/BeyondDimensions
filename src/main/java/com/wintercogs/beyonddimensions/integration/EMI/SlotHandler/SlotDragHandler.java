@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.GUI.BDBaseGUI;
-import com.wintercogs.beyonddimensions.integration.AE.AEHelper;
+import com.wintercogs.beyonddimensions.integration.ae2.AEHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Packet.SetSlotDirectlyPacket;
 import dev.emi.emi.api.EmiDragDropHandler;

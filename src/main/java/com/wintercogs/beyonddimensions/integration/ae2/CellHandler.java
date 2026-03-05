@@ -1,11 +1,11 @@
-package com.wintercogs.beyonddimensions.integration.AE;
+package com.wintercogs.beyonddimensions.integration.ae2;
 
 import appeng.api.storage.cells.ICellHandler;
 import appeng.api.storage.cells.ISaveProvider;
 import appeng.api.storage.cells.StorageCell;
 import com.wintercogs.beyonddimensions.Api.DataBase.DimensionsNet;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
-import com.wintercogs.beyonddimensions.integration.AE.Item.NetAEStorageCell;
+import com.wintercogs.beyonddimensions.integration.ae2.item.NetAEStorageCell;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 

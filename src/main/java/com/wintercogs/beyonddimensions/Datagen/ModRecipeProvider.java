@@ -5,20 +5,24 @@ import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import com.refinedmods.refinedstorage.common.content.Blocks;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
-import com.wintercogs.beyonddimensions.integration.RS.Tags.RSTags;
+import com.wintercogs.beyonddimensions.Datagen.helpers.BaseRecipeProvider;
 import com.wintercogs.beyonddimensions.Item.ModItems;
+import com.wintercogs.beyonddimensions.integration.RS.Tags.RSTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.*;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.conditions.IConditionBuilder;
 import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
+import org.jetbrains.annotations.NotNull;
 import vazkii.botania.common.block.BotaniaBlocks;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModRecipeProvider extends RecipeProvider implements IConditionBuilder
+public class ModRecipeProvider extends BaseRecipeProvider
 {
 
     public ModRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries)
@@ -27,7 +31,13 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput recipeOutput)
+    public @NotNull String getName()
+    {
+        return "Beyond Dimensions Recipes";
+    }
+
+    @Override
+    protected void buildRecipes(@NotNull RecipeOutput recipeOutput)
     {
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.UNSTABLE_SPACE_TIME_FRAGMENT.get())
                 .pattern("ABA")
@@ -257,19 +267,6 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("unlock_xp_exchange_item", has(ModItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
 
-        if (BeyondDimensions.AELoaded)
-        {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.NET_AE_STORAGE_CELL.get())
-                    .pattern("ABA")
-                    .pattern("BDB")
-                    .pattern("CCC")
-                    .define('A', AEBlocks.QUARTZ_GLASS)
-                    .define('B', Items.DIAMOND)
-                    .define('C', ModItems.SPACE_TIME_BAR.get())
-                    .define('D', ModItems.SPACE_TIME_STABLE_FRAME.get())
-                    .unlockedBy("unlock_net_ae_storage_cell", has(ModItems.SPACE_TIME_BAR.get()))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.AE2MODID)));
-        }
 
         if (BeyondDimensions.RS_Loaded)
         {
