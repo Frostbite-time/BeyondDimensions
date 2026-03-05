@@ -8,19 +8,19 @@ public final class CommonConfigRuntime
     {
     }
 
-    public static ButtonState uiSortButton;
-    public static ButtonState uiSecondSortButton;
-    public static ButtonState uiReverseButton;
-    public static ButtonState uiSearchButton;
-    public static ButtonState uiCraftButton;
-    public static ButtonState uiCraftReturnButton;
-    public static int uiPageNum;
-    public static String uiSearch;
-    public static boolean searchTextWithJEIEMI;
-    public static boolean emiAllowNetworkStorageInfo;
+    public static ButtonState uiSortButton = ButtonState.SORT_NAME;
+    public static ButtonState uiSecondSortButton = ButtonState.SORT_INSERTED_TIME;
+    public static ButtonState uiReverseButton = ButtonState.DISABLED;
+    public static ButtonState uiSearchButton = ButtonState.DISABLED;
+    public static ButtonState uiCraftButton = ButtonState.DISABLED;
+    public static ButtonState uiCraftReturnButton = ButtonState.DISABLED;
+    public static int uiPageNum = 5;
+    public static String uiSearch = "";
+    public static boolean searchTextWithJEIEMI = false;
+    public static boolean emiAllowNetworkStorageInfo = false;
 
-    public static boolean interfaceCanReceiveResource;
-    public static boolean interfaceCanOutputResource;
-    public static boolean interfaceCanPopResource;
-    public static int interfaceUsableCapacity;
+    public static boolean interfaceCanReceiveResource = true;
+    public static boolean interfaceCanOutputResource = true;
+    public static boolean interfaceCanPopResource = true;
+    public static int interfaceUsableCapacity = 27;
 }
