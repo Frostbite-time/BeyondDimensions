@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.EventListener;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.integration.Botania.Block.ManaPoolPathwayBlockEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;

@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.Api.DataBase.Stack;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -226,7 +227,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
     {
         return chemical.unwrapKey()
                 .map(k -> k.location().getNamespace())
-                .orElse(BeyondDimensions.MekanismMODID);
+                .orElse(OtherModIds.MEKANISM);
     }
 
     @Override

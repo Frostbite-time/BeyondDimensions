@@ -2,10 +2,10 @@ package com.wintercogs.beyonddimensions.Block;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.Custom.*;
-import com.wintercogs.beyonddimensions.Integration.Ars.Block.SourcePathwayBlock;
-import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathway;
-import com.wintercogs.beyonddimensions.Integration.RS.Block.RSNetPathwayBlock;
-import com.wintercogs.beyonddimensions.Integration.create.blocks.SchematicannonPathWayBlock;
+import com.wintercogs.beyonddimensions.integration.Ars.Block.SourcePathwayBlock;
+import com.wintercogs.beyonddimensions.integration.Botania.Block.ManaPoolPathway;
+import com.wintercogs.beyonddimensions.integration.RS.Block.RSNetPathwayBlock;
+import com.wintercogs.beyonddimensions.integration.create.blocks.SchematicannonPathWayBlock;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;

@@ -2,8 +2,8 @@ package com.wintercogs.beyonddimensions.BlockRender;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
-import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntityRender;
+import com.wintercogs.beyonddimensions.integration.Botania.Block.ManaPoolPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.integration.Botania.Block.ManaPoolPathwayBlockEntityRender;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
