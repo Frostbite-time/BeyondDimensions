@@ -2,8 +2,8 @@ package com.wintercogs.beyonddimensions.datagen;
 
 import com.mojang.math.Quadrant;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Block.Custom.NetFurnaceBlock;
-import com.wintercogs.beyonddimensions.Block.Custom.NetTerminalBlock;
+import com.wintercogs.beyonddimensions.common.block.NetFurnaceBlock;
+import com.wintercogs.beyonddimensions.common.block.NetTerminalBlock;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDItems;

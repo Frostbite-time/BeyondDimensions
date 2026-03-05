@@ -1,28 +1,27 @@
 package com.wintercogs.beyonddimensions;
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.EnergyStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.FluidStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Handler.ItemStackTypedHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EmptyStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.FluidStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
-import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.EnergyHandlerWrapper;
-import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.FluidHandlerWrapper;
-import com.wintercogs.beyonddimensions.Api.DataBase.StackHandlerWrapper.ItemHandlerWrapper;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.EnergyUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.FluidUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.DataBase.Storage.ItemUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.Api.Registry.CapabilityHelper;
-import com.wintercogs.beyonddimensions.Api.Registry.StackHandlerWrapperHelper;
-import com.wintercogs.beyonddimensions.Api.Registry.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetFurnaceBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
-import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
-import com.wintercogs.beyonddimensions.Registry.UIRegister;
+import com.wintercogs.beyonddimensions.api.capability.helper.ordered.EnergyStackTypedHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.ordered.FluidStackTypedHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ItemStackTypedHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.EnergyHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ItemHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.EnergyUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.FluidUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ItemUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
+import com.wintercogs.beyonddimensions.common.block.entity.NetEnergyPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity;
+import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
+import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.integration.curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.common.init.*;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -101,7 +100,7 @@ public class BeyondDimensions
         modEventBus.addListener(NetFurnaceBlockEntity::registerCapability);
 
         // 调用UIRegister的构造函数，从而注册所有UI
-        UIRegister.register(modEventBus);
+        BDMenus.register(modEventBus);
 
         // 注册创造模式菜单
         BDCreativeModeTabs.register(modEventBus);

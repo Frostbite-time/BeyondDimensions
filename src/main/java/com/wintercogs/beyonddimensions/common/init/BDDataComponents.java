@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.mojang.serialization.Codec;
-import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.DataComponents.Custom.ItemStackContents;
-import com.wintercogs.beyonddimensions.Machine.*;
+import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
+import com.wintercogs.beyonddimensions.machine.*;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;

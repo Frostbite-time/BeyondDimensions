@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions;
 
-import com.wintercogs.beyonddimensions.BlockRender.ModBlockRenders;
+import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -20,7 +20,7 @@ public class BeyondDimensionsClient
         modEventBus.register(this);
 
         // 火花BER注册
-        modEventBus.addListener(ModBlockRenders::onRegisterRenderers);
+        modEventBus.addListener(BDBlockRenders::onRegisterRenderers);
     }
 
     @SubscribeEvent

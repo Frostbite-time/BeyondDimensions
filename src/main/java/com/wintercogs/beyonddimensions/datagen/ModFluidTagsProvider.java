@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.FluidTagsProvider;
+import net.neoforged.neoforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -21,7 +22,7 @@ public class ModFluidTagsProvider extends FluidTagsProvider
     protected void addTags(@NotNull HolderLookup.Provider provider)
     {
         // 把源体 + 流动体都塞进 c:experience
-        tag(ModFluidTags.C_EXPERIENCE)
+        tag(Tags.Fluids.EXPERIENCE)
                 .add(BDFluids.XP_FLUID.source().get())
                 .add(BDFluids.XP_FLUID.flowing().get());
     }
