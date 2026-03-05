@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.datagen;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Tags.ModFluidTags;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
