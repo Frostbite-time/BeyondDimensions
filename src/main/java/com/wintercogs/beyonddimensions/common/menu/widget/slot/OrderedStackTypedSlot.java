@@ -31,12 +31,14 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public class OrderedStackTypedSlot extends AbstractStackTypedSlot
 {
-    private KeyAmount lastStack = new KeyAmount(ItemStackKey.EMPTY, 0);
+    private KeyAmount lastStack = new KeyAmount(EmptyStackKey.INSTANCE, 0);
+    private boolean init = false;
 
     public OrderedStackTypedSlot(BDBaseMenu menu, IStackHandler stackTypedHandler, int slotIndex, int xPosition, int yPosition)
     {
@@ -193,8 +195,8 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     // 确保一次取出最大不得超过原版数量
                     int woundChangeNum = BDMath.clampLongToInt(Math.min(clickStack.amount(), clickKey.getVanillaMaxStackSize()));
                     int actualChangeNum = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
-                    ItemStack takenItem = (ItemStack) storage.extract(getSlotIndex(), actualChangeNum, false).toStack();
-                    if (takenItem != null)
+                    KeyAmount extracted = storage.extract(getSlotIndex(), actualChangeNum, false);
+                    if (!extracted.isEmpty() && extracted.toStack() instanceof ItemStack takenItem)
                     {
                         menu.setCarried(takenItem);
                     }
@@ -277,11 +279,11 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                 // 槽位当前物品数量，小于等于其原版最大数量
                                 KeyAmount extract = storage.extract(getSlotIndex(), actualStack.amount(), false);
                                 KeyAmount remaining = storage.insert(getSlotIndex(), new ItemStackKey(carriedItem), carriedItem.getCount(), true);
-                                if (remaining.isEmpty())
+                                if (remaining.isEmpty() && extract.key() instanceof ItemStackKey extractedItemKey)
                                 {
                                     // 全部插入时则完成交换
                                     storage.insert(getSlotIndex(), new ItemStackKey(carriedItem), carriedItem.getCount(), false);
-                                    menu.setCarried((ItemStack) extract.toStack());
+                                    menu.setCarried(extractedItemKey.copyStackWithCount(extract.amount()));
                                 }
                                 else
                                 {
@@ -424,11 +426,16 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     // 物品转移
                     if (key instanceof ItemStackKey trueItemTypedKey)
                     {
-                        ItemStack extract = (ItemStack) safeExtract(trueItemTypedKey, trueStack.amount()).toStack();
-                        ItemStack remaining = slot.safeInsert(extract);
-                        if (!remaining.isEmpty())
-                            safeInsert(new ItemStackKey(remaining), remaining.getCount());
-                        trueStack = new KeyAmount(new ItemStackKey(remaining), remaining.getCount());
+                        KeyAmount extractKA = safeExtract(trueItemTypedKey, trueStack.amount());
+                        if (!extractKA.isEmpty())
+                        {
+                            // 由于trueItemTypedKey属于ItemKey，而extractKA不为空，此处的强转必然安全
+                            // 如果extractKA为空，也任何回退处理
+                            ItemStack remaining = slot.safeInsert((ItemStack) extractKA.toStack());
+                            if (!remaining.isEmpty())
+                                safeInsert(new ItemStackKey(remaining), remaining.getCount());
+                            trueStack = new KeyAmount(new ItemStackKey(remaining), remaining.getCount());
+                        }
                     }
                     // 移动流体并装桶
                     else if (key instanceof FluidStackKey trueFluidTypedKey && trueFluidTypedKey.getSource().getBucket() != Items.AIR)
@@ -491,17 +498,14 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     public void updateChange()
     {
         KeyAmount currentStack = storage.getStackBySlot(this.getSlotIndex());
-        if (currentStack.key() == null)
+        if (!init)
         {
-            lastStack = new KeyAmount(ItemStackKey.EMPTY, 0);
-            PacketDistributor.sendToPlayer((ServerPlayer) menu.player, new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), 0));
+            init = true;
+
+            lastStack = currentStack;
+            PacketDistributor.sendToPlayer((ServerPlayer) menu.player, new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
         }
-        else if (currentStack.isEmpty() && lastStack.isEmpty())
-        {
-        }
-        else if (lastStack.amount() != currentStack.amount()
-                || !lastStack.key().getTypeId().equals(currentStack.key().getTypeId())
-                || !lastStack.key().isSameTypeSameComponents(currentStack.key()))
+        else if (!Objects.equals(currentStack, lastStack))
         {
             lastStack = currentStack;
             PacketDistributor.sendToPlayer((ServerPlayer) menu.player, new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
