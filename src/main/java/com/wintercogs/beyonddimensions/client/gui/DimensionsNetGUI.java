@@ -14,7 +14,7 @@ import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
-import com.wintercogs.beyonddimensions.integration.ModIds;
+import com.wintercogs.beyonddimensions.integration.IntegrationModIds;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.jei.BDJEIPlugin;
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket;
@@ -251,7 +251,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             if (CommonConfigRuntime.searchTextWithJEIEMI)
             {
                 // JEI
-                if (ModPresence.isLoaded(ModIds.JEI))
+                if (ModPresence.isLoaded(IntegrationModIds.JEI))
                 {
                     BDJEIPlugin.runtime().ifPresent(rt -> {
                         var overlay = rt.getIngredientFilter();
@@ -306,7 +306,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         // 每tick从emi或jei同步一次文本
         if (CommonConfigRuntime.searchTextWithJEIEMI)
         {
-            if (ModPresence.isLoaded(ModIds.JEI))
+            if (ModPresence.isLoaded(IntegrationModIds.JEI))
             {
                 BDJEIPlugin.runtime().ifPresent(rt -> {
                     var overlay = rt.getIngredientFilter();

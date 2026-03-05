@@ -2,16 +2,16 @@ package com.wintercogs.beyonddimensions.integration.curios;
 
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
-import com.wintercogs.beyonddimensions.integration.ModIds;
+import com.wintercogs.beyonddimensions.integration.IntegrationModIds;
 import net.neoforged.bus.api.IEventBus;
 
-@BDIntegrationModule(modId = ModIds.CURIOS)
+@BDIntegrationModule(modId = IntegrationModIds.CURIOS)
 public class CuriosIntegrationModule implements IIntegrationModule
 {
     @Override
     public String modId()
     {
-        return ModIds.CURIOS;
+        return IntegrationModIds.CURIOS;
     }
 
     @Override
