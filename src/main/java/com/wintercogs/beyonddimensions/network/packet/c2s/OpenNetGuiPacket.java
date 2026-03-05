@@ -8,7 +8,8 @@ import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
-import com.wintercogs.beyonddimensions.integration.IntegrationMods;
+import com.wintercogs.beyonddimensions.integration.ModIds;
+import com.wintercogs.beyonddimensions.integration.ModPresence;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.Utf8String;
@@ -97,7 +98,7 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
 
                     }
 
-                    if (terminalStack == null && IntegrationMods.CuriosLoaded)
+                    if (terminalStack == null && ModPresence.isLoaded(ModIds.CURIOS))
                     {
 //                        terminalStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
 //                                .flatMap(iCuriosItemHandler ->

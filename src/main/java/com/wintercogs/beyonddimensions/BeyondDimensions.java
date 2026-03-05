@@ -23,7 +23,7 @@ import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity
 import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.init.*;
-import com.wintercogs.beyonddimensions.integration.IntegrationMods;
+import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -48,7 +48,6 @@ public class BeyondDimensions
         NeoForge.EVENT_BUS.register(this);
         Config.register(modContainer);
 
-        modEventBus.addListener(IntegrationMods::constructMod);
         modEventBus.addListener(this::commonSetup);
 
         //为存储网络的接口方块注册物品交互能力
@@ -71,6 +70,9 @@ public class BeyondDimensions
         BDFluids.register(modEventBus);
         // 注册方块实体
         BDBlockEntities.register(modEventBus);
+
+        // 分发集成模块
+        IntegrationManager.bootstrapCommon(modEventBus, NeoForge.EVENT_BUS);
     }
 
 

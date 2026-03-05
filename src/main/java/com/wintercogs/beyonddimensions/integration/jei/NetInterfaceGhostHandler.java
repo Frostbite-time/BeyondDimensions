@@ -12,6 +12,7 @@ import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
 {
 
     @Override
-    public <I> List<Target<I>> getTargetsTyped(BDBaseGUI screen, ITypedIngredient<I> ingredient, boolean doStart)
+    public <I> @NotNull List<Target<I>> getTargetsTyped(BDBaseGUI screen, @NotNull ITypedIngredient<I> ingredient, boolean doStart)
     {
         List<Target<I>> targets = new ArrayList<>();
 
@@ -54,14 +55,14 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
         }
 
         @Override
-        public Rect2i getArea()
+        public @NotNull Rect2i getArea()
         {
             return area;
         }
 
         // 当玩家把物品拖过来时发生的事情
         @Override // I是类似 ItemStack的类
-        public void accept(I ingredient)
+        public void accept(@NotNull I ingredient)
         {
             Object stackKey = ingredient;
             IStackKey<?> dragging = ItemStackKey.EMPTY;

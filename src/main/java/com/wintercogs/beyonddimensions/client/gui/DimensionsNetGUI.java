@@ -14,8 +14,9 @@ import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
-import com.wintercogs.beyonddimensions.integration.IntegrationMods;
-import com.wintercogs.beyonddimensions.integration.jei.BDjeiPlugin;
+import com.wintercogs.beyonddimensions.integration.ModIds;
+import com.wintercogs.beyonddimensions.integration.ModPresence;
+import com.wintercogs.beyonddimensions.integration.jei.BDJEIPlugin;
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.util.UIDataHelper;
 import net.minecraft.client.Minecraft;
@@ -250,9 +251,9 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             if (CommonConfigRuntime.searchTextWithJEIEMI)
             {
                 // JEI
-                if (IntegrationMods.JEILoaded)
+                if (ModPresence.isLoaded(ModIds.JEI))
                 {
-                    BDjeiPlugin.runtime().ifPresent(rt -> {
+                    BDJEIPlugin.runtime().ifPresent(rt -> {
                         var overlay = rt.getIngredientFilter();
                         String current = overlay.getFilterText();
                         if (!Objects.equals(current, text))
@@ -305,9 +306,9 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         // 每tick从emi或jei同步一次文本
         if (CommonConfigRuntime.searchTextWithJEIEMI)
         {
-            if (IntegrationMods.JEILoaded)
+            if (ModPresence.isLoaded(ModIds.JEI))
             {
-                BDjeiPlugin.runtime().ifPresent(rt -> {
+                BDJEIPlugin.runtime().ifPresent(rt -> {
                     var overlay = rt.getIngredientFilter();
                     String current = overlay.getFilterText();
                     if (!Objects.equals(current, lastSearchText))

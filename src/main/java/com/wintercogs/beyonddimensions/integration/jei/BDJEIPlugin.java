@@ -12,16 +12,17 @@ import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
 @JeiPlugin
-public class BDjeiPlugin implements IModPlugin
+public class BDJEIPlugin implements IModPlugin
 {
     public static IJeiRuntime jeiRuntime;
 
     @Override
-    public Identifier getPluginUid()
+    public @NotNull Identifier getPluginUid()
     {
         return BeyondDimensions.makeId("jei_plugin");
     }
@@ -41,19 +42,19 @@ public class BDjeiPlugin implements IModPlugin
     }
 
     @Override
-    public void onRuntimeAvailable(IJeiRuntime jeiRuntime)
+    public void onRuntimeAvailable(@NotNull IJeiRuntime jeiRuntime)
     {
-        BDjeiPlugin.jeiRuntime = jeiRuntime;
+        BDJEIPlugin.jeiRuntime = jeiRuntime;
     }
 
     @Override
     public void onRuntimeUnavailable()
     {
-        BDjeiPlugin.jeiRuntime = null;
+        BDJEIPlugin.jeiRuntime = null;
     }
 
     public static Optional<IJeiRuntime> runtime()
     {
-        return Optional.ofNullable(BDjeiPlugin.jeiRuntime);
+        return Optional.ofNullable(BDJEIPlugin.jeiRuntime);
     }
 }
