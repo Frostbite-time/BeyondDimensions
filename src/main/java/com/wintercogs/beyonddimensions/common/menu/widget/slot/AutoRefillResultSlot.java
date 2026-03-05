@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.common.menu.Slot;
+package com.wintercogs.beyonddimensions.common.menu.widget.slot;
 
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;

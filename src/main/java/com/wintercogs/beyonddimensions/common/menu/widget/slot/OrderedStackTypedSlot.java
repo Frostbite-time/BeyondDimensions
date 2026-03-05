@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.common.menu.Slot;
+package com.wintercogs.beyonddimensions.common.menu.widget.slot;
 
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;

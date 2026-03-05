@@ -5,10 +5,10 @@ import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnordere
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.common.menu.Slot.AbstractStackTypedSlot;
-import com.wintercogs.beyonddimensions.common.menu.Slot.DisorderedSlotGroupSync;
-import com.wintercogs.beyonddimensions.common.menu.Slot.DisorderedStackTypedSlot;
-import com.wintercogs.beyonddimensions.common.menu.Widget.ClientNetStorage;
+import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
+import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
+import com.wintercogs.beyonddimensions.common.menu.widget.ClientNetStorage;
 import com.wintercogs.beyonddimensions.util.TooltipHelper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;

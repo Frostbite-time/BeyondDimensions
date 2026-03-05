@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.common.block.entity.NetHopperBlockEntity;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.machine.*;
-import com.wintercogs.beyonddimensions.common.menu.Slot.FlagStackTypedSlot;
+import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;

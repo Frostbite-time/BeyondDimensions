@@ -7,7 +7,7 @@ import com.wintercogs.beyonddimensions.common.block.entity.NetPumpBlockEntity;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.machine.FilterMode;
 import com.wintercogs.beyonddimensions.machine.RedStoneControlMode;
-import com.wintercogs.beyonddimensions.common.menu.Slot.FlagStackTypedSlot;
+import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;

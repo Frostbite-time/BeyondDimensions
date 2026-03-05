@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.common.menu.Widget;
+package com.wintercogs.beyonddimensions.common.menu.widget;
 
 import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
