@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
-import com.wintercogs.beyonddimensions.machine.BaseMachine;
-import com.wintercogs.beyonddimensions.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.machine.BaseMachine;
+import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;

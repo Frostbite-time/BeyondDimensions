@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.client.gui;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.LeftTabButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
-import com.wintercogs.beyonddimensions.machine.*;
+import com.wintercogs.beyonddimensions.common.machine.*;
 import com.wintercogs.beyonddimensions.common.menu.NetMagnetMenu;
 import com.wintercogs.beyonddimensions.util.GuiRenderHelper;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;

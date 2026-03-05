@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.machine;
+package com.wintercogs.beyonddimensions.common.machine;
 
 // 红石控制模式
 public enum RedStoneControlMode

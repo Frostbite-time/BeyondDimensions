@@ -2,10 +2,10 @@ package com.wintercogs.beyonddimensions.client.gui;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
-import com.wintercogs.beyonddimensions.machine.AutoSortMode;
-import com.wintercogs.beyonddimensions.machine.PopMode;
-import com.wintercogs.beyonddimensions.machine.ReceiveMode;
-import com.wintercogs.beyonddimensions.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
+import com.wintercogs.beyonddimensions.common.machine.PopMode;
+import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
+import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.NetFurnaceMenu;
 import com.wintercogs.beyonddimensions.util.GuiRenderHelper;
 import net.minecraft.client.gui.GuiGraphics;

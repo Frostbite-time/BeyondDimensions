@@ -2,8 +2,8 @@ package com.wintercogs.beyonddimensions.client.gui;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
-import com.wintercogs.beyonddimensions.machine.FilterMode;
-import com.wintercogs.beyonddimensions.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.machine.FilterMode;
+import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.NetPumpMenu;
 import com.wintercogs.beyonddimensions.util.GuiRenderHelper;
 import net.minecraft.client.gui.GuiGraphics;

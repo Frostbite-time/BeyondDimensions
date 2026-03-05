@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.machine;
+package com.wintercogs.beyonddimensions.common.machine;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;

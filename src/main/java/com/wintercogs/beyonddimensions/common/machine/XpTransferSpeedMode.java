@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.machine;
+package com.wintercogs.beyonddimensions.common.machine;
 
 public enum XpTransferSpeedMode
 {
