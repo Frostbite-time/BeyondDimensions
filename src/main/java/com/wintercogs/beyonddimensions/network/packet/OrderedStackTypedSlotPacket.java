@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.network.packet;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -20,7 +20,7 @@ public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackKey<?
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<OrderedStackTypedSlotPacket> TYPE =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(
-                    BeyondDimensions.MODID,
+                    BDConstants.MODID,
                     "ordered_stack_typed_slot")); //path中不要有大写字母 仅数字 小写字母 下划线
 
     // 定义数据包的流编码方式 注册用

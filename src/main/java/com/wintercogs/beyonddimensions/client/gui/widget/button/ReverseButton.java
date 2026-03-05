@@ -6,7 +6,6 @@ import com.wintercogs.beyonddimensions.client.gui.widget.shared.StatusButton;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 
 public class ReverseButton extends StatusButton
 {
@@ -19,8 +18,8 @@ public class ReverseButton extends StatusButton
     @Override
     protected void initButton()
     {
-        iconMap.put(ButtonState.DISABLED, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_asc"));
-        iconMap.put(ButtonState.ENABLED, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_desc"));
+        iconMap.put(ButtonState.DISABLED, BeyondDimensions.makeId("widget/sort_asc"));
+        iconMap.put(ButtonState.ENABLED, BeyondDimensions.makeId("widget/sort_desc"));
 
         tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_asc")));
         tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_desc")));

@@ -53,8 +53,8 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(PopMode.OPEN, Identifier.tryBuild(BeyondDimensions.MODID, "widget/popmode_up"));
-                iconMap.put(PopMode.STOP, Identifier.tryBuild(BeyondDimensions.MODID, "widget/popmode_down"));
+                iconMap.put(PopMode.OPEN, BeyondDimensions.makeId("widget/popmode_up"));
+                iconMap.put(PopMode.STOP, BeyondDimensions.makeId("widget/popmode_down"));
 
                 tooltipMap.put(PopMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
                 tooltipMap.put(PopMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
@@ -80,10 +80,10 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
-                iconMap.put(RedStoneControlMode.POWERED, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_powered"));
-                iconMap.put(RedStoneControlMode.UNPOWERED, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_unpowered"));
+                iconMap.put(RedStoneControlMode.IGNORE, BeyondDimensions.makeId("widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, BeyondDimensions.makeId("widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.POWERED, BeyondDimensions.makeId("widget/control_mode_powered"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, BeyondDimensions.makeId("widget/control_mode_unpowered"));
 
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));

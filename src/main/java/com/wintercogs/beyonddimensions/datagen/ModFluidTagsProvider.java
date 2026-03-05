@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -14,7 +14,7 @@ public class ModFluidTagsProvider extends FluidTagsProvider
 {
     public ModFluidTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider)
     {
-        super(output, provider, BeyondDimensions.MODID);
+        super(output, provider, BDConstants.MODID);
     }
 
     @Override

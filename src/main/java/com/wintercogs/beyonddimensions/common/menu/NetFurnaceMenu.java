@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity;
@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 public class NetFurnaceMenu extends BDBaseMenu
 {
 
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
+    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
     public static final Supplier<MenuType<NetFurnaceMenu>> Net_Furnace_Menu = MENU_TYPES.register("net_furnace_menu", () -> IMenuTypeExtension.create(NetFurnaceMenu::new));
 
 

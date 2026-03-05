@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.init;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.block.entity.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -13,7 +13,7 @@ public class BDBlockEntities
 {
 
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
-            DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, BeyondDimensions.MODID);
+            DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, BDConstants.MODID);
 
     public static final DeferredHolder<BlockEntityType<?>, @NotNull BlockEntityType<@NotNull NetInterfaceBlockEntity>> NET_INTERFACE_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register(

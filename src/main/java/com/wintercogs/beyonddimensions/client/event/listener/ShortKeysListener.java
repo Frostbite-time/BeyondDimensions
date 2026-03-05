@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.event.listener;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ButtonState;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.network.packet.OpenNetGuiPacket;
@@ -16,7 +16,7 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import static com.wintercogs.beyonddimensions.client.init.BDShortKeys.*;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = BDConstants.MODID, value = Dist.CLIENT)
 public class ShortKeysListener
 {
     @SubscribeEvent

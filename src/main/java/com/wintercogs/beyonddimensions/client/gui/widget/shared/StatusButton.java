@@ -22,7 +22,7 @@ public abstract class StatusButton extends IconButton
                            OnPress onPress)
     {
         // 给予一个默认图片用于构造父类
-        super(x, y, width, height, Identifier.tryBuild(BeyondDimensions.MODID, "widget/unkonw_thing"), iconX, iconY, iconWidth, iconHeight, onPress);
+        super(x, y, width, height, BeyondDimensions.makeId("widget/unkonw_thing"), iconX, iconY, iconWidth, iconHeight, onPress);
         initButton();
         setIcon(iconMap.get(currentState));
     }

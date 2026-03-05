@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.client.init;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.*;
 import com.wintercogs.beyonddimensions.common.menu.*;
 import net.neoforged.api.distmarker.Dist;
@@ -8,7 +8,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = BDConstants.MODID, value = Dist.CLIENT)
 public class BDScreens
 {
     @SubscribeEvent

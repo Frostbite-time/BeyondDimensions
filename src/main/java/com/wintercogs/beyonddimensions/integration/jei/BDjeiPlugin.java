@@ -23,7 +23,7 @@ public class BDjeiPlugin implements IModPlugin
     @Override
     public Identifier getPluginUid()
     {
-        return Identifier.tryBuild(BeyondDimensions.MODID, "jei_plugin");
+        return BeyondDimensions.makeId("jei_plugin");
     }
 
     @Override

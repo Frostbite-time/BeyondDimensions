@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 
 public final class FluidStackKey implements IStackKey<FluidStack>
 {
-    public static final Identifier ID = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/fluid");
+    public static final Identifier ID = BeyondDimensions.makeId("stack_type/fluid");
     public static final FluidStackKey EMPTY = new FluidStackKey();
 
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小

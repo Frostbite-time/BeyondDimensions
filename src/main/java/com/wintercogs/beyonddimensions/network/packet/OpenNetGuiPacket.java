@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.network.packet;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.Utf8String;
@@ -14,7 +14,7 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<OpenNetGuiPacket> TYPE =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(
-                    BeyondDimensions.MODID,
+                    BDConstants.MODID,
                     "open_net_gui_packet")); //path中不要有大写字母 仅数字 小写字母 下划线
 
     // 定义数据包的流编码方式 注册用

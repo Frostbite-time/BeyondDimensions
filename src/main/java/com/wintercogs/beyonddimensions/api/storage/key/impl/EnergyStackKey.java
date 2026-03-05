@@ -22,8 +22,7 @@ import java.util.stream.Stream;
 public class EnergyStackKey extends LongStackKey<EnergyType>
 {
 
-    public static final Identifier ID =
-            Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/energy");
+    public static final Identifier ID = BeyondDimensions.makeId("stack_type/energy");
 
     /**
      * 唯一实例（不区分空/非空）

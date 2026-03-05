@@ -13,7 +13,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.player.Player;
@@ -124,7 +123,7 @@ public class DimensionsNet extends SavedData
 
     private static SavedDataType<@NotNull DimensionsNet> savedDataType(String netName)
     {
-        return new SavedDataType<>(Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, netName),
+        return new SavedDataType<>(BeyondDimensions.makeId(netName),
                 DimensionsNet::create, CODEC, DataFixTypes.SAVED_DATA_COMMAND_STORAGE);
     }
 

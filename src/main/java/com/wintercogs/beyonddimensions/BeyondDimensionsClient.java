@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions;
 
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -10,7 +11,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
-@Mod(value = BeyondDimensions.MODID, dist = Dist.CLIENT)
+@Mod(value = BDConstants.MODID, dist = Dist.CLIENT)
 public class BeyondDimensionsClient
 {
 

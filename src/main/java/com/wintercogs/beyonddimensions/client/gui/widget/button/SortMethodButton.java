@@ -6,7 +6,6 @@ import com.wintercogs.beyonddimensions.client.gui.widget.shared.StatusButton;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 
 
 public class SortMethodButton extends StatusButton
@@ -19,11 +18,11 @@ public class SortMethodButton extends StatusButton
     @Override
     protected void initButton()
     {
-        iconMap.put(ButtonState.SORT_QUANTITY, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_quantity"));
-        iconMap.put(ButtonState.SORT_NAME, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_name"));
-        iconMap.put(ButtonState.SORT_MODID, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_modid"));
-        iconMap.put(ButtonState.SORT_INSERTED_TIME, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_inserted_time"));
-        iconMap.put(ButtonState.SORT_MODIFIED_TIME, Identifier.tryBuild(BeyondDimensions.MODID, "widget/sort_modified_time"));
+        iconMap.put(ButtonState.SORT_QUANTITY, BeyondDimensions.makeId("widget/sort_quantity"));
+        iconMap.put(ButtonState.SORT_NAME, BeyondDimensions.makeId("widget/sort_name"));
+        iconMap.put(ButtonState.SORT_MODID, BeyondDimensions.makeId("widget/sort_modid"));
+        iconMap.put(ButtonState.SORT_INSERTED_TIME, BeyondDimensions.makeId("widget/sort_inserted_time"));
+        iconMap.put(ButtonState.SORT_MODIFIED_TIME, BeyondDimensions.makeId("widget/sort_modified_time"));
 
         tooltipMap.put(ButtonState.SORT_QUANTITY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_quantity")));
         tooltipMap.put(ButtonState.SORT_NAME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_name")));

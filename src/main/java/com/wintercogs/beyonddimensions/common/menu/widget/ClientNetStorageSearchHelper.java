@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.common.menu.widget;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.integration.IntegrationMods;
 import com.wintercogs.beyonddimensions.integration.jech.PinInMatches;
 import com.wintercogs.beyonddimensions.util.TinyPinyinUtils;
 import com.wintercogs.beyonddimensions.util.TooltipHelper;
@@ -268,7 +268,7 @@ public class ClientNetStorageSearchHelper
         {
             matchPinyin = false; // 非中文地区默认不匹配
         }
-        else if (BeyondDimensions.JECharactersLoaded)
+        else if (IntegrationMods.JECharactersLoaded)
         {
             matchPinyin = PinInMatches.contains(srcText, inputText);
         }

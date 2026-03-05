@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
@@ -30,7 +30,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     private BlockPos entityPos = null;
 
     // 构建注册用的信息
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
+    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
     public static final Supplier<MenuType<@NotNull DimensionsCraftMenuTerminal>> Dimensions_Craft_Menu_Terminal = MENU_TYPES.register("dimensions_craft_menu_terminal", () -> IMenuTypeExtension.create(DimensionsCraftMenuTerminal::new));
 
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, FriendlyByteBuf data)

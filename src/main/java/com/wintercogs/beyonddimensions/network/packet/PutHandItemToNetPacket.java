@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.network.packet;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -13,7 +13,7 @@ public record PutHandItemToNetPacket(InteractionHand hand) implements CustomPack
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<PutHandItemToNetPacket> TYPE =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(
-                    BeyondDimensions.MODID,
+                    BDConstants.MODID,
                     "put_hand_item_to_net_packet"));
 
     // 定义数据包的流编码方式 注册用

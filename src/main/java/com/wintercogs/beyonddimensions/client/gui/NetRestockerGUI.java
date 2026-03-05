@@ -50,8 +50,8 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FuzzyMode.DISABLE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_allow"));
-                iconMap.put(FuzzyMode.ENABLE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_deny"));
+                iconMap.put(FuzzyMode.DISABLE, BeyondDimensions.makeId("widget/hopper_nbt_mode_allow"));
+                iconMap.put(FuzzyMode.ENABLE, BeyondDimensions.makeId("widget/hopper_nbt_mode_deny"));
 
                 tooltipMap.put(FuzzyMode.DISABLE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.fuzzy_mode_disable")));
                 tooltipMap.put(FuzzyMode.ENABLE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.fuzzy_mode_enable")));
@@ -76,8 +76,8 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(ReceiveMode.STOP, Identifier.tryBuild(BeyondDimensions.MODID, "widget/net_disable"));
-                iconMap.put(ReceiveMode.OPEN, Identifier.tryBuild(BeyondDimensions.MODID, "widget/net_absorb"));
+                iconMap.put(ReceiveMode.STOP, BeyondDimensions.makeId("widget/net_disable"));
+                iconMap.put(ReceiveMode.OPEN, BeyondDimensions.makeId("widget/net_absorb"));
 
                 tooltipMap.put(ReceiveMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.receive_mode_stop")));
                 tooltipMap.put(ReceiveMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.receive_mode_open")));
@@ -102,8 +102,8 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, Identifier.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.IGNORE, BeyondDimensions.makeId("widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, BeyondDimensions.makeId("widget/control_mode_not_working"));
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
                 tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.init;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
@@ -13,11 +13,11 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = BDConstants.MODID, value = Dist.CLIENT)
 public class BDShortKeys
 {
     private static final List<KeyMapping> KEY_MAPPINGS = new ArrayList<>();
-    public static final KeyMapping.Category BDShortCutKeyCategory = new KeyMapping.Category(Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "short_keys"));
+    public static final KeyMapping.Category BDShortCutKeyCategory = new KeyMapping.Category(Identifier.fromNamespaceAndPath(BDConstants.MODID, "short_keys"));
 
     public static final KeyMapping OPEN_GUI_KEY = new KeyMapping(
             "key.beyonddimensions.open_gui", // 键位描述

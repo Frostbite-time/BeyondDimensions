@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 
 public final class ItemStackKey implements IStackKey<ItemStack>
 {
-    public static final Identifier ID = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/item");
+    public static final Identifier ID = BeyondDimensions.makeId("stack_type/item");
     public static final ItemStackKey EMPTY = new ItemStackKey();
 
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小

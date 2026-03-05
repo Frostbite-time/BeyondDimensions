@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.command;
 
 import com.mojang.brigadier.Command;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.util.TooltipHelper;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -10,7 +10,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = BDConstants.MODID, value = Dist.CLIENT)
 public final class ClientCommands
 {
 

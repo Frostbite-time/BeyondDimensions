@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.init;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.item.*;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 public class BDItems
 {
-    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(BeyondDimensions.MODID);
+    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(BDConstants.MODID);
 
     // 维度创造器
     public static final DeferredItem<@NotNull Item> NET_CREATER = registerItem("net_creater", NetCreater::new);

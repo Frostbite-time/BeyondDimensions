@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.init;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.network.ClientPayloadHandler;
 import com.wintercogs.beyonddimensions.network.ServerPayloadHandler;
 import com.wintercogs.beyonddimensions.network.packet.*;
@@ -9,7 +9,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID)
+@EventBusSubscriber(modid = BDConstants.MODID)
 public class BDPackets
 {
 

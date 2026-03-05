@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.datagen;
 
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import java.util.Collections;
 import java.util.List;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID)
+@EventBusSubscriber(modid = BDConstants.MODID)
 public class DataGenerators
 {
     public static final Logger LOGGER = LogUtils.getLogger();

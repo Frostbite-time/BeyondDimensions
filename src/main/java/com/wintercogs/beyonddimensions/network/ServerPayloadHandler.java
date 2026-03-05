@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.network;
 
 import com.mojang.logging.LogUtils;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
@@ -19,6 +18,7 @@ import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.common.menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.integration.IntegrationMods;
 import com.wintercogs.beyonddimensions.network.packet.*;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.core.NonNullList;
@@ -89,7 +89,7 @@ public class ServerPayloadHandler
 
                                 }
 
-                                if (terminalStack == null && BeyondDimensions.CuriosLoaded)
+                                if (terminalStack == null && IntegrationMods.CuriosLoaded)
                                 {
 //                                    terminalStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
 //                                            .flatMap(iCuriosItemHandler ->
@@ -385,7 +385,7 @@ public class ServerPayloadHandler
                         }
                     }
 
-                    if (BeyondDimensions.CuriosLoaded)
+                    if (IntegrationMods.CuriosLoaded)
                     {
 //                        top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
 //                            List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())

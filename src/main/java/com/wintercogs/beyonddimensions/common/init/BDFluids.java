@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.init;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.fluid.XpFluid;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
@@ -32,12 +32,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = BDConstants.MODID, value = Dist.CLIENT)
 public class BDFluids
 {
-    public static final DeferredRegister<FluidType> FLUID_TYPES = DeferredRegister.create(NeoForgeRegistries.FLUID_TYPES, BeyondDimensions.MODID);
+    public static final DeferredRegister<FluidType> FLUID_TYPES = DeferredRegister.create(NeoForgeRegistries.FLUID_TYPES, BDConstants.MODID);
 
-    public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(Registries.FLUID, BeyondDimensions.MODID);
+    public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(Registries.FLUID, BDConstants.MODID);
 
     public static final List<FluidEntry> ALL = new ArrayList<>();
 
@@ -138,8 +138,8 @@ public class BDFluids
     {
         for (var e : BDFluids.ALL)
         {
-            final Identifier still = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "block/" + e.name() + "_still");
-            final Identifier flow = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "block/" + e.name() + "_flow");
+            final Identifier still = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/" + e.name() + "_still");
+            final Identifier flow = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/" + e.name() + "_flow");
             final int tint = e.argbTint();
 
             event.registerFluidType(new IClientFluidTypeExtensions()

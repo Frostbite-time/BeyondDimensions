@@ -21,9 +21,9 @@ public class IconButton extends Button implements GuiElementAccess
     protected final int iconHeight;
 
     protected WidgetSprites backgroundSprites = new WidgetSprites(
-            Identifier.tryBuild(BeyondDimensions.MODID, "widget/slot_button"),
-            Identifier.tryBuild(BeyondDimensions.MODID, "widget/slot_button_disabled"),
-            Identifier.tryBuild(BeyondDimensions.MODID, "widget/slot_button_hovered")
+            BeyondDimensions.makeId("widget/slot_button"),
+            BeyondDimensions.makeId("widget/slot_button_disabled"),
+            BeyondDimensions.makeId("widget/slot_button_hovered")
     );
 
     // 从左到右的含义分别为

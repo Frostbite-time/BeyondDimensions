@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 public class NetHopperMenu extends BDBaseMenu
 {
 
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BeyondDimensions.MODID);
+    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
     public static final Supplier<MenuType<NetHopperMenu>> Net_Hopper_Menu = MENU_TYPES.register("net_hopper_menu", () -> IMenuTypeExtension.create(NetHopperMenu::new));
 
 

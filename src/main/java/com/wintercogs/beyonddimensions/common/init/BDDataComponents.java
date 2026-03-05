@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.mojang.serialization.Codec;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
 import com.wintercogs.beyonddimensions.common.machine.*;
@@ -20,7 +20,7 @@ import java.util.function.UnaryOperator;
 public class BDDataComponents
 {
 
-    public static DeferredRegister<DataComponentType<?>> DATA_COMPONENTS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, BeyondDimensions.MODID);
+    public static DeferredRegister<DataComponentType<?>> DATA_COMPONENTS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, BDConstants.MODID);
 
     // 存储维度id
     public static final DeferredHolder<DataComponentType<?>, @NotNull DataComponentType<Integer>> NET_ID_DATA = register(

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.init;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 public class BDCreativeModeTabs
 {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB =
-            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, BeyondDimensions.MODID);
+            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, BDConstants.MODID);
 
     public static final Supplier<CreativeModeTab> BEYOND_DIMENSIONS_ITEMS_TAB = CREATIVE_MODE_TAB.register(
             "beyond_dimensions_items_tab",
@@ -51,7 +51,7 @@ public class BDCreativeModeTabs
             "beyond_dimensions_blocks_tab",
             () -> CreativeModeTab.builder()
                     .icon(() -> new ItemStack(BDBlocks.NET_CONTROL))
-                    .withTabsBefore(Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "beyond_dimensions_items_tab"))
+                    .withTabsBefore(Identifier.fromNamespaceAndPath(BDConstants.MODID, "beyond_dimensions_items_tab"))
                     .title(Component.translatable("creativetab.beyonddimensions.blocks"))
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(BDBlocks.NET_CONTROL);

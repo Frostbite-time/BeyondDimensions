@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.init;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.block.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -14,7 +14,7 @@ import java.util.function.Function;
 public class BDBlocks
 {
     public static final DeferredRegister.Blocks BLOCKS =
-            DeferredRegister.createBlocks(BeyondDimensions.MODID);
+            DeferredRegister.createBlocks(BDConstants.MODID);
 
     public static final DeferredBlock<@NotNull Block> NET_CONTROL = registerBlock("net_control",
             NetControlBlock::new,

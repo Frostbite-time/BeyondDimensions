@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.datagen;
 
 import com.mojang.math.Quadrant;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.block.NetFurnaceBlock;
 import com.wintercogs.beyonddimensions.common.block.NetTerminalBlock;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
@@ -30,7 +30,7 @@ public class ModModelProvider extends ModelProvider
 
     public ModModelProvider(PackOutput output)
     {
-        super(output, BeyondDimensions.MODID);
+        super(output, BDConstants.MODID);
     }
 
     @Override
@@ -117,14 +117,14 @@ public class ModModelProvider extends ModelProvider
 
     private void customModelBlockWithItem(BlockModelGenerators blockModels, Block block, String modelName)
     {
-        Identifier modelId = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "block/" + modelName);
+        Identifier modelId = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/" + modelName);
         blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(modelId)));
         blockModels.registerSimpleItemModel(block, modelId);
     }
 
     private void customTerminalBlockWithItem(BlockModelGenerators blockModels)
     {
-        Identifier modelId = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "block/net_terminal_block");
+        Identifier modelId = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/net_terminal_block");
         Block block = BDBlocks.NET_TERMINAL_BLOCK.get();
 
         blockModels.blockStateOutput.accept(
@@ -145,8 +145,8 @@ public class ModModelProvider extends ModelProvider
 
     private void customFurnaceBlockWithItem(BlockModelGenerators blockModels)
     {
-        Identifier offModelId = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "block/net_furnace_block");
-        Identifier onModelId = Identifier.fromNamespaceAndPath(BeyondDimensions.MODID, "block/net_furnace_block_on");
+        Identifier offModelId = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/net_furnace_block");
+        Identifier onModelId = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/net_furnace_block_on");
         Block block = BDBlocks.NET_FURNACE_BLOCK.get();
 
         blockModels.blockStateOutput.accept(

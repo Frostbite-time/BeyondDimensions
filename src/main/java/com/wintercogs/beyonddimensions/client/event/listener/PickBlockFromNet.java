@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.client.event.listener;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
 import com.wintercogs.beyonddimensions.network.packet.PickBlockFromNetPacket;
 import com.wintercogs.beyonddimensions.network.packet.PutHandItemToNetPacket;
@@ -18,7 +18,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
-@EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = BDConstants.MODID, value = Dist.CLIENT)
 public class PickBlockFromNet
 {
     @SubscribeEvent

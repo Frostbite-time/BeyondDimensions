@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.network.packet;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetControlAction;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Utf8String;
@@ -18,7 +18,7 @@ public record NetControlActionPacket(UUID receiver, NetControlAction action) imp
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<NetControlActionPacket> TYPE =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(
-                    BeyondDimensions.MODID,
+                    BDConstants.MODID,
                     "net_control_action_packet")); //path中不要有大写字母 仅数字 小写字母 下划线
 
     // 定义数据包的流编码方式 注册用

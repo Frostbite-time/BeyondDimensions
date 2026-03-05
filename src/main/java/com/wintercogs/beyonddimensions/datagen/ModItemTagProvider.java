@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.ItemTagsProvider;
@@ -12,7 +12,7 @@ public class ModItemTagProvider extends ItemTagsProvider
 {
     public ModItemTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
     {
-        super(output, lookupProvider, BeyondDimensions.MODID);
+        super(output, lookupProvider, BDConstants.MODID);
     }
 
     @Override

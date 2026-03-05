@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.network.packet;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,7 +12,7 @@ public record ClickTransferCraftButtonPacket(boolean toStorage) implements Custo
     // 定义数据包的类型 注册用
     public static final CustomPacketPayload.Type<ClickTransferCraftButtonPacket> TYPE =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(
-                    BeyondDimensions.MODID,
+                    BDConstants.MODID,
                     "click_transfer_craft_button_packet")); //path中不要有大写字母 仅数字 小写字母 下划线
 
     // 定义数据包的流编码方式 注册用
