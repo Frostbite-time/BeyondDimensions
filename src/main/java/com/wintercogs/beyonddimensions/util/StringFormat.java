@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.util;
 
 public class StringFormat
 {
-    // 扩展单位到 E (Exa, 10^18)
+
     private static final String[] UNITS = {"", "k", "M", "G", "T", "P", "E"};
     private static final long[] THRESHOLDS = {
             1_000L,          // k (10^3)

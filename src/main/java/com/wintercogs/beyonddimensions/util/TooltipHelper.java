@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.util;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;

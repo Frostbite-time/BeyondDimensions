@@ -1,20 +1,20 @@
 package com.wintercogs.beyonddimensions.common.menu.widget.slot;
 
-import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
-import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;
-import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BucketItem;

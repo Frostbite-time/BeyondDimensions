@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.mojang.serialization.Codec;
-import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import net.minecraft.core.component.DataComponentType;

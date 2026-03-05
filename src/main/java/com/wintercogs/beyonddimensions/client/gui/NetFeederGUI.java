@@ -2,11 +2,11 @@ package com.wintercogs.beyonddimensions.client.gui;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.FeederMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.NetFeederMenu;
 import com.wintercogs.beyonddimensions.util.GuiRenderHelper;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;

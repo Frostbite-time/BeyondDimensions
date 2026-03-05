@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.util;
 
-// 记录一些十分常用的数学方法
+/**
+ * 记录一些十分常用的数学方法
+ */
 public class BDMath
 {
     public static int clampLongToInt(long value)

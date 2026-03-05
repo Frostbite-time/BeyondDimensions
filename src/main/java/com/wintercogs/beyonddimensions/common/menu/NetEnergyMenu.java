@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
-import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
-import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
+import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.common.block.entity.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;

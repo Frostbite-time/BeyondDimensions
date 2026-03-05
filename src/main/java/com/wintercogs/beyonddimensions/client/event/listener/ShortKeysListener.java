@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.client.event.listener;
 
-import com.wintercogs.beyonddimensions.api.ButtonState;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
+import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.network.packet.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.network.packet.ToggleMagnetPacket;
 import net.minecraft.client.Minecraft;

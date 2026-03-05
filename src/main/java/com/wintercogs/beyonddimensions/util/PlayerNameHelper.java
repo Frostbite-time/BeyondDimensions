@@ -9,20 +9,23 @@ import java.util.UUID;
 
 public class PlayerNameHelper
 {
-    // 在线/离线玩家均可查询（优先返回缓存名称）
+    public static final String UNKNOWN_PLAYER = "Unknown";
+
+    /**
+     * 从uuid查询玩家名
+     */
     public static String getPlayerNameByUUID(UUID uuid, MinecraftServer infoProvider)
     {
 
-        MinecraftServer server = infoProvider;
-        // 1. 优先检查在线玩家（即时获取）
-        ServerPlayer onlinePlayer = server.getPlayerList().getPlayer(uuid);
+        // 优先检查在线玩家
+        ServerPlayer onlinePlayer = infoProvider.getPlayerList().getPlayer(uuid);
         if (onlinePlayer != null)
         {
             return onlinePlayer.getGameProfile().name();
         }
 
-        // 2. 若不在线，查询服务端的 profile resolver 缓存
-        var services = server.services();
+        // 若不在线，查询服务端的 profile resolver 缓存
+        var services = infoProvider.services();
         Optional<GameProfile> profileInfo = services.profileResolver().fetchById(uuid);
         if (profileInfo.isPresent())
         {
@@ -30,7 +33,7 @@ public class PlayerNameHelper
             return profile.name();
         }
 
-        // 3. 若缓存无记录，返回 null 或特定占位符（可扩展 Mojang API 异步查询）
-        return "Unknown";
+        // 无记录，返回未知名称
+        return UNKNOWN_PLAYER;
     }
 }

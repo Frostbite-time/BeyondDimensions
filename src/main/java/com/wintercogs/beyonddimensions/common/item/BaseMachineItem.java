@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.common.item;
 
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.BaseMachine;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;

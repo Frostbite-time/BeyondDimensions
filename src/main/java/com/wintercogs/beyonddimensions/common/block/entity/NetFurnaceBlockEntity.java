@@ -1,23 +1,23 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
 import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ItemStackTypedHandler;
-import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.block.NetFurnaceBlock;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.common.menu.NetFurnaceMenu;
-import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
-import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;

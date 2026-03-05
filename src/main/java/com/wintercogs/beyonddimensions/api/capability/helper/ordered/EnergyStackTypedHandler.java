@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.api.capability.helper.ordered;
 
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.neoforged.neoforge.transfer.TransferPreconditions;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;

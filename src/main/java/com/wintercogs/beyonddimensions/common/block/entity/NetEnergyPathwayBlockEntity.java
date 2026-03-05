@@ -1,12 +1,12 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.EnergyUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.EnergyUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.util.BDMath;
-import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;

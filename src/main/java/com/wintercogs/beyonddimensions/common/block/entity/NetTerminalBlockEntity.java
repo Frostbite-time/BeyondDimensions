@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;

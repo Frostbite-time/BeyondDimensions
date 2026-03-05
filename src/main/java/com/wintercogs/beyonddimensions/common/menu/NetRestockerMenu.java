@@ -1,15 +1,15 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;

@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 public class IngredientRenderer
 {
     private static final int TEXTURE_SIZE = 16;
-    private static final int MIN_FLUID_HEIGHT = 1; // ensure tiny amounts of fluid are still visible
 
     public static void drawTiledSprite(GuiGraphics guiGraphics, final int tiledWidth, final int tiledHeight, int color, long scaledAmount, TextureAtlasSprite sprite, int posX, int posY)
     {

@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.common.block.entity.NetHopperBlockEntity;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
+import com.wintercogs.beyonddimensions.common.block.entity.NetHopperBlockEntity;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import net.minecraft.core.registries.Registries;

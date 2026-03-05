@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.network.packet;
 
-import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

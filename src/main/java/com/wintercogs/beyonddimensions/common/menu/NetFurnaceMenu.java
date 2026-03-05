@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;

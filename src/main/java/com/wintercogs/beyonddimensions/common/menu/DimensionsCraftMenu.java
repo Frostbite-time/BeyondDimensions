@@ -1,17 +1,17 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ButtonState;
-import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
+import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
+import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.util.InventoryHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;

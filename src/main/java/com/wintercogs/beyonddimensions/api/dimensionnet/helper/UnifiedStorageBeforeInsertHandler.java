@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.api.dimensionnet.helper;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

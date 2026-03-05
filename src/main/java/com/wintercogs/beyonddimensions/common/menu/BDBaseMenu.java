@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
 import com.google.common.base.Suppliers;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.SlotGroupSync;

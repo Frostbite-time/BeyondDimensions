@@ -18,6 +18,9 @@ public final class RegistryAccessResolver
     private static final HolderLookup.Provider BUILTIN =
             RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
+    /**
+     * 获取一个理论上适配当前环境的注册表信息
+     */
     public static @NotNull HolderLookup.Provider resolve()
     {
         // 1) 若当前在服务端逻辑线程（专服或集成服）

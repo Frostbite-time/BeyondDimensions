@@ -2,8 +2,8 @@ package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;

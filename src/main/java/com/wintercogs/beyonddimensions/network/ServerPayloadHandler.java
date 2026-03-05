@@ -1,15 +1,16 @@
 package com.wintercogs.beyonddimensions.network;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
+import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
+import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
 import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
@@ -20,7 +21,6 @@ import com.wintercogs.beyonddimensions.common.menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.network.packet.*;
 import com.wintercogs.beyonddimensions.util.BDMath;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;

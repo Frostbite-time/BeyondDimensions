@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetControlAction;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PlayerPermissionInfo;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.network.packet.PlayerPermissionInfoPacket;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;

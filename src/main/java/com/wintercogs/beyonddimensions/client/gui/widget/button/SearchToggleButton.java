@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.client.gui.widget.button;
 
-import com.wintercogs.beyonddimensions.api.ButtonState;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.StatusButton;
+import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;

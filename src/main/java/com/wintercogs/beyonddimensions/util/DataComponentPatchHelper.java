@@ -42,7 +42,6 @@ public class DataComponentPatchHelper
         ByteBuf buf = Unpooled.buffer(16);
         try
         {
-            // 写入一个空 CompoundTag（与网络 NBT 写法一致，稳定且无压缩时间戳等不确定因素）
             FriendlyByteBuf.writeNbt(buf, new CompoundTag());
             byte[] out = new byte[buf.readableBytes()];
             buf.readBytes(out);
@@ -50,7 +49,6 @@ public class DataComponentPatchHelper
         }
         finally
         {
-            // 显式释放，避免潜在的 ByteBuf 泄漏警告
             buf.release();
         }
     }
@@ -67,7 +65,7 @@ public class DataComponentPatchHelper
     {
         if (patch == null || patch.isEmpty())
         {
-            return EMPTY_BYTES; // 真·空补丁：稳定字节（非空）
+            return EMPTY_BYTES;
         }
 
         // 1) patch -> NBT（RegistryOps<Tag>）
@@ -76,7 +74,7 @@ public class DataComponentPatchHelper
                 patch
         ).result().orElse(null);
 
-        // Provider 未就绪或编码失败：返回“不可用哨兵”（长度==0）
+        // Provider 未就绪或编码失败：返回“不可用哨兵”
         if (root == null)
         {
             return UNAVAILABLE_BYTES;
@@ -85,7 +83,7 @@ public class DataComponentPatchHelper
         // 2) 递归规范化
         Tag canon = canonicalize(root);
 
-        // 3) 写成“网络 NBT”字节（非压缩），并显式释放 ByteBuf
+        // 3) 写成“网络 NBT”字节，并显式释放 ByteBuf
         ByteBuf raw = null;
         try
         {
@@ -155,7 +153,6 @@ public class DataComponentPatchHelper
         if (t instanceof CompoundTag ct) return Math.max(1, ct.size() * 4);
         if (t instanceof ListTag lt) return Math.max(1, lt.size() * 4);
         return 4;
-        // 经验：多数补丁很小，这个估计已足够避免频繁扩容
     }
 }
 

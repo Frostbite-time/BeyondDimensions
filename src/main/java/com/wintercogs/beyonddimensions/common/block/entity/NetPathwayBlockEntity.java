@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
-import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
+import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.util.CapCtx;
 import com.wintercogs.beyonddimensions.api.util.USHandler;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;

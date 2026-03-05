@@ -6,18 +6,17 @@ import net.minecraft.world.item.ItemStack;
 
 public class ItemStackHelper
 {
-    // 此物品堆的组件被修改过
+    /**
+     * 检查此堆叠的组件是否被修改过，即是否有除了默认组件之外的数据
+     */
     public static boolean hasExtraComponents(ItemStack stack)
     {
         DataComponentMap comps = stack.getComponents();
 
-        // 检查补丁是否为空
         if (comps instanceof PatchedDataComponentMap patched)
         {
-            return !patched.isPatchEmpty();   // 组件被修改
+            return !patched.isPatchEmpty();
         }
-
-        // 无补丁
         return false;
     }
 }

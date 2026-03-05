@@ -22,7 +22,7 @@ public class InventoryHelper
                 {
                     slotStack.grow(transferable);
                     stack.shrink(transferable);
-                    inventory.setItem(i, slotStack); // 更新槽位
+                    inventory.setItem(i, slotStack);
                 }
             }
         }

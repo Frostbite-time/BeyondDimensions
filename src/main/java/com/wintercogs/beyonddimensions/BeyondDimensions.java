@@ -1,28 +1,28 @@
 package com.wintercogs.beyonddimensions;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.ordered.EnergyStackTypedHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.ordered.FluidStackTypedHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ItemStackTypedHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.EnergyUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.FluidUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ItemUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.EnergyHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ItemHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.EnergyHandlerWrapper;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ItemHandlerWrapper;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.EnergyUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.FluidUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ItemUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
-import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.common.block.entity.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.integration.curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.common.init.*;
+import com.wintercogs.beyonddimensions.integration.curios.BD_CuriosPlugin;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -32,7 +32,6 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
 
@@ -82,45 +81,35 @@ public class BeyondDimensions
     public static boolean Create_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    // mod 类的构造函数是加载 mod 时运行的第一个代码。
-    // FML 将识别一些参数类型，如 IEventBus 或 ModContainer 并自动传入它们。
     public BeyondDimensions(IEventBus modEventBus, ModContainer modContainer)
     {
         MOD_EVENT_BUS = modEventBus;
-        NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
+        NeoForge.EVENT_BUS.register(this);
         Config.register(modContainer);
 
         modEventBus.addListener(this::constructMod);
         modEventBus.addListener(this::commonSetup);
-        //为存储网络的接口方块注册物品交互能力
 
+        //为存储网络的接口方块注册物品交互能力
         modEventBus.addListener(NetInterfaceBlockEntity::registerCapability);
         modEventBus.addListener(NetPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetEnergyPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetFurnaceBlockEntity::registerCapability);
 
-        // 调用UIRegister的构造函数，从而注册所有UI
+        // 注册菜单
         BDMenus.register(modEventBus);
-
         // 注册创造模式菜单
         BDCreativeModeTabs.register(modEventBus);
-
         // 注册物品组件
         BDDataComponents.register(modEventBus);
-
         // 注册物品
         BDItems.register(modEventBus);
-
         // 注册方块
         BDBlocks.register(modEventBus);
-
         // 注册流体
         BDFluids.register(modEventBus);
-
         // 注册方块实体
         BDBlockEntities.register(modEventBus);
-
-
     }
 
     // 在此阶段检测模组列表
@@ -245,9 +234,4 @@ public class BeyondDimensions
         LOGGER.info("维度网络初始化完成(服务端)");
     }
 
-    @SubscribeEvent
-    public void onServerStared(ServerStartedEvent event)
-    {
-        //GameTester.OnSeverStartTester(event.getServer());
-    }
 }

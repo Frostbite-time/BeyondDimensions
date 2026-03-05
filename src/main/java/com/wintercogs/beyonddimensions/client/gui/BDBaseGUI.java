@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.network.packet.BatchTransferPacket;

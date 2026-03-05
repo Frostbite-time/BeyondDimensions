@@ -145,30 +145,24 @@ public class GuiRenderHelper
             int originalWidth, int originalHeight)
     {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
-                x, y,                     // 目标起点
-                0F, 0F,                   // 纹理起点 (u,v)
-                width, height,            // 目标尺寸
-                originalWidth, originalHeight,               // 采样整张纹理
-                originalWidth, originalHeight);              // 纹理原尺寸（用于 UV 归一化）
+                x, y,
+                0F, 0F,
+                width, height,
+                originalWidth, originalHeight,
+                originalWidth, originalHeight);
     }
 
     public static void drawRightAnchoredText(GuiGraphics guiGraphics,
                                              Font font,
-                                             Component text,      // 要绘的文字
-                                             int xRight,          // 想让文字右边对齐到的 x 坐标
-                                             int y,               // y 坐标
+                                             Component text,
+                                             int xRight,
+                                             int y,
                                              int color,
                                              boolean dropShadow)
-    {         // 颜色 0xAARRGGBB
-        // 1. 计算文字宽度
+    {
         int width = font.width(text);
-
-        // 2. 计算左上角起点
         int xStart = xRight - width;
-
-        // 3. 绘制
         guiGraphics.drawString(font, text, xStart, y, color, dropShadow);
     }
-
 
 }

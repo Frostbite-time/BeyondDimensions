@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.common.item;
 
-import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
+import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;

@@ -1,11 +1,11 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
-import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
