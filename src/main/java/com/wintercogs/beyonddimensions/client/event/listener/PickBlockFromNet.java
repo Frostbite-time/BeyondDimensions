@@ -2,8 +2,8 @@ package com.wintercogs.beyonddimensions.client.event.listener;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
-import com.wintercogs.beyonddimensions.network.packet.PickBlockFromNetPacket;
-import com.wintercogs.beyonddimensions.network.packet.PutHandItemToNetPacket;
+import com.wintercogs.beyonddimensions.network.packet.c2s.PickBlockFromNetPacket;
+import com.wintercogs.beyonddimensions.network.packet.c2s.PutHandItemToNetPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;

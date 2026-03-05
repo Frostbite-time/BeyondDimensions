@@ -7,7 +7,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.SlotGroupSync;
-import com.wintercogs.beyonddimensions.network.packet.QuickDataTagPacket;
+import com.wintercogs.beyonddimensions.network.packet.both.QuickDataTagPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;

@@ -1,9 +1,12 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.network.ClientPayloadHandler;
-import com.wintercogs.beyonddimensions.network.ServerPayloadHandler;
-import com.wintercogs.beyonddimensions.network.packet.*;
+import com.wintercogs.beyonddimensions.network.packet.both.QuickDataTagPacket;
+import com.wintercogs.beyonddimensions.network.packet.both.SetSlotDirectlyPacket;
+import com.wintercogs.beyonddimensions.network.packet.c2s.*;
+import com.wintercogs.beyonddimensions.network.packet.s2c.DisorderedSlotGroupSyncPacket;
+import com.wintercogs.beyonddimensions.network.packet.s2c.OrderedStackTypedSlotPacket;
+import com.wintercogs.beyonddimensions.network.packet.s2c.PlayerPermissionInfoPacket;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -19,106 +22,102 @@ public class BDPackets
         //设置当前网络版本
         final PayloadRegistrar registrar = event.registrar("1");
 
-        // 注册OpenNetGuiPacket 用于打开当前角色绑定的维度网络GUI
         registrar.playBidirectional(
                 OpenNetGuiPacket.TYPE,
                 OpenNetGuiPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handleOpenNetGuiPacket,
-                ClientPayloadHandler.getInstance()::handleOpenNetGuiPacket
+                OpenNetGuiPacket::handle,
+                OpenNetGuiPacket::handle
         );
 
-        // 注册 CallSeverClickPacket 用于同步滑动条状态
         registrar.playBidirectional(
                 CallSeverClickPacket.TYPE,
                 CallSeverClickPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handleCallSeverClickPacket,
-                ClientPayloadHandler.getInstance()::handleCallSeverClickPacket
+                CallSeverClickPacket::handle,
+                CallSeverClickPacket::handle
         );
 
-        // 注册 CallSeverClickPacket 用于同步滑动条状态
         registrar.playBidirectional(
                 PlayerPermissionInfoPacket.TYPE,
                 PlayerPermissionInfoPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handlePlayerPermissionInfoPacket,
-                ClientPayloadHandler.getInstance()::handlePlayerPermissionInfoPacket
+                PlayerPermissionInfoPacket::handle,
+                PlayerPermissionInfoPacket::handle
         );
 
-        // 注册 CallSeverClickPacket 用于同步滑动条状态
         registrar.playBidirectional(
                 NetControlActionPacket.TYPE,
                 NetControlActionPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handleNetControlActionPacket,
-                ClientPayloadHandler.getInstance()::handleNetControlActionPacket
+                NetControlActionPacket::handle,
+                NetControlActionPacket::handle
         );
 
         registrar.playBidirectional(
                 RecipeFillC2SPacket.TYPE,
                 RecipeFillC2SPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handleRecipeFillC2SPacket,
-                ClientPayloadHandler.getInstance()::handleRecipeFillC2SPacket
+                RecipeFillC2SPacket::handle,
+                RecipeFillC2SPacket::handle
         );
 
         registrar.playBidirectional(
                 ClickTransferCraftButtonPacket.TYPE,
                 ClickTransferCraftButtonPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handleClickTransferCraftButtonPacket,
-                ClientPayloadHandler.getInstance()::handleClickTransferCraftButtonPacket
+                ClickTransferCraftButtonPacket::handle,
+                ClickTransferCraftButtonPacket::handle
         );
 
         registrar.playBidirectional(
                 BatchTransferPacket.TYPE,
                 BatchTransferPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handleBatchTransferPacket,
-                ClientPayloadHandler.getInstance()::handleBatchTransferPacket
+                BatchTransferPacket::handle,
+                BatchTransferPacket::handle
         );
 
         registrar.playBidirectional(
                 PickBlockFromNetPacket.TYPE,
                 PickBlockFromNetPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handlePickBlockFromNetPacket,
-                ClientPayloadHandler.getInstance()::handlePickBlockFromNetPacket
+                PickBlockFromNetPacket::handle,
+                PickBlockFromNetPacket::handle
         );
 
         registrar.playBidirectional(
                 PutHandItemToNetPacket.TYPE,
                 PutHandItemToNetPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handlePutHandItemToNetPacket,
-                ClientPayloadHandler.getInstance()::handlePutHandItemToNetPacket
+                PutHandItemToNetPacket::handle,
+                PutHandItemToNetPacket::handle
         );
 
         registrar.playBidirectional(
                 OrderedStackTypedSlotPacket.TYPE,
                 OrderedStackTypedSlotPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handleOrderedStackTypedSlotPacket,
-                ClientPayloadHandler.getInstance()::handleOrderedStackTypedSlotPacket
+                OrderedStackTypedSlotPacket::handle,
+                OrderedStackTypedSlotPacket::handle
         );
 
         registrar.playBidirectional(
                 SetSlotDirectlyPacket.TYPE,
                 SetSlotDirectlyPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handleSetSlotDirectlyPacket,
-                ClientPayloadHandler.getInstance()::handleSetSlotDirectlyPacket
+                SetSlotDirectlyPacket::handle,
+                SetSlotDirectlyPacket::handle
         );
 
         registrar.playBidirectional(
                 DisorderedSlotGroupSyncPacket.TYPE,
                 DisorderedSlotGroupSyncPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handleDisorderedSlotGroupSyncPacket,
-                ClientPayloadHandler.getInstance()::handleDisorderedSlotGroupSyncPacket
+                DisorderedSlotGroupSyncPacket::handle,
+                DisorderedSlotGroupSyncPacket::handle
         );
 
         registrar.playBidirectional(
                 QuickDataTagPacket.TYPE,
                 QuickDataTagPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handleQuickDataTagPacket,
-                ClientPayloadHandler.getInstance()::handleQuickDataTagPacket
+                QuickDataTagPacket::handle,
+                QuickDataTagPacket::handle
         );
 
         registrar.playBidirectional(
                 ToggleMagnetPacket.TYPE,
                 ToggleMagnetPacket.STREAM_CODEC,
-                ServerPayloadHandler.getInstance()::handleToggleMagnetPacket,
-                ClientPayloadHandler.getInstance()::handleToggleMagnetPacket
+                ToggleMagnetPacket::handle,
+                ToggleMagnetPacket::handle
         );
     }
 }

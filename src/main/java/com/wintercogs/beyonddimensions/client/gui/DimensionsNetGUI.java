@@ -16,7 +16,7 @@ import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.integration.IntegrationMods;
 import com.wintercogs.beyonddimensions.integration.jei.BDjeiPlugin;
-import com.wintercogs.beyonddimensions.network.packet.OpenNetGuiPacket;
+import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.util.UIDataHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

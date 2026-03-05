@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnordere
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
-import com.wintercogs.beyonddimensions.network.packet.DisorderedSlotGroupSyncPacket;
+import com.wintercogs.beyonddimensions.network.packet.s2c.DisorderedSlotGroupSyncPacket;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;

@@ -5,7 +5,7 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.client.gui.widget.button.PermissionInfoButton;
 import com.wintercogs.beyonddimensions.common.menu.NetControlMenu;
-import com.wintercogs.beyonddimensions.network.packet.NetControlActionPacket;
+import com.wintercogs.beyonddimensions.network.packet.c2s.NetControlActionPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.RenderPipelines;

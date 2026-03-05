@@ -1,12 +1,16 @@
-package com.wintercogs.beyonddimensions.network.packet;
+package com.wintercogs.beyonddimensions.network.packet.s2c;
 
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
+import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 // 用于在任何种类的有序Slot中用于网络传输
 // slotId表示其在Menu的Slots列表中的索引，用于确定Slot本身
@@ -17,13 +21,9 @@ import net.minecraft.resources.Identifier;
 public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackKey<?> stack,
                                           long newAmount) implements CustomPacketPayload
 {
-    // 定义数据包的类型 注册用
-    public static final CustomPacketPayload.Type<OrderedStackTypedSlotPacket> TYPE =
-            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(
-                    BDConstants.MODID,
-                    "ordered_stack_typed_slot")); //path中不要有大写字母 仅数字 小写字母 下划线
+    public static final Type<OrderedStackTypedSlotPacket> TYPE =
+            new Type<>(BeyondDimensions.makeId("ordered_stack_typed_slot"));
 
-    // 定义数据包的流编码方式 注册用
     public static final StreamCodec<RegistryFriendlyByteBuf, OrderedStackTypedSlotPacket> STREAM_CODEC =
             StreamCodec.composite(
                     ByteBufCodecs.VAR_INT,
@@ -37,7 +37,40 @@ public record OrderedStackTypedSlotPacket(int slotId, int slotIndex, IStackKey<?
                     OrderedStackTypedSlotPacket::new
             );
 
-    @Override //重写type方法，用于返回当前的TYPE
+    private void handleInClient(final IPayloadContext context)
+    {
+        Player player = context.player();
+        if (player.containerMenu instanceof AbstractContainerMenu menu)
+        {
+            if (menu.slots.get(this.slotId()) instanceof AbstractStackTypedSlot slot)
+            {
+                slot.loadChange(this.slotIndex(), this.stack(), this.newAmount());
+            }
+        }
+    }
+
+    private void handleInServer(final IPayloadContext context)
+    {
+
+    }
+
+    public static void handle(final OrderedStackTypedSlotPacket packet, final IPayloadContext context)
+    {
+        if (packet != null)
+        {
+            PacketFlow direction = context.flow();
+            if (direction == PacketFlow.CLIENTBOUND)
+            {
+                context.enqueueWork(() -> packet.handleInClient(context));
+            }
+            else if (direction == PacketFlow.SERVERBOUND)
+            {
+                context.enqueueWork(() -> packet.handleInServer(context));
+            }
+        }
+    }
+
+    @Override
     public Type<? extends CustomPacketPayload> type()
     {
         return TYPE;

@@ -14,7 +14,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
-import com.wintercogs.beyonddimensions.network.packet.OrderedStackTypedSlotPacket;
+import com.wintercogs.beyonddimensions.network.packet.s2c.OrderedStackTypedSlotPacket;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;
 import net.minecraft.server.level.ServerPlayer;

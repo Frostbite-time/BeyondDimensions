@@ -7,7 +7,7 @@ import com.wintercogs.beyonddimensions.client.gui.widget.shared.IconButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.StatusButton;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
-import com.wintercogs.beyonddimensions.network.packet.ClickTransferCraftButtonPacket;
+import com.wintercogs.beyonddimensions.network.packet.c2s.ClickTransferCraftButtonPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.renderer.RenderPipelines;
