@@ -1,0 +1,43 @@
+package com.wintercogs.beyonddimensions.integration.module.ae2;
+
+import appeng.api.stacks.AEKey;
+import appeng.api.stacks.AEKeyType;
+import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+
+public class AEHelper
+{
+    // 类型转换函数 在任何时间点注册都可
+    public static final Map<ResourceLocation, Function<IStackKey<?>, Optional<AEKey>>> ISTACK_TO_AEKEY_MAP = new HashMap<>();
+    public static final Map<AEKeyType, Function<AEKey, Optional<IStackKey<?>>>> AEKEY_TO_STACK_TYPE_MAP = new HashMap<>();
+
+    static
+    {
+
+    }
+
+
+    public static Optional<IStackKey<?>> fromAEKeyToIStack(AEKey key)
+    {
+        if (AEKEY_TO_STACK_TYPE_MAP.containsKey(key.getType()))
+        {
+            return AEKEY_TO_STACK_TYPE_MAP.get(key.getType()).apply(key);
+        }
+        return Optional.empty();
+    }
+
+
+    public static Optional<AEKey> fromIStackToAEKey(IStackKey<?> stack)
+    {
+        if (ISTACK_TO_AEKEY_MAP.containsKey(stack.getTypeId()))
+        {
+            return ISTACK_TO_AEKEY_MAP.get(stack.getTypeId()).apply(stack);
+        }
+        return Optional.empty();
+    }
+}

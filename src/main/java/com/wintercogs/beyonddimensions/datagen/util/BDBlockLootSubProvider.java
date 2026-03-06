@@ -1,0 +1,14 @@
+package com.wintercogs.beyonddimensions.datagen.util;
+
+import net.minecraft.data.loot.BlockLootSubProvider;
+import net.minecraft.world.flag.FeatureFlags;
+
+import java.util.Set;
+
+public abstract class BDBlockLootSubProvider extends BlockLootSubProvider
+{
+    public BDBlockLootSubProvider()
+    {
+        super(Set.of(), FeatureFlags.REGISTRY.allFlags());
+    }
+}

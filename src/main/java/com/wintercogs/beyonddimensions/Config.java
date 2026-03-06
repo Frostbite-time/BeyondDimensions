@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions;
 
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
-import com.wintercogs.beyonddimensions.Api.config.ServerConfigRuntime;
+import com.wintercogs.beyonddimensions.api.ButtonState;
+import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
+import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
