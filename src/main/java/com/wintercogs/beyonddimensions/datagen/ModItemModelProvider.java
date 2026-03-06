@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDItemModelProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.NotNull;
 
 public class ModItemModelProvider extends BDItemModelProvider
 {
@@ -12,6 +13,12 @@ public class ModItemModelProvider extends BDItemModelProvider
     public ModItemModelProvider(PackOutput output, ExistingFileHelper existingFileHelper)
     {
         super(output, existingFileHelper);
+    }
+
+    @Override
+    public @NotNull String getName()
+    {
+        return "BeyondDimensions ItemModel Provider";
     }
 
     @Override

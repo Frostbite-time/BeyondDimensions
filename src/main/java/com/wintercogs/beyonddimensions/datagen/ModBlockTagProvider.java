@@ -2,9 +2,9 @@ package com.wintercogs.beyonddimensions.datagen;
 
 import com.simibubi.create.AllTags;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
@@ -23,6 +23,12 @@ public class ModBlockTagProvider extends BlockTagsProvider
     public ModBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper)
     {
         super(output, lookupProvider, BDConstants.MODID, existingFileHelper);
+    }
+
+    @Override
+    public String getName()
+    {
+        return "BeyondDimensions BlockTag Provider";
     }
 
     @Override

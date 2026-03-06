@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.datagen.util.BDBlockStateProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.NotNull;
 
 public class ModBlockStateProvider extends BDBlockStateProvider
 {
@@ -13,6 +14,12 @@ public class ModBlockStateProvider extends BDBlockStateProvider
     public ModBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper)
     {
         super(output, exFileHelper);
+    }
+
+    @Override
+    public @NotNull String getName()
+    {
+        return "BeyondDimensions BlockState Provider";
     }
 
     @Override

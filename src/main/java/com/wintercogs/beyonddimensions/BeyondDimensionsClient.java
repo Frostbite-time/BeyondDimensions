@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions;
 
+import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import com.wintercogs.beyonddimensions.integration.module.botania.overlay.ManaPoolPathwayOverlay;
 import com.wintercogs.beyonddimensions.integration.module.polymorph.PolymorphPlug;
-import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;

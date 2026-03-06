@@ -7,11 +7,15 @@ import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
 import com.wintercogs.beyonddimensions.integration.module.rs.tags.RSTags;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.*;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.ConditionalRecipe;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -21,6 +25,12 @@ public class ModRecipeProvider extends BDRecipeProvider
     public ModRecipeProvider(PackOutput output)
     {
         super(output);
+    }
+
+    @Override
+    public @NotNull String getName()
+    {
+        return "BeyondDimensions Recipe Provider";
     }
 
     @Override

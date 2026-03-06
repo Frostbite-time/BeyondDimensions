@@ -33,17 +33,17 @@ public class BDPackets
     private static int packetId = 1;
 
     private static <MSG> void registerC2S(Class<MSG> type,
-                                           BiConsumer<MSG, net.minecraft.network.FriendlyByteBuf> encoder,
-                                           Function<net.minecraft.network.FriendlyByteBuf, MSG> decoder,
-                                           BiConsumer<MSG, java.util.function.Supplier<NetworkEvent.Context>> handler)
+                                          BiConsumer<MSG, net.minecraft.network.FriendlyByteBuf> encoder,
+                                          Function<net.minecraft.network.FriendlyByteBuf, MSG> decoder,
+                                          BiConsumer<MSG, java.util.function.Supplier<NetworkEvent.Context>> handler)
     {
         INSTANCE.registerMessage(packetId++, type, encoder, decoder, handler, Optional.of(NetworkDirection.PLAY_TO_SERVER));
     }
 
     private static <MSG> void registerS2C(Class<MSG> type,
-                                           BiConsumer<MSG, net.minecraft.network.FriendlyByteBuf> encoder,
-                                           Function<net.minecraft.network.FriendlyByteBuf, MSG> decoder,
-                                           BiConsumer<MSG, java.util.function.Supplier<NetworkEvent.Context>> handler)
+                                          BiConsumer<MSG, net.minecraft.network.FriendlyByteBuf> encoder,
+                                          Function<net.minecraft.network.FriendlyByteBuf, MSG> decoder,
+                                          BiConsumer<MSG, java.util.function.Supplier<NetworkEvent.Context>> handler)
     {
         INSTANCE.registerMessage(packetId++, type, encoder, decoder, handler, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }

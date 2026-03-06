@@ -62,6 +62,6 @@ public class ModFluidTagsProvider extends FluidTagsProvider
     @Override
     public String getName()
     {
-        return "BeyondDimensions Fluid Tags";
+        return "BeyondDimensions FluidTag Provider";
     }
 }

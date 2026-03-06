@@ -25,6 +25,12 @@ public class ModItemTagProvider extends ItemTagsProvider
     }
 
     @Override
+    public String getName()
+    {
+        return "BeyondDimensions ItemTag Provider";
+    }
+
+    @Override
     protected void addTags(HolderLookup.Provider provider)
     {
         // 添加RS富铁石英和机器框架的合成表支持
