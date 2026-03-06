@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.botania.overlay;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.integration.module.botania.block.entity.ManaPoolPathwayBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
@@ -10,25 +10,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.client.event.RenderGuiEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 public class ManaPoolPathwayOverlay
 {
-    // 在clientSetup时再决定要不要注册
-    @SubscribeEvent
     public static void onRenderGui(RenderGuiEvent.Post e)
     {
         var mc = Minecraft.getInstance();
         if (mc == null || mc.player == null || mc.level == null || mc.options.hideGui) return;
 
-        if (!BeyondDimensions.Botania_Loaded) return;
-
         HitResult hit = mc.hitResult;
         if (!(hit instanceof BlockHitResult bhr)) return;
 
         BlockEntity be = mc.level.getBlockEntity(bhr.getBlockPos());
-        if (!(be instanceof com.wintercogs.beyonddimensions.integration.module.botania.block.ManaPoolPathwayBlockEntity pool))
+        if (!(be instanceof ManaPoolPathwayBlockEntity pool))
             return;
 
         ItemStack held = mc.player.getMainHandItem();

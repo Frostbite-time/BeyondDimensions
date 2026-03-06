@@ -9,8 +9,10 @@
     "beyonddimensions:net_hopper_block",
     "beyonddimensions:net_furnace_block",
     "beyonddimensions:dimensional_connect_block",
-    "beyonddimensions:mana_pool_pathway",
-    "beyonddimensions:schematicannon_pathway",
+    {
+      "id": "beyonddimensions:schematicannon_pathway",
+      "required": false
+    },
     {
       "id": "beyonddimensions:rs_net_pathway",
       "required": false

@@ -1,8 +1,9 @@
-package com.wintercogs.beyonddimensions.integration.module.botania.block;
+package com.wintercogs.beyonddimensions.integration.module.botania.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
+import com.wintercogs.beyonddimensions.integration.module.botania.block.entity.ManaPoolPathwayBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -24,7 +25,7 @@ public class ManaPoolPathwayBlockEntityRender implements BlockEntityRenderer<Man
     {
         this.waterSprite = Objects.requireNonNull(
                 Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-                        .apply(ResourceLocation.tryBuild(BeyondDimensions.Botania_ModId, "block/mana_water"))
+                        .apply(ResourceLocation.tryBuild(OtherModIds.BOTANIA, "block/mana_water"))
         );
     }
 

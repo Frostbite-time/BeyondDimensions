@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.client.event.listener;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.integration.module.botania.block.ManaPoolPathwayBlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -18,10 +17,6 @@ public final class ReloadHooks
         @SubscribeEvent
         public static void onRecipesUpdated(net.minecraftforge.client.event.RecipesUpdatedEvent e)
         {
-            if (BeyondDimensions.Botania_Loaded)
-            {
-                ManaPoolPathwayBlockEntity.onRecipesReloaded();
-            }
         }
     }
 
@@ -32,10 +27,6 @@ public final class ReloadHooks
         @SubscribeEvent
         public static void onDataPackSync(OnDatapackSyncEvent e)
         {
-            if (BeyondDimensions.Botania_Loaded)
-            {
-                ManaPoolPathwayBlockEntity.onRecipesReloaded();
-            }
         }
     }
 }

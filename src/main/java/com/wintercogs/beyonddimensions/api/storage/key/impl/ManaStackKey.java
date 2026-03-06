@@ -1,11 +1,11 @@
 package com.wintercogs.beyonddimensions.api.storage.key.impl;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.longtype.ManaType;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.render.ManaStackKeyRender;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -47,7 +47,7 @@ public class ManaStackKey extends LongStackKey<ManaType>
     @Override
     public String getModId()
     {
-        return BeyondDimensions.Botania_ModId;
+        return OtherModIds.BOTANIA;
     }
 
     @Override

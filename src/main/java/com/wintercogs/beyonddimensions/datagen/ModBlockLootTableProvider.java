@@ -29,8 +29,6 @@ public class ModBlockLootTableProvider extends BDBlockLootSubProvider
         dropSelf(BDBlocks.NET_HOPPER_BLOCK.get());
         dropSelf(BDBlocks.NET_FURNACE_BLOCK.get());
         dropSelf(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
-        dropSelf(BDBlocks.MANA_POOL_PATHWAY.get());
-        dropSelf(BDBlocks.SCHEMATICANNON_PATHWAY.get());
 
         BDFluids.ALL.forEach(e -> add((LiquidBlock) BDFluids.XP_FLUID.block().get(), LootTable.lootTable()));
     }

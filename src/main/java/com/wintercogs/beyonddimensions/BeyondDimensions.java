@@ -5,11 +5,9 @@ import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.ordered.EnergyStackTypedHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.ordered.FluidStackTypedHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ItemStackTypedHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ManaStackTypedHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.unordered.EnergyUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.unordered.FluidUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ItemUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ManaUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.*;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
@@ -18,9 +16,7 @@ import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
-import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -41,10 +37,6 @@ public class BeyondDimensions
 {
     public static IEventBus MOD_EVENT_BUS;
 
-    public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
-    public static boolean Botania_Loaded = false;
-    public static final String Create_ModId = "create";
-    public static boolean Create_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
 //    防止某些神经整合包禁用消息输出，预留一下位子，平常不启用
@@ -103,17 +95,7 @@ public class BeyondDimensions
 
     private void constructMod(final FMLConstructModEvent event)
     {
-        if (ModPresence.isLoaded(Botania_ModId))
-        {
-            Botania_Loaded = true;
-            MinecraftForge.EVENT_BUS.addGenericListener(BlockEntity.class, BD_BotaniaPlugin::attachBlockEntityCaps); // 为网络通道和网络接口手动注册火花附着
-        }
-        if (ModPresence.isLoaded(Create_ModId))
-        {
-            Create_Loaded = true;
-        }
-
-        BDBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
+        // reserved for lifecycle hooks
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -150,23 +132,6 @@ public class BeyondDimensions
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackKey.ID, FluidHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(EnergyStackKey.ID, EnergyHandlerWrapper::new);
 
-        if (Botania_Loaded)
-        {
-            // 注册Mana（魔力）
-            StackKeyRegistry.registerType(ManaStackKey.INSTANCE);
-            CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_RECEIVER);
-            CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, vazkii.botania.api.BotaniaForgeCapabilities.MANA_ITEM);
-            CapabilityHelper.registerUSHandler(ManaStackKey.INSTANCE, ManaUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
-            StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
-
-        }
-
-        // 注册物品能力交互黑名单
-        if (Botania_Loaded)
-        {
-            BD_BotaniaPlugin.registerItemCapBlackList();
-        }
     }
 
     @SubscribeEvent

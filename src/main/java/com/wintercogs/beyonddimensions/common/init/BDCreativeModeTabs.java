@@ -69,15 +69,6 @@ public class BDCreativeModeTabs
                         output.accept(BDBlocks.NET_FURNACE_BLOCK.get());
                         output.accept(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
 
-                        if (BeyondDimensions.Botania_Loaded)
-                        {
-                            output.accept(BDBlocks.MANA_POOL_PATHWAY.get());
-                        }
-                        if (BeyondDimensions.Create_Loaded)
-                        {
-                            output.accept(BDBlocks.SCHEMATICANNON_PATHWAY.get());
-                        }
-
                         IntegrationManager.onBlockCreativeTabCollect(itemDisplayParameters, output);
                     })
                     .build());

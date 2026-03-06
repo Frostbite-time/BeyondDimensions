@@ -44,9 +44,7 @@ public class ModBlockTagProvider extends BlockTagsProvider
                 .add(BDBlocks.NET_PUMP_BLOCK.get())
                 .add(BDBlocks.NET_HOPPER_BLOCK.get())
                 .add(BDBlocks.NET_FURNACE_BLOCK.get())
-                .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
-                .add(BDBlocks.MANA_POOL_PATHWAY.get())
-                .add(BDBlocks.SCHEMATICANNON_PATHWAY.get());
+                .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
 
         // 防止被机械动力识别为可用于移动式存储的方块
         // （仅1.20.1用，应对机械动力本体的bug）
@@ -59,9 +57,7 @@ public class ModBlockTagProvider extends BlockTagsProvider
                 .add(BDBlocks.NET_PUMP_BLOCK.get())
                 .add(BDBlocks.NET_HOPPER_BLOCK.get())
                 .add(BDBlocks.NET_FURNACE_BLOCK.get())
-                .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
-                .add(BDBlocks.MANA_POOL_PATHWAY.get())
-                .add(BDBlocks.SCHEMATICANNON_PATHWAY.get());
+                .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
 
         IntegrationManager.onBlockTagDatagen(provider, new IIntegrationModule.BlockTagAppender()
         {
