@@ -10,6 +10,7 @@ import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.client.model.generators.loaders.DynamicFluidContainerModelBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class BDItemModelProvider extends ItemModelProvider
 {
@@ -17,6 +18,10 @@ public abstract class BDItemModelProvider extends ItemModelProvider
     {
         super(output, BDConstants.MODID, existingFileHelper);
     }
+
+    @Override
+    @NotNull
+    public abstract String getName();
 
     protected void fluidBucketModel(BDFluids.FluidEntry e)
     {
