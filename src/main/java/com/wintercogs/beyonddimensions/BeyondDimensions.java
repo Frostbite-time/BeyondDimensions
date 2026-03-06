@@ -8,14 +8,18 @@ import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ItemStackTy
 import com.wintercogs.beyonddimensions.api.capability.helper.unordered.EnergyUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.unordered.FluidUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ItemUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.*;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.EnergyHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ItemHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.*;
-import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.integration.ModPresence;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -26,7 +30,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
@@ -46,56 +49,33 @@ public class BeyondDimensions
 //        } catch (Throwable ignored) {}
 //    }
 
-    // mod 类的构造函数是加载 mod 时运行的第一个代码。
-    // FML 将识别一些参数类型，如 IEventBus 或 ModContainer 并自动传入它们。
+
     public BeyondDimensions()
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         MOD_EVENT_BUS = modEventBus;
-        MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
+        MinecraftForge.EVENT_BUS.register(this);
         Config.register(ModLoadingContext.get(), modEventBus);
-
-
-        modEventBus.addListener(this::constructMod);
         modEventBus.addListener(this::commonSetup);
-        //为存储网络的接口方块注册物品交互能力
 
-
-        // 调用UIRegister的构造函数，从而注册所有UI
+        // 注册Menu
         BDMenus.register(modEventBus);
-
         // 注册创造模式菜单
         BDCreativeModeTabs.register(modEventBus);
-
         // 注册物品
         BDItems.register(modEventBus);
-
         // 注册方块
         BDBlocks.register(modEventBus);
-
         // 注册流体
         BDFluids.register(modEventBus);
-
         // 注册方块实体
         BDBlockEntities.register(modEventBus);
 
+        IntegrationManager.bootstrapCommon(modEventBus, MinecraftForge.EVENT_BUS);
         if (FMLEnvironment.dist == Dist.CLIENT)
         {
             BeyondDimensionsClient.clientInit(modEventBus, MinecraftForge.EVENT_BUS);
         }
-
-        if (FMLEnvironment.dist == Dist.CLIENT)
-        {
-            // 注册方块实体渲染
-            modEventBus.addListener(BDBlockRenders::onRegisterRenderers);
-        }
-
-        IntegrationManager.bootstrapCommon(modEventBus, MinecraftForge.EVENT_BUS);
-    }
-
-    private void constructMod(final FMLConstructModEvent event)
-    {
-        // reserved for lifecycle hooks
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -144,5 +124,4 @@ public class BeyondDimensions
     {
         return new ResourceLocation(BDConstants.MODID, path);
     }
-
 }

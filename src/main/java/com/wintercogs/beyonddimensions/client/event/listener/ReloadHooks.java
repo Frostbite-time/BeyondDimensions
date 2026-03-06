@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.client.event.listener;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.OnDatapackSyncEvent;

@@ -6,8 +6,6 @@ import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.botania.eventlistener.BotaniaModuleRecipesUpdatedListener;
 import com.wintercogs.beyonddimensions.integration.module.botania.init.BotaniaModuleBlockRenders;
 import com.wintercogs.beyonddimensions.integration.module.botania.overlay.ManaPoolPathwayOverlay;
-import net.minecraftforge.client.event.RecipesUpdatedEvent;
-import net.minecraftforge.client.event.RenderGuiEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 

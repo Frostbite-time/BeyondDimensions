@@ -1,7 +1,5 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
@@ -10,10 +8,8 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.crafting.ConditionalRecipe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
