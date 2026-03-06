@@ -4,7 +4,6 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import com.wintercogs.beyonddimensions.integration.module.botania.HudOverlay.ManaPoolPathwayOverlay;
-import com.wintercogs.beyonddimensions.integration.module.polymorph.PolymorphPlug;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -35,10 +34,6 @@ public class BeyondDimensionsClient
             BeyondDimensions.LOGGER.info("维度网络初始化完成(客户端)");
 
 
-            if (BeyondDimensions.PolymorphLoaded)
-            {
-                PolymorphPlug.register();
-            }
             if (BeyondDimensions.Botania_Loaded)
             {
                 NeoForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);

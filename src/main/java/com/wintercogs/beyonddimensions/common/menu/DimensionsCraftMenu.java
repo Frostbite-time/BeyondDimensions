@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
@@ -13,6 +12,8 @@ import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackType
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
+import com.wintercogs.beyonddimensions.integration.ModPresence;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.polymorph.PolymorphHelper;
 import com.wintercogs.beyonddimensions.util.InventoryHelper;
 import net.minecraft.core.BlockPos;
@@ -228,7 +229,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
     public static Optional<RecipeHolder<CraftingRecipe>> getRecipe(Player player, CraftingInput input, Level level)
     {
-        if (BeyondDimensions.PolymorphLoaded && player != null)
+        if (ModPresence.isLoaded(OtherModIds.POLYMORPH) && player != null)
         {
             return PolymorphHelper.getRecipe(player, RecipeType.CRAFTING, input, level);
         }

@@ -15,10 +15,7 @@ import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import com.wintercogs.beyonddimensions.integration.module.appars.BD_AE_ArsPlugin;
-import com.wintercogs.beyonddimensions.integration.module.appbotania.BD_AEBotaniaPlugin;
-import com.wintercogs.beyonddimensions.integration.module.appflux.BD_AEFluxPlugin;
 import com.wintercogs.beyonddimensions.integration.module.appifs.BD_AE_IFS_Plugin;
-import com.wintercogs.beyonddimensions.integration.module.appmek.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity;
@@ -48,16 +45,6 @@ public class BeyondDimensions
 {
     public static IEventBus MOD_EVENT_BUS;
 
-    public static boolean EMILoaded = false; // 用于EMI兼容
-    public static final String EMI_MODID = "emi";
-    public static boolean JEILoaded = false; // 用于JEI兼容
-    public static final String JEI2MODID = "jei";
-    public static boolean PolymorphLoaded = false;
-    public static final String PolymorphModId = "polymorph";
-    public static boolean AEMEKLoaded = false;
-    public static final String AEMEK2MODID = "appmek";
-    public static boolean AEFluxLoaded = false;
-    public static final String AEFlux2MODID = "appflux";
     public static boolean CuriosLoaded = false;
     public static final String CuriosModId = "curios";
     public static boolean JECharactersLoaded = false;
@@ -76,8 +63,6 @@ public class BeyondDimensions
     public static boolean AE_ARS_Loaded = false;
     public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
     public static boolean Botania_Loaded = false;
-    public static final String AE_Botania_ModId = "appbot";
-    public static boolean AE_Botania_Loaded = false;
     public static final String RSTypesModId = "refinedtypes";
     public static boolean RSTypesLoaded = false;
     public static final String Create_ModId = "create";
@@ -120,26 +105,6 @@ public class BeyondDimensions
     // 在此阶段检测模组列表
     private void constructMod(final FMLConstructModEvent event)
     {
-        if (ModList.get().isLoaded(EMI_MODID))
-        {
-            EMILoaded = true;
-        }
-        if (ModList.get().isLoaded(JEI2MODID))
-        {
-            JEILoaded = true;
-        }
-        if (ModList.get().isLoaded(PolymorphModId))
-        {
-            PolymorphLoaded = true;
-        }
-        if (ModList.get().isLoaded(AEMEK2MODID))
-        {
-            AEMEKLoaded = true;
-        }
-        if (ModList.get().isLoaded(AEFlux2MODID))
-        {
-            AEFluxLoaded = true;
-        }
         if (ModList.get().isLoaded(CuriosModId))
         {
             CuriosLoaded = true;
@@ -180,10 +145,6 @@ public class BeyondDimensions
             Botania_Loaded = true;
             MOD_EVENT_BUS.addListener(ManaPoolPathwayBlockEntity::registerCapability);
             MOD_EVENT_BUS.addListener(BD_BotaniaPlugin::registerCapability); // 为网络通道和网络接口手动注册火花附着
-        }
-        if (ModList.get().isLoaded(AE_Botania_ModId))
-        {
-            AE_Botania_Loaded = true;
         }
         if (ModList.get().isLoaded(RSTypesModId))
         {
@@ -268,14 +229,6 @@ public class BeyondDimensions
             StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
         }
 
-        if (AEMEKLoaded)
-        {
-            BD_AEMEKPlugin.register();
-        }
-        if (AEFluxLoaded)
-        {
-            BD_AEFluxPlugin.register();
-        }
         if (RS_Loaded)
         {
             BD_RSPlugin.register();
@@ -295,10 +248,6 @@ public class BeyondDimensions
         if (AE_ARS_Loaded)
         {
             BD_AE_ArsPlugin.register();
-        }
-        if (AE_Botania_Loaded)
-        {
-            BD_AEBotaniaPlugin.register();
         }
 
         // 注册物品能力交互黑名单
