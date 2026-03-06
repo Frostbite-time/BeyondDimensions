@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.GUI.*;
-import com.wintercogs.beyonddimensions.Menu.*;
+import com.wintercogs.beyonddimensions.client.gui.*;
+import com.wintercogs.beyonddimensions.common.menu.*;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;

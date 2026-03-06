@@ -1,12 +1,12 @@
 package com.wintercogs.beyonddimensions.ShortCutKey;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.wintercogs.beyonddimensions.Api.DataBase.ButtonState;
-import com.wintercogs.beyonddimensions.Api.DataBase.NetMenuType;
-import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
+import com.wintercogs.beyonddimensions.api.ButtonState;
+import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
+import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.OpenNetGuiPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.ToggleMagnetPacket;
+import com.wintercogs.beyonddimensions.network.Packet.c2s.OpenNetGuiPacket;
+import com.wintercogs.beyonddimensions.network.Packet.c2s.ToggleMagnetPacket;
 import com.wintercogs.beyonddimensions.Registry.PacketRegister;
 import com.wintercogs.beyonddimensions.Registry.ShortCutKeyRegister;
 import net.minecraft.client.KeyMapping;

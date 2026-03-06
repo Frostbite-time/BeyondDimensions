@@ -1,13 +1,13 @@
 package com.wintercogs.beyonddimensions.Registry;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.CallSeverClickPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.QuickDataTagPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.ClientOrServer.SetSlotDirectlyPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toClient.DisorderedSlotGroupSyncPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toClient.OrderedStackTypedSlotPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toClient.PlayerPermissionInfoPacket;
-import com.wintercogs.beyonddimensions.Network.Packet.toServer.*;
+import com.wintercogs.beyonddimensions.network.Packet.both.CallSeverClickPacket;
+import com.wintercogs.beyonddimensions.network.Packet.both.QuickDataTagPacket;
+import com.wintercogs.beyonddimensions.network.Packet.both.SetSlotDirectlyPacket;
+import com.wintercogs.beyonddimensions.network.Packet.c2s.*;
+import com.wintercogs.beyonddimensions.network.Packet.s2c.DisorderedSlotGroupSyncPacket;
+import com.wintercogs.beyonddimensions.network.Packet.s2c.OrderedStackTypedSlotPacket;
+import com.wintercogs.beyonddimensions.network.Packet.s2c.PlayerPermissionInfoPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkRegistry;
