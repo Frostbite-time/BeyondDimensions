@@ -20,8 +20,6 @@ import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPool
 import com.wintercogs.beyonddimensions.integration.module.create.blocks.entities.SchematicannonPathWayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.ifs.BD_SoulCaps;
 import com.wintercogs.beyonddimensions.integration.module.ifs.Item.WardenSoulTagItem;
-import com.wintercogs.beyonddimensions.integration.module.rsmek.BD_RSMekPlugin;
-import com.wintercogs.beyonddimensions.integration.module.rstypes.BD_RSTypesPlugin;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -41,16 +39,12 @@ public class BeyondDimensions
 {
     public static IEventBus MOD_EVENT_BUS;
 
-    public static final String RS_MEK_MODID = "refinedstorage_mekanism_integration";
-    public static boolean RS_MEK_Loaded = false;
     public static final String IFS_ModId = "industrialforegoingsouls"; //工业先锋-灵魂涌动
     public static boolean IFS_Loaded = false;
     public static final String ARS_ModId = "ars_nouveau"; // 新生魔艺-魔源兼容
     public static boolean ARS_Loaded = false;
     public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
     public static boolean Botania_Loaded = false;
-    public static final String RSTypesModId = "refinedtypes";
-    public static boolean RSTypesLoaded = false;
     public static final String Create_ModId = "create";
     public static boolean Create_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
@@ -91,10 +85,6 @@ public class BeyondDimensions
     // 在此阶段检测模组列表
     private void constructMod(final FMLConstructModEvent event)
     {
-        if (ModList.get().isLoaded(RS_MEK_MODID))
-        {
-            RS_MEK_Loaded = true;
-        }
         if (ModList.get().isLoaded(IFS_ModId))
         {
             IFS_Loaded = true;
@@ -110,10 +100,6 @@ public class BeyondDimensions
             Botania_Loaded = true;
             MOD_EVENT_BUS.addListener(ManaPoolPathwayBlockEntity::registerCapability);
             MOD_EVENT_BUS.addListener(BD_BotaniaPlugin::registerCapability); // 为网络通道和网络接口手动注册火花附着
-        }
-        if (ModList.get().isLoaded(RSTypesModId))
-        {
-            RSTypesLoaded = true;
         }
         if (ModList.get().isLoaded(Create_ModId))
         {
@@ -192,15 +178,6 @@ public class BeyondDimensions
             CapabilityHelper.registerUSHandler(ManaStackKey.INSTANCE, ManaUnifiedStorageHandler::new);
             CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
             StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
-        }
-
-        if (RS_MEK_Loaded)
-        {
-            BD_RSMekPlugin.register();
-        }
-        if (RSTypesLoaded)
-        {
-            BD_RSTypesPlugin.register();
         }
 
         // 注册物品能力交互黑名单
