@@ -2,10 +2,15 @@ package com.wintercogs.beyonddimensions.datagen;
 
 import com.simibubi.create.AllTags;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
+import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -55,5 +60,32 @@ public class ModBlockTagProvider extends BlockTagsProvider
                 .add(BDBlocks.ARS_SOURCE_PATHWAY.get())
                 .add(BDBlocks.MANA_POOL_PATHWAY.get())
                 .add(BDBlocks.SCHEMATICANNON_PATHWAY.get());
+
+        IntegrationManager.onBlockTagDatagen(provider, new IIntegrationModule.BlockTagAppender()
+        {
+            @Override
+            public void add(TagKey<Block> tag, Block... blocks)
+            {
+                ModBlockTagProvider.this.tag(tag).add(blocks);
+            }
+
+            @Override
+            public void addTag(TagKey<Block> tag, TagKey<Block> nestedTag)
+            {
+                ModBlockTagProvider.this.tag(tag).addTag(nestedTag);
+            }
+
+            @Override
+            public void addOptional(TagKey<Block> tag, ResourceLocation blockId)
+            {
+                ModBlockTagProvider.this.tag(tag).addOptional(blockId);
+            }
+
+            @Override
+            public void addOptionalTag(TagKey<Block> tag, ResourceLocation nestedTagId)
+            {
+                ModBlockTagProvider.this.tag(tag).addOptionalTag(nestedTagId);
+            }
+        });
     }
 }

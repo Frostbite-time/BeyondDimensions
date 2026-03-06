@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.*;
 import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
 import com.wintercogs.beyonddimensions.common.init.*;
+import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import com.wintercogs.beyonddimensions.integration.module.ae2.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.integration.module.appars.BD_AE_ArsPlugin;
 import com.wintercogs.beyonddimensions.integration.module.appbotania.BD_AEBotaniaPlugin;
@@ -19,6 +20,7 @@ import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.integration.module.rs.BD_RSPlugin;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -90,6 +92,7 @@ public class BeyondDimensions
         MinecraftForge.EVENT_BUS.register(this);//注册this类中所有事件
         Config.register(ModLoadingContext.get(), modEventBus);
 
+
         modEventBus.addListener(this::constructMod);
         modEventBus.addListener(this::commonSetup);
         //为存储网络的接口方块注册物品交互能力
@@ -124,6 +127,7 @@ public class BeyondDimensions
             modEventBus.addListener(BDBlockRenders::onRegisterRenderers);
         }
 
+        IntegrationManager.bootstrapCommon(modEventBus, MinecraftForge.EVENT_BUS);
     }
 
     private void constructMod(final FMLConstructModEvent event)
@@ -332,6 +336,11 @@ public class BeyondDimensions
     public void onServerStarting(ServerStartingEvent event)
     {
         LOGGER.info("维度网络初始化完成(服务端)");
+    }
+
+    public static ResourceLocation makeId(String path)
+    {
+        return new ResourceLocation(BDConstants.MODID, path);
     }
 
 }
