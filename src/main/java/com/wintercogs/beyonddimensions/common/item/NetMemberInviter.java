@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
-import com.wintercogs.beyonddimensions.common.item.Interface.IAddNetMemberHandler;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;

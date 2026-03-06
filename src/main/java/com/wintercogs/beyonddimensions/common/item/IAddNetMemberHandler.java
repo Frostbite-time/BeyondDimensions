@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.common.item.Interface;
+package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import net.minecraft.world.entity.player.Player;

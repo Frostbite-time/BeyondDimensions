@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.jech;
+package com.wintercogs.beyonddimensions.integration.module.jech;
 
 
 public class PinInMatches

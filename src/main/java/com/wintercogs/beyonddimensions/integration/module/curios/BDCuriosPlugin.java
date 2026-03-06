@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.curios;
+package com.wintercogs.beyonddimensions.integration.module.curios;
 
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 

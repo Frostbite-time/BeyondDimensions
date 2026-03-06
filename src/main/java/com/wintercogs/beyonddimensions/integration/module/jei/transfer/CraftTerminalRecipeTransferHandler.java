@@ -1,6 +1,6 @@
-package com.wintercogs.beyonddimensions.integration.jei.transfer;
+package com.wintercogs.beyonddimensions.integration.module.jei.transfer;
 
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
@@ -17,24 +17,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<DimensionsCraftMenu, RecipeHolder<CraftingRecipe>>
+public class CraftTerminalRecipeTransferHandler implements IRecipeTransferHandler<DimensionsCraftMenuTerminal, RecipeHolder<CraftingRecipe>>
 {
 
 
-    public CraftMenuRecipeTransferHandler()
+    public CraftTerminalRecipeTransferHandler()
     {
     }
 
     @Override
-    public Class<? extends DimensionsCraftMenu> getContainerClass()
+    public Class<? extends DimensionsCraftMenuTerminal> getContainerClass()
     {
-        return DimensionsCraftMenu.class;
+        return DimensionsCraftMenuTerminal.class;
     }
 
     @Override
-    public Optional<MenuType<DimensionsCraftMenu>> getMenuType()
+    public Optional<MenuType<DimensionsCraftMenuTerminal>> getMenuType()
     {
-        return Optional.of(DimensionsCraftMenu.Dimensions_Craft_Menu.get());
+        return Optional.of(DimensionsCraftMenuTerminal.Dimensions_Craft_Menu_Terminal.get());
     }
 
     @Override
@@ -44,13 +44,13 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
     }
 
     @Override
-    public @Nullable IRecipeTransferError transferRecipe(DimensionsCraftMenu container, RecipeHolder<CraftingRecipe> recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer)
+    public @Nullable IRecipeTransferError transferRecipe(DimensionsCraftMenuTerminal container, RecipeHolder<CraftingRecipe> recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer)
     {
         return TransferHelper.transferRecipe(getInputSources(container), container.storage.getStorage(), container.player.getInventory().getNonEquipmentItems(), recipeSlots, maxTransfer, doTransfer);
     }
 
     // 获取合成输入槽位（需根据实际容器实现）
-    private List<Slot> getInputSources(DimensionsCraftMenu menu)
+    private List<Slot> getInputSources(DimensionsCraftMenuTerminal menu)
     {
         List<Slot> slots = new ArrayList<>();
         for (int i = menu.craftSlotStartIndex; i < menu.craftSlotEndIndex; i++)

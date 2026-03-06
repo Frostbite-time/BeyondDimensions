@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.jei.transfer;
+package com.wintercogs.beyonddimensions.integration.module.jei.transfer;
 
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;

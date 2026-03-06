@@ -16,7 +16,7 @@ import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
-import com.wintercogs.beyonddimensions.integration.jei.BDJEIPlugin;
+import com.wintercogs.beyonddimensions.integration.module.jei.BDJEIPlugin;
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.util.UIDataHelper;
 import net.minecraft.client.Minecraft;

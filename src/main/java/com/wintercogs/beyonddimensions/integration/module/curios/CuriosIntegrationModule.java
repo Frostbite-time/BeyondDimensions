@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.curios;
+package com.wintercogs.beyonddimensions.integration.module.curios;
 
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;

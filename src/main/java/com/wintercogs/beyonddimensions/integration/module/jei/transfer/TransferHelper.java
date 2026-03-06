@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.jei.transfer;
+package com.wintercogs.beyonddimensions.integration.module.jei.transfer;
 
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;

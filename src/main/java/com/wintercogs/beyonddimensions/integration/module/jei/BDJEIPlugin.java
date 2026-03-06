@@ -1,10 +1,10 @@
-package com.wintercogs.beyonddimensions.integration.jei;
+package com.wintercogs.beyonddimensions.integration.module.jei;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.client.gui.BDBaseGUI;
-import com.wintercogs.beyonddimensions.integration.jei.handler.JeiContainerHandler;
-import com.wintercogs.beyonddimensions.integration.jei.transfer.CraftMenuRecipeTransferHandler;
-import com.wintercogs.beyonddimensions.integration.jei.transfer.CraftTerminalRecipeTransferHandler;
+import com.wintercogs.beyonddimensions.integration.module.jei.handler.JeiContainerHandler;
+import com.wintercogs.beyonddimensions.integration.module.jei.transfer.CraftMenuRecipeTransferHandler;
+import com.wintercogs.beyonddimensions.integration.module.jei.transfer.CraftTerminalRecipeTransferHandler;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
