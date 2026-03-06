@@ -14,8 +14,6 @@ import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEnti
 import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.integration.module.appars.BD_AE_ArsPlugin;
-import com.wintercogs.beyonddimensions.integration.module.appifs.BD_AE_IFS_Plugin;
 import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity;
@@ -55,12 +53,8 @@ public class BeyondDimensions
     public static boolean RS_MEK_Loaded = false;
     public static final String IFS_ModId = "industrialforegoingsouls"; //工业先锋-灵魂涌动
     public static boolean IFS_Loaded = false;
-    public static final String AE_IFS_ModId = "soulplied_energistics"; // 工业先锋-灵魂涌动-AE附属
-    public static boolean AE_IFS_Loaded = false;
     public static final String ARS_ModId = "ars_nouveau"; // 新生魔艺-魔源兼容
     public static boolean ARS_Loaded = false;
-    public static final String AE_ARS_ModId = "arseng";
-    public static boolean AE_ARS_Loaded = false;
     public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
     public static boolean Botania_Loaded = false;
     public static final String RSTypesModId = "refinedtypes";
@@ -127,18 +121,10 @@ public class BeyondDimensions
             IFS_Loaded = true;
             MOD_EVENT_BUS.addListener(WardenSoulTagItem::registerCapability);
         }
-        if (ModList.get().isLoaded(AE_IFS_ModId))
-        {
-            AE_IFS_Loaded = true;
-        }
         if (ModList.get().isLoaded(ARS_ModId))
         {
             ARS_Loaded = true;
             MOD_EVENT_BUS.addListener(BD_ArsCaps::registerCapability);
-        }
-        if (ModList.get().isLoaded(AE_ARS_ModId))
-        {
-            AE_ARS_Loaded = true;
         }
         if (ModList.get().isLoaded(Botania_ModId))
         {
@@ -240,14 +226,6 @@ public class BeyondDimensions
         if (RSTypesLoaded)
         {
             BD_RSTypesPlugin.register();
-        }
-        if (AE_IFS_Loaded)
-        {
-            BD_AE_IFS_Plugin.register();
-        }
-        if (AE_ARS_Loaded)
-        {
-            BD_AE_ArsPlugin.register();
         }
 
         // 注册物品能力交互黑名单
