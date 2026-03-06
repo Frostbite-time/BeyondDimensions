@@ -11,11 +11,6 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.*;
 import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.integration.module.ae2.BD_AEPlugin;
-import com.wintercogs.beyonddimensions.integration.module.appars.BD_AE_ArsPlugin;
-import com.wintercogs.beyonddimensions.integration.module.appbotania.BD_AEBotaniaPlugin;
-import com.wintercogs.beyonddimensions.integration.module.appflux.BD_AEFluxPlugin;
-import com.wintercogs.beyonddimensions.integration.module.appmek.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.curios.BD_CuriosPlugin;
@@ -294,30 +289,6 @@ public class BeyondDimensions
             CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
             StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
 
-        }
-
-        // 为维度ME硬盘注册，其中BD_AEPlugin用于注册存储元件
-        // BD_AEMEKPlugin与BD_AEFluxPlugin分别注册IStackType与AEKey之间的转换。
-        // 物品、流体的转换由AEHelper的静态块负责
-        if (AELoaded)
-        {
-            BD_AEPlugin.register();
-        }
-        if (AEMEKLoaded)
-        {
-            BD_AEMEKPlugin.register();
-        }
-        if (AEFluxLoaded)
-        {
-            BD_AEFluxPlugin.register();
-        }
-        if (AE_ARS_Loaded)
-        {
-            BD_AE_ArsPlugin.register();
-        }
-        if (AE_Botania_Loaded)
-        {
-            BD_AEBotaniaPlugin.register();
         }
 
         if (RS_Loaded)

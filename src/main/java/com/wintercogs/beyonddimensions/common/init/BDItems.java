@@ -1,9 +1,7 @@
 package com.wintercogs.beyonddimensions.common.init;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.item.*;
-import com.wintercogs.beyonddimensions.integration.module.ae2.item.NetAEStorageCell;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -77,17 +75,6 @@ public class BDItems
     // 经验交换棒
     public static final RegistryObject<Item> XP_EXCHANGE_ITEM = ITEMS.register("xp_exchange_item",
             () -> new XpExchangeItem(new Item.Properties()));
-
-    // AE存储磁盘 对于一个没有安装AE的游戏
-    public static final RegistryObject<Item> NET_AE_STORAGE_CELL = ITEMS.register("net_ae_storage_cell",
-            () -> {
-                if (BeyondDimensions.AELoaded)
-                    return new NetAEStorageCell(new Item.Properties());
-                else
-                    return new Item(new Item.Properties());
-            }
-    );
-
 
     // 测试物品 -----------------------
     // 随机物品生成器

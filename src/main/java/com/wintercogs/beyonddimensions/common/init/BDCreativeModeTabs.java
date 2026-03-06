@@ -43,11 +43,6 @@ public class BDCreativeModeTabs
                         output.accept(BDItems.NET_RESTOCKER_ITEM.get());
                         output.accept(BDItems.XP_EXCHANGE_ITEM.get());
 
-                        if (BeyondDimensions.AELoaded)
-                        {
-                            output.accept(BDItems.NET_AE_STORAGE_CELL.get());
-                        }
-
                         for (BDFluids.FluidEntry e : BDFluids.ALL)
                         { //注册所有桶
                             output.accept((Item) e.bucket().get());
