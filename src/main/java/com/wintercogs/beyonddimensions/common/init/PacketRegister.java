@@ -1,14 +1,12 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.network.ClientPayloadHandler;
-import com.wintercogs.beyonddimensions.network.ServerPayloadHandler;
 import com.wintercogs.beyonddimensions.network.packet.both.QuickDataTagPacket;
 import com.wintercogs.beyonddimensions.network.packet.both.SetSlotDirectlyPacket;
 import com.wintercogs.beyonddimensions.network.packet.c2s.*;
 import com.wintercogs.beyonddimensions.network.packet.s2c.DisorderedSlotGroupSyncPacket;
 import com.wintercogs.beyonddimensions.network.packet.s2c.OrderedStackTypedSlotPacket;
-import com.wintercogs.beyonddimensions.network.packet.s2c.PutHandItemToNetPacket;
+import com.wintercogs.beyonddimensions.network.packet.s2c.PlayerPermissionInfoPacket;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -30,8 +28,8 @@ public class PacketRegister
                 OpenNetGuiPacket.TYPE,
                 OpenNetGuiPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleOpenNetGuiPacket,
-                        ServerPayloadHandler.getInstance()::handleOpenNetGuiPacket
+                        OpenNetGuiPacket::handle,
+                        OpenNetGuiPacket::handle
                 )
 
         );
@@ -41,8 +39,8 @@ public class PacketRegister
                 CallSeverClickPacket.TYPE,
                 CallSeverClickPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleCallSeverClickPacket,
-                        ServerPayloadHandler.getInstance()::handleCallSeverClickPacket
+                        CallSeverClickPacket::handle,
+                        CallSeverClickPacket::handle
                 )
         );
 
@@ -51,8 +49,8 @@ public class PacketRegister
                 PlayerPermissionInfoPacket.TYPE,
                 PlayerPermissionInfoPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handlePlayerPermissionInfoPacket,
-                        ServerPayloadHandler.getInstance()::handlePlayerPermissionInfoPacket
+                        PlayerPermissionInfoPacket::handle,
+                        PlayerPermissionInfoPacket::handle
                 )
         );
 
@@ -61,8 +59,8 @@ public class PacketRegister
                 NetControlActionPacket.TYPE,
                 NetControlActionPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleNetControlActionPacket,
-                        ServerPayloadHandler.getInstance()::handleNetControlActionPacket
+                        NetControlActionPacket::handle,
+                        NetControlActionPacket::handle
                 )
         );
 
@@ -70,8 +68,8 @@ public class PacketRegister
                 RecipeFillC2SPacket.TYPE,
                 RecipeFillC2SPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleRecipeFillC2SPacket,
-                        ServerPayloadHandler.getInstance()::handleRecipeFillC2SPacket
+                        RecipeFillC2SPacket::handle,
+                        RecipeFillC2SPacket::handle
                 )
         );
 
@@ -79,8 +77,8 @@ public class PacketRegister
                 ClickTransferCraftButtonPacket.TYPE,
                 ClickTransferCraftButtonPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleClickTransferCraftButtonPacket,
-                        ServerPayloadHandler.getInstance()::handleClickTransferCraftButtonPacket
+                        ClickTransferCraftButtonPacket::handle,
+                        ClickTransferCraftButtonPacket::handle
                 )
         );
 
@@ -88,8 +86,8 @@ public class PacketRegister
                 BatchTransferPacket.TYPE,
                 BatchTransferPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleBatchTransferPacket,
-                        ServerPayloadHandler.getInstance()::handleBatchTransferPacket
+                        BatchTransferPacket::handle,
+                        BatchTransferPacket::handle
                 )
         );
 
@@ -97,8 +95,8 @@ public class PacketRegister
                 PickBlockFromNetPacket.TYPE,
                 PickBlockFromNetPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handlePickBlockFromNetPacket,
-                        ServerPayloadHandler.getInstance()::handlePickBlockFromNetPacket
+                        PickBlockFromNetPacket::handle,
+                        PickBlockFromNetPacket::handle
                 )
         );
 
@@ -106,8 +104,8 @@ public class PacketRegister
                 PutHandItemToNetPacket.TYPE,
                 PutHandItemToNetPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handlePutHandItemToNetPacket,
-                        ServerPayloadHandler.getInstance()::handlePutHandItemToNetPacket
+                        PutHandItemToNetPacket::handle,
+                        PutHandItemToNetPacket::handle
                 )
         );
 
@@ -115,8 +113,8 @@ public class PacketRegister
                 OrderedStackTypedSlotPacket.TYPE,
                 OrderedStackTypedSlotPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleOrderedStackTypedSlotPacket,
-                        ServerPayloadHandler.getInstance()::handleOrderedStackTypedSlotPacket
+                        OrderedStackTypedSlotPacket::handle,
+                        OrderedStackTypedSlotPacket::handle
                 )
         );
 
@@ -124,8 +122,8 @@ public class PacketRegister
                 SetSlotDirectlyPacket.TYPE,
                 SetSlotDirectlyPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleSetSlotDirectlyPacket,
-                        ServerPayloadHandler.getInstance()::handleSetSlotDirectlyPacket
+                        SetSlotDirectlyPacket::handle,
+                        SetSlotDirectlyPacket::handle
                 )
         );
 
@@ -133,8 +131,8 @@ public class PacketRegister
                 DisorderedSlotGroupSyncPacket.TYPE,
                 DisorderedSlotGroupSyncPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleDisorderedSlotGroupSyncPacket,
-                        ServerPayloadHandler.getInstance()::handleDisorderedSlotGroupSyncPacket
+                        DisorderedSlotGroupSyncPacket::handle,
+                        DisorderedSlotGroupSyncPacket::handle
                 )
         );
 
@@ -142,8 +140,8 @@ public class PacketRegister
                 QuickDataTagPacket.TYPE,
                 QuickDataTagPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleQuickDataTagPacket,
-                        ServerPayloadHandler.getInstance()::handleQuickDataTagPacket
+                        QuickDataTagPacket::handle,
+                        QuickDataTagPacket::handle
                 )
         );
 
@@ -151,8 +149,8 @@ public class PacketRegister
                 ToggleMagnetPacket.TYPE,
                 ToggleMagnetPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        ClientPayloadHandler.getInstance()::handleToggleMagnetPacket,
-                        ServerPayloadHandler.getInstance()::handleToggleMagnetPacket
+                        ToggleMagnetPacket::handle,
+                        ToggleMagnetPacket::handle
                 )
         );
     }

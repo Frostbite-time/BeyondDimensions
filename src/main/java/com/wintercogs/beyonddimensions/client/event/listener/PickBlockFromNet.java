@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.client.event.listener;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
 import com.wintercogs.beyonddimensions.network.packet.c2s.PickBlockFromNetPacket;
-import com.wintercogs.beyonddimensions.network.packet.s2c.PutHandItemToNetPacket;
+import com.wintercogs.beyonddimensions.network.packet.c2s.PutHandItemToNetPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;

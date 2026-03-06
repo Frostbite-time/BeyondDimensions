@@ -1,20 +1,27 @@
 package com.wintercogs.beyonddimensions.network.packet.c2s;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
+import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.SlotResult;
+
+import java.util.List;
 
 public record ToggleMagnetPacket() implements CustomPacketPayload
 {
-    // 定义数据包的类型 注册用
     public static final Type<ToggleMagnetPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
-                    BeyondDimensions.MODID,
-                    "toggle_magnet_packet")); //path中不要有大写字母 仅数字 小写字母 下划线
+            new Type<>(BeyondDimensions.makeId("toggle_magnet_packet"));
 
-    // 定义数据包的流编码方式 注册用
     public static final StreamCodec<RegistryFriendlyByteBuf, ToggleMagnetPacket> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, ToggleMagnetPacket>()
     {
         @Override
@@ -30,7 +37,83 @@ public record ToggleMagnetPacket() implements CustomPacketPayload
         }
     };
 
-    @Override //重写type方法，用于返回当前的TYPE
+    private void handleInClient(final IPayloadContext context)
+    {
+
+    }
+
+    private void handleInServer(final IPayloadContext context)
+    {
+        Player player = context.player();
+
+        for (ItemStack stack : player.getInventory().items)
+        {
+            if (stack.getItem() instanceof NetMagnetItem)
+            {
+                if (stack.has(ModDataComponents.CONTROL_MODE))
+                {
+                    if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                    {
+                        stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
+                    }
+                    else if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                    {
+                        stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
+                    }
+                }
+            }
+        }
+
+        if (BeyondDimensions.CuriosLoaded)
+        {
+            CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
+                List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
+                        .stream()
+                        .map(SlotResult::stack)
+                        .toList();
+
+                for (ItemStack stack : curios)
+                {
+                    if (stack.getItem() instanceof NetMagnetItem)
+                    {
+                        if (stack.has(ModDataComponents.CONTROL_MODE))
+                        {
+                            if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                            {
+                                stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
+                            }
+                            else if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                            {
+                                stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    public static void handle(final ToggleMagnetPacket packet, final IPayloadContext context)
+    {
+        if (packet != null)
+        {
+            PacketFlow direction = context.flow();
+            if (direction == PacketFlow.CLIENTBOUND)
+            {
+                context.enqueueWork(() -> packet.handleInClient(context));
+            }
+            else if (direction == PacketFlow.SERVERBOUND)
+            {
+                context.enqueueWork(() -> packet.handleInServer(context));
+            }
+        }
+    }
+
+    @Override
     public Type<? extends CustomPacketPayload> type()
     {
         return TYPE;

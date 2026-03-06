@@ -31,6 +31,7 @@ import com.wintercogs.beyonddimensions.integration.module.polymorph.PolymorphPlu
 import com.wintercogs.beyonddimensions.integration.module.rs.BD_RSPlugin;
 import com.wintercogs.beyonddimensions.integration.module.rsmek.BD_RSMekPlugin;
 import com.wintercogs.beyonddimensions.integration.module.rstypes.BD_RSTypesPlugin;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -396,5 +397,10 @@ public class BeyondDimensions
                 NeoForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);
             }
         }
+    }
+
+    public static ResourceLocation makeId(String path)
+    {
+        return ResourceLocation.fromNamespaceAndPath(MODID, path);
     }
 }

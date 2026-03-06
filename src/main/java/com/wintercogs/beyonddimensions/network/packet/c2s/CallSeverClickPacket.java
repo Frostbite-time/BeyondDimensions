@@ -2,22 +2,21 @@ package com.wintercogs.beyonddimensions.network.packet.c2s;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record CallSeverClickPacket(int slotIndex, KeyAmount clickItem, int button,
                                    boolean shiftDown) implements CustomPacketPayload
 {
-    // 定义数据包的类型 注册用
     public static final Type<CallSeverClickPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
-                    BeyondDimensions.MODID,
-                    "call_sever_click_packet")); //path中不要有大写字母 仅数字 小写字母 下划线
+            new Type<>(BeyondDimensions.makeId("call_sever_click_packet"));
 
-    // 定义数据包的流编码方式 注册用
     public static final StreamCodec<RegistryFriendlyByteBuf, CallSeverClickPacket> STREAM_CODEC =
             StreamCodec.composite(
                     ByteBufCodecs.VAR_INT,
@@ -31,7 +30,38 @@ public record CallSeverClickPacket(int slotIndex, KeyAmount clickItem, int butto
                     CallSeverClickPacket::new
             );
 
-    @Override //重写type方法，用于返回当前的TYPE
+    private void handleInClient(final IPayloadContext context)
+    {
+
+    }
+
+    private void handleInServer(final IPayloadContext context)
+    {
+        Player player = context.player();
+        if (player.containerMenu instanceof BDBaseMenu menu)
+        {
+            menu.customClickHandler(this.slotIndex(), this.clickItem(), this.button(), this.shiftDown());
+            menu.broadcastChanges();
+        }
+    }
+
+    public static void handle(final CallSeverClickPacket packet, final IPayloadContext context)
+    {
+        if (packet != null)
+        {
+            PacketFlow direction = context.flow();
+            if (direction == PacketFlow.CLIENTBOUND)
+            {
+                context.enqueueWork(() -> packet.handleInClient(context));
+            }
+            else if (direction == PacketFlow.SERVERBOUND)
+            {
+                context.enqueueWork(() -> packet.handleInServer(context));
+            }
+        }
+    }
+
+    @Override
     public Type<? extends CustomPacketPayload> type()
     {
         return TYPE;

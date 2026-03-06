@@ -1,21 +1,20 @@
 package com.wintercogs.beyonddimensions.network.packet.c2s;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record ClickTransferCraftButtonPacket(boolean toStorage) implements CustomPacketPayload
 {
-    // 定义数据包的类型 注册用
-    public static final CustomPacketPayload.Type<ClickTransferCraftButtonPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(
-                    BeyondDimensions.MODID,
-                    "click_transfer_craft_button_packet")); //path中不要有大写字母 仅数字 小写字母 下划线
+    public static final Type<ClickTransferCraftButtonPacket> TYPE =
+            new Type<>(BeyondDimensions.makeId("click_transfer_craft_button_packet"));
 
-    // 定义数据包的流编码方式 注册用
     public static final StreamCodec<RegistryFriendlyByteBuf, ClickTransferCraftButtonPacket> STREAM_CODEC =
             StreamCodec.composite(
                     ByteBufCodecs.BOOL,
@@ -23,7 +22,38 @@ public record ClickTransferCraftButtonPacket(boolean toStorage) implements Custo
                     ClickTransferCraftButtonPacket::new
             );
 
-    @Override //重写type方法，用于返回当前的TYPE
+    private void handleInClient(final IPayloadContext context)
+    {
+
+    }
+
+    private void handleInServer(final IPayloadContext context)
+    {
+        Player player = context.player();
+
+        if (player.containerMenu instanceof DimensionsCraftMenu menu)
+        {
+            menu.cleanCraftSlots(this.toStorage());
+        }
+    }
+
+    public static void handle(final ClickTransferCraftButtonPacket packet, final IPayloadContext context)
+    {
+        if (packet != null)
+        {
+            PacketFlow direction = context.flow();
+            if (direction == PacketFlow.CLIENTBOUND)
+            {
+                context.enqueueWork(() -> packet.handleInClient(context));
+            }
+            else if (direction == PacketFlow.SERVERBOUND)
+            {
+                context.enqueueWork(() -> packet.handleInServer(context));
+            }
+        }
+    }
+
+    @Override
     public Type<? extends CustomPacketPayload> type()
     {
         return TYPE;
