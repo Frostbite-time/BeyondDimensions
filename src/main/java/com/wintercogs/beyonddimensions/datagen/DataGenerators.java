@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.datagen;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -36,5 +37,7 @@ public class DataGenerators
 
         // 生成配方表
         event.createProvider(ModRecipeProvider.Runner::new);
+
+        IntegrationManager.onDatagen(event);
     }
 }

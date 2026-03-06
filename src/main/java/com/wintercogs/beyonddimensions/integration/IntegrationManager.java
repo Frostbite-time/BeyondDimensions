@@ -4,6 +4,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,6 +108,14 @@ public final class IntegrationManager
         for (IIntegrationModule module : ACTIVE_COMMON_MODULES)
         {
             module.onBlockCreativeTabCollect(displayParameters, output);
+        }
+    }
+
+    public static void onDatagen(GatherDataEvent.Client event)
+    {
+        for (IIntegrationModule module : ACTIVE_COMMON_MODULES)
+        {
+            module.onDatagen(event);
         }
     }
 }
