@@ -1,6 +1,6 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.wrapper;
+package com.wintercogs.beyonddimensions.integration.module.mekanism.storage;
 
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ChemicalStackKey;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;

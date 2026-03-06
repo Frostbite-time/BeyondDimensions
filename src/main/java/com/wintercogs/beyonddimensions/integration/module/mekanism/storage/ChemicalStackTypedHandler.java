@@ -1,8 +1,7 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.ordered;
+package com.wintercogs.beyonddimensions.integration.module.mekanism.storage;
 
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ChemicalStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;

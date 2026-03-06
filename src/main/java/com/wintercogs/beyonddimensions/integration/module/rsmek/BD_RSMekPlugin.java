@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.integration.module.rsmek;
 
 import com.refinedmods.refinedstorage.mekanism.ChemicalResource;
 import com.refinedmods.refinedstorage.mekanism.ChemicalResourceType;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ChemicalStackKey;
+import com.wintercogs.beyonddimensions.integration.module.mekanism.storage.ChemicalStackKey;
 import com.wintercogs.beyonddimensions.integration.module.rs.RSHelper;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;

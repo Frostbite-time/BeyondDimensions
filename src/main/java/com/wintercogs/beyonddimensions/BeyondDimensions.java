@@ -48,8 +48,6 @@ public class BeyondDimensions
 {
     public static IEventBus MOD_EVENT_BUS;
 
-    public static boolean MekLoaded = false; // 用于mek化学品存储
-    public static final String MekanismMODID = "mekanism";
     public static boolean EMILoaded = false; // 用于EMI兼容
     public static final String EMI_MODID = "emi";
     public static boolean JEILoaded = false; // 用于JEI兼容
@@ -122,10 +120,6 @@ public class BeyondDimensions
     // 在此阶段检测模组列表
     private void constructMod(final FMLConstructModEvent event)
     {
-        if (ModList.get().isLoaded(MekanismMODID))
-        {
-            MekLoaded = true;
-        }
         if (ModList.get().isLoaded(EMI_MODID))
         {
             EMILoaded = true;
@@ -237,22 +231,6 @@ public class BeyondDimensions
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackKey.ID, FluidHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(EnergyStackKey.ID, EnergyHandlerWrapper::new);
 
-        if (MekLoaded)
-        {
-            // 注册化学品堆叠
-            StackKeyRegistry.registerType(ChemicalStackKey.EMPTY);
-            // 注册化学品方块能力
-            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackKey.ID, mekanism.common.capabilities.Capabilities.CHEMICAL.block());
-            // 注册化学品物品能力
-            CapabilityHelper.ItemCapabilityMap.put(ChemicalStackKey.ID, mekanism.common.capabilities.Capabilities.CHEMICAL.item());
-            // 注册分化包装
-            CapabilityHelper.registerUSHandler(ChemicalStackKey.EMPTY, ChemicalUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(ChemicalStackKey.EMPTY, ChemicalStackTypedHandler::new);
-
-            // 注册堆叠处理包装
-            StackHandlerWrapperHelper.stackWrappers.put(ChemicalStackKey.ID, ChemicalHandlerWrapper::new);
-
-        }
 
         if (IFS_Loaded)
         {

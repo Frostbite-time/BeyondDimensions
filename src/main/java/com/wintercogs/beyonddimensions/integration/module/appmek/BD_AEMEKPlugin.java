@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.appmek;
 
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ChemicalStackKey;
 import com.wintercogs.beyonddimensions.integration.module.ae2.AEHelper;
+import com.wintercogs.beyonddimensions.integration.module.mekanism.storage.ChemicalStackKey;
 import me.ramidzkh.mekae2.ae2.MekanismKey;
 import me.ramidzkh.mekae2.ae2.MekanismKeyType;
 import mekanism.api.chemical.ChemicalStack;

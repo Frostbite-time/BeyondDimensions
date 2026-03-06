@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.api.storage.key.render;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ChemicalStackKey;
+import com.wintercogs.beyonddimensions.integration.module.mekanism.storage.ChemicalStackKey;
 import com.wintercogs.beyonddimensions.util.IngredientRenderer;
 import com.wintercogs.beyonddimensions.util.StringFormat;
 import mekanism.api.MekanismAPI;

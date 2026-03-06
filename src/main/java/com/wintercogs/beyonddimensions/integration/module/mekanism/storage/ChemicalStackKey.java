@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.api.storage.key.impl;
+package com.wintercogs.beyonddimensions.integration.module.mekanism.storage;
 
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.render.ChemicalStackKeyRender;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -231,7 +232,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
     {
         return chemical.unwrapKey()
                 .map(k -> k.location().getNamespace())
-                .orElse(BeyondDimensions.MekanismMODID);
+                .orElse(OtherModIds.MEKANISM);
     }
 
     @Override
