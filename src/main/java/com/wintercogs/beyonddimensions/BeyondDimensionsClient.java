@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
+import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import com.wintercogs.beyonddimensions.integration.module.botania.HudOverlay.ManaPoolPathwayOverlay;
 import com.wintercogs.beyonddimensions.integration.module.polymorph.PolymorphPlug;
 import net.neoforged.api.distmarker.Dist;
@@ -22,6 +23,8 @@ public class BeyondDimensionsClient
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         modEventBus.register(this);
         modEventBus.addListener(BDBlockRenders::onRegisterRenderers);
+
+        IntegrationManager.bootstrapClient(modEventBus, NeoForge.EVENT_BUS);
     }
 
     @SubscribeEvent

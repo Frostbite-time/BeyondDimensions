@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.api.storage.key.impl;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackType>
 {
 
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/empty");
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BDConstants.MODID, "stack_type/empty");
     public static final EmptyStackKey INSTANCE = new EmptyStackKey();
 
     /**
@@ -113,7 +113,7 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     @Override
     public String getModId()
     {
-        return BeyondDimensions.MODID;
+        return BDConstants.MODID;
     }
 
     @Override

@@ -13,6 +13,7 @@ import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity
 import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.init.*;
+import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import com.wintercogs.beyonddimensions.integration.module.ae2.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.integration.module.appars.BD_AE_ArsPlugin;
 import com.wintercogs.beyonddimensions.integration.module.appbotania.BD_AEBotaniaPlugin;
@@ -117,6 +118,8 @@ public class BeyondDimensions
         BDFluids.register(modEventBus);
         // 注册方块实体
         BDBlockEntities.register(modEventBus);
+
+        IntegrationManager.bootstrapCommon(modEventBus, NeoForge.EVENT_BUS);
     }
 
     // 在此阶段检测模组列表

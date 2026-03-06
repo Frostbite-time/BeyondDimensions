@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.api.storage.key.impl;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.longtype.EnergyType;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -23,7 +23,7 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
 {
 
     public static final ResourceLocation ID =
-            ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/energy");
+            ResourceLocation.fromNamespaceAndPath(BDConstants.MODID, "stack_type/energy");
 
     /**
      * 唯一实例（不区分空/非空）

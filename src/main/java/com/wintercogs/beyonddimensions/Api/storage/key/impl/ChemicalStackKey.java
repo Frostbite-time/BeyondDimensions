@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.api.storage.key.impl;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -27,7 +28,7 @@ import java.util.stream.Stream;
 public class ChemicalStackKey implements IStackKey<ChemicalStack>
 {
 
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/chemical");
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BDConstants.MODID, "stack_type/chemical");
     public static final ChemicalStackKey EMPTY = new ChemicalStackKey();
 
     private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小

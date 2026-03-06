@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.longtype.SourceType;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -22,7 +23,7 @@ public class SourceStackKey extends LongStackKey<SourceType>
 {
 
     public static final ResourceLocation ID =
-            ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/source");
+            ResourceLocation.fromNamespaceAndPath(BDConstants.MODID, "stack_type/source");
 
     /**
      * 唯一实例

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.longtype.ManaType;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -22,7 +23,7 @@ public class ManaStackKey extends LongStackKey<ManaType>
 {
 
     public static final ResourceLocation ID =
-            ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "stack_type/mana");
+            ResourceLocation.fromNamespaceAndPath(BDConstants.MODID, "stack_type/mana");
 
     /**
      * 唯一实例
