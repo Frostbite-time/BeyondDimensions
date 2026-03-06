@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.common.init.ModFluids;
-import com.wintercogs.beyonddimensions.common.init.ModFluidTags;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.common.init.BDFluidTags;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.FluidTagsProvider;
@@ -16,16 +16,16 @@ public class ModFluidTagsProvider extends FluidTagsProvider
 {
     public ModFluidTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider, @Nullable ExistingFileHelper existingFileHelper)
     {
-        super(output, provider, BeyondDimensions.MODID, existingFileHelper);
+        super(output, provider, BDConstants.MODID, existingFileHelper);
     }
 
     @Override
     protected void addTags(HolderLookup.Provider provider)
     {
         // 把源体 + 流动体都塞进 forge:experience
-        tag(ModFluidTags.C_EXPERIENCE)
-                .add((Fluid) ModFluids.XP_FLUID.source().get())
-                .add((Fluid) ModFluids.XP_FLUID.flowing().get());
+        tag(BDFluidTags.C_EXPERIENCE)
+                .add((Fluid) BDFluids.XP_FLUID.source().get())
+                .add((Fluid) BDFluids.XP_FLUID.flowing().get());
     }
 
     @Override

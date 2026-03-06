@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.api.capability.helper.ordered;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.SourceStackKey;
-import com.wintercogs.beyonddimensions.integration.Ars.Caps.ISourceCap;
+import com.wintercogs.beyonddimensions.integration.module.ars.caps.ISourceCap;
 import com.wintercogs.beyonddimensions.util.BDMath;
 
 public class SourceStackTypedHandler implements ISourceCap

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.api.capability.helper.unordered;
 
-import com.wintercogs.beyonddimensions.api.storage.key.impl.InfusionStackKey;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.InfusionStackKey;
 import mekanism.api.Action;
 import mekanism.api.chemical.infuse.IInfusionHandler;
 import mekanism.api.chemical.infuse.InfusionStack;

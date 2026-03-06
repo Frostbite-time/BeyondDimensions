@@ -2,11 +2,11 @@ package com.wintercogs.beyonddimensions.common.menu;
 
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
-import com.wintercogs.beyonddimensions.common.block.entity.NetHopperBlockEntity;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
+import com.wintercogs.beyonddimensions.common.block.entity.NetHopperBlockEntity;
+import com.wintercogs.beyonddimensions.common.init.BDMenus;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
-import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -33,7 +33,7 @@ public class NetHopperMenu extends BDBaseMenu
 
     public NetHopperMenu(int containerId, Inventory playerInventory, @Nullable IStackHandler storage, NetHopperBlockEntity be)
     {
-        super(UIRegister.Net_Hopper_Menu.get(), containerId, playerInventory);
+        super(BDMenus.Net_Hopper_Menu.get(), containerId, playerInventory);
 
         this.be = be;
 

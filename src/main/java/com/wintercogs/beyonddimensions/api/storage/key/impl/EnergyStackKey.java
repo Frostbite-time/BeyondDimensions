@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.api.storage.key.impl;
 
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.longtype.EnergyType;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.api.storage.key.render.EnergyStackKeyRender;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.render.EnergyStackKeyRender;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -18,7 +18,7 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
 {
 
     public static final ResourceLocation ID =
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/energy");
+            ResourceLocation.tryBuild(BDConstants.MODID, "stack_type/energy");
 
     /**
      * 唯一实例（不区分空/非空）

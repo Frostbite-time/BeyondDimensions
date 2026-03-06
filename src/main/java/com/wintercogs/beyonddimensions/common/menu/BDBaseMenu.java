@@ -1,14 +1,14 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
 import com.google.common.base.Suppliers;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.init.BDPackets;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.SlotGroupSync;
-import com.wintercogs.beyonddimensions.network.Packet.both.QuickDataTagPacket;
-import com.wintercogs.beyonddimensions.Registry.PacketRegister;
+import com.wintercogs.beyonddimensions.network.packet.both.QuickDataTagPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -104,7 +104,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
             {
                 CompoundTag updateTag = new CompoundTag();
                 writeQuickDataTag(updateTag);
-                PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new QuickDataTagPacket(updateTag));
+                BDPackets.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new QuickDataTagPacket(updateTag));
             }
 
             setSlotGroupSyncsUpdate();
@@ -138,11 +138,11 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         writeQuickDataTag(updateTag);
         if (player.level().isClientSide())
         {
-            PacketRegister.INSTANCE.sendToServer(new QuickDataTagPacket(updateTag));
+            BDPackets.INSTANCE.sendToServer(new QuickDataTagPacket(updateTag));
         }
         else
         {
-            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new QuickDataTagPacket(updateTag));
+            BDPackets.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new QuickDataTagPacket(updateTag));
         }
     }
 

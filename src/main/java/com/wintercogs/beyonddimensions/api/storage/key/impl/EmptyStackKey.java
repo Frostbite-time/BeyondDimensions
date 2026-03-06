@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.api.storage.key.impl;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.api.storage.key.render.EmptyStackKeyRender;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.render.EmptyStackKeyRender;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackType>
 {
 
-    public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/empty");
+    public static final ResourceLocation ID = ResourceLocation.tryBuild(BDConstants.MODID, "stack_type/empty");
     public static final EmptyStackKey INSTANCE = new EmptyStackKey();
 
     private EmptyStackKey()
@@ -73,7 +73,7 @@ public final class EmptyStackKey implements IStackKey<EmptyStackKey.EmptyStackTy
     @Override
     public String getModId()
     {
-        return BeyondDimensions.MODID;
+        return BDConstants.MODID;
     }
 
     @Override

@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.api.capability.helper.ordered;
 
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SlurryStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.SlurryStackKey;
 import mekanism.api.Action;
 import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.SlurryStack;

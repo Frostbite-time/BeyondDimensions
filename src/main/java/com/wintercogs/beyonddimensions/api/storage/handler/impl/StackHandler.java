@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.api.storage.handler.impl;
 
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;

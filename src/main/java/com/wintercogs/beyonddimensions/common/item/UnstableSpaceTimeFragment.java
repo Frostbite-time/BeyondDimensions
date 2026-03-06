@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.item;
 
-import com.wintercogs.beyonddimensions.common.init.ModItems;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -68,7 +68,7 @@ public class UnstableSpaceTimeFragment extends Item
             return;
         }
 
-        ItemStack stable = new ItemStack(ModItems.STABLE_SPACE_TIME_FRAGMENT.get(), stack.getCount());
+        ItemStack stable = new ItemStack(BDItems.STABLE_SPACE_TIME_FRAGMENT.get(), stack.getCount());
         player.getInventory().setItem(globalSlot, stable);
     }
 

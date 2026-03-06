@@ -1,19 +1,19 @@
 package com.wintercogs.beyonddimensions.common.menu.widget.slot;
 
-import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
-import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.common.init.ModFluids;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.init.BDFluidTags;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
-import com.wintercogs.beyonddimensions.common.init.ModFluidTags;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;
 import net.minecraft.world.entity.player.Player;
@@ -73,7 +73,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                         long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                         // 插入当前经验流体
-                        KeyAmount remaining = storage.insert(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source().get(), 1)), actualInsertFluid, false);
+                        KeyAmount remaining = storage.insert(new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source().get(), 1)), actualInsertFluid, false);
                         if (!remaining.isEmpty())
                         {
                             int needReturnXp = BDMath.clampLongToInt(remaining.amount() / 20); // 由于前面从int*20，这里除回去
@@ -208,7 +208,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     double currentLevel = XpUtil.levelAsDouble(player);
                     int wantConversionLevel = XpExchangeItem.getXpLevelPerAction(carriedItem);
 
-                    if (actualStack.key() instanceof FluidStackKey fluidStackKey && fluidStackKey.hasTag(ModFluidTags.C_EXPERIENCE))
+                    if (actualStack.key() instanceof FluidStackKey fluidStackKey && fluidStackKey.hasTag(BDFluidTags.C_EXPERIENCE))
                     {
                         handled.set(true); // 走到这一步说明已经进行了交互
                         if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
@@ -251,7 +251,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                             // 插入当前经验流体
-                            KeyAmount remaining = storage.insert(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source().get(), 1)), actualInsertFluid, false);
+                            KeyAmount remaining = storage.insert(new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source().get(), 1)), actualInsertFluid, false);
                             if (!remaining.isEmpty())
                             {
                                 int needReturnXp = BDMath.clampLongToInt(remaining.amount() / 20); // 由于前面从int*20，这里除回去

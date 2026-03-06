@@ -1,13 +1,13 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
-import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
-import com.wintercogs.beyonddimensions.common.init.ModBlockEntities;
-import com.wintercogs.beyonddimensions.common.init.ModFluids;
+import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import com.wintercogs.beyonddimensions.common.menu.NetHopperMenu;
 import net.minecraft.core.BlockPos;
@@ -63,7 +63,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
 
     public NetHopperBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.NET_HOPPER_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.NET_HOPPER_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                     if (xp > 0)
                     {
                         long xpFluid = xp * 20L;
-                        FluidStackKey xpKey = new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source().get(), 1));
+                        FluidStackKey xpKey = new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source().get(), 1));
 
                         if (storage.insert(xpKey, xpFluid, true).isEmpty())
                         {

@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.datagen;
 
 import com.simibubi.create.AllTags;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.common.init.ModBlocks;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
@@ -17,7 +17,7 @@ public class ModBlockTagProvider extends BlockTagsProvider
 
     public ModBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper)
     {
-        super(output, lookupProvider, BeyondDimensions.MODID, existingFileHelper);
+        super(output, lookupProvider, BDConstants.MODID, existingFileHelper);
     }
 
     @Override
@@ -25,35 +25,35 @@ public class ModBlockTagProvider extends BlockTagsProvider
     {
         // 标记以下方块使用镐子挖掘更快
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
-                .add(ModBlocks.NET_CONTROL.get())
-                .add(ModBlocks.NET_INTERFACE.get())
-                .add(ModBlocks.NET_PATHWAY.get())
-                .add(ModBlocks.NET_ENERGY_PATHWAY.get())
-                .add(ModBlocks.NET_TERMINAL_BLOCK.get())
-                .add(ModBlocks.NET_PUMP_BLOCK.get())
-                .add(ModBlocks.NET_HOPPER_BLOCK.get())
-                .add(ModBlocks.NET_FURNACE_BLOCK.get())
-                .add(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
-                .add(ModBlocks.RS_NET_PATHWAY.get())
-                .add(ModBlocks.ARS_SOURCE_PATHWAY.get())
-                .add(ModBlocks.MANA_POOL_PATHWAY.get())
-                .add(ModBlocks.SCHEMATICANNON_PATHWAY.get());
+                .add(BDBlocks.NET_CONTROL.get())
+                .add(BDBlocks.NET_INTERFACE.get())
+                .add(BDBlocks.NET_PATHWAY.get())
+                .add(BDBlocks.NET_ENERGY_PATHWAY.get())
+                .add(BDBlocks.NET_TERMINAL_BLOCK.get())
+                .add(BDBlocks.NET_PUMP_BLOCK.get())
+                .add(BDBlocks.NET_HOPPER_BLOCK.get())
+                .add(BDBlocks.NET_FURNACE_BLOCK.get())
+                .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .add(BDBlocks.RS_NET_PATHWAY.get())
+                .add(BDBlocks.ARS_SOURCE_PATHWAY.get())
+                .add(BDBlocks.MANA_POOL_PATHWAY.get())
+                .add(BDBlocks.SCHEMATICANNON_PATHWAY.get());
 
         // 防止被机械动力识别为可用于移动式存储的方块
         // （仅1.20.1用，应对机械动力本体的bug）
         tag(AllTags.AllBlockTags.NON_MOVABLE.tag)
-                .add(ModBlocks.NET_CONTROL.get())
-                .add(ModBlocks.NET_INTERFACE.get())
-                .add(ModBlocks.NET_PATHWAY.get())
-                .add(ModBlocks.NET_ENERGY_PATHWAY.get())
-                .add(ModBlocks.NET_TERMINAL_BLOCK.get())
-                .add(ModBlocks.NET_PUMP_BLOCK.get())
-                .add(ModBlocks.NET_HOPPER_BLOCK.get())
-                .add(ModBlocks.NET_FURNACE_BLOCK.get())
-                .add(ModBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
-                .add(ModBlocks.RS_NET_PATHWAY.get())
-                .add(ModBlocks.ARS_SOURCE_PATHWAY.get())
-                .add(ModBlocks.MANA_POOL_PATHWAY.get())
-                .add(ModBlocks.SCHEMATICANNON_PATHWAY.get());
+                .add(BDBlocks.NET_CONTROL.get())
+                .add(BDBlocks.NET_INTERFACE.get())
+                .add(BDBlocks.NET_PATHWAY.get())
+                .add(BDBlocks.NET_ENERGY_PATHWAY.get())
+                .add(BDBlocks.NET_TERMINAL_BLOCK.get())
+                .add(BDBlocks.NET_PUMP_BLOCK.get())
+                .add(BDBlocks.NET_HOPPER_BLOCK.get())
+                .add(BDBlocks.NET_FURNACE_BLOCK.get())
+                .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .add(BDBlocks.RS_NET_PATHWAY.get())
+                .add(BDBlocks.ARS_SOURCE_PATHWAY.get())
+                .add(BDBlocks.MANA_POOL_PATHWAY.get())
+                .add(BDBlocks.SCHEMATICANNON_PATHWAY.get());
     }
 }

@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.client.gui.widget.shared;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.resources.ResourceLocation;
 
@@ -23,7 +23,7 @@ public abstract class StatusButton extends IconButton
                            OnPress onPress)
     {
         // 给予一个默认图片用于构造父类
-        super(x, y, width, height, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/unkonw_thing"), iconX, iconY, iconWidth, iconHeight, onPress);
+        super(x, y, width, height, ResourceLocation.tryBuild(BDConstants.MODID, "widget/unkonw_thing"), iconX, iconY, iconWidth, iconHeight, onPress);
         initButton();
         setIcon(iconMap.get(currentState));
     }

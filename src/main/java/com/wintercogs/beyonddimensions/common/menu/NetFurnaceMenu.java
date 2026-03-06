@@ -3,13 +3,13 @@ package com.wintercogs.beyonddimensions.common.menu;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity;
+import com.wintercogs.beyonddimensions.common.init.BDMenus;
 import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.OrderedStackTypedSlot;
-import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -50,7 +50,7 @@ public class NetFurnaceMenu extends BDBaseMenu
 
     public NetFurnaceMenu(int containerId, Inventory playerInventory, NetFurnaceBlockEntity be)
     {
-        super(UIRegister.Net_Furnace_Menu.get(), containerId, playerInventory);
+        super(BDMenus.Net_Furnace_Menu.get(), containerId, playerInventory);
 
         this.be = be;
 

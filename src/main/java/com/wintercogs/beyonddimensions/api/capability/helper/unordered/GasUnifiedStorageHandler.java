@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.api.capability.helper.unordered;
 
-import com.wintercogs.beyonddimensions.api.storage.key.impl.GasStackKey;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.GasStackKey;
 import mekanism.api.Action;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;

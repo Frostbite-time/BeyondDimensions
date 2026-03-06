@@ -1,10 +1,11 @@
 package com.wintercogs.beyonddimensions.api.storage.key.impl;
 
-import com.wintercogs.beyonddimensions.api.longtype.ManaType;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.api.storage.key.render.ManaStackKeyRender;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.longtype.ManaType;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.render.ManaStackKeyRender;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +18,7 @@ import java.util.stream.Stream;
 public class ManaStackKey extends LongStackKey<ManaType>
 {
 
-    public static final ResourceLocation ID = ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/mana");
+    public static final ResourceLocation ID = ResourceLocation.tryBuild(BDConstants.MODID, "stack_type/mana");
 
     /**
      * 唯一实例

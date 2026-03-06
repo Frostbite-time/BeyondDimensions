@@ -3,21 +3,22 @@ package com.wintercogs.beyonddimensions.client.gui;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.api.ButtonState;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
-import com.wintercogs.beyonddimensions.client.gui.widget.shared.IconButton;
+import com.wintercogs.beyonddimensions.api.ButtonState;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.widget.button.ReverseButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.button.SearchToggleButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.button.SortMethodButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.scroller.BigScroller;
-import com.wintercogs.beyonddimensions.integration.JEI.BDjeiPlugin;
+import com.wintercogs.beyonddimensions.client.gui.widget.shared.IconButton;
+import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
+import com.wintercogs.beyonddimensions.common.init.BDPackets;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
-import com.wintercogs.beyonddimensions.network.Packet.c2s.OpenNetGuiPacket;
-import com.wintercogs.beyonddimensions.Registry.PacketRegister;
-import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
+import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
+import com.wintercogs.beyonddimensions.integration.module.jei.BDjeiPlugin;
+import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.util.UIDataHelper;
 import dev.emi.emi.api.EmiApi;
 import net.minecraft.client.Minecraft;
@@ -142,11 +143,11 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             @Override
             protected void initButton()
             {
-                iconMap.put(ButtonState.SORT_QUANTITY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_quantity.png"));
-                iconMap.put(ButtonState.SORT_NAME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_name.png"));
-                iconMap.put(ButtonState.SORT_MODID, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_modid.png"));
-                iconMap.put(ButtonState.SORT_INSERTED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_inserted_time.png"));
-                iconMap.put(ButtonState.SORT_MODIFIED_TIME, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_modified_time.png"));
+                iconMap.put(ButtonState.SORT_QUANTITY, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/sort_quantity.png"));
+                iconMap.put(ButtonState.SORT_NAME, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/sort_name.png"));
+                iconMap.put(ButtonState.SORT_MODID, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/sort_modid.png"));
+                iconMap.put(ButtonState.SORT_INSERTED_TIME, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/sort_inserted_time.png"));
+                iconMap.put(ButtonState.SORT_MODIFIED_TIME, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/sort_modified_time.png"));
 
                 tooltipMap.put(ButtonState.SORT_QUANTITY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_quantity_second")));
                 tooltipMap.put(ButtonState.SORT_NAME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_name_second")));
@@ -182,7 +183,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addRenderableWidget(searchToggleButton);
 
         //页面增减按钮
-        addPageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 4, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/up_arrow.png"), button ->
+        addPageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 4, 16, 16, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/up_arrow.png"), button ->
         {
             if (this.height - 36 <= (rebuildImageHeight() + MID_SLOTS_HEIGHT)
                     || menu.getLines() >= 99)
@@ -202,7 +203,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addPageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.add_page")));
         addRenderableWidget(addPageButton);
 
-        removePageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 5, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/down_arrow.png"), button ->
+        removePageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 5, 16, 16, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/down_arrow.png"), button ->
         {
             if (menu.getLines() <= 2)
                 return;
@@ -341,7 +342,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     // 用于让子类重写工艺槽位按钮的函数
     protected void addCraftButton()
     {
-        craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/craft_button.png"), button ->
+        craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/craft_button.png"), button ->
         {
             UIDataHelper.currentPage = menu.lineData;
 
@@ -360,14 +361,14 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 CommonConfigRuntime.uiCraftButton = ButtonState.DISABLED;
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.set(ButtonState.DISABLED);
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.save();
-                PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_MENU));
+                BDPackets.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_MENU));
             }
             else
             {
                 CommonConfigRuntime.uiCraftButton = ButtonState.ENABLED;
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.set(ButtonState.ENABLED);
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.save();
-                PacketRegister.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
+                BDPackets.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
             }
         });
         craftButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.craft_toggle")));
@@ -498,7 +499,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         // 处理背包关闭热键
         if (this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey) ||
-                DimensionsShortKeys.OPEN_GUI_KEY.getKey() == mouseKey)
+                BDShortKeys.OPEN_GUI_KEY.getKey() == mouseKey)
         {
             onClose();
             return true;

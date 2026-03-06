@@ -2,16 +2,16 @@ package com.wintercogs.beyonddimensions.common.block.entity;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
+import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
-import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
-import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.common.init.ModBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.machine.FilterMode;
 import com.wintercogs.beyonddimensions.common.menu.NetPumpMenu;
 import net.minecraft.core.BlockPos;
@@ -54,7 +54,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
 
     public NetPumpBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.NET_PUMP_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.NET_PUMP_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     @Override

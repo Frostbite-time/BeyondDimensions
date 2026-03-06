@@ -1,15 +1,15 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.api.ButtonState;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
+import com.wintercogs.beyonddimensions.api.ButtonState;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.IconButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.StatusButton;
+import com.wintercogs.beyonddimensions.common.init.BDPackets;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
-import com.wintercogs.beyonddimensions.network.Packet.c2s.ClickTransferCraftButtonPacket;
-import com.wintercogs.beyonddimensions.Registry.PacketRegister;
+import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
+import com.wintercogs.beyonddimensions.network.packet.c2s.ClickTransferCraftButtonPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -41,17 +41,17 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         super.init();
 
         //槽位转移按钮
-        transferCraftToInvButton = new IconButton(this.leftPos + 90, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/down_arrow.png"), button ->
+        transferCraftToInvButton = new IconButton(this.leftPos + 90, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/down_arrow.png"), button ->
         {
-            PacketRegister.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(false));
+            BDPackets.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(false));
         });
         transferCraftToInvButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.transfer_to_inv")));
         addRenderableWidget(transferCraftToInvButton);
 
 
-        transferCraftToStorageButton = new IconButton(this.leftPos + 81, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/up_arrow.png"), button ->
+        transferCraftToStorageButton = new IconButton(this.leftPos + 81, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/up_arrow.png"), button ->
         {
-            PacketRegister.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(true));
+            BDPackets.INSTANCE.sendToServer(new ClickTransferCraftButtonPacket(true));
         });
         transferCraftToStorageButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.transfer_to_storage")));
         addRenderableWidget(transferCraftToStorageButton);
@@ -70,8 +70,8 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
             @Override
             protected void initButton()
             {
-                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_asc.png"));
-                iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/sort_desc.png"));
+                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/sort_asc.png"));
+                iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/sort_desc.png"));
 
                 tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_storage")));
                 tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_inv")));

@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.api.storage.key.impl;
 
-import com.wintercogs.beyonddimensions.api.storage.key.render.ChemicalStackKeyRender;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.storage.key.render.ChemicalStackKeyRender;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.infuse.InfusionStack;
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 public final class InfusionStackKey implements IStackKey<InfusionStack>
 {
     public static final ResourceLocation ID =
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemicals/infuse");
+            ResourceLocation.tryBuild(BDConstants.MODID, "stack_type/chemicals/infuse");
 
     public static final InfusionStackKey EMPTY = new InfusionStackKey(MekanismAPI.EMPTY_INFUSE_TYPE);
 

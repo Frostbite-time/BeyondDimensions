@@ -3,8 +3,8 @@ package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.init.ModItems;
-import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
+import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -38,7 +38,7 @@ public class NetCreater extends Item
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
         tooltipComponents.add(
                 Component.translatable("tooltip.beyonddimensions.network_open_key",
-                                DimensionsShortKeys.OPEN_GUI_KEY.getKey().getDisplayName())
+                                BDShortKeys.OPEN_GUI_KEY.getKey().getDisplayName())
                         .withStyle(ChatFormatting.DARK_GRAY)
         );
     }
@@ -80,7 +80,7 @@ public class NetCreater extends Item
             // 为新网络添加一些时空碎片
             if (newNet != null)
             {
-                ItemStack timeCrystal = new ItemStack(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
+                ItemStack timeCrystal = new ItemStack(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
                 newNet.getUnifiedStorage().insert(new ItemStackKey(timeCrystal), 64, false);
             }
         }

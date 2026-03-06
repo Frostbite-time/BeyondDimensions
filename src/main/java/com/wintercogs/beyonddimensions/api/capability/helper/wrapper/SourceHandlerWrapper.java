@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.api.capability.helper.wrapper;
 
 import com.wintercogs.beyonddimensions.api.longtype.SourceType;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.SourceStackKey;
-import com.wintercogs.beyonddimensions.integration.Ars.Caps.ISourceCap;
+import com.wintercogs.beyonddimensions.integration.module.ars.caps.ISourceCap;
 import net.minecraft.resources.ResourceLocation;
 
 public class SourceHandlerWrapper implements IStackHandlerWrapper<SourceType>

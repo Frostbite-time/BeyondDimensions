@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.LeftTabButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
 import com.wintercogs.beyonddimensions.common.item.BaseMachineItem;
@@ -50,9 +50,9 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FilterMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/ignore_filter.png"));
-                iconMap.put(FilterMode.WHITE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/white_filter.png"));
-                iconMap.put(FilterMode.BLACK, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/black_filter.png"));
+                iconMap.put(FilterMode.IGNORE, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/ignore_filter.png"));
+                iconMap.put(FilterMode.WHITE, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/white_filter.png"));
+                iconMap.put(FilterMode.BLACK, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/black_filter.png"));
 
                 tooltipMap.put(FilterMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_ignore")));
                 tooltipMap.put(FilterMode.WHITE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_white")));
@@ -78,8 +78,8 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_ignore.png"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/control_mode_not_working.png"));
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/control_mode_ignore.png"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/control_mode_not_working.png"));
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
                 tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
@@ -105,8 +105,8 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(HopperItemMode.DENY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_item_mode_deny.png"));
-                iconMap.put(HopperItemMode.ALLOW, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_item_mode_allow.png"));
+                iconMap.put(HopperItemMode.DENY, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_item_mode_deny.png"));
+                iconMap.put(HopperItemMode.ALLOW, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_item_mode_allow.png"));
 
 
                 tooltipMap.put(HopperItemMode.DENY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_item_mode_deny")));
@@ -133,8 +133,8 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(HopperXpMode.DENY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_xp_mode_deny.png"));
-                iconMap.put(HopperXpMode.ALLOW, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_xp_mode_allow.png"));
+                iconMap.put(HopperXpMode.DENY, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_xp_mode_deny.png"));
+                iconMap.put(HopperXpMode.ALLOW, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_xp_mode_allow.png"));
 
 
                 tooltipMap.put(HopperXpMode.DENY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_xp_mode_deny")));
@@ -161,8 +161,8 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(HopperNBTMode.DENY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_nbt_mode_deny.png"));
-                iconMap.put(HopperNBTMode.ALLOW, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_nbt_mode_allow.png"));
+                iconMap.put(HopperNBTMode.DENY, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_nbt_mode_deny.png"));
+                iconMap.put(HopperNBTMode.ALLOW, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_nbt_mode_allow.png"));
 
 
                 tooltipMap.put(HopperNBTMode.DENY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_nbt_mode_deny")));
@@ -189,8 +189,8 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(HopperFluidMode.DENY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_fluid_mode_deny.png"));
-                iconMap.put(HopperFluidMode.ALLOW, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_fluid_mode_allow.png"));
+                iconMap.put(HopperFluidMode.DENY, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_fluid_mode_deny.png"));
+                iconMap.put(HopperFluidMode.ALLOW, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_fluid_mode_allow.png"));
 
                 tooltipMap.put(HopperFluidMode.DENY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_fluid_mode_deny")));
                 tooltipMap.put(HopperFluidMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_fluid_mode_allow")));
@@ -216,12 +216,12 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(HopperRangeMode.RADIUS_LOWEST, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_range_mode_lowest.png"));
-                iconMap.put(HopperRangeMode.RADIUS_LOW, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_range_mode_low.png"));
-                iconMap.put(HopperRangeMode.RADIUS_MID, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_range_mode_mid.png"));
-                iconMap.put(HopperRangeMode.RADIUS_HIGH, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_range_mode_high.png"));
-                iconMap.put(HopperRangeMode.RADIUS_HIGHEST, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_range_mode_highest.png"));
-                iconMap.put(HopperRangeMode.CHUNK_MODE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "textures/gui/sprites/widget/hopper_range_mode_chunk.png"));
+                iconMap.put(HopperRangeMode.RADIUS_LOWEST, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_range_mode_lowest.png"));
+                iconMap.put(HopperRangeMode.RADIUS_LOW, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_range_mode_low.png"));
+                iconMap.put(HopperRangeMode.RADIUS_MID, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_range_mode_mid.png"));
+                iconMap.put(HopperRangeMode.RADIUS_HIGH, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_range_mode_high.png"));
+                iconMap.put(HopperRangeMode.RADIUS_HIGHEST, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_range_mode_highest.png"));
+                iconMap.put(HopperRangeMode.CHUNK_MODE, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/hopper_range_mode_chunk.png"));
 
                 tooltipMap.put(HopperRangeMode.RADIUS_LOWEST, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.magnet_range_mode_lowest")));
                 tooltipMap.put(HopperRangeMode.RADIUS_LOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.magnet_range_mode_low")));

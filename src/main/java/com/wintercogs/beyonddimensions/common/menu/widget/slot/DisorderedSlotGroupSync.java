@@ -3,9 +3,9 @@ package com.wintercogs.beyonddimensions.common.menu.widget.slot;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.common.init.BDPackets;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
-import com.wintercogs.beyonddimensions.network.Packet.s2c.DisorderedSlotGroupSyncPacket;
-import com.wintercogs.beyonddimensions.Registry.PacketRegister;
+import com.wintercogs.beyonddimensions.network.packet.s2c.DisorderedSlotGroupSyncPacket;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -216,7 +216,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
                 buildBatchedPackets(keys, counts, modifiedTimes, insertedTimes);
         for (DisorderedSlotGroupSyncPacket packet : packets)
         {
-            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) menu.player), packet);
+            BDPackets.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) menu.player), packet);
         }
 
         // 推进基线

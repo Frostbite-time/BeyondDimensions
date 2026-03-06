@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.api.capability.helper.unordered;
 
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SlurryStackKey;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.SlurryStackKey;
 import mekanism.api.Action;
 import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.SlurryStack;

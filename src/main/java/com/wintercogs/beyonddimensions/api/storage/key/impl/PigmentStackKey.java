@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.api.storage.key.impl;
 
-import com.wintercogs.beyonddimensions.api.storage.key.render.ChemicalStackKeyRender;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.storage.key.render.ChemicalStackKeyRender;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.pigment.PigmentStack;
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 public final class PigmentStackKey implements IStackKey<PigmentStack>
 {
     public static final ResourceLocation ID =
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemicals/pigment");
+            ResourceLocation.tryBuild(BDConstants.MODID, "stack_type/chemicals/pigment");
 
     public static final PigmentStackKey EMPTY = new PigmentStackKey(MekanismAPI.EMPTY_PIGMENT);
 

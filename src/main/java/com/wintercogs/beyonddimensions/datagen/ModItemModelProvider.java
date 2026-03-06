@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.common.init.ModFluids;
-import com.wintercogs.beyonddimensions.common.init.ModItems;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
@@ -17,29 +17,29 @@ public class ModItemModelProvider extends ItemModelProvider
 
     public ModItemModelProvider(PackOutput output, ExistingFileHelper existingFileHelper)
     {
-        super(output, BeyondDimensions.MODID, existingFileHelper);
+        super(output, BDConstants.MODID, existingFileHelper);
     }
 
     @Override
     protected void registerModels()
     {
-        basicItem(ModItems.NET_CREATER.get());
-        basicItem(ModItems.NET_MEMBER_INVITER.get());
-        basicItem(ModItems.NET_MANAGER_INVITER.get());
-        basicItem(ModItems.UNSTABLE_SPACE_TIME_FRAGMENT.get());
-        basicItem(ModItems.STABLE_SPACE_TIME_FRAGMENT.get());
-        basicItem(ModItems.SPACE_TIME_STABLE_FRAME.get());
-        basicItem(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
-        basicItem(ModItems.SPACE_TIME_BAR.get());
-        basicItem(ModItems.NET_TERMINAL_ITEM.get());
-        basicItem(ModItems.NET_GIFTER.get());
-        basicItem(ModItems.NET_DESTROYER.get());
-        basicItem(ModItems.NET_AE_STORAGE_CELL.get());
-        basicItem(ModItems.MATTER_COMPRESS_BALL.get());
-        basicItem(ModItems.NET_MAGNET_ITEM.get());
-        basicItem(ModItems.NET_FEEDER_ITEM.get());
-        basicItem(ModItems.NET_RESTOCKER_ITEM.get());
-        basicItem(ModItems.XP_EXCHANGE_ITEM.get());
+        basicItem(BDItems.NET_CREATER.get());
+        basicItem(BDItems.NET_MEMBER_INVITER.get());
+        basicItem(BDItems.NET_MANAGER_INVITER.get());
+        basicItem(BDItems.UNSTABLE_SPACE_TIME_FRAGMENT.get());
+        basicItem(BDItems.STABLE_SPACE_TIME_FRAGMENT.get());
+        basicItem(BDItems.SPACE_TIME_STABLE_FRAME.get());
+        basicItem(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get());
+        basicItem(BDItems.SPACE_TIME_BAR.get());
+        basicItem(BDItems.NET_TERMINAL_ITEM.get());
+        basicItem(BDItems.NET_GIFTER.get());
+        basicItem(BDItems.NET_DESTROYER.get());
+        basicItem(BDItems.NET_AE_STORAGE_CELL.get());
+        basicItem(BDItems.MATTER_COMPRESS_BALL.get());
+        basicItem(BDItems.NET_MAGNET_ITEM.get());
+        basicItem(BDItems.NET_FEEDER_ITEM.get());
+        basicItem(BDItems.NET_RESTOCKER_ITEM.get());
+        basicItem(BDItems.XP_EXCHANGE_ITEM.get());
 
         generateFluidBucketModels();
     }
@@ -49,7 +49,7 @@ public class ModItemModelProvider extends ItemModelProvider
      */
     private void generateFluidBucketModels()
     {
-        for (ModFluids.FluidEntry e : ModFluids.ALL)
+        for (BDFluids.FluidEntry e : BDFluids.ALL)
         {
             fluidBucketModel(e);
         }
@@ -63,7 +63,7 @@ public class ModItemModelProvider extends ItemModelProvider
      * "fluid": "<modid>:<fluidName>"
      * }
      */
-    private void fluidBucketModel(ModFluids.FluidEntry e)
+    private void fluidBucketModel(BDFluids.FluidEntry e)
     {
         // 模型文件名建议与桶物品注册名一致，避免资源定位搞混
         final String modelName = e.bucket().getId().getPath(); // 例如 "<fluid>_bucket"

@@ -1,35 +1,24 @@
 package com.wintercogs.beyonddimensions;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.ordered.*;
 import com.wintercogs.beyonddimensions.api.capability.helper.unordered.*;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.*;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.GasStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.InfusionStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.PigmentStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SlurryStackKey;
-import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.*;
-import com.wintercogs.beyonddimensions.common.init.ModBlocks;
-import com.wintercogs.beyonddimensions.common.init.ModBlockEntities;
-import com.wintercogs.beyonddimensions.client.init.ModBlockRenders;
-import com.wintercogs.beyonddimensions.common.init.ModFluids;
-import com.wintercogs.beyonddimensions.integration.AE.BD_AEPlugin;
-import com.wintercogs.beyonddimensions.integration.AEFlux.BD_AEFluxPlugin;
-import com.wintercogs.beyonddimensions.integration.AEMEK.BD_AEMEKPlugin;
-import com.wintercogs.beyonddimensions.integration.AE_Ars.BD_AE_ArsPlugin;
-import com.wintercogs.beyonddimensions.integration.Ars.BD_ArsCaps;
-import com.wintercogs.beyonddimensions.integration.Botania.BD_BotaniaPlugin;
-import com.wintercogs.beyonddimensions.integration.Botania.HudOverlay.ManaPoolPathwayOverlay;
-import com.wintercogs.beyonddimensions.integration.Curios.BD_CuriosPlugin;
-import com.wintercogs.beyonddimensions.integration.Polymorph.PolymorphPlug;
-import com.wintercogs.beyonddimensions.integration.RS.BD_RSPlugin;
-import com.wintercogs.beyonddimensions.integration.botania_ae.BD_AEBotaniaPlugin;
-import com.wintercogs.beyonddimensions.common.init.ModCreativeModeTabs;
-import com.wintercogs.beyonddimensions.common.init.ModItems;
-import com.wintercogs.beyonddimensions.Registry.UIRegister;
+import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
+import com.wintercogs.beyonddimensions.common.init.*;
+import com.wintercogs.beyonddimensions.integration.module.ae2.BD_AEPlugin;
+import com.wintercogs.beyonddimensions.integration.module.appars.BD_AE_ArsPlugin;
+import com.wintercogs.beyonddimensions.integration.module.appbotania.BD_AEBotaniaPlugin;
+import com.wintercogs.beyonddimensions.integration.module.appflux.BD_AEFluxPlugin;
+import com.wintercogs.beyonddimensions.integration.module.appmek.BD_AEMEKPlugin;
+import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
+import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
+import com.wintercogs.beyonddimensions.integration.module.curios.BD_CuriosPlugin;
+import com.wintercogs.beyonddimensions.integration.module.rs.BD_RSPlugin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -41,7 +30,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -49,10 +37,9 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
 
-@Mod(BeyondDimensions.MODID)
+@Mod(BDConstants.MODID)
 public class BeyondDimensions
 {
-    public static final String MODID = "beyonddimensions";
     public static IEventBus MOD_EVENT_BUS;
 
     public static boolean MekLoaded = false; // 用于mek化学品存储
@@ -109,22 +96,22 @@ public class BeyondDimensions
 
 
         // 调用UIRegister的构造函数，从而注册所有UI
-        UIRegister.register(modEventBus);
+        BDMenus.register(modEventBus);
 
         // 注册创造模式菜单
-        ModCreativeModeTabs.register(modEventBus);
+        BDCreativeModeTabs.register(modEventBus);
 
         // 注册物品
-        ModItems.register(modEventBus);
+        BDItems.register(modEventBus);
 
         // 注册方块
-        ModBlocks.register(modEventBus);
+        BDBlocks.register(modEventBus);
 
         // 注册流体
-        ModFluids.register(modEventBus);
+        BDFluids.register(modEventBus);
 
         // 注册方块实体
-        ModBlockEntities.register(modEventBus);
+        BDBlockEntities.register(modEventBus);
 
         if (FMLEnvironment.dist == Dist.CLIENT)
         {
@@ -134,7 +121,7 @@ public class BeyondDimensions
         if (FMLEnvironment.dist == Dist.CLIENT)
         {
             // 注册方块实体渲染
-            modEventBus.addListener(ModBlockRenders::onRegisterRenderers);
+            modEventBus.addListener(BDBlockRenders::onRegisterRenderers);
         }
 
     }
@@ -205,7 +192,7 @@ public class BeyondDimensions
             Create_Loaded = true;
         }
 
-        ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
+        BDBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -347,26 +334,4 @@ public class BeyondDimensions
         LOGGER.info("维度网络初始化完成(服务端)");
     }
 
-
-    // 你可以使用EventBusSubscriber来自动注册类中所有标注了@SubscribeEvent的静态方法。
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event)
-        {
-            // 一些客户端初始代码
-            LOGGER.info("维度网络初始化完成(客户端)");
-            UIRegister.registerScreens(event);
-
-            if (PolymorphLoaded)
-            {
-                PolymorphPlug.register();
-            }
-            if (Botania_Loaded)
-            {
-                MinecraftForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);
-            }
-        }
-    }
 }

@@ -1,12 +1,12 @@
 package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
-import com.wintercogs.beyonddimensions.common.init.ModFluids;
+import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
+import com.wintercogs.beyonddimensions.common.init.BDFluidTags;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.machine.XpTransferSpeedMode;
-import com.wintercogs.beyonddimensions.common.init.ModFluidTags;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;
 import net.minecraft.core.Holder;
@@ -123,7 +123,7 @@ public class XpExchangeItem extends Item
         final UnifiedStorage storage = net.getUnifiedStorage();
 
         // 经验流体候选列表：优先自家 XP 流体，其次为所有带 C_EXPERIENCE 标签的其它流体
-        final Fluid canonicalXp = ModFluids.XP_FLUID.source().get();
+        final Fluid canonicalXp = BDFluids.XP_FLUID.source().get();
 
         if (currentLevel > targetLevel)
         {
@@ -212,7 +212,7 @@ public class XpExchangeItem extends Item
         final Registry<Fluid> reg = level.registryAccess().registryOrThrow(Registries.FLUID);
         final LinkedHashSet<Fluid> set = new LinkedHashSet<>();
         // 追加所有带 C_EXPERIENCE 标签的流体
-        reg.getTag(ModFluidTags.C_EXPERIENCE).ifPresent((HolderSet<Fluid> holders) -> {
+        reg.getTag(BDFluidTags.C_EXPERIENCE).ifPresent((HolderSet<Fluid> holders) -> {
             for (Holder<Fluid> h : holders)
             {
                 set.add(h.value());

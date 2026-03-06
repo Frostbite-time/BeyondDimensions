@@ -3,9 +3,9 @@ package com.wintercogs.beyonddimensions.common.menu;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetControlAction;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PlayerPermissionInfo;
-import com.wintercogs.beyonddimensions.network.Packet.s2c.PlayerPermissionInfoPacket;
-import com.wintercogs.beyonddimensions.Registry.PacketRegister;
-import com.wintercogs.beyonddimensions.Registry.UIRegister;
+import com.wintercogs.beyonddimensions.common.init.BDMenus;
+import com.wintercogs.beyonddimensions.common.init.BDPackets;
+import com.wintercogs.beyonddimensions.network.packet.s2c.PlayerPermissionInfoPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -36,7 +36,7 @@ public class NetControlMenu extends BDBaseMenu
 
     public NetControlMenu(int containerId, Inventory playerInventory)
     {
-        super(UIRegister.Net_Control_Menu.get(), containerId, playerInventory);
+        super(BDMenus.Net_Control_Menu.get(), containerId, playerInventory);
 
         if (!player.level().isClientSide())
         {
@@ -108,7 +108,7 @@ public class NetControlMenu extends BDBaseMenu
 
     public void sendPlayerInfo()
     {
-        PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new PlayerPermissionInfoPacket(playerInfo));
+        BDPackets.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new PlayerPermissionInfoPacket(playerInfo));
     }
 
     public void loadPlayerInfo(HashMap<UUID, PlayerPermissionInfo> playerInfo)

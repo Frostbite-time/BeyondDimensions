@@ -1,22 +1,22 @@
 package com.wintercogs.beyonddimensions.common.menu.widget.slot;
 
-import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
-import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
-import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
+import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.init.ModFluids;
+import com.wintercogs.beyonddimensions.common.init.BDFluidTags;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
+import com.wintercogs.beyonddimensions.common.init.BDPackets;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
-import com.wintercogs.beyonddimensions.network.Packet.s2c.OrderedStackTypedSlotPacket;
-import com.wintercogs.beyonddimensions.Registry.PacketRegister;
-import com.wintercogs.beyonddimensions.common.init.ModFluidTags;
+import com.wintercogs.beyonddimensions.network.packet.s2c.OrderedStackTypedSlotPacket;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;
 import net.minecraft.server.level.ServerPlayer;
@@ -80,7 +80,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                         // 插入当前经验流体
-                        KeyAmount remaining = storage.insert(getSlotIndex(), new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source().get(), 1)), actualInsertFluid, false);
+                        KeyAmount remaining = storage.insert(getSlotIndex(), new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source().get(), 1)), actualInsertFluid, false);
                         if (!remaining.isEmpty())
                         {
                             int needReturnXp = BDMath.clampLongToInt(remaining.amount() / 20); // 由于前面从int*20，这里除回去
@@ -232,7 +232,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         double currentLevel = XpUtil.levelAsDouble(player);
                         int wantConversionLevel = XpExchangeItem.getXpLevelPerAction(carriedItem);
 
-                        if (actualStack.key() instanceof FluidStackKey fluidStackKey && fluidStackKey.hasTag(ModFluidTags.C_EXPERIENCE))
+                        if (actualStack.key() instanceof FluidStackKey fluidStackKey && fluidStackKey.hasTag(BDFluidTags.C_EXPERIENCE))
                         {
                             if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
                             {
@@ -502,12 +502,12 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
             init = true;
 
             lastStack = currentStack;
-            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) menu.player), new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
+            BDPackets.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) menu.player), new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
         }
         else if (!Objects.equals(currentStack, lastStack))
         {
             lastStack = currentStack;
-            PacketRegister.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) menu.player), new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
+            BDPackets.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) menu.player), new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
         }
     }
 

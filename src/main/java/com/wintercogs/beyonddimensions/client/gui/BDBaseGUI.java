@@ -1,13 +1,13 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.init.BDPackets;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
-import com.wintercogs.beyonddimensions.network.Packet.both.CallSeverClickPacket;
-import com.wintercogs.beyonddimensions.network.Packet.c2s.BatchTransferPacket;
-import com.wintercogs.beyonddimensions.Registry.PacketRegister;
+import com.wintercogs.beyonddimensions.network.packet.both.CallSeverClickPacket;
+import com.wintercogs.beyonddimensions.network.packet.c2s.BatchTransferPacket;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -168,7 +168,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 clickItem = sSlot.getVanillaActualStack();
                 if (!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem.key()))
                 {
-                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(clickItem, false));
+                    BDPackets.INSTANCE.sendToServer(new BatchTransferPacket(clickItem, false));
                 }
                 else if (!clickItem.isEmpty() && clickItem.key() instanceof ItemStackKey itemStackKey)
                 {
@@ -185,7 +185,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 // 因为操作基本全由服务端处理
                 if (lastInvClickedSlot == slotId && !lastInvClickedStack.isEmpty())
                 {
-                    PacketRegister.INSTANCE.sendToServer(new BatchTransferPacket(new KeyAmount(new ItemStackKey(lastInvClickedStack), lastInvClickedStack.getCount()), true));
+                    BDPackets.INSTANCE.sendToServer(new BatchTransferPacket(new KeyAmount(new ItemStackKey(lastInvClickedStack), lastInvClickedStack.getCount()), true));
                 }
                 else if (menu.inventoryStartIndex <= slotId && slotId < menu.inventoryEndIndex)
                 {
@@ -194,7 +194,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 }
 
             }
-            PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, true));
+            BDPackets.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, true));
         }
         else
         {
@@ -204,12 +204,12 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 {
                     // 对于标记槽位
                     clickItem = sSlot.getVanillaActualStack();
-                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
+                    BDPackets.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
                 }
                 else
                 {
                     clickItem = sSlot.getVanillaActualStack();
-                    PacketRegister.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
+                    BDPackets.INSTANCE.sendToServer(new CallSeverClickPacket(slotId, clickItem, mouseButton, false));
                 }
             }
         }

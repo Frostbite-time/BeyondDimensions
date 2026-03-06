@@ -2,23 +2,23 @@ package com.wintercogs.beyonddimensions.common.block.entity;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
-import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.util.CapCtx;
 import com.wintercogs.beyonddimensions.api.util.CommonHandler;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
-import com.wintercogs.beyonddimensions.common.init.ModBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
-import com.wintercogs.beyonddimensions.common.init.ModItems;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
+import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.util.SidedCapId;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -103,7 +103,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
     public NetInterfaceBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(), pos, blockState);
         // 接口能力与网络id不强相关，无需添加任务
     }
 
@@ -394,7 +394,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                 }
             }
         }
-        ItemStack ball = new ItemStack(ModItems.MATTER_COMPRESS_BALL.get(), 1);
+        ItemStack ball = new ItemStack(BDItems.MATTER_COMPRESS_BALL.get(), 1);
         if (!dropList.isEmpty())
         {
             MatterCompressionBall.setIStackList(ball, dropList);

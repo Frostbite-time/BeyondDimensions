@@ -5,9 +5,9 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.NetControlAction;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.client.gui.widget.button.PermissionInfoButton;
+import com.wintercogs.beyonddimensions.common.init.BDPackets;
 import com.wintercogs.beyonddimensions.common.menu.NetControlMenu;
-import com.wintercogs.beyonddimensions.network.Packet.c2s.NetControlActionPacket;
-import com.wintercogs.beyonddimensions.Registry.PacketRegister;
+import com.wintercogs.beyonddimensions.network.packet.c2s.NetControlActionPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
@@ -132,7 +132,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if (currentPlayerId != null)
                     {
-                        PacketRegister.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetOwner));
+                        BDPackets.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetOwner));
                     }
                 }
         ).pos(leftPos + 110, topPos + 60).size(100, 20).build();
@@ -143,7 +143,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if (currentPlayerId != null)
                     {
-                        PacketRegister.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetManager));
+                        BDPackets.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.SetManager));
                     }
                 }
         ).pos(leftPos + 110, topPos + 60 + 25).size(100, 20).build();
@@ -154,7 +154,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if (currentPlayerId != null)
                     {
-                        PacketRegister.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemoveManager));
+                        BDPackets.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemoveManager));
                     }
                 }
         ).pos(leftPos + 110, topPos + 60 + 50).size(100, 20).build();
@@ -165,7 +165,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 button -> {
                     if (currentPlayerId != null)
                     {
-                        PacketRegister.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemovePlayer));
+                        BDPackets.INSTANCE.sendToServer(new NetControlActionPacket(currentPlayerId, NetControlAction.RemovePlayer));
                     }
                 }
         ).pos(leftPos + 110, topPos + 60 + 75).size(100, 20).build();

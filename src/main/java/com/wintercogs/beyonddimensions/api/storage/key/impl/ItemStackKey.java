@@ -1,11 +1,12 @@
 package com.wintercogs.beyonddimensions.api.storage.key.impl;
 
-import com.wintercogs.beyonddimensions.api.storage.key.render.ItemStackKeyRender;
-import com.wintercogs.beyonddimensions.api.util.NbtEq;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.render.ItemStackKeyRender;
+import com.wintercogs.beyonddimensions.api.util.NbtEq;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.NbtCanonicalBytesHelper;
 import com.wintercogs.beyonddimensions.util.RegistryUtil;
@@ -35,7 +36,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
 {
 
     public static final ResourceLocation ID =
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/item");
+            ResourceLocation.tryBuild(BDConstants.MODID, "stack_type/item");
 
     public static final ItemStackKey EMPTY = new ItemStackKey(Items.AIR, null, null);
 

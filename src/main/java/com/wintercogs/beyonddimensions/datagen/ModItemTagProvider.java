@@ -1,7 +1,8 @@
 package com.wintercogs.beyonddimensions.datagen;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.integration.RS.Tags.RSTags;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.integration.module.rs.tags.RSTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
@@ -16,7 +17,7 @@ public class ModItemTagProvider extends ItemTagsProvider
 {
     public ModItemTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagLookup<Block>> blockTags, @Nullable ExistingFileHelper existingFileHelper)
     {
-        super(output, lookupProvider, blockTags, BeyondDimensions.MODID, existingFileHelper);
+        super(output, lookupProvider, blockTags, BDConstants.MODID, existingFileHelper);
     }
 
     @Override

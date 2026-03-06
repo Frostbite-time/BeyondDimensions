@@ -1,18 +1,18 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
 import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ItemStackTypedHandler;
-import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
-import com.wintercogs.beyonddimensions.api.util.CombinedItemHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.api.util.CombinedItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.common.block.NetFurnaceBlock;
-import com.wintercogs.beyonddimensions.common.init.ModBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
-import com.wintercogs.beyonddimensions.common.init.ModItems;
 import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
@@ -259,7 +259,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
 
     public NetFurnaceBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     //--- 能力注册 (通过事件) ---
@@ -846,7 +846,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                 }
             }
         }
-        ItemStack ball = new ItemStack(ModItems.MATTER_COMPRESS_BALL.get(), 1);
+        ItemStack ball = new ItemStack(BDItems.MATTER_COMPRESS_BALL.get(), 1);
         if (!dropList.isEmpty())
         {
             MatterCompressionBall.setIStackList(ball, dropList);

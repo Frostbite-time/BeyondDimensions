@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.api.storage.key.impl;
 
-import com.wintercogs.beyonddimensions.api.storage.key.render.ChemicalStackKeyRender;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.storage.key.render.ChemicalStackKeyRender;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 public final class GasStackKey implements IStackKey<GasStack>
 {
     public static final ResourceLocation ID =
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/chemicals/gas");
+            ResourceLocation.tryBuild(BDConstants.MODID, "stack_type/chemicals/gas");
 
     public static final GasStackKey EMPTY = new GasStackKey(MekanismAPI.EMPTY_GAS);
 

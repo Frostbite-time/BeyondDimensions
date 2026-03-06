@@ -1,11 +1,11 @@
 package com.wintercogs.beyonddimensions.api.storage.key.impl;
 
-import com.wintercogs.beyonddimensions.api.storage.key.render.FluidStackKeyRender;
-import com.wintercogs.beyonddimensions.api.util.NbtEq;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.render.FluidStackKeyRender;
+import com.wintercogs.beyonddimensions.api.util.NbtEq;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.NbtCanonicalBytesHelper;
 import com.wintercogs.beyonddimensions.util.RegistryUtil;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 public final class FluidStackKey implements IStackKey<FluidStack>
 {
     public static final ResourceLocation ID =
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "stack_type/fluid");
+            ResourceLocation.tryBuild(BDConstants.MODID, "stack_type/fluid");
 
     public static final FluidStackKey EMPTY = new FluidStackKey(Fluids.EMPTY, null);
 

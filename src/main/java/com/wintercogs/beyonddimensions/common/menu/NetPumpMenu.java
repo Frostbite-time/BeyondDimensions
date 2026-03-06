@@ -2,12 +2,12 @@ package com.wintercogs.beyonddimensions.common.menu;
 
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
-import com.wintercogs.beyonddimensions.common.block.entity.NetPumpBlockEntity;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
+import com.wintercogs.beyonddimensions.common.block.entity.NetPumpBlockEntity;
+import com.wintercogs.beyonddimensions.common.init.BDMenus;
 import com.wintercogs.beyonddimensions.common.machine.FilterMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
-import com.wintercogs.beyonddimensions.Registry.UIRegister;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -34,7 +34,7 @@ public class NetPumpMenu extends BDBaseMenu
 
     public NetPumpMenu(int containerId, Inventory playerInventory, @Nullable IStackHandler storage, NetPumpBlockEntity be)
     {
-        super(UIRegister.Net_Pump_Menu.get(), containerId, playerInventory);
+        super(BDMenus.Net_Pump_Menu.get(), containerId, playerInventory);
 
         this.be = be;
 
