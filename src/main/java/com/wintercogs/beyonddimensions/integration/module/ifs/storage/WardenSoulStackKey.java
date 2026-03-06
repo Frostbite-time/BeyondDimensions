@@ -1,14 +1,14 @@
-package com.wintercogs.beyonddimensions.api.storage.key.impl;
+package com.wintercogs.beyonddimensions.integration.module.ifs.storage;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.api.longtype.WardenSoulType;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.LongStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.render.WardenSoulStackKeyRender;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -92,7 +92,7 @@ public class WardenSoulStackKey extends LongStackKey<WardenSoulType>
     @Override
     public String getModId()
     {
-        return BeyondDimensions.IFS_ModId;
+        return OtherModIds.INDUSTRIAL_FOREGOING_SOULS;
     }
 
     @Override

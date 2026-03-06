@@ -1,8 +1,7 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.wrapper;
+package com.wintercogs.beyonddimensions.integration.module.ifs.storage;
 
 import com.buuz135.industrialforegoingsouls.capabilities.ISoulHandler;
-import com.wintercogs.beyonddimensions.api.longtype.WardenSoulType;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.WardenSoulStackKey;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
 import net.minecraft.resources.ResourceLocation;
 
 public class WardenSoulHandlerWrapper implements IStackHandlerWrapper<WardenSoulType>

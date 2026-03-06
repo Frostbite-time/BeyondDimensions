@@ -1,10 +1,9 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.ordered;
+package com.wintercogs.beyonddimensions.integration.module.ifs.storage;
 
 import com.buuz135.industrialforegoingsouls.capabilities.ISoulHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.WardenSoulStackKey;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.resources.ResourceLocation;
 

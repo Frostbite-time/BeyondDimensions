@@ -264,18 +264,7 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .unlockedBy("unlock_xp_exchange_item", has(BDItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
 
-        if (BeyondDimensions.IFS_Loaded)
-        {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.WARDEN_SOUL_TAG_ITEM.get())
-                    .pattern("AAA")
-                    .pattern("BCB")
-                    .pattern("AAA")
-                    .define('A', Items.AMETHYST_SHARD)
-                    .define('B', BDItems.SPACE_TIME_BAR.get())
-                    .define('C', Items.ECHO_SHARD)
-                    .unlockedBy("unlock_warden_soul_tag_item", has(Items.ECHO_SHARD))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.IFS_ModId)));
-        }
+
 
         if (BeyondDimensions.ARS_Loaded)
         {

@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.integration.module.ifs.Item;
 
 import com.buuz135.industrialforegoingsouls.capabilities.ISoulHandler;
-import com.wintercogs.beyonddimensions.common.init.BDItems;
-import com.wintercogs.beyonddimensions.integration.module.ifs.BD_SoulCaps;
+import com.wintercogs.beyonddimensions.integration.module.ifs.BDSoulCaps;
+import com.wintercogs.beyonddimensions.integration.module.ifs.init.IFSModuleItems;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
@@ -50,11 +50,9 @@ public class WardenSoulTagItem extends Item
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
         event.registerItem(
-                BD_SoulCaps.ITEM,
+                BDSoulCaps.ITEM,
                 (stack, ctx) -> WardenSoulTagItem.EMPTY_CONTAINER,
-                BDItems.WARDEN_SOUL_TAG_ITEM.get()
+                IFSModuleItems.WARDEN_SOUL_TAG_ITEM.get()
         );
     }
-
-
 }

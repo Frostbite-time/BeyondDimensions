@@ -18,7 +18,7 @@ import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.create.blocks.entities.SchematicannonPathWayBlockEntity;
-import com.wintercogs.beyonddimensions.integration.module.ifs.BD_SoulCaps;
+import com.wintercogs.beyonddimensions.integration.module.ifs.BDSoulCaps;
 import com.wintercogs.beyonddimensions.integration.module.ifs.Item.WardenSoulTagItem;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -39,8 +39,6 @@ public class BeyondDimensions
 {
     public static IEventBus MOD_EVENT_BUS;
 
-    public static final String IFS_ModId = "industrialforegoingsouls"; //工业先锋-灵魂涌动
-    public static boolean IFS_Loaded = false;
     public static final String ARS_ModId = "ars_nouveau"; // 新生魔艺-魔源兼容
     public static boolean ARS_Loaded = false;
     public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
@@ -85,11 +83,6 @@ public class BeyondDimensions
     // 在此阶段检测模组列表
     private void constructMod(final FMLConstructModEvent event)
     {
-        if (ModList.get().isLoaded(IFS_ModId))
-        {
-            IFS_Loaded = true;
-            MOD_EVENT_BUS.addListener(WardenSoulTagItem::registerCapability);
-        }
         if (ModList.get().isLoaded(ARS_ModId))
         {
             ARS_Loaded = true;
@@ -142,21 +135,6 @@ public class BeyondDimensions
         StackHandlerWrapperHelper.stackWrappers.put(ItemStackKey.ID, ItemHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackKey.ID, FluidHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(EnergyStackKey.ID, EnergyHandlerWrapper::new);
-
-
-        if (IFS_Loaded)
-        {
-            // 注册监守者之魂
-            StackKeyRegistry.registerType(WardenSoulStackKey.INSTANCE);
-            CapabilityHelper.BlockCapabilityMap.put(WardenSoulStackKey.ID, com.buuz135.industrialforegoingsouls.capabilities.SoulCapabilities.BLOCK);
-            // 此处为自定义物品能力，因为原模组未提供物品能力
-            CapabilityHelper.ItemCapabilityMap.put(WardenSoulStackKey.ID, BD_SoulCaps.ITEM);
-            // 注册分化包装
-            CapabilityHelper.registerUSHandler(WardenSoulStackKey.INSTANCE, WardenSoulUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(WardenSoulStackKey.INSTANCE, WardenSoulStackTypedHandler::new);
-            // 注册堆叠处理包装
-            StackHandlerWrapperHelper.stackWrappers.put(WardenSoulStackKey.ID, WardenSoulHandlerWrapper::new);
-        }
 
         if (ARS_Loaded)
         {

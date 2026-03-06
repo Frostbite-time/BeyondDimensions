@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.integration.module.appifs;
 
 import com.buuz135.soulplied_energistics.applied.SoulAEKeyType;
 import com.buuz135.soulplied_energistics.applied.SoulKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.WardenSoulStackKey;
+import com.wintercogs.beyonddimensions.integration.module.ifs.storage.WardenSoulStackKey;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;

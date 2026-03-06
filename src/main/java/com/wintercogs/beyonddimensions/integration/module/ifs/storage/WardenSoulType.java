@@ -1,6 +1,7 @@
-package com.wintercogs.beyonddimensions.api.longtype;
+package com.wintercogs.beyonddimensions.integration.module.ifs.storage;
 
 import com.mojang.serialization.Codec;
+import com.wintercogs.beyonddimensions.api.longtype.LongType;
 import net.minecraft.network.chat.Component;
 
 // 工业先锋-监守者之魂

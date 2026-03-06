@@ -43,13 +43,9 @@ public class BDCreativeModeTabs
                         output.accept(BDItems.XP_EXCHANGE_ITEM);
 
                         for (BDFluids.FluidEntry e : BDFluids.ALL)
-                        { //注册所有桶
-                            output.accept(e.bucket().get());
-                        }
-
-                        if (BeyondDimensions.IFS_Loaded)
                         {
-                            output.accept(BDItems.WARDEN_SOUL_TAG_ITEM);
+                            //注册所有桶
+                            output.accept(e.bucket().get());
                         }
 
                         IntegrationManager.onItemCreativeTabCollect(itemDisplayParameters, output);

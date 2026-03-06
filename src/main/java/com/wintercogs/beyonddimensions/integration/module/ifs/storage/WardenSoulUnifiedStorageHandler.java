@@ -1,9 +1,8 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.unordered;
+package com.wintercogs.beyonddimensions.integration.module.ifs.storage;
 
 import com.buuz135.industrialforegoingsouls.capabilities.ISoulHandler;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.WardenSoulStackKey;
 import com.wintercogs.beyonddimensions.util.BDMath;
 
 public class WardenSoulUnifiedStorageHandler implements ISoulHandler

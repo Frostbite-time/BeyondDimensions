@@ -8,7 +8,7 @@ import com.ultramega.refinedtypes.type.source.SourceResource;
 import com.ultramega.refinedtypes.type.source.SourceResourceType;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.SourceStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.WardenSoulStackKey;
+import com.wintercogs.beyonddimensions.integration.module.ifs.storage.WardenSoulStackKey;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;

@@ -35,13 +35,11 @@ public class ModItemModelProvider extends BDItemModelProvider
         basicItem(BDItems.NET_TERMINAL_ITEM.get());
         basicItem(BDItems.NET_GIFTER.get());
         basicItem(BDItems.NET_DESTROYER.get());
-
         basicItem(BDItems.MATTER_COMPRESS_BALL.get());
         basicItem(BDItems.NET_MAGNET_ITEM.get());
         basicItem(BDItems.NET_FEEDER_ITEM.get());
         basicItem(BDItems.NET_RESTOCKER_ITEM.get());
         basicItem(BDItems.XP_EXCHANGE_ITEM.get());
-        basicItem(BDItems.WARDEN_SOUL_TAG_ITEM.get());
 
         generateFluidBucketModels();
     }

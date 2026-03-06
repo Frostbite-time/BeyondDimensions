@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.WardenSoulStackKey;
+import com.wintercogs.beyonddimensions.integration.module.ifs.storage.WardenSoulStackKey;
 import com.wintercogs.beyonddimensions.util.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
