@@ -34,7 +34,7 @@ public class BeyondDimensionsClient
         event.enqueueWork(() -> {
             BeyondDimensions.LOGGER.info("维度网络初始化完成(客户端)");
 
-            if (BeyondDimensions.Botania_Loaded)
+            if (Botania_Loaded)
             {
                 NeoForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);
             }

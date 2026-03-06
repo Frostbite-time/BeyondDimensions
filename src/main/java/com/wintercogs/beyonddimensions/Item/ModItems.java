@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Item;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.integration.ae2.item.NetAEStorageCell;
+import com.wintercogs.beyonddimensions.integration.AE.Item.NetAEStorageCell;
 import com.wintercogs.beyonddimensions.integration.IFS.Item.WardenSoulTagItem;
 import com.wintercogs.beyonddimensions.Item.Custom.*;
 import net.minecraft.world.item.Item;
@@ -82,6 +82,16 @@ public class ModItems
             () -> {
                 if (BeyondDimensions.IFS_Loaded)
                     return new WardenSoulTagItem(new Item.Properties());
+                else
+                    return new Item(new Item.Properties());
+            }
+    );
+
+    // AE存储磁盘 对于一个没有安装AE的游戏
+    public static final DeferredItem<Item> NET_AE_STORAGE_CELL = ITEMS.register("net_ae_storage_cell",
+            () -> {
+                if (BeyondDimensions.AELoaded)
+                    return new NetAEStorageCell(new Item.Properties());
                 else
                     return new Item(new Item.Properties());
             }

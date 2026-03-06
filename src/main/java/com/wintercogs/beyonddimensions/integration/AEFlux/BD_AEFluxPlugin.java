@@ -4,7 +4,7 @@ import com.glodblock.github.appflux.common.me.key.FluxKey;
 import com.glodblock.github.appflux.common.me.key.type.EnergyType;
 import com.glodblock.github.appflux.common.me.key.type.FluxKeyType;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.EnergyStackKey;
-import com.wintercogs.beyonddimensions.integration.ae2.AEHelper;
+import com.wintercogs.beyonddimensions.integration.AE.AEHelper;
 
 import java.util.Optional;
 

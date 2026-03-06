@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.integration.AE_IFS;
 import com.buuz135.soulplied_energistics.applied.SoulAEKeyType;
 import com.buuz135.soulplied_energistics.applied.SoulKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.WardenSoulStackKey;
-import com.wintercogs.beyonddimensions.integration.ae2.AEHelper;
+import com.wintercogs.beyonddimensions.integration.AE.AEHelper;
 
 import java.util.Optional;
 

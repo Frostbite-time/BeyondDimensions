@@ -3,8 +3,6 @@ package com.wintercogs.beyonddimensions.Item;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
-import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.integration.ae2.init.AE2ModuleItems;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -49,12 +47,15 @@ public class ModCreativeModeTabs
                             output.accept(e.bucket().get());
                         }
 
+                        if (BeyondDimensions.AELoaded)
+                        {
+                            output.accept(ModItems.NET_AE_STORAGE_CELL);
+                        }
+
                         if (BeyondDimensions.IFS_Loaded)
                         {
                             output.accept(ModItems.WARDEN_SOUL_TAG_ITEM);
                         }
-
-                        IntegrationManager.onItemCreativeTabCollect(itemDisplayParameters, output);
                     })
                     .build());
 
@@ -90,8 +91,6 @@ public class ModCreativeModeTabs
                         {
                             output.accept(ModBlocks.SCHEMATICANNON_PATHWAY);
                         }
-
-                        IntegrationManager.onBlockCreativeTabCollect(itemDisplayParameters, output);
                     })
                     .build());
 

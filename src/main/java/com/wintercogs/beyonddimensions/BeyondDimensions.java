@@ -16,6 +16,7 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
+import com.wintercogs.beyonddimensions.integration.AE.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.integration.AEFlux.BD_AEFluxPlugin;
 import com.wintercogs.beyonddimensions.integration.AE_Ars.BD_AE_ArsPlugin;
 import com.wintercogs.beyonddimensions.integration.AE_IFS.BD_AE_IFS_Plugin;
@@ -26,6 +27,7 @@ import com.wintercogs.beyonddimensions.integration.Curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.integration.IFS.BD_SoulCaps;
 import com.wintercogs.beyonddimensions.integration.IFS.Item.WardenSoulTagItem;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.RS.BD_RSPlugin;
 import com.wintercogs.beyonddimensions.integration.RSMek.BD_RSMekPlugin;
 import com.wintercogs.beyonddimensions.integration.RSTypes.BD_RSTypesPlugin;
@@ -258,6 +260,10 @@ public class BeyondDimensions
         // 为维度ME硬盘注册，其中BD_AEPlugin用于注册存储元件
         // BD_AEMEKPlugin与BD_AEFluxPlugin分别注册IStackType与AEKey之间的转换。
         // 物品、流体的转换由AEHelper的静态块负责
+        if (AELoaded)
+        {
+            BD_AEPlugin.register();
+        }
         if (AEFluxLoaded)
         {
             BD_AEFluxPlugin.register();
