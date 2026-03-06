@@ -1,20 +1,25 @@
 package com.wintercogs.beyonddimensions.datagen;
 
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
-import com.wintercogs.beyonddimensions.datagen.util.BDBlockTagsProvider;
+import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
+import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModBlockTagProvider extends BDBlockTagsProvider
+public class ModBlockTagProvider extends BlockTagsProvider
 {
 
     public ModBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
     {
-        super(output, lookupProvider);
+        super(output, lookupProvider, BDConstants.MODID);
     }
 
     @Override
@@ -37,5 +42,32 @@ public class ModBlockTagProvider extends BDBlockTagsProvider
                 .add(BDBlocks.NET_HOPPER_BLOCK.get())
                 .add(BDBlocks.NET_FURNACE_BLOCK.get())
                 .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
+
+        IntegrationManager.onBlockTagDatagen(provider, new IIntegrationModule.BlockTagAppender()
+        {
+            @Override
+            public void add(TagKey<Block> tag, Block... blocks)
+            {
+                ModBlockTagProvider.this.tag(tag).add(blocks);
+            }
+
+            @Override
+            public void addTag(TagKey<Block> tag, TagKey<Block> nestedTag)
+            {
+                ModBlockTagProvider.this.tag(tag).addTag(nestedTag);
+            }
+
+            @Override
+            public void addOptional(TagKey<Block> tag, Block block)
+            {
+                ModBlockTagProvider.this.tag(tag).addOptional(block);
+            }
+
+            @Override
+            public void addOptionalTag(TagKey<Block> tag, TagKey<Block> nestedTag)
+            {
+                ModBlockTagProvider.this.tag(tag).addOptionalTag(nestedTag);
+            }
+        });
     }
 }

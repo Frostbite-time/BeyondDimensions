@@ -18,7 +18,7 @@ public class CuriosIntegrationModule implements IIntegrationModule
     @Override
     public void onBootstrap(IEventBus modBus, IEventBus gameBus)
     {
-        modBus.addListener(BDCuriosPlugin::registerCapabilities);
+        modBus.addListener(CuriosCapAttach::registerCapabilities);
     }
 
     @Override
