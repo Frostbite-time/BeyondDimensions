@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.common.item;
 
 
-import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
 import com.wintercogs.beyonddimensions.common.init.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -37,7 +37,7 @@ public class NetCreater extends Item
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
         tooltipComponents.add(
                 Component.translatable("tooltip.beyonddimensions.network_open_key",
-                                DimensionsShortKeys.OPEN_GUI_KEY.getKey().getDisplayName())
+                                BDShortKeys.OPEN_GUI_KEY.getKey().getDisplayName())
                         .withStyle(ChatFormatting.DARK_GRAY)
         );
     }

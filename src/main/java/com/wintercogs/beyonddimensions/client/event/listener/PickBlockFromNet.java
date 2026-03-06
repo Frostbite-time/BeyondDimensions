@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.event.listener;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
+import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
 import com.wintercogs.beyonddimensions.network.packet.c2s.PickBlockFromNetPacket;
 import com.wintercogs.beyonddimensions.network.packet.s2c.PutHandItemToNetPacket;
 import net.minecraft.client.Minecraft;
@@ -24,7 +24,7 @@ public class PickBlockFromNet
     @SubscribeEvent
     public static void pickOrPutBlockFromNetMouse(ClientTickEvent.Post event)
     {
-        while (DimensionsShortKeys.MAIN_HAND_ITEM_TRANSFER_KEY.consumeClick())
+        while (BDShortKeys.MAIN_HAND_ITEM_TRANSFER_KEY.consumeClick())
         {
             Player player = Minecraft.getInstance().player;
             if (player == null || player.isCreative()) return; // 不影响原版创造模式

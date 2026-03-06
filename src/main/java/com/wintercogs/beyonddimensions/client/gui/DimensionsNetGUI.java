@@ -5,13 +5,13 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
-import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
 import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.client.gui.widget.button.ReverseButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.button.SearchToggleButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.button.SortMethodButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.scroller.BigScroller;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.IconButton;
+import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
@@ -498,7 +498,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         // 处理背包关闭热键
         if (this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey) ||
-                DimensionsShortKeys.OPEN_GUI_KEY.getKey() == mouseKey)
+                BDShortKeys.OPEN_GUI_KEY.getKey() == mouseKey)
         {
             onClose();
             return true;
