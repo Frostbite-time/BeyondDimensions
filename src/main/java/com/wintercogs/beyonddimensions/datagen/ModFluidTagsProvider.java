@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.FluidTagsProvider;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.common.Tags;
@@ -48,6 +49,18 @@ public class ModFluidTagsProvider extends FluidTagsProvider
             public void addTag(TagKey<Fluid> tag, TagKey<Fluid> nestedTag)
             {
                 ModFluidTagsProvider.this.tag(tag).addTag(nestedTag);
+            }
+
+            @Override
+            public void addOptional(TagKey<Fluid> tag, ResourceLocation fluidId)
+            {
+                ModFluidTagsProvider.this.tag(tag).addOptional(fluidId);
+            }
+
+            @Override
+            public void addOptionalTag(TagKey<Fluid> tag, ResourceLocation nestedTagId)
+            {
+                ModFluidTagsProvider.this.tag(tag).addOptionalTag(nestedTagId);
             }
         });
     }

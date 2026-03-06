@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.integration;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -53,6 +54,10 @@ public interface IIntegrationModule
         void add(TagKey<Block> tag, Block... blocks);
 
         void addTag(TagKey<Block> tag, TagKey<Block> nestedTag);
+
+        void addOptional(TagKey<Block> tag, ResourceLocation blockId);
+
+        void addOptionalTag(TagKey<Block> tag, ResourceLocation nestedTagId);
     }
 
     interface ItemTagAppender
@@ -60,6 +65,10 @@ public interface IIntegrationModule
         void add(TagKey<Item> tag, Item... items);
 
         void addTag(TagKey<Item> tag, TagKey<Item> nestedTag);
+
+        void addOptional(TagKey<Item> tag, ResourceLocation itemId);
+
+        void addOptionalTag(TagKey<Item> tag, ResourceLocation nestedTagId);
     }
 
     interface FluidTagAppender
@@ -67,6 +76,10 @@ public interface IIntegrationModule
         void add(TagKey<Fluid> tag, Fluid... fluids);
 
         void addTag(TagKey<Fluid> tag, TagKey<Fluid> nestedTag);
+
+        void addOptional(TagKey<Fluid> tag, ResourceLocation fluidId);
+
+        void addOptionalTag(TagKey<Fluid> tag, ResourceLocation nestedTagId);
     }
 }
 

@@ -78,7 +78,7 @@ public class RSModule implements IIntegrationModule
     @Override
     public void onBlockTagDatagen(HolderLookup.Provider provider, BlockTagAppender appender)
     {
-        appender.add(BlockTags.MINEABLE_WITH_PICKAXE, RSModuleBlocks.RS_NET_PATHWAY.get());
+        appender.addOptional(BlockTags.MINEABLE_WITH_PICKAXE, RSModuleBlocks.RS_NET_PATHWAY.getId());
     }
 
     @Override

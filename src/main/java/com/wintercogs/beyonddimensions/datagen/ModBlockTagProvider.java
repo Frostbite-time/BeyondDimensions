@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -60,6 +61,18 @@ public class ModBlockTagProvider extends BlockTagsProvider
             public void addTag(TagKey<Block> tag, TagKey<Block> nestedTag)
             {
                 ModBlockTagProvider.this.tag(tag).addTag(nestedTag);
+            }
+
+            @Override
+            public void addOptional(TagKey<Block> tag, ResourceLocation blockId)
+            {
+                ModBlockTagProvider.this.tag(tag).addOptional(blockId);
+            }
+
+            @Override
+            public void addOptionalTag(TagKey<Block> tag, ResourceLocation nestedTagId)
+            {
+                ModBlockTagProvider.this.tag(tag).addOptionalTag(nestedTagId);
             }
         });
     }
