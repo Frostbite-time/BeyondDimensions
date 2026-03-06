@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.module.ae2;
+package com.wintercogs.beyonddimensions.integration.module.ae2.me;
 
 import appeng.api.storage.cells.ICellHandler;
 import appeng.api.storage.cells.ISaveProvider;

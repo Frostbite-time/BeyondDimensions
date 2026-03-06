@@ -24,11 +24,7 @@ public class AEHelper
 
     static
     {
-        ISTACK_TO_AEKEY_MAP.put(ItemStackKey.ID, stackType -> Optional.ofNullable(AEItemKey.of((ItemStack) stackType.copyStack())));
-        ISTACK_TO_AEKEY_MAP.put(FluidStackKey.ID, stackType -> Optional.ofNullable(AEFluidKey.of((FluidStack) stackType.copyStack())));
 
-        AEKEY_TO_STACK_TYPE_MAP.put(AEKeyType.items(), key -> Optional.of(new ItemStackKey(((AEItemKey) key).toStack(1))));
-        AEKEY_TO_STACK_TYPE_MAP.put(AEKeyType.fluids(), key -> Optional.of(new FluidStackKey(((AEFluidKey) key).toStack(1))));
     }
 
 
