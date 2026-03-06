@@ -50,8 +50,6 @@ public class BeyondDimensions
 
     public static boolean MekLoaded = false; // 用于mek化学品存储
     public static final String MekanismMODID = "mekanism";
-    public static boolean AELoaded = false; // 用于添加存储元件
-    public static final String AE2MODID = "ae2";
     public static boolean EMILoaded = false; // 用于EMI兼容
     public static final String EMI_MODID = "emi";
     public static boolean JEILoaded = false; // 用于JEI兼容
@@ -127,10 +125,6 @@ public class BeyondDimensions
         if (ModList.get().isLoaded(MekanismMODID))
         {
             MekLoaded = true;
-        }
-        if (ModList.get().isLoaded(AE2MODID))
-        {
-            AELoaded = true;
         }
         if (ModList.get().isLoaded(EMI_MODID))
         {

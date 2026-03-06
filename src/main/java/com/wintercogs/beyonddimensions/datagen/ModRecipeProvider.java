@@ -267,19 +267,7 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .unlockedBy("unlock_xp_exchange_item", has(BDItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
 
-        if (BeyondDimensions.AELoaded)
-        {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.NET_AE_STORAGE_CELL.get())
-                    .pattern("ABA")
-                    .pattern("BDB")
-                    .pattern("CCC")
-                    .define('A', AEBlocks.QUARTZ_GLASS)
-                    .define('B', Items.DIAMOND)
-                    .define('C', BDItems.SPACE_TIME_BAR.get())
-                    .define('D', BDItems.SPACE_TIME_STABLE_FRAME.get())
-                    .unlockedBy("unlock_net_ae_storage_cell", has(BDItems.SPACE_TIME_BAR.get()))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.AE2MODID)));
-        }
+
 
         if (BeyondDimensions.RS_Loaded)
         {
