@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.ids.BDBlockIds;
 import com.wintercogs.beyonddimensions.common.block.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -16,40 +17,40 @@ public class BDBlocks
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(BDConstants.MODID);
 
-    public static final DeferredBlock<@NotNull Block> NET_CONTROL = registerBlock("net_control",
+    public static final DeferredBlock<@NotNull Block> NET_CONTROL = registerBlock(BDBlockIds.NET_CONTROL,
             NetControlBlock::new,
             BlockBehaviour.Properties.of().strength(4f));
 
-    public static final DeferredBlock<@NotNull Block> NET_INTERFACE = registerBlock("net_interface",
+    public static final DeferredBlock<@NotNull Block> NET_INTERFACE = registerBlock(BDBlockIds.NET_INTERFACE,
             NetInterfaceBlock::new,
             BlockBehaviour.Properties.of().strength(2f));
 
-    public static final DeferredBlock<@NotNull Block> NET_PATHWAY = registerBlock("net_pathway",
+    public static final DeferredBlock<@NotNull Block> NET_PATHWAY = registerBlock(BDBlockIds.NET_PATHWAY,
             NetPathwayBlock::new,
             BlockBehaviour.Properties.of().strength(2f));
 
-    public static final DeferredBlock<@NotNull Block> NET_ENERGY_PATHWAY = registerBlock("net_energy_pathway",
+    public static final DeferredBlock<@NotNull Block> NET_ENERGY_PATHWAY = registerBlock(BDBlockIds.NET_ENERGY_PATHWAY,
             NetEnergyPathwayBlock::new,
             BlockBehaviour.Properties.of().strength(2f));
 
-    public static final DeferredBlock<@NotNull Block> NET_TERMINAL_BLOCK = registerBlock("net_terminal_block",
+    public static final DeferredBlock<@NotNull Block> NET_TERMINAL_BLOCK = registerBlock(BDBlockIds.NET_TERMINAL_BLOCK,
             NetTerminalBlock::new,
             BlockBehaviour.Properties.of().strength(2f));
 
-    public static final DeferredBlock<@NotNull Block> NET_PUMP_BLOCK = registerBlock("net_pump_block",
+    public static final DeferredBlock<@NotNull Block> NET_PUMP_BLOCK = registerBlock(BDBlockIds.NET_PUMP_BLOCK,
             NetPumpBlock::new,
             BlockBehaviour.Properties.of().strength(2f));
 
-    public static final DeferredBlock<@NotNull Block> NET_HOPPER_BLOCK = registerBlock("net_hopper_block",
+    public static final DeferredBlock<@NotNull Block> NET_HOPPER_BLOCK = registerBlock(BDBlockIds.NET_HOPPER_BLOCK,
             NetHopperBlock::new,
             BlockBehaviour.Properties.of().strength(2f));
 
-    public static final DeferredBlock<@NotNull Block> NET_FURNACE_BLOCK = registerBlock("net_furnace_block",
+    public static final DeferredBlock<@NotNull Block> NET_FURNACE_BLOCK = registerBlock(BDBlockIds.NET_FURNACE_BLOCK,
             NetFurnaceBlock::new,
             BlockBehaviour.Properties.of().strength(2f));
 
     // 合成材料-维度链接框架
-    public static final DeferredBlock<@NotNull Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock("dimensional_connect_block",
+    public static final DeferredBlock<@NotNull Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock(BDBlockIds.DIMENSIONAL_CONNECT_BLOCK,
             Block::new,
             BlockBehaviour.Properties.of().strength(2f));
 
