@@ -12,6 +12,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.item.DynamicFluidContainerModel;
 import net.neoforged.neoforge.registries.DeferredBlock;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -21,6 +22,9 @@ public abstract class BDModelProvider extends ModelProvider
     {
         super(output, BDConstants.MODID);
     }
+
+    @Override
+    public abstract @NotNull String getName();
 
     /**
      * 生成单个流体桶模型：

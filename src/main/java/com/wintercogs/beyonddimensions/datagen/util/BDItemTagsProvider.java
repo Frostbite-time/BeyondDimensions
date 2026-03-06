@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.ItemTagsProvider;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -13,4 +14,7 @@ public abstract class BDItemTagsProvider extends ItemTagsProvider
     {
         super(output, lookupProvider, BDConstants.MODID);
     }
+
+    @Override
+    public abstract @NotNull String getName();
 }
