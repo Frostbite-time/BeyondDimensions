@@ -2,19 +2,17 @@ package com.wintercogs.beyonddimensions.datagen;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
+import com.wintercogs.beyonddimensions.datagen.util.BDBlockStateProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.registries.RegistryObject;
 
-public class ModBlockStateProvider extends BlockStateProvider
+public class ModBlockStateProvider extends BDBlockStateProvider
 {
 
     public ModBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper)
     {
-        super(output, BDConstants.MODID, exFileHelper);
+        super(output, exFileHelper);
     }
 
     @Override
@@ -36,8 +34,4 @@ public class ModBlockStateProvider extends BlockStateProvider
         simpleBlockItem(BDBlocks.SCHEMATICANNON_PATHWAY.get(), models().getExistingFile(ResourceLocation.tryBuild(BDConstants.MODID, "schematicannon_pathway")));
     }
 
-    private void blockWithItem(RegistryObject<Block> deferredBlock)
-    {
-        simpleBlockWithItem(deferredBlock.get(), cubeAll(deferredBlock.get()));
-    }
 }

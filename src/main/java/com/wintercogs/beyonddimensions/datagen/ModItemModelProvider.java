@@ -1,23 +1,17 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
+import com.wintercogs.beyonddimensions.datagen.util.BDItemModelProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.client.model.generators.ItemModelBuilder;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.client.model.generators.loaders.DynamicFluidContainerModelBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
-public class ModItemModelProvider extends ItemModelProvider
+public class ModItemModelProvider extends BDItemModelProvider
 {
 
     public ModItemModelProvider(PackOutput output, ExistingFileHelper existingFileHelper)
     {
-        super(output, BDConstants.MODID, existingFileHelper);
+        super(output, existingFileHelper);
     }
 
     @Override
@@ -55,29 +49,4 @@ public class ModItemModelProvider extends ItemModelProvider
         }
     }
 
-    /**
-     * 生成单个流体桶模型：
-     * {
-     * "parent": "neoforge:item/bucket",
-     * "loader": "neoforge:fluid_container",
-     * "fluid": "<modid>:<fluidName>"
-     * }
-     */
-    private void fluidBucketModel(BDFluids.FluidEntry e)
-    {
-        // 模型文件名建议与桶物品注册名一致，避免资源定位搞混
-        final String modelName = e.bucket().getId().getPath(); // 例如 "<fluid>_bucket"
-
-        ItemModelBuilder builder = getBuilder(modelName)
-                .parent(new ModelFile.UncheckedModelFile(ResourceLocation.tryBuild("forge", "item/bucket")));
-
-        // 挂上自定义加载器并指定对应的“静止”流体（Source）
-        builder.customLoader(DynamicFluidContainerModelBuilder::begin)
-                .fluid((Fluid) e.source().get())               // 会在 JSON 中写出 "fluid": "<modid>:<fluidName>"
-                // 可选项（按需开启）：
-                // .flipGas(true)                       // 气体翻转
-                // .coverIsMask(false)                  // 盖层是否作遮罩
-                // .applyFluidLuminosity(true)          // 是否应用流体发光
-                .end();
-    }
 }
