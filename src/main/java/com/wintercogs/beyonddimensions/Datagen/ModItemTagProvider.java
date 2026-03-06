@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.Datagen;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.integration.RS.Tags.RSTags;
+import com.wintercogs.beyonddimensions.Integration.RS.Tags.RSTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;

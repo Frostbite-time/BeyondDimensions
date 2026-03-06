@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.Item;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.integration.AE.Item.NetAEStorageCell;
-import com.wintercogs.beyonddimensions.integration.IFS.Item.WardenSoulTagItem;
+import com.wintercogs.beyonddimensions.Integration.AE.Item.NetAEStorageCell;
+import com.wintercogs.beyonddimensions.Integration.IFS.Item.WardenSoulTagItem;
 import com.wintercogs.beyonddimensions.Item.Custom.*;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;

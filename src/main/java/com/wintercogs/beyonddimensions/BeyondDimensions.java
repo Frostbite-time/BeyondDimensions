@@ -14,37 +14,44 @@ import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.Custom.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.BlockEntity.ModBlockEntities;
+import com.wintercogs.beyonddimensions.BlockRender.ModBlockRenders;
 import com.wintercogs.beyonddimensions.DataComponents.ModDataComponents;
 import com.wintercogs.beyonddimensions.Fluid.ModFluids;
-import com.wintercogs.beyonddimensions.integration.AE.BD_AEPlugin;
-import com.wintercogs.beyonddimensions.integration.AEFlux.BD_AEFluxPlugin;
-import com.wintercogs.beyonddimensions.integration.AE_Ars.BD_AE_ArsPlugin;
-import com.wintercogs.beyonddimensions.integration.AE_IFS.BD_AE_IFS_Plugin;
-import com.wintercogs.beyonddimensions.integration.Ars.BD_ArsCaps;
-import com.wintercogs.beyonddimensions.integration.Botania.BD_BotaniaPlugin;
-import com.wintercogs.beyonddimensions.integration.Botania.Block.ManaPoolPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.integration.Curios.BD_CuriosPlugin;
-import com.wintercogs.beyonddimensions.integration.IFS.BD_SoulCaps;
-import com.wintercogs.beyonddimensions.integration.IFS.Item.WardenSoulTagItem;
-import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.integration.OtherModIds;
-import com.wintercogs.beyonddimensions.integration.RS.BD_RSPlugin;
-import com.wintercogs.beyonddimensions.integration.RSMek.BD_RSMekPlugin;
-import com.wintercogs.beyonddimensions.integration.RSTypes.BD_RSTypesPlugin;
-import com.wintercogs.beyonddimensions.integration.botania_ae.BD_AEBotaniaPlugin;
-import com.wintercogs.beyonddimensions.integration.create.blocks.entities.SchematicannonPathWayBlockEntity;
+import com.wintercogs.beyonddimensions.Integration.AE.BD_AEPlugin;
+import com.wintercogs.beyonddimensions.Integration.AEFlux.BD_AEFluxPlugin;
+import com.wintercogs.beyonddimensions.Integration.AEMEK.BD_AEMEKPlugin;
+import com.wintercogs.beyonddimensions.Integration.AE_Ars.BD_AE_ArsPlugin;
+import com.wintercogs.beyonddimensions.Integration.AE_IFS.BD_AE_IFS_Plugin;
+import com.wintercogs.beyonddimensions.Integration.Ars.BD_ArsCaps;
+import com.wintercogs.beyonddimensions.Integration.Botania.BD_BotaniaPlugin;
+import com.wintercogs.beyonddimensions.Integration.Botania.Block.ManaPoolPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.Integration.Botania.HudOverlay.ManaPoolPathwayOverlay;
+import com.wintercogs.beyonddimensions.Integration.Curios.BD_CuriosPlugin;
+import com.wintercogs.beyonddimensions.Integration.IFS.BD_SoulCaps;
+import com.wintercogs.beyonddimensions.Integration.IFS.Item.WardenSoulTagItem;
+import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphPlug;
+import com.wintercogs.beyonddimensions.Integration.RS.BD_RSPlugin;
+import com.wintercogs.beyonddimensions.Integration.RSMek.BD_RSMekPlugin;
+import com.wintercogs.beyonddimensions.Integration.RSTypes.BD_RSTypesPlugin;
+import com.wintercogs.beyonddimensions.Integration.botania_ae.BD_AEBotaniaPlugin;
+import com.wintercogs.beyonddimensions.Integration.create.blocks.entities.SchematicannonPathWayBlockEntity;
 import com.wintercogs.beyonddimensions.Item.ModCreativeModeTabs;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import com.wintercogs.beyonddimensions.Registry.UIRegister;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
 import vazkii.botania.api.BotaniaForgeCapabilities;
@@ -55,8 +62,18 @@ public class BeyondDimensions
     public static final String MODID = "beyonddimensions";
     public static IEventBus MOD_EVENT_BUS;
 
+    public static boolean MekLoaded = false; // 用于mek化学品存储
+    public static final String MekanismMODID = "mekanism";
     public static boolean AELoaded = false; // 用于添加存储元件
     public static final String AE2MODID = "ae2";
+    public static boolean EMILoaded = false; // 用于EMI兼容
+    public static final String EMI_MODID = "emi";
+    public static boolean JEILoaded = false; // 用于JEI兼容
+    public static final String JEI2MODID = "jei";
+    public static boolean PolymorphLoaded = false;
+    public static final String PolymorphModId = "polymorph";
+    public static boolean AEMEKLoaded = false;
+    public static final String AEMEK2MODID = "appmek";
     public static boolean AEFluxLoaded = false;
     public static final String AEFlux2MODID = "appflux";
     public static boolean CuriosLoaded = false;
@@ -85,16 +102,18 @@ public class BeyondDimensions
     public static boolean Create_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
+    // mod 类的构造函数是加载 mod 时运行的第一个代码。
+    // FML 将识别一些参数类型，如 IEventBus 或 ModContainer 并自动传入它们。
     public BeyondDimensions(IEventBus modEventBus, ModContainer modContainer)
     {
         MOD_EVENT_BUS = modEventBus;
-        NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
         Config.register(modContainer);
 
         modEventBus.addListener(this::constructMod);
         modEventBus.addListener(this::commonSetup);
-
         //为存储网络的接口方块注册物品交互能力
+
         modEventBus.addListener(NetInterfaceBlockEntity::registerCapability);
         modEventBus.addListener(NetPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetEnergyPathwayBlockEntity::registerCapability);
@@ -102,29 +121,59 @@ public class BeyondDimensions
 
         // 调用UIRegister的构造函数，从而注册所有UI
         UIRegister.register(modEventBus);
+
         // 注册创造模式菜单
         ModCreativeModeTabs.register(modEventBus);
+
         // 注册物品组件
         ModDataComponents.register(modEventBus);
+
         // 注册物品
         ModItems.register(modEventBus);
+
         // 注册方块
         ModBlocks.register(modEventBus);
+
         // 注册流体
         ModFluids.register(modEventBus);
+
         // 注册方块实体
         ModBlockEntities.register(modEventBus);
 
-        // 分发集成模块
-        IntegrationManager.bootstrapCommon(modEventBus, NeoForge.EVENT_BUS);
+        if (FMLEnvironment.dist == Dist.CLIENT)
+        {
+            // 注册方块实体渲染
+            modEventBus.addListener(ModBlockRenders::onRegisterRenderers);
+        }
+
     }
 
     // 在此阶段检测模组列表
     private void constructMod(final FMLConstructModEvent event)
     {
+        if (ModList.get().isLoaded(MekanismMODID))
+        {
+            MekLoaded = true;
+        }
         if (ModList.get().isLoaded(AE2MODID))
         {
             AELoaded = true;
+        }
+        if (ModList.get().isLoaded(EMI_MODID))
+        {
+            EMILoaded = true;
+        }
+        if (ModList.get().isLoaded(JEI2MODID))
+        {
+            JEILoaded = true;
+        }
+        if (ModList.get().isLoaded(PolymorphModId))
+        {
+            PolymorphLoaded = true;
+        }
+        if (ModList.get().isLoaded(AEMEK2MODID))
+        {
+            AEMEKLoaded = true;
         }
         if (ModList.get().isLoaded(AEFlux2MODID))
         {
@@ -221,6 +270,23 @@ public class BeyondDimensions
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackKey.ID, FluidHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(EnergyStackKey.ID, EnergyHandlerWrapper::new);
 
+        if (MekLoaded)
+        {
+            // 注册化学品堆叠
+            StackKeyRegistry.registerType(ChemicalStackKey.EMPTY);
+            // 注册化学品方块能力
+            CapabilityHelper.BlockCapabilityMap.put(ChemicalStackKey.ID, mekanism.common.capabilities.Capabilities.CHEMICAL.block());
+            // 注册化学品物品能力
+            CapabilityHelper.ItemCapabilityMap.put(ChemicalStackKey.ID, mekanism.common.capabilities.Capabilities.CHEMICAL.item());
+            // 注册分化包装
+            CapabilityHelper.registerUSHandler(ChemicalStackKey.EMPTY, ChemicalUnifiedStorageHandler::new);
+            CapabilityHelper.registerStackTypedHandler(ChemicalStackKey.EMPTY, ChemicalStackTypedHandler::new);
+
+            // 注册堆叠处理包装
+            StackHandlerWrapperHelper.stackWrappers.put(ChemicalStackKey.ID, ChemicalHandlerWrapper::new);
+
+        }
+
         if (IFS_Loaded)
         {
             // 注册监守者之魂
@@ -264,6 +330,10 @@ public class BeyondDimensions
         {
             BD_AEPlugin.register();
         }
+        if (AEMEKLoaded)
+        {
+            BD_AEMEKPlugin.register();
+        }
         if (AEFluxLoaded)
         {
             BD_AEFluxPlugin.register();
@@ -304,5 +374,34 @@ public class BeyondDimensions
     public void onServerStarting(ServerStartingEvent event)
     {
         LOGGER.info("维度网络初始化完成(服务端)");
+    }
+
+    @SubscribeEvent
+    public void onServerStared(ServerStartedEvent event)
+    {
+        //GameTester.OnSeverStartTester(event.getServer());
+    }
+
+
+    // 你可以使用EventBusSubscriber来自动注册类中所有标注了@SubscribeEvent的静态方法。
+    @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
+    public static class ClientModEvents
+    {
+        @SubscribeEvent
+        public static void onClientSetup(FMLClientSetupEvent event)
+        {
+            // 一些客户端初始代码
+            LOGGER.info("维度网络初始化完成(客户端)");
+
+
+            if (PolymorphLoaded)
+            {
+                PolymorphPlug.register();
+            }
+            if (Botania_Loaded)
+            {
+                NeoForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);
+            }
+        }
     }
 }

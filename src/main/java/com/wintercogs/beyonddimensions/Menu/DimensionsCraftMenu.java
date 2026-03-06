@@ -9,9 +9,7 @@ import com.wintercogs.beyonddimensions.Api.DataBase.Stack.ItemStackKey;
 import com.wintercogs.beyonddimensions.Api.DataBase.Stack.KeyAmount;
 import com.wintercogs.beyonddimensions.Api.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.integration.OtherModIds;
-import com.wintercogs.beyonddimensions.integration.ModPresence;
-import com.wintercogs.beyonddimensions.integration.polymorph.PolymorphHelper;
+import com.wintercogs.beyonddimensions.Integration.Polymorph.PolymorphHelper;
 import com.wintercogs.beyonddimensions.Menu.Slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.Menu.Slot.DisorderedStackTypedSlot;
@@ -229,7 +227,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
     public static Optional<RecipeHolder<CraftingRecipe>> getRecipe(Player player, CraftingInput input, Level level)
     {
-        if (ModPresence.isLoaded(OtherModIds.POLYMORPH) && player != null)
+        if (BeyondDimensions.PolymorphLoaded && player != null)
         {
             return PolymorphHelper.getRecipe(player, RecipeType.CRAFTING, input, level);
         }

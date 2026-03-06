@@ -1,1 +1,1 @@
-com.wintercogs.beyonddimensions.integration.KubeJS.BD_KubeJSPlugin beyonddimensions
+com.wintercogs.beyonddimensions.Integration.KubeJS.BD_KubeJSPlugin beyonddimensions

@@ -12,14 +12,12 @@ import com.wintercogs.beyonddimensions.GUI.Widget.Button.ReverseButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SearchToggleButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Button.SortMethodButton;
 import com.wintercogs.beyonddimensions.GUI.Widget.Scroller.BigScroller;
-import com.wintercogs.beyonddimensions.integration.OtherModIds;
-import com.wintercogs.beyonddimensions.integration.JEI.BDjeiPlugin;
+import com.wintercogs.beyonddimensions.Integration.JEI.BDjeiPlugin;
 import com.wintercogs.beyonddimensions.Menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.Menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.Packet.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.ShortCutKey.DimensionsShortKeys;
 import com.wintercogs.beyonddimensions.Util.UIDataHelper;
-import com.wintercogs.beyonddimensions.integration.ModPresence;
 import dev.emi.emi.api.EmiApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -250,7 +248,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             if (CommonConfigRuntime.searchTextWithJEIEMI)
             {
                 // JEI
-                if (ModPresence.isLoaded(OtherModIds.JEI))
+                if (BeyondDimensions.JEILoaded)
                 {
                     BDjeiPlugin.runtime().ifPresent(rt -> {
                         var overlay = rt.getIngredientFilter();
@@ -262,7 +260,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                     });
                 }
                 // 同步到EMI
-                if (ModPresence.isLoaded(OtherModIds.EMI))
+                if (BeyondDimensions.EMILoaded)
                 {
                     String current = EmiApi.getSearchText();
                     if (!Objects.equals(current, text))
@@ -314,7 +312,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         // 每tick从emi或jei同步一次文本
         if (CommonConfigRuntime.searchTextWithJEIEMI)
         {
-            if (ModPresence.isLoaded(OtherModIds.JEI))
+            if (BeyondDimensions.JEILoaded)
             {
                 BDjeiPlugin.runtime().ifPresent(rt -> {
                     var overlay = rt.getIngredientFilter();
@@ -326,7 +324,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 });
             }
 
-            if (ModPresence.isLoaded(OtherModIds.EMI))
+            if (BeyondDimensions.EMILoaded)
             {
                 String current = EmiApi.getSearchText();
                 if (!Objects.equals(current, lastSearchText))

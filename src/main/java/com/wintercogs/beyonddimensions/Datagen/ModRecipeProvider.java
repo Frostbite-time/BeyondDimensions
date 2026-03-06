@@ -5,7 +5,7 @@ import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import com.refinedmods.refinedstorage.common.content.Blocks;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Block.ModBlocks;
-import com.wintercogs.beyonddimensions.integration.RS.Tags.RSTags;
+import com.wintercogs.beyonddimensions.Integration.RS.Tags.RSTags;
 import com.wintercogs.beyonddimensions.Item.ModItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
