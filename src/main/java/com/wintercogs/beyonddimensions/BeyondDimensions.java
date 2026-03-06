@@ -2,8 +2,14 @@ package com.wintercogs.beyonddimensions;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
-import com.wintercogs.beyonddimensions.api.capability.helper.ordered.*;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.*;
+import com.wintercogs.beyonddimensions.api.capability.helper.ordered.EnergyStackTypedHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.ordered.FluidStackTypedHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ItemStackTypedHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ManaStackTypedHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.EnergyUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.FluidUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ItemUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ManaUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.*;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
@@ -13,9 +19,7 @@ import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
-import com.wintercogs.beyonddimensions.integration.module.curios.BD_CuriosPlugin;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -37,18 +41,6 @@ public class BeyondDimensions
 {
     public static IEventBus MOD_EVENT_BUS;
 
-    public static boolean MekLoaded = false; // 用于mek化学品存储
-    public static final String MekanismMODID = "mekanism";
-    public static boolean EMILoaded = false;
-    public static final String EMI_MODID = "emi";
-    public static boolean JEILoaded = false; // 用于JEI兼容
-    public static final String JEI2MODID = "jei";
-    public static boolean PolymorphLoaded = false;
-    public static final String PolymorphModId = "polymorph";
-    public static boolean CuriosLoaded = false;
-    public static final String CuriosModId = "curios";
-    public static boolean JECharactersLoaded = false;
-    public static final String JECharactersModId = "jecharacters";
     public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
     public static boolean Botania_Loaded = false;
     public static final String Create_ModId = "create";
@@ -111,31 +103,6 @@ public class BeyondDimensions
 
     private void constructMod(final FMLConstructModEvent event)
     {
-        if (ModPresence.isLoaded(MekanismMODID))
-        {
-            MekLoaded = true;
-        }
-        if (ModPresence.isLoaded(EMI_MODID))
-        {
-            EMILoaded = true;
-        }
-        if (ModPresence.isLoaded(JEI2MODID))
-        {
-            JEILoaded = true;
-        }
-        if (ModPresence.isLoaded(PolymorphModId))
-        {
-            PolymorphLoaded = true;
-        }
-        if (ModPresence.isLoaded(CuriosModId))
-        {
-            CuriosLoaded = true;
-            MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, BD_CuriosPlugin::registerCapabilities);
-        }
-        if (ModPresence.isLoaded(JECharactersModId))
-        {
-            JECharactersLoaded = true;
-        }
         if (ModPresence.isLoaded(Botania_ModId))
         {
             Botania_Loaded = true;
@@ -182,45 +149,6 @@ public class BeyondDimensions
         StackHandlerWrapperHelper.stackWrappers.put(ItemStackKey.ID, ItemHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackKey.ID, FluidHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(EnergyStackKey.ID, EnergyHandlerWrapper::new);
-
-        if (MekLoaded)
-        {
-            // 注册化学品堆叠
-            StackKeyRegistry.registerType(GasStackKey.EMPTY);
-            StackKeyRegistry.registerType(InfusionStackKey.EMPTY);
-            StackKeyRegistry.registerType(PigmentStackKey.EMPTY);
-            StackKeyRegistry.registerType(SlurryStackKey.EMPTY);
-            // 注册化学品方块能力
-            CapabilityHelper.BlockCapabilityMap.put(GasStackKey.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
-            CapabilityHelper.BlockCapabilityMap.put(InfusionStackKey.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
-            CapabilityHelper.BlockCapabilityMap.put(PigmentStackKey.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
-            CapabilityHelper.BlockCapabilityMap.put(SlurryStackKey.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
-            // 注册化学品物品能力
-            CapabilityHelper.ItemCapabilityMap.put(GasStackKey.ID, mekanism.common.capabilities.Capabilities.GAS_HANDLER);
-            CapabilityHelper.ItemCapabilityMap.put(InfusionStackKey.ID, mekanism.common.capabilities.Capabilities.INFUSION_HANDLER);
-            CapabilityHelper.ItemCapabilityMap.put(PigmentStackKey.ID, mekanism.common.capabilities.Capabilities.PIGMENT_HANDLER);
-            CapabilityHelper.ItemCapabilityMap.put(SlurryStackKey.ID, mekanism.common.capabilities.Capabilities.SLURRY_HANDLER);
-
-            // 注册分化包装
-            // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
-            CapabilityHelper.registerUSHandler(GasStackKey.EMPTY, GasUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(InfusionStackKey.EMPTY, InfusionUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(PigmentStackKey.EMPTY, PigmentUnifiedStorageHandler::new);
-            CapabilityHelper.registerUSHandler(SlurryStackKey.EMPTY, SlurryUnifiedStorageHandler::new);
-
-            // 注册存储分化包装
-            CapabilityHelper.registerStackTypedHandler(GasStackKey.EMPTY, GasStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(InfusionStackKey.EMPTY, InfusionStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(PigmentStackKey.EMPTY, PigmentStackTypedHandler::new);
-            CapabilityHelper.registerStackTypedHandler(SlurryStackKey.EMPTY, SlurryStackTypedHandler::new);
-
-            // 注册堆叠处理包装
-            StackHandlerWrapperHelper.stackWrappers.put(GasStackKey.ID, GasHandlerWrapper::new);
-            StackHandlerWrapperHelper.stackWrappers.put(InfusionStackKey.ID, InfusionHandlerWrapper::new);
-            StackHandlerWrapperHelper.stackWrappers.put(PigmentStackKey.ID, PigmentHandlerWrapper::new);
-            StackHandlerWrapperHelper.stackWrappers.put(SlurryStackKey.ID, SlurryHandlerWrapper::new);
-
-        }
 
         if (Botania_Loaded)
         {

@@ -1,9 +1,10 @@
 package com.wintercogs.beyonddimensions.network.packet.c2s;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.common.item.BaseMachineItem;
 import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.integration.ModPresence;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -40,7 +41,7 @@ public record ToggleMagnetPacket()
             }
         }
 
-        if (BeyondDimensions.CuriosLoaded)
+        if (ModPresence.isLoaded(OtherModIds.CURIOS))
         {
             top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
                 List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())

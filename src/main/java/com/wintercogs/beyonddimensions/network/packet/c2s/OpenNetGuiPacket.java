@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.network.packet.c2s;
 
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
 import com.wintercogs.beyonddimensions.common.init.BDMenus;
@@ -9,6 +8,8 @@ import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
 import com.wintercogs.beyonddimensions.common.item.NetedItem;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
+import com.wintercogs.beyonddimensions.integration.ModPresence;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -64,7 +65,7 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target)
 
                     }
 
-                    if (terminalStack == null && BeyondDimensions.CuriosLoaded)
+                    if (terminalStack == null && ModPresence.isLoaded(OtherModIds.CURIOS))
                     {
                         terminalStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
                                 .resolve()
