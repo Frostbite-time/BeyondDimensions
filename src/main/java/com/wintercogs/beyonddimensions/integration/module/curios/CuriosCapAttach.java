@@ -10,7 +10,7 @@ import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 
-public class BD_CuriosPlugin
+public class CuriosCapAttach
 {
     // 动态附加物品为饰品
     public static void registerCapabilities(final RegisterCapabilitiesEvent evt)

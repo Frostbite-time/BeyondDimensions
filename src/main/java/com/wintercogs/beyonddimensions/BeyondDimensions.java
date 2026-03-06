@@ -18,7 +18,7 @@ import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.create.blocks.entities.SchematicannonPathWayBlockEntity;
-import com.wintercogs.beyonddimensions.integration.module.curios.BD_CuriosPlugin;
+import com.wintercogs.beyonddimensions.integration.module.curios.CuriosCapAttach;
 import com.wintercogs.beyonddimensions.integration.module.ifs.BD_SoulCaps;
 import com.wintercogs.beyonddimensions.integration.module.ifs.Item.WardenSoulTagItem;
 import com.wintercogs.beyonddimensions.integration.module.rs.BD_RSPlugin;
@@ -43,10 +43,6 @@ public class BeyondDimensions
 {
     public static IEventBus MOD_EVENT_BUS;
 
-    public static boolean CuriosLoaded = false;
-    public static final String CuriosModId = "curios";
-    public static boolean JECharactersLoaded = false;
-    public static final String JECharactersModId = "jecharacters";
     public static final String RSModId = "refinedstorage";
     public static boolean RS_Loaded = false;
     public static final String RS_MEK_MODID = "refinedstorage_mekanism_integration";
@@ -99,15 +95,6 @@ public class BeyondDimensions
     // 在此阶段检测模组列表
     private void constructMod(final FMLConstructModEvent event)
     {
-        if (ModList.get().isLoaded(CuriosModId))
-        {
-            CuriosLoaded = true;
-            MOD_EVENT_BUS.addListener(BD_CuriosPlugin::registerCapabilities);
-        }
-        if (ModList.get().isLoaded(JECharactersModId))
-        {
-            JECharactersLoaded = true;
-        }
         if (ModList.get().isLoaded(RSModId))
         {
             RS_Loaded = true;
