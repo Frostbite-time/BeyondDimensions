@@ -1,1 +1,1 @@
-* init 26.1
+* Reorganization package structure
