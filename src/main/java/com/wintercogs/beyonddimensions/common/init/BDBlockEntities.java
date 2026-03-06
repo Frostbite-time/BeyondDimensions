@@ -1,9 +1,7 @@
 package com.wintercogs.beyonddimensions.common.init;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.block.entity.*;
-import com.wintercogs.beyonddimensions.integration.module.create.blocks.entities.SchematicannonPathWayBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -92,23 +90,6 @@ public class BDBlockEntities
             ).build(null)
     );
 
-    public static Supplier<BlockEntityType<?>> SCHEMATICANNON_PATHWAY_BLOCK_ENTITY;
-
-    public static void IntegrationRegister()
-    {
-
-
-        if (BeyondDimensions.Create_Loaded)
-        {
-            SCHEMATICANNON_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
-                    "schematicannon_pathway_block_entity",
-                    () -> BlockEntityType.Builder.of(
-                            SchematicannonPathWayBlockEntity::new,
-                            BDBlocks.SCHEMATICANNON_PATHWAY.get()
-                    ).build(null)
-            );
-        }
-    }
 
     public static void register(IEventBus eventBus)
     {

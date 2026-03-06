@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.common.init;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.core.registries.Registries;
@@ -69,11 +68,6 @@ public class BDCreativeModeTabs
                         output.accept(BDBlocks.NET_FURNACE_BLOCK);
                         output.accept(BDBlocks.DIMENSIONAL_CONNECT_BLOCK);
 
-
-                        if (BeyondDimensions.Create_Loaded)
-                        {
-                            output.accept(BDBlocks.SCHEMATICANNON_PATHWAY);
-                        }
 
                         IntegrationManager.onBlockCreativeTabCollect(itemDisplayParameters, output);
                     })

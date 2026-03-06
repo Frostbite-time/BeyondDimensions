@@ -24,15 +24,12 @@ import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEnti
 import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.integration.module.create.blocks.entities.SchematicannonPathWayBlockEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -43,10 +40,6 @@ public class BeyondDimensions
 {
     public static IEventBus MOD_EVENT_BUS;
 
-    public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
-    public static boolean Botania_Loaded = false;
-    public static final String Create_ModId = "create";
-    public static boolean Create_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public BeyondDimensions(IEventBus modEventBus, ModContainer modContainer)
@@ -55,7 +48,6 @@ public class BeyondDimensions
         NeoForge.EVENT_BUS.register(this);
         Config.register(modContainer);
 
-        modEventBus.addListener(this::constructMod);
         modEventBus.addListener(this::commonSetup);
 
         //为存储网络的接口方块注册物品交互能力
@@ -64,34 +56,16 @@ public class BeyondDimensions
         modEventBus.addListener(NetEnergyPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetFurnaceBlockEntity::registerCapability);
 
-        // 调用UIRegister的构造函数，从而注册所有UI
         BDMenus.register(modEventBus);
-        // 注册创造模式菜单
         BDCreativeModeTabs.register(modEventBus);
-        // 注册物品组件
         BDDataComponents.register(modEventBus);
-        // 注册物品
         BDItems.register(modEventBus);
-        // 注册方块
         BDBlocks.register(modEventBus);
-        // 注册流体
         BDFluids.register(modEventBus);
-        // 注册方块实体
         BDBlockEntities.register(modEventBus);
 
+        // 分发集成模块
         IntegrationManager.bootstrapCommon(modEventBus, NeoForge.EVENT_BUS);
-    }
-
-    // 在此阶段检测模组列表
-    private void constructMod(final FMLConstructModEvent event)
-    {
-        if (ModList.get().isLoaded(Create_ModId))
-        {
-            Create_Loaded = true;
-            MOD_EVENT_BUS.addListener(SchematicannonPathWayBlockEntity::registerCapability);
-        }
-
-        BDBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)

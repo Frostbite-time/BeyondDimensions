@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.module.create.blocks.entities;
+package com.wintercogs.beyonddimensions.integration.module.create.block.entity;
 
 import com.simibubi.create.content.schematics.cannon.MaterialChecklist;
 import com.simibubi.create.content.schematics.cannon.SchematicannonBlockEntity;
@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.block.entity.NetedBlockEntity;
-import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.integration.module.create.init.CreateModuleBlockEntities;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -47,7 +47,7 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
 
     public SchematicannonPathWayBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(BDBlockEntities.SCHEMATICANNON_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
+        super(CreateModuleBlockEntities.SCHEMATICANNON_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     /**
@@ -57,7 +57,7 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
     {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
-                BDBlockEntities.SCHEMATICANNON_PATHWAY_BLOCK_ENTITY.get(),
+                CreateModuleBlockEntities.SCHEMATICANNON_PATHWAY_BLOCK_ENTITY.get(),
                 (be, direction) -> {
                     if (be instanceof SchematicannonPathWayBlockEntity schematicannonPathWayBlockEntity
                             && direction != null

@@ -1,7 +1,7 @@
-package com.wintercogs.beyonddimensions.integration.module.create.blocks;
+package com.wintercogs.beyonddimensions.integration.module.create.block;
 
 import com.wintercogs.beyonddimensions.common.block.NetedBlock;
-import com.wintercogs.beyonddimensions.integration.module.create.blocks.entities.SchematicannonPathWayBlockEntity;
+import com.wintercogs.beyonddimensions.integration.module.create.block.entity.SchematicannonPathWayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;

@@ -1,9 +1,7 @@
 package com.wintercogs.beyonddimensions.common.init;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.block.*;
-import com.wintercogs.beyonddimensions.integration.module.create.blocks.SchematicannonPathWayBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -47,15 +45,6 @@ public class BDBlocks
     // 合成材料-维度链接框架
     public static final DeferredBlock<Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock("dimensional_connect_block",
             () -> new Block(BlockBehaviour.Properties.of().strength(2f)));
-
-
-    public static final DeferredBlock<Block> SCHEMATICANNON_PATHWAY = registerBlock("schematicannon_pathway",
-            () -> {
-                if (BeyondDimensions.Create_Loaded)
-                    return new SchematicannonPathWayBlock(BlockBehaviour.Properties.of().strength(2f).noOcclusion());
-                else
-                    return new Block(BlockBehaviour.Properties.of().strength(2f).noOcclusion());
-            });
 
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block)
