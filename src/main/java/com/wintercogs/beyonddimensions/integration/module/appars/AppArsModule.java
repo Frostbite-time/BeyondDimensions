@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.integration.module.appars;
 
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SourceStackKey;
+import com.wintercogs.beyonddimensions.integration.module.ars.storage.SourceStackKey;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;

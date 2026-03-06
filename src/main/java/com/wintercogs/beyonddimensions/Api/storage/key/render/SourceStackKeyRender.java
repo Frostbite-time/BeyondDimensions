@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.api.storage.key.render;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SourceStackKey;
+import com.wintercogs.beyonddimensions.integration.module.ars.storage.SourceStackKey;
 import com.wintercogs.beyonddimensions.util.IngredientRenderer;
 import com.wintercogs.beyonddimensions.util.StringFormat;
 import net.minecraft.client.Minecraft;

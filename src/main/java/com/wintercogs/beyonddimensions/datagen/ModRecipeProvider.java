@@ -266,19 +266,7 @@ public class ModRecipeProvider extends BDRecipeProvider
 
 
 
-        if (BeyondDimensions.ARS_Loaded)
-        {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.ARS_SOURCE_PATHWAY.get())
-                    .pattern("ABA")
-                    .pattern("CDC")
-                    .pattern("ABA")
-                    .define('A', BDItems.SPACE_TIME_BAR.get())
-                    .define('B', BDItems.SPACE_TIME_STABLE_FRAME.get())
-                    .define('C', BlockRegistry.SOURCE_JAR.get())
-                    .define('D', Items.ENDER_EYE)
-                    .unlockedBy("unlock_ars_source_pathway", has(BDItems.SPACE_TIME_BAR.get()))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.ARS_ModId)));
-        }
+
 
         if (BeyondDimensions.Botania_Loaded)
         {

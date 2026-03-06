@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.module.ifs.Item;
+package com.wintercogs.beyonddimensions.integration.module.ifs.item;
 
 import com.buuz135.industrialforegoingsouls.capabilities.ISoulHandler;
 import com.wintercogs.beyonddimensions.integration.module.ifs.BDSoulCaps;

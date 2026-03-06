@@ -7,7 +7,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
-import com.wintercogs.beyonddimensions.integration.module.ifs.Item.WardenSoulTagItem;
+import com.wintercogs.beyonddimensions.integration.module.ifs.item.WardenSoulTagItem;
 import com.wintercogs.beyonddimensions.integration.module.ifs.datagen.IFSModuleItemModelProvider;
 import com.wintercogs.beyonddimensions.integration.module.ifs.datagen.IFSModuleRecipeProvider;
 import com.wintercogs.beyonddimensions.integration.module.ifs.init.IFSModuleItems;

@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.module.ars.Caps;
+package com.wintercogs.beyonddimensions.integration.module.ars.caps;
 
 import com.hollingsworth.arsnouveau.api.source.ISourceCap;
 import com.hollingsworth.arsnouveau.common.capability.SourceStorage;

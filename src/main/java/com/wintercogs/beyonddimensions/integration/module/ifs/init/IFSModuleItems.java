@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.ifs.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.integration.module.ifs.Item.WardenSoulTagItem;
+import com.wintercogs.beyonddimensions.integration.module.ifs.item.WardenSoulTagItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;

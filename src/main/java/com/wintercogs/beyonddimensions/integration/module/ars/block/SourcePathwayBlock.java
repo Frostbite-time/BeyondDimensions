@@ -1,6 +1,7 @@
-package com.wintercogs.beyonddimensions.integration.module.ars.Block;
+package com.wintercogs.beyonddimensions.integration.module.ars.block;
 
 import com.wintercogs.beyonddimensions.common.block.NetedBlock;
+import com.wintercogs.beyonddimensions.integration.module.ars.block.entity.SourcePathwayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;

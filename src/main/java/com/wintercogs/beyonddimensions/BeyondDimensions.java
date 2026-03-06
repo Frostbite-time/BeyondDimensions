@@ -14,12 +14,10 @@ import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEnti
 import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
+import com.wintercogs.beyonddimensions.integration.module.ars.BDArsCaps;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.create.blocks.entities.SchematicannonPathWayBlockEntity;
-import com.wintercogs.beyonddimensions.integration.module.ifs.BDSoulCaps;
-import com.wintercogs.beyonddimensions.integration.module.ifs.Item.WardenSoulTagItem;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -39,8 +37,6 @@ public class BeyondDimensions
 {
     public static IEventBus MOD_EVENT_BUS;
 
-    public static final String ARS_ModId = "ars_nouveau"; // 新生魔艺-魔源兼容
-    public static boolean ARS_Loaded = false;
     public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
     public static boolean Botania_Loaded = false;
     public static final String Create_ModId = "create";
@@ -83,11 +79,6 @@ public class BeyondDimensions
     // 在此阶段检测模组列表
     private void constructMod(final FMLConstructModEvent event)
     {
-        if (ModList.get().isLoaded(ARS_ModId))
-        {
-            ARS_Loaded = true;
-            MOD_EVENT_BUS.addListener(BD_ArsCaps::registerCapability);
-        }
         if (ModList.get().isLoaded(Botania_ModId))
         {
             Botania_Loaded = true;
@@ -135,17 +126,6 @@ public class BeyondDimensions
         StackHandlerWrapperHelper.stackWrappers.put(ItemStackKey.ID, ItemHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackKey.ID, FluidHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(EnergyStackKey.ID, EnergyHandlerWrapper::new);
-
-        if (ARS_Loaded)
-        {
-            // 注册魔源
-            StackKeyRegistry.registerType(SourceStackKey.INSTANCE);
-            CapabilityHelper.BlockCapabilityMap.put(SourceStackKey.ID, com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry.SOURCE_CAPABILITY);
-            CapabilityHelper.ItemCapabilityMap.put(SourceStackKey.ID, BD_ArsCaps.ITEM_SOURCE); // 使用的自己的魔源罐能力
-            CapabilityHelper.registerUSHandler(SourceStackKey.INSTANCE, SourceUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(SourceStackKey.INSTANCE, SourceStackTypedHandler::new);
-            StackHandlerWrapperHelper.stackWrappers.put(SourceStackKey.ID, SourceHandlerWrapper::new);
-        }
 
         if (Botania_Loaded)
         {

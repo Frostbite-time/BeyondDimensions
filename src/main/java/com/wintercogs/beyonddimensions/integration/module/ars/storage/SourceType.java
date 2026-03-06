@@ -1,6 +1,7 @@
-package com.wintercogs.beyonddimensions.api.longtype;
+package com.wintercogs.beyonddimensions.integration.module.ars.storage;
 
 import com.mojang.serialization.Codec;
+import com.wintercogs.beyonddimensions.api.longtype.LongType;
 import net.minecraft.network.chat.Component;
 
 // 新生魔艺-魔源

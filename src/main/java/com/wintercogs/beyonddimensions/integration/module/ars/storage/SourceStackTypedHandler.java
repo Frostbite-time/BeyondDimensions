@@ -1,9 +1,8 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.ordered;
+package com.wintercogs.beyonddimensions.integration.module.ars.storage;
 
 import com.hollingsworth.arsnouveau.api.source.ISourceCap;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SourceStackKey;
 import com.wintercogs.beyonddimensions.util.BDMath;
 
 public class SourceStackTypedHandler implements ISourceCap

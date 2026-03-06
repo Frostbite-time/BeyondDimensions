@@ -1,13 +1,13 @@
-package com.wintercogs.beyonddimensions.integration.module.ars.Block;
+package com.wintercogs.beyonddimensions.integration.module.ars.block.entity;
 
 import com.hollingsworth.arsnouveau.api.source.ISourceTile;
 import com.hollingsworth.arsnouveau.api.source.SourceManager;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SourceStackKey;
 import com.wintercogs.beyonddimensions.common.block.entity.NetedBlockEntity;
-import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
-import com.wintercogs.beyonddimensions.integration.module.ars.Caps.SourcePathwayProvider;
+import com.wintercogs.beyonddimensions.integration.module.ars.caps.SourcePathwayProvider;
+import com.wintercogs.beyonddimensions.integration.module.ars.init.ArsModuleBlockEntities;
+import com.wintercogs.beyonddimensions.integration.module.ars.storage.SourceStackKey;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,7 +16,7 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
 {
     public SourcePathwayBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(BDBlockEntities.ARS_SOURCE_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
+        super(ArsModuleBlockEntities.ARS_SOURCE_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     @Override
