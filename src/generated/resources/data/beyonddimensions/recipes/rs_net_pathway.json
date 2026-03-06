@@ -13,7 +13,7 @@
         "category": "misc",
         "key": {
           "A": {
-            "tag": "beyonddimensions:rs/quartz_enriched_iron"
+            "item": "refinedstorage:quartz_enriched_iron"
           },
           "B": {
             "item": "beyonddimensions:space_time_stable_frame"
