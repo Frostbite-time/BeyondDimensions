@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.integration.module.ars.init;
 
+import com.wintercogs.beyonddimensions.api.ids.BDBlockIds;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.integration.module.ars.block.SourcePathwayBlock;
@@ -18,7 +19,7 @@ public class ArsModuleBlocks
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(BDConstants.MODID);
 
 
-    public static final DeferredBlock<Block> ARS_SOURCE_PATHWAY = registerBlock("ars_source_pathway",
+    public static final DeferredBlock<Block> ARS_SOURCE_PATHWAY = registerBlock(BDBlockIds.ARS_SOURCE_PATHWAY,
             () -> new SourcePathwayBlock(BlockBehaviour.Properties.of().strength(2f)));
 
 

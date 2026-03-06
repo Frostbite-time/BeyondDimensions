@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.integration.module.rs.init;
 
+import com.wintercogs.beyonddimensions.api.ids.BDBlockIds;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.integration.module.rs.block.RSNetPathwayBlock;
@@ -18,7 +19,7 @@ public class RSModuleBlocks
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(BDConstants.MODID);
 
 
-    public static final DeferredBlock<Block> RS_NET_PATHWAY = registerBlock("rs_net_pathway",
+    public static final DeferredBlock<Block> RS_NET_PATHWAY = registerBlock(BDBlockIds.RS_NET_PATHWAY,
             () -> new RSNetPathwayBlock(BlockBehaviour.Properties.of().strength(2f)));
 
 

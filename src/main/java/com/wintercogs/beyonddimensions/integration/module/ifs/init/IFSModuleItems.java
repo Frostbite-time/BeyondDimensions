@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.ifs.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.ids.BDItemIds;
 import com.wintercogs.beyonddimensions.integration.module.ifs.item.WardenSoulTagItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -14,7 +15,7 @@ public class IFSModuleItems
     /**
      * 工业先锋：灵魂涌动联动 - 灵魂标记器
      */
-    public static final DeferredItem<Item> WARDEN_SOUL_TAG_ITEM = ITEMS.register("warden_soul_tag_item",
+    public static final DeferredItem<Item> WARDEN_SOUL_TAG_ITEM = ITEMS.register(BDItemIds.WARDEN_SOUL_TAG_ITEM,
             () -> new WardenSoulTagItem(new Item.Properties())
     );
 

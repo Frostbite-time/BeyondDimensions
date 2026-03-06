@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.integration.module.create.init;
 
+import com.wintercogs.beyonddimensions.api.ids.BDBlockIds;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.integration.module.create.block.SchematicannonPathWayBlock;
@@ -18,7 +19,7 @@ public class CreateModuleBlocks
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(BDConstants.MODID);
 
 
-    public static final DeferredBlock<SchematicannonPathWayBlock> SCHEMATICANNON_PATHWAY = registerBlock("schematicannon_pathway",
+    public static final DeferredBlock<SchematicannonPathWayBlock> SCHEMATICANNON_PATHWAY = registerBlock(BDBlockIds.SCHEMATICANNON_PATHWAY,
             () -> new SchematicannonPathWayBlock(BlockBehaviour.Properties.of().strength(2f).noOcclusion()));
 
 

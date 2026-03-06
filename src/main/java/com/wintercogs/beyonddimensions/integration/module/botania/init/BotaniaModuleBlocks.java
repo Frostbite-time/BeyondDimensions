@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.integration.module.botania.init;
 
+import com.wintercogs.beyonddimensions.api.ids.BDBlockIds;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.integration.module.botania.block.ManaPoolPathway;
@@ -18,7 +19,7 @@ public class BotaniaModuleBlocks
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(BDConstants.MODID);
 
 
-    public static final DeferredBlock<ManaPoolPathway> MANA_POOL_PATHWAY = registerBlock("mana_pool_pathway",
+    public static final DeferredBlock<ManaPoolPathway> MANA_POOL_PATHWAY = registerBlock(BDBlockIds.MANA_POOL_PATHWAY,
             () -> new ManaPoolPathway(BlockBehaviour.Properties.of().strength(2f)));
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block)

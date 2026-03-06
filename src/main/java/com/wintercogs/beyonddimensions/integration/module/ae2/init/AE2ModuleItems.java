@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.ae2.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.ids.BDItemIds;
 import com.wintercogs.beyonddimensions.integration.module.ae2.item.NetAEStorageCell;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -15,7 +16,7 @@ public class AE2ModuleItems
     /**
      * AE存储磁盘
      */
-    public static final DeferredItem<Item> NET_AE_STORAGE_CELL = ITEMS.register("net_ae_storage_cell",
+    public static final DeferredItem<Item> NET_AE_STORAGE_CELL = ITEMS.register(BDItemIds.NET_AE_STORAGE_CELL,
             () -> new NetAEStorageCell(new Item.Properties())
     );
 
