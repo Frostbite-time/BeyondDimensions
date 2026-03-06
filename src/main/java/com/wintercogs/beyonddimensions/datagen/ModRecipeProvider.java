@@ -1,12 +1,10 @@
 package com.wintercogs.beyonddimensions.datagen;
 
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
-import com.refinedmods.refinedstorage.common.content.Blocks;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
-import com.wintercogs.beyonddimensions.integration.module.rs.Tags.RSTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -265,21 +263,6 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .define('C', BDItems.SPACE_TIME_BAR.get())
                 .unlockedBy("unlock_xp_exchange_item", has(BDItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
-
-
-        if (BeyondDimensions.RS_Loaded)
-        {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.RS_NET_PATHWAY.get())
-                    .pattern("ABA")
-                    .pattern("ACA")
-                    .pattern("ADA")
-                    .define('A', RSTags.RS_QUARTZ_ENRICHED_IRON)
-                    .define('B', BDItems.SPACE_TIME_STABLE_FRAME.get())
-                    .define('C', Blocks.INSTANCE.getMachineCasing())
-                    .define('D', Items.REDSTONE)
-                    .unlockedBy("unlock_rs_net_pathway", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.RSModId)));
-        }
 
         if (BeyondDimensions.IFS_Loaded)
         {

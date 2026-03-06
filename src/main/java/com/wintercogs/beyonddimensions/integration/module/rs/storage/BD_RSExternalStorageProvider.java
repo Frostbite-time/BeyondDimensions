@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.module.rs.ExternalStorage;
+package com.wintercogs.beyonddimensions.integration.module.rs.storage;
 
 import com.refinedmods.refinedstorage.api.core.Action;
 import com.refinedmods.refinedstorage.api.resource.ResourceAmount;
@@ -6,8 +6,8 @@ import com.refinedmods.refinedstorage.api.resource.ResourceKey;
 import com.refinedmods.refinedstorage.api.storage.Actor;
 import com.refinedmods.refinedstorage.api.storage.external.ExternalStorageProvider;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
-import com.wintercogs.beyonddimensions.integration.module.rs.Block.RSNetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.rs.RSHelper;
+import com.wintercogs.beyonddimensions.integration.module.rs.block.entity.RSNetPathwayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;

@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.module.rs.ExternalStorage;
+package com.wintercogs.beyonddimensions.integration.module.rs.storage;
 
 import com.refinedmods.refinedstorage.api.storage.external.ExternalStorageProvider;
 import com.refinedmods.refinedstorage.common.api.storage.externalstorage.ExternalStorageProviderFactory;

@@ -2,9 +2,9 @@ package com.wintercogs.beyonddimensions.integration.module.rs;
 
 
 import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
-import com.wintercogs.beyonddimensions.integration.module.rs.ExternalStorage.BD_RSExternalStorageProviderFactory;
+import com.wintercogs.beyonddimensions.integration.module.rs.storage.BD_RSExternalStorageProviderFactory;
 
-public class BD_RSPlugin
+public class BDRSPlugin
 {
     private static final RefinedStorageApi api = RefinedStorageApi.INSTANCE;
 

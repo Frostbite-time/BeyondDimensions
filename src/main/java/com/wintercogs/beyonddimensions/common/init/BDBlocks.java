@@ -6,7 +6,6 @@ import com.wintercogs.beyonddimensions.common.block.*;
 import com.wintercogs.beyonddimensions.integration.module.ars.Block.SourcePathwayBlock;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathway;
 import com.wintercogs.beyonddimensions.integration.module.create.blocks.SchematicannonPathWayBlock;
-import com.wintercogs.beyonddimensions.integration.module.rs.Block.RSNetPathwayBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -50,21 +49,6 @@ public class BDBlocks
     // 合成材料-维度链接框架
     public static final DeferredBlock<Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock("dimensional_connect_block",
             () -> new Block(BlockBehaviour.Properties.of().strength(2f)));
-
-
-    // 精致存储2---RS维度通道
-    // 始终注册方块，防止数据包或其他问题出现
-    public static final DeferredBlock<Block> RS_NET_PATHWAY = registerBlock("rs_net_pathway",
-            () -> {
-                if (BeyondDimensions.RS_Loaded)
-                {
-                    return new RSNetPathwayBlock(BlockBehaviour.Properties.of().strength(2f));
-                }
-                else
-                {
-                    return new Block(BlockBehaviour.Properties.of().strength(2f));
-                }
-            });
 
     public static final DeferredBlock<Block> ARS_SOURCE_PATHWAY = registerBlock("ars_source_pathway",
             () -> {

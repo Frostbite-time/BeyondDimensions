@@ -72,10 +72,6 @@ public class BDCreativeModeTabs
                         output.accept(BDBlocks.NET_HOPPER_BLOCK);
                         output.accept(BDBlocks.NET_FURNACE_BLOCK);
                         output.accept(BDBlocks.DIMENSIONAL_CONNECT_BLOCK);
-                        if (BeyondDimensions.RS_Loaded)
-                        {
-                            output.accept(BDBlocks.RS_NET_PATHWAY);
-                        }
                         if (BeyondDimensions.ARS_Loaded)
                         {
                             output.accept(BDBlocks.ARS_SOURCE_PATHWAY);

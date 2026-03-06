@@ -18,10 +18,8 @@ import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.create.blocks.entities.SchematicannonPathWayBlockEntity;
-import com.wintercogs.beyonddimensions.integration.module.curios.CuriosCapAttach;
 import com.wintercogs.beyonddimensions.integration.module.ifs.BD_SoulCaps;
 import com.wintercogs.beyonddimensions.integration.module.ifs.Item.WardenSoulTagItem;
-import com.wintercogs.beyonddimensions.integration.module.rs.BD_RSPlugin;
 import com.wintercogs.beyonddimensions.integration.module.rsmek.BD_RSMekPlugin;
 import com.wintercogs.beyonddimensions.integration.module.rstypes.BD_RSTypesPlugin;
 import net.minecraft.resources.ResourceLocation;
@@ -43,8 +41,6 @@ public class BeyondDimensions
 {
     public static IEventBus MOD_EVENT_BUS;
 
-    public static final String RSModId = "refinedstorage";
-    public static boolean RS_Loaded = false;
     public static final String RS_MEK_MODID = "refinedstorage_mekanism_integration";
     public static boolean RS_MEK_Loaded = false;
     public static final String IFS_ModId = "industrialforegoingsouls"; //工业先锋-灵魂涌动
@@ -95,10 +91,6 @@ public class BeyondDimensions
     // 在此阶段检测模组列表
     private void constructMod(final FMLConstructModEvent event)
     {
-        if (ModList.get().isLoaded(RSModId))
-        {
-            RS_Loaded = true;
-        }
         if (ModList.get().isLoaded(RS_MEK_MODID))
         {
             RS_MEK_Loaded = true;
@@ -202,10 +194,6 @@ public class BeyondDimensions
             StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
         }
 
-        if (RS_Loaded)
-        {
-            BD_RSPlugin.register();
-        }
         if (RS_MEK_Loaded)
         {
             BD_RSMekPlugin.register();

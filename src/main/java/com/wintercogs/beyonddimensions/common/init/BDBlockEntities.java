@@ -6,7 +6,6 @@ import com.wintercogs.beyonddimensions.common.block.entity.*;
 import com.wintercogs.beyonddimensions.integration.module.ars.Block.SourcePathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.create.blocks.entities.SchematicannonPathWayBlockEntity;
-import com.wintercogs.beyonddimensions.integration.module.rs.Block.RSNetPathwayBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -95,25 +94,12 @@ public class BDBlockEntities
             ).build(null)
     );
 
-    // 精致存储2---RS维度通道
-    // 仅在模组存在时才注册实体
-    public static Supplier<BlockEntityType<?>> RS_NET_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> ARS_SOURCE_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> MANA_POOL_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> SCHEMATICANNON_PATHWAY_BLOCK_ENTITY;
 
     public static void IntegrationRegister()
     {
-        if (BeyondDimensions.RS_Loaded)
-        {
-            RS_NET_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
-                    "rs_net_pathway_block_entity",
-                    () -> BlockEntityType.Builder.of(
-                            RSNetPathwayBlockEntity::new,
-                            BDBlocks.RS_NET_PATHWAY.get()
-                    ).build(null)
-            );
-        }
         if (BeyondDimensions.ARS_Loaded)
         {
             ARS_SOURCE_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
