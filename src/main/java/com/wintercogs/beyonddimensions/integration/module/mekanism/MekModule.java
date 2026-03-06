@@ -1,23 +1,12 @@
 package com.wintercogs.beyonddimensions.integration.module.mekanism;
 
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
-import com.wintercogs.beyonddimensions.api.capability.helper.ordered.GasStackTypedHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.ordered.InfusionStackTypedHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.ordered.PigmentStackTypedHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.ordered.SlurryStackTypedHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.GasUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.InfusionUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.PigmentUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.SlurryUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.*;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.GasStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.InfusionStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.PigmentStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SlurryStackKey;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
+import com.wintercogs.beyonddimensions.integration.module.mekanism.storage.*;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 

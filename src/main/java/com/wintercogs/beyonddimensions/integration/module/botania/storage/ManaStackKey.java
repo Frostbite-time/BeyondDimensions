@@ -1,10 +1,9 @@
-package com.wintercogs.beyonddimensions.api.storage.key.impl;
+package com.wintercogs.beyonddimensions.integration.module.botania.storage;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.api.longtype.ManaType;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.storage.key.render.ManaStackKeyRender;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.LongStackKey;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;

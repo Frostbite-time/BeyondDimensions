@@ -1,7 +1,6 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.unordered;
+package com.wintercogs.beyonddimensions.integration.module.mekanism.storage;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.PigmentStackKey;
 import mekanism.api.Action;
 import mekanism.api.chemical.pigment.IPigmentHandler;
 import mekanism.api.chemical.pigment.PigmentStack;

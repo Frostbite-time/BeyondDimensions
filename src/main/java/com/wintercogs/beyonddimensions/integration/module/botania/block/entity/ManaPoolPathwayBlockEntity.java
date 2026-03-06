@@ -2,10 +2,10 @@ package com.wintercogs.beyonddimensions.integration.module.botania.block.entity;
 
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ManaUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.util.CapCtx;
 import com.wintercogs.beyonddimensions.common.block.entity.NetedBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.botania.init.BotaniaModuleBlockEntities;
+import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;

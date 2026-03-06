@@ -1,12 +1,8 @@
 package com.wintercogs.beyonddimensions.integration.module.ars;
 
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
-import com.wintercogs.beyonddimensions.api.capability.helper.ordered.SourceStackTypedHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.SourceUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.SourceHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SourceStackKey;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -15,6 +11,10 @@ import com.wintercogs.beyonddimensions.integration.module.ars.datagen.ArsModuleB
 import com.wintercogs.beyonddimensions.integration.module.ars.datagen.ArsModuleRecipeProvider;
 import com.wintercogs.beyonddimensions.integration.module.ars.init.ArsModuleBlockEntities;
 import com.wintercogs.beyonddimensions.integration.module.ars.init.ArsModuleBlocks;
+import com.wintercogs.beyonddimensions.integration.module.ars.storage.SourceHandlerWrapper;
+import com.wintercogs.beyonddimensions.integration.module.ars.storage.SourceStackKey;
+import com.wintercogs.beyonddimensions.integration.module.ars.storage.SourceStackTypedHandler;
+import com.wintercogs.beyonddimensions.integration.module.ars.storage.SourceUnifiedStorageHandler;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;

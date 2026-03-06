@@ -1,10 +1,9 @@
-package com.wintercogs.beyonddimensions.api.storage.key.impl;
+package com.wintercogs.beyonddimensions.integration.module.mekanism.storage;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.storage.key.render.ChemicalStackKeyRender;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;

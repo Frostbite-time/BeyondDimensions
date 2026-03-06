@@ -1,13 +1,13 @@
 package com.wintercogs.beyonddimensions.integration.module.appmek;
 
-import com.wintercogs.beyonddimensions.api.storage.key.impl.GasStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.InfusionStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.PigmentStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SlurryStackKey;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.ae2.AEHelper;
+import com.wintercogs.beyonddimensions.integration.module.mekanism.storage.GasStackKey;
+import com.wintercogs.beyonddimensions.integration.module.mekanism.storage.InfusionStackKey;
+import com.wintercogs.beyonddimensions.integration.module.mekanism.storage.PigmentStackKey;
+import com.wintercogs.beyonddimensions.integration.module.mekanism.storage.SlurryStackKey;
 import me.ramidzkh.mekae2.ae2.MekanismKey;
 import me.ramidzkh.mekae2.ae2.MekanismKeyType;
 import mekanism.api.chemical.ChemicalStack;

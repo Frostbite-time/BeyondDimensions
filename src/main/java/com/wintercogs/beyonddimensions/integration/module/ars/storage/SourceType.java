@@ -1,5 +1,6 @@
-package com.wintercogs.beyonddimensions.api.longtype;
+package com.wintercogs.beyonddimensions.integration.module.ars.storage;
 
+import com.wintercogs.beyonddimensions.api.longtype.LongType;
 import net.minecraft.network.chat.Component;
 
 public class SourceType extends LongType<SourceType>

@@ -1,10 +1,9 @@
-package com.wintercogs.beyonddimensions.api.storage.key.impl;
+package com.wintercogs.beyonddimensions.integration.module.ars.storage;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.api.longtype.SourceType;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.storage.key.render.SourceStackKeyRender;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.LongStackKey;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;

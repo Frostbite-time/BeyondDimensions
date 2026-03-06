@@ -1,10 +1,9 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.ordered;
+package com.wintercogs.beyonddimensions.integration.module.botania.storage;
 
 import com.google.common.base.Predicates;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ManaStackKey;
 import com.wintercogs.beyonddimensions.api.util.CapCtx;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.core.BlockPos;

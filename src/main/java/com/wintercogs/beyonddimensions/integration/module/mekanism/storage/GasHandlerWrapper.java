@@ -1,24 +1,24 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.wrapper;
+package com.wintercogs.beyonddimensions.integration.module.mekanism.storage;
 
-import com.wintercogs.beyonddimensions.api.storage.key.impl.PigmentStackKey;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
 import mekanism.api.Action;
-import mekanism.api.chemical.pigment.IPigmentHandler;
-import mekanism.api.chemical.pigment.PigmentStack;
+import mekanism.api.chemical.gas.GasStack;
+import mekanism.api.chemical.gas.IGasHandler;
 import net.minecraft.resources.ResourceLocation;
 
-public class PigmentHandlerWrapper implements IStackHandlerWrapper<PigmentStack>
+public class GasHandlerWrapper implements IStackHandlerWrapper<GasStack>
 {
-    private final IPigmentHandler chemicalHandler;
+    private final IGasHandler chemicalHandler;
 
-    public PigmentHandlerWrapper(Object chemicalHandler)
+    public GasHandlerWrapper(Object chemicalHandler)
     {
-        this.chemicalHandler = (IPigmentHandler) chemicalHandler;
+        this.chemicalHandler = (IGasHandler) chemicalHandler;
     }
 
     @Override
     public ResourceLocation getTypeId()
     {
-        return PigmentStackKey.ID;
+        return GasStackKey.ID;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class PigmentHandlerWrapper implements IStackHandlerWrapper<PigmentStack>
     }
 
     @Override
-    public PigmentStack getStackInSlot(int slot)
+    public GasStack getStackInSlot(int slot)
     {
         return chemicalHandler.getChemicalInTank(slot);
     }
@@ -40,13 +40,13 @@ public class PigmentHandlerWrapper implements IStackHandlerWrapper<PigmentStack>
     }
 
     @Override
-    public boolean isStackValid(int slot, PigmentStack stack)
+    public boolean isStackValid(int slot, GasStack stack)
     {
         return chemicalHandler.isValid(slot, stack);
     }
 
     @Override
-    public long insert(int slot, PigmentStack Stack, boolean sim)
+    public long insert(int slot, GasStack Stack, boolean sim)
     {
         if (sim)
             return chemicalHandler.insertChemical(slot, Stack, Action.SIMULATE).getAmount();
@@ -55,7 +55,7 @@ public class PigmentHandlerWrapper implements IStackHandlerWrapper<PigmentStack>
     }
 
     @Override
-    public long insert(PigmentStack stack, boolean sim)
+    public long insert(GasStack stack, boolean sim)
     {
         if (sim)
             return chemicalHandler.insertChemical(stack, Action.SIMULATE).getAmount();
@@ -73,7 +73,7 @@ public class PigmentHandlerWrapper implements IStackHandlerWrapper<PigmentStack>
     }
 
     @Override
-    public long extract(PigmentStack stack, boolean sim)
+    public long extract(GasStack stack, boolean sim)
     {
         if (sim)
             return chemicalHandler.extractChemical(stack, Action.SIMULATE).getAmount();

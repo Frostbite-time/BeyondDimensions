@@ -1,23 +1,22 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.ordered;
+package com.wintercogs.beyonddimensions.integration.module.mekanism.storage;
 
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SlurryStackKey;
 import mekanism.api.Action;
-import mekanism.api.chemical.slurry.ISlurryHandler;
-import mekanism.api.chemical.slurry.SlurryStack;
+import mekanism.api.chemical.infuse.IInfusionHandler;
+import mekanism.api.chemical.infuse.InfusionStack;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-public class SlurryStackTypedHandler implements ISlurryHandler
+public class InfusionStackTypedHandler implements IInfusionHandler
 {
 
-    private static final ResourceLocation GAS_TYPE = SlurryStackKey.ID;
+    private static final ResourceLocation GAS_TYPE = InfusionStackKey.ID;
 
     private final StackHandler handlerStorage;
 
-    public SlurryStackTypedHandler(StackHandler handlerStorage)
+    public InfusionStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
     }
@@ -77,33 +76,33 @@ public class SlurryStackTypedHandler implements ISlurryHandler
     }
 
     @Override
-    public @NotNull SlurryStack getChemicalInTank(int slot)
+    public @NotNull InfusionStack getChemicalInTank(int slot)
     {
-        if (!inGasRegion(slot)) return SlurryStack.EMPTY;
+        if (!inGasRegion(slot)) return InfusionStack.EMPTY;
 
         int actualIndex = resolveActualIndex(slot);
-        if (actualIndex < 0) return SlurryStack.EMPTY;
+        if (actualIndex < 0) return InfusionStack.EMPTY;
 
         KeyAmount ka = handlerStorage.getStackBySlot(actualIndex);
-        if (ka.isEmpty()) return SlurryStack.EMPTY;
+        if (ka.isEmpty()) return InfusionStack.EMPTY;
 
         Object cached = handlerStorage.getOutStackByKey(ka.key());
-        if (!(cached instanceof SlurryStack gas)) return SlurryStack.EMPTY;
-        if (gas.isEmpty()) return SlurryStack.EMPTY;
+        if (!(cached instanceof InfusionStack gas)) return InfusionStack.EMPTY;
+        if (gas.isEmpty()) return InfusionStack.EMPTY;
 
         long shown = ka.amount();
-        if (shown <= 0) return SlurryStack.EMPTY;
+        if (shown <= 0) return InfusionStack.EMPTY;
 
         gas.setAmount(shown);
         return gas;
     }
 
     @Override
-    public void setChemicalInTank(int tank, @NotNull SlurryStack stack)
+    public void setChemicalInTank(int tank, @NotNull InfusionStack stack)
     {
         int actualIndex = resolveActualIndex(tank);
         if (actualIndex < 0) return;
-        handlerStorage.setStackDirectly(actualIndex, new SlurryStackKey(stack), stack.getAmount());
+        handlerStorage.setStackDirectly(actualIndex, new InfusionStackKey(stack), stack.getAmount());
     }
 
     @Override
@@ -113,67 +112,67 @@ public class SlurryStackTypedHandler implements ISlurryHandler
     }
 
     @Override
-    public boolean isValid(int tank, @NotNull SlurryStack stack)
+    public boolean isValid(int tank, @NotNull InfusionStack stack)
     {
         return true;
     }
 
     @Override
-    public @NotNull SlurryStack insertChemical(int tank, @NotNull SlurryStack stack, @NotNull Action action)
+    public @NotNull InfusionStack insertChemical(int tank, @NotNull InfusionStack stack, @NotNull Action action)
     {
-        if (stack.isEmpty()) return SlurryStack.EMPTY;
+        if (stack.isEmpty()) return InfusionStack.EMPTY;
 
         int actualIndex = resolveActualIndex(tank);
         if (actualIndex < 0) return stack.copy();
 
-        KeyAmount remaining = handlerStorage.insert(actualIndex, new SlurryStackKey(stack), stack.getAmount(), action.simulate());
+        KeyAmount remaining = handlerStorage.insert(actualIndex, new InfusionStackKey(stack), stack.getAmount(), action.simulate());
         long rem = remaining.amount();
-        return (rem > 0) ? new SlurryStack(stack, rem) : SlurryStack.EMPTY;
+        return (rem > 0) ? new InfusionStack(stack, rem) : InfusionStack.EMPTY;
     }
 
     @Override
-    public @NotNull SlurryStack extractChemical(int tank, long amount, @NotNull Action action)
+    public @NotNull InfusionStack extractChemical(int tank, long amount, @NotNull Action action)
     {
-        if (amount <= 0) return SlurryStack.EMPTY;
-        if (!inGasRegion(tank)) return SlurryStack.EMPTY;
+        if (amount <= 0) return InfusionStack.EMPTY;
+        if (!inGasRegion(tank)) return InfusionStack.EMPTY;
 
         int actualIndex = resolveActualIndex(tank);
-        if (actualIndex < 0) return SlurryStack.EMPTY;
+        if (actualIndex < 0) return InfusionStack.EMPTY;
 
         Object out = handlerStorage.extract(actualIndex, amount, action.simulate()).toStack();
-        return (out instanceof SlurryStack gs) ? gs : SlurryStack.EMPTY;
+        return (out instanceof InfusionStack gs) ? gs : InfusionStack.EMPTY;
     }
 
     @Override
-    public @NotNull SlurryStack insertChemical(@NotNull SlurryStack stack, @NotNull Action action)
+    public @NotNull InfusionStack insertChemical(@NotNull InfusionStack stack, @NotNull Action action)
     {
-        if (stack.isEmpty()) return SlurryStack.EMPTY;
-        long remaining = handlerStorage.insert(new SlurryStackKey(stack), stack.getAmount(), action.simulate()).amount();
-        return (remaining > 0) ? new SlurryStack(stack, remaining) : SlurryStack.EMPTY;
+        if (stack.isEmpty()) return InfusionStack.EMPTY;
+        long remaining = handlerStorage.insert(new InfusionStackKey(stack), stack.getAmount(), action.simulate()).amount();
+        return (remaining > 0) ? new InfusionStack(stack, remaining) : InfusionStack.EMPTY;
     }
 
     @Override
-    public @NotNull SlurryStack extractChemical(long amount, @NotNull Action action)
+    public @NotNull InfusionStack extractChemical(long amount, @NotNull Action action)
     {
-        if (amount <= 0) return SlurryStack.EMPTY;
+        if (amount <= 0) return InfusionStack.EMPTY;
 
         int firstGasSlot = handlerStorage.getBucket(GAS_TYPE)
                 .map(b -> (b.size() > 0) ? b.get(0) : -1)
                 .orElse(-1);
-        if (firstGasSlot < 0) return SlurryStack.EMPTY;
+        if (firstGasSlot < 0) return InfusionStack.EMPTY;
 
         KeyAmount ka = handlerStorage.getStackBySlot(firstGasSlot);
-        if (ka.isEmpty()) return SlurryStack.EMPTY;
+        if (ka.isEmpty()) return InfusionStack.EMPTY;
 
         Object out = handlerStorage.extract(ka.key(), amount, action.simulate(), false).toStack();
-        return (out instanceof SlurryStack gs) ? gs : SlurryStack.EMPTY;
+        return (out instanceof InfusionStack gs) ? gs : InfusionStack.EMPTY;
     }
 
     @Override
-    public @NotNull SlurryStack extractChemical(@NotNull SlurryStack stack, @NotNull Action action)
+    public @NotNull InfusionStack extractChemical(@NotNull InfusionStack stack, @NotNull Action action)
     {
-        if (stack.isEmpty()) return SlurryStack.EMPTY;
-        Object out = handlerStorage.extract(new SlurryStackKey(stack), stack.getAmount(), action.simulate(), false).toStack();
-        return (out instanceof SlurryStack gs) ? gs : SlurryStack.EMPTY;
+        if (stack.isEmpty()) return InfusionStack.EMPTY;
+        Object out = handlerStorage.extract(new InfusionStackKey(stack), stack.getAmount(), action.simulate(), false).toStack();
+        return (out instanceof InfusionStack gs) ? gs : InfusionStack.EMPTY;
     }
 }

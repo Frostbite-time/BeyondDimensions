@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.integration.module.appars;
 
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SourceStackKey;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.ae2.AEHelper;
+import com.wintercogs.beyonddimensions.integration.module.ars.storage.SourceStackKey;
 import gripe._90.arseng.me.key.SourceKey;
 import gripe._90.arseng.me.key.SourceKeyType;
 import net.minecraftforge.eventbus.api.IEventBus;

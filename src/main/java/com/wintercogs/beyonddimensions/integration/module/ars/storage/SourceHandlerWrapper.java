@@ -1,7 +1,6 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.wrapper;
+package com.wintercogs.beyonddimensions.integration.module.ars.storage;
 
-import com.wintercogs.beyonddimensions.api.longtype.SourceType;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.SourceStackKey;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.integration.module.ars.caps.ISourceCap;
 import net.minecraft.resources.ResourceLocation;
 

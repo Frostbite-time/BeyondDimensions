@@ -1,12 +1,8 @@
 package com.wintercogs.beyonddimensions.integration.module.botania;
 
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
-import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ManaStackTypedHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ManaUnifiedStorageHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ManaHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ManaStackKey;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -16,6 +12,10 @@ import com.wintercogs.beyonddimensions.integration.module.botania.datagen.Botani
 import com.wintercogs.beyonddimensions.integration.module.botania.eventlistener.BotaniaModuleDataPackSyncListener;
 import com.wintercogs.beyonddimensions.integration.module.botania.init.BotaniaModuleBlockEntities;
 import com.wintercogs.beyonddimensions.integration.module.botania.init.BotaniaModuleBlocks;
+import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaHandlerWrapper;
+import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaStackKey;
+import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaStackTypedHandler;
+import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaUnifiedStorageHandler;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
