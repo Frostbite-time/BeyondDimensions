@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.Config;
 import com.wintercogs.beyonddimensions.api.ButtonState;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.IconButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.StatusButton;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
@@ -41,7 +41,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         super.init();
 
         //槽位转移按钮
-        transferCraftToInvButton = new IconButton(this.leftPos + 90, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/down_arrow"), button ->
+        transferCraftToInvButton = new IconButton(this.leftPos + 90, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BDConstants.MODID, "widget/down_arrow"), button ->
         {
             PacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(false));
         });
@@ -49,7 +49,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         addRenderableWidget(transferCraftToInvButton);
 
 
-        transferCraftToStorageButton = new IconButton(this.leftPos + 81, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/up_arrow"), button ->
+        transferCraftToStorageButton = new IconButton(this.leftPos + 81, this.topPos + TOP_BASE_HEIGHT + menu.getLines() * 18 + 10, 8, 8, ResourceLocation.tryBuild(BDConstants.MODID, "widget/up_arrow"), button ->
         {
             PacketDistributor.sendToServer(new ClickTransferCraftButtonPacket(true));
         });
@@ -70,8 +70,8 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
             @Override
             protected void initButton()
             {
-                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_asc"));
-                iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_desc"));
+                iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BDConstants.MODID, "widget/sort_asc"));
+                iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BDConstants.MODID, "widget/sort_desc"));
 
                 tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_storage")));
                 tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_inv")));

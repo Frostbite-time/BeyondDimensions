@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.block.*;
 import com.wintercogs.beyonddimensions.integration.module.ars.Block.SourcePathwayBlock;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathway;
@@ -19,7 +20,7 @@ import java.util.function.Supplier;
 public class BDBlocks
 {
     public static final DeferredRegister.Blocks BLOCKS =
-            DeferredRegister.createBlocks(BeyondDimensions.MODID);
+            DeferredRegister.createBlocks(BDConstants.MODID);
 
     public static final DeferredBlock<Block> NET_CONTROL = registerBlock("net_control",
             () -> new NetControlBlock(BlockBehaviour.Properties.of()

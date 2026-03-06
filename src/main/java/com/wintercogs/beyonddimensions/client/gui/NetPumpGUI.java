@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
 import com.wintercogs.beyonddimensions.common.machine.FilterMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
@@ -44,9 +44,9 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FilterMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/ignore_filter"));
-                iconMap.put(FilterMode.WHITE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/white_filter"));
-                iconMap.put(FilterMode.BLACK, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/black_filter"));
+                iconMap.put(FilterMode.IGNORE, ResourceLocation.tryBuild(BDConstants.MODID, "widget/ignore_filter"));
+                iconMap.put(FilterMode.WHITE, ResourceLocation.tryBuild(BDConstants.MODID, "widget/white_filter"));
+                iconMap.put(FilterMode.BLACK, ResourceLocation.tryBuild(BDConstants.MODID, "widget/black_filter"));
 
                 tooltipMap.put(FilterMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_ignore")));
                 tooltipMap.put(FilterMode.WHITE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_white")));
@@ -72,10 +72,10 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
-                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_powered"));
-                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_unpowered"));
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_powered"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_unpowered"));
 
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));

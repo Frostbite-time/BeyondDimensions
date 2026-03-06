@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.gui.widget.button;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ButtonState;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.StatusButton;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import net.minecraft.client.gui.components.Tooltip;
@@ -18,8 +18,8 @@ public class SearchToggleButton extends StatusButton
     @Override
     protected void initButton()
     {
-        iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/search_disable"));
-        iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/search_enable"));
+        iconMap.put(ButtonState.DISABLED, ResourceLocation.tryBuild(BDConstants.MODID, "widget/search_disable"));
+        iconMap.put(ButtonState.ENABLED, ResourceLocation.tryBuild(BDConstants.MODID, "widget/search_enable"));
 
         tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.search_disable")));
         tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.search_enable")));

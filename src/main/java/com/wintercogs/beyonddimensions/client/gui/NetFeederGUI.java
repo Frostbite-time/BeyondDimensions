@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.FeederMode;
@@ -45,10 +45,10 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FeederMode.HUNGER_TO_EAT, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/feeder_mode_hunger_to_eat"));
-                iconMap.put(FeederMode.NORMAL, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/feeder_mode_normal"));
-                iconMap.put(FeederMode.SATURATION_KEEP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/feeder_mode_saturation_keep"));
-                iconMap.put(FeederMode.CRAZY, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/feeder_mode_crazy"));
+                iconMap.put(FeederMode.HUNGER_TO_EAT, ResourceLocation.tryBuild(BDConstants.MODID, "widget/feeder_mode_hunger_to_eat"));
+                iconMap.put(FeederMode.NORMAL, ResourceLocation.tryBuild(BDConstants.MODID, "widget/feeder_mode_normal"));
+                iconMap.put(FeederMode.SATURATION_KEEP, ResourceLocation.tryBuild(BDConstants.MODID, "widget/feeder_mode_saturation_keep"));
+                iconMap.put(FeederMode.CRAZY, ResourceLocation.tryBuild(BDConstants.MODID, "widget/feeder_mode_crazy"));
 
                 tooltipMap.put(FeederMode.HUNGER_TO_EAT, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.feeder_mode_hunger_to_eat")));
                 tooltipMap.put(FeederMode.NORMAL, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.feeder_mode_normal")));
@@ -76,8 +76,8 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_not_working"));
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
                 tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
 import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
@@ -49,8 +49,8 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(PopMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/popmode_up"));
-                iconMap.put(PopMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/popmode_down"));
+                iconMap.put(PopMode.OPEN, ResourceLocation.tryBuild(BDConstants.MODID, "widget/popmode_up"));
+                iconMap.put(PopMode.STOP, ResourceLocation.tryBuild(BDConstants.MODID, "widget/popmode_down"));
 
                 tooltipMap.put(PopMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_on")));
                 tooltipMap.put(PopMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
@@ -76,8 +76,8 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(ReceiveMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/net_disable"));
-                iconMap.put(ReceiveMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/net_absorb"));
+                iconMap.put(ReceiveMode.STOP, ResourceLocation.tryBuild(BDConstants.MODID, "widget/net_disable"));
+                iconMap.put(ReceiveMode.OPEN, ResourceLocation.tryBuild(BDConstants.MODID, "widget/net_absorb"));
 
                 tooltipMap.put(ReceiveMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.receive_mode_stop")));
                 tooltipMap.put(ReceiveMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.receive_mode_open")));
@@ -103,10 +103,10 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
-                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_powered"));
-                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_unpowered"));
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.POWERED, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_powered"));
+                iconMap.put(RedStoneControlMode.UNPOWERED, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_unpowered"));
 
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
@@ -135,8 +135,8 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(AutoSortMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_mode_open"));
-                iconMap.put(AutoSortMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/sort_mode_stop"));
+                iconMap.put(AutoSortMode.OPEN, ResourceLocation.tryBuild(BDConstants.MODID, "widget/sort_mode_open"));
+                iconMap.put(AutoSortMode.STOP, ResourceLocation.tryBuild(BDConstants.MODID, "widget/sort_mode_stop"));
 
                 tooltipMap.put(AutoSortMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_mode_open")));
                 tooltipMap.put(AutoSortMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_mode_stop")));

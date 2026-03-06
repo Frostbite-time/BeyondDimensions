@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.integration.module.jei;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.BDBaseGUI;
 import com.wintercogs.beyonddimensions.integration.module.jei.ContainerHandler.JeiContainerHandler;
 import com.wintercogs.beyonddimensions.integration.module.jei.RecipeTransfer.CraftMenuRecipeTransferHandler;
@@ -23,7 +23,7 @@ public class BDjeiPlugin implements IModPlugin
     @Override
     public ResourceLocation getPluginUid()
     {
-        return ResourceLocation.tryBuild(BeyondDimensions.MODID, "jei_plugin");
+        return ResourceLocation.tryBuild(BDConstants.MODID, "jei_plugin");
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.block.entity.*;
 import com.wintercogs.beyonddimensions.integration.module.ars.Block.SourcePathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity;
@@ -17,7 +18,7 @@ public class BDBlockEntities
 {
 
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
-            DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, BeyondDimensions.MODID);
+            DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, BDConstants.MODID);
 
     public static final Supplier<BlockEntityType<NetInterfaceBlockEntity>> NET_INTERFACE_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
             "net_interface_block_entity",

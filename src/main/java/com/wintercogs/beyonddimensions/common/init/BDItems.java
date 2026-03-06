@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.item.*;
 import com.wintercogs.beyonddimensions.integration.module.ae2.Item.NetAEStorageCell;
 import com.wintercogs.beyonddimensions.integration.module.ifs.Item.WardenSoulTagItem;
@@ -11,7 +12,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class BDItems
 {
-    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(BeyondDimensions.MODID);
+    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(BDConstants.MODID);
 
     // 维度创造器
     public static final DeferredItem<Item> NET_CREATER = ITEMS.register("net_creater",

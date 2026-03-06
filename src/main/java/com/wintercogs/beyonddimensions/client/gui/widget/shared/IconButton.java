@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.client.gui.widget.shared;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
@@ -20,9 +20,9 @@ public class IconButton extends Button implements GuiElementAccess
     protected final int iconHeight;
 
     protected WidgetSprites backgroundSprites = new WidgetSprites(
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/slot_button"),
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/slot_button_disabled"),
-            ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/slot_button_hovered")
+            ResourceLocation.tryBuild(BDConstants.MODID, "widget/slot_button"),
+            ResourceLocation.tryBuild(BDConstants.MODID, "widget/slot_button_disabled"),
+            ResourceLocation.tryBuild(BDConstants.MODID, "widget/slot_button_hovered")
     );
 
     // 从左到右的含义分别为

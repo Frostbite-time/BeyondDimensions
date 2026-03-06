@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
@@ -50,8 +50,8 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(FuzzyMode.DISABLE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_allow"));
-                iconMap.put(FuzzyMode.ENABLE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/hopper_nbt_mode_deny"));
+                iconMap.put(FuzzyMode.DISABLE, ResourceLocation.tryBuild(BDConstants.MODID, "widget/hopper_nbt_mode_allow"));
+                iconMap.put(FuzzyMode.ENABLE, ResourceLocation.tryBuild(BDConstants.MODID, "widget/hopper_nbt_mode_deny"));
 
                 tooltipMap.put(FuzzyMode.DISABLE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.fuzzy_mode_disable")));
                 tooltipMap.put(FuzzyMode.ENABLE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.fuzzy_mode_enable")));
@@ -76,8 +76,8 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(ReceiveMode.STOP, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/net_disable"));
-                iconMap.put(ReceiveMode.OPEN, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/net_absorb"));
+                iconMap.put(ReceiveMode.STOP, ResourceLocation.tryBuild(BDConstants.MODID, "widget/net_disable"));
+                iconMap.put(ReceiveMode.OPEN, ResourceLocation.tryBuild(BDConstants.MODID, "widget/net_absorb"));
 
                 tooltipMap.put(ReceiveMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.receive_mode_stop")));
                 tooltipMap.put(ReceiveMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.receive_mode_open")));
@@ -102,8 +102,8 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
             @Override
             protected void initButton()
             {
-                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_ignore"));
-                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BeyondDimensions.MODID, "widget/control_mode_not_working"));
+                iconMap.put(RedStoneControlMode.IGNORE, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_ignore"));
+                iconMap.put(RedStoneControlMode.NOT_WORKING, ResourceLocation.tryBuild(BDConstants.MODID, "widget/control_mode_not_working"));
 
                 tooltipMap.put(RedStoneControlMode.IGNORE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_ignore")));
                 tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));

@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.client.event.listener;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -10,7 +11,7 @@ import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 public final class ReloadHooks
 {
 
-    @EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = BDConstants.MODID, value = Dist.CLIENT)
     public static final class ReloadHooksClient
     {
         @SubscribeEvent
@@ -23,7 +24,7 @@ public final class ReloadHooks
         }
     }
 
-    @EventBusSubscriber(modid = BeyondDimensions.MODID)
+    @EventBusSubscriber(modid = BDConstants.MODID)
     public static final class ReloadHooksCommon
     {
         @SubscribeEvent

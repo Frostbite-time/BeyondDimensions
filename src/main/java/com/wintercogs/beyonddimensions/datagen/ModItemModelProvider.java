@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import net.minecraft.data.PackOutput;
@@ -16,7 +16,7 @@ public class ModItemModelProvider extends ItemModelProvider
 
     public ModItemModelProvider(PackOutput output, ExistingFileHelper existingFileHelper)
     {
-        super(output, BeyondDimensions.MODID, existingFileHelper);
+        super(output, BDConstants.MODID, existingFileHelper);
     }
 
     @Override

@@ -5,9 +5,9 @@ import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.ordered.*;
 import com.wintercogs.beyonddimensions.api.capability.helper.unordered.*;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.*;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.*;
-import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
 import com.wintercogs.beyonddimensions.common.block.entity.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
@@ -22,38 +22,30 @@ import com.wintercogs.beyonddimensions.integration.module.appmek.BD_AEMEKPlugin;
 import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.integration.module.botania.HudOverlay.ManaPoolPathwayOverlay;
 import com.wintercogs.beyonddimensions.integration.module.create.blocks.entities.SchematicannonPathWayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.curios.BD_CuriosPlugin;
 import com.wintercogs.beyonddimensions.integration.module.ifs.BD_SoulCaps;
 import com.wintercogs.beyonddimensions.integration.module.ifs.Item.WardenSoulTagItem;
-import com.wintercogs.beyonddimensions.integration.module.polymorph.PolymorphPlug;
 import com.wintercogs.beyonddimensions.integration.module.rs.BD_RSPlugin;
 import com.wintercogs.beyonddimensions.integration.module.rsmek.BD_RSMekPlugin;
 import com.wintercogs.beyonddimensions.integration.module.rstypes.BD_RSTypesPlugin;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
 import vazkii.botania.api.BotaniaForgeCapabilities;
 
-@Mod(BeyondDimensions.MODID)
+@Mod(BDConstants.MODID)
 public class BeyondDimensions
 {
-    public static final String MODID = "beyonddimensions";
     public static IEventBus MOD_EVENT_BUS;
 
     public static boolean MekLoaded = false; // 用于mek化学品存储
@@ -96,12 +88,10 @@ public class BeyondDimensions
     public static boolean Create_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    // mod 类的构造函数是加载 mod 时运行的第一个代码。
-    // FML 将识别一些参数类型，如 IEventBus 或 ModContainer 并自动传入它们。
     public BeyondDimensions(IEventBus modEventBus, ModContainer modContainer)
     {
         MOD_EVENT_BUS = modEventBus;
-        NeoForge.EVENT_BUS.register(this);//注册this类中所有事件
+        NeoForge.EVENT_BUS.register(this);
         Config.register(modContainer);
 
         modEventBus.addListener(this::constructMod);
@@ -359,6 +349,6 @@ public class BeyondDimensions
 
     public static ResourceLocation makeId(String path)
     {
-        return ResourceLocation.fromNamespaceAndPath(MODID, path);
+        return ResourceLocation.fromNamespaceAndPath(BDConstants.MODID, path);
     }
 }
