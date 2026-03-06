@@ -140,6 +140,11 @@ public class BeyondDimensions
 
         if (FMLEnvironment.dist == Dist.CLIENT)
         {
+            BeyondDimensionsClient.clientInit(modEventBus, MinecraftForge.EVENT_BUS);
+        }
+
+        if (FMLEnvironment.dist == Dist.CLIENT)
+        {
             // 注册方块实体渲染
             modEventBus.addListener(ModBlockRenders::onRegisterRenderers);
         }
