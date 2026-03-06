@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "com.wintercogs.beyonddimensions.Mixin",
+  "package": "com.wintercogs.beyonddimensions.mixin",
   "mixins": [
   ],
   "client": [
