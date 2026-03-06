@@ -6,19 +6,23 @@ import com.refinedmods.refinedstorage.common.content.Blocks;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
+import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
 import com.wintercogs.beyonddimensions.integration.module.rs.Tags.RSTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.*;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.conditions.IConditionBuilder;
 import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
+import org.jetbrains.annotations.NotNull;
 import vazkii.botania.common.block.BotaniaBlocks;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModRecipeProvider extends RecipeProvider implements IConditionBuilder
+public class ModRecipeProvider extends BDRecipeProvider
 {
 
     public ModRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries)
@@ -27,7 +31,13 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput recipeOutput)
+    public @NotNull String getName()
+    {
+        return "BeyondDimensions Recipe Provider";
+    }
+
+    @Override
+    protected void buildRecipes(@NotNull RecipeOutput recipeOutput)
     {
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.UNSTABLE_SPACE_TIME_FRAGMENT.get())
                 .pattern("ABA")

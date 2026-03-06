@@ -14,7 +14,6 @@ import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEnti
 import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.integration.module.ae2.BD_AEPlugin;
 import com.wintercogs.beyonddimensions.integration.module.appars.BD_AE_ArsPlugin;
 import com.wintercogs.beyonddimensions.integration.module.appbotania.BD_AEBotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.appflux.BD_AEFluxPlugin;
@@ -297,13 +296,6 @@ public class BeyondDimensions
             StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
         }
 
-        // 为维度ME硬盘注册，其中BD_AEPlugin用于注册存储元件
-        // BD_AEMEKPlugin与BD_AEFluxPlugin分别注册IStackType与AEKey之间的转换。
-        // 物品、流体的转换由AEHelper的静态块负责
-        if (AELoaded)
-        {
-            BD_AEPlugin.register();
-        }
         if (AEMEKLoaded)
         {
             BD_AEMEKPlugin.register();

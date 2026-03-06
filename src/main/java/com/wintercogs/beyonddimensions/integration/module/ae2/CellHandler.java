@@ -5,7 +5,7 @@ import appeng.api.storage.cells.ISaveProvider;
 import appeng.api.storage.cells.StorageCell;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
-import com.wintercogs.beyonddimensions.integration.module.ae2.Item.NetAEStorageCell;
+import com.wintercogs.beyonddimensions.integration.module.ae2.item.NetAEStorageCell;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 

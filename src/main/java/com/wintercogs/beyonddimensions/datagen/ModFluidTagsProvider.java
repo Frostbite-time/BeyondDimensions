@@ -1,35 +1,34 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
-import com.wintercogs.beyonddimensions.common.init.BDTags;
+import com.wintercogs.beyonddimensions.datagen.util.BDFluidTagsProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.FluidTagsProvider;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModFluidTagsProvider extends FluidTagsProvider
+public class ModFluidTagsProvider extends BDFluidTagsProvider
 {
     public ModFluidTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider, @Nullable ExistingFileHelper existingFileHelper)
     {
-        super(output, provider, BDConstants.MODID, existingFileHelper);
+        super(output, provider, existingFileHelper);
     }
 
     @Override
-    protected void addTags(HolderLookup.Provider provider)
+    public @NotNull String getName()
     {
-        // 把源体 + 流动体都塞进 c:experience
-        tag(BDTags.C_EXPERIENCE)
+        return "BeyondDimensions FluidTag Provider";
+    }
+
+    @Override
+    protected void addTags(HolderLookup.@NotNull Provider provider)
+    {
+        tag(Tags.Fluids.EXPERIENCE)
                 .add(BDFluids.XP_FLUID.source().get())
                 .add(BDFluids.XP_FLUID.flowing().get());
-    }
-
-    @Override
-    public String getName()
-    {
-        return "BeyondDimensions Fluid Tags";
     }
 }

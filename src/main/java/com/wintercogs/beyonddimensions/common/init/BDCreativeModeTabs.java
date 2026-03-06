@@ -47,11 +47,6 @@ public class BDCreativeModeTabs
                             output.accept(e.bucket().get());
                         }
 
-                        if (BeyondDimensions.AELoaded)
-                        {
-                            output.accept(BDItems.NET_AE_STORAGE_CELL);
-                        }
-
                         if (BeyondDimensions.IFS_Loaded)
                         {
                             output.accept(BDItems.WARDEN_SOUL_TAG_ITEM);
