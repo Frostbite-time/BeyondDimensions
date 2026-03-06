@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.common.init;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.block.entity.*;
-import com.wintercogs.beyonddimensions.integration.module.ars.block.SourcePathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.botania.block.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.create.block.entity.SchematicannonPathWayBlockEntity;
 import net.minecraft.core.registries.Registries;
@@ -94,22 +93,11 @@ public class BDBlockEntities
             ).build(null)
     );
 
-    public static Supplier<BlockEntityType<?>> ARS_SOURCE_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> MANA_POOL_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> SCHEMATICANNON_PATHWAY_BLOCK_ENTITY;
 
     public static void IntegrationRegister()
     {
-        if (BeyondDimensions.ARS_Loaded)
-        {
-            ARS_SOURCE_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
-                    "ars_source_pathway_block_entity",
-                    () -> BlockEntityType.Builder.of(
-                            SourcePathwayBlockEntity::new,
-                            BDBlocks.ARS_SOURCE_PATHWAY.get()
-                    ).build(null)
-            );
-        }
         if (BeyondDimensions.Botania_Loaded)
         {
             MANA_POOL_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(

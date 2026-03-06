@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.integration.module.ars.caps;
 
-import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
+import com.wintercogs.beyonddimensions.integration.module.ars.BDArsCaps;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
@@ -23,7 +23,7 @@ public class ItemSourceProvider implements ICapabilityProvider
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction direction)
     {
-        return capability == BD_ArsCaps.SOURCE_CAP ? opt.cast() : LazyOptional.empty();
+        return capability == BDArsCaps.SOURCE_CAP ? opt.cast() : LazyOptional.empty();
     }
 
     public void invalidate()

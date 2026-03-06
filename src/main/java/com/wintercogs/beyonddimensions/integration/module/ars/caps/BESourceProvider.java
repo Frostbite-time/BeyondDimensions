@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.ars.caps;
 
 import com.hollingsworth.arsnouveau.api.source.ISourceTile;
-import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
+import com.wintercogs.beyonddimensions.integration.module.ars.BDArsCaps;
 import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -20,9 +20,9 @@ public class BESourceProvider implements ICapabilityProvider
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction direction)
     {
-        if (capability == BD_ArsCaps.SOURCE_CAP)
+        if (capability == BDArsCaps.SOURCE_CAP)
         {
-            return BD_ArsCaps.SOURCE_CAP.orEmpty(capability, opt);
+            return BDArsCaps.SOURCE_CAP.orEmpty(capability, opt);
         }
         return LazyOptional.empty();
     }

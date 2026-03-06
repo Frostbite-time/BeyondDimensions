@@ -12,7 +12,6 @@ import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
-import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.curios.BD_CuriosPlugin;
 import net.minecraft.resources.ResourceLocation;
@@ -46,22 +45,12 @@ public class BeyondDimensions
     public static final String JEI2MODID = "jei";
     public static boolean PolymorphLoaded = false;
     public static final String PolymorphModId = "polymorph";
-    public static boolean AEMEKLoaded = false;
-    public static final String AEMEK2MODID = "appmek";
-    public static boolean AEFluxLoaded = false;
-    public static final String AEFlux2MODID = "appflux";
     public static boolean CuriosLoaded = false;
     public static final String CuriosModId = "curios";
     public static boolean JECharactersLoaded = false;
     public static final String JECharactersModId = "jecharacters";
-    public static final String ARS_ModId = "ars_nouveau"; // 新生魔艺-魔源兼容
-    public static boolean ARS_Loaded = false;
-    public static final String AE_ARS_ModId = "arseng";
-    public static boolean AE_ARS_Loaded = false;
     public static final String Botania_ModId = "botania"; // 植物魔法-mana兼容
     public static boolean Botania_Loaded = false;
-    public static final String AE_Botania_ModId = "appbot";// 植物魔法-ae附属
-    public static boolean AE_Botania_Loaded = false;
     public static final String Create_ModId = "create";
     public static boolean Create_Loaded = false;
     public static final Logger LOGGER = LogUtils.getLogger();
@@ -138,14 +127,6 @@ public class BeyondDimensions
         {
             PolymorphLoaded = true;
         }
-        if (ModPresence.isLoaded(AEMEK2MODID))
-        {
-            AEMEKLoaded = true;
-        }
-        if (ModPresence.isLoaded(AEFlux2MODID))
-        {
-            AEFluxLoaded = true;
-        }
         if (ModPresence.isLoaded(CuriosModId))
         {
             CuriosLoaded = true;
@@ -155,23 +136,10 @@ public class BeyondDimensions
         {
             JECharactersLoaded = true;
         }
-        if (ModPresence.isLoaded(ARS_ModId))
-        {
-            ARS_Loaded = true;
-            BD_ArsCaps.registerCapability(MOD_EVENT_BUS);
-        }
-        if (ModPresence.isLoaded(AE_ARS_ModId))
-        {
-            AE_ARS_Loaded = true;
-        }
         if (ModPresence.isLoaded(Botania_ModId))
         {
             Botania_Loaded = true;
             MinecraftForge.EVENT_BUS.addGenericListener(BlockEntity.class, BD_BotaniaPlugin::attachBlockEntityCaps); // 为网络通道和网络接口手动注册火花附着
-        }
-        if (ModPresence.isLoaded(AE_Botania_ModId))
-        {
-            AE_Botania_Loaded = true;
         }
         if (ModPresence.isLoaded(Create_ModId))
         {
@@ -252,18 +220,6 @@ public class BeyondDimensions
             StackHandlerWrapperHelper.stackWrappers.put(PigmentStackKey.ID, PigmentHandlerWrapper::new);
             StackHandlerWrapperHelper.stackWrappers.put(SlurryStackKey.ID, SlurryHandlerWrapper::new);
 
-        }
-
-        if (ARS_Loaded)
-        {
-            // 注册魔源
-            StackKeyRegistry.registerType(SourceStackKey.INSTANCE);
-            // 自己注册能力作为代替，随后为新生魔艺的方块做包装注册
-            CapabilityHelper.BlockCapabilityMap.put(SourceStackKey.ID, BD_ArsCaps.SOURCE_CAP);
-            CapabilityHelper.ItemCapabilityMap.put(SourceStackKey.ID, BD_ArsCaps.SOURCE_CAP);
-            CapabilityHelper.registerUSHandler(SourceStackKey.INSTANCE, SourceUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(SourceStackKey.INSTANCE, SourceStackTypedHandler::new);
-            StackHandlerWrapperHelper.stackWrappers.put(SourceStackKey.ID, SourceHandlerWrapper::new);
         }
 
         if (Botania_Loaded)

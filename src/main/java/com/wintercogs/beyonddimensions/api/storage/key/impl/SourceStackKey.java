@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.api.longtype.SourceType;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.render.SourceStackKeyRender;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -53,7 +54,7 @@ public class SourceStackKey extends LongStackKey<SourceType>
     @Override
     public String getModId()
     {
-        return BeyondDimensions.ARS_ModId;
+        return OtherModIds.ARS_NOUVEAU;
     }
 
     @Override
