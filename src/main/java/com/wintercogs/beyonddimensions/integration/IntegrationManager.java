@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.integration;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -116,6 +117,30 @@ public final class IntegrationManager
         for (IIntegrationModule module : ACTIVE_COMMON_MODULES)
         {
             module.onDatagen(event);
+        }
+    }
+
+    public static void onBlockTagDatagen(HolderLookup.Provider provider, IIntegrationModule.BlockTagAppender appender)
+    {
+        for (IIntegrationModule module : ACTIVE_COMMON_MODULES)
+        {
+            module.onBlockTagDatagen(provider, appender);
+        }
+    }
+
+    public static void onItemTagDatagen(HolderLookup.Provider provider, IIntegrationModule.ItemTagAppender appender)
+    {
+        for (IIntegrationModule module : ACTIVE_COMMON_MODULES)
+        {
+            module.onItemTagDatagen(provider, appender);
+        }
+    }
+
+    public static void onFluidTagDatagen(HolderLookup.Provider provider, IIntegrationModule.FluidTagAppender appender)
+    {
+        for (IIntegrationModule module : ACTIVE_COMMON_MODULES)
+        {
+            module.onFluidTagDatagen(provider, appender);
         }
     }
 }

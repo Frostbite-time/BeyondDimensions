@@ -10,7 +10,6 @@ import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.rs.datagen.RSModuleBlockLootTableProvider;
 import com.wintercogs.beyonddimensions.integration.module.rs.datagen.RSModuleBlockStateProvider;
-import com.wintercogs.beyonddimensions.integration.module.rs.datagen.RSModuleBlockTagProvider;
 import com.wintercogs.beyonddimensions.integration.module.rs.datagen.RSModuleRecipeProvider;
 import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlockEntities;
 import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlocks;
@@ -19,6 +18,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -76,6 +76,12 @@ public class RSModule implements IIntegrationModule
     }
 
     @Override
+    public void onBlockTagDatagen(HolderLookup.Provider provider, BlockTagAppender appender)
+    {
+        appender.add(BlockTags.MINEABLE_WITH_PICKAXE, RSModuleBlocks.RS_NET_PATHWAY.get());
+    }
+
+    @Override
     public void onDatagen(GatherDataEvent event)
     {
         DataGenerator generator = event.getGenerator();
@@ -93,7 +99,6 @@ public class RSModule implements IIntegrationModule
             }
         });
         generator.addProvider(event.includeClient(), new RSModuleBlockStateProvider(packOutput, existingFileHelper));
-        generator.addProvider(event.includeServer(), new RSModuleBlockTagProvider(packOutput, lookupProvider, existingFileHelper));
         generator.addProvider(event.includeServer(), new RSModuleRecipeProvider(packOutput, lookupProvider));
     }
 }

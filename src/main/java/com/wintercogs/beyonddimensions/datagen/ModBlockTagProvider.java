@@ -1,22 +1,27 @@
 package com.wintercogs.beyonddimensions.datagen;
 
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
-import com.wintercogs.beyonddimensions.datagen.util.BDBlockTagsProvider;
+import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
+import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModBlockTagProvider extends BDBlockTagsProvider
+public class ModBlockTagProvider extends BlockTagsProvider
 {
 
     public ModBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper)
     {
-        super(output, lookupProvider, existingFileHelper);
+        super(output, lookupProvider, BDConstants.MODID, existingFileHelper);
     }
 
     @Override
@@ -26,7 +31,7 @@ public class ModBlockTagProvider extends BDBlockTagsProvider
     }
 
     @Override
-    protected void addTags(HolderLookup.@NotNull Provider provider)
+    protected void addTags(@NotNull HolderLookup.Provider provider)
     {
         // 标记以下方块使用镐子挖掘更快
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
@@ -42,5 +47,20 @@ public class ModBlockTagProvider extends BDBlockTagsProvider
                 .add(BDBlocks.ARS_SOURCE_PATHWAY.get())
                 .add(BDBlocks.MANA_POOL_PATHWAY.get())
                 .add(BDBlocks.SCHEMATICANNON_PATHWAY.get());
+
+        IntegrationManager.onBlockTagDatagen(provider, new IIntegrationModule.BlockTagAppender()
+        {
+            @Override
+            public void add(TagKey<Block> tag, Block... blocks)
+            {
+                ModBlockTagProvider.this.tag(tag).add(blocks);
+            }
+
+            @Override
+            public void addTag(TagKey<Block> tag, TagKey<Block> nestedTag)
+            {
+                ModBlockTagProvider.this.tag(tag).addTag(nestedTag);
+            }
+        });
     }
 }
