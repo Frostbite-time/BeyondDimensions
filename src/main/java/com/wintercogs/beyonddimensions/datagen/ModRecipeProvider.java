@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.datagen;
 
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
+import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
@@ -12,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModRecipeProvider extends RecipeProvider
+public class ModRecipeProvider extends BDRecipeProvider
 {
 
     public ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
@@ -269,7 +270,7 @@ public class ModRecipeProvider extends RecipeProvider
         @Override
         public @NotNull String getName()
         {
-            return "Beyond Dimensions Recipe";
+            return "BeyondDimensions Recipe Provider";
         }
     }
 }

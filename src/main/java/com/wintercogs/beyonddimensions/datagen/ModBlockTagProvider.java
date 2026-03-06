@@ -1,21 +1,26 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
+import com.wintercogs.beyonddimensions.datagen.util.BDBlockTagsProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
-import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModBlockTagProvider extends BlockTagsProvider
+public class ModBlockTagProvider extends BDBlockTagsProvider
 {
 
     public ModBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
     {
-        super(output, lookupProvider, BDConstants.MODID);
+        super(output, lookupProvider);
+    }
+
+    @Override
+    public @NotNull String getName()
+    {
+        return "BeyondDimensions BlockTag Provider";
     }
 
     @Override

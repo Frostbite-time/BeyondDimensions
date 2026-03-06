@@ -1,20 +1,25 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
+import com.wintercogs.beyonddimensions.datagen.util.BDFluidTagsProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.FluidTagsProvider;
 import net.neoforged.neoforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModFluidTagsProvider extends FluidTagsProvider
+public class ModFluidTagsProvider extends BDFluidTagsProvider
 {
     public ModFluidTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider)
     {
-        super(output, provider, BDConstants.MODID);
+        super(output, provider);
+    }
+
+    @Override
+    public @NotNull String getName()
+    {
+        return "BeyondDimensions FluidTag Provider";
     }
 
     @Override
@@ -24,11 +29,5 @@ public class ModFluidTagsProvider extends FluidTagsProvider
         tag(Tags.Fluids.EXPERIENCE)
                 .add(BDFluids.XP_FLUID.source().get())
                 .add(BDFluids.XP_FLUID.flowing().get());
-    }
-
-    @Override
-    public @NotNull String getName()
-    {
-        return "BeyondDimensions Fluid Tags";
     }
 }

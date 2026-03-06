@@ -9,6 +9,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.Collections;
@@ -26,7 +27,14 @@ public class DataGenerators
 
         // 生成方块战利品表
         event.createProvider((output, lookupProvider) -> new LootTableProvider(output, Collections.emptySet(),
-                List.of(new LootTableProvider.SubProviderEntry(ModBlockLootTableProvider::new, LootContextParamSets.BLOCK)), lookupProvider));
+                List.of(new LootTableProvider.SubProviderEntry(ModBlockLootTableProvider::new, LootContextParamSets.BLOCK)), lookupProvider)
+        {
+            @Override
+            public @NotNull String getName()
+            {
+                return "BeyondDimensions LootTable Provider";
+            }
+        });
         // 生成物品和方块模型
         event.createProvider(ModModelProvider::new);
 

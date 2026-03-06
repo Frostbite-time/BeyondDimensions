@@ -7,30 +7,31 @@ import com.wintercogs.beyonddimensions.common.block.NetTerminalBlock;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
+import com.wintercogs.beyonddimensions.datagen.util.BDModelProvider;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
-import net.minecraft.client.data.models.ModelProvider;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.client.data.models.blockstates.PropertyDispatch;
-import net.minecraft.client.data.models.model.ModelLocationUtils;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.renderer.block.model.VariantMutator;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.client.model.item.DynamicFluidContainerModel;
-import net.neoforged.neoforge.registries.DeferredBlock;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
-
-public class ModModelProvider extends ModelProvider
+public class ModModelProvider extends BDModelProvider
 {
 
     public ModModelProvider(PackOutput output)
     {
-        super(output, BDConstants.MODID);
+        super(output);
+    }
+
+    @Override
+    public @NotNull String getName()
+    {
+        return "BeyondDimensions Model Provider";
     }
 
     @Override
@@ -79,47 +80,6 @@ public class ModModelProvider extends ModelProvider
         {
             fluidBucketModel(itemModels, e);
         }
-    }
-
-    /**
-     * 生成单个流体桶模型：
-     * {
-     * "parent": "neoforge:item/bucket",
-     * "loader": "neoforge:fluid_container",
-     * "fluid": "<modid>:<fluidName>"
-     * }
-     */
-    private void fluidBucketModel(ItemModelGenerators itemModels, BDFluids.FluidEntry e)
-    {
-        itemModels.itemModelOutput.accept(
-                e.bucket().get(),
-                new DynamicFluidContainerModel.Unbaked(
-                        new DynamicFluidContainerModel.Textures(
-                                Optional.of(Identifier.withDefaultNamespace("item/bucket")),
-                                Optional.of(Identifier.withDefaultNamespace("item/bucket")),
-                                Optional.of(Identifier.fromNamespaceAndPath("neoforge", "item/mask/bucket_fluid")),
-                                Optional.of(Identifier.fromNamespaceAndPath("neoforge", "item/mask/bucket_fluid_cover"))
-                        ),
-                        e.source().get(),
-                        false, // flip_gas
-                        true,  // cover_is_mask
-                        true  // apply_fluid_luminosity
-                )
-        );
-    }
-
-    private void blockWithItem(BlockModelGenerators blockModels, DeferredBlock<?> deferredBlock)
-    {
-        Block block = deferredBlock.get();
-        blockModels.createTrivialCube(block);
-        blockModels.registerSimpleItemModel(block, ModelLocationUtils.getModelLocation(block));
-    }
-
-    private void customModelBlockWithItem(BlockModelGenerators blockModels, Block block, String modelName)
-    {
-        Identifier modelId = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/" + modelName);
-        blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(modelId)));
-        blockModels.registerSimpleItemModel(block, modelId);
     }
 
     private void customTerminalBlockWithItem(BlockModelGenerators blockModels)
