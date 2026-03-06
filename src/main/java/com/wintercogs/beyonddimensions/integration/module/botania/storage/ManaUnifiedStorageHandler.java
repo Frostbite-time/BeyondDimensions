@@ -1,7 +1,6 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.unordered;
+package com.wintercogs.beyonddimensions.integration.module.botania.storage;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ManaStackKey;
 import com.wintercogs.beyonddimensions.api.util.CapCtx;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.core.BlockPos;

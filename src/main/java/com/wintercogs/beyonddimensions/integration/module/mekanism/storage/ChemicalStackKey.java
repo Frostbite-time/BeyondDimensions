@@ -7,7 +7,6 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.storage.key.render.ChemicalStackKeyRender;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;

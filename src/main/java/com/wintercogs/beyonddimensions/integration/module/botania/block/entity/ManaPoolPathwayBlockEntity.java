@@ -1,11 +1,11 @@
-package com.wintercogs.beyonddimensions.integration.module.botania.Block;
+package com.wintercogs.beyonddimensions.integration.module.botania.block.entity;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ManaUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.util.CapCtx;
 import com.wintercogs.beyonddimensions.common.block.entity.NetedBlockEntity;
-import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.integration.module.botania.init.BotaniaModuleBlockEntities;
+import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -126,7 +126,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
 
     public ManaPoolPathwayBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(BDBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
+        super(BotaniaModuleBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
         refreshHandler();
     }
 
@@ -141,25 +141,25 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
     {
         event.registerBlockEntity(
                 BotaniaForgeCapabilities.MANA_RECEIVER,
-                BDBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
+                BotaniaModuleBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> be instanceof ManaPoolPathwayBlockEntity pool ? pool : null
         );
 
         event.registerBlockEntity(
                 BotaniaForgeCapabilities.SPARK_ATTACHABLE,
-                BDBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
+                BotaniaModuleBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> be instanceof ManaPoolPathwayBlockEntity pool ? pool : null
         );
 
         event.registerBlockEntity(
                 BotaniaForgeClientCapabilities.BLOCK_WAND_HUD,
-                BDBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
+                BotaniaModuleBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> be instanceof ManaPoolPathwayBlockEntity pool ? new WandHud(pool) : null
         );
 
         event.registerBlockEntity(
                 BotaniaForgeCapabilities.WANDABLE,
-                BDBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
+                BotaniaModuleBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> be instanceof ManaPoolPathwayBlockEntity pool ? pool : null
         );
     }

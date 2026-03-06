@@ -1,7 +1,5 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
@@ -13,9 +11,7 @@ import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import org.jetbrains.annotations.NotNull;
-import vazkii.botania.common.block.BotaniaBlocks;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -264,20 +260,6 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .unlockedBy("unlock_xp_exchange_item", has(BDItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
 
-
-
-
-
-        if (BeyondDimensions.Botania_Loaded)
-        {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.MANA_POOL_PATHWAY.get())
-                    .pattern("ABA")
-                    .pattern("AAA")
-                    .define('A', BotaniaBlocks.livingrock)
-                    .define('B', BDItems.SPACE_TIME_STABLE_FRAME.get())
-                    .unlockedBy("unlock_mana_pool_pathway", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                    .save(recipeOutput.withConditions(new ModLoadedCondition(BeyondDimensions.Botania_ModId)));
-        }
 
     }
 }

@@ -1,6 +1,7 @@
-package com.wintercogs.beyonddimensions.integration.module.botania.Block;
+package com.wintercogs.beyonddimensions.integration.module.botania.block;
 
 import com.wintercogs.beyonddimensions.common.block.NetedBlock;
+import com.wintercogs.beyonddimensions.integration.module.botania.block.entity.ManaPoolPathwayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;

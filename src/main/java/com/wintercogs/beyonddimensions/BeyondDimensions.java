@@ -2,21 +2,28 @@ package com.wintercogs.beyonddimensions;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
-import com.wintercogs.beyonddimensions.api.capability.helper.ordered.*;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.*;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.*;
+import com.wintercogs.beyonddimensions.api.capability.helper.ordered.EnergyStackTypedHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.ordered.FluidStackTypedHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ItemStackTypedHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.EnergyUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.FluidUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ItemUnifiedStorageHandler;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.EnergyHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ItemHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.*;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.block.entity.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.integration.module.ars.BDArsCaps;
-import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
-import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.create.blocks.entities.SchematicannonPathWayBlockEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -30,7 +37,6 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
-import vazkii.botania.api.BotaniaForgeCapabilities;
 
 @Mod(BDConstants.MODID)
 public class BeyondDimensions
@@ -51,8 +57,8 @@ public class BeyondDimensions
 
         modEventBus.addListener(this::constructMod);
         modEventBus.addListener(this::commonSetup);
-        //为存储网络的接口方块注册物品交互能力
 
+        //为存储网络的接口方块注册物品交互能力
         modEventBus.addListener(NetInterfaceBlockEntity::registerCapability);
         modEventBus.addListener(NetPathwayBlockEntity::registerCapability);
         modEventBus.addListener(NetEnergyPathwayBlockEntity::registerCapability);
@@ -79,12 +85,6 @@ public class BeyondDimensions
     // 在此阶段检测模组列表
     private void constructMod(final FMLConstructModEvent event)
     {
-        if (ModList.get().isLoaded(Botania_ModId))
-        {
-            Botania_Loaded = true;
-            MOD_EVENT_BUS.addListener(ManaPoolPathwayBlockEntity::registerCapability);
-            MOD_EVENT_BUS.addListener(BD_BotaniaPlugin::registerCapability); // 为网络通道和网络接口手动注册火花附着
-        }
         if (ModList.get().isLoaded(Create_ModId))
         {
             Create_Loaded = true;
@@ -126,23 +126,6 @@ public class BeyondDimensions
         StackHandlerWrapperHelper.stackWrappers.put(ItemStackKey.ID, ItemHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackKey.ID, FluidHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(EnergyStackKey.ID, EnergyHandlerWrapper::new);
-
-        if (Botania_Loaded)
-        {
-            // 注册Mana（魔力）
-            StackKeyRegistry.registerType(ManaStackKey.INSTANCE);
-            CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, BotaniaForgeCapabilities.MANA_RECEIVER);
-            CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, BotaniaForgeCapabilities.MANA_ITEM);
-            CapabilityHelper.registerUSHandler(ManaStackKey.INSTANCE, ManaUnifiedStorageHandler::new);
-            CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
-            StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
-        }
-
-        // 注册物品能力交互黑名单
-        if (Botania_Loaded)
-        {
-            BD_BotaniaPlugin.registerItemCapBlackList();
-        }
     }
 
     @SubscribeEvent

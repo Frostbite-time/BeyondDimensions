@@ -2,11 +2,11 @@ package com.wintercogs.beyonddimensions.integration.module.appifs;
 
 import com.buuz135.soulplied_energistics.applied.SoulAEKeyType;
 import com.buuz135.soulplied_energistics.applied.SoulKey;
-import com.wintercogs.beyonddimensions.integration.module.ifs.storage.WardenSoulStackKey;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.ae2.AEHelper;
+import com.wintercogs.beyonddimensions.integration.module.ifs.storage.WardenSoulStackKey;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 

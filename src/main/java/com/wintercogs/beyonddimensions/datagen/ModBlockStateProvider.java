@@ -34,7 +34,7 @@ public class ModBlockStateProvider extends BDBlockStateProvider
         simpleBlockItem(BDBlocks.NET_PUMP_BLOCK.get(), models().getExistingFile(BeyondDimensions.makeId("net_pump_block")));
         simpleBlockItem(BDBlocks.NET_HOPPER_BLOCK.get(), models().getExistingFile(BeyondDimensions.makeId("net_hopper_block")));
         simpleBlockItem(BDBlocks.NET_FURNACE_BLOCK.get(), models().getExistingFile(BeyondDimensions.makeId("net_furnace_block")));
-        simpleBlockItem(BDBlocks.MANA_POOL_PATHWAY.get(), models().getExistingFile(BeyondDimensions.makeId("mana_pool_pathway")));
+
         simpleBlockItem(BDBlocks.SCHEMATICANNON_PATHWAY.get(), models().getExistingFile(BeyondDimensions.makeId("schematicannon_pathway")));
     }
 }

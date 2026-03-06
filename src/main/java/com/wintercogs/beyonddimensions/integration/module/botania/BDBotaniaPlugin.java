@@ -1,11 +1,11 @@
 package com.wintercogs.beyonddimensions.integration.module.botania;
 
-import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ManaStackTypedHandler;
-import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ManaUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.util.CapCtx;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.ItemCapInteractionBlackList;
+import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaStackTypedHandler;
+import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaUnifiedStorageHandler;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import vazkii.botania.api.BotaniaForgeCapabilities;
 import vazkii.botania.common.item.BotaniaItems;
@@ -13,7 +13,7 @@ import vazkii.botania.common.item.BotaniaItems;
 /**
  * 为网络通道和网络接口注册火花附着
  */
-public class BD_BotaniaPlugin
+public class BDBotaniaPlugin
 {
     public static void registerItemCapBlackList()
     {

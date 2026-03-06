@@ -1,6 +1,7 @@
-package com.wintercogs.beyonddimensions.api.longtype;
+package com.wintercogs.beyonddimensions.integration.module.botania.storage;
 
 import com.mojang.serialization.Codec;
+import com.wintercogs.beyonddimensions.api.longtype.LongType;
 import net.minecraft.network.chat.Component;
 
 // 植物魔法-mana兼容

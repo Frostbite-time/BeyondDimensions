@@ -3,8 +3,6 @@ package com.wintercogs.beyonddimensions.common.init;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.block.*;
-import com.wintercogs.beyonddimensions.integration.module.ars.block.SourcePathwayBlock;
-import com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathway;
 import com.wintercogs.beyonddimensions.integration.module.create.blocks.SchematicannonPathWayBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -50,15 +48,6 @@ public class BDBlocks
     public static final DeferredBlock<Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock("dimensional_connect_block",
             () -> new Block(BlockBehaviour.Properties.of().strength(2f)));
 
-
-
-    public static final DeferredBlock<Block> MANA_POOL_PATHWAY = registerBlock("mana_pool_pathway",
-            () -> {
-                if (BeyondDimensions.Botania_Loaded)
-                    return new ManaPoolPathway(BlockBehaviour.Properties.of().strength(2f));
-                else
-                    return new Block(BlockBehaviour.Properties.of().strength(2f));
-            });
 
     public static final DeferredBlock<Block> SCHEMATICANNON_PATHWAY = registerBlock("schematicannon_pathway",
             () -> {

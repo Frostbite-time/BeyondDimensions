@@ -7,7 +7,6 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.LongStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.render.WardenSoulStackKeyRender;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;

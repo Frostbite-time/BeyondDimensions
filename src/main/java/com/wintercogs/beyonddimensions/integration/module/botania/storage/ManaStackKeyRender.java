@@ -1,9 +1,8 @@
-package com.wintercogs.beyonddimensions.api.storage.key.render;
+package com.wintercogs.beyonddimensions.integration.module.botania.storage;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ManaStackKey;
 import com.wintercogs.beyonddimensions.util.IngredientRenderer;
 import com.wintercogs.beyonddimensions.util.StringFormat;
 import net.minecraft.client.Minecraft;

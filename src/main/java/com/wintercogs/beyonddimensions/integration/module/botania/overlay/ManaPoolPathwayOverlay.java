@@ -1,7 +1,7 @@
-package com.wintercogs.beyonddimensions.integration.module.botania.HudOverlay;
+package com.wintercogs.beyonddimensions.integration.module.botania.overlay;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.integration.module.botania.block.entity.ManaPoolPathwayBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
@@ -10,33 +10,34 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import org.lwjgl.opengl.GL11;
+import vazkii.botania.api.recipe.ManaInfusionRecipe;
+import vazkii.botania.client.core.helper.RenderHelper;
+import vazkii.botania.client.gui.HUDHandler;
+import vazkii.botania.common.item.WandOfTheForestItem;
 
 public class ManaPoolPathwayOverlay
 {
-    @SubscribeEvent
+
     public static void onRenderGui(RenderGuiEvent.Post e)
     {
         var mc = Minecraft.getInstance();
         if (mc == null || mc.player == null || mc.level == null || mc.options.hideGui) return;
 
-        if (!BeyondDimensions.Botania_Loaded) return;
-
         HitResult hit = mc.hitResult;
         if (!(hit instanceof BlockHitResult bhr)) return;
 
         BlockEntity be = mc.level.getBlockEntity(bhr.getBlockPos());
-        if (!(be instanceof com.wintercogs.beyonddimensions.integration.module.botania.Block.ManaPoolPathwayBlockEntity pool))
+        if (!(be instanceof ManaPoolPathwayBlockEntity pool))
             return;
 
         ItemStack held = mc.player.getMainHandItem();
-        if (held.isEmpty() || held.getItem() instanceof vazkii.botania.common.item.WandOfTheForestItem)
+        if (held.isEmpty() || held.getItem() instanceof WandOfTheForestItem)
             return; // 法杖交由植魔自己的逻辑处理
 
         BlockState below = mc.level.getBlockState(bhr.getBlockPos().below());
-        RecipeHolder<vazkii.botania.api.recipe.ManaInfusionRecipe> recipe = pool.getMatchingRecipe(held, below);
+        RecipeHolder<ManaInfusionRecipe> recipe = pool.getMatchingRecipe(held, below);
         if (recipe == null) return;
 
         GuiGraphics gui = e.getGuiGraphics();
@@ -51,7 +52,7 @@ public class ManaPoolPathwayOverlay
         RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         // 直接复用 Botania 的贴图和绘制小工具
-        vazkii.botania.client.core.helper.RenderHelper.drawTexturedModalRect(gui, vazkii.botania.client.gui.HUDHandler.manaBar, x, y, u, v, 22, 15);
+        RenderHelper.drawTexturedModalRect(gui, HUDHandler.manaBar, x, y, u, v, 22, 15);
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
         gui.renderItem(held, x - 20, y);

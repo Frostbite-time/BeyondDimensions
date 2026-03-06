@@ -1,7 +1,6 @@
-package com.wintercogs.beyonddimensions.api.capability.helper.wrapper;
+package com.wintercogs.beyonddimensions.integration.module.botania.storage;
 
-import com.wintercogs.beyonddimensions.api.longtype.ManaType;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ManaStackKey;
+import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.resources.ResourceLocation;
 import vazkii.botania.api.mana.ManaCollector;

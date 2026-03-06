@@ -69,10 +69,7 @@ public class BDCreativeModeTabs
                         output.accept(BDBlocks.NET_FURNACE_BLOCK);
                         output.accept(BDBlocks.DIMENSIONAL_CONNECT_BLOCK);
 
-                        if (BeyondDimensions.Botania_Loaded)
-                        {
-                            output.accept(BDBlocks.MANA_POOL_PATHWAY);
-                        }
+
                         if (BeyondDimensions.Create_Loaded)
                         {
                             output.accept(BDBlocks.SCHEMATICANNON_PATHWAY);

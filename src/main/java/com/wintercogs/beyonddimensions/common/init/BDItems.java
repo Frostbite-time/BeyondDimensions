@@ -76,7 +76,6 @@ public class BDItems
             () -> new XpExchangeItem(new Item.Properties()));
 
 
-
     // 测试物品 -----------------------
     // 随机物品生成器
     public static final DeferredItem<Item> TEST_ITEM_GENERATE = ITEMS.register("test_item_generate",

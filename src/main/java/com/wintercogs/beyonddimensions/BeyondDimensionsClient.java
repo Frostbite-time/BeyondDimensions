@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.integration.module.botania.HudOverlay.ManaPoolPathwayOverlay;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -30,14 +29,7 @@ public class BeyondDimensionsClient
     public void onClientSetup(FMLClientSetupEvent event)
     {
         event.enqueueWork(() -> {
-            // 一些客户端初始代码
             BeyondDimensions.LOGGER.info("维度网络初始化完成(客户端)");
-
-
-            if (BeyondDimensions.Botania_Loaded)
-            {
-                NeoForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);
-            }
         });
     }
 }
