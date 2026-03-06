@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -44,6 +45,8 @@ public class BDCreativeModeTabs
                         { //注册所有桶
                             output.accept(e.bucket().get());
                         }
+
+                        IntegrationManager.onItemCreativeTabCollect(itemDisplayParameters, output);
                     })
                     .build());
 
@@ -63,6 +66,8 @@ public class BDCreativeModeTabs
                         output.accept(BDBlocks.NET_HOPPER_BLOCK);
                         output.accept(BDBlocks.NET_FURNACE_BLOCK);
                         output.accept(BDBlocks.DIMENSIONAL_CONNECT_BLOCK);
+
+                        IntegrationManager.onBlockCreativeTabCollect(itemDisplayParameters, output);
                     })
                     .build());
 

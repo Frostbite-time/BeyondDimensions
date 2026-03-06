@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.integration;
 
+import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -90,6 +91,22 @@ public final class IntegrationManager
         for (IIntegrationClientModule module : ACTIVE_CLIENT_MODULES)
         {
             module.onClientSetup(event);
+        }
+    }
+
+    public static void onItemCreativeTabCollect(CreativeModeTab.ItemDisplayParameters displayParameters, CreativeModeTab.Output output)
+    {
+        for (IIntegrationModule module : ACTIVE_COMMON_MODULES)
+        {
+            module.onItemCreativeTabCollect(displayParameters, output);
+        }
+    }
+
+    public static void onBlockCreativeTabCollect(CreativeModeTab.ItemDisplayParameters displayParameters, CreativeModeTab.Output output)
+    {
+        for (IIntegrationModule module : ACTIVE_COMMON_MODULES)
+        {
+            module.onBlockCreativeTabCollect(displayParameters, output);
         }
     }
 }
