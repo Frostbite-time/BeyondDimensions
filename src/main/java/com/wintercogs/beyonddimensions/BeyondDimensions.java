@@ -11,10 +11,10 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.*;
 import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
+import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.module.ars.BD_ArsCaps;
 import com.wintercogs.beyonddimensions.integration.module.botania.BD_BotaniaPlugin;
 import com.wintercogs.beyonddimensions.integration.module.curios.BD_CuriosPlugin;
-import com.wintercogs.beyonddimensions.integration.module.rs.BD_RSPlugin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -24,7 +24,6 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -55,8 +54,6 @@ public class BeyondDimensions
     public static final String CuriosModId = "curios";
     public static boolean JECharactersLoaded = false;
     public static final String JECharactersModId = "jecharacters";
-    public static final String RSModId = "refinedstorage";
-    public static boolean RS_Loaded = false;
     public static final String ARS_ModId = "ars_nouveau"; // 新生魔艺-魔源兼容
     public static boolean ARS_Loaded = false;
     public static final String AE_ARS_ModId = "arseng";
@@ -125,62 +122,58 @@ public class BeyondDimensions
 
     private void constructMod(final FMLConstructModEvent event)
     {
-        if (ModList.get().isLoaded(MekanismMODID))
+        if (ModPresence.isLoaded(MekanismMODID))
         {
             MekLoaded = true;
         }
-        if (ModList.get().isLoaded(EMI_MODID))
+        if (ModPresence.isLoaded(EMI_MODID))
         {
             EMILoaded = true;
         }
-        if (ModList.get().isLoaded(JEI2MODID))
+        if (ModPresence.isLoaded(JEI2MODID))
         {
             JEILoaded = true;
         }
-        if (ModList.get().isLoaded(PolymorphModId))
+        if (ModPresence.isLoaded(PolymorphModId))
         {
             PolymorphLoaded = true;
         }
-        if (ModList.get().isLoaded(AEMEK2MODID))
+        if (ModPresence.isLoaded(AEMEK2MODID))
         {
             AEMEKLoaded = true;
         }
-        if (ModList.get().isLoaded(AEFlux2MODID))
+        if (ModPresence.isLoaded(AEFlux2MODID))
         {
             AEFluxLoaded = true;
         }
-        if (ModList.get().isLoaded(CuriosModId))
+        if (ModPresence.isLoaded(CuriosModId))
         {
             CuriosLoaded = true;
             MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, BD_CuriosPlugin::registerCapabilities);
         }
-        if (ModList.get().isLoaded(JECharactersModId))
+        if (ModPresence.isLoaded(JECharactersModId))
         {
             JECharactersLoaded = true;
         }
-        if (ModList.get().isLoaded(ARS_ModId))
+        if (ModPresence.isLoaded(ARS_ModId))
         {
             ARS_Loaded = true;
             BD_ArsCaps.registerCapability(MOD_EVENT_BUS);
         }
-        if (ModList.get().isLoaded(AE_ARS_ModId))
+        if (ModPresence.isLoaded(AE_ARS_ModId))
         {
             AE_ARS_Loaded = true;
         }
-        if (ModList.get().isLoaded(Botania_ModId))
+        if (ModPresence.isLoaded(Botania_ModId))
         {
             Botania_Loaded = true;
             MinecraftForge.EVENT_BUS.addGenericListener(BlockEntity.class, BD_BotaniaPlugin::attachBlockEntityCaps); // 为网络通道和网络接口手动注册火花附着
         }
-        if (ModList.get().isLoaded(AE_Botania_ModId))
+        if (ModPresence.isLoaded(AE_Botania_ModId))
         {
             AE_Botania_Loaded = true;
         }
-        if (ModList.get().isLoaded(RSModId))
-        {
-            RS_Loaded = true;
-        }
-        if (ModList.get().isLoaded(Create_ModId))
+        if (ModPresence.isLoaded(Create_ModId))
         {
             Create_Loaded = true;
         }
@@ -283,11 +276,6 @@ public class BeyondDimensions
             CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
             StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
 
-        }
-
-        if (RS_Loaded)
-        {
-            BD_RSPlugin.register();
         }
 
         // 注册物品能力交互黑名单

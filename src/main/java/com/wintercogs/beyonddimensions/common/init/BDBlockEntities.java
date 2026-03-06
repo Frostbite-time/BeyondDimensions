@@ -94,7 +94,6 @@ public class BDBlockEntities
             ).build(null)
     );
 
-    public static Supplier<BlockEntityType<?>> RS_NET_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> ARS_SOURCE_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> MANA_POOL_PATHWAY_BLOCK_ENTITY;
     public static Supplier<BlockEntityType<?>> SCHEMATICANNON_PATHWAY_BLOCK_ENTITY;
@@ -118,16 +117,6 @@ public class BDBlockEntities
                     () -> BlockEntityType.Builder.of(
                             ManaPoolPathwayBlockEntity::new,
                             BDBlocks.MANA_POOL_PATHWAY.get()
-                    ).build(null)
-            );
-        }
-        if (BeyondDimensions.RS_Loaded)
-        {
-            RS_NET_PATHWAY_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
-                    "rs_net_pathway_block_entity",
-                    () -> BlockEntityType.Builder.of(
-                            com.wintercogs.beyonddimensions.integration.module.rs.block.RSNetPathwayBlockEntity::new,
-                            BDBlocks.RS_NET_PATHWAY.get()
                     ).build(null)
             );
         }

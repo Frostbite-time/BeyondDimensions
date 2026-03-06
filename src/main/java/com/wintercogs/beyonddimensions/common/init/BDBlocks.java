@@ -70,18 +70,6 @@ public class BDBlocks
                     return new Block(BlockBehaviour.Properties.of().strength(2f));
             });
 
-    public static final RegistryObject<Block> RS_NET_PATHWAY = registerBlock("rs_net_pathway",
-            () -> {
-                if (BeyondDimensions.RS_Loaded)
-                {
-                    return new com.wintercogs.beyonddimensions.integration.module.rs.block.RSNetPathwayBlock(BlockBehaviour.Properties.of().strength(2f));
-                }
-                else
-                {
-                    return new Block(BlockBehaviour.Properties.of().strength(2f));
-                }
-            });
-
     public static final RegistryObject<Block> SCHEMATICANNON_PATHWAY = registerBlock("schematicannon_pathway",
             () -> {
                 if (BeyondDimensions.Create_Loaded)

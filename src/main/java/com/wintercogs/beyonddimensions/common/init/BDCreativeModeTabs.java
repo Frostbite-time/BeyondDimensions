@@ -69,10 +69,6 @@ public class BDCreativeModeTabs
                         output.accept(BDBlocks.NET_FURNACE_BLOCK.get());
                         output.accept(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
 
-                        if (BeyondDimensions.RS_Loaded)
-                        {
-                            output.accept(BDBlocks.RS_NET_PATHWAY.get());
-                        }
                         if (BeyondDimensions.ARS_Loaded)
                         {
                             output.accept(BDBlocks.ARS_SOURCE_PATHWAY.get());

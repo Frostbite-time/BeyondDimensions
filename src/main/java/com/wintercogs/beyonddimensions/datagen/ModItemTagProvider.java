@@ -1,10 +1,8 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
-import com.wintercogs.beyonddimensions.integration.module.rs.tags.RSTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
@@ -33,12 +31,6 @@ public class ModItemTagProvider extends ItemTagsProvider
     @Override
     protected void addTags(HolderLookup.Provider provider)
     {
-        // 添加RS富铁石英和机器框架的合成表支持
-        tag(RSTags.RS_QUARTZ_ENRICHED_IRON)
-                .addOptional(ResourceLocation.tryBuild(BeyondDimensions.RSModId, RSTags.QUARTZ_ENRICHED_IRON_NAME));
-        tag(RSTags.RS_MACHINE_CASING)
-                .addOptional(ResourceLocation.tryBuild(BeyondDimensions.RSModId, RSTags.MACHINE_CASING_NAME));
-
         IntegrationManager.onItemTagDatagen(provider, new IIntegrationModule.ItemTagAppender()
         {
             @Override

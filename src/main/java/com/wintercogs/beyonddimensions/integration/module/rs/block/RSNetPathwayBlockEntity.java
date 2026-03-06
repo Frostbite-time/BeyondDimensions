@@ -6,8 +6,8 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.common.block.entity.NetedBlockEntity;
-import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.integration.module.rs.RSHelper;
+import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlockEntities;
 import com.wintercogs.beyonddimensions.integration.module.rs.storage.BD_RS120ExternalStorageFluidsMirror;
 import com.wintercogs.beyonddimensions.integration.module.rs.storage.BD_RS120ExternalStorageItemsMirror;
 import net.minecraft.core.BlockPos;
@@ -40,7 +40,7 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
 
     public RSNetPathwayBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(BDBlockEntities.RS_NET_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
+        super(RSModuleBlockEntities.RS_NET_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
         ensureNetTaskRegistered();
     }
 

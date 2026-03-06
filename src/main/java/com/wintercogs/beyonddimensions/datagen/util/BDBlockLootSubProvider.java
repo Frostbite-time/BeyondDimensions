@@ -7,7 +7,7 @@ import java.util.Set;
 
 public abstract class BDBlockLootSubProvider extends BlockLootSubProvider
 {
-    protected BDBlockLootSubProvider()
+    public BDBlockLootSubProvider()
     {
         super(Set.of(), FeatureFlags.REGISTRY.allFlags());
     }

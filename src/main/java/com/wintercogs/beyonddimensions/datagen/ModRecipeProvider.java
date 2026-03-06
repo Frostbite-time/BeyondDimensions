@@ -5,7 +5,6 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
-import com.wintercogs.beyonddimensions.integration.module.rs.tags.RSTags;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -263,26 +262,6 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .define('C', BDItems.SPACE_TIME_BAR.get())
                 .unlockedBy("unlock_xp_exchange_item", has(BDItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
-
-        if (BeyondDimensions.RS_Loaded)
-        {
-            ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.RS_NET_PATHWAY.get())
-                    .pattern("ABA")
-                    .pattern("ACA")
-                    .pattern("ADA")
-                    .define('A', RSTags.RS_QUARTZ_ENRICHED_IRON)
-                    .define('B', BDItems.SPACE_TIME_STABLE_FRAME.get())
-                    .define('C', com.refinedmods.refinedstorage.RSBlocks.MACHINE_CASING.get())
-                    .define('D', Items.REDSTONE)
-                    .unlockedBy("unlock_rs_net_pathway", has(BDItems.SPACE_TIME_STABLE_FRAME.get()));
-
-            // 用 ConditionalRecipe 包起来，加上“模组已加载”的条件
-            ConditionalRecipe.builder()
-                    .addCondition(modLoaded(BeyondDimensions.RSModId)) // 等同于 forge:mod_loaded
-                    .addRecipe(builder::save)                            // 把上面的 ShapedRecipeBuilder 交给它保存
-                    // .generateAdvancement() // 可选：需要时让它自己生成 Advancement
-                    .build(recipeOutput, ResourceLocation.tryBuild(BDConstants.MODID, "rs_net_pathway")); // 最终的配方ID
-        }
 
         if (BeyondDimensions.ARS_Loaded)
         {

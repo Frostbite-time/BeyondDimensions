@@ -30,7 +30,6 @@ public class ModBlockStateProvider extends BDBlockStateProvider
         blockWithItem(BDBlocks.NET_PATHWAY);
         blockWithItem(BDBlocks.NET_ENERGY_PATHWAY);
         blockWithItem(BDBlocks.DIMENSIONAL_CONNECT_BLOCK);
-        blockWithItem(BDBlocks.RS_NET_PATHWAY);
         blockWithItem(BDBlocks.ARS_SOURCE_PATHWAY);
         // obj方块 自编写json 仅注册物品
         simpleBlockItem(BDBlocks.NET_TERMINAL_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BDConstants.MODID, "net_terminal_block")));
