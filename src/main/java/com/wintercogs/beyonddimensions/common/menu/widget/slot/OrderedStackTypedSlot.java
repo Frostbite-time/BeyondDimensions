@@ -11,8 +11,8 @@ import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.init.ModFluidTags;
-import com.wintercogs.beyonddimensions.common.init.ModFluids;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
+import com.wintercogs.beyonddimensions.common.init.BDTags;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.network.packet.s2c.OrderedStackTypedSlotPacket;
@@ -77,7 +77,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         long actualInsertFluid = (long) actualRemovePlayerXp * conversionRate;
 
                         // 插入当前经验流体
-                        KeyAmount remaining = storage.insert(getSlotIndex(), new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(), 1)), actualInsertFluid, false);
+                        KeyAmount remaining = storage.insert(getSlotIndex(), new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source(), 1)), actualInsertFluid, false);
                         if (!remaining.isEmpty())
                         {
                             int needReturnXp = BDMath.clampLongToInt(remaining.amount() / 20); // 由于前面从int*20，这里除回去
@@ -229,7 +229,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         double currentLevel = XpUtil.levelAsDouble(player);
                         int wantConversionLevel = XpExchangeItem.getXpLevelPerAction(carriedItem);
 
-                        if (actualStack.key() instanceof FluidStackKey fluidStackKey && fluidStackKey.hasTag(ModFluidTags.C_EXPERIENCE))
+                        if (actualStack.key() instanceof FluidStackKey fluidStackKey && fluidStackKey.hasTag(BDTags.C_EXPERIENCE))
                         {
                             if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
                             {

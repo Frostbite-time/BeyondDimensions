@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.SourceStackKey;
 import com.wintercogs.beyonddimensions.common.block.entity.NetedBlockEntity;
-import com.wintercogs.beyonddimensions.common.init.ModBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.integration.module.ars.Caps.SourcePathwayProvider;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.core.BlockPos;
@@ -16,7 +16,7 @@ public class SourcePathwayBlockEntity extends NetedBlockEntity implements ISourc
 {
     public SourcePathwayBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.ARS_SOURCE_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.ARS_SOURCE_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     @Override

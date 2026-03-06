@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.LeftTabButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import com.wintercogs.beyonddimensions.common.menu.NetMagnetMenu;
 import com.wintercogs.beyonddimensions.util.GuiRenderHelper;
@@ -43,7 +43,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         filterModeButton = new RightTabButton(leftPos + 176, topPos + 6, 23, 26,
                 leftPos + 176 + 3, topPos + 6 + 4, 16, 16, button -> {
             filterModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.FILTER_MODE, (FilterMode) filterModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.FILTER_MODE, (FilterMode) filterModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -63,7 +63,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.FILTER_MODE));
+                setState(menu.menuStack.get(BDDataComponents.FILTER_MODE));
             }
         };
         addRenderableWidget(filterModeButton);
@@ -71,7 +71,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         controlModeButton = new RightTabButton(leftPos + 176, topPos + 36, 23, 26,
                 leftPos + 176 + 3, topPos + 36 + 4, 16, 16, button -> {
             controlModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.CONTROL_MODE, (RedStoneControlMode) controlModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.CONTROL_MODE, (RedStoneControlMode) controlModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -90,7 +90,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.CONTROL_MODE));
+                setState(menu.menuStack.get(BDDataComponents.CONTROL_MODE));
             }
         };
         addRenderableWidget(controlModeButton);
@@ -98,7 +98,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         hopperItemModeButton = new RightTabButton(leftPos + 176, topPos + 66, 23, 26,
                 leftPos + 176 + 3, topPos + 66 + 4, 16, 16, button -> {
             hopperItemModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.HOPPER_ITEM_MODE, (HopperItemMode) hopperItemModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.HOPPER_ITEM_MODE, (HopperItemMode) hopperItemModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -118,7 +118,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.HOPPER_ITEM_MODE));
+                setState(menu.menuStack.get(BDDataComponents.HOPPER_ITEM_MODE));
             }
         };
         addRenderableWidget(hopperItemModeButton);
@@ -126,7 +126,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         hopperXpModeButton = new RightTabButton(leftPos + 176, topPos + 96, 23, 26,
                 leftPos + 176 + 3, topPos + 96 + 4, 16, 16, button -> {
             hopperXpModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.HOPPER_XP_MODE, (HopperXpMode) hopperXpModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.HOPPER_XP_MODE, (HopperXpMode) hopperXpModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -146,7 +146,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.HOPPER_XP_MODE));
+                setState(menu.menuStack.get(BDDataComponents.HOPPER_XP_MODE));
             }
         };
         addRenderableWidget(hopperXpModeButton);
@@ -154,7 +154,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         hopperNBTModeButton = new RightTabButton(leftPos + 176, topPos + 126, 23, 26,
                 leftPos + 176 + 3, topPos + 126 + 4, 16, 16, button -> {
             hopperNBTModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.HOPPER_NBT_MODE, (HopperNBTMode) hopperNBTModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.HOPPER_NBT_MODE, (HopperNBTMode) hopperNBTModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -174,7 +174,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.HOPPER_NBT_MODE));
+                setState(menu.menuStack.get(BDDataComponents.HOPPER_NBT_MODE));
             }
         };
         addRenderableWidget(hopperNBTModeButton);
@@ -182,7 +182,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         hopperFluidModeButton = new RightTabButton(leftPos + 176, topPos + 156, 23, 26,
                 leftPos + 176 + 3, topPos + 156 + 4, 16, 16, button -> {
             hopperFluidModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.HOPPER_FLUID_MODE, (HopperFluidMode) hopperFluidModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.HOPPER_FLUID_MODE, (HopperFluidMode) hopperFluidModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -201,7 +201,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.HOPPER_FLUID_MODE));
+                setState(menu.menuStack.get(BDDataComponents.HOPPER_FLUID_MODE));
             }
         };
         addRenderableWidget(hopperFluidModeButton);
@@ -209,7 +209,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         hopperRangeModeButton = new LeftTabButton(leftPos - 23, topPos + 156, 23, 26,
                 leftPos - 18, topPos + 156 + 4, 16, 16, button -> {
             hopperRangeModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.HOPPER_RANGE_MODE, (HopperRangeMode) hopperRangeModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.HOPPER_RANGE_MODE, (HopperRangeMode) hopperRangeModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -236,7 +236,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.HOPPER_RANGE_MODE));
+                setState(menu.menuStack.get(BDDataComponents.HOPPER_RANGE_MODE));
             }
         };
         addRenderableWidget(hopperRangeModeButton);
@@ -246,26 +246,26 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
     protected void containerTick()
     {
         super.containerTick();
-        if (filterModeButton.currentState != menu.menuStack.get(ModDataComponents.FILTER_MODE))
-            filterModeButton.setState(menu.menuStack.get(ModDataComponents.FILTER_MODE));
+        if (filterModeButton.currentState != menu.menuStack.get(BDDataComponents.FILTER_MODE))
+            filterModeButton.setState(menu.menuStack.get(BDDataComponents.FILTER_MODE));
 
-        if (controlModeButton.currentState != menu.menuStack.get(ModDataComponents.CONTROL_MODE))
-            controlModeButton.setState(menu.menuStack.get(ModDataComponents.CONTROL_MODE));
+        if (controlModeButton.currentState != menu.menuStack.get(BDDataComponents.CONTROL_MODE))
+            controlModeButton.setState(menu.menuStack.get(BDDataComponents.CONTROL_MODE));
 
-        if (hopperItemModeButton.currentState != menu.menuStack.get(ModDataComponents.HOPPER_ITEM_MODE))
-            hopperItemModeButton.setState(menu.menuStack.get(ModDataComponents.HOPPER_ITEM_MODE));
+        if (hopperItemModeButton.currentState != menu.menuStack.get(BDDataComponents.HOPPER_ITEM_MODE))
+            hopperItemModeButton.setState(menu.menuStack.get(BDDataComponents.HOPPER_ITEM_MODE));
 
-        if (hopperXpModeButton.currentState != menu.menuStack.get(ModDataComponents.HOPPER_XP_MODE))
-            hopperXpModeButton.setState(menu.menuStack.get(ModDataComponents.HOPPER_XP_MODE));
+        if (hopperXpModeButton.currentState != menu.menuStack.get(BDDataComponents.HOPPER_XP_MODE))
+            hopperXpModeButton.setState(menu.menuStack.get(BDDataComponents.HOPPER_XP_MODE));
 
-        if (hopperNBTModeButton.currentState != menu.menuStack.get(ModDataComponents.HOPPER_NBT_MODE))
-            hopperNBTModeButton.setState(menu.menuStack.get(ModDataComponents.HOPPER_NBT_MODE));
+        if (hopperNBTModeButton.currentState != menu.menuStack.get(BDDataComponents.HOPPER_NBT_MODE))
+            hopperNBTModeButton.setState(menu.menuStack.get(BDDataComponents.HOPPER_NBT_MODE));
 
-        if (hopperFluidModeButton.currentState != menu.menuStack.get(ModDataComponents.HOPPER_FLUID_MODE))
-            hopperFluidModeButton.setState(menu.menuStack.get(ModDataComponents.HOPPER_FLUID_MODE));
+        if (hopperFluidModeButton.currentState != menu.menuStack.get(BDDataComponents.HOPPER_FLUID_MODE))
+            hopperFluidModeButton.setState(menu.menuStack.get(BDDataComponents.HOPPER_FLUID_MODE));
 
-        if (hopperRangeModeButton.currentState != menu.menuStack.get(ModDataComponents.HOPPER_RANGE_MODE))
-            hopperRangeModeButton.setState(menu.menuStack.get(ModDataComponents.HOPPER_RANGE_MODE));
+        if (hopperRangeModeButton.currentState != menu.menuStack.get(BDDataComponents.HOPPER_RANGE_MODE))
+            hopperRangeModeButton.setState(menu.menuStack.get(BDDataComponents.HOPPER_RANGE_MODE));
 
     }
 

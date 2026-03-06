@@ -10,9 +10,9 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.api.util.CombinedItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.common.block.NetFurnaceBlock;
-import com.wintercogs.beyonddimensions.common.init.ModBlockEntities;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
-import com.wintercogs.beyonddimensions.common.init.ModItems;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
@@ -253,7 +253,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
 
     public NetFurnaceBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     //--- 能力注册 (通过事件) ---
@@ -261,7 +261,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
     {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, // 标准物品能力
-                ModBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(),
+                BDBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     //首先对所有实体槽位进行包装
                     ItemStackTypedHandler inputStorage = new ItemStackTypedHandler(be.inputStorageSlots)
@@ -827,10 +827,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                 }
             }
         }
-        ItemStack ball = new ItemStack(ModItems.MATTER_COMPRESS_BALL.get(), 1);
+        ItemStack ball = new ItemStack(BDItems.MATTER_COMPRESS_BALL.get(), 1);
         if (!dropList.isEmpty())
         {
-            ball.set(ModDataComponents.ISTACK_SLOTS, dropList);
+            ball.set(BDDataComponents.ISTACK_SLOTS, dropList);
             Block.popResource(level, getBlockPos(), ball);
         }
     }

@@ -5,7 +5,7 @@ import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import net.minecraft.core.registries.Registries;
@@ -43,7 +43,7 @@ public class NetMagnetMenu extends BDBaseMenu
         {
             super.onChange();
             if (!player.level().isClientSide() && initialized)
-                menuStack.set(ModDataComponents.ISTACK_SLOTS, new ArrayList<>(storage.getStorage()));
+                menuStack.set(BDDataComponents.ISTACK_SLOTS, new ArrayList<>(storage.getStorage()));
 
         }
     };
@@ -74,7 +74,7 @@ public class NetMagnetMenu extends BDBaseMenu
         // 为服务端注入真实数据，客户端由槽位同步
         if (!playerInventory.player.level().isClientSide())
         {
-            List<KeyAmount> stacks = menuStack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
+            List<KeyAmount> stacks = menuStack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
             for (int i = 0; i < stacks.size(); i++)
             {
                 storage.insert(i, stacks.get(i).key(), stacks.get(i).amount(), false);
@@ -128,23 +128,23 @@ public class NetMagnetMenu extends BDBaseMenu
     protected boolean shouldSendQuickData()
     {
         boolean result = super.shouldSendQuickData()
-                || lastControlMode != menuStack.get(ModDataComponents.CONTROL_MODE)
-                || lastFilterMode != menuStack.get(ModDataComponents.FILTER_MODE)
-                || lastHopperItemMode != menuStack.get(ModDataComponents.HOPPER_ITEM_MODE)
-                || lastHopperXpMode != menuStack.get(ModDataComponents.HOPPER_XP_MODE)
-                || lastHopperNBTMode != menuStack.get(ModDataComponents.HOPPER_NBT_MODE)
-                || lastHopperFluidMode != menuStack.get(ModDataComponents.HOPPER_FLUID_MODE)
-                || lastHopperRangeMode != menuStack.get(ModDataComponents.HOPPER_RANGE_MODE);
+                || lastControlMode != menuStack.get(BDDataComponents.CONTROL_MODE)
+                || lastFilterMode != menuStack.get(BDDataComponents.FILTER_MODE)
+                || lastHopperItemMode != menuStack.get(BDDataComponents.HOPPER_ITEM_MODE)
+                || lastHopperXpMode != menuStack.get(BDDataComponents.HOPPER_XP_MODE)
+                || lastHopperNBTMode != menuStack.get(BDDataComponents.HOPPER_NBT_MODE)
+                || lastHopperFluidMode != menuStack.get(BDDataComponents.HOPPER_FLUID_MODE)
+                || lastHopperRangeMode != menuStack.get(BDDataComponents.HOPPER_RANGE_MODE);
 
         if (result)
         {
-            lastControlMode = menuStack.get(ModDataComponents.CONTROL_MODE);
-            lastFilterMode = menuStack.get(ModDataComponents.FILTER_MODE);
-            lastHopperItemMode = menuStack.get(ModDataComponents.HOPPER_ITEM_MODE);
-            lastHopperXpMode = menuStack.get(ModDataComponents.HOPPER_XP_MODE);
-            lastHopperNBTMode = menuStack.get(ModDataComponents.HOPPER_NBT_MODE);
-            lastHopperFluidMode = menuStack.get(ModDataComponents.HOPPER_FLUID_MODE);
-            lastHopperRangeMode = menuStack.get(ModDataComponents.HOPPER_RANGE_MODE);
+            lastControlMode = menuStack.get(BDDataComponents.CONTROL_MODE);
+            lastFilterMode = menuStack.get(BDDataComponents.FILTER_MODE);
+            lastHopperItemMode = menuStack.get(BDDataComponents.HOPPER_ITEM_MODE);
+            lastHopperXpMode = menuStack.get(BDDataComponents.HOPPER_XP_MODE);
+            lastHopperNBTMode = menuStack.get(BDDataComponents.HOPPER_NBT_MODE);
+            lastHopperFluidMode = menuStack.get(BDDataComponents.HOPPER_FLUID_MODE);
+            lastHopperRangeMode = menuStack.get(BDDataComponents.HOPPER_RANGE_MODE);
         }
 
         return result;
@@ -154,25 +154,25 @@ public class NetMagnetMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putString("filter_type", menuStack.get(ModDataComponents.FILTER_MODE).name());
-        tag.putString("control_mode", menuStack.get(ModDataComponents.CONTROL_MODE).name());
-        tag.putString("hopper_item_mode", menuStack.get(ModDataComponents.HOPPER_ITEM_MODE).name());
-        tag.putString("hopper_xp_mode", menuStack.get(ModDataComponents.HOPPER_XP_MODE).name());
-        tag.putString("hopper_nbt_mode", menuStack.get(ModDataComponents.HOPPER_NBT_MODE).name());
-        tag.putString("hopper_fluid_mode", menuStack.get(ModDataComponents.HOPPER_FLUID_MODE).name());
-        tag.putString("hopper_range_mode", menuStack.get(ModDataComponents.HOPPER_RANGE_MODE).name());
+        tag.putString("filter_type", menuStack.get(BDDataComponents.FILTER_MODE).name());
+        tag.putString("control_mode", menuStack.get(BDDataComponents.CONTROL_MODE).name());
+        tag.putString("hopper_item_mode", menuStack.get(BDDataComponents.HOPPER_ITEM_MODE).name());
+        tag.putString("hopper_xp_mode", menuStack.get(BDDataComponents.HOPPER_XP_MODE).name());
+        tag.putString("hopper_nbt_mode", menuStack.get(BDDataComponents.HOPPER_NBT_MODE).name());
+        tag.putString("hopper_fluid_mode", menuStack.get(BDDataComponents.HOPPER_FLUID_MODE).name());
+        tag.putString("hopper_range_mode", menuStack.get(BDDataComponents.HOPPER_RANGE_MODE).name());
     }
 
     @Override
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        menuStack.set(ModDataComponents.FILTER_MODE, FilterMode.valueOf(tag.getString("filter_type")));
-        menuStack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode")));
-        menuStack.set(ModDataComponents.HOPPER_ITEM_MODE, HopperItemMode.valueOf(tag.getString("hopper_item_mode")));
-        menuStack.set(ModDataComponents.HOPPER_XP_MODE, HopperXpMode.valueOf(tag.getString("hopper_xp_mode")));
-        menuStack.set(ModDataComponents.HOPPER_NBT_MODE, HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode")));
-        menuStack.set(ModDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode")));
-        menuStack.set(ModDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.valueOf(tag.getString("hopper_range_mode")));
+        menuStack.set(BDDataComponents.FILTER_MODE, FilterMode.valueOf(tag.getString("filter_type")));
+        menuStack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode")));
+        menuStack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.valueOf(tag.getString("hopper_item_mode")));
+        menuStack.set(BDDataComponents.HOPPER_XP_MODE, HopperXpMode.valueOf(tag.getString("hopper_xp_mode")));
+        menuStack.set(BDDataComponents.HOPPER_NBT_MODE, HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode")));
+        menuStack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode")));
+        menuStack.set(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.valueOf(tag.getString("hopper_range_mode")));
     }
 }

@@ -4,7 +4,7 @@ import appeng.api.storage.cells.ICellHandler;
 import appeng.api.storage.cells.ISaveProvider;
 import appeng.api.storage.cells.StorageCell;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.integration.module.ae2.Item.NetAEStorageCell;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -23,10 +23,10 @@ public class CellHandler implements ICellHandler
     @Override
     public @Nullable StorageCell getCellInventory(ItemStack itemstack, @Nullable ISaveProvider host)
     {
-        if (!itemstack.has(ModDataComponents.NET_ID_DATA))
+        if (!itemstack.has(BDDataComponents.NET_ID_DATA))
             return null;
 
-        int netId = itemstack.getOrDefault(ModDataComponents.NET_ID_DATA, -1);
+        int netId = itemstack.getOrDefault(BDDataComponents.NET_ID_DATA, -1);
         if (netId < 0) return null;
 
         DimensionsNet net = DimensionsNet.getNetFromId(netId);

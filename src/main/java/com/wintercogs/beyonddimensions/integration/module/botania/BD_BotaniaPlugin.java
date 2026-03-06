@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ManaStackTy
 import com.wintercogs.beyonddimensions.api.capability.helper.unordered.ManaUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.util.CapCtx;
-import com.wintercogs.beyonddimensions.common.init.ModBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.ItemCapInteractionBlackList;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import vazkii.botania.api.BotaniaForgeCapabilities;
@@ -24,7 +24,7 @@ public class BD_BotaniaPlugin
     {
         event.registerBlockEntity(
                 BotaniaForgeCapabilities.SPARK_ATTACHABLE,
-                ModBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
+                BDBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     DimensionsNet net = be.getNet();
                     if (net != null)
@@ -37,7 +37,7 @@ public class BD_BotaniaPlugin
 
         event.registerBlockEntity(
                 BotaniaForgeCapabilities.SPARK_ATTACHABLE,
-                ModBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
+                BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     return new ManaStackTypedHandler(be.getStackHandler(), new CapCtx(be.getLevel(), be.getBlockPos(), be));
                 }

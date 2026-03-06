@@ -5,8 +5,8 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
-import com.wintercogs.beyonddimensions.common.init.ModFluids;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import com.wintercogs.beyonddimensions.common.menu.NetMagnetMenu;
 import com.wintercogs.beyonddimensions.util.ItemStackHelper;
@@ -76,20 +76,20 @@ public class NetMagnetItem extends BaseMachineItem
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
-        if (!stack.has(ModDataComponents.ISTACK_SLOTS))
-            stack.set(ModDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
-        if (!stack.has(ModDataComponents.FILTER_MODE))
-            stack.set(ModDataComponents.FILTER_MODE, FilterMode.BLACK);
-        if (!stack.has(ModDataComponents.HOPPER_ITEM_MODE))
-            stack.set(ModDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
-        if (!stack.has(ModDataComponents.HOPPER_XP_MODE))
-            stack.set(ModDataComponents.HOPPER_XP_MODE, HopperXpMode.DENY);
-        if (!stack.has(ModDataComponents.HOPPER_NBT_MODE))
-            stack.set(ModDataComponents.HOPPER_NBT_MODE, HopperNBTMode.DENY);
-        if (!stack.has(ModDataComponents.HOPPER_FLUID_MODE))
-            stack.set(ModDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
-        if (!stack.has(ModDataComponents.HOPPER_RANGE_MODE))
-            stack.set(ModDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
+        if (!stack.has(BDDataComponents.ISTACK_SLOTS))
+            stack.set(BDDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
+        if (!stack.has(BDDataComponents.FILTER_MODE))
+            stack.set(BDDataComponents.FILTER_MODE, FilterMode.BLACK);
+        if (!stack.has(BDDataComponents.HOPPER_ITEM_MODE))
+            stack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
+        if (!stack.has(BDDataComponents.HOPPER_XP_MODE))
+            stack.set(BDDataComponents.HOPPER_XP_MODE, HopperXpMode.DENY);
+        if (!stack.has(BDDataComponents.HOPPER_NBT_MODE))
+            stack.set(BDDataComponents.HOPPER_NBT_MODE, HopperNBTMode.DENY);
+        if (!stack.has(BDDataComponents.HOPPER_FLUID_MODE))
+            stack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
+        if (!stack.has(BDDataComponents.HOPPER_RANGE_MODE))
+            stack.set(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
     }
 
     @Override
@@ -104,13 +104,13 @@ public class NetMagnetItem extends BaseMachineItem
     {
         super.workContent(stack, level, holder, slotId, isSelected);
 
-        FilterMode filterMode = stack.getOrDefault(ModDataComponents.FILTER_MODE, FilterMode.BLACK);
-        HopperItemMode hopperItemMode = stack.getOrDefault(ModDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
-        HopperXpMode hopperXpMode = stack.getOrDefault(ModDataComponents.HOPPER_XP_MODE, HopperXpMode.DENY);
-        HopperNBTMode hopperNBTMode = stack.getOrDefault(ModDataComponents.HOPPER_NBT_MODE, HopperNBTMode.DENY);
-        HopperFluidMode hopperFluidMode = stack.getOrDefault(ModDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
-        HopperRangeMode hopperRangeMode = stack.getOrDefault(ModDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
-        List<KeyAmount> filterSlots = stack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
+        FilterMode filterMode = stack.getOrDefault(BDDataComponents.FILTER_MODE, FilterMode.BLACK);
+        HopperItemMode hopperItemMode = stack.getOrDefault(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
+        HopperXpMode hopperXpMode = stack.getOrDefault(BDDataComponents.HOPPER_XP_MODE, HopperXpMode.DENY);
+        HopperNBTMode hopperNBTMode = stack.getOrDefault(BDDataComponents.HOPPER_NBT_MODE, HopperNBTMode.DENY);
+        HopperFluidMode hopperFluidMode = stack.getOrDefault(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
+        HopperRangeMode hopperRangeMode = stack.getOrDefault(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
+        List<KeyAmount> filterSlots = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
 
         AABB searchArea = getSearchArea(hopperRangeMode, level, holder.getOnPos());
 
@@ -164,7 +164,7 @@ public class NetMagnetItem extends BaseMachineItem
                     if (xp > 0)
                     {
                         long xpFluid = xp * 20L;
-                        FluidStackKey xpStack = new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(), 1));
+                        FluidStackKey xpStack = new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source(), 1));
 
                         if (storage.insert(xpStack, xpFluid, true).isEmpty())
                         {
@@ -185,8 +185,8 @@ public class NetMagnetItem extends BaseMachineItem
     @Override
     public int getTicksPerWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
-        HopperRangeMode hopperRangeMode = stack.getOrDefault(ModDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
-        HopperFluidMode hopperFluidMode = stack.getOrDefault(ModDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
+        HopperRangeMode hopperRangeMode = stack.getOrDefault(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
+        HopperFluidMode hopperFluidMode = stack.getOrDefault(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
         if (hopperFluidMode == HopperFluidMode.ALLOW)
         {
             return switch (hopperRangeMode)

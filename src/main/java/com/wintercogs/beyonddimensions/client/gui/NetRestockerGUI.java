@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.client.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
@@ -43,7 +43,7 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
         fuzzyModeButton = new RightTabButton(leftPos + 176, topPos + 6, 23, 26,
                 leftPos + 176 + 3, topPos + 6 + 4, 16, 16, button -> {
             fuzzyModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.FUZZY_MODE, (FuzzyMode) fuzzyModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.FUZZY_MODE, (FuzzyMode) fuzzyModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -61,7 +61,7 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.FUZZY_MODE));
+                setState(menu.menuStack.get(BDDataComponents.FUZZY_MODE));
             }
         };
         addRenderableWidget(fuzzyModeButton);
@@ -69,7 +69,7 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
         receiveModeButton = new RightTabButton(leftPos + 176, topPos + 36, 23, 26,
                 leftPos + 176 + 3, topPos + 36 + 4, 16, 16, button -> {
             receiveModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.RECEIVE_MODE, (ReceiveMode) receiveModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.RECEIVE_MODE, (ReceiveMode) receiveModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -87,7 +87,7 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.RECEIVE_MODE));
+                setState(menu.menuStack.get(BDDataComponents.RECEIVE_MODE));
             }
         };
         addRenderableWidget(receiveModeButton);
@@ -95,7 +95,7 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
         controlModeButton = new RightTabButton(leftPos + 176, topPos + 66, 23, 26,
                 leftPos + 176 + 3, topPos + 66 + 4, 16, 16, button -> {
             controlModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.CONTROL_MODE, (RedStoneControlMode) controlModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.CONTROL_MODE, (RedStoneControlMode) controlModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -113,7 +113,7 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.CONTROL_MODE));
+                setState(menu.menuStack.get(BDDataComponents.CONTROL_MODE));
             }
         };
         addRenderableWidget(controlModeButton);
@@ -124,14 +124,14 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
     {
         super.containerTick();
 
-        if (fuzzyModeButton.currentState != menu.menuStack.get(ModDataComponents.FUZZY_MODE))
-            fuzzyModeButton.setState(menu.menuStack.get(ModDataComponents.FUZZY_MODE));
+        if (fuzzyModeButton.currentState != menu.menuStack.get(BDDataComponents.FUZZY_MODE))
+            fuzzyModeButton.setState(menu.menuStack.get(BDDataComponents.FUZZY_MODE));
 
-        if (receiveModeButton.currentState != menu.menuStack.get(ModDataComponents.RECEIVE_MODE))
-            receiveModeButton.setState(menu.menuStack.get(ModDataComponents.RECEIVE_MODE));
+        if (receiveModeButton.currentState != menu.menuStack.get(BDDataComponents.RECEIVE_MODE))
+            receiveModeButton.setState(menu.menuStack.get(BDDataComponents.RECEIVE_MODE));
 
-        if (controlModeButton.currentState != menu.menuStack.get(ModDataComponents.CONTROL_MODE))
-            controlModeButton.setState(menu.menuStack.get(ModDataComponents.CONTROL_MODE));
+        if (controlModeButton.currentState != menu.menuStack.get(BDDataComponents.CONTROL_MODE))
+            controlModeButton.setState(menu.menuStack.get(BDDataComponents.CONTROL_MODE));
     }
 
     @Override

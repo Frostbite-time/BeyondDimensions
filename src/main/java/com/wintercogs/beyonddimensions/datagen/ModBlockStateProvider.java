@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.datagen;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.common.init.ModBlocks;
+import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
@@ -19,20 +19,20 @@ public class ModBlockStateProvider extends BlockStateProvider
     @Override
     protected void registerStatesAndModels()
     {
-        blockWithItem(ModBlocks.NET_CONTROL);
-        blockWithItem(ModBlocks.NET_INTERFACE);
-        blockWithItem(ModBlocks.NET_PATHWAY);
-        blockWithItem(ModBlocks.NET_ENERGY_PATHWAY);
-        blockWithItem(ModBlocks.DIMENSIONAL_CONNECT_BLOCK);
-        blockWithItem(ModBlocks.RS_NET_PATHWAY);
-        blockWithItem(ModBlocks.ARS_SOURCE_PATHWAY);
+        blockWithItem(BDBlocks.NET_CONTROL);
+        blockWithItem(BDBlocks.NET_INTERFACE);
+        blockWithItem(BDBlocks.NET_PATHWAY);
+        blockWithItem(BDBlocks.NET_ENERGY_PATHWAY);
+        blockWithItem(BDBlocks.DIMENSIONAL_CONNECT_BLOCK);
+        blockWithItem(BDBlocks.RS_NET_PATHWAY);
+        blockWithItem(BDBlocks.ARS_SOURCE_PATHWAY);
         // obj方块 自编写json 仅注册物品
-        simpleBlockItem(ModBlocks.NET_TERMINAL_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "net_terminal_block")));
-        simpleBlockItem(ModBlocks.NET_PUMP_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "net_pump_block")));
-        simpleBlockItem(ModBlocks.NET_HOPPER_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "net_hopper_block")));
-        simpleBlockItem(ModBlocks.NET_FURNACE_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "net_furnace_block")));
-        simpleBlockItem(ModBlocks.MANA_POOL_PATHWAY.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "mana_pool_pathway")));
-        simpleBlockItem(ModBlocks.SCHEMATICANNON_PATHWAY.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "schematicannon_pathway")));
+        simpleBlockItem(BDBlocks.NET_TERMINAL_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "net_terminal_block")));
+        simpleBlockItem(BDBlocks.NET_PUMP_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "net_pump_block")));
+        simpleBlockItem(BDBlocks.NET_HOPPER_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "net_hopper_block")));
+        simpleBlockItem(BDBlocks.NET_FURNACE_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "net_furnace_block")));
+        simpleBlockItem(BDBlocks.MANA_POOL_PATHWAY.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "mana_pool_pathway")));
+        simpleBlockItem(BDBlocks.SCHEMATICANNON_PATHWAY.get(), models().getExistingFile(ResourceLocation.tryBuild(BeyondDimensions.MODID, "schematicannon_pathway")));
     }
 
     private void blockWithItem(DeferredBlock<?> deferredBlock)

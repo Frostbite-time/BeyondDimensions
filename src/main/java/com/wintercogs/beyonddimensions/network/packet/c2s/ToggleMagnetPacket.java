@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.network.packet.c2s;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -50,16 +50,16 @@ public record ToggleMagnetPacket() implements CustomPacketPayload
         {
             if (stack.getItem() instanceof NetMagnetItem)
             {
-                if (stack.has(ModDataComponents.CONTROL_MODE))
+                if (stack.has(BDDataComponents.CONTROL_MODE))
                 {
-                    if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                    if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
                     {
-                        stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                        stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
                     }
-                    else if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                    else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
                     {
-                        stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                        stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
                     }
                 }
@@ -78,16 +78,16 @@ public record ToggleMagnetPacket() implements CustomPacketPayload
                 {
                     if (stack.getItem() instanceof NetMagnetItem)
                     {
-                        if (stack.has(ModDataComponents.CONTROL_MODE))
+                        if (stack.has(BDDataComponents.CONTROL_MODE))
                         {
-                            if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                            if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
                             {
-                                stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                                stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
                                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
                             }
-                            else if (stack.get(ModDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                            else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
                             {
-                                stack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                                stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
                                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
                             }
                         }

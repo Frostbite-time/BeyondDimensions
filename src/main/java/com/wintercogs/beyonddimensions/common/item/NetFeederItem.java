@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.FeederMode;
 import com.wintercogs.beyonddimensions.common.machine.FilterMode;
 import com.wintercogs.beyonddimensions.common.menu.NetFeederMenu;
@@ -59,10 +59,10 @@ public class NetFeederItem extends BaseMachineItem
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
-        if (!stack.has(ModDataComponents.ISTACK_SLOTS))
-            stack.set(ModDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
-        if (!stack.has(ModDataComponents.FEEDER_MODE))
-            stack.set(ModDataComponents.FEEDER_MODE, FeederMode.NORMAL);
+        if (!stack.has(BDDataComponents.ISTACK_SLOTS))
+            stack.set(BDDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
+        if (!stack.has(BDDataComponents.FEEDER_MODE))
+            stack.set(BDDataComponents.FEEDER_MODE, FeederMode.NORMAL);
     }
 
     @Override
@@ -79,8 +79,8 @@ public class NetFeederItem extends BaseMachineItem
 
         if (holder instanceof Player player) // 只喂食玩家（实际上是其他实体没有FoodData 2333）
         {
-            FeederMode feederMode = stack.getOrDefault(ModDataComponents.FEEDER_MODE, FeederMode.NORMAL);
-            List<KeyAmount> filterSlots = stack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
+            FeederMode feederMode = stack.getOrDefault(BDDataComponents.FEEDER_MODE, FeederMode.NORMAL);
+            List<KeyAmount> filterSlots = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
 
             FoodData playerFoodState = player.getFoodData();
 

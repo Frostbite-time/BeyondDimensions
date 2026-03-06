@@ -7,7 +7,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.FeederMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
@@ -45,7 +45,7 @@ public class NetFeederMenu extends BDBaseMenu
         {
             super.onChange();
             if (!player.level().isClientSide() && initialized)
-                menuStack.set(ModDataComponents.ISTACK_SLOTS, new ArrayList<>(storage.getStorage()));
+                menuStack.set(BDDataComponents.ISTACK_SLOTS, new ArrayList<>(storage.getStorage()));
 
         }
 
@@ -79,7 +79,7 @@ public class NetFeederMenu extends BDBaseMenu
         // 为服务端注入真实数据，客户端由槽位同步
         if (!playerInventory.player.level().isClientSide())
         {
-            List<KeyAmount> stacks = menuStack.getOrDefault(ModDataComponents.ISTACK_SLOTS, new ArrayList<>());
+            List<KeyAmount> stacks = menuStack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
             for (int i = 0; i < stacks.size(); i++)
             {
                 storage.insert(i, stacks.get(i).key(), stacks.get(i).amount(), false);
@@ -133,13 +133,13 @@ public class NetFeederMenu extends BDBaseMenu
     protected boolean shouldSendQuickData()
     {
         boolean result = super.shouldSendQuickData()
-                || lastControlMode != menuStack.get(ModDataComponents.CONTROL_MODE)
-                || lastFeederMode != menuStack.get(ModDataComponents.FEEDER_MODE);
+                || lastControlMode != menuStack.get(BDDataComponents.CONTROL_MODE)
+                || lastFeederMode != menuStack.get(BDDataComponents.FEEDER_MODE);
 
         if (result)
         {
-            lastControlMode = menuStack.get(ModDataComponents.CONTROL_MODE);
-            lastFeederMode = menuStack.get(ModDataComponents.FEEDER_MODE);
+            lastControlMode = menuStack.get(BDDataComponents.CONTROL_MODE);
+            lastFeederMode = menuStack.get(BDDataComponents.FEEDER_MODE);
         }
 
         return result;
@@ -149,15 +149,15 @@ public class NetFeederMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putString("control_mode", menuStack.get(ModDataComponents.CONTROL_MODE).name());
-        tag.putString("feeder_mode", menuStack.get(ModDataComponents.FEEDER_MODE).name());
+        tag.putString("control_mode", menuStack.get(BDDataComponents.CONTROL_MODE).name());
+        tag.putString("feeder_mode", menuStack.get(BDDataComponents.FEEDER_MODE).name());
     }
 
     @Override
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        menuStack.set(ModDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode")));
-        menuStack.set(ModDataComponents.FEEDER_MODE, FeederMode.valueOf(tag.getString("feeder_mode")));
+        menuStack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode")));
+        menuStack.set(BDDataComponents.FEEDER_MODE, FeederMode.valueOf(tag.getString("feeder_mode")));
     }
 }

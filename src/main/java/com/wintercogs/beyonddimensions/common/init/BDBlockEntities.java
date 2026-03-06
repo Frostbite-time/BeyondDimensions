@@ -13,7 +13,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
 
-public class ModBlockEntities
+public class BDBlockEntities
 {
 
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
@@ -27,7 +27,7 @@ public class ModBlockEntities
                             NetInterfaceBlockEntity::new,
                             // 可以拥有此方块实体的方块的可变参数.
                             // 这假设引用的方块作为 DeferredBlock<Block> 存在.
-                            ModBlocks.NET_INTERFACE.get()
+                            BDBlocks.NET_INTERFACE.get()
                     )
                     // 使用 null 构建；原版对参数进行了一些数据修复操作，我们不需要.
                     .build(null)
@@ -41,7 +41,7 @@ public class ModBlockEntities
                             NetPathwayBlockEntity::new,
                             // 可以拥有此方块实体的方块的可变参数.
                             // 这假设引用的方块作为 DeferredBlock<Block> 存在.
-                            ModBlocks.NET_PATHWAY.get()
+                            BDBlocks.NET_PATHWAY.get()
                     )
                     // 使用 null 构建；原版对参数进行了一些数据修复操作，我们不需要.
                     .build(null)
@@ -56,7 +56,7 @@ public class ModBlockEntities
                             NetEnergyPathwayBlockEntity::new,
                             // 可以拥有此方块实体的方块的可变参数.
                             // 这假设引用的方块作为 DeferredBlock<Block> 存在.
-                            ModBlocks.NET_ENERGY_PATHWAY.get()
+                            BDBlocks.NET_ENERGY_PATHWAY.get()
                     )
                     // 使用 null 构建；原版对参数进行了一些数据修复操作，我们不需要.
                     .build(null)
@@ -66,7 +66,7 @@ public class ModBlockEntities
             "net_terminal_block_entity",
             () -> BlockEntityType.Builder.of(
                     NetTerminalBlockEntity::new,
-                    ModBlocks.NET_TERMINAL_BLOCK.get()
+                    BDBlocks.NET_TERMINAL_BLOCK.get()
             ).build(null)
     );
 
@@ -74,7 +74,7 @@ public class ModBlockEntities
             "net_pump_block_entity",
             () -> BlockEntityType.Builder.of(
                     NetPumpBlockEntity::new,
-                    ModBlocks.NET_PUMP_BLOCK.get()
+                    BDBlocks.NET_PUMP_BLOCK.get()
             ).build(null)
     );
 
@@ -82,7 +82,7 @@ public class ModBlockEntities
             "net_hopper_block_entity",
             () -> BlockEntityType.Builder.of(
                     NetHopperBlockEntity::new,
-                    ModBlocks.NET_HOPPER_BLOCK.get()
+                    BDBlocks.NET_HOPPER_BLOCK.get()
             ).build(null)
     );
 
@@ -90,7 +90,7 @@ public class ModBlockEntities
             "net_furnace_block_entity",
             () -> BlockEntityType.Builder.of(
                     NetFurnaceBlockEntity::new,
-                    ModBlocks.NET_FURNACE_BLOCK.get()
+                    BDBlocks.NET_FURNACE_BLOCK.get()
             ).build(null)
     );
 
@@ -109,7 +109,7 @@ public class ModBlockEntities
                     "rs_net_pathway_block_entity",
                     () -> BlockEntityType.Builder.of(
                             RSNetPathwayBlockEntity::new,
-                            ModBlocks.RS_NET_PATHWAY.get()
+                            BDBlocks.RS_NET_PATHWAY.get()
                     ).build(null)
             );
         }
@@ -119,7 +119,7 @@ public class ModBlockEntities
                     "ars_source_pathway_block_entity",
                     () -> BlockEntityType.Builder.of(
                             SourcePathwayBlockEntity::new,
-                            ModBlocks.ARS_SOURCE_PATHWAY.get()
+                            BDBlocks.ARS_SOURCE_PATHWAY.get()
                     ).build(null)
             );
         }
@@ -129,7 +129,7 @@ public class ModBlockEntities
                     "mana_pool_pathway_block_entity",
                     () -> BlockEntityType.Builder.of(
                             ManaPoolPathwayBlockEntity::new,
-                            ModBlocks.MANA_POOL_PATHWAY.get()
+                            BDBlocks.MANA_POOL_PATHWAY.get()
                     ).build(null)
             );
         }
@@ -139,7 +139,7 @@ public class ModBlockEntities
                     "schematicannon_pathway_block_entity",
                     () -> BlockEntityType.Builder.of(
                             SchematicannonPathWayBlockEntity::new,
-                            ModBlocks.SCHEMATICANNON_PATHWAY.get()
+                            BDBlocks.SCHEMATICANNON_PATHWAY.get()
                     ).build(null)
             );
         }

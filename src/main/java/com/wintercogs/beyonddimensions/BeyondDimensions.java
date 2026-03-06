@@ -7,7 +7,7 @@ import com.wintercogs.beyonddimensions.api.capability.helper.unordered.*;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.*;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.*;
-import com.wintercogs.beyonddimensions.client.init.ModBlockRenders;
+import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
 import com.wintercogs.beyonddimensions.common.block.entity.NetEnergyPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
@@ -117,27 +117,27 @@ public class BeyondDimensions
         BDMenus.register(modEventBus);
 
         // 注册创造模式菜单
-        ModCreativeModeTabs.register(modEventBus);
+        BDCreativeModeTabs.register(modEventBus);
 
         // 注册物品组件
-        ModDataComponents.register(modEventBus);
+        BDDataComponents.register(modEventBus);
 
         // 注册物品
-        ModItems.register(modEventBus);
+        BDItems.register(modEventBus);
 
         // 注册方块
-        ModBlocks.register(modEventBus);
+        BDBlocks.register(modEventBus);
 
         // 注册流体
-        ModFluids.register(modEventBus);
+        BDFluids.register(modEventBus);
 
         // 注册方块实体
-        ModBlockEntities.register(modEventBus);
+        BDBlockEntities.register(modEventBus);
 
         if (FMLEnvironment.dist == Dist.CLIENT)
         {
             // 注册方块实体渲染
-            modEventBus.addListener(ModBlockRenders::onRegisterRenderers);
+            modEventBus.addListener(BDBlockRenders::onRegisterRenderers);
         }
 
     }
@@ -228,7 +228,7 @@ public class BeyondDimensions
             MOD_EVENT_BUS.addListener(SchematicannonPathWayBlockEntity::registerCapability);
         }
 
-        ModBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
+        BDBlockEntities.IntegrationRegister(); // 模组列表检查完成后，动态注册方块实体
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)

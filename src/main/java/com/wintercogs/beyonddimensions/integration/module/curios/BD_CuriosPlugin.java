@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.integration.module.curios;
 
-import com.wintercogs.beyonddimensions.common.init.ModItems;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.NetFeederItem;
 import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
 import com.wintercogs.beyonddimensions.common.item.NetRestockerItem;
@@ -32,7 +32,7 @@ public class BD_CuriosPlugin
                         // 在此添加持续生效逻辑
                     }
                 },
-                ModItems.NET_TERMINAL_ITEM // 目标物品
+                BDItems.NET_TERMINAL_ITEM // 目标物品
         );
         // 磁铁
         evt.registerItem(
@@ -49,14 +49,14 @@ public class BD_CuriosPlugin
                     public void curioTick(SlotContext slotContext)
                     {
                         // 在此添加持续生效逻辑
-                        if (stack.getItem() == ModItems.NET_MAGNET_ITEM.get())
+                        if (stack.getItem() == BDItems.NET_MAGNET_ITEM.get())
                         {
                             NetMagnetItem item = (NetMagnetItem) stack.getItem();
                             item.inventoryTick(stack, slotContext.entity().level(), slotContext.entity(), slotContext.index(), false);
                         }
                     }
                 },
-                ModItems.NET_MAGNET_ITEM // 目标物品
+                BDItems.NET_MAGNET_ITEM // 目标物品
         );
         // 喂食器
         evt.registerItem(
@@ -73,14 +73,14 @@ public class BD_CuriosPlugin
                     public void curioTick(SlotContext slotContext)
                     {
                         // 在此添加持续生效逻辑
-                        if (stack.getItem() == ModItems.NET_FEEDER_ITEM.get())
+                        if (stack.getItem() == BDItems.NET_FEEDER_ITEM.get())
                         {
                             NetFeederItem item = (NetFeederItem) stack.getItem();
                             item.inventoryTick(stack, slotContext.entity().level(), slotContext.entity(), slotContext.index(), false);
                         }
                     }
                 },
-                ModItems.NET_FEEDER_ITEM // 目标物品
+                BDItems.NET_FEEDER_ITEM // 目标物品
         );
         // 补货器
         evt.registerItem(
@@ -96,14 +96,14 @@ public class BD_CuriosPlugin
                     @Override
                     public void curioTick(SlotContext slotContext)
                     {
-                        if (stack.getItem() == ModItems.NET_RESTOCKER_ITEM.get())
+                        if (stack.getItem() == BDItems.NET_RESTOCKER_ITEM.get())
                         {
                             NetRestockerItem item = (NetRestockerItem) stack.getItem();
                             item.inventoryTick(stack, slotContext.entity().level(), slotContext.entity(), slotContext.index(), false);
                         }
                     }
                 },
-                ModItems.NET_RESTOCKER_ITEM
+                BDItems.NET_RESTOCKER_ITEM
         );
     }
 }

@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
 import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
@@ -102,8 +102,8 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
                                 .flatMap(iCuriosItemHandler ->
                                         iCuriosItemHandler.findFirstCurio(itemStack ->
                                                 itemStack.getItem() instanceof NetTerminalItem &&
-                                                        itemStack.has(ModDataComponents.NET_ID_DATA) &&
-                                                        itemStack.get(ModDataComponents.NET_ID_DATA) >= 0
+                                                        itemStack.has(BDDataComponents.NET_ID_DATA) &&
+                                                        itemStack.get(BDDataComponents.NET_ID_DATA) >= 0
                                         )
                                 )
                                 .map(slotResult -> slotResult.stack())
@@ -113,8 +113,8 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
 
                 if (terminalStack != null)
                 {
-                    if (terminalStack.get(ModDataComponents.CRAFT_SLOTS) == null)
-                        terminalStack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9, ItemStack.EMPTY)));
+                    if (terminalStack.get(BDDataComponents.CRAFT_SLOTS) == null)
+                        terminalStack.set(BDDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9, ItemStack.EMPTY)));
 
                     NetTerminalItem.contextMap.put(player, new NetTerminalItem.MenuTriggerContext(InteractionHand.MAIN_HAND, terminalStack));
                     player.openMenu((NetTerminalItem) terminalStack.getItem());

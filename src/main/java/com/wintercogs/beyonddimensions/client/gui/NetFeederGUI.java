@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.client.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.FeederMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.NetFeederMenu;
@@ -38,7 +38,7 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
         feederModeButton = new RightTabButton(leftPos + 176, topPos + 6, 23, 26,
                 leftPos + 176 + 3, topPos + 6 + 4, 16, 16, button -> {
             feederModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.FEEDER_MODE, (FeederMode) feederModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.FEEDER_MODE, (FeederMode) feederModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -61,7 +61,7 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.FEEDER_MODE));
+                setState(menu.menuStack.get(BDDataComponents.FEEDER_MODE));
             }
         };
         addRenderableWidget(feederModeButton);
@@ -69,7 +69,7 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
         controlModeButton = new RightTabButton(leftPos + 176, topPos + 36, 23, 26,
                 leftPos + 176 + 3, topPos + 36 + 4, 16, 16, button -> {
             controlModeButton.toggleState();
-            menu.menuStack.set(ModDataComponents.CONTROL_MODE, (RedStoneControlMode) controlModeButton.currentState);
+            menu.menuStack.set(BDDataComponents.CONTROL_MODE, (RedStoneControlMode) controlModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -88,7 +88,7 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
                     this.states.add(state);
                 }
 
-                setState(menu.menuStack.get(ModDataComponents.CONTROL_MODE));
+                setState(menu.menuStack.get(BDDataComponents.CONTROL_MODE));
             }
         };
         addRenderableWidget(controlModeButton);
@@ -101,11 +101,11 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
     {
         super.containerTick();
 
-        if (controlModeButton.currentState != menu.menuStack.get(ModDataComponents.CONTROL_MODE))
-            controlModeButton.setState(menu.menuStack.get(ModDataComponents.CONTROL_MODE));
+        if (controlModeButton.currentState != menu.menuStack.get(BDDataComponents.CONTROL_MODE))
+            controlModeButton.setState(menu.menuStack.get(BDDataComponents.CONTROL_MODE));
 
-        if (feederModeButton.currentState != menu.menuStack.get(ModDataComponents.FEEDER_MODE))
-            feederModeButton.setState(menu.menuStack.get(ModDataComponents.FEEDER_MODE));
+        if (feederModeButton.currentState != menu.menuStack.get(BDDataComponents.FEEDER_MODE))
+            feederModeButton.setState(menu.menuStack.get(BDDataComponents.FEEDER_MODE));
 
     }
 

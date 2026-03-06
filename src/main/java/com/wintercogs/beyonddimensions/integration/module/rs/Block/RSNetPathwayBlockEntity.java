@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.common.block.entity.NetedBlockEntity;
-import com.wintercogs.beyonddimensions.common.init.ModBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.integration.module.rs.RSHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
@@ -58,7 +58,7 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
 
     public RSNetPathwayBlockEntity(BlockPos pos, BlockState blockState)
     {
-        super(ModBlockEntities.RS_NET_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
+        super(BDBlockEntities.RS_NET_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
 
         index.defaultReturnValue(-1);
         counts.defaultReturnValue(0L);

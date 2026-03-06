@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @EventBusSubscriber(modid = BeyondDimensions.MODID, value = Dist.CLIENT)
-public class ModFluids
+public class BDFluids
 {
     public static final DeferredRegister<FluidType> FLUID_TYPES = DeferredRegister.create(NeoForgeRegistries.FLUID_TYPES, BeyondDimensions.MODID);
 
@@ -75,13 +75,13 @@ public class ModFluids
 
         // 4) 方块 + 桶
         DeferredHolder<Block, LiquidBlock> block =
-                ModBlocks.BLOCKS.register(name, () ->
+                BDBlocks.BLOCKS.register(name, () ->
                         new LiquidBlock(source.get(),
                                 BlockBehaviour.Properties.ofFullCopy(Blocks.WATER)
                                         .lightLevel(s -> lightlevel)));
 
         DeferredHolder<Item, Item> bucket =
-                ModItems.ITEMS.register(name + "_bucket", () ->
+                BDItems.ITEMS.register(name + "_bucket", () ->
                         new BucketItem(source.get(),
                                 new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
 
@@ -129,7 +129,7 @@ public class ModFluids
     @SubscribeEvent
     public static void onRegisterClientExtensions(RegisterClientExtensionsEvent event)
     {
-        for (var e : ModFluids.ALL)
+        for (var e : BDFluids.ALL)
         {
             final ResourceLocation still = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + e.name() + "_still");
             final ResourceLocation flow = ResourceLocation.tryBuild(BeyondDimensions.MODID, "block/" + e.name() + "_flow");
@@ -163,7 +163,7 @@ public class ModFluids
     public static void onClientSetup(FMLClientSetupEvent evt)
     {
         evt.enqueueWork(() -> {
-            for (var e : ModFluids.ALL)
+            for (var e : BDFluids.ALL)
             {
                 net.minecraft.client.renderer.ItemBlockRenderTypes.setRenderLayer(e.source().get(), net.minecraft.client.renderer.RenderType.translucent());
                 net.minecraft.client.renderer.ItemBlockRenderTypes.setRenderLayer(e.flowing().get(), net.minecraft.client.renderer.RenderType.translucent());

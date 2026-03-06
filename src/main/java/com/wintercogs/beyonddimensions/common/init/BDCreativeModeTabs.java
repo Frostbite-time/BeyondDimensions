@@ -11,7 +11,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
 
-public class ModCreativeModeTabs
+public class BDCreativeModeTabs
 {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, BeyondDimensions.MODID);
@@ -19,40 +19,40 @@ public class ModCreativeModeTabs
     public static final Supplier<CreativeModeTab> BEYOND_DIMENSIONS_ITEMS_TAB = CREATIVE_MODE_TAB.register(
             "beyond_dimensions_items_tab",
             () -> CreativeModeTab.builder()
-                    .icon(() -> new ItemStack(ModItems.NET_CREATER.get()))
+                    .icon(() -> new ItemStack(BDItems.NET_CREATER.get()))
                     .title(Component.translatable("creativetab.beyonddimensions.items"))
                     .displayItems((itemDisplayParameters, output) -> {
-                        output.accept(ModItems.NET_CREATER);
-                        output.accept(ModItems.NET_MEMBER_INVITER);
-                        output.accept(ModItems.NET_MANAGER_INVITER);
-                        output.accept(ModItems.UNSTABLE_SPACE_TIME_FRAGMENT);
-                        output.accept(ModItems.STABLE_SPACE_TIME_FRAGMENT);
-                        output.accept(ModItems.SPACE_TIME_STABLE_FRAME);
-                        output.accept(ModItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION);
-                        output.accept(ModItems.SPACE_TIME_BAR);
-                        output.accept(ModItems.TEST_ITEM_GENERATE);
-                        output.accept(ModItems.NET_TERMINAL_ITEM);
-                        output.accept(ModItems.NET_GIFTER);
-                        output.accept(ModItems.NET_DESTROYER);
-                        output.accept(ModItems.MATTER_COMPRESS_BALL);
-                        output.accept(ModItems.NET_MAGNET_ITEM);
-                        output.accept(ModItems.NET_FEEDER_ITEM);
-                        output.accept(ModItems.NET_RESTOCKER_ITEM);
-                        output.accept(ModItems.XP_EXCHANGE_ITEM);
+                        output.accept(BDItems.NET_CREATER);
+                        output.accept(BDItems.NET_MEMBER_INVITER);
+                        output.accept(BDItems.NET_MANAGER_INVITER);
+                        output.accept(BDItems.UNSTABLE_SPACE_TIME_FRAGMENT);
+                        output.accept(BDItems.STABLE_SPACE_TIME_FRAGMENT);
+                        output.accept(BDItems.SPACE_TIME_STABLE_FRAME);
+                        output.accept(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION);
+                        output.accept(BDItems.SPACE_TIME_BAR);
+                        output.accept(BDItems.TEST_ITEM_GENERATE);
+                        output.accept(BDItems.NET_TERMINAL_ITEM);
+                        output.accept(BDItems.NET_GIFTER);
+                        output.accept(BDItems.NET_DESTROYER);
+                        output.accept(BDItems.MATTER_COMPRESS_BALL);
+                        output.accept(BDItems.NET_MAGNET_ITEM);
+                        output.accept(BDItems.NET_FEEDER_ITEM);
+                        output.accept(BDItems.NET_RESTOCKER_ITEM);
+                        output.accept(BDItems.XP_EXCHANGE_ITEM);
 
-                        for (ModFluids.FluidEntry e : ModFluids.ALL)
+                        for (BDFluids.FluidEntry e : BDFluids.ALL)
                         { //注册所有桶
                             output.accept(e.bucket().get());
                         }
 
                         if (BeyondDimensions.AELoaded)
                         {
-                            output.accept(ModItems.NET_AE_STORAGE_CELL);
+                            output.accept(BDItems.NET_AE_STORAGE_CELL);
                         }
 
                         if (BeyondDimensions.IFS_Loaded)
                         {
-                            output.accept(ModItems.WARDEN_SOUL_TAG_ITEM);
+                            output.accept(BDItems.WARDEN_SOUL_TAG_ITEM);
                         }
                     })
                     .build());
@@ -60,34 +60,34 @@ public class ModCreativeModeTabs
     public static final Supplier<CreativeModeTab> BEYOND_DIMENSIONS_BLOCKS_TAB = CREATIVE_MODE_TAB.register(
             "beyond_dimensions_blocks_tab",
             () -> CreativeModeTab.builder()
-                    .icon(() -> new ItemStack(ModBlocks.NET_CONTROL))
+                    .icon(() -> new ItemStack(BDBlocks.NET_CONTROL))
                     .withTabsBefore(ResourceLocation.fromNamespaceAndPath(BeyondDimensions.MODID, "beyond_dimensions_items_tab"))
                     .title(Component.translatable("creativetab.beyonddimensions.blocks"))
                     .displayItems((itemDisplayParameters, output) -> {
-                        output.accept(ModBlocks.NET_CONTROL);
-                        output.accept(ModBlocks.NET_INTERFACE);
-                        output.accept(ModBlocks.NET_PATHWAY);
-                        output.accept(ModBlocks.NET_ENERGY_PATHWAY);
-                        output.accept(ModBlocks.NET_TERMINAL_BLOCK);
-                        output.accept(ModBlocks.NET_PUMP_BLOCK);
-                        output.accept(ModBlocks.NET_HOPPER_BLOCK);
-                        output.accept(ModBlocks.NET_FURNACE_BLOCK);
-                        output.accept(ModBlocks.DIMENSIONAL_CONNECT_BLOCK);
+                        output.accept(BDBlocks.NET_CONTROL);
+                        output.accept(BDBlocks.NET_INTERFACE);
+                        output.accept(BDBlocks.NET_PATHWAY);
+                        output.accept(BDBlocks.NET_ENERGY_PATHWAY);
+                        output.accept(BDBlocks.NET_TERMINAL_BLOCK);
+                        output.accept(BDBlocks.NET_PUMP_BLOCK);
+                        output.accept(BDBlocks.NET_HOPPER_BLOCK);
+                        output.accept(BDBlocks.NET_FURNACE_BLOCK);
+                        output.accept(BDBlocks.DIMENSIONAL_CONNECT_BLOCK);
                         if (BeyondDimensions.RS_Loaded)
                         {
-                            output.accept(ModBlocks.RS_NET_PATHWAY);
+                            output.accept(BDBlocks.RS_NET_PATHWAY);
                         }
                         if (BeyondDimensions.ARS_Loaded)
                         {
-                            output.accept(ModBlocks.ARS_SOURCE_PATHWAY);
+                            output.accept(BDBlocks.ARS_SOURCE_PATHWAY);
                         }
                         if (BeyondDimensions.Botania_Loaded)
                         {
-                            output.accept(ModBlocks.MANA_POOL_PATHWAY);
+                            output.accept(BDBlocks.MANA_POOL_PATHWAY);
                         }
                         if (BeyondDimensions.Create_Loaded)
                         {
-                            output.accept(ModBlocks.SCHEMATICANNON_PATHWAY);
+                            output.accept(BDBlocks.SCHEMATICANNON_PATHWAY);
                         }
                     })
                     .build());

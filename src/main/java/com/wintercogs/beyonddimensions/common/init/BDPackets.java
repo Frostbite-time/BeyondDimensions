@@ -14,7 +14,7 @@ import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 @EventBusSubscriber(modid = BeyondDimensions.MODID)
-public class PacketRegister
+public class BDPackets
 {
 
     @SubscribeEvent

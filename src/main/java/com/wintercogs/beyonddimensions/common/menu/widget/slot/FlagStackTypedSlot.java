@@ -10,7 +10,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.init.ModFluids;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.network.packet.s2c.OrderedStackTypedSlotPacket;
@@ -85,7 +85,7 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
                 {
                     if (carriedItem.getItem() instanceof XpExchangeItem)
                     {
-                        setStackDirectly(new FluidStackKey(new FluidStack(ModFluids.XP_FLUID.source(), 1)), 1);
+                        setStackDirectly(new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source(), 1)), 1);
                     }
                     else
                     {

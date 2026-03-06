@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
-import com.wintercogs.beyonddimensions.common.init.ModDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -88,7 +88,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
                 nonNullList.set(i, stack);
             }
             if (terminalStack != null && terminalStack.getItem() instanceof NetTerminalItem)
-                terminalStack.set(ModDataComponents.CRAFT_SLOTS, new ItemStackContents(nonNullList));
+                terminalStack.set(BDDataComponents.CRAFT_SLOTS, new ItemStackContents(nonNullList));
         }
 
     }
