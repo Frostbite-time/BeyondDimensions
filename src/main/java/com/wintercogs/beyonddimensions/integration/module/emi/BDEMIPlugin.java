@@ -2,9 +2,9 @@ package com.wintercogs.beyonddimensions.integration.module.emi;
 
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
-import com.wintercogs.beyonddimensions.integration.module.emi.Exclusion.BDExclusionZones;
-import com.wintercogs.beyonddimensions.integration.module.emi.Recipe.NetRecipeHandler;
-import com.wintercogs.beyonddimensions.integration.module.emi.SlotHandler.SlotDragHandler;
+import com.wintercogs.beyonddimensions.integration.module.emi.exclusion.BDExclusionZones;
+import com.wintercogs.beyonddimensions.integration.module.emi.recipe.NetRecipeHandler;
+import com.wintercogs.beyonddimensions.integration.module.emi.slothandler.SlotDragHandler;
 import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;

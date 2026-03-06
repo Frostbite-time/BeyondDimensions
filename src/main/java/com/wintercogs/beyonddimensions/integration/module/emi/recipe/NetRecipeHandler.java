@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.module.emi.Recipe;
+package com.wintercogs.beyonddimensions.integration.module.emi.recipe;
 
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;

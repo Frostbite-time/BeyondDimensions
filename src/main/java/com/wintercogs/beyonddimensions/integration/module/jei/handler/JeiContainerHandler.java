@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.module.jei.ContainerHandler;
+package com.wintercogs.beyonddimensions.integration.module.jei.handler;
 
 import com.wintercogs.beyonddimensions.client.gui.BDBaseGUI;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.GuiElementAccess;

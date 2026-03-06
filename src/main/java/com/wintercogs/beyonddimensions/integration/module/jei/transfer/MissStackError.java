@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.module.jei.RecipeTransfer;
+package com.wintercogs.beyonddimensions.integration.module.jei.transfer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;

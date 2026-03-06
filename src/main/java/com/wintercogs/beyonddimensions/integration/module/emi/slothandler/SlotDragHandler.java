@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.module.emi.SlotHandler;
+package com.wintercogs.beyonddimensions.integration.module.emi.slothandler;
 
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;

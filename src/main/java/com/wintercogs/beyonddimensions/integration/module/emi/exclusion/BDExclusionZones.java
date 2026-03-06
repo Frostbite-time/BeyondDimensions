@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.integration.module.emi.Exclusion;
+package com.wintercogs.beyonddimensions.integration.module.emi.exclusion;
 
 import com.wintercogs.beyonddimensions.client.gui.BDBaseGUI;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.GuiElementAccess;
