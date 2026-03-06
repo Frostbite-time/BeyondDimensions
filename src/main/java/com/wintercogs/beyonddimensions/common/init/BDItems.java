@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.common.init;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.item.*;
-import com.wintercogs.beyonddimensions.integration.module.ae2.item.NetAEStorageCell;
 import com.wintercogs.beyonddimensions.integration.module.ifs.Item.WardenSoulTagItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;

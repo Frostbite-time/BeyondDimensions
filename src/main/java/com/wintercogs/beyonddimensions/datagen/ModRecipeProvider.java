@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import appeng.core.definitions.AEBlocks;
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import com.refinedmods.refinedstorage.common.content.Blocks;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
@@ -266,7 +265,6 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .define('C', BDItems.SPACE_TIME_BAR.get())
                 .unlockedBy("unlock_xp_exchange_item", has(BDItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
-
 
 
         if (BeyondDimensions.RS_Loaded)

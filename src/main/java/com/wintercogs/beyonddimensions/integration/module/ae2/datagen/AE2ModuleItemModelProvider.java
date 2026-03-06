@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.integration.module.ae2.datagen;
 
-import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDItemModelProvider;
 import com.wintercogs.beyonddimensions.integration.module.ae2.init.AE2ModuleItems;
 import net.minecraft.data.PackOutput;
