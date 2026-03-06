@@ -115,31 +115,18 @@ public class BeyondDimensions
 
         // 调用UIRegister的构造函数，从而注册所有UI
         BDMenus.register(modEventBus);
-
         // 注册创造模式菜单
         BDCreativeModeTabs.register(modEventBus);
-
         // 注册物品组件
         BDDataComponents.register(modEventBus);
-
         // 注册物品
         BDItems.register(modEventBus);
-
         // 注册方块
         BDBlocks.register(modEventBus);
-
         // 注册流体
         BDFluids.register(modEventBus);
-
         // 注册方块实体
         BDBlockEntities.register(modEventBus);
-
-        if (FMLEnvironment.dist == Dist.CLIENT)
-        {
-            // 注册方块实体渲染
-            modEventBus.addListener(BDBlockRenders::onRegisterRenderers);
-        }
-
     }
 
     // 在此阶段检测模组列表
@@ -368,35 +355,6 @@ public class BeyondDimensions
     public void onServerStarting(ServerStartingEvent event)
     {
         LOGGER.info("维度网络初始化完成(服务端)");
-    }
-
-    @SubscribeEvent
-    public void onServerStared(ServerStartedEvent event)
-    {
-        //GameTester.OnSeverStartTester(event.getServer());
-    }
-
-
-    // 你可以使用EventBusSubscriber来自动注册类中所有标注了@SubscribeEvent的静态方法。
-    @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event)
-        {
-            // 一些客户端初始代码
-            LOGGER.info("维度网络初始化完成(客户端)");
-
-
-            if (PolymorphLoaded)
-            {
-                PolymorphPlug.register();
-            }
-            if (Botania_Loaded)
-            {
-                NeoForge.EVENT_BUS.register(ManaPoolPathwayOverlay.class);
-            }
-        }
     }
 
     public static ResourceLocation makeId(String path)
