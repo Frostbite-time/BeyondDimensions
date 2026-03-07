@@ -22,7 +22,6 @@
   "menu.label.beyonddimensions.tag_and_stored_slots": "Markierungs- & Lagerplätze",
   "menu.label.beyonddimensions.input_filter_slots": "Eingang",
   "menu.label.beyonddimensions.fuel_filter_slots": "Brennstoff",
-
   "tooltip.button.beyonddimensions.sort_asc": "Aktuell: Aufsteigende Sortierung",
   "tooltip.button.beyonddimensions.sort_desc": "Aktuell: Absteigende Sortierung",
   "tooltip.button.beyonddimensions.search_disable": "Suchfeld leeren bei Deaktivierung",
@@ -86,17 +85,14 @@
   "tooltip.item.unstable_space_time.long_data": "Raumzeit stabilisiert sich noch, %s Stabilisierungszyklen benötigt. Bitte stets bei sich tragen.",
   "tooltip.beyonddimensions.item.xp_exchange": "Im GUI: Rechtsklick zum Speichern von XP, Mittlere Maustaste zum Abrufen von XP\nIn der Hand: Rechtsklick zum Wechseln des Arbeitsmodus, Umschalt+Rechtsklick zum Ändern der XP-Interaktionsrate",
   "tooltip.editbox.beyonddimensions.search": "Gib Text ein, um nach Namen zu suchen\nGib '@' ein, um Mod-IDs zu filtern\nGib '$' ein, um Tooltip-Inhalte zu filtern\nGib '#' ein, um Tags zu filtern\nTrenne mehrere Filter mit Leerzeichen; mit Anführungszeichen kannst du Leerzeichen suchen\nVerwende '|' für ODER-Treffer und '-' zum Ausschließen von Treffern\nDrücke Shift+Z, um die Verknüpfung mit dem JEI/EMI-Suchfeld umzuschalten",
-
   "istack.beyonddimensions.storage_num.item": "Gespeichert: %s Stück",
   "istack.beyonddimensions.storage_num.fluid": "Gespeichert: %s mB",
   "istack.beyonddimensions.storage_num.long_type": "Gespeichert: %s",
-
   "key.categories.beyonddimensions": "Jenseits der Dimensionen",
   "key.beyonddimensions.open_gui": "Netzwerk öffnen",
   "key.beyonddimensions.open_terminal_quick_key": "Schnell das Terminal im Inventar öffnen",
   "key.beyonddimensions.main_hand_item_transfer_key": "Schneller Transfer für Haupthand-Gegenstand",
   "key.beyonddimensions.toggle_magnet_key": "Magnet umschalten",
-
   "item.beyonddimensions.net_creater": "Dimensionsgenerator",
   "item.beyonddimensions.net_member_inviter": "Mitgliederverbinder",
   "item.beyonddimensions.net_manager_inviter": "Admin-Verbinder",
@@ -116,7 +112,6 @@
   "item.beyonddimensions.xp_fluid_bucket": "Eimer mit flüssiger Erfahrung",
   "item.beyonddimensions.xp_exchange_item": "XP-Stab",
   "item.beyonddimensions.warden_soul_tag_item": "Seelenmarkierer",
-
   "block.beyonddimensions.net_control": "Netzwerkcontroller",
   "block.beyonddimensions.net_interface": "Netzwerkschnittstelle",
   "block.beyonddimensions.net_pathway": "Dimensionskanal",
@@ -131,14 +126,10 @@
   "block.beyonddimensions.ars_source_pathway": "Arkanquelle-Pfad zwischen Dimensionen",
   "block.beyonddimensions.mana_pool_pathway": "Dimensions-Mana-Pool",
   "block.beyonddimensions.schematicannon_pathway": "Blaupausen-Schnittstelle",
-
   "fluid_type.beyonddimensions.xp_fluid": "Flüssige Erfahrung",
-
   "creativetab.beyonddimensions.items": "Jenseits - Gegenstände",
   "creativetab.beyonddimensions.blocks": "Jenseits - Blöcke",
-
   "beyonddimensions.message.insufficient_materials": "Nicht genug Materialien",
-
   "msg.beyonddimensions.network_created": "Du hast einen Riss in den Kosmos gerissen...\nHinweis: Standardmäßig drücke [O], um das Dimensionsnetzwerk zu öffnen.",
   "msg.beyonddimensions.item_net_bound": "Gegenstand an Netzwerk %d gebunden",
   "msg.beyonddimensions.item_net_unbound": "Gegenstand von Netzwerk %d entbunden",
@@ -157,14 +148,16 @@
   "msg.beyonddimensions.xp_mode.switch.high": "XP-Transfermenge umgeschaltet auf: 30 Stufen",
   "msg.beyonddimensions.xp_mode.switch.highest": "XP-Transfermenge umgeschaltet auf: 100 Stufen",
   "msg.beyonddimensions.xp_mode.switch.over_highest": "XP-Transfermenge umgeschaltet auf: 150 Stufen",
-
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Wächterseelen",
   "types.beyonddimensions.source_type.name": "Arkanquelle",
   "types.beyonddimensions.mana_type.name": "Pflanzen-Mana",
-
   "msg.beyonddimensions.magnet.close": "Magnet deaktiviert",
   "msg.beyonddimensions.magnet.open": "Magnet aktiviert",
   "msg.beyonddimensions.item.xp_exchange.open": "Erfahrungspunkt-Automatik aktivieren, behält den Erfahrungsgrad mit einer Einzelinteraktionsmenge aufrecht",
-  "msg.beyonddimensions.item.xp_exchange.close": "Erfahrungspunkt-Automatik deaktivieren"
+  "msg.beyonddimensions.item.xp_exchange.close": "Erfahrungspunkt-Automatik deaktivieren",
+  "tooltip.button.beyonddimensions.sort_creative_tab": "Sortierstrategie: Nach Kreativ-Tab-Reihenfolge",
+  "tooltip.button.beyonddimensions.sort_creative_tab_second": "Zweite Sortierstrategie: Nach Kreativ-Tab-Reihenfolge",
+  "tooltip.button.beyonddimensions.sort_max_stack": "Sortierstrategie: Nach maximaler Stapelgröße",
+  "tooltip.button.beyonddimensions.sort_max_stack_second": "Zweite Sortierstrategie: Nach maximaler Stapelgröße"
 }

@@ -22,7 +22,6 @@
   "menu.label.beyonddimensions.tag_and_stored_slots": "태그 및 저장 슬롯",
   "menu.label.beyonddimensions.input_filter_slots": "입력",
   "menu.label.beyonddimensions.fuel_filter_slots": "연료",
-
   "tooltip.button.beyonddimensions.sort_asc": "현재: 오름차순 정렬",
   "tooltip.button.beyonddimensions.sort_desc": "현재: 내림차순 정렬",
   "tooltip.button.beyonddimensions.search_disable": "비활성 시 검색창 초기화",
@@ -86,17 +85,14 @@
   "tooltip.item.unstable_space_time.long_data": "시공간 안정화 중, %s회의 안정화 주기 남음. 항상 휴대하십시오.",
   "tooltip.beyonddimensions.item.xp_exchange": "GUI에서: 우클릭 시 경험치 저장, 휠 클릭 시 경험치 회수\n손에 들었을 때: 우클릭으로 작업 모드 전환, 쉬프트+우클릭으로 경험치 상호작용 속도 변경",
   "tooltip.editbox.beyonddimensions.search": "텍스트를 입력해 이름으로 검색\n'@'를 입력해 모드 ID 필터링\n'$'를 입력해 툴팁 내용 필터링\n'#'를 입력해 태그 필터링\n여러 필터는 공백으로 구분하고, 공백 문자를 검색하려면 따옴표로 감싸기\n'|'는 OR 매칭, '-'는 매칭 제외\nShift+Z를 눌러 JEI/EMI 검색창 연동 전환",
-
   "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
   "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",
   "istack.beyonddimensions.storage_num.long_type": "저장됨: %s",
-
   "key.categories.beyonddimensions": "차원을 넘어",
   "key.beyonddimensions.open_gui": "네트워크 열기",
   "key.beyonddimensions.open_terminal_quick_key": "인벤토리에서 터미널 빠르게 열기",
   "key.beyonddimensions.main_hand_item_transfer_key": "주 손 아이템 빠른 이동",
   "key.beyonddimensions.toggle_magnet_key": "자석 토글",
-
   "item.beyonddimensions.net_creater": "차원 네트워크 생성기",
   "item.beyonddimensions.net_member_inviter": "멤버 연결기",
   "item.beyonddimensions.net_manager_inviter": "관리자 연결기",
@@ -116,7 +112,6 @@
   "item.beyonddimensions.xp_fluid_bucket": "액체 경험 양동이",
   "item.beyonddimensions.xp_exchange_item": "경험치 막대",
   "item.beyonddimensions.warden_soul_tag_item": "영혼 태그 아이템",
-
   "block.beyonddimensions.net_control": "네트워크 제어기",
   "block.beyonddimensions.net_interface": "네트워크 인터페이스",
   "block.beyonddimensions.net_pathway": "차원 통신로",
@@ -131,14 +126,10 @@
   "block.beyonddimensions.ars_source_pathway": "차원 마력원 경로",
   "block.beyonddimensions.mana_pool_pathway": "차원 마나 풀",
   "block.beyonddimensions.schematicannon_pathway": "블루프린트 인터페이스",
-
   "fluid_type.beyonddimensions.xp_fluid": "액체 경험",
-
   "creativetab.beyonddimensions.items": "초차원 - 아이템",
   "creativetab.beyonddimensions.blocks": "초차원 - 블록",
-
   "beyonddimensions.message.insufficient_materials": "재료가 부족합니다",
-
   "msg.beyonddimensions.network_created": "당신은 우주에 균열을 만들었습니다...\n팁: 기본적으로 [O] 키를 눌러 차원 네트워크를 엽니다.",
   "msg.beyonddimensions.item_net_bound": "%d번 네트워크에 아이템 연결됨",
   "msg.beyonddimensions.item_net_unbound": "%d번 네트워크에서 아이템 연결 해제",
@@ -157,14 +148,16 @@
   "msg.beyonddimensions.xp_mode.switch.high": "전송량 전환됨: 30레벨",
   "msg.beyonddimensions.xp_mode.switch.highest": "전송량 전환됨: 100레벨",
   "msg.beyonddimensions.xp_mode.switch.over_highest": "전송량 전환됨: 150레벨",
-
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "워든의 영혼",
   "types.beyonddimensions.source_type.name": "마력원",
   "types.beyonddimensions.mana_type.name": "식물 마나",
-
   "msg.beyonddimensions.magnet.close": "자석 비활성화됨",
   "msg.beyonddimensions.magnet.open": "자석 활성화됨",
   "msg.beyonddimensions.item.xp_exchange.open": "XP 자동 교환 활성화, 상호작용당 레벨 유지",
-  "msg.beyonddimensions.item.xp_exchange.close": "XP 자동 교환 비활성화"
+  "msg.beyonddimensions.item.xp_exchange.close": "XP 자동 교환 비활성화",
+  "tooltip.button.beyonddimensions.sort_creative_tab": "정렬 전략: 크리에이티브 탭 순서 기준",
+  "tooltip.button.beyonddimensions.sort_creative_tab_second": "두 번째 정렬 전략: 크리에이티브 탭 순서 기준",
+  "tooltip.button.beyonddimensions.sort_max_stack": "정렬 전략: 최대 스택 수 기준",
+  "tooltip.button.beyonddimensions.sort_max_stack_second": "두 번째 정렬 전략: 최대 스택 수 기준"
 }

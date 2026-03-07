@@ -145,12 +145,16 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             @Override
             protected void initButton()
             {
+                iconMap.put(ButtonState.SORT_CREATIVE_TAB, BeyondDimensions.makeId("widget/sort_creative_tab"));
+                iconMap.put(ButtonState.SORT_MAX_STACK, BeyondDimensions.makeId("widget/sort_max_stack"));
                 iconMap.put(ButtonState.SORT_QUANTITY, BeyondDimensions.makeId("widget/sort_quantity"));
                 iconMap.put(ButtonState.SORT_NAME, BeyondDimensions.makeId("widget/sort_name"));
                 iconMap.put(ButtonState.SORT_MODID, BeyondDimensions.makeId("widget/sort_modid"));
                 iconMap.put(ButtonState.SORT_INSERTED_TIME, BeyondDimensions.makeId("widget/sort_inserted_time"));
                 iconMap.put(ButtonState.SORT_MODIFIED_TIME, BeyondDimensions.makeId("widget/sort_modified_time"));
 
+                tooltipMap.put(ButtonState.SORT_CREATIVE_TAB, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_creative_tab_second")));
+                tooltipMap.put(ButtonState.SORT_MAX_STACK, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_max_stack_second")));
                 tooltipMap.put(ButtonState.SORT_QUANTITY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_quantity_second")));
                 tooltipMap.put(ButtonState.SORT_NAME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_name_second")));
                 tooltipMap.put(ButtonState.SORT_MODID, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_modid_second")));
