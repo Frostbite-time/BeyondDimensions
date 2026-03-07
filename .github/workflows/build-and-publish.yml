@@ -54,7 +54,7 @@ jobs:
           fi
 
           jar_name="${mod_id}-${minecraft_version}-${{ env.LOADER }}-${mod_version}.jar"
-          display_name="${mod_name} ${mod_version}"
+          display_name="${mod_name} ${mod_version} for ${minecraft_version} ${{ env.LOADER }}"
 
           {
             echo "mod_id=$mod_id"
