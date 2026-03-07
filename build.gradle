@@ -62,7 +62,7 @@ repositories {
 }
 
 base {
-    archivesName = mod_id
+    archivesName = "${mod_id}-${minecraft_version}-neoforge"
 }
 
 // Minecraft 26.1 snapshots use Java 25.

@@ -1,1 +1,1 @@
-* Reorganization package structure
+* Fix the mod version number so it can be used for version comparison.
