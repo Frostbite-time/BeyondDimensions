@@ -55,6 +55,7 @@ jobs:
 
           jar_name="${mod_id}-${minecraft_version}-${{ env.LOADER }}-${mod_version}.jar"
           display_name="${mod_name} ${mod_version} for ${minecraft_version} ${{ env.LOADER }}"
+          display_version="${mod_version}-${minecraft_version}-${{ env.LOADER }}"
 
           {
             echo "mod_id=$mod_id"
@@ -69,6 +70,8 @@ jobs:
             echo "display_name<<EOF"
             echo "$display_name"
             echo "EOF"
+
+            echo "display_version=$display_version"
           } >> "$GITHUB_OUTPUT"
 
       - name: Build with Gradle
@@ -100,11 +103,11 @@ jobs:
           modrinth-token: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
 
           # GitHub Release
-          github-tag: v${{ steps.props.outputs.mod_version }}
+          github-tag: v${{ steps.props.outputs.display_version }}
           github-token: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
 
           name: ${{ steps.props.outputs.display_name }}
-          version: ${{ steps.props.outputs.mod_version }}
+          version: ${{ steps.props.outputs.display_version }}
           version-type: release
           changelog-file: docs/CHANGELOG.md
 
