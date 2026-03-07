@@ -170,6 +170,7 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
         final boolean needNameSort = (primarySortPolicy == ButtonState.SORT_NAME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_NAME);
         final boolean needModIdSort = (primarySortPolicy == ButtonState.SORT_MODID) || (useSecondary && secondarySortPolicy == ButtonState.SORT_MODID);
         final boolean needQuantitySort = (primarySortPolicy == ButtonState.SORT_QUANTITY) || (useSecondary && secondarySortPolicy == ButtonState.SORT_QUANTITY);
+        final boolean needMaxStackSort = (primarySortPolicy == ButtonState.SORT_MAX_STACK) || (useSecondary && secondarySortPolicy == ButtonState.SORT_MAX_STACK);
         final boolean needCreationTimeSort = (primarySortPolicy == ButtonState.SORT_INSERTED_TIME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_INSERTED_TIME);
         final boolean needModificationTimeSort = (primarySortPolicy == ButtonState.SORT_MODIFIED_TIME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_MODIFIED_TIME);
         final boolean needCreativeTabSort = (primarySortPolicy == ButtonState.SORT_CREATIVE_TAB) || (useSecondary && secondarySortPolicy == ButtonState.SORT_CREATIVE_TAB);
@@ -204,6 +205,7 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
             }
 
             long amt = needQuantitySort ? ka.amount() : 0L;
+            long maxStack = needMaxStackSort ? key.getVanillaMaxStackSize() : 0L;
             long ctime = (needCreationTimeSort && creationTimeMap != null) ? creationTimeMap.getOrDefault(key, 0L) : 0L;
             long mtime = (needModificationTimeSort && modificationTimeMap != null) ? modificationTimeMap.getOrDefault(key, 0L) : 0L;
             int creativeTabOrder = CREATIVE_SORT_LAST;
@@ -218,7 +220,7 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
                 }
             }
 
-            rows.add(new Row(i, displayName, modIdSort, amt, ctime, mtime, creativeTabOrder, creativeItemOrder));
+            rows.add(new Row(i, displayName, modIdSort, amt, maxStack, ctime, mtime, creativeTabOrder, creativeItemOrder));
         }
 
         if (!rows.isEmpty())
@@ -269,6 +271,7 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
                     .comparingInt((Row r) -> r.creativeTabOrder)
                     .thenComparingInt(r -> r.creativeItemOrder);
             case SORT_QUANTITY -> Comparator.comparingLong((Row r) -> r.amount);
+            case SORT_MAX_STACK -> Comparator.comparingLong((Row r) -> r.maxStack);
             case SORT_NAME -> Comparator.comparing((Row r) -> r.name, String::compareTo);
             case SORT_MODID -> Comparator.comparing((Row r) -> r.modIdSort, String::compareTo);
             case SORT_INSERTED_TIME -> Comparator.comparingLong((Row r) -> r.ctime);
@@ -282,12 +285,14 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
      * @param name              显示名（仅在需要时非 null）
      * @param modIdSort         模组ID（排序用原字符串；仅在需要时非 null）
      * @param amount            数量（仅在需要时有意义）
+     * @param maxStack          最大堆叠数（仅在需要时有意义）
      * @param ctime             插入时间（仅在需要时有意义）
      * @param mtime             修改时间（仅在需要时有意义）
      * @param creativeTabOrder  创造模式标签页顺序（仅在需要时有意义）
      * @param creativeItemOrder 创造模式页内顺序（仅在需要时有意义）
      */
-    private record Row(int idx, @Nullable String name, @Nullable String modIdSort, long amount, long ctime, long mtime,
+    private record Row(int idx, @Nullable String name, @Nullable String modIdSort, long amount, long maxStack,
+                       long ctime, long mtime,
                        int creativeTabOrder, int creativeItemOrder)
     {
     }
