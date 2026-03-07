@@ -4,6 +4,12 @@ import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,6 +23,8 @@ import java.util.*;
  */
 public class ClientNetStorage extends AbstractUnorderedStackHandler
 {
+    private static final int CREATIVE_SORT_LAST = Integer.MAX_VALUE;
+
     /**
      * 原有的，对客户端而言绝对真实的存储
      */
@@ -30,6 +38,9 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
     private final AutoCloseable deltaSubscriber;
 
     private final ClientNetStorageSearchHelper searchHelper = new ClientNetStorageSearchHelper();
+
+    private final Map<Item, CreativeRank> creativeRankCache = new IdentityHashMap<>();
+    private boolean creativeRankCacheBuilt = false;
 
     private @Nullable List<Integer> cacheIndexes = null;
 
@@ -161,6 +172,12 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
         final boolean needQuantitySort = (primarySortPolicy == ButtonState.SORT_QUANTITY) || (useSecondary && secondarySortPolicy == ButtonState.SORT_QUANTITY);
         final boolean needCreationTimeSort = (primarySortPolicy == ButtonState.SORT_INSERTED_TIME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_INSERTED_TIME);
         final boolean needModificationTimeSort = (primarySortPolicy == ButtonState.SORT_MODIFIED_TIME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_MODIFIED_TIME);
+        final boolean needCreativeTabSort = (primarySortPolicy == ButtonState.SORT_CREATIVE_TAB) || (useSecondary && secondarySortPolicy == ButtonState.SORT_CREATIVE_TAB);
+
+        if (needCreativeTabSort)
+        {
+            ensureCreativeRankCache();
+        }
 
         final @Nullable Map<IStackKey<?>, Long> creationTimeMap = needCreationTimeSort ? sourceStorage.getCreationTimeMap() : null;
         final @Nullable Map<IStackKey<?>, Long> modificationTimeMap = needModificationTimeSort ? sourceStorage.getLastModifiedTimeMap() : null;
@@ -189,8 +206,19 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
             long amt = needQuantitySort ? ka.amount() : 0L;
             long ctime = (needCreationTimeSort && creationTimeMap != null) ? creationTimeMap.getOrDefault(key, 0L) : 0L;
             long mtime = (needModificationTimeSort && modificationTimeMap != null) ? modificationTimeMap.getOrDefault(key, 0L) : 0L;
+            int creativeTabOrder = CREATIVE_SORT_LAST;
+            int creativeItemOrder = CREATIVE_SORT_LAST;
+            if (needCreativeTabSort)
+            {
+                CreativeRank rank = getCreativeRank(key);
+                if (rank != null)
+                {
+                    creativeTabOrder = rank.tabOrder;
+                    creativeItemOrder = rank.itemOrder;
+                }
+            }
 
-            rows.add(new Row(i, displayName, modIdSort, amt, ctime, mtime));
+            rows.add(new Row(i, displayName, modIdSort, amt, ctime, mtime, creativeTabOrder, creativeItemOrder));
         }
 
         if (!rows.isEmpty())
@@ -237,6 +265,9 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
     {
         return switch (state)
         {
+            case SORT_CREATIVE_TAB -> Comparator
+                    .comparingInt((Row r) -> r.creativeTabOrder)
+                    .thenComparingInt(r -> r.creativeItemOrder);
             case SORT_QUANTITY -> Comparator.comparingLong((Row r) -> r.amount);
             case SORT_NAME -> Comparator.comparing((Row r) -> r.name, String::compareTo);
             case SORT_MODID -> Comparator.comparing((Row r) -> r.modIdSort, String::compareTo);
@@ -247,14 +278,76 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
     }
 
     /**
-     * @param idx       指向视觉存储的下标
-     * @param name      显示名（仅在需要时非 null）
-     * @param modIdSort 模组ID（排序用原字符串；仅在需要时非 null）
-     * @param amount    数量（仅在需要时有意义）
-     * @param ctime     插入时间（仅在需要时有意义）
-     * @param mtime     修改时间（仅在需要时有意义）
+     * @param idx               指向视觉存储的下标
+     * @param name              显示名（仅在需要时非 null）
+     * @param modIdSort         模组ID（排序用原字符串；仅在需要时非 null）
+     * @param amount            数量（仅在需要时有意义）
+     * @param ctime             插入时间（仅在需要时有意义）
+     * @param mtime             修改时间（仅在需要时有意义）
+     * @param creativeTabOrder  创造模式标签页顺序（仅在需要时有意义）
+     * @param creativeItemOrder 创造模式页内顺序（仅在需要时有意义）
      */
-    private record Row(int idx, @Nullable String name, @Nullable String modIdSort, long amount, long ctime, long mtime)
+    private record Row(int idx, @Nullable String name, @Nullable String modIdSort, long amount, long ctime, long mtime,
+                       int creativeTabOrder, int creativeItemOrder)
+    {
+    }
+
+    private void ensureCreativeRankCache()
+    {
+        if (creativeRankCacheBuilt) return;
+
+        creativeRankCache.clear();
+        int tabOrder = 0;
+        for (CreativeModeTab tab : getCreativeTabsInOrder())
+        {
+            if (!tab.getType().equals(CreativeModeTab.Type.CATEGORY))
+            {
+                continue;
+            }
+
+            int itemOrder = 0;
+            for (ItemStack stack : tab.getDisplayItems())
+            {
+                if (stack == null || stack.isEmpty())
+                {
+                    continue;
+                }
+
+                Item item = stack.getItem();
+                creativeRankCache.putIfAbsent(item, new CreativeRank(tabOrder, itemOrder));
+                itemOrder++;
+            }
+
+            tabOrder++;
+        }
+
+        creativeRankCacheBuilt = true;
+    }
+
+    private @Nullable CreativeRank getCreativeRank(@NotNull IStackKey<?> key)
+    {
+        if (!(key instanceof ItemStackKey itemStackKey))
+        {
+            return null;
+        }
+
+        return creativeRankCache.get(itemStackKey.getSource());
+    }
+
+    private List<CreativeModeTab> getCreativeTabsInOrder()
+    {
+        List<CreativeModeTab> orderedTabs = CreativeModeTabRegistry.getSortedCreativeModeTabs();
+        if (!orderedTabs.isEmpty())
+        {
+            return orderedTabs;
+        }
+
+        return BuiltInRegistries.CREATIVE_MODE_TAB.stream()
+                .sorted(Comparator.comparing(tab -> String.valueOf(BuiltInRegistries.CREATIVE_MODE_TAB.getKey(tab))))
+                .toList();
+    }
+
+    private record CreativeRank(int tabOrder, int itemOrder)
     {
     }
 

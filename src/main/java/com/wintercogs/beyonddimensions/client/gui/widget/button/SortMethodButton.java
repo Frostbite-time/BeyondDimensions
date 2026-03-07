@@ -19,12 +19,14 @@ public class SortMethodButton extends StatusButton
     @Override
     protected void initButton()
     {
+        iconMap.put(ButtonState.SORT_CREATIVE_TAB, ResourceLocation.tryBuild(BDConstants.MODID, "widget/sort_creative_tab"));
         iconMap.put(ButtonState.SORT_QUANTITY, ResourceLocation.tryBuild(BDConstants.MODID, "widget/sort_quantity"));
         iconMap.put(ButtonState.SORT_NAME, ResourceLocation.tryBuild(BDConstants.MODID, "widget/sort_name"));
         iconMap.put(ButtonState.SORT_MODID, ResourceLocation.tryBuild(BDConstants.MODID, "widget/sort_modid"));
         iconMap.put(ButtonState.SORT_INSERTED_TIME, ResourceLocation.tryBuild(BDConstants.MODID, "widget/sort_inserted_time"));
         iconMap.put(ButtonState.SORT_MODIFIED_TIME, ResourceLocation.tryBuild(BDConstants.MODID, "widget/sort_modified_time"));
 
+        tooltipMap.put(ButtonState.SORT_CREATIVE_TAB, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_creative_tab")));
         tooltipMap.put(ButtonState.SORT_QUANTITY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_quantity")));
         tooltipMap.put(ButtonState.SORT_NAME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_name")));
         tooltipMap.put(ButtonState.SORT_MODID, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_modid")));
