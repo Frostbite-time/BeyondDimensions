@@ -1,1 +1,1 @@
-* Fixed an issue where Git’s case-insensitive behavior caused package names to remain unchanged in cloud environments.
+* Fix the mod version number so it can be used for version comparison.

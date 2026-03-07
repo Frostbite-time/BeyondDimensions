@@ -4,6 +4,7 @@ on: [workflow_dispatch]
 
 env:
   JAVA_VERSION: "21"
+  LOADER: "neoforge"
 
 permissions:
   contents: write
@@ -18,7 +19,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Setup JDK 21
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -31,23 +32,25 @@ jobs:
         shell: bash
         run: chmod +x ./gradlew
 
-      - name: Read gradle.properties (mod_id/mod_version)
+      - name: Read gradle.properties (mod_id/minecraft_version/mod_version)
         id: props
         shell: bash
         run: |
           set -euo pipefail
 
           mod_id="$(grep -m1 -E '^\s*mod_id\s*=' gradle.properties | sed -E 's/^\s*mod_id\s*=\s*//; s/\r$//')"
+          minecraft_version="$(grep -m1 -E '^\s*minecraft_version\s*=' gradle.properties | sed -E 's/^\s*minecraft_version\s*=\s*//; s/\r$//')"
           mod_version="$(grep -m1 -E '^\s*mod_version\s*=' gradle.properties | sed -E 's/^\s*mod_version\s*=\s*//; s/\r$//')"
 
-          if [[ -z "$mod_id" || -z "$mod_version" ]]; then
-            echo "mod_id or mod_version not found in gradle.properties" >&2
+          if [[ -z "$mod_id" || -z "$minecraft_version" || -z "$mod_version" ]]; then
+            echo "mod_id / minecraft_version / mod_version not found in gradle.properties" >&2
             exit 1
           fi
 
-          jar_name="${mod_id}-${mod_version}.jar"
+          jar_name="${mod_id}-${minecraft_version}-${{ env.LOADER }}-${mod_version}.jar"
 
           echo "mod_id=$mod_id" >> "$GITHUB_OUTPUT"
+          echo "minecraft_version=$minecraft_version" >> "$GITHUB_OUTPUT"
           echo "mod_version=$mod_version" >> "$GITHUB_OUTPUT"
           echo "jar_name=$jar_name" >> "$GITHUB_OUTPUT"
 

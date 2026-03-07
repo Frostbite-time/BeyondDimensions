@@ -3,7 +3,6 @@ name: Build & Publish
 on: [workflow_dispatch]
 
 env:
-  MINECRAFT_VERSION: "1.21.1"
   JAVA_VERSION: "21"
   LOADER: "neoforge"
 
@@ -25,7 +24,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Setup JDK 21
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -38,26 +37,28 @@ jobs:
         shell: bash
         run: chmod +x ./gradlew
 
-      - name: Read gradle.properties (mod_id/mod_version/mod_name)
+      - name: Read gradle.properties (mod_id/minecraft_version/mod_version/mod_name)
         id: props
         shell: bash
         run: |
           set -euo pipefail
 
           mod_id="$(grep -m1 -E '^\s*mod_id\s*=' gradle.properties | sed -E 's/^\s*mod_id\s*=\s*//; s/\r$//')"
+          minecraft_version="$(grep -m1 -E '^\s*minecraft_version\s*=' gradle.properties | sed -E 's/^\s*minecraft_version\s*=\s*//; s/\r$//')"
           mod_version="$(grep -m1 -E '^\s*mod_version\s*=' gradle.properties | sed -E 's/^\s*mod_version\s*=\s*//; s/\r$//')"
           mod_name="$(grep -m1 -E '^\s*mod_name\s*=' gradle.properties | sed -E 's/^\s*mod_name\s*=\s*//; s/\r$//')"
 
-          if [[ -z "$mod_id" || -z "$mod_version" || -z "$mod_name" ]]; then
-            echo "mod_id / mod_version / mod_name not found in gradle.properties" >&2
+          if [[ -z "$mod_id" || -z "$minecraft_version" || -z "$mod_version" || -z "$mod_name" ]]; then
+            echo "mod_id / minecraft_version / mod_version / mod_name not found in gradle.properties" >&2
             exit 1
           fi
 
-          jar_name="${mod_id}-${mod_version}.jar"
+          jar_name="${mod_id}-${minecraft_version}-${{ env.LOADER }}-${mod_version}.jar"
           display_name="${mod_name} ${mod_version}"
 
           {
             echo "mod_id=$mod_id"
+            echo "minecraft_version=$minecraft_version"
             echo "mod_version=$mod_version"
             echo "jar_name=$jar_name"
 
@@ -114,7 +115,7 @@ jobs:
             ${{ env.LOADER }}
 
           game-versions: |
-            ${{ env.MINECRAFT_VERSION }}
+            ${{ steps.props.outputs.minecraft_version }}
 
           java: |
             ${{ env.JAVA_VERSION }}
