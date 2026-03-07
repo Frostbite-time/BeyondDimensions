@@ -234,11 +234,11 @@ public class ScrollBar extends AbstractWidget
     }
 
     @Override
-    protected void onDrag(@NotNull MouseButtonEvent event, double mouseX, double mouseY)
+    protected void onDrag(@NotNull MouseButtonEvent event, double x, double y)
     {
-        super.onDrag(event, mouseX, mouseY);
+        super.onDrag(event, x, y);
         if (!isDragging) return;
-        scrollToMouse(mouseY);
+        scrollToMouse(event.y());
     }
 
     @Override
