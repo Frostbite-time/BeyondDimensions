@@ -1,1 +1,1 @@
-* Add two new UI sorting modes.
+* Fix kubejs compat
