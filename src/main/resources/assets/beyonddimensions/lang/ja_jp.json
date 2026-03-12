@@ -100,6 +100,9 @@
   "key.beyonddimensions.open_terminal_quick_key": "インベントリー内のターミナルをすばやく開く",
   "key.beyonddimensions.main_hand_item_transfer_key": "メインハンドのアイテムをクイック転送",
   "key.beyonddimensions.toggle_magnet_key": "マグネット切り替え",
+  "key.beyonddimensions.toggle_magnet_item_key": "アイテムマグネット切り替え",
+  "key.beyonddimensions.toggle_magnet_fluid_key": "流体マグネット切り替え",
+  "key.beyonddimensions.open_magnet_gui_key": "マグネットGUIを開く",
 
   "item.beyonddimensions.net_creater": "次元ネットワーク生成器",
   "item.beyonddimensions.net_member_inviter": "メンバー接続器",
@@ -169,6 +172,10 @@
 
   "msg.beyonddimensions.magnet.close": "マグネットが無効",
   "msg.beyonddimensions.magnet.open": "マグネットが有効",
+  "msg.beyonddimensions.magnet.itemclose": "アイテムマグネットが無効",
+  "msg.beyonddimensions.magnet.itemopen": "アイテムマグネットが有効",
+  "msg.beyonddimensions.magnet.fluidclose": "流体マグネットが無効",
+  "msg.beyonddimensions.magnet.fluidopen": "流体マグネットが有効",
   "msg.beyonddimensions.item.xp_exchange.open": "XP自動交換を有効化（1回の操作あたりの経験値量を維持）",
   "msg.beyonddimensions.item.xp_exchange.close": "XP自動交換を無効化"
 }

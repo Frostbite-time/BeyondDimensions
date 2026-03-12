@@ -100,6 +100,9 @@
   "key.beyonddimensions.open_terminal_quick_key": "Abrir rápidamente el terminal en el inventario",
   "key.beyonddimensions.main_hand_item_transfer_key": "Transferencia rápida de objeto en mano principal",
   "key.beyonddimensions.toggle_magnet_key": "Alternar imán",
+  "key.beyonddimensions.toggle_magnet_item_key": "Alternar imán para objetos",
+  "key.beyonddimensions.toggle_magnet_fluid_key": "Alternar imán para fluidos",
+  "key.beyonddimensions.open_magnet_gui_key": "Abrir GUI del imán",
 
   "item.beyonddimensions.net_creater": "Generador de Red Dimensional",
   "item.beyonddimensions.net_member_inviter": "Conector de Miembros",
@@ -169,6 +172,10 @@
 
   "msg.beyonddimensions.magnet.close": "Imán desactivado",
   "msg.beyonddimensions.magnet.open": "Imán activado",
+  "msg.beyonddimensions.magnet.itemclose": "Imán para objetos desactivado",
+  "msg.beyonddimensions.magnet.itemopen": "Imán para objetos activado",
+  "msg.beyonddimensions.magnet.fluidclose": "Imán para fluidos desactivado",
+  "msg.beyonddimensions.magnet.fluidopen": "Imán para fluidos activado",
   "msg.beyonddimensions.item.xp_exchange.open": "Habilitar intercambio automático de XP, manteniendo nivel por interacción",
   "msg.beyonddimensions.item.xp_exchange.close": "Deshabilitar intercambio automático de XP"
 }

@@ -1,8 +1,11 @@
 package com.wintercogs.beyonddimensions.network.packet.c2s;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.client.gui.MagnetToggleType;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
+import com.wintercogs.beyonddimensions.common.machine.HopperFluidMode;
+import com.wintercogs.beyonddimensions.common.machine.HopperItemMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -19,7 +22,7 @@ import top.theillusivec4.curios.api.SlotResult;
 
 import java.util.List;
 
-public record ToggleMagnetPacket() implements CustomPacketPayload
+public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomPacketPayload
 {
     public static final Type<ToggleMagnetPacket> TYPE =
             new Type<>(BeyondDimensions.makeId("toggle_magnet_packet"));
@@ -29,13 +32,13 @@ public record ToggleMagnetPacket() implements CustomPacketPayload
         @Override
         public ToggleMagnetPacket decode(RegistryFriendlyByteBuf registryFriendlyByteBuf)
         {
-            return new ToggleMagnetPacket();
+            return new ToggleMagnetPacket(registryFriendlyByteBuf.readEnum(MagnetToggleType.class));
         }
 
         @Override
         public void encode(RegistryFriendlyByteBuf buf, ToggleMagnetPacket toggleMagnetPacket)
         {
-
+            buf.writeEnum(toggleMagnetPacket.toggleType);
         }
     };
 
@@ -44,41 +47,14 @@ public record ToggleMagnetPacket() implements CustomPacketPayload
 
     }
 
-    private void handleInServer(final IPayloadContext context)
-    {
-        Player player = context.player();
-
-        for (ItemStack stack : player.getInventory().items)
+    private void toggleMagnet(Player player, List<ItemStack> itemStackList) {
+        for (ItemStack stack : itemStackList)
         {
             if (stack.getItem() instanceof NetMagnetItem)
             {
-                if (stack.has(BDDataComponents.CONTROL_MODE))
+                switch (toggleType)
                 {
-                    if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
-                    {
-                        stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
-                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
-                    }
-                    else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
-                    {
-                        stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
-                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
-                    }
-                }
-            }
-        }
-
-        if (ModPresence.isLoaded(OtherModIds.CURIOS))
-        {
-            CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
-                List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
-                        .stream()
-                        .map(SlotResult::stack)
-                        .toList();
-
-                for (ItemStack stack : curios)
-                {
-                    if (stack.getItem() instanceof NetMagnetItem)
+                    case ALL ->
                     {
                         if (stack.has(BDDataComponents.CONTROL_MODE))
                         {
@@ -94,7 +70,56 @@ public record ToggleMagnetPacket() implements CustomPacketPayload
                             }
                         }
                     }
+                    case ITEM -> {
+                        if (stack.has(BDDataComponents.HOPPER_ITEM_MODE))
+                        {
+                            if (stack.get(BDDataComponents.HOPPER_ITEM_MODE) == HopperItemMode.ALLOW)
+                            {
+                                stack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.DENY);
+                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.itemclose"));
+                            }
+                            else if (stack.get(BDDataComponents.HOPPER_ITEM_MODE) == HopperItemMode.DENY)
+                            {
+                                stack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
+                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.itemopen"));
+                            }
+                        }
+                    }
+                    case FLUID -> {
+                        if (stack.has(BDDataComponents.HOPPER_FLUID_MODE))
+                        {
+                            if (stack.get(BDDataComponents.HOPPER_FLUID_MODE) == HopperFluidMode.ALLOW)
+                            {
+                                stack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
+                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.fluidclose"));
+                            }
+                            else if (stack.get(BDDataComponents.HOPPER_FLUID_MODE) == HopperFluidMode.DENY)
+                            {
+                                stack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.ALLOW);
+                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.fluidopen"));
+                            }
+                        }
+                    }
                 }
+            }
+        }
+    }
+
+    private void handleInServer(final IPayloadContext context)
+    {
+        Player player = context.player();
+
+        toggleMagnet(player, player.getInventory().items);
+
+        if (ModPresence.isLoaded(OtherModIds.CURIOS))
+        {
+            CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
+                List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
+                        .stream()
+                        .map(SlotResult::stack)
+                        .toList();
+
+                toggleMagnet(player, curios);
             });
         }
     }

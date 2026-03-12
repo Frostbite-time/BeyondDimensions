@@ -100,6 +100,9 @@
   "key.beyonddimensions.open_terminal_quick_key": "인벤토리에서 터미널 빠르게 열기",
   "key.beyonddimensions.main_hand_item_transfer_key": "주 손 아이템 빠른 이동",
   "key.beyonddimensions.toggle_magnet_key": "자석 토글",
+  "key.beyonddimensions.toggle_magnet_item_key": "아이템 자석 토글",
+  "key.beyonddimensions.toggle_magnet_fluid_key": "유체 자석 토글",
+  "key.beyonddimensions.open_magnet_gui_key": "네트워크 자석 GUI 열기",
 
   "item.beyonddimensions.net_creater": "차원 네트워크 생성기",
   "item.beyonddimensions.net_member_inviter": "멤버 연결기",
@@ -169,6 +172,10 @@
 
   "msg.beyonddimensions.magnet.close": "자석 비활성화됨",
   "msg.beyonddimensions.magnet.open": "자석 활성화됨",
+  "msg.beyonddimensions.magnet.itemclose": "자석 아이템 흡수 비활성화됨",
+  "msg.beyonddimensions.magnet.itemopen": "자석 아이템 흡수 활성화됨",
+  "msg.beyonddimensions.magnet.fluidclose": "자석 유체 흡수 비활성화됨",
+  "msg.beyonddimensions.magnet.fluidopen": "자석 유체 흡수 활성화됨",
   "msg.beyonddimensions.item.xp_exchange.open": "XP 자동 교환 활성화, 상호작용당 레벨 유지",
   "msg.beyonddimensions.item.xp_exchange.close": "XP 자동 교환 비활성화"
 }
