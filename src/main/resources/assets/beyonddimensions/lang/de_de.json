@@ -100,6 +100,9 @@
   "key.beyonddimensions.open_terminal_quick_key": "Schnell das Terminal im Inventar öffnen",
   "key.beyonddimensions.main_hand_item_transfer_key": "Schneller Transfer für Haupthand-Gegenstand",
   "key.beyonddimensions.toggle_magnet_key": "Magnet umschalten",
+  "key.beyonddimensions.toggle_magnet_item_key": "Gegenstands-Magnet umschalten",
+  "key.beyonddimensions.toggle_magnet_fluid_key": "Fluessigkeits-Magnet umschalten",
+  "key.beyonddimensions.open_magnet_gui_key": "Magnet-GUI oeffnen",
 
   "item.beyonddimensions.net_creater": "Dimensionsgenerator",
   "item.beyonddimensions.net_member_inviter": "Mitgliederverbinder",
@@ -169,6 +172,10 @@
 
   "msg.beyonddimensions.magnet.close": "Magnet deaktiviert",
   "msg.beyonddimensions.magnet.open": "Magnet aktiviert",
+  "msg.beyonddimensions.magnet.itemclose": "Gegenstandsaufnahme des Magneten deaktiviert",
+  "msg.beyonddimensions.magnet.itemopen": "Gegenstandsaufnahme des Magneten aktiviert",
+  "msg.beyonddimensions.magnet.fluidclose": "Fluessigkeitsaufnahme des Magneten deaktiviert",
+  "msg.beyonddimensions.magnet.fluidopen": "Fluessigkeitsaufnahme des Magneten aktiviert",
   "msg.beyonddimensions.item.xp_exchange.open": "Erfahrungspunkt-Automatik aktivieren, behält den Erfahrungsgrad mit einer Einzelinteraktionsmenge aufrecht",
   "msg.beyonddimensions.item.xp_exchange.close": "Erfahrungspunkt-Automatik deaktivieren"
 }

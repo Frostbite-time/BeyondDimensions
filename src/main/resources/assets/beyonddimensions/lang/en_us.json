@@ -103,6 +103,9 @@
   "key.beyonddimensions.open_terminal_quick_key": "Quickly open the terminal in the inventory",
   "key.beyonddimensions.main_hand_item_transfer_key": "Quick Transfer Item from Main Hand",
   "key.beyonddimensions.toggle_magnet_key": "Toggle Magnet",
+  "key.beyonddimensions.toggle_magnet_item_key": "Toggle Item Magnet",
+  "key.beyonddimensions.toggle_magnet_fluid_key": "Toggle Fluid Magnet",
+  "key.beyonddimensions.open_magnet_gui_key": "Open Magnet GUI",
 
   "item.beyonddimensions.net_creater": "Dimensional Network Generator",
   "item.beyonddimensions.net_member_inviter": "Member Connector",
@@ -173,6 +176,10 @@
 
   "msg.beyonddimensions.magnet.close": "Magnet disabled",
   "msg.beyonddimensions.magnet.open": "Magnet enabled",
+  "msg.beyonddimensions.magnet.itemclose": "Magnet item pickup disabled",
+  "msg.beyonddimensions.magnet.itemopen": "Magnet item pickup enabled",
+  "msg.beyonddimensions.magnet.fluidclose": "Magnet fluid pickup disabled",
+  "msg.beyonddimensions.magnet.fluidopen": "Magnet fluid pickup enabled",
   "msg.beyonddimensions.item.xp_exchange.open": "Enable XP auto-exchange, maintaining level per interaction",
   "msg.beyonddimensions.item.xp_exchange.close": "Disable XP auto-exchange"
 }

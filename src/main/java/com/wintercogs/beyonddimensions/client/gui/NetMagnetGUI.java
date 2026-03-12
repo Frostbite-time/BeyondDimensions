@@ -1,13 +1,16 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.LeftTabButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
+import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
 import com.wintercogs.beyonddimensions.common.item.BaseMachineItem;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import com.wintercogs.beyonddimensions.common.menu.NetMagnetMenu;
 import com.wintercogs.beyonddimensions.util.GuiRenderHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -267,6 +270,21 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
         if (hopperRangeModeButton.currentState != BaseMachineItem.getHopperRangeModeOrDefault(menu.menuStack, HopperRangeMode.RADIUS_MID))
             hopperRangeModeButton.setState(BaseMachineItem.getHopperRangeModeOrDefault(menu.menuStack, HopperRangeMode.RADIUS_MID));
 
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    {
+        InputConstants.Key mouseKey = InputConstants.getKey(keyCode, scanCode);
+
+        if (Minecraft.getInstance().options.keyInventory.isActiveAndMatches(mouseKey)
+                || BDShortKeys.OPEN_MAGNET_GUI_KEY.getKey() == mouseKey)
+        {
+            onClose();
+            return true;
+        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
