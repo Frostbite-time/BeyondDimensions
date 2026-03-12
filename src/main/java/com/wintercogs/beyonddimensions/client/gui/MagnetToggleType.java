@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
-public enum MagnetToggleType {
+public enum MagnetToggleType
+{
     ALL,
     ITEM,
     FLUID

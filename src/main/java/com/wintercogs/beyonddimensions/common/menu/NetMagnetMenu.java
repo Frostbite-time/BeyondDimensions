@@ -13,7 +13,6 @@ import com.wintercogs.beyonddimensions.util.InventoryHelper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
@@ -64,6 +63,7 @@ public class NetMagnetMenu extends BDBaseMenu
 
     public NetMagnetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
+        // TODO findItemInPlayerInventory 在这里有后续维护时操作不当导致崩溃的风险，等以后有空了改
         this(id, playerInventory, InventoryHelper.findItemInPlayerInventory(playerInventory.player, BDItems.NET_MAGNET_ITEM.get()));
     }
 

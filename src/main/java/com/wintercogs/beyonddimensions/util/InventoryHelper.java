@@ -7,6 +7,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
+import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotResult;
 
 public class InventoryHelper
@@ -72,6 +74,7 @@ public class InventoryHelper
         return stack.copyWithCount(extract);
     }
 
+    @Nullable
     public static ItemStack findItemInPlayerInventory(Player player, Item item)
     {
         ItemStack itemStack = null;
@@ -90,7 +93,7 @@ public class InventoryHelper
 
         if (itemStack == null && ModPresence.isLoaded(OtherModIds.CURIOS))
         {
-            itemStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
+            itemStack = CuriosApi.getCuriosInventory(player)
                     .flatMap(iCuriosItemHandler ->
                             iCuriosItemHandler.findFirstCurio(stack -> stack.is(item))
                     )

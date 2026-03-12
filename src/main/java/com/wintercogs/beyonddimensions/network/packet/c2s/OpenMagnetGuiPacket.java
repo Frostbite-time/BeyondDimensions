@@ -15,11 +15,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record OpenMagnetGuiPacket() implements CustomPacketPayload {
+public record OpenMagnetGuiPacket() implements CustomPacketPayload
+{
 
     public static final Type<OpenMagnetGuiPacket> TYPE = new Type<>(BeyondDimensions.makeId("open_magnet_gui_packet"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, OpenMagnetGuiPacket> STREAM_CODEC = new StreamCodec<>() {
+    public static final StreamCodec<RegistryFriendlyByteBuf, OpenMagnetGuiPacket> STREAM_CODEC = new StreamCodec<>()
+    {
         @Override
         public void encode(RegistryFriendlyByteBuf o, OpenMagnetGuiPacket openMagnetGuiPaket)
         {

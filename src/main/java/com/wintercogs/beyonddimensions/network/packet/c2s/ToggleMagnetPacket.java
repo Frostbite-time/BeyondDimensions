@@ -17,6 +17,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotResult;
 
@@ -30,7 +31,7 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
     public static final StreamCodec<RegistryFriendlyByteBuf, ToggleMagnetPacket> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, ToggleMagnetPacket>()
     {
         @Override
-        public ToggleMagnetPacket decode(RegistryFriendlyByteBuf registryFriendlyByteBuf)
+        public @NotNull ToggleMagnetPacket decode(RegistryFriendlyByteBuf registryFriendlyByteBuf)
         {
             return new ToggleMagnetPacket(registryFriendlyByteBuf.readEnum(MagnetToggleType.class));
         }
@@ -47,7 +48,8 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
 
     }
 
-    private void toggleMagnet(Player player, List<ItemStack> itemStackList) {
+    private void toggleMagnet(Player player, List<ItemStack> itemStackList)
+    {
         for (ItemStack stack : itemStackList)
         {
             if (stack.getItem() instanceof NetMagnetItem)
@@ -70,7 +72,8 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
                             }
                         }
                     }
-                    case ITEM -> {
+                    case ITEM ->
+                    {
                         if (stack.has(BDDataComponents.HOPPER_ITEM_MODE))
                         {
                             if (stack.get(BDDataComponents.HOPPER_ITEM_MODE) == HopperItemMode.ALLOW)
@@ -85,7 +88,8 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
                             }
                         }
                     }
-                    case FLUID -> {
+                    case FLUID ->
+                    {
                         if (stack.has(BDDataComponents.HOPPER_FLUID_MODE))
                         {
                             if (stack.get(BDDataComponents.HOPPER_FLUID_MODE) == HopperFluidMode.ALLOW)
