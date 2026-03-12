@@ -155,11 +155,11 @@ public class BDPackets
         );
 
         registrar.playBidirectional(
-                OpenMagnetGuiPaket.TYPE,
-                OpenMagnetGuiPaket.STREAM_CODEC,
+                OpenMagnetGuiPacket.TYPE,
+                OpenMagnetGuiPacket.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        OpenMagnetGuiPaket::handle,
-                        OpenMagnetGuiPaket::handle
+                        OpenMagnetGuiPacket::handle,
+                        OpenMagnetGuiPacket::handle
                 )
         );
     }

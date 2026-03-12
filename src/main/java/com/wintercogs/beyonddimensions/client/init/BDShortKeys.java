@@ -7,7 +7,7 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.MagnetToggleType;
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
-import com.wintercogs.beyonddimensions.network.packet.c2s.OpenMagnetGuiPaket;
+import com.wintercogs.beyonddimensions.network.packet.c2s.OpenMagnetGuiPacket;
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.network.packet.c2s.ToggleMagnetPacket;
 import net.minecraft.client.KeyMapping;
@@ -165,7 +165,7 @@ public class BDShortKeys
                 return;
             }
 
-            PacketDistributor.sendToServer(new OpenMagnetGuiPaket());
+            PacketDistributor.sendToServer(new OpenMagnetGuiPacket());
         });
 
         for (KeyMapping keyMapping : KEY_MAPPINGS)

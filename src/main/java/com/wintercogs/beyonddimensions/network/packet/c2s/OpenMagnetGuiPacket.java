@@ -15,20 +15,20 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record OpenMagnetGuiPaket() implements CustomPacketPayload {
+public record OpenMagnetGuiPacket() implements CustomPacketPayload {
 
-    public static final Type<OpenMagnetGuiPaket> TYPE = new Type<>(BeyondDimensions.makeId("open_magnet_gui_packet"));
+    public static final Type<OpenMagnetGuiPacket> TYPE = new Type<>(BeyondDimensions.makeId("open_magnet_gui_packet"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, OpenMagnetGuiPaket> STREAM_CODEC = new StreamCodec<>() {
+    public static final StreamCodec<RegistryFriendlyByteBuf, OpenMagnetGuiPacket> STREAM_CODEC = new StreamCodec<>() {
         @Override
-        public void encode(RegistryFriendlyByteBuf o, OpenMagnetGuiPaket openMagnetGuiPaket)
+        public void encode(RegistryFriendlyByteBuf o, OpenMagnetGuiPacket openMagnetGuiPaket)
         {
         }
 
         @Override
-        public OpenMagnetGuiPaket decode(RegistryFriendlyByteBuf registryFriendlyByteBuf)
+        public OpenMagnetGuiPacket decode(RegistryFriendlyByteBuf registryFriendlyByteBuf)
         {
-            return new OpenMagnetGuiPaket();
+            return new OpenMagnetGuiPacket();
         }
     };
 
@@ -56,7 +56,7 @@ public record OpenMagnetGuiPaket() implements CustomPacketPayload {
         );
     }
 
-    public static void handle(final OpenMagnetGuiPaket packet, final IPayloadContext context)
+    public static void handle(final OpenMagnetGuiPacket packet, final IPayloadContext context)
     {
         if (packet == null)
             return;
