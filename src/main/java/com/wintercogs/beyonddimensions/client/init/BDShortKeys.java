@@ -57,19 +57,19 @@ public class BDShortKeys
 
     public static final KeyMapping TOGGLE_MAGNET_ITEM_KEY =  new KeyMapping(
             "key.beyonddimensions.toggle_magnet_item_key",
-            -1,
+            InputConstants.UNKNOWN.getValue(),
             "key.categories.beyonddimensions"
     );
 
     public static final KeyMapping TOGGLE_MAGNET_FLUID_KEY = new KeyMapping(
             "key.beyonddimensions.toggle_magnet_fluid_key",
-            -1,
+            InputConstants.UNKNOWN.getValue(),
             "key.categories.beyonddimensions"
     );
 
     public static final KeyMapping OPEN_MAGNET_GUI_KEY = new KeyMapping(
             "key.beyonddimensions.open_magnet_gui_key",
-            -1,
+            InputConstants.UNKNOWN.getValue(),
             "key.categories.beyonddimensions"
     );
 
