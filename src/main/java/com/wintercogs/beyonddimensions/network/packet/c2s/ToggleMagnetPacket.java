@@ -1,8 +1,11 @@
 package com.wintercogs.beyonddimensions.network.packet.c2s;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.client.gui.MagnetToggleType;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
+import com.wintercogs.beyonddimensions.common.machine.HopperFluidMode;
+import com.wintercogs.beyonddimensions.common.machine.HopperItemMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -15,7 +18,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record ToggleMagnetPacket() implements CustomPacketPayload
+import java.util.List;
+
+public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomPacketPayload
 {
     public static final Type<ToggleMagnetPacket> TYPE =
             new Type<>(BeyondDimensions.makeId("toggle_magnet_packet"));
@@ -25,13 +30,13 @@ public record ToggleMagnetPacket() implements CustomPacketPayload
         @Override
         public ToggleMagnetPacket decode(RegistryFriendlyByteBuf registryFriendlyByteBuf)
         {
-            return new ToggleMagnetPacket();
+            return new ToggleMagnetPacket(registryFriendlyByteBuf.readEnum(MagnetToggleType.class));
         }
 
         @Override
         public void encode(RegistryFriendlyByteBuf buf, ToggleMagnetPacket toggleMagnetPacket)
         {
-
+            buf.writeEnum(toggleMagnetPacket.toggleType);
         }
     };
 
@@ -40,29 +45,71 @@ public record ToggleMagnetPacket() implements CustomPacketPayload
 
     }
 
-    private void handleInServer(final IPayloadContext context)
+    private void toggleMagnet(Player player, List<ItemStack> itemStackList)
     {
-        Player player = context.player();
-
-        for (ItemStack stack : player.getInventory().getNonEquipmentItems())
+        for (ItemStack stack : itemStackList)
         {
-            if (stack.getItem() instanceof NetMagnetItem)
+            if (!(stack.getItem() instanceof NetMagnetItem))
             {
-                if (stack.has(BDDataComponents.CONTROL_MODE))
-                {
-                    if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                continue;
+            }
+
+            switch (toggleType)
+            {
+                case ALL -> {
+                    if (stack.has(BDDataComponents.CONTROL_MODE))
                     {
-                        stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
-                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.close"), false);
+                        if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
+                        {
+                            stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
+                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.close"), false);
+                        }
+                        else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                        {
+                            stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.open"), false);
+                        }
                     }
-                    else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
+                }
+                case ITEM -> {
+                    if (stack.has(BDDataComponents.HOPPER_ITEM_MODE))
                     {
-                        stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
-                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.open"), false);
+                        if (stack.get(BDDataComponents.HOPPER_ITEM_MODE) == HopperItemMode.ALLOW)
+                        {
+                            stack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.DENY);
+                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.itemclose"), false);
+                        }
+                        else if (stack.get(BDDataComponents.HOPPER_ITEM_MODE) == HopperItemMode.DENY)
+                        {
+                            stack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
+                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.itemopen"), false);
+                        }
+                    }
+                }
+                case FLUID -> {
+                    if (stack.has(BDDataComponents.HOPPER_FLUID_MODE))
+                    {
+                        if (stack.get(BDDataComponents.HOPPER_FLUID_MODE) == HopperFluidMode.ALLOW)
+                        {
+                            stack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
+                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.fluidclose"), false);
+                        }
+                        else if (stack.get(BDDataComponents.HOPPER_FLUID_MODE) == HopperFluidMode.DENY)
+                        {
+                            stack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.ALLOW);
+                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.fluidopen"), false);
+                        }
                     }
                 }
             }
         }
+    }
+
+    private void handleInServer(final IPayloadContext context)
+    {
+        Player player = context.player();
+
+        toggleMagnet(player, player.getInventory().getNonEquipmentItems());
 
         if (ModPresence.isLoaded(OtherModIds.CURIOS))
         {
@@ -72,25 +119,7 @@ public record ToggleMagnetPacket() implements CustomPacketPayload
 //                        .map(SlotResult::stack)
 //                        .toList();
 //
-//                for (ItemStack stack : curios)
-//                {
-//                    if (stack.getItem() instanceof NetMagnetItem)
-//                    {
-//                        if (stack.has(BDDataComponents.CONTROL_MODE))
-//                        {
-//                            if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
-//                            {
-//                                stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
-//                                player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.close"), false);
-//                            }
-//                            else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
-//                            {
-//                                stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
-//                                player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.open"), false);
-//                            }
-//                        }
-//                    }
-//                }
+//                toggleMagnet(player, curios);
 //            });
         }
     }

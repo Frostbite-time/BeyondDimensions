@@ -1,8 +1,11 @@
 package com.wintercogs.beyonddimensions.util;
 
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 public class InventoryHelper
 {
@@ -65,5 +68,23 @@ public class InventoryHelper
             }
         }
         return stack.copyWithCount(extract);
+    }
+
+    @Nullable
+    public static ItemStack findItemInPlayerInventory(Player player, Item item)
+    {
+        if (player.getItemInHand(InteractionHand.MAIN_HAND).is(item))
+        {
+            return player.getItemInHand(InteractionHand.MAIN_HAND);
+        }
+        if (player.getItemInHand(InteractionHand.OFF_HAND).is(item))
+        {
+            return player.getItemInHand(InteractionHand.OFF_HAND);
+        }
+
+        return player.getInventory().getNonEquipmentItems().stream()
+                .filter(stack -> stack.is(item))
+                .findFirst()
+                .orElse(null);
     }
 }
