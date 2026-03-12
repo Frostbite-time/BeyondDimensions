@@ -66,8 +66,7 @@ public class NetMagnetItem extends BaseMachineItem
         {
             player.openMenu(new SimpleMenuProvider((containerId, inv, ServerPlayer) ->
                             new NetMagnetMenu(containerId, inv, itemstack),
-                            Component.translatable("menu.title.beyonddimensions.magnet_menu")),
-                    buf -> buf.writeEnum(usedHand));
+                            Component.translatable("menu.title.beyonddimensions.magnet_menu")));
         }
         return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }

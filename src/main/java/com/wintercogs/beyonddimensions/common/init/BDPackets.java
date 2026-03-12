@@ -153,5 +153,14 @@ public class BDPackets
                         ToggleMagnetPacket::handle
                 )
         );
+
+        registrar.playBidirectional(
+                OpenMagnetGuiPaket.TYPE,
+                OpenMagnetGuiPaket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        OpenMagnetGuiPaket::handle,
+                        OpenMagnetGuiPaket::handle
+                )
+        );
     }
 }

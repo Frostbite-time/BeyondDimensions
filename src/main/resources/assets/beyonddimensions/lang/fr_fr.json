@@ -100,6 +100,9 @@
   "key.beyonddimensions.open_terminal_quick_key": "Ouvrir rapidement le terminal dans l'inventaire",
   "key.beyonddimensions.main_hand_item_transfer_key": "Transfert rapide d'objet dans la main principale",
   "key.beyonddimensions.toggle_magnet_key": "Activer/désactiver l'aimant",
+  "key.beyonddimensions.toggle_magnet_item_key": "Activer/désactiver l'aimant pour les objets",
+  "key.beyonddimensions.toggle_magnet_fluid_key": "Activer/désactiver l'aimant pour les fluides",
+  "key.beyonddimensions.open_magnet_gui_key": "Ouvrir l'interface de l'aimant",
 
   "item.beyonddimensions.net_creater": "Générateur Dimensionnel",
   "item.beyonddimensions.net_member_inviter": "Connecteur de Membres",
@@ -169,6 +172,10 @@
 
   "msg.beyonddimensions.magnet.close": "Aimant désactivé",
   "msg.beyonddimensions.magnet.open": "Aimant activé",
+  "msg.beyonddimensions.magnet.itemclose": "Aimant pour objets désactivé",
+  "msg.beyonddimensions.magnet.itemopen": "Aimant pour objets activé",
+  "msg.beyonddimensions.magnet.fluidclose": "Aimant pour fluides désactivé",
+  "msg.beyonddimensions.magnet.fluidopen": "Aimant pour fluides activé",
   "msg.beyonddimensions.item.xp_exchange.open": "Activer l'échange automatique d'XP, maintenant le niveau par interaction",
   "msg.beyonddimensions.item.xp_exchange.close": "Désactiver l'échange automatique d'XP"
 }

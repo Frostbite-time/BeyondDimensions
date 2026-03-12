@@ -1,8 +1,13 @@
 package com.wintercogs.beyonddimensions.util;
 
+import com.wintercogs.beyonddimensions.integration.ModPresence;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import top.theillusivec4.curios.api.SlotResult;
 
 public class InventoryHelper
 {
@@ -65,5 +70,34 @@ public class InventoryHelper
             }
         }
         return stack.copyWithCount(extract);
+    }
+
+    public static ItemStack findItemInPlayerInventory(Player player, Item item)
+    {
+        ItemStack itemStack = null;
+        if (player.getItemInHand(InteractionHand.MAIN_HAND).is(item))
+            itemStack = player.getItemInHand(InteractionHand.MAIN_HAND);
+        else if (player.getItemInHand(InteractionHand.OFF_HAND).is(item))
+            itemStack = player.getItemInHand(InteractionHand.OFF_HAND);
+        else
+        {
+            ItemStack findInInv = player.getInventory().items.stream()
+                    .filter(stack -> stack.is(item))
+                    .findFirst().orElse(null);
+            if (findInInv != null)
+                itemStack = findInInv;
+        }
+
+        if (itemStack == null && ModPresence.isLoaded(OtherModIds.CURIOS))
+        {
+            itemStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
+                    .flatMap(iCuriosItemHandler ->
+                            iCuriosItemHandler.findFirstCurio(stack -> stack.is(item))
+                    )
+                    .map(SlotResult::stack)
+                    .orElse(null);
+        }
+
+        return itemStack;
     }
 }

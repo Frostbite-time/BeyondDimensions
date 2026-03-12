@@ -6,8 +6,10 @@ import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
+import com.wintercogs.beyonddimensions.util.InventoryHelper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -62,7 +64,7 @@ public class NetMagnetMenu extends BDBaseMenu
 
     public NetMagnetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, playerInventory.player.getItemInHand(data.readEnum(InteractionHand.class)));
+        this(id, playerInventory, InventoryHelper.findItemInPlayerInventory(playerInventory.player, BDItems.NET_MAGNET_ITEM.get()));
     }
 
     public NetMagnetMenu(int containerId, Inventory playerInventory, ItemStack menuStack)

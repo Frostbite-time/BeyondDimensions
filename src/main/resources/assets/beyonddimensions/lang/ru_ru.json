@@ -100,6 +100,9 @@
   "key.beyonddimensions.open_terminal_quick_key": "Быстро открыть терминал в инвентаре",
   "key.beyonddimensions.main_hand_item_transfer_key": "Быстрый перенос предмета в основной руке",
   "key.beyonddimensions.toggle_magnet_key": "Переключить магнит",
+  "key.beyonddimensions.toggle_magnet_item_key": "Переключить режим магнита для предметов",
+  "key.beyonddimensions.toggle_magnet_fluid_key": "Переключить режим магнита для жидкостей",
+  "key.beyonddimensions.open_magnet_gui_key": "Открыть интерфейс магнита",
 
   "item.beyonddimensions.net_creater": "Генератор Измерений",
   "item.beyonddimensions.net_member_inviter": "Пригласитель участников",
@@ -169,6 +172,10 @@
 
   "msg.beyonddimensions.magnet.close": "Магнит отключён",
   "msg.beyonddimensions.magnet.open": "Магнит включён",
+  "msg.beyonddimensions.magnet.itemclose": "Магнит для предметов отключён",
+  "msg.beyonddimensions.magnet.itemopen": "Магнит для предметов включён",
+  "msg.beyonddimensions.magnet.fluidclose": "Магнит для жидкостей отключён",
+  "msg.beyonddimensions.magnet.fluidopen": "Магнит для жидкостей включён",
   "msg.beyonddimensions.item.xp_exchange.open": "Включить автоматический обмен опыта, поддерживая уровень за одно взаимодействие",
   "msg.beyonddimensions.item.xp_exchange.close": "Выключить автоматический обмен опыта"
 }
