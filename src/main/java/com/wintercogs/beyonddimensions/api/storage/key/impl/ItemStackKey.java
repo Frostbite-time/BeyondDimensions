@@ -62,6 +62,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     // 识别字段-用于hashcode和equals，用于解决组件可能未正确实现hashcode和equals的问题，同时也能处理数字值为NaN时的比较
     private byte[] patchByte = new byte[0]; // patch -> NBT -> 递归排序 -> 写为非压缩字节
     private transient WeakReference<HolderLookup.Provider> equalsByteProviderRef = null; // 序列化时所用的注册表提供者，如果提供者变化，应当重新计算字节
+    private transient DataComponentPatch detachedPatchCache = null;
+    private transient WeakReference<HolderLookup.Provider> detachedPatchProviderRef = null;
 
     // 缓存字段
     private ItemStack serverCache; // 用于非渲染用途的缓存，始终保持对外数量为1（懒加载）
@@ -123,7 +125,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     {
         if (this.serverCache == null)
         {
-            this.serverCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+            this.serverCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.getDetachedPatch());
         }
         // item为空时，必须返回 EMPTY，且不要对 EMPTY 调用 setCount(方便复制到1.20.1的流体实现去)
         if (this.item == Items.AIR)
@@ -139,7 +141,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         ItemStack cache = this.serverCache;
         if (cache.isEmpty() || cache.getItem() != this.item)
         {
-            this.serverCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+            this.serverCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.getDetachedPatch());
             return this.serverCache;
         }
 
@@ -200,7 +202,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     public ItemStack copyStackWithCount(long count)
     {
         return this.item == Items.AIR ? ItemStack.EMPTY
-                : new ItemStack(RegistryUtil.holderOf(this.item), BDMath.clampLongToInt(count), this.patch);
+                : new ItemStack(RegistryUtil.holderOf(this.item), BDMath.clampLongToInt(count), this.getDetachedPatch());
     }
 
     @Override
@@ -210,7 +212,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         if (this.item == Items.AIR) return 1; // 返回1，与原版行为一致，且不会使外部认为无法输入
         if (vanillaMaxSize <= 0)
         {
-            vanillaMaxSize = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch).getMaxStackSize();
+            vanillaMaxSize = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.getDetachedPatch()).getMaxStackSize();
         }
         return Math.min(vanillaMaxSize, getCustomMaxStackSize());
     }
@@ -371,7 +373,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     {
         if (this.clientCache == null)
         {
-            this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+            this.clientCache = this.item == Items.AIR ? ItemStack.EMPTY : new ItemStack(RegistryUtil.holderOf(this.item), 1, this.getDetachedPatch());
         }
         // item为空时，必须返回 EMPTY，且不要对 EMPTY 调用 setCount(方便复制到1.20.1的流体实现去)
         if (this.item == Items.AIR)
@@ -387,7 +389,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         ItemStack cache = this.clientCache;
         if (cache.isEmpty() || cache.getItem() != this.item)
         {
-            this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.patch);
+            this.clientCache = new ItemStack(RegistryUtil.holderOf(this.item), 1, this.getDetachedPatch());
             return this.clientCache;
         }
 
@@ -488,6 +490,47 @@ public final class ItemStackKey implements IStackKey<ItemStack>
             BeyondDimensions.LOGGER.warn("ItemStackKey字节序列化失败: {}", t.toString());
             this.patchByte = new byte[0];
             this.equalsByteProviderRef = null;
+        }
+    }
+
+    private DataComponentPatch getDetachedPatch()
+    {
+        if (this.patch == null || this.patch.isEmpty())
+        {
+            this.detachedPatchCache = DataComponentPatch.EMPTY;
+            this.detachedPatchProviderRef = null;
+            return DataComponentPatch.EMPTY;
+        }
+
+        HolderLookup.Provider current = null;
+        try
+        {
+            current = RegistryAccessResolver.resolve();
+        }
+        catch (Throwable ignored)
+        {
+        }
+
+        HolderLookup.Provider cached = this.detachedPatchProviderRef != null ? this.detachedPatchProviderRef.get() : null;
+        if (this.detachedPatchCache != null && cached != null && cached == current)
+        {
+            return this.detachedPatchCache;
+        }
+
+        try
+        {
+            HolderLookup.Provider use = current != null ? current : RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+            DataComponentPatch detached = DataComponentPatchHelper.detachWithBuiltinFallback(this.patch, use);
+            this.detachedPatchCache = detached;
+            this.detachedPatchProviderRef = new WeakReference<>(use);
+            return detached;
+        }
+        catch (Throwable t)
+        {
+            BeyondDimensions.LOGGER.warn("ItemStackKey patch 断开失败: {}", t.toString());
+            this.detachedPatchCache = this.patch;
+            this.detachedPatchProviderRef = null;
+            return this.patch;
         }
     }
 }

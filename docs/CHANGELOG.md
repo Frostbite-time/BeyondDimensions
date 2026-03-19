@@ -1,1 +1,1 @@
-* Added several keybindings for switching magnet modes and quickly opening the magnet UI.
+* Prevent storage key from being modified at certain times
