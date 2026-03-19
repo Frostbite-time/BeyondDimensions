@@ -154,6 +154,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     // equals/hash 的规范化快照
     private volatile byte[] patchByte = new byte[0];
     private transient volatile WeakReference<HolderLookup.Provider> equalsByteProviderRef = null;
+    private transient volatile DataComponentPatch detachedPatchCache = null;
+    private transient volatile WeakReference<HolderLookup.Provider> detachedPatchProviderRef = null;
 
     // 渲染/便捷复制用的客户端缓存（amount 仅用于渲染，不参与 key 语义）
     private FluidStack serverCache; // （懒加载）
@@ -214,7 +216,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     {
         if (this.serverCache == null)
         {
-            this.serverCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
+            this.serverCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.getDetachedPatch());
         }
 
         if (this.fluid == Fluids.EMPTY)
@@ -229,7 +231,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         FluidStack cache = this.serverCache;
         if (cache.isEmpty() || cache.getFluid() != this.fluid)
         {
-            this.serverCache = new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
+            this.serverCache = new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.getDetachedPatch());
             return this.serverCache;
         }
 
@@ -290,7 +292,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     public FluidStack copyStackWithCount(long count)
     {
         if (this.fluid == Fluids.EMPTY) return FluidStack.EMPTY;
-        return new FluidStack(RegistryUtil.holderOf(this.fluid), BDMath.clampLongToInt(count), this.patch);
+        return new FluidStack(RegistryUtil.holderOf(this.fluid), BDMath.clampLongToInt(count), this.getDetachedPatch());
     }
 
     @Override
@@ -443,7 +445,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     {
         if (this.clientCache == null)
         {
-            this.clientCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
+            this.clientCache = this.fluid == Fluids.EMPTY ? FluidStack.EMPTY : new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.getDetachedPatch());
         }
 
         if (this.fluid == Fluids.EMPTY)
@@ -458,7 +460,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         FluidStack cache = this.clientCache;
         if (cache.isEmpty() || cache.getFluid() != this.fluid)
         {
-            this.clientCache = new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.patch);
+            this.clientCache = new FluidStack(RegistryUtil.holderOf(this.fluid), 1, this.getDetachedPatch());
             return this.clientCache;
         }
 
@@ -547,6 +549,47 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             BeyondDimensions.LOGGER.warn("FluidStackKey 组件规范化失败: {}", t.toString());
             this.patchByte = new byte[0];
             this.equalsByteProviderRef = null;
+        }
+    }
+
+    private DataComponentPatch getDetachedPatch()
+    {
+        if (this.patch == null || this.patch.isEmpty())
+        {
+            this.detachedPatchCache = DataComponentPatch.EMPTY;
+            this.detachedPatchProviderRef = null;
+            return DataComponentPatch.EMPTY;
+        }
+
+        HolderLookup.Provider current = null;
+        try
+        {
+            current = RegistryAccessResolver.resolve();
+        }
+        catch (Throwable ignored)
+        {
+        }
+
+        HolderLookup.Provider cached = this.detachedPatchProviderRef != null ? this.detachedPatchProviderRef.get() : null;
+        if (this.detachedPatchCache != null && cached != null && cached == current)
+        {
+            return this.detachedPatchCache;
+        }
+
+        try
+        {
+            HolderLookup.Provider use = current != null ? current : RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+            DataComponentPatch detached = DataComponentPatchHelper.detachWithBuiltinFallback(this.patch, use);
+            this.detachedPatchCache = detached;
+            this.detachedPatchProviderRef = new WeakReference<>(use);
+            return detached;
+        }
+        catch (Throwable t)
+        {
+            BeyondDimensions.LOGGER.warn("FluidStackKey patch 断开失败: {}", t.toString());
+            this.detachedPatchCache = this.patch;
+            this.detachedPatchProviderRef = null;
+            return this.patch;
         }
     }
 }

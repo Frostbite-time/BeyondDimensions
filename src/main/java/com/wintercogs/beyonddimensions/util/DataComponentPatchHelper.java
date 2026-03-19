@@ -3,7 +3,9 @@ package com.wintercogs.beyonddimensions.util;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -107,6 +109,56 @@ public class DataComponentPatchHelper
                 raw.release();
             }
         }
+    }
+
+    /**
+     * 通过 Codec 的编码/解码回环，构造与输入值语义相同、但内部引用尽量断开的 patch。
+     * <p>
+     * 若当前 Provider 不可用或编解码失败，则回退为原 patch 引用。
+     */
+    public static DataComponentPatch detach(DataComponentPatch patch, HolderLookup.Provider registries)
+    {
+        if (patch == null || patch.isEmpty())
+        {
+            return DataComponentPatch.EMPTY;
+        }
+
+        try
+        {
+            Tag root = DataComponentPatch.CODEC.encodeStart(
+                    registries.createSerializationContext(NbtOps.INSTANCE),
+                    patch
+            ).result().orElse(null);
+            if (root == null)
+            {
+                return patch;
+            }
+
+            return DataComponentPatch.CODEC.parse(
+                    registries.createSerializationContext(NbtOps.INSTANCE),
+                    root
+            ).result().orElse(patch);
+        }
+        catch (Throwable t)
+        {
+            return patch;
+        }
+    }
+
+    public static DataComponentPatch detachWithBuiltinFallback(DataComponentPatch patch, HolderLookup.Provider registries)
+    {
+        DataComponentPatch detached = detach(patch, registries);
+        if (detached != patch)
+        {
+            return detached;
+        }
+
+        HolderLookup.Provider builtin = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+        if (builtin == registries)
+        {
+            return detached;
+        }
+        return detach(patch, builtin);
     }
 
     /**
