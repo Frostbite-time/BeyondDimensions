@@ -27,5 +27,6 @@ public class BDScreens
         event.register(NetMagnetMenu.Net_Magnet_Menu.get(), NetMagnetGUI::new);
         event.register(NetFeederMenu.Net_Feeder_Menu.get(), NetFeederGUI::new);
         event.register(NetRestockerMenu.Net_Restocker_Menu.get(), NetRestockerGUI::new);
+        event.register(XpExchangeMenu.XP_EXCHANGE_MENU.get(), XpExchangeGUI::new);
     }
 }

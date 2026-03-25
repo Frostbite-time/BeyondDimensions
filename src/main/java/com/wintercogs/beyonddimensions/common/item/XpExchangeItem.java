@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDTags;
 import com.wintercogs.beyonddimensions.common.machine.XpTransferSpeedMode;
+import com.wintercogs.beyonddimensions.common.menu.XpExchangeMenu;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;
 import net.minecraft.core.Holder;
@@ -15,10 +16,9 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -32,7 +32,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 
 // 经验交换棒
 public class XpExchangeItem extends Item
@@ -41,13 +40,17 @@ public class XpExchangeItem extends Item
 
     public XpExchangeItem(Properties properties)
     {
-        super(properties.stacksTo(1).component(BDDataComponents.XP_TRANSFER_SPEED_MODE, XpTransferSpeedMode.SLOW));
+        super(properties.stacksTo(1)
+                .component(BDDataComponents.XP_TRANSFER_SPEED_MODE, XpTransferSpeedMode.SLOW)
+                .component(BDDataComponents.XP_TARGET_LEVEL, XpExchangeSettings.DEFAULT_TARGET_LEVEL)
+                .component(BDDataComponents.XP_NET_KEEP_MODE, false));
     }
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected)
     {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
+        XpExchangeSettings.ensureComponents(stack);
         if (xpFluids.isEmpty())
             xpFluids = getExperienceFluids(level);
         if (entity instanceof Player player && !level.isClientSide() && stack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false))
@@ -73,33 +76,16 @@ public class XpExchangeItem extends Item
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
         if (usedHand != InteractionHand.MAIN_HAND)
-            return InteractionResultHolder.fail(itemstack); // 非主手使用默认fail
+            return InteractionResultHolder.fail(itemstack);
 
-        if (level.isClientSide()) // 客户端shift使用时播放失败动画，否则播放pass动画（直接步进到最终回退）
+        XpExchangeSettings.ensureComponents(itemstack);
+        if (!level.isClientSide())
         {
-            if (player.isShiftKeyDown())
-            {
-                return InteractionResultHolder.fail(itemstack);
-            }
+            player.openMenu(new SimpleMenuProvider((containerId, inv, serverPlayer) ->
+                            new XpExchangeMenu(containerId, inv, itemstack),
+                            Component.translatable("menu.title.beyonddimensions.xp_exchange_menu")),
+                    buf -> buf.writeEnum(usedHand));
         }
-        if (!level.isClientSide()) // 服务端实际处理两个不同操作
-        {
-            if (player.isShiftKeyDown())
-            {
-                cycleMode(itemstack, player, level);
-            }
-            else
-            {
-                boolean current = itemstack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false);
-                itemstack.set(BDDataComponents.XP_NET_KEEP_MODE, !current);
-                if (itemstack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false))
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.open"));
-                else
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.close"));
-            }
-        }
-
-        // 最终回退
         return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
@@ -220,30 +206,9 @@ public class XpExchangeItem extends Item
     {
         if (stack.getItem() instanceof XpExchangeItem)
         {
-            XpTransferSpeedMode xpMode = stack.getOrDefault(BDDataComponents.XP_TRANSFER_SPEED_MODE, XpTransferSpeedMode.SLOW);
-
-            return switch (xpMode)
-            {
-                case SLOW -> 1;
-                case MID -> 10;
-                case HIGH -> 30;
-                case HIGHEST -> 100;
-                case OVER_HIGHEST -> 150;
-            };
+            XpExchangeSettings.ensureComponents(stack);
+            return XpExchangeSettings.getTargetLevel(stack);
         }
-        return 0; // 最终回退
-    }
-
-    // 将经验模式切换到下一级
-    private static void cycleMode(ItemStack stack, Player player, Level level)
-    {
-        XpTransferSpeedMode cur = stack.getOrDefault(BDDataComponents.XP_TRANSFER_SPEED_MODE, XpTransferSpeedMode.SLOW);
-        XpTransferSpeedMode next = cur.next();
-        stack.set(BDDataComponents.XP_TRANSFER_SPEED_MODE, next); // 写回到该物品栈
-
-        // 提示切换
-        // 键为 beyonddimensions.xp_mode.switch.<xpmode>
-        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.xp_mode.switch." + next.name().toLowerCase(Locale.ENGLISH)));
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
+        return 0;
     }
 }

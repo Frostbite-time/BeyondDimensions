@@ -19,5 +19,6 @@ public class BDMenus
         NetMagnetMenu.MENU_TYPES.register(eventBus);
         NetFeederMenu.MENU_TYPES.register(eventBus);
         NetRestockerMenu.MENU_TYPES.register(eventBus);
+        XpExchangeMenu.MENU_TYPES.register(eventBus);
     }
 }
