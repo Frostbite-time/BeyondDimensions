@@ -89,7 +89,7 @@ public class XpExchangeItem extends Item
         {
             player.openMenu(new SimpleMenuProvider((containerId, inv, serverPlayer) ->
                             new XpExchangeMenu(containerId, inv, itemstack),
-                    Component.translatable("menu.title.beyonddimensions.xp_exchange_menu")),
+                            Component.translatable("menu.title.beyonddimensions.xp_exchange_menu")),
                     buf -> buf.writeEnum(usedHand));
         }
 

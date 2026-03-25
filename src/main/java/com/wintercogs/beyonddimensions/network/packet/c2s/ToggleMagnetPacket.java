@@ -17,6 +17,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import top.theillusivec4.curios.api.SlotResult;
 
 import java.util.List;
 
@@ -116,14 +117,14 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
 
         if (ModPresence.isLoaded(OtherModIds.CURIOS))
         {
-//            top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
-//                List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
-//                        .stream()
-//                        .map(SlotResult::stack)
-//                        .toList();
-//
-//                toggleMagnet(player, curios);
-//            });
+            top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
+                List<ItemStack> curios = handler.findCurios(stack -> !stack.isEmpty())
+                        .stream()
+                        .map(SlotResult::stack)
+                        .toList();
+
+                toggleMagnet(player, curios);
+            });
         }
     }
 

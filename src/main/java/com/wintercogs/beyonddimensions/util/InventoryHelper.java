@@ -1,11 +1,15 @@
 package com.wintercogs.beyonddimensions.util;
 
+import com.wintercogs.beyonddimensions.integration.ModPresence;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.SlotResult;
 
 public class InventoryHelper
 {
@@ -73,18 +77,30 @@ public class InventoryHelper
     @Nullable
     public static ItemStack findItemInPlayerInventory(Player player, Item item)
     {
+        ItemStack itemStack = null;
         if (player.getItemInHand(InteractionHand.MAIN_HAND).is(item))
+            itemStack = player.getItemInHand(InteractionHand.MAIN_HAND);
+        else if (player.getItemInHand(InteractionHand.OFF_HAND).is(item))
+            itemStack = player.getItemInHand(InteractionHand.OFF_HAND);
+        else
         {
-            return player.getItemInHand(InteractionHand.MAIN_HAND);
-        }
-        if (player.getItemInHand(InteractionHand.OFF_HAND).is(item))
-        {
-            return player.getItemInHand(InteractionHand.OFF_HAND);
+            ItemStack findInInv = player.getInventory().getNonEquipmentItems().stream()
+                    .filter(stack -> stack.is(item))
+                    .findFirst().orElse(null);
+            if (findInInv != null)
+                itemStack = findInInv;
         }
 
-        return player.getInventory().getNonEquipmentItems().stream()
-                .filter(stack -> stack.is(item))
-                .findFirst()
-                .orElse(null);
+        if (itemStack == null && ModPresence.isLoaded(OtherModIds.CURIOS))
+        {
+            itemStack = CuriosApi.getCuriosInventory(player)
+                    .flatMap(iCuriosItemHandler ->
+                            iCuriosItemHandler.findFirstCurio(stack -> stack.is(item))
+                    )
+                    .map(SlotResult::stack)
+                    .orElse(null);
+        }
+
+        return itemStack;
     }
 }

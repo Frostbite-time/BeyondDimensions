@@ -1,12 +1,12 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.client.gui.widget.shared.RightTabButton;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeSettings;
 import com.wintercogs.beyonddimensions.common.menu.XpExchangeMenu;
 import net.minecraft.client.Minecraft;
-import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
