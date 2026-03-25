@@ -89,19 +89,19 @@ public class NetedItem extends Item
                 {
                     itemstack.set(BDDataComponents.NET_ID_DATA, net.getId());
                     level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
-                    player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_net_bound", net.getId()), false);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound", net.getId()));
                 }
                 else
                 {
                     itemstack.set(BDDataComponents.NET_ID_DATA, -1);
                     level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
-                    player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_net_unbound", net.getId()), false);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound", net.getId()));
                 }
                 return true;
             }
             else
             {
-                player.displayClientMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"), false);
+                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"));
                 return false;
             }
         }

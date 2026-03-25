@@ -75,7 +75,7 @@ public class NetCreater extends Item
                     0.8F,
                     1.0F);
             // 发送文字提示
-            player.displayClientMessage(Component.translatable("msg.beyonddimensions.network_created"), false);
+            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.network_created"));
 
             // 为新网络添加一些时空碎片
             if (newNet != null)

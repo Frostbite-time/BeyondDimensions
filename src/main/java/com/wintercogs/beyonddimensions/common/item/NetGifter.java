@@ -43,17 +43,17 @@ public class NetGifter extends NetedItem
                         int id = itemNet.getId();
                         playerNet.mergeOtherNet(itemNet);
                         itemstack.consume(1, player);
-                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.net_gift_done", id), false);
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.net_gift_done", id));
                     }
                     else
-                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.cant_merge_net"), false);
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.cant_merge_net"));
                 }
                 else
-                    player.displayClientMessage(Component.translatable("msg.beyonddimensions.error_item_net"), false);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.error_item_net"));
             }
             else
             {
-                player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_need_bound"), false);
+                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
             }
 
         }

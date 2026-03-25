@@ -95,9 +95,9 @@ public class XpExchangeItem extends Item
                 boolean current = itemstack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false);
                 itemstack.set(BDDataComponents.XP_NET_KEEP_MODE, !current);
                 if (itemstack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false))
-                    player.displayClientMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.open"), false);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.open"));
                 else
-                    player.displayClientMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.close"), false);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.close"));
             }
         }
 
@@ -242,7 +242,7 @@ public class XpExchangeItem extends Item
 
         // 提示切换
         // 键为 beyonddimensions.xp_mode.switch.<xpmode>
-        player.displayClientMessage(Component.translatable("msg.beyonddimensions.xp_mode.switch." + next.name().toLowerCase(Locale.ENGLISH)), false);
+        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.xp_mode.switch." + next.name().toLowerCase(Locale.ENGLISH)));
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
     }
 }

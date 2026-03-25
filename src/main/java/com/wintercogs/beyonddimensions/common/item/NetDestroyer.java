@@ -65,21 +65,21 @@ public class NetDestroyer extends NetedItem
                     {
                         playerNet.destroySelf();
                         stack.consume(1, player);
-                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_net_destroyed"), false);
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_destroyed"));
                     }
                     else
                     {
-                        player.displayClientMessage(Component.translatable("msg.beyonddimensions.cant_delete_net"), false);
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.cant_delete_net"));
                     }
                 }
                 else
                 {
-                    player.displayClientMessage(Component.translatable("msg.beyonddimensions.error_item_net"), false);
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.error_item_net"));
                 }
             }
             else
             {
-                player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_need_bound"), false);
+                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
             }
         }
         return stack;

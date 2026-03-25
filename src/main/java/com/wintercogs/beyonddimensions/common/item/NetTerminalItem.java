@@ -56,7 +56,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
             }
             else
             {
-                player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_need_bound"), false);
+                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
             }
 
         }

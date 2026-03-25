@@ -62,12 +62,12 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
                         if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
                         {
                             stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
-                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.close"), false);
+                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
                         }
                         else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
                         {
                             stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
-                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.open"), false);
+                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
                         }
                     }
                 }
@@ -77,12 +77,12 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
                         if (stack.get(BDDataComponents.HOPPER_ITEM_MODE) == HopperItemMode.ALLOW)
                         {
                             stack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.DENY);
-                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.itemclose"), false);
+                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.itemclose"));
                         }
                         else if (stack.get(BDDataComponents.HOPPER_ITEM_MODE) == HopperItemMode.DENY)
                         {
                             stack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
-                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.itemopen"), false);
+                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.itemopen"));
                         }
                     }
                 }
@@ -92,12 +92,12 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
                         if (stack.get(BDDataComponents.HOPPER_FLUID_MODE) == HopperFluidMode.ALLOW)
                         {
                             stack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
-                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.fluidclose"), false);
+                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.fluidclose"));
                         }
                         else if (stack.get(BDDataComponents.HOPPER_FLUID_MODE) == HopperFluidMode.DENY)
                         {
                             stack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.ALLOW);
-                            player.displayClientMessage(Component.translatable("msg.beyonddimensions.magnet.fluidopen"), false);
+                            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.fluidopen"));
                         }
                     }
                 }

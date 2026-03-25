@@ -106,7 +106,7 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
             if (blockEntity.getNet() != null)
                 player.openMenu((NetTerminalBlockEntity) level.getBlockEntity(pos));
             else
-                player.displayClientMessage(Component.translatable("msg.beyonddimensions.item_need_bound"), false);
+                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
         }
         return InteractionResult.SUCCESS;
     }

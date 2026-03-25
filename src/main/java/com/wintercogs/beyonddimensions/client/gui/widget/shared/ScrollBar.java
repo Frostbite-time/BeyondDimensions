@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.gui.widget.shared;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -267,7 +267,7 @@ public class ScrollBar extends AbstractWidget
     /* ---------------------------- 渲染/无障碍 ---------------------------- */
 
     @Override
-    protected void renderWidget(@NotNull GuiGraphics gg, int mouseX, int mouseY, float partialTick)
+    protected void extractWidgetRenderState(GuiGraphicsExtractor gg, int i, int i1, float v)
     {
         // 组件自身x/y不变，只根据当前位置计算“渲染偏移”
         this.scrollerOffset = computeOffset();
