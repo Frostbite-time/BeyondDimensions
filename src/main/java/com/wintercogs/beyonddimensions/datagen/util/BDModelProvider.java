@@ -7,6 +7,7 @@ import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.client.data.models.model.ModelLocationUtils;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -40,10 +41,10 @@ public abstract class BDModelProvider extends ModelProvider
                 e.bucket().get(),
                 new DynamicFluidContainerModel.Unbaked(
                         new DynamicFluidContainerModel.Textures(
-                                Optional.of(Identifier.withDefaultNamespace("item/bucket")),
-                                Optional.of(Identifier.withDefaultNamespace("item/bucket")),
-                                Optional.of(Identifier.fromNamespaceAndPath("neoforge", "item/mask/bucket_fluid")),
-                                Optional.of(Identifier.fromNamespaceAndPath("neoforge", "item/mask/bucket_fluid_cover"))
+                                Optional.of(new Material(Identifier.withDefaultNamespace("item/bucket"))),
+                                Optional.of(new Material(Identifier.withDefaultNamespace("item/bucket"))),
+                                Optional.of(new Material(Identifier.fromNamespaceAndPath("neoforge", "item/mask/bucket_fluid"))),
+                                Optional.of(new Material(Identifier.fromNamespaceAndPath("neoforge", "item/mask/bucket_fluid_cover")))
                         ),
                         e.source().get(),
                         false, // flip_gas

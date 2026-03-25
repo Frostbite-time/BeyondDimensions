@@ -10,17 +10,16 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.client.ClientTooltipFlag;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,13 +43,16 @@ public class FluidStackKeyRender implements IStackRender
             if (!stack.isEmpty())
             {
                 var fluid = stack.getFluid();
-                IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluid);
-                Identifier still = props.getStillTexture(stack);
-                TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(ClientHooks.getBlockMaterial(still));
+                FluidModel fluidModel = Minecraft.getInstance().getModelManager()
+                        .getFluidStateModelSet().get(fluid.defaultFluidState());
+                TextureAtlasSprite sprite = fluidModel
+                        .stillMaterial().sprite();
+
                 if (sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation())
                 {
-                    int tint = IClientFluidTypeExtensions.of(fluid).getTintColor();
-                    IngredientRenderer.drawTiledSprite(gui, 16, 16, tint, 16, sprite, x, y);
+                    int tintColor = fluidModel.fluidTintSource() == null ?
+                            0xFFFFFFFF : fluidModel.fluidTintSource().color(fluid.defaultFluidState());
+                    IngredientRenderer.drawTiledSprite(gui, 16, 16, tintColor, 16, sprite, x, y);
                 }
             }
 

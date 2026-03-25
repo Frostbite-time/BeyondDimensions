@@ -56,7 +56,8 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
 
             switch (toggleType)
             {
-                case ALL -> {
+                case ALL ->
+                {
                     if (stack.has(BDDataComponents.CONTROL_MODE))
                     {
                         if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
@@ -71,7 +72,8 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
                         }
                     }
                 }
-                case ITEM -> {
+                case ITEM ->
+                {
                     if (stack.has(BDDataComponents.HOPPER_ITEM_MODE))
                     {
                         if (stack.get(BDDataComponents.HOPPER_ITEM_MODE) == HopperItemMode.ALLOW)
@@ -86,7 +88,8 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
                         }
                     }
                 }
-                case FLUID -> {
+                case FLUID ->
+                {
                     if (stack.has(BDDataComponents.HOPPER_FLUID_MODE))
                     {
                         if (stack.get(BDDataComponents.HOPPER_FLUID_MODE) == HopperFluidMode.ALLOW)

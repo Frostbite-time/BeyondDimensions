@@ -2,8 +2,8 @@ package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.fluid.XpFluid;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.block.FluidModel;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -19,9 +19,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.neoforged.neoforge.client.event.RegisterFluidModelsEvent;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -132,9 +130,8 @@ public class BDFluids
     {
     }
 
-    //注册每个 FluidType 的贴图 & 颜色（替代 initializeClient）
     @SubscribeEvent
-    public static void onRegisterClientExtensions(RegisterClientExtensionsEvent event)
+    static void onRegisterFluidModels(RegisterFluidModelsEvent event)
     {
         for (var e : BDFluids.ALL)
         {
@@ -142,39 +139,12 @@ public class BDFluids
             final Identifier flow = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/" + e.name() + "_flow");
             final int tint = e.argbTint();
 
-            event.registerFluidType(new IClientFluidTypeExtensions()
-            {
-                @Override
-                public Identifier getStillTexture()
-                {
-                    return still;
-                }
-
-                @Override
-                public Identifier getFlowingTexture()
-                {
-                    return flow;
-                }
-
-                @Override
-                public int getTintColor()
-                {
-                    return tint;
-                }
-            }, e.type().get());
+            event.register(new FluidModel.Unbaked(
+                    new Material(still),
+                    new Material(flow),
+                    null,
+                    state -> tint
+            ), e.source, e.flowing);
         }
-    }
-
-    //渲染层（半透明）
-    @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent evt)
-    {
-        evt.enqueueWork(() -> {
-            for (var e : BDFluids.ALL)
-            {
-                ItemBlockRenderTypes.setRenderLayer(e.source().get(), ChunkSectionLayer.TRANSLUCENT);
-                ItemBlockRenderTypes.setRenderLayer(e.flowing().get(), ChunkSectionLayer.TRANSLUCENT);
-            }
-        });
     }
 }

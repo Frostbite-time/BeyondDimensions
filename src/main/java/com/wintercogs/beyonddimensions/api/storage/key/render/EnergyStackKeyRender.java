@@ -10,10 +10,10 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
@@ -22,7 +22,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.client.ClientTooltipFlag;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -42,16 +41,16 @@ public class EnergyStackKeyRender implements IStackRender
         var pose = gui.pose();
         pose.pushMatrix();
 
-        // 占位图标：用水的静态贴图 + 绿色
-        Identifier still = IClientFluidTypeExtensions
-                .of(Fluids.WATER)
-                .getStillTexture();
-        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(ClientHooks.getBlockMaterial(still));
+        var fluid = Fluids.WATER;
+        FluidModel fluidModel = Minecraft.getInstance().getModelManager()
+                .getFluidStateModelSet().get(fluid.defaultFluidState());
+        TextureAtlasSprite sprite = fluidModel
+                .stillMaterial().sprite();
 
         if (sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation())
         {
-            int tint = 0x50F18E; // 能量绿色
-            IngredientRenderer.drawTiledSprite(gui, 16, 16, tint, 16, sprite, x, y);
+            int tintColor = 0xFF50F18E;
+            IngredientRenderer.drawTiledSprite(gui, 16, 16, tintColor, 16, sprite, x, y);
         }
 
         pose.popMatrix();
