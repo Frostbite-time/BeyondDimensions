@@ -287,7 +287,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
     }
 
     @Override
-    protected void extractMenuBackground(GuiGraphicsExtractor guiGraphics)
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
     {
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);

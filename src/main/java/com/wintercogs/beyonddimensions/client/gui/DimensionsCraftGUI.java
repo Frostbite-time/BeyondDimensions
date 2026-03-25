@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.jetbrains.annotations.NotNull;
 
 
 public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends DimensionsNetGUI<T>
@@ -87,7 +86,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
     }
 
     @Override
-    protected void extractMenuBackground(@NotNull GuiGraphicsExtractor guiGraphics)
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
     {
         int drawY = this.topPos; // 用于动态控制绘制
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE_TOP_BASE, this.leftPos, drawY, 0F, 0F, TOP_BASE_WIDTH, TOP_BASE_HEIGHT, TOP_BASE_WIDTH, TOP_BASE_HEIGHT);

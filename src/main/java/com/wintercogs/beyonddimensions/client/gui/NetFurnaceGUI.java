@@ -168,7 +168,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
     }
 
     @Override
-    protected void extractMenuBackground(GuiGraphicsExtractor guiGraphics)
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
     {
         CommonTexturesRender.renderNetFurnaceBackground(guiGraphics, leftPos, new int[]{topPos});
 
