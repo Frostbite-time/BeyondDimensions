@@ -88,8 +88,11 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "현재: 자동 정렬 활성화됨",
   "tooltip.button.beyonddimensions.sort_mode_stop": "현재: 자동 정렬 비활성화됨",
   "tooltip.item.unstable_space_time.long_data": "시공간 안정화 중, %s회의 안정화 주기 남음. 항상 휴대하십시오.",
-  "tooltip.beyonddimensions.item.xp_exchange": "GUI에서: 우클릭 시 경험치 저장, 휠 클릭 시 경험치 회수\n손에 들었을 때: 우클릭으로 작업 모드 전환, 쉬프트+우클릭으로 경험치 상호작용 속도 변경",
+  "tooltip.beyonddimensions.item.xp_exchange": "손에 들었을 때: 우클릭으로 설정 열기\n저장 GUI에서: 우클릭으로 XP 저장, 휠 클릭으로 XP 회수",
   "tooltip.editbox.beyonddimensions.search": "텍스트를 입력해 이름으로 검색\n'@'를 입력해 모드 ID 필터링\n'$'를 입력해 툴팁 내용 필터링\n'#'를 입력해 태그 필터링\n여러 필터는 공백으로 구분하고, 공백 문자를 검색하려면 따옴표로 감싸기\n'|'는 OR 매칭, '-'는 매칭 제외\nShift+Z를 눌러 JEI/EMI 검색창 연동 전환",
+  "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "유지하거나 수동 교환에 사용할 XP 레벨을 입력하세요\n한도를 넘는 값은 자동으로 제한됩니다",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "현재: 작업 중 (목표 레벨을 적극 유지)",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "현재: 작업 안 함 (수동 교환만)",
 
   "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
   "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",
@@ -123,6 +126,10 @@
   "item.beyonddimensions.xp_fluid_bucket": "액체 경험 양동이",
   "item.beyonddimensions.xp_exchange_item": "경험치 막대",
   "item.beyonddimensions.warden_soul_tag_item": "영혼 태그 아이템",
+
+  "menu.title.beyonddimensions.xp_exchange_menu": "경험치 막대 설정",
+  "menu.label.beyonddimensions.xp_exchange.target_level": "목표 레벨",
+  "menu.label.beyonddimensions.xp_exchange.max_level": "최대: %s",
 
   "block.beyonddimensions.net_control": "네트워크 제어기",
   "block.beyonddimensions.net_interface": "네트워크 인터페이스",
@@ -176,6 +183,6 @@
   "msg.beyonddimensions.magnet.itemopen": "자석 아이템 흡수 활성화됨",
   "msg.beyonddimensions.magnet.fluidclose": "자석 유체 흡수 비활성화됨",
   "msg.beyonddimensions.magnet.fluidopen": "자석 유체 흡수 활성화됨",
-  "msg.beyonddimensions.item.xp_exchange.open": "XP 자동 교환 활성화, 상호작용당 레벨 유지",
+  "msg.beyonddimensions.item.xp_exchange.open": "XP 자동 교환 활성화, 설정된 레벨 유지",
   "msg.beyonddimensions.item.xp_exchange.close": "XP 자동 교환 비활성화"
 }

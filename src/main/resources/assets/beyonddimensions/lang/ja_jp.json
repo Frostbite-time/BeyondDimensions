@@ -88,8 +88,11 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "現在：自動整頓ON",
   "tooltip.button.beyonddimensions.sort_mode_stop": "現在：自動整頓OFF",
   "tooltip.item.unstable_space_time.long_data": "時空は安定化中、残り%s回の安定化サイクルが必要です。常に携帯してください。",
-  "tooltip.beyonddimensions.item.xp_exchange": "GUI内：右クリックで経験値を貯蔵、中クリックで経験値を取り出す\n手に持った状態：右クリックで作業モード切替、Shift+右クリックで経験値操作速度変更",
+  "tooltip.beyonddimensions.item.xp_exchange": "手に持った状態：右クリックで設定を開く\nストレージGUI内：右クリックで経験値を保存、中クリックで経験値を取り出す",
   "tooltip.editbox.beyonddimensions.search": "テキストを入力して名前で検索\n'@'を入力してMod IDを絞り込み\n'$'を入力してツールチップ内容を絞り込み\n'#'を入力してタグを絞り込み\n複数のフィルターはスペースで区切り、スペースを含む文字は引用符で囲って検索\n'|'でOR検索、'-'で除外検索\nShift+ZでJEI/EMI検索ボックス連動を切り替え",
+  "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "維持または手動交換に使う経験値レベルを入力\n上限を超える値は自動で制限されます",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "現在：動作中（目標レベルを維持）",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "現在：停止中（手動交換のみ）",
 
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
   "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",
@@ -123,6 +126,10 @@
   "item.beyonddimensions.xp_fluid_bucket": "液体経験値のバケツ",
   "item.beyonddimensions.xp_exchange_item": "経験値の杖",
   "item.beyonddimensions.warden_soul_tag_item": "魂マーカー",
+
+  "menu.title.beyonddimensions.xp_exchange_menu": "経験値の杖設定",
+  "menu.label.beyonddimensions.xp_exchange.target_level": "目標レベル",
+  "menu.label.beyonddimensions.xp_exchange.max_level": "最大：%s",
 
   "block.beyonddimensions.net_control": "ネットワーク制御装置",
   "block.beyonddimensions.net_interface": "ネットワークインタフェース",
@@ -176,6 +183,6 @@
   "msg.beyonddimensions.magnet.itemopen": "アイテムマグネットが有効",
   "msg.beyonddimensions.magnet.fluidclose": "流体マグネットが無効",
   "msg.beyonddimensions.magnet.fluidopen": "流体マグネットが有効",
-  "msg.beyonddimensions.item.xp_exchange.open": "XP自動交換を有効化（1回の操作あたりの経験値量を維持）",
+  "msg.beyonddimensions.item.xp_exchange.open": "XP自動交換を有効化（設定したレベルを維持）",
   "msg.beyonddimensions.item.xp_exchange.close": "XP自動交換を無効化"
 }

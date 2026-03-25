@@ -1,1 +1,1 @@
-* Prevent storage key from being modified at certain times
+* Upgrade XpExhchanger interaction method 

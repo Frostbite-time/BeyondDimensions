@@ -88,8 +88,11 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Actuel : Tri auto. activé",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Actuel : Tri auto. désactivé",
   "tooltip.item.unstable_space_time.long_data": "L'espace-temps se stabilise encore, %s cycles requis. Gardez-le sur vous en permanence.",
-  "tooltip.beyonddimensions.item.xp_exchange": "Dans l'interface : Clic droit pour stocker l'XP, Clic milieu pour récupérer l'XP\nTenue en main : Clic droit pour changer de mode, Maj+Clic droit pour modifier la vitesse d'interaction d'XP",
+  "tooltip.beyonddimensions.item.xp_exchange": "En main : clic droit pour ouvrir les paramètres\nDans les interfaces de stockage : clic droit pour stocker l'XP, clic milieu pour récupérer l'XP",
   "tooltip.editbox.beyonddimensions.search": "Saisissez du texte pour rechercher par nom\nSaisissez '@' pour filtrer les IDs des mods\nSaisissez '$' pour filtrer le contenu des infobulles\nSaisissez '#' pour filtrer les tags\nSéparez plusieurs filtres par des espaces ; utilisez des guillemets pour rechercher des espaces\nUtilisez '|' pour une correspondance OU et '-' pour exclure une correspondance\nAppuyez sur Maj+Z pour activer/désactiver le lien avec la barre de recherche JEI/EMI",
+  "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Entrez le niveau d'XP à maintenir ou à utiliser pour l'échange manuel\nLes valeurs au-dessus de la limite sont réduites automatiquement",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Actuel : En marche (maintient activement le niveau cible)",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Actuel : À l'arrêt (échange manuel uniquement)",
 
   "istack.beyonddimensions.storage_num.item": "Stocké : %s unités",
   "istack.beyonddimensions.storage_num.fluid": "Stocké : %s mB",
@@ -123,6 +126,10 @@
   "item.beyonddimensions.xp_fluid_bucket": "Seau d'XP liquide",
   "item.beyonddimensions.xp_exchange_item": "Baguette d'XP",
   "item.beyonddimensions.warden_soul_tag_item": "Marqueur d'Âmes",
+
+  "menu.title.beyonddimensions.xp_exchange_menu": "Paramètres de la baguette d'XP",
+  "menu.label.beyonddimensions.xp_exchange.target_level": "Niveau cible",
+  "menu.label.beyonddimensions.xp_exchange.max_level": "Max : %s",
 
   "block.beyonddimensions.net_control": "Contrôleur Réseau",
   "block.beyonddimensions.net_interface": "Interface Réseau",
@@ -176,6 +183,6 @@
   "msg.beyonddimensions.magnet.itemopen": "Aimant pour objets activé",
   "msg.beyonddimensions.magnet.fluidclose": "Aimant pour fluides désactivé",
   "msg.beyonddimensions.magnet.fluidopen": "Aimant pour fluides activé",
-  "msg.beyonddimensions.item.xp_exchange.open": "Activer l'échange automatique d'XP, maintenant le niveau par interaction",
+  "msg.beyonddimensions.item.xp_exchange.open": "Activer l'échange automatique d'XP en maintenant le niveau configuré",
   "msg.beyonddimensions.item.xp_exchange.close": "Désactiver l'échange automatique d'XP"
 }

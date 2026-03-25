@@ -88,8 +88,11 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Actual: Orden automático activado",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Actual: Orden automático desactivado",
   "tooltip.item.unstable_space_time.long_data": "El espacio-tiempo aún se estabiliza, faltan %s ciclos. Por favor, llévalo siempre contigo.",
-  "tooltip.beyonddimensions.item.xp_exchange": "En GUI: Clic derecho para guardar XP, Clic medio para obtener XP\nAl sostener: Clic derecho para cambiar modo de trabajo, Mayús+Clic derecho para cambiar tasa de interacción de XP",
+  "tooltip.beyonddimensions.item.xp_exchange": "Al sostenerlo: clic derecho para abrir la configuración\nEn GUIs de almacenamiento: clic derecho para guardar XP, clic central para recuperar XP",
   "tooltip.editbox.beyonddimensions.search": "Escribe texto para buscar por nombre\nEscribe '@' para filtrar IDs de mods\nEscribe '$' para filtrar el contenido de los tooltips\nEscribe '#' para filtrar etiquetas\nSepara varios filtros con espacios; usa comillas para buscar espacios\nUsa '|' para coincidencias OR y '-' para excluir coincidencias\nPulsa Shift+Z para alternar el enlace con la caja de búsqueda JEI/EMI",
+  "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Introduce el nivel de XP que quieres mantener o usar para el intercambio manual\nLos valores por encima del límite se ajustan automáticamente",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Actual: Funcionando (mantiene activamente el nivel objetivo)",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Actual: Sin funcionar (solo intercambio manual)",
 
   "istack.beyonddimensions.storage_num.item": "Almacenado: %s unidades",
   "istack.beyonddimensions.storage_num.fluid": "Almacenado: %s mB",
@@ -123,6 +126,10 @@
   "item.beyonddimensions.xp_fluid_bucket": "Cubo de experiencia líquida",
   "item.beyonddimensions.xp_exchange_item": "Varita de XP",
   "item.beyonddimensions.warden_soul_tag_item": "Marcador de Almas",
+
+  "menu.title.beyonddimensions.xp_exchange_menu": "Configuración de la varita de XP",
+  "menu.label.beyonddimensions.xp_exchange.target_level": "Nivel objetivo",
+  "menu.label.beyonddimensions.xp_exchange.max_level": "Máx: %s",
 
   "block.beyonddimensions.net_control": "Controlador de Red",
   "block.beyonddimensions.net_interface": "Interfaz de Red",
@@ -176,6 +183,6 @@
   "msg.beyonddimensions.magnet.itemopen": "Imán para objetos activado",
   "msg.beyonddimensions.magnet.fluidclose": "Imán para fluidos desactivado",
   "msg.beyonddimensions.magnet.fluidopen": "Imán para fluidos activado",
-  "msg.beyonddimensions.item.xp_exchange.open": "Habilitar intercambio automático de XP, manteniendo nivel por interacción",
+  "msg.beyonddimensions.item.xp_exchange.open": "Habilitar intercambio automático de XP, manteniendo el nivel configurado",
   "msg.beyonddimensions.item.xp_exchange.close": "Deshabilitar intercambio automático de XP"
 }

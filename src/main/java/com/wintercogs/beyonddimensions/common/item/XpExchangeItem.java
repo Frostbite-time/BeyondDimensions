@@ -61,7 +61,11 @@ public class XpExchangeItem extends Item
     public void appendHoverText(@NotNull ItemStack stack, @NotNull TooltipContext context, @NotNull List<Component> tooltipComponents, TooltipFlag tooltipFlag)
     {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-        tooltipComponents.add(Component.translatable("tooltip.beyonddimensions.item.xp_exchange"));
+        String[] tooltipLines = Component.translatable("tooltip.beyonddimensions.item.xp_exchange").getString().split("\\n");
+        for (String tooltipLine : tooltipLines)
+        {
+            tooltipComponents.add(Component.literal(tooltipLine));
+        }
     }
 
     // 每点经验能转为多少mb经验流体？

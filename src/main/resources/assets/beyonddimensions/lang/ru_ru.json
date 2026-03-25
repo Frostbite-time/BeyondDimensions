@@ -88,8 +88,11 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Текущий: Автосортировка включена",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Текущий: Автосортировка отключена",
   "tooltip.item.unstable_space_time.long_data": "Пространство-время стабилизируется, осталось %s циклов. Носите с собой постоянно.",
-  "tooltip.beyonddimensions.item.xp_exchange": "В интерфейсе: ПКМ - сохранить опыт, СКМ - извлечь опыт\nВ руке: ПКМ - переключить режим работы, Shift+ПКМ - изменить скорость взаимодействия с опытом",
+  "tooltip.beyonddimensions.item.xp_exchange": "В руке: ПКМ открывает настройки\nВ интерфейсах хранилища: ПКМ - сохранить опыт, СКМ - извлечь опыт",
   "tooltip.editbox.beyonddimensions.search": "Введите текст для поиска по имени\nВведите '@', чтобы фильтровать ID модов\nВведите '$', чтобы фильтровать содержимое подсказок\nВведите '#', чтобы фильтровать теги\nРазделяйте несколько фильтров пробелами; используйте кавычки для поиска пробелов\nИспользуйте '|' для совпадения по ИЛИ, а '-' для исключения совпадений\nНажмите Shift+Z для переключения привязки к строке поиска JEI/EMI",
+  "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Введите уровень опыта для поддержания или ручного обмена\nЗначения выше лимита автоматически ограничиваются",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Текущий: Работает (активно поддерживает целевой уровень)",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Текущий: Не работает (только ручной обмен)",
 
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
   "istack.beyonddimensions.storage_num.fluid": "Сохранено: %s мБ",
@@ -123,6 +126,10 @@
   "item.beyonddimensions.xp_fluid_bucket": "Ведро жидкого опыта",
   "item.beyonddimensions.xp_exchange_item": "Жезл опыта",
   "item.beyonddimensions.warden_soul_tag_item": "Маркер душ",
+
+  "menu.title.beyonddimensions.xp_exchange_menu": "Настройки жезла опыта",
+  "menu.label.beyonddimensions.xp_exchange.target_level": "Целевой уровень",
+  "menu.label.beyonddimensions.xp_exchange.max_level": "Макс: %s",
 
   "block.beyonddimensions.net_control": "Контроллер Сети",
   "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
@@ -176,6 +183,6 @@
   "msg.beyonddimensions.magnet.itemopen": "Магнит для предметов включён",
   "msg.beyonddimensions.magnet.fluidclose": "Магнит для жидкостей отключён",
   "msg.beyonddimensions.magnet.fluidopen": "Магнит для жидкостей включён",
-  "msg.beyonddimensions.item.xp_exchange.open": "Включить автоматический обмен опыта, поддерживая уровень за одно взаимодействие",
+  "msg.beyonddimensions.item.xp_exchange.open": "Включить автообмен опытом, поддерживая заданный уровень",
   "msg.beyonddimensions.item.xp_exchange.close": "Выключить автоматический обмен опыта"
 }
