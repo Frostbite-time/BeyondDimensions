@@ -7,11 +7,10 @@ import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.util.GuiRenderHelper;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import org.jetbrains.annotations.NotNull;
 
 
 public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
@@ -145,7 +144,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
+    protected void extractMenuBackground(GuiGraphicsExtractor guiGraphics)
     {
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
@@ -160,18 +159,17 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
+    public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        popButton.render(guiGraphics, mouseX, mouseY, partialTicks);
+        super.extractContents(guiGraphics, mouseX, mouseY, partialTicks);
+        popButton.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
+        guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
         GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.tag_and_stored_slots"), imageWidth - 6, this.titleLabelY + 3, -12566464, false);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
+        guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
-
 }

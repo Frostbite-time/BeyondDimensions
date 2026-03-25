@@ -7,7 +7,7 @@ import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.util.StringFormat;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -115,30 +115,30 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
+    protected void extractMenuBackground(GuiGraphicsExtractor guiGraphics)
     {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE, this.leftPos, this.topPos, 0F, 0F, this.imageWidth, this.imageHeight, 256, 256);
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
+    public void extractContents(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        popButton.render(guiGraphics, mouseX, mouseY, partialTicks);
+        super.extractContents(guiGraphics, mouseX, mouseY, partialTicks);
+        popButton.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
         this.renderEnergyBar(guiGraphics, this.leftPos + 8, this.topPos + 35);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY + 10, -12566464, false);
+        guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
+        guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY + 10, -12566464, false);
 
-        guiGraphics.drawString(this.font, StringFormat.formatCount(menu.lastEnergyStored) + "/" + StringFormat.formatCount(menu.lastEnergyCapacity), this.inventoryLabelX, this.inventoryLabelY - 20, -12566464, false);
-        guiGraphics.drawString(this.font, StringFormat.formatChange(menu.lastEnergySpeedState) + " FE/t", this.inventoryLabelX, this.inventoryLabelY - 10, -12566464, false);
+        guiGraphics.text(this.font, StringFormat.formatCount(menu.lastEnergyStored) + "/" + StringFormat.formatCount(menu.lastEnergyCapacity), this.inventoryLabelX, this.inventoryLabelY - 20, -12566464, false);
+        guiGraphics.text(this.font, StringFormat.formatChange(menu.lastEnergySpeedState) + " FE/t", this.inventoryLabelX, this.inventoryLabelY - 10, -12566464, false);
     }
 
-    protected void renderEnergyBar(GuiGraphics guiGraphics, int xStart, int yStart)
+    protected void renderEnergyBar(GuiGraphicsExtractor guiGraphics, int xStart, int yStart)
     {
         int areaWidth = 160;
         int areaHeight = 16;

@@ -16,12 +16,11 @@ import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
-import com.wintercogs.beyonddimensions.integration.module.jei.BDJEIPlugin;
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.util.UIDataHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.input.KeyEvent;
@@ -34,8 +33,6 @@ import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
-
-import java.util.Objects;
 
 
 public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
@@ -257,14 +254,14 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 // JEI
                 if (ModPresence.isLoaded(OtherModIds.JEI))
                 {
-                    BDJEIPlugin.runtime().ifPresent(rt -> {
-                        var overlay = rt.getIngredientFilter();
-                        String current = overlay.getFilterText();
-                        if (!Objects.equals(current, text))
-                        {
-                            overlay.setFilterText(text);
-                        }
-                    });
+//                    BDJEIPlugin.runtime().ifPresent(rt -> {
+//                        var overlay = rt.getIngredientFilter();
+//                        String current = overlay.getFilterText();
+//                        if (!Objects.equals(current, text))
+//                        {
+//                            overlay.setFilterText(text);
+//                        }
+//                    });
                 }
             }
         });
@@ -312,14 +309,14 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         {
             if (ModPresence.isLoaded(OtherModIds.JEI))
             {
-                BDJEIPlugin.runtime().ifPresent(rt -> {
-                    var overlay = rt.getIngredientFilter();
-                    String current = overlay.getFilterText();
-                    if (!Objects.equals(current, lastSearchText))
-                    {
-                        searchField.setValue(current);
-                    }
-                });
+//                BDJEIPlugin.runtime().ifPresent(rt -> {
+//                    var overlay = rt.getIngredientFilter();
+//                    String current = overlay.getFilterText();
+//                    if (!Objects.equals(current, lastSearchText))
+//                    {
+//                        searchField.setValue(current);
+//                    }
+//                });
             }
         }
 
@@ -380,7 +377,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
+    protected void extractMenuBackground(@NotNull GuiGraphicsExtractor guiGraphics)
     {
         int drawY = this.topPos; // 用于动态控制绘制
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE_TOP_BASE, this.leftPos, drawY, 0F, 0F, TOP_BASE_WIDTH, TOP_BASE_HEIGHT, TOP_BASE_WIDTH, TOP_BASE_HEIGHT);
@@ -403,16 +400,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
     {
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
-    }
-
-    @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
-    {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
+        guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
+        guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
     @Override

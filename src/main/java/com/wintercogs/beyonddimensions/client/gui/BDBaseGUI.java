@@ -9,7 +9,7 @@ import com.wintercogs.beyonddimensions.network.packet.c2s.BatchTransferPacket;
 import com.wintercogs.beyonddimensions.network.packet.c2s.CallSeverClickPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
@@ -41,14 +41,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
-    {
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        renderTooltip(guiGraphics, mouseX, mouseY);
-    }
-
-    @Override
-    protected void renderTooltip(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY)
+    protected void extractTooltip(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY)
     {
         if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem())
         {
@@ -66,7 +59,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     }
 
     @Override
-    protected void renderSlot(@NotNull GuiGraphics guiGraphics, @NotNull Slot slot, int mouseX, int mouseY)
+    protected void extractSlot(@NotNull GuiGraphicsExtractor guiGraphics, @NotNull Slot slot, int mouseX, int mouseY)
     {
         if (slot instanceof AbstractStackTypedSlot sSlot)
         {
@@ -90,7 +83,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
         }
         else
         {
-            super.renderSlot(guiGraphics, slot, mouseX, mouseY);
+            super.extractSlot(guiGraphics, slot, mouseX, mouseY);
         }
     }
 

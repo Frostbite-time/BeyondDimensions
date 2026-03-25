@@ -8,7 +8,7 @@ import com.wintercogs.beyonddimensions.client.gui.widget.shared.StatusButton;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.network.packet.c2s.ClickTransferCraftButtonPacket;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -87,7 +87,7 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
+    protected void extractMenuBackground(@NotNull GuiGraphicsExtractor guiGraphics)
     {
         int drawY = this.topPos; // 用于动态控制绘制
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE_TOP_BASE, this.leftPos, drawY, 0F, 0F, TOP_BASE_WIDTH, TOP_BASE_HEIGHT, TOP_BASE_WIDTH, TOP_BASE_HEIGHT);
@@ -130,12 +130,5 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
     {
         return (int) ((this.height - 36 - (TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + CRAFT_SLOTS_HEIGHT + PLAYER_INV_HEIGHT)) / (float) MID_SLOTS_HEIGHT + 2);
     }
-
-    @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
-    {
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
-    }
-
 
 }

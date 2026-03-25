@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.util;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -25,7 +25,7 @@ public class GuiRenderHelper
      * @param origHeight   原始纹理高度
      */
     public static void renderBorderedPanel(
-            GuiGraphics guiGraphics,
+            GuiGraphicsExtractor guiGraphics,
             Identifier texture,
             int x, int y,
             int width, int height,
@@ -138,7 +138,7 @@ public class GuiRenderHelper
      * @param height      希望绘制出的高度
      */
     public static void renderFullTexture(
-            GuiGraphics guiGraphics,
+            GuiGraphicsExtractor guiGraphics,
             Identifier texture,
             int x, int y,
             int width, int height,
@@ -152,7 +152,7 @@ public class GuiRenderHelper
                 originalWidth, originalHeight);
     }
 
-    public static void drawRightAnchoredText(GuiGraphics guiGraphics,
+    public static void drawRightAnchoredText(GuiGraphicsExtractor guiGraphics,
                                              Font font,
                                              Component text,
                                              int xRight,
@@ -162,7 +162,7 @@ public class GuiRenderHelper
     {
         int width = font.width(text);
         int xStart = xRight - width;
-        guiGraphics.drawString(font, text, xStart, y, color, dropShadow);
+        guiGraphics.text(font, text, xStart, y, color, dropShadow);
     }
 
 }

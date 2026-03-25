@@ -6,14 +6,13 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.client.gui.widget.button.PermissionInfoButton;
 import com.wintercogs.beyonddimensions.common.menu.NetControlMenu;
 import com.wintercogs.beyonddimensions.network.packet.c2s.NetControlActionPacket;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -204,15 +203,15 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
+    protected void extractMenuBackground(GuiGraphicsExtractor guiGraphics)
     {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE, this.leftPos, this.topPos, 0F, 0F, this.imageWidth, this.imageHeight, this.imageWidth, this.imageHeight);
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks)
+    public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks)
     {
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+        super.extractContents(guiGraphics, mouseX, mouseY, partialTicks);
         nowShowPlayer = 0;
         for (PermissionInfoButton button : permissionInfoButtons)
         {
@@ -221,33 +220,31 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
                 nowShowPlayer++;
                 continue;
             }
-            button.render(guiGraphics, mouseX, mouseY, partialTicks);
+            button.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
             nowShowPlayer++;
             if (nowShowPlayer - nowTopShowPlayer >= maxShowPlayers)
             {
                 break;
             }
         }
-        ownerButton.render(guiGraphics, mouseX, mouseY, partialTicks);
-        managerButton.render(guiGraphics, mouseX, mouseY, partialTicks);
-        removeManagerButton.render(guiGraphics, mouseX, mouseY, partialTicks);
-        removeMemberButton.render(guiGraphics, mouseX, mouseY, partialTicks);
+        ownerButton.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
+        managerButton.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
+        removeManagerButton.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
+        removeMemberButton.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX + 3, this.titleLabelY, -12566464, false);
-        guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.name.player", Component.literal(currentPlayerName)), 110, 25, -12566464, false);
+        guiGraphics.text(this.font, this.title, this.titleLabelX + 3, this.titleLabelY, -12566464, false);
+        guiGraphics.text(this.font, Component.translatable("menu.text.beyonddimensions.name.player", Component.literal(currentPlayerName)), 110, 25, -12566464, false);
         if (currentPlayerPermissionLevel == null)
         {
-            guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.permission.level.zero"), 110, 10, -12566464, false);
+            guiGraphics.text(this.font, Component.translatable("menu.text.beyonddimensions.permission.level.zero"), 110, 10, -12566464, false);
         }
         else
         {
-            guiGraphics.drawString(this.font, Component.translatable("menu.text.beyonddimensions.permission.level.prefix", Component.literal(currentPlayerPermissionLevel.name())), 110, 10, -12566464, false);
+            guiGraphics.text(this.font, Component.translatable("menu.text.beyonddimensions.permission.level.prefix", Component.literal(currentPlayerPermissionLevel.name())), 110, 10, -12566464, false);
         }
-
-
     }
 }

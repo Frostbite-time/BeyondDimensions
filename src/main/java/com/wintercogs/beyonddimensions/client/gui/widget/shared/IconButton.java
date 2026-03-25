@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.gui.widget.shared;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -48,7 +48,7 @@ public class IconButton extends Button implements GuiElementAccess
     }
 
     @Override
-    protected void renderContents(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
+    protected void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick)
     {
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, backgroundSprites.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
         drawIcon(guiGraphics, mouseX, mouseY, partialTick);
@@ -61,7 +61,7 @@ public class IconButton extends Button implements GuiElementAccess
         setFocused(false);
     }
 
-    protected void drawIcon(GuiGraphics st, int mouseX, int mouseY, float pt)
+    protected void drawIcon(GuiGraphicsExtractor st, int mouseX, int mouseY, float pt)
     {
         st.blitSprite(RenderPipelines.GUI_TEXTURED, getIcon(), iconX, iconY, iconWidth, iconHeight);
     }

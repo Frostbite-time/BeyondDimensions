@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.common.machine.FilterMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.NetPumpMenu;
 import com.wintercogs.beyonddimensions.util.GuiRenderHelper;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -105,7 +105,7 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
+    protected void extractMenuBackground(GuiGraphicsExtractor guiGraphics)
     {
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
@@ -118,11 +118,11 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
     {
-        guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
+        guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
         GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.filter_slots"), imageWidth - 6, this.titleLabelY + 3, -12566464, false);
-        guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
+        guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
     protected int rebuildImageHeight()

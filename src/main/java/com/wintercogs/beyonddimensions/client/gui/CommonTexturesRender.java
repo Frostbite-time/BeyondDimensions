@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.util.Mth;
 
@@ -9,14 +9,14 @@ import net.minecraft.util.Mth;
 public class CommonTexturesRender
 {
     // TOP_BASE_COMMON 渲染方法
-    public static void renderTopBaseCommon(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    public static void renderTopBaseCommon(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef)
     {
         renderTopBaseCommon(guiGraphics, leftPos, yPosRef,
                 CommonTextures.TOP_BASE_COMMON_WIDTH,
                 CommonTextures.TOP_BASE_COMMON_HEIGHT);
     }
 
-    public static void renderTopBaseCommon(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+    public static void renderTopBaseCommon(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef,
                                            int width, int height)
     {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.TOP_BASE_COMMON, leftPos, yPosRef[0],
@@ -28,14 +28,14 @@ public class CommonTexturesRender
     }
 
     // COMMON_CONNECTION 渲染方法
-    public static void renderCommonConnection(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    public static void renderCommonConnection(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef)
     {
         renderCommonConnection(guiGraphics, leftPos, yPosRef,
                 CommonTextures.COMMON_CONNECTION_WIDTH,
                 CommonTextures.COMMON_CONNECTION_HEIGHT);
     }
 
-    public static void renderCommonConnection(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+    public static void renderCommonConnection(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef,
                                               int width, int height)
     {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.COMMON_CONNECTION, leftPos, yPosRef[0],
@@ -47,14 +47,14 @@ public class CommonTexturesRender
     }
 
     // COMMON_SLOTS 渲染方法
-    public static void renderCommonSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    public static void renderCommonSlots(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef)
     {
         renderCommonSlots(guiGraphics, leftPos, yPosRef,
                 CommonTextures.COMMON_SLOTS_WIDTH,
                 CommonTextures.COMMON_SLOTS_HEIGHT);
     }
 
-    public static void renderCommonSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+    public static void renderCommonSlots(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef,
                                          int width, int height)
     {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.COMMON_SLOTS, leftPos, yPosRef[0],
@@ -66,14 +66,14 @@ public class CommonTexturesRender
     }
 
     // FILTER_SLOTS 渲染方法
-    public static void renderFilterSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    public static void renderFilterSlots(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef)
     {
         renderFilterSlots(guiGraphics, leftPos, yPosRef,
                 CommonTextures.FILTER_SLOTS_WIDTH,
                 CommonTextures.FILTER_SLOTS_HEIGHT);
     }
 
-    public static void renderFilterSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+    public static void renderFilterSlots(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef,
                                          int width, int height)
     {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.FILTER_SLOTS, leftPos, yPosRef[0],
@@ -85,14 +85,14 @@ public class CommonTexturesRender
     }
 
     // PLAYER_INV 渲染方法
-    public static void renderPlayerInv(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    public static void renderPlayerInv(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef)
     {
         renderPlayerInv(guiGraphics, leftPos, yPosRef,
                 CommonTextures.PLAYER_INV_WIDTH,
                 CommonTextures.PLAYER_INV_HEIGHT);
     }
 
-    public static void renderPlayerInv(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+    public static void renderPlayerInv(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef,
                                        int width, int height)
     {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.GUI_TEXTURE_PLAYER_INV, leftPos, yPosRef[0],
@@ -104,28 +104,28 @@ public class CommonTexturesRender
     }
 
     // 右标签渲染
-    public static void renderRightTab(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    public static void renderRightTab(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef)
     {
         renderRightTab(guiGraphics, leftPos, yPosRef,
                 CommonTextures.RIGHT_TAB_WIDTH,
                 CommonTextures.RIGHT_TAB_HEIGHT);
     }
 
-    public static void renderRightTab(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+    public static void renderRightTab(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef,
                                       int width, int height)
     {
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, CommonTextures.RIGHT_TAB, leftPos, yPosRef[0], width, height);
         yPosRef[0] += height;
     }
 
-    public static void renderNetFurnaceBackground(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    public static void renderNetFurnaceBackground(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef)
     {
         renderNetFurnaceBackground(guiGraphics, leftPos, yPosRef,
                 CommonTextures.NET_FURNACE_BACKGROUND_WIDTH,
                 CommonTextures.NET_FURNACE_BACKGROUND_HEIGHT);
     }
 
-    public static void renderNetFurnaceBackground(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+    public static void renderNetFurnaceBackground(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef,
                                                   int width, int height)
     {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CommonTextures.NET_FURNACE_BACKGROUND, leftPos, yPosRef[0],
@@ -136,21 +136,21 @@ public class CommonTexturesRender
         yPosRef[0] += height;
     }
 
-    public static void renderWorkDoneV(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    public static void renderWorkDoneV(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef)
     {
         renderWorkDoneV(guiGraphics, leftPos, yPosRef,
                 CommonTextures.WORK_DONE_V_WIDTH,
                 CommonTextures.WORK_DONE_V_HEIGHT);
     }
 
-    public static void renderWorkDoneV(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+    public static void renderWorkDoneV(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef,
                                        int width, int height)
     {
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, CommonTextures.WORK_DONE_V, leftPos, yPosRef[0], width, height);
         yPosRef[0] += height;
     }
 
-    public static void renderWorkDoneV_AsProgress(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+    public static void renderWorkDoneV_AsProgress(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef,
                                                   int width, int height, float progress) //从上往下
     {
         // 0. 约束进度
@@ -174,21 +174,21 @@ public class CommonTexturesRender
                 vHeight);                              // VHeight = 截掉剩余 (1‑progress)
     }
 
-    public static void renderFurnaceWorkV(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    public static void renderFurnaceWorkV(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef)
     {
         renderWorkDoneV(guiGraphics, leftPos, yPosRef,
                 CommonTextures.FURNACE_WORK_V_WIDTH,
                 CommonTextures.FURNACE_WORK_V_HEIGHT);
     }
 
-    public static void renderFurnaceWorkV(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+    public static void renderFurnaceWorkV(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef,
                                           int width, int height)
     {
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, CommonTextures.FURNACE_WORK_V, leftPos, yPosRef[0], width, height);
         yPosRef[0] += height;
     }
 
-    public static void renderFurnaceWorkV_AsProgress(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+    public static void renderFurnaceWorkV_AsProgress(GuiGraphicsExtractor guiGraphics, int leftPos, int[] yPosRef,
                                                      int width, int height, float progress) // 从下往上
     {
         // 0. 约束进度
