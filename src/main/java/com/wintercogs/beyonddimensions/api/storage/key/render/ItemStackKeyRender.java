@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.util.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
@@ -28,18 +28,18 @@ public class ItemStackKeyRender implements IStackRender
     public static final ItemStackKeyRender INSTANCE = new ItemStackKeyRender();
 
     @Override
-    public void render(GuiGraphics gui, IStackKey<?> key, int x, int y)
+    public void render(GuiGraphicsExtractor gui, IStackKey<?> key, int x, int y)
     {
         if (key instanceof ItemStackKey itemKey)
         {
             ItemStack renderStack = itemKey.getRenderStack();
-            gui.renderFakeItem(renderStack, x, y);
-            gui.renderItemDecorations(Minecraft.getInstance().font, renderStack, x, y, "");
+            gui.fakeItem(renderStack, x, y);
+            gui.itemDecorations(Minecraft.getInstance().font, renderStack, x, y, "");
         }
     }
 
     @Override
-    public void renderAmount(GuiGraphics gui, long amount, int x, int y)
+    public void renderAmount(GuiGraphicsExtractor gui, long amount, int x, int y)
     {
         // 渲染数量文本
         String countText = getCountText(amount);
@@ -53,7 +53,7 @@ public class ItemStackKeyRender implements IStackRender
         int w = Minecraft.getInstance().font.width(countText);
         final int X = (int) ((x - 1 + 16.0f + 2.0f - w * 0.666f) / 0.666f);
         final int Y = (int) ((y - 1 + 16.0f - 5.0f * 0.666f) / 0.666f);
-        gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFFFF);
+        gui.text(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFFFF);
         pose.popMatrix();
     }
 
@@ -101,7 +101,7 @@ public class ItemStackKeyRender implements IStackRender
     }
 
     @Override
-    public void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY)
+    public void renderTooltip(GuiGraphicsExtractor gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY)
     {
         var mc = Minecraft.getInstance();
         var ctx = mc.level != null ? Item.TooltipContext.of(mc.level) : Item.TooltipContext.EMPTY;
@@ -113,7 +113,7 @@ public class ItemStackKeyRender implements IStackRender
                 ClientHooks.gatherTooltipComponents(
                         ItemStack.EMPTY, tooltips, visualTooltipComponent, mouseX, gui.guiWidth(), gui.guiHeight(), font);
 
-        gui.renderTooltip(
+        gui.tooltip(
                 mc.font,
                 clientTooltips,
                 mouseX, mouseY,

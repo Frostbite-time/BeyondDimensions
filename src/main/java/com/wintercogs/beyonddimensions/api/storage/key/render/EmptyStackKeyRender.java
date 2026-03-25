@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.api.storage.key.render;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -27,13 +27,13 @@ public class EmptyStackKeyRender implements IStackRender
     }
 
     @Override
-    public void render(GuiGraphics gui, IStackKey<?> key, int x, int y)
+    public void render(GuiGraphicsExtractor gui, IStackKey<?> key, int x, int y)
     {
 
     }
 
     @Override
-    public void renderAmount(GuiGraphics gui, long amount, int x, int y)
+    public void renderAmount(GuiGraphicsExtractor gui, long amount, int x, int y)
     {
 
     }
@@ -63,7 +63,7 @@ public class EmptyStackKeyRender implements IStackRender
     }
 
     @Override
-    public void renderTooltip(GuiGraphics gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY)
+    public void renderTooltip(GuiGraphicsExtractor gui, Font font, IStackKey<?> key, long amount, int mouseX, int mouseY)
     {
 
     }
