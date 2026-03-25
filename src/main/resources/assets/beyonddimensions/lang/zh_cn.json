@@ -24,7 +24,6 @@
   "menu.label.beyonddimensions.tag_and_stored_slots": "标记与存储槽位",
   "menu.label.beyonddimensions.input_filter_slots": "输入",
   "menu.label.beyonddimensions.fuel_filter_slots": "燃料",
-
   "tooltip.beyonddimensions.network_open_key": "按【%s】打开维度网络",
   "tooltip.button.beyonddimensions.sort_asc": "当前：顺序排序",
   "tooltip.button.beyonddimensions.sort_desc": "当前：倒序排序",
@@ -91,13 +90,14 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "当前：自动整理开启",
   "tooltip.button.beyonddimensions.sort_mode_stop": "当前：自动整理关闭",
   "tooltip.item.unstable_space_time.long_data": "时空仍在稳定中，仍需%s个稳定周期，请保持随身携带",
-  "tooltip.beyonddimensions.item.xp_exchange": "在GUI中：右键存入经验，中键取出经验\n手持时：右键切换工作模式，Shift右键改变经验交互速率",
+  "tooltip.beyonddimensions.item.xp_exchange": "手持时：右键打开设置界面\n在仓库GUI中：右键存入经验，中键取出经验",
   "tooltip.editbox.beyonddimensions.search": "输入文本以按名称搜索\n输入'@'以筛选模组ID\n输入'$'以筛选提示框内容\n输入'#'以筛选标签\n按空格分割多个筛选字段，使用引号包裹可搜索空格字符\n使用'|'可进行或匹配，使用'-'可排除匹配\n按Shift+Z以开关JEI/EMI搜索框联动",
-
+  "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "输入要维持或手动交互的经验等级\n超过上限时会自动回限",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "当前：工作（主动维持设定等级）",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "当前：不工作（仅手动交互）",
   "istack.beyonddimensions.storage_num.item": "已存储：%s个",
   "istack.beyonddimensions.storage_num.fluid": "已存储：%smB",
   "istack.beyonddimensions.storage_num.long_type": "已存储：%s",
-
   "key.categories.beyonddimensions": "超越维度",
   "key.beyonddimensions.open_gui": "打开维度网络",
   "key.beyonddimensions.open_terminal_quick_key": "快速打开物品栏中的终端",
@@ -106,7 +106,6 @@
   "key.beyonddimensions.toggle_magnet_item_key": "开关物品磁铁",
   "key.beyonddimensions.toggle_magnet_fluid_key": "开关流体磁铁",
   "key.beyonddimensions.open_magnet_gui_key": "打开磁铁界面",
-
   "item.beyonddimensions.net_creater": "维度网络发生器",
   "item.beyonddimensions.net_member_inviter": "成员连接符",
   "item.beyonddimensions.net_manager_inviter": "管理员连接符",
@@ -127,7 +126,9 @@
   "item.beyonddimensions.xp_fluid_bucket": "液态经验桶",
   "item.beyonddimensions.xp_exchange_item": "经验棒",
   "item.beyonddimensions.warden_soul_tag_item": "灵魂标记器",
-
+  "menu.title.beyonddimensions.xp_exchange_menu": "经验棒设置",
+  "menu.label.beyonddimensions.xp_exchange.target_level": "目标等级",
+  "menu.label.beyonddimensions.xp_exchange.max_level": "最大：%s",
   "block.beyonddimensions.net_control": "网络控制器",
   "block.beyonddimensions.net_interface": "网络接口",
   "block.beyonddimensions.net_pathway": "维度网络通道",
@@ -142,14 +143,10 @@
   "block.beyonddimensions.ars_source_pathway": "维度魔源通道",
   "block.beyonddimensions.mana_pool_pathway": "维度魔力池",
   "block.beyonddimensions.schematicannon_pathway": "蓝图接口",
-
   "fluid_type.beyonddimensions.xp_fluid": "液态经验",
-
   "creativetab.beyonddimensions.items": "超越维度-物品",
   "creativetab.beyonddimensions.blocks": "超越维度-方块",
-
   "beyonddimensions.message.insufficient_materials": "缺少足够材料",
-
   "msg.beyonddimensions.network_created": "你从宇宙中撕开了一个裂隙...",
   "msg.beyonddimensions.item_net_bound": "物品被绑定到%d号网络",
   "msg.beyonddimensions.item_net_unbound": "物品从%d号网络解绑",
@@ -168,18 +165,16 @@
   "msg.beyonddimensions.xp_mode.switch.high": "单次交互量切换到：30级",
   "msg.beyonddimensions.xp_mode.switch.highest": "单次交互量切换到：100级",
   "msg.beyonddimensions.xp_mode.switch.over_highest": "单次交互量切换到：150级",
-
   "types.beyonddimensions.energytype.name": "FE能量",
   "types.beyonddimensions.warden_soul_type.name": "监守者之魂",
   "types.beyonddimensions.source_type.name": "魔源",
   "types.beyonddimensions.mana_type.name": "植物魔力",
-
   "msg.beyonddimensions.magnet.close": "磁铁被禁用",
   "msg.beyonddimensions.magnet.open": "磁铁被启用",
   "msg.beyonddimensions.magnet.itemclose": "禁用磁铁物品吸取",
   "msg.beyonddimensions.magnet.itemopen": "启用磁铁物品吸取",
   "msg.beyonddimensions.magnet.fluidclose": "禁用磁铁流体吸取",
   "msg.beyonddimensions.magnet.fluidopen": "启用磁铁流体吸取",
-  "msg.beyonddimensions.item.xp_exchange.open": "开启经验自动存取，将经验等级维持在单次交互量",
+  "msg.beyonddimensions.item.xp_exchange.open": "开启经验自动存取，将经验等级维持在设定值",
   "msg.beyonddimensions.item.xp_exchange.close": "关闭经验自动存取"
 }

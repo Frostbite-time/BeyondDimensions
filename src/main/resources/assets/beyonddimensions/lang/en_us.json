@@ -24,7 +24,6 @@
   "menu.label.beyonddimensions.tag_and_stored_slots": "Tag & Storage Slots",
   "menu.label.beyonddimensions.input_filter_slots": "Input",
   "menu.label.beyonddimensions.fuel_filter_slots": "Fuel",
-
   "tooltip.beyonddimensions.network_open_key": "Press [%s] to open dimension network",
   "tooltip.button.beyonddimensions.sort_asc": "Current: Ascending Order",
   "tooltip.button.beyonddimensions.sort_desc": "Current: Descending Order",
@@ -91,13 +90,14 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Current: Auto-sort enabled",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Current: Auto-sort disabled",
   "tooltip.item.unstable_space_time.long_data": "Spacetime is stabilizing, requires %s more stabilization cycles. Please keep it on your person.",
-  "tooltip.beyonddimensions.item.xp_exchange": "In GUI: Right-click to store XP, Middle-click to retrieve XP\nWhen held: Right-click to switch work mode, Shift+Right-click to change XP interaction rate",
+  "tooltip.beyonddimensions.item.xp_exchange": "When held: Right-click to open settings\nIn storage GUIs: Right-click to store XP, Middle-click to retrieve XP",
   "tooltip.editbox.beyonddimensions.search": "Type text to search by name\nType '@' to filter mod IDs\nType '$' to filter tooltip contents\nType '#' to filter tags\nUse spaces to separate multiple filters; wrap in quotes to search spaces\nUse '|' for OR matches and '-' to exclude matches\nPress Shift+Z to toggle JEI/EMI search box linking",
-
+  "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Enter the XP level to keep or use for manual exchange\nValues above the limit are clamped automatically",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Current: Working (actively keeps target level)",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Current: Not Working (manual exchange only)",
   "istack.beyonddimensions.storage_num.item": "Stored: %s Items",
   "istack.beyonddimensions.storage_num.fluid": "Stored: %s mB",
   "istack.beyonddimensions.storage_num.long_type": "Stored: %s",
-
   "key.categories.beyonddimensions": "Beyond Dimensions",
   "key.beyonddimensions.open_gui": "Open Dimensional Network UI",
   "key.beyonddimensions.open_terminal_quick_key": "Quickly open the terminal in the inventory",
@@ -106,7 +106,6 @@
   "key.beyonddimensions.toggle_magnet_item_key": "Toggle Item Magnet",
   "key.beyonddimensions.toggle_magnet_fluid_key": "Toggle Fluid Magnet",
   "key.beyonddimensions.open_magnet_gui_key": "Open Magnet GUI",
-
   "item.beyonddimensions.net_creater": "Dimensional Network Generator",
   "item.beyonddimensions.net_member_inviter": "Member Connector",
   "item.beyonddimensions.net_manager_inviter": "Manager Connector",
@@ -127,7 +126,9 @@
   "item.beyonddimensions.xp_fluid_bucket": "Bucket of Liquid XP",
   "item.beyonddimensions.xp_exchange_item": "XP Rod",
   "item.beyonddimensions.warden_soul_tag_item": "Warden Soul Tagger",
-
+  "menu.title.beyonddimensions.xp_exchange_menu": "XP Rod Settings",
+  "menu.label.beyonddimensions.xp_exchange.target_level": "Target Level",
+  "menu.label.beyonddimensions.xp_exchange.max_level": "Max: %s",
   "block.beyonddimensions.net_control": "Network Controller",
   "block.beyonddimensions.net_interface": "Network Interface",
   "block.beyonddimensions.net_pathway": "Dimensional Network Pathway",
@@ -142,14 +143,10 @@
   "block.beyonddimensions.ars_source_pathway": "Interdimensional Source Pathway",
   "block.beyonddimensions.mana_pool_pathway": "Dimensional Mana Pool",
   "block.beyonddimensions.schematicannon_pathway": "Schematic Interface",
-
   "fluid_type.beyonddimensions.xp_fluid": "Liquid XP",
-
   "creativetab.beyonddimensions.items": "Beyond Dimensions - Items",
   "creativetab.beyonddimensions.blocks": "Beyond Dimensions - Blocks",
-
   "beyonddimensions.message.insufficient_materials": "Lack of sufficient materials",
-
   "msg.beyonddimensions.network_created": "You ripped a rift through the cosmos...",
   "msg.beyonddimensions.item_net_bound": "Item bound to network #%d",
   "msg.beyonddimensions.item_net_unbound": "Item unbound from network #%d",
@@ -168,18 +165,16 @@
   "msg.beyonddimensions.xp_mode.switch.high": "XP transfer amount switched to: 30 levels",
   "msg.beyonddimensions.xp_mode.switch.highest": "XP transfer amount switched to: 100 levels",
   "msg.beyonddimensions.xp_mode.switch.over_highest": "XP transfer amount switched to: 150 levels",
-
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Warden Souls",
   "types.beyonddimensions.source_type.name": "Source",
   "types.beyonddimensions.mana_type.name": "Plant Mana",
-
   "msg.beyonddimensions.magnet.close": "Magnet disabled",
   "msg.beyonddimensions.magnet.open": "Magnet enabled",
   "msg.beyonddimensions.magnet.itemclose": "Magnet item pickup disabled",
   "msg.beyonddimensions.magnet.itemopen": "Magnet item pickup enabled",
   "msg.beyonddimensions.magnet.fluidclose": "Magnet fluid pickup disabled",
   "msg.beyonddimensions.magnet.fluidopen": "Magnet fluid pickup enabled",
-  "msg.beyonddimensions.item.xp_exchange.open": "Enable XP auto-exchange, maintaining level per interaction",
+  "msg.beyonddimensions.item.xp_exchange.open": "Enable XP auto-exchange, maintaining the configured level",
   "msg.beyonddimensions.item.xp_exchange.close": "Disable XP auto-exchange"
 }

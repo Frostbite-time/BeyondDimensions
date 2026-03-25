@@ -35,6 +35,7 @@ public class BDScreens
                     MenuScreens.register(Net_Magnet_Menu.get(), NetMagnetGUI::new);
                     MenuScreens.register(Net_Feeder_Menu.get(), NetFeederGUI::new);
                     MenuScreens.register(Net_Restocker_Menu.get(), NetRestockerGUI::new);
+                    MenuScreens.register(Xp_Exchange_Menu.get(), XpExchangeGUI::new);
                 }
         );
     }

@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDFluidTags;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.machine.XpTransferSpeedMode;
+import com.wintercogs.beyonddimensions.common.menu.XpExchangeMenu;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;
 import net.minecraft.core.Holder;
@@ -14,10 +15,10 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -26,12 +27,12 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 
 public class XpExchangeItem extends Item
 {
@@ -55,17 +56,18 @@ public class XpExchangeItem extends Item
 
     private void checkComponents(ItemStack stack)
     {
-        if (!hasXpTransferSpeedMode(stack))
-            setXpTransferSpeedMode(stack, XpTransferSpeedMode.SLOW);
-        if (!hasXpNetKeepMode(stack))
-            setXpNetKeepMode(stack, false);
+        XpExchangeSettings.ensureComponents(stack);
     }
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced)
     {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
-        tooltipComponents.add(Component.translatable("tooltip.beyonddimensions.item.xp_exchange"));
+        String[] tooltipLines = Component.translatable("tooltip.beyonddimensions.item.xp_exchange").getString().split("\\n");
+        for (String tooltipLine : tooltipLines)
+        {
+            tooltipComponents.add(Component.literal(tooltipLine));
+        }
     }
 
     // 每点经验能转为多少mb经验流体？
@@ -80,33 +82,16 @@ public class XpExchangeItem extends Item
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
         if (usedHand != InteractionHand.MAIN_HAND)
-            return InteractionResultHolder.fail(itemstack); // 非主手使用默认fail
+            return InteractionResultHolder.fail(itemstack);
 
-        if (level.isClientSide()) // 客户端shift使用时播放失败动画，否则播放pass动画（直接步进到最终回退）
+        XpExchangeSettings.ensureComponents(itemstack);
+        if (!level.isClientSide())
         {
-            if (player.isShiftKeyDown())
-            {
-                return InteractionResultHolder.fail(itemstack);
-            }
+            NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider((containerId, inv, serverPlayer) ->
+                            new XpExchangeMenu(containerId, inv, itemstack),
+                            Component.translatable("menu.title.beyonddimensions.xp_exchange_menu")),
+                    buf -> buf.writeEnum(usedHand));
         }
-        if (!level.isClientSide()) // 服务端实际处理两个不同操作
-        {
-            if (player.isShiftKeyDown())
-            {
-                cycleMode(itemstack, player, level);
-            }
-            else
-            {
-                boolean current = getOrDefaultXpNetKeepMode(itemstack, false);
-                setXpNetKeepMode(itemstack, !current);
-                if (getOrDefaultXpNetKeepMode(itemstack, false))
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.open"));
-                else
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item.xp_exchange.close"));
-            }
-        }
-
-        // 最终回退
         return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
@@ -227,31 +212,10 @@ public class XpExchangeItem extends Item
     {
         if (stack.getItem() instanceof XpExchangeItem)
         {
-            XpTransferSpeedMode xpMode = getOrDefaultXpTransferSpeedMode(stack, XpTransferSpeedMode.SLOW);
-
-            return switch (xpMode)
-            {
-                case SLOW -> 1;
-                case MID -> 10;
-                case HIGH -> 30;
-                case HIGHEST -> 100;
-                case OVER_HIGHEST -> 150;
-            };
+            XpExchangeSettings.ensureComponents(stack);
+            return XpExchangeSettings.getTargetLevel(stack);
         }
-        return 0; // 最终回退
-    }
-
-    // 将经验模式切换到下一级
-    private static void cycleMode(ItemStack stack, Player player, Level level)
-    {
-        XpTransferSpeedMode cur = getOrDefaultXpTransferSpeedMode(stack, XpTransferSpeedMode.SLOW);
-        XpTransferSpeedMode next = cur.next();
-        setXpTransferSpeedMode(stack, next);
-
-        // 提示切换
-        // 键为 beyonddimensions.xp_mode.switch.<xpmode>
-        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.xp_mode.switch." + next.name().toLowerCase(Locale.ENGLISH)));
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
+        return 0;
     }
 
     public static XpTransferSpeedMode getOrDefaultXpTransferSpeedMode(ItemStack stack, XpTransferSpeedMode defaultValue)

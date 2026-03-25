@@ -22,7 +22,6 @@
   "menu.label.beyonddimensions.tag_and_stored_slots": "Tags e Slots de Armazenamento",
   "menu.label.beyonddimensions.input_filter_slots": "Entrada",
   "menu.label.beyonddimensions.fuel_filter_slots": "Combustível",
-
   "tooltip.button.beyonddimensions.sort_asc": "Atual: Ordem crescente",
   "tooltip.button.beyonddimensions.sort_desc": "Atual: Ordem decrescente",
   "tooltip.button.beyonddimensions.search_disable": "Limpar busca ao desativar",
@@ -88,19 +87,19 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Atual: Ordenação automática ativada",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Atual: Ordenação automática desativada",
   "tooltip.item.unstable_space_time.long_data": "O espaço-tempo está estabilizando, faltam %s ciclos. Mantenha-o sempre com você.",
-  "tooltip.beyonddimensions.item.xp_exchange": "No GUI: Botão direito para armazenar XP, Botão do meio para resgatar XP\nSegurando: Botão direito para alternar modo de trabalho, Shift+Botão direito para alterar taxa de interação de XP",
+  "tooltip.beyonddimensions.item.xp_exchange": "Segurando: Botão direito abre as configurações\nEm GUIs de armazenamento: Botão direito para guardar XP, Botão do meio para recuperar XP",
   "tooltip.editbox.beyonddimensions.search": "Digite texto para pesquisar por nome\nDigite '@' para filtrar IDs de mods\nDigite '$' para filtrar conteúdo de tooltips\nDigite '#' para filtrar tags\nSepare vários filtros com espaços; use aspas para pesquisar caracteres de espaço\nUse '|' para correspondência OU e '-' para excluir correspondências\nPressione Shift+Z para alternar a vinculação da caixa de pesquisa JEI/EMI",
-
+  "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Digite o nível de XP para manter ou usar na troca manual\nValores acima do limite são reduzidos automaticamente",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Atual: Trabalhando (mantém o nível alvo ativamente)",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Atual: Não trabalhando (apenas troca manual)",
   "istack.beyonddimensions.storage_num.item": "Armazenado: %s itens",
   "istack.beyonddimensions.storage_num.fluid": "Armazenado: %s mB",
   "istack.beyonddimensions.storage_num.long_type": "Armazenado: %s",
-
   "key.categories.beyonddimensions": "Além das Dimensões",
   "key.beyonddimensions.open_gui": "Abrir rede",
   "key.beyonddimensions.open_terminal_quick_key": "Abrir rapidamente o terminal no inventário",
   "key.beyonddimensions.main_hand_item_transfer_key": "Transferência rápida de item na mão principal",
   "key.beyonddimensions.toggle_magnet_key": "Alternar ímã",
-
   "item.beyonddimensions.net_creater": "Gerador Dimensional",
   "item.beyonddimensions.net_member_inviter": "Conector de Membros",
   "item.beyonddimensions.net_manager_inviter": "Conector de Admins",
@@ -120,7 +119,9 @@
   "item.beyonddimensions.xp_fluid_bucket": "Balde de XP líquido",
   "item.beyonddimensions.xp_exchange_item": "Varinha de XP",
   "item.beyonddimensions.warden_soul_tag_item": "Marcador de Almas",
-
+  "menu.title.beyonddimensions.xp_exchange_menu": "Configurações da Varinha de XP",
+  "menu.label.beyonddimensions.xp_exchange.target_level": "Nível Alvo",
+  "menu.label.beyonddimensions.xp_exchange.max_level": "Máx: %s",
   "block.beyonddimensions.net_control": "Controlador de Rede",
   "block.beyonddimensions.net_interface": "Interface de Rede",
   "block.beyonddimensions.net_pathway": "Caminho Dimensional",
@@ -135,14 +136,10 @@
   "block.beyonddimensions.ars_source_pathway": "Caminho da Fonte Interdimensional",
   "block.beyonddimensions.mana_pool_pathway": "Poço de Mana Dimensional",
   "block.beyonddimensions.schematicannon_pathway": "Interface de esquema",
-
   "fluid_type.beyonddimensions.xp_fluid": "XP líquido",
-
   "creativetab.beyonddimensions.items": "Além das Dimensões - Itens",
   "creativetab.beyonddimensions.blocks": "Além das Dimensões - Blocos",
-
   "beyonddimensions.message.insufficient_materials": "Materiais insuficientes",
-
   "msg.beyonddimensions.network_created": "Você abriu uma fenda no cosmos...\nDica: Por padrão pressione [O] para abrir a rede dimensional.",
   "msg.beyonddimensions.item_net_bound": "Item vinculado à rede nº%d",
   "msg.beyonddimensions.item_net_unbound": "Item desvinculado da rede nº%d",
@@ -161,14 +158,12 @@
   "msg.beyonddimensions.xp_mode.switch.high": "Quantidade de transferência XP alterada para: 30 níveis",
   "msg.beyonddimensions.xp_mode.switch.highest": "Quantidade de transferência XP alterada para: 100 níveis",
   "msg.beyonddimensions.xp_mode.switch.over_highest": "Quantidade de transferência XP alterada para: 150 níveis",
-
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Almas do Guardião",
   "types.beyonddimensions.source_type.name": "Fonte",
   "types.beyonddimensions.mana_type.name": "Mana Vegetal",
-
   "msg.beyonddimensions.magnet.close": "Ímã desativado",
   "msg.beyonddimensions.magnet.open": "Ímã ativado",
-  "msg.beyonddimensions.item.xp_exchange.open": "Ativar troca automática de XP, mantendo nível por interação",
+  "msg.beyonddimensions.item.xp_exchange.open": "Ativar troca automática de XP, mantendo o nível configurado",
   "msg.beyonddimensions.item.xp_exchange.close": "Desativar troca automática de XP"
 }

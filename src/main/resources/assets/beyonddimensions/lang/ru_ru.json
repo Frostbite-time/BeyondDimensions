@@ -22,7 +22,6 @@
   "menu.label.beyonddimensions.tag_and_stored_slots": "Теги и слоты хранения",
   "menu.label.beyonddimensions.input_filter_slots": "Ввод",
   "menu.label.beyonddimensions.fuel_filter_slots": "Топливо",
-
   "tooltip.button.beyonddimensions.sort_asc": "Текущий: По возрастанию",
   "tooltip.button.beyonddimensions.sort_desc": "Текущий: По убыванию",
   "tooltip.button.beyonddimensions.search_disable": "Очищать поиск при отключении",
@@ -88,13 +87,14 @@
   "tooltip.button.beyonddimensions.sort_mode_open": "Текущий: Автосортировка включена",
   "tooltip.button.beyonddimensions.sort_mode_stop": "Текущий: Автосортировка отключена",
   "tooltip.item.unstable_space_time.long_data": "Пространство-время стабилизируется, осталось %s циклов. Носите с собой постоянно.",
-  "tooltip.beyonddimensions.item.xp_exchange": "В интерфейсе: ПКМ - сохранить опыт, СКМ - извлечь опыт\nВ руке: ПКМ - переключить режим работы, Shift+ПКМ - изменить скорость взаимодействия с опытом",
+  "tooltip.beyonddimensions.item.xp_exchange": "В руке: ПКМ открывает настройки\nВ интерфейсах хранилища: ПКМ - сохранить опыт, СКМ - извлечь опыт",
   "tooltip.editbox.beyonddimensions.search": "Введите текст для поиска по имени\nВведите '@', чтобы фильтровать ID модов\nВведите '$', чтобы фильтровать содержимое подсказок\nВведите '#', чтобы фильтровать теги\nРазделяйте несколько фильтров пробелами; используйте кавычки для поиска пробелов\nИспользуйте '|' для совпадения по ИЛИ, а '-' для исключения совпадений\nНажмите Shift+Z для переключения привязки к строке поиска JEI/EMI",
-
+  "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Введите уровень опыта для поддержания или ручного обмена\nЗначения выше лимита автоматически ограничиваются",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Текущий: Работает (активно поддерживает целевой уровень)",
+  "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Текущий: Не работает (только ручной обмен)",
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
   "istack.beyonddimensions.storage_num.fluid": "Сохранено: %s мБ",
   "istack.beyonddimensions.storage_num.long_type": "Хранится: %s",
-
   "key.categories.beyonddimensions": "За Гранью Измерений",
   "key.beyonddimensions.open_gui": "Открыть сеть",
   "key.beyonddimensions.open_terminal_quick_key": "Быстро открыть терминал в инвентаре",
@@ -103,7 +103,6 @@
   "key.beyonddimensions.toggle_magnet_item_key": "Переключить магнит предметов",
   "key.beyonddimensions.toggle_magnet_fluid_key": "Переключить магнит жидкостей",
   "key.beyonddimensions.open_magnet_gui_key": "Открыть интерфейс магнита",
-
   "item.beyonddimensions.net_creater": "Генератор Измерений",
   "item.beyonddimensions.net_member_inviter": "Пригласитель участников",
   "item.beyonddimensions.net_manager_inviter": "Пригласитель админов",
@@ -123,7 +122,9 @@
   "item.beyonddimensions.xp_fluid_bucket": "Ведро жидкого опыта",
   "item.beyonddimensions.xp_exchange_item": "Жезл опыта",
   "item.beyonddimensions.warden_soul_tag_item": "Маркер душ",
-
+  "menu.title.beyonddimensions.xp_exchange_menu": "Настройки жезла опыта",
+  "menu.label.beyonddimensions.xp_exchange.target_level": "Целевой уровень",
+  "menu.label.beyonddimensions.xp_exchange.max_level": "Макс: %s",
   "block.beyonddimensions.net_control": "Контроллер Сети",
   "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
   "block.beyonddimensions.net_pathway": "Измеренческий Канал",
@@ -138,14 +139,10 @@
   "block.beyonddimensions.ars_source_pathway": "Межмерный Канал Источника",
   "block.beyonddimensions.mana_pool_pathway": "Измеренческий Мана-Резервуар",
   "block.beyonddimensions.schematicannon_pathway": "Интерфейс схемы",
-
   "fluid_type.beyonddimensions.xp_fluid": "Жидкий опыт",
-
   "creativetab.beyonddimensions.items": "За Гранью - Предметы",
   "creativetab.beyonddimensions.blocks": "За Гранью - Блоки",
-
   "beyonddimensions.message.insufficient_materials": "Недостаточно материалов",
-
   "msg.beyonddimensions.network_created": "Ты прорвал брешь в космосе...\nПодсказка: По умолчанию нажмите [O], чтобы открыть сеть измерений.",
   "msg.beyonddimensions.item_net_bound": "Предмет привязан к сети №%d",
   "msg.beyonddimensions.item_net_unbound": "Предмет отвязан от сети №%d",
@@ -164,14 +161,12 @@
   "msg.beyonddimensions.xp_mode.switch.high": "Объем передачи переключен на: 30 уровней",
   "msg.beyonddimensions.xp_mode.switch.highest": "Объем передачи переключен на: 100 уровней",
   "msg.beyonddimensions.xp_mode.switch.over_highest": "Объем передачи переключен на: 150 уровней",
-
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Души Вардена",
   "types.beyonddimensions.source_type.name": "Источник",
   "types.beyonddimensions.mana_type.name": "Растительная Мана",
-
   "msg.beyonddimensions.magnet.close": "Магнит отключён",
   "msg.beyonddimensions.magnet.open": "Магнит включён",
-  "msg.beyonddimensions.item.xp_exchange.open": "Включить автоматический обмен опыта, поддерживая уровень за одно взаимодействие",
+  "msg.beyonddimensions.item.xp_exchange.open": "Включить автообмен опытом, поддерживая заданный уровень",
   "msg.beyonddimensions.item.xp_exchange.close": "Выключить автоматический обмен опыта"
 }
