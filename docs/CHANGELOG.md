@@ -1,1 +1,1 @@
-* Prevent storage key from being modified at certain times
+* update to 26.1 release

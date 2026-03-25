@@ -95,12 +95,12 @@ jobs:
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           # CurseForge
-          # curseforge-id: ${{ env.CURSEFORGE_ID }}
-          # curseforge-token: ${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}
+          curseforge-id: ${{ env.CURSEFORGE_ID }}
+          curseforge-token: ${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}
 
           # Modrinth
-          # modrinth-id: ${{ env.MODRINTH_ID }}
-          # modrinth-token: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
+          modrinth-id: ${{ env.MODRINTH_ID }}
+          modrinth-token: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
 
           # GitHub Release
           github-tag: v${{ steps.props.outputs.display_version }}
