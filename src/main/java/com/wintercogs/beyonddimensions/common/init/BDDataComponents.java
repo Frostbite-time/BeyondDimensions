@@ -209,6 +209,12 @@ public class BDDataComponents
             )
     );
 
+    public static final DeferredHolder<DataComponentType<?>, @NotNull DataComponentType<Integer>> XP_TARGET_LEVEL = register(
+            "xp_target_level", builder -> builder
+                    .persistent(Codec.INT)
+                    .networkSynchronized(ByteBufCodecs.VAR_INT)
+    );
+
     public static final DeferredHolder<DataComponentType<?>, @NotNull DataComponentType<Boolean>> XP_NET_KEEP_MODE = register(
             "xp_net_keep_mode", builder -> builder
                     .persistent(Codec.BOOL)

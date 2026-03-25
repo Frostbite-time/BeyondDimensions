@@ -1,1 +1,1 @@
-* update to 26.1 release
+* Upgrade XpExhchanger interaction method
