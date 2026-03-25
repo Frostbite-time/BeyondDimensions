@@ -111,6 +111,28 @@ public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu>
         menu.writeAndSendQuickData();
     }
 
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
+    {
+        if (targetLevelField != null && targetLevelField.isMouseOver(mouseX, mouseY) && scrollY != 0)
+        {
+            int step = hasControlDown() ? 100 : (hasShiftDown() ? 10 : 1);
+            int direction = scrollY > 0 ? 1 : -1;
+            int currentValue = targetLevelField.getValue().isEmpty() ? 0 : Integer.parseInt(targetLevelField.getValue());
+            int nextValue = XpExchangeSettings.sanitizeTargetLevel(currentValue + direction * step);
+
+            syncingField = true;
+            targetLevelField.setValue(Integer.toString(nextValue));
+            syncingField = false;
+
+            XpExchangeSettings.setTargetLevel(menu.menuStack, nextValue);
+            menu.writeAndSendQuickData();
+            return true;
+        }
+
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
     private KeepModeState resolveKeepModeState()
     {
         return menu.menuStack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false) ? KeepModeState.WORKING : KeepModeState.NOT_WORKING;
