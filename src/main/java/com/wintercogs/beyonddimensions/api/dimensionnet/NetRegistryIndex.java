@@ -16,7 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,9 +37,19 @@ final class NetRegistryIndex extends SavedData
     private static final Factory<NetRegistryIndex> FACTORY = new Factory<>(NetRegistryIndex::new, NetRegistryIndex::load);
 
     /**
-     * 实际保存已知网络和下一个可分配 ID 的状态容器。
+     * 当前仍然有效的网络 ID 集合。
      */
-    private final NetRegistryIndexState state = new NetRegistryIndexState();
+    private final TreeSet<Integer> activeNetIds = new TreeSet<>();
+
+    /**
+     * 当前候选的下一个网络 ID。
+     */
+    private int nextNetId;
+
+    /**
+     * 标记网络注册表是否已经完成初始化或旧存档迁移。
+     */
+    private boolean initialized;
 
     /**
      * 获取网络注册表数据，不存在时自动创建。
@@ -63,15 +75,15 @@ final class NetRegistryIndex extends SavedData
         ListTag activeNetIds = tag.getList(ACTIVE_NET_IDS, IntTag.TAG_INT);
         for (int i = 0; i < activeNetIds.size(); i++)
         {
-            index.state.observeExistingNet(activeNetIds.getInt(i), true);
+            index.observeExistingNet(activeNetIds.getInt(i), true);
         }
         if (tag.contains(NEXT_NET_ID))
         {
-            index.state.observeExistingNet(tag.getInt(NEXT_NET_ID) - 1, false);
+            index.nextNetId = Math.max(0, tag.getInt(NEXT_NET_ID));
         }
         if (tag.contains(INITIALIZED))
         {
-            index.state.setInitialized(tag.getBoolean(INITIALIZED));
+            index.initialized = tag.getBoolean(INITIALIZED);
         }
         return index;
     }
@@ -86,14 +98,14 @@ final class NetRegistryIndex extends SavedData
     @Override
     public @NotNull CompoundTag save(CompoundTag tag, HolderLookup.Provider registryAccess)
     {
-        ListTag activeNetIds = new ListTag();
-        for (int netId : state.getActiveNetIds())
+        ListTag activeNetIdTags = new ListTag();
+        for (int netId : activeNetIds)
         {
-            activeNetIds.add(IntTag.valueOf(netId));
+            activeNetIdTags.add(IntTag.valueOf(netId));
         }
-        tag.put(ACTIVE_NET_IDS, activeNetIds);
-        tag.putInt(NEXT_NET_ID, state.getNextNetId());
-        tag.putBoolean(INITIALIZED, state.isInitialized());
+        tag.put(ACTIVE_NET_IDS, activeNetIdTags);
+        tag.putInt(NEXT_NET_ID, nextNetId);
+        tag.putBoolean(INITIALIZED, initialized);
         return tag;
     }
 
@@ -107,13 +119,14 @@ final class NetRegistryIndex extends SavedData
      */
     void ensureInitialized(MinecraftServer server)
     {
-        if (state.isInitialized())
+        if (initialized)
         {
             return;
         }
 
         boolean changed = migrateLegacyData(server);
-        changed |= state.setInitialized(true);
+        changed |= !initialized;
+        initialized = true;
         if (changed)
         {
             setDirty();
@@ -134,9 +147,7 @@ final class NetRegistryIndex extends SavedData
     int allocateNetId(MinecraftServer server)
     {
         ensureInitialized(server);
-        int allocated = state.allocateNetId();
-        setDirty();
-        return allocated;
+        return allocateNetId();
     }
 
     /**
@@ -148,7 +159,7 @@ final class NetRegistryIndex extends SavedData
     void registerNet(MinecraftServer server, int netId)
     {
         ensureInitialized(server);
-        if (state.registerNet(netId))
+        if (registerNet(netId))
         {
             setDirty();
         }
@@ -163,7 +174,7 @@ final class NetRegistryIndex extends SavedData
     void unregisterNet(MinecraftServer server, int netId)
     {
         ensureInitialized(server);
-        if (state.unregisterNet(netId))
+        if (activeNetIds.remove(netId))
         {
             setDirty();
         }
@@ -178,7 +189,7 @@ final class NetRegistryIndex extends SavedData
     List<Integer> getActiveNetIds(MinecraftServer server)
     {
         ensureInitialized(server);
-        return state.getActiveNetIds();
+        return new ArrayList<>(activeNetIds);
     }
 
     /**
@@ -191,7 +202,7 @@ final class NetRegistryIndex extends SavedData
     boolean isKnownNet(MinecraftServer server, int netId)
     {
         ensureInitialized(server);
-        return state.isKnownNet(netId);
+        return activeNetIds.contains(netId);
     }
 
     /**
@@ -221,7 +232,7 @@ final class NetRegistryIndex extends SavedData
 
                 int netId = Integer.parseInt(matcher.group(1));
                 DimensionsNet net = DimensionsNet.getNetFromId(server, netId);
-                changed |= state.observeExistingNet(netId, net != null);
+                changed |= observeExistingNet(netId, net != null);
             }
         }
         catch (IOException exception)
@@ -240,8 +251,67 @@ final class NetRegistryIndex extends SavedData
      * @param event 服务端启动事件
      */
     @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event)
+    private static void onServerStarted(ServerStartedEvent event)
     {
         NetRegistryIndex.get(event.getServer()).ensureInitialized(event.getServer());
     }
+
+    /**
+     * 记录一个已经存在的网络 ID。
+     * <p>
+     * 该方法会在需要时推进候选 ID，避免与历史网络 ID 冲突。
+     *
+     * @param netId         已存在的网络 ID
+     * @param activeNetwork 为真时把该网络视为当前有效网络
+     * @return 注册表状态发生变化时返回 {@code true}
+     */
+    private boolean observeExistingNet(int netId, boolean activeNetwork)
+    {
+        if (netId < 0)
+        {
+            return false;
+        }
+
+        boolean changed = false;
+        if (activeNetwork)
+        {
+            changed = activeNetIds.add(netId);
+        }
+        if (nextNetId <= netId)
+        {
+            nextNetId = netId + 1;
+            changed = true;
+        }
+        return changed;
+    }
+
+    /**
+     * 把一个网络标记为当前有效网络。
+     * <p>
+     * 当登记的网络恰好等于当前候选 ID 时，候选 ID 会推进到下一个值。
+     *
+     * @param netId 网络 ID
+     * @return 注册表状态发生变化时返回 {@code true}
+     */
+    private boolean registerNet(int netId)
+    {
+        if (netId < 0)
+        {
+            return false;
+        }
+
+        boolean changed = activeNetIds.add(netId);
+        if (netId == nextNetId)
+        {
+            nextNetId++;
+            changed = true;
+        }
+        return changed;
+    }
+
+    private int allocateNetId()
+    {
+        return nextNetId;
+    }
+
 }

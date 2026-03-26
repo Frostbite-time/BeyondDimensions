@@ -10,9 +10,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @EventBusSubscriber(modid = BDConstants.MODID)
 final class PlayerNetIndex extends SavedData
@@ -25,7 +23,7 @@ final class PlayerNetIndex extends SavedData
     /**
      * 表示玩家当前没有主网络的特殊值。
      */
-    static final int NO_PRIMARY_NET = PlayerNetIndexState.NO_PRIMARY_NET;
+    static final int NO_PRIMARY_NET = -1;
 
     private static final String PRIMARY_NET_ENTRIES = "PrimaryNetEntries";
     private static final String PLAYER_ID = "PlayerId";
@@ -33,9 +31,18 @@ final class PlayerNetIndex extends SavedData
     private static final Factory<PlayerNetIndex> FACTORY = new Factory<>(PlayerNetIndex::new, PlayerNetIndex::load);
 
     /**
-     * 持久化主网络映射与运行时成员网络组的实际状态容器。
+     * 玩家 UUID -> 主网络 ID。
+     * <p>
+     * 该映射会持久化保存；值为 {@link #NO_PRIMARY_NET} 时表示空主网络状态。
      */
-    private final PlayerNetIndexState state = new PlayerNetIndexState();
+    private final Map<UUID, Integer> primaryNetIds = new HashMap<>();
+
+    /**
+     * 玩家 UUID -> 全部成员网络 ID 组。
+     * <p>
+     * 该映射仅在运行时维护，不写入存档。
+     */
+    private final Map<UUID, LinkedHashSet<Integer>> allNetIds = new HashMap<>();
 
     /**
      * 获取玩家网络索引数据，不存在时自动创建。
@@ -79,7 +86,7 @@ final class PlayerNetIndex extends SavedData
             {
                 continue;
             }
-            index.state.putSavedPrimary(entry.getUUID(PLAYER_ID), entry.getInt(PRIMARY_NET_ID));
+            index.primaryNetIds.put(entry.getUUID(PLAYER_ID), entry.getInt(PRIMARY_NET_ID));
         }
         return index;
     }
@@ -97,7 +104,7 @@ final class PlayerNetIndex extends SavedData
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registryAccess)
     {
         ListTag entryList = new ListTag();
-        for (Map.Entry<UUID, Integer> entry : state.copyPrimaryNetIds().entrySet())
+        for (Map.Entry<UUID, Integer> entry : copyPrimaryNetIds().entrySet())
         {
             CompoundTag data = new CompoundTag();
             data.putUUID(PLAYER_ID, entry.getKey());
@@ -115,7 +122,7 @@ final class PlayerNetIndex extends SavedData
      */
     void clearRuntime()
     {
-        state.clearRuntime();
+        allNetIds.clear();
     }
 
     /**
@@ -155,8 +162,18 @@ final class PlayerNetIndex extends SavedData
      */
     void addMembership(UUID playerId, int netId, boolean switchPrimary)
     {
-        if (state.addMembership(playerId, netId, switchPrimary))
+        if (netId < 0)
         {
+            return;
+        }
+
+        LinkedHashSet<Integer> memberships = allNetIds.computeIfAbsent(playerId, ignored -> new LinkedHashSet<>());
+        if (memberships.add(netId))
+        {
+            if (switchPrimary)
+            {
+                primaryNetIds.put(playerId, netId);
+            }
             setDirty();
         }
     }
@@ -171,10 +188,26 @@ final class PlayerNetIndex extends SavedData
      */
     void removeMembership(UUID playerId, int netId)
     {
-        if (state.removeMembership(playerId, netId))
+        LinkedHashSet<Integer> memberships = allNetIds.get(playerId);
+        if (memberships == null || !memberships.remove(netId))
         {
-            setDirty();
+            return;
         }
+
+        if (memberships.isEmpty())
+        {
+            allNetIds.remove(playerId);
+            primaryNetIds.remove(playerId);
+            setDirty();
+            return;
+        }
+
+        Integer primaryNetId = primaryNetIds.get(playerId);
+        if (primaryNetId != null && primaryNetId == netId)
+        {
+            primaryNetIds.put(playerId, getSmallestNetId(memberships));
+        }
+        setDirty();
     }
 
     /**
@@ -186,7 +219,18 @@ final class PlayerNetIndex extends SavedData
      */
     void clearPrimary(UUID playerId)
     {
-        if (state.clearPrimary(playerId))
+        LinkedHashSet<Integer> memberships = allNetIds.get(playerId);
+        if (memberships == null || memberships.isEmpty())
+        {
+            if (primaryNetIds.remove(playerId) != null)
+            {
+                setDirty();
+            }
+            return;
+        }
+
+        Integer previous = primaryNetIds.put(playerId, NO_PRIMARY_NET);
+        if (previous == null || previous != NO_PRIMARY_NET)
         {
             setDirty();
         }
@@ -201,7 +245,32 @@ final class PlayerNetIndex extends SavedData
      */
     boolean setPrimary(UUID playerId, int netId)
     {
-        boolean changed = state.setPrimary(playerId, netId);
+        boolean changed;
+        if (netId == NO_PRIMARY_NET)
+        {
+            LinkedHashSet<Integer> memberships = allNetIds.get(playerId);
+            if (memberships == null || memberships.isEmpty())
+            {
+                changed = primaryNetIds.remove(playerId) != null;
+            }
+            else
+            {
+                Integer previous = primaryNetIds.put(playerId, NO_PRIMARY_NET);
+                changed = previous == null || previous != NO_PRIMARY_NET;
+            }
+        }
+        else
+        {
+            LinkedHashSet<Integer> memberships = allNetIds.get(playerId);
+            if (memberships == null || !memberships.contains(netId))
+            {
+                return false;
+            }
+
+            Integer previous = primaryNetIds.put(playerId, netId);
+            changed = previous == null || previous != netId;
+        }
+
         if (changed)
         {
             setDirty();
@@ -217,7 +286,7 @@ final class PlayerNetIndex extends SavedData
      */
     int getPrimaryNetId(UUID playerId)
     {
-        return state.getPrimaryNetId(playerId);
+        return primaryNetIds.getOrDefault(playerId, NO_PRIMARY_NET);
     }
 
     /**
@@ -228,7 +297,8 @@ final class PlayerNetIndex extends SavedData
      */
     boolean hasAnyMembership(UUID playerId)
     {
-        return state.hasAnyMembership(playerId);
+        LinkedHashSet<Integer> memberships = allNetIds.get(playerId);
+        return memberships != null && !memberships.isEmpty();
     }
 
     /**
@@ -239,7 +309,8 @@ final class PlayerNetIndex extends SavedData
      */
     List<Integer> getAllNetIds(UUID playerId)
     {
-        return state.getAllNetIds(playerId);
+        LinkedHashSet<Integer> memberships = allNetIds.get(playerId);
+        return memberships == null || memberships.isEmpty() ? List.of() : new ArrayList<>(memberships);
     }
 
     /**
@@ -249,7 +320,7 @@ final class PlayerNetIndex extends SavedData
      */
     Map<UUID, Integer> copyPrimaryNetIds()
     {
-        return state.copyPrimaryNetIds();
+        return new HashMap<>(primaryNetIds);
     }
 
     /**
@@ -261,7 +332,55 @@ final class PlayerNetIndex extends SavedData
      */
     boolean reconcilePrimaryMappings()
     {
-        return state.reconcilePrimaryMappings();
+        boolean changed = false;
+        Set<UUID> playerIds = new HashSet<>(allNetIds.keySet());
+        playerIds.addAll(primaryNetIds.keySet());
+
+        for (UUID playerId : playerIds)
+        {
+            LinkedHashSet<Integer> memberships = allNetIds.get(playerId);
+            if (memberships == null || memberships.isEmpty())
+            {
+                changed |= primaryNetIds.remove(playerId) != null;
+                continue;
+            }
+
+            if (!primaryNetIds.containsKey(playerId))
+            {
+                primaryNetIds.put(playerId, getSmallestNetId(memberships));
+                changed = true;
+                continue;
+            }
+
+            int primaryNetId = primaryNetIds.get(playerId);
+            if (primaryNetId == NO_PRIMARY_NET)
+            {
+                continue;
+            }
+
+            if (!memberships.contains(primaryNetId))
+            {
+                primaryNetIds.put(playerId, getSmallestNetId(memberships));
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
+    /**
+     * 获取一组网络 ID 中最小的那个，作为主网络回退目标。
+     *
+     * @param memberships 候选网络 ID 集合
+     * @return 最小的网络 ID
+     */
+    private static int getSmallestNetId(LinkedHashSet<Integer> memberships)
+    {
+        int smallest = Integer.MAX_VALUE;
+        for (int membership : memberships)
+        {
+            smallest = Math.min(smallest, membership);
+        }
+        return smallest;
     }
 
     /**
@@ -272,7 +391,7 @@ final class PlayerNetIndex extends SavedData
      * @param event 服务端启动事件
      */
     @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event)
+    private static void onServerStarted(ServerStartedEvent event)
     {
         PlayerNetIndex.get(event.getServer()).rebuildFromServer(event.getServer());
     }
