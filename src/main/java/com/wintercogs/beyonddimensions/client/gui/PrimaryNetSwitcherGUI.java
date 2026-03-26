@@ -145,6 +145,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         {
             CommonTexturesRender.renderCommonConnection(guiGraphics, this.leftPos, drawY);
         }
+        CommonTexturesRender.renderBottomBaseCommon(guiGraphics, this.leftPos, drawY);
     }
 
     @Override
@@ -373,7 +374,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
 
     private int rebuildImageHeight()
     {
-        return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_CONNECTION_HEIGHT * PANEL_CONNECTION_COUNT;
+        return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_CONNECTION_HEIGHT * PANEL_CONNECTION_COUNT + CommonTextures.BOTTOM_BASE_COMMON_HEIGHT;
     }
 
     private final class PrimaryNetOptionButton extends Button

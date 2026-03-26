@@ -8,6 +8,7 @@
   "menu.title.beyonddimensions.furnace_menu": "Сетевая печь",
   "menu.title.beyonddimensions.magnet_menu": "Сетевой магнит",
   "menu.title.beyonddimensions.feeder_menu": "Сетевой питатель",
+  "menu.title.beyonddimensions.primary_net_switcher": "Переключатель основной сети",
   "beyonddimensions.scrollbar.usage.focused": "Ползунок в фокусе",
   "beyonddimensions.scrollbar.usage.hovered": "Наведение курсора",
   "wintercogs.beyonddimensions.dimensionsguisearch": "Поиск...",
@@ -93,6 +94,10 @@
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Введите уровень опыта для поддержания или ручного обмена\nЗначения выше лимита автоматически ограничиваются",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Текущий: Работает (активно поддерживает целевой уровень)",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Текущий: Не работает (только ручной обмен)",
+  "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "Поиск по ID сети или уровню прав",
+  "tooltip.button.beyonddimensions.primary_net_switcher.clear": "Сохранить участие, но не использовать основную сеть",
+  "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Быстро переключиться на сеть #%s",
+  "tooltip.button.beyonddimensions.primary_net_switcher.option": "Сеть #%s\nПрава: %s",
 
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
   "istack.beyonddimensions.storage_num.fluid": "Сохранено: %s мБ",
@@ -106,6 +111,8 @@
   "key.beyonddimensions.toggle_magnet_item_key": "Переключить режим магнита для предметов",
   "key.beyonddimensions.toggle_magnet_fluid_key": "Переключить режим магнита для жидкостей",
   "key.beyonddimensions.open_magnet_gui_key": "Открыть интерфейс магнита",
+  "key.beyonddimensions.open_primary_net_switcher_key": "Открыть переключатель основной сети",
+  "key.beyonddimensions.cycle_primary_net_key": "Переключать основную сеть",
 
   "item.beyonddimensions.net_creater": "Генератор Измерений",
   "item.beyonddimensions.net_member_inviter": "Пригласитель участников",
@@ -130,6 +137,17 @@
   "menu.title.beyonddimensions.xp_exchange_menu": "Настройки жезла опыта",
   "menu.label.beyonddimensions.xp_exchange.target_level": "Целевой уровень",
   "menu.label.beyonddimensions.xp_exchange.max_level": "Макс: %s",
+  "menu.label.beyonddimensions.primary_net_switcher.search": "Поиск сетей...",
+  "menu.label.beyonddimensions.primary_net_switcher.recent": "Недавние",
+  "menu.label.beyonddimensions.primary_net_switcher.all_networks": "Доступные сети",
+  "menu.button.beyonddimensions.primary_net_switcher.clear": "Не использовать основную сеть",
+  "menu.text.beyonddimensions.primary_net_switcher.current": "Текущая основная сеть: %s",
+  "menu.text.beyonddimensions.primary_net_switcher.none": "Нет",
+  "menu.text.beyonddimensions.primary_net_switcher.current_suffix": " [Текущая]",
+  "menu.text.beyonddimensions.primary_net_switcher.hint": "Вверх/Вниз для выбора, Enter для переключения, ПКМ очищает поиск",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.member": "Участник",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.manager": "Менеджер",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "Владелец",
 
   "block.beyonddimensions.net_control": "Контроллер Сети",
   "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
@@ -184,5 +202,10 @@
   "msg.beyonddimensions.magnet.fluidclose": "Магнит для жидкостей отключён",
   "msg.beyonddimensions.magnet.fluidopen": "Магнит для жидкостей включён",
   "msg.beyonddimensions.item.xp_exchange.open": "Включить автообмен опытом, поддерживая заданный уровень",
-  "msg.beyonddimensions.item.xp_exchange.close": "Выключить автоматический обмен опыта"
+  "msg.beyonddimensions.item.xp_exchange.close": "Выключить автоматический обмен опыта",
+  "msg.beyonddimensions.primary_net.switch.changed": "Основная сеть переключена на #%s",
+  "msg.beyonddimensions.primary_net.switch.cleared": "Основная сеть очищена",
+  "msg.beyonddimensions.primary_net.switch.none_available": "Нет доступных сетей для переключения",
+  "msg.beyonddimensions.primary_net.switch.invalid_target": "Эта сеть недоступна или вы больше не состоите в ней",
+  "msg.beyonddimensions.primary_net.switch.no_other": "Нет другой доступной основной сети"
 }

@@ -8,6 +8,7 @@
   "menu.title.beyonddimensions.furnace_menu": "네트워크 용광로",
   "menu.title.beyonddimensions.magnet_menu": "네트워크 자석",
   "menu.title.beyonddimensions.feeder_menu": "네트워크 공급기",
+  "menu.title.beyonddimensions.primary_net_switcher": "주 네트워크 전환기",
   "beyonddimensions.scrollbar.usage.focused": "스크롤바 포커스됨",
   "beyonddimensions.scrollbar.usage.hovered": "스크롤바 호버링 중",
   "wintercogs.beyonddimensions.dimensionsguisearch": "검색...",
@@ -93,6 +94,10 @@
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "유지하거나 수동 교환에 사용할 XP 레벨을 입력하세요\n한도를 넘는 값은 자동으로 제한됩니다",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "현재: 작업 중 (목표 레벨을 적극 유지)",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "현재: 작업 안 함 (수동 교환만)",
+  "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "네트워크 ID 또는 권한 레벨로 검색",
+  "tooltip.button.beyonddimensions.primary_net_switcher.clear": "소속은 유지하지만 어떤 주 네트워크도 사용하지 않음",
+  "tooltip.button.beyonddimensions.primary_net_switcher.recent": "네트워크 #%s 로 빠르게 전환",
+  "tooltip.button.beyonddimensions.primary_net_switcher.option": "네트워크 #%s\n권한: %s",
 
   "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
   "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",
@@ -106,6 +111,8 @@
   "key.beyonddimensions.toggle_magnet_item_key": "아이템 자석 토글",
   "key.beyonddimensions.toggle_magnet_fluid_key": "유체 자석 토글",
   "key.beyonddimensions.open_magnet_gui_key": "네트워크 자석 GUI 열기",
+  "key.beyonddimensions.open_primary_net_switcher_key": "주 네트워크 전환기 열기",
+  "key.beyonddimensions.cycle_primary_net_key": "주 네트워크 순환 전환",
 
   "item.beyonddimensions.net_creater": "차원 네트워크 생성기",
   "item.beyonddimensions.net_member_inviter": "멤버 연결기",
@@ -130,6 +137,17 @@
   "menu.title.beyonddimensions.xp_exchange_menu": "경험치 막대 설정",
   "menu.label.beyonddimensions.xp_exchange.target_level": "목표 레벨",
   "menu.label.beyonddimensions.xp_exchange.max_level": "최대: %s",
+  "menu.label.beyonddimensions.primary_net_switcher.search": "네트워크 검색...",
+  "menu.label.beyonddimensions.primary_net_switcher.recent": "최근 사용",
+  "menu.label.beyonddimensions.primary_net_switcher.all_networks": "사용 가능한 네트워크",
+  "menu.button.beyonddimensions.primary_net_switcher.clear": "주 네트워크 사용 안 함",
+  "menu.text.beyonddimensions.primary_net_switcher.current": "현재 주 네트워크: %s",
+  "menu.text.beyonddimensions.primary_net_switcher.none": "없음",
+  "menu.text.beyonddimensions.primary_net_switcher.current_suffix": " [현재]",
+  "menu.text.beyonddimensions.primary_net_switcher.hint": "위/아래로 선택, Enter로 전환, 우클릭으로 검색 지우기",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.member": "구성원",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.manager": "관리자",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "소유자",
 
   "block.beyonddimensions.net_control": "네트워크 제어기",
   "block.beyonddimensions.net_interface": "네트워크 인터페이스",
@@ -184,5 +202,10 @@
   "msg.beyonddimensions.magnet.fluidclose": "자석 유체 흡수 비활성화됨",
   "msg.beyonddimensions.magnet.fluidopen": "자석 유체 흡수 활성화됨",
   "msg.beyonddimensions.item.xp_exchange.open": "XP 자동 교환 활성화, 설정된 레벨 유지",
-  "msg.beyonddimensions.item.xp_exchange.close": "XP 자동 교환 비활성화"
+  "msg.beyonddimensions.item.xp_exchange.close": "XP 자동 교환 비활성화",
+  "msg.beyonddimensions.primary_net.switch.changed": "주 네트워크가 #%s 로 변경됨",
+  "msg.beyonddimensions.primary_net.switch.cleared": "주 네트워크가 해제됨",
+  "msg.beyonddimensions.primary_net.switch.none_available": "전환할 수 있는 네트워크가 없음",
+  "msg.beyonddimensions.primary_net.switch.invalid_target": "해당 네트워크를 사용할 수 없거나 더 이상 구성원이 아님",
+  "msg.beyonddimensions.primary_net.switch.no_other": "전환할 다른 주 네트워크가 없음"
 }

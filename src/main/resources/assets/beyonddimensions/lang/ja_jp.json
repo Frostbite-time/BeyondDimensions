@@ -8,6 +8,7 @@
   "menu.title.beyonddimensions.furnace_menu": "ネットワーク炉",
   "menu.title.beyonddimensions.magnet_menu": "ネットワーク磁石",
   "menu.title.beyonddimensions.feeder_menu": "ネットワーク給餌機",
+  "menu.title.beyonddimensions.primary_net_switcher": "主ネットワーク切替",
   "beyonddimensions.scrollbar.usage.focused": "スクロールバーにフォーカス中",
   "beyonddimensions.scrollbar.usage.hovered": "スクロールバーにホバー中",
   "wintercogs.beyonddimensions.dimensionsguisearch": "検索...",
@@ -93,6 +94,10 @@
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "維持または手動交換に使う経験値レベルを入力\n上限を超える値は自動で制限されます",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "現在：動作中（目標レベルを維持）",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "現在：停止中（手動交換のみ）",
+  "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "ネットワークIDまたは権限レベルで検索",
+  "tooltip.button.beyonddimensions.primary_net_switcher.clear": "所属は維持したまま、主ネットワークを使わない",
+  "tooltip.button.beyonddimensions.primary_net_switcher.recent": "ネットワーク #%s にすばやく切替",
+  "tooltip.button.beyonddimensions.primary_net_switcher.option": "ネットワーク #%s\n権限: %s",
 
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
   "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",
@@ -106,6 +111,8 @@
   "key.beyonddimensions.toggle_magnet_item_key": "アイテムマグネット切り替え",
   "key.beyonddimensions.toggle_magnet_fluid_key": "流体マグネット切り替え",
   "key.beyonddimensions.open_magnet_gui_key": "マグネットGUIを開く",
+  "key.beyonddimensions.open_primary_net_switcher_key": "主ネットワーク切替を開く",
+  "key.beyonddimensions.cycle_primary_net_key": "主ネットワークを巡回切替",
 
   "item.beyonddimensions.net_creater": "次元ネットワーク生成器",
   "item.beyonddimensions.net_member_inviter": "メンバー接続器",
@@ -130,6 +137,17 @@
   "menu.title.beyonddimensions.xp_exchange_menu": "経験値の杖設定",
   "menu.label.beyonddimensions.xp_exchange.target_level": "目標レベル",
   "menu.label.beyonddimensions.xp_exchange.max_level": "最大：%s",
+  "menu.label.beyonddimensions.primary_net_switcher.search": "ネットワークを検索...",
+  "menu.label.beyonddimensions.primary_net_switcher.recent": "最近使用",
+  "menu.label.beyonddimensions.primary_net_switcher.all_networks": "利用可能なネットワーク",
+  "menu.button.beyonddimensions.primary_net_switcher.clear": "主ネットワークを使わない",
+  "menu.text.beyonddimensions.primary_net_switcher.current": "現在の主ネットワーク: %s",
+  "menu.text.beyonddimensions.primary_net_switcher.none": "なし",
+  "menu.text.beyonddimensions.primary_net_switcher.current_suffix": " [現在]",
+  "menu.text.beyonddimensions.primary_net_switcher.hint": "上下で選択、Enterで切替、右クリックで検索をクリア",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.member": "メンバー",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.manager": "管理者",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "所有者",
 
   "block.beyonddimensions.net_control": "ネットワーク制御装置",
   "block.beyonddimensions.net_interface": "ネットワークインタフェース",
@@ -184,5 +202,10 @@
   "msg.beyonddimensions.magnet.fluidclose": "流体マグネットが無効",
   "msg.beyonddimensions.magnet.fluidopen": "流体マグネットが有効",
   "msg.beyonddimensions.item.xp_exchange.open": "XP自動交換を有効化（設定したレベルを維持）",
-  "msg.beyonddimensions.item.xp_exchange.close": "XP自動交換を無効化"
+  "msg.beyonddimensions.item.xp_exchange.close": "XP自動交換を無効化",
+  "msg.beyonddimensions.primary_net.switch.changed": "主ネットワークを #%s に切り替えました",
+  "msg.beyonddimensions.primary_net.switch.cleared": "主ネットワークを解除しました",
+  "msg.beyonddimensions.primary_net.switch.none_available": "切り替え可能なネットワークがありません",
+  "msg.beyonddimensions.primary_net.switch.invalid_target": "そのネットワークは利用できないか、既に所属していません",
+  "msg.beyonddimensions.primary_net.switch.no_other": "他に切り替え可能な主ネットワークがありません"
 }

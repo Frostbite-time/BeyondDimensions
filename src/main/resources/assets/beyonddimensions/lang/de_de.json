@@ -8,6 +8,7 @@
   "menu.title.beyonddimensions.furnace_menu": "Netzwerkofen",
   "menu.title.beyonddimensions.magnet_menu": "Netzwerkmagnet",
   "menu.title.beyonddimensions.feeder_menu": "Netzwerkfütterer",
+  "menu.title.beyonddimensions.primary_net_switcher": "Primärnetz-Umschalter",
   "beyonddimensions.scrollbar.usage.focused": "Scrollleiste fokussiert",
   "beyonddimensions.scrollbar.usage.hovered": "Scrollleiste gehovered",
   "wintercogs.beyonddimensions.dimensionsguisearch": "Suchen...",
@@ -93,6 +94,10 @@
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Gib die XP-Stufe ein, die gehalten oder für manuellen Austausch verwendet werden soll\nWerte über dem Limit werden automatisch begrenzt",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Aktuell: Aktiv (hält die Zielstufe automatisch)",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Aktuell: Inaktiv (nur manueller Austausch)",
+  "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "Suche nach Netzwerk-ID oder Berechtigungsstufe",
+  "tooltip.button.beyonddimensions.primary_net_switcher.clear": "Mitgliedschaften behalten, aber kein Primärnetz verwenden",
+  "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Schnell zu Netzwerk #%s wechseln",
+  "tooltip.button.beyonddimensions.primary_net_switcher.option": "Netzwerk #%s\nBerechtigung: %s",
 
   "istack.beyonddimensions.storage_num.item": "Gespeichert: %s Stück",
   "istack.beyonddimensions.storage_num.fluid": "Gespeichert: %s mB",
@@ -106,6 +111,8 @@
   "key.beyonddimensions.toggle_magnet_item_key": "Schalterelement Magnet",
   "key.beyonddimensions.toggle_magnet_fluid_key": "Flüssigkeitsmagnet wechseln",
   "key.beyonddimensions.open_magnet_gui_key": "Magnet-GUI öffnen",
+  "key.beyonddimensions.open_primary_net_switcher_key": "Primärnetz-Umschalter öffnen",
+  "key.beyonddimensions.cycle_primary_net_key": "Primärnetz durchschalten",
 
   "item.beyonddimensions.net_creater": "Dimensionsgenerator",
   "item.beyonddimensions.net_member_inviter": "Mitgliederverbinder",
@@ -130,6 +137,17 @@
   "menu.title.beyonddimensions.xp_exchange_menu": "XP-Stab-Einstellungen",
   "menu.label.beyonddimensions.xp_exchange.target_level": "Zielstufe",
   "menu.label.beyonddimensions.xp_exchange.max_level": "Max: %s",
+  "menu.label.beyonddimensions.primary_net_switcher.search": "Netzwerke suchen...",
+  "menu.label.beyonddimensions.primary_net_switcher.recent": "Zuletzt verwendet",
+  "menu.label.beyonddimensions.primary_net_switcher.all_networks": "Verfügbare Netzwerke",
+  "menu.button.beyonddimensions.primary_net_switcher.clear": "Kein Primärnetz verwenden",
+  "menu.text.beyonddimensions.primary_net_switcher.current": "Aktuelles Primärnetz: %s",
+  "menu.text.beyonddimensions.primary_net_switcher.none": "Keines",
+  "menu.text.beyonddimensions.primary_net_switcher.current_suffix": " [Aktuell]",
+  "menu.text.beyonddimensions.primary_net_switcher.hint": "Hoch/Runter zum Wählen, Enter zum Wechseln, Rechtsklick leert die Suche",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.member": "Mitglied",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.manager": "Manager",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "Besitzer",
 
   "block.beyonddimensions.net_control": "Netzwerkcontroller",
   "block.beyonddimensions.net_interface": "Netzwerkschnittstelle",
@@ -184,5 +202,10 @@
   "msg.beyonddimensions.magnet.fluidclose": "Flüssigkeitsmagnet deaktiviert",
   "msg.beyonddimensions.magnet.fluidopen": "Flüssigkeitsmagnet aktiviert",
   "msg.beyonddimensions.item.xp_exchange.open": "XP-Automatik aktivieren und die eingestellte Stufe halten",
-  "msg.beyonddimensions.item.xp_exchange.close": "Erfahrungspunkt-Automatik deaktivieren"
+  "msg.beyonddimensions.item.xp_exchange.close": "Erfahrungspunkt-Automatik deaktivieren",
+  "msg.beyonddimensions.primary_net.switch.changed": "Primärnetz zu #%s gewechselt",
+  "msg.beyonddimensions.primary_net.switch.cleared": "Primärnetz gelöscht",
+  "msg.beyonddimensions.primary_net.switch.none_available": "Kein verfügbares Netzwerk zum Wechseln",
+  "msg.beyonddimensions.primary_net.switch.invalid_target": "Dieses Netzwerk ist nicht verfügbar oder du bist kein Mitglied mehr",
+  "msg.beyonddimensions.primary_net.switch.no_other": "Kein anderes Primärnetz verfügbar"
 }

@@ -8,6 +8,7 @@
   "menu.title.beyonddimensions.furnace_menu": "Fornalha Dimensional",
   "menu.title.beyonddimensions.magnet_menu": "Ímã Dimensional",
   "menu.title.beyonddimensions.feeder_menu": "Alimentador Dimensional",
+  "menu.title.beyonddimensions.primary_net_switcher": "Alternador de rede principal",
   "beyonddimensions.scrollbar.usage.focused": "Barra de rolagem focada",
   "beyonddimensions.scrollbar.usage.hovered": "Cursor sobre a barra",
   "wintercogs.beyonddimensions.dimensionsguisearch": "Pesquisar...",
@@ -93,6 +94,10 @@
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Digite o nível de XP para manter ou usar na troca manual\nValores acima do limite são reduzidos automaticamente",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Atual: Trabalhando (mantém o nível alvo ativamente)",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Atual: Não trabalhando (apenas troca manual)",
+  "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "Pesquisar por ID da rede ou nível de permissão",
+  "tooltip.button.beyonddimensions.primary_net_switcher.clear": "Manter as participações, mas parar de usar uma rede principal",
+  "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Trocar rapidamente para a rede #%s",
+  "tooltip.button.beyonddimensions.primary_net_switcher.option": "Rede #%s\nPermissão: %s",
 
   "istack.beyonddimensions.storage_num.item": "Armazenado: %s itens",
   "istack.beyonddimensions.storage_num.fluid": "Armazenado: %s mB",
@@ -106,6 +111,8 @@
   "key.beyonddimensions.toggle_magnet_item_key": "Alternar ímã (modo item)",
   "key.beyonddimensions.toggle_magnet_fluid_key": "Alternar ímã (modo fluido)",
   "key.beyonddimensions.open_magnet_gui_key": "Abrir GUI do ímã",
+  "key.beyonddimensions.open_primary_net_switcher_key": "Abrir alternador de rede principal",
+  "key.beyonddimensions.cycle_primary_net_key": "Alternar rede principal",
 
   "item.beyonddimensions.net_creater": "Gerador Dimensional",
   "item.beyonddimensions.net_member_inviter": "Conector de Membros",
@@ -130,6 +137,17 @@
   "menu.title.beyonddimensions.xp_exchange_menu": "Configurações da Varinha de XP",
   "menu.label.beyonddimensions.xp_exchange.target_level": "Nível Alvo",
   "menu.label.beyonddimensions.xp_exchange.max_level": "Máx: %s",
+  "menu.label.beyonddimensions.primary_net_switcher.search": "Pesquisar redes...",
+  "menu.label.beyonddimensions.primary_net_switcher.recent": "Recentes",
+  "menu.label.beyonddimensions.primary_net_switcher.all_networks": "Redes disponíveis",
+  "menu.button.beyonddimensions.primary_net_switcher.clear": "Não usar rede principal",
+  "menu.text.beyonddimensions.primary_net_switcher.current": "Rede principal atual: %s",
+  "menu.text.beyonddimensions.primary_net_switcher.none": "Nenhuma",
+  "menu.text.beyonddimensions.primary_net_switcher.current_suffix": " [Atual]",
+  "menu.text.beyonddimensions.primary_net_switcher.hint": "Cima/Baixo para selecionar, Enter para trocar, clique direito limpa a busca",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.member": "Membro",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.manager": "Gerente",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "Dono",
 
   "block.beyonddimensions.net_control": "Controlador de Rede",
   "block.beyonddimensions.net_interface": "Interface de Rede",
@@ -184,5 +202,10 @@
   "msg.beyonddimensions.magnet.fluidclose": "Desativar ímã para fluidos",
   "msg.beyonddimensions.magnet.fluidopen": "Ativar ímã para fluidos",
   "msg.beyonddimensions.item.xp_exchange.open": "Ativar troca automática de XP, mantendo o nível configurado",
-  "msg.beyonddimensions.item.xp_exchange.close": "Desativar troca automática de XP"
+  "msg.beyonddimensions.item.xp_exchange.close": "Desativar troca automática de XP",
+  "msg.beyonddimensions.primary_net.switch.changed": "Rede principal alterada para #%s",
+  "msg.beyonddimensions.primary_net.switch.cleared": "Rede principal limpa",
+  "msg.beyonddimensions.primary_net.switch.none_available": "Nenhuma rede disponível para alternar",
+  "msg.beyonddimensions.primary_net.switch.invalid_target": "Essa rede não está disponível ou você não faz mais parte dela",
+  "msg.beyonddimensions.primary_net.switch.no_other": "Nenhuma outra rede principal disponível"
 }
