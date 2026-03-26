@@ -41,6 +41,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
     private BigScroller scroller;
     private Button clearPrimaryButton;
     private List<PrimaryNetOption> filteredOptions = List.of();
+    private List<PrimaryNetOption> lastObservedOptions = List.of();
     private int topIndex;
     private int selectedIndex;
     private int lastObservedPrimaryNetId = DimensionsNet.NO_PRIMARY_NET_ID;
@@ -55,6 +56,8 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
     {
         super.init();
         clearWidgets();
+        optionButtons.clear();
+        recentButtons.clear();
 
         this.imageWidth = PANEL_WIDTH;
         this.imageHeight = rebuildImageHeight();
@@ -70,7 +73,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         searchField.setVisible(true);
         searchField.setTextColor(16777215);
         searchField.setTooltip(Tooltip.create(Component.translatable("tooltip.editbox.beyonddimensions.primary_net_switcher.search")));
-        searchField.setResponder(ignored -> rebuildFilteredOptions());
+        searchField.setResponder(this::onSearchTextChanged);
         searchField.setSuggestion(Component.translatable("menu.label.beyonddimensions.primary_net_switcher.search").getString());
         addRenderableWidget(searchField);
 
@@ -113,6 +116,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         addRenderableWidget(scroller);
 
         lastObservedPrimaryNetId = menu.currentPrimaryNetId;
+        lastObservedOptions = menu.options;
         rebuildFilteredOptions();
     }
 
@@ -120,6 +124,12 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
     protected void containerTick()
     {
         super.containerTick();
+        if (menu.options != lastObservedOptions)
+        {
+            lastObservedOptions = menu.options;
+            rebuildFilteredOptions();
+        }
+
         if (menu.currentPrimaryNetId != lastObservedPrimaryNetId)
         {
             lastObservedPrimaryNetId = menu.currentPrimaryNetId;
@@ -222,7 +232,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         List<PrimaryNetOption> nextFilteredOptions = new ArrayList<>();
         for (PrimaryNetOption option : menu.options)
         {
-            String searchableText = ("#" + option.netId() + " " + option.permission().name()).toLowerCase(Locale.ROOT);
+            String searchableText = buildSearchableText(option);
             if (searchText.isEmpty() || searchableText.contains(searchText))
             {
                 nextFilteredOptions.add(option);
@@ -244,6 +254,27 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
 
         syncRecentButtons();
         syncOptionButtons();
+    }
+
+    private void onSearchTextChanged(String text)
+    {
+        if (searchField != null)
+        {
+            searchField.setSuggestion(text.isEmpty()
+                    ? Component.translatable("menu.label.beyonddimensions.primary_net_switcher.search").getString()
+                    : "");
+        }
+        rebuildFilteredOptions();
+    }
+
+    private String buildSearchableText(PrimaryNetOption option)
+    {
+        return ("#" + option.netId() + " " + buildPermissionLabel(option.permission()).getString()).toLowerCase(Locale.ROOT);
+    }
+
+    private Component buildPermissionLabel(NetPermissionlevel permission)
+    {
+        return Component.translatable("menu.text.beyonddimensions.primary_net_switcher.permission." + permission.name().toLowerCase(Locale.ROOT));
     }
 
     private void syncRecentButtons()
@@ -300,26 +331,6 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         }
     }
 
-    private void moveSelection(int delta)
-    {
-        if (filteredOptions.isEmpty())
-        {
-            return;
-        }
-
-        if (selectedIndex < 0)
-        {
-            selectedIndex = 0;
-        }
-        else
-        {
-            selectedIndex = Math.max(0, Math.min(selectedIndex + delta, filteredOptions.size() - 1));
-        }
-
-        ensureSelectionVisible();
-        syncOptionButtons();
-    }
-
     private void ensureSelectionVisible()
     {
         if (selectedIndex < 0)
@@ -336,18 +347,24 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         }
     }
 
-    private void applySelectedOption()
-    {
-        if (selectedIndex < 0 || selectedIndex >= filteredOptions.size())
-        {
-            return;
-        }
-        sendSetPrimary(filteredOptions.get(selectedIndex).netId());
-    }
-
     private void sendSetPrimary(int netId)
     {
         PacketDistributor.sendToServer(new PrimaryNetSwitchActionPacket(PrimaryNetSwitchAction.SET_EXPLICIT, netId));
+    }
+
+    private void selectNetAndSend(int netId)
+    {
+        for (int i = 0; i < filteredOptions.size(); i++)
+        {
+            if (filteredOptions.get(i).netId() == netId)
+            {
+                selectedIndex = i;
+                ensureSelectionVisible();
+                syncOptionButtons();
+                break;
+            }
+        }
+        sendSetPrimary(netId);
     }
 
     private Component describeCurrentPrimary()
@@ -380,13 +397,14 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
     private final class PrimaryNetOptionButton extends Button
     {
         private PrimaryNetOption option;
+        private int optionIndex = -1;
 
         private PrimaryNetOptionButton(int x, int y, int width, int height)
         {
             super(x, y, width, height, Component.empty(), button -> {
                 if (((PrimaryNetOptionButton) button).option != null)
                 {
-                    sendSetPrimary(((PrimaryNetOptionButton) button).option.netId());
+                    ((PrimaryNetOptionButton) button).onSelected();
                 }
             }, DEFAULT_NARRATION);
             this.visible = false;
@@ -396,6 +414,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         private void load(PrimaryNetOption option, boolean selected, boolean currentPrimary)
         {
             this.option = option;
+            this.optionIndex = PrimaryNetSwitcherGUI.this.topIndex + optionButtons.indexOf(this);
             this.visible = true;
             this.active = !currentPrimary;
             this.setMessage(buildLabel(option, currentPrimary));
@@ -405,20 +424,29 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         private void clear()
         {
             this.option = null;
+            this.optionIndex = -1;
             this.visible = false;
             this.active = false;
             this.setMessage(Component.empty());
             this.setTooltip(null);
         }
 
-        private Component buildLabel(PrimaryNetOption option, boolean currentPrimary)
+        private void onSelected()
         {
-            return Component.literal("#" + option.netId() + " ").append(buildPermissionLabel(option.permission())).append(currentPrimary ? Component.translatable("menu.text.beyonddimensions.primary_net_switcher.current_suffix") : Component.empty());
+            if (option == null)
+            {
+                return;
+            }
+            if (optionIndex >= 0)
+            {
+                selectedIndex = optionIndex;
+            }
+            selectNetAndSend(option.netId());
         }
 
-        private Component buildPermissionLabel(NetPermissionlevel permission)
+        private Component buildLabel(PrimaryNetOption option, boolean currentPrimary)
         {
-            return Component.translatable("menu.text.beyonddimensions.primary_net_switcher.permission." + permission.name().toLowerCase(Locale.ROOT));
+            return Component.literal("#" + option.netId() + " ").append(PrimaryNetSwitcherGUI.this.buildPermissionLabel(option.permission())).append(currentPrimary ? Component.translatable("menu.text.beyonddimensions.primary_net_switcher.current_suffix") : Component.empty());
         }
     }
 
@@ -442,6 +470,15 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
             this.targetNetId = netId;
             this.setMessage(Component.literal("#" + netId));
             this.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.primary_net_switcher.recent", netId)));
+        }
+
+        @Override
+        public void onPress()
+        {
+            if (targetNetId >= 0)
+            {
+                selectNetAndSend(targetNetId);
+            }
         }
     }
 }
