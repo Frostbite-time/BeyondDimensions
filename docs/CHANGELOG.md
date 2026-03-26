@@ -1,1 +1,1 @@
-* Upgrade XpExhchanger interaction method 
+* Allow Player has multi networks.
