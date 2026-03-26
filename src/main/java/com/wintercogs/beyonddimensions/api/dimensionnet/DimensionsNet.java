@@ -35,7 +35,6 @@ import java.util.*;
 public class DimensionsNet extends SavedData
 {
     static final String NET_DATA_PREFIX = "BDNet_";
-    static final int MAX_NET_SCAN = 10000;
 
     /**
      * 作为网络的唯一标识符，id从0开始，小于0的id均可以认为是无效网络
@@ -123,10 +122,11 @@ public class DimensionsNet extends SavedData
         MinecraftServer server = player.getServer();
         if (server != null)
         {
-            String netId = DimensionsNet.buildNewNetName(server);
-            String numId = netId.replace("BDNet_", "");
-            DimensionsNet newNet = server.overworld().getDataStorage().computeIfAbsent(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), netId);
-            newNet.setId(Integer.parseInt(numId));
+            int allocatedNetId = NetRegistryIndex.get(server).allocateNetId(server);
+            String netDataName = DimensionsNet.buildNetDataName(allocatedNetId);
+            DimensionsNet newNet = server.overworld().getDataStorage().computeIfAbsent(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), netDataName);
+            newNet.setId(allocatedNetId);
+            NetRegistryIndex.get(server).registerNet(server, allocatedNetId);
             newNet.setOwner(player.getUUID());
             newNet.addManager(player.getUUID());
             newNet.addPlayer(player.getUUID());
@@ -140,23 +140,27 @@ public class DimensionsNet extends SavedData
     }
 
     /**
-     * 构建最新的，可用的网络名称，用于创建新网络时确定新网络的id，仅在服务端调用
+     * 构建最新的，可用的网络名称，仅在服务端调用。
+     * <p>
+     * 该方法会通过网络注册表分配一个全新的、单调递增的网络 ID，并基于它构建数据名。
+     * 该操作不会自动把网络登记为有效网络。
      *
      * @param dataProvider 用于获取SavedData
      * @return 最新可用的网络名称，内容为字符串："BDNet_<数字id>"
      */
     public static String buildNewNetName(@NotNull MinecraftServer dataProvider)
     {
-        int netId;
-        // 接下来按照"BDNet_" + netId从0查找网络，直到找到不存在的网络，此时netId为新网络id
-        // 后续可以做一个废弃网络回收处理，但是暂时不着急
-        for (netId = 0; netId < MAX_NET_SCAN; netId++)
-        {
-            if (dataProvider.overworld().getDataStorage().get(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), NET_DATA_PREFIX + netId) == null)
-            {
-                break;
-            }
-        }
+        return buildNetDataName(NetRegistryIndex.get(dataProvider).allocateNetId(dataProvider));
+    }
+
+    /**
+     * 根据网络 ID 构建其固定的数据存档名。
+     *
+     * @param netId 网络 ID
+     * @return 对应的 SavedData 名称
+     */
+    public static String buildNetDataName(int netId)
+    {
         return NET_DATA_PREFIX + netId;
     }
 
@@ -177,7 +181,7 @@ public class DimensionsNet extends SavedData
     {
         if (id < 0) return null;
 
-        DimensionsNet net = server.overworld().getDataStorage().get(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), NET_DATA_PREFIX + id);
+        DimensionsNet net = server.overworld().getDataStorage().get(new SavedData.Factory<>(DimensionsNet::create, DimensionsNet::load), buildNetDataName(id));
         if (net != null && !net.deleted)
         {
             return net;
@@ -616,6 +620,11 @@ public class DimensionsNet extends SavedData
         this.id = -99; // 用-99作为被删除的特殊标记
         this.unifiedStorage.clearStorage();
         this.deleted = true;
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server != null)
+        {
+            NetRegistryIndex.get(server).unregisterNet(server, previousNetId);
+        }
         setDirty();
     }
 

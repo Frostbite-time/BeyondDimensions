@@ -128,7 +128,7 @@ final class PlayerNetIndex extends SavedData
     void rebuildFromServer(MinecraftServer server)
     {
         clearRuntime();
-        for (int netId = 0; netId < DimensionsNet.MAX_NET_SCAN; netId++)
+        for (int netId : NetRegistryIndex.get(server).getActiveNetIds(server))
         {
             DimensionsNet net = DimensionsNet.getNetFromId(server, netId);
             if (net == null)
