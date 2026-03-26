@@ -35,6 +35,7 @@ import java.util.*;
 public class DimensionsNet extends SavedData
 {
     static final String NET_DATA_PREFIX = "BDNet_";
+    public static final int NO_PRIMARY_NET_ID = -1;
 
     /**
      * 作为网络的唯一标识符，id从0开始，小于0的id均可以认为是无效网络
