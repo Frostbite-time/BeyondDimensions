@@ -126,5 +126,19 @@ public class BDPackets
                 OpenMagnetGuiPacket::handle,
                 OpenMagnetGuiPacket::handle
         );
+
+        registrar.playBidirectional(
+                OpenPrimaryNetSwitcherPacket.TYPE,
+                OpenPrimaryNetSwitcherPacket.STREAM_CODEC,
+                OpenPrimaryNetSwitcherPacket::handle,
+                OpenPrimaryNetSwitcherPacket::handle
+        );
+
+        registrar.playBidirectional(
+                PrimaryNetSwitchActionPacket.TYPE,
+                PrimaryNetSwitchActionPacket.STREAM_CODEC,
+                PrimaryNetSwitchActionPacket::handle,
+                PrimaryNetSwitchActionPacket::handle
+        );
     }
 }

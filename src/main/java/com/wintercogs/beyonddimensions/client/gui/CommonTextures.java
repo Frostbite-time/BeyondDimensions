@@ -11,6 +11,9 @@ public class CommonTextures
     public static final Identifier COMMON_CONNECTION = Identifier.parse("beyonddimensions:textures/gui/common_connection.png");
     public static final int COMMON_CONNECTION_WIDTH = 176;
     public static final int COMMON_CONNECTION_HEIGHT = 8;
+    public static final Identifier BOTTOM_BASE_COMMON = Identifier.parse("beyonddimensions:textures/gui/bottom_base_common.png");
+    public static final int BOTTOM_BASE_COMMON_WIDTH = 176;
+    public static final int BOTTOM_BASE_COMMON_HEIGHT = 7;
     public static final Identifier COMMON_SLOTS = Identifier.parse("beyonddimensions:textures/gui/common_slots.png");
     public static final int COMMON_SLOTS_WIDTH = 176;
     public static final int COMMON_SLOTS_HEIGHT = 18;
