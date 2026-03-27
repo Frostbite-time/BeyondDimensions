@@ -28,10 +28,9 @@ public class NetedItem extends Item
         }
         if (!level.isClientSide())
         {
-            DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-            if (net != null)
+            if (setNet(itemstack, player))
             {
-                setNet(itemstack, net, player);
+                return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
             }
             else
             {
@@ -52,7 +51,7 @@ public class NetedItem extends Item
         DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
         if (net != null)
         {
-            setNet(stack, net, player);
+            setNet(stack, player);
         }
     }
 
@@ -66,34 +65,38 @@ public class NetedItem extends Item
         return null;
     }
 
-    public static boolean setNet(ItemStack itemstack, DimensionsNet net, Player player)
+    public static boolean setNet(ItemStack itemstack, Player player)
     {
-        // 确保仅对网络化物品赋值
         if (itemstack.getItem() instanceof NetedItem item)
         {
             Level level = player.level();
-            if (item.validToReWrite(net, player))
+            int netId = getNetId(itemstack);
+            if (netId >= 0)
             {
-                int netId = getNetId(itemstack);
-                if (netId != net.getId())
+                DimensionsNet itemNet = DimensionsNet.getNetFromId(netId);
+                if (itemNet != null && !item.validToReWrite(itemNet, player))
                 {
-                    setNetId(itemstack, net.getId());
-                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound", net.getId()));
+                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"));
+                    return false;
                 }
-                else
-                {
-                    setNetId(itemstack, -1);
-                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
-                    player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound", net.getId()));
-                }
+
+                setNetId(itemstack, -1);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
+                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound", netId));
                 return true;
             }
-            else
+
+            DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
+            if (playerNet != null && item.validToReWrite(playerNet, player))
             {
-                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"));
-                return false;
+                setNetId(itemstack, playerNet.getId());
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
+                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound", playerNet.getId()));
+                return true;
             }
+
+            player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_item"));
+            return false;
         }
         return false;
     }
