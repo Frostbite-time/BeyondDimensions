@@ -1,2 +1,2 @@
-* Upgrade XpExhchanger interaction method
-* restore curios compat
+* Fix Furnace
+* Allow Player has multi networks.
