@@ -8,6 +8,7 @@
   "menu.title.beyonddimensions.furnace_menu": "Сетевая печь",
   "menu.title.beyonddimensions.magnet_menu": "Сетевой магнит",
   "menu.title.beyonddimensions.feeder_menu": "Сетевой питатель",
+  "menu.title.beyonddimensions.primary_net_switcher": "Переключатель основной сети",
   "beyonddimensions.scrollbar.usage.focused": "Ползунок в фокусе",
   "beyonddimensions.scrollbar.usage.hovered": "Наведение курсора",
   "wintercogs.beyonddimensions.dimensionsguisearch": "Поиск...",
@@ -22,10 +23,13 @@
   "menu.label.beyonddimensions.tag_and_stored_slots": "Теги и слоты хранения",
   "menu.label.beyonddimensions.input_filter_slots": "Ввод",
   "menu.label.beyonddimensions.fuel_filter_slots": "Топливо",
+
   "tooltip.button.beyonddimensions.sort_asc": "Текущий: По возрастанию",
   "tooltip.button.beyonddimensions.sort_desc": "Текущий: По убыванию",
   "tooltip.button.beyonddimensions.search_disable": "Очищать поиск при отключении",
   "tooltip.button.beyonddimensions.search_enable": "Сохранять текст поиска",
+  "tooltip.button.beyonddimensions.sort_creative_tab": "Стратегия сортировки: По порядку вкладок креатива",
+  "tooltip.button.beyonddimensions.sort_max_stack": "Стратегия сортировки: По максимальному размеру стака",
   "tooltip.button.beyonddimensions.sort_quantity": "Стратегия сортировки: По количеству",
   "tooltip.button.beyonddimensions.sort_name": "Стратегия сортировки: По имени",
   "tooltip.button.beyonddimensions.sort_modid": "Стратегия сортировки: По ID мода",
@@ -36,6 +40,8 @@
   "tooltip.button.beyonddimensions.sort_modid_second": "Вторая стратегия сортировки: По ID мода",
   "tooltip.button.beyonddimensions.sort_inserted_time_second": "Вторая стратегия сортировки: По времени добавления категории",
   "tooltip.button.beyonddimensions.sort_modified_time_second": "Вторая стратегия сортировки: По времени изменения количества",
+  "tooltip.button.beyonddimensions.sort_creative_tab_second": "Вторая стратегия сортировки: По порядку вкладок креатива",
+  "tooltip.button.beyonddimensions.sort_max_stack_second": "Вторая стратегия сортировки: По максимальному размеру стака",
   "tooltip.button.beyonddimensions.first_storage": "Приоритет: Хранилище",
   "tooltip.button.beyonddimensions.first_inv": "Приоритет: Инвентарь",
   "tooltip.button.beyonddimensions.transfer_to_inv": "Переместить остатки в инвентарь",
@@ -88,9 +94,15 @@
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Введите уровень опыта для поддержания или ручного обмена\nЗначения выше лимита автоматически ограничиваются",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Текущий: Работает (активно поддерживает целевой уровень)",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Текущий: Не работает (только ручной обмен)",
+  "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "Поиск по ID сети или уровню прав",
+  "tooltip.button.beyonddimensions.primary_net_switcher.clear": "Сохранить участие, но не использовать основную сеть",
+  "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Быстро переключиться на сеть #%s",
+  "tooltip.button.beyonddimensions.primary_net_switcher.option": "Сеть #%s\nПрава: %s",
+
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
   "istack.beyonddimensions.storage_num.fluid": "Сохранено: %s мБ",
   "istack.beyonddimensions.storage_num.long_type": "Хранится: %s",
+
   "key.categories.beyonddimensions": "За Гранью Измерений",
   "key.beyonddimensions.open_gui": "Открыть сеть",
   "key.beyonddimensions.open_terminal_quick_key": "Быстро открыть терминал в инвентаре",
@@ -99,6 +111,9 @@
   "key.beyonddimensions.toggle_magnet_item_key": "Переключить режим магнита для предметов",
   "key.beyonddimensions.toggle_magnet_fluid_key": "Переключить режим магнита для жидкостей",
   "key.beyonddimensions.open_magnet_gui_key": "Открыть интерфейс магнита",
+  "key.beyonddimensions.open_primary_net_switcher_key": "Открыть переключатель основной сети",
+  "key.beyonddimensions.cycle_primary_net_key": "Переключать основную сеть",
+
   "item.beyonddimensions.net_creater": "Генератор Измерений",
   "item.beyonddimensions.net_member_inviter": "Пригласитель участников",
   "item.beyonddimensions.net_manager_inviter": "Пригласитель админов",
@@ -118,9 +133,22 @@
   "item.beyonddimensions.xp_fluid_bucket": "Ведро жидкого опыта",
   "item.beyonddimensions.xp_exchange_item": "Жезл опыта",
   "item.beyonddimensions.warden_soul_tag_item": "Маркер душ",
+
   "menu.title.beyonddimensions.xp_exchange_menu": "Настройки жезла опыта",
   "menu.label.beyonddimensions.xp_exchange.target_level": "Целевой уровень",
   "menu.label.beyonddimensions.xp_exchange.max_level": "Макс: %s",
+  "menu.label.beyonddimensions.primary_net_switcher.search": "Поиск сетей...",
+  "menu.label.beyonddimensions.primary_net_switcher.recent": "Недавние",
+  "menu.label.beyonddimensions.primary_net_switcher.all_networks": "Доступные сети",
+  "menu.button.beyonddimensions.primary_net_switcher.clear": "Не использовать основную сеть",
+  "menu.text.beyonddimensions.primary_net_switcher.current": "Текущая основная сеть: %s",
+  "menu.text.beyonddimensions.primary_net_switcher.none": "Нет",
+  "menu.text.beyonddimensions.primary_net_switcher.current_suffix": " [Текущая]",
+  "menu.text.beyonddimensions.primary_net_switcher.hint": "Вверх/Вниз для выбора, Enter для переключения, ПКМ очищает поиск",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.member": "Участник",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.manager": "Менеджер",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "Владелец",
+
   "block.beyonddimensions.net_control": "Контроллер Сети",
   "block.beyonddimensions.net_interface": "Сетевой Интерфейс",
   "block.beyonddimensions.net_pathway": "Измеренческий Канал",
@@ -135,10 +163,14 @@
   "block.beyonddimensions.ars_source_pathway": "Межмерный Канал Источника",
   "block.beyonddimensions.mana_pool_pathway": "Измеренческий Мана-Резервуар",
   "block.beyonddimensions.schematicannon_pathway": "Интерфейс схемы",
+
   "fluid_type.beyonddimensions.xp_fluid": "Жидкий опыт",
+
   "creativetab.beyonddimensions.items": "За Гранью - Предметы",
   "creativetab.beyonddimensions.blocks": "За Гранью - Блоки",
+
   "beyonddimensions.message.insufficient_materials": "Недостаточно материалов",
+
   "msg.beyonddimensions.network_created": "Ты прорвал брешь в космосе...\nПодсказка: По умолчанию нажмите [O], чтобы открыть сеть измерений.",
   "msg.beyonddimensions.item_net_bound": "Предмет привязан к сети №%d",
   "msg.beyonddimensions.item_net_unbound": "Предмет отвязан от сети №%d",
@@ -157,10 +189,12 @@
   "msg.beyonddimensions.xp_mode.switch.high": "Объем передачи переключен на: 30 уровней",
   "msg.beyonddimensions.xp_mode.switch.highest": "Объем передачи переключен на: 100 уровней",
   "msg.beyonddimensions.xp_mode.switch.over_highest": "Объем передачи переключен на: 150 уровней",
+
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Души Вардена",
   "types.beyonddimensions.source_type.name": "Источник",
   "types.beyonddimensions.mana_type.name": "Растительная Мана",
+
   "msg.beyonddimensions.magnet.close": "Магнит отключён",
   "msg.beyonddimensions.magnet.open": "Магнит включён",
   "msg.beyonddimensions.magnet.itemclose": "Магнит для предметов отключён",
@@ -169,8 +203,9 @@
   "msg.beyonddimensions.magnet.fluidopen": "Магнит для жидкостей включён",
   "msg.beyonddimensions.item.xp_exchange.open": "Включить автообмен опытом, поддерживая заданный уровень",
   "msg.beyonddimensions.item.xp_exchange.close": "Выключить автоматический обмен опыта",
-  "tooltip.button.beyonddimensions.sort_creative_tab": "Стратегия сортировки: По порядку вкладок креатива",
-  "tooltip.button.beyonddimensions.sort_creative_tab_second": "Вторая стратегия сортировки: По порядку вкладок креатива",
-  "tooltip.button.beyonddimensions.sort_max_stack": "Стратегия сортировки: По максимальному размеру стака",
-  "tooltip.button.beyonddimensions.sort_max_stack_second": "Вторая стратегия сортировки: По максимальному размеру стака"
+  "msg.beyonddimensions.primary_net.switch.changed": "Основная сеть переключена на #%s",
+  "msg.beyonddimensions.primary_net.switch.cleared": "Основная сеть очищена",
+  "msg.beyonddimensions.primary_net.switch.none_available": "Нет доступных сетей для переключения",
+  "msg.beyonddimensions.primary_net.switch.invalid_target": "Эта сеть недоступна или вы больше не состоите в ней",
+  "msg.beyonddimensions.primary_net.switch.no_other": "Нет другой доступной основной сети"
 }

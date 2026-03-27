@@ -8,6 +8,7 @@
   "menu.title.beyonddimensions.furnace_menu": "ネットワーク炉",
   "menu.title.beyonddimensions.magnet_menu": "ネットワーク磁石",
   "menu.title.beyonddimensions.feeder_menu": "ネットワーク給餌機",
+  "menu.title.beyonddimensions.primary_net_switcher": "主ネットワーク切替",
   "beyonddimensions.scrollbar.usage.focused": "スクロールバーにフォーカス中",
   "beyonddimensions.scrollbar.usage.hovered": "スクロールバーにホバー中",
   "wintercogs.beyonddimensions.dimensionsguisearch": "検索...",
@@ -22,10 +23,13 @@
   "menu.label.beyonddimensions.tag_and_stored_slots": "タグと保存スロット",
   "menu.label.beyonddimensions.input_filter_slots": "入力",
   "menu.label.beyonddimensions.fuel_filter_slots": "燃料",
+
   "tooltip.button.beyonddimensions.sort_asc": "現在：昇順",
   "tooltip.button.beyonddimensions.sort_desc": "現在：降順",
   "tooltip.button.beyonddimensions.search_disable": "無効時に検索をクリア",
   "tooltip.button.beyonddimensions.search_enable": "検索内容を保持",
+  "tooltip.button.beyonddimensions.sort_creative_tab": "ソート戦略: クリエイティブタブ順",
+  "tooltip.button.beyonddimensions.sort_max_stack": "ソート戦略: 最大スタック数順",
   "tooltip.button.beyonddimensions.sort_quantity": "ソート戦略: 数量順",
   "tooltip.button.beyonddimensions.sort_name": "ソート戦略: 名前順",
   "tooltip.button.beyonddimensions.sort_modid": "ソート戦略: MOD ID順",
@@ -36,6 +40,8 @@
   "tooltip.button.beyonddimensions.sort_modid_second": "第二ソート戦略: MOD ID順",
   "tooltip.button.beyonddimensions.sort_inserted_time_second": "第二ソート戦略: カテゴリ登録時間順",
   "tooltip.button.beyonddimensions.sort_modified_time_second": "第二ソート戦略: 数量変更時間順",
+  "tooltip.button.beyonddimensions.sort_creative_tab_second": "第二ソート戦略: クリエイティブタブ順",
+  "tooltip.button.beyonddimensions.sort_max_stack_second": "第二ソート戦略: 最大スタック数順",
   "tooltip.button.beyonddimensions.first_storage": "現在：閉じた時ストレージ優先",
   "tooltip.button.beyonddimensions.first_inv": "現在：閉じた時インベントリ優先",
   "tooltip.button.beyonddimensions.transfer_to_inv": "残りをインベントリに移動",
@@ -88,9 +94,15 @@
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "維持または手動交換に使う経験値レベルを入力\n上限を超える値は自動で制限されます",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "現在：動作中（目標レベルを維持）",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "現在：停止中（手動交換のみ）",
+  "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "ネットワークIDまたは権限レベルで検索",
+  "tooltip.button.beyonddimensions.primary_net_switcher.clear": "所属は維持したまま、主ネットワークを使わない",
+  "tooltip.button.beyonddimensions.primary_net_switcher.recent": "ネットワーク #%s にすばやく切替",
+  "tooltip.button.beyonddimensions.primary_net_switcher.option": "ネットワーク #%s\n権限: %s",
+
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
   "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",
   "istack.beyonddimensions.storage_num.long_type": "保存済み：%s",
+
   "key.categories.beyonddimensions": "次元を超えて",
   "key.beyonddimensions.open_gui": "ネットワークを開く",
   "key.beyonddimensions.open_terminal_quick_key": "インベントリー内のターミナルをすばやく開く",
@@ -99,6 +111,9 @@
   "key.beyonddimensions.toggle_magnet_item_key": "アイテムマグネット切り替え",
   "key.beyonddimensions.toggle_magnet_fluid_key": "流体マグネット切り替え",
   "key.beyonddimensions.open_magnet_gui_key": "マグネットGUIを開く",
+  "key.beyonddimensions.open_primary_net_switcher_key": "主ネットワーク切替を開く",
+  "key.beyonddimensions.cycle_primary_net_key": "主ネットワークを巡回切替",
+
   "item.beyonddimensions.net_creater": "次元ネットワーク生成器",
   "item.beyonddimensions.net_member_inviter": "メンバー接続器",
   "item.beyonddimensions.net_manager_inviter": "管理者接続器",
@@ -118,9 +133,22 @@
   "item.beyonddimensions.xp_fluid_bucket": "液体経験値のバケツ",
   "item.beyonddimensions.xp_exchange_item": "経験値の杖",
   "item.beyonddimensions.warden_soul_tag_item": "魂マーカー",
+
   "menu.title.beyonddimensions.xp_exchange_menu": "経験値の杖設定",
   "menu.label.beyonddimensions.xp_exchange.target_level": "目標レベル",
   "menu.label.beyonddimensions.xp_exchange.max_level": "最大：%s",
+  "menu.label.beyonddimensions.primary_net_switcher.search": "ネットワークを検索...",
+  "menu.label.beyonddimensions.primary_net_switcher.recent": "最近使用",
+  "menu.label.beyonddimensions.primary_net_switcher.all_networks": "利用可能なネットワーク",
+  "menu.button.beyonddimensions.primary_net_switcher.clear": "主ネットワークを使わない",
+  "menu.text.beyonddimensions.primary_net_switcher.current": "現在の主ネットワーク: %s",
+  "menu.text.beyonddimensions.primary_net_switcher.none": "なし",
+  "menu.text.beyonddimensions.primary_net_switcher.current_suffix": " [現在]",
+  "menu.text.beyonddimensions.primary_net_switcher.hint": "上下で選択、Enterで切替、右クリックで検索をクリア",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.member": "メンバー",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.manager": "管理者",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "所有者",
+
   "block.beyonddimensions.net_control": "ネットワーク制御装置",
   "block.beyonddimensions.net_interface": "ネットワークインタフェース",
   "block.beyonddimensions.net_pathway": "次元通信路",
@@ -135,10 +163,14 @@
   "block.beyonddimensions.ars_source_pathway": "次元魔素源経路",
   "block.beyonddimensions.mana_pool_pathway": "次元マナプール",
   "block.beyonddimensions.schematicannon_pathway": "ブループリント・インターフェース",
+
   "fluid_type.beyonddimensions.xp_fluid": "液体経験値",
+
   "creativetab.beyonddimensions.items": "超次元 - アイテム",
   "creativetab.beyonddimensions.blocks": "超次元 - ブロック",
+
   "beyonddimensions.message.insufficient_materials": "材料が不足しています",
+
   "msg.beyonddimensions.network_created": "あなたは宇宙に裂け目を開けました...\nヒント: デフォルトでは[O]キーを押してディメンション・ネットワークを開きます。",
   "msg.beyonddimensions.item_net_bound": "アイテムを%d番ネットワークに接続しました",
   "msg.beyonddimensions.item_net_unbound": "アイテムを%d番ネットワークから切断しました",
@@ -157,10 +189,12 @@
   "msg.beyonddimensions.xp_mode.switch.high": "転送量切り替え済み：30レベル",
   "msg.beyonddimensions.xp_mode.switch.highest": "転送量切り替え済み：100レベル",
   "msg.beyonddimensions.xp_mode.switch.over_highest": "転送量切り替え済み：150レベル",
+
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "ウォーデンの魂",
   "types.beyonddimensions.source_type.name": "魔素源",
   "types.beyonddimensions.mana_type.name": "植物マナ",
+
   "msg.beyonddimensions.magnet.close": "マグネットが無効",
   "msg.beyonddimensions.magnet.open": "マグネットが有効",
   "msg.beyonddimensions.magnet.itemclose": "アイテムマグネットが無効",
@@ -169,8 +203,9 @@
   "msg.beyonddimensions.magnet.fluidopen": "流体マグネットが有効",
   "msg.beyonddimensions.item.xp_exchange.open": "XP自動交換を有効化（設定したレベルを維持）",
   "msg.beyonddimensions.item.xp_exchange.close": "XP自動交換を無効化",
-  "tooltip.button.beyonddimensions.sort_creative_tab": "ソート戦略: クリエイティブタブ順",
-  "tooltip.button.beyonddimensions.sort_creative_tab_second": "第二ソート戦略: クリエイティブタブ順",
-  "tooltip.button.beyonddimensions.sort_max_stack": "ソート戦略: 最大スタック数順",
-  "tooltip.button.beyonddimensions.sort_max_stack_second": "第二ソート戦略: 最大スタック数順"
+  "msg.beyonddimensions.primary_net.switch.changed": "主ネットワークを #%s に切り替えました",
+  "msg.beyonddimensions.primary_net.switch.cleared": "主ネットワークを解除しました",
+  "msg.beyonddimensions.primary_net.switch.none_available": "切り替え可能なネットワークがありません",
+  "msg.beyonddimensions.primary_net.switch.invalid_target": "そのネットワークは利用できないか、既に所属していません",
+  "msg.beyonddimensions.primary_net.switch.no_other": "他に切り替え可能な主ネットワークがありません"
 }

@@ -8,6 +8,7 @@
   "menu.title.beyonddimensions.furnace_menu": "Fornalha Dimensional",
   "menu.title.beyonddimensions.magnet_menu": "Ímã Dimensional",
   "menu.title.beyonddimensions.feeder_menu": "Alimentador Dimensional",
+  "menu.title.beyonddimensions.primary_net_switcher": "Alternador de rede principal",
   "beyonddimensions.scrollbar.usage.focused": "Barra de rolagem focada",
   "beyonddimensions.scrollbar.usage.hovered": "Cursor sobre a barra",
   "wintercogs.beyonddimensions.dimensionsguisearch": "Pesquisar...",
@@ -22,10 +23,13 @@
   "menu.label.beyonddimensions.tag_and_stored_slots": "Tags e Slots de Armazenamento",
   "menu.label.beyonddimensions.input_filter_slots": "Entrada",
   "menu.label.beyonddimensions.fuel_filter_slots": "Combustível",
+
   "tooltip.button.beyonddimensions.sort_asc": "Atual: Ordem crescente",
   "tooltip.button.beyonddimensions.sort_desc": "Atual: Ordem decrescente",
   "tooltip.button.beyonddimensions.search_disable": "Limpar busca ao desativar",
   "tooltip.button.beyonddimensions.search_enable": "Manter conteúdo da busca",
+  "tooltip.button.beyonddimensions.sort_creative_tab": "Estratégia de Ordenação: Por Ordem das Abas do Criativo",
+  "tooltip.button.beyonddimensions.sort_max_stack": "Estratégia de Ordenação: Por Tamanho Máximo de Pilha",
   "tooltip.button.beyonddimensions.sort_quantity": "Estratégia de Ordenação: Por Quantidade",
   "tooltip.button.beyonddimensions.sort_name": "Estratégia de Ordenação: Por Nome",
   "tooltip.button.beyonddimensions.sort_modid": "Estratégia de Ordenação: Por ID de Mod",
@@ -36,6 +40,8 @@
   "tooltip.button.beyonddimensions.sort_modid_second": "Segunda Estratégia de Ordenação: Por ID de Mod",
   "tooltip.button.beyonddimensions.sort_inserted_time_second": "Segunda Estratégia de Ordenação: Por Tempo de Inserção da Categoria",
   "tooltip.button.beyonddimensions.sort_modified_time_second": "Segunda Estratégia de Ordenação: Por Tempo de Modificação de Quantidade",
+  "tooltip.button.beyonddimensions.sort_creative_tab_second": "Segunda Estratégia de Ordenação: Por Ordem das Abas do Criativo",
+  "tooltip.button.beyonddimensions.sort_max_stack_second": "Segunda Estratégia de Ordenação: Por Tamanho Máximo de Pilha",
   "tooltip.button.beyonddimensions.first_storage": "Atual: Priorizar armazenamento",
   "tooltip.button.beyonddimensions.first_inv": "Atual: Priorizar inventário",
   "tooltip.button.beyonddimensions.transfer_to_inv": "Transferir restos para inventário",
@@ -88,9 +94,15 @@
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Digite o nível de XP para manter ou usar na troca manual\nValores acima do limite são reduzidos automaticamente",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Atual: Trabalhando (mantém o nível alvo ativamente)",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Atual: Não trabalhando (apenas troca manual)",
+  "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "Pesquisar por ID da rede ou nível de permissão",
+  "tooltip.button.beyonddimensions.primary_net_switcher.clear": "Manter as participações, mas parar de usar uma rede principal",
+  "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Trocar rapidamente para a rede #%s",
+  "tooltip.button.beyonddimensions.primary_net_switcher.option": "Rede #%s\nPermissão: %s",
+
   "istack.beyonddimensions.storage_num.item": "Armazenado: %s itens",
   "istack.beyonddimensions.storage_num.fluid": "Armazenado: %s mB",
   "istack.beyonddimensions.storage_num.long_type": "Armazenado: %s",
+
   "key.categories.beyonddimensions": "Além das Dimensões",
   "key.beyonddimensions.open_gui": "Abrir rede",
   "key.beyonddimensions.open_terminal_quick_key": "Abrir rapidamente o terminal no inventário",
@@ -99,6 +111,9 @@
   "key.beyonddimensions.toggle_magnet_item_key": "Alternar ímã (modo item)",
   "key.beyonddimensions.toggle_magnet_fluid_key": "Alternar ímã (modo fluido)",
   "key.beyonddimensions.open_magnet_gui_key": "Abrir GUI do ímã",
+  "key.beyonddimensions.open_primary_net_switcher_key": "Abrir alternador de rede principal",
+  "key.beyonddimensions.cycle_primary_net_key": "Alternar rede principal",
+
   "item.beyonddimensions.net_creater": "Gerador Dimensional",
   "item.beyonddimensions.net_member_inviter": "Conector de Membros",
   "item.beyonddimensions.net_manager_inviter": "Conector de Admins",
@@ -118,9 +133,22 @@
   "item.beyonddimensions.xp_fluid_bucket": "Balde de XP líquido",
   "item.beyonddimensions.xp_exchange_item": "Varinha de XP",
   "item.beyonddimensions.warden_soul_tag_item": "Marcador de Almas",
+
   "menu.title.beyonddimensions.xp_exchange_menu": "Configurações da Varinha de XP",
   "menu.label.beyonddimensions.xp_exchange.target_level": "Nível Alvo",
   "menu.label.beyonddimensions.xp_exchange.max_level": "Máx: %s",
+  "menu.label.beyonddimensions.primary_net_switcher.search": "Pesquisar redes...",
+  "menu.label.beyonddimensions.primary_net_switcher.recent": "Recentes",
+  "menu.label.beyonddimensions.primary_net_switcher.all_networks": "Redes disponíveis",
+  "menu.button.beyonddimensions.primary_net_switcher.clear": "Não usar rede principal",
+  "menu.text.beyonddimensions.primary_net_switcher.current": "Rede principal atual: %s",
+  "menu.text.beyonddimensions.primary_net_switcher.none": "Nenhuma",
+  "menu.text.beyonddimensions.primary_net_switcher.current_suffix": " [Atual]",
+  "menu.text.beyonddimensions.primary_net_switcher.hint": "Cima/Baixo para selecionar, Enter para trocar, clique direito limpa a busca",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.member": "Membro",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.manager": "Gerente",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "Dono",
+
   "block.beyonddimensions.net_control": "Controlador de Rede",
   "block.beyonddimensions.net_interface": "Interface de Rede",
   "block.beyonddimensions.net_pathway": "Caminho Dimensional",
@@ -135,10 +163,14 @@
   "block.beyonddimensions.ars_source_pathway": "Caminho da Fonte Interdimensional",
   "block.beyonddimensions.mana_pool_pathway": "Poço de Mana Dimensional",
   "block.beyonddimensions.schematicannon_pathway": "Interface de esquema",
+
   "fluid_type.beyonddimensions.xp_fluid": "XP líquido",
+
   "creativetab.beyonddimensions.items": "Além das Dimensões - Itens",
   "creativetab.beyonddimensions.blocks": "Além das Dimensões - Blocos",
+
   "beyonddimensions.message.insufficient_materials": "Materiais insuficientes",
+
   "msg.beyonddimensions.network_created": "Você abriu uma fenda no cosmos...\nDica: Por padrão pressione [O] para abrir a rede dimensional.",
   "msg.beyonddimensions.item_net_bound": "Item vinculado à rede nº%d",
   "msg.beyonddimensions.item_net_unbound": "Item desvinculado da rede nº%d",
@@ -157,10 +189,12 @@
   "msg.beyonddimensions.xp_mode.switch.high": "Quantidade de transferência XP alterada para: 30 níveis",
   "msg.beyonddimensions.xp_mode.switch.highest": "Quantidade de transferência XP alterada para: 100 níveis",
   "msg.beyonddimensions.xp_mode.switch.over_highest": "Quantidade de transferência XP alterada para: 150 níveis",
+
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Almas do Guardião",
   "types.beyonddimensions.source_type.name": "Fonte",
   "types.beyonddimensions.mana_type.name": "Mana Vegetal",
+
   "msg.beyonddimensions.magnet.close": "Ímã desativado",
   "msg.beyonddimensions.magnet.open": "Ímã ativado",
   "msg.beyonddimensions.magnet.itemclose": "Desativar ímã para itens",
@@ -169,8 +203,9 @@
   "msg.beyonddimensions.magnet.fluidopen": "Ativar ímã para fluidos",
   "msg.beyonddimensions.item.xp_exchange.open": "Ativar troca automática de XP, mantendo o nível configurado",
   "msg.beyonddimensions.item.xp_exchange.close": "Desativar troca automática de XP",
-  "tooltip.button.beyonddimensions.sort_creative_tab": "Estratégia de Ordenação: Por Ordem das Abas do Criativo",
-  "tooltip.button.beyonddimensions.sort_creative_tab_second": "Segunda Estratégia de Ordenação: Por Ordem das Abas do Criativo",
-  "tooltip.button.beyonddimensions.sort_max_stack": "Estratégia de Ordenação: Por Tamanho Máximo de Pilha",
-  "tooltip.button.beyonddimensions.sort_max_stack_second": "Segunda Estratégia de Ordenação: Por Tamanho Máximo de Pilha"
+  "msg.beyonddimensions.primary_net.switch.changed": "Rede principal alterada para #%s",
+  "msg.beyonddimensions.primary_net.switch.cleared": "Rede principal limpa",
+  "msg.beyonddimensions.primary_net.switch.none_available": "Nenhuma rede disponível para alternar",
+  "msg.beyonddimensions.primary_net.switch.invalid_target": "Essa rede não está disponível ou você não faz mais parte dela",
+  "msg.beyonddimensions.primary_net.switch.no_other": "Nenhuma outra rede principal disponível"
 }

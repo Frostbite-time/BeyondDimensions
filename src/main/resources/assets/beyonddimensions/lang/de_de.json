@@ -8,6 +8,7 @@
   "menu.title.beyonddimensions.furnace_menu": "Netzwerkofen",
   "menu.title.beyonddimensions.magnet_menu": "Netzwerkmagnet",
   "menu.title.beyonddimensions.feeder_menu": "Netzwerkfütterer",
+  "menu.title.beyonddimensions.primary_net_switcher": "Primärnetz-Umschalter",
   "beyonddimensions.scrollbar.usage.focused": "Scrollleiste fokussiert",
   "beyonddimensions.scrollbar.usage.hovered": "Scrollleiste gehovered",
   "wintercogs.beyonddimensions.dimensionsguisearch": "Suchen...",
@@ -22,10 +23,13 @@
   "menu.label.beyonddimensions.tag_and_stored_slots": "Markierungs- & Lagerplätze",
   "menu.label.beyonddimensions.input_filter_slots": "Eingang",
   "menu.label.beyonddimensions.fuel_filter_slots": "Brennstoff",
+
   "tooltip.button.beyonddimensions.sort_asc": "Aktuell: Aufsteigende Sortierung",
   "tooltip.button.beyonddimensions.sort_desc": "Aktuell: Absteigende Sortierung",
   "tooltip.button.beyonddimensions.search_disable": "Suchfeld leeren bei Deaktivierung",
   "tooltip.button.beyonddimensions.search_enable": "Suchfeldinhalt immer behalten",
+  "tooltip.button.beyonddimensions.sort_creative_tab": "Sortierstrategie: Nach Kreativ-Tab-Reihenfolge",
+  "tooltip.button.beyonddimensions.sort_max_stack": "Sortierstrategie: Nach maximaler Stapelgröße",
   "tooltip.button.beyonddimensions.sort_quantity": "Sortierstrategie: Nach Menge",
   "tooltip.button.beyonddimensions.sort_name": "Sortierstrategie: Nach Name",
   "tooltip.button.beyonddimensions.sort_modid": "Sortierstrategie: Nach Mod-ID",
@@ -36,6 +40,8 @@
   "tooltip.button.beyonddimensions.sort_modid_second": "Zweite Sortierstrategie: Nach Mod-ID",
   "tooltip.button.beyonddimensions.sort_inserted_time_second": "Zweite Sortierstrategie: Nach Kategorie-Erstellzeit",
   "tooltip.button.beyonddimensions.sort_modified_time_second": "Zweite Sortierstrategie: Nach Mengenänderungszeit",
+  "tooltip.button.beyonddimensions.sort_creative_tab_second": "Zweite Sortierstrategie: Nach Kreativ-Tab-Reihenfolge",
+  "tooltip.button.beyonddimensions.sort_max_stack_second": "Zweite Sortierstrategie: Nach maximaler Stapelgröße",
   "tooltip.button.beyonddimensions.first_storage": "Aktuell: Restitems priorisieren Lager beim Schließen",
   "tooltip.button.beyonddimensions.first_inv": "Aktuell: Restitems priorisieren Inventar beim Schließen",
   "tooltip.button.beyonddimensions.transfer_to_inv": "Restitems ins Inventar übertragen",
@@ -88,9 +94,15 @@
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Gib die XP-Stufe ein, die gehalten oder für manuellen Austausch verwendet werden soll\nWerte über dem Limit werden automatisch begrenzt",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Aktuell: Aktiv (hält die Zielstufe automatisch)",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Aktuell: Inaktiv (nur manueller Austausch)",
+  "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "Suche nach Netzwerk-ID oder Berechtigungsstufe",
+  "tooltip.button.beyonddimensions.primary_net_switcher.clear": "Mitgliedschaften behalten, aber kein Primärnetz verwenden",
+  "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Schnell zu Netzwerk #%s wechseln",
+  "tooltip.button.beyonddimensions.primary_net_switcher.option": "Netzwerk #%s\nBerechtigung: %s",
+
   "istack.beyonddimensions.storage_num.item": "Gespeichert: %s Stück",
   "istack.beyonddimensions.storage_num.fluid": "Gespeichert: %s mB",
   "istack.beyonddimensions.storage_num.long_type": "Gespeichert: %s",
+
   "key.categories.beyonddimensions": "Jenseits der Dimensionen",
   "key.beyonddimensions.open_gui": "Netzwerk öffnen",
   "key.beyonddimensions.open_terminal_quick_key": "Schnell das Terminal im Inventar öffnen",
@@ -99,6 +111,9 @@
   "key.beyonddimensions.toggle_magnet_item_key": "Schalterelement Magnet",
   "key.beyonddimensions.toggle_magnet_fluid_key": "Flüssigkeitsmagnet wechseln",
   "key.beyonddimensions.open_magnet_gui_key": "Magnet-GUI öffnen",
+  "key.beyonddimensions.open_primary_net_switcher_key": "Primärnetz-Umschalter öffnen",
+  "key.beyonddimensions.cycle_primary_net_key": "Primärnetz durchschalten",
+
   "item.beyonddimensions.net_creater": "Dimensionsgenerator",
   "item.beyonddimensions.net_member_inviter": "Mitgliederverbinder",
   "item.beyonddimensions.net_manager_inviter": "Admin-Verbinder",
@@ -118,9 +133,22 @@
   "item.beyonddimensions.xp_fluid_bucket": "Eimer mit flüssiger Erfahrung",
   "item.beyonddimensions.xp_exchange_item": "XP-Stab",
   "item.beyonddimensions.warden_soul_tag_item": "Seelenmarkierer",
+
   "menu.title.beyonddimensions.xp_exchange_menu": "XP-Stab-Einstellungen",
   "menu.label.beyonddimensions.xp_exchange.target_level": "Zielstufe",
   "menu.label.beyonddimensions.xp_exchange.max_level": "Max: %s",
+  "menu.label.beyonddimensions.primary_net_switcher.search": "Netzwerke suchen...",
+  "menu.label.beyonddimensions.primary_net_switcher.recent": "Zuletzt verwendet",
+  "menu.label.beyonddimensions.primary_net_switcher.all_networks": "Verfügbare Netzwerke",
+  "menu.button.beyonddimensions.primary_net_switcher.clear": "Kein Primärnetz verwenden",
+  "menu.text.beyonddimensions.primary_net_switcher.current": "Aktuelles Primärnetz: %s",
+  "menu.text.beyonddimensions.primary_net_switcher.none": "Keines",
+  "menu.text.beyonddimensions.primary_net_switcher.current_suffix": " [Aktuell]",
+  "menu.text.beyonddimensions.primary_net_switcher.hint": "Hoch/Runter zum Wählen, Enter zum Wechseln, Rechtsklick leert die Suche",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.member": "Mitglied",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.manager": "Manager",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "Besitzer",
+
   "block.beyonddimensions.net_control": "Netzwerkcontroller",
   "block.beyonddimensions.net_interface": "Netzwerkschnittstelle",
   "block.beyonddimensions.net_pathway": "Dimensionskanal",
@@ -135,10 +163,14 @@
   "block.beyonddimensions.ars_source_pathway": "Arkanquelle-Pfad zwischen Dimensionen",
   "block.beyonddimensions.mana_pool_pathway": "Dimensions-Mana-Pool",
   "block.beyonddimensions.schematicannon_pathway": "Blaupausen-Schnittstelle",
+
   "fluid_type.beyonddimensions.xp_fluid": "Flüssige Erfahrung",
+
   "creativetab.beyonddimensions.items": "Jenseits - Gegenstände",
   "creativetab.beyonddimensions.blocks": "Jenseits - Blöcke",
+
   "beyonddimensions.message.insufficient_materials": "Nicht genug Materialien",
+
   "msg.beyonddimensions.network_created": "Du hast einen Riss in den Kosmos gerissen...\nHinweis: Standardmäßig drücke [O], um das Dimensionsnetzwerk zu öffnen.",
   "msg.beyonddimensions.item_net_bound": "Gegenstand an Netzwerk %d gebunden",
   "msg.beyonddimensions.item_net_unbound": "Gegenstand von Netzwerk %d entbunden",
@@ -157,10 +189,12 @@
   "msg.beyonddimensions.xp_mode.switch.high": "XP-Transfermenge umgeschaltet auf: 30 Stufen",
   "msg.beyonddimensions.xp_mode.switch.highest": "XP-Transfermenge umgeschaltet auf: 100 Stufen",
   "msg.beyonddimensions.xp_mode.switch.over_highest": "XP-Transfermenge umgeschaltet auf: 150 Stufen",
+
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Wächterseelen",
   "types.beyonddimensions.source_type.name": "Arkanquelle",
   "types.beyonddimensions.mana_type.name": "Pflanzen-Mana",
+
   "msg.beyonddimensions.magnet.close": "Magnet deaktiviert",
   "msg.beyonddimensions.magnet.open": "Magnet aktiviert",
   "msg.beyonddimensions.magnet.itemclose": "Gegenstandsmagnet deaktiviert",
@@ -169,8 +203,9 @@
   "msg.beyonddimensions.magnet.fluidopen": "Flüssigkeitsmagnet aktiviert",
   "msg.beyonddimensions.item.xp_exchange.open": "XP-Automatik aktivieren und die eingestellte Stufe halten",
   "msg.beyonddimensions.item.xp_exchange.close": "Erfahrungspunkt-Automatik deaktivieren",
-  "tooltip.button.beyonddimensions.sort_creative_tab": "Sortierstrategie: Nach Kreativ-Tab-Reihenfolge",
-  "tooltip.button.beyonddimensions.sort_creative_tab_second": "Zweite Sortierstrategie: Nach Kreativ-Tab-Reihenfolge",
-  "tooltip.button.beyonddimensions.sort_max_stack": "Sortierstrategie: Nach maximaler Stapelgröße",
-  "tooltip.button.beyonddimensions.sort_max_stack_second": "Zweite Sortierstrategie: Nach maximaler Stapelgröße"
+  "msg.beyonddimensions.primary_net.switch.changed": "Primärnetz zu #%s gewechselt",
+  "msg.beyonddimensions.primary_net.switch.cleared": "Primärnetz gelöscht",
+  "msg.beyonddimensions.primary_net.switch.none_available": "Kein verfügbares Netzwerk zum Wechseln",
+  "msg.beyonddimensions.primary_net.switch.invalid_target": "Dieses Netzwerk ist nicht verfügbar oder du bist kein Mitglied mehr",
+  "msg.beyonddimensions.primary_net.switch.no_other": "Kein anderes Primärnetz verfügbar"
 }
