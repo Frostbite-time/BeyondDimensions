@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetOption;
@@ -16,6 +17,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import org.lwjgl.glfw.GLFW;
 
@@ -26,8 +28,9 @@ import java.util.Locale;
 
 public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
 {
-    private static final int PANEL_WIDTH = CommonTextures.TOP_BASE_COMMON_WIDTH;
-    private static final int PANEL_CONNECTION_COUNT = 26;
+    private static final ResourceLocation BACKGROUND = BeyondDimensions.makeId("textures/gui/primary_net_switcher_gui.png");
+    private static final int BACKGROUND_WIDTH = 176;
+    private static final int BACKGROUND_HEIGHT = 239;
     private static final int RECENT_BUTTON_COUNT = 3;
     private static final int VISIBLE_OPTION_COUNT = 6;
     private static final int OPTION_BUTTON_WIDTH = 140;
@@ -59,7 +62,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         optionButtons.clear();
         recentButtons.clear();
 
-        this.imageWidth = PANEL_WIDTH;
+        this.imageWidth = BACKGROUND_WIDTH;
         this.imageHeight = rebuildImageHeight();
         this.leftPos = (this.width - this.imageWidth) / 2;
         this.topPos = (this.height - this.imageHeight) / 2;
@@ -147,15 +150,13 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY)
     {
-        int[] drawY = new int[]{this.topPos};
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
-        for (int i = 0; i < PANEL_CONNECTION_COUNT; i++)
-        {
-            CommonTexturesRender.renderCommonConnection(guiGraphics, this.leftPos, drawY);
-        }
-        CommonTexturesRender.renderBottomBaseCommon(guiGraphics, this.leftPos, drawY);
+        guiGraphics.blit(BACKGROUND, this.leftPos, this.topPos,
+                BACKGROUND_WIDTH, BACKGROUND_HEIGHT,
+                0, 0,
+                BACKGROUND_WIDTH, BACKGROUND_HEIGHT,
+                BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
     }
 
     @Override
@@ -391,7 +392,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
 
     private int rebuildImageHeight()
     {
-        return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_CONNECTION_HEIGHT * PANEL_CONNECTION_COUNT + CommonTextures.BOTTOM_BASE_COMMON_HEIGHT;
+        return BACKGROUND_HEIGHT;
     }
 
     private final class PrimaryNetOptionButton extends Button
