@@ -68,6 +68,8 @@ public class BDPackets
         registerC2S(PutHandItemToNetPacket.class, PutHandItemToNetPacket::encode, PutHandItemToNetPacket::decode, PutHandItemToNetPacket::handle);
         registerC2S(ToggleMagnetPacket.class, ToggleMagnetPacket::encode, ToggleMagnetPacket::decode, ToggleMagnetPacket::handle);
         registerC2S(OpenMagnetGuiPacket.class, OpenMagnetGuiPacket::encode, OpenMagnetGuiPacket::decode, OpenMagnetGuiPacket::handle);
+        registerC2S(OpenPrimaryNetSwitcherPacket.class, OpenPrimaryNetSwitcherPacket::encode, OpenPrimaryNetSwitcherPacket::decode, OpenPrimaryNetSwitcherPacket::handle);
+        registerC2S(PrimaryNetSwitchActionPacket.class, PrimaryNetSwitchActionPacket::encode, PrimaryNetSwitchActionPacket::decode, PrimaryNetSwitchActionPacket::handle);
 
         registerS2C(PlayerPermissionInfoPacket.class, PlayerPermissionInfoPacket::encode, PlayerPermissionInfoPacket::decode, PlayerPermissionInfoPacket::handle);
         registerS2C(DisorderedSlotGroupSyncPacket.class, DisorderedSlotGroupSyncPacket::encode, DisorderedSlotGroupSyncPacket::decode, DisorderedSlotGroupSyncPacket::handle);

@@ -26,6 +26,7 @@ public class BDMenus
     public static final Supplier<MenuType<NetFeederMenu>> Net_Feeder_Menu = BDMenus.MENU_TYPES.register("net_feeder_menu", () -> IForgeMenuType.create(NetFeederMenu::new));
     public static final Supplier<MenuType<NetRestockerMenu>> Net_Restocker_Menu = BDMenus.MENU_TYPES.register("net_restocker_menu", () -> IForgeMenuType.create(NetRestockerMenu::new));
     public static final Supplier<MenuType<XpExchangeMenu>> Xp_Exchange_Menu = BDMenus.MENU_TYPES.register("xp_exchange_menu", () -> IForgeMenuType.create(XpExchangeMenu::new));
+    public static final Supplier<MenuType<PrimaryNetSwitcherMenu>> Primary_Net_Switcher_Menu = BDMenus.MENU_TYPES.register("primary_net_switcher_menu", () -> IForgeMenuType.create(PrimaryNetSwitcherMenu::new));
 
     public static void register(IEventBus eventBus)
     {

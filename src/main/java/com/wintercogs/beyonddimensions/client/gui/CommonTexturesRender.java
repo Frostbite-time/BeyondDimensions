@@ -47,6 +47,26 @@ public class CommonTexturesRender
         yPosRef[0] += height;
     }
 
+    public static void renderBottomBaseCommon(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
+    {
+        renderBottomBaseCommon(guiGraphics, leftPos, yPosRef,
+                CommonTextures.BOTTOM_BASE_COMMON_WIDTH,
+                CommonTextures.BOTTOM_BASE_COMMON_HEIGHT);
+    }
+
+    public static void renderBottomBaseCommon(GuiGraphics guiGraphics, int leftPos, int[] yPosRef,
+                                              int width, int height)
+    {
+        guiGraphics.blit(CommonTextures.BOTTOM_BASE_COMMON, leftPos, yPosRef[0],
+                width, height,
+                0, 0,
+                CommonTextures.BOTTOM_BASE_COMMON_WIDTH,
+                CommonTextures.BOTTOM_BASE_COMMON_HEIGHT,
+                CommonTextures.BOTTOM_BASE_COMMON_WIDTH,
+                CommonTextures.BOTTOM_BASE_COMMON_HEIGHT);
+        yPosRef[0] += height;
+    }
+
     // COMMON_SLOTS 渲染方法
     public static void renderCommonSlots(GuiGraphics guiGraphics, int leftPos, int[] yPosRef)
     {

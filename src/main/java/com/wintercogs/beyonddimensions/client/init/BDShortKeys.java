@@ -77,6 +77,18 @@ public class BDShortKeys
             "key.categories.beyonddimensions"
     );
 
+    public static final KeyMapping OPEN_PRIMARY_NET_SWITCHER_KEY = new KeyMapping(
+            "key.beyonddimensions.open_primary_net_switcher_key",
+            GLFW.GLFW_KEY_U,
+            "key.categories.beyonddimensions"
+    );
+
+    public static final KeyMapping CYCLE_PRIMARY_NET_KEY = new KeyMapping(
+            "key.beyonddimensions.cycle_primary_net_key",
+            GLFW.GLFW_KEY_RIGHT_BRACKET,
+            "key.categories.beyonddimensions"
+    );
+
     public static void processKeyInput()
     {
         for (Pair<KeyMapping, Runnable> pair : KEY_MAPPINGS_WITH_CALLBACK)
@@ -190,6 +202,26 @@ public class BDShortKeys
             }
 
             BDPackets.INSTANCE.sendToServer(new OpenMagnetGuiPacket());
+        });
+        BDShortKeys.registerKey(OPEN_PRIMARY_NET_SWITCHER_KEY, () -> {
+            LocalPlayer player = Minecraft.getInstance().player;
+
+            if (player == null)
+            {
+                return;
+            }
+
+            BDPackets.INSTANCE.sendToServer(new OpenPrimaryNetSwitcherPacket());
+        });
+        BDShortKeys.registerKey(CYCLE_PRIMARY_NET_KEY, () -> {
+            LocalPlayer player = Minecraft.getInstance().player;
+
+            if (player == null)
+            {
+                return;
+            }
+
+            BDPackets.INSTANCE.sendToServer(new PrimaryNetSwitchActionPacket(com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetSwitchAction.CYCLE_NEXT, -1));
         });
 
         for (KeyMapping keyMapping : KEY_MAPPINGS)
