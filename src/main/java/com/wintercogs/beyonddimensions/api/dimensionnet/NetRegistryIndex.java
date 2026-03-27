@@ -18,9 +18,7 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -129,7 +127,8 @@ final class NetRegistryIndex extends SavedData
     private boolean migrateLegacyData(MinecraftServer server)
     {
         boolean changed = false;
-        Path dataPath = server.getWorldPath(LevelResource.ROOT).resolve("data");
+        Set<Integer> discoveredNetIds = new LinkedHashSet<>();
+        Path dataPath = server.getWorldPath(LevelResource.ROOT).resolve("data").resolve(BDConstants.MODID);
         if (!Files.isDirectory(dataPath))
         {
             return false;
@@ -145,14 +144,18 @@ final class NetRegistryIndex extends SavedData
                     continue;
                 }
 
-                int netId = Integer.parseInt(matcher.group(1));
-                DimensionsNet net = DimensionsNet.getNetFromId(server, netId);
-                changed |= observeExistingNet(netId, net != null);
+                discoveredNetIds.add(Integer.parseInt(matcher.group(1)));
             }
         }
         catch (IOException exception)
         {
             throw new IllegalStateException("Failed to initialize net registry index", exception);
+        }
+
+        for (int netId : discoveredNetIds)
+        {
+            DimensionsNet net = DimensionsNet.getNetFromId(server, netId);
+            changed |= observeExistingNet(netId, net != null);
         }
 
         return changed;
