@@ -9,6 +9,7 @@
   "menu.title.beyonddimensions.magnet_menu": "Network Magnet",
   "menu.title.beyonddimensions.feeder_menu": "Network Feeder",
   "menu.title.beyonddimensions.restocker_menu": "Network Restocker",
+  "menu.title.beyonddimensions.primary_net_switcher": "Primary Network Switcher",
   "beyonddimensions.scrollbar.usage.focused": "Scrollbar is focused",
   "beyonddimensions.scrollbar.usage.hovered": "Mouse is currently hovering over the scrollbar",
   "wintercogs.beyonddimensions.dimensionsguisearch": "Search...",
@@ -24,6 +25,7 @@
   "menu.label.beyonddimensions.tag_and_stored_slots": "Tag & Storage Slots",
   "menu.label.beyonddimensions.input_filter_slots": "Input",
   "menu.label.beyonddimensions.fuel_filter_slots": "Fuel",
+
   "tooltip.beyonddimensions.network_open_key": "Press [%s] to open dimension network",
   "tooltip.button.beyonddimensions.sort_asc": "Current: Ascending Order",
   "tooltip.button.beyonddimensions.sort_desc": "Current: Descending Order",
@@ -95,9 +97,15 @@
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Enter the XP level to keep or use for manual exchange\nValues above the limit are clamped automatically",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Current: Working (actively keeps target level)",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Current: Not Working (manual exchange only)",
+  "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "Search by network ID or permission level",
+  "tooltip.button.beyonddimensions.primary_net_switcher.clear": "Keep memberships, but stop using any primary network",
+  "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Quick switch to network #%s",
+  "tooltip.button.beyonddimensions.primary_net_switcher.option": "Network #%s\nPermission: %s",
+
   "istack.beyonddimensions.storage_num.item": "Stored: %s Items",
   "istack.beyonddimensions.storage_num.fluid": "Stored: %s mB",
   "istack.beyonddimensions.storage_num.long_type": "Stored: %s",
+
   "key.categories.beyonddimensions": "Beyond Dimensions",
   "key.beyonddimensions.open_gui": "Open Dimensional Network UI",
   "key.beyonddimensions.open_terminal_quick_key": "Quickly open the terminal in the inventory",
@@ -106,6 +114,9 @@
   "key.beyonddimensions.toggle_magnet_item_key": "Toggle Item Magnet",
   "key.beyonddimensions.toggle_magnet_fluid_key": "Toggle Fluid Magnet",
   "key.beyonddimensions.open_magnet_gui_key": "Open Magnet GUI",
+  "key.beyonddimensions.open_primary_net_switcher_key": "Open Primary Network Switcher",
+  "key.beyonddimensions.cycle_primary_net_key": "Cycle Primary Network",
+
   "item.beyonddimensions.net_creater": "Dimensional Network Generator",
   "item.beyonddimensions.net_member_inviter": "Member Connector",
   "item.beyonddimensions.net_manager_inviter": "Manager Connector",
@@ -126,9 +137,22 @@
   "item.beyonddimensions.xp_fluid_bucket": "Bucket of Liquid XP",
   "item.beyonddimensions.xp_exchange_item": "XP Rod",
   "item.beyonddimensions.warden_soul_tag_item": "Warden Soul Tagger",
+
   "menu.title.beyonddimensions.xp_exchange_menu": "XP Rod Settings",
   "menu.label.beyonddimensions.xp_exchange.target_level": "Target Level",
   "menu.label.beyonddimensions.xp_exchange.max_level": "Max: %s",
+  "menu.label.beyonddimensions.primary_net_switcher.search": "Search networks...",
+  "menu.label.beyonddimensions.primary_net_switcher.recent": "Recent",
+  "menu.label.beyonddimensions.primary_net_switcher.all_networks": "Available Networks",
+  "menu.button.beyonddimensions.primary_net_switcher.clear": "Use No Primary Network",
+  "menu.text.beyonddimensions.primary_net_switcher.current": "Current Primary: %s",
+  "menu.text.beyonddimensions.primary_net_switcher.none": "None",
+  "menu.text.beyonddimensions.primary_net_switcher.current_suffix": " [Current]",
+  "menu.text.beyonddimensions.primary_net_switcher.hint": "Up/Down to select, Enter to switch, right-click search to clear",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.member": "Member",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.manager": "Manager",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "Owner",
+
   "block.beyonddimensions.net_control": "Network Controller",
   "block.beyonddimensions.net_interface": "Network Interface",
   "block.beyonddimensions.net_pathway": "Dimensional Network Pathway",
@@ -143,10 +167,14 @@
   "block.beyonddimensions.ars_source_pathway": "Interdimensional Source Pathway",
   "block.beyonddimensions.mana_pool_pathway": "Dimensional Mana Pool",
   "block.beyonddimensions.schematicannon_pathway": "Schematic Interface",
+
   "fluid_type.beyonddimensions.xp_fluid": "Liquid XP",
+
   "creativetab.beyonddimensions.items": "Beyond Dimensions - Items",
   "creativetab.beyonddimensions.blocks": "Beyond Dimensions - Blocks",
+
   "beyonddimensions.message.insufficient_materials": "Lack of sufficient materials",
+
   "msg.beyonddimensions.network_created": "You ripped a rift through the cosmos...",
   "msg.beyonddimensions.item_net_bound": "Item bound to network #%d",
   "msg.beyonddimensions.item_net_unbound": "Item unbound from network #%d",
@@ -165,10 +193,12 @@
   "msg.beyonddimensions.xp_mode.switch.high": "XP transfer amount switched to: 30 levels",
   "msg.beyonddimensions.xp_mode.switch.highest": "XP transfer amount switched to: 100 levels",
   "msg.beyonddimensions.xp_mode.switch.over_highest": "XP transfer amount switched to: 150 levels",
+
   "types.beyonddimensions.energytype.name": "FE",
   "types.beyonddimensions.warden_soul_type.name": "Warden Souls",
   "types.beyonddimensions.source_type.name": "Source",
   "types.beyonddimensions.mana_type.name": "Plant Mana",
+
   "msg.beyonddimensions.magnet.close": "Magnet disabled",
   "msg.beyonddimensions.magnet.open": "Magnet enabled",
   "msg.beyonddimensions.magnet.itemclose": "Magnet item pickup disabled",
@@ -176,5 +206,10 @@
   "msg.beyonddimensions.magnet.fluidclose": "Magnet fluid pickup disabled",
   "msg.beyonddimensions.magnet.fluidopen": "Magnet fluid pickup enabled",
   "msg.beyonddimensions.item.xp_exchange.open": "Enable XP auto-exchange, maintaining the configured level",
-  "msg.beyonddimensions.item.xp_exchange.close": "Disable XP auto-exchange"
+  "msg.beyonddimensions.item.xp_exchange.close": "Disable XP auto-exchange",
+  "msg.beyonddimensions.primary_net.switch.changed": "Primary network switched to #%s",
+  "msg.beyonddimensions.primary_net.switch.cleared": "Primary network cleared",
+  "msg.beyonddimensions.primary_net.switch.none_available": "No available network to switch to",
+  "msg.beyonddimensions.primary_net.switch.invalid_target": "That network is unavailable or you are no longer a member",
+  "msg.beyonddimensions.primary_net.switch.no_other": "No other primary network is available"
 }
