@@ -57,7 +57,6 @@ public class NetedBlock extends Block
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
     {
-        // 空手右键可以设定网络接口所绑定的网络
         if (!player.getMainHandItem().isEmpty() || !player.isShiftKeyDown())
         {
             return InteractionResult.PASS;
@@ -73,40 +72,42 @@ public class NetedBlock extends Block
                     {
                         if (net.isManager(player))
                         {
-                            // 成功设置网络id
                             blockEntity.setNetId(net.getId());
-                            level.invalidateCapabilities(pos); // 用于清除实体能力缓存
+                            level.invalidateCapabilities(pos);
                             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.5F, 1.0F);
                             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_bound", net.getId()));
                         }
                         else
+                        {
                             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_block"));
+                        }
                     }
                 }
                 else
                 {
-                    DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
-                    if (net != null)
+                    int currentNetId = blockEntity.getNetId();
+                    DimensionsNet currentNet = DimensionsNet.getNetFromId(currentNetId);
+                    if (currentNet == null)
                     {
-                        if (net.getId() == blockEntity.getNetId() || DimensionsNet.getNetFromId(blockEntity.getNetId()) == null)
-                        {
-                            if (net.isManager(player))
-                            {
-                                // 成功清除网络id
-                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_unbound", blockEntity.getNetId()));
-                                blockEntity.setNetId(-1);
-                                level.invalidateCapabilities(pos); // 用于清除实体能力缓存
-                                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.5F, 1.0F);
-                            }
-                            else
-                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_block"));
-                        }
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_unbound", currentNetId));
+                        blockEntity.setNetId(-1);
+                        level.invalidateCapabilities(pos);
+                        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.5F, 1.0F);
+                    }
+                    else if (currentNet.isManager(player))
+                    {
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_unbound", currentNetId));
+                        blockEntity.setNetId(-1);
+                        level.invalidateCapabilities(pos);
+                        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.5F, 1.0F);
+                    }
+                    else
+                    {
+                        player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_block"));
                     }
                 }
             }
         }
         return InteractionResult.SUCCESS;
     }
-
-
 }
