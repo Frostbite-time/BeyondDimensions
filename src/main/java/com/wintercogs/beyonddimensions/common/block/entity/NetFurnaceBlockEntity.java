@@ -27,6 +27,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -552,8 +553,8 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                             int burnTime = fuelItem.getReadOnlyStack().getBurnTime(RecipeType.SMELTING, level.fuelValues());
                             if (burnTime > 0)
                             {
-                                ItemStack returnItem = fuelItem.getReadOnlyStack().getCraftingRemainder().create();
-                                if (returnItem.isEmpty())
+                                ItemStackTemplate returnTemplate = fuelItem.getReadOnlyStack().getCraftingRemainder();
+                                if (returnTemplate == null)
                                 {
                                     fuelStorageSlots.extract(fuelItem, 1, false, false);
                                     litTime.set(litSlot, burnTime);
@@ -561,6 +562,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                                 }
                                 else // 先尝试插入returnItem，如果能插入再消耗
                                 {
+                                    ItemStack returnItem = returnTemplate.create();
                                     IStackKey<?> returnKey = new ItemStackKey(returnItem);
                                     int returnCount = returnItem.getCount();
                                     // 模拟插入陈功
