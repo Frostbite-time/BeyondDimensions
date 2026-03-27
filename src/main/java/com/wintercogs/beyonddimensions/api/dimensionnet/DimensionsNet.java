@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
@@ -37,8 +38,8 @@ import java.util.*;
  */
 public class DimensionsNet extends SavedData
 {
-    private static final String NET_NAME_PREFIX = "bd_net_";
-    private static final int MAX_NET_SCAN = 10000;
+    static final String NET_DATA_PREFIX = "bd_net_";
+    public static final int NO_PRIMARY_NET_ID = -1;
     private static final int DELETED_ID = -99;
 
     private static final String SAVE_KEY_ID = "id";
@@ -153,10 +154,11 @@ public class DimensionsNet extends SavedData
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null)
         {
-            String netId = DimensionsNet.buildNewNetName(server);
-            String numId = netId.replace(NET_NAME_PREFIX, "");
-            DimensionsNet newNet = server.getDataStorage().computeIfAbsent(savedDataType(netId));
-            newNet.setId(Integer.parseInt(numId));
+            int allocatedNetId = NetRegistryIndex.get(server).allocateNetId(server);
+            String netDataName = DimensionsNet.buildNetDataName(allocatedNetId);
+            DimensionsNet newNet = server.getDataStorage().computeIfAbsent(savedDataType(netDataName));
+            newNet.setId(allocatedNetId);
+            NetRegistryIndex.get(server).registerNet(server, allocatedNetId);
             newNet.setOwner(player.getUUID());
             newNet.addManager(player.getUUID());
             newNet.addPlayer(player.getUUID());
@@ -170,24 +172,22 @@ public class DimensionsNet extends SavedData
     }
 
     /**
-     * 构建最新的，可用的网络名称，用于创建新网络时确定新网络的id，仅在服务端调用
+     * 构建最新的，可用的网络名称，仅在服务端调用。
+     * <p>
+     * 该方法会通过网络注册表分配一个全新的、单调递增的网络 ID，并基于它构建数据名。
+     * 该操作不会自动把网络登记为有效网络。
      *
      * @param dataProvider 用于获取SavedData
      * @return 最新可用的网络名称，内容为字符串："bd_net_<数字id>"
      */
     public static String buildNewNetName(@NotNull MinecraftServer dataProvider)
     {
-        int netId;
-        // 接下来按照"bd_net_" + netId从0查找网络，直到找到不存在的网络，此时netId为新网络id
-        // 后续可以做一个废弃网络回收处理，但是暂时不着急
-        for (netId = 0; netId < MAX_NET_SCAN; netId++)
-        {
-            if (dataProvider.getDataStorage().get(savedDataType(NET_NAME_PREFIX + netId)) == null)
-            {
-                break;
-            }
-        }
-        return NET_NAME_PREFIX + netId;
+        return buildNetDataName(NetRegistryIndex.get(dataProvider).allocateNetId(dataProvider));
+    }
+
+    public static String buildNetDataName(int netId)
+    {
+        return NET_DATA_PREFIX + netId;
     }
 
     /**
@@ -200,9 +200,14 @@ public class DimensionsNet extends SavedData
     {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return null;
+        return getNetFromId(server, id);
+    }
+
+    static @Nullable DimensionsNet getNetFromId(@NotNull MinecraftServer server, int id)
+    {
         if (id < 0) return null;
 
-        DimensionsNet net = server.getDataStorage().get(savedDataType(NET_NAME_PREFIX + id));
+        DimensionsNet net = server.getDataStorage().get(savedDataType(buildNetDataName(id)));
         if (net != null && !net.deleted)
         {
             return net;
@@ -216,28 +221,88 @@ public class DimensionsNet extends SavedData
      * @param player 玩家
      * @return 返回玩家所在的维度网络，如果不存在，则返回null
      */
+    @Deprecated(forRemoval = false)
     public static @Nullable DimensionsNet getNetFromPlayer(Player player)
+    {
+        return getPrimaryNetFromPlayer(player);
+    }
+
+    public static @Nullable DimensionsNet getPrimaryNetFromPlayer(Player player)
     {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return null;
 
-        int netId;
-        for (netId = 0; netId < MAX_NET_SCAN; netId++)
+        PlayerNetIndex index = PlayerNetIndex.get(server);
+        int primaryNetId = index.getPrimaryNetId(player.getUUID());
+        if (primaryNetId == PlayerNetIndex.NO_PRIMARY_NET)
         {
-            DimensionsNet net = server.getDataStorage().get(savedDataType(NET_NAME_PREFIX + netId));
-            if (net != null && !net.deleted)
+            return null;
+        }
+
+        return getNetFromId(server, primaryNetId);
+    }
+
+    public static @NotNull List<DimensionsNet> getAllNetFromPlayer(Player player)
+    {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null)
+        {
+            return List.of();
+        }
+
+        PlayerNetIndex index = PlayerNetIndex.get(server);
+        List<Integer> netIds = index.getAllNetIds(player.getUUID());
+        if (netIds.isEmpty())
+        {
+            return List.of();
+        }
+
+        List<DimensionsNet> nets = new ArrayList<>(netIds.size());
+        for (int netId : netIds)
+        {
+            DimensionsNet net = getNetFromId(server, netId);
+            if (net != null)
             {
-                if (net.players.contains(player.getUUID()))
-                {
-                    return net;
-                }
-            }
-            else
-            {
-                continue; // 给予10000次查找机会，防止乱删乱改导致id轮空
+                nets.add(net);
             }
         }
-        return null;
+        return nets;
+    }
+
+    public static boolean hasAnyNet(Player player)
+    {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        return server != null && PlayerNetIndex.get(server).hasAnyMembership(player.getUUID());
+    }
+
+    public static boolean hasPrimaryNet(Player player)
+    {
+        return getPrimaryNetFromPlayer(player) != null;
+    }
+
+    public static boolean setPrimaryNetForPlayer(Player player, @Nullable DimensionsNet net)
+    {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null)
+        {
+            return false;
+        }
+
+        PlayerNetIndex index = PlayerNetIndex.get(server);
+        return net == null
+                ? index.setPrimary(player.getUUID(), PlayerNetIndex.NO_PRIMARY_NET)
+                : index.setPrimary(player.getUUID(), net.getId());
+    }
+
+    public static void clearPrimaryNetForPlayer(Player player)
+    {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null)
+        {
+            return;
+        }
+
+        PlayerNetIndex.get(server).clearPrimary(player.getUUID());
     }
 
     private static DimensionsNet fromTag(CompoundTag tag)
@@ -252,6 +317,15 @@ public class DimensionsNet extends SavedData
         }
 
         net.unifiedStorage.deserializeNBT(currentRegistryAccess(), tag.getCompoundOrEmpty(SAVE_KEY_UNIFIED_STORAGE));
+
+        if (tag.contains("EnergyStorage"))
+        {
+            CompoundTag energyTag = tag.getCompoundOrEmpty("EnergyStorage");
+            if (energyTag.contains("Energy"))
+            {
+                net.unifiedStorage.insert(EnergyStackKey.INSTANCE, energyTag.getLongOr("Energy", 0L), false);
+            }
+        }
 
         if (tag.contains(SAVE_KEY_MANAGERS))
         {
@@ -389,8 +463,11 @@ public class DimensionsNet extends SavedData
      */
     public void addPlayer(UUID playerId)
     {
-        players.add(playerId);
-        setDirty();
+        if (players.add(playerId))
+        {
+            syncPlayerMembership(playerId, true);
+            setDirty();
+        }
     }
 
     /**
@@ -404,9 +481,12 @@ public class DimensionsNet extends SavedData
         {
             return;
         }
-        players.remove(playerId);
-        managers.remove(playerId);
-        setDirty();
+        if (players.remove(playerId))
+        {
+            managers.remove(playerId);
+            syncPlayerRemoval(playerId);
+            setDirty();
+        }
     }
 
     /**
@@ -479,6 +559,13 @@ public class DimensionsNet extends SavedData
      */
     public void destroySelf()
     {
+        int previousNetId = this.id;
+        List<UUID> playerIds = new ArrayList<>(this.players);
+        for (UUID playerId : playerIds)
+        {
+            syncPlayerRemoval(playerId, previousNetId);
+        }
+
         // 这里有一些问题。即我们实际上无法删除已经存在的SaveData。
         // 所以我们要做的是巧妙地将此SaveData有关数据指向移除。
         // 然后将所有对应的存储容量设置为0
@@ -488,6 +575,11 @@ public class DimensionsNet extends SavedData
         this.id = DELETED_ID; // 用-99作为被删除的特殊标记
         this.unifiedStorage.clearStorage();
         this.deleted = true;
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server != null)
+        {
+            NetRegistryIndex.get(server).unregisterNet(server, previousNetId);
+        }
         setDirty();
     }
 
@@ -546,6 +638,33 @@ public class DimensionsNet extends SavedData
             currentTime = 0;
         }
 
+    }
+
+    private void syncPlayerMembership(UUID playerId, boolean switchPrimary)
+    {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null || id < 0)
+        {
+            return;
+        }
+
+        PlayerNetIndex.get(server).addMembership(playerId, id, switchPrimary);
+    }
+
+    private void syncPlayerRemoval(UUID playerId)
+    {
+        syncPlayerRemoval(playerId, this.id);
+    }
+
+    private static void syncPlayerRemoval(UUID playerId, int netId)
+    {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null || netId < 0)
+        {
+            return;
+        }
+
+        PlayerNetIndex.get(server).removeMembership(playerId, netId);
     }
 }
 
