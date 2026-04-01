@@ -141,10 +141,6 @@ sourceSets {
         resources {
             srcDir 'src/generated/resources'
         }
-        java {
-            // 暂时排除JEI联动
-            exclude 'com/wintercogs/beyonddimensions/integration/module/jei/**'
-        }
     }
 }
 
@@ -166,8 +162,8 @@ dependencies {
     }
 
     // JEI支持
-    //compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
-    //runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+    runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
     // 饰品栏支持
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}:api"

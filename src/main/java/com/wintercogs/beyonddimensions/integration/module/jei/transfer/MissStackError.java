@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.integration.module.jei.transfer;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.Collection;
 
@@ -30,7 +30,7 @@ public class MissStackError implements IRecipeTransferError
     }
 
     @Override
-    public void showError(GuiGraphics guiGraphics, int mouseX, int mouseY, IRecipeSlotsView recipeSlotsView, int recipeX, int recipeY)
+    public void showError(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, IRecipeSlotsView recipeSlotsView, int recipeX, int recipeY)
     {
         var poseStack = guiGraphics.pose();
         poseStack.pushMatrix();
