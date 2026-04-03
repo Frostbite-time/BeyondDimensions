@@ -1,1 +1,1 @@
-* add jei support
+* add Traditional Chinese translation
