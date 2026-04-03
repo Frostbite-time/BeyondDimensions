@@ -1,1 +1,1 @@
-* update ui texture
+* add Traditional Chinese translation
