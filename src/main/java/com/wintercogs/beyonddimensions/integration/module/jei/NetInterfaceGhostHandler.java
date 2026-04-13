@@ -51,7 +51,7 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
         public IStackTarget(AbstractStackTypedSlot slot, BDBaseGUI screen)
         {
             this.slot = slot;
-            this.area = new Rect2i(screen.getGuiLeft() + slot.x, screen.getGuiTop() + slot.y, 16, 16);
+            this.area = new Rect2i(screen.getLeftPos() + slot.x, screen.getTopPos() + slot.y, 16, 16);
         }
 
         @Override

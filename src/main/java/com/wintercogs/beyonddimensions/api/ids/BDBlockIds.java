@@ -12,6 +12,9 @@ public class BDBlockIds
     public static final String NET_FURNACE_BLOCK = "net_furnace_block";
     public static final String DIMENSIONAL_CONNECT_BLOCK = "dimensional_connect_block";
 
+    // 模块方块
+    public static final String RS_NET_PATHWAY = "rs_net_pathway";
+
     private BDBlockIds()
     {
     }
