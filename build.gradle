@@ -166,17 +166,15 @@ dependencies {
     runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
     // 饰品栏支持
-    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+26.1:api"
-    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+26.1"
-//    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}:api"
-//    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
+    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
     // 通用拼音搜索-在安装时优先使用它的拼音处理 不启用runtime：会导致runServer失败
     // compileOnly "curse.maven:just-enough-characters-250702:7320201"
 
     // RS支持
-    compileOnly "maven.modrinth:refined-storage:k4yMUj29"
-    runtimeOnly "maven.modrinth:refined-storage:k4yMUj29"
+    compileOnly "curse.maven:refined-storage-243076:7934242"
+    runtimeOnly "curse.maven:refined-storage-243076:7934242"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
@@ -186,6 +184,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,
             neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
             mod_id                 : mod_id,
             mod_name               : mod_name,
             mod_license            : mod_license,
