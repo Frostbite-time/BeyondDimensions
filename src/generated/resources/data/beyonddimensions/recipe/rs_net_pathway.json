@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "refinedstorage"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "refinedstorage:quartz_enriched_iron",
+    "B": "beyonddimensions:space_time_stable_frame",
+    "C": "refinedstorage:machine_casing",
+    "D": "minecraft:redstone"
+  },
+  "pattern": [
+    "ABA",
+    "ACA",
+    "ADA"
+  ],
+  "result": {
+    "id": "beyonddimensions:rs_net_pathway"
+  }
+}

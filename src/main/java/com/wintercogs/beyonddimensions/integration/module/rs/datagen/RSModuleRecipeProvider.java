@@ -4,6 +4,7 @@ import com.refinedmods.refinedstorage.common.content.Blocks;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.ModRecipeProvider;
 import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -16,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
+import static net.neoforged.neoforge.common.conditions.NeoForgeConditions.modLoaded;
+
 public class RSModuleRecipeProvider extends BDRecipeProvider
 {
 
@@ -27,10 +30,7 @@ public class RSModuleRecipeProvider extends BDRecipeProvider
     @Override
     protected void buildRecipes()
     {
-        // TODO uncomment this
-//        RecipeOutput compatOutput = recipeOutput.withConditions(modLoaded(OtherModIds.REFINED_STORAGE));
-
-//        super.buildRecipes(compatOutput, holderLookup);
+        RecipeOutput compatOutput = this.output.withConditions(modLoaded(OtherModIds.REFINED_STORAGE));
 
         ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, RSModuleBlocks.RS_NET_PATHWAY.get())
                 .pattern("ABA")
@@ -41,7 +41,7 @@ public class RSModuleRecipeProvider extends BDRecipeProvider
                 .define('C', Blocks.INSTANCE.getMachineCasing())
                 .define('D', Items.REDSTONE)
                 .unlockedBy("unlock_rs_net_pathway", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
-                .save(this.output);
+                .save(compatOutput);
     }
 
     public static class Runner extends RecipeProvider.Runner
@@ -54,7 +54,7 @@ public class RSModuleRecipeProvider extends BDRecipeProvider
         @Override
         protected @NotNull RecipeProvider createRecipeProvider(HolderLookup.@NotNull Provider provider, @NotNull RecipeOutput output)
         {
-            return new ModRecipeProvider(provider, output);
+            return new RSModuleRecipeProvider(provider, output);
         }
 
         @Override

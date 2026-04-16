@@ -15,10 +15,14 @@ import net.minecraft.client.data.models.blockstates.PropertyDispatch;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.renderer.block.dispatch.VariantMutator;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.stream.Stream;
 
 public class ModModelProvider extends BDModelProvider
 {
@@ -32,6 +36,18 @@ public class ModModelProvider extends BDModelProvider
     public @NotNull String getName()
     {
         return "BeyondDimensions Model Provider";
+    }
+
+    @Override
+    protected @NotNull Stream<? extends Holder<Item>> getKnownItems()
+    {
+        return BDItems.ITEMS.getEntries().stream();
+    }
+
+    @Override
+    protected @NotNull Stream<? extends Holder<Block>> getKnownBlocks()
+    {
+        return BDBlocks.BLOCKS.getEntries().stream();
     }
 
     @Override
