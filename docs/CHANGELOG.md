@@ -1,2 +1,1 @@
-* restore RS support (thanks rocascent)
-* update to mc 26.1.2
+* xEI recipe transfer now support for non-crafting recipes.

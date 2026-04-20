@@ -5,6 +5,8 @@ import com.wintercogs.beyonddimensions.client.gui.BDBaseGUI;
 import com.wintercogs.beyonddimensions.integration.module.jei.handler.JeiContainerHandler;
 import com.wintercogs.beyonddimensions.integration.module.jei.transfer.CraftMenuRecipeTransferHandler;
 import com.wintercogs.beyonddimensions.integration.module.jei.transfer.CraftTerminalRecipeTransferHandler;
+import com.wintercogs.beyonddimensions.integration.module.jei.transfer.MenuUniversalRecipeTransfer;
+import com.wintercogs.beyonddimensions.integration.module.jei.transfer.TerminalUniversalRecipeTransfer;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
@@ -32,6 +34,8 @@ public class BDJEIPlugin implements IModPlugin
     {
         registration.addRecipeTransferHandler(new CraftMenuRecipeTransferHandler(), RecipeTypes.CRAFTING);
         registration.addRecipeTransferHandler(new CraftTerminalRecipeTransferHandler(), RecipeTypes.CRAFTING);
+        registration.addUniversalRecipeTransferHandler(new MenuUniversalRecipeTransfer());
+        registration.addUniversalRecipeTransferHandler(new TerminalUniversalRecipeTransfer());
     }
 
     @Override
