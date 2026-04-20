@@ -64,7 +64,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
     @Override
     public boolean supportsRecipe(EmiRecipe recipe)
     {
-        return recipe.getCategory() == VanillaEmiRecipeCategories.CRAFTING && recipe.supportsRecipeTree();
+        return true;
     }
 
     @Override
