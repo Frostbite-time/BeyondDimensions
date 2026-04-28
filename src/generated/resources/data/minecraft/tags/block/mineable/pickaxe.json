@@ -10,19 +10,19 @@
     "beyonddimensions:net_furnace_block",
     "beyonddimensions:dimensional_connect_block",
     {
-      "id": "beyonddimensions:ars_source_pathway",
-      "required": false
-    },
-    {
-      "id": "beyonddimensions:mana_pool_pathway",
-      "required": false
-    },
-    {
       "id": "beyonddimensions:schematicannon_pathway",
       "required": false
     },
     {
+      "id": "beyonddimensions:ars_source_pathway",
+      "required": false
+    },
+    {
       "id": "beyonddimensions:rs_net_pathway",
+      "required": false
+    },
+    {
+      "id": "beyonddimensions:mana_pool_pathway",
       "required": false
     }
   ]
