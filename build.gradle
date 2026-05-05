@@ -172,6 +172,12 @@ dependencies {
     // 通用拼音搜索-在安装时优先使用它的拼音处理 不启用runtime：会导致runServer失败
     // compileOnly "curse.maven:just-enough-characters-250702:7320201"
 
+    // GuideMe
+    runtimeOnly "curse.maven:guideme-1173950:7929350"
+    // AE支持
+    compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
+    runtimeOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
+
     // RS支持
     compileOnly "curse.maven:refined-storage-243076:7934242"
     runtimeOnly "curse.maven:refined-storage-243076:7934242"

@@ -8,8 +8,8 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
-import com.wintercogs.beyonddimensions.integration.module.rs.datagen.RSModuleModelProvider;
 import com.wintercogs.beyonddimensions.integration.module.rs.datagen.RSModuleBlockLootTableProvider;
+import com.wintercogs.beyonddimensions.integration.module.rs.datagen.RSModuleModelProvider;
 import com.wintercogs.beyonddimensions.integration.module.rs.datagen.RSModuleRecipeProvider;
 import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlockEntities;
 import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlocks;
@@ -80,7 +80,7 @@ public class RSModule implements IIntegrationModule
     @Override
     public void onDatagen(GatherDataEvent.Client event)
     {
-        event.createProvider((output, lookupProvider)-> new LootTableProvider(output, Collections.emptySet(),
+        event.createProvider((output, lookupProvider) -> new LootTableProvider(output, Collections.emptySet(),
                 List.of(new LootTableProvider.SubProviderEntry(RSModuleBlockLootTableProvider::new, LootContextParamSets.BLOCK)), lookupProvider)
         {
             @Override

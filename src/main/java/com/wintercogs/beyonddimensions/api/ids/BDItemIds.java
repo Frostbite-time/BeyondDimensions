@@ -20,6 +20,9 @@ public class BDItemIds
     public static final String XP_EXCHANGE_ITEM = "xp_exchange_item";
     public static final String TEST_ITEM_GENERATE = "test_item_generate";
 
+    // 模块物品
+    public static final String NET_AE_STORAGE_CELL = "net_ae_storage_cell";
+
     private BDItemIds()
     {
     }

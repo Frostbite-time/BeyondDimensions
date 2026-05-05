@@ -6,6 +6,9 @@ import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.client.gui.BDBaseGUI;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.integration.ModPresence;
+import com.wintercogs.beyonddimensions.integration.OtherModIds;
+import com.wintercogs.beyonddimensions.integration.module.ae2.AEHelper;
 import com.wintercogs.beyonddimensions.network.packet.both.SetSlotDirectlyPacket;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
@@ -81,19 +84,19 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
             }
 
             // AE2通用包裹支持
-//            if (BeyondDimensions.AELoaded)
-//            {
-//                if (dragging instanceof ItemStackKey draggingItemKey && !dragging.isEmpty())
-//                {
-//                    appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItemKey.copyStack());
-//
-//                    if (genericContent != null)
-//                    {
-//                        dragging = AEHelper.fromAEKeyToIStack(genericContent.what()).orElse(ItemStackKey.EMPTY);
-//                    }
-//
-//                }
-//            }
+            if (ModPresence.isLoaded(OtherModIds.AE2))
+            {
+                if (dragging instanceof ItemStackKey draggingItemKey && !dragging.isEmpty())
+                {
+                    appeng.api.stacks.GenericStack genericContent = appeng.api.stacks.GenericStack.fromItemStack(draggingItemKey.copyStack());
+
+                    if (genericContent != null)
+                    {
+                        dragging = AEHelper.fromAEKeyToIStack(genericContent.what()).orElse(ItemStackKey.EMPTY);
+                    }
+
+                }
+            }
 
             ClientPacketDistributor.sendToServer(new SetSlotDirectlyPacket(slot.index, new KeyAmount(dragging, 1)));
 

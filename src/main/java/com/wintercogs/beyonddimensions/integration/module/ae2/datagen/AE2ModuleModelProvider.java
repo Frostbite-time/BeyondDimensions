@@ -1,9 +1,10 @@
-package com.wintercogs.beyonddimensions.integration.module.rs.datagen;
+package com.wintercogs.beyonddimensions.integration.module.ae2.datagen;
 
 import com.wintercogs.beyonddimensions.datagen.util.BDModelProvider;
-import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlocks;
+import com.wintercogs.beyonddimensions.integration.module.ae2.init.AE2ModuleItems;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.core.Holder;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.Item;
@@ -12,10 +13,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.Stream;
 
-public class RSModuleModelProvider extends BDModelProvider
+public class AE2ModuleModelProvider extends BDModelProvider
 {
-
-    public RSModuleModelProvider(PackOutput output)
+    public AE2ModuleModelProvider(PackOutput output)
     {
         super(output);
     }
@@ -23,24 +23,24 @@ public class RSModuleModelProvider extends BDModelProvider
     @Override
     public @NotNull String getName()
     {
-        return "BeyondDimensions RSModule Model Provider";
+        return "BeyondDimensions AE2Module Model Provider";
     }
 
     @Override
     protected void registerModels(@NotNull BlockModelGenerators blockModels, @NotNull ItemModelGenerators itemModels)
     {
-        blockWithItem(blockModels, RSModuleBlocks.RS_NET_PATHWAY);
+        itemModels.generateFlatItem(AE2ModuleItems.NET_AE_STORAGE_CELL.get(), ModelTemplates.FLAT_ITEM);
     }
 
     @Override
     protected @NotNull Stream<? extends Holder<Block>> getKnownBlocks()
     {
-        return RSModuleBlocks.BLOCKS.getEntries().stream();
+        return Stream.empty();
     }
 
     @Override
-    protected Stream<? extends Holder<Item>> getKnownItems()
+    protected @NotNull Stream<? extends Holder<Item>> getKnownItems()
     {
-        return Stream.empty();
+        return AE2ModuleItems.ITEMS.getEntries().stream();
     }
 }

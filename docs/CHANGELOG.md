@@ -1,1 +1,1 @@
-* xEI recipe transfer now support for non-crafting recipes.
+* restore AE2 support
