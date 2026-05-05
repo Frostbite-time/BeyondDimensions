@@ -16,9 +16,8 @@ public class AE2ModuleItems
     /**
      * AE存储磁盘
      */
-    public static final DeferredItem<Item> NET_AE_STORAGE_CELL = ITEMS.register(BDItemIds.NET_AE_STORAGE_CELL,
-            () -> new NetAEStorageCell(new Item.Properties())
-    );
+    public static final DeferredItem<Item> NET_AE_STORAGE_CELL = ITEMS.registerItem(BDItemIds.NET_AE_STORAGE_CELL,
+            NetAEStorageCell::new);
 
 
     public static void register(IEventBus eventBus)
