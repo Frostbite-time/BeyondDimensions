@@ -103,6 +103,10 @@
   "tooltip.button.beyonddimensions.open_dimensions_net_menu": "切换到维度网络仓库",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "快速切换到 #%s 号网络",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "网络 #%s\n权限：%s",
+  "tooltip.jade.beyonddimensions.net.bound": "网络：%1$s（#%2$s）（%3$s）",
+  "tooltip.jade.beyonddimensions.net.unbound": "网络：未绑定",
+  "tooltip.jade.beyonddimensions.net.permission.none": "无",
+  "config.jade.plugin_beyonddimensions.net_info": "网络信息",
 
   "istack.beyonddimensions.storage_num.item": "已存储：%s个",
   "istack.beyonddimensions.storage_num.fluid": "已存储：%smB",

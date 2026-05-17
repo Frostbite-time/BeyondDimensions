@@ -100,6 +100,10 @@
   "tooltip.button.beyonddimensions.open_dimensions_net_menu": "네트워크 저장소 메뉴로 전환",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "네트워크 #%s 로 빠르게 전환",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "네트워크 #%s\n권한: %s",
+  "tooltip.jade.beyonddimensions.net.bound": "네트워크: %1$s (#%2$s) (%3$s)",
+  "tooltip.jade.beyonddimensions.net.unbound": "네트워크: 바인딩되지 않음",
+  "tooltip.jade.beyonddimensions.net.permission.none": "없음",
+  "config.jade.plugin_beyonddimensions.net_info": "네트워크 정보",
 
   "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
   "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",

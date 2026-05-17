@@ -100,6 +100,10 @@
   "tooltip.button.beyonddimensions.open_dimensions_net_menu": "Переключиться к хранилищу сети",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Быстро переключиться на сеть #%s",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "Сеть #%s\nПрава: %s",
+  "tooltip.jade.beyonddimensions.net.bound": "Сеть: %1$s (#%2$s) (%3$s)",
+  "tooltip.jade.beyonddimensions.net.unbound": "Сеть: не привязана",
+  "tooltip.jade.beyonddimensions.net.permission.none": "Нет",
+  "config.jade.plugin_beyonddimensions.net_info": "Информация о сети",
 
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
   "istack.beyonddimensions.storage_num.fluid": "Сохранено: %s мБ",

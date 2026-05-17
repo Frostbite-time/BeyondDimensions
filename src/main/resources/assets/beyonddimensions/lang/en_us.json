@@ -103,6 +103,10 @@
   "tooltip.button.beyonddimensions.open_dimensions_net_menu": "Switch to the network storage menu",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Quick switch to network #%s",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "Network #%s\nPermission: %s",
+  "tooltip.jade.beyonddimensions.net.bound": "Network: %1$s (#%2$s) (%3$s)",
+  "tooltip.jade.beyonddimensions.net.unbound": "Network: Unbound",
+  "tooltip.jade.beyonddimensions.net.permission.none": "None",
+  "config.jade.plugin_beyonddimensions.net_info": "Network Info",
 
   "istack.beyonddimensions.storage_num.item": "Stored: %s Items",
   "istack.beyonddimensions.storage_num.fluid": "Stored: %s mB",

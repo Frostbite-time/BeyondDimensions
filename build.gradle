@@ -176,6 +176,10 @@ dependencies {
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
     runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
+    // Jade支持
+    compileOnly "curse.maven:jade-324717:7545219"
+    runtimeOnly "curse.maven:jade-324717:7545219"
+
     // 多态合成支持
     compileOnly "curse.maven:polymorph-388800:6451024"
     runtimeOnly "curse.maven:polymorph-388800:6451024"

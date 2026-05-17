@@ -100,6 +100,10 @@
   "tooltip.button.beyonddimensions.open_dimensions_net_menu": "Cambiar al menú de almacenamiento de red",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Cambiar rápidamente a la red #%s",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "Red #%s\nPermiso: %s",
+  "tooltip.jade.beyonddimensions.net.bound": "Red: %1$s (#%2$s) (%3$s)",
+  "tooltip.jade.beyonddimensions.net.unbound": "Red: sin vincular",
+  "tooltip.jade.beyonddimensions.net.permission.none": "Ninguno",
+  "config.jade.plugin_beyonddimensions.net_info": "Información de red",
 
   "istack.beyonddimensions.storage_num.item": "Almacenado: %s unidades",
   "istack.beyonddimensions.storage_num.fluid": "Almacenado: %s mB",

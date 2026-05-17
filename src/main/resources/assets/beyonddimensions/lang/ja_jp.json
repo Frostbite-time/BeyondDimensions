@@ -100,6 +100,10 @@
   "tooltip.button.beyonddimensions.open_dimensions_net_menu": "ネットワークストレージ画面へ切り替え",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "ネットワーク #%s にすばやく切替",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "ネットワーク #%s\n権限: %s",
+  "tooltip.jade.beyonddimensions.net.bound": "ネットワーク：%1$s（#%2$s）（%3$s）",
+  "tooltip.jade.beyonddimensions.net.unbound": "ネットワーク：未バインド",
+  "tooltip.jade.beyonddimensions.net.permission.none": "なし",
+  "config.jade.plugin_beyonddimensions.net_info": "ネットワーク情報",
 
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
   "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",

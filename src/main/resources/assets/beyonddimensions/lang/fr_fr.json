@@ -100,6 +100,10 @@
   "tooltip.button.beyonddimensions.open_dimensions_net_menu": "Passer au menu de stockage du réseau",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Basculer rapidement vers le réseau #%s",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "Réseau #%s\nPermission : %s",
+  "tooltip.jade.beyonddimensions.net.bound": "Réseau : %1$s (#%2$s) (%3$s)",
+  "tooltip.jade.beyonddimensions.net.unbound": "Réseau : non lié",
+  "tooltip.jade.beyonddimensions.net.permission.none": "Aucune",
+  "config.jade.plugin_beyonddimensions.net_info": "Informations réseau",
 
   "istack.beyonddimensions.storage_num.item": "Stocké : %s unités",
   "istack.beyonddimensions.storage_num.fluid": "Stocké : %s mB",
