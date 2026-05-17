@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.NetFeederItem;
 import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
 import com.wintercogs.beyonddimensions.common.item.NetRestockerItem;
+import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import top.theillusivec4.curios.api.CuriosCapability;
@@ -104,6 +105,29 @@ public class CuriosCapAttach
                     }
                 },
                 BDItems.NET_RESTOCKER_ITEM
+        );
+        // 经验交换棒
+        evt.registerItem(
+                CuriosCapability.ITEM,
+                (stack, context) -> new ICurio()
+                {
+                    @Override
+                    public ItemStack getStack()
+                    {
+                        return stack;
+                    }
+
+                    @Override
+                    public void curioTick(SlotContext slotContext)
+                    {
+                        if (stack.getItem() == BDItems.XP_EXCHANGE_ITEM.get())
+                        {
+                            XpExchangeItem item = (XpExchangeItem) stack.getItem();
+                            item.inventoryTick(stack, slotContext.entity().level(), slotContext.entity(), slotContext.index(), false);
+                        }
+                    }
+                },
+                BDItems.XP_EXCHANGE_ITEM
         );
     }
 }

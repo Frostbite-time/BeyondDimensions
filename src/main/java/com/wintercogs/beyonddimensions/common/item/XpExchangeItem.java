@@ -21,7 +21,6 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -34,7 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 // 经验交换棒
-public class XpExchangeItem extends Item
+public class XpExchangeItem extends NetedItem
 {
     public static List<Fluid> xpFluids = new ArrayList<>();
 
@@ -79,8 +78,10 @@ public class XpExchangeItem extends Item
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
-        if (usedHand != InteractionHand.MAIN_HAND)
+        if (usedHand != InteractionHand.MAIN_HAND || player.isShiftKeyDown())
+        {
             return InteractionResultHolder.fail(itemstack);
+        }
 
         XpExchangeSettings.ensureComponents(itemstack);
         if (!level.isClientSide())
@@ -97,7 +98,7 @@ public class XpExchangeItem extends Item
     {
         if (level.isClientSide()) return;
 
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = NetedItem.getNet(stack);
         if (net == null) return;
 
         final int conversionRate = XpExchangeItem.getConversionRate();
