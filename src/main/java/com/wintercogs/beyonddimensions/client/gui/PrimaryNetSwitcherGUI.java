@@ -1,16 +1,21 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetOption;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetSwitchAction;
+import com.wintercogs.beyonddimensions.client.gui.widget.shared.IconButton;
 import com.wintercogs.beyonddimensions.client.gui.widget.scroller.BigScroller;
 import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
 import com.wintercogs.beyonddimensions.common.menu.PrimaryNetSwitcherMenu;
+import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.network.packet.c2s.PrimaryNetSwitchActionPacket;
+import com.wintercogs.beyonddimensions.util.UIDataHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -18,6 +23,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
@@ -43,6 +49,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
 
     private EditBox searchField;
     private BigScroller scroller;
+    private IconButton dimensionsNetButton;
     private Button clearPrimaryButton;
     private List<PrimaryNetOption> filteredOptions = List.of();
     private List<PrimaryNetOption> lastObservedOptions = List.of();
@@ -63,6 +70,12 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         optionButtons.clear();
         recentButtons.clear();
 
+        if (UIDataHelper.isTransfer)
+        {
+            restoreMousePosition();
+            UIDataHelper.isTransfer = false;
+        }
+
         this.imageWidth = BACKGROUND_WIDTH;
         this.imageHeight = rebuildImageHeight();
         this.leftPos = (this.width - this.imageWidth) / 2;
@@ -80,6 +93,18 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         searchField.setResponder(this::onSearchTextChanged);
         searchField.setSuggestion(Component.translatable("menu.label.beyonddimensions.primary_net_switcher.search").getString());
         addRenderableWidget(searchField);
+
+        dimensionsNetButton = new IconButton(this.leftPos + 152, this.topPos + 4, 16, 16, BeyondDimensions.makeId("widget/opposite_arrow"), button ->
+        {
+            if (menu.currentPrimaryNetId == DimensionsNet.NO_PRIMARY_NET_ID)
+                return;
+
+            saveMousePosition();
+            PacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
+        });
+        dimensionsNetButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.open_dimensions_net_menu")));
+        dimensionsNetButton.active = menu.currentPrimaryNetId != DimensionsNet.NO_PRIMARY_NET_ID;
+        addRenderableWidget(dimensionsNetButton);
 
         clearPrimaryButton = Button.builder(
                         Component.translatable("menu.button.beyonddimensions.primary_net_switcher.clear"),
@@ -146,6 +171,9 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
             syncRecentButtons();
             syncOptionButtons();
         }
+
+        if (dimensionsNetButton != null)
+            dimensionsNetButton.active = menu.currentPrimaryNetId != DimensionsNet.NO_PRIMARY_NET_ID;
     }
 
     @Override
@@ -394,6 +422,31 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
     private int rebuildImageHeight()
     {
         return BACKGROUND_HEIGHT;
+    }
+
+    private void restoreMousePosition()
+    {
+        if (UIDataHelper.lastMousePos == null)
+            return;
+
+        Window window = Minecraft.getInstance().getWindow();
+        GLFW.glfwSetCursorPos(
+                window.getWindow(),
+                UIDataHelper.lastMousePos.x,
+                UIDataHelper.lastMousePos.y
+        );
+    }
+
+    private void saveMousePosition()
+    {
+        double[] xpos = new double[1];
+        double[] ypos = new double[1];
+        GLFW.glfwGetCursorPos(Minecraft.getInstance().getWindow().getWindow(), xpos, ypos);
+        UIDataHelper.lastMousePos = new Vec2(
+                (float) xpos[0],
+                (float) ypos[0]
+        );
+        UIDataHelper.isTransfer = true;
     }
 
     private final class PrimaryNetOptionButton extends Button

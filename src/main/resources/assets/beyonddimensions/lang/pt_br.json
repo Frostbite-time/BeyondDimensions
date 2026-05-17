@@ -96,6 +96,8 @@
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Atual: Não trabalhando (apenas troca manual)",
   "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "Pesquisar por ID da rede ou nível de permissão",
   "tooltip.button.beyonddimensions.primary_net_switcher.clear": "Manter as participações, mas parar de usar uma rede principal",
+  "tooltip.button.beyonddimensions.open_primary_net_switcher": "Alternar para o seletor de rede principal",
+  "tooltip.button.beyonddimensions.open_dimensions_net_menu": "Alternar para o menu de armazenamento da rede",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Trocar rapidamente para a rede #%s",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "Rede #%s\nPermissão: %s",
 

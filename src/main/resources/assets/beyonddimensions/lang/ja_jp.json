@@ -96,6 +96,8 @@
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "現在：停止中（手動交換のみ）",
   "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "ネットワークIDまたは権限レベルで検索",
   "tooltip.button.beyonddimensions.primary_net_switcher.clear": "所属は維持したまま、主ネットワークを使わない",
+  "tooltip.button.beyonddimensions.open_primary_net_switcher": "主ネットワーク切替へ切り替え",
+  "tooltip.button.beyonddimensions.open_dimensions_net_menu": "ネットワークストレージ画面へ切り替え",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "ネットワーク #%s にすばやく切替",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "ネットワーク #%s\n権限: %s",
 

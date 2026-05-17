@@ -96,6 +96,8 @@
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "현재: 작업 안 함 (수동 교환만)",
   "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "네트워크 ID 또는 권한 레벨로 검색",
   "tooltip.button.beyonddimensions.primary_net_switcher.clear": "소속은 유지하지만 어떤 주 네트워크도 사용하지 않음",
+  "tooltip.button.beyonddimensions.open_primary_net_switcher": "주 네트워크 전환기로 전환",
+  "tooltip.button.beyonddimensions.open_dimensions_net_menu": "네트워크 저장소 메뉴로 전환",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "네트워크 #%s 로 빠르게 전환",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "네트워크 #%s\n권한: %s",
 

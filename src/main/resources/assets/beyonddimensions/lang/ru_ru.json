@@ -96,6 +96,8 @@
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Текущий: Не работает (только ручной обмен)",
   "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "Поиск по ID сети или уровню прав",
   "tooltip.button.beyonddimensions.primary_net_switcher.clear": "Сохранить участие, но не использовать основную сеть",
+  "tooltip.button.beyonddimensions.open_primary_net_switcher": "Переключиться к выбору основной сети",
+  "tooltip.button.beyonddimensions.open_dimensions_net_menu": "Переключиться к хранилищу сети",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Быстро переключиться на сеть #%s",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "Сеть #%s\nПрава: %s",
 

@@ -96,6 +96,8 @@
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Aktuell: Inaktiv (nur manueller Austausch)",
   "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "Suche nach Netzwerk-ID oder Berechtigungsstufe",
   "tooltip.button.beyonddimensions.primary_net_switcher.clear": "Mitgliedschaften behalten, aber kein Primärnetz verwenden",
+  "tooltip.button.beyonddimensions.open_primary_net_switcher": "Zum Primärnetz-Umschalter wechseln",
+  "tooltip.button.beyonddimensions.open_dimensions_net_menu": "Zum Netzwerkspeicher-Menü wechseln",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Schnell zu Netzwerk #%s wechseln",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "Netzwerk #%s\nBerechtigung: %s",
 

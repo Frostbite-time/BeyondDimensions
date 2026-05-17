@@ -99,6 +99,8 @@
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Current: Not Working (manual exchange only)",
   "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "Search by network ID or permission level",
   "tooltip.button.beyonddimensions.primary_net_switcher.clear": "Keep memberships, but stop using any primary network",
+  "tooltip.button.beyonddimensions.open_primary_net_switcher": "Switch to the primary network switcher",
+  "tooltip.button.beyonddimensions.open_dimensions_net_menu": "Switch to the network storage menu",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "Quick switch to network #%s",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "Network #%s\nPermission: %s",
 

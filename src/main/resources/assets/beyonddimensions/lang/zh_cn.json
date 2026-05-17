@@ -99,6 +99,8 @@
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "当前：不工作（仅手动交互）",
   "tooltip.editbox.beyonddimensions.primary_net_switcher.search": "可按网络 ID 或权限等级搜索",
   "tooltip.button.beyonddimensions.primary_net_switcher.clear": "保留成员身份，但当前不使用任何主网络",
+  "tooltip.button.beyonddimensions.open_primary_net_switcher": "切换到主网络切换器",
+  "tooltip.button.beyonddimensions.open_dimensions_net_menu": "切换到维度网络仓库",
   "tooltip.button.beyonddimensions.primary_net_switcher.recent": "快速切换到 #%s 号网络",
   "tooltip.button.beyonddimensions.primary_net_switcher.option": "网络 #%s\n权限：%s",
 
