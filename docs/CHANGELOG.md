@@ -1,2 +1,4 @@
-* restore AE2 support
-* upgrade to neoforge 26.1.2.41-beta
+* Change how the experience rod works, making it bound to the network
+* Add switch buttons for the Network UI and network-switcher UI
+* Add a naming mechanism for networks
+* Jade compatibility

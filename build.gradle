@@ -181,6 +181,10 @@ dependencies {
     // RS支持
     compileOnly "curse.maven:refined-storage-243076:8032789"
     runtimeOnly "curse.maven:refined-storage-243076:8032789"
+
+    // Jade支持
+    compileOnly "curse.maven:jade-324717:8068368"
+    runtimeOnly "curse.maven:jade-324717:8068368"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

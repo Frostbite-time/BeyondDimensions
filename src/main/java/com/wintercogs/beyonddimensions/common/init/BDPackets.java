@@ -140,5 +140,12 @@ public class BDPackets
                 PrimaryNetSwitchActionPacket::handle,
                 PrimaryNetSwitchActionPacket::handle
         );
+
+        registrar.playBidirectional(
+                RenameNetPacket.TYPE,
+                RenameNetPacket.STREAM_CODEC,
+                RenameNetPacket::handle,
+                RenameNetPacket::handle
+        );
     }
 }

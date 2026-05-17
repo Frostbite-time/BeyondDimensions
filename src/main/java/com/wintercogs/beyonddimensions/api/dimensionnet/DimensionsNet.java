@@ -14,6 +14,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.player.Player;
@@ -40,6 +41,7 @@ public class DimensionsNet extends SavedData
 {
     static final String NET_DATA_PREFIX = "bd_net_";
     public static final int NO_PRIMARY_NET_ID = -1;
+    public static final int MAX_NETWORK_NAME_LENGTH = 48;
     private static final int DELETED_ID = -99;
 
     private static final String SAVE_KEY_ID = "id";
@@ -49,6 +51,7 @@ public class DimensionsNet extends SavedData
     private static final String SAVE_KEY_UNIFIED_STORAGE = "unified_storage";
     private static final String SAVE_KEY_CURRENT_TIME = "current_time";
     private static final String SAVE_KEY_DELETED = "deleted";
+    private static final String SAVE_KEY_CUSTOM_NAME = "custom_name";
 
     private static final Codec<DimensionsNet> CODEC = CompoundTag.CODEC.xmap(DimensionsNet::fromTag, DimensionsNet::toTag);
 
@@ -58,6 +61,11 @@ public class DimensionsNet extends SavedData
      * 被删除的网络均使用-99作为特殊标记
      */
     private int id;
+
+    /**
+     * 玩家自定义网络名。空字符串表示未命名，展示时回退到本地化默认名。
+     */
+    private String customName = "";
 
     /**
      * deleted为真则表示网络被删除，被删除的网络仍可被{@link SavedData}的方法获得，但不应该被使用
@@ -310,6 +318,7 @@ public class DimensionsNet extends SavedData
         DimensionsNet net = new DimensionsNet(false);
 
         net.id = tag.getIntOr(SAVE_KEY_ID, DELETED_ID);
+        net.customName = sanitizeCustomName(tag.getStringOr(SAVE_KEY_CUSTOM_NAME, ""));
         String owner = tag.getStringOr(SAVE_KEY_OWNER, "");
         if (!owner.isEmpty())
         {
@@ -350,6 +359,10 @@ public class DimensionsNet extends SavedData
         CompoundTag tag = new CompoundTag();
 
         tag.putInt(SAVE_KEY_ID, this.id);
+        if (!this.customName.isEmpty())
+        {
+            tag.putString(SAVE_KEY_CUSTOM_NAME, this.customName);
+        }
         if (this.owner != null)
         {
             tag.putString(SAVE_KEY_OWNER, this.owner.toString());
@@ -384,6 +397,50 @@ public class DimensionsNet extends SavedData
     public int getId()
     {
         return id;
+    }
+
+    /**
+     * 获取用于展示的网络名。自定义名为空时，返回本地化默认名。
+     */
+    public Component getNetworkName()
+    {
+        return getNetworkName(this.id, this.customName);
+    }
+
+    /**
+     * 供客户端快照等没有 DimensionsNet 实例的场景复用同一命名规则。
+     */
+    public static Component getNetworkName(int netId, @Nullable String customName)
+    {
+        String sanitizedName = sanitizeCustomName(customName);
+        if (!sanitizedName.isEmpty())
+        {
+            return Component.literal(sanitizedName);
+        }
+
+        return Component.translatable("menu.text.beyonddimensions.net.default_name", netId);
+    }
+
+    public String getCustomName()
+    {
+        return customName;
+    }
+
+    public boolean hasCustomName()
+    {
+        return !customName.isEmpty();
+    }
+
+    public void setCustomName(@Nullable String customName)
+    {
+        String sanitizedName = sanitizeCustomName(customName);
+        if (Objects.equals(this.customName, sanitizedName))
+        {
+            return;
+        }
+
+        this.customName = sanitizedName;
+        setDirty();
     }
 
     /**
@@ -665,6 +722,36 @@ public class DimensionsNet extends SavedData
         }
 
         PlayerNetIndex.get(server).removeMembership(playerId, netId);
+    }
+
+    private static String sanitizeCustomName(@Nullable String customName)
+    {
+        if (customName == null)
+        {
+            return "";
+        }
+
+        String trimmedName = customName.trim();
+        if (trimmedName.isEmpty())
+        {
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder(Math.min(trimmedName.length(), MAX_NETWORK_NAME_LENGTH));
+        int appendedCodePoints = 0;
+        for (int offset = 0; offset < trimmedName.length() && appendedCodePoints < MAX_NETWORK_NAME_LENGTH; )
+        {
+            int codePoint = trimmedName.codePointAt(offset);
+            offset += Character.charCount(codePoint);
+            if (Character.isISOControl(codePoint))
+            {
+                continue;
+            }
+
+            builder.appendCodePoint(codePoint);
+            appendedCodePoints++;
+        }
+        return builder.toString().trim();
     }
 }
 

@@ -145,7 +145,7 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu
         List<PrimaryNetOption> builtOptions = new ArrayList<>(nets.size());
         for (DimensionsNet net : nets)
         {
-            builtOptions.add(new PrimaryNetOption(net.getId(), resolvePermission(net, playerId)));
+            builtOptions.add(new PrimaryNetOption(net.getId(), resolvePermission(net, playerId), net.getCustomName()));
         }
         return builtOptions;
     }

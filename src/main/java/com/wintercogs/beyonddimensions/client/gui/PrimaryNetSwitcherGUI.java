@@ -1,27 +1,36 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetOption;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetSwitchAction;
 import com.wintercogs.beyonddimensions.client.gui.widget.scroller.BigScroller;
+import com.wintercogs.beyonddimensions.client.gui.widget.shared.IconButton;
 import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
 import com.wintercogs.beyonddimensions.common.menu.PrimaryNetSwitcherMenu;
+import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.network.packet.c2s.PrimaryNetSwitchActionPacket;
+import com.wintercogs.beyonddimensions.network.packet.c2s.RenameNetPacket;
+import com.wintercogs.beyonddimensions.util.UIDataHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -44,12 +53,15 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
     private final List<RecentNetButton> recentButtons = new ArrayList<>();
 
     private EditBox searchField;
+    private @Nullable EditBox renameField;
     private BigScroller scroller;
+    private IconButton dimensionsNetButton;
     private Button clearPrimaryButton;
     private List<PrimaryNetOption> filteredOptions = List.of();
     private List<PrimaryNetOption> lastObservedOptions = List.of();
     private int topIndex;
-    private int selectedIndex;
+    private int selectedIndex = -1;
+    private int renamingNetId = DimensionsNet.NO_PRIMARY_NET_ID;
     private int lastObservedPrimaryNetId = DimensionsNet.NO_PRIMARY_NET_ID;
 
     public PrimaryNetSwitcherGUI(PrimaryNetSwitcherMenu menu, Inventory playerInventory, Component title)
@@ -64,6 +76,14 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         clearWidgets();
         optionButtons.clear();
         recentButtons.clear();
+        renameField = null;
+        renamingNetId = DimensionsNet.NO_PRIMARY_NET_ID;
+
+        if (UIDataHelper.isTransfer)
+        {
+            restoreMousePosition();
+            UIDataHelper.isTransfer = false;
+        }
 
         this.imageWidth = BACKGROUND_WIDTH;
         this.imageHeight = rebuildImageHeight();
@@ -82,6 +102,18 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         searchField.setResponder(this::onSearchTextChanged);
         searchField.setSuggestion(Component.translatable("menu.label.beyonddimensions.primary_net_switcher.search").getString());
         addRenderableWidget(searchField);
+
+        dimensionsNetButton = new IconButton(this.leftPos + 152, this.topPos + 4, 16, 16, BeyondDimensions.makeId("widget/opposite_arrow"), button ->
+        {
+            if (menu.currentPrimaryNetId == DimensionsNet.NO_PRIMARY_NET_ID)
+                return;
+
+            saveMousePosition();
+            ClientPacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
+        });
+        dimensionsNetButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.open_dimensions_net_menu")));
+        dimensionsNetButton.active = menu.currentPrimaryNetId != DimensionsNet.NO_PRIMARY_NET_ID;
+        addRenderableWidget(dimensionsNetButton);
 
         clearPrimaryButton = Button.builder(
                         Component.translatable("menu.button.beyonddimensions.primary_net_switcher.clear"),
@@ -148,6 +180,11 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
             syncRecentButtons();
             syncOptionButtons();
         }
+
+        if (dimensionsNetButton != null)
+            dimensionsNetButton.active = menu.currentPrimaryNetId != DimensionsNet.NO_PRIMARY_NET_ID;
+
+        updateRenameFieldBounds();
     }
 
     @Override
@@ -168,6 +205,11 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
     {
+        if (renameField != null)
+        {
+            return true;
+        }
+
         boolean result = super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
         if (!result)
         {
@@ -179,9 +221,32 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
     @Override
     public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleclick)
     {
-        boolean result = super.mouseClicked(event, doubleclick);
         double mouseX = event.x();
         double mouseY = event.y();
+
+        if (renameField != null)
+        {
+            if (renameField.mouseClicked(event, doubleclick))
+            {
+                this.setFocused(renameField);
+            }
+            return true;
+        }
+
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+        {
+            PrimaryNetOptionButton optionButton = getOptionButtonAt(mouseX, mouseY);
+            if (optionButton != null && optionButton.option != null)
+            {
+                if (canRename(optionButton.option))
+                {
+                    startRename(optionButton.option, optionButton.optionIndex, optionButton.button.getX(), optionButton.button.getY(), optionButton.button.getWidth(), optionButton.button.getHeight());
+                }
+                return true;
+            }
+        }
+
+        boolean result = super.mouseClicked(event, doubleclick);
 
         boolean inSearchField = searchField.isMouseOver(mouseX, mouseY);
         if (!inSearchField && this.getFocused() == searchField)
@@ -202,6 +267,21 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
     {
         InputConstants.Key key = InputConstants.getKey(event);
 
+        if (renameField != null && renameField.canConsumeInput())
+        {
+            if (key.getValue() == GLFW.GLFW_KEY_ENTER || key.getValue() == GLFW.GLFW_KEY_KP_ENTER)
+            {
+                submitRename();
+                return true;
+            }
+            if (key.getValue() == GLFW.GLFW_KEY_ESCAPE)
+            {
+                cancelRename();
+                return true;
+            }
+            return renameField.keyPressed(event);
+        }
+
         if (searchField != null && searchField.canConsumeInput() && key.getValue() != GLFW.GLFW_KEY_ESCAPE)
         {
             searchField.keyPressed(event);
@@ -215,6 +295,21 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         }
 
         return super.keyPressed(event);
+    }
+
+    @Override
+    public boolean charTyped(@NotNull CharacterEvent event)
+    {
+        if (renameField != null && renameField.canConsumeInput())
+        {
+            return renameField.charTyped(event);
+        }
+
+        if (searchField != null && searchField.canConsumeInput())
+        {
+            return searchField.charTyped(event);
+        }
+        return super.charTyped(event);
     }
 
     private void rebuildFilteredOptions()
@@ -238,9 +333,15 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         }
         else
         {
-            selectedIndex = Math.max(0, Math.min(selectedIndex, filteredOptions.size() - 1));
+            if (selectedIndex >= filteredOptions.size())
+            {
+                selectedIndex = filteredOptions.size() - 1;
+            }
+            if (selectedIndex >= 0)
+            {
+                ensureSelectionVisible();
+            }
             topIndex = Math.max(0, Math.min(topIndex, Math.max(0, filteredOptions.size() - VISIBLE_OPTION_COUNT)));
-            ensureSelectionVisible();
         }
 
         syncRecentButtons();
@@ -260,7 +361,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
 
     private String buildSearchableText(PrimaryNetOption option)
     {
-        return ("#" + option.netId() + " " + buildPermissionLabel(option.permission()).getString()).toLowerCase(Locale.ROOT);
+        return (option.getNetworkName().getString() + " (#" + option.netId() + ") " + buildPermissionLabel(option.permission()).getString()).toLowerCase(Locale.ROOT);
     }
 
     private Component buildPermissionLabel(NetPermissionlevel permission)
@@ -320,6 +421,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
                 optionButton.clear();
             }
         }
+        updateRenameFieldBounds();
     }
 
     private void ensureSelectionVisible()
@@ -345,6 +447,11 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
 
     private void selectNetAndSend(int netId)
     {
+        if (renameField != null)
+        {
+            return;
+        }
+
         for (int i = 0; i < filteredOptions.size(); i++)
         {
             if (filteredOptions.get(i).netId() == netId)
@@ -385,6 +492,137 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         return BACKGROUND_HEIGHT;
     }
 
+    private boolean startRename(PrimaryNetOption option, int optionIndex, int x, int y, int width, int height)
+    {
+        if (!canRename(option))
+        {
+            return false;
+        }
+
+        cancelRename();
+        selectedIndex = optionIndex;
+        renamingNetId = option.netId();
+        renameField = new EditBox(getFont(), x, y + 2, width, height - 4,
+                Component.translatable("menu.label.beyonddimensions.primary_net_switcher.rename"));
+        renameField.setMaxLength(DimensionsNet.MAX_NETWORK_NAME_LENGTH);
+        renameField.setBordered(true);
+        renameField.setVisible(true);
+        renameField.setTextColor(0xFFFFFFFF);
+        renameField.setValue(option.customName());
+        updateRenameSuggestion(option);
+        renameField.setResponder(text -> updateRenameSuggestion(option));
+        addRenderableWidget(renameField);
+        this.setFocused(renameField);
+        renameField.setFocused(true);
+        syncOptionButtons();
+        return true;
+    }
+
+    private boolean canRename(PrimaryNetOption option)
+    {
+        return option != null && (option.permission() == NetPermissionlevel.Owner || option.permission() == NetPermissionlevel.Manager);
+    }
+
+    private void updateRenameSuggestion(PrimaryNetOption option)
+    {
+        if (renameField == null)
+        {
+            return;
+        }
+
+        renameField.setSuggestion(renameField.getValue().isEmpty()
+                ? DimensionsNet.getNetworkName(option.netId(), "").getString()
+                : null);
+    }
+
+    private void submitRename()
+    {
+        if (renameField == null || renamingNetId == DimensionsNet.NO_PRIMARY_NET_ID)
+        {
+            return;
+        }
+
+        ClientPacketDistributor.sendToServer(new RenameNetPacket(renamingNetId, renameField.getValue()));
+        cancelRename();
+    }
+
+    private void cancelRename()
+    {
+        if (renameField != null)
+        {
+            removeWidget(renameField);
+            if (this.getFocused() == renameField)
+            {
+                this.setFocused(null);
+            }
+        }
+        renameField = null;
+        renamingNetId = DimensionsNet.NO_PRIMARY_NET_ID;
+        syncOptionButtons();
+    }
+
+    private void updateRenameFieldBounds()
+    {
+        if (renameField == null)
+        {
+            return;
+        }
+
+        for (PrimaryNetOptionButton optionButton : optionButtons)
+        {
+            if (optionButton.option != null && optionButton.option.netId() == renamingNetId)
+            {
+                renameField.setX(optionButton.button.getX());
+                renameField.setY(optionButton.button.getY() + 2);
+                renameField.setWidth(optionButton.button.getWidth());
+                renameField.setHeight(optionButton.button.getHeight() - 4);
+                return;
+            }
+        }
+        cancelRename();
+    }
+
+    private @Nullable PrimaryNetOptionButton getOptionButtonAt(double mouseX, double mouseY)
+    {
+        for (PrimaryNetOptionButton optionButton : optionButtons)
+        {
+            Button button = optionButton.button;
+            if (button.visible
+                    && mouseX >= button.getX() && mouseY >= button.getY()
+                    && mouseX < button.getX() + button.getWidth()
+                    && mouseY < button.getY() + button.getHeight())
+            {
+                return optionButton;
+            }
+        }
+        return null;
+    }
+
+    private void restoreMousePosition()
+    {
+        if (UIDataHelper.lastMousePos == null)
+            return;
+
+        Window window = Minecraft.getInstance().getWindow();
+        GLFW.glfwSetCursorPos(
+                window.handle(),
+                UIDataHelper.lastMousePos.x,
+                UIDataHelper.lastMousePos.y
+        );
+    }
+
+    private void saveMousePosition()
+    {
+        double[] xpos = new double[1];
+        double[] ypos = new double[1];
+        GLFW.glfwGetCursorPos(Minecraft.getInstance().getWindow().handle(), xpos, ypos);
+        UIDataHelper.lastMousePos = new Vec2(
+                (float) xpos[0],
+                (float) ypos[0]
+        );
+        UIDataHelper.isTransfer = true;
+    }
+
     private final class PrimaryNetOptionButton
     {
         private final Button button;
@@ -407,7 +645,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         {
             this.option = option;
             this.optionIndex = PrimaryNetSwitcherGUI.this.topIndex + optionButtons.indexOf(this);
-            this.button.visible = true;
+            this.button.visible = option.netId() != renamingNetId;
             this.button.active = !currentPrimary;
             this.button.setMessage(buildLabel(option, currentPrimary));
             this.button.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.primary_net_switcher.option", option.netId(), buildPermissionLabel(option.permission()))));
@@ -438,7 +676,8 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
 
         private Component buildLabel(PrimaryNetOption option, boolean currentPrimary)
         {
-            return Component.literal("#" + option.netId() + " ")
+            return option.getNetworkName().copy()
+                    .append(Component.literal(" (#" + option.netId() + ") "))
                     .append(PrimaryNetSwitcherGUI.this.buildPermissionLabel(option.permission()))
                     .append(currentPrimary ? Component.translatable("menu.text.beyonddimensions.primary_net_switcher.current_suffix") : Component.empty());
         }
