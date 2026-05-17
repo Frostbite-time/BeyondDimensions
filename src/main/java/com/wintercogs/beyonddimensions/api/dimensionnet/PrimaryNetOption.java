@@ -6,9 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 public record PrimaryNetOption(int netId, @NotNull NetPermissionlevel permission, @NotNull String customName)
 {
-    private static final String NET_ID = "NetId";
-    private static final String PERMISSION = "Permission";
-    private static final String CUSTOM_NAME = "CustomName";
+    private static final String NET_ID = "net_id";
+    private static final String PERMISSION = "permission";
+    private static final String CUSTOM_NAME = "custom_name";
 
     public CompoundTag save()
     {
