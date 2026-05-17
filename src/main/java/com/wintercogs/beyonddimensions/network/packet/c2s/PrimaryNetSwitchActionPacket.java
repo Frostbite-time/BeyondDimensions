@@ -13,6 +13,7 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -24,13 +25,13 @@ public record PrimaryNetSwitchActionPacket(PrimaryNetSwitchAction action,
     public static final StreamCodec<ByteBuf, PrimaryNetSwitchAction> ACTION_STREAM_CODEC = new StreamCodec<>()
     {
         @Override
-        public PrimaryNetSwitchAction decode(ByteBuf buf)
+        public @NotNull PrimaryNetSwitchAction decode(@NotNull ByteBuf buf)
         {
             return PrimaryNetSwitchAction.valueOf(Utf8String.read(buf, 32000));
         }
 
         @Override
-        public void encode(ByteBuf buf, PrimaryNetSwitchAction action)
+        public void encode(@NotNull ByteBuf buf, PrimaryNetSwitchAction action)
         {
             Utf8String.write(buf, action.name(), 32000);
         }
@@ -154,7 +155,7 @@ public record PrimaryNetSwitchActionPacket(PrimaryNetSwitchAction action,
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type()
+    public @NotNull Type<? extends CustomPacketPayload> type()
     {
         return TYPE;
     }

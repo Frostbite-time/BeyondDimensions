@@ -12,19 +12,25 @@ public class PlayerNameHelper
     public static final String UNKNOWN_PLAYER = "Unknown";
 
     /**
-     * 从uuid查询玩家名
+     * 根据uuid查询玩家名称
+     * <p>优先查询在线玩家数据</p>
+     * <p>其次是缓存数据</p>
+     *
+     * @param uuid         玩家id
+     * @param infoProvider 提供数据的服务器
+     * @return 玩家名称
      */
     public static String getPlayerNameByUUID(UUID uuid, MinecraftServer infoProvider)
     {
 
-        // 优先检查在线玩家
+        // 在线查询
         ServerPlayer onlinePlayer = infoProvider.getPlayerList().getPlayer(uuid);
         if (onlinePlayer != null)
         {
             return onlinePlayer.getGameProfile().name();
         }
 
-        // 若不在线，查询服务端的 profile resolver 缓存
+        // 缓存查询
         var services = infoProvider.services();
         Optional<GameProfile> profileInfo = services.profileResolver().fetchById(uuid);
         if (profileInfo.isPresent())
@@ -33,7 +39,6 @@ public class PlayerNameHelper
             return profile.name();
         }
 
-        // 无记录，返回未知名称
         return UNKNOWN_PLAYER;
     }
 }

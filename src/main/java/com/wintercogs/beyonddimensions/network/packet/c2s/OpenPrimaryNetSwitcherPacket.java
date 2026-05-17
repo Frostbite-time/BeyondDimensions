@@ -10,6 +10,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
 public record OpenPrimaryNetSwitcherPacket() implements CustomPacketPayload
 {
@@ -61,7 +62,7 @@ public record OpenPrimaryNetSwitcherPacket() implements CustomPacketPayload
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type()
+    public @NotNull Type<? extends CustomPacketPayload> type()
     {
         return TYPE;
     }

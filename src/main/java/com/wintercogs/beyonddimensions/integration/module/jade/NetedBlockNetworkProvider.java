@@ -95,9 +95,12 @@ public enum NetedBlockNetworkProvider implements StreamServerDataProvider<@NotNu
         {
             return switch (NetPermissionlevel.valueOf(permission))
             {
-                case Owner -> Component.translatable("menu.text.beyonddimensions.primary_net_switcher.permission.owner");
-                case Manager -> Component.translatable("menu.text.beyonddimensions.primary_net_switcher.permission.manager");
-                case Member -> Component.translatable("menu.text.beyonddimensions.primary_net_switcher.permission.member");
+                case Owner ->
+                        Component.translatable("menu.text.beyonddimensions.primary_net_switcher.permission.owner");
+                case Manager ->
+                        Component.translatable("menu.text.beyonddimensions.primary_net_switcher.permission.manager");
+                case Member ->
+                        Component.translatable("menu.text.beyonddimensions.primary_net_switcher.permission.member");
             };
         }
         catch (IllegalArgumentException ignored)

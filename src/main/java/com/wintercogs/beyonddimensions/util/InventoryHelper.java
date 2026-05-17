@@ -13,6 +13,14 @@ import top.theillusivec4.curios.api.SlotResult;
 
 public class InventoryHelper
 {
+    /**
+     * 尝试将传入的物品堆叠插入玩家背包，会修改传入的堆叠。
+     * <p>返回的堆叠与传入堆叠为同一引用。
+     *
+     * @param player 玩家
+     * @param stack  传入的堆叠，会被修改
+     * @return 余量
+     */
     public static ItemStack transferToPlayerInventory(Player player, ItemStack stack)
     {
         Inventory inventory = player.getInventory();
@@ -52,7 +60,13 @@ public class InventoryHelper
         return stack;
     }
 
-    // 返回取出量
+    /**
+     * 尝试从玩家背包提取指定数量的物品堆叠，传入堆叠不会被修改。
+     * <p>返回的堆叠与传入的堆叠是不同的实例</p>
+     *
+     * @param player 玩家
+     * @param stack  目标物品堆，其count即为目标数量
+     */
     public static ItemStack extractFromPlayerInventory(Player player, ItemStack stack)
     {
         int extract = 0;
@@ -74,6 +88,9 @@ public class InventoryHelper
         return stack.copyWithCount(extract);
     }
 
+    /**
+     * 给定一个物品，从玩家的背包以及其curios仓库中找到一个对应的物品堆并返回
+     */
     @Nullable
     public static ItemStack findItemInPlayerInventory(Player player, Item item)
     {

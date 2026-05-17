@@ -37,7 +37,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
         super(BDBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
-    //--- 能力注册 (通过事件) ---
+    // 能力注册
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
         event.registerBlockEntity(
@@ -104,7 +104,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
 
         if (net == null || level == null)
         {
-            return; //虽然getNet已经被shouldWork检查过，但是此处仍然进行防御性编程
+            return;
         }
 
 
@@ -167,13 +167,13 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     }
 
     @Override
-    public Component getDisplayName()
+    public @NotNull Component getDisplayName()
     {
         return Component.translatable("menu.title.beyonddimensions.net_energy_menu");
     }
 
     @Override
-    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, Player player)
     {
         return new NetEnergyMenu(containerId, player.getInventory(), this);
     }

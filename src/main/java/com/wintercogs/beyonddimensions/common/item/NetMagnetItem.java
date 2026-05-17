@@ -312,7 +312,7 @@ public class NetMagnetItem extends BaseMachineItem
 
                     // 使用原始数据计算提取量
                     FluidState fluidState = level.getFluidState(pos);
-                    if (fluidState.isEmpty()) continue;          // 不是流体
+                    if (fluidState.isEmpty()) continue;
 
                     // 计算提取量（mB）
                     int amount = fluidState.isSource()

@@ -48,35 +48,62 @@ import java.util.*;
 
 public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
-    private static final int capacity = 9; // 同时处理的任务格数
+    /**
+     * 同时处理的任务格数
+     */
+    private static final int capacity = 9;
 
     public int getCapacity()
     {
         return capacity;
     }
 
-    private static final int filterCapacity = 8; // 同时能用的标记格数
+    /**
+     * 同时能用的标记格数
+     */
+    private static final int filterCapacity = 8;
 
     public int getFilterCapacity()
     {
         return filterCapacity;
     }
 
-    private static final int fuelCapacity = 1; // 燃料槽个数
+    /**
+     * 燃料槽个数
+     */
+    private static final int fuelCapacity = 1;
 
     public int getFuelCapacity()
     {
         return fuelCapacity;
     }
 
-    public PopMode popMode = PopMode.STOP;// 是否弹出输出物
-    public ReceiveMode receiveMode = ReceiveMode.STOP; // 是否将输出物送回网络
-    public AutoSortMode sortMode = AutoSortMode.STOP; // 自动整理内容物
-    private int sortCursor = 0; //用来记录当前tick整理到第几个槽位，以将自动整理的处理量平摊到n个tick中
+    /**
+     * 是否弹出输出物
+     */
+    public PopMode popMode = PopMode.STOP;
 
-    private List<RecipeManager.CachedCheck<SingleRecipeInput, SmeltingRecipe>> quickChecks = new ArrayList<>(Collections.nCopies(capacity, RecipeManager.createCheck(RecipeType.SMELTING)));
+    /**
+     * 是否将输出物送回网络
+     */
+    public ReceiveMode receiveMode = ReceiveMode.STOP;
 
-    private List<Integer> litTime = new ArrayList<>(Collections.nCopies(capacity, 0)); // 槽位剩余燃烧 tick
+    /**
+     * 自动整理内容物
+     */
+    public AutoSortMode sortMode = AutoSortMode.STOP;
+
+    /**
+     * 用来记录当前tick整理到第几个槽位，以将自动整理的处理量平摊到n个tick中
+     */
+    private int sortCursor = 0;
+
+    private final List<RecipeManager.CachedCheck<SingleRecipeInput, SmeltingRecipe>> quickChecks = new ArrayList<>(Collections.nCopies(capacity, RecipeManager.createCheck(RecipeType.SMELTING)));
+
+    /**
+     * 槽位剩余燃烧 tick
+     */
+    private List<Integer> litTime = new ArrayList<>(Collections.nCopies(capacity, 0));
 
     public List<Integer> getLitTime()
     {
@@ -88,7 +115,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         this.litTime = litTime;
     }
 
-    private List<Integer> litDuration = new ArrayList<>(Collections.nCopies(capacity, 0)); // 槽位燃料总 tick
+    /**
+     * 槽位燃料总 tick
+     */
+    private List<Integer> litDuration = new ArrayList<>(Collections.nCopies(capacity, 0));
 
     public List<Integer> getLitDuration()
     {
@@ -100,7 +130,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         this.litDuration = litDuration;
     }
 
-    private List<Integer> cookTime = new ArrayList<>(Collections.nCopies(capacity, 0)); // 槽位为此次配方燃烧的 tick
+    /**
+     * 槽位为此次配方燃烧的 tick
+     */
+    private List<Integer> cookTime = new ArrayList<>(Collections.nCopies(capacity, 0));
 
     public List<Integer> getCookTime()
     {
@@ -112,7 +145,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         this.cookTime = cookTime;
     }
 
-    private List<Integer> cookTimeTotal = new ArrayList<>(Collections.nCopies(capacity, 0)); // 槽位配方所需 tick
+    /**
+     * 槽位配方所需 tick
+     */
+    private List<Integer> cookTimeTotal = new ArrayList<>(Collections.nCopies(capacity, 0));
 
     public List<Integer> getCookTimeTotal()
     {
@@ -124,7 +160,9 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         this.cookTimeTotal = cookTimeTotal;
     }
 
-    // 输入标记
+    /**
+     * 输入标记
+     */
     private final StackHandler inputFilterSlots = new StackHandler(filterCapacity)
     {
         @Override
@@ -147,7 +185,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         return inputFilterSlots;
     }
 
-    // 燃料标记
+
+    /**
+     * 燃料标记
+     */
     private final StackHandler fuelFilterSlots = new StackHandler(filterCapacity)
     {
         @Override
@@ -173,7 +214,10 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         return fuelFilterSlots;
     }
 
-    // 输入存储
+
+    /**
+     * 输入存储
+     */
     private final StackHandler inputStorageSlots = new StackHandler(capacity)
     {
         @Override
@@ -197,7 +241,9 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         return inputStorageSlots;
     }
 
-    // 输出存储
+    /**
+     * 输出存储
+     */
     private final StackHandler outputStorageSlots = new StackHandler(capacity)
     {
         @Override
@@ -214,7 +260,9 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         return outputStorageSlots;
     }
 
-    // 燃料存储
+    /**
+     * 燃料存储
+     */
     private final StackHandler fuelStorageSlots = new StackHandler(fuelCapacity)
     {
         @Override
@@ -239,7 +287,9 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         return fuelStorageSlots;
     }
 
-    // 燃料返回物存储
+    /**
+     * 燃料返回物存储
+     */
     private final StackHandler fuelReturnSlots = new StackHandler(fuelCapacity)
     {
         @Override
@@ -260,14 +310,13 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         super(BDBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(), pos, blockState);
     }
 
-    //--- 能力注册 (通过事件) ---
+    // 能力注册
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
         event.registerBlockEntity(
                 Capabilities.Item.BLOCK,
                 BDBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(),
                 (be, side) -> {
-                    //首先对所有实体槽位进行包装
                     ItemStackTypedHandler inputStorage = new ItemStackTypedHandler(be.inputStorageSlots)
                     {
                         @Override
@@ -342,19 +391,15 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
     @Override
     public boolean shouldWork()
     {
+        if (level == null) return false;
+
         // 无论是否工作，总是先降低燃料持续时间
         litTime.replaceAll(i -> Math.max(0, i - 1));
         // 更新方块状态
-        if (litTime.stream().allMatch(t -> t <= 0))
-        {
-            setLit(false);
-        }
-        else
-        {
-            setLit(true);
-        }
+        setLit(!litTime.stream().allMatch(t -> t <= 0));
 
-        level.blockEntityChanged(worldPosition); //熔炉所在的区块总是需要保存的（比起为每个熔炉都判断燃烧时间，显然让区块始终保存性能更好，毕竟设为需要保存只是一个布尔值设置）
+        // 总是保存区块
+        level.blockEntityChanged(worldPosition);
 
         // 输入槽为空 并且 标记槽无物品，可以判为无工作意图
         // 再加上output和fuelreturn，可以正确执行弹出和收纳设置
@@ -666,7 +711,6 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
                 BlockEntity neighbor = level.getBlockEntity(targetPos);
                 if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
                 {
-                    // 开始查询能力 记住，你获取你上方的方块，一定是获取其下方的能力
                     ResourceHandler<@NotNull ItemResource> otherStorage = level.getCapability(Capabilities.Item.BLOCK, targetPos, dir.getOpposite());
                     if (otherStorage != null)
                     {
@@ -682,7 +726,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             KeyAmount outputStack = outputStorageSlots.getStackBySlot(outputSlot);
             if (!outputStack.isEmpty())
             {
-                // 弹出模式（如果弹出模式关闭，这里会由迭代器安全的离开）
+                // 弹出模式
                 for (ItemHandlerWrapper otherStorage : otherStorages)
                 {
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
@@ -728,7 +772,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
             KeyAmount returnStack = fuelReturnSlots.getStackBySlot(returnSlot);
             if (returnStack != null && !returnStack.isEmpty())
             {
-                // 弹出模式（如果弹出模式关闭，这里会由迭代器安全的离开）
+                // 弹出模式
                 for (ItemHandlerWrapper otherStorage : otherStorages)
                 {
                     //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
@@ -772,8 +816,7 @@ public class NetFurnaceBlockEntity extends BaseMachineBlockEntity implements Men
         for (int fuelSlot = 0; fuelSlot < fuelCapacity; fuelSlot++)
         {
             KeyAmount fuelStack = fuelStorageSlots.getStackBySlot(fuelSlot);
-            if (fuelStack != null && !fuelStack.isEmpty()
-                    && (fuelStack.key() instanceof EnergyStackKey || fuelStack.key() instanceof FluidStackKey))
+            if (!fuelStack.isEmpty() && (fuelStack.key() instanceof EnergyStackKey || fuelStack.key() instanceof FluidStackKey))
             {
                 // 转移至网络
                 if (receiveMode == ReceiveMode.OPEN)

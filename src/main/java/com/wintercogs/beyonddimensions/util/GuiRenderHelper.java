@@ -34,7 +34,7 @@ public class GuiRenderHelper
             int origWidth, int origHeight)
     {
 
-        // === 1. 四个角（不拉伸） ===
+        // === 四个角（不拉伸） ===
         // 左上
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                 x, y,
@@ -67,7 +67,7 @@ public class GuiRenderHelper
                 borderRight, borderBottom,
                 origWidth, origHeight);
 
-        // === 2. 四条边（单向拉伸） ===
+        // === 四条边（单向拉伸） ===
         int dstEdgeW = width - borderLeft - borderRight;
         int dstEdgeH = height - borderTop - borderBottom;
         int srcEdgeW = origWidth - borderLeft - borderRight;
@@ -117,7 +117,7 @@ public class GuiRenderHelper
                     origWidth, origHeight);
         }
 
-        // === 3. 中心（双向拉伸） ===
+        // === 中心（双向拉伸） ===
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                 x + borderLeft, y + borderTop,
                 borderLeft, borderTop,
@@ -128,8 +128,6 @@ public class GuiRenderHelper
 
     /**
      * 绘制整张纹理并缩放到指定宽高
-     * <p>已帮你绑定 shader & 纹理；调用方不用再 setShaderTexture。</p>
-     *
      * @param guiGraphics 渲染上下文
      * @param texture     纹理资源路径（不需要是在图集里的）
      * @param x           目标左上角 X
@@ -152,6 +150,15 @@ public class GuiRenderHelper
                 originalWidth, originalHeight);
     }
 
+    /**
+     * @param guiGraphics 渲染上下文
+     * @param font        字体
+     * @param text        绘制文本
+     * @param xRight      右对齐情况下的x坐标
+     * @param y           y坐标
+     * @param color       字体颜色
+     * @param dropShadow  是否绘制字体阴影
+     */
     public static void drawRightAnchoredText(GuiGraphicsExtractor guiGraphics,
                                              Font font,
                                              Component text,

@@ -25,16 +25,10 @@ public class CuriosCapAttach
                     @Override
                     public ItemStack getStack()
                     {
-                        return stack; // 必须返回传入的stack
-                    }
-
-                    @Override
-                    public void curioTick(SlotContext slotContext)
-                    {
-                        // 在此添加持续生效逻辑
+                        return stack;
                     }
                 },
-                BDItems.NET_TERMINAL_ITEM // 目标物品
+                BDItems.NET_TERMINAL_ITEM
         );
         // 磁铁
         evt.registerItem(
@@ -44,7 +38,7 @@ public class CuriosCapAttach
                     @Override
                     public ItemStack getStack()
                     {
-                        return stack; // 必须返回传入的stack
+                        return stack;
                     }
 
                     @Override
@@ -52,7 +46,6 @@ public class CuriosCapAttach
                     {
                         if (!(slotContext.entity().level() instanceof ServerLevel serverLevel)) return;
 
-                        // 在此添加持续生效逻辑
                         if (stack.getItem() == BDItems.NET_MAGNET_ITEM.get())
                         {
                             NetMagnetItem item = (NetMagnetItem) stack.getItem();
@@ -60,7 +53,7 @@ public class CuriosCapAttach
                         }
                     }
                 },
-                BDItems.NET_MAGNET_ITEM // 目标物品
+                BDItems.NET_MAGNET_ITEM
         );
         // 喂食器
         evt.registerItem(
@@ -70,14 +63,13 @@ public class CuriosCapAttach
                     @Override
                     public ItemStack getStack()
                     {
-                        return stack; // 必须返回传入的stack
+                        return stack;
                     }
 
                     @Override
                     public void curioTick(SlotContext slotContext)
                     {
                         if (!(slotContext.entity().level() instanceof ServerLevel serverLevel)) return;
-                        // 在此添加持续生效逻辑
                         if (stack.getItem() == BDItems.NET_FEEDER_ITEM.get())
                         {
                             NetFeederItem item = (NetFeederItem) stack.getItem();
@@ -85,7 +77,7 @@ public class CuriosCapAttach
                         }
                     }
                 },
-                BDItems.NET_FEEDER_ITEM // 目标物品
+                BDItems.NET_FEEDER_ITEM
         );
         // 补货器
         evt.registerItem(

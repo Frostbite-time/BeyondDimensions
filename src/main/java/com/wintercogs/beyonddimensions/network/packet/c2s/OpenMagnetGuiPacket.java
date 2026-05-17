@@ -14,6 +14,7 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
 public record OpenMagnetGuiPacket() implements CustomPacketPayload
 {
@@ -22,12 +23,12 @@ public record OpenMagnetGuiPacket() implements CustomPacketPayload
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenMagnetGuiPacket> STREAM_CODEC = new StreamCodec<>()
     {
         @Override
-        public void encode(RegistryFriendlyByteBuf byteBuf, OpenMagnetGuiPacket packet)
+        public void encode(@NotNull RegistryFriendlyByteBuf byteBuf, @NotNull OpenMagnetGuiPacket packet)
         {
         }
 
         @Override
-        public OpenMagnetGuiPacket decode(RegistryFriendlyByteBuf byteBuf)
+        public @NotNull OpenMagnetGuiPacket decode(@NotNull RegistryFriendlyByteBuf byteBuf)
         {
             return new OpenMagnetGuiPacket();
         }
@@ -78,7 +79,7 @@ public record OpenMagnetGuiPacket() implements CustomPacketPayload
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type()
+    public @NotNull Type<? extends CustomPacketPayload> type()
     {
         return TYPE;
     }

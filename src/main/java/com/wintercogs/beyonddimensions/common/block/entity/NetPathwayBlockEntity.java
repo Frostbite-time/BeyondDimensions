@@ -21,7 +21,7 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
         super(BDBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
-    //--- 能力注册 (通过事件) ---
+    // 能力注册
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
 
@@ -41,16 +41,10 @@ public class NetPathwayBlockEntity extends NetedBlockEntity
                                         return handler.apply(net.getUnifiedStorage(), null);
                                 }
                                 return null;
-                            } // 根据方向返回处理器
+                            }
                     );
                 }
         );
-    }
-
-    @Override
-    public void invalidateCapabilities()
-    {
-        super.invalidateCapabilities();
     }
 
     @Override

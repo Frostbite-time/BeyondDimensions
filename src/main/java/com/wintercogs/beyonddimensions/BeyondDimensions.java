@@ -94,7 +94,7 @@ public class BeyondDimensions
         CapabilityHelper.ItemCapabilityMap.put(FluidStackKey.ID, Capabilities.Fluid.ITEM);
         CapabilityHelper.ItemCapabilityMap.put(EnergyStackKey.ID, Capabilities.Energy.ITEM);
 
-        // 注册网络能力，使得网络通道能暴露对应存储能力 注:能量存储无需注册，单独实现
+        // 注册网络能力，使得网络通道能暴露对应存储能力
         CapabilityHelper.registerUSHandler(ItemStackKey.EMPTY, ItemUnifiedStorageHandler::new);
         CapabilityHelper.registerUSHandler(FluidStackKey.EMPTY, FluidUnifiedStorageHandler::new);
         CapabilityHelper.registerUSHandler(EnergyStackKey.INSTANCE, EnergyUnifiedStorageHandler::new);

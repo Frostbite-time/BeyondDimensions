@@ -19,15 +19,15 @@ public final class RegistryAccessResolver
             RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
     /**
-     * 获取一个理论上适配当前环境的注册表信息
+     * 获取一个最合适的注册表来源
      */
     public static @NotNull HolderLookup.Provider resolve()
     {
-        // 1) 若当前在服务端逻辑线程（专服或集成服）
+        // 专用服或集成服
         var srv = ServerLifecycleHooks.getCurrentServer();
         if (srv != null && srv.isSameThread()) return srv.registryAccess();
 
-        // 2) 客户端优先用 Connection（与网络来的 Holder 同 owner）
+        // 客户端走Connection或当前level
         if (FMLEnvironment.getDist() == Dist.CLIENT)
         {
             var mc = Minecraft.getInstance();
@@ -36,7 +36,7 @@ public final class RegistryAccessResolver
             if (mc.level != null) return mc.level.registryAccess();
         }
 
-        // 3) 主菜单/离线兜底
+        // 内建表回退
         return BUILTIN;
     }
 }
