@@ -23,6 +23,7 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
 public record OpenNetGuiPacket(String uuid, NetMenuType target) implements CustomPacketPayload
 {
@@ -36,13 +37,13 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
                     new StreamCodec<ByteBuf, NetMenuType>()
                     {
                         @Override
-                        public void encode(ByteBuf buf, NetMenuType netMenuType)
+                        public void encode(@NotNull ByteBuf buf, @NotNull NetMenuType netMenuType)
                         {
                             Utf8String.write(buf, netMenuType.toString(), 32000);
                         }
 
                         @Override
-                        public NetMenuType decode(ByteBuf buf)
+                        public @NotNull NetMenuType decode(@NotNull ByteBuf buf)
                         {
                             return NetMenuType.valueOf(Utf8String.read(buf, 32000));
                         }
@@ -142,7 +143,7 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type()
+    public @NotNull Type<? extends CustomPacketPayload> type()
     {
         return TYPE;
     }

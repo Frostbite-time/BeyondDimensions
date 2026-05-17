@@ -111,7 +111,7 @@ public class XpExchangeItem extends NetedItem
 
         if (currentLevel > targetLevel)
         {
-            // 把多余的 XP 存成“自家 XP 流体”
+            // 把多余的 XP 存成 XP流体
             long needRemoveXp = XpUtil.xpExcessAbove(currentLevel, targetLevel);
             int toRemoveXp = BDMath.clampLongToInt(needRemoveXp);
 
@@ -124,7 +124,7 @@ public class XpExchangeItem extends NetedItem
 
             if (!remaining.isEmpty())
             {
-                // 有剩余（仓库放不下），把这部分折算回 XP，不再扣玩家
+                // 有剩余，把这部分折算回 XP，不再扣玩家
                 int overflowXp = BDMath.clampLongToInt(remaining.amount() / conversionRate);
                 toRemoveXp -= overflowXp;
             }

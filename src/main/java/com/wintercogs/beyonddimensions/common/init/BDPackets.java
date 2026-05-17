@@ -23,7 +23,6 @@ public class BDPackets
         //设置当前网络版本
         final PayloadRegistrar registrar = event.registrar("1");
 
-        // 注册OpenNetGuiPacket 用于打开当前角色绑定的维度网络GUI
         registrar.playBidirectional(
                 OpenNetGuiPacket.TYPE,
                 OpenNetGuiPacket.STREAM_CODEC,
@@ -34,7 +33,6 @@ public class BDPackets
 
         );
 
-        // 注册 CallSeverClickPacket 用于同步滑动条状态
         registrar.playBidirectional(
                 CallSeverClickPacket.TYPE,
                 CallSeverClickPacket.STREAM_CODEC,
@@ -44,7 +42,6 @@ public class BDPackets
                 )
         );
 
-        // 注册 CallSeverClickPacket 用于同步滑动条状态
         registrar.playBidirectional(
                 PlayerPermissionInfoPacket.TYPE,
                 PlayerPermissionInfoPacket.STREAM_CODEC,
@@ -54,7 +51,6 @@ public class BDPackets
                 )
         );
 
-        // 注册 CallSeverClickPacket 用于同步滑动条状态
         registrar.playBidirectional(
                 NetControlActionPacket.TYPE,
                 NetControlActionPacket.STREAM_CODEC,

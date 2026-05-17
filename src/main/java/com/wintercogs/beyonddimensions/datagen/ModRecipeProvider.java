@@ -259,7 +259,5 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .define('C', BDItems.SPACE_TIME_BAR.get())
                 .unlockedBy("unlock_xp_exchange_item", has(BDItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
-
-
     }
 }

@@ -10,6 +10,7 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
 public record CallSeverClickPacket(int slotIndex, KeyAmount clickItem, int button,
                                    boolean shiftDown) implements CustomPacketPayload
@@ -62,7 +63,7 @@ public record CallSeverClickPacket(int slotIndex, KeyAmount clickItem, int butto
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type()
+    public @NotNull Type<? extends CustomPacketPayload> type()
     {
         return TYPE;
     }

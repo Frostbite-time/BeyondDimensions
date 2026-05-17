@@ -48,14 +48,9 @@ public class WardenSoulHandlerWrapper implements IStackHandlerWrapper<WardenSoul
     public long insert(int slot, WardenSoulType stack, boolean sim)
     {
         long amount = stack.getStackCount();
-        // 确保请求的插入量在int范围内（Max: 2,147,483,647）
         int insertAmount = (amount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) amount;
         ISoulHandler.Action action = sim ? ISoulHandler.Action.SIMULATE : ISoulHandler.Action.EXECUTE;
-
-        // 获取实际接受量
         int accepted = soulHandler.fill(insertAmount, action);
-
-        // 计算未接收的余量 = 请求总量 - 实际接受量
         return amount - accepted;
     }
 
@@ -63,14 +58,9 @@ public class WardenSoulHandlerWrapper implements IStackHandlerWrapper<WardenSoul
     public long insert(WardenSoulType stack, boolean sim)
     {
         long amount = stack.getStackCount();
-        // 确保请求的插入量在int范围内（Max: 2,147,483,647）
         int insertAmount = (amount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) amount;
         ISoulHandler.Action action = sim ? ISoulHandler.Action.SIMULATE : ISoulHandler.Action.EXECUTE;
-
-        // 获取实际接受量
         int accepted = soulHandler.fill(insertAmount, action);
-
-        // 计算未接收的余量 = 请求总量 - 实际接受量
         return amount - accepted;
     }
 

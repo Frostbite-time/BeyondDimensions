@@ -21,8 +21,6 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
         this.handlerStorage = handlerStorage;
     }
 
-    // ---------- 工具：纯 Optional 写法，返回基本类型/哨兵 ----------
-
     /**
      * 化学品桶的槽位数量（非空的 ChemicalStackKey 槽）。
      */

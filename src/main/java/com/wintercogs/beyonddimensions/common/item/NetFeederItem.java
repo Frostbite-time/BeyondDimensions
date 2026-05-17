@@ -189,6 +189,6 @@ public class NetFeederItem extends BaseMachineItem
     @Override
     public int getTicksPerWork()
     {
-        return 10; //每10tick检测一次
+        return 10;
     }
 }

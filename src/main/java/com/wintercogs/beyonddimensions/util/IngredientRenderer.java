@@ -17,7 +17,6 @@ import org.joml.Matrix4f;
 public class IngredientRenderer
 {
     private static final int TEXTURE_SIZE = 16;
-    private static final int MIN_FLUID_HEIGHT = 1; // ensure tiny amounts of fluid are still visible
 
     // 仅用于新生魔艺的魔源渲染
     public static final Material ARS_SOURCE = new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.fromNamespaceAndPath("ars_nouveau", "block/mana_still"));
@@ -28,8 +27,6 @@ public class IngredientRenderer
     {
 
         RenderSystem.enableBlend();
-
-
         RenderSystem.setShaderTexture(0, sprite.atlasLocation());
         Matrix4f matrix = guiGraphics.pose().last().pose();
         setGLColorFromInt(color);
@@ -69,7 +66,6 @@ public class IngredientRenderer
         float red = ((color >> 16) & 255) / 256f;
         float green = ((color >> 8) & 255) / 256f;
         float blue = (color & 255) / 256f;
-        //float alpha = ((color >> 24) & 0xFF) / 255F;
         float alpha = 1;
 
         RenderSystem.setShaderColor(red, green, blue, alpha);

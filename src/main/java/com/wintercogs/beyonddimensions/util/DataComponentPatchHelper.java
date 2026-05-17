@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * 将 DataComponentPatch 规范化为“稳定字节”的工具。
  * <p>
- * 重要约定：
+ * 约定：
  * - EMPTY_BYTES：代表“补丁确实为空”的稳定字节（非空长度）。
  * - UNAVAILABLE_BYTES：代表“当前无法得到稳定字节”（Provider 未就绪/编码失败）的哨兵（长度==0）。
  * <p>
@@ -69,7 +69,7 @@ public class DataComponentPatchHelper
     {
         if (patch == null || patch.isEmpty())
         {
-            return EMPTY_BYTES; // 真·空补丁：稳定字节（非空）
+            return EMPTY_BYTES; // 稳定字节（非空）
         }
 
         // 1) patch -> NBT（RegistryOps<Tag>）
@@ -145,6 +145,10 @@ public class DataComponentPatchHelper
         }
     }
 
+    /**
+     * 与{@link DataComponentPatchHelper#detach(DataComponentPatch, HolderLookup.Provider)}一致。
+     * 但在传入registries不可用时，自动使用内建注册表再试一次
+     */
     public static DataComponentPatch detachWithBuiltinFallback(DataComponentPatch patch, HolderLookup.Provider registries)
     {
         DataComponentPatch detached = detach(patch, registries);
@@ -200,14 +204,13 @@ public class DataComponentPatchHelper
     }
 
     /**
-     * 粗略容量估计，减少 ByteBuf 扩容次数（无需精确）
+     * 粗略容量估计，减少 ByteBuf 扩容次数
      */
     private static int sizeHint(Tag t)
     {
         if (t instanceof CompoundTag ct) return Math.max(1, ct.size() * 4);
         if (t instanceof ListTag lt) return Math.max(1, lt.size() * 4);
         return 4;
-        // 经验：多数补丁很小，这个估计已足够避免频繁扩容
     }
 }
 

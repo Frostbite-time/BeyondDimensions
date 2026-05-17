@@ -23,6 +23,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+// TODO 也许我应该mixin Create来获得更及时的通知刷新，而不是每tick检查
+// TODO 不过现在先放着吧
 public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
 {
     /**

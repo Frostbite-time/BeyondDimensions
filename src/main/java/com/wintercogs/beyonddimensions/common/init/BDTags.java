@@ -8,5 +8,5 @@ import net.minecraft.world.level.material.Fluid;
 public class BDTags
 {
     public static final TagKey<Fluid> C_EXPERIENCE =
-            TagKey.create(Registries.FLUID, ResourceLocation.tryBuild("c", "experience"));
+            TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath("c", "experience"));
 }

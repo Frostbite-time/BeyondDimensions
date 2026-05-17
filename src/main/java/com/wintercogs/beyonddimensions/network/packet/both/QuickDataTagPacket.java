@@ -11,9 +11,11 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-// 用于双端互相同步，无验证的数据包，不要用它传递重要信息
-// 一般用于传递方块或者物品的设置信息，且仅利用菜单进行读写，以防止被伪造数据包远程修改
-// 服务端中每tick验证并发送同步，客户端中仅在点击按钮等确定性修改后发送同步
+/**
+ * 用于双端互相同步，无验证的数据包，不要用它传递重要信息
+ * <p>一般用于传递方块或者物品的设置信息，且仅利用菜单进行读写，以防止被伪造数据包远程修改</p>
+ * <p>服务端中每tick验证并发送同步，客户端中仅在点击按钮等确定性修改后发送同步</p>
+ */
 public record QuickDataTagPacket(CompoundTag tag) implements CustomPacketPayload
 {
     public static final Type<QuickDataTagPacket> TYPE =

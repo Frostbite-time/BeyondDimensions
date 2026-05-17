@@ -14,28 +14,54 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-// 专用于IStackType泛型类的slot组件，内部自带click、quick-click以及数据的网络同步处理
-// 以便于在本模组的不同UI中使用时可以被快速而泛化的添加
-// 请确保其只被添加到BDBaseMenu或BDBaseGUI及其子类
-// 如果你需要将其添加到你自定义的菜单或ui，你需要修改他们，以确保会正确调用click函数以及同步函数
+/**
+ * 专用于IStackKey泛型类的slot组件，内部自带click、quick-click以及数据的网络同步处理，以便于在本模组的不同UI中使用时可以被快速而泛化的添加。
+ * <p>请确保其只被添加到BDBaseMenu或BDBaseGUI及其子类</p>
+ * <p>如果你需要将其添加到你自定义的菜单或ui，你需要修改他们，以确保会正确调用click函数以及同步函数</p>
+ */
 public abstract class AbstractStackTypedSlot extends Slot
 {
-    // 一个空容器，仅用于欺骗父类构造函数，实际存储使用StoredItemStack并结合index
+    /**
+     * 一个空容器，仅用于欺骗父类构造函数
+     */
     private static final Container empty_inv = new SimpleContainer(0);
-    // 如果双端不用同一套逻辑的stackTypedHandler处理，请确保服务端使用的stackTypedHandler可以直接操作数据
-    // 因为服务端需要处理数据同步和鼠标点击，而客户端只需要显示数据
+
+    /**
+     * 对应的实际存储，客户端用于显示数据，服务端用于操作数据
+     */
     protected final IStackHandler storage;
 
-    // 这两行int信息用来标注快速物品转移的目标区间，这将借助BDBaseMenu从中获得的slots列表来辅助完成
-    // 其使用前会进行数据校验，不正确的数值应当阻止quickMove函数调用（请自行实现）
+    /**
+     * 可供快速转移物品的slots区间起始
+     * <p>注意：slots指的是Menu的slots列表，索引对应的也是这个列表</p>
+     * <p>其使用前应当进行数据校验，不正确的数值应当阻止quickMove函数调用（需自行实现）</p>
+     * <p>区间范围：前闭后开</p>
+     */
     protected final int quickMoveSlotStartIndex;
+    /**
+     * 可供快速转移物品的slots区间结束
+     */
     protected final int quickMoveSlotEndIndex;
 
-    protected int theSlot; // 其存储物在stackTypedHandler中的具体索引
-    protected boolean fake;
-    protected boolean active = true;
-    protected final BDBaseMenu menu;
+    /**
+     * 此slot所对应的存储物在IStackHandler中的具体索引
+     */
+    protected int theSlot;
 
+    /**
+     * 假槽位/标记槽位
+     */
+    protected boolean fake;
+
+    /**
+     * 是否启用
+     */
+    protected boolean active = true;
+
+    /**
+     * 对应的menu，用于提供上下文
+     */
+    protected final BDBaseMenu menu;
 
     public AbstractStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex, int xPosition, int yPosition)
     {
@@ -61,26 +87,41 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 注意，此处的函数除loadChange外请仅在服务端调用，重写时也只考虑服务端逻辑
     // 客户端请通过loadChange从服务端接收数据，然后处理
 
+    /**
+     * 获取容器
+     */
     public IStackHandler getStorage()
     {
         return storage;
     }
 
+    /**
+     * 是否为有序容器槽位
+     */
     public abstract boolean isOrdered();
 
-    // 当鼠标直接点击此槽位会发生什么
-    // IStackType为客户端所认为的，自己所点击的物品，用于无序容器处理
+    /**
+     * 当鼠标直接点击此槽位会发生什么
+     */
     public abstract void click(KeyAmount clickStack, int button, Player player);
 
-    // 当鼠标shift点击此槽位会发生什么
+    /**
+     * 当鼠标shift点击此槽位会发生什么
+     */
     public abstract void quickMove(KeyAmount clickStack, int button, Player player);
 
-    // 如何处理此槽位的数据同步
+    /**
+     * 将数据从服务端向客户端发包
+     */
     public abstract void updateChange();
 
-    // 如何读取同步所用的数据包
-    // where表示要newStack应当覆盖的位置
-    // 绝大部分情况下，where是用不到的，这里只是提供给你一个额外的数据，用来验证或者放着不管都可以
+    /**
+     * 如何接受同步数据
+     *
+     * @param where     stack应当覆盖的位置
+     * @param newKey    对应位置应当出现的新stackKey
+     * @param newAmount 对应位置stack应当呈现的数量
+     */
     public abstract void loadChange(int where, IStackKey<?> newKey, long newAmount);
 
 
@@ -135,7 +176,6 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 获取原版最大堆叠数的Stack，一般仅用于GUI类，可以保留Item实现
     public KeyAmount getVanillaMaxSizeStack()
     {
-        //从当前槽索引取物品
         KeyAmount stack = getTypedStackFromUnifiedStorage();
         if (stack.isEmpty())
             return stack;
@@ -148,12 +188,11 @@ public abstract class AbstractStackTypedSlot extends Slot
         {
             return new KeyAmount(EmptyStackKey.INSTANCE, 0);
         }
-        //从当前槽索引取物品
         return storage.getStackBySlot(getSlotIndex());
     }
 
 
-    // 以下这些重写 覆盖了slot中最基本的要素，以便将Container驱动的inv系统，替换成IStackType驱动------------------------------
+    // 以下这些重写 覆盖了slot中最基本的要素，以便将Container驱动的inv系统，替换成IStackKey驱动------------------------------
     public void setStackDirectly(IStackKey<?> key, long amount)
     {
         // 绕过一切限制直接设置目标槽位的内容
@@ -181,11 +220,9 @@ public abstract class AbstractStackTypedSlot extends Slot
         {
             return ItemStack.EMPTY;
         }
-        //从当前槽索引取物品
         ItemStack itemStack = getItemStackFromUnifiedStorage();
         if (itemStack.isEmpty())
             return ItemStack.EMPTY;
-        //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
         return itemStack.copy();
 
     }
@@ -200,7 +237,7 @@ public abstract class AbstractStackTypedSlot extends Slot
     @Override
     public void setChanged()
     {
-        // IStackTypedHandler系列均应当在实际变化后自行调用onchange，此处不重复处理
+        // IStackHandler系列均应当在实际变化后自行调用onchange，此处不重复处理
     }
 
     @Override
@@ -237,10 +274,9 @@ public abstract class AbstractStackTypedSlot extends Slot
         {
             return -1;
         }
-        //从当前槽索引取物品
         KeyAmount stack = storage.getStackBySlot(getSlotIndex());
         if (!stack.isEmpty())
-        {   //使用getActualStack将当前的真正总数返回，可以确保显示数量的正确
+        {
             return stack.amount();
         }
         return -1;
@@ -270,6 +306,7 @@ public abstract class AbstractStackTypedSlot extends Slot
 
     // 仅对原版slot的重写，但不实际使用它们-------------------------------------------------------------------------------------
     // 如果发现意外使用则可能需要重写原版方法
+    // 大部分情况下，我们仅提供空实现或其他占位实现，因为我们不希望被原版方法干扰
 
     @Override
     public void set(@NotNull ItemStack stack)

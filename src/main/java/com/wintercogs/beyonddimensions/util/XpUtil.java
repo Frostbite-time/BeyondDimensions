@@ -6,15 +6,11 @@ public class XpUtil
 {
     /**
      * 读取玩家的“等级 + 进度”，转换为一个 double（例如 35.4）。
-     * 说明：Minecraft 中 Player.experienceLevel 是整数等级；
-     * Player.experienceProgress 是 [0,1) 的当前进度比例。
      */
     public static double levelAsDouble(Player player)
     {
-        // 这里直接使用公开字段；如果你的映射里是 getter，请改成相应的 getter。
         int level = player.experienceLevel;
-        float progress = player.experienceProgress; // [0,1)
-        // 进度防御性夹紧，避免浮点误差导致越界
+        float progress = player.experienceProgress;
         if (progress < 0f) progress = 0f;
         if (progress > 1f) progress = 1f;
         return level + (double) progress;
@@ -22,9 +18,8 @@ public class XpUtil
 
     /**
      * 计算两个“带小数的等级”之间的经验差（toLevel - fromLevel），返回 long。
-     * 例：from=35.0, to=35.4 => 约等于 0.4 * cost(35)。
-     * 约定：如果任一输入为负，则返回 0。
-     * 四舍五入到最近的整数经验（与游戏实际经验离散一致）。
+     * <p>如果任一输入为负，则返回 0。</p>
+     * <p>四舍五入到最近的整数经验。</p>
      */
     public static long xpBetweenLevels(double fromLevel, double toLevel)
     {
@@ -34,10 +29,10 @@ public class XpUtil
             return 0L;
         }
         double diff = totalXpAtFractionalLevel(toLevel) - totalXpAtFractionalLevel(fromLevel);
-        return Math.round(diff); // 经验是整数，取最接近的整数
+        return Math.round(diff);
     }
 
-    // ====== 下面是内部辅助：严格按官方分段公式 ======
+    // ====== 内部辅助方法 ======
 
     /**
      * 指定整数等级 L（到达该等级为止），从 0 级累计所需总经验。L >= 0

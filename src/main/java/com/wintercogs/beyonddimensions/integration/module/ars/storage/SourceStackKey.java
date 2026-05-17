@@ -24,9 +24,6 @@ public class SourceStackKey extends LongStackKey<SourceType>
     public static final ResourceLocation ID =
             ResourceLocation.fromNamespaceAndPath(BDConstants.MODID, "stack_type/source");
 
-    /**
-     * 唯一实例
-     */
     public static final SourceStackKey INSTANCE = new SourceStackKey();
 
     /**
@@ -46,7 +43,7 @@ public class SourceStackKey extends LongStackKey<SourceType>
                                                                     com.mojang.serialization.DynamicOps<T> ops,
                                                                     com.mojang.serialization.RecordBuilder<T> prefix)
         {
-            return prefix; // 不写任何键
+            return prefix;
         }
 
         @Override

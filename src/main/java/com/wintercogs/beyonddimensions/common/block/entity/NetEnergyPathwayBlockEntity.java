@@ -22,6 +22,7 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.energy.EnergyStorage;
 import net.neoforged.neoforge.energy.IEnergyStorage;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implements MenuProvider
@@ -35,11 +36,11 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
         super(BDBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(), pos, blockState);
     }
 
-    //--- 能力注册 (通过事件) ---
+    // 能力注册
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
         event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK, // 标准物品能力
+                Capabilities.EnergyStorage.BLOCK,
                 BDBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     if (be.popMode == PopMode.OPEN)
@@ -56,7 +57,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
                         return new EnergyUnifiedStorageHandler(net.getUnifiedStorage());
                     }
                     return new EnergyStorage(0);
-                } // 根据方向返回处理器
+                }
         );
     }
 
@@ -100,9 +101,9 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     {
         DimensionsNet net = getNet();
 
-        if (net == null)
+        if (net == null || level == null)
         {
-            return; //虽然getNet已经被shouldWork检查过，但是此处仍然进行防御性编程
+            return;
         }
 
 
@@ -112,7 +113,6 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
             BlockEntity neighbor = level.getBlockEntity(targetPos);
             if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
             {
-                // 开始查询能力 记住，你获取你上方的方块，一定是获取其下方的能力
                 IEnergyStorage otherStorage = level.getCapability(Capabilities.EnergyStorage.BLOCK, targetPos, dir.getOpposite());
                 if (otherStorage != null)
                 {
@@ -154,13 +154,13 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     }
 
     @Override
-    public Component getDisplayName()
+    public @NotNull Component getDisplayName()
     {
         return Component.translatable("menu.title.beyonddimensions.net_energy_menu");
     }
 
     @Override
-    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, Player player)
     {
         return new NetEnergyMenu(containerId, player.getInventory(), this);
     }

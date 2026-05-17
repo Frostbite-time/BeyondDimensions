@@ -23,7 +23,7 @@ public class ManaPoolPathwayOverlay
     public static void onRenderGui(RenderGuiEvent.Post e)
     {
         var mc = Minecraft.getInstance();
-        if (mc == null || mc.player == null || mc.level == null || mc.options.hideGui) return;
+        if (mc.player == null || mc.level == null || mc.options.hideGui) return;
 
         HitResult hit = mc.hitResult;
         if (!(hit instanceof BlockHitResult bhr)) return;

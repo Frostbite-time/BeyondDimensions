@@ -12,9 +12,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-// 此记录的处理会调用对应slot的setStackDirectly
-// 不会有数据校验
-// 因此，请仅在绝对需要setStackDirectly再重写实现（如标记槽位）
+/**
+ * 调用对应AbstractStackTypedSlot的setStackDirectly的数据包，不会有数据校验
+ * <p>因此，请仅在绝对需要setStackDirectly再重写实现（如标记槽位）</p>
+ */
 public record SetSlotDirectlyPacket(int slotId, KeyAmount stack) implements CustomPacketPayload
 {
     public static final Type<SetSlotDirectlyPacket> TYPE =

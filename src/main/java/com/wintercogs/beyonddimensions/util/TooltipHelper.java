@@ -34,7 +34,9 @@ public class TooltipHelper
                 return t;
             });
 
-    /* ---------- 统一的异步加载入口 ---------- */
+    /**
+     * 统一的异步加载入口
+     */
     private static CompletableFuture<List<Component>> loadAsync(
             KeyAmount stack,
             Item.TooltipContext ctx,

@@ -101,11 +101,11 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
     private String inputKey = "";
     private String outputKey = "";
 
-    // ====== 池子的转移状态（用于“转移结束补同步”） ======
+    // 池子的转移状态（用于转移结束补同步）
     private boolean isDoingTransfer = false;
     private int ticksDoingTransfer = 0;
 
-    // ====== 节流发包（对齐新版 markDispatchable 行为） ======
+    // 节流发包
     private boolean sendPacket = false;
     private int ticks = 0;
 

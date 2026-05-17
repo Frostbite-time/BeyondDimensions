@@ -9,7 +9,7 @@ import com.wintercogs.beyonddimensions.util.BDMath;
 // 对ISourceCap的适配器，由于ISource类本身注释不完善，方法实现具体使用按照SourceStorage的实现和注释推测
 public class SourceUnifiedStorageHandler implements ISourceCap
 {
-    private UnifiedStorage storage;
+    private final UnifiedStorage storage;
 
     public SourceUnifiedStorageHandler(UnifiedStorage storage)
     {

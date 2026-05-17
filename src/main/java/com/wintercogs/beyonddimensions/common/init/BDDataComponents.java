@@ -43,7 +43,7 @@ public class BDDataComponents
             )
     );
 
-    // IStackType类已经实现了hashCode和equals，直接使用即可
+    // KeyAmount类已经实现了hashCode和equals，直接使用即可
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<KeyAmount>>> ISTACK_SLOTS = register(
             "istack_slots", builder -> builder.persistent(
                     KeyAmount.CODEC.listOf()

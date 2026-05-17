@@ -31,9 +31,8 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(BDConstants.MODID, "stack_type/chemical");
     public static final ChemicalStackKey EMPTY = new ChemicalStackKey();
 
-    private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE; // 自定义堆叠大小
+    private static final long CUSTOM_MAX_STACK_SIZE = Long.MAX_VALUE;
 
-    // 新格式：仅化学品注册名
     private static final MapCodec<ChemicalStackKey> NEW_FMT = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     ResourceLocation.CODEC.fieldOf("chemical")
@@ -44,7 +43,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
                 ResourceKey<Chemical> key = ResourceKey.create(MekanismAPI.CHEMICAL_REGISTRY_NAME, rl);
                 Holder<Chemical> holder = MekanismAPI.CHEMICAL_REGISTRY.getHolder(key)
                         .<Holder<Chemical>>map(r -> r)
-                        .orElse(MekanismAPI.EMPTY_CHEMICAL_HOLDER); // 未注册 → EMPTY
+                        .orElse(MekanismAPI.EMPTY_CHEMICAL_HOLDER);
                 return new ChemicalStackKey(holder);
             })
     );
@@ -57,9 +56,9 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
         // 统一键名
         private static final String K_CHEM = "chemical";
 
-        // 【兼容 G0】早期把整个 ChemicalStack 内嵌
-        private static final String K_LEGACY = "internal_stack"; // 旧 JSON/Codec
-        private static final String K_STACK = "Stack";          // 旧 NBT 写法
+        // 早期键名
+        private static final String K_LEGACY = "internal_stack";
+        private static final String K_STACK = "Stack";
 
         @Override
         public <T> DataResult<ChemicalStackKey> decode(DynamicOps<T> ops, MapLike<T> input)
@@ -68,55 +67,44 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
             final T kLegacy = ops.createString(K_LEGACY);
             final T kStack = ops.createString(K_STACK);
 
-            // ─────────────────────────────────────────
-            // 【新格式 v3】chemical
-            // ─────────────────────────────────────────
+            // 新格式
             if (input.get(kChem) != null)
             {
                 return NEW_FMT.decode(ops, input);
             }
 
-            // ─────────────────────────────────────────
-            // 【兼容 G0 v1】直接内嵌 ChemicalStack（忽略 Amount/amount）
-            // 形态 A：internal_stack（旧 JSON/Codec）
-            // 形态 B：Stack          （旧 NBT）
-            // 处理：解析出 ChemicalStack，然后 new ChemicalStackKey(ChemicalStack)
-            // 删除时机：确认旧档已全部迁移/重存为新格式后可删除
-            // ─────────────────────────────────────────
+            // 旧格式
             T legacyNode = input.get(kLegacy);
             if (legacyNode == null) legacyNode = input.get(kStack);
             if (legacyNode != null)
             {
-                // 注意：旧数据里可能同时带有 Amount/amount —— 在 Key 层直接忽略
                 return ChemicalStack.OPTIONAL_CODEC.parse(ops, legacyNode)
                         .map(ChemicalStackKey::new);
             }
 
-            // 默认：让 NEW_FMT 给出“缺少 chemical”的明确错误
+            // 回退
             return NEW_FMT.decode(ops, input);
         }
 
         @Override
         public <T> RecordBuilder<T> encode(ChemicalStackKey value, DynamicOps<T> ops, RecordBuilder<T> prefix)
         {
-            // 仅写新格式（chemical）
             return NEW_FMT.encode(value, ops, prefix);
         }
 
         @Override
         public <T> java.util.stream.Stream<T> keys(DynamicOps<T> ops)
         {
-            // 对外暴露新格式键集合
             return java.util.stream.Stream.of(K_CHEM).map(ops::createString);
         }
     };
 
     public static final Codec<ChemicalStackKey> CODEC = TYPE_CODEC.codec();
 
-    // —— 实际不可变要素 —— //
+    // 唯一实际存储
     private final Holder<Chemical> chemical;
 
-    // 客户端渲染/复制缓存（amount≥1，仅用于显示，不参与 Key 语义）
+    // 对外缓存
     private ChemicalStack serverCache;
     private ChemicalStack clientCache;
     private int hashCodeCache = 0;
@@ -268,7 +256,6 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
     @Override
     public long getVanillaMaxStackSize()
     {
-        // 仅用于 UI/逻辑辅助（不参与 Key）
         return Math.min(64_000L, getCustomMaxStackSize());
     }
 
@@ -311,8 +298,6 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
         // Chemical 无额外组件，组件相等与 isSame 一致
         return isSame(other);
     }
-
-    // —— 网络序列化（新形态）——
 
     @Override
     public void serialize(RegistryFriendlyByteBuf buf)

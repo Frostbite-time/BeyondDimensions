@@ -33,13 +33,13 @@ public class blitSpriteMixin
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/gui/GuiGraphics;" +
                             "blitTiledSprite(Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;" +
-                            "IIIIIIIIIII)V",   // 11 个 I
-                    ordinal = 6 // 修改第六次出现时的
+                            "IIIIIIIIIII)V",
+                    ordinal = 6
             )
     )
     private void beyonddimensions$fixRightMiddleWidth(Args args)
     {
-        int j = args.get(8);           // source regionW == 右边框宽度 j
-        args.set(4, j);                // 把目标绘制宽度 (index 4) 设为 j
+        int j = args.get(8);
+        args.set(4, j);
     }
 }

@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -162,7 +163,7 @@ public abstract class NetedBlockEntity extends BlockEntity
 
     // 为子类提供基础的网络同步，需要正确实现loadAdditional和saveAdditional
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
+    public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries)
     {
         CompoundTag tag = new CompoundTag();
         saveAdditional(tag, registries);
