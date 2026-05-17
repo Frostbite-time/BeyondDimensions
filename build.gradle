@@ -196,6 +196,10 @@ dependencies {
 
     modLocalRuntime "mezz.jei:jei-${minecraft_version}-forge:${jei_version}"
 
+    // Jade支持
+    modCompileOnly "curse.maven:jade-324717:6855440"
+    modLocalRuntime "curse.maven:jade-324717:6855440"
+
     // 多态合成支持
     modCompileOnly "curse.maven:polymorph-388800:4928442"
 

@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.common.item.NetFeederItem;
 import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
 import com.wintercogs.beyonddimensions.common.item.NetRestockerItem;
 import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
+import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -76,6 +77,24 @@ public class BDCuriosPlugin
             }));
         }
         else if (item instanceof NetRestockerItem)
+        {
+            evt.addCapability(CuriosCapability.ID_ITEM, CuriosApi.createCurioProvider(new ICurio()
+            {
+
+                @Override
+                public ItemStack getStack()
+                {
+                    return stack;
+                }
+
+                @Override
+                public void curioTick(SlotContext slotContext)
+                {
+                    item.inventoryTick(stack, slotContext.entity().level(), slotContext.entity(), slotContext.index(), false);
+                }
+            }));
+        }
+        else if (item instanceof XpExchangeItem)
         {
             evt.addCapability(CuriosCapability.ID_ITEM, CuriosApi.createCurioProvider(new ICurio()
             {

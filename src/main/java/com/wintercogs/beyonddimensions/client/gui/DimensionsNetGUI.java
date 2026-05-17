@@ -20,6 +20,7 @@ import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.jei.BDjeiPlugin;
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket;
+import com.wintercogs.beyonddimensions.network.packet.c2s.OpenPrimaryNetSwitcherPacket;
 import com.wintercogs.beyonddimensions.util.UIDataHelper;
 import dev.emi.emi.api.EmiApi;
 import net.minecraft.client.Minecraft;
@@ -65,6 +66,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     protected IconButton addPageButton;
     protected IconButton removePageButton;
     protected IconButton craftButton;
+    protected IconButton primaryNetSwitcherButton;
     protected BigScroller scroller;
 
     public DimensionsNetGUI(T container, Inventory playerInventory, Component title)
@@ -226,6 +228,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addRenderableWidget(removePageButton);
 
         addCraftButton();
+        addPrimaryNetSwitcherButton();
 
 
         // 初始化搜索方案
@@ -349,17 +352,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     {
         craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/craft_button.png"), button ->
         {
-            UIDataHelper.currentPage = menu.lineData;
-
-            double xpos[] = new double[1];
-            double ypos[] = new double[1];
-            GLFW.glfwGetCursorPos(Minecraft.getInstance().getWindow().getWindow(), xpos, ypos);
-            UIDataHelper.lastMousePos = new Vec2(
-                    (float) xpos[0],
-                    (float) ypos[0]
-            );
-
-            UIDataHelper.isTransfer = true;
+            saveTransferContext();
 
             if (menu instanceof DimensionsCraftMenu)
             {
@@ -378,6 +371,32 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         });
         craftButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.craft_toggle")));
         addRenderableWidget(craftButton);
+    }
+
+    protected void addPrimaryNetSwitcherButton()
+    {
+        primaryNetSwitcherButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 7, 16, 16, ResourceLocation.tryBuild(BDConstants.MODID, "textures/gui/sprites/widget/opposite_arrow.png"), button ->
+        {
+            saveTransferContext();
+            BDPackets.INSTANCE.sendToServer(new OpenPrimaryNetSwitcherPacket());
+        });
+        primaryNetSwitcherButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.open_primary_net_switcher")));
+        addRenderableWidget(primaryNetSwitcherButton);
+    }
+
+    private void saveTransferContext()
+    {
+        UIDataHelper.currentPage = menu.lineData;
+
+        double[] xpos = new double[1];
+        double[] ypos = new double[1];
+        GLFW.glfwGetCursorPos(Minecraft.getInstance().getWindow().getWindow(), xpos, ypos);
+        UIDataHelper.lastMousePos = new Vec2(
+                (float) xpos[0],
+                (float) ypos[0]
+        );
+
+        UIDataHelper.isTransfer = true;
     }
 
     protected int rebuildImageHeight()
