@@ -19,7 +19,7 @@ public record NetControlActionPacket(UUID receiver, NetControlAction action)
         NetControlMenu menu;
         if (!(player.containerMenu instanceof NetControlMenu))
         {
-            return; // 当服务器接受到包时，如果玩家打开的不是DimensionsNetMenu，不予理会
+            return;
         }
         menu = (NetControlMenu) player.containerMenu;
         menu.handlePlayerAction(receiver(), action());

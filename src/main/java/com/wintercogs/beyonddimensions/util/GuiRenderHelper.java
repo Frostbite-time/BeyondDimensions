@@ -35,7 +35,7 @@ public class GuiRenderHelper
             int origWidth, int origHeight)
     {
 
-        // === 1. 四个角（不拉伸） ===
+        // === 四个角（不拉伸） ===
         // 左上
         guiGraphics.blit(texture,
                 x, y,
@@ -68,7 +68,7 @@ public class GuiRenderHelper
                 borderRight, borderBottom,
                 origWidth, origHeight);
 
-        // === 2. 四条边（单向拉伸） ===
+        // === 四条边（单向拉伸） ===
         int dstEdgeW = width - borderLeft - borderRight;
         int dstEdgeH = height - borderTop - borderBottom;
         int srcEdgeW = origWidth - borderLeft - borderRight;
@@ -118,7 +118,7 @@ public class GuiRenderHelper
                     origWidth, origHeight);
         }
 
-        // === 3. 中心（双向拉伸） ===
+        // === 中心（双向拉伸） ===
         guiGraphics.blit(texture,
                 x + borderLeft, y + borderTop,
                 dstEdgeW, dstEdgeH,
@@ -129,7 +129,6 @@ public class GuiRenderHelper
 
     /**
      * 绘制整张纹理并缩放到指定宽高
-     * <p>已帮你绑定 shader & 纹理；调用方不用再 setShaderTexture。</p>
      *
      * @param guiGraphics 渲染上下文
      * @param texture     纹理资源路径（不需要是在图集里的）
@@ -145,35 +144,36 @@ public class GuiRenderHelper
             int width, int height,
             int originalWidth, int originalHeight)
     {
-
-        // 1. 绑定默认 PositionTex shader（同 blitSprite 内部做的事）
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, texture);
 
-        // 3. 把整张图 (0,0 → texW,texH) 按目标宽高拉伸
         guiGraphics.blit(texture,
-                x, y,                     // 目标起点
-                width, height,            // 目标尺寸
-                0, 0,                     // 纹理起点 (u,v)
-                originalWidth, originalHeight,               // 采样整张纹理
-                originalWidth, originalHeight);              // 纹理原尺寸（用于 UV 归一化）
+                x, y,
+                width, height,
+                0, 0,
+                originalWidth, originalHeight,
+                originalWidth, originalHeight);
     }
 
+    /**
+     * @param guiGraphics 渲染上下文
+     * @param font        字体
+     * @param text        绘制文本
+     * @param xRight      右对齐情况下的x坐标
+     * @param y           y坐标
+     * @param color       字体颜色
+     * @param dropShadow  是否绘制字体阴影
+     */
     public static void drawRightAnchoredText(GuiGraphics guiGraphics,
                                              Font font,
-                                             Component text,      // 要绘的文字
-                                             int xRight,          // 想让文字右边对齐到的 x 坐标
-                                             int y,               // y 坐标
+                                             Component text,
+                                             int xRight,
+                                             int y,
                                              int color,
                                              boolean dropShadow)
-    {         // 颜色 0xAARRGGBB
-        // 1. 计算文字宽度
+    {
         int width = font.width(text);
-
-        // 2. 计算左上角起点
         int xStart = xRight - width;
-
-        // 3. 绘制
         guiGraphics.drawString(font, text, xStart, y, color, dropShadow);
     }
 }

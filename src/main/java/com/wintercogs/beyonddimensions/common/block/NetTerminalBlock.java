@@ -87,7 +87,7 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context)
     {
-        // 获取玩家看向的方向的反方向作为方块朝向（更符合直觉）
+        // 获取玩家看向的方向的反方向作为方块朝向
         return this.defaultBlockState()
                 .setValue(FACING, context.getClickedFace().getOpposite());
     }

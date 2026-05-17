@@ -119,7 +119,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     {
         DimensionsNet net = getNet();
 
-        if (net == null)
+        if (net == null || level == null)
         {
             return;
         }

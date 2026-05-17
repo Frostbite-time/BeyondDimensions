@@ -47,13 +47,8 @@ public class SourceHandlerWrapper implements IStackHandlerWrapper<SourceType>
     public long insert(int slot, SourceType stack, boolean sim)
     {
         long amount = stack.getStackCount();
-        // 确保请求的插入量在int范围内（Max: 2,147,483,647）
         int insertAmount = (amount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) amount;
-
-        // 接收能量并获取实际接受量
         int accepted = sourceCap.receiveSource(insertAmount, sim);
-
-        // 计算未接收的余量 = 请求总量 - 实际接受量
         return amount - accepted;
     }
 
@@ -61,13 +56,8 @@ public class SourceHandlerWrapper implements IStackHandlerWrapper<SourceType>
     public long insert(SourceType stack, boolean sim)
     {
         long amount = stack.getStackCount();
-        // 确保请求的插入量在int范围内（Max: 2,147,483,647）
         int insertAmount = (amount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) amount;
-
-        // 接收能量并获取实际接受量
         int accepted = sourceCap.receiveSource(insertAmount, sim);
-
-        // 计算未接收的余量 = 请求总量 - 实际接受量
         return amount - accepted;
     }
 

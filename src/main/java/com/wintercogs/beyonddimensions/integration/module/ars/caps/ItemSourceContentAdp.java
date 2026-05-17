@@ -123,7 +123,6 @@ public class ItemSourceContentAdp implements ISourceCap
             sourceStorage.setSource(amount);
     }
 
-    // 跳过
     @Override
     public void setMaxSource(int amount)
     {

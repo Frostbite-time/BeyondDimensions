@@ -25,7 +25,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
 
     public final int groupId; // 用于读取时的标记
     private final BDBaseMenu menu;
-    private final AbstractUnorderedStackHandler storage; // 对真实存储的直接引用
+    private final AbstractUnorderedStackHandler storage;
     private final List<KeyAmount> lastStorage = new ArrayList<>();
 
     private boolean initialized = false; // 首次发送控制
@@ -157,7 +157,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
 
         if (dirtyFullRescan)
         {
-            // === 仅做全量对比 ===
+            // 仅做全量对比
             Map<IStackKey<?>, Long> lastMap = new HashMap<>();
             for (KeyAmount ka : this.lastStorage)
             {
@@ -191,7 +191,7 @@ public class DisorderedSlotGroupSync implements SlotGroupSync
         }
         else
         {
-            // === 仅发送 pending ===
+            // 仅发送 pending
             toSend.putAll(pending);
             pending.clear();
         }

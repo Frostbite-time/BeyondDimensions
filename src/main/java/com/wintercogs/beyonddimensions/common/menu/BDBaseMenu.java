@@ -64,7 +64,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     @Override
     public void broadcastChanges()
     {
-        // 在原版方法上剔除了对StoredStackSlot的处理
+        // 在原版方法上剔除了对AbstractStackTypedSlot的处理
         for (int i = 0; i < this.slots.size(); ++i)
         {
             Slot slot = this.slots.get(i);
@@ -114,7 +114,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     }
 
     // 什么时候应该发送快速更新
-    // 你也可以用这个来阻止某一端发送更新
+    // 可以用来阻止某一端发送更新
     protected boolean shouldSendQuickData()
     {
         return false;

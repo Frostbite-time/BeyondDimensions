@@ -19,9 +19,6 @@ public class SourceStackKey extends LongStackKey<SourceType>
 
     public static final ResourceLocation ID = ResourceLocation.tryBuild(BDConstants.MODID, "stack_type/source");
 
-    /**
-     * 唯一实例
-     */
     public static final SourceStackKey INSTANCE = new SourceStackKey();
 
     private SourceStackKey()

@@ -189,7 +189,7 @@ public class NetFeederItem extends BaseMachineItem
     @Override
     public int getTicksPerWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
-        return 10; //每10tick检测一次
+        return 10;
     }
 
 }
