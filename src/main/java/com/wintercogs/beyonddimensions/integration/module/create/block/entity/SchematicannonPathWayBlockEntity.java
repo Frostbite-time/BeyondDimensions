@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -176,8 +177,13 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
             }
         }
 
-        // 理论上 otherChecklists 非空时这里也至少有一个 item，不过稳妥起见还是兜一手
-        if (newSnapshot.isEmpty() || newAllowedDirections.isEmpty())
+        // 始终添加火药暴露
+        if (seenItems.add(Items.GUNPOWDER))
+        {
+            newSnapshot.add(new ItemStack(Items.GUNPOWDER));
+        }
+
+        if (newAllowedDirections.isEmpty())
         {
             clearCap();
             invalidateCapabilities();
