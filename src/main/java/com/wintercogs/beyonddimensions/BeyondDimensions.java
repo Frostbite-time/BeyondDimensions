@@ -18,10 +18,6 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.block.entity.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity;
-import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
-import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.resources.ResourceLocation;
@@ -49,12 +45,6 @@ public class BeyondDimensions
         Config.register(modContainer);
 
         modEventBus.addListener(this::commonSetup);
-
-        //为存储网络的接口方块注册物品交互能力
-        modEventBus.addListener(NetInterfaceBlockEntity::registerCapability);
-        modEventBus.addListener(NetPathwayBlockEntity::registerCapability);
-        modEventBus.addListener(NetEnergyPathwayBlockEntity::registerCapability);
-        modEventBus.addListener(NetFurnaceBlockEntity::registerCapability);
 
         BDMenus.register(modEventBus);
         BDCreativeModeTabs.register(modEventBus);
