@@ -75,6 +75,22 @@ public class BDBlockEntities
             ).build(null)
     );
 
+    public static final Supplier<BlockEntityType<NetBlastFurnaceBlockEntity>> NET_BLAST_FURNACE_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+            "net_blast_furnace_block_entity",
+            () -> BlockEntityType.Builder.of(
+                    NetBlastFurnaceBlockEntity::new,
+                    BDBlocks.NET_BLAST_FURNACE_BLOCK.get()
+            ).build(null)
+    );
+
+    public static final Supplier<BlockEntityType<NetSmokerBlockEntity>> NET_SMOKER_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+            "net_smoker_block_entity",
+            () -> BlockEntityType.Builder.of(
+                    NetSmokerBlockEntity::new,
+                    BDBlocks.NET_SMOKER_BLOCK.get()
+            ).build(null)
+    );
+
 
     public static void register(IEventBus eventBus)
     {

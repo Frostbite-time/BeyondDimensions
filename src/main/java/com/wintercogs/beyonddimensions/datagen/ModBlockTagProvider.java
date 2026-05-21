@@ -44,6 +44,8 @@ public class ModBlockTagProvider extends BlockTagsProvider
                 .add(BDBlocks.NET_PUMP_BLOCK.get())
                 .add(BDBlocks.NET_HOPPER_BLOCK.get())
                 .add(BDBlocks.NET_FURNACE_BLOCK.get())
+                .add(BDBlocks.NET_BLAST_FURNACE_BLOCK.get())
+                .add(BDBlocks.NET_SMOKER_BLOCK.get())
                 .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
 
         IntegrationManager.onBlockTagDatagen(provider, new IIntegrationModule.BlockTagAppender()

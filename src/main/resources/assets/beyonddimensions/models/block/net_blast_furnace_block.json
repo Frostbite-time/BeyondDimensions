@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "beyonddimensions:block/net_blast_furnace_front",
+    "side" : "beyonddimensions:block/mana_pool_top",
+    "top"  : "beyonddimensions:block/mana_pool_top"
+  }
+}

@@ -14,6 +14,8 @@ public class BDBlockIds
     public static final String NET_PUMP_BLOCK = "net_pump_block";
     public static final String NET_HOPPER_BLOCK = "net_hopper_block";
     public static final String NET_FURNACE_BLOCK = "net_furnace_block";
+    public static final String NET_BLAST_FURNACE_BLOCK = "net_blast_furnace_block";
+    public static final String NET_SMOKER_BLOCK = "net_smoker_block";
     public static final String DIMENSIONAL_CONNECT_BLOCK = "dimensional_connect_block";
 
     // 模块方块
