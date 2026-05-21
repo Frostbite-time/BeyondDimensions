@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.mixin;
+package com.wintercogs.beyonddimensions.mixin.target;
 
 import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;

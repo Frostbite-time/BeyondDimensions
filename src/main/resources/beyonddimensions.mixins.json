@@ -1,10 +1,12 @@
 {
   "required": true,
   "package": "com.wintercogs.beyonddimensions.mixin",
+  "plugin": "com.wintercogs.beyonddimensions.mixin.integration.create.plugin.CreateIntegrationMixinPlugin",
   "mixins": [
+    "integration.create.target.SchematicannonBlockEntityMixin"
   ],
   "client": [
-    "blitSpriteMixin"
+    "target.blitSpriteMixin"
   ],
   "server": [
   ],

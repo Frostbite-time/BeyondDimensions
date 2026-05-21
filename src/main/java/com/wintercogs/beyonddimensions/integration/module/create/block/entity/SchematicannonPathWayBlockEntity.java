@@ -23,8 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-// TODO 也许我应该mixin Create来获得更及时的通知刷新，而不是每tick检查
-// TODO 不过现在先放着吧
 public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
 {
     /**
@@ -74,7 +72,7 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
     }
 
     /**
-     * 每 tick 主动刷新：根据 checklist 快照是否变化决定是否重建能力
+     * 根据相邻蓝图大炮的 checklist 快照是否变化决定是否重建能力。
      */
     public void updateCap()
     {
@@ -212,19 +210,37 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
         allowedDirections.clear();
     }
 
+    /** 更新能力，这是给Mixin部分使用的专门刷新方法 */
+    public static void updateAdjacentPathways(Level level, BlockPos schematicannonPos)
+    {
+        if (level == null || level.isClientSide()) return;
+
+        for (Direction dir : Direction.values())
+        {
+            BlockPos pathwayPos = schematicannonPos.relative(dir);
+            if (!level.isLoaded(pathwayPos)) continue;
+
+            BlockEntity be = level.getBlockEntity(pathwayPos);
+            if (be instanceof SchematicannonPathWayBlockEntity pathway)
+            {
+                pathway.updateCap();
+            }
+        }
+    }
+
+    @Override
+    public void onLoad()
+    {
+        super.onLoad();
+        updateCap();
+    }
+
     // 网络更变时立刻更新能力
     @Override
     public void setChanged()
     {
         super.setChanged();
         updateCap();
-    }
-
-    public static void tick(Level level, BlockPos pos, BlockState state, SchematicannonPathWayBlockEntity blockEntity)
-    {
-        if (level == null || level.isClientSide()) return;
-
-        blockEntity.updateCap();
     }
 
     /**
