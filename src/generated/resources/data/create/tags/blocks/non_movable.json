@@ -8,6 +8,8 @@
     "beyonddimensions:net_pump_block",
     "beyonddimensions:net_hopper_block",
     "beyonddimensions:net_furnace_block",
+    "beyonddimensions:net_blast_furnace_block",
+    "beyonddimensions:net_smoker_block",
     "beyonddimensions:dimensional_connect_block",
     {
       "id": "beyonddimensions:schematicannon_pathway",

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:cobblestone"
+    },
+    "B": {
+      "item": "minecraft:piston"
+    },
+    "C": {
+      "item": "beyonddimensions:dimensional_connect_block"
+    },
+    "D": {
+      "item": "minecraft:blast_furnace"
+    }
+  },
+  "pattern": [
+    "AAA",
+    "BCB",
+    "ADA"
+  ],
+  "result": {
+    "item": "beyonddimensions:net_blast_furnace_block"
+  },
+  "show_notification": true
+}

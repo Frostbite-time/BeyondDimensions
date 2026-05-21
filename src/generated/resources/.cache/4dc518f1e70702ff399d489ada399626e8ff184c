@@ -1,5 +1,6 @@
-// 1.20.1	2026-03-06T23:59:01.6188125	BeyondDimensions LootTable Provider
+// 1.20.1	2026-05-21T21:42:01.319964	BeyondDimensions LootTable Provider
 84c4afd3f6d07608f95ebf2b0fe894a1073e3f3e data/beyonddimensions/loot_tables/blocks/dimensional_connect_block.json
+793102ad9c40c36df46650acefa1112b86f81a98 data/beyonddimensions/loot_tables/blocks/net_blast_furnace_block.json
 b76ce05befe12b9d31a73cc46d5f9cb5c4368099 data/beyonddimensions/loot_tables/blocks/net_control.json
 8d9400c72c06dc9c3a24471e8e54dcb69cf62bb8 data/beyonddimensions/loot_tables/blocks/net_energy_pathway.json
 cb330c36112104ce66451029e90130be48bdc6e3 data/beyonddimensions/loot_tables/blocks/net_furnace_block.json
@@ -7,5 +8,6 @@ f608a5c1e15b10aa631de4b7bdb41cd168cb8732 data/beyonddimensions/loot_tables/block
 afd50456feafcf8786f69583d46f94a9de1b7e95 data/beyonddimensions/loot_tables/blocks/net_interface.json
 ebf89e0007e4b6e7fa2a4129ebc3ca92049daa3d data/beyonddimensions/loot_tables/blocks/net_pathway.json
 05c36f954630bf7d6f9ac9bf10eee885f3f925dd data/beyonddimensions/loot_tables/blocks/net_pump_block.json
+4de3a582f9507571d495e579ec583118b06b9f24 data/beyonddimensions/loot_tables/blocks/net_smoker_block.json
 cf7db46aad4af70c56c8790a0e5dc2e1c17b0bd3 data/beyonddimensions/loot_tables/blocks/net_terminal_block.json
 b20e6c1855daa134ac79aa9b979532ef379fe211 data/beyonddimensions/loot_tables/blocks/xp_fluid.json

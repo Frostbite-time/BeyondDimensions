@@ -66,6 +66,8 @@ public class BDCreativeModeTabs
                         output.accept(BDBlocks.NET_PUMP_BLOCK.get());
                         output.accept(BDBlocks.NET_HOPPER_BLOCK.get());
                         output.accept(BDBlocks.NET_FURNACE_BLOCK.get());
+                        output.accept(BDBlocks.NET_BLAST_FURNACE_BLOCK.get());
+                        output.accept(BDBlocks.NET_SMOKER_BLOCK.get());
                         output.accept(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
 
                         IntegrationManager.onBlockCreativeTabCollect(itemDisplayParameters, output);

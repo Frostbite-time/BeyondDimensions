@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.common.menu;
 
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
-import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity;
+import com.wintercogs.beyonddimensions.common.block.entity.BaseNetFurnaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.init.BDMenus;
 import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
@@ -41,14 +41,14 @@ public class NetFurnaceMenu extends BDBaseMenu
     private List<Integer> lastCookTime = new ArrayList<>();
     private List<Integer> lastCookTimeTotal = new ArrayList<>();
 
-    public final NetFurnaceBlockEntity be;
+    public final BaseNetFurnaceBlockEntity<?> be;
 
     public NetFurnaceMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, (NetFurnaceBlockEntity) playerInventory.player.level().getBlockEntity(data.readBlockPos()));
+        this(id, playerInventory, (BaseNetFurnaceBlockEntity<?>) playerInventory.player.level().getBlockEntity(data.readBlockPos()));
     }
 
-    public NetFurnaceMenu(int containerId, Inventory playerInventory, NetFurnaceBlockEntity be)
+    public NetFurnaceMenu(int containerId, Inventory playerInventory, BaseNetFurnaceBlockEntity<?> be)
     {
         super(BDMenus.Net_Furnace_Menu.get(), containerId, playerInventory);
 

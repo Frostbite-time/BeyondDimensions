@@ -43,6 +43,12 @@ public class BDBlocks
     public static final RegistryObject<Block> NET_FURNACE_BLOCK = registerBlock(BDBlockIds.NET_FURNACE_BLOCK,
             () -> new NetFurnaceBlock(BlockBehaviour.Properties.of().strength(2f)));
 
+    public static final RegistryObject<Block> NET_BLAST_FURNACE_BLOCK = registerBlock(BDBlockIds.NET_BLAST_FURNACE_BLOCK,
+            () -> new NetBlastFurnaceBlock(BlockBehaviour.Properties.of().strength(2f)));
+
+    public static final RegistryObject<Block> NET_SMOKER_BLOCK = registerBlock(BDBlockIds.NET_SMOKER_BLOCK,
+            () -> new NetSmokerBlock(BlockBehaviour.Properties.of().strength(2f)));
+
     // 合成材料-维度链接框架
     public static final RegistryObject<Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock(BDBlockIds.DIMENSIONAL_CONNECT_BLOCK,
             () -> new Block(BlockBehaviour.Properties.of().strength(2f)));
