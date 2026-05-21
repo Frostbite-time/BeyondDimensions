@@ -4,10 +4,9 @@ import com.wintercogs.beyonddimensions.common.block.NetedBlock;
 import com.wintercogs.beyonddimensions.integration.module.create.block.entity.SchematicannonPathWayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,17 +22,13 @@ public class SchematicannonPathWayBlock extends NetedBlock implements EntityBloc
     }
 
     @Override
-    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType)
+    public void neighborChanged(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Block block, @NotNull BlockPos fromPos, boolean isMoving)
     {
-        if (level.isClientSide())
-            return null;
-
-        return (level1, blockPos, blockState, blockEntity) -> {
-            if (blockEntity instanceof SchematicannonPathWayBlockEntity machine)
-            {
-                SchematicannonPathWayBlockEntity.tick(level1, blockPos, blockState, machine);
-            }
-        };
+        super.neighborChanged(state, level, pos, block, fromPos, isMoving);
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof SchematicannonPathWayBlockEntity pathway)
+        {
+            pathway.updateCap();
+        }
     }
 
     @Override

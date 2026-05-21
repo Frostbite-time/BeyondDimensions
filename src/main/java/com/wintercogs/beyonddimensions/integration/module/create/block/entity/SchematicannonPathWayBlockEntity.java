@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,8 +25,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-// TODO 也许我应该mixin Create来获得更及时的通知刷新，而不是每tick检查
-// TODO 不过现在先放着吧
 public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
 {
     LazyOptional<IItemHandler> opt = LazyOptional.empty();
@@ -88,7 +87,7 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
     }
 
     /**
-     * 每 tick 主动刷新：根据 checklist 快照是否变化决定是否重建能力
+     * 根据相邻蓝图大炮的 checklist 快照是否变化决定是否重建能力。
      */
     public void updateCap()
     {
@@ -192,8 +191,13 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
             }
         }
 
-        // 理论上 otherChecklists 非空时这里也至少有一个 item，不过稳妥起见还是兜一手
-        if (newSnapshot.isEmpty() || newAllowedDirections.isEmpty())
+        // 始终添加火药暴露
+        if (seenItems.add(Items.GUNPOWDER))
+        {
+            newSnapshot.add(new ItemStack(Items.GUNPOWDER));
+        }
+
+        if (newAllowedDirections.isEmpty())
         {
             clearCap();
             invalidateCaps();
@@ -226,19 +230,37 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
         allowedDirections.clear();
     }
 
+    /** 更新能力，这是给Mixin部分使用的专门刷新方法 */
+    public static void updateAdjacentPathways(Level level, BlockPos schematicannonPos)
+    {
+        if (level == null || level.isClientSide()) return;
+
+        for (Direction dir : Direction.values())
+        {
+            BlockPos pathwayPos = schematicannonPos.relative(dir);
+            if (!level.isLoaded(pathwayPos)) continue;
+
+            BlockEntity be = level.getBlockEntity(pathwayPos);
+            if (be instanceof SchematicannonPathWayBlockEntity pathway)
+            {
+                pathway.updateCap();
+            }
+        }
+    }
+
+    @Override
+    public void onLoad()
+    {
+        super.onLoad();
+        updateCap();
+    }
+
     // 网络更变时立刻更新能力
     @Override
     public void setChanged()
     {
         super.setChanged();
         updateCap();
-    }
-
-    public static void tick(Level level, BlockPos pos, BlockState state, SchematicannonPathWayBlockEntity blockEntity)
-    {
-        if (level == null || level.isClientSide()) return;
-
-        blockEntity.updateCap();
     }
 
     /**
