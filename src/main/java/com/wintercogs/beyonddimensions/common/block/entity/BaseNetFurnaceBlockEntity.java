@@ -405,90 +405,74 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     {
         super.workStart();
 
-        if (getNet() != null)
+        var net = getNet();
+        UnifiedStorage storage = net == null ? null : net.getUnifiedStorage();
+        if (storage != null)
         {
-            UnifiedStorage storage = getNet().getUnifiedStorage();
-
             // 1.尝试按照标记槽位从网络抽取原料
             for (int inputSlot = 0; inputSlot < capacity; inputSlot++)
             {
-                if (inputStorageSlots.getStackBySlot(inputSlot).isEmpty())
+                if (!inputStorageSlots.getStackBySlot(inputSlot).isEmpty()) continue;
+
+                for (KeyAmount filterStack : inputFilterSlots.getStorage())
                 {
-                    for (KeyAmount filterStack : inputFilterSlots.getStorage())
+                    if (!inputStorageSlots.getStackBySlot(inputSlot).isEmpty()) break; // 如果已经插入过则直接跳过
+                    if (!(filterStack.key() instanceof ItemStackKey filterItem) || filterItem.isEmpty()) continue;
+
+                    KeyAmount extracted = storage.extract(filterItem, filterItem.getVanillaMaxStackSize(), false, false);
+                    if (extracted.isEmpty()) continue;
+
+                    KeyAmount remaining = inputStorageSlots.insert(inputSlot, extracted.key(), extracted.amount(), false);
+                    if (!remaining.isEmpty())
                     {
-                        if (!inputStorageSlots.getStackBySlot(inputSlot).isEmpty())
-                            break; //如果已经插入过则直接跳过
-                        if (filterStack.key() instanceof ItemStackKey filterItem && !filterItem.isEmpty())
-                        {
-                            KeyAmount extracted = storage.extract(filterItem, filterItem.getVanillaMaxStackSize(), false, false);
-                            KeyAmount remaining = inputStorageSlots.insert(inputSlot, extracted.key(), extracted.amount(), false);
-                            if (!remaining.isEmpty())
-                            {
-                                storage.insert(remaining.key(), remaining.amount(), false);
-                            }
-                        }
+                        storage.insert(remaining.key(), remaining.amount(), false);
                     }
                 }
             }
             // 2.如果开启了自动整理，则每tick进行一次快速整理
             if (sortMode == AutoSortMode.OPEN)
             {
-                IStackKey<?>[] stacks = new IStackKey[capacity]; // 种类引用 每tick重新获取，无隐藏问题
                 long[] amounts = new long[capacity]; //种类数量
-
                 Map<IStackKey<?>, List<Integer>> groupSlots = new HashMap<>(); // 所属槽位
                 Map<IStackKey<?>, Long> groupTotal = new HashMap<>(); // 种类总数
-
                 List<Integer> emptySlots = new ArrayList<>(); // 标记可用的空槽位
 
                 for (int i = 0; i < capacity; i++)
                 {
-                    KeyAmount s = inputStorageSlots.getStackBySlot(i);
-                    stacks[i] = s.key();
-
-                    if (s.isEmpty())
+                    KeyAmount stack = inputStorageSlots.getStackBySlot(i);
+                    if (stack.isEmpty())
                     {
                         emptySlots.add(i);
-                        amounts[i] = 0;
                         continue;
                     }
 
-                    long amt = s.amount();
-                    amounts[i] = amt;
-
-                    groupSlots.computeIfAbsent(s.key(), k -> new ArrayList<>()).add(i);
-                    groupTotal.put(s.key(), groupTotal.getOrDefault(s.key(), 0L) + amt);
+                    IStackKey<?> key = stack.key();
+                    long amount = stack.amount();
+                    amounts[i] = amount;
+                    groupSlots.computeIfAbsent(key, k -> new ArrayList<>()).add(i);
+                    groupTotal.put(key, groupTotal.getOrDefault(key, 0L) + amount);
                 }
-                // 为不同的种类再分配，循环次数小于种类数量，即小于capacity
+
+                // 将同类物品在现有槽与可用空槽间尽量均分：先扩展目标槽列表，再用双指针从盈余槽搬到欠额槽。
                 for (Map.Entry<IStackKey<?>, List<Integer>> entry : groupSlots.entrySet())
                 {
-
-                    IStackKey<?> type = entry.getKey();
                     List<Integer> typedSlots = entry.getValue();
-                    long total = groupTotal.get(type);
+                    long total = groupTotal.get(entry.getKey());
 
-                    // 目标槽数 k：现有槽 + 可用空槽，但不超过总量
                     int k = (int) Math.min(total, typedSlots.size() + emptySlots.size());
 
-                    // 把需要的空槽“借”过来
                     while (typedSlots.size() < k && !emptySlots.isEmpty())
                     {
-                        int idx = emptySlots.remove(emptySlots.size() - 1); // 取最后一个空槽
+                        int idx = emptySlots.remove(emptySlots.size() - 1);
                         typedSlots.add(idx);
-                        stacks[idx] = type; // 逻辑标记：该槽将容纳同类物品
-                        amounts[idx] = 0;
                     }
 
-                    // 计算平均值
-                    long base = total / k; // 每个槽位的基本数量
-                    int extra = (int) (total % k); // 前extra个槽位平摊余数
+                    long base = total / k;
+                    int extra = (int) (total % k);
 
-                    // 双指针搬运：把“多”的搬给“少”的
                     int surplusPtr = 0, deficitPtr = 0;
                     while (true)
-                    { // 实际小于k次
-
-                        // 找下一个盈余槽
+                    {
                         while (surplusPtr < k)
                         {
                             int idx = typedSlots.get(surplusPtr);
@@ -497,7 +481,6 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
                             surplusPtr++;
                         }
 
-                        // 找下一个欠额槽
                         while (deficitPtr < k)
                         {
                             int idx = typedSlots.get(deficitPtr);
@@ -506,25 +489,24 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
                             deficitPtr++;
                         }
 
-                        if (surplusPtr >= k || deficitPtr >= k) break; // 已平衡
+                        if (surplusPtr >= k || deficitPtr >= k) break;
 
                         int from = typedSlots.get(surplusPtr);
                         int to = typedSlots.get(deficitPtr);
 
-                        long surplus = amounts[from] - (base + (surplusPtr < extra ? 1 : 0)); // 盈余槽需要减少的
-                        long deficit = (base + (deficitPtr < extra ? 1 : 0)) - amounts[to]; // 缺欠额槽需要增加的
-                        long move = Math.min(surplus, deficit); // 实际搬运量
+                        long surplus = amounts[from] - (base + (surplusPtr < extra ? 1 : 0));
+                        long deficit = (base + (deficitPtr < extra ? 1 : 0)) - amounts[to];
+                        long move = Math.min(surplus, deficit);
 
-                        // 真正提取 & 插入
                         KeyAmount moved = inputStorageSlots.extract(from, move, false);
                         KeyAmount leftover = inputStorageSlots.insert(to, moved.key(), moved.amount(), false);
                         if (!leftover.isEmpty())
                         {
+                            // 插入失败时回滚本次移动，避免吞物品。
                             inputStorageSlots.insert(from, leftover.key(), leftover.amount(), false);
                             break;
                         }
 
-                        // 更新本地计数
                         amounts[from] -= move;
                         amounts[to] += move;
                     }
@@ -533,22 +515,20 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
             // 3.尝试按燃料标记从网络抽取燃料 虽然当前燃料槽仅有一个，但是还是可以继续使用这个方法来方便后续修改
             for (int fuelSlot = 0; fuelSlot < fuelCapacity; fuelSlot++)
             {
-                if (fuelStorageSlots.getStackBySlot(fuelSlot).isEmpty())
+                if (!fuelStorageSlots.getStackBySlot(fuelSlot).isEmpty()) continue;
+
+                for (KeyAmount filterStack : fuelFilterSlots.getStorage())
                 {
-                    for (KeyAmount filterStack : fuelFilterSlots.getStorage())
+                    if (filterStack.isEmpty()) continue;
+                    if (!fuelStorageSlots.getStackBySlot(fuelSlot).isEmpty()) break; // 如果已经插入过则直接跳过
+
+                    KeyAmount extracted = storage.extract(filterStack.key(), filterStack.key().getVanillaMaxStackSize(), false, false);
+                    if (extracted.isEmpty()) continue;
+
+                    KeyAmount remaining = fuelStorageSlots.insert(fuelSlot, extracted.key(), extracted.amount(), false);
+                    if (!remaining.isEmpty())
                     {
-                        if (filterStack.isEmpty())
-                            continue;
-
-                        if (!fuelStorageSlots.getStackBySlot(fuelSlot).isEmpty())
-                            break; //如果已经插入过则直接跳过
-
-                        KeyAmount extracted = storage.extract(filterStack.key(), filterStack.key().getVanillaMaxStackSize(), false, false);
-                        KeyAmount remaining = fuelStorageSlots.insert(fuelSlot, extracted.key(), extracted.amount(), false);
-                        if (!remaining.isEmpty())
-                        {
-                            storage.insert(remaining.key(), remaining.amount(), false);
-                        }
+                        storage.insert(remaining.key(), remaining.amount(), false);
                     }
                 }
             }
@@ -557,70 +537,63 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         for (int litSlot = 0; litSlot < capacity; litSlot++)
         {
             // 燃料已经烧完，并且对应槽位仍然有需要冶炼的物品
-            if (litTime.get(litSlot) <= 0 && !inputStorageSlots.getStackBySlot(litSlot).isEmpty())
+            if (litTime.get(litSlot) > 0 || inputStorageSlots.getStackBySlot(litSlot).isEmpty()) continue;
+
+            for (KeyAmount fuelStack : fuelStorageSlots.getStorage())
             {
-                for (KeyAmount fuelStack : fuelStorageSlots.getStorage())
+                if (fuelStack.isEmpty()) continue;
+
+                IStackKey<?> fuelKey = fuelStack.key();
+                if (fuelKey instanceof EnergyStackKey)
                 {
-                    if (!fuelStack.isEmpty())
+                    // 每个fe对应1tick燃烧时间
+                    int burnTime = (int) Math.min(fuelStack.amount(), 20000);
+                    if (burnTime <= 0) continue;
+
+                    fuelStorageSlots.extract(fuelKey, burnTime, false, false);
+                    litTime.set(litSlot, burnTime);
+                    litDuration.set(litSlot, burnTime);
+                }
+                else if (fuelKey instanceof FluidStackKey fuelFluid && fuelFluid.getSource() == Fluids.LAVA)
+                {
+                    // 每mb熔岩对应20tick燃烧时间
+                    int burnNum = (int) Math.min(fuelStack.amount(), 1000);
+                    int burnTime = burnNum * 20;
+                    if (burnTime <= 0) continue;
+
+                    fuelStorageSlots.extract(fuelFluid, burnNum, false, false);
+                    litTime.set(litSlot, burnTime);
+                    litDuration.set(litSlot, burnTime);
+                }
+                else if (fuelKey instanceof ItemStackKey fuelItem)
+                {
+                    int burnTime = ForgeHooks.getBurnTime(fuelItem.getReadOnlyStack(), recipeType);
+                    if (burnTime <= 0) continue;
+
+                    ItemStack returnItem = fuelItem.getReadOnlyStack().getCraftingRemainingItem();
+                    if (returnItem.isEmpty())
                     {
-                        if (fuelStack.key() instanceof EnergyStackKey)
-                        {
-                            // 每个fe对应1tick燃烧时间
-                            int burnTime = (int) Math.min(fuelStack.amount(), 20000);
-                            if (burnTime > 0)
-                            {
-                                fuelStorageSlots.extract(fuelStack.key(), burnTime, false, false);
-                                litTime.set(litSlot, burnTime);
-                                litDuration.set(litSlot, burnTime);
-                            }
-                        }
-                        else if (fuelStack.key() instanceof FluidStackKey fuelFluid && fuelFluid.getSource() == Fluids.LAVA)
-                        {
-                            // 每mb熔岩对应20tick燃烧时间
-                            int burnNum = (int) Math.min(fuelStack.amount(), 1000);
-                            int burnTime = burnNum * 20;
-                            if (burnTime > 0)
-                            {
-                                fuelStorageSlots.extract(fuelFluid, burnNum, false, false);
-                                litTime.set(litSlot, burnTime);
-                                litDuration.set(litSlot, burnTime);
-                            }
-                        }
-                        else if (fuelStack.key() instanceof ItemStackKey fuelItem)
-                        {
-                            int burnTime = ForgeHooks.getBurnTime(fuelItem.getReadOnlyStack(), recipeType);
-                            if (burnTime > 0)
-                            {
-                                ItemStack returnItem = fuelItem.getReadOnlyStack().getCraftingRemainingItem();
-                                if (returnItem.isEmpty())
-                                {
-                                    fuelStorageSlots.extract(fuelItem, 1, false, false);
-                                    litTime.set(litSlot, burnTime);
-                                    litDuration.set(litSlot, burnTime);
-                                }
-                                else // 先尝试插入returnItem，如果能插入再消耗
-                                {
-                                    IStackKey<?> returnKey = new ItemStackKey(returnItem);
-                                    int returnCount = returnItem.getCount();
-                                    // 模拟插入陈功
-                                    if (fuelReturnSlots.insert(returnKey, returnCount, true).isEmpty())
-                                    {
-                                        fuelReturnSlots.insert(returnKey, returnCount, false);
-                                        fuelStorageSlots.extract(fuelItem, 1, false, false);
-                                        litTime.set(litSlot, burnTime);
-                                        litDuration.set(litSlot, burnTime);
-                                    }
-                                    else //无法补充燃料，则将双时间设为0
-                                    {
-                                        litTime.set(litSlot, 0);
-                                        litDuration.set(litSlot, 0);
-                                    }
-                                }
-
-                            }
-
-                        }
+                        fuelStorageSlots.extract(fuelItem, 1, false, false);
+                        litTime.set(litSlot, burnTime);
+                        litDuration.set(litSlot, burnTime);
+                        continue;
                     }
+
+                    // 先尝试插入returnItem，如果能插入再消耗
+                    IStackKey<?> returnKey = new ItemStackKey(returnItem);
+                    int returnCount = returnItem.getCount();
+                    if (!fuelReturnSlots.insert(returnKey, returnCount, true).isEmpty())
+                    {
+                        // 无法补充燃料，则将双时间设为0
+                        litTime.set(litSlot, 0);
+                        litDuration.set(litSlot, 0);
+                        continue;
+                    }
+
+                    fuelReturnSlots.insert(returnKey, returnCount, false);
+                    fuelStorageSlots.extract(fuelItem, 1, false, false);
+                    litTime.set(litSlot, burnTime);
+                    litDuration.set(litSlot, burnTime);
                 }
             }
         }
@@ -635,52 +608,46 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         //开始熔炼
         for (int inputSlot = 0; inputSlot < capacity; inputSlot++)
         {
-            if (litTime.get(inputSlot) <= 0)
-                continue; // 必须有燃烧才能熔炼
+            if (litTime.get(inputSlot) <= 0) continue;
 
-            if (inputStorageSlots.getStackBySlot(inputSlot).key() instanceof ItemStackKey inputItem
-                    && !inputItem.isEmpty())
-            {
-                R recipeHolder = quickChecks.get(inputSlot)
-                        .getRecipeFor(new SimpleContainer(inputItem.getReadOnlyStack()), level).orElse(null);
-                if (recipeHolder != null)
-                {
-                    // 一旦找到配方，始终重设总时间，以防错误越过
-                    cookTimeTotal.set(inputSlot, recipeHolder.getCookingTime());
-                    // 熔炼时间正常，并且能正常输出
-                    if (cookTime.get(inputSlot) >= cookTimeTotal.get(inputSlot))
-                    {
-                        ItemStack resultItem = recipeHolder.getResultItem(level.registryAccess());
-                        ItemStackKey resultKey = new ItemStackKey(resultItem);
-                        int resultCount = resultItem.getCount();
-
-                        // 如果能完全输出，则输出，并重设熔炼时间
-                        if (outputStorageSlots.insert(inputSlot, resultKey, resultCount, true).isEmpty())
-                        {
-                            outputStorageSlots.insert(inputSlot, resultKey, resultCount, false);
-                            inputStorageSlots.extract(inputSlot, 1, false);
-                            cookTime.set(inputSlot, 0);
-                            cookTimeTotal.set(inputSlot, recipeHolder.getCookingTime());
-                        }
-                    }
-                    else // 存在recipe，且没有完全熔炼，减少熔炼时间 （与此同时，顺便重置总时间，以防万一）
-                    {
-                        cookTime.set(inputSlot, cookTime.get(inputSlot) + 1);
-                    }
-                }
-                else
-                {
-                    // 如果不存在recipe，那么时间重设为0
-                    cookTime.set(inputSlot, 0);
-                    cookTimeTotal.set(inputSlot, 0);
-                }
-            }
-            else
+            KeyAmount inputStack = inputStorageSlots.getStackBySlot(inputSlot);
+            if (!(inputStack.key() instanceof ItemStackKey inputItem) || inputItem.isEmpty())
             {
                 // 如果物品不合法，时间重设为0
                 cookTime.set(inputSlot, 0);
                 cookTimeTotal.set(inputSlot, 0);
+                continue;
             }
+
+            R recipeHolder = quickChecks.get(inputSlot)
+                    .getRecipeFor(new SimpleContainer(inputItem.getReadOnlyStack()), level).orElse(null);
+            if (recipeHolder == null)
+            {
+                // 如果不存在recipe，那么时间重设为0
+                cookTime.set(inputSlot, 0);
+                cookTimeTotal.set(inputSlot, 0);
+                continue;
+            }
+
+            int totalCookTime = recipeHolder.getCookingTime();
+            cookTimeTotal.set(inputSlot, totalCookTime); // 一旦找到配方，始终重设总时间，以防错误越过
+            if (cookTime.get(inputSlot) < totalCookTime)
+            {
+                cookTime.set(inputSlot, cookTime.get(inputSlot) + 1);
+                continue;
+            }
+
+            ItemStack resultItem = recipeHolder.getResultItem(level.registryAccess());
+            ItemStackKey resultKey = new ItemStackKey(resultItem);
+            int resultCount = resultItem.getCount();
+
+            // 如果能完全输出，则输出，并重设熔炼时间
+            if (!outputStorageSlots.insert(inputSlot, resultKey, resultCount, true).isEmpty()) continue;
+
+            outputStorageSlots.insert(inputSlot, resultKey, resultCount, false);
+            inputStorageSlots.extract(inputSlot, 1, false);
+            cookTime.set(inputSlot, 0);
+            cookTimeTotal.set(inputSlot, totalCookTime);
         }
     }
 
@@ -688,61 +655,61 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     public void workEnd()
     {
         super.workEnd();
-        if (level == null) return;
+        if (level == null || level.isClientSide()) return;
 
         // 应用转移模式与弹出模式的设置
         // 优先弹出，再转移
 
-        ArrayList<IItemHandler> otherStroages = new ArrayList<>();
+        ArrayList<IItemHandler> otherStorages = new ArrayList<>();
         if (popMode == PopMode.OPEN)
         {
             for (Direction dir : Direction.values())
             {
                 BlockPos targetPos = this.getBlockPos().relative(dir);
                 BlockEntity neighbor = level.getBlockEntity(targetPos);
-                if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
-                {
-                    LazyOptional<IItemHandler> otherStorage = neighbor.getCapability(ForgeCapabilities.ITEM_HANDLER, dir.getOpposite());
-                    otherStorage.ifPresent(otherStroages::add);
-                }
+                if (neighbor == null || neighbor instanceof NetedBlockEntity) continue;
+
+                LazyOptional<IItemHandler> otherStorage = neighbor.getCapability(ForgeCapabilities.ITEM_HANDLER, dir.getOpposite());
+                otherStorage.ifPresent(otherStorages::add);
             }
         }
+
+        // 此处的net用于后续收入网络，如果接受模式未打开，此处net直接给null，后续跳过收入网络
+        var net = receiveMode == ReceiveMode.OPEN ? getNet() : null;
+        UnifiedStorage storage = net == null ? null : net.getUnifiedStorage();
 
         // 输出槽处理
         for (int outputSlot = 0; outputSlot < capacity; outputSlot++)
         {
             KeyAmount outputStack = outputStorageSlots.getStackBySlot(outputSlot);
-            if (!outputStack.isEmpty())
+            if (outputStack.isEmpty()) continue;
+
+            // 弹出模式
+            for (IItemHandler otherStorage : otherStorages)
             {
-                // 弹出模式（如果弹出模式关闭，这里会由迭代器安全的离开）
-                for (IItemHandler otherStorage : otherStroages)
+                for (int otherSlot = 0; otherSlot < otherStorage.getSlots(); otherSlot++)
                 {
-                    //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
-                    for (int otherSlot = 0; otherSlot < otherStorage.getSlots(); otherSlot++)
+                    KeyAmount extracted = outputStorageSlots.extract(outputSlot, outputStack.key().getVanillaMaxStackSize(), false);
+                    if (!(extracted.key() instanceof ItemStackKey)) continue;
+
+                    int remaining = otherStorage.insertItem(otherSlot, (ItemStack) extracted.toStack(), false).getCount();
+                    if (remaining > 0)
                     {
-                        KeyAmount extracted = outputStorageSlots.extract(outputSlot, outputStack.key().getVanillaMaxStackSize(), false);
-                        if (!(extracted.key() instanceof ItemStackKey)) continue;
-                        int remaining = otherStorage.insertItem(otherSlot, (ItemStack) extracted.toStack(), false).getCount();
-                        if (remaining > 0)
-                        {
-                            outputStorageSlots.insert(outputSlot, extracted.key(), remaining, false);
-                        }
+                        outputStorageSlots.insert(outputSlot, extracted.key(), remaining, false);
                     }
                 }
+            }
 
-                // 转移至网络
-                if (receiveMode == ReceiveMode.OPEN)
+            // 转移至网络
+            if (storage != null)
+            {
+                KeyAmount extracted = outputStorageSlots.extract(outputSlot, outputStack.amount(), false);
+                if (extracted.isEmpty()) continue;
+
+                KeyAmount remaining = storage.insert(outputSlot, extracted.key(), extracted.amount(), false);
+                if (!remaining.isEmpty())
                 {
-                    if (getNet() != null)
-                    {
-                        UnifiedStorage storage = getNet().getUnifiedStorage();
-                        KeyAmount extracted = outputStorageSlots.extract(outputSlot, outputStack.amount(), false);
-                        KeyAmount remaining = storage.insert(outputSlot, extracted.key(), extracted.amount(), false);
-                        if (!remaining.isEmpty())
-                        {
-                            outputStorageSlots.insert(outputSlot, remaining.key(), remaining.amount(), false);
-                        }
-                    }
+                    outputStorageSlots.insert(outputSlot, remaining.key(), remaining.amount(), false);
                 }
             }
         }
@@ -751,36 +718,32 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         for (int returnSlot = 0; returnSlot < fuelCapacity; returnSlot++)
         {
             KeyAmount returnStack = fuelReturnSlots.getStackBySlot(returnSlot);
-            if (!returnStack.isEmpty())
+            if (returnStack.isEmpty()) continue;
+
+            // 弹出模式
+            for (IItemHandler otherStorage : otherStorages)
             {
-                // 弹出模式
-                for (IItemHandler otherStorage : otherStroages)
+                for (int otherSlot = 0; otherSlot < otherStorage.getSlots(); otherSlot++)
                 {
-                    //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
-                    for (int otherSlot = 0; otherSlot < otherStorage.getSlots(); otherSlot++)
+                    KeyAmount extracted = fuelReturnSlots.extract(returnSlot, returnStack.key().getVanillaMaxStackSize(), false);
+                    int remaining = otherStorage.insertItem(otherSlot, (ItemStack) extracted.toStack(), false).getCount();
+                    if (remaining > 0)
                     {
-                        KeyAmount extracted = fuelReturnSlots.extract(returnSlot, returnStack.key().getVanillaMaxStackSize(), false);
-                        int remaining = otherStorage.insertItem(otherSlot, (ItemStack) extracted.toStack(), false).getCount();
-                        if (remaining > 0)
-                        {
-                            fuelReturnSlots.insert(returnSlot, extracted.key(), remaining, false);
-                        }
+                        fuelReturnSlots.insert(returnSlot, extracted.key(), remaining, false);
                     }
                 }
+            }
 
-                // 转移至网络
-                if (receiveMode == ReceiveMode.OPEN)
+            // 转移至网络
+            if (storage != null)
+            {
+                KeyAmount extracted = fuelReturnSlots.extract(returnSlot, returnStack.amount(), false);
+                if (extracted.isEmpty()) continue;
+
+                KeyAmount remaining = storage.insert(returnSlot, extracted.key(), extracted.amount(), false);
+                if (!remaining.isEmpty())
                 {
-                    if (getNet() != null)
-                    {
-                        UnifiedStorage storage = getNet().getUnifiedStorage();
-                        KeyAmount extracted = fuelReturnSlots.extract(returnSlot, returnStack.amount(), false);
-                        KeyAmount remaining = storage.insert(returnSlot, extracted.key(), extracted.amount(), false);
-                        if (!remaining.isEmpty())
-                        {
-                            fuelReturnSlots.insert(returnSlot, remaining.key(), remaining.amount(), false);
-                        }
-                    }
+                    fuelReturnSlots.insert(returnSlot, remaining.key(), remaining.amount(), false);
                 }
             }
         }
@@ -790,25 +753,17 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         for (int fuelSlot = 0; fuelSlot < fuelCapacity; fuelSlot++)
         {
             KeyAmount fuelStack = fuelStorageSlots.getStackBySlot(fuelSlot);
-            if (!fuelStack.isEmpty() && (fuelStack.key() instanceof EnergyStackKey || fuelStack.key() instanceof FluidStackKey))
+            if (fuelStack.isEmpty()) continue;
+            if (!(fuelStack.key() instanceof EnergyStackKey || fuelStack.key() instanceof FluidStackKey)) continue;
+            if (storage == null || fuelFilterSlots.hasStack(fuelStack.key())) continue;
+
+            KeyAmount extracted = fuelStorageSlots.extract(fuelSlot, fuelStack.amount(), false);
+            if (extracted.isEmpty()) continue;
+
+            KeyAmount remaining = storage.insert(fuelSlot, extracted.key(), extracted.amount(), false);
+            if (!remaining.isEmpty())
             {
-                // 转移至网络
-                if (receiveMode == ReceiveMode.OPEN)
-                {
-                    if (getNet() != null)
-                    {
-                        if (!fuelFilterSlots.hasStack(fuelStack.key()))
-                        {
-                            UnifiedStorage storage = getNet().getUnifiedStorage();
-                            KeyAmount extracted = fuelStorageSlots.extract(fuelSlot, fuelStack.amount(), false);
-                            KeyAmount remaining = storage.insert(fuelSlot, extracted.key(), extracted.amount(), false);
-                            if (!remaining.isEmpty())
-                            {
-                                fuelStorageSlots.insert(fuelSlot, remaining.key(), remaining.amount(), false);
-                            }
-                        }
-                    }
-                }
+                fuelStorageSlots.insert(fuelSlot, remaining.key(), remaining.amount(), false);
             }
         }
     }
@@ -818,87 +773,29 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         if (level == null || level.isClientSide()) return;
 
         List<KeyAmount> dropList = new ArrayList<>();
-        for (KeyAmount stack : inputStorageSlots.getStorage())
+        StackHandler[] handlers = {inputStorageSlots, outputStorageSlots, fuelStorageSlots, fuelReturnSlots};
+        for (StackHandler handler : handlers)
         {
-            if (!stack.isEmpty())
+            for (KeyAmount stack : handler.getStorage())
             {
-                // 如果内含物质球，直接弹出，防止NBT套娃
-                if (stack.key() instanceof ItemStackKey itemKey)
-                {
-                    if (itemKey.getSource() instanceof MatterCompressionBall)
-                        Block.popResource(level, getBlockPos(), itemKey.copyStackWithCount(stack.amount()));
-                    else
-                        dropList.add(stack);
-                }
-                else
-                {
-                    dropList.add(stack);
-                }
-            }
-        }
-        for (KeyAmount stack : outputStorageSlots.getStorage())
-        {
-            if (!stack.isEmpty())
-            {
-                // 如果内含物质球，直接弹出，防止NBT套娃
-                if (stack.key() instanceof ItemStackKey itemKey)
-                {
-                    if (itemKey.getSource() instanceof MatterCompressionBall)
-                        Block.popResource(level, getBlockPos(), itemKey.copyStackWithCount(stack.amount()));
-                    else
-                        dropList.add(stack);
-                }
-                else
-                {
-                    dropList.add(stack);
-                }
-            }
-        }
-        for (KeyAmount stack : fuelStorageSlots.getStorage())
-        {
-            if (!stack.isEmpty())
-            {
-                // 如果内含物质球，直接弹出，防止NBT套娃
-                if (stack.key() instanceof ItemStackKey itemKey)
-                {
-                    if (itemKey.getSource() instanceof MatterCompressionBall)
-                        Block.popResource(level, getBlockPos(), itemKey.copyStackWithCount(stack.amount()));
-                    else
-                        dropList.add(stack);
-                }
-                else
-                {
-                    dropList.add(stack);
-                }
-            }
-        }
-        for (KeyAmount stack : fuelReturnSlots.getStorage())
-        {
-            if (!stack.isEmpty())
-            {
-                if (!stack.isEmpty())
+                if (stack.isEmpty()) continue;
+
+                if (stack.key() instanceof ItemStackKey itemKey && itemKey.getSource() instanceof MatterCompressionBall)
                 {
                     // 如果内含物质球，直接弹出，防止NBT套娃
-                    if (stack.key() instanceof ItemStackKey itemKey)
-                    {
-                        if (itemKey.getSource() instanceof MatterCompressionBall)
-                            Block.popResource(level, getBlockPos(), itemKey.copyStackWithCount(stack.amount()));
-                        else
-                            dropList.add(stack);
-                    }
-                    else
-                    {
-                        dropList.add(stack);
-                    }
+                    Block.popResource(level, getBlockPos(), itemKey.copyStackWithCount(stack.amount()));
+                    continue;
                 }
+
+                dropList.add(stack);
             }
         }
+
+        if (dropList.isEmpty()) return;
+
         ItemStack ball = new ItemStack(BDItems.MATTER_COMPRESS_BALL.get(), 1);
-        if (!dropList.isEmpty())
-        {
-            MatterCompressionBall.setIStackList(ball, dropList);
-            Block.popResource(level, getBlockPos(), ball);
-        }
+        MatterCompressionBall.setIStackList(ball, dropList);
+        Block.popResource(level, getBlockPos(), ball);
     }
 
 
