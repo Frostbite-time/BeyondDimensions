@@ -1,16 +1,15 @@
 package com.wintercogs.beyonddimensions.common.block;
 
-import com.wintercogs.beyonddimensions.common.block.entity.NetFurnaceBlockEntity;
+import com.wintercogs.beyonddimensions.common.block.entity.NetBlastFurnaceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-// 网络熔炉
-public class NetFurnaceBlock extends BaseNetFurnaceBlock
+public class NetBlastFurnaceBlock extends BaseNetFurnaceBlock
 {
-    public NetFurnaceBlock(Properties properties)
+    public NetBlastFurnaceBlock(Properties properties)
     {
         super(properties);
     }
@@ -18,6 +17,6 @@ public class NetFurnaceBlock extends BaseNetFurnaceBlock
     @Override
     public @Nullable BlockEntity newBlockEntity(@NotNull BlockPos blockPos, @NotNull BlockState blockState)
     {
-        return new NetFurnaceBlockEntity(blockPos, blockState);
+        return new NetBlastFurnaceBlockEntity(blockPos, blockState);
     }
 }

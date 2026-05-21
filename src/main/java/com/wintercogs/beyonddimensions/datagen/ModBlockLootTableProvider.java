@@ -26,6 +26,8 @@ public class ModBlockLootTableProvider extends BDBlockLootSubProvider
         dropSelf(BDBlocks.NET_PUMP_BLOCK.get());
         dropSelf(BDBlocks.NET_HOPPER_BLOCK.get());
         dropSelf(BDBlocks.NET_FURNACE_BLOCK.get());
+        dropSelf(BDBlocks.NET_BLAST_FURNACE_BLOCK.get());
+        dropSelf(BDBlocks.NET_SMOKER_BLOCK.get());
         dropSelf(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
     }
 

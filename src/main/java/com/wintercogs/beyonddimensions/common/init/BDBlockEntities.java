@@ -80,6 +80,24 @@ public class BDBlockEntities
                     )
             );
 
+    public static final DeferredHolder<BlockEntityType<?>, @NotNull BlockEntityType<@NotNull NetBlastFurnaceBlockEntity>> NET_BLAST_FURNACE_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register(
+                    BDBlockIds.NET_BLAST_FURNACE_BLOCK,
+                    () -> new BlockEntityType<>(
+                            NetBlastFurnaceBlockEntity::new,
+                            BDBlocks.NET_BLAST_FURNACE_BLOCK.get()
+                    )
+            );
+
+    public static final DeferredHolder<BlockEntityType<?>, @NotNull BlockEntityType<@NotNull NetSmokerBlockEntity>> NET_SMOKER_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register(
+                    BDBlockIds.NET_SMOKER_BLOCK,
+                    () -> new BlockEntityType<>(
+                            NetSmokerBlockEntity::new,
+                            BDBlocks.NET_SMOKER_BLOCK.get()
+                    )
+            );
+
     public static void register(IEventBus eventBus)
     {
         BLOCK_ENTITY_TYPES.register(eventBus);

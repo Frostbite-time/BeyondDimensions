@@ -192,6 +192,28 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .unlockedBy("unlock_net_furnace_block", has(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
                 .save(this.output);
 
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.NET_BLAST_FURNACE_BLOCK.get())
+                .pattern("AAA")
+                .pattern("BCB")
+                .pattern("ADA")
+                .define('A', Items.COBBLESTONE)
+                .define('B', Items.PISTON)
+                .define('C', BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .define('D', Items.BLAST_FURNACE)
+                .unlockedBy("unlock_net_blast_furnace_block", has(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
+                .save(this.output);
+
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.NET_SMOKER_BLOCK.get())
+                .pattern("AAA")
+                .pattern("BCB")
+                .pattern("ADA")
+                .define('A', Items.COBBLESTONE)
+                .define('B', Items.PISTON)
+                .define('C', BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .define('D', Items.SMOKER)
+                .unlockedBy("unlock_net_smoker_block", has(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
+                .save(this.output);
+
         ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BDBlocks.NET_PUMP_BLOCK.get())
                 .pattern("ABA")
                 .pattern("BCB")

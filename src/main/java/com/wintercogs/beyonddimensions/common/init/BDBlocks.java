@@ -49,6 +49,14 @@ public class BDBlocks
             NetFurnaceBlock::new,
             BlockBehaviour.Properties.of().strength(2f));
 
+    public static final DeferredBlock<@NotNull Block> NET_BLAST_FURNACE_BLOCK = registerBlock(BDBlockIds.NET_BLAST_FURNACE_BLOCK,
+            NetBlastFurnaceBlock::new,
+            BlockBehaviour.Properties.of().strength(2f));
+
+    public static final DeferredBlock<@NotNull Block> NET_SMOKER_BLOCK = registerBlock(BDBlockIds.NET_SMOKER_BLOCK,
+            NetSmokerBlock::new,
+            BlockBehaviour.Properties.of().strength(2f));
+
     // 合成材料-维度链接框架
     public static final DeferredBlock<@NotNull Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock(BDBlockIds.DIMENSIONAL_CONNECT_BLOCK,
             Block::new,

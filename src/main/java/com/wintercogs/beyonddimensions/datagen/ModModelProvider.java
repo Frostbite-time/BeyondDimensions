@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.datagen;
 
 import com.mojang.math.Quadrant;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.common.block.NetFurnaceBlock;
+import com.wintercogs.beyonddimensions.common.block.BaseNetFurnaceBlock;
 import com.wintercogs.beyonddimensions.common.block.NetTerminalBlock;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
@@ -62,7 +62,9 @@ public class ModModelProvider extends BDModelProvider
         customModelBlockWithItem(blockModels, BDBlocks.NET_PUMP_BLOCK.get(), "net_pump_block");
         customModelBlockWithItem(blockModels, BDBlocks.NET_HOPPER_BLOCK.get(), "net_hopper_block");
         customTerminalBlockWithItem(blockModels);
-        customFurnaceBlockWithItem(blockModels);
+        customFurnaceBlockWithItem(blockModels, BDBlocks.NET_FURNACE_BLOCK.get(), "net_furnace_block");
+        customFurnaceBlockWithItem(blockModels, BDBlocks.NET_BLAST_FURNACE_BLOCK.get(), "net_blast_furnace_block");
+        customFurnaceBlockWithItem(blockModels, BDBlocks.NET_SMOKER_BLOCK.get(), "net_smoker_block");
 
         blockModels.createParticleOnlyBlock(BDFluids.XP_FLUID.block().get());
 
@@ -119,15 +121,14 @@ public class ModModelProvider extends BDModelProvider
         blockModels.registerSimpleItemModel(block, modelId);
     }
 
-    private void customFurnaceBlockWithItem(BlockModelGenerators blockModels)
+    private void customFurnaceBlockWithItem(BlockModelGenerators blockModels, Block block, String modelName)
     {
-        Identifier offModelId = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/net_furnace_block");
-        Identifier onModelId = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/net_furnace_block_on");
-        Block block = BDBlocks.NET_FURNACE_BLOCK.get();
+        Identifier offModelId = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/" + modelName);
+        Identifier onModelId = Identifier.fromNamespaceAndPath(BDConstants.MODID, "block/" + modelName + "_on");
 
         blockModels.blockStateOutput.accept(
                 MultiVariantGenerator.dispatch(block)
-                        .with(PropertyDispatch.initial(NetFurnaceBlock.FACING, NetFurnaceBlock.LIT)
+                        .with(PropertyDispatch.initial(BaseNetFurnaceBlock.FACING, BaseNetFurnaceBlock.LIT)
                                 .select(Direction.NORTH, false, BlockModelGenerators.plainVariant(offModelId))
                                 .select(Direction.NORTH, true, BlockModelGenerators.plainVariant(onModelId))
                                 .select(Direction.EAST, false, BlockModelGenerators.plainVariant(offModelId).with(BlockModelGenerators.Y_ROT_90))
