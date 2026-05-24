@@ -1,2 +1,1 @@
-* Added Blast Furnace and Smoker blocks
-* The Schematic Interface now provides Gunpowder
+* Mitigate crashes caused by occasional configuration file access conflicts.

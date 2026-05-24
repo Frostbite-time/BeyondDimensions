@@ -62,7 +62,6 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
             craftReturnButton.toggleState();
             CommonConfigRuntime.uiCraftReturnButton = (ButtonState) craftReturnButton.currentState;
             Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.set((ButtonState) craftReturnButton.currentState);
-            Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.save();
             menu.writeAndSendQuickData();
         })
         {

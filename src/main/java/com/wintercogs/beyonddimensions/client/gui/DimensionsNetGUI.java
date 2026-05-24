@@ -129,7 +129,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             sortButton.toggleState();
             CommonConfigRuntime.uiSortButton = (ButtonState) sortButton.currentState;
             Config.INSTANCE.commonConfig.UI_SORT_BUTTON.set((ButtonState) sortButton.currentState);
-            Config.INSTANCE.commonConfig.UI_SORT_BUTTON.save();
             menu.buildIndexList();
         });
         addRenderableWidget(sortButton);
@@ -139,7 +138,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             secondSortButton.toggleState();
             CommonConfigRuntime.uiSecondSortButton = (ButtonState) secondSortButton.currentState;
             Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.set((ButtonState) secondSortButton.currentState);
-            Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.save();
             menu.buildIndexList();
         })
         {
@@ -176,7 +174,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             reverseButton.toggleState();
             CommonConfigRuntime.uiReverseButton = (ButtonState) reverseButton.currentState;
             Config.INSTANCE.commonConfig.UI_REVERSE_BUTTON.set((ButtonState) reverseButton.currentState);
-            Config.INSTANCE.commonConfig.UI_REVERSE_BUTTON.save();
             menu.buildIndexList();
         });
         addRenderableWidget(reverseButton);
@@ -185,7 +182,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             searchToggleButton.toggleState();
             CommonConfigRuntime.uiSearchButton = (ButtonState) searchToggleButton.currentState;
             Config.INSTANCE.commonConfig.UI_SEARCH_BUTTON.set((ButtonState) searchToggleButton.currentState);
-            Config.INSTANCE.commonConfig.UI_SEARCH_BUTTON.save();
         });
         addRenderableWidget(searchToggleButton);
 
@@ -200,7 +196,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             menu.addLines();
             CommonConfigRuntime.uiPageNum = menu.getLines();
             Config.INSTANCE.commonConfig.UI_PAGE_NUM.set(menu.getLines());
-            Config.INSTANCE.commonConfig.UI_PAGE_NUM.save();
             CommonConfigRuntime.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
@@ -217,7 +212,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             menu.reduceLines();
             CommonConfigRuntime.uiPageNum = menu.getLines();
             Config.INSTANCE.commonConfig.UI_PAGE_NUM.set(menu.getLines());
-            Config.INSTANCE.commonConfig.UI_PAGE_NUM.save();
             CommonConfigRuntime.uiSearch = searchField.getValue();
             this.imageHeight = rebuildImageHeight();
             menu.rebuildSlots();
@@ -358,14 +352,12 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             {
                 CommonConfigRuntime.uiCraftButton = ButtonState.DISABLED;
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.set(ButtonState.DISABLED);
-                Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.save();
                 BDPackets.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_MENU));
             }
             else
             {
                 CommonConfigRuntime.uiCraftButton = ButtonState.ENABLED;
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.set(ButtonState.ENABLED);
-                Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.save();
                 BDPackets.INSTANCE.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
             }
         });
@@ -517,7 +509,6 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             boolean current = CommonConfigRuntime.searchTextWithJEIEMI;
             CommonConfigRuntime.searchTextWithJEIEMI = !current;
             Config.INSTANCE.commonConfig.SEARCH_TEXT_WITH_JEI_EMI.set(!current);
-            Config.INSTANCE.commonConfig.SEARCH_TEXT_WITH_JEI_EMI.save();
             return true;
         }
 
@@ -558,13 +549,11 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             {
                 CommonConfigRuntime.uiSearch = searchField.getValue();
                 Config.INSTANCE.commonConfig.UI_SEARCH.set(searchField.getValue());
-                Config.INSTANCE.commonConfig.UI_SEARCH.save();
             }
             else
             {
                 CommonConfigRuntime.uiSearch = "";
                 Config.INSTANCE.commonConfig.UI_SEARCH.set("");
-                Config.INSTANCE.commonConfig.UI_SEARCH.save();
             }
         }
 
