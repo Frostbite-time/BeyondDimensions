@@ -1,2 +1,1 @@
-* Added Blast Furnace and Smoker blocks
-* The Schematic Interface now provides Gunpowder
+* Fix an occasional freeze caused by retrieving tooltips from an async thread.
