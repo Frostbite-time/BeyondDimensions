@@ -1,1 +1,1 @@
-* Mitigate crashes caused by occasional configuration file access conflicts.
+* Fix an occasional freeze caused by retrieving tooltips from an async thread.

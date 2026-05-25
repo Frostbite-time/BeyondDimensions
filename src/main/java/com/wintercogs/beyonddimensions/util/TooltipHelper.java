@@ -1,81 +1,90 @@
 package com.wintercogs.beyonddimensions.util;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Mod.EventBusSubscriber(modid = BDConstants.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class TooltipHelper
 {
 
-    private static final AtomicLong EPOCH = new AtomicLong(0);
+    private static final int MAX_LOADS_PER_TICK = 5;
 
-    private static final Map<IStackKey<?>, List<Component>> NORMAL_CACHE = new ConcurrentHashMap<>();
-    private static final Map<IStackKey<?>, List<Component>> ADVANCED_CACHE = new ConcurrentHashMap<>();
+    private static final AtomicLong CACHE_EPOCH = new AtomicLong(0);
 
-    private static final Map<IStackKey<?>, CompletableFuture<List<Component>>> NORMAL_PENDING = new ConcurrentHashMap<>();
-    private static final Map<IStackKey<?>, CompletableFuture<List<Component>>> ADVANCED_PENDING = new ConcurrentHashMap<>();
+    private static final Map<IStackKey<?>, List<Component>> NORMAL_CACHE = new HashMap<>();
+    private static final Map<IStackKey<?>, List<Component>> ADVANCED_CACHE = new HashMap<>();
 
-    private static final ExecutorService TOOLTIP_EXECUTOR = Executors.newFixedThreadPool(
-            Math.min(4, Math.max(1, Runtime.getRuntime().availableProcessors() / 4)),
-            r -> {
-                Thread t = new Thread(r, "Tooltip-Loader");
-                t.setDaemon(true);
-                return t;
-            });
+    private static final Set<IStackKey<?>> NORMAL_QUEUED = new HashSet<>();
+    private static final Set<IStackKey<?>> ADVANCED_QUEUED = new HashSet<>();
 
-    /**
-     * 统一的异步加载入口
-     */
-    private static CompletableFuture<List<Component>> loadAsync(
+    private static final Queue<TooltipRequest> PENDING = new ArrayDeque<>();
+
+    private static Map<IStackKey<?>, List<Component>> cacheFor(TooltipFlag flag)
+    {
+        return flag.isAdvanced() ? ADVANCED_CACHE : NORMAL_CACHE;
+    }
+
+    private static Set<IStackKey<?>> queuedFor(TooltipFlag flag)
+    {
+        return flag.isAdvanced() ? ADVANCED_QUEUED : NORMAL_QUEUED;
+    }
+
+    private static void queueTooltip(
             KeyAmount stack,
             @Nullable Player player,
-            TooltipFlag flag,
-            Map<IStackKey<?>, List<Component>> cache,
-            Map<IStackKey<?>, CompletableFuture<List<Component>>> pending
+            TooltipFlag flag
     )
     {
-        final long taskEpoch = EPOCH.get();
-        final IStackKey<?> key = stack.key();
+        IStackKey<?> key = stack.key();
+        Map<IStackKey<?>, List<Component>> cache = cacheFor(flag);
+        Set<IStackKey<?>> queued = queuedFor(flag);
 
-        return pending.computeIfAbsent(key, s -> {
-            CompletableFuture<List<Component>> created = CompletableFuture.supplyAsync(
-                    () -> s.getRender().getTooltipLines(s, stack.amount(), player, flag),
-                    TOOLTIP_EXECUTOR
-            );
+        if (cache.containsKey(key)) return;
+        if (queued.add(key))
+        {
+            PENDING.offer(new TooltipRequest(stack, player, flag, CACHE_EPOCH.get()));
+        }
+    }
 
-            created.whenCompleteAsync((tooltip, err) -> {
-                pending.remove(s, created);
-                if (err != null)
-                {
-                    BeyondDimensions.LOGGER.error("Failed to load tooltip for {}", key, err);
-                    return;
-                }
-                if (taskEpoch == EPOCH.get())
-                {
-                    cache.put(s, tooltip);
-                }
-            }, TOOLTIP_EXECUTOR);
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event)
+    {
+        if (event.phase == TickEvent.Phase.END)
+        {
+            drainQueue(MAX_LOADS_PER_TICK);
+        }
+    }
 
-            return created;
-        });
+    private static void drainQueue(int maxLoads)
+    {
+        int loaded = 0;
+        TooltipRequest request;
+        while (loaded < maxLoads && (request = PENDING.poll()) != null)
+        {
+            if (request.epoch() != CACHE_EPOCH.get()) continue;
+            getTooltipLines(request.stack(), request.player(), request.flag());
+            loaded++;
+        }
     }
 
 
     /* ---------- 对外 API ---------- */
 
     /**
-     * 获取指定键的提示内容。建议在调用此函数之前先将全部key通过readAsCache进行预读。
-     * 否则会堵塞等待。
+     * 获取指定键的提示内容。建议在调用此函数之前先将全部key通过readAsCache进行预读
      */
     public static List<Component> getTooltipLines(
             KeyAmount stack,
@@ -83,40 +92,35 @@ public class TooltipHelper
             TooltipFlag flag
     )
     {
-        boolean advanced = flag.isAdvanced();
         IStackKey<?> key = stack.key();
-        Map<IStackKey<?>, List<Component>> cache = advanced ? ADVANCED_CACHE : NORMAL_CACHE;
-        Map<IStackKey<?>, CompletableFuture<List<Component>>> pending = advanced ? ADVANCED_PENDING : NORMAL_PENDING;
+        Map<IStackKey<?>, List<Component>> cache = cacheFor(flag);
+        Set<IStackKey<?>> queued = queuedFor(flag);
 
-        // 先查缓存
         List<Component> cached = cache.get(key);
-        if (cached != null) return cached;
-
-        // 再查异步任务
-        CompletableFuture<List<Component>> future = pending.get(key);
-        if (future == null)
+        if (cached != null)
         {
-            future = loadAsync(stack, player, flag, cache, pending);
+            queued.remove(key);
+            return cached;
         }
 
+        queued.remove(key);
         try
         {
-            return future.get();
+            List<Component> tooltip = key.getRender().getTooltipLines(key, stack.amount(), player, flag);
+            cache.put(key, tooltip);
+            return tooltip;
         }
-        catch (InterruptedException ie)
+        catch (Throwable err)
         {
-            Thread.currentThread().interrupt();
-            return Collections.emptyList();
-        }
-        catch (ExecutionException ee)
-        {
-            BeyondDimensions.LOGGER.error("Failed to load tooltip for {}", key, ee);
-            return Collections.emptyList();
+            BeyondDimensions.LOGGER.error("Failed to load tooltip for {}", key, err);
+            List<Component> emptyTooltip = Collections.emptyList();
+            cache.put(key, emptyTooltip);
+            return emptyTooltip;
         }
     }
 
     /**
-     * 预读取若干 Stack 的 Tooltip，典型用在滚动列表或搜索结果批量展示前
+     * 预读取若干 Stack 的 Tooltip
      */
     public static void readAsCache(
             List<KeyAmount> stacks,
@@ -124,25 +128,29 @@ public class TooltipHelper
             TooltipFlag flag
     )
     {
-        boolean advanced = flag.isAdvanced();
-        Map<IStackKey<?>, List<Component>> cache = advanced ? ADVANCED_CACHE : NORMAL_CACHE;
-        Map<IStackKey<?>, CompletableFuture<List<Component>>> pending = advanced ? ADVANCED_PENDING : NORMAL_PENDING;
-
         for (KeyAmount stack : stacks)
         {
-            if (cache.containsKey(stack.key())) continue;
-            // loadAsync内部自动过滤重复任务
-            loadAsync(stack, player, flag, cache, pending);
+            queueTooltip(stack, player, flag);
         }
     }
 
     public static void clearCache()
     {
-        EPOCH.incrementAndGet();
+        CACHE_EPOCH.incrementAndGet();
 
         NORMAL_CACHE.clear();
         ADVANCED_CACHE.clear();
-        NORMAL_PENDING.clear();
-        ADVANCED_PENDING.clear();
+        NORMAL_QUEUED.clear();
+        ADVANCED_QUEUED.clear();
+        PENDING.clear();
+    }
+
+    private record TooltipRequest(
+            KeyAmount stack,
+            @Nullable Player player,
+            TooltipFlag flag,
+            long epoch
+    )
+    {
     }
 }
