@@ -56,6 +56,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "切換合成槽 顯示/隱藏",
   "tooltip.button.beyonddimensions.popmode_off": "目前：彈出模式關閉",
   "tooltip.button.beyonddimensions.popmode_on": "目前：彈出模式啟用",
+  "tooltip.button.beyonddimensions.popmode_mounted_unavailable": "動態結構中不可使用彈出模式",
   "tooltip.button.beyonddimensions.filter_mode_ignore": "目前：忽略過濾",
   "tooltip.button.beyonddimensions.filter_mode_white": "目前：白名單模式",
   "tooltip.button.beyonddimensions.filter_mode_black": "目前：黑名單模式",

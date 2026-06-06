@@ -53,6 +53,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "Переключить слот крафта",
   "tooltip.button.beyonddimensions.popmode_off": "Режим всплывающих окон выключен",
   "tooltip.button.beyonddimensions.popmode_on": "Режим всплывающих окон включен",
+  "tooltip.button.beyonddimensions.popmode_mounted_unavailable": "Режим всплывающих окон недоступен на движущихся механизмах",
   "tooltip.button.beyonddimensions.filter_mode_ignore": "Текущий: Игнорировать фильтр",
   "tooltip.button.beyonddimensions.filter_mode_white": "Текущий: Белый список",
   "tooltip.button.beyonddimensions.filter_mode_black": "Текущий: Чёрный список",

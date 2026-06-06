@@ -29,7 +29,10 @@ public class NetInterfaceBlock extends BaseMachineBlock
         super.useWithoutItem(state, level, pos, player, hitResult);
         if (!level.isClientSide() && !player.isShiftKeyDown())
         {
-            player.openMenu((NetInterfaceBlockEntity) level.getBlockEntity(pos), pos);
+            player.openMenu((NetInterfaceBlockEntity) level.getBlockEntity(pos), buf -> {
+                buf.writeBoolean(false);
+                buf.writeBlockPos(pos);
+            });
         }
         return InteractionResult.SUCCESS_NO_ITEM_USED;
     }
