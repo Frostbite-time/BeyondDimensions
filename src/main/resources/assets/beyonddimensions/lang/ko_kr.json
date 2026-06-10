@@ -53,6 +53,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "제작 슬롯 표시 전환",
   "tooltip.button.beyonddimensions.popmode_off": "현재: 팝업 모드 비활성",
   "tooltip.button.beyonddimensions.popmode_on": "현재: 팝업 모드 활성",
+  "tooltip.button.beyonddimensions.popmode_mounted_unavailable": "움직이는 구조물에서는 팝업 모드를 사용할 수 없습니다",
   "tooltip.button.beyonddimensions.filter_mode_ignore": "현재: 필터 무시",
   "tooltip.button.beyonddimensions.filter_mode_white": "현재: 허용 목록 모드",
   "tooltip.button.beyonddimensions.filter_mode_black": "현재: 차단 목록 모드",

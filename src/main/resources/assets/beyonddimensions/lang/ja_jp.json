@@ -53,6 +53,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "クラフトスロット表示切替",
   "tooltip.button.beyonddimensions.popmode_off": "現在：ポップアップ無効",
   "tooltip.button.beyonddimensions.popmode_on": "現在：ポップアップ有効",
+  "tooltip.button.beyonddimensions.popmode_mounted_unavailable": "移動中の構造物ではポップアップモードを使用できません",
   "tooltip.button.beyonddimensions.filter_mode_ignore": "現在：フィルター無視",
   "tooltip.button.beyonddimensions.filter_mode_white": "現在：ホワイトリストモード",
   "tooltip.button.beyonddimensions.filter_mode_black": "現在：ブラックリストモード",

@@ -53,6 +53,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "Alternar slot de fabricación",
   "tooltip.button.beyonddimensions.popmode_off": "Actual: Modo emergente desactivado",
   "tooltip.button.beyonddimensions.popmode_on": "Actual: Modo emergente activado",
+  "tooltip.button.beyonddimensions.popmode_mounted_unavailable": "El modo emergente no esta disponible en artilugios en movimiento",
   "tooltip.button.beyonddimensions.filter_mode_ignore": "Actual: Ignorar filtro",
   "tooltip.button.beyonddimensions.filter_mode_white": "Actual: Modo lista blanca",
   "tooltip.button.beyonddimensions.filter_mode_black": "Actual: Modo lista negra",

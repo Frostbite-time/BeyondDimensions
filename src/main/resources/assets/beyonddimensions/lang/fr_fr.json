@@ -53,6 +53,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "Basculer slot de craft",
   "tooltip.button.beyonddimensions.popmode_off": "Actuel : Mode popup désactivé",
   "tooltip.button.beyonddimensions.popmode_on": "Actuel : Mode popup activé",
+  "tooltip.button.beyonddimensions.popmode_mounted_unavailable": "Le mode popup n'est pas disponible sur les contraptions en mouvement",
   "tooltip.button.beyonddimensions.filter_mode_ignore": "Actuel : Ignorer filtre",
   "tooltip.button.beyonddimensions.filter_mode_white": "Actuel : Mode liste blanche",
   "tooltip.button.beyonddimensions.filter_mode_black": "Actuel : Mode liste noire",
