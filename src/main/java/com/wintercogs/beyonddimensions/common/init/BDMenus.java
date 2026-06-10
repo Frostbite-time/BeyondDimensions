@@ -17,7 +17,7 @@ public class BDMenus
     public static final Supplier<MenuType<DimensionsCraftMenu>> Dimensions_Craft_Menu = BDMenus.MENU_TYPES.register("dimensions_craft_menu", () -> IForgeMenuType.create(DimensionsCraftMenu::new));
     public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = BDMenus.MENU_TYPES.register("net_control_menu", () -> IForgeMenuType.create(NetControlMenu::new));
     public static final Supplier<MenuType<NetEnergyMenu>> Net_Energy_Menu = BDMenus.MENU_TYPES.register("net_energy_menu", () -> IForgeMenuType.create(NetEnergyMenu::new));
-    public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = BDMenus.MENU_TYPES.register("net_interface_menu", () -> IForgeMenuType.create(NetInterfaceBaseMenu::new));
+    public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = BDMenus.MENU_TYPES.register("net_interface_menu", () -> IForgeMenuType.create(NetInterfaceBaseMenu::fromNetwork));
     public static final Supplier<MenuType<DimensionsCraftMenuTerminal>> Dimensions_Craft_Menu_Terminal = BDMenus.MENU_TYPES.register("dimensions_craft_menu_terminal", () -> IForgeMenuType.create(DimensionsCraftMenuTerminal::new));
     public static final Supplier<MenuType<NetPumpMenu>> Net_Pump_Menu = BDMenus.MENU_TYPES.register("net_pump_menu", () -> IForgeMenuType.create(NetPumpMenu::new));
     public static final Supplier<MenuType<NetHopperMenu>> Net_Hopper_Menu = BDMenus.MENU_TYPES.register("net_hopper_menu", () -> IForgeMenuType.create(NetHopperMenu::new));

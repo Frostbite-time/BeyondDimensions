@@ -1,7 +1,6 @@
 {
   "values": [
     "beyonddimensions:net_control",
-    "beyonddimensions:net_interface",
     "beyonddimensions:net_pathway",
     "beyonddimensions:net_energy_pathway",
     "beyonddimensions:net_terminal_block",

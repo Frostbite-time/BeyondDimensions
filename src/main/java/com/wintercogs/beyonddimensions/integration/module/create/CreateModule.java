@@ -1,9 +1,14 @@
 package com.wintercogs.beyonddimensions.integration.module.create;
 
 import com.simibubi.create.AllTags;
+import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
+import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
+import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
+import com.wintercogs.beyonddimensions.integration.module.create.contraption.NetInterfaceMountedStorageType;
+import com.wintercogs.beyonddimensions.integration.module.create.contraption.NetInterfaceMovementBehaviour;
 import com.wintercogs.beyonddimensions.integration.module.create.datagen.CreateModuleBlockLootTableProvider;
 import com.wintercogs.beyonddimensions.integration.module.create.datagen.CreateModuleBlockStateProvider;
 import com.wintercogs.beyonddimensions.integration.module.create.datagen.CreateModuleRecipeProvider;
@@ -37,11 +42,22 @@ public class CreateModule implements IIntegrationModule
     {
         CreateModuleBlocks.register(modBus);
         CreateModuleBlockEntities.register(modBus);
+        NetInterfaceMountedStorageType.register(modBus);
     }
 
     @Override
     public void onCommonSetup(FMLCommonSetupEvent event)
     {
+        event.enqueueWork(() -> {
+            MountedItemStorageType.REGISTRY.register(
+                    BDBlocks.NET_INTERFACE.get(),
+                    NetInterfaceMountedStorageType.NET_INTERFACE.get()
+            );
+            MovementBehaviour.REGISTRY.register(
+                    BDBlocks.NET_INTERFACE.get(),
+                    new NetInterfaceMovementBehaviour()
+            );
+        });
     }
 
     @Override

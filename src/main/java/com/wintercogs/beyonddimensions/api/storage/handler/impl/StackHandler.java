@@ -1,11 +1,14 @@
 package com.wintercogs.beyonddimensions.api.storage.handler.impl;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +25,31 @@ import java.util.*;
  */
 public class StackHandler implements IStackHandler
 {
+    // 简单的CODEC薄壳
+    public static final Codec<StackHandler> CODEC = Codec.PASSTHROUGH.xmap(dynamic -> {
+        Tag tag = dynamic.convert(NbtOps.INSTANCE).getValue();
+        if (tag instanceof CompoundTag compoundTag)
+        {
+            StackHandler handler = new StackHandler(getSerializedSize(compoundTag));
+            handler.deserializeNBT(compoundTag);
+            return handler;
+        }
+        return new StackHandler(0);
+    }, handler -> new Dynamic<>(NbtOps.INSTANCE, handler.serializeNBT()));
+
+    private static int getSerializedSize(CompoundTag tag)
+    {
+        if (tag.contains("stacks", Tag.TAG_LIST))
+        {
+            return tag.getList("stacks", Tag.TAG_COMPOUND).size();
+        }
+        if (tag.contains("Stacks", Tag.TAG_LIST))
+        {
+            return tag.getList("Stacks", Tag.TAG_COMPOUND).size();
+        }
+        return 0;
+    }
+
     /**
      * 存储槽位数
      */

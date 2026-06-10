@@ -33,7 +33,10 @@ public class NetInterfaceBlock extends BaseMachineBlock
         super.use(state, level, pos, player, hand, hitResult);
         if (!level.isClientSide() && !player.isShiftKeyDown())
         {
-            NetworkHooks.openScreen((ServerPlayer) player, (NetInterfaceBlockEntity) level.getBlockEntity(pos), pos);
+            NetworkHooks.openScreen((ServerPlayer) player, (NetInterfaceBlockEntity) level.getBlockEntity(pos), buf -> {
+                buf.writeBoolean(false);
+                buf.writeBlockPos(pos);
+            });
         }
         return InteractionResult.SUCCESS;
     }

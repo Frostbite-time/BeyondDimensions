@@ -52,7 +52,6 @@ public class ModBlockTagProvider extends BlockTagsProvider
         // （仅1.20.1用，应对机械动力本体的bug）
         tag(AllTags.AllBlockTags.NON_MOVABLE.tag)
                 .add(BDBlocks.NET_CONTROL.get())
-                .add(BDBlocks.NET_INTERFACE.get())
                 .add(BDBlocks.NET_PATHWAY.get())
                 .add(BDBlocks.NET_ENERGY_PATHWAY.get())
                 .add(BDBlocks.NET_TERMINAL_BLOCK.get())

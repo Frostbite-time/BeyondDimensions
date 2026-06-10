@@ -53,6 +53,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "Crafting-Slot ein/ausblenden",
   "tooltip.button.beyonddimensions.popmode_off": "Aktuell: Pop-up-Modus deaktiviert",
   "tooltip.button.beyonddimensions.popmode_on": "Aktuell: Pop-up-Modus aktiviert",
+  "tooltip.button.beyonddimensions.popmode_mounted_unavailable": "Der Pop-up-Modus ist auf bewegten Konstruktionen nicht verfügbar",
   "tooltip.button.beyonddimensions.filter_mode_ignore": "Aktuell: Filter ignorieren",
   "tooltip.button.beyonddimensions.filter_mode_white": "Aktuell: Whitelist-Modus",
   "tooltip.button.beyonddimensions.filter_mode_black": "Aktuell: Blacklist-Modus",

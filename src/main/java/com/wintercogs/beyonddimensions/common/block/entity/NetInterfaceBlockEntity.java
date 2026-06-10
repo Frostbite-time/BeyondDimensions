@@ -17,7 +17,10 @@ import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
+import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.menu.NetInterfaceAccess;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
+import com.wintercogs.beyonddimensions.common.menu.NetInterfaceSettings;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.util.SidedCapId;
 import net.minecraft.core.BlockPos;
@@ -44,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider
+public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider, NetInterfaceAccess
 {
     private final Map<SidedCapId, LazyOptional<?>> caps = new HashMap<>();
 
@@ -72,9 +75,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         }
     };
 
-    public PopMode popMode = PopMode.STOP;
-
-    public FuzzyMode fuzzyMode = FuzzyMode.DISABLE;
+    private final NetInterfaceSettings settings = new NetInterfaceSettings();
 
     private final Direction[] directions = Direction.values();
 
@@ -94,6 +95,34 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public StackHandler getFakeStackHandler()
     {
         return this.fakeStackHandler;
+    }
+
+    @Override
+    public NetInterfaceSettings getNetInterfaceSettings()
+    {
+        return this.settings;
+    }
+
+    @Override
+    public void setControlMode(RedStoneControlMode controlMode)
+    {
+        this.controlMode = controlMode;
+    }
+
+    @Override
+    public boolean isMenuValid()
+    {
+        return !this.isRemoved();
+    }
+
+    @Override
+    public void onMenuDataChanged()
+    {
+        if (this.level != null && !this.level.isClientSide())
+        {
+            this.level.blockEntityChanged(this.getBlockPos());
+            this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 2);
+        }
     }
 
     public int getRedstoneLevel()
@@ -143,7 +172,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         if (CommonConfigRuntime.interfaceCanPopResource)
         {
             // 尝试输出物品到周围
-            if (popMode == PopMode.OPEN)
+            if (getPopMode() == PopMode.OPEN)
             {
                 // 在使用缓存前确保它是最新的
                 updateCapabilityCache();
@@ -256,78 +285,13 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
     public void transferToNet()
     {
-        // 只有不被标记的槽位才会被收纳进入网络
-        DimensionsNet net = getNet();
-        if (net != null)
-        {
-            for (int i = 0; i < capacity; i++)
-            {
-                KeyAmount flag = fakeStackHandler.getStackBySlot(i);
-                if (!flag.isEmpty())
-                {
-                    if (flag.key().isSameTypeSameComponents(stackHandler.getStackBySlot(i).key()))
-                        continue;
-                }
-                KeyAmount stack = stackHandler.getStackBySlot(i);
-                if (!stack.isEmpty())
-                {
-                    KeyAmount extracted = stackHandler.extract(i, stack.amount(), false);
-                    KeyAmount remaining = net.getUnifiedStorage().insert(extracted.key(), extracted.amount(), false);
-                    if (!remaining.isEmpty())
-                        stackHandler.insert(i, remaining.key(), remaining.amount(), false);
-                }
-            }
-        }
+        NetInterfaceAccess.transferToNet(getNet(), stackHandler, fakeStackHandler, capacity);
     }
 
     // 从网络中获取物品，然后转移到槽位
     public void transferFromNet()
     {
-        // 首先检测标记
-        // 然后从网络提取适当标记物
-        // 插入物品槽
-        // 将剩余插回网络
-        DimensionsNet net = getNet();
-        if (net != null)
-        {
-            for (int i = 0; i < capacity; i++)
-            {
-                KeyAmount flag = fakeStackHandler.getStackBySlot(i);
-                if (!flag.isEmpty())
-                {
-                    // 到达数量上限或者是不同物品则不尝试插入
-                    KeyAmount current = stackHandler.getStackBySlot(i);
-                    if (!current.isEmpty())
-                    {
-                        if (current.key().getVanillaMaxStackSize() >= current.amount())
-                        {
-                            continue;
-                        }
-                        if (!current.key().isSameTypeSameComponents(flag.key()))
-                        {
-                            continue;
-                        }
-                    }
-
-                    // 插入逻辑
-                    KeyAmount stack = net.getUnifiedStorage().extract(
-                            flag.key(),
-                            flag.key().getVanillaMaxStackSize(),
-                            false,
-                            fuzzyMode == FuzzyMode.ENABLE
-                    );
-                    if (!stack.isEmpty())
-                    {
-                        KeyAmount remaining = stackHandler.insert(i, stack.key(), stack.amount(), false);
-                        if (!remaining.isEmpty())
-                        {
-                            net.getUnifiedStorage().insert(remaining.key(), remaining.amount(), false);
-                        }
-                    }
-                }
-
-            }
-        }
+        NetInterfaceAccess.transferFromNet(getNet(), stackHandler, fakeStackHandler, capacity, getFuzzyMode());
     }
 
     public void popStack()
@@ -343,12 +307,12 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                     {
                         if (fakeStackHandler.getStackBySlot(i).key().getTypeId().equals(typeId))
                         {
-                            if (this.fuzzyMode == FuzzyMode.ENABLE
+                            if (getFuzzyMode() == FuzzyMode.ENABLE
                                     && !fakeStackHandler.getStackBySlot(i).key().isSame(stackHandler.getStackBySlot(i).key()))
                             {
                                 continue;
                             }
-                            if (this.fuzzyMode == FuzzyMode.DISABLE
+                            if (getFuzzyMode() == FuzzyMode.DISABLE
                                     && !fakeStackHandler.getStackBySlot(i).key().isSameTypeSameComponents(stackHandler.getStackBySlot(i).key()))
                             {
                                 continue;
@@ -413,25 +377,25 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         String popModeNew = tag.getString("pop_mode");
         if (!popModeNew.isEmpty())
         {
-            this.popMode = PopMode.valueOf(popModeNew);
+            setPopMode(PopMode.valueOf(popModeNew));
         }
         else if (!tag.getString("popMode").isEmpty())
         {
-            this.popMode = PopMode.valueOf(tag.getString("popMode"));
+            setPopMode(PopMode.valueOf(tag.getString("popMode")));
         }
         else if (tag.getBoolean("popMode"))
         {
-            this.popMode = PopMode.OPEN;
+            setPopMode(PopMode.OPEN);
         }
         else
         {
-            this.popMode = PopMode.STOP;
+            setPopMode(PopMode.STOP);
         }
 
         String fuzzyModeNew = tag.getString("fuzzy_mode");
         if (!fuzzyModeNew.isEmpty())
         {
-            this.fuzzyMode = FuzzyMode.valueOf(fuzzyModeNew);
+            setFuzzyMode(FuzzyMode.valueOf(fuzzyModeNew));
         }
         // 加载后需要更新缓存
         setNeedsCapabilityUpdate();
@@ -443,8 +407,8 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         super.saveAdditional(tag);
         tag.put("inventory", stackHandler.serializeNBT());
         tag.put("flags", fakeStackHandler.serializeNBT());
-        tag.putString("pop_mode", this.popMode.name());
-        tag.putString("fuzzy_mode", this.fuzzyMode.name());
+        tag.putString("pop_mode", getPopMode().name());
+        tag.putString("fuzzy_mode", getFuzzyMode().name());
     }
 
     @Override

@@ -53,6 +53,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "Alternar slot de crafting",
   "tooltip.button.beyonddimensions.popmode_off": "Atual: Modo popup desativado",
   "tooltip.button.beyonddimensions.popmode_on": "Atual: Modo popup ativado",
+  "tooltip.button.beyonddimensions.popmode_mounted_unavailable": "O modo popup não está disponível em engenhocas em movimento",
   "tooltip.button.beyonddimensions.filter_mode_ignore": "Atual: Ignorar filtro",
   "tooltip.button.beyonddimensions.filter_mode_white": "Atual: Modo lista branca",
   "tooltip.button.beyonddimensions.filter_mode_black": "Atual: Modo lista negra",
