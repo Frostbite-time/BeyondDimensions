@@ -6,18 +6,17 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.simibubi.create.api.contraption.storage.item.MountedItemStorage;
 import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
 import com.simibubi.create.content.contraptions.Contraption;
+import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ItemStackTypedHandler;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceAccess;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceSettings;
-import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
@@ -31,8 +30,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class NetInterfaceMountedStorage extends MountedItemStorage implements NetInterfaceAccess
 {
-    private static final int DEFAULT_EMPTY_SLOT_LIMIT = 64;
-
     private static final Codec<PopMode> POP_MODE_CODEC = Codec.STRING.xmap(PopMode::valueOf, PopMode::name);
     private static final Codec<FuzzyMode> FUZZY_MODE_CODEC = Codec.STRING.xmap(FuzzyMode::valueOf, FuzzyMode::name);
     private static final Codec<RedStoneControlMode> CONTROL_MODE_CODEC = Codec.STRING.xmap(RedStoneControlMode::valueOf, RedStoneControlMode::name);
@@ -48,6 +45,7 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
     ).apply(instance, NetInterfaceMountedStorage::new));
 
     private final StackHandler stackHandler;
+    private final ItemStackTypedHandler itemHandlerWrapper;
     private final StackHandler fakeStackHandler;
     private final int netId;
     private final NetInterfaceSettings settings = new NetInterfaceSettings();
@@ -69,6 +67,7 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
     {
         super(type);
         this.stackHandler = stackHandler;
+        this.itemHandlerWrapper = new ItemStackTypedHandler(stackHandler);
         this.fakeStackHandler = fakeStackHandler;
         this.netId = netId;
         this.settings.setPopMode(popMode);
@@ -173,14 +172,13 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
     @Override
     public int getSlots()
     {
-        return this.stackHandler.getSlots();
+        return this.itemHandlerWrapper.getSlots();
     }
 
     @Override
     public @NotNull ItemStack getStackInSlot(int slot)
     {
-        KeyAmount stack = this.stackHandler.getStackBySlot(slot);
-        return toItemStack(stack);
+        return this.itemHandlerWrapper.getStackInSlot(slot);
     }
 
     @Override
@@ -190,7 +188,7 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
         {
             return;
         }
-        setItemStack(this.stackHandler, slot, stack);
+        this.itemHandlerWrapper.setStackInSlot(slot, stack);
     }
 
     @Override
@@ -200,9 +198,7 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
         {
             return stack;
         }
-        if (stack.isEmpty()) return ItemStack.EMPTY;
-        KeyAmount remaining = this.stackHandler.insert(slot, new ItemStackKey(stack), stack.getCount(), simulate);
-        return toRemainingItemStack(remaining, stack);
+        return this.itemHandlerWrapper.insertItem(slot, stack, simulate);
     }
 
     @Override
@@ -212,24 +208,19 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
         {
             return ItemStack.EMPTY;
         }
-        if (amount <= 0) return ItemStack.EMPTY;
-        KeyAmount extracted = this.stackHandler.extract(slot, amount, simulate);
-        return toItemStack(extracted);
+        return this.itemHandlerWrapper.extractItem(slot, amount, simulate);
     }
 
     @Override
     public int getSlotLimit(int slot)
     {
-        KeyAmount stack = this.stackHandler.getStackBySlot(slot);
-        long byType = stack.isEmpty() ? DEFAULT_EMPTY_SLOT_LIMIT : stack.key().getVanillaMaxStackSize();
-        long byCap = this.stackHandler.getSlotCapacity(slot);
-        return BDMath.clampLongToInt(Math.min(byType, byCap));
+        return this.itemHandlerWrapper.getSlotLimit(slot);
     }
 
     @Override
     public boolean isItemValid(int slot, @NotNull ItemStack stack)
     {
-        return true;
+        return this.itemHandlerWrapper.isItemValid(slot, stack);
     }
 
     public void tickCoreTransfer()
@@ -350,32 +341,4 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
         }
     }
 
-    private static ItemStack toItemStack(KeyAmount stack)
-    {
-        Object out = stack.toStack();
-        return out instanceof ItemStack itemStack ? itemStack : ItemStack.EMPTY;
-    }
-
-    private static ItemStack toRemainingItemStack(KeyAmount remaining, ItemStack fallback)
-    {
-        if (remaining.isEmpty())
-        {
-            return ItemStack.EMPTY;
-        }
-
-        Object out = remaining.toStack();
-        return out instanceof ItemStack itemStack ? itemStack : fallback.copy();
-    }
-
-    private static void setItemStack(StackHandler handler, int slot, ItemStack stack)
-    {
-        if (stack.isEmpty())
-        {
-            handler.setStackDirectly(slot, EmptyStackKey.INSTANCE, 0);
-            return;
-        }
-
-        ItemStack copy = stack.copy();
-        handler.setStackDirectly(slot, new ItemStackKey(copy), copy.getCount());
-    }
 }
