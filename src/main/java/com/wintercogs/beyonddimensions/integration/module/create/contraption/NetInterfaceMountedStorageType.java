@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 public class NetInterfaceMountedStorageType extends MountedItemStorageType<NetInterfaceMountedStorage>
 {
     public static final DeferredRegister<MountedItemStorageType<?>> TYPES = DeferredRegister.create(CreateRegistries.MOUNTED_ITEM_STORAGE_TYPE, BDConstants.MODID);
-    public static final DeferredHolder<MountedItemStorageType<?>, NetInterfaceMountedStorageType> NET_INTERFACE = TYPES.register("net_interface", NetInterfaceMountedStorageType::new);
+    public static final DeferredHolder<MountedItemStorageType<?>, NetInterfaceMountedStorageType> NET_INTERFACE = TYPES.register("net_interface_item", NetInterfaceMountedStorageType::new);
 
     public static void register(IEventBus modBus)
     {
