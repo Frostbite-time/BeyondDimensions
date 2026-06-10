@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.integration.module.create.contraption;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.simibubi.create.api.contraption.storage.SyncedMountedStorage;
 import com.simibubi.create.api.contraption.storage.item.MountedItemStorage;
 import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
 import com.simibubi.create.content.contraptions.Contraption;
@@ -21,16 +20,16 @@ import com.wintercogs.beyonddimensions.common.menu.NetInterfaceSettings;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class NetInterfaceMountedStorage extends MountedItemStorage implements NetInterfaceAccess, SyncedMountedStorage
+public class NetInterfaceMountedStorage extends MountedItemStorage implements NetInterfaceAccess
 {
     private static final int DEFAULT_EMPTY_SLOT_LIMIT = 64;
 
@@ -119,7 +118,6 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
             return;
         }
         this.controlMode = controlMode;
-        markDirty();
     }
 
     @Override
@@ -134,7 +132,6 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
             return;
         }
         NetInterfaceAccess.super.setPopMode(popMode);
-        markDirty();
     }
 
     @Override
@@ -149,7 +146,6 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
             return;
         }
         NetInterfaceAccess.super.setFuzzyMode(fuzzyMode);
-        markDirty();
     }
 
     @Override
@@ -171,24 +167,6 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
 
     @Override
     public void onMenuDataChanged()
-    {
-        markDirty();
-    }
-
-    @Override
-    public boolean isDirty()
-    {
-        return this.dirty;
-    }
-
-    @Override
-    public void markClean()
-    {
-        this.dirty = false;
-    }
-
-    @Override
-    public void afterSync(Contraption contraption, BlockPos localPos)
     {
     }
 
@@ -213,7 +191,6 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
             return;
         }
         setItemStack(this.stackHandler, slot, stack);
-        markDirty();
     }
 
     @Override
@@ -225,10 +202,6 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
         }
         if (stack.isEmpty()) return ItemStack.EMPTY;
         KeyAmount remaining = this.stackHandler.insert(slot, new ItemStackKey(stack), stack.getCount(), simulate);
-        if (!simulate && remaining.amount() != stack.getCount())
-        {
-            markDirty();
-        }
         return toRemainingItemStack(remaining, stack);
     }
 
@@ -241,10 +214,6 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
         }
         if (amount <= 0) return ItemStack.EMPTY;
         KeyAmount extracted = this.stackHandler.extract(slot, amount, simulate);
-        if (!simulate && !extracted.isEmpty())
-        {
-            markDirty();
-        }
         return toItemStack(extracted);
     }
 
@@ -273,15 +242,8 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
         {
             return;
         }
-        if (transferToNetMounted() || transferFromNetMounted())
-        {
-            markDirty();
-        }
-    }
-
-    private void markDirty()
-    {
-        this.dirty = true;
+        transferToNetMounted();
+        transferFromNetMounted();
     }
 
     private boolean shouldWorkMounted()
