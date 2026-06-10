@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
  * - 可视槽位 = ItemStackKey 桶槽位 + EmptyStackKey 桶槽位（顺序：先 Item，后 Empty）。
  * - getStackInSlot 直接使用缓存对象并设数量（高频无拷贝）；若缓存为空/为空栈则返回 EMPTY。
  */
-public class ItemStackTypedHandler implements IItemHandler
+public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiable
 {
     private static final ResourceLocation ITEM_TYPE = ItemStackKey.ID;
 
@@ -130,6 +131,24 @@ public class ItemStackTypedHandler implements IItemHandler
 
         item.setCount(shown); // 直接改缓存数量并返回
         return item;
+    }
+
+    /**
+     * 直接设置对应槽位物品
+     */
+    @Override
+    public void setStackInSlot(int slot, @NotNull ItemStack stack)
+    {
+        int actualIndex = resolveActualIndex(slot);
+        if (actualIndex < 0) return;
+
+        if (stack.isEmpty())
+        {
+            handlerStorage.setStackDirectly(actualIndex, EmptyStackKey.INSTANCE, 0);
+            return;
+        }
+
+        handlerStorage.setStackDirectly(actualIndex, new ItemStackKey(stack), stack.getCount());
     }
 
     /**

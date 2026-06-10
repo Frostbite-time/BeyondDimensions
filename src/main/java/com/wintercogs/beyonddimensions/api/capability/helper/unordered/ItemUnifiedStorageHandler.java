@@ -1,15 +1,17 @@
 package com.wintercogs.beyonddimensions.api.capability.helper.unordered;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.NotNull;
 
 // 以IStackType为基础实现IItemHandler的类
-public class ItemUnifiedStorageHandler implements IItemHandler
+public class ItemUnifiedStorageHandler implements IItemHandler, IItemHandlerModifiable
 {
     private final UnifiedStorage storage;
 
@@ -48,6 +50,38 @@ public class ItemUnifiedStorageHandler implements IItemHandler
                     return null;
                 })
                 .orElse(ItemStack.EMPTY);
+    }
+
+    @Override
+    public void setStackInSlot(int slot, @NotNull ItemStack itemStack)
+    {
+        IStackKey<?> oldKey = storage.getBucket(ItemStackKey.ID)
+                .filter(slots -> slot >= 0 && slot < slots.size())
+                .map(slots -> slots.get(slot))
+                .orElse(null);
+
+        IStackKey<?> newKey = itemStack.isEmpty() ? null : new ItemStackKey(itemStack);
+        long newCount = itemStack.getCount();
+
+        if (oldKey != null)
+        {
+            if (oldKey.equals(newKey))
+            {
+                storage.setAmountByKey(oldKey, newCount);
+                return;
+            }
+            storage.setAmountByKey(oldKey, 0);
+        }
+        else if (storage.isFullSlotsSize() || storage.getBucket(ItemStackKey.ID)
+                .map(slots -> slot != slots.size())
+                .orElse(slot != 0))
+        {
+            return;
+        }
+
+        if (newKey == null) return;
+
+        storage.setAmountByKey(newKey, newCount);
     }
 
     @Override
