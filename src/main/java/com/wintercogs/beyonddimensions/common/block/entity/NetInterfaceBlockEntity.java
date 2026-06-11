@@ -357,6 +357,12 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         {
             setFuzzyMode(FuzzyMode.valueOf(fuzzyModeNew));
         }
+    }
+
+    @Override
+    public void onLoad()
+    {
+        super.onLoad();
         // 加载后需要更新缓存
         setNeedsCapabilityUpdate();
     }

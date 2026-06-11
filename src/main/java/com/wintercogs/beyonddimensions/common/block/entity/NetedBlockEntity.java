@@ -143,7 +143,7 @@ public abstract class NetedBlockEntity extends BlockEntity
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-        setNetId(tag.getInt("netId"));
+        this.netId = tag.getInt("netId");
     }
 
     @Override
