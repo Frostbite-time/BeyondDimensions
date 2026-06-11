@@ -146,7 +146,7 @@ public abstract class NetedBlockEntity extends BlockEntity
     protected void loadAdditional(@NotNull ValueInput input)
     {
         super.loadAdditional(input);
-        setNetId(input.getIntOr("net_id", input.getIntOr("netId", -1)));
+        this.netId = input.getIntOr("net_id", input.getIntOr("netId", -1));
     }
 
     @Override

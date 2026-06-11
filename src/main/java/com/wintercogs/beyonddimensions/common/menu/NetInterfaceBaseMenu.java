@@ -3,15 +3,19 @@ package com.wintercogs.beyonddimensions.common.menu;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
-import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.OrderedStackTypedSlot;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
@@ -33,11 +37,11 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
     public final StackHandler storage;
     public final StackHandler flagStorage;
 
-    public NetInterfaceBlockEntity be;
+    private final NetInterfaceAccess access;
 
     // 构建注册用的信息
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
-    public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = MENU_TYPES.register("net_interface_menu", () -> IMenuTypeExtension.create(NetInterfaceBaseMenu::new));
+    public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = MENU_TYPES.register("net_interface_menu", () -> IMenuTypeExtension.create(NetInterfaceBaseMenu::fromNetwork));
 
 
     /**
@@ -47,7 +51,31 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
      */
     public NetInterfaceBaseMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, (NetInterfaceBlockEntity) playerInventory.player.level().getBlockEntity(data.readBlockPos()));
+        this(id, playerInventory, data.readBlockPos());
+    }
+
+    private static NetInterfaceBaseMenu fromNetwork(int id, Inventory playerInventory, FriendlyByteBuf data)
+    {
+        if (data.readableBytes() == Long.BYTES)
+        {
+            return new NetInterfaceBaseMenu(id, playerInventory, data.readBlockPos());
+        }
+
+        if (data.readBoolean())
+        {
+            return NetInterfaceBaseMenu.mounted(id, playerInventory, data);
+        }
+        return new NetInterfaceBaseMenu(id, playerInventory, data.readBlockPos());
+    }
+
+    public static NetInterfaceBaseMenu mounted(int id, Inventory playerInventory, FriendlyByteBuf data)
+    {
+        return new NetInterfaceBaseMenu(id, playerInventory, new ClientAccess(playerInventory.player.level().registryAccess(), data));
+    }
+
+    public NetInterfaceBaseMenu(int id, Inventory playerInventory, BlockPos pos)
+    {
+        this(id, playerInventory, (NetInterfaceAccess) playerInventory.player.level().getBlockEntity(pos));
     }
 
     /**
@@ -55,20 +83,25 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
      *
      * @param playerInventory 玩家背包
      */
-    public NetInterfaceBaseMenu(int id, Inventory playerInventory, NetInterfaceBlockEntity be)
+    public NetInterfaceBaseMenu(int id, Inventory playerInventory, NetInterfaceAccess access)
     {
         super(Net_Interface_Menu.get(), id, playerInventory);
 
         // 初始化标记容器（slot负责同步）
-        this.storage = be.getStackHandler();
-        this.flagStorage = be.getFakeStackHandler();
+        this.storage = access.getStackHandler();
+        this.flagStorage = access.getFakeStackHandler();
 
-        this.be = be;
+        this.access = access;
 
         addPlayerInv(playerInventory);
         addStorageSlots();
         addFlagSlots();
 
+    }
+
+    public NetInterfaceAccess getAccess()
+    {
+        return this.access;
     }
 
     private void addStorageSlots()
@@ -153,23 +186,29 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
     protected void writeQuickDataTag(CompoundTag tag)
     {
         super.writeQuickDataTag(tag);
-        tag.putString("popMode", be.popMode.name());
-        tag.putString("controlMode", be.controlMode.name());
-        tag.putString("fuzzyMode", be.fuzzyMode.name());
+        tag.putString("popMode", access.getPopMode().name());
+        tag.putString("controlMode", access.getControlMode().name());
+        tag.putString("fuzzyMode", access.getFuzzyMode().name());
     }
 
     @Override
     public void readQuickDataTag(CompoundTag tag)
     {
         super.readQuickDataTag(tag);
-        be.popMode = PopMode.valueOf(tag.getString("popMode").orElse(PopMode.STOP.name()));
-        be.controlMode = RedStoneControlMode.valueOf(tag.getString("controlMode").orElse(RedStoneControlMode.IGNORE.name()));
-        be.fuzzyMode = FuzzyMode.valueOf(tag.getString("fuzzyMode").orElse(FuzzyMode.DISABLE.name()));
+        if (access == null || !access.isMenuValid())
+        {
+            return;
+        }
+        if (access.canConfigurePopMode())
+        {
+            access.setPopMode(PopMode.valueOf(tag.getString("popMode").orElse(PopMode.STOP.name())));
+        }
+        access.setControlMode(RedStoneControlMode.valueOf(tag.getString("controlMode").orElse(RedStoneControlMode.IGNORE.name())));
+        access.setFuzzyMode(FuzzyMode.valueOf(tag.getString("fuzzyMode").orElse(FuzzyMode.DISABLE.name())));
         // 服务端读取新数据之后利用sendBlockUpdated将数据发送给附近所有玩家
         if (!player.level().isClientSide())
         {
-            player.level().blockEntityChanged(be.getBlockPos());
-            player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
+            access.onMenuDataChanged();
         }
     }
 
@@ -177,7 +216,84 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
     @Override
     public boolean stillValid(@NotNull Player player)
     {
-        return be != null && !be.isRemoved();
+        return access != null && access.isMenuValid();
+    }
+
+    private static final class ClientAccess implements NetInterfaceAccess
+    {
+        private final StackHandler stackHandler;
+        private final StackHandler fakeStackHandler;
+        private final NetInterfaceSettings settings = new NetInterfaceSettings();
+        private RedStoneControlMode controlMode;
+
+        private ClientAccess(HolderLookup.Provider registries, FriendlyByteBuf data)
+        {
+            CompoundTag inventory = data.readNbt();
+            CompoundTag flags = data.readNbt();
+            this.stackHandler = decodeStackHandler(registries, inventory);
+            this.fakeStackHandler = decodeStackHandler(registries, flags);
+            settings.setPopMode(PopMode.valueOf(data.readUtf()));
+            settings.setFuzzyMode(FuzzyMode.valueOf(data.readUtf()));
+            this.controlMode = RedStoneControlMode.valueOf(data.readUtf());
+        }
+
+        @Override
+        public StackHandler getStackHandler()
+        {
+            return this.stackHandler;
+        }
+
+        @Override
+        public StackHandler getFakeStackHandler()
+        {
+            return this.fakeStackHandler;
+        }
+
+        @Override
+        public NetInterfaceSettings getNetInterfaceSettings()
+        {
+            return this.settings;
+        }
+
+        @Override
+        public RedStoneControlMode getControlMode()
+        {
+            return this.controlMode;
+        }
+
+        @Override
+        public void setControlMode(RedStoneControlMode controlMode)
+        {
+            this.controlMode = controlMode;
+        }
+
+        @Override
+        public boolean canConfigurePopMode()
+        {
+            return false;
+        }
+
+        @Override
+        public boolean isMenuValid()
+        {
+            return true;
+        }
+
+        @Override
+        public void onMenuDataChanged()
+        {
+        }
+
+        private static StackHandler decodeStackHandler(HolderLookup.Provider registries, CompoundTag tag)
+        {
+            if (tag == null)
+            {
+                return new StackHandler(0);
+            }
+            RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, registries);
+            return StackHandler.CODEC.parse(ops, tag)
+                    .getOrThrow(IllegalStateException::new);
+        }
     }
 
 }

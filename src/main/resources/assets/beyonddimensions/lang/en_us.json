@@ -56,6 +56,7 @@
   "tooltip.button.beyonddimensions.craft_toggle": "Toggle crafting slot visibility",
   "tooltip.button.beyonddimensions.popmode_off": "Current: Popup mode disabled",
   "tooltip.button.beyonddimensions.popmode_on": "Current: Popup mode enabled",
+  "tooltip.button.beyonddimensions.popmode_mounted_unavailable": "Popup mode is unavailable on moving contraptions",
   "tooltip.button.beyonddimensions.filter_mode_ignore": "Current: Ignore Filter",
   "tooltip.button.beyonddimensions.filter_mode_white": "Current: Whitelist Mode",
   "tooltip.button.beyonddimensions.filter_mode_black": "Current: Blacklist Mode",

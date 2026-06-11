@@ -180,6 +180,12 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
         super.loadAdditional(input);
         filterSlots.deserializeNBT(input.lookup(), input.read("filter_slots", net.minecraft.nbt.CompoundTag.CODEC).orElseGet(net.minecraft.nbt.CompoundTag::new));
         filterMode = FilterMode.valueOf(input.getStringOr("filter_type", FilterMode.BLACK.name()));
+    }
+
+    @Override
+    public void onLoad()
+    {
+        super.onLoad();
         setNeedsCapabilityUpdate();
     }
 

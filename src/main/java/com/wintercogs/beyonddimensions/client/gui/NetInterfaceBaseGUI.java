@@ -44,8 +44,12 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         popButton = new RightTabButton(this.leftPos + 176, this.topPos + 6, 23, 26,
                 this.leftPos + 176 + 3, this.topPos + 6 + 4, 16, 16, button ->
         {
+            if (!menu.getAccess().canConfigurePopMode())
+            {
+                return;
+            }
             popButton.toggleState();
-            menu.be.popMode = (PopMode) popButton.currentState;
+            menu.getAccess().setPopMode((PopMode) popButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -61,15 +65,20 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 
                 this.states.addAll(iconMap.keySet());
 
-                setState(menu.be.popMode);
+                setState(menu.getAccess().getPopMode());
             }
         };
+        if (!menu.getAccess().canConfigurePopMode())
+        {
+            popButton.active = false;
+            popButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_mounted_unavailable")));
+        }
         addRenderableWidget(popButton);
 
         controlModeButton = new RightTabButton(leftPos + 176, topPos + 36, 23, 26,
                 leftPos + 176 + 3, topPos + 36 + 4, 16, 16, button -> {
             controlModeButton.toggleState();
-            menu.be.controlMode = (RedStoneControlMode) controlModeButton.currentState;
+            menu.getAccess().setControlMode((RedStoneControlMode) controlModeButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -88,7 +97,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 
                 this.states.addAll(iconMap.keySet());
 
-                setState(menu.be.controlMode);
+                setState(menu.getAccess().getControlMode());
             }
         };
         addRenderableWidget(controlModeButton);
@@ -96,7 +105,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         fuzzyModelButton = new RightTabButton(leftPos + 176, topPos + 66, 23, 26,
                 leftPos + 176 + 3, topPos + 66 + 4, 16, 16, button -> {
             fuzzyModelButton.toggleState();
-            menu.be.fuzzyMode = (FuzzyMode) fuzzyModelButton.currentState;
+            menu.getAccess().setFuzzyMode((FuzzyMode) fuzzyModelButton.currentState);
             menu.writeAndSendQuickData();
         })
         {
@@ -111,7 +120,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 
                 this.states.addAll(iconMap.keySet());
 
-                setState(menu.be.fuzzyMode);
+                setState(menu.getAccess().getFuzzyMode());
             }
         };
         addRenderableWidget(fuzzyModelButton);
@@ -135,12 +144,12 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         //父类无操作
         //每tick自动更新搜索方案
 
-        if (popButton.currentState != menu.be.popMode)
-            popButton.setState(menu.be.popMode);
-        if (controlModeButton.currentState != menu.be.controlMode)
-            controlModeButton.setState(menu.be.controlMode);
-        if (fuzzyModelButton.currentState != menu.be.fuzzyMode)
-            fuzzyModelButton.setState(menu.be.fuzzyMode);
+        if (popButton.currentState != menu.getAccess().getPopMode())
+            popButton.setState(menu.getAccess().getPopMode());
+        if (controlModeButton.currentState != menu.getAccess().getControlMode())
+            controlModeButton.setState(menu.getAccess().getControlMode());
+        if (fuzzyModelButton.currentState != menu.getAccess().getFuzzyMode())
+            fuzzyModelButton.setState(menu.getAccess().getFuzzyMode());
     }
 
     @Override
