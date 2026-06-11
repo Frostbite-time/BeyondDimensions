@@ -171,7 +171,7 @@ dependencies {
     runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
     // 通用拼音搜索-在安装时优先使用它的拼音处理 不启用runtime：会导致runServer失败
-    // compileOnly "curse.maven:just-enough-characters-250702:7320201"
+    compileOnly "curse.maven:just-enough-characters-250702:8136581"
 
     // GuideMe
     runtimeOnly "curse.maven:guideme-1173950:7929350"
