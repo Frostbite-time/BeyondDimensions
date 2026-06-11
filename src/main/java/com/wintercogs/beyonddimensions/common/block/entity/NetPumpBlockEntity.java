@@ -177,6 +177,12 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
         super.load(tag);
         filterSlots.deserializeNBT(tag.getCompound("filter_slots"));
         filterMode = FilterMode.valueOf(tag.getString("filter_type"));
+    }
+
+    @Override
+    public void onLoad()
+    {
+        super.onLoad();
         setNeedsCapabilityUpdate();
     }
 

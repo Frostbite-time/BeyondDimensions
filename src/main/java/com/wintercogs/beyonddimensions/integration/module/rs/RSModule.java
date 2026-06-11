@@ -60,7 +60,6 @@ public class RSModule implements IIntegrationModule
     public void onBlockTagDatagen(net.minecraft.core.HolderLookup.Provider provider, BlockTagAppender appender)
     {
         appender.addOptional(BlockTags.MINEABLE_WITH_PICKAXE, RSModuleBlocks.RS_NET_PATHWAY.getId());
-        appender.addOptional(AllTags.AllBlockTags.NON_MOVABLE.tag, RSModuleBlocks.RS_NET_PATHWAY.getId());
     }
 
     @Override

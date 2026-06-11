@@ -149,9 +149,7 @@ public abstract class NetedBlockEntity extends BlockEntity
     public void load(CompoundTag tag)
     {
         super.load(tag);
-        this.netId = tag.getInt("NetId");
-        // TODO 仍需确认影响程度
-        //setNetId(tag.getInt("netId"));
+        this.netId = tag.getInt("netId");
     }
 
     @Override

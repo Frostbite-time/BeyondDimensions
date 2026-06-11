@@ -48,20 +48,6 @@ public class ModBlockTagProvider extends BlockTagsProvider
                 .add(BDBlocks.NET_SMOKER_BLOCK.get())
                 .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
 
-        // 防止被机械动力识别为可用于移动式存储的方块
-        // （仅1.20.1用，应对机械动力本体的bug）
-        tag(AllTags.AllBlockTags.NON_MOVABLE.tag)
-                .add(BDBlocks.NET_CONTROL.get())
-                .add(BDBlocks.NET_PATHWAY.get())
-                .add(BDBlocks.NET_ENERGY_PATHWAY.get())
-                .add(BDBlocks.NET_TERMINAL_BLOCK.get())
-                .add(BDBlocks.NET_PUMP_BLOCK.get())
-                .add(BDBlocks.NET_HOPPER_BLOCK.get())
-                .add(BDBlocks.NET_FURNACE_BLOCK.get())
-                .add(BDBlocks.NET_BLAST_FURNACE_BLOCK.get())
-                .add(BDBlocks.NET_SMOKER_BLOCK.get())
-                .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
-
         IntegrationManager.onBlockTagDatagen(provider, new IIntegrationModule.BlockTagAppender()
         {
             @Override

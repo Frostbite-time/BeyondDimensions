@@ -70,7 +70,6 @@ public class CreateModule implements IIntegrationModule
     public void onBlockTagDatagen(net.minecraft.core.HolderLookup.Provider provider, BlockTagAppender appender)
     {
         appender.addOptional(BlockTags.MINEABLE_WITH_PICKAXE, CreateModuleBlocks.SCHEMATICANNON_PATHWAY.getId());
-        appender.addOptional(AllTags.AllBlockTags.NON_MOVABLE.tag, CreateModuleBlocks.SCHEMATICANNON_PATHWAY.getId());
     }
 
     @Override
