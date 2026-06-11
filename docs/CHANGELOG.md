@@ -1,2 +1,2 @@
-* Add support for network interfaces on Create contraptions.
+* Add support for network interfaces on Create contraptions.(Thanks Moraxyc for the [PR](https://github.com/Frostbite-time/BeyondDimensions/pull/48))
 * Fix crash when networked blocks run on Create contraptions.
