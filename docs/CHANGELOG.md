@@ -1,1 +1,1 @@
-* Fix an occasional freeze caused by retrieving tooltips from an async thread.
+* Add support for network interfaces on Create contraptions.
