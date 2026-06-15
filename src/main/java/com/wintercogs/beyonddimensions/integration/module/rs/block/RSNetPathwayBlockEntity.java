@@ -18,6 +18,7 @@ import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -126,12 +127,16 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
     {
         List<ItemStack> base = itemMirror.getAllView();
         if (base.isEmpty()) return Collections.emptyList();
-        return base;
+        // 返回副本：RS 的 StackList.add 会按引用保存并在合并时原地 grow 既有条目，
+        // 若直接返回内部快照对象，会被 RS 反向改写而污染本地快照。
+        List<ItemStack> out = new ArrayList<>(base.size());
+        for (ItemStack s : base) out.add(s.copy());
+        return out;
     }
 
     public void flushItemsToRsCache(IStorageCache<ItemStack> cache, IExternalStorageContext ctx)
     {
-        itemMirror.flushToRsCache(cache, ctx::acceptsItem);
+        itemMirror.flushToRsCache(cache, ctx::acceptsItem, unified);
     }
 
     // --- fluids ---
@@ -139,12 +144,15 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
     {
         List<FluidStack> base = fluidMirror.getAllView();
         if (base.isEmpty()) return Collections.emptyList();
-        return base;
+        // 返回副本，理由同 getItemsForContext()
+        List<FluidStack> out = new ArrayList<>(base.size());
+        for (FluidStack s : base) out.add(s.copy());
+        return out;
     }
 
     public void flushFluidsToRsCache(IStorageCache<FluidStack> cache, IExternalStorageContext ctx)
     {
-        fluidMirror.flushToRsCache(cache, ctx::acceptsFluid);
+        fluidMirror.flushToRsCache(cache, ctx::acceptsFluid, unified);
     }
 
     // ====== unified bind/unbind + subscriptions ======
@@ -167,8 +175,9 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
             }
             else
             {
-                itemMirror.clearAll();
-                fluidMirror.clearAll();
+                // 未绑定：请求一次重同步，让 flush 把可能残留的已上报内容差量清空（目标为空）
+                itemMirror.requestResync();
+                fluidMirror.requestResync();
             }
             return;
         }
@@ -181,23 +190,24 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
 
     private void bindUnified(@NotNull UnifiedStorage u)
     {
-        unbindUnifiedInternal(false);
+        // 仅关闭旧订阅；保留镜像快照(all)，以便对“旧→新”做差量过渡（重绑场景）
+        closeSubscriptions();
 
         unified = u;
 
-        // 初次对齐：让 RS cache 能在下一次 update() 完全同步
-        itemMirror.resyncFromUnified(unified);
-        fluidMirror.resyncFromUnified(unified);
+        // 整体重同步：在下一次 adapter.update() 时对 live 目标(u)与当前快照做差量
+        itemMirror.requestResync();
+        fluidMirror.requestResync();
 
-        // AnyChange：走 resync（清旧 + 推新基线）
+        // AnyChange：整体变化 -> 请求一次差量重同步
         unifiedAnySub = unified.subscribeAnyWeak(this, be -> {
             be.runOnServerThread(() -> {
-                be.itemMirror.resyncFromUnified(be.unified);
-                be.fluidMirror.resyncFromUnified(be.unified);
+                be.itemMirror.requestResync();
+                be.fluidMirror.requestResync();
             });
         });
 
-        // Delta：把变化分发到 itemMirror / fluidMirror
+        // Delta：把变化分发到 itemMirror / fluidMirror（仅入队，flush 时 lockstep 应用+推送）
         unifiedDeltaSub = unified.subscribeDeltaWeak(this, (be, type, size, insert) -> {
             be.runOnServerThread(() -> {
                 if (be.unified == null) return;
@@ -215,18 +225,18 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
 
     private void unbindUnified()
     {
-        // 解绑：安排一次 clear（交给下一次 adapter.update() remove）
-        unbindUnifiedInternal(true);
+        closeSubscriptions();
+        unified = null;
+
+        // 目标变为空：请求重同步，让下一次 flush 以差量方式移除已上报内容。
+        // 若本 BE 即将被移除/卸载，RS 会在自身 invalidate 重建时直接丢弃本存储，
+        // 这里的重同步即便不被 flush 也不会造成残留。
+        itemMirror.requestResync();
+        fluidMirror.requestResync();
     }
 
-    private void unbindUnifiedInternal(boolean scheduleClear)
+    private void closeSubscriptions()
     {
-        if (scheduleClear)
-        {
-            itemMirror.scheduleClearFromCurrentView();
-            fluidMirror.scheduleClearFromCurrentView();
-        }
-
         if (unifiedAnySub != null)
         {
             try
@@ -248,20 +258,6 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
             {
             }
             unifiedDeltaSub = null;
-        }
-
-        unified = null;
-
-        if (!scheduleClear)
-        {
-            itemMirror.clearAll();
-            fluidMirror.clearAll();
-        }
-        else
-        {
-            // 清视图与 delta，但保留 pendingClear
-            itemMirror.fullRebuild(null);
-            fluidMirror.fullRebuild(null);
         }
     }
 
