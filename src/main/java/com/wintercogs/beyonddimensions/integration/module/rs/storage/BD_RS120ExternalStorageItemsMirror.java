@@ -15,7 +15,6 @@ import java.util.function.Predicate;
 /**
  * 维护“已上报给 RS 网络缓存(ItemStorageCache)的物品快照”。
  *
- * <p>设计要点（修复 RS 终端偶发双倍物品）：</p>
  * <ul>
  *   <li>{@code all/keys/indexByKey} 即“已上报快照”，{@code getStacks()} 直接返回它。</li>
  *   <li>RS 在每次 {@code invalidate()} 时会清空网络列表并用各存储的 {@code getStacks()} 全量重建；

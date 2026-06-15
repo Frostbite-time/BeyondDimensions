@@ -18,7 +18,6 @@ import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -127,11 +126,7 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
     {
         List<ItemStack> base = itemMirror.getAllView();
         if (base.isEmpty()) return Collections.emptyList();
-        // 返回副本：RS 的 StackList.add 会按引用保存并在合并时原地 grow 既有条目，
-        // 若直接返回内部快照对象，会被 RS 反向改写而污染本地快照。
-        List<ItemStack> out = new ArrayList<>(base.size());
-        for (ItemStack s : base) out.add(s.copy());
-        return out;
+        return base;
     }
 
     public void flushItemsToRsCache(IStorageCache<ItemStack> cache, IExternalStorageContext ctx)
@@ -144,10 +139,7 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
     {
         List<FluidStack> base = fluidMirror.getAllView();
         if (base.isEmpty()) return Collections.emptyList();
-        // 返回副本，理由同 getItemsForContext()
-        List<FluidStack> out = new ArrayList<>(base.size());
-        for (FluidStack s : base) out.add(s.copy());
-        return out;
+        return base;
     }
 
     public void flushFluidsToRsCache(IStorageCache<FluidStack> cache, IExternalStorageContext ctx)

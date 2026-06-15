@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 /**
  * 维护“已上报给 RS 网络缓存(FluidStorageCache)的流体快照”。
  *
- * <p>结构与 {@link BD_RS120ExternalStorageItemsMirror} 完全对称，修复同一个“偶发双倍”问题：
+ * <p>结构与 {@link BD_RS120ExternalStorageItemsMirror} 完全对称，
  * 不再向缓存推送“全量基线”，而是以本地快照为基准只推送差量，并令快照与推送保持 lockstep。</p>
  */
 public class BD_RS120ExternalStorageFluidsMirror
