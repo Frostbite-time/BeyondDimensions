@@ -175,9 +175,14 @@ dependencies {
 
     // GuideMe
     runtimeOnly "curse.maven:guideme-1173950:7929350"
+    // glodium
+    runtimeOnly "curse.maven:glodium-957920:8196173"
     // AE支持
     compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
     runtimeOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
+    // AF
+    compileOnly "curse.maven:applied-flux-965012:8246560"
+    runtimeOnly "curse.maven:applied-flux-965012:8246560"
 
     // RS支持
     compileOnly "curse.maven:refined-storage-243076:8032789"
