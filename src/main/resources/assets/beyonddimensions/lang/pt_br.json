@@ -112,7 +112,7 @@
   "istack.beyonddimensions.storage_num.fluid": "Armazenado: %s mB",
   "istack.beyonddimensions.storage_num.long_type": "Armazenado: %s",
 
-  "key.categories.beyonddimensions": "Além das Dimensões",
+  "key.category.beyonddimensions.short_keys": "Além das Dimensões",
   "key.beyonddimensions.open_gui": "Abrir rede",
   "key.beyonddimensions.open_terminal_quick_key": "Abrir rapidamente o terminal no inventário",
   "key.beyonddimensions.main_hand_item_transfer_key": "Transferência rápida de item na mão principal",

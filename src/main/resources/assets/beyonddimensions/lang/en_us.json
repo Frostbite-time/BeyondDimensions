@@ -115,7 +115,7 @@
   "istack.beyonddimensions.storage_num.fluid": "Stored: %s mB",
   "istack.beyonddimensions.storage_num.long_type": "Stored: %s",
 
-  "key.categories.beyonddimensions": "Beyond Dimensions",
+  "key.category.beyonddimensions.short_keys": "Beyond Dimensions",
   "key.beyonddimensions.open_gui": "Open Dimensional Network UI",
   "key.beyonddimensions.open_terminal_quick_key": "Quickly open the terminal in the inventory",
   "key.beyonddimensions.main_hand_item_transfer_key": "Quick Transfer Item from Main Hand",

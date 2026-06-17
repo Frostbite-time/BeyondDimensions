@@ -112,7 +112,7 @@
   "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",
   "istack.beyonddimensions.storage_num.long_type": "저장됨: %s",
 
-  "key.categories.beyonddimensions": "차원을 넘어",
+  "key.category.beyonddimensions.short_keys": "차원을 넘어",
   "key.beyonddimensions.open_gui": "네트워크 열기",
   "key.beyonddimensions.open_terminal_quick_key": "인벤토리에서 터미널 빠르게 열기",
   "key.beyonddimensions.main_hand_item_transfer_key": "주 손 아이템 빠른 이동",

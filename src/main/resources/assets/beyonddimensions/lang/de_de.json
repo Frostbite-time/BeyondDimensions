@@ -112,7 +112,7 @@
   "istack.beyonddimensions.storage_num.fluid": "Gespeichert: %s mB",
   "istack.beyonddimensions.storage_num.long_type": "Gespeichert: %s",
 
-  "key.categories.beyonddimensions": "Jenseits der Dimensionen",
+  "key.category.beyonddimensions.short_keys": "Jenseits der Dimensionen",
   "key.beyonddimensions.open_gui": "Netzwerk öffnen",
   "key.beyonddimensions.open_terminal_quick_key": "Schnell das Terminal im Inventar öffnen",
   "key.beyonddimensions.main_hand_item_transfer_key": "Schneller Transfer für Haupthand-Gegenstand",
