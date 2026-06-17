@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
     "A": "minecraft:bucket",
     "B": "beyonddimensions:dimensional_connect_block",

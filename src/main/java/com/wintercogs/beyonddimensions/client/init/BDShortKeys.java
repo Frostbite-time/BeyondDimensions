@@ -41,7 +41,7 @@ public class BDShortKeys
 
     public static final KeyMapping OPEN_GUI_KEY = new KeyMapping(
             "key.beyonddimensions.open_gui", // 键位描述
-            GLFW.GLFW_KEY_O,                 // 默认按键 "O"
+            GLFW.GLFW_KEY_Y,                 // 默认按键 "Y"
             BDShortCutKeyCategory
     );
 

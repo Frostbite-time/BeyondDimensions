@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.integration;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -50,33 +51,33 @@ public interface IIntegrationModule
 
     interface BlockTagAppender
     {
-        void add(TagKey<Block> tag, Block... blocks);
+        void add(TagKey<Block> tag, ResourceKey<Block>... blocks);
 
         void addTag(TagKey<Block> tag, TagKey<Block> nestedTag);
 
-        void addOptional(TagKey<Block> tag, Block block);
+        void addOptional(TagKey<Block> tag, ResourceKey<Block> block);
 
         void addOptionalTag(TagKey<Block> tag, TagKey<Block> nestedTag);
     }
 
     interface ItemTagAppender
     {
-        void add(TagKey<Item> tag, Item... items);
+        void add(TagKey<Item> tag, ResourceKey<Item>... items);
 
         void addTag(TagKey<Item> tag, TagKey<Item> nestedTag);
 
-        void addOptional(TagKey<Item> tag, Item item);
+        void addOptional(TagKey<Item> tag, ResourceKey<Item> item);
 
         void addOptionalTag(TagKey<Item> tag, TagKey<Item> nestedTag);
     }
 
     interface FluidTagAppender
     {
-        void add(TagKey<Fluid> tag, Fluid... fluids);
+        void add(TagKey<Fluid> tag, ResourceKey<Fluid>... fluids);
 
         void addTag(TagKey<Fluid> tag, TagKey<Fluid> nestedTag);
 
-        void addOptional(TagKey<Fluid> tag, Fluid fluid);
+        void addOptional(TagKey<Fluid> tag, ResourceKey<Fluid> fluid);
 
         void addOptionalTag(TagKey<Fluid> tag, TagKey<Fluid> nestedTag);
     }

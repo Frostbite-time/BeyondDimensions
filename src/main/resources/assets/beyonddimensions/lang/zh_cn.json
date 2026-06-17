@@ -115,7 +115,7 @@
   "istack.beyonddimensions.storage_num.fluid": "已存储：%smB",
   "istack.beyonddimensions.storage_num.long_type": "已存储：%s",
 
-  "key.categories.beyonddimensions": "超越维度",
+  "key.category.beyonddimensions.short_keys": "超越维度",
   "key.beyonddimensions.open_gui": "打开维度网络",
   "key.beyonddimensions.open_terminal_quick_key": "快速打开物品栏中的终端",
   "key.beyonddimensions.main_hand_item_transfer_key": "主手物品快速转移",

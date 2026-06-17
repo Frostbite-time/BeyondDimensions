@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.common.data.ItemTagsProvider;
@@ -31,7 +32,7 @@ public class ModItemTagProvider extends ItemTagsProvider
         IntegrationManager.onItemTagDatagen(provider, new IIntegrationModule.ItemTagAppender()
         {
             @Override
-            public void add(TagKey<Item> tag, Item... items)
+            public void add(TagKey<Item> tag, ResourceKey<Item>... items)
             {
                 ModItemTagProvider.this.tag(tag).add(items);
             }
@@ -43,7 +44,7 @@ public class ModItemTagProvider extends ItemTagsProvider
             }
 
             @Override
-            public void addOptional(TagKey<Item> tag, Item item)
+            public void addOptional(TagKey<Item> tag, ResourceKey<Item> item)
             {
                 ModItemTagProvider.this.tag(tag).addOptional(item);
             }

@@ -112,7 +112,7 @@
   "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",
   "istack.beyonddimensions.storage_num.long_type": "保存済み：%s",
 
-  "key.categories.beyonddimensions": "次元を超えて",
+  "key.category.beyonddimensions.short_keys": "次元を超えて",
   "key.beyonddimensions.open_gui": "ネットワークを開く",
   "key.beyonddimensions.open_terminal_quick_key": "インベントリー内のターミナルをすばやく開く",
   "key.beyonddimensions.main_hand_item_transfer_key": "メインハンドのアイテムをクイック転送",

@@ -4,7 +4,6 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
-import com.wintercogs.beyonddimensions.integration.module.jech.PinInMatches;
 import com.wintercogs.beyonddimensions.util.TinyPinyinUtils;
 import com.wintercogs.beyonddimensions.util.TooltipHelper;
 import net.minecraft.client.Minecraft;
@@ -269,10 +268,10 @@ public class ClientNetStorageSearchHelper
         {
             matchPinyin = false; // 非中文地区默认不匹配
         }
-        else if (ModPresence.isLoaded(OtherModIds.JE_CHARACTERS))
-        {
-            matchPinyin = PinInMatches.contains(srcText, inputText);
-        }
+//        else if (ModPresence.isLoaded(OtherModIds.JE_CHARACTERS))
+//        {
+//            matchPinyin = PinInMatches.contains(srcText, inputText);
+//        }
         else
         {
             String allPinyin = TinyPinyinUtils.getAllPinyin(srcText, false).toLowerCase(Locale.ENGLISH);

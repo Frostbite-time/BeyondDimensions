@@ -1,1 +1,1 @@
-* Restored the JECH compat
+* init 26.2

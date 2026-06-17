@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
     "A": "beyonddimensions:space_time_bar",
     "B": "beyonddimensions:space_time_stable_frame",

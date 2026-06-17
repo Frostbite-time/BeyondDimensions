@@ -6,8 +6,10 @@ import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import org.jetbrains.annotations.NotNull;
@@ -33,22 +35,22 @@ public class ModBlockTagProvider extends BlockTagsProvider
     {
         // 标记以下方块使用镐子挖掘更快
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
-                .add(BDBlocks.NET_CONTROL.get())
-                .add(BDBlocks.NET_INTERFACE.get())
-                .add(BDBlocks.NET_PATHWAY.get())
-                .add(BDBlocks.NET_ENERGY_PATHWAY.get())
-                .add(BDBlocks.NET_TERMINAL_BLOCK.get())
-                .add(BDBlocks.NET_PUMP_BLOCK.get())
-                .add(BDBlocks.NET_HOPPER_BLOCK.get())
-                .add(BDBlocks.NET_FURNACE_BLOCK.get())
-                .add(BDBlocks.NET_BLAST_FURNACE_BLOCK.get())
-                .add(BDBlocks.NET_SMOKER_BLOCK.get())
-                .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
+                .add(BDBlocks.NET_CONTROL.getKey())
+                .add(BDBlocks.NET_INTERFACE.getKey())
+                .add(BDBlocks.NET_PATHWAY.getKey())
+                .add(BDBlocks.NET_ENERGY_PATHWAY.getKey())
+                .add(BDBlocks.NET_TERMINAL_BLOCK.getKey())
+                .add(BDBlocks.NET_PUMP_BLOCK.getKey())
+                .add(BDBlocks.NET_HOPPER_BLOCK.getKey())
+                .add(BDBlocks.NET_FURNACE_BLOCK.getKey())
+                .add(BDBlocks.NET_BLAST_FURNACE_BLOCK.getKey())
+                .add(BDBlocks.NET_SMOKER_BLOCK.getKey())
+                .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.getKey());
 
         IntegrationManager.onBlockTagDatagen(provider, new IIntegrationModule.BlockTagAppender()
         {
             @Override
-            public void add(TagKey<Block> tag, Block... blocks)
+            public void add(TagKey<Block> tag, ResourceKey<Block>... blocks)
             {
                 ModBlockTagProvider.this.tag(tag).add(blocks);
             }
@@ -60,7 +62,7 @@ public class ModBlockTagProvider extends BlockTagsProvider
             }
 
             @Override
-            public void addOptional(TagKey<Block> tag, Block block)
+            public void addOptional(TagKey<Block> tag, ResourceKey<Block> block)
             {
                 ModBlockTagProvider.this.tag(tag).addOptional(block);
             }

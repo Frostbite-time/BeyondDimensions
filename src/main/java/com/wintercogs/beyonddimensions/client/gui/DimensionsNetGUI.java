@@ -16,7 +16,6 @@ import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
-import com.wintercogs.beyonddimensions.integration.module.jei.BDJEIPlugin;
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket;
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenPrimaryNetSwitcherPacket;
 import com.wintercogs.beyonddimensions.util.UIDataHelper;
@@ -35,8 +34,6 @@ import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
-
-import java.util.Objects;
 
 
 public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
@@ -260,14 +257,14 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 // JEI
                 if (ModPresence.isLoaded(OtherModIds.JEI))
                 {
-                    BDJEIPlugin.runtime().ifPresent(rt -> {
-                        var overlay = rt.getIngredientFilter();
-                        String current = overlay.getFilterText();
-                        if (!Objects.equals(current, text))
-                        {
-                            overlay.setFilterText(text);
-                        }
-                    });
+//                    BDJEIPlugin.runtime().ifPresent(rt -> {
+//                        var overlay = rt.getIngredientFilter();
+//                        String current = overlay.getFilterText();
+//                        if (!Objects.equals(current, text))
+//                        {
+//                            overlay.setFilterText(text);
+//                        }
+//                    });
                 }
             }
         });
@@ -315,14 +312,14 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         {
             if (ModPresence.isLoaded(OtherModIds.JEI))
             {
-                BDJEIPlugin.runtime().ifPresent(rt -> {
-                    var overlay = rt.getIngredientFilter();
-                    String current = overlay.getFilterText();
-                    if (!Objects.equals(current, lastSearchText))
-                    {
-                        searchField.setValue(current);
-                    }
-                });
+//                BDJEIPlugin.runtime().ifPresent(rt -> {
+//                    var overlay = rt.getIngredientFilter();
+//                    String current = overlay.getFilterText();
+//                    if (!Objects.equals(current, lastSearchText))
+//                    {
+//                        searchField.setValue(current);
+//                    }
+//                });
             }
         }
 

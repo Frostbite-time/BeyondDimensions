@@ -101,16 +101,16 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
 
                     if (terminalStack == null && ModPresence.isLoaded(OtherModIds.CURIOS))
                     {
-                        terminalStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
-                                .flatMap(iCuriosItemHandler ->
-                                        iCuriosItemHandler.findFirstCurio(itemStack ->
-                                                itemStack.getItem() instanceof NetTerminalItem &&
-                                                        itemStack.has(BDDataComponents.NET_ID_DATA) &&
-                                                        itemStack.get(BDDataComponents.NET_ID_DATA) >= 0
-                                        )
-                                )
-                                .map(slotResult -> slotResult.stack())
-                                .orElse(null);
+//                        terminalStack = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
+//                                .flatMap(iCuriosItemHandler ->
+//                                        iCuriosItemHandler.findFirstCurio(itemStack ->
+//                                                itemStack.getItem() instanceof NetTerminalItem &&
+//                                                        itemStack.has(BDDataComponents.NET_ID_DATA) &&
+//                                                        itemStack.get(BDDataComponents.NET_ID_DATA) >= 0
+//                                        )
+//                                )
+//                                .map(slotResult -> slotResult.stack())
+//                                .orElse(null);
                     }
                 }
 

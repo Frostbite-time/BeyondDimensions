@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.FluidTagsProvider;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.common.Tags;
@@ -32,13 +33,13 @@ public class ModFluidTagsProvider extends FluidTagsProvider
     {
         // 把源体 + 流动体都塞进 c:experience
         tag(Tags.Fluids.EXPERIENCE)
-                .add(BDFluids.XP_FLUID.source().get())
-                .add(BDFluids.XP_FLUID.flowing().get());
+                .add(BDFluids.XP_FLUID.source().getKey())
+                .add(BDFluids.XP_FLUID.flowing().getKey());
 
         IntegrationManager.onFluidTagDatagen(provider, new IIntegrationModule.FluidTagAppender()
         {
             @Override
-            public void add(TagKey<Fluid> tag, Fluid... fluids)
+            public void add(TagKey<Fluid> tag, ResourceKey<Fluid>... fluids)
             {
                 ModFluidTagsProvider.this.tag(tag).add(fluids);
             }
@@ -50,7 +51,7 @@ public class ModFluidTagsProvider extends FluidTagsProvider
             }
 
             @Override
-            public void addOptional(TagKey<Fluid> tag, Fluid fluid)
+            public void addOptional(TagKey<Fluid> tag, ResourceKey<Fluid> fluid)
             {
                 ModFluidTagsProvider.this.tag(tag).addOptional(fluid);
             }

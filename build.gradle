@@ -66,7 +66,7 @@ base {
     archivesName = "${mod_id}-${minecraft_version}-neoforge"
 }
 
-// Minecraft 26.1 snapshots use Java 25.
+// Minecraft 26.2 snapshots use Java 25.
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
@@ -142,6 +142,15 @@ sourceSets {
         resources {
             srcDir 'src/generated/resources'
         }
+        java {
+            // 暂时排除JEI联动
+            exclude 'com/wintercogs/beyonddimensions/integration/module/jei/**'
+            exclude 'com/wintercogs/beyonddimensions/integration/module/ae2/**'
+            exclude 'com/wintercogs/beyonddimensions/integration/module/curios/**'
+            exclude 'com/wintercogs/beyonddimensions/integration/module/jade/**'
+            exclude 'com/wintercogs/beyonddimensions/integration/module/jech/**'
+            exclude 'com/wintercogs/beyonddimensions/integration/module/rs/**'
+        }
     }
 }
 
@@ -163,29 +172,29 @@ dependencies {
     }
 
     // JEI支持
-    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
-    runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    //compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+    //runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
     // 饰品栏支持
-    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
-    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    //compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
+    //runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
     // 通用拼音搜索-在安装时优先使用它的拼音处理 不启用runtime：会导致runServer失败
-    compileOnly "curse.maven:just-enough-characters-250702:8136581"
+    //compileOnly "curse.maven:just-enough-characters-250702:8136581"
 
     // GuideMe
-    runtimeOnly "curse.maven:guideme-1173950:7929350"
+    //runtimeOnly "curse.maven:guideme-1173950:7929350"
     // AE支持
-    compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
-    runtimeOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
+    //compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
+    //runtimeOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
 
     // RS支持
-    compileOnly "curse.maven:refined-storage-243076:8032789"
-    runtimeOnly "curse.maven:refined-storage-243076:8032789"
+    //compileOnly "curse.maven:refined-storage-243076:8032789"
+    //runtimeOnly "curse.maven:refined-storage-243076:8032789"
 
     // Jade支持
-    compileOnly "curse.maven:jade-324717:8068368"
-    runtimeOnly "curse.maven:jade-324717:8068368"
+    //compileOnly "curse.maven:jade-324717:8068368"
+    //runtimeOnly "curse.maven:jade-324717:8068368"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

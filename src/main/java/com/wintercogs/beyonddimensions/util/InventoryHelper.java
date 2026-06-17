@@ -8,8 +8,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
-import top.theillusivec4.curios.api.CuriosApi;
-import top.theillusivec4.curios.api.SlotResult;
 
 public class InventoryHelper
 {
@@ -110,12 +108,12 @@ public class InventoryHelper
 
         if (itemStack == null && ModPresence.isLoaded(OtherModIds.CURIOS))
         {
-            itemStack = CuriosApi.getCuriosInventory(player)
-                    .flatMap(iCuriosItemHandler ->
-                            iCuriosItemHandler.findFirstCurio(stack -> stack.is(item))
-                    )
-                    .map(SlotResult::stack)
-                    .orElse(null);
+//            itemStack = CuriosApi.getCuriosInventory(player)
+//                    .flatMap(iCuriosItemHandler ->
+//                            iCuriosItemHandler.findFirstCurio(stack -> stack.is(item))
+//                    )
+//                    .map(SlotResult::stack)
+//                    .orElse(null);
         }
 
         return itemStack;
