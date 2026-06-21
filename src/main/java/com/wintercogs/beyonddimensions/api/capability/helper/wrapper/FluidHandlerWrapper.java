@@ -72,18 +72,14 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
     @Override
     public long extract(int slot, long amount, boolean sim)
     {
-        for (int i = 0; i < getSlots(); i++)
-        {
-            FluidStack stack = getStackInSlot(i);
-            if (!stack.isEmpty())
-            {
-                if (sim)
-                    return fluidHandler.drain(stack.copyWithAmount((int) Math.min(amount, Integer.MAX_VALUE)), IFluidHandler.FluidAction.SIMULATE).getAmount();
-                else
-                    return fluidHandler.drain(stack.copyWithAmount((int) Math.min(amount, Integer.MAX_VALUE)), IFluidHandler.FluidAction.EXECUTE).getAmount();
-            }
-        }
-        return 0;
+        if (amount <= 0) return 0;
+        if (slot < 0 || slot >= getSlots()) return 0;
+        FluidStack target = fluidHandler.getFluidInTank(slot);
+
+        if (sim)
+            return fluidHandler.drain(target.copyWithAmount((int) Math.min(amount, Integer.MAX_VALUE)), IFluidHandler.FluidAction.SIMULATE).getAmount();
+        else
+            return fluidHandler.drain(target.copyWithAmount((int) Math.min(amount, Integer.MAX_VALUE)), IFluidHandler.FluidAction.EXECUTE).getAmount();
     }
 
     @Override
