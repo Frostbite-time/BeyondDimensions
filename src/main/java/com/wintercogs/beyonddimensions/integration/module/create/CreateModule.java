@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.integration.module.create;
 
-import com.simibubi.create.AllTags;
 import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
 import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;

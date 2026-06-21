@@ -230,7 +230,9 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
         allowedDirections.clear();
     }
 
-    /** 更新能力，这是给Mixin部分使用的专门刷新方法 */
+    /**
+     * 更新能力，这是给Mixin部分使用的专门刷新方法
+     */
     public static void updateAdjacentPathways(Level level, BlockPos schematicannonPos)
     {
         if (level == null || level.isClientSide()) return;

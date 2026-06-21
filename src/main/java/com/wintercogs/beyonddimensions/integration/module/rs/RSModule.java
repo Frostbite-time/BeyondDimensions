@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.integration.module.rs;
 
 import com.refinedmods.refinedstorage.api.storage.StorageType;
 import com.refinedmods.refinedstorage.apiimpl.API;
-import com.simibubi.create.AllTags;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;

@@ -1,10 +1,6 @@
 package com.wintercogs.beyonddimensions.integration.module.curios;
 
-import com.wintercogs.beyonddimensions.common.item.NetFeederItem;
-import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
-import com.wintercogs.beyonddimensions.common.item.NetRestockerItem;
-import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
-import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
+import com.wintercogs.beyonddimensions.common.item.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.AttachCapabilitiesEvent;

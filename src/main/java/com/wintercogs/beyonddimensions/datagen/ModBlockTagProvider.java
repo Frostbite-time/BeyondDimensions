@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.simibubi.create.AllTags;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
