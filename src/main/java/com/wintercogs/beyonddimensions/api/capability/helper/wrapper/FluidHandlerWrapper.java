@@ -3,6 +3,8 @@ package com.wintercogs.beyonddimensions.api.capability.helper.wrapper;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
@@ -72,18 +74,14 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
     @Override
     public long extract(int slot, long amount, boolean sim)
     {
-        for (int i = 0; i < getSlots(); i++)
-        {
-            FluidStack stack = getStackInSlot(i);
-            if (!stack.isEmpty())
-            {
-                if (sim)
-                    return fluidHandler.drain(new FluidStack(stack, (int) Math.min(amount, Integer.MAX_VALUE)), IFluidHandler.FluidAction.SIMULATE).getAmount();
-                else
-                    return fluidHandler.drain(new FluidStack(stack, (int) Math.min(amount, Integer.MAX_VALUE)), IFluidHandler.FluidAction.EXECUTE).getAmount();
-            }
-        }
-        return 0;
+        if (slot < 0 || slot >= getSlots()) return 0;
+        FluidStack target = fluidHandler.getFluidInTank(slot);
+        if (target.isEmpty() || amount <= 0) return 0;
+
+        if (sim)
+            return fluidHandler.drain(new FluidStack(target, (int) Math.min(amount, Integer.MAX_VALUE)), IFluidHandler.FluidAction.SIMULATE).getAmount();
+        else
+            return fluidHandler.drain(new FluidStack(target, (int) Math.min(amount, Integer.MAX_VALUE)), IFluidHandler.FluidAction.EXECUTE).getAmount();
     }
 
     @Override
