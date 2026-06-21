@@ -2,8 +2,6 @@ package com.wintercogs.beyonddimensions.common.menu.widget;
 
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.integration.ModPresence;
-import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.util.TinyPinyinUtils;
 import com.wintercogs.beyonddimensions.util.TooltipHelper;
 import net.minecraft.client.Minecraft;
