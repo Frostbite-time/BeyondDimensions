@@ -74,9 +74,9 @@ public class FluidHandlerWrapper implements IStackHandlerWrapper<FluidStack>
     @Override
     public long extract(int slot, long amount, boolean sim)
     {
+        if (amount <= 0) return 0;
         if (slot < 0 || slot >= getSlots()) return 0;
         FluidStack target = fluidHandler.getFluidInTank(slot);
-        if (target.isEmpty() || amount <= 0) return 0;
 
         if (sim)
             return fluidHandler.drain(new FluidStack(target, (int) Math.min(amount, Integer.MAX_VALUE)), IFluidHandler.FluidAction.SIMULATE).getAmount();
