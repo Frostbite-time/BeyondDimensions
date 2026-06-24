@@ -29,7 +29,6 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.jetbrains.annotations.NotNull;
-import vazkii.botania.api.BotaniaForgeCapabilities;
 
 import java.util.Collections;
 import java.util.List;
@@ -59,8 +58,8 @@ public class BotaniaModule implements IIntegrationModule
     public void onCommonSetup(FMLCommonSetupEvent event)
     {
         StackKeyRegistry.registerType(ManaStackKey.INSTANCE);
-        CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, BotaniaForgeCapabilities.MANA_RECEIVER);
-        CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, BotaniaForgeCapabilities.MANA_ITEM);
+        CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, BotaniaCapabilityCompat.manaReceiver());
+        CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, BotaniaCapabilityCompat.manaItem());
         CapabilityHelper.registerUSHandler(ManaStackKey.INSTANCE, ManaUnifiedStorageHandler::new);
         CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
         StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
