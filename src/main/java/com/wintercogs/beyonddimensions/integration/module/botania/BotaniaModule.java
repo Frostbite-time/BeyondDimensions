@@ -3,6 +3,8 @@ package com.wintercogs.beyonddimensions.integration.module.botania;
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
+import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
+import com.wintercogs.beyonddimensions.common.block.entity.NetPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -26,10 +28,14 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.ItemCapability;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.jetbrains.annotations.NotNull;
-import vazkii.botania.api.BotaniaForgeCapabilities;
+import vazkii.botania.api.mana.ManaItem;
+import vazkii.botania.api.mana.ManaReceiver;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,6 +58,7 @@ public class BotaniaModule implements IIntegrationModule
 
         modBus.addListener(ManaPoolPathwayBlockEntity::registerCapability);
         modBus.addListener(BDBotaniaPlugin::registerCapability);
+        modBus.addListener(this::registerNetCapabilities);
         gameBus.addListener(BotaniaModuleDataPackSyncListener::onDataPackSync);
     }
 
@@ -59,14 +66,22 @@ public class BotaniaModule implements IIntegrationModule
     public void onCommonSetup(FMLCommonSetupEvent event)
     {
         StackKeyRegistry.registerType(ManaStackKey.INSTANCE);
-        CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, BotaniaForgeCapabilities.MANA_RECEIVER);
-        CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, BotaniaForgeCapabilities.MANA_ITEM);
         CapabilityHelper.registerUSHandler(ManaStackKey.INSTANCE, ManaUnifiedStorageHandler::new);
         CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
         StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);
 
         // 能力交互黑名单（魔力手镜）
         BDBotaniaPlugin.registerItemCapBlackList();
+    }
+
+    private void registerNetCapabilities(RegisterCapabilitiesEvent event)
+    {
+        BlockCapability<ManaReceiver, net.minecraft.core.Direction> manaReceiver = BotaniaCompat.manaReceiver();
+        ItemCapability<ManaItem, Void> manaItem = BotaniaCompat.manaItem();
+        CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, manaReceiver);
+        CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, manaItem);
+        NetInterfaceBlockEntity.registerCapability(event, ManaStackKey.ID, manaReceiver);
+        NetPathwayBlockEntity.registerCapability(event, ManaStackKey.ID, manaReceiver);
     }
 
     @Override

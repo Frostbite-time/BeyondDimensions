@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.api.util.CapCtx;
 import com.wintercogs.beyonddimensions.common.block.entity.NetedBlockEntity;
+import com.wintercogs.beyonddimensions.integration.module.botania.BotaniaCompat;
 import com.wintercogs.beyonddimensions.integration.module.botania.init.BotaniaModuleBlockEntities;
 import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.util.BDMath;
@@ -30,6 +31,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
@@ -37,12 +39,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.lwjgl.opengl.GL11;
 import vazkii.botania.api.BotaniaAPIClient;
-import vazkii.botania.api.BotaniaForgeCapabilities;
-import vazkii.botania.api.BotaniaForgeClientCapabilities;
 import vazkii.botania.api.block.WandHUD;
 import vazkii.botania.api.block.Wandable;
 import vazkii.botania.api.internal.ManaBurst;
-import vazkii.botania.api.internal.VanillaPacketDispatcher;
 import vazkii.botania.api.item.ManaDissolvable;
 import vazkii.botania.api.mana.KeyLocked;
 import vazkii.botania.api.mana.ManaCollector;
@@ -53,18 +52,14 @@ import vazkii.botania.client.core.helper.RenderHelper;
 import vazkii.botania.client.fx.SparkleParticleData;
 import vazkii.botania.client.fx.WispParticleData;
 import vazkii.botania.client.gui.HUDHandler;
-import vazkii.botania.common.block.BotaniaBlocks;
 import vazkii.botania.common.block.block_entity.mana.BellowsBlockEntity;
 import vazkii.botania.common.block.block_entity.mana.ManaPoolBlockEntity;
-import vazkii.botania.common.block.block_entity.mana.ThrottledPacket;
 import vazkii.botania.common.crafting.BotaniaRecipeTypes;
 import vazkii.botania.common.crafting.StateIngredients;
 import vazkii.botania.common.handler.BotaniaSounds;
 import vazkii.botania.common.helper.EntityHelper;
-import vazkii.botania.common.item.BotaniaItems;
 import vazkii.botania.common.item.ManaTabletItem;
 import vazkii.botania.xplat.BotaniaConfig;
-import vazkii.botania.xplat.XplatAbstractions;
 
 import java.util.List;
 
@@ -72,7 +67,7 @@ import java.util.List;
  * 既可以为功能花提供魔力，也可以从产能花以及魔力发射器接收魔力，并能并入火花网络的魔力池
  */
 public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
-        implements ManaCollector, ManaPool, SparkAttachable, Wandable, KeyLocked, ThrottledPacket
+        implements ManaCollector, ManaPool, SparkAttachable, Wandable, KeyLocked
 {
 
     // Botania 常量/事件
@@ -140,25 +135,28 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
         event.registerBlockEntity(
-                BotaniaForgeCapabilities.MANA_RECEIVER,
+                BotaniaCompat.manaReceiver(),
                 BotaniaModuleBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> be instanceof ManaPoolPathwayBlockEntity pool ? pool : null
         );
 
         event.registerBlockEntity(
-                BotaniaForgeCapabilities.SPARK_ATTACHABLE,
+                BotaniaCompat.sparkAttachable(),
                 BotaniaModuleBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> be instanceof ManaPoolPathwayBlockEntity pool ? pool : null
         );
 
-        event.registerBlockEntity(
-                BotaniaForgeClientCapabilities.BLOCK_WAND_HUD,
-                BotaniaModuleBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
-                (be, side) -> be instanceof ManaPoolPathwayBlockEntity pool ? new WandHud(pool) : null
-        );
+        if (FMLEnvironment.dist == Dist.CLIENT)
+        {
+            event.registerBlockEntity(
+                    BotaniaCompat.blockWandHud(),
+                    BotaniaModuleBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
+                    (be, side) -> be instanceof ManaPoolPathwayBlockEntity pool ? new WandHud(pool) : null
+            );
+        }
 
         event.registerBlockEntity(
-                BotaniaForgeCapabilities.WANDABLE,
+                BotaniaCompat.wandable(),
                 BotaniaModuleBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> be instanceof ManaPoolPathwayBlockEntity pool ? pool : null
         );
@@ -196,8 +194,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
         // 10 tick节流发包
         if (be.sendPacket && be.ticks % 10 == 0)
         {
-            VanillaPacketDispatcher.dispatchTEToNearbyPlayers(be);
-            be.sendPacket = false;
+            be.syncNow(level, pos, state);
         }
 
         // 扫描池内物品
@@ -207,7 +204,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
             if (!item.isAlive()) continue;
 
             ItemStack stack = item.getItem();
-            var mana = XplatAbstractions.INSTANCE.findManaItem(stack);
+            var mana = BotaniaCompat.findManaItem(stack);
             if (stack.isEmpty() || mana == null) continue;
 
             boolean isOutputting = be.isOutputtingPower();
@@ -253,7 +250,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
                     int space = BDMath.clampLongToInt(be.getActualMaxMana() - be.getActualCurrentMana());
                     int manaVal = Math.min(transfRate, Math.min(space, mana.getMana()));
 
-                    if (manaVal == 0 && level.getBlockState(pos.below()).is(BotaniaBlocks.manaVoid))
+                    if (manaVal == 0 && level.getBlockState(pos.below()).is(BotaniaCompat.manaVoid()))
                     {
                         manaVal = Math.min(transfRate, mana.getMana());
                     }
@@ -292,7 +289,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
             be.ticksDoingTransfer = 0;
             if (wasDoingTransfer)
             {
-                VanillaPacketDispatcher.dispatchTEToNearbyPlayers(be);
+                be.syncNow(level, pos, state);
             }
         }
 
@@ -314,7 +311,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
             dissolvable.onDissolveTick(this, item);
         }
 
-        if (XplatAbstractions.INSTANCE.itemFlagsComponent(item).manaInfusionSpawned)
+        if (BotaniaCompat.isManaInfusionSpawned(item))
         {
             return false;
         }
@@ -333,7 +330,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
 
                 ItemEntity outputItem = new ItemEntity(level,
                         worldPosition.getX() + 0.5, worldPosition.getY() + 1.5, worldPosition.getZ() + 0.5, output);
-                XplatAbstractions.INSTANCE.itemFlagsComponent(outputItem).manaInfusionSpawned = true;
+                BotaniaCompat.setManaInfusionSpawned(outputItem);
 
                 if (item.getOwner() instanceof Player player)
                 {
@@ -622,7 +619,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
         if (refreshHandler())
         {
             handler.receiveMana(mana);
-            markDispatchable();
+            queueSync();
             setChanged();
         }
     }
@@ -658,8 +655,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
         {
             isOutPutting = !isOutPutting;
             setChanged();
-            markDispatchable();
-            VanillaPacketDispatcher.dispatchTEToNearbyPlayers(this);
+            syncNow(level, worldPosition, getBlockState());
         }
         return true;
     }
@@ -723,10 +719,15 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
         return best;
     }
 
-    @Override
-    public void markDispatchable()
+    private void queueSync()
     {
         sendPacket = true;
+    }
+
+    private void syncNow(Level level, BlockPos pos, BlockState state)
+    {
+        level.sendBlockUpdated(pos, state, state, 3);
+        sendPacket = false;
     }
 
     @Override
@@ -774,7 +775,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
             RenderHelper.drawTexturedModalRect(gui, HUDHandler.manaBar, centerX - 11, centerY + 30, arrowU, arrowV, 22, 15);
             RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
-            ItemStack tablet = new ItemStack(BotaniaItems.manaTablet);
+            ItemStack tablet = new ItemStack(BotaniaCompat.manaTablet());
             ManaTabletItem.setStackCreative(tablet);
 
             gui.renderItem(tablet, centerX - 31, centerY + 30);

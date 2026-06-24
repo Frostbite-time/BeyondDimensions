@@ -223,21 +223,26 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
         CapabilityHelper.BlockCapabilityMap.forEach(
                 (resourceLocation, directionBlockCapability) -> {
-                    CommonHandler handler = CapabilityHelper.CommonHandlerMap.get(resourceLocation);
-                    event.registerBlockEntity(
-                            (BlockCapability<? super Object, ? extends Direction>) directionBlockCapability,
-                            BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
-                            (be, side) -> {
-                                if (handler != null)
-                                {
-                                    if (handler.isContextual())
-                                        return handler.apply(be.stackHandler, new CapCtx(be.level, be.getBlockPos(), be));
-                                    else
-                                        return handler.apply(be.stackHandler, null);
-                                }
-                                return null; // 如果handler是null，那么必然返回null
-                            }
-                    );
+                    registerCapability(event, resourceLocation, directionBlockCapability);
+                }
+        );
+    }
+
+    public static void registerCapability(RegisterCapabilitiesEvent event, ResourceLocation resourceLocation, BlockCapability<?, Direction> directionBlockCapability)
+    {
+        CommonHandler handler = CapabilityHelper.CommonHandlerMap.get(resourceLocation);
+        event.registerBlockEntity(
+                (BlockCapability<? super Object, ? extends Direction>) directionBlockCapability,
+                BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
+                (be, side) -> {
+                    if (handler != null)
+                    {
+                        if (handler.isContextual())
+                            return handler.apply(be.stackHandler, new CapCtx(be.level, be.getBlockPos(), be));
+                        else
+                            return handler.apply(be.stackHandler, null);
+                    }
+                    return null; // 如果handler是null，那么必然返回null
                 }
         );
     }

@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.integration.module.botania.datagen;
 
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
+import com.wintercogs.beyonddimensions.integration.module.botania.BotaniaCompat;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.botania.init.BotaniaModuleBlocks;
 import net.minecraft.core.HolderLookup;
@@ -10,7 +11,6 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import org.jetbrains.annotations.NotNull;
-import vazkii.botania.common.block.BotaniaBlocks;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -38,7 +38,7 @@ public class BotaniaModuleRecipeProvider extends BDRecipeProvider
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BotaniaModuleBlocks.MANA_POOL_PATHWAY.get())
                 .pattern("ABA")
                 .pattern("AAA")
-                .define('A', BotaniaBlocks.livingrock)
+                .define('A', BotaniaCompat.livingrock())
                 .define('B', BDItems.SPACE_TIME_STABLE_FRAME.get())
                 .unlockedBy("unlock_mana_pool_pathway", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
                 .save(compatOutput);

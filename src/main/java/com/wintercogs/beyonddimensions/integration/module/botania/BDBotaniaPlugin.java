@@ -7,8 +7,6 @@ import com.wintercogs.beyonddimensions.common.menu.widget.slot.ItemCapInteractio
 import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaStackTypedHandler;
 import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaUnifiedStorageHandler;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import vazkii.botania.api.BotaniaForgeCapabilities;
-import vazkii.botania.common.item.BotaniaItems;
 
 /**
  * 为网络通道和网络接口注册火花附着
@@ -17,13 +15,13 @@ public class BDBotaniaPlugin
 {
     public static void registerItemCapBlackList()
     {
-        ItemCapInteractionBlackList.addToBlackList(BotaniaItems.manaMirror);
+        ItemCapInteractionBlackList.addToBlackList(BotaniaCompat.manaMirror());
     }
 
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
         event.registerBlockEntity(
-                BotaniaForgeCapabilities.SPARK_ATTACHABLE,
+                BotaniaCompat.sparkAttachable(),
                 BDBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     DimensionsNet net = be.getNet();
@@ -36,7 +34,7 @@ public class BDBotaniaPlugin
         );
 
         event.registerBlockEntity(
-                BotaniaForgeCapabilities.SPARK_ATTACHABLE,
+                BotaniaCompat.sparkAttachable(),
                 BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     return new ManaStackTypedHandler(be.getStackHandler(), new CapCtx(be.getLevel(), be.getBlockPos(), be));
