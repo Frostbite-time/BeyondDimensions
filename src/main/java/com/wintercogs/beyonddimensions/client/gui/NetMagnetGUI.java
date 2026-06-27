@@ -16,8 +16,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
-{
+public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu> {
     private RightTabButton filterModeButton;
     private RightTabButton controlModeButton;
     private RightTabButton hopperItemModeButton;
@@ -26,14 +25,12 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
     private RightTabButton hopperFluidModeButton;
     private LeftTabButton hopperRangeModeButton;
 
-    public NetMagnetGUI(NetMagnetMenu menu, Inventory playerInventory, Component title)
-    {
+    public NetMagnetGUI(NetMagnetMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         super.init();
 
         this.imageWidth = 176;
@@ -47,11 +44,9 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             filterModeButton.toggleState();
             menu.menuStack.set(BDDataComponents.FILTER_MODE, (FilterMode) filterModeButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(FilterMode.IGNORE, BeyondDimensions.makeId("widget/ignore_filter"));
                 iconMap.put(FilterMode.WHITE, BeyondDimensions.makeId("widget/white_filter"));
                 iconMap.put(FilterMode.BLACK, BeyondDimensions.makeId("widget/black_filter"));
@@ -60,8 +55,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                 tooltipMap.put(FilterMode.WHITE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_white")));
                 tooltipMap.put(FilterMode.BLACK, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_black")));
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -75,11 +69,9 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             controlModeButton.toggleState();
             menu.menuStack.set(BDDataComponents.CONTROL_MODE, (RedStoneControlMode) controlModeButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(RedStoneControlMode.IGNORE, BeyondDimensions.makeId("widget/control_mode_ignore"));
                 iconMap.put(RedStoneControlMode.NOT_WORKING, BeyondDimensions.makeId("widget/control_mode_not_working"));
 
@@ -87,8 +79,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                 tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -102,11 +93,9 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             hopperItemModeButton.toggleState();
             menu.menuStack.set(BDDataComponents.HOPPER_ITEM_MODE, (HopperItemMode) hopperItemModeButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(HopperItemMode.DENY, BeyondDimensions.makeId("widget/hopper_item_mode_deny"));
                 iconMap.put(HopperItemMode.ALLOW, BeyondDimensions.makeId("widget/hopper_item_mode_allow"));
 
@@ -115,8 +104,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                 tooltipMap.put(HopperItemMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_item_mode_allow")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -130,11 +118,9 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             hopperXpModeButton.toggleState();
             menu.menuStack.set(BDDataComponents.HOPPER_XP_MODE, (HopperXpMode) hopperXpModeButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(HopperXpMode.DENY, BeyondDimensions.makeId("widget/hopper_xp_mode_deny"));
                 iconMap.put(HopperXpMode.ALLOW, BeyondDimensions.makeId("widget/hopper_xp_mode_allow"));
 
@@ -143,8 +129,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                 tooltipMap.put(HopperXpMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_xp_mode_allow")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -158,11 +143,9 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             hopperNBTModeButton.toggleState();
             menu.menuStack.set(BDDataComponents.HOPPER_NBT_MODE, (HopperNBTMode) hopperNBTModeButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(HopperNBTMode.DENY, BeyondDimensions.makeId("widget/hopper_nbt_mode_deny"));
                 iconMap.put(HopperNBTMode.ALLOW, BeyondDimensions.makeId("widget/hopper_nbt_mode_allow"));
 
@@ -171,8 +154,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                 tooltipMap.put(HopperNBTMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_nbt_mode_allow")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -186,11 +168,9 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             hopperFluidModeButton.toggleState();
             menu.menuStack.set(BDDataComponents.HOPPER_FLUID_MODE, (HopperFluidMode) hopperFluidModeButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(HopperFluidMode.DENY, BeyondDimensions.makeId("widget/hopper_fluid_mode_deny"));
                 iconMap.put(HopperFluidMode.ALLOW, BeyondDimensions.makeId("widget/hopper_fluid_mode_allow"));
 
@@ -198,8 +178,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                 tooltipMap.put(HopperFluidMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_fluid_mode_allow")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -213,11 +192,9 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
             hopperRangeModeButton.toggleState();
             menu.menuStack.set(BDDataComponents.HOPPER_RANGE_MODE, (HopperRangeMode) hopperRangeModeButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(HopperRangeMode.RADIUS_LOWEST, BeyondDimensions.makeId("widget/hopper_range_mode_lowest"));
                 iconMap.put(HopperRangeMode.RADIUS_LOW, BeyondDimensions.makeId("widget/hopper_range_mode_low"));
                 iconMap.put(HopperRangeMode.RADIUS_MID, BeyondDimensions.makeId("widget/hopper_range_mode_mid"));
@@ -233,8 +210,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
                 tooltipMap.put(HopperRangeMode.CHUNK_MODE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.magnet_range_mode_chunk")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -245,8 +221,7 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
     }
 
     @Override
-    protected void containerTick()
-    {
+    protected void containerTick() {
         super.containerTick();
         if (filterModeButton.currentState != menu.menuStack.get(BDDataComponents.FILTER_MODE))
             filterModeButton.setState(menu.menuStack.get(BDDataComponents.FILTER_MODE));
@@ -272,13 +247,11 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
+    public boolean keyPressed(KeyEvent event) {
         InputConstants.Key key = InputConstants.getKey(event);
 
         if (Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key)
-                || BDShortKeys.OPEN_MAGNET_GUI_KEY.getKey().equals(key))
-        {
+                || BDShortKeys.OPEN_MAGNET_GUI_KEY.getKey().equals(key)) {
             onClose();
             return true;
         }
@@ -287,8 +260,8 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
-    {
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(guiGraphics, mouseX, mouseY, a);
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
         CommonTexturesRender.renderFilterSlots(guiGraphics, this.leftPos, drawY);
@@ -300,20 +273,17 @@ public class NetMagnetGUI extends BDBaseGUI<NetMagnetMenu>
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
-    {
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym) {
         guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
         GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.filter_slots"), imageWidth - 6, this.titleLabelY + 3, -12566464, false);
         guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
-    protected int rebuildImageHeight()
-    {
+    protected int rebuildImageHeight() {
         return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + CommonTextures.PLAYER_INV_HEIGHT;
     }
 
-    protected void rebuildLabelHeight()
-    {
+    protected void rebuildLabelHeight() {
         this.titleLabelY = 8;
         this.inventoryLabelY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + 4;
     }

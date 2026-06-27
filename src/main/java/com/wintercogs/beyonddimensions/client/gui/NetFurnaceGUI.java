@@ -13,21 +13,18 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
-{
+public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu> {
     private RightTabButton popModeButton; // 弹出模式
     private RightTabButton controlModeButton;
     private RightTabButton receiveModeButton;
     private RightTabButton sortModeButton;
 
-    public NetFurnaceGUI(NetFurnaceMenu menu, Inventory playerInventory, Component title)
-    {
+    public NetFurnaceGUI(NetFurnaceMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         super.init();
 
         this.imageWidth = 230;
@@ -42,11 +39,9 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
             popModeButton.toggleState();
             menu.be.popMode = (PopMode) popModeButton.currentState;
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(PopMode.OPEN, BeyondDimensions.makeId("widget/popmode_up"));
                 iconMap.put(PopMode.STOP, BeyondDimensions.makeId("widget/popmode_down"));
 
@@ -54,8 +49,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
                 tooltipMap.put(PopMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_off")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -69,11 +63,9 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
             receiveModeButton.toggleState();
             menu.be.receiveMode = (ReceiveMode) receiveModeButton.currentState;
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(ReceiveMode.STOP, BeyondDimensions.makeId("widget/net_disable"));
                 iconMap.put(ReceiveMode.OPEN, BeyondDimensions.makeId("widget/net_absorb"));
 
@@ -81,8 +73,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
                 tooltipMap.put(ReceiveMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.receive_mode_open")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -96,11 +87,9 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
             controlModeButton.toggleState();
             menu.be.controlMode = (RedStoneControlMode) controlModeButton.currentState;
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(RedStoneControlMode.IGNORE, BeyondDimensions.makeId("widget/control_mode_ignore"));
                 iconMap.put(RedStoneControlMode.NOT_WORKING, BeyondDimensions.makeId("widget/control_mode_not_working"));
                 iconMap.put(RedStoneControlMode.POWERED, BeyondDimensions.makeId("widget/control_mode_powered"));
@@ -113,8 +102,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
                 tooltipMap.put(RedStoneControlMode.UNPOWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_unpowered")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -128,19 +116,16 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
             sortModeButton.toggleState();
             menu.be.sortMode = (AutoSortMode) sortModeButton.currentState;
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(AutoSortMode.OPEN, BeyondDimensions.makeId("widget/sort_mode_open"));
                 iconMap.put(AutoSortMode.STOP, BeyondDimensions.makeId("widget/sort_mode_stop"));
 
                 tooltipMap.put(AutoSortMode.OPEN, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_mode_open")));
                 tooltipMap.put(AutoSortMode.STOP, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_mode_stop")));
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -151,8 +136,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
     }
 
     @Override
-    protected void containerTick()
-    {
+    protected void containerTick() {
         super.containerTick();
         if (controlModeButton.currentState != menu.be.controlMode)
             controlModeButton.setState(menu.be.controlMode);
@@ -168,39 +152,34 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
-    {
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(guiGraphics, mouseX, mouseY, a);
         CommonTexturesRender.renderNetFurnaceBackground(guiGraphics, leftPos, new int[]{topPos});
 
         // 绘制熔炼进度 getCapacity为同时处理的任务数
-        for (int i = 0; i < menu.be.getCapacity(); i++)
-        {
+        for (int i = 0; i < menu.be.getCapacity(); i++) {
             float progress = (float) menu.be.getCookTime().get(i) / (float) menu.be.getCookTimeTotal().get(i);
             CommonTexturesRender.renderWorkDoneV_AsProgress(guiGraphics, leftPos + 32 + i * 19, new int[]{topPos + 61}, CommonTextures.WORK_DONE_V_WIDTH, CommonTextures.WORK_DONE_V_HEIGHT, progress);
         }
         // 绘制燃料进度
-        for (int i = 0; i < menu.be.getCapacity(); i++)
-        {
+        for (int i = 0; i < menu.be.getCapacity(); i++) {
             float progress = (float) menu.be.getLitTime().get(i) / menu.be.getLitDuration().get(i);
             CommonTexturesRender.renderFurnaceWorkV_AsProgress(guiGraphics, leftPos + 31 + i * 19, new int[]{topPos + 109}, CommonTextures.FURNACE_WORK_V_WIDTH, CommonTextures.FURNACE_WORK_V_HEIGHT, progress);
         }
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
-    {
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym) {
         guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
         guiGraphics.text(this.font, Component.translatable("menu.label.beyonddimensions.input_filter_slots"), 6, 27, -12566464, false);
         GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.fuel_filter_slots"), 224, 27, -12566464, false);
     }
 
-    protected int rebuildImageHeight()
-    {
+    protected int rebuildImageHeight() {
         return 210;
     }
 
-    protected void rebuildLabelHeight()
-    {
+    protected void rebuildLabelHeight() {
         this.titleLabelY = 8;
         this.inventoryLabelX = 6;
         this.inventoryLabelY = 190;

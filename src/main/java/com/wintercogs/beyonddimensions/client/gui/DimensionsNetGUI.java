@@ -39,8 +39,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Objects;
 
 
-public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
-{
+public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T> {
 
     protected static final Identifier GUI_TEXTURE_TOP_BASE = Identifier.parse("beyonddimensions:textures/gui/top_base.png");
     protected static final int TOP_BASE_WIDTH = 194;
@@ -70,23 +69,19 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     protected IconButton primaryNetSwitcherButton;
     protected BigScroller scroller;
 
-    public DimensionsNetGUI(T container, Inventory playerInventory, Component title)
-    {
+    public DimensionsNetGUI(T container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         super.init();
 
         clearWidgets();
 
-        if (UIDataHelper.isTransfer)
-        {
+        if (UIDataHelper.isTransfer) {
             menu.lineData = UIDataHelper.currentPage;
-            if (UIDataHelper.lastMousePos != null)
-            {
+            if (UIDataHelper.lastMousePos != null) {
                 Window window = Minecraft.getInstance().getWindow();
                 GLFW.glfwSetCursorPos(
                         window.handle(),
@@ -100,8 +95,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         // 计算最大行数
         int maxLines = calMaxLines();
-        if (maxLines < menu.getLines())
-        {
+        if (maxLines < menu.getLines()) {
             // 自动计算不主动持久化参数
             if (maxLines < 2)
                 maxLines = 2;
@@ -142,11 +136,9 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.set((ButtonState) secondSortButton.currentState);
             Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.save();
             menu.buildIndexList();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(ButtonState.SORT_CREATIVE_TAB, BeyondDimensions.makeId("widget/sort_creative_tab"));
                 iconMap.put(ButtonState.SORT_MAX_STACK, BeyondDimensions.makeId("widget/sort_max_stack"));
                 iconMap.put(ButtonState.SORT_QUANTITY, BeyondDimensions.makeId("widget/sort_quantity"));
@@ -163,8 +155,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 tooltipMap.put(ButtonState.SORT_INSERTED_TIME, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.sort_inserted_time_second")));
                 tooltipMap.put(ButtonState.SORT_MODIFIED_TIME, Tooltip.create(Component.translatable(("tooltip.button.beyonddimensions.sort_modified_time_second"))));
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
                 setState(CommonConfigRuntime.uiSecondSortButton);
@@ -194,8 +185,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addPageButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 4, 16, 16, BeyondDimensions.makeId("widget/up_arrow"), button ->
         {
             if (this.height - 36 <= (rebuildImageHeight() + MID_SLOTS_HEIGHT)
-                    || menu.getLines() >= 99)
-            {
+                    || menu.getLines() >= 99) {
                 return;
             }
             menu.addLines();
@@ -240,12 +230,9 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         this.searchField.setTextColor(0xFFFFFFFF);
         this.searchField.setTooltip(Tooltip.create(Component.translatable("tooltip.editbox.beyonddimensions.search")));
         this.searchField.setResponder(text -> {
-            if (text.isEmpty())
-            {
+            if (text.isEmpty()) {
                 searchField.setSuggestion(Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch").getString());
-            }
-            else
-            {
+            } else {
                 searchField.setSuggestion(null);
             }
             menu.loadSearchText(text);
@@ -255,28 +242,22 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             lastSearchText = text;
 
             // 文本同步
-            if (CommonConfigRuntime.searchTextWithJEIEMI)
-            {
+            if (CommonConfigRuntime.searchTextWithJEIEMI) {
                 // JEI
-                if (ModPresence.isLoaded(OtherModIds.JEI))
-                {
+                if (ModPresence.isLoaded(OtherModIds.JEI)) {
                     BDJEIPlugin.runtime().ifPresent(rt -> {
                         var overlay = rt.getIngredientFilter();
                         String current = overlay.getFilterText();
-                        if (!Objects.equals(current, text))
-                        {
+                        if (!Objects.equals(current, text)) {
                             overlay.setFilterText(text);
                         }
                     });
                 }
             }
         });
-        if (!this.searchField.getValue().equals(""))
-        {
+        if (!this.searchField.getValue().equals("")) {
             this.searchField.setSuggestion(null);
-        }
-        else
-        {
+        } else {
             searchField.setSuggestion(Component.translatable("wintercogs.beyonddimensions.dimensionsguisearch").getString());
         }
         this.searchField.setValue(CommonConfigRuntime.uiSearch);
@@ -292,8 +273,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 menu.maxLineData,
                 pos ->
                 {
-                    if (menu.lineData != pos)
-                    {
+                    if (menu.lineData != pos) {
                         menu.lineData = pos;
                         menu.buildIndexList();
                     }
@@ -307,19 +287,15 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    protected void containerTick()
-    {
+    protected void containerTick() {
         super.containerTick();
         // 每tick从emi或jei同步一次文本
-        if (CommonConfigRuntime.searchTextWithJEIEMI)
-        {
-            if (ModPresence.isLoaded(OtherModIds.JEI))
-            {
+        if (CommonConfigRuntime.searchTextWithJEIEMI) {
+            if (ModPresence.isLoaded(OtherModIds.JEI)) {
                 BDJEIPlugin.runtime().ifPresent(rt -> {
                     var overlay = rt.getIngredientFilter();
                     String current = overlay.getFilterText();
-                    if (!Objects.equals(current, lastSearchText))
-                    {
+                    if (!Objects.equals(current, lastSearchText)) {
                         searchField.setValue(current);
                     }
                 });
@@ -331,21 +307,17 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     // 用于让子类重写工艺槽位按钮的函数
-    protected void addCraftButton()
-    {
+    protected void addCraftButton() {
         craftButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 6, 16, 16, BeyondDimensions.makeId("widget/craft_button"), button ->
         {
             saveTransferContext();
 
-            if (menu instanceof DimensionsCraftMenu)
-            {
+            if (menu instanceof DimensionsCraftMenu) {
                 CommonConfigRuntime.uiCraftButton = ButtonState.DISABLED;
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.set(ButtonState.DISABLED);
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.save();
                 ClientPacketDistributor.sendToServer(new OpenNetGuiPacket(menu.player.getStringUUID(), NetMenuType.NET_MENU));
-            }
-            else
-            {
+            } else {
                 CommonConfigRuntime.uiCraftButton = ButtonState.ENABLED;
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.set(ButtonState.ENABLED);
                 Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.save();
@@ -356,8 +328,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addRenderableWidget(craftButton);
     }
 
-    protected void addPrimaryNetSwitcherButton()
-    {
+    protected void addPrimaryNetSwitcherButton() {
         primaryNetSwitcherButton = new IconButton(this.leftPos - 18, this.topPos + 6 + 18 * 7, 16, 16, BeyondDimensions.makeId("widget/opposite_arrow"), button ->
         {
             saveTransferContext();
@@ -367,8 +338,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addRenderableWidget(primaryNetSwitcherButton);
     }
 
-    private void saveTransferContext()
-    {
+    private void saveTransferContext() {
         UIDataHelper.currentPage = menu.lineData;
 
         double[] xpos = new double[1];
@@ -382,25 +352,22 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         UIDataHelper.isTransfer = true;
     }
 
-    protected int rebuildImageHeight()
-    {
+    protected int rebuildImageHeight() {
         return TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines() - 2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
     }
 
-    protected void rebuildLabelHeight()
-    {
+    protected void rebuildLabelHeight() {
         this.titleLabelY = 8;
         this.inventoryLabelY = TOP_BASE_HEIGHT + menu.getLines() * 18 + 5;
     }
 
-    protected int calMaxLines()
-    {
+    protected int calMaxLines() {
         return (int) ((this.height - 36 - (TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + PLAYER_INV_HEIGHT)) / (float) MID_SLOTS_HEIGHT + 2);
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
-    {
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(guiGraphics, mouseX, mouseY, a);
         int drawY = this.topPos; // 用于动态控制绘制
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE_TOP_BASE, this.leftPos, drawY, 0F, 0F, TOP_BASE_WIDTH, TOP_BASE_HEIGHT, TOP_BASE_WIDTH, TOP_BASE_HEIGHT);
         drawY += TOP_BASE_HEIGHT;
@@ -408,8 +375,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE_TOP_SLOTS, this.leftPos, drawY, 0F, 0F, TOP_SLOTS_WIDTH, TOP_SLOTS_HEIGHT, TOP_SLOTS_WIDTH, TOP_SLOTS_HEIGHT);
         drawY += TOP_SLOTS_HEIGHT;
 
-        for (int i = 0; i < menu.getLines() - 2; i++)
-        {
+        for (int i = 0; i < menu.getLines() - 2; i++) {
             guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE_MID_SLOTS, this.leftPos, drawY, 0F, 0F, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT);
             drawY += MID_SLOTS_HEIGHT;
         }
@@ -422,15 +388,13 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
-    {
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym) {
         guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
         guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
-    {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         boolean result = super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
         if (!result) // 让滑动条全局可滑
             result = scroller.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
@@ -438,8 +402,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleclick)
-    {
+    public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleclick) {
         boolean result = super.mouseClicked(event, doubleclick);
 
         double mouseX = event.x();
@@ -447,18 +410,14 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         // 处理对搜索框的焦点取消
         boolean flag = searchField.active && searchField.visible && mouseX >= (double) searchField.getX() && mouseY >= (double) searchField.getY() && mouseX < (double) (searchField.getX() + searchField.getWidth()) && mouseY < (double) (searchField.getY() + searchField.getHeight());
-        if (!flag)
-        {
-            if (this.getFocused() != null)
-            {
-                if (this.getFocused() == searchField)
-                {   // 在未命中搜索框情况下 焦点不为空 且焦点为搜索框，则取消搜索框的焦点身份
+        if (!flag) {
+            if (this.getFocused() != null) {
+                if (this.getFocused() == searchField) {   // 在未命中搜索框情况下 焦点不为空 且焦点为搜索框，则取消搜索框的焦点身份
                     searchField.setFocused(false);
                     this.setFocused(null);
                 }
             }
-        }
-        else if (event.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 右键点击搜索框则清空搜索框内容
+        } else if (event.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 右键点击搜索框则清空搜索框内容
         {
             searchField.setValue("");
         }
@@ -467,8 +426,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
+    public boolean keyPressed(KeyEvent event) {
         int keyCode = event.key();
         int scanCode = event.scancode();
 
@@ -479,8 +437,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         InputConstants.Key mouseKey = InputConstants.getKey(event);
 
         // 如果搜索框有效，拦截，然后让搜索框接管处理
-        if (searchField != null && searchField.canConsumeInput() && mouseKey.getValue() != GLFW.GLFW_KEY_ESCAPE)
-        {
+        if (searchField != null && searchField.canConsumeInput() && mouseKey.getValue() != GLFW.GLFW_KEY_ESCAPE) {
             // 无论如何都不继续后续逻辑
             // 等以后可能改为重写searchField以获得更稳定的效果
             searchField.keyPressed(event);
@@ -488,8 +445,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         }
 
         // 处理shift + z切换
-        if (Minecraft.getInstance().hasShiftDown() && mouseKey.getValue() == GLFW.GLFW_KEY_Z)
-        {
+        if (Minecraft.getInstance().hasShiftDown() && mouseKey.getValue() == GLFW.GLFW_KEY_Z) {
             boolean current = CommonConfigRuntime.searchTextWithJEIEMI;
             CommonConfigRuntime.searchTextWithJEIEMI = !current;
             Config.INSTANCE.commonConfig.SEARCH_TEXT_WITH_JEI_EMI.set(!current);
@@ -499,8 +455,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
         // 处理背包关闭热键
         if (this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey) ||
-                BDShortKeys.OPEN_GUI_KEY.getKey() == mouseKey)
-        {
+                BDShortKeys.OPEN_GUI_KEY.getKey() == mouseKey) {
             onClose();
             return true;
         }
@@ -509,13 +464,11 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    public boolean keyReleased(KeyEvent event)
-    {
+    public boolean keyReleased(KeyEvent event) {
         int keyCode = event.key();
         boolean result = super.keyReleased(event);
 
-        if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
-        {
+        if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT) {
             menu.markForceAllUpdateClientView();
             menu.updateViewerStorage(false);
             menu.hasShiftDown = false;
@@ -525,20 +478,15 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     }
 
     @Override
-    public void removed()
-    {
+    public void removed() {
         super.removed();
 
-        if (searchField != null)
-        {
-            if (searchField.getValue().length() > 0 && CommonConfigRuntime.uiSearchButton == ButtonState.ENABLED)
-            {
+        if (searchField != null) {
+            if (searchField.getValue().length() > 0 && CommonConfigRuntime.uiSearchButton == ButtonState.ENABLED) {
                 CommonConfigRuntime.uiSearch = searchField.getValue();
                 Config.INSTANCE.commonConfig.UI_SEARCH.set(searchField.getValue());
                 Config.INSTANCE.commonConfig.UI_SEARCH.save();
-            }
-            else
-            {
+            } else {
                 CommonConfigRuntime.uiSearch = "";
                 Config.INSTANCE.commonConfig.UI_SEARCH.set("");
                 Config.INSTANCE.commonConfig.UI_SEARCH.save();
@@ -547,8 +495,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
 
     }
 
-    public @NotNull Font getFont()
-    {
+    public @NotNull Font getFont() {
         return font;
     }
 

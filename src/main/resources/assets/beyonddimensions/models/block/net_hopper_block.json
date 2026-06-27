@@ -3,7 +3,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [64, 64],
 	"textures": {
-		"2": "beyonddimensions:block/net_hopper_block"
+		"2": "beyonddimensions:block/net_hopper_block",
+		"particle": "beyonddimensions:block/net_hopper_block"
 	},
 	"elements": [
 		{

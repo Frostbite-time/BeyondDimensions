@@ -13,15 +13,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 
-public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
-{
+public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu> {
 
     public RightTabButton popButton; // 弹出模式
     public RightTabButton controlModeButton; // 红石控制模式按钮
     public RightTabButton fuzzyModelButton; //模糊匹配模式
 
-    public NetInterfaceBaseGUI(NetInterfaceBaseMenu container, Inventory playerInventory, Component title)
-    {
+    public NetInterfaceBaseGUI(NetInterfaceBaseMenu container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
         // 去除空白的真实部分，用于计算图片显示的最佳位置
 
@@ -29,8 +27,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
 
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         super.init();
 
         // 如果以后图片大小有变，显示中心所期望的大小仍然是x:176,y:235用于计算
@@ -44,18 +41,15 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         popButton = new RightTabButton(this.leftPos + 176, this.topPos + 6, 23, 26,
                 this.leftPos + 176 + 3, this.topPos + 6 + 4, 16, 16, button ->
         {
-            if (!menu.getAccess().canConfigurePopMode())
-            {
+            if (!menu.getAccess().canConfigurePopMode()) {
                 return;
             }
             popButton.toggleState();
             menu.getAccess().setPopMode((PopMode) popButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(PopMode.OPEN, BeyondDimensions.makeId("widget/popmode_up"));
                 iconMap.put(PopMode.STOP, BeyondDimensions.makeId("widget/popmode_down"));
 
@@ -68,8 +62,7 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
                 setState(menu.getAccess().getPopMode());
             }
         };
-        if (!menu.getAccess().canConfigurePopMode())
-        {
+        if (!menu.getAccess().canConfigurePopMode()) {
             popButton.active = false;
             popButton.setTooltip(Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.popmode_mounted_unavailable")));
         }
@@ -80,11 +73,9 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
             controlModeButton.toggleState();
             menu.getAccess().setControlMode((RedStoneControlMode) controlModeButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(RedStoneControlMode.IGNORE, BeyondDimensions.makeId("widget/control_mode_ignore"));
                 iconMap.put(RedStoneControlMode.NOT_WORKING, BeyondDimensions.makeId("widget/control_mode_not_working"));
                 iconMap.put(RedStoneControlMode.POWERED, BeyondDimensions.makeId("widget/control_mode_powered"));
@@ -107,11 +98,9 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
             fuzzyModelButton.toggleState();
             menu.getAccess().setFuzzyMode((FuzzyMode) fuzzyModelButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(FuzzyMode.DISABLE, BeyondDimensions.makeId("widget/hopper_nbt_mode_allow"));
                 iconMap.put(FuzzyMode.ENABLE, BeyondDimensions.makeId("widget/hopper_nbt_mode_deny"));
 
@@ -126,20 +115,17 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
         addRenderableWidget(fuzzyModelButton);
     }
 
-    protected int rebuildImageHeight()
-    {
+    protected int rebuildImageHeight() {
         return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_SLOTS_HEIGHT * 3 + CommonTextures.FILTER_SLOTS_HEIGHT * 3 + CommonTextures.COMMON_CONNECTION_HEIGHT + CommonTextures.PLAYER_INV_HEIGHT;
     }
 
-    protected void rebuildLabelHeight()
-    {
+    protected void rebuildLabelHeight() {
         this.titleLabelY = 8;
         this.inventoryLabelY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_SLOTS_HEIGHT * 3 + CommonTextures.FILTER_SLOTS_HEIGHT * 3 + 4;
     }
 
     @Override
-    protected void containerTick()
-    {
+    protected void containerTick() {
         super.containerTick();
         //父类无操作
         //每tick自动更新搜索方案
@@ -153,8 +139,8 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
-    {
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(guiGraphics, mouseX, mouseY, a);
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
         CommonTexturesRender.renderFilterSlots(guiGraphics, this.leftPos, drawY);
@@ -168,15 +154,13 @@ public class NetInterfaceBaseGUI extends BDBaseGUI<NetInterfaceBaseMenu>
     }
 
     @Override
-    public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks)
-    {
+    public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         super.extractContents(guiGraphics, mouseX, mouseY, partialTicks);
         popButton.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
-    {
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym) {
         guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
         GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.tag_and_stored_slots"), imageWidth - 6, this.titleLabelY + 3, -12566464, false);
         guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);

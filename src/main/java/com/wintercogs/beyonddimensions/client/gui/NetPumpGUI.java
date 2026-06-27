@@ -11,19 +11,16 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
-{
+public class NetPumpGUI extends BDBaseGUI<NetPumpMenu> {
     private RightTabButton filterModeButton;
     private RightTabButton controlModeButton;
 
-    public NetPumpGUI(NetPumpMenu menu, Inventory playerInventory, Component title)
-    {
+    public NetPumpGUI(NetPumpMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         super.init();
 
         this.imageWidth = 176;
@@ -37,11 +34,9 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
             filterModeButton.toggleState();
             menu.be.filterMode = (FilterMode) filterModeButton.currentState;
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(FilterMode.IGNORE, BeyondDimensions.makeId("widget/ignore_filter"));
                 iconMap.put(FilterMode.WHITE, BeyondDimensions.makeId("widget/white_filter"));
                 iconMap.put(FilterMode.BLACK, BeyondDimensions.makeId("widget/black_filter"));
@@ -50,8 +45,7 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
                 tooltipMap.put(FilterMode.WHITE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_white")));
                 tooltipMap.put(FilterMode.BLACK, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_black")));
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -65,11 +59,9 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
             controlModeButton.toggleState();
             menu.be.controlMode = (RedStoneControlMode) controlModeButton.currentState;
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(RedStoneControlMode.IGNORE, BeyondDimensions.makeId("widget/control_mode_ignore"));
                 iconMap.put(RedStoneControlMode.NOT_WORKING, BeyondDimensions.makeId("widget/control_mode_not_working"));
                 iconMap.put(RedStoneControlMode.POWERED, BeyondDimensions.makeId("widget/control_mode_powered"));
@@ -82,8 +74,7 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
                 tooltipMap.put(RedStoneControlMode.UNPOWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_unpowered")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -94,8 +85,7 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
     }
 
     @Override
-    protected void containerTick()
-    {
+    protected void containerTick() {
         super.containerTick();
         if (filterModeButton.currentState != menu.be.filterMode)
             filterModeButton.setState(menu.be.filterMode);
@@ -105,8 +95,8 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
-    {
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(guiGraphics, mouseX, mouseY, a);
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
         CommonTexturesRender.renderFilterSlots(guiGraphics, this.leftPos, drawY);
@@ -118,20 +108,17 @@ public class NetPumpGUI extends BDBaseGUI<NetPumpMenu>
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
-    {
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym) {
         guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
         GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.filter_slots"), imageWidth - 6, this.titleLabelY + 3, -12566464, false);
         guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
-    protected int rebuildImageHeight()
-    {
+    protected int rebuildImageHeight() {
         return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + CommonTextures.PLAYER_INV_HEIGHT;
     }
 
-    protected void rebuildLabelHeight()
-    {
+    protected void rebuildLabelHeight() {
         this.titleLabelY = 8;
         this.inventoryLabelY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + 4;
     }

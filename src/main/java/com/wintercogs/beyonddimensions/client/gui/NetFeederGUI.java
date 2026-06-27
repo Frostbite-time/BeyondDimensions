@@ -12,19 +12,16 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
-{
+public class NetFeederGUI extends BDBaseGUI<NetFeederMenu> {
     private RightTabButton controlModeButton;
     private RightTabButton feederModeButton;
 
-    public NetFeederGUI(NetFeederMenu menu, Inventory playerInventory, Component title)
-    {
+    public NetFeederGUI(NetFeederMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         super.init();
 
         this.imageWidth = 176;
@@ -38,11 +35,9 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
             feederModeButton.toggleState();
             menu.menuStack.set(BDDataComponents.FEEDER_MODE, (FeederMode) feederModeButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(FeederMode.HUNGER_TO_EAT, BeyondDimensions.makeId("widget/feeder_mode_hunger_to_eat"));
                 iconMap.put(FeederMode.NORMAL, BeyondDimensions.makeId("widget/feeder_mode_normal"));
                 iconMap.put(FeederMode.SATURATION_KEEP, BeyondDimensions.makeId("widget/feeder_mode_saturation_keep"));
@@ -54,8 +49,7 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
                 tooltipMap.put(FeederMode.CRAZY, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.feeder_mode_crazy")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -69,11 +63,9 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
             controlModeButton.toggleState();
             menu.menuStack.set(BDDataComponents.CONTROL_MODE, (RedStoneControlMode) controlModeButton.currentState);
             menu.writeAndSendQuickData();
-        })
-        {
+        }) {
             @Override
-            protected void initButton()
-            {
+            protected void initButton() {
                 iconMap.put(RedStoneControlMode.IGNORE, BeyondDimensions.makeId("widget/control_mode_ignore"));
                 iconMap.put(RedStoneControlMode.NOT_WORKING, BeyondDimensions.makeId("widget/control_mode_not_working"));
 
@@ -81,8 +73,7 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
                 tooltipMap.put(RedStoneControlMode.NOT_WORKING, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_not_working")));
 
 
-                for (Enum<?> state : iconMap.keySet())
-                {
+                for (Enum<?> state : iconMap.keySet()) {
                     this.states.add(state);
                 }
 
@@ -95,8 +86,7 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
     }
 
     @Override
-    protected void containerTick()
-    {
+    protected void containerTick() {
         super.containerTick();
 
         if (controlModeButton.currentState != menu.menuStack.get(BDDataComponents.CONTROL_MODE))
@@ -108,8 +98,8 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
-    {
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(guiGraphics, mouseX, mouseY, a);
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
         CommonTexturesRender.renderFilterSlots(guiGraphics, this.leftPos, drawY);
@@ -121,20 +111,17 @@ public class NetFeederGUI extends BDBaseGUI<NetFeederMenu>
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
-    {
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym) {
         guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
         GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.filter_slots"), imageWidth - 6, this.titleLabelY + 3, -12566464, false);
         guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
-    protected int rebuildImageHeight()
-    {
+    protected int rebuildImageHeight() {
         return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + CommonTextures.PLAYER_INV_HEIGHT;
     }
 
-    protected void rebuildLabelHeight()
-    {
+    protected void rebuildLabelHeight() {
         this.titleLabelY = 8;
         this.inventoryLabelY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + 4;
     }
