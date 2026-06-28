@@ -155,7 +155,8 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
                 clickItem = sSlot.getVanillaActualStack();
                 if (!lastStorageClickedStack.isEmpty() && lastStorageClickedStack.equals(clickItem.key()))
                 {
-                    ClientPacketDistributor.sendToServer(new BatchTransferPacket(clickItem, false));
+                    // TODO 相当一部分人不喜欢存储物品双击后全量进入背包的实现，所以我们先禁用这条线，回头有空再整体更改点击处理
+                    // ClientPacketDistributor.sendToServer(new BatchTransferPacket(clickItem, false));
                 }
                 else if (!clickItem.isEmpty() && clickItem.key() instanceof ItemStackKey itemStackKey)
                 {
