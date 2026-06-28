@@ -147,6 +147,7 @@ public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu>
     @Override
     public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick)
     {
+        super.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
         int[] drawY = new int[]{this.topPos};
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
         CommonTexturesRender.renderCommonConnection(guiGraphics, this.leftPos, drawY);

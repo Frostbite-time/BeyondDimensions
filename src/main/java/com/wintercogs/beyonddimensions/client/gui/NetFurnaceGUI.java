@@ -170,6 +170,7 @@ public class NetFurnaceGUI extends BDBaseGUI<NetFurnaceMenu>
     @Override
     public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
     {
+        super.extractBackground(guiGraphics, mouseX, mouseY, a);
         CommonTexturesRender.renderNetFurnaceBackground(guiGraphics, leftPos, new int[]{topPos});
 
         // 绘制熔炼进度 getCapacity为同时处理的任务数
