@@ -235,8 +235,9 @@ dependencies {
     runtimeOnly "maven.modrinth:patchouli:1.21.1-92-neoforge" // 帕秋莎
 
     // 植物魔法以及其ae附属
-    implementation "vazkii.botania:botania-neoforge-1.21.1:451-SNAPSHOT"
-    implementation "curse.maven:applied-botanics-addon-610632:7234122"
+    implementation "vazkii.botania:botania-neoforge-1.21.1:454-SNAPSHOT"
+    // ae-botania对botania新版api的注册时机有一点问题，保留兼容暂不纳入运行
+    compileOnly "curse.maven:applied-botanics-addon-610632:8298277"
 
     // 机械动力支持 - 蓝图炮
     compileOnly "maven.modrinth:create:mc1.21.1-6.0.9"

@@ -38,7 +38,7 @@ public class BotaniaModuleRecipeProvider extends BDRecipeProvider
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BotaniaModuleBlocks.MANA_POOL_PATHWAY.get())
                 .pattern("ABA")
                 .pattern("AAA")
-                .define('A', BotaniaBlocks.livingrock)
+                .define('A', BotaniaBlocks.LIVINGROCK)
                 .define('B', BDItems.SPACE_TIME_STABLE_FRAME.get())
                 .unlockedBy("unlock_mana_pool_pathway", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
                 .save(compatOutput);

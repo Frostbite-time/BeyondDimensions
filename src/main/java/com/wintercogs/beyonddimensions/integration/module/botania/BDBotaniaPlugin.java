@@ -4,10 +4,11 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.util.CapCtx;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.ItemCapInteractionBlackList;
+import com.wintercogs.beyonddimensions.integration.module.botania.capabilities.BotaniaCapabilitiesHelper;
 import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaStackTypedHandler;
 import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaUnifiedStorageHandler;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import vazkii.botania.api.BotaniaForgeCapabilities;
+import vazkii.botania.api.mana.spark.SparkAttachable;
 import vazkii.botania.common.item.BotaniaItems;
 
 /**
@@ -17,13 +18,13 @@ public class BDBotaniaPlugin
 {
     public static void registerItemCapBlackList()
     {
-        ItemCapInteractionBlackList.addToBlackList(BotaniaItems.manaMirror);
+        ItemCapInteractionBlackList.addToBlackList(BotaniaItems.MANA_MIRROR);
     }
 
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
         event.registerBlockEntity(
-                BotaniaForgeCapabilities.SPARK_ATTACHABLE,
+                BotaniaCapabilitiesHelper.getBlockApiLookupById(SparkAttachable.LOOKUP),
                 BDBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     DimensionsNet net = be.getNet();
@@ -36,7 +37,7 @@ public class BDBotaniaPlugin
         );
 
         event.registerBlockEntity(
-                BotaniaForgeCapabilities.SPARK_ATTACHABLE,
+                BotaniaCapabilitiesHelper.getBlockApiLookupById(SparkAttachable.LOOKUP),
                 BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     return new ManaStackTypedHandler(be.getStackHandler(), new CapCtx(be.getLevel(), be.getBlockPos(), be));

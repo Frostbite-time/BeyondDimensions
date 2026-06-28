@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.botania.block.entity.ManaPoolPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.integration.module.botania.capabilities.BotaniaCapabilitiesHelper;
 import com.wintercogs.beyonddimensions.integration.module.botania.datagen.BotaniaModuleBlockLootTableProvider;
 import com.wintercogs.beyonddimensions.integration.module.botania.datagen.BotaniaModuleBlockStateProvider;
 import com.wintercogs.beyonddimensions.integration.module.botania.datagen.BotaniaModuleRecipeProvider;
@@ -29,7 +30,8 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.jetbrains.annotations.NotNull;
-import vazkii.botania.api.BotaniaForgeCapabilities;
+import vazkii.botania.api.mana.ManaItem;
+import vazkii.botania.api.mana.ManaReceiver;
 
 import java.util.Collections;
 import java.util.List;
@@ -59,8 +61,8 @@ public class BotaniaModule implements IIntegrationModule
     public void onCommonSetup(FMLCommonSetupEvent event)
     {
         StackKeyRegistry.registerType(ManaStackKey.INSTANCE);
-        CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, BotaniaForgeCapabilities.MANA_RECEIVER);
-        CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, BotaniaForgeCapabilities.MANA_ITEM);
+        CapabilityHelper.BlockCapabilityMap.put(ManaStackKey.ID, BotaniaCapabilitiesHelper.getBlockApiLookupById(ManaReceiver.LOOKUP));
+        CapabilityHelper.ItemCapabilityMap.put(ManaStackKey.ID, BotaniaCapabilitiesHelper.getItemApiLookupById(ManaItem.LOOKUP));
         CapabilityHelper.registerUSHandler(ManaStackKey.INSTANCE, ManaUnifiedStorageHandler::new);
         CapabilityHelper.registerStackTypedHandler(ManaStackKey.INSTANCE, ManaStackTypedHandler::new);
         StackHandlerWrapperHelper.stackWrappers.put(ManaStackKey.ID, ManaHandlerWrapper::new);

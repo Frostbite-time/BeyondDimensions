@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.integration.module.botania;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationClientModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationClientModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
+import com.wintercogs.beyonddimensions.integration.module.botania.block.entity.ManaPoolPathwayBlockEntity;
 import com.wintercogs.beyonddimensions.integration.module.botania.eventlistener.BotaniaModuleRecipesUpdatedListener;
 import com.wintercogs.beyonddimensions.integration.module.botania.init.BotaniaModuleBlockRenders;
 import com.wintercogs.beyonddimensions.integration.module.botania.overlay.ManaPoolPathwayOverlay;
@@ -23,6 +24,7 @@ public class BotaniaClientModule implements IIntegrationClientModule
     public void onBootstrapClient(IEventBus modBus, IEventBus gameBus)
     {
         modBus.addListener(BotaniaModuleBlockRenders::onRegisterRenderers);
+        modBus.addListener(ManaPoolPathwayBlockEntity::registerClientCapability);
         gameBus.addListener(BotaniaModuleRecipesUpdatedListener::onRecipesUpdated);
         gameBus.addListener(ManaPoolPathwayOverlay::onRenderGui);
     }
