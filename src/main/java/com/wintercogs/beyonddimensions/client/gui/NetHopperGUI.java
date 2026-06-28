@@ -11,7 +11,8 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
+public class NetHopperGUI extends BDBaseGUI<NetHopperMenu>
+{
     private RightTabButton filterModeButton;
     private RightTabButton controlModeButton;
     private RightTabButton hopperItemModeButton;
@@ -20,12 +21,14 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
     private RightTabButton hopperFluidModeButton;
     private LeftTabButton hopperRangeModeButton;
 
-    public NetHopperGUI(NetHopperMenu menu, Inventory playerInventory, Component title) {
+    public NetHopperGUI(NetHopperMenu menu, Inventory playerInventory, Component title)
+    {
         super(menu, playerInventory, title);
     }
 
     @Override
-    protected void init() {
+    protected void init()
+    {
         super.init();
 
         this.imageWidth = 176;
@@ -39,9 +42,11 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
             filterModeButton.toggleState();
             menu.be.filterMode = (FilterMode) filterModeButton.currentState;
             menu.writeAndSendQuickData();
-        }) {
+        })
+        {
             @Override
-            protected void initButton() {
+            protected void initButton()
+            {
                 iconMap.put(FilterMode.IGNORE, BeyondDimensions.makeId("widget/ignore_filter"));
                 iconMap.put(FilterMode.WHITE, BeyondDimensions.makeId("widget/white_filter"));
                 iconMap.put(FilterMode.BLACK, BeyondDimensions.makeId("widget/black_filter"));
@@ -50,7 +55,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
                 tooltipMap.put(FilterMode.WHITE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_white")));
                 tooltipMap.put(FilterMode.BLACK, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.filter_mode_black")));
 
-                for (Enum<?> state : iconMap.keySet()) {
+                for (Enum<?> state : iconMap.keySet())
+                {
                     this.states.add(state);
                 }
 
@@ -64,9 +70,11 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
             controlModeButton.toggleState();
             menu.be.controlMode = (RedStoneControlMode) controlModeButton.currentState;
             menu.writeAndSendQuickData();
-        }) {
+        })
+        {
             @Override
-            protected void initButton() {
+            protected void initButton()
+            {
                 iconMap.put(RedStoneControlMode.IGNORE, BeyondDimensions.makeId("widget/control_mode_ignore"));
                 iconMap.put(RedStoneControlMode.NOT_WORKING, BeyondDimensions.makeId("widget/control_mode_not_working"));
                 iconMap.put(RedStoneControlMode.POWERED, BeyondDimensions.makeId("widget/control_mode_powered"));
@@ -79,7 +87,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
                 tooltipMap.put(RedStoneControlMode.UNPOWERED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.control_mode_unpowered")));
 
 
-                for (Enum<?> state : iconMap.keySet()) {
+                for (Enum<?> state : iconMap.keySet())
+                {
                     this.states.add(state);
                 }
 
@@ -93,9 +102,11 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
             hopperItemModeButton.toggleState();
             menu.be.hopperItemMode = (HopperItemMode) hopperItemModeButton.currentState;
             menu.writeAndSendQuickData();
-        }) {
+        })
+        {
             @Override
-            protected void initButton() {
+            protected void initButton()
+            {
                 iconMap.put(HopperItemMode.DENY, BeyondDimensions.makeId("widget/hopper_item_mode_deny"));
                 iconMap.put(HopperItemMode.ALLOW, BeyondDimensions.makeId("widget/hopper_item_mode_allow"));
 
@@ -104,7 +115,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
                 tooltipMap.put(HopperItemMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_item_mode_allow")));
 
 
-                for (Enum<?> state : iconMap.keySet()) {
+                for (Enum<?> state : iconMap.keySet())
+                {
                     this.states.add(state);
                 }
 
@@ -118,9 +130,11 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
             hopperXpModeButton.toggleState();
             menu.be.hopperXpMode = (HopperXpMode) hopperXpModeButton.currentState;
             menu.writeAndSendQuickData();
-        }) {
+        })
+        {
             @Override
-            protected void initButton() {
+            protected void initButton()
+            {
                 iconMap.put(HopperXpMode.DENY, BeyondDimensions.makeId("widget/hopper_xp_mode_deny"));
                 iconMap.put(HopperXpMode.ALLOW, BeyondDimensions.makeId("widget/hopper_xp_mode_allow"));
 
@@ -129,7 +143,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
                 tooltipMap.put(HopperXpMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_xp_mode_allow")));
 
 
-                for (Enum<?> state : iconMap.keySet()) {
+                for (Enum<?> state : iconMap.keySet())
+                {
                     this.states.add(state);
                 }
 
@@ -143,9 +158,11 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
             hopperNBTModeButton.toggleState();
             menu.be.hopperNBTMode = (HopperNBTMode) hopperNBTModeButton.currentState;
             menu.writeAndSendQuickData();
-        }) {
+        })
+        {
             @Override
-            protected void initButton() {
+            protected void initButton()
+            {
                 iconMap.put(HopperNBTMode.DENY, BeyondDimensions.makeId("widget/hopper_nbt_mode_deny"));
                 iconMap.put(HopperNBTMode.ALLOW, BeyondDimensions.makeId("widget/hopper_nbt_mode_allow"));
 
@@ -154,7 +171,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
                 tooltipMap.put(HopperNBTMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_nbt_mode_allow")));
 
 
-                for (Enum<?> state : iconMap.keySet()) {
+                for (Enum<?> state : iconMap.keySet())
+                {
                     this.states.add(state);
                 }
 
@@ -168,9 +186,11 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
             hopperFluidModeButton.toggleState();
             menu.be.hopperFluidMode = (HopperFluidMode) hopperFluidModeButton.currentState;
             menu.writeAndSendQuickData();
-        }) {
+        })
+        {
             @Override
-            protected void initButton() {
+            protected void initButton()
+            {
                 iconMap.put(HopperFluidMode.DENY, BeyondDimensions.makeId("widget/hopper_fluid_mode_deny"));
                 iconMap.put(HopperFluidMode.ALLOW, BeyondDimensions.makeId("widget/hopper_fluid_mode_allow"));
 
@@ -178,7 +198,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
                 tooltipMap.put(HopperFluidMode.ALLOW, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_fluid_mode_allow")));
 
 
-                for (Enum<?> state : iconMap.keySet()) {
+                for (Enum<?> state : iconMap.keySet())
+                {
                     this.states.add(state);
                 }
 
@@ -192,9 +213,11 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
             hopperRangeModeButton.toggleState();
             menu.be.hopperRangeMode = (HopperRangeMode) hopperRangeModeButton.currentState;
             menu.writeAndSendQuickData();
-        }) {
+        })
+        {
             @Override
-            protected void initButton() {
+            protected void initButton()
+            {
                 iconMap.put(HopperRangeMode.RADIUS_LOWEST, BeyondDimensions.makeId("widget/hopper_range_mode_lowest"));
                 iconMap.put(HopperRangeMode.RADIUS_LOW, BeyondDimensions.makeId("widget/hopper_range_mode_low"));
                 iconMap.put(HopperRangeMode.RADIUS_MID, BeyondDimensions.makeId("widget/hopper_range_mode_mid"));
@@ -210,7 +233,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
                 tooltipMap.put(HopperRangeMode.CHUNK_MODE, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.hopper_range_mode_chunk")));
 
 
-                for (Enum<?> state : iconMap.keySet()) {
+                for (Enum<?> state : iconMap.keySet())
+                {
                     this.states.add(state);
                 }
 
@@ -221,7 +245,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
     }
 
     @Override
-    protected void containerTick() {
+    protected void containerTick()
+    {
         super.containerTick();
         if (filterModeButton.currentState != menu.be.filterMode)
             filterModeButton.setState(menu.be.filterMode);
@@ -247,7 +272,8 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a) {
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
+    {
         super.extractBackground(guiGraphics, mouseX, mouseY, a);
         int[] drawY = new int[]{this.topPos}; // 用于动态控制绘制
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
@@ -260,17 +286,20 @@ public class NetHopperGUI extends BDBaseGUI<NetHopperMenu> {
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym) {
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int xm, int ym)
+    {
         guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
         GuiRenderHelper.drawRightAnchoredText(guiGraphics, this.font, Component.translatable("menu.label.beyonddimensions.filter_slots"), imageWidth - 6, this.titleLabelY + 3, -12566464, false);
         guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
-    protected int rebuildImageHeight() {
+    protected int rebuildImageHeight()
+    {
         return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + CommonTextures.PLAYER_INV_HEIGHT;
     }
 
-    protected void rebuildLabelHeight() {
+    protected void rebuildLabelHeight()
+    {
         this.titleLabelY = 8;
         this.inventoryLabelY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + 4;
     }

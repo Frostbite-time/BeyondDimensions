@@ -14,17 +14,20 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.lwjgl.glfw.GLFW;
 
-public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu> {
+public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu>
+{
     private RightTabButton keepModeButton;
     private EditBox targetLevelField;
     private boolean syncingField;
 
-    public XpExchangeGUI(XpExchangeMenu menu, Inventory playerInventory, Component title) {
+    public XpExchangeGUI(XpExchangeMenu menu, Inventory playerInventory, Component title)
+    {
         super(menu, playerInventory, title);
     }
 
     @Override
-    protected void init() {
+    protected void init()
+    {
         super.init();
 
         this.imageWidth = 176;
@@ -51,9 +54,11 @@ public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu> {
             keepModeButton.setState(nextState);
             menu.menuStack.set(BDDataComponents.XP_NET_KEEP_MODE, nextState == KeepModeState.WORKING);
             menu.writeAndSendQuickData();
-        }) {
+        })
+        {
             @Override
-            protected void initButton() {
+            protected void initButton()
+            {
                 iconMap.put(KeepModeState.WORKING, BeyondDimensions.makeId("widget/control_mode_ignore"));
                 iconMap.put(KeepModeState.NOT_WORKING, BeyondDimensions.makeId("widget/control_mode_not_working"));
 
@@ -69,7 +74,8 @@ public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu> {
     }
 
     @Override
-    protected void containerTick() {
+    protected void containerTick()
+    {
         super.containerTick();
 
         KeepModeState keepModeState = resolveKeepModeState();
@@ -77,23 +83,27 @@ public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu> {
             keepModeButton.setState(keepModeState);
 
         String currentTargetLevel = Integer.toString(XpExchangeSettings.getTargetLevel(menu.menuStack));
-        if (!targetLevelField.isFocused() && !targetLevelField.getValue().equals(currentTargetLevel)) {
+        if (!targetLevelField.isFocused() && !targetLevelField.getValue().equals(currentTargetLevel))
+        {
             syncingField = true;
             targetLevelField.setValue(currentTargetLevel);
             syncingField = false;
         }
     }
 
-    private void onTargetLevelChanged(String text) {
+    private void onTargetLevelChanged(String text)
+    {
         if (syncingField)
             return;
 
         int targetLevel = text.isEmpty() ? 0 : Integer.parseInt(text);
         int sanitizedTargetLevel = XpExchangeSettings.sanitizeTargetLevel(targetLevel);
         XpExchangeSettings.setTargetLevel(menu.menuStack, sanitizedTargetLevel);
-        if (!text.isEmpty()) {
+        if (!text.isEmpty())
+        {
             String sanitizedText = Integer.toString(sanitizedTargetLevel);
-            if (!sanitizedText.equals(text)) {
+            if (!sanitizedText.equals(text))
+            {
                 syncingField = true;
                 targetLevelField.setValue(sanitizedText);
                 syncingField = false;
@@ -103,8 +113,10 @@ public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu> {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (targetLevelField != null && targetLevelField.isMouseOver(mouseX, mouseY) && scrollY != 0) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
+    {
+        if (targetLevelField != null && targetLevelField.isMouseOver(mouseX, mouseY) && scrollY != 0)
+        {
             var window = Minecraft.getInstance().getWindow();
             boolean controlDown = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_CONTROL)
                     || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_CONTROL);
@@ -127,12 +139,14 @@ public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu> {
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
-    private KeepModeState resolveKeepModeState() {
+    private KeepModeState resolveKeepModeState()
+    {
         return menu.menuStack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false) ? KeepModeState.WORKING : KeepModeState.NOT_WORKING;
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick)
+    {
         super.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
         int[] drawY = new int[]{this.topPos};
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);
@@ -145,23 +159,27 @@ public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu> {
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY)
+    {
         guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
         guiGraphics.text(this.font, Component.translatable("menu.label.beyonddimensions.xp_exchange.target_level"), 8, 27, -12566464, false);
         guiGraphics.text(this.font, Component.translatable("menu.label.beyonddimensions.xp_exchange.max_level", XpExchangeSettings.MAX_TARGET_LEVEL), 8, 41, -12566464, false);
         guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
-    protected int rebuildImageHeight() {
+    protected int rebuildImageHeight()
+    {
         return CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_CONNECTION_HEIGHT * 5 + CommonTextures.PLAYER_INV_HEIGHT;
     }
 
-    protected void rebuildLabelHeight() {
+    protected void rebuildLabelHeight()
+    {
         this.titleLabelY = 8;
         this.inventoryLabelY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_CONNECTION_HEIGHT * 4 + 4;
     }
 
-    private enum KeepModeState {
+    private enum KeepModeState
+    {
         WORKING,
         NOT_WORKING
     }

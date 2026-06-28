@@ -17,7 +17,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 
-public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends DimensionsNetGUI<T> {
+public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends DimensionsNetGUI<T>
+{
 
     private static final Identifier GUI_TEXTURE_CRAFT_SLOTS = Identifier.parse("beyonddimensions:textures/gui/craft_slots.png");
     private static final int CRAFT_SLOTS_WIDTH = 176;
@@ -27,13 +28,15 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
     private IconButton transferCraftToStorageButton;
     protected StatusButton craftReturnButton;
 
-    public DimensionsCraftGUI(T container, Inventory playerInventory, Component title) {
+    public DimensionsCraftGUI(T container, Inventory playerInventory, Component title)
+    {
         super(container, playerInventory, title);
     }
 
 
     @Override
-    protected void init() {
+    protected void init()
+    {
         super.init();
 
         //槽位转移按钮
@@ -60,17 +63,20 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
             Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.set((ButtonState) craftReturnButton.currentState);
             Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.save();
             menu.writeAndSendQuickData();
-        }) {
+        })
+        {
 
             @Override
-            protected void initButton() {
+            protected void initButton()
+            {
                 iconMap.put(ButtonState.ENABLED, BeyondDimensions.makeId("widget/sort_asc"));
                 iconMap.put(ButtonState.DISABLED, BeyondDimensions.makeId("widget/sort_desc"));
 
                 tooltipMap.put(ButtonState.ENABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_storage")));
                 tooltipMap.put(ButtonState.DISABLED, Tooltip.create(Component.translatable("tooltip.button.beyonddimensions.first_inv")));
 
-                for (Enum<?> state : iconMap.keySet()) {
+                for (Enum<?> state : iconMap.keySet())
+                {
                     this.states.add(state);
                 }
                 setState(CommonConfigRuntime.uiCraftReturnButton);
@@ -80,7 +86,8 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a) {
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
+    {
         super.extractBackground(guiGraphics, mouseX, mouseY, a);
         int drawY = this.topPos; // 用于动态控制绘制
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE_TOP_BASE, this.leftPos, drawY, 0F, 0F, TOP_BASE_WIDTH, TOP_BASE_HEIGHT, TOP_BASE_WIDTH, TOP_BASE_HEIGHT);
@@ -89,7 +96,8 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE_TOP_SLOTS, this.leftPos, drawY, 0F, 0F, TOP_SLOTS_WIDTH, TOP_SLOTS_HEIGHT, TOP_SLOTS_WIDTH, TOP_SLOTS_HEIGHT);
         drawY += TOP_SLOTS_HEIGHT;
 
-        for (int i = 0; i < menu.getLines() - 2; i++) {
+        for (int i = 0; i < menu.getLines() - 2; i++)
+        {
             guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE_MID_SLOTS, this.leftPos, drawY, 0F, 0F, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT, MID_SLOTS_WIDTH, MID_SLOTS_HEIGHT);
             drawY += MID_SLOTS_HEIGHT;
         }
@@ -105,18 +113,21 @@ public class DimensionsCraftGUI<T extends DimensionsCraftMenu> extends Dimension
     }
 
     @Override
-    protected int rebuildImageHeight() {
+    protected int rebuildImageHeight()
+    {
         return TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + (menu.getLines() - 2) * MID_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + CRAFT_SLOTS_HEIGHT + PLAYER_INV_HEIGHT;
     }
 
     @Override
-    protected void rebuildLabelHeight() {
+    protected void rebuildLabelHeight()
+    {
         this.titleLabelY = 8;
         this.inventoryLabelY = TOP_BASE_HEIGHT + menu.getLines() * 18 + 5 + CRAFT_SLOTS_HEIGHT;
     }
 
     @Override
-    protected int calMaxLines() {
+    protected int calMaxLines()
+    {
         return (int) ((this.height - 36 - (TOP_BASE_HEIGHT + TOP_SLOTS_HEIGHT + BOTTOM_SLOTS_HEIGHT + CRAFT_SLOTS_HEIGHT + PLAYER_INV_HEIGHT)) / (float) MID_SLOTS_HEIGHT + 2);
     }
 
