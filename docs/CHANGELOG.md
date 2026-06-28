@@ -1,1 +1,1 @@
-* init 26.2
+* Prevent double-clicking storage UI slots from bulk-transferring stored contents into the inventory.
