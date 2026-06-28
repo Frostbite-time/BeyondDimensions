@@ -117,6 +117,7 @@ public class NetEnergyGUI extends BDBaseGUI<NetEnergyMenu>
     @Override
     public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
     {
+        super.extractBackground(guiGraphics, mouseX, mouseY, a);
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE, this.leftPos, this.topPos, 0F, 0F, this.imageWidth, this.imageHeight, 256, 256);
     }
 

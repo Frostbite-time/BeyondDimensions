@@ -401,6 +401,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     @Override
     public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
     {
+        super.extractBackground(guiGraphics, mouseX, mouseY, a);
         int drawY = this.topPos; // 用于动态控制绘制
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE_TOP_BASE, this.leftPos, drawY, 0F, 0F, TOP_BASE_WIDTH, TOP_BASE_HEIGHT, TOP_BASE_WIDTH, TOP_BASE_HEIGHT);
         drawY += TOP_BASE_HEIGHT;

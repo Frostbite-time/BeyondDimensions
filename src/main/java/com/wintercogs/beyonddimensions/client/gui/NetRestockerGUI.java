@@ -136,6 +136,7 @@ public class NetRestockerGUI extends BDBaseGUI<NetRestockerMenu>
     @Override
     public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
     {
+        super.extractBackground(guiGraphics, mouseX, mouseY, a);
         int[] drawY = new int[]{this.topPos};
 
         CommonTexturesRender.renderTopBaseCommon(guiGraphics, this.leftPos, drawY);

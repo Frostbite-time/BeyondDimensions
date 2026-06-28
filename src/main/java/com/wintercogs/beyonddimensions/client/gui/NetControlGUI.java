@@ -205,6 +205,7 @@ public class NetControlGUI extends BDBaseGUI<NetControlMenu>
     @Override
     public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a)
     {
+        super.extractBackground(guiGraphics, mouseX, mouseY, a);
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE, this.leftPos, this.topPos, 0F, 0F, this.imageWidth, this.imageHeight, this.imageWidth, this.imageHeight);
     }
 
