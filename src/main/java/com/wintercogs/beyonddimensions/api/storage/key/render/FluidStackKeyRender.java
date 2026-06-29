@@ -46,15 +46,14 @@ public class FluidStackKeyRender implements IStackRender
                 var fluid = stack.getFluid();
                 IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluid);
                 ResourceLocation still = props.getStillTexture(stack);
+                // still在此处有null风险，不可移除null检查
                 TextureAtlasSprite sprite = still == null ? null :
                         Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(still);
 
                 if (sprite != null && sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation())
                 {
-                    int tint = IClientFluidTypeExtensions.of(fluid).getTintColor();
-                    // 复用项目现有的绘制工具
-                    IngredientRenderer
-                            .drawTiledSprite(gui, 16, 16, tint, 16, sprite, x, y);
+                    int tint = IClientFluidTypeExtensions.of(fluid).getTintColor(stack);
+                    IngredientRenderer.drawTiledSprite(gui, 16, 16, tint, 16, sprite, x, y);
                 }
             }
 
