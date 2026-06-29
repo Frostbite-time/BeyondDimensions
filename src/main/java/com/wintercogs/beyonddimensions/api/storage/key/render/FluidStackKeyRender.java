@@ -50,8 +50,7 @@ public class FluidStackKeyRender implements IStackRender
 
                 if (sprite != null && sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation())
                 {
-                    int tint = IClientFluidTypeExtensions.of(fluid).getTintColor();
-                    // 复用项目现有的绘制工具
+                    int tint = IClientFluidTypeExtensions.of(fluid).getTintColor(stack);
                     IngredientRenderer
                             .drawTiledSprite(gui, 16, 16, tint, 16, sprite, x, y);
                 }
