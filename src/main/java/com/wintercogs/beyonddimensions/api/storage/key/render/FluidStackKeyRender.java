@@ -51,7 +51,7 @@ public class FluidStackKeyRender implements IStackRender
                 if (sprite.atlasLocation() != MissingTextureAtlasSprite.getLocation())
                 {
                     int tintColor = fluidModel.fluidTintSource() == null ?
-                            0xFFFFFFFF : fluidModel.fluidTintSource().color(fluid.defaultFluidState());
+                            0xFFFFFFFF : fluidModel.fluidTintSource().colorAsStack(stack);
                     IngredientRenderer.drawTiledSprite(gui, 16, 16, tintColor, 16, sprite, x, y);
                 }
             }
