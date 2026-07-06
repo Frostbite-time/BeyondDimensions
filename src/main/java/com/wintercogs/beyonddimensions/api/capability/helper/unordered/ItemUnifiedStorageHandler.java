@@ -16,8 +16,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
+/**
+ * 动态槽位视图：size() 随存储内容实时变化，调用方持有的索引可能在两次调用间失效。
+ * 因此对越界索引不抛错：读取返回 EMPTY/0，插入与提取返回 0。
+ */
 public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> implements ResourceHandler<@NotNull ItemResource>
 {
     private final UnifiedStorage storage;
@@ -90,8 +93,6 @@ public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> 
     @Override
     public ItemResource getResource(int index)
     {
-        Objects.checkIndex(index, size());
-
         IStackKey<?> key = getItemKeyAt(index);
         if (key == null) return ItemResource.EMPTY;
 
@@ -102,8 +103,6 @@ public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> 
     @Override
     public long getAmountAsLong(int index)
     {
-        Objects.checkIndex(index, size());
-
         IStackKey<?> key = getItemKeyAt(index);
         if (key == null) return 0L;
 
@@ -113,8 +112,6 @@ public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> 
     @Override
     public long getCapacityAsLong(int index, ItemResource resource)
     {
-        Objects.checkIndex(index, size());
-
         if (!resource.isEmpty() && !isValid(index, resource))
         {
             return 0L;
@@ -128,7 +125,6 @@ public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> 
     @Override
     public boolean isValid(int index, ItemResource resource)
     {
-        Objects.checkIndex(index, size());
         TransferPreconditions.checkNonEmpty(resource);
         return true;
     }
@@ -136,7 +132,6 @@ public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> 
     @Override
     public int insert(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
     {
-        Objects.checkIndex(index, size());
         TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
         if (amount == 0) return 0;
 
@@ -155,7 +150,6 @@ public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> 
     @Override
     public int extract(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
     {
-        Objects.checkIndex(index, size());
         TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
         if (amount == 0) return 0;
 

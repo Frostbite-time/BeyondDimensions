@@ -1,1 +1,1 @@
-* Fix fluid key render
+* Adapt capability handler views to dynamic slots: out-of-range indices no longer throw and are treated as empty slots instead.

@@ -17,8 +17,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
+/**
+ * 仅基于桶（Fluid 桶 + Empty 桶）进行索引映射的 Fluid 资源视图。
+ * 动态槽位：size() 随存储内容实时变化，调用方持有的索引可能在两次调用间失效，
+ * 因此对越界索引不抛错：读取返回 EMPTY/0，插入与提取返回 0，isValid 返回 false。
+ */
 public class FluidStackTypedHandler extends SnapshotJournal<List<KeyAmount>> implements ResourceHandler<@NotNull FluidResource>
 {
     private static final Identifier FLUID_TYPE = FluidStackKey.ID;
@@ -126,7 +130,6 @@ public class FluidStackTypedHandler extends SnapshotJournal<List<KeyAmount>> imp
     @Override
     public FluidResource getResource(int index)
     {
-        Objects.checkIndex(index, size());
         if (!inFluidRegion(index)) return FluidResource.EMPTY;
 
         int actualIndex = resolveActualIndex(index);
@@ -139,7 +142,6 @@ public class FluidStackTypedHandler extends SnapshotJournal<List<KeyAmount>> imp
     @Override
     public long getAmountAsLong(int index)
     {
-        Objects.checkIndex(index, size());
         if (!inFluidRegion(index)) return 0L;
 
         int actualIndex = resolveActualIndex(index);
@@ -152,8 +154,6 @@ public class FluidStackTypedHandler extends SnapshotJournal<List<KeyAmount>> imp
     @Override
     public long getCapacityAsLong(int index, FluidResource resource)
     {
-        Objects.checkIndex(index, size());
-
         if (!resource.isEmpty() && !isValid(index, resource))
         {
             return 0L;
@@ -178,7 +178,6 @@ public class FluidStackTypedHandler extends SnapshotJournal<List<KeyAmount>> imp
     @Override
     public boolean isValid(int index, FluidResource resource)
     {
-        Objects.checkIndex(index, size());
         TransferPreconditions.checkNonEmpty(resource);
 
         int actualIndex = resolveActualIndex(index);
@@ -194,7 +193,6 @@ public class FluidStackTypedHandler extends SnapshotJournal<List<KeyAmount>> imp
     @Override
     public int insert(int index, FluidResource resource, int amount, @NotNull TransactionContext transaction)
     {
-        Objects.checkIndex(index, size());
         TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
 
         if (amount == 0) return 0;
@@ -217,7 +215,6 @@ public class FluidStackTypedHandler extends SnapshotJournal<List<KeyAmount>> imp
     @Override
     public int extract(int index, FluidResource resource, int amount, @NotNull TransactionContext transaction)
     {
-        Objects.checkIndex(index, size());
         TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
 
         if (amount == 0) return 0;

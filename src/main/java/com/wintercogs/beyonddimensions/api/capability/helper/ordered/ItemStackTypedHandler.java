@@ -17,13 +17,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 仅基于桶（Item 桶 + Empty 桶）进行索引映射的 Item 资源视图。
  * - 不做快照/镜像；单次调用内直接访问桶当前状态。
  * - 可视槽位 = ItemStackKey 桶槽位 + EmptyStackKey 桶槽位（顺序：先 Item，后 Empty）。
  * - 对外实现 ResourceHandler<ItemResource>，并通过 SnapshotJournal 支持事务回滚。
+ * - 动态槽位：size() 随存储内容实时变化，调用方持有的索引可能在两次调用间失效，
+ *   因此对越界索引不抛错：读取返回 EMPTY/0，插入与提取返回 0，isValid 返回 false。
  */
 public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> implements ResourceHandler<@NotNull ItemResource>
 {
@@ -160,7 +161,6 @@ public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> impl
     @Override
     public ItemResource getResource(int index)
     {
-        Objects.checkIndex(index, size());
         if (!inItemRegion(index)) return ItemResource.EMPTY;
 
         int actualIndex = resolveActualIndex(index);
@@ -176,7 +176,6 @@ public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> impl
     @Override
     public long getAmountAsLong(int index)
     {
-        Objects.checkIndex(index, size());
         if (!inItemRegion(index)) return 0L;
 
         int actualIndex = resolveActualIndex(index);
@@ -189,8 +188,6 @@ public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> impl
     @Override
     public long getCapacityAsLong(int index, ItemResource resource)
     {
-        Objects.checkIndex(index, size());
-
         if (!resource.isEmpty() && !isValid(index, resource))
         {
             return 0L;
@@ -215,7 +212,6 @@ public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> impl
     @Override
     public boolean isValid(int index, ItemResource resource)
     {
-        Objects.checkIndex(index, size());
         TransferPreconditions.checkNonEmpty(resource);
 
         int actualIndex = resolveActualIndex(index);
@@ -231,7 +227,6 @@ public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> impl
     @Override
     public int insert(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
     {
-        Objects.checkIndex(index, size());
         TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
 
         if (amount == 0) return 0;
@@ -257,7 +252,6 @@ public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> impl
     @Override
     public int extract(int index, ItemResource resource, int amount, @NotNull TransactionContext transaction)
     {
-        Objects.checkIndex(index, size());
         TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
 
         if (amount == 0) return 0;
