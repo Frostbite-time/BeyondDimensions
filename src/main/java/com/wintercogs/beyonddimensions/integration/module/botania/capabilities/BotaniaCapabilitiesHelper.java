@@ -6,15 +6,7 @@ import net.neoforged.neoforge.capabilities.ItemCapability;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import vazkii.botania.api.BotaniaForgeCapabilities;
-import vazkii.botania.api.capability.ApiIdBlock;
-import vazkii.botania.api.capability.ApiIdEntity;
-import vazkii.botania.api.capability.ApiIdItem;
-import vazkii.botania.api.capability.BlockApiNoContext;
-import vazkii.botania.api.capability.BlockApiWithContext;
-import vazkii.botania.api.capability.EntityApiNoContext;
-import vazkii.botania.api.capability.EntityApiWithContext;
-import vazkii.botania.api.capability.ItemApiNoContext;
-import vazkii.botania.api.capability.ItemApiWithContext;
+import vazkii.botania.api.capability.*;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
