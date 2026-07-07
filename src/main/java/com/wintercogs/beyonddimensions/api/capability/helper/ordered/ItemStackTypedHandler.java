@@ -24,7 +24,7 @@ import java.util.List;
  * - 可视槽位 = ItemStackKey 桶槽位 + EmptyStackKey 桶槽位（顺序：先 Item，后 Empty）。
  * - 对外实现 ResourceHandler<ItemResource>，并通过 SnapshotJournal 支持事务回滚。
  * - 动态槽位：size() 随存储内容实时变化，调用方持有的索引可能在两次调用间失效，
- *   因此对越界索引不抛错：读取返回 EMPTY/0，插入与提取返回 0，isValid 返回 false。
+ * 因此对越界索引不抛错：读取返回 EMPTY/0，插入与提取返回 0，isValid 返回 false。
  */
 public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> implements ResourceHandler<@NotNull ItemResource>
 {
