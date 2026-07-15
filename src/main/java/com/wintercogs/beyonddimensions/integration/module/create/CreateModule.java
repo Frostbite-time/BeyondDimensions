@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.integration.module.create;
 
 import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
 import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
@@ -22,7 +23,9 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +33,9 @@ import java.util.List;
 @BDIntegrationModule(modId = OtherModIds.CREATE)
 public class CreateModule implements IIntegrationModule
 {
+    private static final ComparableVersion MINIMUM_STORAGE_API_VERSION = new ComparableVersion("6.0.0");
+    private boolean storageApiAvailable;
+
     @Override
     public String modId()
     {
@@ -41,12 +47,29 @@ public class CreateModule implements IIntegrationModule
     {
         CreateModuleBlocks.register(modBus);
         CreateModuleBlockEntities.register(modBus);
-        NetInterfaceMountedStorageType.register(modBus);
+
+        String createVersion = ModList.get().getModContainerById(OtherModIds.CREATE)
+                .map(container -> container.getModInfo().getVersion().toString())
+                .orElse("0");
+        storageApiAvailable = new ComparableVersion(createVersion).compareTo(MINIMUM_STORAGE_API_VERSION) >= 0;
+        if (storageApiAvailable)
+        {
+            NetInterfaceMountedStorageType.register(modBus);
+        }
+        else
+        {
+            BeyondDimensions.LOGGER.warn("Create {} does not provide the mounted storage API; contraption support is disabled", createVersion);
+        }
     }
 
     @Override
     public void onCommonSetup(FMLCommonSetupEvent event)
     {
+        if (!storageApiAvailable)
+        {
+            return;
+        }
+
         event.enqueueWork(() -> {
             MountedItemStorageType.REGISTRY.register(
                     BDBlocks.NET_INTERFACE.get(),
