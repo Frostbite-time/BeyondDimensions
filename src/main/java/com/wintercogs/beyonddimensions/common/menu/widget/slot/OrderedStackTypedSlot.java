@@ -390,87 +390,9 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public void quickMove(KeyAmount clickStack, int button, Player player)
+    protected KeyAmount getQuickMoveStack(KeyAmount clickStack)
     {
-        // 虽然当前的默认值不会导致出现问题，但还是添加执行前检查，防止某一天遗漏
-        if (!(quickMoveSlotStartIndex >= 0 && quickMoveSlotEndIndex >= 0 && quickMoveSlotStartIndex < quickMoveSlotEndIndex))
-            return;
-        if (!clickStack.isEmpty())
-        {
-            // TODO
-            // 这里的trueStack和注释并不正确，实际上后续操作中extract本身就不会提取超出真实数量的值，本身即有数据包验证的效果
-            // 这里的trueStack更类似于wannaStack，这里先加上这些注释，后续有空再改名
-            // 之前错误的注释：防止数据包伪造，然后赋予trueStack需要提取的数量
-            KeyAmount trueStack = new KeyAmount(storage.getStackBySlot(theSlot).key(), clickStack.amount());
-
-            // 遍历目标槽位
-            for (int targetSlotIndex = quickMoveSlotStartIndex; targetSlotIndex < quickMoveSlotEndIndex && !trueStack.isEmpty(); targetSlotIndex++)
-            {
-                Slot slot = menu.slots.get(targetSlotIndex);
-                if (slot instanceof AbstractStackTypedSlot aSlot)
-                {
-                    // aSlot处理任何情况
-
-                    //首先尝试从存储提取指定堆叠
-                    KeyAmount extract = safeExtract(trueStack.key(), trueStack.amount());
-                    KeyAmount remaining = aSlot.safeInsert(extract.key(), extract.amount()); // 然后插入到其他堆叠并获取余量
-                    if (!remaining.isEmpty())
-                        safeInsert(remaining.key(), remaining.amount()); // 最后将余量返回
-                    trueStack = remaining;
-
-                }
-                else // 目标slot为非StackTypedSlot时
-                {
-                    IStackKey<?> key = trueStack.key();
-
-                    // 物品转移
-                    if (key instanceof ItemStackKey trueItemTypedKey)
-                    {
-                        KeyAmount extractKA = safeExtract(trueItemTypedKey, trueStack.amount());
-                        if (!extractKA.isEmpty())
-                        {
-                            // 由于trueItemTypedKey属于ItemKey，而extractKA不为空，此处的强转必然安全
-                            // 如果extractKA为空，也任何回退处理
-                            ItemStack remaining = slot.safeInsert((ItemStack) extractKA.toStack());
-                            if (!remaining.isEmpty())
-                                safeInsert(new ItemStackKey(remaining), remaining.getCount());
-                            trueStack = new KeyAmount(new ItemStackKey(remaining), remaining.getCount());
-                        }
-                    }
-                    // 移动流体并装桶
-                    else if (key instanceof FluidStackKey trueFluidTypedKey && trueFluidTypedKey.getSource().getBucket() != Items.AIR)
-                    {
-                        KeyAmount extract = safeExtract(trueFluidTypedKey, 1000);
-                        if (extract.amount() != 1000)
-                        {
-                            safeInsert(extract.key(), extract.amount());
-                            break;
-                        }
-
-                        KeyAmount bucket = storage.extract(new ItemStackKey(new ItemStack(Items.BUCKET)), 1, false, false);
-                        if (bucket.isEmpty())
-                        {
-                            safeInsert(extract.key(), extract.amount());
-                            break;
-                        }
-
-                        Item bucketItem = trueFluidTypedKey.getSource().getBucket();
-                        ItemStack insertStack = new ItemStack(bucketItem);
-                        ItemStack remaining = slot.safeInsert(insertStack);
-                        if (!remaining.isEmpty())
-                        {
-                            safeInsert(extract.key(), extract.amount());
-                            storage.insert(bucket.key(), bucket.amount(), false);
-                            continue;
-                        }
-                        trueStack = new KeyAmount(trueFluidTypedKey, trueStack.amount() - 1000);
-                        break; // 更新trueStack以保持语义相同，但是这里我们break，以确保一次点击最多只成功装桶一次
-                    }
-                }
-
-            }
-            setChanged();
-        }
+        return new KeyAmount(storage.getStackBySlot(theSlot).key(), clickStack.amount());
     }
 
     @Override

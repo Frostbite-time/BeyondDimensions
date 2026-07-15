@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.util.BDMath;
@@ -11,7 +12,9 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -110,7 +113,83 @@ public abstract class AbstractStackTypedSlot extends Slot
     /**
      * 当鼠标shift点击此槽位会发生什么
      */
-    public abstract void quickMove(KeyAmount clickStack, int button, Player player);
+    public void quickMove(KeyAmount clickStack, int button, Player player)
+    {
+        if (!hasQuickMoveTarget() || clickStack.isEmpty())
+            return;
+
+        KeyAmount remainingStack = getQuickMoveStack(clickStack);
+        for (int targetSlotIndex = quickMoveSlotStartIndex; targetSlotIndex < quickMoveSlotEndIndex && !remainingStack.isEmpty(); targetSlotIndex++)
+        {
+            Slot slot = menu.slots.get(targetSlotIndex);
+            if (slot instanceof AbstractStackTypedSlot stackTypedSlot)
+            {
+                KeyAmount extracted = safeExtract(remainingStack.key(), remainingStack.amount());
+                KeyAmount remaining = stackTypedSlot.safeInsert(extracted.key(), extracted.amount());
+                if (!remaining.isEmpty())
+                    safeInsert(remaining.key(), remaining.amount());
+                remainingStack = remaining;
+            }
+            else if (remainingStack.key() instanceof ItemStackKey itemStackKey)
+            {
+                KeyAmount extracted = safeExtract(itemStackKey, remainingStack.amount());
+                if (!extracted.isEmpty())
+                {
+                    ItemStack remaining = slot.safeInsert((ItemStack) extracted.toStack());
+                    if (!remaining.isEmpty())
+                        safeInsert(new ItemStackKey(remaining), remaining.getCount());
+                    remainingStack = new KeyAmount(new ItemStackKey(remaining), remaining.getCount());
+                }
+            }
+            else
+            {
+                remainingStack = quickMoveFluidToSlot(remainingStack, slot);
+                if (remainingStack == null)
+                    break;
+            }
+        }
+        setChanged();
+    }
+
+    protected KeyAmount getQuickMoveStack(KeyAmount clickStack)
+    {
+        return clickStack;
+    }
+
+    private boolean hasQuickMoveTarget()
+    {
+        return quickMoveSlotStartIndex >= 0 && quickMoveSlotEndIndex >= 0 && quickMoveSlotStartIndex < quickMoveSlotEndIndex;
+    }
+
+    private KeyAmount quickMoveFluidToSlot(KeyAmount stack, Slot slot)
+    {
+        if (!(stack.key() instanceof FluidStackKey fluidStackKey) || fluidStackKey.getSource().getBucket() == Items.AIR)
+            return stack;
+
+        KeyAmount extracted = safeExtract(fluidStackKey, 1000);
+        if (extracted.amount() != 1000)
+        {
+            safeInsert(extracted.key(), extracted.amount());
+            return null;
+        }
+
+        KeyAmount bucket = storage.extract(new ItemStackKey(new ItemStack(Items.BUCKET)), 1, false, false);
+        if (bucket.isEmpty())
+        {
+            safeInsert(extracted.key(), extracted.amount());
+            return null;
+        }
+
+        Item bucketItem = fluidStackKey.getSource().getBucket();
+        ItemStack remaining = slot.safeInsert(new ItemStack(bucketItem));
+        if (!remaining.isEmpty())
+        {
+            safeInsert(extracted.key(), extracted.amount());
+            storage.insert(bucket.key(), bucket.amount(), false);
+            return stack;
+        }
+        return null;
+    }
 
     /**
      * 将数据从服务端向客户端发包
