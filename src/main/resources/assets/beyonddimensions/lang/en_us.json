@@ -224,5 +224,8 @@
   "msg.beyonddimensions.primary_net.switch.cleared": "Primary network cleared",
   "msg.beyonddimensions.primary_net.switch.none_available": "No available network to switch to",
   "msg.beyonddimensions.primary_net.switch.invalid_target": "That network is unavailable or you are no longer a member",
-  "msg.beyonddimensions.primary_net.switch.no_other": "No other primary network is available"
+  "msg.beyonddimensions.primary_net.switch.no_other": "No other primary network is available",
+  "key.beyonddimensions.wysiwyg_harvest_key": "What You See Is What You Get",
+  "msg.beyonddimensions.wysiwyg_no_network": "No dimension network is available",
+  "msg.beyonddimensions.wysiwyg_result": "Harvested %s blocks, %s entities, and %s containers"
 }

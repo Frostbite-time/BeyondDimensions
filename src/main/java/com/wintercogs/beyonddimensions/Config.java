@@ -161,6 +161,8 @@ public class Config
 
         public final ModConfigSpec.LongValue UNSTABLE_SPACE_TIME_FRAGMENT_TRANSFER_TIME;
         public final ModConfigSpec.IntValue SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME;
+        public final ModConfigSpec.IntValue WYSIWYG_MAX_BLOCKS;
+        public final ModConfigSpec.IntValue WYSIWYG_RANGE;
 
         public ServerConfig()
         {
@@ -172,6 +174,12 @@ public class Config
             SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME = builder
                     .comment("结晶生成间隔（0代表不生成）")
                     .defineInRange("crystalGenerateTime", 600, 0, Integer.MAX_VALUE);
+            WYSIWYG_MAX_BLOCKS = builder
+                    .comment("单次所见即所得最多破坏的方块数量")
+                    .defineInRange("wysiwygMaxBlocks", 1024, 1, 65536);
+            WYSIWYG_RANGE = builder
+                    .comment("所见即所得的最大作用距离")
+                    .defineInRange("wysiwygRange", 32, 1, 128);
 
             this.spec = builder.build();
         }
@@ -180,6 +188,8 @@ public class Config
         {
             ServerConfigRuntime.fragmentTransferTime = UNSTABLE_SPACE_TIME_FRAGMENT_TRANSFER_TIME.get();
             ServerConfigRuntime.crystalGenerateTime = SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME.get();
+            ServerConfigRuntime.wysiwygMaxBlocks = WYSIWYG_MAX_BLOCKS.get();
+            ServerConfigRuntime.wysiwygRange = WYSIWYG_RANGE.get();
         }
     }
 }

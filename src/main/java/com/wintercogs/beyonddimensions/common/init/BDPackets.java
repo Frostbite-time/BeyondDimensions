@@ -185,5 +185,11 @@ public class BDPackets
                         RenameNetPacket::handle
                 )
         );
+
+        registrar.playToServer(
+                WysiwygHarvestPacket.TYPE,
+                WysiwygHarvestPacket.STREAM_CODEC,
+                WysiwygHarvestPacket::handle
+        );
     }
 }

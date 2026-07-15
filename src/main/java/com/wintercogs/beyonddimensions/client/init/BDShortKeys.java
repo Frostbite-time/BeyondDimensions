@@ -90,6 +90,12 @@ public class BDShortKeys
             "key.categories.beyonddimensions"
     );
 
+    public static final KeyMapping WYSIWYG_HARVEST_KEY = new KeyMapping(
+            "key.beyonddimensions.wysiwyg_harvest_key",
+            GLFW.GLFW_KEY_I,
+            "key.categories.beyonddimensions"
+    );
+
     public static void processKeyInput()
     {
         for (Pair<KeyMapping, Runnable> pair : KEY_MAPPINGS_WITH_CALLBACK)
@@ -224,6 +230,13 @@ public class BDShortKeys
             }
 
             PacketDistributor.sendToServer(new PrimaryNetSwitchActionPacket(com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetSwitchAction.CYCLE_NEXT, -1));
+        });
+        BDShortKeys.registerKey(WYSIWYG_HARVEST_KEY, () -> {
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player != null)
+            {
+                PacketDistributor.sendToServer(new WysiwygHarvestPacket());
+            }
         });
 
         for (KeyMapping keyMapping : KEY_MAPPINGS)

@@ -224,5 +224,8 @@
   "msg.beyonddimensions.primary_net.switch.cleared": "已切换为无主网络",
   "msg.beyonddimensions.primary_net.switch.none_available": "当前没有可切换的网络",
   "msg.beyonddimensions.primary_net.switch.invalid_target": "目标网络不可用，或你已经不再属于该网络",
-  "msg.beyonddimensions.primary_net.switch.no_other": "没有其他可切换的主网络"
+  "msg.beyonddimensions.primary_net.switch.no_other": "没有其他可切换的主网络",
+  "key.beyonddimensions.wysiwyg_harvest_key": "所见即所得",
+  "msg.beyonddimensions.wysiwyg_no_network": "当前没有可用的维度网络",
+  "msg.beyonddimensions.wysiwyg_result": "已收取 %s 个方块、%s 个生物和 %s 个容器"
 }
