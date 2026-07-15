@@ -247,7 +247,7 @@ dependencies {
 
     // 机械动力支持 - 蓝图炮
     modCompileOnly "maven.modrinth:create:mc1.20.1-6.0.8"
-    modLocalRuntime "maven.modrinth:create:${findProperty('create_runtime_version') ?: 'mc1.20.1-6.0.8'}"
+    modLocalRuntime "maven.modrinth:create:mc1.20.1-6.0.8"
 
     modCompileOnly "net.createmod.ponder:Ponder-Forge-1.20.1:1.0.92"
 
