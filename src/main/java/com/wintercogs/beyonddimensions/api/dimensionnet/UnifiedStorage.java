@@ -1,10 +1,12 @@
 package com.wintercogs.beyonddimensions.api.dimensionnet;
 
+import com.wintercogs.beyonddimensions.api.dimensionnet.helper.UnifiedStorageBeforeExtractHandler;
 import com.wintercogs.beyonddimensions.api.dimensionnet.helper.UnifiedStorageBeforeInsertHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
+import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -90,6 +92,47 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
             return adjusted;
 
         return super.insert(adjusted.key(), adjusted.amount(), simulate);
+    }
+
+    @Override
+    public @NotNull KeyAmount extract(int slot, long amount, boolean simulate)
+    {
+        return handleExtract(getStackBySlot(slot), amount, simulate, false);
+    }
+
+    @Override
+    public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy)
+    {
+        return handleExtract(new KeyAmount(Objects.requireNonNullElse(key, EmptyStackKey.INSTANCE), amount), amount, simulate, fuzzy);
+    }
+
+    @Override
+    public @NotNull KeyAmount extract(TagKey<?> tagKey, long amount, boolean simulate)
+    {
+        KeyAmount extracted = super.extract(tagKey, amount, true);
+        return handleExtract(extracted, amount, simulate, false);
+    }
+
+    private @NotNull KeyAmount handleExtract(KeyAmount requested, long amount, boolean simulate, boolean fuzzy)
+    {
+        if (amount <= 0L || requested.isEmpty())
+            return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
+
+        KeyAmount available = super.extract(requested.key(), amount, true, fuzzy);
+        var info = UnifiedStorageBeforeExtractHandler.onBeforeExtract(available, net);
+
+        if (info.cancel())
+            return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
+
+        KeyAmount adjusted = info.beforeExtract();
+        if (adjusted.isEmpty())
+            return adjusted;
+
+        long extractedAmount = Math.min(available.amount(), adjusted.amount());
+        if (!simulate)
+            super.extract(available.key(), extractedAmount, false, false);
+
+        return new KeyAmount(adjusted.key(), extractedAmount);
     }
 
 }

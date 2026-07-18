@@ -628,7 +628,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 for (int i = applied.size() - 1; i >= 0; i--)
                 {
                     KeyAmount a = applied.get(i);
-                    extract(a.key(), a.amount(), false, false);
+                    extractByKey(a.key(), a.amount(), false);
                 }
                 return new KeyAmount(ballKey, ballCount);
             }
@@ -640,7 +640,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 for (int i = applied.size() - 1; i >= 0; i--)
                 {
                     KeyAmount a = applied.get(i);
-                    extract(a.key(), a.amount(), false, false);
+                    extractByKey(a.key(), a.amount(), false);
                 }
                 return new KeyAmount(ballKey, ballCount);
             }
