@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.api.dimensionnet;
 
 import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.event.dimensionnet.DimensionsNetEvent;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -167,12 +168,11 @@ public class DimensionsNet extends SavedData
             DimensionsNet newNet = server.getDataStorage().computeIfAbsent(savedDataType(netDataName));
             newNet.setId(allocatedNetId);
             NetRegistryIndex.get(server).registerNet(server, allocatedNetId);
-            newNet.setOwner(player.getUUID());
-            newNet.addManager(player.getUUID());
-            newNet.addPlayer(player.getUUID());
+            newNet.setOwner(player.getUUID(), false);
             newNet.setDirty();
             newNet.unifiedStorage.setSlotCapacity(defaultSlotCapability);
             newNet.unifiedStorage.setSlotMaxSize(defaultSlotMaxSize);
+            NeoForge.EVENT_BUS.post(new DimensionsNetEvent.Created(newNet));
 
             return newNet;
         }
@@ -467,9 +467,21 @@ public class DimensionsNet extends SavedData
      */
     public void setOwner(UUID owner)
     {
+        setOwner(owner, true);
+    }
+
+    private void setOwner(UUID owner, boolean dispatchEvent)
+    {
+        UUID beforeOwner = this.owner;
+
         this.owner = owner;
-        addManager(owner);
+        addManager(owner, false);
         setDirty();
+
+        if (dispatchEvent && beforeOwner != null && !beforeOwner.equals(owner))
+        {
+            NeoForge.EVENT_BUS.post(new DimensionsNetEvent.OwnerChanged(this, beforeOwner, owner));
+        }
     }
 
     /**
@@ -487,9 +499,33 @@ public class DimensionsNet extends SavedData
      */
     public void addManager(UUID managerId)
     {
-        managers.add(managerId);
-        addPlayer(managerId);
-        setDirty();
+        addManager(managerId, true);
+    }
+
+    private void addManager(UUID managerId, boolean dispatchEvent)
+    {
+        Objects.requireNonNull(managerId);
+        boolean wasMember = players.contains(managerId);
+        boolean managerAdded = managers.add(managerId);
+        boolean playerAdded = addPlayer(managerId, false);
+
+        if (!managerAdded && !playerAdded)
+        {
+            return;
+        }
+
+        if (managerAdded && !playerAdded)
+        {
+            setDirty();
+        }
+
+        if (dispatchEvent && managerAdded)
+        {
+            DimensionsNetEvent.MemberChangeState changeState = wasMember
+                    ? DimensionsNetEvent.MemberChangeState.PROMOTED_TO_MANAGER
+                    : DimensionsNetEvent.MemberChangeState.JOINED_AS_MANAGER;
+            NeoForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(this, managerId, changeState));
+        }
     }
 
     /**
@@ -499,12 +535,20 @@ public class DimensionsNet extends SavedData
      */
     public void removeManager(UUID managerId)
     {
+        Objects.requireNonNull(managerId);
         if (managerId.equals(owner))
         {
             return;
         }
-        managers.remove(managerId);
-        setDirty();
+        if (managers.remove(managerId))
+        {
+            setDirty();
+            NeoForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(
+                    this,
+                    managerId,
+                    DimensionsNetEvent.MemberChangeState.DEMOTED_TO_MEMBER
+            ));
+        }
     }
 
     /**
@@ -520,29 +564,74 @@ public class DimensionsNet extends SavedData
      */
     public void addPlayer(UUID playerId)
     {
+        addPlayer(playerId, true);
+    }
+
+    private boolean addPlayer(UUID playerId, boolean dispatchEvent)
+    {
+        Objects.requireNonNull(playerId);
         if (players.add(playerId))
         {
             syncPlayerMembership(playerId, true);
             setDirty();
+
+            if (dispatchEvent)
+            {
+                DimensionsNetEvent.MemberChangeState changeState = managers.contains(playerId)
+                        ? DimensionsNetEvent.MemberChangeState.JOINED_AS_MANAGER
+                        : DimensionsNetEvent.MemberChangeState.JOINED_AS_MEMBER;
+                NeoForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(this, playerId, changeState));
+            }
+            return true;
         }
+        return false;
     }
 
     /**
-     * 从网络移除一个玩家，你不能直接移除当前所有者
+     * 从网络踢出一个玩家，你不能直接移除当前所有者
      * <p>
      * 但是你可以直接移除任何其他成员
      */
     public void removePlayer(UUID playerId)
     {
+        removePlayer(playerId, true);
+    }
+
+    /**
+     * 让一个玩家主动离开网络，你不能让当前所有者直接离开。
+     */
+    public void leavePlayer(UUID playerId)
+    {
+        removePlayer(playerId, false);
+    }
+
+    private void removePlayer(UUID playerId, boolean kicked)
+    {
+        Objects.requireNonNull(playerId);
         if (playerId.equals(owner))
         {
             return;
         }
         if (players.remove(playerId))
         {
-            managers.remove(playerId);
+            boolean wasManager = managers.remove(playerId);
             syncPlayerRemoval(playerId);
             setDirty();
+
+            DimensionsNetEvent.MemberChangeState changeState;
+            if (kicked)
+            {
+                changeState = wasManager
+                        ? DimensionsNetEvent.MemberChangeState.KICKED_AS_MANAGER
+                        : DimensionsNetEvent.MemberChangeState.KICKED_AS_MEMBER;
+            }
+            else
+            {
+                changeState = wasManager
+                        ? DimensionsNetEvent.MemberChangeState.LEFT_AS_MANAGER
+                        : DimensionsNetEvent.MemberChangeState.LEFT_AS_MEMBER;
+            }
+            NeoForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(this, playerId, changeState));
         }
     }
 
@@ -616,7 +705,21 @@ public class DimensionsNet extends SavedData
      */
     public void destroySelf()
     {
+        if (this.deleted)
+        {
+            return;
+        }
+
         int previousNetId = this.id;
+        DimensionsNetEvent.Destroyed destroyedEvent = new DimensionsNetEvent.Destroyed(
+                previousNetId,
+                this.customName,
+                List.copyOf(this.unifiedStorage.getStorage()),
+                this.owner,
+                Set.copyOf(this.managers),
+                Set.copyOf(this.players)
+        );
+
         List<UUID> playerIds = new ArrayList<>(this.players);
         for (UUID playerId : playerIds)
         {
@@ -638,6 +741,7 @@ public class DimensionsNet extends SavedData
             NetRegistryIndex.get(server).unregisterNet(server, previousNetId);
         }
         setDirty();
+        NeoForge.EVENT_BUS.post(destroyedEvent);
     }
 
 
@@ -754,4 +858,3 @@ public class DimensionsNet extends SavedData
         return builder.toString().trim();
     }
 }
-

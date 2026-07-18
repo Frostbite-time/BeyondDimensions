@@ -88,7 +88,7 @@ public class NetControlMenu extends BDBaseMenu
             }
             else if (player.getUUID().equals(receiver) && !net.isOwner(receiver)) // 任何人都可以直接移除自己，除非是所有者
             {
-                net.removePlayer(receiver);
+                net.leavePlayer(receiver);
             }
             else if (net.isOwner(player) && !player.getUUID().equals(receiver)) // 所有者可以移除自己之外的任何人
             {
