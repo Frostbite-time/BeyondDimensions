@@ -158,8 +158,8 @@ public abstract class DimensionsNetEvent extends Event
         KICKED_AS_MANAGER,
 
         // 权限变更
-        PROMOTED_AS_MANAGER,
-        DEMOTED_AS_MEMBER,
+        PROMOTED_TO_MANAGER,
+        DEMOTED_TO_MEMBER,
     }
 
     /**
