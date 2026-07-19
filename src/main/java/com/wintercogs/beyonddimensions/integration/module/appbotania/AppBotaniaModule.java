@@ -30,7 +30,7 @@ public class AppBotaniaModule implements IIntegrationModule
     @Override
     public void onCommonSetup(FMLCommonSetupEvent event)
     {
-        AEHelper.ISTACK_TO_AEKEY_MAP.put(ManaKey.KEY.getId(), stackType -> Optional.of(ManaKey.KEY));
+        AEHelper.ISTACK_TO_AEKEY_MAP.put(ManaStackKey.ID, stackType -> Optional.of(ManaKey.KEY));
         AEHelper.AEKEY_TO_STACK_TYPE_MAP.put(ManaKeyType.TYPE, key -> Optional.of(ManaStackKey.INSTANCE));
     }
 }
