@@ -96,7 +96,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "目前：自動整理關閉",
   "tooltip.item.unstable_space_time.long_data": "時空仍在穩定中，仍需%s個穩定週期，請保持隨身攜帶",
   "tooltip.beyonddimensions.item.xp_exchange": "手持時：右鍵開啟設定介面\n在倉庫GUI中：右鍵存入經驗，中鍵取出經驗",
-  "tooltip.editbox.beyonddimensions.search": "輸入文字以按名稱搜尋\n輸入'@'以篩選模組ID\n輸入'$'以篩選提示框內容\n輸入'#'以篩選標籤\n按空格分割多個篩選欄位，使用引號包裹可搜尋空格字元\n使用'|'可進行或匹配，使用'-'可排除匹配\n按Shift+Z以開關JEI/EMI搜尋框聯動",
+  "tooltip.editbox.beyonddimensions.search": "輸入文字以按名稱搜尋\n輸入'@'以篩選模組ID\n輸入'$'以篩選提示框內容\n輸入'#'以篩選標籤\n輸入'*'以篩選物品ID\n按空格分割多個篩選欄位，使用引號包裹可搜尋空格字元\n使用'|'可進行或匹配，使用'-'可排除匹配\n按Shift+Z以開關JEI/EMI搜尋框聯動",
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "輸入要維持或手動互動的經驗等級\n超過上限時會自動回限",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "目前：工作（主動維持設定等級）",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "目前：不工作（僅手動互動）",
