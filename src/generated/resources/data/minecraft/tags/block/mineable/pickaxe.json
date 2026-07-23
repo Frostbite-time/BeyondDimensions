@@ -12,7 +12,7 @@
     "beyonddimensions:net_smoker_block",
     "beyonddimensions:dimensional_connect_block",
     {
-      "id": "beyonddimensions:ars_source_pathway",
+      "id": "beyonddimensions:rs_net_pathway",
       "required": false
     },
     {
@@ -25,6 +25,10 @@
     },
     {
       "id": "beyonddimensions:rs_net_pathway",
+      "required": false
+    },
+    {
+      "id": "beyonddimensions:lightning_pathway",
       "required": false
     }
   ]

@@ -194,6 +194,8 @@ dependencies {
     runtimeOnly "curse.maven:applied-flux-965012:6649565" // 应用通量附属
     runtimeOnly "curse.maven:glodium-957920:5821676" // ae flux 前置
     runtimeOnly "maven.modrinth:guideme:21.1.15" // guideme
+    compileOnly "maven.modrinth:ae2-lightning-tech:${ae2lt_version}"
+    runtimeOnly "maven.modrinth:ae2-lightning-tech:${ae2lt_version}"
 
     // 饰品栏支持
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}:api"

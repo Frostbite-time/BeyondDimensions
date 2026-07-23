@@ -4,6 +4,7 @@ public final class OtherModIds
 {
     public static final String MEKANISM = "mekanism";
     public static final String AE2 = "ae2";
+    public static final String AE2_LIGHTNING_TECH = "ae2lt";
     public static final String EMI = "emi";
     public static final String JEI = "jei";
     public static final String POLYMORPH = "polymorph";

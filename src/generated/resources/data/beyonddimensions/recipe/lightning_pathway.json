@@ -1,0 +1,33 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ae2lt"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "beyonddimensions:space_time_bar"
+    },
+    "B": {
+      "item": "beyonddimensions:space_time_stable_frame"
+    },
+    "C": {
+      "item": "minecraft:lightning_rod"
+    },
+    "D": {
+      "item": "minecraft:ender_eye"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "CDC",
+    "ABA"
+  ],
+  "result": {
+    "count": 1,
+    "id": "beyonddimensions:lightning_pathway"
+  }
+}

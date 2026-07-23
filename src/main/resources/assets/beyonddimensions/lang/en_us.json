@@ -224,5 +224,8 @@
   "msg.beyonddimensions.primary_net.switch.cleared": "Primary network cleared",
   "msg.beyonddimensions.primary_net.switch.none_available": "No available network to switch to",
   "msg.beyonddimensions.primary_net.switch.invalid_target": "That network is unavailable or you are no longer a member",
-  "msg.beyonddimensions.primary_net.switch.no_other": "No other primary network is available"
+  "msg.beyonddimensions.primary_net.switch.no_other": "No other primary network is available",
+  "block.beyonddimensions.lightning_pathway": "Dimensional Lightning Pathway",
+  "types.beyonddimensions.lightning.high_voltage": "High-Voltage Lightning",
+  "types.beyonddimensions.lightning.extreme_high_voltage": "Extreme High-Voltage Lightning"
 }
