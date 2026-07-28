@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnordere
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AutoRefillResultSlot;
@@ -22,14 +23,18 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
+import net.minecraft.recipebook.PlaceRecipe;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
@@ -38,7 +43,10 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -79,8 +87,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
      */
     public DimensionsCraftMenu(MenuType<?> type, int id, Inventory playerInventory, AbstractUnorderedStackHandler data, @Nullable NonNullList<ItemStack> craftItems, @Nullable BlockPos entityPos)
     {
-        // 利用父类函数处理存储槽位 玩家背包 和一些其他数据添加处理
-        super(type, id, playerInventory, data);
+        super(type, id, playerInventory, data, true);
 
         TransientCraftingContainer craftContainer;
         if (craftItems != null)
@@ -110,6 +117,8 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                 }
             };
         initCraftSlots(playerInventory, craftContainer);
+        addPlayerInv(playerInventory);
+        addStorageSlots();
     }
 
 
@@ -234,6 +243,258 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
             return PolymorphHelper.getRecipe(player, RecipeType.CRAFTING, input, level);
         }
         return level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
+    }
+
+    @Override
+    protected void onNetworkStorageChanged()
+    {
+        if (player.level().isClientSide())
+            player.getInventory().setChanged();
+    }
+
+    @Override
+    public void fillCraftSlotsStackedContents(StackedContents itemHelper)
+    {
+        craftSlots.fillStackedContents(itemHelper);
+        for (KeyAmount entry : storage.getStorage())
+        {
+            if (entry == null || entry.isEmpty() || !(entry.key() instanceof ItemStackKey itemKey)) continue;
+
+            int count = (int) Math.min(entry.amount(), itemKey.getVanillaMaxStackSize());
+            itemHelper.accountStack(itemKey.copyStackWithCount(count), count);
+        }
+    }
+
+    @Override
+    public void clearCraftingContent()
+    {
+        craftSlots.clearContent();
+        resultSlots.clearContent();
+    }
+
+    @Override
+    public boolean recipeMatches(RecipeHolder<CraftingRecipe> recipe)
+    {
+        return recipe.value().matches(craftSlots.asCraftInput(), player.level());
+    }
+
+    @Override
+    public int getResultSlotIndex()
+    {
+        return resultSlotIndex;
+    }
+
+    @Override
+    public int getGridWidth()
+    {
+        return craftSlots.getWidth();
+    }
+
+    @Override
+    public int getGridHeight()
+    {
+        return craftSlots.getHeight();
+    }
+
+    @Override
+    public int getSize()
+    {
+        return craftSlotEndIndex;
+    }
+
+    @Override
+    public RecipeBookType getRecipeBookType()
+    {
+        return RecipeBookType.CRAFTING;
+    }
+
+    @Override
+    public boolean shouldMoveToInventory(int slotIndex)
+    {
+        return slotIndex >= craftSlotStartIndex && slotIndex < craftSlotEndIndex;
+    }
+
+    @Override
+    public void handlePlacement(boolean placeAll, RecipeHolder<?> recipe, ServerPlayer player)
+    {
+        Optional<RecipeHolder<CraftingRecipe>> selected = player.level().getRecipeManager()
+                .getAllRecipesFor(RecipeType.CRAFTING)
+                .stream()
+                .filter(holder -> holder.id().equals(recipe.id()))
+                .findFirst();
+
+        if (selected.isEmpty()
+                || !player.getRecipeBook().contains(selected.get())
+                || !selected.get().value().canCraftInDimensions(getGridWidth(), getGridHeight()))
+        {
+            return;
+        }
+
+        RecipeTransferPlan plan = createRecipeTransferPlan(selected.get(), placeAll);
+        if (plan == null)
+        {
+            player.connection.send(new ClientboundPlaceGhostRecipePacket(containerId, selected.get()));
+            return;
+        }
+
+        transferRecipe(plan.keys(), plan.amounts());
+        player.getInventory().setChanged();
+    }
+
+    private @Nullable RecipeTransferPlan createRecipeTransferPlan(RecipeHolder<CraftingRecipe> recipe, boolean placeAll)
+    {
+        List<AvailableItem> available = collectAvailableItems();
+        int maxAmount = placeAll ? getMaximumTransferAmount(recipe, available) : 1;
+        if (maxAmount <= 0) return null;
+
+        List<SelectedIngredient> selected = selectIngredients(recipe.value().getIngredients(), available, maxAmount);
+        if (selected == null) return null;
+
+        ArrayList<IStackKey<?>> keys = new ArrayList<>();
+        ArrayList<Long> amounts = new ArrayList<>();
+        for (int i = 0; i < craftSlots.getContainerSize(); i++)
+        {
+            keys.add(EmptyStackKey.INSTANCE);
+            amounts.add(0L);
+        }
+
+        new PlaceRecipe<SelectedIngredient>()
+        {
+            @Override
+            public void addItemToSlot(SelectedIngredient ingredient, int slot, int amount, int x, int y)
+            {
+                int craftIndex = slot - craftSlotStartIndex;
+                if (craftIndex >= 0 && craftIndex < keys.size())
+                {
+                    keys.set(craftIndex, ingredient.key());
+                    amounts.set(craftIndex, (long) maxAmount);
+                }
+            }
+        }.placeRecipe(getGridWidth(), getGridHeight(), resultSlotIndex, recipe, selected.iterator(), maxAmount);
+
+        return new RecipeTransferPlan(keys, amounts);
+    }
+
+    private int getMaximumTransferAmount(RecipeHolder<CraftingRecipe> recipe, List<AvailableItem> available)
+    {
+        int upperBound = 64;
+        for (int amount = upperBound; amount > 0; amount--)
+        {
+            if (selectIngredients(recipe.value().getIngredients(), copyAvailableItems(available), amount) != null)
+                return amount;
+        }
+        return 0;
+    }
+
+    private @Nullable List<SelectedIngredient> selectIngredients(List<Ingredient> ingredients, List<AvailableItem> available, int amount)
+    {
+        ArrayList<SelectedIngredient> selected = new ArrayList<>(ingredients.size());
+        for (Ingredient ingredient : ingredients)
+        {
+            if (ingredient.isEmpty())
+            {
+                selected.add(SelectedIngredient.EMPTY);
+                continue;
+            }
+
+            AvailableItem best = null;
+            for (AvailableItem item : available)
+            {
+                if (item.remaining() >= amount
+                        && item.key().getVanillaMaxStackSize() >= amount
+                        && ingredient.test(item.key().copyStack())
+                        && (best == null || item.remaining() > best.remaining()))
+                {
+                    best = item;
+                }
+            }
+            if (best == null) return null;
+
+            best.consume(amount);
+            selected.add(new SelectedIngredient(best.key()));
+        }
+        return selected;
+    }
+
+    private List<AvailableItem> collectAvailableItems()
+    {
+        Map<ItemStackKey, AvailableItem> available = new HashMap<>();
+        for (ItemStack stack : craftSlots.getItems()) addAvailableItem(available, stack);
+        for (ItemStack stack : player.getInventory().items) addAvailableItem(available, stack);
+        for (KeyAmount entry : storage.getStorage())
+        {
+            if (entry != null && !entry.isEmpty() && entry.key() instanceof ItemStackKey itemKey)
+                addAvailableItem(available, itemKey, entry.amount());
+        }
+        return new ArrayList<>(available.values());
+    }
+
+    private void addAvailableItem(Map<ItemStackKey, AvailableItem> available, ItemStack stack)
+    {
+        if (!stack.isEmpty()) addAvailableItem(available, new ItemStackKey(stack), stack.getCount());
+    }
+
+    private void addAvailableItem(Map<ItemStackKey, AvailableItem> available, ItemStackKey key, long amount)
+    {
+        AvailableItem matching = available.values().stream()
+                .filter(item -> item.key().isSameTypeSameComponents(key))
+                .findFirst()
+                .orElse(null);
+        if (matching == null)
+            available.put(key, new AvailableItem(key, amount));
+        else
+            matching.add(amount);
+    }
+
+    private List<AvailableItem> copyAvailableItems(List<AvailableItem> available)
+    {
+        return available.stream().map(AvailableItem::copy).toList();
+    }
+
+    private record RecipeTransferPlan(List<IStackKey<?>> keys, List<Long> amounts)
+    {
+    }
+
+    private record SelectedIngredient(ItemStackKey key)
+    {
+        private static final SelectedIngredient EMPTY = new SelectedIngredient(null);
+    }
+
+    private static final class AvailableItem
+    {
+        private final ItemStackKey key;
+        private long remaining;
+
+        private AvailableItem(ItemStackKey key, long remaining)
+        {
+            this.key = key;
+            this.remaining = remaining;
+        }
+
+        private ItemStackKey key()
+        {
+            return key;
+        }
+
+        private long remaining()
+        {
+            return remaining;
+        }
+
+        private void add(long amount)
+        {
+            remaining += amount;
+        }
+
+        private void consume(long amount)
+        {
+            remaining -= amount;
+        }
+
+        private AvailableItem copy()
+        {
+            return new AvailableItem(key, remaining);
+        }
     }
 
     public void transferRecipe(List<IStackKey<?>> inputKeys, List<Long> amount)

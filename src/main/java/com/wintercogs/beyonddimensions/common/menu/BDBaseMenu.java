@@ -12,8 +12,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.anti_ad.mc.ipn.api.IPNIgnore;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +29,7 @@ import java.util.function.Supplier;
 // 定义一些用于 超越维度 模组的ui界面的基本方法。
 // 主要是重写网络同步和点击事件，确保父类机制不处理StoredStackSlot的相关内容
 @IPNIgnore
-public abstract class BDBaseMenu extends AbstractContainerMenu
+public abstract class BDBaseMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe>
 {
 
     public final Player player;
@@ -45,6 +49,58 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     {
         super(menuType, containerId);
         this.player = playerInventory.player;
+    }
+
+    @Override
+    public void fillCraftSlotsStackedContents(StackedContents itemHelper)
+    {
+    }
+
+    @Override
+    public void clearCraftingContent()
+    {
+    }
+
+    @Override
+    public boolean recipeMatches(RecipeHolder<CraftingRecipe> recipe)
+    {
+        return false;
+    }
+
+    @Override
+    public int getResultSlotIndex()
+    {
+        return -1;
+    }
+
+    @Override
+    public int getGridWidth()
+    {
+        return 0;
+    }
+
+    @Override
+    public int getGridHeight()
+    {
+        return 0;
+    }
+
+    @Override
+    public int getSize()
+    {
+        return 0;
+    }
+
+    @Override
+    public RecipeBookType getRecipeBookType()
+    {
+        return RecipeBookType.CRAFTING;
+    }
+
+    @Override
+    public boolean shouldMoveToInventory(int slotIndex)
+    {
+        return false;
     }
 
     protected void addSlotGroupSync(SlotGroupSync slotGroupSync)

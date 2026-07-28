@@ -70,6 +70,11 @@ public class DimensionsNetMenu extends BDBaseMenu
      */
     public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, AbstractUnorderedStackHandler data)
     {
+        this(menuType, id, playerInventory, data, false);
+    }
+
+    protected DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, AbstractUnorderedStackHandler data, boolean deferSlots)
+    {
         super(menuType, id, playerInventory);
 
         // 初始化搜索方案
@@ -97,16 +102,21 @@ public class DimensionsNetMenu extends BDBaseMenu
             public void afterLoadChange()
             {
                 updateViewerStorage(hasShiftDown);
+                onNetworkStorageChanged();
                 TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.NORMAL);
                 TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.ADVANCED);
             }
         });
 
-        // 添加玩家背包和快捷栏
-        addPlayerInv(playerInventory);
+        if (!deferSlots)
+        {
+            addPlayerInv(playerInventory);
+            addStorageSlots();
+        }
+    }
 
-        // 添加存储槽
-        addStorageSlots();
+    protected void onNetworkStorageChanged()
+    {
     }
 
     // 添加存储槽位
