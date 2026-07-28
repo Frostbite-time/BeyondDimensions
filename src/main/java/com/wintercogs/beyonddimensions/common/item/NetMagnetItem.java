@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.PigStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.machine.*;
@@ -21,6 +22,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -117,6 +119,16 @@ public class NetMagnetItem extends BaseMachineItem
         List<ExperienceOrb> xpEntities = hopperXpMode == HopperXpMode.ALLOW ? refreshXpEntityCache(level, searchArea) : new ArrayList<>();
 
         UnifiedStorage storage = NetedItem.getNet(stack).getUnifiedStorage();
+
+        // 将范围内的猪收进维度网络。先模拟插入，成功后才移除实体。
+        for (Pig pig : level.getEntitiesOfClass(Pig.class, searchArea, Entity::isAlive))
+        {
+            if (storage.insert(PigStackKey.INSTANCE, 1, true).isEmpty())
+            {
+                storage.insert(PigStackKey.INSTANCE, 1, false);
+                pig.discard();
+            }
+        }
 
         // 开始收集物品
         if (hopperItemMode == HopperItemMode.ALLOW)
