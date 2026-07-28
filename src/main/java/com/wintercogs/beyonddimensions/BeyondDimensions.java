@@ -18,6 +18,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.PigStackKey;
 import com.wintercogs.beyonddimensions.common.init.*;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.resources.ResourceLocation;
@@ -66,6 +67,7 @@ public class BeyondDimensions
         StackKeyRegistry.registerType(ItemStackKey.EMPTY);
         StackKeyRegistry.registerType(FluidStackKey.EMPTY);
         StackKeyRegistry.registerType(EnergyStackKey.INSTANCE);
+        StackKeyRegistry.registerType(PigStackKey.INSTANCE);
 
         // 注册方块能力类型，用于动态为方块注册能力
         CapabilityHelper.BlockCapabilityMap.put(ItemStackKey.ID, Capabilities.ItemHandler.BLOCK);

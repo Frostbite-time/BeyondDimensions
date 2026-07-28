@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.PigStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.util.PlayerNameHelper;
@@ -16,6 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -92,6 +94,13 @@ public class DimensionsNet extends SavedData
      * holdTime是固定的时间间隔，用于确定多久生成一次时间间隔，每当currentTime归零，holdTime会为它赋值
      */
     private int currentTime = 0;
+
+    /**
+     * 维度养猪场繁殖进度。正常猪被喂食后约需5分钟才能再次繁殖，
+     * 因此网络每6000 tick消耗两根胡萝卜并增加一只猪。
+     */
+    private int pigBreedingTime = 0;
+    private static final int PIG_BREEDING_INTERVAL = 6000;
 
     /**
      * 构造函数
@@ -380,6 +389,7 @@ public class DimensionsNet extends SavedData
 
         // 读取倒计时
         net.currentTime = tag.getInt("currentTime");
+        net.pigBreedingTime = tag.getInt("pigBreedingTime");
 
         if (tag.contains("Deleted"))
             net.deleted = tag.getBoolean("Deleted");
@@ -428,6 +438,7 @@ public class DimensionsNet extends SavedData
 
         // 保存倒计时
         tag.putInt("currentTime", this.currentTime);
+        tag.putInt("pigBreedingTime", this.pigBreedingTime);
 
         // 保存删除状态
         tag.putBoolean("Deleted", this.deleted);
@@ -725,9 +736,11 @@ public class DimensionsNet extends SavedData
     @SubscribeEvent
     public void onServerTick(ServerTickEvent.Pre event)
     {
-        // 不对临时网络执行倒计时
-        if (temporary || ServerConfigRuntime.crystalGenerateTime <= 0)
-            return;
+        if (temporary) return;
+
+        tickPigBreeding();
+
+        if (ServerConfigRuntime.crystalGenerateTime <= 0) return;
 
         currentTime++;
         setDirty();
@@ -737,7 +750,40 @@ public class DimensionsNet extends SavedData
             this.unifiedStorage.insert(new ItemStackKey(stack), stack.getCount(), false);
             currentTime = 0;
         }
+    }
 
+    private void tickPigBreeding()
+    {
+        long pigs = unifiedStorage.getStackByKey(PigStackKey.INSTANCE).amount();
+        ItemStack carrot = new ItemStack(Items.CARROT);
+        ItemStackKey carrotKey = new ItemStackKey(carrot);
+        long carrots = unifiedStorage.getStackByKey(carrotKey).amount();
+
+        if (pigs < 2 || carrots < 2)
+        {
+            if (pigBreedingTime != 0)
+            {
+                pigBreedingTime = 0;
+                setDirty();
+            }
+            return;
+        }
+
+        pigBreedingTime++;
+        if (pigBreedingTime % 20 == 0) setDirty();
+        if (pigBreedingTime < PIG_BREEDING_INTERVAL) return;
+
+        long requestedBirths = Math.min(pigs / 2, carrots / 2);
+        long remainder = unifiedStorage.insert(PigStackKey.INSTANCE, requestedBirths, true).amount();
+        long births = requestedBirths - remainder;
+        if (births <= 0) return;
+
+        long carrotCost = births * 2;
+        KeyAmount extracted = unifiedStorage.extract(carrotKey, carrotCost, false, false);
+        if (extracted.amount() != carrotCost) return;
+
+        unifiedStorage.insert(PigStackKey.INSTANCE, births, false);
+        pigBreedingTime = 0;
     }
 
     private void syncPlayerMembership(UUID playerId, boolean switchPrimary)
