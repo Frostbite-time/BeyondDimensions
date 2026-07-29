@@ -5,16 +5,24 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.MobStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.PigStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.util.PlayerNameHelper;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -96,11 +104,19 @@ public class DimensionsNet extends SavedData
     private int currentTime = 0;
 
     /**
-     * 维度养猪场繁殖进度。正常猪被喂食后约需5分钟才能再次繁殖，
-     * 因此网络每6000 tick消耗两根胡萝卜并增加一只猪。
+     * 各类动物和村民的繁殖进度。每种实体独立计时，约5分钟完成一轮繁殖。
      */
-    private int pigBreedingTime = 0;
-    private static final int PIG_BREEDING_INTERVAL = 6000;
+    private final Map<ResourceLocation, Integer> mobBreedingTimes = new HashMap<>();
+    private final Map<EntityType<?>, ItemStackKey> animalFoodKeys = new HashMap<>();
+    private static final int MOB_BREEDING_INTERVAL = 6000;
+    private static final int RANCH_TICK_INTERVAL = 20;
+    private static final int VILLAGER_FOOD_POINTS = 12;
+    private static final Map<net.minecraft.world.item.Item, Integer> VILLAGER_FOODS = Map.of(
+            Items.BREAD, 4,
+            Items.CARROT, 1,
+            Items.POTATO, 1,
+            Items.BEETROOT, 1
+    );
 
     /**
      * 构造函数
@@ -365,6 +381,13 @@ public class DimensionsNet extends SavedData
         }
 
         net.unifiedStorage.deserializeNBT(registryAccess, tag.getCompound("UnifiedStorage"));
+        // 把旧版养猪场的猪数量迁移到通用实体存储。
+        long legacyPigs = net.unifiedStorage.getStackByKey(PigStackKey.INSTANCE).amount();
+        if (legacyPigs > 0)
+        {
+            net.unifiedStorage.extract(PigStackKey.INSTANCE, legacyPigs, false, false);
+            net.unifiedStorage.insert(new MobStackKey(EntityType.PIG), legacyPigs, false);
+        }
         // 旧数据兼容
         if (tag.contains("EnergyStorage"))
         {
@@ -389,7 +412,16 @@ public class DimensionsNet extends SavedData
 
         // 读取倒计时
         net.currentTime = tag.getInt("currentTime");
-        net.pigBreedingTime = tag.getInt("pigBreedingTime");
+        CompoundTag breedingTimesTag = tag.getCompound("mobBreedingTimes");
+        for (String key : breedingTimesTag.getAllKeys())
+        {
+            ResourceLocation typeId = ResourceLocation.tryParse(key);
+            if (typeId != null)
+                net.mobBreedingTimes.put(typeId, Math.max(0, breedingTimesTag.getInt(key)));
+        }
+        if (tag.contains("pigBreedingTime"))
+            net.mobBreedingTimes.put(BuiltInRegistries.ENTITY_TYPE.getKey(EntityType.PIG),
+                    Math.max(0, tag.getInt("pigBreedingTime")));
 
         if (tag.contains("Deleted"))
             net.deleted = tag.getBoolean("Deleted");
@@ -438,7 +470,9 @@ public class DimensionsNet extends SavedData
 
         // 保存倒计时
         tag.putInt("currentTime", this.currentTime);
-        tag.putInt("pigBreedingTime", this.pigBreedingTime);
+        CompoundTag breedingTimesTag = new CompoundTag();
+        mobBreedingTimes.forEach((typeId, time) -> breedingTimesTag.putInt(typeId.toString(), time));
+        tag.put("mobBreedingTimes", breedingTimesTag);
 
         // 保存删除状态
         tag.putBoolean("Deleted", this.deleted);
@@ -738,7 +772,7 @@ public class DimensionsNet extends SavedData
     {
         if (temporary) return;
 
-        tickPigBreeding();
+        tickRanchBreeding(event.getServer().overworld());
 
         if (ServerConfigRuntime.crystalGenerateTime <= 0) return;
 
@@ -752,38 +786,169 @@ public class DimensionsNet extends SavedData
         }
     }
 
-    private void tickPigBreeding()
+    private void tickRanchBreeding(ServerLevel level)
     {
-        long pigs = unifiedStorage.getStackByKey(PigStackKey.INSTANCE).amount();
-        ItemStack carrot = new ItemStack(Items.CARROT);
-        ItemStackKey carrotKey = new ItemStackKey(carrot);
-        long carrots = unifiedStorage.getStackByKey(carrotKey).amount();
+        if (level.getGameTime() % RANCH_TICK_INTERVAL != 0) return;
 
-        if (pigs < 2 || carrots < 2)
+        Set<ResourceLocation> activeTypes = new HashSet<>();
+        for (KeyAmount entry : List.copyOf(unifiedStorage.getStorage()))
         {
-            if (pigBreedingTime != 0)
+            if (!(entry.key() instanceof MobStackKey mobKey) || entry.amount() < 2) continue;
+
+            ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(mobKey.entityType());
+            activeTypes.add(typeId);
+            if (!hasBreedingFood(level, mobKey.entityType()))
             {
-                pigBreedingTime = 0;
+                resetBreedingTime(typeId);
+                continue;
+            }
+
+            int breedingTime = mobBreedingTimes.getOrDefault(typeId, 0) + RANCH_TICK_INTERVAL;
+            mobBreedingTimes.put(typeId, breedingTime);
+            setDirty();
+            if (breedingTime < MOB_BREEDING_INTERVAL) continue;
+
+            if (breedStoredMobs(level, mobKey, entry.amount()))
+            {
+                mobBreedingTimes.put(typeId, 0);
                 setDirty();
             }
-            return;
         }
 
-        pigBreedingTime++;
-        if (pigBreedingTime % 20 == 0) setDirty();
-        if (pigBreedingTime < PIG_BREEDING_INTERVAL) return;
+        if (mobBreedingTimes.keySet().removeIf(typeId -> !activeTypes.contains(typeId)))
+            setDirty();
+    }
 
-        long requestedBirths = Math.min(pigs / 2, carrots / 2);
-        long remainder = unifiedStorage.insert(PigStackKey.INSTANCE, requestedBirths, true).amount();
-        long births = requestedBirths - remainder;
-        if (births <= 0) return;
+    private boolean hasBreedingFood(ServerLevel level, EntityType<?> entityType)
+    {
+        if (entityType == EntityType.VILLAGER)
+            return getVillagerFoodPoints() >= VILLAGER_FOOD_POINTS;
 
-        long carrotCost = births * 2;
-        KeyAmount extracted = unifiedStorage.extract(carrotKey, carrotCost, false, false);
-        if (extracted.amount() != carrotCost) return;
+        ItemStackKey cachedFood = animalFoodKeys.get(entityType);
+        if (cachedFood != null)
+        {
+            if (unifiedStorage.getStackByKey(cachedFood).amount() > 0) return true;
+            animalFoodKeys.remove(entityType);
+        }
 
-        unifiedStorage.insert(PigStackKey.INSTANCE, births, false);
-        pigBreedingTime = 0;
+        Entity entity = entityType.create(level);
+        if (!(entity instanceof Animal animal)) return false;
+        try
+        {
+            ItemStackKey foodKey = findAnimalFood(animal);
+            if (foodKey == null) return false;
+            animalFoodKeys.put(entityType, foodKey);
+            return true;
+        }
+        finally
+        {
+            entity.discard();
+        }
+    }
+
+    private boolean breedStoredMobs(ServerLevel level, MobStackKey mobKey, long mobCount)
+    {
+        if (mobKey.entityType() == EntityType.VILLAGER)
+            return breedVillagers(mobKey, mobCount);
+
+        ItemStackKey foodKey = animalFoodKeys.get(mobKey.entityType());
+        if (foodKey == null) return false;
+
+        long foodCount = unifiedStorage.getStackByKey(foodKey).amount();
+        long births = Math.min(mobCount / 2, foodCount / 2);
+        births = Math.min(births, Long.MAX_VALUE / 2);
+        return completeBreeding(mobKey, births, Map.of(foodKey, births * 2));
+    }
+
+    private @Nullable ItemStackKey findAnimalFood(Animal animal)
+    {
+        for (KeyAmount entry : List.copyOf(unifiedStorage.getStorage()))
+        {
+            if (entry.amount() > 0 && entry.key() instanceof ItemStackKey itemKey
+                    && animal.isFood(itemKey.copyStack()))
+                return itemKey;
+        }
+        return null;
+    }
+
+    private boolean breedVillagers(MobStackKey mobKey, long mobCount)
+    {
+        long births = Math.min(mobCount / 2, getVillagerFoodPoints() / VILLAGER_FOOD_POINTS);
+        births = Math.min(births, Long.MAX_VALUE / VILLAGER_FOOD_POINTS);
+        births -= unifiedStorage.insert(mobKey, births, true).amount();
+        if (births <= 0) return false;
+
+        long requiredPoints = births * VILLAGER_FOOD_POINTS;
+        Map<ItemStackKey, Long> costs = new LinkedHashMap<>();
+        for (Map.Entry<net.minecraft.world.item.Item, Integer> food : VILLAGER_FOODS.entrySet())
+        {
+            ItemStackKey foodKey = new ItemStackKey(new ItemStack(food.getKey()));
+            long available = unifiedStorage.getStackByKey(foodKey).amount();
+            long itemsNeeded = (requiredPoints + food.getValue() - 1) / food.getValue();
+            long used = Math.min(available, itemsNeeded);
+            if (used <= 0) continue;
+
+            costs.put(foodKey, used);
+            requiredPoints = Math.max(0, requiredPoints - used * food.getValue());
+            if (requiredPoints == 0) break;
+        }
+        return requiredPoints == 0 && completeBreeding(mobKey, births, costs);
+    }
+
+    private long getVillagerFoodPoints()
+    {
+        long points = 0;
+        for (Map.Entry<net.minecraft.world.item.Item, Integer> food : VILLAGER_FOODS.entrySet())
+        {
+            long count = unifiedStorage.getStackByKey(new ItemStackKey(new ItemStack(food.getKey()))).amount();
+            if (count > (Long.MAX_VALUE - points) / food.getValue()) return Long.MAX_VALUE;
+            points += count * food.getValue();
+        }
+        return points;
+    }
+
+    private boolean completeBreeding(MobStackKey mobKey, long births, Map<ItemStackKey, Long> costs)
+    {
+        if (births <= 0) return false;
+
+        long accepted = births - unifiedStorage.insert(mobKey, births, true).amount();
+        if (accepted <= 0) return false;
+        if (accepted != births)
+        {
+            births = accepted;
+            if (costs.size() != 1) return false;
+
+            ItemStackKey key = costs.keySet().iterator().next();
+            costs = Map.of(key, births * 2);
+        }
+
+        Map<ItemStackKey, Long> extractedFoods = new LinkedHashMap<>();
+        for (Map.Entry<ItemStackKey, Long> cost : costs.entrySet())
+        {
+            KeyAmount extracted = unifiedStorage.extract(cost.getKey(), cost.getValue(), false, false);
+            if (extracted.amount() != cost.getValue())
+            {
+                extractedFoods.forEach((key, amount) -> unifiedStorage.insert(key, amount, false));
+                if (extracted.amount() > 0) unifiedStorage.insert(cost.getKey(), extracted.amount(), false);
+                return false;
+            }
+            extractedFoods.put(cost.getKey(), extracted.amount());
+        }
+
+        long inserted = births - unifiedStorage.insert(mobKey, births, false).amount();
+        if (inserted != births)
+        {
+            if (inserted > 0) unifiedStorage.extract(mobKey, inserted, false, false);
+            extractedFoods.forEach((key, amount) -> unifiedStorage.insert(key, amount, false));
+            return false;
+        }
+        return true;
+    }
+
+    private void resetBreedingTime(ResourceLocation typeId)
+    {
+        if (mobBreedingTimes.remove(typeId) != null)
+            setDirty();
     }
 
     private void syncPlayerMembership(UUID playerId, boolean switchPrimary)

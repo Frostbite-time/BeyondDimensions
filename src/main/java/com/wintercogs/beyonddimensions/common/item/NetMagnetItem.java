@@ -5,7 +5,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.PigStackKey;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.MobStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.machine.*;
@@ -20,9 +20,14 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.Leashable;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -120,13 +125,14 @@ public class NetMagnetItem extends BaseMachineItem
 
         UnifiedStorage storage = NetedItem.getNet(stack).getUnifiedStorage();
 
-        // 将范围内的猪收进维度网络。先模拟插入，成功后才移除实体。
-        for (Pig pig : level.getEntitiesOfClass(Pig.class, searchArea, Entity::isAlive))
+        // 收集可繁殖动物和村民。只接收成年、无自定义数据且未骑乘的实体。
+        for (AgeableMob mob : level.getEntitiesOfClass(AgeableMob.class, searchArea, this::canCollectMob))
         {
-            if (storage.insert(PigStackKey.INSTANCE, 1, true).isEmpty())
+            MobStackKey mobKey = new MobStackKey(mob.getType());
+            if (storage.insert(mobKey, 1, true).isEmpty())
             {
-                storage.insert(PigStackKey.INSTANCE, 1, false);
-                pig.discard();
+                storage.insert(mobKey, 1, false);
+                mob.discard();
             }
         }
 
@@ -191,6 +197,22 @@ public class NetMagnetItem extends BaseMachineItem
         {
             fluidCollect(filterMode, filterSlots, storage, level, searchArea);
         }
+    }
+
+    private boolean canCollectMob(AgeableMob mob)
+    {
+        return mob.isAlive()
+                && !mob.isBaby()
+                && !mob.hasCustomName()
+                && !mob.isPassenger()
+                && !mob.isVehicle()
+                && (!(mob instanceof Leashable leashable) || !leashable.isLeashed())
+                && (!(mob instanceof TamableAnimal tamable) || !tamable.isTame())
+                && (!(mob instanceof Villager villager)
+                        || villager.getVillagerXp() == 0
+                        && villager.getVillagerData().getProfession() == VillagerProfession.NONE
+                        && villager.getInventory().isEmpty())
+                && (mob instanceof Animal || mob instanceof Villager);
     }
 
     @Override
