@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -63,6 +64,12 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
                 return true;
             }
         };
+    }
+
+    @Nullable
+    public DimensionsNet getNet()
+    {
+        return net;
     }
 
     @Override
