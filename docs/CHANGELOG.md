@@ -1,1 +1,1 @@
-* Adapt capability handler views to dynamic slots: out-of-range indices no longer throw and are treated as empty slots instead.
+* Added several events that other mod and modpack authors can subscribe to.
