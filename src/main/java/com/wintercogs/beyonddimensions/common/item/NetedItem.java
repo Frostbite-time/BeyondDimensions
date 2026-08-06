@@ -2,8 +2,10 @@ package com.wintercogs.beyonddimensions.common.item;
 
 import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
+import com.wintercogs.beyonddimensions.api.event.dimensionnet.NetedItemEvent;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -12,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -91,6 +94,10 @@ public class NetedItem extends Item
                 }
 
                 itemstack.set(BDDataComponents.NET_ID_DATA, -1);
+                if (player instanceof ServerPlayer serverPlayer)
+                {
+                    NeoForge.EVENT_BUS.post(new NetedItemEvent.Unbound(netId, serverPlayer, itemstack, item));
+                }
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound", netId));
                 return true;
@@ -100,6 +107,10 @@ public class NetedItem extends Item
             if (playerNet != null && item.validToReWrite(playerNet, player))
             {
                 itemstack.set(BDDataComponents.NET_ID_DATA, playerNet.getId());
+                if (player instanceof ServerPlayer serverPlayer)
+                {
+                    NeoForge.EVENT_BUS.post(new NetedItemEvent.Bound(playerNet.getId(), serverPlayer, itemstack, item));
+                }
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound", playerNet.getId()));
                 return true;

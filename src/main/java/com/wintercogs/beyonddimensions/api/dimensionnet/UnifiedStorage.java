@@ -1,11 +1,14 @@
 package com.wintercogs.beyonddimensions.api.dimensionnet;
 
+import com.wintercogs.beyonddimensions.api.dimensionnet.helper.UnifiedStorageBeforeExtractHandler;
 import com.wintercogs.beyonddimensions.api.dimensionnet.helper.UnifiedStorageBeforeInsertHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
+import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -63,6 +66,12 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
         };
     }
 
+    @Nullable
+    public DimensionsNet getNet()
+    {
+        return net;
+    }
+
     @Override
     public void onChange()
     {
@@ -90,6 +99,47 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
             return adjusted;
 
         return super.insert(adjusted.key(), adjusted.amount(), simulate);
+    }
+
+    @Override
+    public @NotNull KeyAmount extract(int slot, long amount, boolean simulate)
+    {
+        if (amount <= 0L)
+            return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
+
+        KeyAmount stack = getStackBySlot(slot);
+        if (stack.isEmpty())
+            return stack;
+
+        return extract(stack.key(), amount, simulate, false);
+    }
+
+    @Override
+    public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy)
+    {
+        KeyAmount input = new KeyAmount(Objects.requireNonNullElse(key, EmptyStackKey.INSTANCE), amount);
+
+        var info = UnifiedStorageBeforeExtractHandler.onBeforeExtract(input, net);
+
+        if (info.cancel())
+            return new KeyAmount(input.key(), 0);
+
+        KeyAmount adjusted = info.beforeExtract();
+
+        if (adjusted.isEmpty())
+            return adjusted;
+
+        return super.extract(adjusted.key(), adjusted.amount(), simulate, fuzzy);
+    }
+
+    @Override
+    public @NotNull KeyAmount extract(TagKey<?> tagKey, long amount, boolean simulate)
+    {
+        var key = tag2stackMap.get(tagKey).stream().findFirst();
+        if (key.isEmpty() || amount <= 0L)
+            return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
+
+        return extract(key.get(), amount, simulate, false);
     }
 
 }
