@@ -1,7 +1,9 @@
 package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
+import com.wintercogs.beyonddimensions.api.event.dimensionnet.NetedItemEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -10,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.MinecraftForge;
 
 public class NetedItem extends Item
 {
@@ -81,6 +84,10 @@ public class NetedItem extends Item
                 }
 
                 setNetId(itemstack, -1);
+                if (player instanceof ServerPlayer serverPlayer)
+                {
+                    MinecraftForge.EVENT_BUS.post(new NetedItemEvent.Unbound(netId, serverPlayer, itemstack, item));
+                }
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_unbound", netId));
                 return true;
@@ -90,6 +97,10 @@ public class NetedItem extends Item
             if (playerNet != null && item.validToReWrite(playerNet, player))
             {
                 setNetId(itemstack, playerNet.getId());
+                if (player instanceof ServerPlayer serverPlayer)
+                {
+                    MinecraftForge.EVENT_BUS.post(new NetedItemEvent.Bound(playerNet.getId(), serverPlayer, itemstack, item));
+                }
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_bound", playerNet.getId()));
                 return true;

@@ -107,4 +107,14 @@ public class NetedBlock extends Block
         return InteractionResult.SUCCESS;
     }
 
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston)
+    {
+        if (!level.isClientSide() && !state.is(newState.getBlock())
+                && level.getBlockEntity(pos) instanceof NetedBlockEntity blockEntity)
+        {
+            blockEntity.clearNetId();
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
+    }
 }

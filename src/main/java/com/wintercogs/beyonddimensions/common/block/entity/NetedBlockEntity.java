@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
+import com.wintercogs.beyonddimensions.api.event.dimensionnet.NetedBlockEvent;
+import com.wintercogs.beyonddimensions.common.block.NetedBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -11,7 +13,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraftforge.common.MinecraftForge;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,32 +38,39 @@ public abstract class NetedBlockEntity extends BlockEntity
 
     public void setNetId(int id)
     {
-        boolean needsUpdate = this.netId != id;
+        if (this.netId == id)
+            return;
+
+        int previousNetId = this.netId;
         this.netId = id;
 
         // 标识符变化时更新缓存
         if (level != null)
         {
-            if (needsUpdate)
+            refreshNetCache();
+            setChanged();
+
+            if (level instanceof ServerLevel serverLevel && getBlockState().getBlock() instanceof NetedBlock block)
             {
-                refreshNetCache();
-                setChanged();
+                if (previousNetId >= 0)
+                {
+                    MinecraftForge.EVENT_BUS.post(new NetedBlockEvent.Unbound(
+                            previousNetId, serverLevel, worldPosition, getBlockState(), block, this
+                    ));
+                }
+                if (id >= 0)
+                {
+                    MinecraftForge.EVENT_BUS.post(new NetedBlockEvent.Bound(
+                            id, serverLevel, worldPosition, getBlockState(), block, this
+                    ));
+                }
             }
         }
     }
 
     public void clearNetId()
     {
-        boolean needsUpdate = this.netId != -1;
-        this.netId = -1;
-        net = null; // 清空缓存
-        if (level != null)
-        {
-            if (needsUpdate)
-            {
-                setChanged();
-            }
-        }
+        setNetId(-1);
     }
 
     public void setNetIdFromPlayer(ServerPlayer player)

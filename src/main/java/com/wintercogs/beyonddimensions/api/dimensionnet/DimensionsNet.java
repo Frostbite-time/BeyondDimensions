@@ -140,7 +140,7 @@ public class DimensionsNet extends SavedData
             newNet.setDirty();
             newNet.unifiedStorage.setSlotCapacity(defaultSlotCapability);
             newNet.unifiedStorage.setSlotMaxSize(defaultSlotMaxSize);
-            NeoForge.EVENT_BUS.post(new DimensionsNetEvent.Created(newNet));
+            MinecraftForge.EVENT_BUS.post(new DimensionsNetEvent.Created(newNet));
 
             return newNet;
         }
@@ -463,7 +463,7 @@ public class DimensionsNet extends SavedData
 
         if (dispatchEvent && beforeOwner != null && !beforeOwner.equals(owner))
         {
-            NeoForge.EVENT_BUS.post(new DimensionsNetEvent.OwnerChanged(this, beforeOwner, owner));
+            MinecraftForge.EVENT_BUS.post(new DimensionsNetEvent.OwnerChanged(this, beforeOwner, owner));
         }
     }
 
@@ -507,7 +507,7 @@ public class DimensionsNet extends SavedData
             DimensionsNetEvent.MemberChangeState changeState = wasMember
                     ? DimensionsNetEvent.MemberChangeState.PROMOTED_TO_MANAGER
                     : DimensionsNetEvent.MemberChangeState.JOINED_AS_MANAGER;
-            NeoForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(this, managerId, changeState));
+            MinecraftForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(this, managerId, changeState));
         }
     }
 
@@ -526,7 +526,7 @@ public class DimensionsNet extends SavedData
         if (managers.remove(managerId))
         {
             setDirty();
-            NeoForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(
+            MinecraftForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(
                     this,
                     managerId,
                     DimensionsNetEvent.MemberChangeState.DEMOTED_TO_MEMBER
@@ -563,7 +563,7 @@ public class DimensionsNet extends SavedData
                 DimensionsNetEvent.MemberChangeState changeState = managers.contains(playerId)
                         ? DimensionsNetEvent.MemberChangeState.JOINED_AS_MANAGER
                         : DimensionsNetEvent.MemberChangeState.JOINED_AS_MEMBER;
-                NeoForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(this, playerId, changeState));
+                MinecraftForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(this, playerId, changeState));
             }
             return true;
         }
@@ -614,7 +614,7 @@ public class DimensionsNet extends SavedData
                         ? DimensionsNetEvent.MemberChangeState.LEFT_AS_MANAGER
                         : DimensionsNetEvent.MemberChangeState.LEFT_AS_MEMBER;
             }
-            NeoForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(this, playerId, changeState));
+            MinecraftForge.EVENT_BUS.post(new DimensionsNetEvent.MemberChanged(this, playerId, changeState));
         }
     }
 
@@ -724,7 +724,7 @@ public class DimensionsNet extends SavedData
             NetRegistryIndex.get(server).unregisterNet(server, previousNetId);
         }
         setDirty();
-        NeoForge.EVENT_BUS.post(destroyedEvent);
+        MinecraftForge.EVENT_BUS.post(destroyedEvent);
     }
 
 

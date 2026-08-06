@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.api.event.dimensionnet;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import net.neoforged.bus.api.Event;
+import net.minecraftforge.eventbus.api.Event;
 
 import java.util.List;
 import java.util.Set;
