@@ -34,15 +34,6 @@ public final class UnifiedStorageBeforeInsertHandler
 
     public record BeforeInsertHandlerReturnInfo(@NotNull KeyAmount beforeInsert, boolean cancel)
     {
-        boolean isEmpty()
-        {
-            return beforeInsert.isEmpty();
-        }
-
-        boolean isCanceled()
-        {
-            return cancel;
-        }
     }
 
     /**
@@ -83,7 +74,6 @@ public final class UnifiedStorageBeforeInsertHandler
                 continue;
 
             var ret = handler.beforeInsert(original, current, net);
-
             current = ret.beforeInsert();
 
             if (ret.cancel())

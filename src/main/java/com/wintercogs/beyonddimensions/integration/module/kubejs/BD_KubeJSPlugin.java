@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PlayerPermissionInfo;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.dimensionnet.helper.UnifiedStorageBeforeExtractHandler;
 import com.wintercogs.beyonddimensions.api.dimensionnet.helper.UnifiedStorageBeforeInsertHandler;
 import com.wintercogs.beyonddimensions.api.longtype.LongType;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
@@ -24,6 +25,7 @@ public class BD_KubeJSPlugin extends KubeJSPlugin
     {
         bindings.add("UnifiedStorage", UnifiedStorage.class);
         bindings.add("UnifiedStorageBeforeInsertHandler", UnifiedStorageBeforeInsertHandler.class);
+        bindings.add("UnifiedStorageBeforeExtractHandler", UnifiedStorageBeforeExtractHandler.class);
         bindings.add("IStackTypedHandler", IStackHandler.class);
         bindings.add("StackTypedHandler", StackHandler.class);
         bindings.add("LongType", LongType.class);
