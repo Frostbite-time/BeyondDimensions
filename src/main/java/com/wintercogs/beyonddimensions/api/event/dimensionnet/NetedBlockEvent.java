@@ -66,7 +66,9 @@ public abstract class NetedBlockEvent extends Event
         return blockEntity;
     }
 
-    /** 方块完成绑定后派发。 */
+    /**
+     * 方块完成绑定后派发。
+     */
     public static final class Bound extends NetedBlockEvent
     {
         public Bound(int netId, @NotNull ServerLevel level,
@@ -77,7 +79,9 @@ public abstract class NetedBlockEvent extends Event
         }
     }
 
-    /** 方块完成主动解绑或因方块被移除而解绑后派发。 */
+    /**
+     * 方块完成主动解绑或因方块被移除而解绑后派发。
+     */
     public static final class Unbound extends NetedBlockEvent
     {
         public Unbound(int netId, @NotNull ServerLevel level,

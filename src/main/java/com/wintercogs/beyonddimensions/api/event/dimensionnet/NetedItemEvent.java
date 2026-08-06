@@ -36,7 +36,9 @@ public abstract class NetedItemEvent extends Event
         return netId;
     }
 
-    /** 获取发起此次主动绑定或解绑的服务端玩家。 */
+    /**
+     * 获取发起此次主动绑定或解绑的服务端玩家。
+     */
     public @NotNull ServerPlayer getPlayer()
     {
         return player;
@@ -57,7 +59,9 @@ public abstract class NetedItemEvent extends Event
         return item;
     }
 
-    /** 物品完成主动绑定后派发。 */
+    /**
+     * 物品完成主动绑定后派发。
+     */
     public static final class Bound extends NetedItemEvent
     {
         public Bound(int netId, @NotNull ServerPlayer player,
@@ -67,7 +71,9 @@ public abstract class NetedItemEvent extends Event
         }
     }
 
-    /** 物品完成主动解绑后派发。 */
+    /**
+     * 物品完成主动解绑后派发。
+     */
     public static final class Unbound extends NetedItemEvent
     {
         public Unbound(int netId, @NotNull ServerPlayer player,
