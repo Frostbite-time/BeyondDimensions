@@ -220,5 +220,6 @@
   "msg.beyonddimensions.primary_net.switch.cleared": "Primärnetz gelöscht",
   "msg.beyonddimensions.primary_net.switch.none_available": "Kein verfügbares Netzwerk zum Wechseln",
   "msg.beyonddimensions.primary_net.switch.invalid_target": "Dieses Netzwerk ist nicht verfügbar oder du bist kein Mitglied mehr",
-  "msg.beyonddimensions.primary_net.switch.no_other": "Kein anderes Primärnetz verfügbar"
+  "msg.beyonddimensions.primary_net.switch.no_other": "Kein anderes Primärnetz verfügbar",
+  "msg.beyonddimensions.primary_net.switch.disabled_by_client_config": "Das Wechseln zwischen mehreren Netzwerken ist in diesem Client deaktiviert. Ändere zum Aktivieren die Client-Konfigurationsdatei."
 }

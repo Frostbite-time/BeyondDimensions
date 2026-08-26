@@ -220,5 +220,6 @@
   "msg.beyonddimensions.primary_net.switch.cleared": "Основная сеть очищена",
   "msg.beyonddimensions.primary_net.switch.none_available": "Нет доступных сетей для переключения",
   "msg.beyonddimensions.primary_net.switch.invalid_target": "Эта сеть недоступна или вы больше не состоите в ней",
-  "msg.beyonddimensions.primary_net.switch.no_other": "Нет другой доступной основной сети"
+  "msg.beyonddimensions.primary_net.switch.no_other": "Нет другой доступной основной сети",
+  "msg.beyonddimensions.primary_net.switch.disabled_by_client_config": "Переключение между несколькими сетями отключено в этом клиенте. Чтобы включить его, измените файл конфигурации клиента."
 }
