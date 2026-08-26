@@ -223,7 +223,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
         }
 
         // 发包请求物品
-        BDPackets.INSTANCE.sendToServer(new RecipeFillC2SPacket(outKeys, outAmts));
+        BDPackets.INSTANCE.sendToServer(new RecipeFillC2SPacket(outKeys, outAmts, false));
 
         return true;
     }

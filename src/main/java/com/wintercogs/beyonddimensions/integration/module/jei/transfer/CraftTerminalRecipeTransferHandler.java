@@ -46,7 +46,7 @@ public class CraftTerminalRecipeTransferHandler implements IRecipeTransferHandle
     @Override
     public @Nullable IRecipeTransferError transferRecipe(DimensionsCraftMenuTerminal container, CraftingRecipe recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer)
     {
-        return TransferHelper.transferRecipe(getInputSources(container), container.storage.getStorage(), container.player.getInventory().items, recipeSlots, maxTransfer, doTransfer);
+        return TransferHelper.transferRecipe(getInputSources(container), container.storage.getStorage(), container.player.getInventory().items, recipeSlots, maxTransfer, doTransfer, false);
     }
 
     // 获取合成输入槽位（需根据实际容器实现）

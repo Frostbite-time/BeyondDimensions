@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public record RecipeFillC2SPacket(List<IStackKey<?>> keys, List<Long> amount)
+public record RecipeFillC2SPacket(List<IStackKey<?>> keys, List<Long> amount, boolean compressOverflow)
 {
 
     private void handle(NetworkEvent.Context context)
@@ -20,7 +20,7 @@ public record RecipeFillC2SPacket(List<IStackKey<?>> keys, List<Long> amount)
 
         if (player.containerMenu instanceof DimensionsCraftMenu menu)
         {
-            menu.transferRecipe(keys(), amount());
+            menu.transferRecipe(this.keys(), this.amount(), this.compressOverflow());
         }
     }
 
@@ -50,6 +50,8 @@ public record RecipeFillC2SPacket(List<IStackKey<?>> keys, List<Long> amount)
         {
             buf.writeLong(v);
         }
+
+        buf.writeBoolean(packet.compressOverflow());
     }
 
     public static RecipeFillC2SPacket decode(FriendlyByteBuf buf)
@@ -70,6 +72,7 @@ public record RecipeFillC2SPacket(List<IStackKey<?>> keys, List<Long> amount)
             amount.add(buf.readLong());
         }
 
-        return new RecipeFillC2SPacket(keys, amount);
+        boolean compressOverflow = buf.readBoolean();
+        return new RecipeFillC2SPacket(keys, amount, compressOverflow);
     }
 }

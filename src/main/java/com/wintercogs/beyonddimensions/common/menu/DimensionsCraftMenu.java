@@ -7,6 +7,8 @@ import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHa
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.init.BDItems;
+import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
@@ -32,6 +34,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -226,8 +229,19 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
     public void transferRecipe(List<IStackKey<?>> inputKeys, List<Long> amount)
     {
+        transferRecipe(inputKeys, amount, false);
+    }
+
+    public void transferRecipe(List<IStackKey<?>> inputKeys, List<Long> amount, boolean compressOverflow)
+    {
         // 清空工艺槽物品
         cleanCraftSlots(firstCraftReturnDir);
+
+        if (compressOverflow && inputKeys.size() > craftSlots.getContainerSize())
+        {
+            transferRecipeToMatterBall(inputKeys, amount);
+            return;
+        }
 
         final int limit = Math.min(craftSlots.getContainerSize(), inputKeys.size());
         for (int i = 0; i < limit; i++)
@@ -245,6 +259,45 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
             int got = need - remaining;
             if (got > 0) craftSlots.setItem(i, itemStackKey.copyStackWithCount(got));
+        }
+    }
+
+    private void transferRecipeToMatterBall(List<IStackKey<?>> inputKeys, List<Long> amount)
+    {
+        List<KeyAmount> packedContents = new ArrayList<>();
+        for (int i = 0; i < inputKeys.size(); i++)
+        {
+            long needL = i < amount.size() ? amount.get(i) : 0L;
+            IStackKey<?> key = inputKeys.get(i);
+            if (key == null || key.isEmpty() || needL <= 0L) continue;
+
+            if (key instanceof ItemStackKey itemStackKey)
+            {
+                int need = (int) Math.min(Integer.MAX_VALUE, needL);
+                int remaining = extractFromInventory(player.getInventory(), itemStackKey.copyStack(), need);
+                if (remaining > 0) remaining = extractFromStorage(storage, itemStackKey, remaining);
+
+                int extracted = need - remaining;
+                if (extracted > 0)
+                {
+                    packedContents.add(new KeyAmount(itemStackKey, extracted));
+                }
+            }
+            else
+            {
+                KeyAmount extracted = storage.extract(key, needL, false, false);
+                if (!extracted.isEmpty())
+                {
+                    packedContents.add(extracted);
+                }
+            }
+        }
+
+        if (!packedContents.isEmpty())
+        {
+            ItemStack matterBall = new ItemStack(BDItems.MATTER_COMPRESS_BALL.get());
+            MatterCompressionBall.setIStackList(matterBall, packedContents);
+            craftSlots.setItem(0, matterBall);
         }
     }
 
