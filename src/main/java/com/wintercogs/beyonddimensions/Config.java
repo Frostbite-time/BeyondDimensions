@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions;
 
 import com.wintercogs.beyonddimensions.api.ButtonState;
+import com.wintercogs.beyonddimensions.config.ClientConfigRuntime;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import net.neoforged.fml.ModContainer;
@@ -12,6 +13,7 @@ public class Config
 {
 
     public final Config.StartUpConfig startUpConfig = new Config.StartUpConfig();
+    public final Config.ClientConfig clientConfig = new Config.ClientConfig();
     public final Config.CommonConfig commonConfig = new Config.CommonConfig();
     public final Config.ServerConfig serverConfig = new Config.ServerConfig();
 
@@ -20,10 +22,15 @@ public class Config
     private Config(ModContainer container)
     {
         container.registerConfig(ModConfig.Type.STARTUP, startUpConfig.spec);
+        container.registerConfig(ModConfig.Type.CLIENT, clientConfig.spec);
         container.registerConfig(ModConfig.Type.COMMON, commonConfig.spec);
         container.registerConfig(ModConfig.Type.SERVER, serverConfig.spec);
         container.getEventBus().addListener((ModConfigEvent.Loading evt) ->
         {
+            if (evt.getConfig().getSpec() == clientConfig.spec)
+            {
+                clientConfig.onLoaded();
+            }
             if (evt.getConfig().getSpec() == commonConfig.spec)
             {
                 commonConfig.onLoaded();
@@ -35,6 +42,10 @@ public class Config
         });
         container.getEventBus().addListener((ModConfigEvent.Reloading evt) ->
         {
+            if (evt.getConfig().getSpec() == clientConfig.spec)
+            {
+                clientConfig.onLoaded();
+            }
             if (evt.getConfig().getSpec() == commonConfig.spec)
             {
                 commonConfig.onLoaded();
@@ -60,6 +71,29 @@ public class Config
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
             this.spec = builder.build();
+        }
+    }
+
+    public static class ClientConfig
+    {
+        public final ModConfigSpec spec;
+
+        public final ModConfigSpec.BooleanValue DISABLE_MULTI_NETWORK_SWITCHING;
+
+        public ClientConfig()
+        {
+            ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+
+            DISABLE_MULTI_NETWORK_SWITCHING = builder
+                    .comment("是否禁用多网络切换功能")
+                    .define("disable_multi_network_switching", false);
+
+            this.spec = builder.build();
+        }
+
+        public void onLoaded()
+        {
+            ClientConfigRuntime.disableMultiNetworkSwitching = DISABLE_MULTI_NETWORK_SWITCHING.get();
         }
     }
 

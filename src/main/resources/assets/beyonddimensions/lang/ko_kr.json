@@ -220,5 +220,6 @@
   "msg.beyonddimensions.primary_net.switch.cleared": "주 네트워크가 해제됨",
   "msg.beyonddimensions.primary_net.switch.none_available": "전환할 수 있는 네트워크가 없음",
   "msg.beyonddimensions.primary_net.switch.invalid_target": "해당 네트워크를 사용할 수 없거나 더 이상 구성원이 아님",
-  "msg.beyonddimensions.primary_net.switch.no_other": "전환할 다른 주 네트워크가 없음"
+  "msg.beyonddimensions.primary_net.switch.no_other": "전환할 다른 주 네트워크가 없음",
+  "msg.beyonddimensions.primary_net.switch.disabled_by_client_config": "이 클라이언트에서는 다중 네트워크 전환이 비활성화되어 있습니다. 활성화하려면 클라이언트 설정 파일을 변경하세요."
 }

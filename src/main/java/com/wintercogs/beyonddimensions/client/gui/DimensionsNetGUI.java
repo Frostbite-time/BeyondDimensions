@@ -14,6 +14,7 @@ import com.wintercogs.beyonddimensions.client.gui.widget.shared.IconButton;
 import com.wintercogs.beyonddimensions.client.init.BDShortKeys;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
+import com.wintercogs.beyonddimensions.config.ClientConfigRuntime;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -228,7 +229,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         addRenderableWidget(removePageButton);
 
         addCraftButton();
-        addPrimaryNetSwitcherButton();
+        if (!ClientConfigRuntime.disableMultiNetworkSwitching)
+        {
+            addPrimaryNetSwitcherButton();
+        }
 
 
         // 初始化搜索方案

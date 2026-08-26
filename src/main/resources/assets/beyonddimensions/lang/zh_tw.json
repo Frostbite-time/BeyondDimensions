@@ -224,5 +224,6 @@
   "msg.beyonddimensions.primary_net.switch.cleared": "已切換為無主網路",
   "msg.beyonddimensions.primary_net.switch.none_available": "目前沒有可切換的網路",
   "msg.beyonddimensions.primary_net.switch.invalid_target": "目標網路不可用，或你已經不再屬於該網路",
-  "msg.beyonddimensions.primary_net.switch.no_other": "沒有其他可切換的主網路"
+  "msg.beyonddimensions.primary_net.switch.no_other": "沒有其他可切換的主網路",
+  "msg.beyonddimensions.primary_net.switch.disabled_by_client_config": "目前遊戲已停用多網路切換功能，如需啟用，請修改設定檔。"
 }

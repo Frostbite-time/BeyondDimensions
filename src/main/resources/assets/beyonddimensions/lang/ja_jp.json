@@ -220,5 +220,6 @@
   "msg.beyonddimensions.primary_net.switch.cleared": "主ネットワークを解除しました",
   "msg.beyonddimensions.primary_net.switch.none_available": "切り替え可能なネットワークがありません",
   "msg.beyonddimensions.primary_net.switch.invalid_target": "そのネットワークは利用できないか、既に所属していません",
-  "msg.beyonddimensions.primary_net.switch.no_other": "他に切り替え可能な主ネットワークがありません"
+  "msg.beyonddimensions.primary_net.switch.no_other": "他に切り替え可能な主ネットワークがありません",
+  "msg.beyonddimensions.primary_net.switch.disabled_by_client_config": "このクライアントでは複数ネットワークの切り替えが無効です。有効にするには、クライアント設定ファイルを変更してください。"
 }
