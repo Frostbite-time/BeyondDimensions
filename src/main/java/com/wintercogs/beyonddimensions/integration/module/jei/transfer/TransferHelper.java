@@ -24,7 +24,12 @@ import java.util.stream.Collectors;
 
 public class TransferHelper
 {
-    public static @Nullable IRecipeTransferError transferRecipe(List<Slot> inputSource, List<KeyAmount> storage, List<ItemStack> playerInv, IRecipeSlotsView recipeSlots, boolean maxTransfer, boolean doTransfer)
+    /**
+     * 处理配方转移的主要方法，其他方法均为辅助方法
+     * <p>从存储、背包、以及其他可用源获取可用物，随后计算向合成槽填入的信息（包括填充物和数量），之后发往服务端，从服务端执行物品转移的实际逻辑
+     * <p>对于每一个槽位而言，如果有多个可选材料，总是选用总量剩余最多的那一个
+     */
+    public static @Nullable IRecipeTransferError transferRecipe(List<Slot> inputSource, List<KeyAmount> storage, List<ItemStack> playerInv, IRecipeSlotsView recipeSlots, boolean maxTransfer, boolean doTransfer, boolean compressOverflow)
     {
         final Map<Item, List<Avail>> pool = new HashMap<>();
 
@@ -115,7 +120,7 @@ public class TransferHelper
 
         if (doTransfer)
         {
-            ClientPacketDistributor.sendToServer(new RecipeFillC2SPacket(outKeys, outAmts));
+            ClientPacketDistributor.sendToServer(new RecipeFillC2SPacket(outKeys, outAmts, compressOverflow));
         }
 
         if (hasMissing)
