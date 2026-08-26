@@ -5,11 +5,13 @@ import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.MagnetToggleType;
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
+import com.wintercogs.beyonddimensions.config.ClientConfigRuntime;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.network.packet.c2s.*;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -220,6 +222,7 @@ public class BDShortKeys
             {
                 return;
             }
+            if (preventMultiNetworkSwitching(player)) return;
 
             ClientPacketDistributor.sendToServer(new OpenPrimaryNetSwitcherPacket());
         });
@@ -230,6 +233,7 @@ public class BDShortKeys
             {
                 return;
             }
+            if (preventMultiNetworkSwitching(player)) return;
 
             ClientPacketDistributor.sendToServer(new PrimaryNetSwitchActionPacket(com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetSwitchAction.CYCLE_NEXT, -1));
         });
@@ -237,5 +241,20 @@ public class BDShortKeys
         {
             event.register(keyMapping);
         }
+    }
+
+    // ---辅助方法---
+
+    private static boolean preventMultiNetworkSwitching(LocalPlayer player)
+    {
+        if (!ClientConfigRuntime.disableMultiNetworkSwitching)
+        {
+            return false;
+        }
+
+        player.sendSystemMessage(
+                Component.translatable("msg.beyonddimensions.primary_net.switch.disabled_by_client_config")
+        );
+        return true;
     }
 }
