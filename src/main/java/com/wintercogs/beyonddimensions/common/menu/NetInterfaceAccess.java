@@ -2,10 +2,18 @@ package com.wintercogs.beyonddimensions.common.menu;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
 
 public interface NetInterfaceAccess
 {
@@ -58,7 +66,7 @@ public interface NetInterfaceAccess
             if (!flag.isEmpty() && flag.key().isSameTypeSameComponents(stackHandler.getStackBySlot(i).key()))
                 continue;
             KeyAmount stack = stackHandler.getStackBySlot(i);
-            if (!stack.isEmpty())
+            if (!stack.isEmpty() && !isInputTypeBlocked(stack.key(), 0))
             {
                 KeyAmount extracted = stackHandler.extract(i, stack.amount(), false);
                 KeyAmount remaining = net.getUnifiedStorage().insert(extracted.key(), extracted.amount(), false);
@@ -68,6 +76,38 @@ public interface NetInterfaceAccess
             }
         }
         return changed;
+    }
+
+    private static boolean isInputTypeBlocked(IStackKey<?> key, int depth)
+    {
+        if (!ServerConfigRuntime.hasInterfaceInputTypeRestrictions())
+        {
+            return false;
+        }
+        if (ServerConfigRuntime.isInterfaceInputTypeBlocked(key.getTypeId()))
+        {
+            return true;
+        }
+        if (!(key instanceof ItemStackKey itemKey)
+                || !(itemKey.getSource() instanceof MatterCompressionBall))
+        {
+            return false;
+        }
+        if (depth >= 16)
+        {
+            return true;
+        }
+
+        ItemStack ballStack = itemKey.copyStack();
+        List<KeyAmount> contents = ballStack.getOrDefault(BDDataComponents.ISTACK_SLOTS, List.of());
+        for (KeyAmount content : contents)
+        {
+            if (content != null && !content.isEmpty() && isInputTypeBlocked(content.key(), depth + 1))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     static boolean transferFromNet(DimensionsNet net, StackHandler stackHandler, StackHandler fakeStackHandler, int slotCount, FuzzyMode fuzzyMode)
