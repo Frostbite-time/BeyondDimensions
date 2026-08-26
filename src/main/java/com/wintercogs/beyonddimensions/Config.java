@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions;
 
 import com.wintercogs.beyonddimensions.api.ButtonState;
+import com.wintercogs.beyonddimensions.config.ClientConfigRuntime;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -12,6 +13,7 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 public class Config
 {
+    public final Config.ClientConfig clientConfig = new Config.ClientConfig();
     public final Config.CommonConfig commonConfig = new Config.CommonConfig();
     public final Config.ServerConfig serverConfig = new Config.ServerConfig();
 
@@ -19,10 +21,15 @@ public class Config
 
     private Config(ModLoadingContext container, IEventBus modEventBus)
     {
+        container.registerConfig(ModConfig.Type.CLIENT, clientConfig.spec);
         container.registerConfig(ModConfig.Type.COMMON, commonConfig.spec);
         container.registerConfig(ModConfig.Type.SERVER, serverConfig.spec);
         modEventBus.addListener((ModConfigEvent.Loading evt) ->
         {
+            if (evt.getConfig().getSpec() == clientConfig.spec)
+            {
+                clientConfig.onLoaded();
+            }
             if (evt.getConfig().getSpec() == commonConfig.spec)
             {
                 commonConfig.onLoaded();
@@ -34,6 +41,10 @@ public class Config
         });
         modEventBus.addListener((ModConfigEvent.Reloading evt) ->
         {
+            if (evt.getConfig().getSpec() == clientConfig.spec)
+            {
+                clientConfig.onLoaded();
+            }
             if (evt.getConfig().getSpec() == commonConfig.spec)
             {
                 commonConfig.onLoaded();
@@ -48,6 +59,29 @@ public class Config
     public static void register(ModLoadingContext container, IEventBus modEventBus)
     {
         INSTANCE = new Config(container, modEventBus);
+    }
+
+    public static class ClientConfig
+    {
+        public final ForgeConfigSpec spec;
+
+        public final ForgeConfigSpec.BooleanValue DISABLE_MULTI_NETWORK_SWITCHING;
+
+        public ClientConfig()
+        {
+            ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+
+            DISABLE_MULTI_NETWORK_SWITCHING = builder
+                    .comment("是否禁用多网络切换功能")
+                    .define("disable_multi_network_switching", false);
+
+            this.spec = builder.build();
+        }
+
+        public void onLoaded()
+        {
+            ClientConfigRuntime.disableMultiNetworkSwitching = DISABLE_MULTI_NETWORK_SWITCHING.get();
+        }
     }
 
     public static class CommonConfig

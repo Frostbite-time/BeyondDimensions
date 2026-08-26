@@ -220,5 +220,6 @@
   "msg.beyonddimensions.primary_net.switch.cleared": "Réseau principal supprimé",
   "msg.beyonddimensions.primary_net.switch.none_available": "Aucun réseau disponible pour le changement",
   "msg.beyonddimensions.primary_net.switch.invalid_target": "Ce réseau est indisponible ou vous n'en faites plus partie",
-  "msg.beyonddimensions.primary_net.switch.no_other": "Aucun autre réseau principal disponible"
+  "msg.beyonddimensions.primary_net.switch.no_other": "Aucun autre réseau principal disponible",
+  "msg.beyonddimensions.primary_net.switch.disabled_by_client_config": "Le changement entre plusieurs réseaux est désactivé sur ce client. Pour l'activer, modifiez le fichier de configuration client."
 }
