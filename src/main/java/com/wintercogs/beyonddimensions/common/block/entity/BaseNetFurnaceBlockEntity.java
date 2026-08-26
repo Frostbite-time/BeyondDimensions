@@ -11,8 +11,10 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.api.util.CombinedItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.common.block.BaseNetFurnaceBlock;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
+import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
@@ -35,6 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -94,6 +97,16 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     private final RecipeType<R> recipeType;
     private final Component displayName;
     private final List<RecipeManager.CachedCheck<SingleRecipeInput, R>> quickChecks;
+
+    /**
+     * 尚未收入网络或发放给玩家的熔炼经验
+     */
+    private double storedExperience = 0.0D;
+
+    public double getStoredExperience()
+    {
+        return storedExperience;
+    }
 
     /**
      * 槽位剩余燃烧 tick
@@ -630,6 +643,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
 
             outputStorageSlots.insert(inputSlot, resultKey, resultCount, false);
             inputStorageSlots.extract(inputSlot, 1, false);
+            storedExperience = Math.clamp(recipeHolder.value().getExperience() + storedExperience, 0.0D, Integer.MAX_VALUE);
             cookTime.set(inputSlot, 0);
             cookTimeTotal.set(inputSlot, totalCookTime);
         }
@@ -750,6 +764,56 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
                 fuelStorageSlots.insert(fuelSlot, remaining.key(), remaining.amount(), false);
             }
         }
+
+        // 自动收入开启时，将配方经验按经验交换棒的规则转换成经验流体。
+        // 网络无法接纳的部分仍保存在方块实体中，等待下次收入阶段重试。
+        if (storage != null)
+        {
+            transferStoredExperienceToNetwork(storage);
+        }
+    }
+
+    private void transferStoredExperienceToNetwork(UnifiedStorage storage)
+    {
+        if (storedExperience <= 0.0D) return;
+
+        int conversionRate = XpExchangeItem.getConversionRate();
+        if (conversionRate <= 0) return;
+
+        double exactFluidAmount = storedExperience * conversionRate;
+        long fluidAmount = exactFluidAmount >= Long.MAX_VALUE
+                ? Long.MAX_VALUE
+                : Math.round(exactFluidAmount);
+        if (fluidAmount <= 0L) return;
+
+        FluidStackKey xpFluidKey = new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source(), 1));
+        KeyAmount remaining = storage.insert(xpFluidKey, fluidAmount, false);
+        long insertedFluid = Math.max(0L, fluidAmount - Math.max(0L, remaining.amount()));
+        if (insertedFluid <= 0L) return;
+
+        storedExperience = Math.max(0.0D, storedExperience - insertedFluid / (double) conversionRate);
+        setChanged();
+    }
+
+    private void awardStoredExperience(Player player)
+    {
+        if (level == null || level.isClientSide() || receiveMode == ReceiveMode.OPEN || storedExperience <= 0.0D)
+            return;
+
+        // 与原版熔炉一致：总经验的小数部分按概率向上取整。
+        int experience = (int) Math.floor(storedExperience);
+        double fraction = storedExperience - experience;
+        if (fraction > 0.0D && level.random.nextDouble() < fraction)
+        {
+            experience++;
+        }
+
+        storedExperience = 0.0D;
+        setChanged();
+        if (experience > 0)
+        {
+            player.giveExperiencePoints(experience);
+        }
     }
 
     public void dropContent()
@@ -800,6 +864,8 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         this.popMode = PopMode.valueOf(tag.getString("pop_mode"));
         this.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
         this.sortMode = tag.contains("sort_mode") ? AutoSortMode.valueOf(tag.getString("sort_mode")) : AutoSortMode.STOP;
+        double loadedExperience = tag.getDouble("stored_experience");
+        this.storedExperience = Double.isFinite(loadedExperience) && loadedExperience > 0.0D ? loadedExperience : 0.0D;
     }
 
     @Override
@@ -819,6 +885,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         tag.putString("pop_mode", this.popMode.name());
         tag.putString("receive_mode", this.receiveMode.name());
         tag.putString("sort_mode", this.sortMode.name());
+        tag.putDouble("stored_experience", this.storedExperience);
     }
 
     public void setLit(boolean lit)
@@ -847,6 +914,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     @Override
     public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player)
     {
+        awardStoredExperience(player);
         return new NetFurnaceMenu(containerId, inventory, this);
     }
 
