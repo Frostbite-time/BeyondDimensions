@@ -35,7 +35,7 @@ public class MenuUniversalRecipeTransfer implements IUniversalRecipeTransferHand
                                                          @NotNull IRecipeSlotsView recipeSlots, @NotNull Player player,
                                                          boolean maxTransfer, boolean doTransfer)
     {
-        return TransferHelper.transferRecipe(getInputSources(container), container.storage.getStorage(), container.player.getInventory().items, recipeSlots, maxTransfer, doTransfer);
+        return TransferHelper.transferRecipe(getInputSources(container), container.storage.getStorage(), container.player.getInventory().items, recipeSlots, maxTransfer, doTransfer, true);
     }
 
     private List<Slot> getInputSources(DimensionsCraftMenu menu)
