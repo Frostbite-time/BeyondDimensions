@@ -15,7 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public record RecipeFillC2SPacket(List<IStackKey<?>> keys, List<Long> amount, boolean compressOverflow) implements CustomPacketPayload
+public record RecipeFillC2SPacket(List<IStackKey<?>> keys, List<Long> amount,
+                                  boolean compressOverflow) implements CustomPacketPayload
 {
     public static final Type<RecipeFillC2SPacket> TYPE =
             new Type<>(BeyondDimensions.makeId("recipe_fill_c2s_packet"));
