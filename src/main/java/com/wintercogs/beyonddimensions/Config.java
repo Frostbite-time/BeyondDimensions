@@ -4,12 +4,14 @@ import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
+import java.util.List;
 
 public class Config
 {
@@ -182,6 +184,7 @@ public class Config
 
         public final ForgeConfigSpec.LongValue UNSTABLE_SPACE_TIME_FRAGMENT_TRANSFER_TIME;
         public final ForgeConfigSpec.IntValue SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> INTERFACE_BLOCKED_INPUT_STACK_TYPES;
 
         public ServerConfig()
         {
@@ -193,6 +196,19 @@ public class Config
             SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME = builder
                     .comment("结晶生成间隔（0代表不生成）")
                     .defineInRange("crystalGenerateTime", 600, 0, Integer.MAX_VALUE);
+            INTERFACE_BLOCKED_INPUT_STACK_TYPES = builder
+                    .comment("禁止网络接口向维度网络输入的资源大类 ID；空列表表示不限制。")
+                    .comment("常见资源大类 ID：")
+                    .comment("物品：beyonddimensions:stack_type/item")
+                    .comment("流体：beyonddimensions:stack_type/fluid")
+                    .comment("能量：beyonddimensions:stack_type/energy")
+                    .comment("示例：同时禁止流体和能量输入，可填写 [\"beyonddimensions:stack_type/fluid\", \"beyonddimensions:stack_type/energy\"]。")
+                    .comment("查找其他资源大类 ID：在对应的 IStackKey 实现中查看 getTypeId() 的返回值，或查找其静态 ID 常量。")
+                    .defineListAllowEmpty(
+                            "interfaceBlockedInputStackTypes",
+                            List.of(),
+                            ServerConfig::isValidResourceLocation
+                    );
 
             this.spec = builder.build();
         }
@@ -201,6 +217,12 @@ public class Config
         {
             ServerConfigRuntime.fragmentTransferTime = UNSTABLE_SPACE_TIME_FRAGMENT_TRANSFER_TIME.get();
             ServerConfigRuntime.crystalGenerateTime = SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME.get();
+            ServerConfigRuntime.setInterfaceBlockedInputStackTypes(INTERFACE_BLOCKED_INPUT_STACK_TYPES.get());
+        }
+
+        private static boolean isValidResourceLocation(Object value)
+        {
+            return value instanceof String id && ResourceLocation.tryParse(id) != null;
         }
     }
 }
