@@ -1,1 +1,5 @@
+* Network furnaces now produce experience based on recipes. When automatic network receiving is enabled, experience is converted into experience fluid and stored in the network; otherwise, it is awarded when a player opens the interface.
+* Added a client configuration option to disable multi-network switching. When disabled, hotkey cycling and opening the network switcher by hotkey are blocked, and switch buttons are hidden from network storage and crafting terminal interfaces.
+* Compressed Matter Orbs can now be unpacked manually: right-clicking prioritizes the player's inventory, while Shift-right-clicking stores overflow and non-item resources in the current primary network. JEI universal recipe transfers with more than nine input slots now package the retrieved materials into an orb.
+* Added a server configuration option to prevent network interfaces from inserting specified resource types into dimension networks by resource type ID.
 * Added several events that other mod and modpack authors can subscribe to.
