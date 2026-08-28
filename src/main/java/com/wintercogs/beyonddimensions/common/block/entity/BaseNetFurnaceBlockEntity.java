@@ -724,11 +724,17 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
 
                     int moveCount = (int) Math.min(slotNow.amount(), itemKey.getVanillaMaxStackSize());
                     KeyAmount extracted = outputStorageSlots.extract(outputSlot, moveCount, false);
-                    if (!(extracted.key() instanceof ItemStackKey)) continue;
-                    long remaining = otherStorage.insert(otherSlot, (ItemStack) extracted.toStack(), false);
-                    if (remaining > 0L)
+                    if (extracted.key() instanceof ItemStackKey extractedItemKey)
                     {
-                        outputStorageSlots.insert(outputSlot, extracted.key(), remaining, false);
+                        long remaining = otherStorage.insert(otherSlot, extractedItemKey.copyStackWithCount(extracted.amount()), false);
+                        if (remaining > 0L)
+                        {
+                            outputStorageSlots.insert(outputSlot, extracted.key(), remaining, false);
+                        }
+                    }
+                    else
+                    {
+                        outputStorageSlots.insert(outputSlot, extracted.key(), extracted.amount(), false);
                     }
                 }
             }
@@ -769,10 +775,17 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
 
                     int moveCount = (int) Math.min(slotNow.amount(), itemKey.getVanillaMaxStackSize());
                     KeyAmount extracted = fuelReturnSlots.extract(returnSlot, moveCount, false);
-                    long remaining = otherStorage.insert(otherSlot, (ItemStack) extracted.toStack(), false);
-                    if (remaining > 0L)
+                    if (extracted.key() instanceof ItemStackKey extractedItemKey)
                     {
-                        fuelReturnSlots.insert(returnSlot, extracted.key(), remaining, false);
+                        long remaining = otherStorage.insert(otherSlot, extractedItemKey.copyStackWithCount(extracted.amount()), false);
+                        if (remaining > 0L)
+                        {
+                            fuelReturnSlots.insert(returnSlot, extracted.key(), remaining, false);
+                        }
+                    }
+                    else
+                    {
+                        fuelReturnSlots.insert(returnSlot, extracted.key(), extracted.amount(), false);
                     }
                 }
             }
