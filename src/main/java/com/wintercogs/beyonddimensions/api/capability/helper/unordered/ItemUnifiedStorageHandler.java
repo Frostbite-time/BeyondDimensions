@@ -15,15 +15,15 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 动态槽位视图：size() 随存储内容实时变化，调用方持有的索引可能在两次调用间失效。
  * 因此对越界索引不抛错：读取返回 EMPTY/0，插入与提取返回 0。
  */
-public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> implements ResourceHandler<@NotNull ItemResource>
+public class ItemUnifiedStorageHandler implements ResourceHandler<@NotNull ItemResource>
 {
     private final UnifiedStorage storage;
+    private final ArrayList<StackJournal> snapshotJournals = new ArrayList<>();
 
     public ItemUnifiedStorageHandler(UnifiedStorage storage)
     {
@@ -83,6 +83,24 @@ public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> 
         return new ItemStackKey(resource.toStack(1));
     }
 
+    /**
+     * 查找或创建与指定 key 关联的 StackJournal。
+     * 遍历 snapshotJournals 列表找到匹配的 journal，若不存在则新建。
+     */
+    private StackJournal getOrCreateJournal(IStackKey<?> key)
+    {
+        for (StackJournal journal : snapshotJournals)
+        {
+            if (journal.getKey().equals(key))
+            {
+                return journal;
+            }
+        }
+        StackJournal journal = new StackJournal(key);
+        snapshotJournals.add(journal);
+        return journal;
+    }
+
     @Override
     public int size()
     {
@@ -140,7 +158,7 @@ public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> 
         long simulatedInserted = amount - simulatedLeft.amount();
         if (simulatedInserted <= 0L) return 0;
 
-        updateSnapshots(transaction);
+        getOrCreateJournal(key).updateSnapshots(transaction);
 
         KeyAmount left = storage.insert(key, amount, false);
         long inserted = amount - left.amount();
@@ -162,37 +180,46 @@ public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> 
         KeyAmount simulated = storage.extract(key, amount, true, false);
         if (simulated.isEmpty() || simulated.amount() <= 0L) return 0;
 
-        updateSnapshots(transaction);
+        getOrCreateJournal(key).updateSnapshots(transaction);
 
         KeyAmount taken = storage.extract(key, amount, false, false);
         return BDMath.clampLongToInt(Math.max(0L, taken.amount()));
     }
 
-    @Override
-    protected List<KeyAmount> createSnapshot()
+    // ---- Per-key journal for transaction support ----
+
+    private class StackJournal extends SnapshotJournal<KeyAmount>
     {
-        List<KeyAmount> view = storage.getStorage();
-        ArrayList<KeyAmount> snapshot = new ArrayList<>(view.size());
-        for (int i = 0; i < view.size(); i++)
+        private final IStackKey<?> key;
+
+        StackJournal(IStackKey<?> key)
         {
-            KeyAmount ka = view.get(i);
-            snapshot.add(new KeyAmount(ka.key(), ka.amount()));
+            this.key = key;
         }
-        return snapshot;
-    }
 
-    @Override
-    protected void revertToSnapshot(List<KeyAmount> snapshot)
-    {
-        if (snapshot == null) return;
-
-        storage.clearStorage();
-        for (int i = 0; i < snapshot.size(); i++)
+        public IStackKey<?> getKey()
         {
-            KeyAmount ka = snapshot.get(i);
-            if (!ka.isEmpty())
+            return key;
+        }
+
+        @Override
+        protected KeyAmount createSnapshot()
+        {
+            return storage.getStackByKey(key);
+        }
+
+        @Override
+        protected void revertToSnapshot(KeyAmount snapshot)
+        {
+            if (snapshot == null) return;
+            if (snapshot.isEmpty() || snapshot.key().isEmpty())
             {
-                storage.setAmountByKey(ka.key(), ka.amount());
+                // 该 key 原先不存在于存储中，将其置零移除
+                storage.setAmountByKey(key, 0L);
+            }
+            else
+            {
+                storage.setAmountByKey(snapshot.key(), snapshot.amount());
             }
         }
     }

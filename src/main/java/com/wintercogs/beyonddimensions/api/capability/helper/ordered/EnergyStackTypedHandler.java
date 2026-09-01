@@ -12,15 +12,32 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class EnergyStackTypedHandler extends SnapshotJournal<List<KeyAmount>> implements EnergyHandler
+public class EnergyStackTypedHandler implements EnergyHandler
 {
     private final StackHandler handlerStorage;
+    private final ArrayList<StackJournal> snapshotJournals = new ArrayList<>();
 
     public EnergyStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
+    }
+
+    /**
+     * 查找或创建与 EnergyStackKey.INSTANCE 关联的 StackJournal。
+     */
+    private StackJournal getOrCreateJournal()
+    {
+        for (StackJournal journal : snapshotJournals)
+        {
+            if (journal.getKey().equals(EnergyStackKey.INSTANCE))
+            {
+                return journal;
+            }
+        }
+        StackJournal journal = new StackJournal(EnergyStackKey.INSTANCE);
+        snapshotJournals.add(journal);
+        return journal;
     }
 
     @Override
@@ -95,7 +112,7 @@ public class EnergyStackTypedHandler extends SnapshotJournal<List<KeyAmount>> im
         long simulatedInserted = amount - simulatedLeft.amount();
         if (simulatedInserted <= 0L) return 0;
 
-        updateSnapshots(transaction);
+        getOrCreateJournal().updateSnapshots(transaction);
 
         KeyAmount left = handlerStorage.insert(EnergyStackKey.INSTANCE, amount, false);
         long inserted = amount - left.amount();
@@ -111,41 +128,51 @@ public class EnergyStackTypedHandler extends SnapshotJournal<List<KeyAmount>> im
         KeyAmount simulated = handlerStorage.extract(EnergyStackKey.INSTANCE, amount, true, false);
         if (simulated.isEmpty() || simulated.amount() <= 0L) return 0;
 
-        updateSnapshots(transaction);
+        getOrCreateJournal().updateSnapshots(transaction);
 
         KeyAmount taken = handlerStorage.extract(EnergyStackKey.INSTANCE, amount, false, false);
         return BDMath.clampLongToInt(Math.max(0L, taken.amount()));
     }
 
-    @Override
-    protected List<KeyAmount> createSnapshot()
+    // ---- Per-key journal for transaction support ----
+
+    private class StackJournal extends SnapshotJournal<KeyAmount>
     {
-        int total = handlerStorage.getSlots();
-        ArrayList<KeyAmount> snapshot = new ArrayList<>(total);
-        for (int i = 0; i < total; i++)
+        private final EnergyStackKey key;
+
+        StackJournal(EnergyStackKey key)
         {
-            KeyAmount ka = handlerStorage.getStackBySlot(i);
-            snapshot.add(new KeyAmount(ka.key(), ka.amount()));
+            this.key = key;
         }
-        return snapshot;
-    }
 
-    @Override
-    protected void revertToSnapshot(List<KeyAmount> snapshot)
-    {
-        if (snapshot == null) return;
-
-        int total = handlerStorage.getSlots();
-        int restore = Math.min(total, snapshot.size());
-
-        for (int i = 0; i < restore; i++)
+        public EnergyStackKey getKey()
         {
-            KeyAmount ka = snapshot.get(i);
-            handlerStorage.setStackDirectly(i, ka.key(), ka.amount());
+            return key;
         }
-        for (int i = restore; i < total; i++)
+
+        @Override
+        protected KeyAmount createSnapshot()
         {
-            handlerStorage.setStackDirectly(i, EmptyStackKey.INSTANCE, 0L);
+            KeyAmount ka = handlerStorage.getStackByKey(key);
+            return ka.isEmpty() ? new KeyAmount(key, 0L) : ka;
+        }
+
+        @Override
+        protected void revertToSnapshot(KeyAmount snapshot)
+        {
+            if (snapshot == null) return;
+
+            // 先提取所有当前能量，再恢复快照中的量
+            KeyAmount current = handlerStorage.getStackByKey(key);
+            if (!current.isEmpty())
+            {
+                handlerStorage.extract(key, current.amount(), false, false);
+            }
+            long restoreAmount = snapshot.isEmpty() ? 0L : snapshot.amount();
+            if (restoreAmount > 0L)
+            {
+                handlerStorage.insert(key, restoreAmount, false);
+            }
         }
     }
 }

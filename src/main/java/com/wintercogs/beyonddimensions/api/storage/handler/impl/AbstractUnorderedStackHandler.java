@@ -819,6 +819,15 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         return key2stackMap.get(key);
     }
 
+    /**
+     * @return the position of the given key in the slot index, or -1 if not found
+     */
+    public int getKeyPosition(IStackKey<?> key)
+    {
+        Integer pos = posMap.get(key);
+        return pos != null ? pos : -1;
+    }
+
     /* ---------------- NBT 序列化（仅写新格式） ---------------- */
     public CompoundTag serializeNBT(HolderLookup.Provider provider)
     {

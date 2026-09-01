@@ -16,7 +16,6 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 仅基于桶（Item 桶 + Empty 桶）进行索引映射的 Item 资源视图。
@@ -26,15 +25,21 @@ import java.util.List;
  * - 动态槽位：size() 随存储内容实时变化，调用方持有的索引可能在两次调用间失效，
  * 因此对越界索引不抛错：读取返回 EMPTY/0，插入与提取返回 0，isValid 返回 false。
  */
-public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> implements ResourceHandler<@NotNull ItemResource>
+public class ItemStackTypedHandler implements ResourceHandler<@NotNull ItemResource>
 {
     private static final Identifier ITEM_TYPE = ItemStackKey.ID;
 
     private final StackHandler handlerStorage;
+    private final ArrayList<StackJournal> snapshotJournals;
 
     public ItemStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
+        this.snapshotJournals = new ArrayList<>(handlerStorage.getSlots());
+        for (int i = 0; i < handlerStorage.getSlots(); i++)
+        {
+            snapshotJournals.add(new StackJournal(i));
+        }
     }
 
     // ---- 小工具：纯 Optional 计算，避免 orElse(null) ----
@@ -91,7 +96,7 @@ public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> impl
     }
 
     /**
-     * 将“可视槽位”映射为真实槽位；无效则 -1。
+     * 将"可视槽位"映射为真实槽位；无效则 -1。
      */
     private int resolveActualIndex(int visibleSlot)
     {
@@ -239,7 +244,7 @@ public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> impl
         long simulatedInserted = amount - simulatedLeft.amount();
         if (simulatedInserted <= 0L) return 0;
 
-        updateSnapshots(transaction);
+        snapshotJournals.get(actualIndex).updateSnapshots(transaction);
 
         KeyAmount left = handlerStorage.insert(actualIndex, key, amount, false);
         long inserted = amount - left.amount();
@@ -266,41 +271,34 @@ public class ItemStackTypedHandler extends SnapshotJournal<List<KeyAmount>> impl
         KeyAmount simulated = handlerStorage.extract(actualIndex, amount, true);
         if (simulated.isEmpty() || simulated.amount() <= 0L) return 0;
 
-        updateSnapshots(transaction);
+        snapshotJournals.get(actualIndex).updateSnapshots(transaction);
 
         KeyAmount taken = handlerStorage.extract(actualIndex, amount, false);
         return BDMath.clampLongToInt(Math.max(0L, taken.amount()));
     }
 
-    @Override
-    protected List<KeyAmount> createSnapshot()
+    // ---- Per-slot journal for transaction support ----
+
+    private class StackJournal extends SnapshotJournal<KeyAmount>
     {
-        int total = handlerStorage.getSlots();
-        ArrayList<KeyAmount> snapshot = new ArrayList<>(total);
-        for (int i = 0; i < total; i++)
+        private final int slotIndex;
+
+        StackJournal(int slotIndex)
         {
-            KeyAmount ka = handlerStorage.getStackBySlot(i);
-            snapshot.add(new KeyAmount(ka.key(), ka.amount()));
+            this.slotIndex = slotIndex;
         }
-        return snapshot;
-    }
 
-    @Override
-    protected void revertToSnapshot(List<KeyAmount> snapshot)
-    {
-        if (snapshot == null) return;
-
-        int total = handlerStorage.getSlots();
-        int restore = Math.min(total, snapshot.size());
-
-        for (int i = 0; i < restore; i++)
+        @Override
+        protected KeyAmount createSnapshot()
         {
-            KeyAmount ka = snapshot.get(i);
-            handlerStorage.setStackDirectly(i, ka.key(), ka.amount());
+            return handlerStorage.getStackBySlot(slotIndex);
         }
-        for (int i = restore; i < total; i++)
+
+        @Override
+        protected void revertToSnapshot(KeyAmount snapshot)
         {
-            handlerStorage.setStackDirectly(i, EmptyStackKey.INSTANCE, 0L);
+            if (snapshot == null) return;
+            handlerStorage.setStackDirectly(slotIndex, snapshot.key(), snapshot.amount());
         }
     }
 }
