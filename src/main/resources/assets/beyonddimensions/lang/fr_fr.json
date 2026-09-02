@@ -145,7 +145,6 @@
 
   "menu.title.beyonddimensions.xp_exchange_menu": "Paramètres de la baguette d'XP",
   "menu.label.beyonddimensions.xp_exchange.target_level": "Niveau cible",
-  "menu.label.beyonddimensions.xp_exchange.max_level": "Max : %s",
   "menu.label.beyonddimensions.primary_net_switcher.search": "Rechercher des réseaux...",
   "menu.label.beyonddimensions.primary_net_switcher.recent": "Récents",
   "menu.label.beyonddimensions.primary_net_switcher.all_networks": "Réseaux disponibles",

@@ -145,7 +145,6 @@
 
   "menu.title.beyonddimensions.xp_exchange_menu": "경험치 막대 설정",
   "menu.label.beyonddimensions.xp_exchange.target_level": "목표 레벨",
-  "menu.label.beyonddimensions.xp_exchange.max_level": "최대: %s",
   "menu.label.beyonddimensions.primary_net_switcher.search": "네트워크 검색...",
   "menu.label.beyonddimensions.primary_net_switcher.recent": "최근 사용",
   "menu.label.beyonddimensions.primary_net_switcher.all_networks": "사용 가능한 네트워크",

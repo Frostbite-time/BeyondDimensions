@@ -145,7 +145,6 @@
 
   "menu.title.beyonddimensions.xp_exchange_menu": "Настройки жезла опыта",
   "menu.label.beyonddimensions.xp_exchange.target_level": "Целевой уровень",
-  "menu.label.beyonddimensions.xp_exchange.max_level": "Макс: %s",
   "menu.label.beyonddimensions.primary_net_switcher.search": "Поиск сетей...",
   "menu.label.beyonddimensions.primary_net_switcher.recent": "Недавние",
   "menu.label.beyonddimensions.primary_net_switcher.all_networks": "Доступные сети",

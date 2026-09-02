@@ -7,7 +7,6 @@ import net.minecraft.world.item.ItemStack;
 public final class XpExchangeSettings
 {
     public static final int DEFAULT_TARGET_LEVEL = 1;
-    public static final int MAX_TARGET_LEVEL = 9999;
 
     private XpExchangeSettings()
     {
@@ -15,7 +14,7 @@ public final class XpExchangeSettings
 
     public static int sanitizeTargetLevel(int targetLevel)
     {
-        return Math.clamp(targetLevel, 0, MAX_TARGET_LEVEL);
+        return Math.max(0, targetLevel);
     }
 
     public static int targetLevelFromLegacyMode(XpTransferSpeedMode legacyMode)

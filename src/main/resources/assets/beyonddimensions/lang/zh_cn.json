@@ -149,7 +149,6 @@
 
   "menu.title.beyonddimensions.xp_exchange_menu": "经验棒设置",
   "menu.label.beyonddimensions.xp_exchange.target_level": "目标等级",
-  "menu.label.beyonddimensions.xp_exchange.max_level": "最大：%s",
   "menu.label.beyonddimensions.primary_net_switcher.search": "搜索网络...",
   "menu.label.beyonddimensions.primary_net_switcher.recent": "最近使用",
   "menu.label.beyonddimensions.primary_net_switcher.all_networks": "可用网络",

@@ -145,7 +145,6 @@
 
   "menu.title.beyonddimensions.xp_exchange_menu": "XP-Stab-Einstellungen",
   "menu.label.beyonddimensions.xp_exchange.target_level": "Zielstufe",
-  "menu.label.beyonddimensions.xp_exchange.max_level": "Max: %s",
   "menu.label.beyonddimensions.primary_net_switcher.search": "Netzwerke suchen...",
   "menu.label.beyonddimensions.primary_net_switcher.recent": "Zuletzt verwendet",
   "menu.label.beyonddimensions.primary_net_switcher.all_networks": "Verfügbare Netzwerke",
