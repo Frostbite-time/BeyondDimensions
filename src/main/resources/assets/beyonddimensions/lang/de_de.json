@@ -93,7 +93,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "Aktuell: Sortierung deaktiviert",
   "tooltip.item.unstable_space_time.long_data": "Raumzeit stabilisiert sich noch, %s Stabilisierungszyklen benötigt. Bitte stets bei sich tragen.",
   "tooltip.beyonddimensions.item.xp_exchange": "In der Hand: Rechtsklick öffnet die Einstellungen\nIn Lager-GUIs: Rechtsklick speichert XP, Mittelklick ruft XP ab",
-  "tooltip.editbox.beyonddimensions.search": "Gib Text ein, um nach Namen zu suchen\nGib '@' ein, um Mod-IDs zu filtern\nGib '$' ein, um Tooltip-Inhalte zu filtern\nGib '#' ein, um Tags zu filtern\nTrenne mehrere Filter mit Leerzeichen; mit Anführungszeichen kannst du Leerzeichen suchen\nVerwende '|' für ODER-Treffer und '-' zum Ausschließen von Treffern\nDrücke Shift+Z, um die Verknüpfung mit dem JEI/EMI-Suchfeld umzuschalten",
+  "tooltip.editbox.beyonddimensions.search": "Gib Text ein, um nach Namen zu suchen\nGib '@' ein, um Mod-IDs zu filtern\nGib '$' ein, um Tooltip-Inhalte zu filtern\nGib '#' ein, um Tags zu filtern\nGib '*' ein, um Gegenstands-IDs zu filtern\nTrenne mehrere Filter mit Leerzeichen; mit Anführungszeichen kannst du Leerzeichen suchen\nVerwende '|' für ODER-Treffer und '-' zum Ausschließen von Treffern\nDrücke Shift+Z, um die Verknüpfung mit dem JEI/EMI-Suchfeld umzuschalten",
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "Gib die XP-Stufe ein, die gehalten oder für manuellen Austausch verwendet werden soll\nWerte über dem Limit werden automatisch begrenzt",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "Aktuell: Aktiv (hält die Zielstufe automatisch)",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "Aktuell: Inaktiv (nur manueller Austausch)",
