@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.common.menu.widget;
 
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.jech.PinInMatches;
@@ -9,8 +10,10 @@ import com.wintercogs.beyonddimensions.util.TinyPinyinUtils;
 import com.wintercogs.beyonddimensions.util.TooltipHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -39,6 +42,7 @@ public class ClientNetStorageSearchHelper
     // TODO 等到有空的时候，我应该给IStackKeyRender加个接口，允许其产出无数量tooltip
     private final Map<IStackKey<?>, List<String>> tooltipCache = new HashMap<>();
     private final Map<IStackKey<?>, List<String>> tagCache = new HashMap<>();
+    private final Map<IStackKey<?>, String> itemIdCache = new HashMap<>();
 
     public void loadTexts(@NotNull String text)
     {
@@ -146,7 +150,7 @@ public class ClientNetStorageSearchHelper
      * 单个 searchText：
      * 1. 先按 | 拆分，多个部分按或合并
      * 2. 每个部分可带 - 前缀表示取反
-     * 3. 再根据 @ / $ / # / 默认 选择匹配范围
+     * 3. 再根据 @ / $ / # / * / 默认 选择匹配范围
      */
     private boolean matchesSingleSearchText(@NotNull KeyAmount keyAmount, @NotNull String searchText)
     {
@@ -210,6 +214,11 @@ public class ClientNetStorageSearchHelper
                 needle = actual.substring(1);
                 matched = needle.isEmpty() || matchesTag(keyAmount, needle);
             }
+            case '*' ->
+            {
+                needle = actual.substring(1);
+                matched = needle.isEmpty() || matchesItemId(keyAmount, needle);
+            }
             default -> matched = matchesName(keyAmount, actual);
         }
 
@@ -243,6 +252,11 @@ public class ClientNetStorageSearchHelper
             }
         }
         return false;
+    }
+
+    private boolean matchesItemId(@NotNull KeyAmount keyAmount, @NotNull String needle)
+    {
+        return checkTextMatches(getItemId(keyAmount.key()), needle);
     }
 
     private boolean matchesName(@NotNull KeyAmount keyAmount, @NotNull String needle)
@@ -294,6 +308,19 @@ public class ClientNetStorageSearchHelper
                 k -> k.getModId().toLowerCase(Locale.ENGLISH));
     }
 
+    private @NotNull String getItemId(@NotNull IStackKey<?> key)
+    {
+        return this.itemIdCache.computeIfAbsent(key,
+                k -> {
+                    if (key instanceof ItemStackKey itemKey)
+                    {
+                        ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(itemKey.getSource());
+                        return registryName.getPath().toLowerCase(Locale.ENGLISH);
+                    }
+                    return "";
+                });
+    }
+
     private @NotNull List<String> getTags(@NotNull IStackKey<?> key)
     {
         return this.tagCache.computeIfAbsent(key,
@@ -330,6 +357,7 @@ public class ClientNetStorageSearchHelper
         this.matchCache.clear();
         this.nameCache.clear();
         this.modidCache.clear();
+        this.itemIdCache.clear();
         this.tooltipCache.clear();
         this.tagCache.clear();
     }

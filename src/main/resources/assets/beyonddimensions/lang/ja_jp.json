@@ -93,7 +93,7 @@
   "tooltip.button.beyonddimensions.sort_mode_stop": "現在：自動整頓OFF",
   "tooltip.item.unstable_space_time.long_data": "時空は安定化中、残り%s回の安定化サイクルが必要です。常に携帯してください。",
   "tooltip.beyonddimensions.item.xp_exchange": "手に持った状態：右クリックで設定を開く\nストレージGUI内：右クリックで経験値を保存、中クリックで経験値を取り出す",
-  "tooltip.editbox.beyonddimensions.search": "テキストを入力して名前で検索\n'@'を入力してMod IDを絞り込み\n'$'を入力してツールチップ内容を絞り込み\n'#'を入力してタグを絞り込み\n複数のフィルターはスペースで区切り、スペースを含む文字は引用符で囲って検索\n'|'でOR検索、'-'で除外検索\nShift+ZでJEI/EMI検索ボックス連動を切り替え",
+  "tooltip.editbox.beyonddimensions.search": "テキストを入力して名前で検索\n'@'を入力してMod IDを絞り込み\n'$'を入力してツールチップ内容を絞り込み\n'#'を入力してタグを絞り込み\n'*'を入力してアイテムIDを絞り込み\n複数のフィルターはスペースで区切り、スペースを含む文字は引用符で囲って検索\n'|'でOR検索、'-'で除外検索\nShift+ZでJEI/EMI検索ボックス連動を切り替え",
   "tooltip.editbox.beyonddimensions.xp_exchange_target_level": "維持または手動交換に使う経験値レベルを入力\n上限を超える値は自動で制限されます",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_working": "現在：動作中（目標レベルを維持）",
   "tooltip.button.beyonddimensions.xp_exchange.keep_mode_not_working": "現在：停止中（手動交換のみ）",
