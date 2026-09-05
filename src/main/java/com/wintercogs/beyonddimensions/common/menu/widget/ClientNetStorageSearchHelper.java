@@ -2,13 +2,16 @@ package com.wintercogs.beyonddimensions.common.menu.widget;
 
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.jech.PinInMatches;
 import com.wintercogs.beyonddimensions.util.TinyPinyinUtils;
 import com.wintercogs.beyonddimensions.util.TooltipHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
@@ -310,10 +313,9 @@ public class ClientNetStorageSearchHelper
     {
         return this.itemIdCache.computeIfAbsent(key,
                 k -> {
-                    if (key instanceof com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey itemKey)
+                    if (key instanceof ItemStackKey itemKey)
                     {
-                        net.minecraft.resources.ResourceLocation registryName =
-                                net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(itemKey.getSource());
+                        ResourceLocation registryName = BuiltInRegistries.ITEM.getKey(itemKey.getSource());
                         return registryName.getPath().toLowerCase(Locale.ENGLISH);
                     }
                     return "";
