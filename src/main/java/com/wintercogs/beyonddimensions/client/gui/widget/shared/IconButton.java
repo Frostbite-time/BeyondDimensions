@@ -13,8 +13,8 @@ public class IconButton extends Button implements GuiElementAccess
 {
     protected ResourceLocation icon;
 
-    protected final int iconX;
-    protected final int iconY;
+    protected final int iconOffsetX;
+    protected final int iconOffsetY;
     protected final int iconWidth;
     protected final int iconHeight;
 
@@ -32,8 +32,9 @@ public class IconButton extends Button implements GuiElementAccess
     {
         super(x, y, width, height, Component.empty(), onPress, Button.DEFAULT_NARRATION);
         this.icon = icon;
-        this.iconX = iconX;
-        this.iconY = iconY;
+        // 内部保存相对偏移，图标随按钮布局移动。
+        this.iconOffsetX = iconX - x;
+        this.iconOffsetY = iconY - y;
         this.iconWidth = iconWidth;
         this.iconHeight = iconHeight;
         initBackground();
@@ -74,7 +75,7 @@ public class IconButton extends Button implements GuiElementAccess
 
     protected void drawIcon(GuiGraphics st, int mouseX, int mouseY, float pt)
     {
-        st.blit(getIcon(), iconX, iconY, 0, 0, iconWidth, iconHeight, iconWidth, iconHeight);
+        st.blit(getIcon(), getX() + iconOffsetX, getY() + iconOffsetY, 0, 0, iconWidth, iconHeight, iconWidth, iconHeight);
     }
 
     // 用于覆写背景
