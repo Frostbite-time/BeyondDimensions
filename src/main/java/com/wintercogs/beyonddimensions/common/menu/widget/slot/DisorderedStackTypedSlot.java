@@ -228,13 +228,8 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                         }
                         else if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) // 鼠标中键--取出一级
                         {
-                            long needInsertPlayerXp = XpUtil.xpBetweenLevels(currentLevel, currentLevel + wantConversionLevel);
-                            int actualInsertPlayerXp = BDMath.clampLongToInt(needInsertPlayerXp);
-                            long actualRemoveFluid = actualInsertPlayerXp * conversionRate;
-
-                            // 首先尝试提取指定数量的经验流体
-                            KeyAmount extracted = storage.extract(fluidStackKey, actualRemoveFluid, false, false);
-                            actualInsertPlayerXp = BDMath.clampLongToInt(extracted.amount() / 20);
+                            int maxXp = XpUtil.xpToGiveForLevels(player, wantConversionLevel);
+                            int actualInsertPlayerXp = XpExchangeItem.extractExperience(storage, fluidStackKey, -1, maxXp);
                             if (actualInsertPlayerXp > 0)
                             {
                                 player.giveExperiencePoints(actualInsertPlayerXp);
