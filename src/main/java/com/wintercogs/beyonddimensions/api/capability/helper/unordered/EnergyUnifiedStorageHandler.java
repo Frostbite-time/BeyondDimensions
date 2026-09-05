@@ -11,32 +11,15 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class EnergyUnifiedStorageHandler implements EnergyHandler
+public class EnergyUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> implements EnergyHandler
 {
     private final UnifiedStorage storage;
-    private final ArrayList<StackJournal> snapshotJournals = new ArrayList<>();
 
     public EnergyUnifiedStorageHandler(UnifiedStorage storage)
     {
         this.storage = storage;
-    }
-
-    /**
-     * 查找或创建与 EnergyStackKey.INSTANCE 关联的 StackJournal。
-     */
-    private StackJournal getOrCreateJournal()
-    {
-        for (StackJournal journal : snapshotJournals)
-        {
-            if (journal.getKey().equals(EnergyStackKey.INSTANCE))
-            {
-                return journal;
-            }
-        }
-        StackJournal journal = new StackJournal(EnergyStackKey.INSTANCE);
-        snapshotJournals.add(journal);
-        return journal;
     }
 
     @Override
@@ -61,7 +44,7 @@ public class EnergyUnifiedStorageHandler implements EnergyHandler
         long simulatedInserted = amount - simulatedLeft.amount();
         if (simulatedInserted <= 0L) return 0;
 
-        getOrCreateJournal().updateSnapshots(transaction);
+        updateSnapshots(transaction);
 
         KeyAmount left = storage.insert(EnergyStackKey.INSTANCE, amount, false);
         long inserted = amount - left.amount();
@@ -77,45 +60,37 @@ public class EnergyUnifiedStorageHandler implements EnergyHandler
         KeyAmount simulated = storage.extract(EnergyStackKey.INSTANCE, amount, true, false);
         if (simulated.isEmpty() || simulated.amount() <= 0L) return 0;
 
-        getOrCreateJournal().updateSnapshots(transaction);
+        updateSnapshots(transaction);
 
         KeyAmount taken = storage.extract(EnergyStackKey.INSTANCE, amount, false, false);
         return BDMath.clampLongToInt(Math.max(0L, taken.amount()));
     }
 
-    // ---- Per-key journal for transaction support ----
-
-    private class StackJournal extends SnapshotJournal<KeyAmount>
+    @Override
+    protected List<KeyAmount> createSnapshot()
     {
-        private final EnergyStackKey key;
-
-        StackJournal(EnergyStackKey key)
+        List<KeyAmount> view = storage.getStorage();
+        ArrayList<KeyAmount> snapshot = new ArrayList<>(view.size());
+        for (int i = 0; i < view.size(); i++)
         {
-            this.key = key;
+            KeyAmount ka = view.get(i);
+            snapshot.add(new KeyAmount(ka.key(), ka.amount()));
         }
+        return snapshot;
+    }
 
-        public EnergyStackKey getKey()
-        {
-            return key;
-        }
+    @Override
+    protected void revertToSnapshot(List<KeyAmount> snapshot)
+    {
+        if (snapshot == null) return;
 
-        @Override
-        protected KeyAmount createSnapshot()
+        storage.clearStorage();
+        for (int i = 0; i < snapshot.size(); i++)
         {
-            return storage.getStackByKey(key);
-        }
-
-        @Override
-        protected void revertToSnapshot(KeyAmount snapshot)
-        {
-            if (snapshot == null) return;
-            if (snapshot.isEmpty() || snapshot.key().isEmpty())
+            KeyAmount ka = snapshot.get(i);
+            if (!ka.isEmpty())
             {
-                storage.setAmountByKey(key, 0L);
-            }
-            else
-            {
-                storage.setAmountByKey(snapshot.key(), snapshot.amount());
+                storage.setAmountByKey(ka.key(), ka.amount());
             }
         }
     }
