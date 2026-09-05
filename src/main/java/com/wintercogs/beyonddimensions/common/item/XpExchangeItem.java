@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
@@ -73,6 +74,45 @@ public class XpExchangeItem extends NetedItem
         return 20;
     }
 
+    /**
+     * 按整点 XP 提取经验流体。slot 为 -1 时按 key 提取，否则从指定槽位提取。
+     * maxXp 必须已按玩家剩余容量限制；返回值不会超过该预算。
+     */
+    public static int extractExperience(IStackHandler storage, FluidStackKey key, int slot, int maxXp)
+    {
+        if (maxXp <= 0)
+            return 0;
+
+        int conversionRate = getConversionRate();
+        KeyAmount available = slot >= 0 ? storage.getStackBySlot(slot) : storage.getStackByKey(key);
+        if (available.isEmpty())
+            return 0;
+
+        // 先留下库存中不足 1 XP 的零头，避免正常路径依赖回插成功。
+        long requestedXp = Math.min((long) maxXp, available.amount() / conversionRate);
+        if (requestedXp <= 0)
+            return 0;
+
+        long requestedUnits = requestedXp * conversionRate;
+        KeyAmount extracted = slot >= 0
+                ? storage.extract(slot, requestedUnits, false)
+                : storage.extract(key, requestedUnits, false, false);
+        if (extracted.isEmpty())
+            return 0;
+
+        int gainedXp = (int) Math.min(requestedXp, extracted.amount() / conversionRate);
+        long remainder = extracted.amount() - (long) gainedXp * conversionRate;
+        // 提取处理器改变实际数量时，退回不足 1 XP 或超出预算的部分。
+        if (remainder > 0)
+        {
+            if (slot >= 0)
+                storage.insert(slot, extracted.key(), remainder, false);
+            else
+                storage.insert(extracted.key(), remainder, false);
+        }
+        return gainedXp;
+    }
+
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
     {
@@ -139,42 +179,14 @@ public class XpExchangeItem extends NetedItem
         {
             // 从任意“经验流体”里提取，尽量把玩家补到目标等级
             long needAddXp = XpUtil.xpToReachAtLeast(currentLevel, targetLevel);
-            int remainingXp = BDMath.clampLongToInt(needAddXp);
+            int remainingXp = XpUtil.clampXpToGive(player, needAddXp);
             int gainedXpTotal = 0;
 
             for (Fluid f : xpFluids)
             {
                 if (remainingXp <= 0) break;
 
-                long wantUnits = (long) remainingXp * conversionRate;
-                if (wantUnits <= 0) break;
-
-                KeyAmount extracted = storage.extract(
-                        new FluidStackKey(new FluidStack(f, 1)),
-                        wantUnits,
-                        false,
-                        false
-                );
-
-                if (extracted.isEmpty()) continue;
-
-                long units = extracted.amount();
-                int gainedXp = BDMath.clampLongToInt(units / conversionRate);
-                if (gainedXp <= 0)
-                {
-                    // 抽到了不足 1 XP 的零头，原样放回，继续尝试其它流体
-                    storage.insert(new FluidStackKey(new FluidStack(f, 1)), units, false);
-                    continue;
-                }
-
-                long consumedUnits = (long) gainedXp * conversionRate;
-                long remainderUnits = units - consumedUnits;
-
-                // 多抽出来但不足 1 XP 的部分回滚
-                if (remainderUnits > 0)
-                {
-                    storage.insert(new FluidStackKey(new FluidStack(f, 1)), remainderUnits, false);
-                }
+                int gainedXp = extractExperience(storage, new FluidStackKey(new FluidStack(f, 1)), -1, remainingXp);
 
                 gainedXpTotal += gainedXp;
                 remainingXp -= gainedXp;
