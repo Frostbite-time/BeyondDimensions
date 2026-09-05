@@ -145,6 +145,7 @@
 
   "menu.title.beyonddimensions.xp_exchange_menu": "経験値の杖設定",
   "menu.label.beyonddimensions.xp_exchange.target_level": "目標レベル",
+  "menu.label.beyonddimensions.xp_exchange.max_level": "最大：%s",
   "menu.label.beyonddimensions.primary_net_switcher.search": "ネットワークを検索...",
   "menu.label.beyonddimensions.primary_net_switcher.recent": "最近使用",
   "menu.label.beyonddimensions.primary_net_switcher.all_networks": "利用可能なネットワーク",

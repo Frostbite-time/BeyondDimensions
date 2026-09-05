@@ -163,6 +163,7 @@ public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu>
     {
         guiGraphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
         guiGraphics.text(this.font, Component.translatable("menu.label.beyonddimensions.xp_exchange.target_level"), 8, 27, -12566464, false);
+        guiGraphics.text(this.font, Component.translatable("menu.label.beyonddimensions.xp_exchange.max_level", XpExchangeSettings.MAX_TARGET_LEVEL), 8, 41, -12566464, false);
         guiGraphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 

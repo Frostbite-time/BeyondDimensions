@@ -145,6 +145,7 @@
 
   "menu.title.beyonddimensions.xp_exchange_menu": "Configurações da Varinha de XP",
   "menu.label.beyonddimensions.xp_exchange.target_level": "Nível Alvo",
+  "menu.label.beyonddimensions.xp_exchange.max_level": "Máx: %s",
   "menu.label.beyonddimensions.primary_net_switcher.search": "Pesquisar redes...",
   "menu.label.beyonddimensions.primary_net_switcher.recent": "Recentes",
   "menu.label.beyonddimensions.primary_net_switcher.all_networks": "Redes disponíveis",
