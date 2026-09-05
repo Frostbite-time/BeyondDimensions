@@ -4,6 +4,41 @@ import net.minecraft.world.entity.player.Player;
 
 public class XpUtil
 {
+    // 保守限制玩家等级，避免绕过 totalExperience 的等级修改使经验公式越界。
+    public static final int MAX_SAFE_EXPERIENCE_LEVEL = 21863;
+
+    /**
+     * 在扣流体前限制本次发放量，保护原版的 totalExperience 加法及等级计算。
+     * 原版使用 float 更新等级进度，接近目标时可能需要下一次操作补足舍入误差。
+     */
+    public static int clampXpToGive(Player player, long requestedXp)
+    {
+        if (requestedXp <= 0 || player.experienceLevel < 0
+                || player.experienceLevel >= MAX_SAFE_EXPERIENCE_LEVEL
+                || player.totalExperience < 0
+                || !Float.isFinite(player.experienceProgress)
+                || player.experienceProgress < 0f || player.experienceProgress > 1f)
+            return 0;
+
+        long totalRoom = (long) Integer.MAX_VALUE - player.totalExperience;
+        long levelRoom = xpToReachAtLeast(levelAsDouble(player), MAX_SAFE_EXPERIENCE_LEVEL);
+        return (int) Math.clamp(requestedXp, 0L, Math.min(levelRoom, totalRoom));
+    }
+
+    /**
+     * 获取手动增加指定等级时可安全发放的 XP；先检查玩家状态，再计算等级差。
+     */
+    public static int xpToGiveForLevels(Player player, int levels)
+    {
+        int available = clampXpToGive(player, Integer.MAX_VALUE);
+        if (available == 0 || levels <= 0)
+            return 0;
+
+        double currentLevel = levelAsDouble(player);
+        double targetLevel = Math.min(currentLevel + levels, MAX_SAFE_EXPERIENCE_LEVEL);
+        return (int) Math.clamp(xpBetweenLevels(currentLevel, targetLevel), 0L, (long) available);
+    }
+
     /**
      * 读取玩家的“等级 + 进度”，转换为一个 double（例如 35.4）。
      */
