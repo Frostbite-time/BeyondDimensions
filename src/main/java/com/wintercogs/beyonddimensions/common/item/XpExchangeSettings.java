@@ -7,7 +7,7 @@ import net.minecraft.world.item.ItemStack;
 public final class XpExchangeSettings
 {
     public static final int DEFAULT_TARGET_LEVEL = 1;
-    public static final int MAX_TARGET_LEVEL = 9999;
+    public static final int MAX_TARGET_LEVEL = 21863;
 
     private XpExchangeSettings()
     {
