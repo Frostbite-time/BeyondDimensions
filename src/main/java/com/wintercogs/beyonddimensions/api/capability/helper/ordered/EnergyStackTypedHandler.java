@@ -12,15 +12,32 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class EnergyStackTypedHandler extends SnapshotJournal<List<KeyAmount>> implements EnergyHandler
+// TODO: 能量插入与提取跨多槽，目前实现为记录整个容器，后续应该将快照记录内聚到StackHandler，等什么时候我有空...
+public class EnergyStackTypedHandler implements EnergyHandler
 {
     private final StackHandler handlerStorage;
+    private final ArrayList<StackJournal> snapshotJournals;
 
     public EnergyStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
+        this.snapshotJournals = new ArrayList<>(handlerStorage.getSlots());
+        for (int i = 0; i < handlerStorage.getSlots(); i++)
+        {
+            snapshotJournals.add(new StackJournal(i));
+        }
+    }
+
+    /**
+     * 每次实际更改前记录所有槽位
+     */
+    private void updateSnapshots(TransactionContext transaction)
+    {
+        for (StackJournal journal : snapshotJournals)
+        {
+            journal.updateSnapshots(transaction);
+        }
     }
 
     @Override
@@ -117,35 +134,29 @@ public class EnergyStackTypedHandler extends SnapshotJournal<List<KeyAmount>> im
         return BDMath.clampLongToInt(Math.max(0L, taken.amount()));
     }
 
-    @Override
-    protected List<KeyAmount> createSnapshot()
+    // ---- Per-slot journal for transaction support ----
+
+    private class StackJournal extends SnapshotJournal<KeyAmount>
     {
-        int total = handlerStorage.getSlots();
-        ArrayList<KeyAmount> snapshot = new ArrayList<>(total);
-        for (int i = 0; i < total; i++)
+        private final int slotIndex;
+
+        StackJournal(int slotIndex)
         {
-            KeyAmount ka = handlerStorage.getStackBySlot(i);
-            snapshot.add(new KeyAmount(ka.key(), ka.amount()));
+            this.slotIndex = slotIndex;
         }
-        return snapshot;
-    }
 
-    @Override
-    protected void revertToSnapshot(List<KeyAmount> snapshot)
-    {
-        if (snapshot == null) return;
-
-        int total = handlerStorage.getSlots();
-        int restore = Math.min(total, snapshot.size());
-
-        for (int i = 0; i < restore; i++)
+        @Override
+        protected KeyAmount createSnapshot()
         {
-            KeyAmount ka = snapshot.get(i);
-            handlerStorage.setStackDirectly(i, ka.key(), ka.amount());
+            return handlerStorage.getStackBySlot(slotIndex);
         }
-        for (int i = restore; i < total; i++)
+
+        @Override
+        protected void revertToSnapshot(KeyAmount snapshot)
         {
-            handlerStorage.setStackDirectly(i, EmptyStackKey.INSTANCE, 0L);
+            if (snapshot == null) return;
+
+            handlerStorage.setStackDirectly(slotIndex, snapshot.key(), snapshot.amount());
         }
     }
 }

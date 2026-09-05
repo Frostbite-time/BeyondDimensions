@@ -23,6 +23,8 @@ import java.util.List;
  */
 public class ItemUnifiedStorageHandler extends SnapshotJournal<List<KeyAmount>> implements ResourceHandler<@NotNull ItemResource>
 {
+    // TODO暂时不能直接更改为按key精确索引的日志，因为BeforeInsert以及BeforeExtract允许对key-A的修改被重定向到key-B，按key记录会导致错误
+    // TODO快照api适配需要等到有空的时候直接针对UnifiedStorage进行更改
     private final UnifiedStorage storage;
 
     public ItemUnifiedStorageHandler(UnifiedStorage storage)
