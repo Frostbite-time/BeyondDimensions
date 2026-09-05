@@ -13,31 +13,31 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
+// TODO: 能量插入与提取跨多槽，目前实现为记录整个容器，后续应该将快照记录内聚到StackHandler，等什么时候我有空...
 public class EnergyStackTypedHandler implements EnergyHandler
 {
     private final StackHandler handlerStorage;
-    private final ArrayList<StackJournal> snapshotJournals = new ArrayList<>();
+    private final ArrayList<StackJournal> snapshotJournals;
 
     public EnergyStackTypedHandler(StackHandler handlerStorage)
     {
         this.handlerStorage = handlerStorage;
+        this.snapshotJournals = new ArrayList<>(handlerStorage.getSlots());
+        for (int i = 0; i < handlerStorage.getSlots(); i++)
+        {
+            snapshotJournals.add(new StackJournal(i));
+        }
     }
 
     /**
-     * 查找或创建与 EnergyStackKey.INSTANCE 关联的 StackJournal。
+     * 每次实际更改前记录所有槽位
      */
-    private StackJournal getOrCreateJournal()
+    private void updateSnapshots(TransactionContext transaction)
     {
         for (StackJournal journal : snapshotJournals)
         {
-            if (journal.getKey().equals(EnergyStackKey.INSTANCE))
-            {
-                return journal;
-            }
+            journal.updateSnapshots(transaction);
         }
-        StackJournal journal = new StackJournal(EnergyStackKey.INSTANCE);
-        snapshotJournals.add(journal);
-        return journal;
     }
 
     @Override
@@ -112,7 +112,7 @@ public class EnergyStackTypedHandler implements EnergyHandler
         long simulatedInserted = amount - simulatedLeft.amount();
         if (simulatedInserted <= 0L) return 0;
 
-        getOrCreateJournal().updateSnapshots(transaction);
+        updateSnapshots(transaction);
 
         KeyAmount left = handlerStorage.insert(EnergyStackKey.INSTANCE, amount, false);
         long inserted = amount - left.amount();
@@ -128,33 +128,27 @@ public class EnergyStackTypedHandler implements EnergyHandler
         KeyAmount simulated = handlerStorage.extract(EnergyStackKey.INSTANCE, amount, true, false);
         if (simulated.isEmpty() || simulated.amount() <= 0L) return 0;
 
-        getOrCreateJournal().updateSnapshots(transaction);
+        updateSnapshots(transaction);
 
         KeyAmount taken = handlerStorage.extract(EnergyStackKey.INSTANCE, amount, false, false);
         return BDMath.clampLongToInt(Math.max(0L, taken.amount()));
     }
 
-    // ---- Per-key journal for transaction support ----
+    // ---- Per-slot journal for transaction support ----
 
     private class StackJournal extends SnapshotJournal<KeyAmount>
     {
-        private final EnergyStackKey key;
+        private final int slotIndex;
 
-        StackJournal(EnergyStackKey key)
+        StackJournal(int slotIndex)
         {
-            this.key = key;
-        }
-
-        public EnergyStackKey getKey()
-        {
-            return key;
+            this.slotIndex = slotIndex;
         }
 
         @Override
         protected KeyAmount createSnapshot()
         {
-            KeyAmount ka = handlerStorage.getStackByKey(key);
-            return ka.isEmpty() ? new KeyAmount(key, 0L) : ka;
+            return handlerStorage.getStackBySlot(slotIndex);
         }
 
         @Override
@@ -162,17 +156,7 @@ public class EnergyStackTypedHandler implements EnergyHandler
         {
             if (snapshot == null) return;
 
-            // 先提取所有当前能量，再恢复快照中的量
-            KeyAmount current = handlerStorage.getStackByKey(key);
-            if (!current.isEmpty())
-            {
-                handlerStorage.extract(key, current.amount(), false, false);
-            }
-            long restoreAmount = snapshot.isEmpty() ? 0L : snapshot.amount();
-            if (restoreAmount > 0L)
-            {
-                handlerStorage.insert(key, restoreAmount, false);
-            }
+            handlerStorage.setStackDirectly(slotIndex, snapshot.key(), snapshot.amount());
         }
     }
 }
