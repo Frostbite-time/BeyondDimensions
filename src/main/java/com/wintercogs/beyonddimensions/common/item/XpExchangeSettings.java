@@ -8,7 +8,7 @@ public final class XpExchangeSettings
 {
     public static final String XP_TARGET_LEVEL_TAG = "xp_target_level";
     public static final int DEFAULT_TARGET_LEVEL = 1;
-    public static final int MAX_TARGET_LEVEL = 9999;
+    public static final int MAX_TARGET_LEVEL = 21863;
 
     private XpExchangeSettings()
     {
