@@ -143,12 +143,8 @@ sourceSets {
             srcDir 'src/generated/resources'
         }
         java {
-            // 暂时排除JEI联动
-            exclude 'com/wintercogs/beyonddimensions/integration/module/jei/**'
+            // TODO: 恢复 AE2 联动时，启用 AE 依赖、移除此排除项，并恢复 NetInterfaceGhostHandler 中的 AE 导入和通用包裹转换代码。
             exclude 'com/wintercogs/beyonddimensions/integration/module/ae2/**'
-            exclude 'com/wintercogs/beyonddimensions/integration/module/curios/**'
-            exclude 'com/wintercogs/beyonddimensions/integration/module/jade/**'
-            exclude 'com/wintercogs/beyonddimensions/integration/module/jech/**'
             exclude 'com/wintercogs/beyonddimensions/integration/module/rs/**'
         }
     }
@@ -172,15 +168,15 @@ dependencies {
     }
 
     // JEI支持
-    //compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
-    //runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    compileOnly "mezz.jei:jei-26.2-neoforge-api:${jei_version}"
+    runtimeOnly "mezz.jei:jei-26.2-neoforge:${jei_version}"
 
     // 饰品栏支持
-    //compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
-    //runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
+    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
     // 通用拼音搜索-在安装时优先使用它的拼音处理 不启用runtime：会导致runServer失败
-    //compileOnly "curse.maven:just-enough-characters-250702:8136581"
+    compileOnly "curse.maven:just-enough-characters-250702:8770968"
 
     // GuideMe
     //runtimeOnly "curse.maven:guideme-1173950:7929350"
@@ -193,8 +189,8 @@ dependencies {
     //runtimeOnly "curse.maven:refined-storage-243076:8032789"
 
     // Jade支持
-    //compileOnly "curse.maven:jade-324717:8068368"
-    //runtimeOnly "curse.maven:jade-324717:8068368"
+    compileOnly "curse.maven:jade-324717:8755115"
+    runtimeOnly "curse.maven:jade-324717:8755115"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

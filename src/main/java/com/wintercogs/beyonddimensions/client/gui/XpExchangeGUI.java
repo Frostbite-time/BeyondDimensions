@@ -11,11 +11,14 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Inventory;
 import org.lwjgl.glfw.GLFW;
 
 public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu>
 {
+    private static final int TARGET_LEVEL_MAX_LENGTH = 6;
+
     private RightTabButton keepModeButton;
     private EditBox targetLevelField;
     private boolean syncingField;
@@ -37,13 +40,45 @@ public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu>
         this.topPos = (this.height - imageHeight) / 2;
 
         this.targetLevelField = new EditBox(getFont(), this.leftPos + 50, this.topPos + 24, 82, this.getFont().lineHeight + 6,
-                Component.translatable("menu.label.beyonddimensions.xp_exchange.target_level"));
-        this.targetLevelField.setMaxLength(6);
+                Component.translatable("menu.label.beyonddimensions.xp_exchange.target_level"))
+        {
+            private boolean isValidText(String text)
+            {
+                return text.isEmpty() || text.chars().allMatch(Character::isDigit);
+            }
+
+            @Override
+            public void setValue(String value)
+            {
+                if (isValidText(value))
+                    super.setValue(value);
+            }
+
+            @Override
+            public void insertText(String input)
+            {
+                // 模拟旧版本setFilter：先按 EditBox 规则清理、截断输入，再校验实际插入的文本。
+                int maxInsertionLength = TARGET_LEVEL_MAX_LENGTH - getValue().length() + getHighlighted().length();
+                if (maxInsertionLength <= 0)
+                    return;
+
+                String text = StringUtil.filterText(input);
+                if (text.length() > maxInsertionLength)
+                {
+                    if (Character.isHighSurrogate(text.charAt(maxInsertionLength - 1)))
+                        maxInsertionLength--;
+                    text = text.substring(0, maxInsertionLength);
+                }
+
+                if (isValidText(text))
+                    super.insertText(text);
+            }
+        };
+        this.targetLevelField.setMaxLength(TARGET_LEVEL_MAX_LENGTH);
         this.targetLevelField.setBordered(true);
         this.targetLevelField.setVisible(true);
         this.targetLevelField.setTextColor(0xFFFFFFFF);
         this.targetLevelField.setTooltip(Tooltip.create(Component.translatable("tooltip.editbox.beyonddimensions.xp_exchange_target_level")));
-        this.targetLevelField.setFilter(text -> text.isEmpty() || text.chars().allMatch(Character::isDigit));
         this.targetLevelField.setValue(Integer.toString(XpExchangeSettings.getTargetLevel(menu.menuStack)));
         this.targetLevelField.setResponder(this::onTargetLevelChanged);
         addRenderableWidget(this.targetLevelField);

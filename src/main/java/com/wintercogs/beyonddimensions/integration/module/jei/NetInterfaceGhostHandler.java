@@ -6,9 +6,10 @@ import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.client.gui.BDBaseGUI;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
-import com.wintercogs.beyonddimensions.integration.ModPresence;
-import com.wintercogs.beyonddimensions.integration.OtherModIds;
-import com.wintercogs.beyonddimensions.integration.module.ae2.AEHelper;
+// TODO: 恢复 AE2 联动时，与下方通用包裹转换代码一起恢复这些导入，并移除 build.gradle 中的 AE2 排除项、启用 AE 依赖。
+// import com.wintercogs.beyonddimensions.integration.ModPresence;
+// import com.wintercogs.beyonddimensions.integration.OtherModIds;
+// import com.wintercogs.beyonddimensions.integration.module.ae2.AEHelper;
 import com.wintercogs.beyonddimensions.network.packet.both.SetSlotDirectlyPacket;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
@@ -83,7 +84,8 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
                 }
             }
 
-            // AE2通用包裹支持
+            // TODO: 恢复 AE2 联动时，取消此段注释并恢复上方导入，同时移除 build.gradle 中的 AE2 排除项、启用 AE 依赖。
+            /* AE2通用包裹支持
             if (ModPresence.isLoaded(OtherModIds.AE2))
             {
                 if (dragging instanceof ItemStackKey draggingItemKey && !dragging.isEmpty())
@@ -97,6 +99,8 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
 
                 }
             }
+
+            */
 
             ClientPacketDistributor.sendToServer(new SetSlotDirectlyPacket(slot.index, new KeyAmount(dragging, 1)));
 
