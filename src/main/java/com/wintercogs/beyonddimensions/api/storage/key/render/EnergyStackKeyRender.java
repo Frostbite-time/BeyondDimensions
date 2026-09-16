@@ -123,7 +123,8 @@ public class EnergyStackKeyRender implements IStackRender
                 clientTooltips,
                 mouseX, mouseY,
                 DefaultTooltipPositioner.INSTANCE,
-                null
+                null,
+                false
         );
     }
 }

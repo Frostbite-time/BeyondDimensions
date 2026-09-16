@@ -67,11 +67,11 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
             {
                 if (player.isAlive() && !((ServerPlayer) player).hasDisconnected())
                 {
-                    player.getInventory().placeItemBackInInventory(itemstack);
+                    player.getInventory().placeItemBackInInventory(itemstack, net.minecraft.util.Prediction.SERVER_ONLY);
                 }
                 else
                 {
-                    player.drop(itemstack, false);
+                    player.drop(itemstack, false, net.minecraft.util.Prediction.SERVER_ONLY);
                 }
 
                 this.setCarried(ItemStack.EMPTY);

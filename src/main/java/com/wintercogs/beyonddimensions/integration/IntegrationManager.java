@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.integration;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -117,6 +118,14 @@ public final class IntegrationManager
         for (IIntegrationModule module : ACTIVE_COMMON_MODULES)
         {
             module.onDatagen(event);
+        }
+    }
+
+    public static void addReloadableRegistryEntries(RegistrySetBuilder registrySetBuilder)
+    {
+        for (IIntegrationModule module : ACTIVE_COMMON_MODULES)
+        {
+            module.addReloadableRegistryEntries(registrySetBuilder);
         }
     }
 

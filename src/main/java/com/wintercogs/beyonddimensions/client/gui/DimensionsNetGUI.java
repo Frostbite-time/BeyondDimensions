@@ -35,7 +35,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 
 public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
@@ -88,10 +88,10 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
             if (UIDataHelper.lastMousePos != null)
             {
                 Window window = Minecraft.getInstance().getWindow();
-                GLFW.glfwSetCursorPos(
+                SDLMouse.SDL_WarpMouseInWindow(
                         window.handle(),
-                        UIDataHelper.lastMousePos.x,
-                        UIDataHelper.lastMousePos.y
+                        (float) UIDataHelper.lastMousePos.x,
+                        (float) UIDataHelper.lastMousePos.y
                 );
             }
 
@@ -375,12 +375,9 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     {
         UIDataHelper.currentPage = menu.lineData;
 
-        double[] xpos = new double[1];
-        double[] ypos = new double[1];
-        GLFW.glfwGetCursorPos(Minecraft.getInstance().getWindow().handle(), xpos, ypos);
         UIDataHelper.lastMousePos = new Vec2(
-                (float) xpos[0],
-                (float) ypos[0]
+                (float) Minecraft.getInstance().mouseHandler.xpos(),
+                (float) Minecraft.getInstance().mouseHandler.ypos()
         );
 
         UIDataHelper.isTransfer = true;
@@ -463,7 +460,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
                 }
             }
         }
-        else if (event.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 右键点击搜索框则清空搜索框内容
+        else if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) // 右键点击搜索框则清空搜索框内容
         {
             searchField.setValue("");
         }
@@ -475,16 +472,16 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
     public boolean keyPressed(KeyEvent event)
     {
         int keyCode = event.key();
-        int scanCode = event.scancode();
+        int scanCode = event.keycode();
 
         // 先处理menu相关数据
-        if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
+        if (keyCode == InputConstants.KEY_LSHIFT || keyCode == InputConstants.KEY_RSHIFT)
             menu.hasShiftDown = true;
 
         InputConstants.Key mouseKey = InputConstants.getKey(event);
 
         // 如果搜索框有效，拦截，然后让搜索框接管处理
-        if (searchField != null && searchField.canConsumeInput() && mouseKey.getValue() != GLFW.GLFW_KEY_ESCAPE)
+        if (searchField != null && searchField.canConsumeInput() && mouseKey.getValue() != InputConstants.KEY_ESCAPE)
         {
             // 无论如何都不继续后续逻辑
             // 等以后可能改为重写searchField以获得更稳定的效果
@@ -493,7 +490,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         }
 
         // 处理shift + z切换
-        if (Minecraft.getInstance().hasShiftDown() && mouseKey.getValue() == GLFW.GLFW_KEY_Z)
+        if (Minecraft.getInstance().hasShiftDown() && mouseKey.getValue() == InputConstants.KEY_Z)
         {
             boolean current = CommonConfigRuntime.searchTextWithJEIEMI;
             CommonConfigRuntime.searchTextWithJEIEMI = !current;
@@ -503,7 +500,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         }
 
         // 处理背包关闭热键
-        if (this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey) ||
+        if (this.minecraft.options.keyInventory.matches(mouseKey) ||
                 BDShortKeys.OPEN_GUI_KEY.getKey() == mouseKey)
         {
             onClose();
@@ -519,7 +516,7 @@ public class DimensionsNetGUI<T extends DimensionsNetMenu> extends BDBaseGUI<T>
         int keyCode = event.key();
         boolean result = super.keyReleased(event);
 
-        if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
+        if (keyCode == InputConstants.KEY_LSHIFT || keyCode == InputConstants.KEY_RSHIFT)
         {
             menu.markForceAllUpdateClientView();
             menu.updateViewerStorage(false);

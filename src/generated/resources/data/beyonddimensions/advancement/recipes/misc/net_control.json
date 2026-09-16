@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "beyonddimensions:net_control"
+        "recipes": "beyonddimensions:net_control"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

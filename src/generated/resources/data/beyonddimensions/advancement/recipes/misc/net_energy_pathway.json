@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "beyonddimensions:net_energy_pathway"
+        "recipes": "beyonddimensions:net_energy_pathway"
       },
       "trigger": "minecraft:recipe_unlocked"
     },
