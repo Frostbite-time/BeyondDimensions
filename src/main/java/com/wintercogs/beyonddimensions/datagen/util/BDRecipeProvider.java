@@ -1,13 +1,14 @@
 package com.wintercogs.beyonddimensions.datagen.util;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.world.item.crafting.Recipe;
 
 public abstract class BDRecipeProvider extends RecipeProvider
 {
-    protected BDRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
+    protected BDRecipeProvider(BootstrapContext<Recipe<?>> recipeOutput, BootstrapContext<Advancement> advancementOutput)
     {
-        super(registries, output);
+        super(recipeOutput, advancementOutput);
     }
 }

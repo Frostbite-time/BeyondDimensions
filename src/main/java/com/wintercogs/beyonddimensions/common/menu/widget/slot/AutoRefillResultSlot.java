@@ -131,7 +131,7 @@ public class AutoRefillResultSlot extends ResultSlot
                     // 如果仍然有剩余，直接掉落
                     if (remainderCount > 0)
                     {
-                        this.player.drop(remainderKey.copyStackWithCount(remainderCount), false);
+                        this.player.drop(remainderKey.copyStackWithCount(remainderCount), false, net.minecraft.util.Prediction.SERVER_ONLY);
                     }
                 }
             }

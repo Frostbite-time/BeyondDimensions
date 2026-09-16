@@ -13,7 +13,6 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Inventory;
-import org.lwjgl.glfw.GLFW;
 
 public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu>
 {
@@ -152,11 +151,10 @@ public class XpExchangeGUI extends BDBaseGUI<XpExchangeMenu>
     {
         if (targetLevelField != null && targetLevelField.isMouseOver(mouseX, mouseY) && scrollY != 0)
         {
-            var window = Minecraft.getInstance().getWindow();
-            boolean controlDown = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_CONTROL)
-                    || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_CONTROL);
-            boolean shiftDown = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT)
-                    || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
+            boolean controlDown = InputConstants.isKeyDown(InputConstants.KEY_LCONTROL)
+                    || InputConstants.isKeyDown(InputConstants.KEY_RCONTROL);
+            boolean shiftDown = InputConstants.isKeyDown(InputConstants.KEY_LSHIFT)
+                    || InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);
             int step = controlDown ? 100 : (shiftDown ? 10 : 1);
             int direction = scrollY > 0 ? 1 : -1;
             int currentValue = targetLevelField.getValue().isEmpty() ? 0 : Integer.parseInt(targetLevelField.getValue());

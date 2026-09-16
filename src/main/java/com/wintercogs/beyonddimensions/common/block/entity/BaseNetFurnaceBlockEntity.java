@@ -19,6 +19,19 @@ import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.common.menu.NetFurnaceMenu;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.component.CookingFuel;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.loot.NeoForgeLootContextParams;
+
+import java.util.Optional;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -215,7 +228,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
             // 能量或者可以燃烧的物品能作为燃料标记
             return (key instanceof EnergyStackKey)
                     || (key instanceof FluidStackKey fluidKey && fluidKey.getSource() == Fluids.LAVA)
-                    || (key instanceof ItemStackKey itemKey && level != null && itemKey.getReadOnlyStack().getBurnTime(recipeType, level.fuelValues()) > 0);
+                    || (key instanceof ItemStackKey itemKey && getFuelBurnTime(itemKey.getReadOnlyStack()) > 0);
         }
 
     };
@@ -289,7 +302,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
             // 能量或者可以燃烧的物品能作为燃料标记
             return (key instanceof EnergyStackKey)
                     || (key instanceof FluidStackKey fluidKey && fluidKey.getSource() == Fluids.LAVA)
-                    || (key instanceof ItemStackKey itemKey && level != null && itemKey.getReadOnlyStack().getBurnTime(recipeType, level.fuelValues()) > 0);
+                    || (key instanceof ItemStackKey itemKey && getFuelBurnTime(itemKey.getReadOnlyStack()) > 0);
         }
     };
 
@@ -591,7 +604,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
                 }
                 else if (fuelKey instanceof ItemStackKey fuelItem)
                 {
-                    int burnTime = fuelItem.getReadOnlyStack().getBurnTime(recipeType, level.fuelValues());
+                    int burnTime = getFuelBurnTime(fuelItem.getReadOnlyStack());
                     if (burnTime <= 0) continue;
 
                     ItemStackTemplate returnTemplate = fuelItem.getReadOnlyStack().getCraftingRemainder();
@@ -1016,6 +1029,29 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     {
         awardStoredExperience(player);
         return new NetFurnaceMenu(containerId, inventory, this);
+    }
+
+    /**
+     * 26.3 起燃料数据由物品的 DataComponents.COOKING_FUEL 组件承载，
+     * 通过 ResolvableInt 解析；等价于旧版 getBurnTime(recipeType, level.fuelValues())。
+     * 仅在服务端可完整解析；客户端返回 0（调用方以 >0 判定是否为燃料）。
+     */
+    private int getFuelBurnTime(ItemStack stack)
+    {
+        if (!(level instanceof ServerLevel serverLevel) || stack.isEmpty())
+        {
+            return 0;
+        }
+        LootContext context = new LootContext.Builder(
+                new LootParams.Builder(serverLevel)
+                        .withParameter(LootContextParams.BLOCK_STATE, this.getBlockState())
+                        .withParameter(LootContextParams.BLOCK_ENTITY, this)
+                        .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(this.getBlockPos()))
+                        .withParameter(LootContextParams.CONTAINER, new SimpleContainer())
+                        .withOptionalParameter(NeoForgeLootContextParams.QUERIED_STACK, stack)
+                        .create(LootContextParamSets.CONTAINER_PROCESS))
+                .create(Optional.empty());
+        return ResolvableInt.getFromItem(stack, DataComponents.COOKING_FUEL, CookingFuel::burnTime, context, 0);
     }
 
 }

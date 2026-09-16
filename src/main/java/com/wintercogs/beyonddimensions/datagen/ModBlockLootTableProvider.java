@@ -3,16 +3,16 @@ package com.wintercogs.beyonddimensions.datagen;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.datagen.util.BDBlockLootSubProvider;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 public class ModBlockLootTableProvider extends BDBlockLootSubProvider
 {
 
-    protected ModBlockLootTableProvider(HolderLookup.Provider registries)
+    protected ModBlockLootTableProvider(LootTableSubProvider.Context context)
     {
-        super(registries);
+        super(context);
     }
 
     @Override

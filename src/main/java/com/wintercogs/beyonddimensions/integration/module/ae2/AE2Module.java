@@ -11,6 +11,8 @@ import com.wintercogs.beyonddimensions.integration.module.ae2.me.CellHandler;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.data.recipes.RecipeProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 @BDIntegrationModule(modId = OtherModIds.AE2)
@@ -42,9 +44,14 @@ public class AE2Module implements IIntegrationModule
 
 
     @Override
+    public void addReloadableRegistryEntries(RegistrySetBuilder registrySetBuilder)
+    {
+        registrySetBuilder.add(RecipeProvider.asBootstrap(AE2ModuleRecipeProvider::new));
+    }
+
+    @Override
     public void onDatagen(GatherDataEvent.Client event)
     {
         event.createProvider(AE2ModuleModelProvider::new);
-        event.createProvider(AE2ModuleRecipeProvider.Runner::new);
     }
 }

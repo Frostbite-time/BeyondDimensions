@@ -135,7 +135,8 @@ public class FluidStackKeyRender implements IStackRender
                 clientTooltips,
                 mouseX, mouseY,
                 DefaultTooltipPositioner.INSTANCE,
-                null
+                null,
+                false
         );
     }
 }

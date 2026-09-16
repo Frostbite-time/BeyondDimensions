@@ -15,6 +15,9 @@ import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlockE
 import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.CreativeModeTab;
@@ -78,18 +81,17 @@ public class RSModule implements IIntegrationModule
     }
 
     @Override
+    public void addReloadableRegistryEntries(RegistrySetBuilder registrySetBuilder)
+    {
+        registrySetBuilder
+                .add(Registries.LOOT_TABLE, new LootTableProvider(Collections.emptySet(),
+                        List.of(new LootTableProvider.SubProviderEntry(RSModuleBlockLootTableProvider::new, LootContextParamSets.BLOCK))))
+                .add(RecipeProvider.asBootstrap(RSModuleRecipeProvider::new));
+    }
+
+    @Override
     public void onDatagen(GatherDataEvent.Client event)
     {
-        event.createProvider((output, lookupProvider) -> new LootTableProvider(output, Collections.emptySet(),
-                List.of(new LootTableProvider.SubProviderEntry(RSModuleBlockLootTableProvider::new, LootContextParamSets.BLOCK)), lookupProvider)
-        {
-            @Override
-            public @NotNull String getName()
-            {
-                return "BeyondDimensions RSModule LootTable Provider";
-            }
-        });
         event.createProvider(RSModuleModelProvider::new);
-        event.createProvider(RSModuleRecipeProvider.Runner::new);
     }
 }
