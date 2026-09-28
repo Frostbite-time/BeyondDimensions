@@ -1,30 +1,23 @@
 package com.wintercogs.beyonddimensions.integration.module.emi.exclusion;
 
-import com.wintercogs.beyonddimensions.client.gui.BDBaseGUI;
-import com.wintercogs.beyonddimensions.client.gui.widget.shared.GuiElementAccess;
+import com.wintercogs.beyonddimensions.client.ui.InventoryScreenAccess;
+import dev.composemc.forge.ComposeInventoryScreen;
 import dev.emi.emi.api.EmiExclusionArea;
 import dev.emi.emi.api.widget.Bounds;
-import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.Rect2i;
 
 import java.util.function.Consumer;
 
+// 让 EMI 的物品列表避开 Compose 界面实际占据的区域
 public class BDExclusionZones implements EmiExclusionArea<Screen>
 {
     @Override
     public void addExclusionArea(Screen screen, Consumer<Bounds> consumer)
     {
-        if (screen instanceof BDBaseGUI<?>)
-        {
-            for (Renderable renderable : screen.renderables) // 仅为可渲染元素创造避让区域
-            {
-                if (renderable instanceof GuiElementAccess access)
-                {
-                    Rect2i area = access.getElementArea();
-                    consumer.accept(new Bounds(area.getX(), area.getY(), area.getWidth(), area.getHeight()));
-                }
-            }
-        }
+        if (!(screen instanceof ComposeInventoryScreen<?>))
+            return;
+        var area = InventoryScreenAccess.area(screen);
+        if (area != null)
+            consumer.accept(new Bounds(area.getX(), area.getY(), area.getWidth(), area.getHeight()));
     }
 }

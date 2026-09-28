@@ -1,20 +1,15 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
 import com.google.common.base.Suppliers;
-import com.wintercogs.beyonddimensions.BeyondDimensions;
+import dev.composemc.slots.SlotTransferRoutes;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
-import com.wintercogs.beyonddimensions.common.menu.widget.slot.SlotGroupSync;
-import com.wintercogs.beyonddimensions.network.packet.both.QuickDataTagPacket;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.anti_ad.mc.ipn.api.IPNIgnore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,10 +20,23 @@ import java.util.function.Supplier;
 // 定义一些用于 超越维度 模组的ui界面的基本方法。
 // 主要是重写网络同步和点击事件，确保父类机制不处理StoredStackSlot的相关内容
 @IPNIgnore
-public abstract class BDBaseMenu extends AbstractContainerMenu
+public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.composemc.forge.sync.SyncedMenu
 {
 
     public final Player player;
+    private BDMenuResources resources;
+    private BDMenuCommands commands;
+    public final BDMenuCommands commands() {
+        if (commands == null) commands = new BDMenuCommands(this);
+        return commands;
+    }
+    private boolean vanillaSnapshot;
+    public final boolean isVanillaSnapshot(){return vanillaSnapshot;}
+    public final BDMenuResources resources() {
+        if (resources == null) resources = new BDMenuResources(this);
+        return resources;
+    }
+    @Override public abstract dev.composemc.forge.sync.MenuSync<? extends BDBaseMenu> menuSync();
     // 用于快速移动时标记玩家背包的槽位索引 如 索引从0开始 背包为54~89
     public int inventoryStartIndex = -1; //索引开始位置 为54
     public int inventoryEndIndex = -1;   //索引结束位置+1 为90
@@ -37,9 +45,28 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     protected int vanillaQuickMoveStartIndex = -1;
     protected int vanillaQuickMoveEndIndex = -1;
 
+    private SlotTransferRoutes quickMoveRoutes;
+
+    /** Construct after all slots have been added; subclasses can declare named groups/routes. */
+    protected SlotTransferRoutes createQuickMoveRoutes()
+    {
+        var builder = SlotTransferRoutes.builder(slots.size());
+        int start = vanillaQuickMoveStartIndex, end = vanillaQuickMoveEndIndex;
+        if (start < 0 || start >= end || end > slots.size()) return builder.build();
+        builder.group("storage", start, end);
+        if (start > 0) builder.group("before_storage", 0, start).route("before_storage", "storage");
+        if (end < slots.size()) builder.group("after_storage", end, slots.size()).route("after_storage", "storage");
+        return builder.build();
+    }
+
+    public final SlotTransferRoutes quickMoveRoutes()
+    {
+        if (quickMoveRoutes == null) quickMoveRoutes = createQuickMoveRoutes();
+        return quickMoveRoutes;
+    }
+
     private boolean init = false; // 需要在客户端Menu完成时才能向其发送的操作是否完成的标志
-    protected List<AbstractStackTypedSlot> updatedSlots = new ArrayList<>(); // 用于槽位更新
-    public List<SlotGroupSync> slotGroupSyncs = new ArrayList<>();
+    public List<DisorderedSlotGroupSync> slotGroupSyncs = new ArrayList<>();
 
     protected BDBaseMenu(@Nullable MenuType<?> menuType, int containerId, Inventory playerInventory)
     {
@@ -47,7 +74,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         this.player = playerInventory.player;
     }
 
-    protected void addSlotGroupSync(SlotGroupSync slotGroupSync)
+    protected void addSlotGroupSync(DisorderedSlotGroupSync slotGroupSync)
     {
         slotGroupSyncs.add(slotGroupSync);
     }
@@ -55,8 +82,8 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     @Override
     protected @NotNull Slot addSlot(@NotNull Slot slot)
     {
-        if (slot instanceof AbstractStackTypedSlot sSlot)
-            updatedSlots.add(sSlot);
+        quickMoveRoutes = null;
+        if (slot instanceof AbstractStackTypedSlot resource && resource.isOrdered()) resources().slotAdded(resource);
         return super.addSlot(slot);
     }
 
@@ -99,67 +126,8 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                 init = true;
             }
 
-            if (shouldSendQuickData())
-            {
-                CompoundTag updateTag = new CompoundTag();
-                writeQuickDataTag(updateTag);
-                PacketDistributor.sendToPlayer((ServerPlayer) player, new QuickDataTagPacket(updateTag));
-            }
-
-            setSlotGroupSyncsUpdate();
-            abstractSlotsUpdate();
+            if (resources != null) resources.pollOrdered();
             updateChange();
-        }
-    }
-
-    // 什么时候应该发送快速更新
-    // 可以用来阻止某一端发送更新
-    protected boolean shouldSendQuickData()
-    {
-        return false;
-    }
-
-    // 双端可用的快速更新
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-
-    }
-
-    // 双端可用的快速读取
-    public void readQuickDataTag(CompoundTag tag)
-    {
-
-    }
-
-    public void writeAndSendQuickData()
-    {
-        CompoundTag updateTag = new CompoundTag();
-        writeQuickDataTag(updateTag);
-        if (player.level().isClientSide())
-        {
-            PacketDistributor.sendToServer(new QuickDataTagPacket(updateTag));
-        }
-        else
-        {
-            PacketDistributor.sendToPlayer((ServerPlayer) player, new QuickDataTagPacket(updateTag));
-        }
-    }
-
-    // 槽位更新
-    protected void abstractSlotsUpdate()
-    {
-        for (AbstractStackTypedSlot slot : updatedSlots)
-        {
-            slot.updateChange();
-        }
-    }
-
-    // 槽位组更新
-    protected void setSlotGroupSyncsUpdate()
-    {
-        for (SlotGroupSync slotGroupSync : slotGroupSyncs)
-        {
-            slotGroupSync.updateChange();
         }
     }
 
@@ -178,8 +146,11 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     // 自定义点击操作
     public void customClickHandler(int slotIndex, KeyAmount clickedStack, int button, boolean shiftDown)
     {
-        if (inventoryStartIndex < 0 || inventoryEndIndex < 0)
-            BeyondDimensions.LOGGER.info("警告:背包索引设置错误！！！");
+        // Packet data is a request. Validate before indexing or touching server inventory.
+        if (player.level().isClientSide() || player.containerMenu != this || !player.isAlive() || player.isSpectator()
+                || !stillValid(player) || slotIndex < 0 || slotIndex >= slots.size()
+                || button < 0 || button > 2 || clickedStack == null || clickedStack.amount() < 0
+                || clickedStack.amount() > clickedStack.key().getVanillaMaxStackSize()) return;
 
         if (slots.get(slotIndex) instanceof AbstractStackTypedSlot slot)
         {
@@ -191,18 +162,17 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
         else
         {
             // 用于处理原版槽位的快速转移
-            if (shiftDown && vanillaQuickMoveEndIndex >= 0 && vanillaQuickMoveStartIndex >= 0 && vanillaQuickMoveStartIndex < vanillaQuickMoveEndIndex)
-            {
-                quickMoveHandle(player, slotIndex, clickedStack, vanillaQuickMoveStartIndex, vanillaQuickMoveEndIndex);
-            }
+            var targets = quickMoveRoutes().targets(slotIndex);
+            if (shiftDown && !targets.isEmpty()) quickMoveHandle(player, slotIndex, clickedStack, targets);
         }
     }
 
     // 处理非AbstractStackTypedSlot槽位的快速转移
-    protected ItemStack quickMoveHandle(Player player, int slotIndex, KeyAmount clickStack, int targetStartIndex, int targetEndIndex)
+    protected ItemStack quickMoveHandle(Player player, int slotIndex, KeyAmount clickStack, List<Integer> targets)
     {
         Slot slot = this.slots.get(slotIndex);
-        if (slot != null && !clickStack.isEmpty()) // 根据客户端信息，无视空槽或者null
+        if (slot != null && slot.mayPickup(player) && !clickStack.isEmpty()
+                && clickStack.key().equals(new ItemStackKey(slot.getItem())))
         {
             ItemStack cacheStack;
             // 快速合成处理
@@ -228,8 +198,9 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
                     }
 
                     // 处理剩余物品
-                    for (int targetSlotIndex = targetStartIndex; targetSlotIndex < targetEndIndex && !remaining.isEmpty(); targetSlotIndex++)
+                    for (int targetSlotIndex : targets)
                     {
+                        if (remaining.isEmpty()) break;
                         Slot targetSlot = slots.get(targetSlotIndex);
                         int newSize;
                         if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
@@ -301,8 +272,9 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
             {
                 cacheStack = slot.getItem().copy(); // 完成数据包校验
                 ItemStack remaining = cacheStack.copy();
-                for (int targetSlotIndex = targetStartIndex; targetSlotIndex < targetEndIndex && !remaining.isEmpty(); targetSlotIndex++)
+                for (int targetSlotIndex : targets)
                 {
+                    if (remaining.isEmpty()) break;
                     Slot targetSlot = slots.get(targetSlotIndex);
                     int newSize;
                     if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
@@ -329,7 +301,12 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     @Override
     public void broadcastFullState()
     {
-        super.broadcastFullState();
+        boolean previous=vanillaSnapshot;vanillaSnapshot=true;
+        try{super.broadcastFullState();}finally{vanillaSnapshot=previous;}
+    }
+    @Override public void sendAllDataToRemote(){
+        boolean previous=vanillaSnapshot;vanillaSnapshot=true;
+        try{super.sendAllDataToRemote();}finally{vanillaSnapshot=previous;}
     }
 
     // 完全重写快速移动方案
@@ -361,12 +338,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu
     public void removed(@NotNull Player player)
     {
         super.removed(player);
-        for (SlotGroupSync slotGroupSync : slotGroupSyncs)
-        {
-            if (slotGroupSync instanceof DisorderedSlotGroupSync disSync)
-            {
-                disSync.dispose();
-            }
-        }
+        for (var group : slotGroupSyncs) group.dispose();
+        if (resources != null) resources.close();
     }
 }

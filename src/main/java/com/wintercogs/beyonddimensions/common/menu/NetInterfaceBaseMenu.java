@@ -8,14 +8,13 @@ import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.OrderedStackTypedSlot;
+import dev.composemc.forge.sync.MenuSync;
+import dev.composemc.slots.SlotTransferRoutes;
+import dev.composemc.sync.state.SyncCodecs;
+import dev.composemc.sync.state.SyncSchema;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
@@ -27,9 +26,95 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 
 // 网络接口的UI
-// 管理一组虚拟槽、以及一组
+// 管理一组虚拟槽、以及一组标记槽
 public class NetInterfaceBaseMenu extends BDBaseMenu
 {
+    /** applyMode 的设置项 */
+    public static final int SETTING_POP = 0;
+    public static final int SETTING_REDSTONE = 1;
+    public static final int SETTING_FUZZY = 2;
+
+    // 客户端镜像，由同步 schema 写入
+    public PopMode synchronizedPopMode = PopMode.STOP;
+    public RedStoneControlMode synchronizedControlMode = RedStoneControlMode.IGNORE;
+    public FuzzyMode synchronizedFuzzyMode = FuzzyMode.DISABLE;
+    public boolean synchronizedCanConfigurePop;
+
+    private static final SyncSchema<NetInterfaceBaseMenu> SYNC_SCHEMA = SyncSchema.<NetInterfaceBaseMenu>builder("beyonddimensions:interface", 1)
+            .field("pop", SyncCodecs.enumeration(PopMode.class),
+                    m -> m.player.level().isClientSide() ? m.synchronizedPopMode : m.access.getPopMode(),
+                    (m, value) -> m.synchronizedPopMode = value)
+            .field("redstone", SyncCodecs.enumeration(RedStoneControlMode.class),
+                    m -> m.player.level().isClientSide() ? m.synchronizedControlMode : m.access.getControlMode(),
+                    (m, value) -> m.synchronizedControlMode = value)
+            .field("fuzzy", SyncCodecs.enumeration(FuzzyMode.class),
+                    m -> m.player.level().isClientSide() ? m.synchronizedFuzzyMode : m.access.getFuzzyMode(),
+                    (m, value) -> m.synchronizedFuzzyMode = value)
+            .field("configurable_pop", SyncCodecs.BOOLEAN,
+                    m -> m.player.level().isClientSide() ? m.synchronizedCanConfigurePop : m.access.canConfigurePopMode(),
+                    (m, value) -> m.synchronizedCanConfigurePop = value)
+            .build();
+
+    private final MenuSync<NetInterfaceBaseMenu> synchronization = commands().inventory(BDMenuResources.bind(this, SYNC_SCHEMA)).action(BDMenuCommands.MODE);
+
+    @Override
+    public MenuSync<NetInterfaceBaseMenu> menuSync()
+    {
+        return synchronization;
+    }
+
+    public boolean ready()
+    {
+        return synchronization.hasSnapshot();
+    }
+
+    @Override
+    protected SlotTransferRoutes createQuickMoveRoutes()
+    {
+        return SlotTransferRoutes.builder(slots.size())
+                .group("player", inventoryStartIndex, inventoryEndIndex)
+                .group("storage", vanillaQuickMoveStartIndex, vanillaQuickMoveEndIndex)
+                .route("player", "storage")
+                .route("storage", "player")
+                .build();
+    }
+
+    /**
+     * 服务端：修改单个设置项。只接受单项修改，从不接受客户端提交的整份机器状态
+     */
+    public boolean applyMode(int setting, int value)
+    {
+        if (player.level().isClientSide() || player.containerMenu != this || !player.isAlive() || player.isSpectator() || !stillValid(player))
+            return false;
+        switch (setting)
+        {
+            case SETTING_POP ->
+            {
+                if (!access.canConfigurePopMode() || value < 0 || value >= PopMode.values().length)
+                    return false;
+                access.setPopMode(PopMode.values()[value]);
+            }
+            case SETTING_REDSTONE ->
+            {
+                if (value < 0 || value >= RedStoneControlMode.values().length)
+                    return false;
+                access.setControlMode(RedStoneControlMode.values()[value]);
+            }
+            case SETTING_FUZZY ->
+            {
+                if (value < 0 || value >= FuzzyMode.values().length)
+                    return false;
+                access.setFuzzyMode(FuzzyMode.values()[value]);
+            }
+            default ->
+            {
+                return false;
+            }
+        }
+        access.onMenuDataChanged();
+        return true;
+    }
+
     private static final int slotStartY = 1 + CommonTextures.TOP_BASE_COMMON_HEIGHT;
     private static final int invSlotStartY = 6 + slotStartY + CommonTextures.COMMON_SLOTS_HEIGHT * 3 + CommonTextures.FILTER_SLOTS_HEIGHT * 3 + CommonTextures.COMMON_CONNECTION_HEIGHT;
 
@@ -70,7 +155,15 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
 
     public static NetInterfaceBaseMenu mounted(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        return new NetInterfaceBaseMenu(id, playerInventory, new ClientAccess(playerInventory.player.level().registryAccess(), data));
+        return new NetInterfaceBaseMenu(id, playerInventory, new ClientAccess(data));
+    }
+
+    // 打开数据只携带槽位结构，资源内容与设置（包括较大的 NBT）由菜单同步负责
+    public static void writeMountedOpeningData(FriendlyByteBuf data, NetInterfaceAccess access)
+    {
+        data.writeBoolean(true);
+        data.writeVarInt(access.getStackHandler().getSlots());
+        data.writeVarInt(access.getFakeStackHandler().getSlots());
     }
 
     public NetInterfaceBaseMenu(int id, Inventory playerInventory, BlockPos pos)
@@ -92,6 +185,10 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         this.flagStorage = access.getFakeStackHandler();
 
         this.access = access;
+        synchronizedPopMode = access.getPopMode();
+        synchronizedControlMode = access.getControlMode();
+        synchronizedFuzzyMode = access.getFuzzyMode();
+        synchronizedCanConfigurePop = access.canConfigurePopMode();
 
         addPlayerInv(playerInventory);
         addStorageSlots();
@@ -176,44 +273,6 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
     }
 
     @Override
-    protected boolean shouldSendQuickData()
-    {
-        // 阻止服务端主动同步，将同步权交给sendBlockUpdated
-        return false;
-    }
-
-    @Override
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-        super.writeQuickDataTag(tag);
-        tag.putString("popMode", access.getPopMode().name());
-        tag.putString("controlMode", access.getControlMode().name());
-        tag.putString("fuzzyMode", access.getFuzzyMode().name());
-    }
-
-    @Override
-    public void readQuickDataTag(CompoundTag tag)
-    {
-        super.readQuickDataTag(tag);
-        if (access == null || !access.isMenuValid())
-        {
-            return;
-        }
-        if (access.canConfigurePopMode())
-        {
-            access.setPopMode(PopMode.valueOf(tag.getString("popMode")));
-        }
-        access.setControlMode(RedStoneControlMode.valueOf(tag.getString("controlMode")));
-        access.setFuzzyMode(FuzzyMode.valueOf(tag.getString("fuzzyMode")));
-        // 服务端读取新数据之后利用sendBlockUpdated将数据发送给附近所有玩家
-        if (!player.level().isClientSide())
-        {
-            access.onMenuDataChanged();
-        }
-    }
-
-
-    @Override
     public boolean stillValid(@NotNull Player player)
     {
         return access != null && access.isMenuValid();
@@ -224,17 +283,16 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         private final StackHandler stackHandler;
         private final StackHandler fakeStackHandler;
         private final NetInterfaceSettings settings = new NetInterfaceSettings();
-        private RedStoneControlMode controlMode;
+        private RedStoneControlMode controlMode = RedStoneControlMode.IGNORE;
 
-        private ClientAccess(HolderLookup.Provider registries, FriendlyByteBuf data)
+        private ClientAccess(FriendlyByteBuf data)
         {
-            CompoundTag inventory = data.readNbt();
-            CompoundTag flags = data.readNbt();
-            this.stackHandler = decodeStackHandler(registries, inventory);
-            this.fakeStackHandler = decodeStackHandler(registries, flags);
-            settings.setPopMode(PopMode.valueOf(data.readUtf()));
-            settings.setFuzzyMode(FuzzyMode.valueOf(data.readUtf()));
-            this.controlMode = RedStoneControlMode.valueOf(data.readUtf());
+            int slots = data.readVarInt();
+            int flags = data.readVarInt();
+            if (slots != 27 || flags != 27)
+                throw new IllegalArgumentException("Invalid interface slot structure");
+            this.stackHandler = new StackHandler(slots);
+            this.fakeStackHandler = new StackHandler(flags);
         }
 
         @Override
@@ -284,16 +342,6 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         {
         }
 
-        private static StackHandler decodeStackHandler(HolderLookup.Provider registries, CompoundTag tag)
-        {
-            if (tag == null)
-            {
-                return new StackHandler(0);
-            }
-            RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, registries);
-            return StackHandler.CODEC.parse(ops, tag)
-                    .getOrThrow(IllegalStateException::new);
-        }
     }
 
 }

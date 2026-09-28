@@ -279,14 +279,7 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
         player.openMenu(new SimpleMenuProvider(
                 (containerId, inventory, serverPlayer) -> new com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu(containerId, inventory, this),
                 info.state().getBlock().getName()
-        ), buf -> {
-            buf.writeBoolean(true);
-            buf.writeNbt(this.stackHandler.serializeNBT(player.registryAccess()));
-            buf.writeNbt(this.fakeStackHandler.serializeNBT(player.registryAccess()));
-            buf.writeUtf(getPopMode().name());
-            buf.writeUtf(getFuzzyMode().name());
-            buf.writeUtf(this.controlMode.name());
-        });
+        ), buf -> com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu.writeMountedOpeningData(buf, this));
         return true;
     }
 

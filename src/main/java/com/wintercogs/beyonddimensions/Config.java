@@ -111,6 +111,7 @@ public class Config
         public final ModConfigSpec.EnumValue<ButtonState> UI_CRAFT_BUTTON;
         public final ModConfigSpec.EnumValue<ButtonState> UI_CRAFT_RETURN_BUTTON;
         public final ModConfigSpec.IntValue UI_PAGE_NUM;
+        public final ModConfigSpec.IntValue UI_COLUMNS;
         public final ModConfigSpec.ConfigValue<String> UI_SEARCH;
         public final ModConfigSpec.BooleanValue SEARCH_TEXT_WITH_JEI_EMI;
         public final ModConfigSpec.BooleanValue EMI_ALLOW_NETWORK_STORAGE_INFO;
@@ -145,6 +146,9 @@ public class Config
             UI_PAGE_NUM = builder
                     .comment("存储UI当前显示的总页数 (除非你知道你在做什么，否则不要手动修改)")
                     .defineInRange("ui_page_num", 5, 2, 99);
+            UI_COLUMNS = builder
+                    .comment("存储UI首选的列数，界面会按屏幕宽度自动收窄 (除非你知道你在做什么，否则不要手动修改)")
+                    .defineInRange("ui_columns", 9, 9, 99);
             UI_SEARCH = builder
                     .comment("存储UI搜索框内容 (除非你知道你在做什么，否则不要手动修改)")
                     .define("ui_search", "");
@@ -181,6 +185,7 @@ public class Config
             CommonConfigRuntime.uiCraftButton = UI_CRAFT_BUTTON.get();
             CommonConfigRuntime.uiCraftReturnButton = UI_CRAFT_RETURN_BUTTON.get();
             CommonConfigRuntime.uiPageNum = UI_PAGE_NUM.get();
+            CommonConfigRuntime.uiColumns = UI_COLUMNS.get();
             CommonConfigRuntime.uiSearch = UI_SEARCH.get();
             CommonConfigRuntime.searchTextWithJEIEMI = SEARCH_TEXT_WITH_JEI_EMI.get();
             CommonConfigRuntime.emiAllowNetworkStorageInfo = EMI_ALLOW_NETWORK_STORAGE_INFO.get();

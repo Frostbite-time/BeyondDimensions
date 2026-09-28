@@ -6,5 +6,5 @@ public final class ClientConfigRuntime
     {
     }
 
-    public static boolean disableMultiNetworkSwitching = false;
+    public static volatile boolean disableMultiNetworkSwitching = false;
 }

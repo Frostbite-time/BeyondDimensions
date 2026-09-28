@@ -13,12 +13,9 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
-import com.wintercogs.beyonddimensions.network.packet.s2c.OrderedStackTypedSlotPacket;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.function.Function;
 
@@ -26,8 +23,6 @@ import java.util.function.Function;
 // 注意，标记性槽位必须用于有序容器
 public class FlagStackTypedSlot extends AbstractStackTypedSlot
 {
-
-    private KeyAmount lastStack = new KeyAmount(ItemStackKey.EMPTY, 0);
 
     public FlagStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex, int xPosition, int yPosition)
     {
@@ -42,10 +37,12 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     }
 
     // 内部会copy这个stack，因此无需再次操作
-    // Flag实际上会通过insert插入，这样能考虑内部的isStackValid，从而限制标记类型
+    // 直接写入的标记同样要遵守存储对资源类型的限制
     @Override
     public void setStackDirectly(IStackKey<?> key, long amount)
     {
+        if (key == null || (!key.isEmpty() && amount > 0 && !storage.isStackValid(theSlot, key)))
+            return;
         storage.setStackDirectly(theSlot, key, amount);
     }
 
@@ -155,23 +152,4 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
         click(clickStack, button, player);
     }
 
-    @Override
-    public void updateChange()
-    {
-        KeyAmount currentStack = storage.getStackBySlot(this.getSlotIndex());
-        if (lastStack.amount() != currentStack.amount()
-                || !lastStack.key().getTypeId().equals(currentStack.key().getTypeId())
-                || !lastStack.key().isSameTypeSameComponents(currentStack.key()))
-        {
-            lastStack = currentStack;
-            PacketDistributor.sendToPlayer((ServerPlayer) menu.player, new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
-        }
-    }
-
-    @Override
-    public void loadChange(int where, IStackKey<?> newKey, long newAmount)
-    {
-        // 同步读取仍直接操作storage
-        storage.setStackDirectly(where, newKey, newAmount);
-    }
 }

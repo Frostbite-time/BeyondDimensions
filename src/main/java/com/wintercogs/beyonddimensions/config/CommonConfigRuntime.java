@@ -8,19 +8,20 @@ public final class CommonConfigRuntime
     {
     }
 
-    public static ButtonState uiSortButton = ButtonState.SORT_NAME;
-    public static ButtonState uiSecondSortButton = ButtonState.SORT_INSERTED_TIME;
-    public static ButtonState uiReverseButton = ButtonState.DISABLED;
-    public static ButtonState uiSearchButton = ButtonState.DISABLED;
-    public static ButtonState uiCraftButton = ButtonState.DISABLED;
-    public static ButtonState uiCraftReturnButton = ButtonState.DISABLED;
-    public static int uiPageNum = 5;
-    public static String uiSearch = "";
-    public static boolean searchTextWithJEIEMI = false;
-    public static boolean emiAllowNetworkStorageInfo = false;
+    public static volatile ButtonState uiSortButton = ButtonState.SORT_NAME;
+    public static volatile ButtonState uiSecondSortButton = ButtonState.SORT_INSERTED_TIME;
+    public static volatile ButtonState uiReverseButton = ButtonState.DISABLED;
+    public static volatile ButtonState uiSearchButton = ButtonState.DISABLED;
+    public static volatile ButtonState uiCraftButton = ButtonState.DISABLED;
+    public static volatile ButtonState uiCraftReturnButton = ButtonState.DISABLED;
+    public static volatile int uiPageNum = 5;
+    public static volatile int uiColumns = 9;
+    public static volatile String uiSearch = "";
+    public static volatile boolean searchTextWithJEIEMI = false;
+    public static volatile boolean emiAllowNetworkStorageInfo = false;
 
-    public static boolean interfaceCanReceiveResource = true;
-    public static boolean interfaceCanOutputResource = true;
-    public static boolean interfaceCanPopResource = true;
-    public static int interfaceUsableCapacity = 27;
+    public static volatile boolean interfaceCanReceiveResource = true;
+    public static volatile boolean interfaceCanOutputResource = true;
+    public static volatile boolean interfaceCanPopResource = true;
+    public static volatile int interfaceUsableCapacity = 27;
 }

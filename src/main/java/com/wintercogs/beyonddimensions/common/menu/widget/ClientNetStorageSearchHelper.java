@@ -363,4 +363,15 @@ public class ClientNetStorageSearchHelper
         this.tooltipCache.clear();
         this.tagCache.clear();
     }
+
+    // 某个资源被移除后，丢弃它的派生缓存
+    public void forget(IStackKey<?> key)
+    {
+        this.matchCache.remove(key);
+        this.nameCache.remove(key);
+        this.modidCache.remove(key);
+        this.itemIdCache.remove(key);
+        this.tooltipCache.remove(key);
+        this.tagCache.remove(key);
+    }
 }

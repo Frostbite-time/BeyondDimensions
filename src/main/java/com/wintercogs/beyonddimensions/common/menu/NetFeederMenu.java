@@ -11,8 +11,11 @@ import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.FeederMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
+import dev.composemc.forge.sync.MenuAction;
+import dev.composemc.forge.sync.MenuSync;
+import dev.composemc.sync.state.SyncCodecs;
+import dev.composemc.sync.state.SyncSchema;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
@@ -28,11 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+/** 网络喂食器：设置保存在物品组件上，只同步工作状态与喂食模式。 */
 public class NetFeederMenu extends BDBaseMenu
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
     public static final Supplier<MenuType<NetFeederMenu>> Net_Feeder_Menu = MENU_TYPES.register("net_feeder_menu", () -> IMenuTypeExtension.create(NetFeederMenu::new));
-
 
     private static final int slotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + 1;
     private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + 7;
@@ -61,9 +64,48 @@ public class NetFeederMenu extends BDBaseMenu
 
     public final ItemStack menuStack;
 
-    private RedStoneControlMode lastControlMode;
-    private FeederMode lastFeederMode;
+    // 以下字段仅用于客户端镜像，由同步schema的setter写入
+    private RedStoneControlMode clientWorking = RedStoneControlMode.IGNORE;
+    private boolean workingEditable;
+    private FeederMode clientFeeding = FeederMode.NORMAL;
+    private boolean feedingEditable;
 
+    private static final List<RedStoneControlMode> WORKING_OPTIONS = List.of(RedStoneControlMode.IGNORE, RedStoneControlMode.NOT_WORKING);
+
+    private static final SyncSchema<NetFeederMenu> SCHEMA = SyncSchema.<NetFeederMenu>builder("beyonddimensions:feeder", 1)
+            .field("value.working", SyncCodecs.enumeration(RedStoneControlMode.class),
+                    m -> m.player.level().isClientSide() ? m.clientWorking : m.menuStack.getOrDefault(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE),
+                    (m, value) -> m.clientWorking = value)
+            .field("editable.working", SyncCodecs.BOOLEAN,
+                    m -> m.player.level().isClientSide() ? m.workingEditable : editable(m),
+                    (m, value) -> m.workingEditable = value)
+            .field("value.feeding", SyncCodecs.enumeration(FeederMode.class),
+                    m -> m.player.level().isClientSide() ? m.clientFeeding : m.menuStack.getOrDefault(BDDataComponents.FEEDER_MODE, FeederMode.NORMAL),
+                    (m, value) -> m.clientFeeding = value)
+            .field("editable.feeding", SyncCodecs.BOOLEAN,
+                    m -> m.player.level().isClientSide() ? m.feedingEditable : editable(m),
+                    (m, value) -> m.feedingEditable = value)
+            .build();
+
+    private static final MenuAction<NetFeederMenu, RedStoneControlMode> SET_WORKING = MenuAction.of("set.working",
+            SyncCodecs.enumeration(RedStoneControlMode.class), (m, player, value) -> {
+                if (!editable(m) || !WORKING_OPTIONS.contains(value)) return false;
+                var current = m.menuStack.getOrDefault(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
+                if (current != value) { m.menuStack.set(BDDataComponents.CONTROL_MODE, value); m.markItemChanged(); }
+                return true;
+            });
+
+    private static final MenuAction<NetFeederMenu, FeederMode> SET_FEEDING = MenuAction.of("set.feeding",
+            SyncCodecs.enumeration(FeederMode.class), (m, player, value) -> {
+                if (!editable(m)) return false;
+                var current = m.menuStack.getOrDefault(BDDataComponents.FEEDER_MODE, FeederMode.NORMAL);
+                if (current != value) { m.menuStack.set(BDDataComponents.FEEDER_MODE, value); m.markItemChanged(); }
+                return true;
+            });
+
+    private final MenuSync<NetFeederMenu> synchronization;
+
+    @Override public MenuSync<NetFeederMenu> menuSync() { return synchronization; }
 
     public NetFeederMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -73,7 +115,9 @@ public class NetFeederMenu extends BDBaseMenu
     public NetFeederMenu(int containerId, Inventory playerInventory, ItemStack menuStack)
     {
         super(Net_Feeder_Menu.get(), containerId, playerInventory);
-        this.menuStack = menuStack;
+        this.menuStack = java.util.Objects.requireNonNullElse(menuStack, ItemStack.EMPTY);
+        if (!playerInventory.player.level().isClientSide() && this.menuStack.getItem() instanceof com.wintercogs.beyonddimensions.common.item.BaseMachineItem device)
+            device.checkComponents(this.menuStack);
 
         initialized = false;
         // 为服务端注入真实数据，客户端由槽位同步
@@ -87,11 +131,37 @@ public class NetFeederMenu extends BDBaseMenu
         }
         initialized = true;
 
-
         addPlayerInv(playerInventory);
         addFlagSlots();
-
+        synchronization = commands().inventory(BDMenuResources.bind(this, SCHEMA)).action(SET_WORKING).action(SET_FEEDING);
     }
+
+    private static boolean editable(NetFeederMenu menu) { return !menu.player.isSpectator(); }
+
+    private void markItemChanged() { player.getInventory().setChanged(); }
+
+    // 客户端读取接口：本页只暴露自己这两个模式
+
+    public RedStoneControlMode working() { return clientWorking; }
+    public FeederMode feeding() { return clientFeeding; }
+    public boolean workingEditable() { return workingEditable; }
+    public boolean feedingEditable() { return feedingEditable; }
+
+    public boolean ready() { return synchronization.hasSnapshot(); }
+
+    public boolean requestWorking(int ordinal)
+    {
+        return workingEditable && ordinal >= 0 && ordinal < WORKING_OPTIONS.size()
+                && synchronization.request(SET_WORKING, WORKING_OPTIONS.get(ordinal)).queued();
+    }
+
+    public boolean requestFeeding(int ordinal)
+    {
+        FeederMode[] modes = FeederMode.values();
+        return feedingEditable && ordinal >= 0 && ordinal < modes.length && synchronization.request(SET_FEEDING, modes[ordinal]).queued();
+    }
+
+    /** 工作模式只有开/关两个状态，标签也不走通用的模式命名。 */
 
     private void addFlagSlots()
     {
@@ -126,38 +196,6 @@ public class NetFeederMenu extends BDBaseMenu
     @Override
     public boolean stillValid(@NotNull Player player)
     {
-        return menuStack != null && !menuStack.isEmpty();
-    }
-
-    @Override
-    protected boolean shouldSendQuickData()
-    {
-        boolean result = super.shouldSendQuickData()
-                || lastControlMode != menuStack.get(BDDataComponents.CONTROL_MODE)
-                || lastFeederMode != menuStack.get(BDDataComponents.FEEDER_MODE);
-
-        if (result)
-        {
-            lastControlMode = menuStack.get(BDDataComponents.CONTROL_MODE);
-            lastFeederMode = menuStack.get(BDDataComponents.FEEDER_MODE);
-        }
-
-        return result;
-    }
-
-    @Override
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-        super.writeQuickDataTag(tag);
-        tag.putString("control_mode", menuStack.get(BDDataComponents.CONTROL_MODE).name());
-        tag.putString("feeder_mode", menuStack.get(BDDataComponents.FEEDER_MODE).name());
-    }
-
-    @Override
-    public void readQuickDataTag(CompoundTag tag)
-    {
-        super.readQuickDataTag(tag);
-        menuStack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.valueOf(tag.getString("control_mode")));
-        menuStack.set(BDDataComponents.FEEDER_MODE, FeederMode.valueOf(tag.getString("feeder_mode")));
+        return player.level().isClientSide() || com.wintercogs.beyonddimensions.util.InventoryHelper.containsExactStack(player, menuStack);
     }
 }

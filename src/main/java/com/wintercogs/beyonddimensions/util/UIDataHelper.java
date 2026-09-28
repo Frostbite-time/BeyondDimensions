@@ -9,5 +9,6 @@ public class UIDataHelper
 
 
     public static int currentPage = 0;
+    public static int storageColumns = 9;
     public static Vec2 lastMousePos = null;
 }

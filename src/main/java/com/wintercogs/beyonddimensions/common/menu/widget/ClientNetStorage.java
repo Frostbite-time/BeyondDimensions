@@ -5,7 +5,10 @@ import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnordere
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.util.TooltipHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +24,7 @@ import java.util.*;
  * 其可以被理解为一个客户端专用的存储视图，其与真存储区分开的原因是需要在一定时间内提供给客户端一个稳定不变的视图
  * 避免因真存储在服务端与客户端之间的变动导致存储视图频繁闪烁
  */
-public class ClientNetStorage extends AbstractUnorderedStackHandler
+public class ClientNetStorage extends AbstractUnorderedStackHandler implements AutoCloseable
 {
     private static final int CREATIVE_SORT_LAST = Integer.MAX_VALUE;
 
@@ -43,6 +46,73 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
     private boolean creativeRankCacheBuilt = false;
 
     private @Nullable List<Integer> cacheIndexes = null;
+
+    // 提示框缓存的世代与高级提示框开关，任一变化都会使名称、提示框等派生缓存失效
+    private long cacheEpoch = -1;
+    private boolean advancedTooltips;
+
+    // 仅显示某一种资源类型，null 表示全部
+    private @Nullable ResourceLocation typeFilter = null;
+
+    /**
+     * 语言、资源包或高级提示框变化后，丢弃派生缓存并完整重建视图
+     *
+     * @return 缓存是否被重置
+     */
+    public boolean refreshContext()
+    {
+        long epoch = TooltipHelper.epoch();
+        boolean advanced = Minecraft.getInstance().options.advancedItemTooltips;
+        if (epoch == cacheEpoch && advanced == advancedTooltips)
+            return false;
+        cacheEpoch = epoch;
+        advancedTooltips = advanced;
+        searchHelper.clearDerivedCaches();
+        creativeRankCache.clear();
+        creativeRankCacheBuilt = false;
+        mustUpdateAllFromSource = true;
+        cacheIndexes = null;
+        return true;
+    }
+
+    /**
+     * 源存储中的这些资源发生了变化
+     */
+    public void sourceChanged(List<IStackKey<?>> keys)
+    {
+        // 按时间排序时，任何变化都可能改变顺序
+        if (isTimeSort(lastSortProperties.primarySortPolicy()) || isTimeSort(lastSortProperties.secondarySortPolicy()))
+            cacheIndexes = null;
+        for (IStackKey<?> key : keys)
+        {
+            if (!sourceStorage.hasStack(key))
+                searchHelper.forget(key);
+            if (!mustUpdateAllFromSource)
+                pendingCache.add(key);
+        }
+    }
+
+    private static boolean isTimeSort(ButtonState value)
+    {
+        return value == ButtonState.SORT_INSERTED_TIME || value == ButtonState.SORT_MODIFIED_TIME;
+    }
+
+    /**
+     * 设置资源类型过滤，null 表示显示全部类型
+     */
+    public void setTypeFilter(@Nullable ResourceLocation typeId)
+    {
+        if (Objects.equals(typeFilter, typeId))
+            return;
+        typeFilter = typeId;
+        mustUpdateAllFromSource = true;
+        cacheIndexes = null;
+    }
+
+    public @Nullable ResourceLocation getTypeFilter()
+    {
+        return typeFilter;
+    }
 
     // 初始值给一个不可能出现的按钮值防止命中
     private SortProperties lastSortProperties = new SortProperties(ButtonState.DISABLED, ButtonState.DISABLED, false);
@@ -85,13 +155,14 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
 
     public void resolvePendingOrAllUpdate(boolean onlyAmountUpdate)
     {
-        boolean anyChanged = false;
+        refreshContext();
+        boolean amountsChanged = false, membershipChanged = false;
         if (mustUpdateAllFromSource)
         {
             pendingCache.clear();
             updateViewFromStorage(onlyAmountUpdate);
             this.mustUpdateAllFromSource = false;
-            anyChanged = true;
+            membershipChanged = true;
         }
         else
         {
@@ -99,27 +170,36 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
             while (it.hasNext())
             {
                 IStackKey<?> key = it.next();
-                if (key.isEmpty()) continue;
+                if (key.isEmpty())
+                {
+                    it.remove();
+                    continue;
+                }
 
                 long newAmount = sourceStorage.getStackByKey(key).amount();
+                long oldAmount = this.getStackByKey(key).amount();
                 if (this.hasStack(key))
                 {
                     // 视图内已经有这个键，则说明其符合过滤器，直接设置数量
-                    anyChanged = true;
+                    amountsChanged |= oldAmount != newAmount;
                     this.setAmountByKey(key, newAmount);
                 }
                 else if (!onlyAmountUpdate && matchFilter(key))
                 {
                     // 否则，我们要求符合过滤器，且不处于仅数量更新的情况下，才允许向视图内增加新键
-                    anyChanged = true;
+                    amountsChanged |= oldAmount != newAmount;
                     this.setAmountByKey(key, newAmount);
                 }
+                membershipChanged |= (oldAmount > 0) != (this.getStackByKey(key).amount() > 0);
 
                 it.remove();
             }
         }
 
-        if (anyChanged)
+        // 仅数量变化时，只有按数量排序才需要重排
+        boolean quantitySort = lastSortProperties.primarySortPolicy() == ButtonState.SORT_QUANTITY
+                || lastSortProperties.secondarySortPolicy() == ButtonState.SORT_QUANTITY;
+        if (membershipChanged || amountsChanged && quantitySort)
         {
             this.cacheIndexes = null;
         }
@@ -158,13 +238,17 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
      */
     public List<Integer> buildSortedIndex(ButtonState primarySortPolicy, ButtonState secondarySortPolicy, boolean reverse)
     {
+        if (refreshContext())
+            resolvePendingOrAllUpdate(false);
+        primarySortPolicy = isSortPolicy(primarySortPolicy) ? primarySortPolicy : ButtonState.SORT_NAME;
+        if (!isSortPolicy(secondarySortPolicy))
+            secondarySortPolicy = null;
         if (cacheIndexes != null
                 && primarySortPolicy == lastSortProperties.primarySortPolicy()
                 && secondarySortPolicy == lastSortProperties.secondarySortPolicy()
                 && reverse == lastSortProperties.reverse())
             return cacheIndexes;
 
-        if (primarySortPolicy == null) primarySortPolicy = ButtonState.SORT_NAME;
         final boolean useSecondary = (secondarySortPolicy != null && secondarySortPolicy != primarySortPolicy);
 
         final boolean needNameSort = (primarySortPolicy == ButtonState.SORT_NAME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_NAME);
@@ -246,17 +330,25 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
         {
             result.add(row.idx);
         }
-        this.cacheIndexes = result;
+        this.cacheIndexes = Collections.unmodifiableList(result);
         this.lastSortProperties = new SortProperties(primarySortPolicy, secondarySortPolicy, reverse);
-        return result;
+        return this.cacheIndexes;
+    }
+
+    // 只有具体的排序方式才参与排序，其他按钮状态（如关闭、默认）不算
+    private static boolean isSortPolicy(@Nullable ButtonState value)
+    {
+        return value != null && value.name().startsWith("SORT_") && value != ButtonState.SORT_DEFAULT;
     }
 
 
     /**
-     * 搜索过滤逻辑
+     * 类型过滤与搜索过滤
      */
     private boolean matchFilter(IStackKey<?> key)
     {
+        if (typeFilter != null && !typeFilter.equals(key.getTypeId()))
+            return false;
         return this.searchHelper.matches(key);
     }
 
@@ -358,5 +450,31 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
 
     private record SortProperties(ButtonState primarySortPolicy, ButtonState secondarySortPolicy, boolean reverse)
     {
+    }
+    /**
+     * 取消对源存储的订阅并清空视图
+     */
+    @Override
+    public void close()
+    {
+        closeQuietly(anySubscriber);
+        closeQuietly(deltaSubscriber);
+        pendingCache.clear();
+        cacheIndexes = null;
+        searchHelper.clearDerivedCaches();
+        creativeRankCache.clear();
+        clearStorage();
+    }
+
+    private static void closeQuietly(AutoCloseable subscriber)
+    {
+        try
+        {
+            subscriber.close();
+        }
+        catch (Exception ignored)
+        {
+            // 订阅只持有弱引用，关闭失败不影响视图本身
+        }
     }
 }

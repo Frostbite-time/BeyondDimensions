@@ -13,8 +13,8 @@ public final class ServerConfigRuntime
     }
 
 
-    public static long fragmentTransferTime = 3600;
-    public static int crystalGenerateTime = 600;
+    public static volatile long fragmentTransferTime = 3600;
+    public static volatile int crystalGenerateTime = 600;
     private static volatile Set<ResourceLocation> interfaceBlockedInputStackTypes = Set.of();
 
     public static void setInterfaceBlockedInputStackTypes(Collection<? extends String> configuredIds)

@@ -18,11 +18,14 @@ import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.polymorph.PolymorphHelper;
 import com.wintercogs.beyonddimensions.util.InventoryHelper;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -36,6 +39,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
+import net.neoforged.neoforge.network.connection.ConnectionType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 
@@ -113,6 +117,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                 }
             };
         initCraftSlots(playerInventory, craftContainer);
+        commands().crafting(menuSync());
     }
 
 
@@ -244,15 +249,36 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         transferRecipe(inputKeys, amount, false);
     }
 
-    public void transferRecipe(List<IStackKey<?>> inputKeys, List<Long> amount, boolean compressOverflow)
+    public boolean transferRecipe(List<IStackKey<?>> inputKeys, List<Long> amount, boolean compressOverflow)
     {
+        // 请求来自客户端，先完整校验再触碰任何物品
+        if (player.level().isClientSide() || player.containerMenu != this || !player.isAlive() || player.isSpectator() || !stillValid(player))
+            return false;
+        if (inputKeys == null || amount == null || inputKeys.size() != amount.size() || inputKeys.size() > 4096)
+            return false;
+        boolean packed = compressOverflow && inputKeys.size() > craftSlots.getContainerSize();
+        if (!packed && inputKeys.size() > craftSlots.getContainerSize())
+            return false;
+        for (int i = 0; i < inputKeys.size(); i++)
+        {
+            IStackKey<?> key = inputKeys.get(i);
+            Long need = amount.get(i);
+            if (key == null || need == null || need < 0)
+                return false;
+            // 放入合成格的只能是物品；打包进物质压缩球时才允许其他资源
+            if (!packed && need > 0 && !key.isEmpty() && !(key instanceof ItemStackKey))
+                return false;
+        }
+        if (packed && !fitsInMatterBall(inputKeys, amount))
+            return false;
+
         // 清空工艺槽物品
         cleanCraftSlots(firstCraftReturnDir);
 
         if (compressOverflow && inputKeys.size() > craftSlots.getContainerSize())
         {
             transferRecipeToMatterBall(inputKeys, amount);
-            return;
+            return true;
         }
 
         final int limit = Math.min(craftSlots.getContainerSize(), inputKeys.size());
@@ -263,7 +289,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
             if (!(key instanceof ItemStackKey itemStackKey) || needL <= 0) continue;
 
-            int need = (int) Math.min(Integer.MAX_VALUE, needL);
+            int need = (int) Math.min(itemStackKey.getVanillaMaxStackSize(), needL);
 
             // 这里只有实际执行转移时才会调用copy，且槽位数量有限，整体性能可控
             int remaining = extractFromInventory(player.getInventory(), itemStackKey.copyStack(), need);
@@ -271,6 +297,33 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
             int got = need - remaining;
             if (got > 0) craftSlots.setItem(i, itemStackKey.copyStackWithCount(got));
+        }
+        return true;
+    }
+
+    // 物质压缩球需要能随物品同步给客户端，编码超出上限的内容不予打包
+    private boolean fitsInMatterBall(List<IStackKey<?>> inputKeys, List<Long> amount)
+    {
+        List<KeyAmount> contents = new ArrayList<>(inputKeys.size());
+        for (int i = 0; i < inputKeys.size(); i++)
+        {
+            contents.add(new KeyAmount(inputKeys.get(i), amount.get(i)));
+        }
+        ItemStack preview = new ItemStack(BDItems.MATTER_COMPRESS_BALL.get());
+        preview.set(BDDataComponents.ISTACK_SLOTS, contents);
+        ByteBuf bytes = Unpooled.buffer(256, BDMenuResources.MAX_NATIVE_BYTES);
+        try
+        {
+            ItemStack.OPTIONAL_STREAM_CODEC.encode(new RegistryFriendlyByteBuf(bytes, player.registryAccess(), ConnectionType.NEOFORGE), preview);
+            return true;
+        }
+        catch (RuntimeException tooLarge)
+        {
+            return false;
+        }
+        finally
+        {
+            bytes.release();
         }
     }
 
@@ -359,7 +412,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         {
             if (slot instanceof AbstractStackTypedSlot sSlot)
             {
-                if (sSlotNum / 9 < getLines())
+                if (sSlotNum < getColumns() * getLines())
                     sSlot.setActive(true);
                 else
                     sSlot.setActive(false);
@@ -450,34 +503,6 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
             }
             craftSlots.clearContent();
             resultSlots.clearContent();
-        }
-    }
-
-    @Override
-    protected boolean shouldSendQuickData()
-    {
-        return super.shouldSendQuickData();
-    }
-
-    @Override
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-        super.writeQuickDataTag(tag);
-        if (player.level().isClientSide())
-            firstCraftReturnDir = CommonConfigRuntime.uiCraftReturnButton == ButtonState.ENABLED;
-        tag.putBoolean("firstCraftReturnDir", firstCraftReturnDir);
-    }
-
-    @Override
-    public void readQuickDataTag(CompoundTag tag)
-    {
-        super.readQuickDataTag(tag);
-        if (player.level().isClientSide())
-        {
-        }
-        else
-        {
-            firstCraftReturnDir = tag.getBoolean("firstCraftReturnDir");
         }
     }
 

@@ -433,9 +433,8 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
     @Override
     public void quickMove(KeyAmount clickStack, int button, Player player)
     {
-        // 虽然当前的默认值不会导致出现问题，但还是添加执行前检查，防止某一天遗漏
-        if (!(quickMoveSlotStartIndex >= 0 && quickMoveSlotEndIndex >= 0 && quickMoveSlotStartIndex < quickMoveSlotEndIndex))
-            return;
+        var targets = menu.quickMoveRoutes().targets(index);
+        if (targets.isEmpty()) return;
         if (!clickStack.isEmpty())
         {
             // TODO
@@ -445,8 +444,9 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
             KeyAmount trueStack = new KeyAmount(clickStack.key(), clickStack.amount());
 
             // 遍历目标槽位
-            for (int targetSlotIndex = quickMoveSlotStartIndex; targetSlotIndex < quickMoveSlotEndIndex && !trueStack.isEmpty(); targetSlotIndex++)
+            for (int targetSlotIndex : targets)
             {
+                if (trueStack.isEmpty()) break;
                 Slot slot = menu.slots.get(targetSlotIndex);
                 if (slot instanceof AbstractStackTypedSlot aSlot)
                 {
@@ -530,16 +530,4 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
         return new KeyAmount(ItemStackKey.EMPTY, 0);
     }
 
-    // 无序槽位由槽位组负责处理同步
-    @Override
-    public void updateChange()
-    {
-
-    }
-
-    @Override
-    public void loadChange(int where, IStackKey<?> newStack, long newAmount)
-    {
-
-    }
 }

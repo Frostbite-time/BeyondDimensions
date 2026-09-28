@@ -15,26 +15,23 @@ import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDTags;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
-import com.wintercogs.beyonddimensions.network.packet.s2c.OrderedStackTypedSlotPacket;
+import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 public class OrderedStackTypedSlot extends AbstractStackTypedSlot
 {
-    private KeyAmount lastStack = new KeyAmount(EmptyStackKey.INSTANCE, 0);
-    private boolean init = false;
 
     public OrderedStackTypedSlot(BDBaseMenu menu, IStackHandler stackTypedHandler, int slotIndex, int xPosition, int yPosition)
     {
@@ -386,6 +383,10 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
         // 虽然当前的默认值不会导致出现问题，但还是添加执行前检查，防止某一天遗漏
         if (!(quickMoveSlotStartIndex >= 0 && quickMoveSlotEndIndex >= 0 && quickMoveSlotStartIndex < quickMoveSlotEndIndex))
             return;
+        // 网络接口按菜单声明的路线转移，其他菜单沿用原有的目标区间
+        List<Integer> targets = menu instanceof NetInterfaceBaseMenu
+                ? menu.quickMoveRoutes().targets(index)
+                : IntStream.range(quickMoveSlotStartIndex, quickMoveSlotEndIndex).boxed().toList();
         if (!clickStack.isEmpty())
         {
             // TODO
@@ -395,8 +396,9 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
             KeyAmount trueStack = new KeyAmount(storage.getStackBySlot(theSlot).key(), clickStack.amount());
 
             // 遍历目标槽位
-            for (int targetSlotIndex = quickMoveSlotStartIndex; targetSlotIndex < quickMoveSlotEndIndex && !trueStack.isEmpty(); targetSlotIndex++)
+            for (int targetSlotIndex : targets)
             {
+                if (trueStack.isEmpty()) break;
                 Slot slot = menu.slots.get(targetSlotIndex);
                 if (slot instanceof AbstractStackTypedSlot aSlot)
                 {
@@ -485,27 +487,4 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
         return new KeyAmount(EmptyStackKey.INSTANCE, amount);
     }
 
-    @Override
-    public void updateChange()
-    {
-        KeyAmount currentStack = storage.getStackBySlot(this.getSlotIndex());
-        if (!init)
-        {
-            init = true;
-
-            lastStack = currentStack;
-            PacketDistributor.sendToPlayer((ServerPlayer) menu.player, new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
-        }
-        else if (!Objects.equals(currentStack, lastStack))
-        {
-            lastStack = currentStack;
-            PacketDistributor.sendToPlayer((ServerPlayer) menu.player, new OrderedStackTypedSlotPacket(index, theSlot, lastStack.key(), lastStack.amount()));
-        }
-    }
-
-    @Override
-    public void loadChange(int where, IStackKey<?> newStack, long newAmount)
-    {
-        storage.setStackDirectly(where, newStack, newAmount);
-    }
 }

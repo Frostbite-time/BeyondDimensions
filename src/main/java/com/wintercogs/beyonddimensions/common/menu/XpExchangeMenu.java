@@ -4,8 +4,11 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeSettings;
+import dev.composemc.forge.sync.MenuAction;
+import dev.composemc.forge.sync.MenuSync;
+import dev.composemc.sync.state.SyncCodecs;
+import dev.composemc.sync.state.SyncSchema;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
+/** 经验交换：只有一个开关和一个目标等级，两个设置各自校验。 */
 public class XpExchangeMenu extends BDBaseMenu
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
@@ -28,8 +32,52 @@ public class XpExchangeMenu extends BDBaseMenu
 
     public final ItemStack menuStack;
 
-    private boolean lastKeepMode;
-    private int lastTargetLevel;
+    // 以下字段仅用于客户端镜像，由同步schema的setter写入
+    private boolean clientKeep;
+    private boolean keepEditable;
+    private int clientTarget;
+    private boolean targetEditable;
+
+    private static final SyncSchema<XpExchangeMenu> SCHEMA = SyncSchema.<XpExchangeMenu>builder("beyonddimensions:xp_exchange", 1)
+            .field("value.keep", SyncCodecs.BOOLEAN,
+                    m -> m.player.level().isClientSide() ? m.clientKeep : m.menuStack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false),
+                    (m, value) -> m.clientKeep = value)
+            .field("editable.keep", SyncCodecs.BOOLEAN,
+                    m -> m.player.level().isClientSide() ? m.keepEditable : editable(m),
+                    (m, value) -> m.keepEditable = value)
+            .field("value.target", SyncCodecs.INT,
+                    m -> m.player.level().isClientSide() ? m.clientTarget : XpExchangeSettings.getTargetLevel(m.menuStack),
+                    (m, value) -> m.clientTarget = value)
+            .field("editable.target", SyncCodecs.BOOLEAN,
+                    m -> m.player.level().isClientSide() ? m.targetEditable : editable(m),
+                    (m, value) -> m.targetEditable = value)
+            .build();
+
+    private static final MenuAction<XpExchangeMenu, Boolean> SET_KEEP = MenuAction.of("set.keep",
+            SyncCodecs.BOOLEAN, (m, player, value) -> {
+                if (!editable(m)) return false;
+                if (m.menuStack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false) != value)
+                {
+                    m.menuStack.set(BDDataComponents.XP_NET_KEEP_MODE, value);
+                    m.markItemChanged();
+                }
+                return true;
+            });
+
+    private static final MenuAction<XpExchangeMenu, Integer> SET_TARGET = MenuAction.of("set.target",
+            SyncCodecs.INT, (m, player, value) -> {
+                if (!editable(m) || value < 0 || value > XpExchangeSettings.MAX_TARGET_LEVEL) return false;
+                if (XpExchangeSettings.getTargetLevel(m.menuStack) != value)
+                {
+                    XpExchangeSettings.setTargetLevel(m.menuStack, value);
+                    m.markItemChanged();
+                }
+                return true;
+            });
+
+    private final MenuSync<XpExchangeMenu> synchronization;
+
+    @Override public MenuSync<XpExchangeMenu> menuSync() { return synchronization; }
 
     public XpExchangeMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -40,8 +88,33 @@ public class XpExchangeMenu extends BDBaseMenu
     {
         super(XP_EXCHANGE_MENU.get(), containerId, playerInventory);
         this.menuStack = menuStack;
-        XpExchangeSettings.ensureComponents(this.menuStack);
+        if (!player.level().isClientSide()) XpExchangeSettings.ensureComponents(this.menuStack);
         addPlayerInv(playerInventory);
+        synchronization = MenuSync.bind(this, SCHEMA).action(SET_KEEP).action(SET_TARGET);
+    }
+
+    private static boolean editable(XpExchangeMenu menu) { return !menu.player.isSpectator(); }
+
+    private void markItemChanged() { player.getInventory().setChanged(); }
+
+    // 客户端读取接口：本页只暴露自己的开关与目标等级
+
+    public boolean keep() { return clientKeep; }
+    public boolean keepEditable() { return keepEditable; }
+    public int target() { return clientTarget; }
+    public boolean targetEditable() { return targetEditable; }
+
+    public boolean ready() { return synchronization.hasSnapshot(); }
+
+    public boolean requestKeep(boolean value)
+    {
+        return keepEditable && synchronization.request(SET_KEEP, value).queued();
+    }
+
+    public boolean requestTarget(int value)
+    {
+        return targetEditable && value >= 0 && value <= XpExchangeSettings.MAX_TARGET_LEVEL
+                && synchronization.request(SET_TARGET, value).queued();
     }
 
     private void addPlayerInv(Inventory playerInventory)
@@ -64,46 +137,6 @@ public class XpExchangeMenu extends BDBaseMenu
     @Override
     public boolean stillValid(@NotNull Player player)
     {
-        return menuStack != null && !menuStack.isEmpty();
-    }
-
-    @Override
-    protected boolean shouldSendQuickData()
-    {
-        XpExchangeSettings.ensureComponents(menuStack);
-        boolean currentKeepMode = menuStack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false);
-        int currentTargetLevel = XpExchangeSettings.getTargetLevel(menuStack);
-        boolean result = super.shouldSendQuickData()
-                || lastKeepMode != currentKeepMode
-                || lastTargetLevel != currentTargetLevel;
-
-        if (result)
-        {
-            lastKeepMode = currentKeepMode;
-            lastTargetLevel = currentTargetLevel;
-        }
-
-        return result;
-    }
-
-    @Override
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-        super.writeQuickDataTag(tag);
-        tag.putBoolean("xp_keep_mode", menuStack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false));
-        tag.putInt("xp_target_level", XpExchangeSettings.getTargetLevel(menuStack));
-    }
-
-    @Override
-    public void readQuickDataTag(CompoundTag tag)
-    {
-        super.readQuickDataTag(tag);
-        XpExchangeSettings.ensureComponents(menuStack);
-
-        if (tag.contains("xp_keep_mode"))
-            menuStack.set(BDDataComponents.XP_NET_KEEP_MODE, tag.getBoolean("xp_keep_mode"));
-
-        if (tag.contains("xp_target_level"))
-            XpExchangeSettings.setTargetLevel(menuStack, tag.getInt("xp_target_level"));
+        return player.level().isClientSide() || com.wintercogs.beyonddimensions.util.InventoryHelper.containsExactStack(player, menuStack);
     }
 }

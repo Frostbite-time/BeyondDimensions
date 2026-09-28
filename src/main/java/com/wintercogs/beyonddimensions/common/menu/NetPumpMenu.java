@@ -8,8 +8,11 @@ import com.wintercogs.beyonddimensions.common.block.entity.NetPumpBlockEntity;
 import com.wintercogs.beyonddimensions.common.machine.FilterMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
+import dev.composemc.forge.sync.MenuAction;
+import dev.composemc.forge.sync.MenuSync;
+import dev.composemc.sync.state.SyncCodecs;
+import dev.composemc.sync.state.SyncSchema;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -22,11 +25,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
+/** 维度网络泵：只同步本页自己的过滤器与红石模式。 */
 public class NetPumpMenu extends BDBaseMenu
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
     public static final Supplier<MenuType<NetPumpMenu>> Net_Pump_Menu = MENU_TYPES.register("net_pump_menu", () -> IMenuTypeExtension.create(NetPumpMenu::new));
-
 
     private static final int slotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + 1;
     private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + 7;
@@ -34,6 +37,45 @@ public class NetPumpMenu extends BDBaseMenu
     private final IStackHandler storage;
 
     public final NetPumpBlockEntity be;
+
+    // 以下字段仅用于客户端镜像，由同步schema的setter写入
+    private FilterMode clientFilter = FilterMode.IGNORE;
+    private RedStoneControlMode clientRedstone = RedStoneControlMode.IGNORE;
+    private boolean filterEditable;
+    private boolean redstoneEditable;
+
+    private static final SyncSchema<NetPumpMenu> SCHEMA = SyncSchema.<NetPumpMenu>builder("beyonddimensions:pump", 1)
+            .field("value.filter", SyncCodecs.enumeration(FilterMode.class),
+                    m -> m.player.level().isClientSide() ? m.clientFilter : m.be.filterMode,
+                    (m, value) -> m.clientFilter = value)
+            .field("editable.filter", SyncCodecs.BOOLEAN,
+                    m -> m.player.level().isClientSide() ? m.filterEditable : editable(m),
+                    (m, value) -> m.filterEditable = value)
+            .field("value.redstone", SyncCodecs.enumeration(RedStoneControlMode.class),
+                    m -> m.player.level().isClientSide() ? m.clientRedstone : m.be.controlMode,
+                    (m, value) -> m.clientRedstone = value)
+            .field("editable.redstone", SyncCodecs.BOOLEAN,
+                    m -> m.player.level().isClientSide() ? m.redstoneEditable : editable(m),
+                    (m, value) -> m.redstoneEditable = value)
+            .build();
+
+    private static final MenuAction<NetPumpMenu, FilterMode> SET_FILTER = MenuAction.of("set.filter",
+            SyncCodecs.enumeration(FilterMode.class), (m, player, value) -> {
+                if (!editable(m) || m.be == null) return false;
+                if (m.be.filterMode != value) { m.be.filterMode = value; m.markBoardChanged(); }
+                return true;
+            });
+
+    private static final MenuAction<NetPumpMenu, RedStoneControlMode> SET_REDSTONE = MenuAction.of("set.redstone",
+            SyncCodecs.enumeration(RedStoneControlMode.class), (m, player, value) -> {
+                if (!editable(m) || m.be == null) return false;
+                if (m.be.controlMode != value) { m.be.controlMode = value; m.markBoardChanged(); }
+                return true;
+            });
+
+    private final MenuSync<NetPumpMenu> synchronization;
+
+    @Override public MenuSync<NetPumpMenu> menuSync() { return synchronization; }
 
     public NetPumpMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -57,7 +99,35 @@ public class NetPumpMenu extends BDBaseMenu
 
         addPlayerInv(playerInventory);
         addFlagSlots();
+        synchronization = commands().inventory(BDMenuResources.bind(this, SCHEMA)).action(SET_FILTER).action(SET_REDSTONE);
+    }
 
+    private static boolean editable(NetPumpMenu menu) { return !menu.player.isSpectator(); }
+
+    private void markBoardChanged()
+    {
+        be.setChanged();
+        player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
+    }
+
+    // 客户端读取接口：本页只暴露自己这两个模式
+
+    public FilterMode filter() { return clientFilter; }
+    public RedStoneControlMode redstone() { return clientRedstone; }
+    public boolean filterEditable() { return filterEditable; }
+    public boolean redstoneEditable() { return redstoneEditable; }
+    public boolean ready() { return synchronization.hasSnapshot(); }
+
+    public boolean requestFilter(int ordinal)
+    {
+        FilterMode[] modes = FilterMode.values();
+        return filterEditable && ordinal >= 0 && ordinal < modes.length && synchronization.request(SET_FILTER, modes[ordinal]).queued();
+    }
+
+    public boolean requestRedstone(int ordinal)
+    {
+        RedStoneControlMode[] modes = RedStoneControlMode.values();
+        return redstoneEditable && ordinal >= 0 && ordinal < modes.length && synchronization.request(SET_REDSTONE, modes[ordinal]).queued();
     }
 
     private void addFlagSlots()
@@ -94,33 +164,5 @@ public class NetPumpMenu extends BDBaseMenu
     public boolean stillValid(@NotNull Player player)
     {
         return be != null && !be.isRemoved();
-    }
-
-    @Override
-    protected boolean shouldSendQuickData()
-    {
-        return false;
-    }
-
-    @Override
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-        super.writeQuickDataTag(tag);
-        tag.putString("filter_type", be.filterMode.name());
-        tag.putString("control_mode", be.controlMode.name());
-    }
-
-    @Override
-    public void readQuickDataTag(CompoundTag tag)
-    {
-        super.readQuickDataTag(tag);
-        be.filterMode = FilterMode.valueOf(tag.getString("filter_type"));
-        be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
-        if (!player.level().isClientSide())
-        {
-            // 服务端接收到更新信息后立刻通知保存
-            player.level().blockEntityChanged(be.getBlockPos());
-            player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
-        }
     }
 }

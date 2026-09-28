@@ -13,6 +13,17 @@ import top.theillusivec4.curios.api.SlotResult;
 
 public class InventoryHelper
 {
+    /** Identity matters: another copy of the same device cannot keep an old menu authorized. */
+    public static boolean containsExactStack(Player player, ItemStack stack)
+    {
+        if (stack == null || stack.isEmpty()) return false;
+        Inventory inventory = player.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++)
+            if (inventory.getItem(i) == stack) return true;
+        return ModPresence.isLoaded(OtherModIds.CURIOS) && CuriosApi.getCuriosInventory(player)
+                .flatMap(handler -> handler.findFirstCurio(candidate -> candidate == stack)).isPresent();
+    }
+
     /**
      * 尝试将传入的物品堆叠插入玩家背包，会修改传入的堆叠。
      * <p>返回的堆叠与传入堆叠为同一引用。
