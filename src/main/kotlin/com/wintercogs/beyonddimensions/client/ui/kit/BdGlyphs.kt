@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.kit
 
-import dev.composemc.ui.ore.display.OrePixelArt
+import dev.compixel.ui.ore.display.OrePixelArt
 
 /** BD 自己的单色图标，与 Ore 图标同样使用 16×16 网格和两格粗的笔画 */
 object BdGlyphs {

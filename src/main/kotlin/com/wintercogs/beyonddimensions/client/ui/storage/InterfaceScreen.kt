@@ -23,7 +23,7 @@ import com.wintercogs.beyonddimensions.common.machine.FuzzyMode
 import com.wintercogs.beyonddimensions.common.machine.PopMode
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu
-import dev.composemc.forge.slots.ComposeMenuSlots
+import dev.compixel.forge.slots.ComposeMenuSlots
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 

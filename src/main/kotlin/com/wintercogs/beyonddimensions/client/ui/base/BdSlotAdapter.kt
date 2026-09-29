@@ -6,10 +6,10 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
 import com.wintercogs.beyonddimensions.client.ui.kit.formatCompact
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
-import dev.composemc.forge.item.ItemIcon
-import dev.composemc.forge.slots.MenuSlotVisual
-import dev.composemc.forge.slots.VanillaMenuSlotAdapter
-import dev.composemc.host.UiBinding
+import dev.compixel.forge.item.ItemIcon
+import dev.compixel.forge.slots.MenuSlotVisual
+import dev.compixel.forge.slots.VanillaMenuSlotAdapter
+import dev.compixel.host.UiBinding
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.world.inventory.ClickType

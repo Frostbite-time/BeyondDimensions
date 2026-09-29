@@ -4,11 +4,11 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetOption;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import dev.composemc.sync.state.SyncCodec;
-import dev.composemc.sync.state.SyncCodecs;
-import dev.composemc.sync.state.SyncSchema;
-import dev.composemc.forge.sync.MenuSync;
-import dev.composemc.forge.sync.SyncedMenu;
+import dev.compixel.sync.state.SyncCodec;
+import dev.compixel.sync.state.SyncCodecs;
+import dev.compixel.sync.state.SyncSchema;
+import dev.compixel.forge.sync.MenuSync;
+import dev.compixel.forge.sync.SyncedMenu;
 import net.minecraft.core.registries.Registries;
 
 

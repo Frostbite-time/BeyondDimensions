@@ -58,13 +58,13 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
-import dev.composemc.forge.item.ItemIcon
-import dev.composemc.forge.item.MinecraftItemIcon
-import dev.composemc.ui.ore.display.OreGlyph
-import dev.composemc.ui.ore.display.OreIcon
-import dev.composemc.ui.ore.display.OrePixelArt
-import dev.composemc.ui.ore.display.OreText
-import dev.composemc.ui.ore.overlay.OreTooltip
+import dev.compixel.forge.item.ItemIcon
+import dev.compixel.forge.item.MinecraftItemIcon
+import dev.compixel.ui.ore.display.OreGlyph
+import dev.compixel.ui.ore.display.OreIcon
+import dev.compixel.ui.ore.display.OrePixelArt
+import dev.compixel.ui.ore.display.OreText
+import dev.compixel.ui.ore.overlay.OreTooltip
 import kotlin.math.roundToInt
 
 /** 窗口：切角的冰白面板，细线边框与柔和阴影；高度随内容 */

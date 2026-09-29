@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.kit.BdAmountPill
 import com.wintercogs.beyonddimensions.client.ui.kit.brackets
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
-import dev.composemc.forge.slots.ComposeMenuSlots
-import dev.composemc.host.UiBinding
+import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.UiBinding
 
 /** 虚拟资源槽的数量文字，由 [BdSlotAdapter] 发布 */
 val LocalSlotAmounts = staticCompositionLocalOf<UiBinding<Map<Int, String>, Unit>?> { null }

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.jei.handler;
 
 import com.wintercogs.beyonddimensions.client.ui.InventoryScreenAccess;
-import dev.composemc.forge.ComposeInventoryScreen;
+import dev.compixel.forge.ComposeInventoryScreen;
 import mezz.jei.api.gui.handlers.IGuiProperties;
 import mezz.jei.api.gui.handlers.IScreenHandler;
 import net.minecraft.client.gui.screens.Screen;

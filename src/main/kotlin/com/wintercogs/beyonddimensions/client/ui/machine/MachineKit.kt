@@ -45,11 +45,11 @@ import com.wintercogs.beyonddimensions.client.ui.kit.BdWindow
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
-import dev.composemc.forge.item.ItemIcon
-import dev.composemc.forge.slots.ComposeMenuSlots
-import dev.composemc.host.UiBinding
-import dev.composemc.ui.ore.display.OreGlyph
-import dev.composemc.ui.ore.display.OreText
+import dev.compixel.forge.item.ItemIcon
+import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.UiBinding
+import dev.compixel.ui.ore.display.OreGlyph
+import dev.compixel.ui.ore.display.OreText
 import net.minecraft.network.chat.Component
 import net.minecraft.world.level.ItemLike
 import net.minecraft.world.item.ItemStack

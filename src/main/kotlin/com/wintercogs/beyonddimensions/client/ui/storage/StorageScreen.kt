@@ -66,13 +66,13 @@ import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
-import dev.composemc.forge.item.ItemIcon
-import dev.composemc.forge.slots.ComposeMenuSlots
-import dev.composemc.host.UiBinding
-import dev.composemc.ui.ore.display.OreGlyph
-import dev.composemc.ui.ore.display.OreIcon
-import dev.composemc.ui.ore.display.OreText
-import dev.composemc.ui.ore.overlay.OreTooltip
+import dev.compixel.forge.item.ItemIcon
+import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.UiBinding
+import dev.compixel.ui.ore.display.OreGlyph
+import dev.compixel.ui.ore.display.OreIcon
+import dev.compixel.ui.ore.display.OreText
+import dev.compixel.ui.ore.overlay.OreTooltip
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -307,7 +307,7 @@ private fun Rail(state: StorageState, send: (StorageAction) -> Unit, layout: Sto
 }
 
 @Composable
-private fun RailTab(label: String, selected: Boolean, art: dev.composemc.ui.ore.display.OrePixelArt = BdGlyphs.Storage, onClick: () -> Unit) {
+private fun RailTab(label: String, selected: Boolean, art: dev.compixel.ui.ore.display.OrePixelArt = BdGlyphs.Storage, onClick: () -> Unit) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()

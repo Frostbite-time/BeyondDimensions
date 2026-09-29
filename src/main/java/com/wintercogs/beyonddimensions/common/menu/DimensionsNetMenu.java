@@ -13,10 +13,10 @@ import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGro
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.util.TooltipHelper;
-import dev.composemc.forge.sync.MenuSync;
-import dev.composemc.slots.SlotTransferRoutes;
-import dev.composemc.sync.state.SyncCodecs;
-import dev.composemc.sync.state.SyncSchema;
+import dev.compixel.forge.sync.MenuSync;
+import dev.compixel.slots.SlotTransferRoutes;
+import dev.compixel.sync.state.SyncCodecs;
+import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;

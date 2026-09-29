@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
 import com.google.common.base.Suppliers;
-import dev.composemc.slots.SlotTransferRoutes;
+import dev.compixel.slots.SlotTransferRoutes;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 // 定义一些用于 超越维度 模组的ui界面的基本方法。
 // 主要是重写网络同步和点击事件，确保父类机制不处理StoredStackSlot的相关内容
 @IPNIgnore
-public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.composemc.forge.sync.SyncedMenu
+public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.compixel.forge.sync.SyncedMenu
 {
 
     public final Player player;
@@ -36,7 +36,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
         if (resources == null) resources = new BDMenuResources(this);
         return resources;
     }
-    @Override public abstract dev.composemc.forge.sync.MenuSync<? extends BDBaseMenu> menuSync();
+    @Override public abstract dev.compixel.forge.sync.MenuSync<? extends BDBaseMenu> menuSync();
     // 用于快速移动时标记玩家背包的槽位索引 如 索引从0开始 背包为54~89
     public int inventoryStartIndex = -1; //索引开始位置 为54
     public int inventoryEndIndex = -1;   //索引结束位置+1 为90

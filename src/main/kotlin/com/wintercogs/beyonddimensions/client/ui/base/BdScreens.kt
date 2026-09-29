@@ -6,11 +6,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
-import dev.composemc.forge.ComposeInventoryScreen
-import dev.composemc.forge.ComposeMenuScreen
-import dev.composemc.forge.item.NativeItemOptions
-import dev.composemc.forge.slots.ComposeMenuSlots
-import dev.composemc.host.UiBinding
+import dev.compixel.forge.ComposeInventoryScreen
+import dev.compixel.forge.ComposeMenuScreen
+import dev.compixel.forge.item.NativeItemOptions
+import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.UiBinding
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.network.chat.Component

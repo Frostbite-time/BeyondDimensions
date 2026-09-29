@@ -9,14 +9,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.composemc.ui.ore.theme.OreColors
-import dev.composemc.ui.ore.theme.OreTheme
-import dev.composemc.ui.ore.theme.OreThemeId
+import dev.compixel.ui.ore.theme.OreColors
+import dev.compixel.ui.ore.theme.OreTheme
+import dev.compixel.ui.ore.theme.OreThemeId
 
 /**
  * 超越维度的界面风格：冰白色的面板、冷色细线、一种天蓝强调色，以及由青到紫的标志渐变。
  *
- * 面板、线条与文字取自 Ore 主题（assets/beyonddimensions/composemc/ore_themes/default.json），
+ * 面板、线条与文字取自 Ore 主题（assets/beyonddimensions/compixel/ore_themes/default.json），
  * 资源包可以覆盖；标志渐变与状态色属于模组自身的识别色，不随主题变化。
  */
 object Bd {

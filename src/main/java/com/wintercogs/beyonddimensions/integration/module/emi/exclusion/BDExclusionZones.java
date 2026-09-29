@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.emi.exclusion;
 
 import com.wintercogs.beyonddimensions.client.ui.InventoryScreenAccess;
-import dev.composemc.forge.ComposeInventoryScreen;
+import dev.compixel.forge.ComposeInventoryScreen;
 import dev.emi.emi.api.EmiExclusionArea;
 import dev.emi.emi.api.widget.Bounds;
 import net.minecraft.client.gui.screens.Screen;

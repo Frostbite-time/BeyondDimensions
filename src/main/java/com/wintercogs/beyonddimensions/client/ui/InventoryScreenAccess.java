@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.client.ui;
 
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
-import dev.composemc.forge.ComposeInventoryScreen;
-import dev.composemc.forge.slots.MenuSlotBounds;
+import dev.compixel.forge.ComposeInventoryScreen;
+import dev.compixel.forge.slots.MenuSlotBounds;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.Rect2i;

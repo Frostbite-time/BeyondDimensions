@@ -43,9 +43,9 @@ import com.wintercogs.beyonddimensions.common.menu.NetMagnetMenu
 import com.wintercogs.beyonddimensions.common.menu.NetPumpMenu
 import com.wintercogs.beyonddimensions.common.menu.NetRestockerMenu
 import com.wintercogs.beyonddimensions.common.menu.XpExchangeMenu
-import dev.composemc.ui.ore.display.OreGlyph
-import dev.composemc.ui.ore.display.OreIcon
-import dev.composemc.ui.ore.display.OreText
+import dev.compixel.ui.ore.display.OreGlyph
+import dev.compixel.ui.ore.display.OreIcon
+import dev.compixel.ui.ore.display.OreText
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 
@@ -444,7 +444,7 @@ class FurnaceGroups(menu: NetFurnaceMenu) {
 private fun <M : com.wintercogs.beyonddimensions.common.menu.BDBaseMenu> FurnaceContent(
     readout: FurnaceReadout?,
     groups: FurnaceGroups,
-    slots: dev.composemc.forge.slots.ComposeMenuSlots<M>,
+    slots: dev.compixel.forge.slots.ComposeMenuSlots<M>,
 ) {
     val colors = Bd.colors
     BdSectionLabel(groups.filters)
@@ -481,7 +481,7 @@ private fun <M : com.wintercogs.beyonddimensions.common.menu.BDBaseMenu> Furnace
 private fun <M : com.wintercogs.beyonddimensions.common.menu.BDBaseMenu> FilterRow(
     label: String,
     ids: List<Int>,
-    slots: dev.composemc.forge.slots.ComposeMenuSlots<M>,
+    slots: dev.compixel.forge.slots.ComposeMenuSlots<M>,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         OreText(label, Modifier.width(18.dp), color = Bd.colors.muted, style = Bd.caption, maxLines = 1)
@@ -501,7 +501,7 @@ private fun LaneBar(fraction: Float, color: Color) {
  * 按背包的排布显示，一眼就能看出每个模板对应哪一格。
  */
 @Composable
-private fun RestockerTemplates(layout: MachineLayout, slots: dev.composemc.forge.slots.ComposeMenuSlots<NetRestockerMenu>) {
+private fun RestockerTemplates(layout: MachineLayout, slots: dev.compixel.forge.slots.ComposeMenuSlots<NetRestockerMenu>) {
     val flags = layout.flagSlots
     BdSectionLabel(tr("ui.beyonddimensions.restocker.templates"))
     Spacer(Modifier.height(4.dp))

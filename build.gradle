@@ -21,10 +21,16 @@ group = mod_group_id
 
 repositories {
     mavenCentral()
-    maven {
-        name = 'ComposeMC'
-        url = 'https://maven.wintercogs.com/releases'
-        content { includeGroup 'dev.composemc' }
+    // CompixelUI is published only here; other repositories are never asked for it, so their outages cannot fail
+    // the build.
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'CompixelUI'
+                url = 'https://maven.wintercogs.com/releases'
+            }
+        }
+        filter { includeGroup 'dev.compixel' }
     }
     maven {
         url = "https://maven.blamejared.com"
@@ -164,10 +170,10 @@ configurations {
 dependencies {
 
     // 引入对拼音库的依赖 并将其打包到模组
-    // Compose MC is installed as its own mod. Compile against the coordinate that includes Kotlin; development runs
+    // CompixelUI is installed as its own mod. Compile against the coordinate that includes Kotlin; development runs
     // the standard library mod with Kotlin for Forge, as players do when they install KFF.
-    compileOnly "dev.composemc:composemc-neoforge-1.21.1-with-kotlin:${composemc_version}"
-    localRuntime "dev.composemc:composemc-neoforge-1.21.1:${composemc_version}"
+    compileOnly "dev.compixel:compixel-neoforge-1.21.1-with-kotlin:${compixel_version}"
+    localRuntime "dev.compixel:compixel-neoforge-1.21.1:${compixel_version}"
     localRuntime "maven.modrinth:kotlin-for-forge:${kff_version}"
 
     jarJar(implementation group: 'com.github.promeg', name: 'tinypinyin', version: '2.0.3'){
@@ -280,7 +286,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_version            : mod_version,
             mod_authors            : mod_authors,
             mod_description        : mod_description,
-            composemc_version      : composemc_version,
+            compixel_version      : compixel_version,
             kff_version            : kff_version
     ]
     inputs.properties replaceProperties
