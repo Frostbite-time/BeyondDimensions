@@ -1,0 +1,12 @@
+{
+  "format": 1,
+  "colors": {
+    "panel": "#000000",
+    "raised": "#000000",
+    "text": "#E0E0E0",
+    "mutedText": "#7E7E7E",
+    "edge": "#A0A0A0",
+    "highlight": "#A0A0A0",
+    "focus": "#FFFFFF"
+  }
+}

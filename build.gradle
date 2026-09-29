@@ -2,6 +2,8 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.116'
+    id 'org.jetbrains.kotlin.jvm' version '2.4.10'
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.4.10'
     id 'idea'
 }
 
@@ -19,6 +21,17 @@ group = mod_group_id
 
 repositories {
     mavenCentral()
+    // CompixelUI is published only here; other repositories are never asked for it, so their outages cannot fail
+    // the build.
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'CompixelUI'
+                url = 'https://maven.wintercogs.com/releases'
+            }
+        }
+        filter { includeGroup 'dev.compixel' }
+    }
     maven {
         url = "https://maven.blamejared.com"
     }
@@ -68,6 +81,7 @@ base {
 
 // Mojang ships Java 21 to end users in 1.21.1, so mods should target Java 21.
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+kotlin.jvmToolchain(21)
 
 neoForge {
     // Specify the version of NeoForge to use.
@@ -156,6 +170,12 @@ configurations {
 dependencies {
 
     // 引入对拼音库的依赖 并将其打包到模组
+    // CompixelUI is installed as its own mod. Compile against the coordinate that includes Kotlin; development runs
+    // the standard library mod with Kotlin for Forge, as players do when they install KFF.
+    compileOnly "dev.compixel:compixel-neoforge-1.21.1-with-kotlin:${compixel_version}"
+    localRuntime "dev.compixel:compixel-neoforge-1.21.1:${compixel_version}"
+    localRuntime "maven.modrinth:kotlin-for-forge:${kff_version}"
+
     jarJar(implementation group: 'com.github.promeg', name: 'tinypinyin', version: '2.0.3'){
         version {
             strictly '[2.0.3,)'
@@ -265,7 +285,9 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_license            : mod_license,
             mod_version            : mod_version,
             mod_authors            : mod_authors,
-            mod_description        : mod_description
+            mod_description        : mod_description,
+            compixel_version      : compixel_version,
+            kff_version            : kff_version
     ]
     inputs.properties replaceProperties
     expand replaceProperties

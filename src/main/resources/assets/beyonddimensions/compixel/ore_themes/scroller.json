@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "colors": {
+    "secondary": "#C6C6C6",
+    "secondaryHover": "#D6D6D6",
+    "secondaryButtonLightEdge": "#FFFFFF",
+    "secondaryButtonCorner": "#FFFFFF",
+    "secondaryEdge": "#555555",
+    "buttonBorder": "#000000",
+    "edge": "#373737",
+    "trackEmptyLight": "#8B8B8B"
+  }
+}

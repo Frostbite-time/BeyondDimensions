@@ -87,6 +87,21 @@ config="${mod_id}.mixins.json"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
+    modId="compixel"
+    type="required"
+    versionRange="[${compixel_version},0.2)"
+    ordering="AFTER"
+    side="BOTH"
+
+# Kotlin comes from Kotlin for Forge or from CompixelUI's with-kotlin file.
+[[dependencies.${mod_id}]]
+    modId="kotlinforforge"
+    type="optional"
+    versionRange="[${kff_version},6)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
     modId="create"
     type="optional"
     versionRange="[6.0.0,)"

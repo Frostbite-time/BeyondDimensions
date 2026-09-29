@@ -1,0 +1,14 @@
+{
+  "format": 1,
+  "colors": {
+    "secondary": "#8B8B8B",
+    "secondaryHover": "#438AD0",
+    "secondaryPressed": "#438AD0",
+    "secondaryButtonActive": "#438AD0",
+    "secondaryButtonLightEdge": "#373737",
+    "secondaryButtonDarkEdge": "#FFFFFF",
+    "secondaryButtonCorner": "#8B8B8B",
+    "buttonBorder": "#373737",
+    "onSecondary": "#FFFFFF"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "format": 1,
+  "preset": "light",
+  "palette": {
+    "primary": "#438AD0",
+    "secondary": "#6F6F6F"
+  },
+  "colors": {
+    "backdrop": "#101010C0",
+    "panel": "#C6C6C6",
+    "raised": "#C6C6C6",
+    "hovered": "#D6D6D6",
+    "edge": "#555555",
+    "highlight": "#FFFFFF",
+    "frameEdge": "#000000",
+    "ledge": "#555555",
+    "slot": "#8B8B8B",
+    "slotEdge": "#373737",
+    "markedSlot": "#8B8B8B",
+    "slotHover": "#FFFFFF80",
+    "slotHoverEdge": "#FFFFFF",
+    "text": "#404040",
+    "mutedText": "#707070",
+    "disabledText": "#A0A0A0",
+    "disabledEdge": "#8B8B8B",
+    "ink": "#404040",
+    "onPrimary": "#FFFFFF",
+    "onSecondary": "#FCFCFC",
+    "buttonBorder": "#000000",
+    "secondaryButtonActive": "#8A8A8A",
+    "secondaryButtonLightEdge": "#AAAAAA",
+    "secondaryButtonDarkEdge": "#555555",
+    "secondaryButtonCorner": "#6F6F6F",
+    "trackEmpty": "#8B8B8B",
+    "trackEmptyLight": "#FFFFFF",
+    "focus": "#FFFFFF"
+  }
+}
