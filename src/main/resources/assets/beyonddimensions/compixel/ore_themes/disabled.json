@@ -1,0 +1,9 @@
+{
+  "format": 1,
+  "colors": {
+    "secondary": "#2C2C2C",
+    "bevelLight": "#2C2C2C",
+    "disabledEdge": "#000000",
+    "disabledText": "#9E9E9E"
+  }
+}

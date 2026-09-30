@@ -1,6 +1,12 @@
 package com.wintercogs.beyonddimensions.client.ui.base
 
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import dev.compixel.forge.ComposeInventoryScreen
 import dev.compixel.forge.ComposeMenuScreen
@@ -24,7 +30,7 @@ object BdThemes {
     /** 输入框：沿用原版黑底输入框的配色 */
     val Field = OreThemeId("beyonddimensions", "field")
 
-    /** 物品网格：数量标签使用浅色文字 */
+    /** 物品网格：数量标签使用浅色文字，过滤槽的外框与普通槽位相同 */
     val Grid = OreThemeId("beyonddimensions", "grid")
 
     /** 存储界面左侧的按钮栏：与旧版一样的凹陷按钮，悬停时变蓝 */
@@ -35,7 +41,33 @@ object BdThemes {
 
     /** 设备界面两侧的模式按钮：与面板同色的凸起按钮 */
     val Tab = OreThemeId("beyonddimensions", "tab")
+
+    /** 能量条：暗红底色上的红色填充 */
+    val Energy = OreThemeId("beyonddimensions", "energy")
+
+    /** 网络控制的成员列表：深色底与双层边框 */
+    val List = OreThemeId("beyonddimensions", "list")
+
+    /** 选中的列表项：按钮保持悬停时的颜色，如同旧版获得焦点的按钮 */
+    val Selected = OreThemeId("beyonddimensions", "selected")
+
+    /** 不可用的按钮：旧版原版按钮的黑框深灰底 */
+    val Disabled = OreThemeId("beyonddimensions", "disabled")
 }
+
+/*
+ * 旧版界面坐标。Ore 面板不加内边距时，内容从边框内侧 (2, 2) 开始；这里把旧版的界面坐标换算为其中的偏移。
+ * 文字放在旧版的绘制坐标上时与旧版的基线对齐。逐项绝对定位，避免文字行高的小数像素在纵向排列中累积。
+ */
+
+/** 旧版界面坐标 (x, y) */
+fun Modifier.at(x: Int, y: Int): Modifier = offset((x - 2).dp, (y - 2).dp)
+
+/** 旧版槽位坐标（槽位内容的左上角）对应的槽位外框位置 */
+fun Modifier.slotAt(x: Int, y: Int): Modifier = at(x - 1, y - 1)
+
+/** 右端对齐旧版 x 坐标 [right] 的文字 */
+fun Modifier.endAt(right: Int, y: Int): Modifier = at(0, y).width(right.dp).wrapContentWidth(Alignment.End)
 
 /**
  * 页面控制器：在游戏线程读取菜单并发布不可变快照，处理界面发回的操作。

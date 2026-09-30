@@ -2,16 +2,10 @@ package com.wintercogs.beyonddimensions.client.ui.device
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,6 +14,9 @@ import com.wintercogs.beyonddimensions.client.ui.base.BdController
 import com.wintercogs.beyonddimensions.client.ui.base.BdIcons
 import com.wintercogs.beyonddimensions.client.ui.base.BdInventoryScreen
 import com.wintercogs.beyonddimensions.client.ui.base.BdThemes
+import com.wintercogs.beyonddimensions.client.ui.base.at
+import com.wintercogs.beyonddimensions.client.ui.base.endAt
+import com.wintercogs.beyonddimensions.client.ui.base.slotAt
 import com.wintercogs.beyonddimensions.client.ui.base.tr
 import com.wintercogs.beyonddimensions.client.ui.storage.PlayerInventory
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
@@ -104,7 +101,7 @@ class SlotPlace(val id: Int, val x: Int, val y: Int)
 
 /**
  * 设备界面，布局与旧版一致：标题与右侧的说明文字，设备的槽位（按旧版坐标排布）或自定义内容，下方是玩家背包；
- * 模式按钮排在面板右侧，范围按钮在左侧。
+ * 模式按钮排在面板右侧，范围按钮在左侧。全部内容按旧版界面坐标绝对定位，面板尺寸由菜单里背包槽位的位置决定。
  */
 open class DeviceScreen<M : BDBaseMenu>
 protected constructor(
@@ -124,13 +121,15 @@ protected constructor(
     ) : this(menu, title, DeviceController(menu, tabs), deviceLabels(menu, inventory, title, section), deviceSlots(menu))
 
     companion object {
-        fun deviceLabels(menu: BDBaseMenu, inventory: Inventory, title: Component, section: String?, bodyHeight: Int = placesHeight(places(menu))) =
+        /** [titleY] 是旧版标题的 y：多数设备界面为 8，沿用原版默认值的界面为 6 */
+        fun deviceLabels(menu: BDBaseMenu, inventory: Inventory, title: Component, section: String?, titleY: Int = 8) =
             DeviceLabels(
                 title.string,
                 section?.let { tr(it) },
                 inventory.displayName.string,
                 (menu.inventoryStartIndex until menu.inventoryEndIndex).toList(),
-                bodyHeight,
+                menu.slots[menu.inventoryStartIndex].y,
+                titleY,
             )
 
         fun places(menu: BDBaseMenu) =
@@ -146,8 +145,18 @@ protected constructor(
     }
 }
 
-/** [bodyHeight] 是标题与背包之间内容的高度，用于计算面板高度 */
-class DeviceLabels(val title: String, val section: String?, val inventory: String, val player: List<Int>, val bodyHeight: Int)
+/**
+ * [playerTop] 是旧版背包第一行槽位的 y。旧版的背包标题在它上方 11，面板底边在它下方 82（快捷栏下留 7），
+ * 各设备界面都遵循这一布局，因此面板高度与背包位置都由它得出。
+ */
+class DeviceLabels(
+    val title: String,
+    val section: String?,
+    val inventory: String,
+    val player: List<Int>,
+    val playerTop: Int,
+    val titleY: Int,
+)
 
 private const val WIDTH = 176
 
@@ -163,19 +172,16 @@ private fun <M : BDBaseMenu> DeviceView(
         Box {
             OrePanel(
                 "",
-                Modifier.width(WIDTH.dp).height((124 + labels.bodyHeight).dp).then(slots.areaModifier()),
+                Modifier.size(WIDTH.dp, (labels.playerTop + 82).dp).then(slots.areaModifier()),
                 showTitleBar = false,
-                contentPadding = PaddingValues(start = 5.dp, top = 5.dp, end = 5.dp, bottom = 4.dp),
+                contentPadding = PaddingValues(0.dp),
             ) {
-                Column {
-                    Row(Modifier.padding(start = 1.dp, end = 1.dp)) {
-                        OreText(labels.title, Modifier.weight(1f), maxLines = 1)
-                        if (labels.section != null) OreText(labels.section, maxLines = 1)
-                    }
-                    Spacer(Modifier.height(6.dp))
+                Box(Modifier.fillMaxSize()) {
+                    OreText(labels.title, Modifier.at(8, labels.titleY), maxLines = 1)
+                    if (labels.section != null) OreText(labels.section, Modifier.endAt(WIDTH - 6, labels.titleY + 3), maxLines = 1)
                     body(slots, state) { binding.send(it) }
-                    OreText(labels.inventory, Modifier.padding(start = 1.dp, top = 3.dp, bottom = 2.dp))
-                    PlayerInventory(slots, labels.player)
+                    OreText(labels.inventory, Modifier.at(8, labels.playerTop - 11), maxLines = 1)
+                    Box(Modifier.slotAt(8, labels.playerTop)) { PlayerInventory(slots, labels.player) }
                 }
             }
             Tabs(state.tabs.withIndex().filter { !it.value.left }, binding, Modifier.offset(x = (WIDTH - 2).dp, y = 6.dp))
@@ -186,7 +192,7 @@ private fun <M : BDBaseMenu> DeviceView(
 
 /** 模式按钮：与旧版一样每格相隔 30 */
 @Composable
-private fun Tabs(tabs: List<IndexedValue<TabView>>, binding: UiBinding<DeviceState, Any>, modifier: Modifier) {
+internal fun Tabs(tabs: List<IndexedValue<TabView>>, binding: UiBinding<DeviceState, Any>, modifier: Modifier) {
     if (tabs.isEmpty()) return
     OreTheme(id = BdThemes.Tab) {
         Box(modifier) {
@@ -198,19 +204,8 @@ private fun Tabs(tabs: List<IndexedValue<TabView>>, binding: UiBinding<DeviceSta
     }
 }
 
-fun placesHeight(places: List<SlotPlace>) = if (places.isEmpty()) 0 else places.maxOf { it.y } - places.minOf { it.y } + 18
-
-/** 按旧版坐标排布槽位：坐标是槽位内容的左上角，外框比它多 1 */
+/** 按旧版坐标排布槽位 */
 @Composable
 fun SlotLayout(slots: ComposeMenuSlots<*>, places: List<SlotPlace>) {
-    if (places.isEmpty()) return
-    val left = places.minOf { it.x }
-    val top = places.minOf { it.y }
-    val width = places.maxOf { it.x } - left + 18
-    val height = places.maxOf { it.y } - top + 18
-    OreTheme(id = BdThemes.Grid) {
-        Box(Modifier.size(width.dp, height.dp)) {
-            for (place in places) slots.Slot(place.id, Modifier.offset((place.x - left).dp, (place.y - top).dp))
-        }
-    }
+    OreTheme(id = BdThemes.Grid) { for (place in places) slots.Slot(place.id, Modifier.slotAt(place.x, place.y)) }
 }

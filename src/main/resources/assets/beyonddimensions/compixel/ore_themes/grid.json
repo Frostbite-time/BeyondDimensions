@@ -1,6 +1,8 @@
 {
   "format": 1,
   "colors": {
-    "text": "#FFFFFF"
+    "text": "#FFFFFF",
+    "edge": "#373737",
+    "primary": "#FFFFFF"
   }
 }

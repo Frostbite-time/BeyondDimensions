@@ -46,7 +46,8 @@ open class BdSlotAdapter<M : BDBaseMenu>(protected val menu: M) : VanillaMenuSlo
         if (key.isEmpty) {
             resourceKeys.remove(slot.index)
             resources.remove(slot.index)
-            return MenuSlotVisual(icon = if (slot.isFake) BdIcons.filterMarker else emptyIcon(slot), marked = slot.isFake)
+            // 与旧版相同：槽位自己的空槽图标（如盔甲轮廓）优先，其余标记槽显示过滤标记
+            return MenuSlotVisual(icon = emptyIcon(slot) ?: if (slot.isFake) BdIcons.filterMarker else null, marked = slot.isFake)
         }
         if (previous != null && resources[slot.index] == resource) return previous
         resources[slot.index] = resource
