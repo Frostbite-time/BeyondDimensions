@@ -5,10 +5,11 @@
     "secondaryHover": "#438AD0",
     "secondaryPressed": "#438AD0",
     "secondaryButtonActive": "#438AD0",
-    "secondaryButtonLightEdge": "#373737",
-    "secondaryButtonDarkEdge": "#FFFFFF",
+    "secondaryButtonLightEdge": "#FFFFFF",
+    "secondaryButtonDarkEdge": "#373737",
     "secondaryButtonCorner": "#8B8B8B",
-    "buttonBorder": "#373737",
+    "buttonBorder": "#8B8B8B",
+    "secondaryEdge": "#8B8B8B",
     "onSecondary": "#FFFFFF"
   }
 }

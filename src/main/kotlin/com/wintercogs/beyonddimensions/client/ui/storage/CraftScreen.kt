@@ -1,19 +1,17 @@
 package com.wintercogs.beyonddimensions.client.ui.storage
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.base.BdThemes
+import com.wintercogs.beyonddimensions.client.ui.base.at
+import com.wintercogs.beyonddimensions.client.ui.base.slotAt
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal
+import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.ui.ore.button.OreIconButton
 import dev.compixel.ui.ore.display.OreGlyph
@@ -44,7 +42,10 @@ private fun <M : DimensionsCraftMenu> craftSection(
 ): @Composable (ComposeMenuSlots<M>, StorageState, (StorageAction) -> Unit) -> Unit =
     { slots, state, send -> CraftSection(slots, grid, result, state, send) }
 
-/** 与旧版相同的排布：3x3 合成格，右侧三个小按钮与箭头，最右是产物 */
+/**
+ * 与旧版相同的排布，坐标相对合成区顶端：3x3 合成格从 (26, 3) 开始，上方三个 8×8 的小按钮在 x=81、90、99，
+ * 箭头在格子与产物之间，产物槽是 (115, 16) 起的 26×26 大槽位。
+ */
 @Composable
 private fun CraftSection(
     slots: ComposeMenuSlots<*>,
@@ -53,19 +54,19 @@ private fun CraftSection(
     state: StorageState,
     send: (StorageAction) -> Unit,
 ) {
-    Row(Modifier.height(CRAFT_HEIGHT.dp).padding(start = 18.dp), verticalAlignment = Alignment.CenterVertically) {
-        OreTheme(id = BdThemes.Grid) {
-            Column { for (row in grid.chunked(3)) Row { for (id in row) slots.Slot(id) } }
-        }
-        Spacer(Modifier.width(6.dp))
-        OreTheme(id = BdThemes.Sidebar) {
-            Column {
-                for ((action, button) in state.craftButtons) OreIconButton(button.glyph, button.tooltip, { send(action) })
+    val top = storageUpperHeight(state.lines)
+    OreTheme(id = BdThemes.Grid) {
+        Box(Modifier.slotAt(26, top + 3)) { SlotGrid(slots, grid, columns = 3) }
+        slots.Slot(result, Modifier.at(115, top + 16).size(26.dp))
+    }
+    OreTheme(id = BdThemes.Sidebar) {
+        for ((index, entry) in state.craftButtons.withIndex()) {
+            val (action, button) = entry
+            OreIconButton(button.tooltip, { send(action) }, Modifier.at(81 + index * 9, top + 2).size(8.dp)) {
+                MinecraftItemIcon(button.icon, Modifier.requiredSize(8.dp))
             }
         }
-        Spacer(Modifier.width(8.dp))
-        OreIcon(OreGlyph.ArrowRight, Modifier.size(16.dp), OreTheme.colors.edge)
-        Spacer(Modifier.width(10.dp))
-        OreTheme(id = BdThemes.Grid) { slots.Slot(result) }
     }
+    // 旧版的箭头以槽位的灰色画在 (87, 21) 起的 22×15 内
+    OreIcon(OreGlyph.ArrowRight, Modifier.at(90, top + 20).size(16.dp), OreTheme.colors.slot)
 }

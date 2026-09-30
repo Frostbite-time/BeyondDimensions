@@ -35,7 +35,7 @@ object BdThemes {
     /** 物品网格：数量标签使用浅色文字，过滤槽的外框与普通槽位相同 */
     val Grid = OreThemeId("beyonddimensions", "grid")
 
-    /** 存储界面左侧的按钮栏：与旧版一样的凹陷按钮，悬停时变蓝 */
+    /** 旧版的小图标按钮（存储界面的侧边栏、合成区的小按钮等）：灰色凸起、左上亮右下暗，外圈与底边同为灰色；悬停时变蓝 */
     val Sidebar = OreThemeId("beyonddimensions", "sidebar")
 
     /** 滚动条：浅色滑块与槽位色的轨道 */

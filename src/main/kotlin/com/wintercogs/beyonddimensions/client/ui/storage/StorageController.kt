@@ -18,7 +18,6 @@ import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenPrimaryNetSwitcherPacket
 import com.wintercogs.beyonddimensions.util.UIDataHelper
 import dev.compixel.forge.item.ItemIcon
-import dev.compixel.ui.ore.display.OreGlyph
 import dev.emi.emi.api.EmiApi
 import net.minecraft.client.Minecraft
 import net.minecraft.world.phys.Vec2
@@ -29,7 +28,7 @@ import org.lwjgl.glfw.GLFW
 data class SideButton(val icon: ItemIcon, val tooltip: String)
 
 /** 合成区的小按钮，使用 Ore 的像素图标 */
-data class CraftButton(val glyph: OreGlyph, val tooltip: String)
+data class CraftButton(val icon: ItemIcon, val tooltip: String)
 
 data class StorageState(
     /** 显示的存储行数 */
@@ -159,11 +158,11 @@ class StorageController<M : DimensionsNetMenu>(
         if (menu !is DimensionsCraftMenu) return emptyList()
         val storageFirst = craftReturn == ButtonState.ENABLED
         return listOf(
-            StorageAction.CraftToStorage to CraftButton(OreGlyph.ArrowUp, tr("tooltip.button.beyonddimensions.transfer_to_storage")),
-            StorageAction.CraftToInventory to CraftButton(OreGlyph.ArrowDown, tr("tooltip.button.beyonddimensions.transfer_to_inv")),
+            StorageAction.CraftToStorage to CraftButton(BdIcons.sprite("up_arrow"), tr("tooltip.button.beyonddimensions.transfer_to_storage")),
+            StorageAction.CraftToInventory to CraftButton(BdIcons.sprite("down_arrow"), tr("tooltip.button.beyonddimensions.transfer_to_inv")),
             StorageAction.ToggleCraftReturn to
                 CraftButton(
-                    if (storageFirst) OreGlyph.ChevronUp else OreGlyph.ChevronDown,
+                    BdIcons.sprite(if (storageFirst) "sort_asc" else "sort_desc"),
                     tr(if (storageFirst) "tooltip.button.beyonddimensions.first_storage" else "tooltip.button.beyonddimensions.first_inv"),
                 ),
         )
