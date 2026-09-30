@@ -16,6 +16,7 @@ import com.wintercogs.beyonddimensions.client.ui.base.BdInventoryScreen
 import com.wintercogs.beyonddimensions.client.ui.base.BdThemes
 import com.wintercogs.beyonddimensions.client.ui.base.at
 import com.wintercogs.beyonddimensions.client.ui.base.endAt
+import com.wintercogs.beyonddimensions.client.ui.base.outsideArea
 import com.wintercogs.beyonddimensions.client.ui.base.slotAt
 import com.wintercogs.beyonddimensions.client.ui.base.tr
 import com.wintercogs.beyonddimensions.client.ui.storage.PlayerInventory
@@ -197,7 +198,7 @@ internal fun Tabs(tabs: List<IndexedValue<TabView>>, binding: UiBinding<DeviceSt
     OreTheme(id = BdThemes.Tab) {
         Box(modifier) {
             for ((index, tab) in tabs)
-                OreIconButton(tab.tooltip, { binding.send(index) }, Modifier.offset(y = (tab.row * 30).dp).size(24.dp), tab.enabled) {
+                OreIconButton(tab.tooltip, { binding.send(index) }, Modifier.offset(y = (tab.row * 30).dp).size(24.dp).then(outsideArea()), tab.enabled) {
                     MinecraftItemIcon(tab.icon, Modifier.size(16.dp))
                 }
         }

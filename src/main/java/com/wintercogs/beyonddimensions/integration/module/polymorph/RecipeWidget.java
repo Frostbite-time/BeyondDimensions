@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.polymorph;
 
 import com.illusivesoulworks.polymorph.api.client.widgets.PlayerRecipesWidget;
-import com.wintercogs.beyonddimensions.client.gui.DimensionsCraftGUI;
+import com.wintercogs.beyonddimensions.client.ui.storage.CraftScreen;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -11,7 +11,7 @@ public class RecipeWidget extends PlayerRecipesWidget
 {
     private final DimensionsCraftMenu menu;
 
-    public RecipeWidget(DimensionsCraftGUI<?> containerScreen, Slot outputSlot)
+    public RecipeWidget(CraftScreen<?> containerScreen, Slot outputSlot)
     {
         super(containerScreen, outputSlot);
         menu = containerScreen.getMenu();

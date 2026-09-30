@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.polymorph;
 
 import com.illusivesoulworks.polymorph.api.client.PolymorphWidgets;
-import com.wintercogs.beyonddimensions.client.gui.DimensionsCraftGUI;
+import com.wintercogs.beyonddimensions.client.ui.storage.CraftScreen;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationClientModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationClientModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -27,7 +27,8 @@ public class PolymorphClientModule implements IIntegrationClientModule
     public void onClientSetup(FMLClientSetupEvent event)
     {
         PolymorphWidgets.getInstance().registerWidget(screen -> {
-            if (screen instanceof DimensionsCraftGUI<?> gui)
+            // 界面按 Compose 布局同步槽位坐标，Polymorph 的按钮仍然出现在产物槽旁
+            if (screen instanceof CraftScreen<?> gui)
                 return new RecipeWidget(gui, gui.getMenu().getSlot(gui.getMenu().resultSlotIndex));
 
             return null;

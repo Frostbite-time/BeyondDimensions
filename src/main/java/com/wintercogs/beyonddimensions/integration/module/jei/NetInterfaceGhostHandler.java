@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.client.gui.BDBaseGUI;
+import com.wintercogs.beyonddimensions.client.ui.InventoryScreenAccess;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -12,6 +12,7 @@ import com.wintercogs.beyonddimensions.integration.module.ae2.AEHelper;
 import com.wintercogs.beyonddimensions.network.packet.both.SetSlotDirectlyPacket;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -20,19 +21,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 // 为网络接口注册JEI拖拽支持
-public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseGUI>
+public class NetInterfaceGhostHandler<S extends Screen> implements IGhostIngredientHandler<S>
 {
 
     @Override
-    public <I> List<Target<I>> getTargetsTyped(BDBaseGUI screen, ITypedIngredient<I> ingredient, boolean doStart)
+    public <I> List<Target<I>> getTargetsTyped(S screen, ITypedIngredient<I> ingredient, boolean doStart)
     {
         List<Target<I>> targets = new ArrayList<>();
 
-        for (Slot slot : screen.getMenu().slots)
+        var menu = InventoryScreenAccess.menu(screen);
+        if (menu == null)
+            return targets;
+        for (Slot slot : menu.slots)
         {
-            if (slot.isActive() && slot.isFake() && slot instanceof AbstractStackTypedSlot sSlot)
+            // 只为界面上可见的标记槽提供目标
+            Rect2i area = slot.isActive() && slot.isFake() && slot instanceof AbstractStackTypedSlot ? InventoryScreenAccess.slot(screen, slot) : null;
+            if (area != null)
             {
-                targets.add(new IStackTarget<>(sSlot, screen));
+                targets.add(new IStackTarget<>((AbstractStackTypedSlot) slot, area));
             }
         }
 
@@ -50,10 +56,10 @@ public class NetInterfaceGhostHandler implements IGhostIngredientHandler<BDBaseG
         private final Rect2i area;
 
 
-        public IStackTarget(AbstractStackTypedSlot slot, BDBaseGUI screen)
+        public IStackTarget(AbstractStackTypedSlot slot, Rect2i area)
         {
             this.slot = slot;
-            this.area = new Rect2i(screen.getGuiLeft() + slot.x, screen.getGuiTop() + slot.y, 16, 16);
+            this.area = area;
         }
 
         @Override

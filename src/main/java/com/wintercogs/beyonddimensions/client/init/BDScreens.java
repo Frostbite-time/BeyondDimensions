@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.client.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.client.gui.*;
 import com.wintercogs.beyonddimensions.client.ui.device.*;
 import com.wintercogs.beyonddimensions.client.ui.network.ControlScreen;
 import com.wintercogs.beyonddimensions.client.ui.network.PrimaryScreen;

@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.base.BdInventoryScreen
 import com.wintercogs.beyonddimensions.client.ui.base.BdThemes
+import com.wintercogs.beyonddimensions.client.ui.base.outsideArea
 import com.wintercogs.beyonddimensions.client.ui.base.tr
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot
@@ -236,7 +237,7 @@ private fun SideBar(state: StorageState, send: (StorageAction) -> Unit, modifier
     OreTheme(id = BdThemes.Sidebar) {
         Column(modifier) {
             for ((action, button) in state.buttons)
-                OreIconButton(button.tooltip, { send(action) }, Modifier.size(24.dp)) {
+                OreIconButton(button.tooltip, { send(action) }, Modifier.size(24.dp).then(outsideArea())) {
                     MinecraftItemIcon(button.icon, Modifier.size(16.dp))
                 }
         }

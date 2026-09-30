@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -15,6 +16,7 @@ import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.host.UiBinding
 import dev.compixel.ui.ore.theme.OreThemeId
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.Rect2i
 import net.minecraft.network.chat.Component
 import net.minecraft.world.inventory.AbstractContainerMenu
 import org.lwjgl.glfw.GLFW
@@ -102,6 +104,7 @@ private constructor(
     title: Component,
     protected val adapter: BdSlotAdapter<M>,
     private val controller: BdController<*, *>?,
+    private val outside: OutsideAreas,
     content: @Composable (ComposeMenuSlots<M>) -> Unit,
 ) :
     ComposeInventoryScreen<M>(
@@ -110,14 +113,17 @@ private constructor(
         ComposeMenuSlots(ownedMenu, adapter),
         BdThemes.Screen,
         NativeItemOptions(cacheCapacity = 512),
-        content,
+        { slots -> CompositionLocalProvider(LocalOutsideAreas provides outside) { content(slots) } },
     ) {
     protected constructor(
         menu: M,
         title: Component,
         controller: BdController<*, *>?,
         content: @Composable (ComposeMenuSlots<M>) -> Unit,
-    ) : this(menu, title, BdSlotAdapter(menu), controller, content)
+    ) : this(menu, title, BdSlotAdapter(menu), controller, OutsideAreas(), content)
+
+    /** 面板外的按钮所占的界面区域，供配方查看器避让 */
+    fun extraAreas(): List<Rect2i> = outside.rects(this)
 
     override fun inventoryTick() {
         adapter.tick()
