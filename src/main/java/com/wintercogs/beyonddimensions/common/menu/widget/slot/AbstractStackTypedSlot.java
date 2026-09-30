@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * 专用于IStackKey泛型类的slot组件，内部自带click、quick-click以及数据的网络同步处理，以便于在本模组的不同UI中使用时可以被快速而泛化的添加。
- * <p>请确保其只被添加到BDBaseMenu或BDBaseGUI及其子类</p>
+ * <p>请确保其只被添加到BDBaseMenu及其子类</p>
  * <p>如果你需要将其添加到你自定义的菜单或ui，你需要修改他们，以确保会正确调用click函数以及同步函数</p>
  */
 public abstract class AbstractStackTypedSlot extends Slot

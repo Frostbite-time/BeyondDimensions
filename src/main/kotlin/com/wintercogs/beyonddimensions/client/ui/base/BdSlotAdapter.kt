@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack
 import net.neoforged.neoforge.network.PacketDistributor
 
 /**
- * BD 菜单的槽位适配，行为与旧版 BDBaseGUI 一致：虚拟资源槽显示资源与数量，点击通过原有的数据包交给服务端；
+ * BD 菜单的槽位适配，行为与旧版界面一致：虚拟资源槽显示资源与数量，点击通过原有的数据包交给服务端；
  * 普通槽位仍走原版逻辑。所有方法都在游戏线程调用。
  */
 open class BdSlotAdapter<M : BDBaseMenu>(protected val menu: M) : VanillaMenuSlotAdapter(menu) {

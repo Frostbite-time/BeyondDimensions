@@ -74,7 +74,7 @@ sealed interface StorageAction {
 }
 
 /**
- * 存储终端的游戏线程逻辑，行为与旧版 DimensionsNetGUI 一致：搜索与配方查看器同步、排序、行数、合成与网络切换。
+ * 存储终端的游戏线程逻辑，行为与旧版界面一致：搜索与配方查看器同步、排序、行数、合成与网络切换。
  * [extraHeight] 是存储网格与背包之外的附加区域（合成区）的高度，用于按窗口高度推算可显示的行数。
  */
 class StorageController<M : DimensionsNetMenu>(
