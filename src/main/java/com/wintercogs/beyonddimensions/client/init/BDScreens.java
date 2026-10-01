@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.client.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.client.screen.NetEnergyScreen;
 import com.wintercogs.beyonddimensions.client.ui.machine.EnergyScreen;
 import com.wintercogs.beyonddimensions.client.ui.machine.FeederScreen;
 import com.wintercogs.beyonddimensions.client.ui.machine.FurnaceScreen;
@@ -43,7 +44,7 @@ public class BDScreens
         event.<DimensionsNetMenu, StorageScreen>register(DimensionsCraftMenu.Dimensions_Craft_Menu.get(), StorageScreen::new);
         event.<DimensionsNetMenu, StorageScreen>register(DimensionsCraftMenuTerminal.Dimensions_Craft_Menu_Terminal.get(), StorageScreen::new);
         event.<NetInterfaceBaseMenu, InterfaceScreen>register(NetInterfaceBaseMenu.Net_Interface_Menu.get(), InterfaceScreen::new);
-        event.<NetEnergyMenu, EnergyScreen>register(NetEnergyMenu.Net_Energy_Menu.get(), EnergyScreen::new);
+        event.<NetEnergyMenu, NetEnergyScreen>register(NetEnergyMenu.Net_Energy_Menu.get(), NetEnergyScreen::new);
         event.<NetPumpMenu, PumpScreen>register(NetPumpMenu.Net_Pump_Menu.get(), PumpScreen::new);
         event.<NetHopperMenu, HopperScreen>register(NetHopperMenu.Net_Hopper_Menu.get(), HopperScreen::new);
         event.<NetFurnaceMenu, FurnaceScreen>register(NetFurnaceMenu.Net_Furnace_Menu.get(), FurnaceScreen::new);

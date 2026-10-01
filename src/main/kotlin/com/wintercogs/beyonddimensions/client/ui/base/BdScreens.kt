@@ -65,8 +65,7 @@ private constructor(
     private val requests: UiBinding<Unit, ScreenRequest>,
     private val controller: BdController<*, *>?,
     content: @Composable (ComposeMenuSlots<M>) -> Unit,
-) :
-    ComposeInventoryScreen<M>(
+) : ComposeInventoryScreen<M>(
         ownedMenu,
         title,
         ComposeMenuSlots(ownedMenu, adapter),
