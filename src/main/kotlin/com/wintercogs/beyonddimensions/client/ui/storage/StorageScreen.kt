@@ -234,14 +234,16 @@ private fun StorageView(binding: UiBinding<StorageState, StorageAction>, slots: 
                             val ids = List(gridColumns * gridRows) { layout.storageStart + it }
                             BdSlotGrid(slots, ids, gridColumns)
                         }
-                        Spacer(Modifier.width(2.dp))
-                        BdScrollbar(
-                            state.firstRow,
-                            gridRows,
-                            state.totalRows,
-                            { send(StorageAction.ScrollTo(it)) },
-                            Modifier.width(SCROLLBAR.dp).fillMaxHeight(),
-                        )
+                        if (state.totalRows > gridRows) {
+                            Spacer(Modifier.width(2.dp))
+                            BdScrollbar(
+                                state.firstRow,
+                                gridRows,
+                                state.totalRows,
+                                { send(StorageAction.ScrollTo(it)) },
+                                Modifier.width(SCROLLBAR.dp).fillMaxHeight(),
+                            )
+                        }
                     }
                     if (roomy) {
                         Spacer(Modifier.height(4.dp))
