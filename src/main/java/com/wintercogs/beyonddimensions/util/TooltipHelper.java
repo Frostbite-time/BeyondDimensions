@@ -89,11 +89,11 @@ public final class TooltipHelper
             Map.Entry<Key, KeyAmount> next = iterator.next();
             iterator.remove();
             TooltipFlag flag = next.getKey().advanced() ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
-            getTooltipLines(next.getValue(), Item.TooltipContext.of(mc.level), mc.player, flag);
+            getTooltipLines(next.getValue(), Item.TooltipContext.of(mc.level), flag);
         }
     }
 
-    public static List<Component> getTooltipLines(KeyAmount stack, Item.TooltipContext context, @Nullable Player currentPlayer, TooltipFlag flag)
+    public static List<Component> getTooltipLines(KeyAmount stack, Item.TooltipContext context, TooltipFlag flag)
     {
         ensureContext();
         Key key = new Key(stack.key(), stack.amount(), flag.isAdvanced());
@@ -105,7 +105,8 @@ public final class TooltipHelper
         List<Component> result;
         try
         {
-            result = List.copyOf(stack.key().getRender().getTooltipLines(stack.key(), stack.amount(), context, currentPlayer, flag));
+            // 搜索索引使用空玩家上下文，避免 GuideME 等监听器改写实际悬停状态。
+            result = List.copyOf(stack.key().getRender().getTooltipLines(stack.key(), stack.amount(), context, null, flag));
         }
         catch (RuntimeException failure)
         {
@@ -123,7 +124,7 @@ public final class TooltipHelper
     /**
      * 预取这些资源的提示框。搜索按单个数量匹配；队列已满时丢弃最早的请求
      */
-    public static void readAsCache(List<KeyAmount> stacks, Item.TooltipContext context, @Nullable Player currentPlayer, TooltipFlag flag)
+    public static void readAsCache(List<KeyAmount> stacks, @Nullable Player currentPlayer, TooltipFlag flag)
     {
         ensureContext();
         Minecraft mc = Minecraft.getInstance();

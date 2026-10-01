@@ -25,7 +25,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -153,8 +152,8 @@ public class DimensionsNetMenu extends BDBaseMenu
                     clientNetStorage.sourceChanged(changedKeys);
                 updateViewerStorage(hasShiftDown);
                 var changedStacks = changedKeys.stream().map(storage::getStackByKey).filter(value -> !value.isEmpty()).toList();
-                TooltipHelper.readAsCache(changedStacks, Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.NORMAL);
-                TooltipHelper.readAsCache(changedStacks, Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.ADVANCED);
+                TooltipHelper.readAsCache(changedStacks, player, TooltipFlag.Default.NORMAL);
+                TooltipHelper.readAsCache(changedStacks, player, TooltipFlag.Default.ADVANCED);
             }
         });
 
