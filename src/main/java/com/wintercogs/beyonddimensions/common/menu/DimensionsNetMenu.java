@@ -97,8 +97,8 @@ public class DimensionsNetMenu extends BDBaseMenu
             public void afterLoadChange()
             {
                 updateViewerStorage(hasShiftDown);
-                TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.NORMAL);
-                TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), player, TooltipFlag.Default.ADVANCED);
+                TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), TooltipFlag.Default.NORMAL);
+                TooltipHelper.readAsCache(storage.getStorage(), Item.TooltipContext.of(player.level()), TooltipFlag.Default.ADVANCED);
             }
         });
 

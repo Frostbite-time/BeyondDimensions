@@ -5,14 +5,12 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -46,7 +44,6 @@ public class TooltipHelper
     private static void queueTooltip(
             KeyAmount stack,
             Item.TooltipContext ctx,
-            @Nullable Player player,
             TooltipFlag flag
     )
     {
@@ -57,7 +54,7 @@ public class TooltipHelper
         if (cache.containsKey(key)) return;
         if (queued.add(key))
         {
-            PENDING.offer(new TooltipRequest(stack, ctx, player, flag, CACHE_EPOCH.get()));
+            PENDING.offer(new TooltipRequest(stack, ctx, flag, CACHE_EPOCH.get()));
         }
     }
 
@@ -75,7 +72,7 @@ public class TooltipHelper
         while (loaded < maxLoads && (request = PENDING.poll()) != null)
         {
             if (request.epoch() != CACHE_EPOCH.get()) continue;
-            getTooltipLines(request.stack(), request.ctx(), request.player(), request.flag());
+            getTooltipLines(request.stack(), request.ctx(), request.flag());
             loaded++;
         }
     }
@@ -84,12 +81,11 @@ public class TooltipHelper
     /* ---------- 对外 API ---------- */
 
     /**
-     * 获取指定键的提示内容。建议在调用此函数之前先将全部key通过readAsCache进行预读
+     * 获取搜索用的提示内容。建议在调用此函数之前先将全部key通过readAsCache进行预读
      */
     public static List<Component> getTooltipLines(
             KeyAmount stack,
             Item.TooltipContext ctx,
-            @Nullable Player player,
             TooltipFlag flag
     )
     {
@@ -107,7 +103,8 @@ public class TooltipHelper
         queued.remove(key);
         try
         {
-            List<Component> tooltip = key.getRender().getTooltipLines(key, stack.amount(), ctx, player, flag);
+            // 搜索索引使用空玩家上下文，避免 GuideME 等监听器改写实际悬停状态。
+            List<Component> tooltip = key.getRender().getTooltipLines(key, stack.amount(), ctx, null, flag);
             cache.put(key, tooltip);
             return tooltip;
         }
@@ -126,13 +123,12 @@ public class TooltipHelper
     public static void readAsCache(
             List<KeyAmount> stacks,
             Item.TooltipContext ctx,
-            @Nullable Player player,
             TooltipFlag flag
     )
     {
         for (KeyAmount stack : stacks)
         {
-            queueTooltip(stack, ctx, player, flag);
+            queueTooltip(stack, ctx, flag);
         }
     }
 
@@ -150,7 +146,6 @@ public class TooltipHelper
     private record TooltipRequest(
             KeyAmount stack,
             Item.TooltipContext ctx,
-            @Nullable Player player,
             TooltipFlag flag,
             long epoch
     )

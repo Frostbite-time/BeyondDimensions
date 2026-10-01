@@ -340,7 +340,6 @@ public class ClientNetStorageSearchHelper
             List<Component> tooltips = TooltipHelper.getTooltipLines(
                     keyAmount,
                     Item.TooltipContext.of(player.level()),
-                    player,
                     mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
             );
 
