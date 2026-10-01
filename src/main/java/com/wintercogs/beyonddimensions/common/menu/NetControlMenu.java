@@ -27,11 +27,7 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -44,7 +40,9 @@ public class NetControlMenu extends BDBaseMenu
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
     public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = MENU_TYPES.register("net_control_menu", () -> IMenuTypeExtension.create(NetControlMenu::new));
 
-    /** 成员及当前玩家可以对其执行的操作（按 NetControlAction 序号的位掩码） */
+    /**
+     * 成员及当前玩家可以对其执行的操作（按 NetControlAction 序号的位掩码）
+     */
     public record Member(UUID id, String name, NetPermissionlevel role, int actions)
     {
         public boolean allows(NetControlAction action)
@@ -53,8 +51,12 @@ public class NetControlMenu extends BDBaseMenu
         }
     }
 
-    /** 操作请求携带客户端看到的角色，角色已变化时服务端拒绝执行 */
-    public record Request(UUID target, NetControlAction action, NetPermissionlevel expectedRole) {}
+    /**
+     * 操作请求携带客户端看到的角色，角色已变化时服务端拒绝执行
+     */
+    public record Request(UUID target, NetControlAction action, NetPermissionlevel expectedRole)
+    {
+    }
 
     private static final int ACTION_MASK = (1 << NetControlAction.values().length) - 1;
     private static final SyncCodec<String> NAME = SyncCodecs.string(256);
@@ -211,7 +213,8 @@ public class NetControlMenu extends BDBaseMenu
             case SetOwner -> net.setOwner(request.target());
             case SetManager -> net.addManager(request.target());
             case RemoveManager -> net.removeManager(request.target());
-            case RemovePlayer -> {
+            case RemovePlayer ->
+            {
                 if (actor.getUUID().equals(request.target()))
                     net.leavePlayer(request.target());
                 else
@@ -245,8 +248,12 @@ public class NetControlMenu extends BDBaseMenu
     }
 
     @Override
-    protected void updateChange()
+    public void broadcastChanges()
     {
+        super.broadcastChanges();
+
+        if (player.level().isClientSide()) return;
+
         if (dirty || lastSpectator != player.isSpectator())
             refreshMembers();
     }

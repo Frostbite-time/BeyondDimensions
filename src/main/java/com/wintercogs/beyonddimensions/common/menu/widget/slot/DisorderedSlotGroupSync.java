@@ -14,8 +14,12 @@ import java.util.List;
  */
 public class DisorderedSlotGroupSync
 {
-    /** 同步中某个资源的新数量与排序用时间戳，数量为 0 表示移除 */
-    public record Change(IStackKey<?> key, long count, long modified, long inserted) {}
+    /**
+     * 同步中某个资源的新数量与排序用时间戳，数量为 0 表示移除
+     */
+    public record Change(IStackKey<?> key, long count, long modified, long inserted)
+    {
+    }
 
     public final int groupId;
     private final AbstractUnorderedStackHandler storage;

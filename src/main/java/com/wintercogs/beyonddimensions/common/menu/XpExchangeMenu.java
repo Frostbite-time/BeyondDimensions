@@ -22,7 +22,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-/** 经验交换：只有一个开关和一个目标等级，两个设置各自校验。 */
+/**
+ * 经验交换：只有一个开关和一个目标等级，两个设置各自校验。
+ */
 public class XpExchangeMenu extends BDBaseMenu
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
@@ -77,7 +79,11 @@ public class XpExchangeMenu extends BDBaseMenu
 
     private final MenuSync<XpExchangeMenu> synchronization;
 
-    @Override public MenuSync<XpExchangeMenu> menuSync() { return synchronization; }
+    @Override
+    public MenuSync<XpExchangeMenu> menuSync()
+    {
+        return synchronization;
+    }
 
     public XpExchangeMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -93,18 +99,42 @@ public class XpExchangeMenu extends BDBaseMenu
         synchronization = MenuSync.bind(this, SCHEMA).action(SET_KEEP).action(SET_TARGET);
     }
 
-    private static boolean editable(XpExchangeMenu menu) { return !menu.player.isSpectator(); }
+    private static boolean editable(XpExchangeMenu menu)
+    {
+        return !menu.player.isSpectator();
+    }
 
-    private void markItemChanged() { player.getInventory().setChanged(); }
+    private void markItemChanged()
+    {
+        player.getInventory().setChanged();
+    }
 
     // 客户端读取接口：本页只暴露自己的开关与目标等级
 
-    public boolean keep() { return clientKeep; }
-    public boolean keepEditable() { return keepEditable; }
-    public int target() { return clientTarget; }
-    public boolean targetEditable() { return targetEditable; }
+    public boolean keep()
+    {
+        return clientKeep;
+    }
 
-    public boolean ready() { return synchronization.hasSnapshot(); }
+    public boolean keepEditable()
+    {
+        return keepEditable;
+    }
+
+    public int target()
+    {
+        return clientTarget;
+    }
+
+    public boolean targetEditable()
+    {
+        return targetEditable;
+    }
+
+    public boolean ready()
+    {
+        return synchronization.hasSnapshot();
+    }
 
     public boolean requestKeep(boolean value)
     {

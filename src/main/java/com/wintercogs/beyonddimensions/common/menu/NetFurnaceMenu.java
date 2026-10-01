@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.OrderedStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
@@ -30,7 +31,9 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-/** 维度网络熔炉：本页四个模式 + 九条产线的实时进度。 */
+/**
+ * 维度网络熔炉：本页四个模式 + 九条产线的实时进度。
+ */
 public class NetFurnaceMenu extends BDBaseMenu
 {
 
@@ -49,9 +52,18 @@ public class NetFurnaceMenu extends BDBaseMenu
     // 各槽位组的起始索引，由构造过程记录，供客户端页面分区显示
     private int inputFilterStart, fuelFilterStart, inputStorageStart, fuelStorageIndex, fuelReturnIndex, outputStorageStart;
 
-    public record Lane(int index, int cooking, int cookingTotal, int burning, int burningTotal) {}
+    public record Lane(int index, int cooking, int cookingTotal, int burning, int burningTotal)
+    {
+    }
+
     private static final SyncCodec<Lane> LANE_CODEC = SyncCodec.of("beyonddimensions:furnace_lane/1",
-            (out, lane) -> { out.writeInt(lane.index()); out.writeInt(lane.cooking()); out.writeInt(lane.cookingTotal()); out.writeInt(lane.burning()); out.writeInt(lane.burningTotal()); },
+            (out, lane) -> {
+                out.writeInt(lane.index());
+                out.writeInt(lane.cooking());
+                out.writeInt(lane.cookingTotal());
+                out.writeInt(lane.burning());
+                out.writeInt(lane.burningTotal());
+            },
             in -> {
                 var lane = new Lane(in.readInt(), in.readInt(), in.readInt(), in.readInt(), in.readInt());
                 if (lane.index() < 0 || lane.index() >= 9 || lane.cooking() < 0 || lane.cookingTotal() < 0 || lane.burning() < 0 || lane.burningTotal() < 0)
@@ -60,12 +72,17 @@ public class NetFurnaceMenu extends BDBaseMenu
             });
     private List<Lane> lanes = IntStream.range(0, 9).mapToObj(i -> new Lane(i, 0, 0, 0, 0)).toList();
 
-    public List<Lane> lanes() { return lanes; }
+    public List<Lane> lanes()
+    {
+        return lanes;
+    }
 
-    private List<Lane> captureLanes() {
+    private List<Lane> captureLanes()
+    {
         if (player.level().isClientSide()) return lanes;
         var current = new ArrayList<Lane>(9);
-        for (int i = 0; i < 9; i++) current.add(new Lane(i, be.getCookTime().get(i), be.getCookTimeTotal().get(i), be.getLitTime().get(i), be.getLitDuration().get(i)));
+        for (int i = 0; i < 9; i++)
+            current.add(new Lane(i, be.getCookTime().get(i), be.getCookTimeTotal().get(i), be.getLitTime().get(i), be.getLitDuration().get(i)));
         if (!current.equals(lanes)) lanes = List.copyOf(current);
         return lanes;
     }
@@ -113,34 +130,54 @@ public class NetFurnaceMenu extends BDBaseMenu
     private static final MenuAction<NetFurnaceMenu, PopMode> SET_OUTPUT = MenuAction.of("set.output",
             SyncCodecs.enumeration(PopMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.popMode != value) { m.be.popMode = value; m.markBoardChanged(); }
+                if (m.be.popMode != value)
+                {
+                    m.be.popMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private static final MenuAction<NetFurnaceMenu, ReceiveMode> SET_RECEIVE = MenuAction.of("set.receive",
             SyncCodecs.enumeration(ReceiveMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.receiveMode != value) { m.be.receiveMode = value; m.markBoardChanged(); }
+                if (m.be.receiveMode != value)
+                {
+                    m.be.receiveMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private static final MenuAction<NetFurnaceMenu, RedStoneControlMode> SET_REDSTONE = MenuAction.of("set.redstone",
             SyncCodecs.enumeration(RedStoneControlMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.controlMode != value) { m.be.controlMode = value; m.markBoardChanged(); }
+                if (m.be.controlMode != value)
+                {
+                    m.be.controlMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private static final MenuAction<NetFurnaceMenu, AutoSortMode> SET_SORTING = MenuAction.of("set.sorting",
             SyncCodecs.enumeration(AutoSortMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.sortMode != value) { m.be.sortMode = value; m.markBoardChanged(); }
+                if (m.be.sortMode != value)
+                {
+                    m.be.sortMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private final MenuSync<NetFurnaceMenu> synchronization;
 
-    @Override public MenuSync<NetFurnaceMenu> menuSync() { return synchronization; }
+    @Override
+    public MenuSync<NetFurnaceMenu> menuSync()
+    {
+        return synchronization;
+    }
 
     public NetFurnaceMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -179,7 +216,10 @@ public class NetFurnaceMenu extends BDBaseMenu
                 .action(SET_OUTPUT).action(SET_RECEIVE).action(SET_REDSTONE).action(SET_SORTING);
     }
 
-    private static boolean editable(NetFurnaceMenu menu) { return !menu.player.isSpectator(); }
+    private static boolean editable(NetFurnaceMenu menu)
+    {
+        return !menu.player.isSpectator();
+    }
 
     private void markBoardChanged()
     {
@@ -189,21 +229,70 @@ public class NetFurnaceMenu extends BDBaseMenu
 
     // 客户端读取接口：本页只暴露自己这四个模式
 
-    public PopMode output() { return clientOutput; }
-    public ReceiveMode receive() { return clientReceive; }
-    public RedStoneControlMode redstone() { return clientRedstone; }
-    public AutoSortMode sorting() { return clientSorting; }
-    public boolean outputEditable() { return outputEditable; }
-    public boolean receiveEditable() { return receiveEditable; }
-    public boolean redstoneEditable() { return redstoneEditable; }
-    public boolean sortingEditable() { return sortingEditable; }
+    public PopMode output()
+    {
+        return clientOutput;
+    }
 
-    public boolean ready() { return synchronization.hasSnapshot(); }
+    public ReceiveMode receive()
+    {
+        return clientReceive;
+    }
 
-    public boolean requestOutput(int ordinal) { return request(SET_OUTPUT, PopMode.values(), ordinal, outputEditable); }
-    public boolean requestReceive(int ordinal) { return request(SET_RECEIVE, ReceiveMode.values(), ordinal, receiveEditable); }
-    public boolean requestRedstone(int ordinal) { return request(SET_REDSTONE, RedStoneControlMode.values(), ordinal, redstoneEditable); }
-    public boolean requestSorting(int ordinal) { return request(SET_SORTING, AutoSortMode.values(), ordinal, sortingEditable); }
+    public RedStoneControlMode redstone()
+    {
+        return clientRedstone;
+    }
+
+    public AutoSortMode sorting()
+    {
+        return clientSorting;
+    }
+
+    public boolean outputEditable()
+    {
+        return outputEditable;
+    }
+
+    public boolean receiveEditable()
+    {
+        return receiveEditable;
+    }
+
+    public boolean redstoneEditable()
+    {
+        return redstoneEditable;
+    }
+
+    public boolean sortingEditable()
+    {
+        return sortingEditable;
+    }
+
+    public boolean ready()
+    {
+        return synchronization.hasSnapshot();
+    }
+
+    public boolean requestOutput(int ordinal)
+    {
+        return request(SET_OUTPUT, PopMode.values(), ordinal, outputEditable);
+    }
+
+    public boolean requestReceive(int ordinal)
+    {
+        return request(SET_RECEIVE, ReceiveMode.values(), ordinal, receiveEditable);
+    }
+
+    public boolean requestRedstone(int ordinal)
+    {
+        return request(SET_REDSTONE, RedStoneControlMode.values(), ordinal, redstoneEditable);
+    }
+
+    public boolean requestSorting(int ordinal)
+    {
+        return request(SET_SORTING, AutoSortMode.values(), ordinal, sortingEditable);
+    }
 
     private <E extends Enum<E>> boolean request(MenuAction<NetFurnaceMenu, E> action, E[] modes, int ordinal, boolean enabled)
     {
@@ -212,14 +301,40 @@ public class NetFurnaceMenu extends BDBaseMenu
 
     // 槽位分组：由本页建立，也由本页回答各自的下标范围
 
-    public List<Integer> inputFilterSlotIds() { return ids(inputFilterStart, 8); }
-    public List<Integer> fuelFilterSlotIds() { return ids(fuelFilterStart, 8); }
-    public List<Integer> inputStorageSlotIds() { return ids(inputStorageStart, 9); }
-    public List<Integer> fuelStorageSlotIds() { return List.of(fuelStorageIndex); }
-    public List<Integer> fuelReturnSlotIds() { return List.of(fuelReturnIndex); }
-    public List<Integer> outputStorageSlotIds() { return ids(outputStorageStart, 9); }
+    public List<Integer> inputFilterSlotIds()
+    {
+        return ids(inputFilterStart, 8);
+    }
 
-    private static List<Integer> ids(int start, int count) { return IntStream.range(start, start + count).boxed().toList(); }
+    public List<Integer> fuelFilterSlotIds()
+    {
+        return ids(fuelFilterStart, 8);
+    }
+
+    public List<Integer> inputStorageSlotIds()
+    {
+        return ids(inputStorageStart, 9);
+    }
+
+    public List<Integer> fuelStorageSlotIds()
+    {
+        return List.of(fuelStorageIndex);
+    }
+
+    public List<Integer> fuelReturnSlotIds()
+    {
+        return List.of(fuelReturnIndex);
+    }
+
+    public List<Integer> outputStorageSlotIds()
+    {
+        return ids(outputStorageStart, 9);
+    }
+
+    private static List<Integer> ids(int start, int count)
+    {
+        return IntStream.range(start, start + count).boxed().toList();
+    }
 
     private void addFilterSlots()
     {

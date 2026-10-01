@@ -1,11 +1,13 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
 import com.google.common.base.Suppliers;
-import dev.compixel.slots.SlotTransferRoutes;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuCommands;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
+import dev.compixel.slots.SlotTransferRoutes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
@@ -26,17 +28,29 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
     public final Player player;
     private BDMenuResources resources;
     private BDMenuCommands commands;
-    public final BDMenuCommands commands() {
+
+    public final BDMenuCommands commands()
+    {
         if (commands == null) commands = new BDMenuCommands(this);
         return commands;
     }
+
     private boolean vanillaSnapshot;
-    public final boolean isVanillaSnapshot(){return vanillaSnapshot;}
-    public final BDMenuResources resources() {
+
+    public final boolean isVanillaSnapshot()
+    {
+        return vanillaSnapshot;
+    }
+
+    public final BDMenuResources resources()
+    {
         if (resources == null) resources = new BDMenuResources(this);
         return resources;
     }
-    @Override public abstract dev.compixel.forge.sync.MenuSync<? extends BDBaseMenu> menuSync();
+
+    @Override
+    public abstract dev.compixel.forge.sync.MenuSync<? extends BDBaseMenu> menuSync();
+
     // 用于快速移动时标记玩家背包的槽位索引 如 索引从0开始 背包为54~89
     public int inventoryStartIndex = -1; //索引开始位置 为54
     public int inventoryEndIndex = -1;   //索引结束位置+1 为90
@@ -47,7 +61,9 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
 
     private SlotTransferRoutes quickMoveRoutes;
 
-    /** Construct after all slots have been added; subclasses can declare named groups/routes. */
+    /**
+     * Construct after all slots have been added; subclasses can declare named groups/routes.
+     */
     protected SlotTransferRoutes createQuickMoveRoutes()
     {
         var builder = SlotTransferRoutes.builder(slots.size());
@@ -116,31 +132,6 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
 
             this.synchronizeDataSlotToRemote(j, k);
         }
-
-        // 确保自定义同步不会被客户端调用
-        if (!player.level().isClientSide())
-        {
-            if (!init)
-            {
-                initUpdate();
-                init = true;
-            }
-
-            if (resources != null) resources.pollOrdered();
-            updateChange();
-        }
-    }
-
-    // 仅由服务端发送的更新
-    protected void updateChange()
-    {
-
-    }
-
-    // 仅由服务端发送一次的更新
-    protected void initUpdate()
-    {
-
     }
 
     // 自定义点击操作
@@ -301,12 +292,31 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
     @Override
     public void broadcastFullState()
     {
-        boolean previous=vanillaSnapshot;vanillaSnapshot=true;
-        try{super.broadcastFullState();}finally{vanillaSnapshot=previous;}
+        boolean previous = vanillaSnapshot;
+        vanillaSnapshot = true;
+        try
+        {
+            super.broadcastFullState();
+        }
+        finally
+        {
+            vanillaSnapshot = previous;
+        }
     }
-    @Override public void sendAllDataToRemote(){
-        boolean previous=vanillaSnapshot;vanillaSnapshot=true;
-        try{super.sendAllDataToRemote();}finally{vanillaSnapshot=previous;}
+
+    @Override
+    public void sendAllDataToRemote()
+    {
+        boolean previous = vanillaSnapshot;
+        vanillaSnapshot = true;
+        try
+        {
+            super.sendAllDataToRemote();
+        }
+        finally
+        {
+            vanillaSnapshot = previous;
+        }
     }
 
     // 完全重写快速移动方案

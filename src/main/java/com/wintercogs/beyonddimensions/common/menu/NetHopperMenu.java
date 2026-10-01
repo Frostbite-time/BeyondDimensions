@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.common.block.entity.NetHopperBlockEntity;
 import com.wintercogs.beyonddimensions.common.machine.*;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
@@ -24,7 +25,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-/** 维度网络漏斗：本页七个模式各自独立声明与校验。 */
+/**
+ * 维度网络漏斗：本页七个模式各自独立声明与校验。
+ */
 public class NetHopperMenu extends BDBaseMenu
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
@@ -101,55 +104,87 @@ public class NetHopperMenu extends BDBaseMenu
     private static final MenuAction<NetHopperMenu, FilterMode> SET_FILTER = MenuAction.of("set.filter",
             SyncCodecs.enumeration(FilterMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.filterMode != value) { m.be.filterMode = value; m.markBoardChanged(); }
+                if (m.be.filterMode != value)
+                {
+                    m.be.filterMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private static final MenuAction<NetHopperMenu, RedStoneControlMode> SET_REDSTONE = MenuAction.of("set.redstone",
             SyncCodecs.enumeration(RedStoneControlMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.controlMode != value) { m.be.controlMode = value; m.markBoardChanged(); }
+                if (m.be.controlMode != value)
+                {
+                    m.be.controlMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private static final MenuAction<NetHopperMenu, HopperItemMode> SET_ITEMS = MenuAction.of("set.items",
             SyncCodecs.enumeration(HopperItemMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.hopperItemMode != value) { m.be.hopperItemMode = value; m.markBoardChanged(); }
+                if (m.be.hopperItemMode != value)
+                {
+                    m.be.hopperItemMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private static final MenuAction<NetHopperMenu, HopperXpMode> SET_EXPERIENCE = MenuAction.of("set.experience",
             SyncCodecs.enumeration(HopperXpMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.hopperXpMode != value) { m.be.hopperXpMode = value; m.markBoardChanged(); }
+                if (m.be.hopperXpMode != value)
+                {
+                    m.be.hopperXpMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private static final MenuAction<NetHopperMenu, HopperFluidMode> SET_FLUIDS = MenuAction.of("set.fluids",
             SyncCodecs.enumeration(HopperFluidMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.hopperFluidMode != value) { m.be.hopperFluidMode = value; m.markBoardChanged(); }
+                if (m.be.hopperFluidMode != value)
+                {
+                    m.be.hopperFluidMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private static final MenuAction<NetHopperMenu, HopperNBTMode> SET_COMPONENTS = MenuAction.of("set.components",
             SyncCodecs.enumeration(HopperNBTMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.hopperNBTMode != value) { m.be.hopperNBTMode = value; m.markBoardChanged(); }
+                if (m.be.hopperNBTMode != value)
+                {
+                    m.be.hopperNBTMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private static final MenuAction<NetHopperMenu, HopperRangeMode> SET_RANGE = MenuAction.of("set.range",
             SyncCodecs.enumeration(HopperRangeMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.hopperRangeMode != value) { m.be.hopperRangeMode = value; m.markBoardChanged(); }
+                if (m.be.hopperRangeMode != value)
+                {
+                    m.be.hopperRangeMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private final MenuSync<NetHopperMenu> synchronization;
 
-    @Override public MenuSync<NetHopperMenu> menuSync() { return synchronization; }
+    @Override
+    public MenuSync<NetHopperMenu> menuSync()
+    {
+        return synchronization;
+    }
 
     public NetHopperMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -178,7 +213,10 @@ public class NetHopperMenu extends BDBaseMenu
                 .action(SET_FLUIDS).action(SET_COMPONENTS).action(SET_RANGE);
     }
 
-    private static boolean editable(NetHopperMenu menu) { return !menu.player.isSpectator(); }
+    private static boolean editable(NetHopperMenu menu)
+    {
+        return !menu.player.isSpectator();
+    }
 
     private void markBoardChanged()
     {
@@ -188,23 +226,80 @@ public class NetHopperMenu extends BDBaseMenu
 
     // 客户端读取接口：本页只暴露自己这七个模式
 
-    public FilterMode filter() { return clientFilter; }
-    public RedStoneControlMode redstone() { return clientRedstone; }
-    public HopperItemMode items() { return clientItems; }
-    public HopperXpMode experience() { return clientExperience; }
-    public HopperFluidMode fluids() { return clientFluids; }
-    public HopperNBTMode components() { return clientComponents; }
-    public HopperRangeMode range() { return clientRange; }
+    public FilterMode filter()
+    {
+        return clientFilter;
+    }
 
-    public boolean filterEditable() { return filterEditable; }
-    public boolean redstoneEditable() { return redstoneEditable; }
-    public boolean itemsEditable() { return itemsEditable; }
-    public boolean experienceEditable() { return experienceEditable; }
-    public boolean fluidsEditable() { return fluidsEditable; }
-    public boolean componentsEditable() { return componentsEditable; }
-    public boolean rangeEditable() { return rangeEditable; }
+    public RedStoneControlMode redstone()
+    {
+        return clientRedstone;
+    }
 
-    public boolean ready() { return synchronization.hasSnapshot(); }
+    public HopperItemMode items()
+    {
+        return clientItems;
+    }
+
+    public HopperXpMode experience()
+    {
+        return clientExperience;
+    }
+
+    public HopperFluidMode fluids()
+    {
+        return clientFluids;
+    }
+
+    public HopperNBTMode components()
+    {
+        return clientComponents;
+    }
+
+    public HopperRangeMode range()
+    {
+        return clientRange;
+    }
+
+    public boolean filterEditable()
+    {
+        return filterEditable;
+    }
+
+    public boolean redstoneEditable()
+    {
+        return redstoneEditable;
+    }
+
+    public boolean itemsEditable()
+    {
+        return itemsEditable;
+    }
+
+    public boolean experienceEditable()
+    {
+        return experienceEditable;
+    }
+
+    public boolean fluidsEditable()
+    {
+        return fluidsEditable;
+    }
+
+    public boolean componentsEditable()
+    {
+        return componentsEditable;
+    }
+
+    public boolean rangeEditable()
+    {
+        return rangeEditable;
+    }
+
+    public boolean ready()
+    {
+        return synchronization.hasSnapshot();
+    }
 
     public boolean requestFilter(int ordinal)
     {

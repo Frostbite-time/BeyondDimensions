@@ -119,11 +119,10 @@ class EnergyScreen private constructor(menu: NetEnergyMenu, title: Component, la
         MachineController(
             menu::ready,
             listOf(
-                pop(text.popHint, menu::output, menu::outputEditable, menu::requestOutput),
-                redstone(menu::redstone, menu::redstoneEditable, menu::requestRedstone),
+                pop(text.popHint, menu::popMode, { true }, menu::requestOutput),
+                redstone(menu::redStoneMode, { true }, menu::requestRedstone),
             ),
-            { EnergyReadout(menu.stored(), menu.capacity(), menu.rate()) },
-        ),
+        ) { EnergyReadout(menu.energyStored(), menu.energyCapacity(), menu.energyRate()) },
         layout,
         { state, _ -> EnergyContent(state.readout as? EnergyReadout, text) },
     ) {

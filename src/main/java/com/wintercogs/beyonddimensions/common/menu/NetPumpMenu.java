@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.common.block.entity.NetPumpBlockEntity;
 import com.wintercogs.beyonddimensions.common.machine.FilterMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
@@ -25,7 +26,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-/** 维度网络泵：只同步本页自己的过滤器与红石模式。 */
+/**
+ * 维度网络泵：只同步本页自己的过滤器与红石模式。
+ */
 public class NetPumpMenu extends BDBaseMenu
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
@@ -62,20 +65,32 @@ public class NetPumpMenu extends BDBaseMenu
     private static final MenuAction<NetPumpMenu, FilterMode> SET_FILTER = MenuAction.of("set.filter",
             SyncCodecs.enumeration(FilterMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.filterMode != value) { m.be.filterMode = value; m.markBoardChanged(); }
+                if (m.be.filterMode != value)
+                {
+                    m.be.filterMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private static final MenuAction<NetPumpMenu, RedStoneControlMode> SET_REDSTONE = MenuAction.of("set.redstone",
             SyncCodecs.enumeration(RedStoneControlMode.class), (m, player, value) -> {
                 if (!editable(m) || m.be == null) return false;
-                if (m.be.controlMode != value) { m.be.controlMode = value; m.markBoardChanged(); }
+                if (m.be.controlMode != value)
+                {
+                    m.be.controlMode = value;
+                    m.markBoardChanged();
+                }
                 return true;
             });
 
     private final MenuSync<NetPumpMenu> synchronization;
 
-    @Override public MenuSync<NetPumpMenu> menuSync() { return synchronization; }
+    @Override
+    public MenuSync<NetPumpMenu> menuSync()
+    {
+        return synchronization;
+    }
 
     public NetPumpMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -102,7 +117,10 @@ public class NetPumpMenu extends BDBaseMenu
         synchronization = commands().inventory(BDMenuResources.bind(this, SCHEMA)).action(SET_FILTER).action(SET_REDSTONE);
     }
 
-    private static boolean editable(NetPumpMenu menu) { return !menu.player.isSpectator(); }
+    private static boolean editable(NetPumpMenu menu)
+    {
+        return !menu.player.isSpectator();
+    }
 
     private void markBoardChanged()
     {
@@ -112,11 +130,30 @@ public class NetPumpMenu extends BDBaseMenu
 
     // 客户端读取接口：本页只暴露自己这两个模式
 
-    public FilterMode filter() { return clientFilter; }
-    public RedStoneControlMode redstone() { return clientRedstone; }
-    public boolean filterEditable() { return filterEditable; }
-    public boolean redstoneEditable() { return redstoneEditable; }
-    public boolean ready() { return synchronization.hasSnapshot(); }
+    public FilterMode filter()
+    {
+        return clientFilter;
+    }
+
+    public RedStoneControlMode redstone()
+    {
+        return clientRedstone;
+    }
+
+    public boolean filterEditable()
+    {
+        return filterEditable;
+    }
+
+    public boolean redstoneEditable()
+    {
+        return redstoneEditable;
+    }
+
+    public boolean ready()
+    {
+        return synchronization.hasSnapshot();
+    }
 
     public boolean requestFilter(int ordinal)
     {

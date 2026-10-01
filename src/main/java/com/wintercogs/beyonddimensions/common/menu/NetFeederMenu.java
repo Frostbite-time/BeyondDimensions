@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.FeederMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
@@ -31,7 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-/** 网络喂食器：设置保存在物品组件上，只同步工作状态与喂食模式。 */
+/**
+ * 网络喂食器：设置保存在物品组件上，只同步工作状态与喂食模式。
+ */
 public class NetFeederMenu extends BDBaseMenu
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
@@ -91,7 +94,11 @@ public class NetFeederMenu extends BDBaseMenu
             SyncCodecs.enumeration(RedStoneControlMode.class), (m, player, value) -> {
                 if (!editable(m) || !WORKING_OPTIONS.contains(value)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
-                if (current != value) { m.menuStack.set(BDDataComponents.CONTROL_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.CONTROL_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
@@ -99,13 +106,21 @@ public class NetFeederMenu extends BDBaseMenu
             SyncCodecs.enumeration(FeederMode.class), (m, player, value) -> {
                 if (!editable(m)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.FEEDER_MODE, FeederMode.NORMAL);
-                if (current != value) { m.menuStack.set(BDDataComponents.FEEDER_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.FEEDER_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
     private final MenuSync<NetFeederMenu> synchronization;
 
-    @Override public MenuSync<NetFeederMenu> menuSync() { return synchronization; }
+    @Override
+    public MenuSync<NetFeederMenu> menuSync()
+    {
+        return synchronization;
+    }
 
     public NetFeederMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -136,18 +151,42 @@ public class NetFeederMenu extends BDBaseMenu
         synchronization = commands().inventory(BDMenuResources.bind(this, SCHEMA)).action(SET_WORKING).action(SET_FEEDING);
     }
 
-    private static boolean editable(NetFeederMenu menu) { return !menu.player.isSpectator(); }
+    private static boolean editable(NetFeederMenu menu)
+    {
+        return !menu.player.isSpectator();
+    }
 
-    private void markItemChanged() { player.getInventory().setChanged(); }
+    private void markItemChanged()
+    {
+        player.getInventory().setChanged();
+    }
 
     // 客户端读取接口：本页只暴露自己这两个模式
 
-    public RedStoneControlMode working() { return clientWorking; }
-    public FeederMode feeding() { return clientFeeding; }
-    public boolean workingEditable() { return workingEditable; }
-    public boolean feedingEditable() { return feedingEditable; }
+    public RedStoneControlMode working()
+    {
+        return clientWorking;
+    }
 
-    public boolean ready() { return synchronization.hasSnapshot(); }
+    public FeederMode feeding()
+    {
+        return clientFeeding;
+    }
+
+    public boolean workingEditable()
+    {
+        return workingEditable;
+    }
+
+    public boolean feedingEditable()
+    {
+        return feedingEditable;
+    }
+
+    public boolean ready()
+    {
+        return synchronization.hasSnapshot();
+    }
 
     public boolean requestWorking(int ordinal)
     {
@@ -161,7 +200,9 @@ public class NetFeederMenu extends BDBaseMenu
         return feedingEditable && ordinal >= 0 && ordinal < modes.length && synchronization.request(SET_FEEDING, modes[ordinal]).queued();
     }
 
-    /** 工作模式只有开/关两个状态，标签也不走通用的模式命名。 */
+    /**
+     * 工作模式只有开/关两个状态，标签也不走通用的模式命名。
+     */
 
     private void addFlagSlots()
     {

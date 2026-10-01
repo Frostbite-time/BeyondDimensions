@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.ClientNetStorage;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
@@ -285,7 +286,9 @@ public class DimensionsNetMenu extends BDBaseMenu
 
     // 客户端读取接口
 
-    /** 存储槽位在菜单中的起始编号（共 891 个） */
+    /**
+     * 存储槽位在菜单中的起始编号（共 891 个）
+     */
     public int getStorageStartIndex()
     {
         return storageStartIndex;
@@ -301,25 +304,33 @@ public class DimensionsNetMenu extends BDBaseMenu
         return synchronization.hasSnapshot();
     }
 
-    /** 所属网络的编号，未知时为 {@link DimensionsNet#NO_PRIMARY_NET_ID} */
+    /**
+     * 所属网络的编号，未知时为 {@link DimensionsNet#NO_PRIMARY_NET_ID}
+     */
     public int networkId()
     {
         return clientNetworkId;
     }
 
-    /** 所属网络的显示名称（自定义名称或默认名称） */
+    /**
+     * 所属网络的显示名称（自定义名称或默认名称）
+     */
     public Component networkName()
     {
         return DimensionsNet.getNetworkName(clientNetworkId, clientNetworkName);
     }
 
-    /** 可存放的资源种类上限 */
+    /**
+     * 可存放的资源种类上限
+     */
     public int typeLimit()
     {
         return clientTypeLimit;
     }
 
-    /** 每种资源的数量上限 */
+    /**
+     * 每种资源的数量上限
+     */
     public long amountLimit()
     {
         return clientAmountLimit;

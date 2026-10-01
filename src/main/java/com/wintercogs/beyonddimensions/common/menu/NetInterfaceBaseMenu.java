@@ -6,6 +6,8 @@ import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuCommands;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.OrderedStackTypedSlot;
 import dev.compixel.forge.sync.MenuSync;
@@ -29,7 +31,9 @@ import java.util.function.Supplier;
 // 管理一组虚拟槽、以及一组标记槽
 public class NetInterfaceBaseMenu extends BDBaseMenu
 {
-    /** applyMode 的设置项 */
+    /**
+     * applyMode 的设置项
+     */
     public static final int SETTING_POP = 0;
     public static final int SETTING_REDSTONE = 1;
     public static final int SETTING_FUZZY = 2;

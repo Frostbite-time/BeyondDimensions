@@ -1,28 +1,18 @@
-package com.wintercogs.beyonddimensions.common.menu;
+package com.wintercogs.beyonddimensions.common.menu.sync;
 
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.forge.sync.MinecraftSyncCodecs;
 import dev.compixel.sync.MenuSyncOptions;
 import dev.compixel.sync.action.ActionLimits;
-import dev.compixel.sync.state.SyncCodec;
-import dev.compixel.sync.state.SyncCodecs;
-import dev.compixel.sync.state.SyncLimits;
-import dev.compixel.sync.state.SyncMap;
-import dev.compixel.sync.state.SyncSchema;
+import dev.compixel.sync.state.*;
 import dev.compixel.sync.transport.TransferBudget;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 菜单资源同步：服务端为每种资源分配仅在本菜单内有效的句柄，
@@ -31,17 +21,33 @@ import java.util.Set;
  */
 public final class BDMenuResources implements AutoCloseable
 {
-    /** 资源目录条目：句柄与其对应的资源 */
-    public record Definition(long id, IStackKey<?> key) {}
+    /**
+     * 资源目录条目：句柄与其对应的资源
+     */
+    public record Definition(long id, IStackKey<?> key)
+    {
+    }
 
-    /** 某个槽组中的一种资源 */
-    public record Ref(int group, long resource) {}
+    /**
+     * 某个槽组中的一种资源
+     */
+    public record Ref(int group, long resource)
+    {
+    }
 
-    /** 槽组资源的数量与排序用时间戳 */
-    public record Amount(Ref ref, long count, long modified, long inserted) {}
+    /**
+     * 槽组资源的数量与排序用时间戳
+     */
+    public record Amount(Ref ref, long count, long modified, long inserted)
+    {
+    }
 
-    /** 有序槽位的内容，resource 为 0 表示空槽 */
-    public record Ordered(int slot, int index, long resource, long count) {}
+    /**
+     * 有序槽位的内容，resource 为 0 表示空槽
+     */
+    public record Ordered(int slot, int index, long resource, long count)
+    {
+    }
 
     public static final int MAX_NATIVE_BYTES = 1536 * 1024;
     public static final int MAX_ACTION_BYTES = 8 * 1024 * 1024;
@@ -82,7 +88,9 @@ public final class BDMenuResources implements AutoCloseable
             },
             in -> new Ordered(in.readInt(), in.readInt(), in.readLong(), in.readLong()));
 
-    /** 服务端句柄：记录被多少个数量条目或有序槽位引用 */
+    /**
+     * 服务端句柄：记录被多少个数量条目或有序槽位引用
+     */
     private static final class Handle
     {
         final long id;
@@ -144,7 +152,9 @@ public final class BDMenuResources implements AutoCloseable
                 .build();
     }
 
-    /** 以页面自己的状态 schema 加上资源同步绑定菜单 */
+    /**
+     * 以页面自己的状态 schema 加上资源同步绑定菜单
+     */
     public static <M extends BDBaseMenu> MenuSync<M> bind(M menu, SyncSchema<M> view)
     {
         var combined = SyncSchema.<M>builder(view.id(), 1)
@@ -154,7 +164,9 @@ public final class BDMenuResources implements AutoCloseable
         return MenuSync.bind(menu, combined, OPTIONS).onUpdate(m -> m.resources().applyClient());
     }
 
-    /** 仅同步资源的菜单 */
+    /**
+     * 仅同步资源的菜单
+     */
     public static <M extends BDBaseMenu> MenuSync<M> bind(M menu)
     {
         var schema = SyncSchema.<M>builder("beyonddimensions:resources", 2)
@@ -169,7 +181,9 @@ public final class BDMenuResources implements AutoCloseable
         orderedDirty = true;
     }
 
-    /** 服务端每次广播时检查有序槽位是否与已同步内容不同 */
+    /**
+     * 服务端每次广播时检查有序槽位是否与已同步内容不同
+     */
     public void pollOrdered()
     {
         if (closed || orderedDirty)
@@ -196,7 +210,9 @@ public final class BDMenuResources implements AutoCloseable
             orderedDirty = true;
     }
 
-    /** 整组重新扫描，用于无法得知具体变化的情况 */
+    /**
+     * 整组重新扫描，用于无法得知具体变化的情况
+     */
     public void invalidateGroup(int group)
     {
         if (closed)
@@ -233,7 +249,9 @@ public final class BDMenuResources implements AutoCloseable
         return ordered;
     }
 
-    /** 句柄对应的资源；0 为空资源，未知句柄返回 null */
+    /**
+     * 句柄对应的资源；0 为空资源，未知句柄返回 null
+     */
     public IStackKey<?> resolve(long id)
     {
         if (id == 0)
@@ -247,7 +265,9 @@ public final class BDMenuResources implements AutoCloseable
         return handle == null ? null : handle.key;
     }
 
-    /** 资源当前的句柄，没有句柄时返回 0 */
+    /**
+     * 资源当前的句柄，没有句柄时返回 0
+     */
     public long idOf(IStackKey<?> key)
     {
         if (key.isEmpty())

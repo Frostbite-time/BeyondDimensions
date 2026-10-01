@@ -1,8 +1,12 @@
-package com.wintercogs.beyonddimensions.common.menu;
+package com.wintercogs.beyonddimensions.common.menu.sync;
 
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
+import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
@@ -24,16 +28,28 @@ import java.util.Objects;
  */
 public final class BDMenuCommands
 {
-    /** 句柄为 -1 时使用 literal 携带的资源键 */
-    public record Key(long handle, IStackKey<?> literal) {}
+    /**
+     * 句柄为 -1 时使用 literal 携带的资源键
+     */
+    public record Key(long handle, IStackKey<?> literal)
+    {
+    }
 
-    public record Click(int slot, Key key, long amount, int button, boolean shift) {}
+    public record Click(int slot, Key key, long amount, int button, boolean shift)
+    {
+    }
 
-    public record Ghost(int slot, IStackKey<?> key, long amount) {}
+    public record Ghost(int slot, IStackKey<?> key, long amount)
+    {
+    }
 
-    public record Batch(Key key, boolean toStorage) {}
+    public record Batch(Key key, boolean toStorage)
+    {
+    }
 
-    public record Mode(int setting, int value) {}
+    public record Mode(int setting, int value)
+    {
+    }
 
     public record Recipe(List<Key> keys, List<Long> amounts, boolean compress)
     {
@@ -188,13 +204,17 @@ public final class BDMenuCommands
         });
     }
 
-    /** 注册槽位点击、标记与批量转移，并在客户端提示失败的请求 */
+    /**
+     * 注册槽位点击、标记与批量转移，并在客户端提示失败的请求
+     */
     public <M extends BDBaseMenu> MenuSync<M> inventory(MenuSync<M> sync)
     {
         return sync.action(CLICK).action(GHOST).action(BATCH).onActionResult(this::reportFailure);
     }
 
-    /** 注册合成页面的配方填充与合成槽清理 */
+    /**
+     * 注册合成页面的配方填充与合成槽清理
+     */
     public <M extends BDBaseMenu> MenuSync<M> crafting(MenuSync<M> sync)
     {
         return sync.action(RECIPE).action(CRAFT_RETURN).action(CRAFT_PREFERENCE);
@@ -228,7 +248,9 @@ public final class BDMenuCommands
         return key.handle() < 0 ? null : menu.resources().resolve(key.handle());
     }
 
-    /** 已有句柄的资源以句柄引用，否则直接携带资源键 */
+    /**
+     * 已有句柄的资源以句柄引用，否则直接携带资源键
+     */
     public Key reference(IStackKey<?> key)
     {
         long id = menu.resources().idOf(key);
@@ -270,7 +292,9 @@ public final class BDMenuCommands
         return menu.menuSync().request(CRAFT_RETURN, toStorage).queued();
     }
 
-    /** 合成返还方向在首个快照到达后才能发送，之前的设置会暂存 */
+    /**
+     * 合成返还方向在首个快照到达后才能发送，之前的设置会暂存
+     */
     public void preference(boolean toStorage)
     {
         pendingPreference = toStorage;
@@ -284,7 +308,9 @@ public final class BDMenuCommands
             pendingPreference = null;
     }
 
-    /** 批量转移：把背包中所有同种物品存入网络，或把网络中的该物品尽量取到背包 */
+    /**
+     * 批量转移：把背包中所有同种物品存入网络，或把网络中的该物品尽量取到背包
+     */
     private boolean applyBatch(Batch request)
     {
         IStackKey<?> key = resolve(request.key());

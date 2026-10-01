@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
@@ -33,7 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-/** 网络装配器：设置保存在物品组件上，另带五个装备模板槽。 */
+/**
+ * 网络装配器：设置保存在物品组件上，另带五个装备模板槽。
+ */
 public class NetRestockerMenu extends BDBaseMenu
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
@@ -93,7 +96,11 @@ public class NetRestockerMenu extends BDBaseMenu
             SyncCodecs.enumeration(RedStoneControlMode.class), (m, player, value) -> {
                 if (!editable(m) || !WORKING_OPTIONS.contains(value)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
-                if (current != value) { m.menuStack.set(BDDataComponents.CONTROL_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.CONTROL_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
@@ -101,7 +108,11 @@ public class NetRestockerMenu extends BDBaseMenu
             SyncCodecs.enumeration(FuzzyMode.class), (m, player, value) -> {
                 if (!editable(m)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.FUZZY_MODE, FuzzyMode.DISABLE);
-                if (current != value) { m.menuStack.set(BDDataComponents.FUZZY_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.FUZZY_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
@@ -109,13 +120,21 @@ public class NetRestockerMenu extends BDBaseMenu
             SyncCodecs.enumeration(ReceiveMode.class), (m, player, value) -> {
                 if (!editable(m)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.RECEIVE_MODE, ReceiveMode.STOP);
-                if (current != value) { m.menuStack.set(BDDataComponents.RECEIVE_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.RECEIVE_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
     private final MenuSync<NetRestockerMenu> synchronization;
 
-    @Override public MenuSync<NetRestockerMenu> menuSync() { return synchronization; }
+    @Override
+    public MenuSync<NetRestockerMenu> menuSync()
+    {
+        return synchronization;
+    }
 
     public NetRestockerMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -146,20 +165,52 @@ public class NetRestockerMenu extends BDBaseMenu
                 .action(SET_WORKING).action(SET_MATCHING).action(SET_RECYCLE);
     }
 
-    private static boolean editable(NetRestockerMenu menu) { return !menu.player.isSpectator(); }
+    private static boolean editable(NetRestockerMenu menu)
+    {
+        return !menu.player.isSpectator();
+    }
 
-    private void markItemChanged() { player.getInventory().setChanged(); }
+    private void markItemChanged()
+    {
+        player.getInventory().setChanged();
+    }
 
     // 客户端读取接口：本页只暴露自己这三个模式
 
-    public RedStoneControlMode working() { return clientWorking; }
-    public FuzzyMode matching() { return clientMatching; }
-    public ReceiveMode recycle() { return clientRecycle; }
-    public boolean workingEditable() { return workingEditable; }
-    public boolean matchingEditable() { return matchingEditable; }
-    public boolean recycleEditable() { return recycleEditable; }
+    public RedStoneControlMode working()
+    {
+        return clientWorking;
+    }
 
-    public boolean ready() { return synchronization.hasSnapshot(); }
+    public FuzzyMode matching()
+    {
+        return clientMatching;
+    }
+
+    public ReceiveMode recycle()
+    {
+        return clientRecycle;
+    }
+
+    public boolean workingEditable()
+    {
+        return workingEditable;
+    }
+
+    public boolean matchingEditable()
+    {
+        return matchingEditable;
+    }
+
+    public boolean recycleEditable()
+    {
+        return recycleEditable;
+    }
+
+    public boolean ready()
+    {
+        return synchronization.hasSnapshot();
+    }
 
     public boolean requestWorking(int ordinal)
     {
@@ -179,7 +230,9 @@ public class NetRestockerMenu extends BDBaseMenu
         return recycleEditable && ordinal >= 0 && ordinal < modes.length && synchronization.request(SET_RECYCLE, modes[ordinal]).queued();
     }
 
-    /** 工作模式只有开/关两个状态，标签也不走通用的模式命名。 */
+    /**
+     * 工作模式只有开/关两个状态，标签也不走通用的模式命名。
+     */
 
     private void addFlagSlots()
     {

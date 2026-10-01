@@ -451,6 +451,7 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
     private record SortProperties(ButtonState primarySortPolicy, ButtonState secondarySortPolicy, boolean reverse)
     {
     }
+
     /**
      * 取消对源存储的订阅并清空视图
      */

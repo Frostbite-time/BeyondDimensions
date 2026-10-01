@@ -4,27 +4,23 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetOption;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import dev.compixel.forge.sync.MenuSync;
+import dev.compixel.forge.sync.SyncedMenu;
 import dev.compixel.sync.state.SyncCodec;
 import dev.compixel.sync.state.SyncCodecs;
 import dev.compixel.sync.state.SyncSchema;
-import dev.compixel.forge.sync.MenuSync;
-import dev.compixel.forge.sync.SyncedMenu;
 import net.minecraft.core.registries.Registries;
-
-
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
-
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -63,7 +59,10 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu implements SyncedMenu
             MenuSync.bind(this, SYNC_SCHEMA);
 
     @Override
-    public MenuSync<PrimaryNetSwitcherMenu> menuSync() { return synchronization; }
+    public MenuSync<PrimaryNetSwitcherMenu> menuSync()
+    {
+        return synchronization;
+    }
 
     public PrimaryNetSwitcherMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -81,13 +80,20 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu implements SyncedMenu
     }
 
     @Override
-    protected void initUpdate() { refreshSnapshot(); }
+    public void broadcastChanges()
+    {
+        super.broadcastChanges();
+
+        if (player.level().isClientSide()) return;
+
+        refreshSnapshot();
+    }
 
     @Override
-    protected void updateChange() { refreshSnapshot(); }
-
-    @Override
-    public boolean stillValid(@NotNull Player player) { return true; }
+    public boolean stillValid(@NotNull Player player)
+    {
+        return true;
+    }
 
     private void refreshSnapshot()
     {

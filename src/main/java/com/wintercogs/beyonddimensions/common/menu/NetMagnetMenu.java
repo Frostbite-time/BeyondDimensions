@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.*;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
@@ -119,7 +120,11 @@ public class NetMagnetMenu extends BDBaseMenu
             SyncCodecs.enumeration(RedStoneControlMode.class), (m, player, value) -> {
                 if (!editable(m) || !WORKING_OPTIONS.contains(value)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
-                if (current != value) { m.menuStack.set(BDDataComponents.CONTROL_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.CONTROL_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
@@ -127,7 +132,11 @@ public class NetMagnetMenu extends BDBaseMenu
             SyncCodecs.enumeration(FilterMode.class), (m, player, value) -> {
                 if (!editable(m)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.FILTER_MODE, FilterMode.BLACK);
-                if (current != value) { m.menuStack.set(BDDataComponents.FILTER_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.FILTER_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
@@ -135,7 +144,11 @@ public class NetMagnetMenu extends BDBaseMenu
             SyncCodecs.enumeration(HopperItemMode.class), (m, player, value) -> {
                 if (!editable(m)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
-                if (current != value) { m.menuStack.set(BDDataComponents.HOPPER_ITEM_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.HOPPER_ITEM_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
@@ -143,7 +156,11 @@ public class NetMagnetMenu extends BDBaseMenu
             SyncCodecs.enumeration(HopperXpMode.class), (m, player, value) -> {
                 if (!editable(m)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.HOPPER_XP_MODE, HopperXpMode.DENY);
-                if (current != value) { m.menuStack.set(BDDataComponents.HOPPER_XP_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.HOPPER_XP_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
@@ -151,7 +168,11 @@ public class NetMagnetMenu extends BDBaseMenu
             SyncCodecs.enumeration(HopperFluidMode.class), (m, player, value) -> {
                 if (!editable(m)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
-                if (current != value) { m.menuStack.set(BDDataComponents.HOPPER_FLUID_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.HOPPER_FLUID_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
@@ -159,7 +180,11 @@ public class NetMagnetMenu extends BDBaseMenu
             SyncCodecs.enumeration(HopperNBTMode.class), (m, player, value) -> {
                 if (!editable(m)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.HOPPER_NBT_MODE, HopperNBTMode.DENY);
-                if (current != value) { m.menuStack.set(BDDataComponents.HOPPER_NBT_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.HOPPER_NBT_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
@@ -167,13 +192,21 @@ public class NetMagnetMenu extends BDBaseMenu
             SyncCodecs.enumeration(HopperRangeMode.class), (m, player, value) -> {
                 if (!editable(m)) return false;
                 var current = m.menuStack.getOrDefault(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
-                if (current != value) { m.menuStack.set(BDDataComponents.HOPPER_RANGE_MODE, value); m.markItemChanged(); }
+                if (current != value)
+                {
+                    m.menuStack.set(BDDataComponents.HOPPER_RANGE_MODE, value);
+                    m.markItemChanged();
+                }
                 return true;
             });
 
     private final MenuSync<NetMagnetMenu> synchronization;
 
-    @Override public MenuSync<NetMagnetMenu> menuSync() { return synchronization; }
+    @Override
+    public MenuSync<NetMagnetMenu> menuSync()
+    {
+        return synchronization;
+    }
 
     public NetMagnetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -207,29 +240,92 @@ public class NetMagnetMenu extends BDBaseMenu
                 .action(SET_FLUIDS).action(SET_COMPONENTS).action(SET_RANGE);
     }
 
-    private static boolean editable(NetMagnetMenu menu) { return !menu.player.isSpectator(); }
+    private static boolean editable(NetMagnetMenu menu)
+    {
+        return !menu.player.isSpectator();
+    }
 
-    private void markItemChanged() { player.getInventory().setChanged(); }
+    private void markItemChanged()
+    {
+        player.getInventory().setChanged();
+    }
 
     // 客户端读取接口：本页只暴露自己这七个模式
 
-    public RedStoneControlMode working() { return clientWorking; }
-    public FilterMode filter() { return clientFilter; }
-    public HopperItemMode items() { return clientItems; }
-    public HopperXpMode experience() { return clientExperience; }
-    public HopperFluidMode fluids() { return clientFluids; }
-    public HopperNBTMode components() { return clientComponents; }
-    public HopperRangeMode range() { return clientRange; }
+    public RedStoneControlMode working()
+    {
+        return clientWorking;
+    }
 
-    public boolean workingEditable() { return workingEditable; }
-    public boolean filterEditable() { return filterEditable; }
-    public boolean itemsEditable() { return itemsEditable; }
-    public boolean experienceEditable() { return experienceEditable; }
-    public boolean fluidsEditable() { return fluidsEditable; }
-    public boolean componentsEditable() { return componentsEditable; }
-    public boolean rangeEditable() { return rangeEditable; }
+    public FilterMode filter()
+    {
+        return clientFilter;
+    }
 
-    public boolean ready() { return synchronization.hasSnapshot(); }
+    public HopperItemMode items()
+    {
+        return clientItems;
+    }
+
+    public HopperXpMode experience()
+    {
+        return clientExperience;
+    }
+
+    public HopperFluidMode fluids()
+    {
+        return clientFluids;
+    }
+
+    public HopperNBTMode components()
+    {
+        return clientComponents;
+    }
+
+    public HopperRangeMode range()
+    {
+        return clientRange;
+    }
+
+    public boolean workingEditable()
+    {
+        return workingEditable;
+    }
+
+    public boolean filterEditable()
+    {
+        return filterEditable;
+    }
+
+    public boolean itemsEditable()
+    {
+        return itemsEditable;
+    }
+
+    public boolean experienceEditable()
+    {
+        return experienceEditable;
+    }
+
+    public boolean fluidsEditable()
+    {
+        return fluidsEditable;
+    }
+
+    public boolean componentsEditable()
+    {
+        return componentsEditable;
+    }
+
+    public boolean rangeEditable()
+    {
+        return rangeEditable;
+    }
+
+    public boolean ready()
+    {
+        return synchronization.hasSnapshot();
+    }
 
     public boolean requestWorking(int ordinal)
     {
@@ -237,19 +333,44 @@ public class NetMagnetMenu extends BDBaseMenu
                 && synchronization.request(SET_WORKING, WORKING_OPTIONS.get(ordinal)).queued();
     }
 
-    public boolean requestFilter(int ordinal) { return request(SET_FILTER, FilterMode.values(), ordinal, filterEditable); }
-    public boolean requestItems(int ordinal) { return request(SET_ITEMS, HopperItemMode.values(), ordinal, itemsEditable); }
-    public boolean requestExperience(int ordinal) { return request(SET_EXPERIENCE, HopperXpMode.values(), ordinal, experienceEditable); }
-    public boolean requestFluids(int ordinal) { return request(SET_FLUIDS, HopperFluidMode.values(), ordinal, fluidsEditable); }
-    public boolean requestComponents(int ordinal) { return request(SET_COMPONENTS, HopperNBTMode.values(), ordinal, componentsEditable); }
-    public boolean requestRange(int ordinal) { return request(SET_RANGE, HopperRangeMode.values(), ordinal, rangeEditable); }
+    public boolean requestFilter(int ordinal)
+    {
+        return request(SET_FILTER, FilterMode.values(), ordinal, filterEditable);
+    }
+
+    public boolean requestItems(int ordinal)
+    {
+        return request(SET_ITEMS, HopperItemMode.values(), ordinal, itemsEditable);
+    }
+
+    public boolean requestExperience(int ordinal)
+    {
+        return request(SET_EXPERIENCE, HopperXpMode.values(), ordinal, experienceEditable);
+    }
+
+    public boolean requestFluids(int ordinal)
+    {
+        return request(SET_FLUIDS, HopperFluidMode.values(), ordinal, fluidsEditable);
+    }
+
+    public boolean requestComponents(int ordinal)
+    {
+        return request(SET_COMPONENTS, HopperNBTMode.values(), ordinal, componentsEditable);
+    }
+
+    public boolean requestRange(int ordinal)
+    {
+        return request(SET_RANGE, HopperRangeMode.values(), ordinal, rangeEditable);
+    }
 
     private <E extends Enum<E>> boolean request(MenuAction<NetMagnetMenu, E> action, E[] modes, int ordinal, boolean enabled)
     {
         return enabled && ordinal >= 0 && ordinal < modes.length && synchronization.request(action, modes[ordinal]).queued();
     }
 
-    /** 工作模式只有开/关两个状态，标签也不走通用的模式命名。 */
+    /**
+     * 工作模式只有开/关两个状态，标签也不走通用的模式命名。
+     */
 
     private void addFlagSlots()
     {
