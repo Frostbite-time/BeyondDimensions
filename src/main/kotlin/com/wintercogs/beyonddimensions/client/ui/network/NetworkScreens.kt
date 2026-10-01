@@ -69,6 +69,7 @@ import dev.compixel.ui.ore.input.OreTextField
 import dev.compixel.ui.ore.layout.OrePanel
 import dev.compixel.ui.ore.layout.OreSurface
 import dev.compixel.ui.ore.overlay.OreTooltip
+import dev.compixel.ui.ore.overlay.OreTooltipMode
 import dev.compixel.ui.ore.scroll.OreScrollbar
 import dev.compixel.ui.ore.theme.OreTheme
 import java.util.Locale
@@ -400,7 +401,7 @@ private fun SwitcherView(binding: UiBinding<SwitcherState, SwitcherAction>, labe
                     }
                 }
                 OreTheme(id = BdThemes.Field) {
-                    OreTooltip(labels.searchTooltip, Modifier.at(8, 20)) {
+                    OreTooltip(labels.searchTooltip, Modifier.at(8, 20), mode = OreTooltipMode.Immediate) {
                         Box(
                             Modifier.width(160.dp).onPointerEvent(PointerEventType.Press, PointerEventPass.Initial) {
                                 // 右键清空搜索框，与旧版相同
@@ -412,12 +413,16 @@ private fun SwitcherView(binding: UiBinding<SwitcherState, SwitcherAction>, labe
                     }
                 }
                 OreText(state.current, Modifier.at(8, 37 + SHIFT), maxLines = 1)
-                OreTooltip(labels.clearTooltip, Modifier.at(8, 47 + SHIFT)) {
+                OreTooltip(labels.clearTooltip, Modifier.at(8, 47 + SHIFT), mode = OreTooltipMode.Immediate) {
                     BdButton(labels.clear, { binding.send(SwitcherAction.ClearPrimary) }, Modifier.size(160.dp, 20.dp))
                 }
                 OreText(labels.recent, Modifier.at(8, 69 + SHIFT), maxLines = 1)
                 for ((index, recent) in state.recent.withIndex())
-                    OreTooltip(recent.second, Modifier.at(8 + index * 54, 78 + SHIFT)) {
+                    OreTooltip(
+                        recent.second,
+                        Modifier.at(8 + index * 54, 78 + SHIFT),
+                        mode = OreTooltipMode.Immediate,
+                    ) {
                         BdButton("#${recent.first}", { binding.send(SwitcherAction.SetPrimary(recent.first)) }, Modifier.size(50.dp, 16.dp))
                     }
                 OreText(labels.networks, Modifier.at(8, 96 + SHIFT), maxLines = 1)
@@ -434,7 +439,7 @@ private fun SwitcherView(binding: UiBinding<SwitcherState, SwitcherAction>, labe
                                 { renaming = null },
                             )
                         else
-                            OreTooltip(option.tooltip) {
+                            OreTooltip(option.tooltip, mode = OreTooltipMode.Immediate) {
                                 BdButton(
                                     option.label,
                                     { binding.send(SwitcherAction.SetPrimary(option.id)) },
