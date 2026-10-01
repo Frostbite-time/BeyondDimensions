@@ -27,7 +27,8 @@ repositories {
         forRepository {
             maven {
                 name = 'CompixelUI'
-                url = 'https://maven.wintercogs.com/releases'
+                // Local development can override this with -Pcompixel_repository=<Maven directory>.
+                url = uri(providers.gradleProperty('compixel_repository').orElse('https://maven.wintercogs.com/releases').get())
             }
         }
         filter { includeGroup 'dev.compixel' }

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.client.ui.base
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants
-import dev.compixel.forge.item.IconRefresh
+import dev.compixel.forge.drawing.NativeRefresh
 import dev.compixel.forge.item.ItemIcon
 import net.minecraft.resources.ResourceLocation
 
@@ -15,13 +15,13 @@ object BdIcons {
     fun sprite(name: String): ItemIcon =
         icons.getOrPut(name) {
             val sprite = ResourceLocation.fromNamespaceAndPath(BDConstants.MODID, "widget/$name")
-            ItemIcon.drawn("sprite:$sprite", { graphics -> graphics.blitSprite(sprite, 0, 0, 16, 16) }, IconRefresh.STATIC)
+            ItemIcon.drawn("sprite:$sprite", { graphics -> graphics.blitSprite(sprite, 0, 0, 16, 16) }, NativeRefresh.STATIC)
         }
 
     /** 空的过滤槽里的向下箭头，取自旧版过滤槽贴图 */
     val filterMarker: ItemIcon by lazy {
         val texture = ResourceLocation.fromNamespaceAndPath(BDConstants.MODID, "textures/gui/filter_slots.png")
-        ItemIcon.drawn("filter-marker", { graphics -> graphics.blit(texture, 0, 0, 8f, 1f, 16, 16, 176, 18) }, IconRefresh.STATIC)
+        ItemIcon.drawn("filter-marker", { graphics -> graphics.blit(texture, 0, 0, 8f, 1f, 16, 16, 176, 18) }, NativeRefresh.STATIC)
     }
 
     private val furnace = ResourceLocation.fromNamespaceAndPath(BDConstants.MODID, "textures/gui/net_furnace.png")
@@ -43,7 +43,7 @@ object BdIcons {
                     graphics.blit(furnace, 1, 0, 32f, (61 + top).toFloat(), 14, height, 230, 210)
                     if (done > 0) graphics.blitSprite(cooked, 14, 19, 0, top, 1, 0, 14, done)
                 },
-                IconRefresh.STATIC,
+                NativeRefresh.STATIC,
             )
         }
 
@@ -56,7 +56,7 @@ object BdIcons {
                     graphics.blit(furnace, 1, 1, 31f, 109f, 14, 14, 230, 210)
                     if (rows > 0) graphics.blitSprite(burning, 14, 14, 0, 14 - rows, 1, 15 - rows, 14, rows)
                 },
-                IconRefresh.STATIC,
+                NativeRefresh.STATIC,
             )
         }
 }

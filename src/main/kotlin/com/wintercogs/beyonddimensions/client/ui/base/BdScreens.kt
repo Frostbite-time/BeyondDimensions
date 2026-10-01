@@ -113,7 +113,7 @@ private constructor(
         ComposeMenuSlots(ownedMenu, adapter),
         BdThemes.Screen,
         NativeItemOptions(cacheCapacity = 512),
-        { slots -> CompositionLocalProvider(LocalOutsideAreas provides outside) { content(slots) } },
+        content = { slots -> CompositionLocalProvider(LocalOutsideAreas provides outside) { content(slots) } },
     ) {
     protected constructor(
         menu: M,
