@@ -65,6 +65,7 @@ import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OrePixelArt
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.overlay.OreTooltip
+import dev.compixel.ui.ore.overlay.OreTooltipMode
 import kotlin.math.roundToInt
 
 /** 窗口：切角的冰白面板，细线边框与柔和阴影；高度随内容 */
@@ -208,7 +209,7 @@ fun BdGlyphButton(
             OreIcon(art, Modifier.size(glyphSize), color = tint)
         }
     }
-    if (description != null) OreTooltip(description) { button() } else button()
+    if (description != null) OreTooltip(description, mode = OreTooltipMode.Immediate) { button() } else button()
 }
 
 /** 分组标题：强调色方点、标题与延伸到边缘的细线 */

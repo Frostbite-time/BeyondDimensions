@@ -73,6 +73,7 @@ import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.overlay.OreTooltip
+import dev.compixel.ui.ore.overlay.OreTooltipMode
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -313,7 +314,7 @@ private fun RailTab(label: String, selected: Boolean, art: dev.compixel.ui.ore.d
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
-    OreTooltip(label) {
+    OreTooltip(label, mode = OreTooltipMode.Immediate) {
         Box(
             Modifier.size(20.dp)
                 .hoverable(interaction)
@@ -356,7 +357,7 @@ private fun Toolbar(state: StorageState, send: (StorageAction) -> Unit, text: St
     val colors = Bd.colors
     Row(Modifier.width(width.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.weight(1f)) {
-            OreTooltip(text.searchHelp) {
+            OreTooltip(text.searchHelp, mode = OreTooltipMode.Immediate) {
                 BdSearchField(
                     value,
                     {

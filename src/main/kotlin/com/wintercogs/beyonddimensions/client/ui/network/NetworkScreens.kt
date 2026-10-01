@@ -65,6 +65,7 @@ import dev.compixel.host.UiBinding
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.overlay.OreTooltip
+import dev.compixel.ui.ore.overlay.OreTooltipMode
 import dev.compixel.ui.ore.scroll.OreScrollbar
 import java.util.UUID
 import net.minecraft.client.Minecraft
@@ -242,7 +243,7 @@ private fun ActionButton(label: String, hint: String, danger: Boolean, onClick: 
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val ink = if (danger) colors.danger else colors.accentDeep
-    OreTooltip(hint) {
+    OreTooltip(hint, mode = OreTooltipMode.Immediate) {
         Box(
             Modifier.height(13.dp)
                 .hoverable(interaction)
