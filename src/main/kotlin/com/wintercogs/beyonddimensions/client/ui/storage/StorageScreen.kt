@@ -191,11 +191,13 @@ private fun <M : DimensionsNetMenu> StorageView(
                     Header(labels, state, send)
                     Box(Modifier.slotAt(8, 25)) { OreTheme(id = BdThemes.Grid) { SlotGrid(slots, labels.storage.take(state.lines * 9)) } }
                     Box(Modifier.at(174, 25).size(12.dp, (state.lines * ROW - 2).dp)) {
-                        // 不可见的内容高度等于全部结果的行数，滚动条据此计算位置与长度
+                        // 可见区与内容都扣除边框的 2dp，使滚动范围恰好等于可滚动的行数
                         Box(Modifier.width(0.dp).fillMaxHeight().verticalScroll(scroll)) {
-                            Spacer(Modifier.height(((state.maxLine + state.lines) * ROW).dp))
+                            Spacer(Modifier.height(((state.maxLine + state.lines) * ROW - 2).dp))
                         }
-                        OreTheme(id = BdThemes.Scroller) { OreScrollbar(scroll, Modifier.fillMaxSize()) }
+                        if (state.maxLine > 0) {
+                            OreTheme(id = BdThemes.Scroller) { OreScrollbar(scroll, Modifier.fillMaxSize()) }
+                        }
                     }
                     extra(slots, state, send)
                     OreText(labels.inventory, Modifier.at(8, upper + extraHeight - 3), maxLines = 1)

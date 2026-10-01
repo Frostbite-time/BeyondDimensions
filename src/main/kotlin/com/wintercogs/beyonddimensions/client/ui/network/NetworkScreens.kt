@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -381,6 +382,7 @@ private fun SwitcherView(binding: UiBinding<SwitcherState, SwitcherAction>, labe
     val query = search.trim().lowercase(Locale.ROOT)
     val shown = if (query.isEmpty()) state.options else state.options.filter { query in it.searchable }
     val list = rememberLazyListState()
+    val showScrollbar by remember { derivedStateOf { list.canScrollForward || list.canScrollBackward } }
     Box(Modifier.fillMaxSize().background(OreTheme.colors.backdrop), contentAlignment = Alignment.Center) {
         // Ore 输入框比原版高 6 像素，搜索框以下的内容与面板一起下移 6
         OrePanel("", Modifier.size(176.dp, (239 + SHIFT).dp), showTitleBar = false, contentPadding = PaddingValues(0.dp)) {
@@ -445,7 +447,9 @@ private fun SwitcherView(binding: UiBinding<SwitcherState, SwitcherAction>, labe
                     }
                 }
                 // 与存储界面相同的 Ore 滚动条，放在旧版滑块所在的一列（轨道内 12 宽、120 高）
-                OreTheme(id = BdThemes.Scroller) { OreScrollbar(list, Modifier.at(160, 108 + SHIFT).size(12.dp, 120.dp)) }
+                if (showScrollbar) {
+                    OreTheme(id = BdThemes.Scroller) { OreScrollbar(list, Modifier.at(160, 108 + SHIFT).size(12.dp, 120.dp)) }
+                }
             }
         }
     }
