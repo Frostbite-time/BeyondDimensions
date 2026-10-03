@@ -47,7 +47,6 @@ import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
-import dev.compixel.host.UiBinding
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
 import net.minecraft.network.chat.Component
@@ -133,7 +132,7 @@ class MachineController(
     private val ready: () -> Boolean,
     private val settings: List<Setting>,
     private val readout: () -> MachineReadout? = { null },
-) : BdController<MachineState, MachineAction>(MachineState()) {
+) : BdController<MachineState, MachineAction> {
     /** 设置栏在首个快照之前就要占位，窗口宽度不随同步跳动 */
     val hasSettings = settings.isNotEmpty()
 
@@ -178,15 +177,25 @@ class MachineText {
 
 /**
  * 机器页面：左侧是机器内容与玩家背包，右侧是设置。
- * [content] 只负责左上方的机器内容。
+ * 子类只提供左上方的机器内容 [Machine]。
  */
 abstract class MachineScreen<M : BDBaseMenu>(
     menu: M,
     title: Component,
-    controller: MachineController,
-    layout: MachineLayout,
-    content: @Composable ColumnScope.(MachineState, ComposeMenuSlots<M>) -> Unit,
-) : BdInventoryScreen<M>(menu, title, controller, { slots -> MachineView(controller.ui, controller.hasSettings, slots, layout, content) })
+    private val controller: MachineController,
+    protected val layout: MachineLayout,
+) : BdInventoryScreen<M, MachineState, MachineAction>(menu, title) {
+    final override fun snapshot() = controller.snapshot()
+
+    final override fun handle(action: MachineAction) = controller.handle(action)
+
+    /** 左上方的机器内容 */
+    @Composable protected abstract fun ColumnScope.Machine(state: MachineState, slots: ComposeMenuSlots<M>)
+
+    @Composable
+    final override fun Page(state: MachineState, slots: ComposeMenuSlots<M>) =
+        MachineView(state, ::send, controller.hasSettings, slots, layout) { current, shown -> Machine(current, shown) }
+}
 
 private const val PAD = 8
 private const val GAP = 10
@@ -195,13 +204,13 @@ private const val RIGHT = 140
 
 @Composable
 private fun <M : BDBaseMenu> MachineView(
-    binding: UiBinding<MachineState, MachineAction>,
+    state: MachineState,
+    send: (MachineAction) -> Unit,
     hasSettings: Boolean,
     slots: ComposeMenuSlots<M>,
     layout: MachineLayout,
     content: @Composable ColumnScope.(MachineState, ComposeMenuSlots<M>) -> Unit,
 ) {
-    val state = binding.value
     val colors = Bd.colors
     val screen = LocalBdScreen.current
     Box(Modifier.fillMaxSize().background(Color(0x400A1423)), contentAlignment = Alignment.Center) {
@@ -225,7 +234,7 @@ private fun <M : BDBaseMenu> MachineView(
                     Spacer(Modifier.width(GAP.dp))
                     Column(Modifier.width(RIGHT.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         BdSectionLabel(layout.text.settings)
-                        state.settings.forEachIndexed { index, setting -> SettingItem(index, setting) { binding.send(it) } }
+                        state.settings.forEachIndexed { index, setting -> SettingItem(index, setting, send) }
                     }
                 }
             }

@@ -9,7 +9,7 @@ import net.minecraft.client.gui.screens.Screen;
 /**
  * 向 JEI 报告 Compose 界面实际占据的区域，使 JEI 的物品列表避开界面
  */
-public final class ComposeJeiScreenHandler<S extends ComposeInventoryScreen<?>> implements IScreenHandler<S>
+public final class ComposeJeiScreenHandler<S extends ComposeInventoryScreen<?, ?, ?>> implements IScreenHandler<S>
 {
     @Override
     public IGuiProperties apply(S screen)

@@ -61,7 +61,6 @@ import com.wintercogs.beyonddimensions.network.packet.c2s.PrimaryNetSwitchAction
 import com.wintercogs.beyonddimensions.network.packet.c2s.RenameNetPacket
 import com.wintercogs.beyonddimensions.util.UIDataHelper
 import dev.compixel.forge.item.ItemIcon
-import dev.compixel.host.UiBinding
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.overlay.OreTooltip
@@ -115,7 +114,7 @@ sealed interface NetControlRequest {
     data object Refresh : NetControlRequest
 }
 
-class NetControlController(private val menu: NetControlMenu) : BdController<NetControlState, NetControlRequest>(NetControlState()) {
+class NetControlController(private val menu: NetControlMenu) : BdController<NetControlState, NetControlRequest> {
     private var members = emptyList<NetControlMenu.Member>()
     private var views = emptyList<MemberView>()
 
@@ -148,13 +147,16 @@ class NetControlController(private val menu: NetControlMenu) : BdController<NetC
     }
 }
 
-class NetControlScreen private constructor(menu: NetControlMenu, title: Component, controller: NetControlController, text: NetControlText) :
-    BdMenuScreen<NetControlMenu>(menu, title, controller, { NetControlView(controller.ui, text) }) {
-    constructor(
-        menu: NetControlMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(menu, title, NetControlController(menu), NetControlText(title.string))
+class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Component) :
+    BdMenuScreen<NetControlMenu, NetControlState, NetControlRequest>(menu, title) {
+    private val controller = NetControlController(menu)
+    private val text = NetControlText(title.string)
+
+    override fun snapshot() = controller.snapshot()
+
+    override fun handle(action: NetControlRequest) = controller.handle(action)
+
+    @Composable override fun Page(state: NetControlState) = NetControlView(state, ::send, text)
 }
 
 class NetControlText(val title: String) {
@@ -173,8 +175,7 @@ class NetControlText(val title: String) {
 }
 
 @Composable
-private fun NetControlView(binding: UiBinding<NetControlState, NetControlRequest>, text: NetControlText) {
-    val state = binding.value
+private fun NetControlView(state: NetControlState, send: (NetControlRequest) -> Unit, text: NetControlText) {
     val colors = Bd.colors
     val screen = LocalBdScreen.current
     Box(Modifier.fillMaxSize().background(Color(0x400A1423)), contentAlignment = Alignment.Center) {
@@ -191,7 +192,7 @@ private fun NetControlView(binding: UiBinding<NetControlState, NetControlRequest
                 BdSectionLabel(text.members) {
                     OreText(state.members.size.toString(), color = colors.faint, style = Bd.caption)
                     Spacer(Modifier.width(3.dp))
-                    BdGlyphButton(OreGlyph.CycleArrows, text.refresh, { binding.send(NetControlRequest.Refresh) }, size = 11.dp, glyphSize = 7.dp)
+                    BdGlyphButton(OreGlyph.CycleArrows, text.refresh, { send(NetControlRequest.Refresh) }, size = 11.dp, glyphSize = 7.dp)
                 }
                 Spacer(Modifier.height(5.dp))
                 if (state.members.isEmpty()) {
@@ -199,7 +200,7 @@ private fun NetControlView(binding: UiBinding<NetControlState, NetControlRequest
                 } else {
                     ScrollList(200) {
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            for (member in state.members) MemberRow(member, text) { binding.send(it) }
+                            for (member in state.members) MemberRow(member, text) { send(it) }
                         }
                     }
                 }
@@ -274,7 +275,7 @@ sealed interface PrimaryNetRequest {
     data object OpenTerminal : PrimaryNetRequest
 }
 
-class PrimaryNetController(private val menu: PrimaryNetSwitcherMenu) : BdController<PrimaryNetState, PrimaryNetRequest>(PrimaryNetState()) {
+class PrimaryNetController(private val menu: PrimaryNetSwitcherMenu) : BdController<PrimaryNetState, PrimaryNetRequest> {
     override fun snapshot() =
         PrimaryNetState(
             menu.menuSync().hasSnapshot(),
@@ -315,13 +316,16 @@ class PrimaryNetController(private val menu: PrimaryNetSwitcherMenu) : BdControl
     }
 }
 
-class PrimaryNetScreen private constructor(menu: PrimaryNetSwitcherMenu, title: Component, controller: PrimaryNetController, text: PrimaryNetText) :
-    BdMenuScreen<PrimaryNetSwitcherMenu>(menu, title, controller, { PrimaryNetView(controller.ui, text) }) {
-    constructor(
-        menu: PrimaryNetSwitcherMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(menu, title, PrimaryNetController(menu), PrimaryNetText(title.string))
+class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title: Component) :
+    BdMenuScreen<PrimaryNetSwitcherMenu, PrimaryNetState, PrimaryNetRequest>(menu, title) {
+    private val controller = PrimaryNetController(menu)
+    private val text = PrimaryNetText(title.string)
+
+    override fun snapshot() = controller.snapshot()
+
+    override fun handle(action: PrimaryNetRequest) = controller.handle(action)
+
+    @Composable override fun Page(state: PrimaryNetState) = PrimaryNetView(state, ::send, text)
 }
 
 class PrimaryNetText(val title: String) {
@@ -340,8 +344,7 @@ class PrimaryNetText(val title: String) {
 }
 
 @Composable
-private fun PrimaryNetView(binding: UiBinding<PrimaryNetState, PrimaryNetRequest>, text: PrimaryNetText) {
-    val state = binding.value
+private fun PrimaryNetView(state: PrimaryNetState, send: (PrimaryNetRequest) -> Unit, text: PrimaryNetText) {
     val colors = Bd.colors
     val screen = LocalBdScreen.current
     var query by remember { mutableStateOf("") }
@@ -377,11 +380,11 @@ private fun PrimaryNetView(binding: UiBinding<PrimaryNetState, PrimaryNetRequest
                                     option.id == state.primary,
                                     renaming == option.id,
                                     text,
-                                    onSelect = { binding.send(PrimaryNetRequest.Select(option.id)) },
+                                    onSelect = { send(PrimaryNetRequest.Select(option.id)) },
                                     onRename = { renaming = option.id },
                                     onCommit = { name ->
                                         renaming = null
-                                        if (name != null) binding.send(PrimaryNetRequest.Rename(option.id, name))
+                                        if (name != null) send(PrimaryNetRequest.Rename(option.id, name))
                                     },
                                 )
                             }
@@ -393,11 +396,11 @@ private fun PrimaryNetView(binding: UiBinding<PrimaryNetState, PrimaryNetRequest
                     OreText(text.primary, color = colors.faint, style = Bd.caption, maxLines = 1)
                     Spacer(Modifier.width(3.dp))
                     OreText(current?.name ?: text.none, Modifier.weight(1f), color = colors.text, style = Bd.caption, maxLines = 1)
-                    BdChip({ binding.send(PrimaryNetRequest.Clear) }, enabled = current != null) {
+                    BdChip({ send(PrimaryNetRequest.Clear) }, enabled = current != null) {
                         OreText(text.clear, color = colors.muted, style = Bd.caption, maxLines = 1)
                     }
                     Spacer(Modifier.width(4.dp))
-                    BdChip({ binding.send(PrimaryNetRequest.OpenTerminal) }, enabled = current != null, active = current != null) {
+                    BdChip({ send(PrimaryNetRequest.OpenTerminal) }, enabled = current != null, active = current != null) {
                         OreText(text.open, color = colors.accentDeep, style = Bd.caption, maxLines = 1)
                     }
                 }

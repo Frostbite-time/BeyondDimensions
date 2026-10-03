@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.client.ui.storage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
 import com.wintercogs.beyonddimensions.client.ui.machine.MachineController
 import com.wintercogs.beyonddimensions.client.ui.machine.MachineLayout
 import com.wintercogs.beyonddimensions.client.ui.machine.MachineScreen
+import com.wintercogs.beyonddimensions.client.ui.machine.MachineState
 import com.wintercogs.beyonddimensions.client.ui.machine.ModeSetting
 import com.wintercogs.beyonddimensions.client.ui.machine.ToggleSetting
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
@@ -30,19 +32,16 @@ import net.minecraft.world.entity.player.Inventory
 /**
  * 网络接口：每行标记槽下方是对应的缓存槽，标记决定从网络中保持哪些资源。
  */
-class InterfaceScreen private constructor(menu: NetInterfaceBaseMenu, title: Component, layout: MachineLayout) :
+class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: Component) :
     MachineScreen<NetInterfaceBaseMenu>(
         menu,
         title,
         MachineController(menu::ready, settings(menu)),
-        layout,
-        { _, slots -> InterfaceSlots(layout, slots) },
+        MachineLayout(menu, BDBlocks.NET_INTERFACE.get(), title.string),
     ) {
-    constructor(
-        menu: NetInterfaceBaseMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(menu, title, MachineLayout(menu, BDBlocks.NET_INTERFACE.get(), title.string))
+    @Composable
+    override fun ColumnScope.Machine(state: MachineState, slots: ComposeMenuSlots<NetInterfaceBaseMenu>) =
+        InterfaceSlots(layout, slots)
 
     private companion object {
         fun settings(menu: NetInterfaceBaseMenu) =

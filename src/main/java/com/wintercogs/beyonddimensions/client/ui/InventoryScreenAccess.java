@@ -22,7 +22,7 @@ public final class InventoryScreenAccess
      */
     public static BDBaseMenu menu(Screen screen)
     {
-        if (screen instanceof ComposeInventoryScreen<?> compose && !compose.getInventory().getInteractionsEnabled())
+        if (screen instanceof ComposeInventoryScreen<?, ?, ?> compose && !compose.getInventory().getInteractionsEnabled())
             return null;
         return screen instanceof MenuAccess<?> access && access.getMenu() instanceof BDBaseMenu menu ? menu : null;
     }
@@ -32,7 +32,7 @@ public final class InventoryScreenAccess
      */
     public static Rect2i slot(Screen screen, Slot slot)
     {
-        if (screen instanceof ComposeInventoryScreen<?> compose)
+        if (screen instanceof ComposeInventoryScreen<?, ?, ?> compose)
             return rectangle(compose.getInventory().bounds(slot.index));
         return null;
     }
@@ -42,7 +42,7 @@ public final class InventoryScreenAccess
      */
     public static Rect2i area(Screen screen)
     {
-        if (screen instanceof ComposeInventoryScreen<?> compose)
+        if (screen instanceof ComposeInventoryScreen<?, ?, ?> compose)
             return rectangle(compose.getInventory().areaBounds());
         return null;
     }

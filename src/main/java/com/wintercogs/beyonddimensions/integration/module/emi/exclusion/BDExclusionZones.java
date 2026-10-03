@@ -14,7 +14,7 @@ public class BDExclusionZones implements EmiExclusionArea<Screen>
     @Override
     public void addExclusionArea(Screen screen, Consumer<Bounds> consumer)
     {
-        if (!(screen instanceof ComposeInventoryScreen<?>))
+        if (!(screen instanceof ComposeInventoryScreen<?, ?, ?>))
             return;
         var area = InventoryScreenAccess.area(screen);
         if (area != null)

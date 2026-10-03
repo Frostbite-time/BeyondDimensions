@@ -68,7 +68,6 @@ import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
-import dev.compixel.host.UiBinding
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OreText
@@ -126,18 +125,22 @@ class StorageText {
 }
 
 /** 存储终端与合成终端 */
-class StorageScreen
-private constructor(
-    private val storageMenu: DimensionsNetMenu,
-    title: Component,
-    private val controller: StorageController,
-    layout: StorageLayout,
-) : BdInventoryScreen<DimensionsNetMenu>(storageMenu, title, controller, { slots -> StorageView(controller.ui, slots, layout) }) {
-    constructor(
-        menu: DimensionsNetMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(menu, title, StorageController(menu), StorageLayout(menu))
+class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inventory, title: Component) :
+    BdInventoryScreen<DimensionsNetMenu, StorageState, StorageAction>(storageMenu, title) {
+    private val controller = StorageController(storageMenu)
+    private val layout = StorageLayout(storageMenu)
+
+    override fun snapshot() = controller.snapshot()
+
+    override fun handle(action: StorageAction) = controller.handle(action)
+
+    @Composable
+    override fun Page(state: StorageState, slots: ComposeMenuSlots<DimensionsNetMenu>) = StorageView(state, ::send, slots, layout)
+
+    override fun menuClosed() {
+        super.menuClosed()
+        controller.saveSearch()
+    }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT) storageMenu.hasShiftDown = true
@@ -185,9 +188,12 @@ private fun chromeHeight(tabs: Boolean, status: Boolean, craft: Boolean): Int {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun StorageView(binding: UiBinding<StorageState, StorageAction>, slots: ComposeMenuSlots<DimensionsNetMenu>, layout: StorageLayout) {
-    val state = binding.value
-    val send: (StorageAction) -> Unit = { binding.send(it) }
+private fun StorageView(
+    state: StorageState,
+    send: (StorageAction) -> Unit,
+    slots: ComposeMenuSlots<DimensionsNetMenu>,
+    layout: StorageLayout,
+) {
     val colors = Bd.colors
     // 方块终端可以在本地隐藏合成区；可切换的终端则重新打开对应的菜单
     var craftHidden by remember { mutableStateOf(false) }

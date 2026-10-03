@@ -29,77 +29,41 @@ import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode
 import com.wintercogs.beyonddimensions.common.menu.NetEnergyMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
-import dev.compixel.host.UiBinding
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OreText
-import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 import kotlin.math.abs
 
 
-class NetEnergyScreen private constructor(
+class NetEnergyScreen(
     menu: NetEnergyMenu,
-    title: Component,
-    private val ui: UiBinding<NetEnergyState, NetEnergyAction>,
-    icon: ItemIcon,
-    text: NetEnergyText
-) : BdInventoryScreen<NetEnergyMenu>(
-    menu,
-    title,
-    null,
-    content = { slots -> NetEnergyContent(slots, ui.value, icon, text) { action -> ui.send(action) } }
-) {
-    constructor(
-        menu: NetEnergyMenu,
-        inventory: Inventory,
-        title: Component
-    ) : this(
-        menu,
-        title,
-        UiBinding(
-            NetEnergyState(
-                PopMode.STOP,
-                RedStoneControlMode.IGNORE,
-                0, 0, 0
-            )
-        ),
-        ItemIcon.snapshot(ItemStack(BDBlocks.NET_ENERGY_PATHWAY.get())),
-        NetEnergyText(title.string)
+    inventory: Inventory,
+    title: Component
+) : BdInventoryScreen<NetEnergyMenu, NetEnergyState, NetEnergyAction>(menu, title) {
+    private val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_ENERGY_PATHWAY.get()))
+    private val text = NetEnergyText(title.string)
+
+    override fun snapshot() = NetEnergyState(
+        popMode = container.popMode(),
+        redstoneMode = container.redStoneMode(),
+        energyStored = container.energyStored(),
+        energyCapacity = container.energyCapacity(),
+        energyRate = container.energyRate(),
     )
 
-    override fun inventoryTick() {
-        super.inventoryTick()
-        ui.drainActions { action ->
-            when (action) {
-                is NetEnergyAction.SetRedstoneMode -> container.requestRedstone(action.redstoneMode.ordinal)
-                is NetEnergyAction.SetPopMode -> container.requestOutput(action.popMode.ordinal)
-            }
-        }
-
-        ui.update(
-            NetEnergyState(
-                popMode = container.popMode(),
-                redstoneMode = container.redStoneMode(),
-                energyStored = container.energyStored(),
-                energyCapacity = container.energyCapacity(),
-                energyRate = container.energyRate(),
-            )
-        )
-    }
-
-    override fun removed() {
-        val menuStillOpen = Minecraft.getInstance().player?.containerMenu === container
-        try {
-            super.removed()
-        } finally {
-            if (!menuStillOpen) {
-                ui.close()
-            }
+    override fun handle(action: NetEnergyAction) {
+        when (action) {
+            is NetEnergyAction.SetRedstoneMode -> container.requestRedstone(action.redstoneMode.ordinal)
+            is NetEnergyAction.SetPopMode -> container.requestOutput(action.popMode.ordinal)
         }
     }
+
+    @Composable
+    override fun Page(state: NetEnergyState, slots: ComposeMenuSlots<NetEnergyMenu>) =
+        NetEnergyContent(slots, state, icon, text, ::send)
 }
 
 @Composable

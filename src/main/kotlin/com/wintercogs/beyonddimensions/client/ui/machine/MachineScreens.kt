@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,6 +44,7 @@ import com.wintercogs.beyonddimensions.common.menu.NetMagnetMenu
 import com.wintercogs.beyonddimensions.common.menu.NetPumpMenu
 import com.wintercogs.beyonddimensions.common.menu.NetRestockerMenu
 import com.wintercogs.beyonddimensions.common.menu.XpExchangeMenu
+import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OreText
@@ -112,30 +114,28 @@ private fun range(device: String, current: () -> Int, editable: () -> Boolean, r
 
 data class EnergyReadout(val stored: Long, val capacity: Long, val rate: Long) : MachineReadout
 
-class EnergyScreen private constructor(menu: NetEnergyMenu, title: Component, layout: MachineLayout, text: EnergyText) :
+class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) :
     MachineScreen<NetEnergyMenu>(
         menu,
         title,
         MachineController(
             menu::ready,
             listOf(
-                pop(text.popHint, menu::popMode, { true }, menu::requestOutput),
+                pop(tr("ui.beyonddimensions.energy.pop.hint"), menu::popMode, { true }, menu::requestOutput),
                 redstone(menu::redStoneMode, { true }, menu::requestRedstone),
             ),
         ) { EnergyReadout(menu.energyStored(), menu.energyCapacity(), menu.energyRate()) },
-        layout,
-        { state, _ -> EnergyContent(state.readout as? EnergyReadout, text) },
+        MachineLayout(menu, BDBlocks.NET_ENERGY_PATHWAY.get(), title.string),
     ) {
-    constructor(
-        menu: NetEnergyMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(menu, title, MachineLayout(menu, BDBlocks.NET_ENERGY_PATHWAY.get(), title.string), EnergyText())
+    private val text = EnergyText()
+
+    @Composable
+    override fun ColumnScope.Machine(state: MachineState, slots: ComposeMenuSlots<NetEnergyMenu>) =
+        EnergyContent(state.readout as? EnergyReadout, text)
 }
 
 class EnergyText {
     val network = tr("ui.beyonddimensions.energy.network")
-    val popHint = tr("ui.beyonddimensions.energy.pop.hint")
     val unit = "FE"
     val rateUnit = "FE/t"
 }
@@ -171,7 +171,7 @@ private fun EnergyContent(readout: EnergyReadout?, text: EnergyText) {
 
 // ---- 网络泵 ----
 
-class PumpScreen private constructor(menu: NetPumpMenu, title: Component, layout: MachineLayout) :
+class PumpScreen(menu: NetPumpMenu, inventory: Inventory, title: Component) :
     MachineScreen<NetPumpMenu>(
         menu,
         title,
@@ -182,19 +182,16 @@ class PumpScreen private constructor(menu: NetPumpMenu, title: Component, layout
                 redstone(menu::redstone, menu::redstoneEditable, menu::requestRedstone),
             ),
         ),
-        layout,
-        { _, slots -> FlagSlots(layout.text.filters, layout.flagSlots, slots) },
+        MachineLayout(menu, BDBlocks.NET_PUMP_BLOCK.get(), title.string),
     ) {
-    constructor(
-        menu: NetPumpMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(menu, title, MachineLayout(menu, BDBlocks.NET_PUMP_BLOCK.get(), title.string))
+    @Composable
+    override fun ColumnScope.Machine(state: MachineState, slots: ComposeMenuSlots<NetPumpMenu>) =
+        FlagSlots(layout.text.filters, layout.flagSlots, slots)
 }
 
 // ---- 网络漏斗 ----
 
-class HopperScreen private constructor(menu: NetHopperMenu, title: Component, layout: MachineLayout) :
+class HopperScreen(menu: NetHopperMenu, inventory: Inventory, title: Component) :
     MachineScreen<NetHopperMenu>(
         menu,
         title,
@@ -210,19 +207,16 @@ class HopperScreen private constructor(menu: NetHopperMenu, title: Component, la
                 range("hopper", { menu.range().ordinal }, menu::rangeEditable, menu::requestRange),
             ),
         ),
-        layout,
-        { _, slots -> FlagSlots(layout.text.filters, layout.flagSlots, slots) },
+        MachineLayout(menu, BDBlocks.NET_HOPPER_BLOCK.get(), title.string),
     ) {
-    constructor(
-        menu: NetHopperMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(menu, title, MachineLayout(menu, BDBlocks.NET_HOPPER_BLOCK.get(), title.string))
+    @Composable
+    override fun ColumnScope.Machine(state: MachineState, slots: ComposeMenuSlots<NetHopperMenu>) =
+        FlagSlots(layout.text.filters, layout.flagSlots, slots)
 }
 
 // ---- 网络磁铁 ----
 
-class MagnetScreen private constructor(menu: NetMagnetMenu, title: Component, layout: MachineLayout) :
+class MagnetScreen(menu: NetMagnetMenu, inventory: Inventory, title: Component) :
     MachineScreen<NetMagnetMenu>(
         menu,
         title,
@@ -238,19 +232,16 @@ class MagnetScreen private constructor(menu: NetMagnetMenu, title: Component, la
                 range("magnet", { menu.range().ordinal }, menu::rangeEditable, menu::requestRange),
             ),
         ),
-        layout,
-        { _, slots -> FlagSlots(layout.text.filters, layout.flagSlots, slots) },
+        MachineLayout(menu, BDItems.NET_MAGNET_ITEM.get(), title.string),
     ) {
-    constructor(
-        menu: NetMagnetMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(menu, title, MachineLayout(menu, BDItems.NET_MAGNET_ITEM.get(), title.string))
+    @Composable
+    override fun ColumnScope.Machine(state: MachineState, slots: ComposeMenuSlots<NetMagnetMenu>) =
+        FlagSlots(layout.text.filters, layout.flagSlots, slots)
 }
 
 // ---- 网络喂食器 ----
 
-class FeederScreen private constructor(menu: NetFeederMenu, title: Component, layout: MachineLayout) :
+class FeederScreen(menu: NetFeederMenu, inventory: Inventory, title: Component) :
     MachineScreen<NetFeederMenu>(
         menu,
         title,
@@ -261,14 +252,13 @@ class FeederScreen private constructor(menu: NetFeederMenu, title: Component, la
                 feeding(menu),
             ),
         ),
-        layout,
-        { _, slots -> FlagSlots(tr("ui.beyonddimensions.feeder.foods"), layout.flagSlots, slots) },
+        MachineLayout(menu, BDItems.NET_FEEDER_ITEM.get(), title.string),
     ) {
-    constructor(
-        menu: NetFeederMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(menu, title, MachineLayout(menu, BDItems.NET_FEEDER_ITEM.get(), title.string))
+    private val foods = tr("ui.beyonddimensions.feeder.foods")
+
+    @Composable
+    override fun ColumnScope.Machine(state: MachineState, slots: ComposeMenuSlots<NetFeederMenu>) =
+        FlagSlots(foods, layout.flagSlots, slots)
 
     private companion object {
         fun feeding(menu: NetFeederMenu): ModeSetting {
@@ -289,7 +279,7 @@ class FeederScreen private constructor(menu: NetFeederMenu, title: Component, la
 
 // ---- 网络补货器 ----
 
-class RestockerScreen private constructor(menu: NetRestockerMenu, title: Component, layout: MachineLayout) :
+class RestockerScreen(menu: NetRestockerMenu, inventory: Inventory, title: Component) :
     MachineScreen<NetRestockerMenu>(
         menu,
         title,
@@ -313,19 +303,16 @@ class RestockerScreen private constructor(menu: NetRestockerMenu, title: Compone
                 ),
             ),
         ),
-        layout,
-        { _, slots -> RestockerTemplates(layout, slots) },
+        MachineLayout(menu, BDItems.NET_RESTOCKER_ITEM.get(), title.string),
     ) {
-    constructor(
-        menu: NetRestockerMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(menu, title, MachineLayout(menu, BDItems.NET_RESTOCKER_ITEM.get(), title.string))
+    @Composable
+    override fun ColumnScope.Machine(state: MachineState, slots: ComposeMenuSlots<NetRestockerMenu>) =
+        RestockerTemplates(layout, slots)
 }
 
 // ---- 经验棒 ----
 
-class XpExchangeScreen private constructor(menu: XpExchangeMenu, title: Component, layout: MachineLayout, usage: List<String>) :
+class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Component) :
     MachineScreen<XpExchangeMenu>(
         menu,
         title,
@@ -349,19 +336,12 @@ class XpExchangeScreen private constructor(menu: XpExchangeMenu, title: Componen
                 ),
             ),
         ),
-        layout,
-        { _, _ -> XpUsage(usage) },
-    ) {
-    constructor(
-        menu: XpExchangeMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(
-        menu,
-        title,
         MachineLayout(menu, BDItems.XP_EXCHANGE_ITEM.get(), title.string),
-        tr("tooltip.beyonddimensions.item.xp_exchange").split('\n'),
-    )
+    ) {
+    private val usage = tr("tooltip.beyonddimensions.item.xp_exchange").split('\n')
+
+    @Composable
+    override fun ColumnScope.Machine(state: MachineState, slots: ComposeMenuSlots<XpExchangeMenu>) = XpUsage(usage)
 }
 
 @Composable
@@ -381,7 +361,7 @@ data class LaneView(val cooking: Float, val burning: Float)
 
 data class FurnaceReadout(val lanes: List<LaneView>) : MachineReadout
 
-class FurnaceScreen private constructor(menu: NetFurnaceMenu, title: Component, layout: MachineLayout, groups: FurnaceGroups) :
+class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component) :
     MachineScreen<NetFurnaceMenu>(
         menu,
         title,
@@ -407,19 +387,13 @@ class FurnaceScreen private constructor(menu: NetFurnaceMenu, title: Component, 
             ),
             { FurnaceReadout(menu.lanes().map { LaneView(fraction(it.cooking(), it.cookingTotal()), fraction(it.burning(), it.burningTotal())) }) },
         ),
-        layout,
-        { state, slots -> FurnaceContent(state.readout as? FurnaceReadout, groups, slots) },
-    ) {
-    constructor(
-        menu: NetFurnaceMenu,
-        inventory: Inventory,
-        title: Component,
-    ) : this(
-        menu,
-        title,
         MachineLayout(menu, menu.be?.blockState?.block ?: BDBlocks.NET_FURNACE_BLOCK.get(), title.string),
-        FurnaceGroups(menu),
-    )
+    ) {
+    private val groups = FurnaceGroups(menu)
+
+    @Composable
+    override fun ColumnScope.Machine(state: MachineState, slots: ComposeMenuSlots<NetFurnaceMenu>) =
+        FurnaceContent(state.readout as? FurnaceReadout, groups, slots)
 
     private companion object {
         fun fraction(value: Int, total: Int) = if (total > 0) (value.toFloat() / total).coerceIn(0f, 1f) else 0f

@@ -117,7 +117,7 @@ val SORT_POLICIES =
 /**
  * 存储终端（含合成终端）的控制器，运行在游戏线程。
  */
-class StorageController(private val menu: DimensionsNetMenu) : BdController<StorageState, StorageAction>(StorageState()) {
+class StorageController(private val menu: DimensionsNetMenu) : BdController<StorageState, StorageAction> {
     private val craftMenu = menu as? DimensionsCraftMenu
     private val recipeChoices =
         if (craftMenu != null && ModPresence.isLoaded(OtherModIds.POLYMORPH)) ComposeRecipeChoices() else null
@@ -323,13 +323,12 @@ class StorageController(private val menu: DimensionsNetMenu) : BdController<Stor
         }
     }
 
-    /** 关闭时按偏好保留或清空搜索文字 */
-    override fun close() {
+    /** 菜单关闭时按偏好保留或清空搜索文字 */
+    fun saveSearch() {
         val keep = CommonConfigRuntime.uiSearchButton == ButtonState.ENABLED && lastSearch.isNotEmpty()
         val saved = if (keep) lastSearch else ""
         CommonConfigRuntime.uiSearch = saved
         Config.INSTANCE.commonConfig.UI_SEARCH.set(saved)
         Config.INSTANCE.commonConfig.UI_SEARCH.save()
-        super.close()
     }
 }
