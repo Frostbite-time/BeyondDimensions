@@ -1,5 +1,8 @@
 package com.wintercogs.beyonddimensions.client.ui.kit
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +21,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,11 +29,15 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -47,7 +55,11 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -99,6 +111,7 @@ fun BdHeader(
     tag: String? = null,
     status: BdStatus? = null,
     onClose: (() -> Unit)? = null,
+    actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val colors = Bd.colors
     Box(Modifier.fillMaxWidth().height(2.dp).background(colors.signature))
@@ -123,6 +136,10 @@ fun BdHeader(
         if (status != null) {
             Spacer(Modifier.width(4.dp))
             BdStatusChip(status)
+        }
+        if (actions != null) {
+            Spacer(Modifier.width(4.dp))
+            actions()
         }
         if (onClose != null) {
             Spacer(Modifier.width(4.dp))
@@ -335,7 +352,9 @@ fun BdChip(
     )
 }
 
-/** 互斥的模式：选中项是带天蓝边框的白色按键 */
+private data class BdSegmentBounds(val left: Dp, val width: Dp)
+
+/** 互斥的模式：白色选中框随选项切换平滑移动，同时适应选项宽度 */
 @Composable
 fun BdSegmented(
     options: List<String>,
@@ -346,48 +365,98 @@ fun BdSegmented(
     fill: Boolean = false,
 ) {
     val colors = Bd.colors
-    Row(
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val segments = remember(options) { mutableStateMapOf<Int, BdSegmentBounds>() }
+    var trackWidth by remember { mutableStateOf(0.dp) }
+    Box(
         modifier
             .height(15.dp)
+            .clip(Bd.ChipShape)
             .background(colors.sunken, Bd.ChipShape)
             .border(1.dp, colors.line, Bd.ChipShape)
             .padding(1.dp)
             .alpha(if (enabled) 1f else 0.55f)
     ) {
-        options.forEachIndexed { index, option ->
-            val interaction = remember { MutableInteractionSource() }
-            val hovered by interaction.collectIsHoveredAsState()
-            val chosen = index == selected
-            Box(
-                (if (fill) Modifier.weight(1f) else Modifier)
-                    .fillMaxHeight()
-                    .hoverable(interaction, enabled)
-                    .clickable(interaction, indication = null, enabled = enabled && !chosen) { onSelect(index) }
-                    .then(if (chosen) Modifier.background(colors.surface).border(1.dp, colors.accent) else Modifier)
-                    .padding(horizontal = 5.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                OreText(
-                    option,
-                    color =
-                        when {
-                            chosen -> colors.accentDeep
-                            hovered && enabled -> colors.text
-                            else -> colors.muted
-                        },
-                    maxLines = 1,
+        segments[selected]?.let { target ->
+            val left by animateDpAsState(
+                targetValue = target.left,
+                animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                label = "BD tab position",
+            )
+            val width by animateDpAsState(
+                targetValue = target.width,
+                animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                label = "BD tab width",
+            )
+            val rightGap = trackWidth - left - width
+            val startGap = if (layoutDirection == LayoutDirection.Ltr) left else rightGap
+            val endGap = if (layoutDirection == LayoutDirection.Ltr) rightGap else left
+            // 接近两端时才形成切角，滑动中也保持在外框以内。
+            val segmentShape = CutCornerShape(
+                topStart = (2.dp - startGap).coerceIn(0.dp, 2.dp),
+                bottomEnd = (2.dp - endGap).coerceIn(0.dp, 2.dp),
+            )
+            // 选中框不参与轨道测量；轨道尺寸只由实际选项决定。
+            Box(Modifier.matchParentSize()) {
+                Box(
+                    Modifier.absoluteOffset(x = left)
+                        .width(width)
+                        .fillMaxHeight()
+                        .background(colors.surface, segmentShape)
+                        .border(1.dp, colors.accent, segmentShape)
                 )
+            }
+        }
+        Row(
+            Modifier.fillMaxHeight().onSizeChanged { size ->
+                trackWidth = with(density) { size.width.toDp() }
+            }
+        ) {
+            options.forEachIndexed { index, option ->
+                val interaction = remember { MutableInteractionSource() }
+                val hovered by interaction.collectIsHoveredAsState()
+                val chosen = index == selected
+                Box(
+                    (if (fill) Modifier.weight(1f) else Modifier)
+                        .fillMaxHeight()
+                        .hoverable(interaction, enabled)
+                        .clickable(interaction, indication = null, enabled = enabled && !chosen) { onSelect(index) }
+                        .onGloballyPositioned { position ->
+                            segments[index] = with(density) {
+                                BdSegmentBounds(position.positionInParent().x.toDp(), position.size.width.toDp())
+                            }
+                        }
+                        .padding(horizontal = 5.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    OreText(
+                        option,
+                        color =
+                            when {
+                                chosen -> colors.accentDeep
+                                hovered && enabled -> colors.text
+                                else -> colors.muted
+                            },
+                        maxLines = 1,
+                    )
+                }
             }
         }
     }
 }
 
-/** 开关：开启时轨道为标志渐变，关闭时为凹陷底色，方形白色滑块 */
+/** 开关：开启时轨道为标志渐变，白色滑块沿轨道左右滑动 */
 @Composable
 fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Boolean = true) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
+    val thumbOffset by animateDpAsState(
+        targetValue = if (checked) 11.dp else 0.dp,
+        animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+        label = "BD switch thumb position",
+    )
     Box(
         Modifier.size(22.dp, 11.dp)
             .hoverable(interaction, enabled)
@@ -404,9 +473,14 @@ fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Bool
             )
             .padding(2.dp)
             .alpha(if (enabled) 1f else 0.55f),
-        contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
+        contentAlignment = Alignment.CenterStart,
     ) {
-        Box(Modifier.size(7.dp).background(colors.surface).border(1.dp, if (checked) Color.Transparent else colors.lineStrong))
+        Box(
+            Modifier.offset(x = thumbOffset)
+                .size(7.dp)
+                .background(colors.surface)
+                .border(1.dp, if (checked) Color.Transparent else colors.lineStrong)
+        )
     }
 }
 
