@@ -11,6 +11,8 @@ import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackType
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.forge.sync.MinecraftSyncCodecs;
+import dev.compixel.sync.action.ActionResult;
+import dev.compixel.sync.action.ActionStatus;
 import dev.compixel.sync.state.SyncCodec;
 import dev.compixel.sync.state.SyncCodecs;
 import net.minecraft.network.chat.Component;
@@ -220,9 +222,9 @@ public final class BDMenuCommands
         return sync.action(RECIPE).action(CRAFT_RETURN).action(CRAFT_PREFERENCE);
     }
 
-    private void reportFailure(MenuSync.ActionResult result)
+    private void reportFailure(ActionResult result)
     {
-        if (!menu.player.level().isClientSide() || result.status() == MenuSync.ActionStatus.APPLIED)
+        if (!menu.player.level().isClientSide() || result.status() == ActionStatus.APPLIED)
             return;
         long tick = menu.player.level().getGameTime();
         if (lastFeedbackTick != Long.MIN_VALUE && tick - lastFeedbackTick < FEEDBACK_INTERVAL_TICKS)
