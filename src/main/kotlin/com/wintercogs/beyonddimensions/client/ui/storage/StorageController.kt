@@ -20,6 +20,7 @@ import com.wintercogs.beyonddimensions.integration.module.polymorph.ComposeRecip
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenPrimaryNetSwitcherPacket
 import com.wintercogs.beyonddimensions.util.UIDataHelper
+import net.minecraft.Util
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.language.I18n
 import net.minecraft.resources.ResourceLocation
@@ -122,9 +123,9 @@ class StorageController(private val menu: DimensionsNetMenu) : BdController<Stor
     private val recipeChoices =
         if (craftMenu != null && ModPresence.isLoaded(OtherModIds.POLYMORPH)) ComposeRecipeChoices() else null
     private var lastSearch = CommonConfigRuntime.uiSearch
-    private var ticks = 0
     private var tabs = emptyList<TypeTab>()
     private var tabsStored = -1
+    private var tabsCountedAt = 0L
 
     init {
         menu.loadSearchText(lastSearch)
@@ -133,7 +134,6 @@ class StorageController(private val menu: DimensionsNetMenu) : BdController<Stor
     }
 
     override fun snapshot(): StorageState {
-        ticks++
         if (CommonConfigRuntime.searchTextWithJEIEMI) followViewerSearch()
         val craft =
             craftMenu?.let {
@@ -269,8 +269,11 @@ class StorageController(private val menu: DimensionsNetMenu) : BdController<Stor
 
     /** 各类资源的页签；种类数不变时每秒最多重算一次 */
     private fun typeTabs(stored: Int): List<TypeTab> {
-        if (stored == tabsStored && ticks % 20 != 0) return tabs
+        // 快照除了每刻一次，输入事件处理完动作后也会再取，所以按时间而不是按调用次数限制重算
+        val now = Util.getMillis()
+        if (stored == tabsStored && now - tabsCountedAt < 1000) return tabs
         tabsStored = stored
+        tabsCountedAt = now
         val counts = LinkedHashMap<ResourceLocation, Int>()
         val samples = HashMap<ResourceLocation, IStackKey<*>>()
         for (value in menu.storage.storage) {
