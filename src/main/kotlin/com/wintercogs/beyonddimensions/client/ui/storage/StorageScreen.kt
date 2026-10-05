@@ -60,6 +60,7 @@ import com.wintercogs.beyonddimensions.client.ui.kit.BdStepper
 import com.wintercogs.beyonddimensions.client.ui.kit.BdToggle
 import com.wintercogs.beyonddimensions.client.ui.kit.BdTone
 import com.wintercogs.beyonddimensions.client.ui.kit.BdWindow
+import com.wintercogs.beyonddimensions.client.ui.kit.bdClickable
 import com.wintercogs.beyonddimensions.client.ui.kit.formatExact
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
@@ -324,7 +325,7 @@ private fun RailTab(label: String, selected: Boolean, art: dev.compixel.ui.ore.d
         Box(
             Modifier.size(20.dp)
                 .hoverable(interaction)
-                .clickable(interaction, indication = null, enabled = !selected, onClick = onClick)
+                .bdClickable(interaction, enabled = !selected, onClick = onClick)
                 .then(
                     when {
                         selected -> Modifier.background(colors.surface).border(1.dp, colors.line)
@@ -417,7 +418,7 @@ private fun TypeTab(label: String, count: Int, selected: Boolean, onClick: () ->
         Modifier.width(IntrinsicSize.Max)
             .fillMaxHeight()
             .hoverable(interaction)
-            .clickable(interaction, indication = null, enabled = !selected, onClick = onClick)
+            .bdClickable(interaction, enabled = !selected, onClick = onClick)
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
             OreText(label, color = if (selected || hovered) colors.text else colors.muted, maxLines = 1)
@@ -570,7 +571,7 @@ private fun OptionRow(label: String, selected: Boolean, enabled: Boolean = true,
         Modifier.fillMaxWidth()
             .height(13.dp)
             .hoverable(interaction, enabled)
-            .clickable(interaction, indication = null, enabled = enabled && !selected, onClick = onClick)
+            .bdClickable(interaction, enabled = enabled && !selected, onClick = onClick)
             .background(if (hovered && enabled && !selected) colors.accentSoft else Color.Transparent)
             .padding(horizontal = 3.dp),
         verticalAlignment = Alignment.CenterVertically,

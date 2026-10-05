@@ -2,34 +2,35 @@ package com.wintercogs.beyonddimensions.client.ui.theme
 
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.compixel.ui.ore.theme.OreColors
+import dev.compixel.ui.UiDesign
+import dev.compixel.ui.ore.theme.OreDesign
 import dev.compixel.ui.ore.theme.OreTheme
-import dev.compixel.ui.ore.theme.OreThemeId
+import dev.compixel.ui.theme.ThemeId
+import dev.compixel.ui.theme.ThemeSection
+import dev.compixel.ui.theme.current
 
 /**
  * 超越维度的界面风格：冰白色的面板、冷色细线、一种天蓝强调色，以及由青到紫的标志渐变。
  *
- * 面板、线条与文字取自 Ore 主题（assets/beyonddimensions/compixel/ore_themes/default.json），
- * 资源包可以覆盖；标志渐变与状态色属于模组自身的识别色，不随主题变化。
+ * 颜色来自主题文件 assets/beyonddimensions/compixel/themes/default.json 的 "beyonddimensions" 段，资源包可以覆盖；
+ * 同一文件的 "ore" 段为界面里的 Ore 组件配色。
  */
 object Bd {
-    val ThemeId = OreThemeId("beyonddimensions", "default")
+    val ThemeId: ThemeId = dev.compixel.ui.theme.ThemeId("beyonddimensions", "default")
 
     val WindowShape = CutCornerShape(topStart = 7.dp, bottomEnd = 7.dp)
     val ChipShape = CutCornerShape(topStart = 3.dp, bottomEnd = 3.dp)
 
     val colors: BdColors
-        @Composable get() {
-            val ore = OreTheme.colors
-            return remember(ore) { BdColors.from(ore) }
-        }
+        @Composable get() = LocalBdColors.current
 
     val body: TextStyle
         @Composable get() = OreTheme.typography.body
@@ -50,49 +51,90 @@ object Bd {
 }
 
 @Immutable
-class BdColors(
-    val window: Color,
-    val surface: Color,
-    val sunken: Color,
-    val line: Color,
-    val lineStrong: Color,
-    val text: Color,
-    val muted: Color,
-    val faint: Color,
-    val accent: Color,
-    val accentDeep: Color,
-    val accentSoft: Color,
-    val cell: Color,
-    val danger: Color,
+data class BdColors(
+    val window: Color = Color(0xFFF4F7FA),
+    val surface: Color = Color(0xFFFFFFFF),
+    val sunken: Color = Color(0xFFEAF0F5),
+    val line: Color = Color(0xFFD5DEE7),
+    val lineStrong: Color = Color(0xFFA9B8C8),
+    val text: Color = Color(0xFF14202E),
+    val muted: Color = Color(0xFF5B6B7E),
+    val faint: Color = Color(0xFF8C9BAD),
+    val accent: Color = Color(0xFF169FE6),
+    val accentDeep: Color = Color(0xFF0A74B8),
+    val accentSoft: Color = Color(0xFFE0F2FD),
+    val cell: Color = Color(0xFFEDF2F7),
+    val danger: Color = Color(0xFFD93A4A),
+    /** 标志渐变的两端 */
+    val cyan: Color = Color(0xFF22C7F0),
+    val violet: Color = Color(0xFF6D6AFF),
+    val online: Color = Color(0xFF17A56C),
+    val onlineSoft: Color = Color(0xFFE6F7EF),
+    val onlineLine: Color = Color(0xFFBFE6D4),
+    val warning: Color = Color(0xFFC77A12),
+    val warningSoft: Color = Color(0xFFFFF4E0),
+    val warningLine: Color = Color(0xFFF1D6A6),
 ) {
-    val cyan = Color(0xFF22C7F0)
-    val violet = Color(0xFF6D6AFF)
     val signature = Brush.horizontalGradient(listOf(cyan, violet))
     val signatureVertical = Brush.verticalGradient(listOf(cyan, violet))
+}
 
-    val online = Color(0xFF17A56C)
-    val onlineSoft = Color(0xFFE6F7EF)
-    val onlineLine = Color(0xFFBFE6D4)
-    val warning = Color(0xFFC77A12)
-    val warningSoft = Color(0xFFFFF4E0)
-    val warningLine = Color(0xFFF1D6A6)
+/** 主题文件中 BD 自己的颜色，位于 "beyonddimensions" 段；每个字段写成 "#RRGGBB" 或 "#RRGGBBAA" */
+object BdThemeSection : ThemeSection<BdColors>("beyonddimensions") {
+    override val default = BdColors()
 
-    companion object {
-        fun from(ore: OreColors) =
-            BdColors(
-                window = ore.panel,
-                surface = ore.raised,
-                sunken = ore.trackEmptyLight,
-                line = ore.edge,
-                lineStrong = ore.frameEdge,
-                text = ore.text,
-                muted = ore.mutedText,
-                faint = ore.disabledText,
-                accent = ore.focus,
-                accentDeep = ore.primary,
-                accentSoft = ore.hovered,
-                cell = ore.slot,
-                danger = ore.danger,
-            )
+    override fun apply(value: BdColors, layer: Any?): BdColors {
+        require(layer is Map<*, *>) { "expected an object" }
+        var result = value
+        for ((name, hex) in layer) {
+            val color = parse(name, hex)
+            result =
+                when (name) {
+                    "window" -> result.copy(window = color)
+                    "surface" -> result.copy(surface = color)
+                    "sunken" -> result.copy(sunken = color)
+                    "line" -> result.copy(line = color)
+                    "lineStrong" -> result.copy(lineStrong = color)
+                    "text" -> result.copy(text = color)
+                    "muted" -> result.copy(muted = color)
+                    "faint" -> result.copy(faint = color)
+                    "accent" -> result.copy(accent = color)
+                    "accentDeep" -> result.copy(accentDeep = color)
+                    "accentSoft" -> result.copy(accentSoft = color)
+                    "cell" -> result.copy(cell = color)
+                    "danger" -> result.copy(danger = color)
+                    "cyan" -> result.copy(cyan = color)
+                    "violet" -> result.copy(violet = color)
+                    "online" -> result.copy(online = color)
+                    "onlineSoft" -> result.copy(onlineSoft = color)
+                    "onlineLine" -> result.copy(onlineLine = color)
+                    "warning" -> result.copy(warning = color)
+                    "warningSoft" -> result.copy(warningSoft = color)
+                    "warningLine" -> result.copy(warningLine = color)
+                    else -> throw IllegalArgumentException("$name: unknown color")
+                }
+        }
+        return result
+    }
+
+    private fun parse(name: Any?, hex: Any?): Color {
+        require(hex is String && hex.matches(Regex("#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?"))) {
+            "$name: expected #RRGGBB or #RRGGBBAA"
+        }
+        val bits = hex.drop(1).toLong(16)
+        val argb = if (hex.length == 7) bits or 0xFF000000L else (bits ushr 8) or ((bits and 255) shl 24)
+        return Color(argb.toInt())
+    }
+}
+
+val LocalBdColors = staticCompositionLocalOf { BdColors() }
+
+/** BD 界面的设计：沿用 Ore 为其中的 Ore 组件配色，再提供 BD 自己的颜色 */
+object BdDesign : UiDesign {
+    @Composable
+    override fun Decorate(theme: ThemeId, content: @Composable () -> Unit) {
+        OreDesign.Decorate(theme) {
+            CompositionLocalProvider(LocalBdColors provides BdThemeSection.current(theme), content = content)
+        }
     }
 }

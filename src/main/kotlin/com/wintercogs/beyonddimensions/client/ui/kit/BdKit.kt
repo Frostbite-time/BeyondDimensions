@@ -72,6 +72,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
+import dev.compixel.ui.LocalUiFeedback
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OrePixelArt
@@ -207,7 +208,7 @@ fun BdGlyphButton(
             modifier
                 .size(size)
                 .hoverable(interaction, enabled)
-                .clickable(interaction, indication = null, enabled = enabled, onClick = onClick)
+                .bdClickable(interaction, enabled = enabled, onClick = onClick)
                 .background(
                     when {
                         selected -> colors.accentSoft
@@ -261,6 +262,16 @@ fun Modifier.brackets(color: Color, arm: Dp = 4.dp, stroke: Dp = 1.dp): Modifier
     drawRect(color, Offset(0f, h - a), Size(s, a))
     drawRect(color, Offset(w - a, h - s), Size(a, s))
     drawRect(color, Offset(w - s, h - a), Size(s, a))
+}
+
+/** 可点击的 BD 控件：与 Ore 控件一样，点击后发出原版的点击声 */
+@Composable
+fun Modifier.bdClickable(interaction: MutableInteractionSource, enabled: Boolean = true, onClick: () -> Unit): Modifier {
+    val feedback = LocalUiFeedback.current
+    return clickable(interaction, indication = null, enabled = enabled) {
+        onClick()
+        feedback.activate()
+    }
 }
 
 /** 数量标签：白色半透明底上的深色小字 */
@@ -342,7 +353,7 @@ fun BdChip(
         modifier
             .height(18.dp)
             .hoverable(interaction, enabled)
-            .clickable(interaction, indication = null, enabled = enabled, onClick = onClick)
+            .bdClickable(interaction, enabled = enabled, onClick = onClick)
             .background(if ((hovered || active) && enabled) colors.accentSoft else colors.surface, Bd.ChipShape)
             .border(1.dp, if ((hovered || active) && enabled) colors.accent else colors.line, Bd.ChipShape)
             .padding(horizontal = 5.dp)
@@ -421,7 +432,7 @@ fun BdSegmented(
                     (if (fill) Modifier.weight(1f) else Modifier)
                         .fillMaxHeight()
                         .hoverable(interaction, enabled)
-                        .clickable(interaction, indication = null, enabled = enabled && !chosen) { onSelect(index) }
+                        .bdClickable(interaction, enabled = enabled && !chosen) { onSelect(index) }
                         .onGloballyPositioned { position ->
                             segments[index] = with(density) {
                                 BdSegmentBounds(position.positionInParent().x.toDp(), position.size.width.toDp())
@@ -460,7 +471,7 @@ fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Bool
     Box(
         Modifier.size(22.dp, 11.dp)
             .hoverable(interaction, enabled)
-            .clickable(interaction, indication = null, enabled = enabled) { onCheckedChange(!checked) }
+            .bdClickable(interaction, enabled = enabled) { onCheckedChange(!checked) }
             .background(if (checked) colors.signature else SolidColor(colors.sunken), Bd.ChipShape)
             .border(
                 1.dp,

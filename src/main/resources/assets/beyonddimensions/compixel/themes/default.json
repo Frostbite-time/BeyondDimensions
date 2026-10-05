@@ -1,0 +1,59 @@
+{
+  "format": 1,
+  "ore": {
+    "preset": "light",
+    "palette": {
+      "primary": "#0A74B8",
+      "secondary": "#E6EDF4",
+      "danger": "#D93A4A"
+    },
+    "colors": {
+      "backdrop": "#0A142340",
+      "panel": "#F4F7FA",
+      "raised": "#FFFFFF",
+      "hovered": "#E0F2FD",
+      "edge": "#D5DEE7",
+      "highlight": "#FFFFFF",
+      "frameEdge": "#A9B8C8",
+      "ledge": "#D3DCE6",
+      "slot": "#EDF2F7",
+      "slotEdge": "#CBD5DF",
+      "markedSlot": "#DFF0FB",
+      "slotHover": "#CDEBFC",
+      "slotHoverEdge": "#7CC6F0",
+      "text": "#14202E",
+      "mutedText": "#5B6B7E",
+      "disabledText": "#8C9BAD",
+      "buttonBorder": "#AEBBC9",
+      "switchTrack": "#C9D4DF",
+      "trackFilled": "#1AA3E8",
+      "trackFilledLight": "#63C4F2",
+      "trackEmpty": "#D3DCE6",
+      "trackEmptyLight": "#EAF0F5",
+      "focus": "#169FE6"
+    }
+  },
+  "beyonddimensions": {
+    "window": "#F4F7FA",
+    "surface": "#FFFFFF",
+    "sunken": "#EAF0F5",
+    "line": "#D5DEE7",
+    "lineStrong": "#A9B8C8",
+    "text": "#14202E",
+    "muted": "#5B6B7E",
+    "faint": "#8C9BAD",
+    "accent": "#169FE6",
+    "accentDeep": "#0A74B8",
+    "accentSoft": "#E0F2FD",
+    "cell": "#EDF2F7",
+    "danger": "#D93A4A",
+    "cyan": "#22C7F0",
+    "violet": "#6D6AFF",
+    "online": "#17A56C",
+    "onlineSoft": "#E6F7EF",
+    "onlineLine": "#BFE6D4",
+    "warning": "#C77A12",
+    "warningSoft": "#FFF4E0",
+    "warningLine": "#F1D6A6"
+  }
+}

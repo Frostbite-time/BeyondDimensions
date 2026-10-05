@@ -9,7 +9,6 @@ import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackType
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.MenuSlotVisual
 import dev.compixel.forge.slots.VanillaMenuSlotAdapter
-import dev.compixel.host.UiBinding
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.world.inventory.ClickType
@@ -18,16 +17,12 @@ import net.minecraft.world.inventory.Slot
 /**
  * BD 菜单的槽位适配：在原生容器界面中显示虚拟资源，并把槽位操作转成菜单命令。
  *
- * 虚拟资源的数量不交给通用槽位绘制，而是通过 [amounts] 发布给界面，以 BD 的数量标签显示。
- * 所有方法都在游戏线程调用；图标回调只捕获不可变的资源键。
+ * 虚拟资源的数量随槽位的显示内容一起交给界面，由 [BdSlot] 以 BD 的数量标签显示。
+ * 除 [isResource] 外，所有方法都在游戏线程调用；图标回调只捕获不可变的资源键。
  */
 class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapter(menu), AutoCloseable {
-    /** 虚拟资源槽的数量文字，键为槽位编号 */
-    val amounts = UiBinding<Map<Int, String>, Unit>(emptyMap())
-
-    private val labels = HashMap<Int, String>()
-    private var labelsChanged = false
-    private var closed = false
+    // 菜单创建后槽位不再增减，可在任何线程读取
+    private val resourceSlots: Set<Int> = menu.slots.filter { it is AbstractStackTypedSlot }.mapTo(HashSet()) { it.index }
     private val resourceKeys = HashMap<Int, IStackKey<*>>()
     private val resourceValues = HashMap<Int, KeyAmount>()
 
@@ -39,14 +34,10 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     fun tick() {
         menu.commands().flushPreference()
         if (repeatTicks > 0 && --repeatTicks == 0) forgetRepeat()
-        publish()
     }
 
-    fun publish() {
-        if (closed || !labelsChanged) return
-        labelsChanged = false
-        amounts.update(HashMap(labels))
-    }
+    /** 该槽位是否显示虚拟资源；可在 Compose 线程调用 */
+    fun isResource(slotId: Int) = slotId in resourceSlots
 
     override fun visual(slot: Slot, previous: MenuSlotVisual?): MenuSlotVisual {
         if (slot !is AbstractStackTypedSlot) return super.visual(slot, previous)
@@ -54,7 +45,6 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         val key = resource.key()
         // 标记槽只表示资源种类；存储行在点击结束前可能暂时保留数量为 0 的资源
         val shown = !key.isEmpty && (slot.isFake || resource.amount() > 0)
-        setLabel(slot.index, if (shown && !slot.isFake) formatCompact(resource.amount()) else null)
 
         if (previous != null && resourceValues[slot.index] == resource) return previous
         resourceValues[slot.index] = resource
@@ -68,12 +58,8 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
                 resourceKeys[slot.index] = key
                 iconOf(key)
             }
-        return MenuSlotVisual(icon, marked = slot.isFake)
-    }
-
-    private fun setLabel(slotIndex: Int, label: String?) {
-        val old = if (label == null) labels.remove(slotIndex) else labels.put(slotIndex, label)
-        if (old != label) labelsChanged = true
+        val label = if (slot.isFake) "" else formatCompact(resource.amount())
+        return MenuSlotVisual(icon, amount = label, marked = slot.isFake)
     }
 
     private fun iconOf(key: IStackKey<*>): ItemIcon =
@@ -142,9 +128,6 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     }
 
     override fun close() {
-        closed = true
-        amounts.close()
-        labels.clear()
         resourceKeys.clear()
         resourceValues.clear()
     }

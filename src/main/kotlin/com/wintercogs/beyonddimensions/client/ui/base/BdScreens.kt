@@ -4,12 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.BdDesign
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import dev.compixel.forge.ComposeInventoryScreen
 import dev.compixel.forge.ComposeMenuScreen
 import dev.compixel.forge.item.NativeItemOptions
 import dev.compixel.forge.slots.ComposeMenuSlots
-import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.network.chat.Component
 import net.minecraft.world.inventory.AbstractContainerMenu
 import org.lwjgl.glfw.GLFW
@@ -45,6 +45,7 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
         ComposeMenuSlots(menu, BdSlotAdapter(menu)),
         Bd.ThemeId,
         NativeItemOptions(cacheCapacity = 512),
+        design = BdDesign,
     ) {
     @Suppress("UNCHECKED_CAST") private val adapter = inventory.adapter as BdSlotAdapter<M>
     private val scope = BdScreenScope(::requestClose)
@@ -54,17 +55,10 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
 
     @Composable
     final override fun Content(state: S, slots: ComposeMenuSlots<M>) {
-        CompositionLocalProvider(LocalBdScreen provides scope, LocalSlotAmounts provides adapter.amounts) {
-            Page(state, slots)
-        }
+        CompositionLocalProvider(LocalBdScreen provides scope) { Page(state, slots) }
     }
 
     override fun inventoryTick() = adapter.tick()
-
-    override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
-        super.render(graphics, mouseX, mouseY, partialTick)
-        adapter.publish()
-    }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         val editing = hasTextInputFocus
@@ -83,6 +77,7 @@ abstract class BdMenuScreen<M : AbstractContainerMenu, S, A>(menu: M, title: Com
         title,
         theme = Bd.ThemeId,
         nativeItemOptions = NativeItemOptions(cacheCapacity = 256),
+        design = BdDesign,
     ) {
     private val scope = BdScreenScope(::requestClose)
 

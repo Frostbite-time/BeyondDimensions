@@ -52,6 +52,7 @@ import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
 import com.wintercogs.beyonddimensions.client.ui.kit.BdStatus
 import com.wintercogs.beyonddimensions.client.ui.kit.BdTone
 import com.wintercogs.beyonddimensions.client.ui.kit.BdWindow
+import com.wintercogs.beyonddimensions.client.ui.kit.bdClickable
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.NetControlMenu
@@ -248,7 +249,7 @@ private fun ActionButton(label: String, hint: String, danger: Boolean, onClick: 
         Box(
             Modifier.height(13.dp)
                 .hoverable(interaction)
-                .clickable(interaction, indication = null, onClick = onClick)
+                .bdClickable(interaction, onClick = onClick)
                 .background(if (hovered) ink else Color.Transparent, Bd.ChipShape)
                 .border(1.dp, ink.copy(alpha = if (hovered) 1f else 0.45f), Bd.ChipShape)
                 .padding(horizontal = 4.dp),
@@ -426,7 +427,7 @@ private fun NetworkRow(
         Modifier.fillMaxWidth()
             .height(20.dp)
             .hoverable(interaction)
-            .clickable(interaction, indication = null, enabled = !selected && !renaming, onClick = onSelect)
+            .bdClickable(interaction, enabled = !selected && !renaming, onClick = onSelect)
             .background(if (selected || hovered) colors.accentSoft else colors.surface)
             .border(1.dp, if (selected) colors.accent else colors.line)
             .padding(horizontal = 5.dp),

@@ -8,33 +8,47 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.kit.BdAmountPill
 import com.wintercogs.beyonddimensions.client.ui.kit.brackets
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
-import dev.compixel.host.UiBinding
-
-/** 虚拟资源槽的数量文字，由 [BdSlotAdapter] 发布 */
-val LocalSlotAmounts = staticCompositionLocalOf<UiBinding<Map<Int, String>, Unit>?> { null }
+import dev.compixel.ui.ore.inventory.OreSlot
 
 const val SLOT_PITCH = 18
 
-/** 一个原生槽位：主题化的槽底，悬停时加上角标，虚拟资源再叠加数量标签 */
+/** 一个原生槽位：主题化的槽底，悬停时加上角标；虚拟资源的数量以 BD 的数量标签显示 */
 @Composable
 fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
+    if ((slots.adapter as? BdSlotAdapter<*>)?.isResource(id) == true) {
+        slots.Slot(id, modifier.size(SLOT_PITCH.dp)) { slot ->
+            OreSlot(
+                Modifier.matchParentSize(),
+                marked = slot.marked,
+                highlighted = slot.highlighted,
+                contentModifier = Modifier.size(16.dp),
+            ) {
+                slot.icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
+            }
+            if (slot.amount.isNotEmpty())
+                BdAmountPill(slot.amount, Modifier.align(Alignment.BottomEnd).padding(end = 1.dp, bottom = 1.dp))
+            if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors.accent, arm = 4.dp))
+        }
+        return
+    }
+    // 原版槽位沿用 Ore 的外观与数量文字
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
-    val amount = LocalSlotAmounts.current?.value?.get(id)
     Box(
         modifier
             .size(SLOT_PITCH.dp)
@@ -42,7 +56,6 @@ fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
             .then(if (hovered) Modifier.brackets(Bd.colors.accent, arm = 4.dp) else Modifier)
     ) {
         slots.Slot(id, Modifier.matchParentSize())
-        if (amount != null) BdAmountPill(amount, Modifier.align(Alignment.BottomEnd).padding(end = 1.dp, bottom = 1.dp))
     }
 }
 
