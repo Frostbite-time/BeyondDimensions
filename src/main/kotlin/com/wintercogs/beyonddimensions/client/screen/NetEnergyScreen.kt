@@ -497,7 +497,7 @@ private fun OreWindowFrame(
                 OreText(
                     title,
                     Modifier.weight(1f),
-                    style = OreTheme.typography.title,
+                    style = OreTheme.typography.body,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
