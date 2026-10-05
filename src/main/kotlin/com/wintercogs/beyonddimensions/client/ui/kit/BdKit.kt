@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -60,6 +61,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -81,18 +83,11 @@ import dev.compixel.ui.ore.overlay.OreTooltip
 import dev.compixel.ui.ore.overlay.OreTooltipMode
 import kotlin.math.roundToInt
 
-/** 窗口：切角的冰白面板，细线边框与柔和阴影；高度随内容 */
+/** 窗口：深色半透明的玻璃面板加一像素细线框，透出背后的游戏画面；高度随内容 */
 @Composable
 fun BdWindow(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = Bd.colors
-    Column(
-        modifier
-            .shadow(10.dp, Bd.WindowShape, ambientColor = Color(0x330B1420), spotColor = Color(0x660B1420))
-            .clip(Bd.WindowShape)
-            .background(colors.window)
-            .border(1.dp, colors.lineStrong, Bd.WindowShape),
-        content = content,
-    )
+    Column(modifier.background(colors.window).border(1.dp, colors.line), content = content)
 }
 
 enum class BdTone {
@@ -103,7 +98,7 @@ enum class BdTone {
 
 class BdStatus(val text: String, val tone: BdTone)
 
-/** 窗口标题栏：顶端的标志渐变线、设备图标、所属网络与状态 */
+/** 窗口标题栏：设备图标、所属网络与状态 */
 @Composable
 fun BdHeader(
     icon: ItemIcon?,
@@ -115,7 +110,6 @@ fun BdHeader(
     actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val colors = Bd.colors
-    Box(Modifier.fillMaxWidth().height(2.dp).background(colors.signature))
     Row(
         Modifier.fillMaxWidth().height(24.dp).background(colors.surface).padding(start = 7.dp, end = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -125,9 +119,15 @@ fun BdHeader(
             Spacer(Modifier.width(6.dp))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-            OreText(overline, color = colors.faint, style = Bd.overline, maxLines = 1)
+            OreText(overline, color = colors.faint, style = Bd.overline, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Row(verticalAlignment = Alignment.Bottom) {
-                OreText(title, Modifier.weight(1f, fill = false), color = colors.text, maxLines = 1)
+                OreText(
+                    title,
+                    Modifier.weight(1f, fill = false),
+                    color = colors.text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 if (tag != null) {
                     Spacer(Modifier.width(3.dp))
                     OreText(tag, color = colors.faint, style = Bd.caption, maxLines = 1)
@@ -234,7 +234,7 @@ fun BdGlyphButton(
 @Composable
 fun BdSectionLabel(text: String, modifier: Modifier = Modifier, trailing: (@Composable () -> Unit)? = null) {
     val colors = Bd.colors
-    Row(modifier.fillMaxWidth().height(9.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier.fillMaxWidth().heightIn(min = 9.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(2.dp).background(colors.accent))
         Spacer(Modifier.width(3.dp))
         OreText(text, color = colors.muted, style = Bd.overline, maxLines = 1)
@@ -274,10 +274,10 @@ fun Modifier.bdClickable(interaction: MutableInteractionSource, enabled: Boolean
     }
 }
 
-/** 数量标签：白色半透明底上的深色小字 */
+/** 数量标签：深色半透明底上的浅色小字 */
 @Composable
 fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
-    Box(modifier.offset(x = (-0.5).dp, y = (-0.5).dp).background(Color(0xD9FFFFFF)).padding(start = 1.dp, top = 0.5.dp)) {
+    Box(modifier.offset(x = (-0.5).dp, y = (-0.5).dp).background(Bd.colors.pill).padding(start = 1.dp, top = 0.5.dp)) {
         OreText(text, color = Bd.colors.text, style = Bd.amount, maxLines = 1)
     }
 }
@@ -489,7 +489,7 @@ fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Bool
         Box(
             Modifier.offset(x = thumbOffset)
                 .size(7.dp)
-                .background(colors.surface)
+                .background(colors.knob)
                 .border(1.dp, if (checked) Color.Transparent else colors.lineStrong)
         )
     }
@@ -609,8 +609,8 @@ fun BdPopover(onDismissRequest: () -> Unit, content: @Composable ColumnScope.() 
     val position = remember(gap) { BesideAnchor(gap) }
     Popup(position, onDismissRequest, properties = PopupProperties(focusable = true)) {
         Column(
-            Modifier.shadow(6.dp, Bd.ChipShape, ambientColor = Color(0x330B1420), spotColor = Color(0x550B1420))
-                .background(colors.surface, Bd.ChipShape)
+            Modifier.shadow(6.dp, Bd.ChipShape, ambientColor = Color(0x33000000), spotColor = Color(0x66000000))
+                .background(colors.popover, Bd.ChipShape)
                 .border(1.dp, colors.lineStrong, Bd.ChipShape)
                 .padding(6.dp),
             content = content,

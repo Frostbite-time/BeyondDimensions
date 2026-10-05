@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -68,6 +69,7 @@ import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
 import dev.compixel.forge.item.ItemIcon
+import dev.compixel.ui.ore.theme.OreTheme
 import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
@@ -174,16 +176,18 @@ private const val RAIL = 24
 private const val PAD = 7
 private const val SCROLLBAR = 5
 private const val SCREEN_MARGIN = 8
+/** 分组标题与状态栏的行高：9sp 小字的行高 */
+private const val LABEL = 11
 
 /** 格子区域（含边框）、间隔与滚动条的总宽度 */
 private fun contentWidth(columns: Int) = columns * SLOT_PITCH + 2 + 2 + SCROLLBAR
 
 /** 除格子行外的固定高度 */
 private fun chromeHeight(tabs: Boolean, status: Boolean, craft: Boolean): Int {
-    var height = 27 + 6 + 18 + 4 + 2 + 7 + 9 + 4 + 76 + PAD + 2
+    var height = 25 + 6 + 18 + 4 + 2 + 7 + LABEL + 4 + 76 + PAD + 2
     if (tabs) height += 5 + 13
-    if (status) height += 4 + 9
-    if (craft) height += 7 + 9 + 4 + 54
+    if (status) height += 4 + LABEL
+    if (craft) height += 7 + LABEL + 4 + 54
     return height
 }
 
@@ -200,7 +204,7 @@ private fun StorageView(
     var craftHidden by remember { mutableStateOf(false) }
     val craftShown = state.craft != null && !craftHidden
 
-    BoxWithConstraints(Modifier.fillMaxSize().background(Color(0x400A1423)), contentAlignment = Alignment.Center) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(OreTheme.colors.backdrop), contentAlignment = Alignment.Center) {
         val availableHeight = maxHeight.value.toInt() - SCREEN_MARGIN * 2
         val availableWidth = maxWidth.value.toInt() - SCREEN_MARGIN * 2
         // 空间不足三行时收起页签与状态栏
@@ -434,7 +438,7 @@ private fun TypeTab(label: String, count: Int, selected: Boolean, onClick: () ->
 private fun StatusStrip(state: StorageState, text: StorageText, width: Int) {
     val colors = Bd.colors
     val limited = state.typeLimit in 1 until Int.MAX_VALUE
-    Row(Modifier.width(width.dp).height(9.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.width(width.dp).heightIn(min = 9.dp), verticalAlignment = Alignment.CenterVertically) {
         OreText(text.types, color = colors.faint, style = Bd.caption, maxLines = 1)
         Spacer(Modifier.width(3.dp))
         val used = formatExact(state.stored.toLong())

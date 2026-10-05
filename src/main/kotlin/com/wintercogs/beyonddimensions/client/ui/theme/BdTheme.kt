@@ -19,7 +19,7 @@ import dev.compixel.ui.theme.ThemeSection
 import dev.compixel.ui.theme.current
 
 /**
- * 超越维度的界面风格：冰白色的面板、冷色细线、一种天蓝强调色，以及由青到紫的标志渐变。
+ * 超越维度的界面风格：深色半透明的玻璃面板透出背后的游戏画面，配一像素的浅色细线、青色强调色，以及由青到紫的标志渐变。
  *
  * 颜色来自主题文件 assets/beyonddimensions/compixel/themes/default.json 的 "beyonddimensions" 段，资源包可以覆盖；
  * 同一文件的 "ore" 段为界面里的 Ore 组件配色。
@@ -42,9 +42,9 @@ object Bd {
     val caption: TextStyle
         @Composable get() = OreTheme.typography.caption
 
-    /** 小号的分组标题，字距加宽 */
+    /** 分组标题与标题栏上方的小字 */
     val overline: TextStyle
-        @Composable get() = OreTheme.typography.caption.copy(letterSpacing = 1.sp)
+        @Composable get() = OreTheme.typography.caption
 
     /** 4.5sp 的 Monocraft：GUI 缩放为 2 时每个字体像素正好对应一个屏幕像素 */
     val amount: TextStyle
@@ -53,28 +53,36 @@ object Bd {
 
 @Immutable
 data class BdColors(
-    val window: Color = Color(0xFFF4F7FA),
-    val surface: Color = Color(0xFFFFFFFF),
-    val sunken: Color = Color(0xFFEAF0F5),
-    val line: Color = Color(0xFFD5DEE7),
-    val lineStrong: Color = Color(0xFFA9B8C8),
-    val text: Color = Color(0xFF14202E),
-    val muted: Color = Color(0xFF5B6B7E),
-    val faint: Color = Color(0xFF8C9BAD),
-    val accent: Color = Color(0xFF169FE6),
-    val accentDeep: Color = Color(0xFF0A74B8),
-    val accentSoft: Color = Color(0xFFE0F2FD),
-    val cell: Color = Color(0xFFEDF2F7),
-    val danger: Color = Color(0xFFD93A4A),
+    val window: Color = Color(0xC70C1018),
+    val surface: Color = Color(0x0FFFFFFF),
+    val sunken: Color = Color(0x59000000),
+    val line: Color = Color(0x24FFFFFF),
+    val lineStrong: Color = Color(0x40FFFFFF),
+    val text: Color = Color(0xFFF2F5F9),
+    val muted: Color = Color(0xFFA7B1BF),
+    val faint: Color = Color(0xFF7D8898),
+    val accent: Color = Color(0xFF22C7F0),
+    val accentDeep: Color = Color(0xFF8CE6FF),
+    val accentSoft: Color = Color(0x2622C7F0),
+    val cell: Color = Color(0x59000000),
+    val danger: Color = Color(0xFFFF6B6B),
     /** 标志渐变的两端 */
     val cyan: Color = Color(0xFF22C7F0),
     val violet: Color = Color(0xFF6D6AFF),
-    val online: Color = Color(0xFF17A56C),
-    val onlineSoft: Color = Color(0xFFE6F7EF),
-    val onlineLine: Color = Color(0xFFBFE6D4),
-    val warning: Color = Color(0xFFC77A12),
-    val warningSoft: Color = Color(0xFFFFF4E0),
-    val warningLine: Color = Color(0xFFF1D6A6),
+    val online: Color = Color(0xFF4FD69A),
+    val onlineSoft: Color = Color(0x1F4FD69A),
+    val onlineLine: Color = Color(0x594FD69A),
+    val warning: Color = Color(0xFFF2B544),
+    val warningSoft: Color = Color(0x1FF2B544),
+    val warningLine: Color = Color(0x59F2B544),
+    /** 开关滑块等需要始终醒目的小块 */
+    val knob: Color = Color(0xFFF2F5F9),
+    /** 强调色或危险色实底上的文字 */
+    val onAccent: Color = Color(0xFF0B1220),
+    /** 浮层的底色，比窗口更实，免得下面的内容透上来 */
+    val popover: Color = Color(0xF2141A26),
+    /** 格子数量标签的底色 */
+    val pill: Color = Color(0xA6000000),
 ) {
     val signature = Brush.horizontalGradient(listOf(cyan, violet))
     val signatureVertical = Brush.verticalGradient(listOf(cyan, violet))
@@ -112,6 +120,10 @@ object BdThemeSection : ThemeSection<BdColors>("beyonddimensions") {
                     "warning" -> result.copy(warning = color)
                     "warningSoft" -> result.copy(warningSoft = color)
                     "warningLine" -> result.copy(warningLine = color)
+                    "knob" -> result.copy(knob = color)
+                    "onAccent" -> result.copy(onAccent = color)
+                    "popover" -> result.copy(popover = color)
+                    "pill" -> result.copy(pill = color)
                     else -> throw IllegalArgumentException("$name: unknown color")
                 }
         }

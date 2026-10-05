@@ -46,6 +46,7 @@ import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
 import dev.compixel.forge.item.ItemIcon
+import dev.compixel.ui.ore.theme.OreTheme
 import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
@@ -213,7 +214,7 @@ private fun <M : BDBaseMenu> MachineView(
 ) {
     val colors = Bd.colors
     val screen = LocalBdScreen.current
-    Box(Modifier.fillMaxSize().background(Color(0x400A1423)), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(OreTheme.colors.backdrop), contentAlignment = Alignment.Center) {
         val width = PAD + LEFT + (if (hasSettings) GAP + RIGHT else 0) + PAD + 2
         BdWindow(Modifier.width(width.dp).then(slots.areaModifier())) {
             BdHeader(

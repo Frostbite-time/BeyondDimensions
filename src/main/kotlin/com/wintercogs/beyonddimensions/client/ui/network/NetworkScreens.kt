@@ -62,6 +62,7 @@ import com.wintercogs.beyonddimensions.network.packet.c2s.PrimaryNetSwitchAction
 import com.wintercogs.beyonddimensions.network.packet.c2s.RenameNetPacket
 import com.wintercogs.beyonddimensions.util.UIDataHelper
 import dev.compixel.forge.item.ItemIcon
+import dev.compixel.ui.ore.theme.OreTheme
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.overlay.OreTooltip
@@ -84,7 +85,7 @@ private fun RoleChip(role: NetPermissionlevel, label: String) {
     val colors = Bd.colors
     val (ink, fill) =
         when (role) {
-            NetPermissionlevel.Owner -> colors.surface to colors.accentDeep
+            NetPermissionlevel.Owner -> colors.onAccent to colors.accentDeep
             NetPermissionlevel.Manager -> colors.accentDeep to colors.accentSoft
             NetPermissionlevel.Member -> colors.muted to colors.sunken
         }
@@ -179,7 +180,7 @@ class NetControlText(val title: String) {
 private fun NetControlView(state: NetControlState, send: (NetControlRequest) -> Unit, text: NetControlText) {
     val colors = Bd.colors
     val screen = LocalBdScreen.current
-    Box(Modifier.fillMaxSize().background(Color(0x400A1423)), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(OreTheme.colors.backdrop), contentAlignment = Alignment.Center) {
         BdWindow(Modifier.width(250.dp)) {
             BdHeader(
                 text.icon,
@@ -255,7 +256,7 @@ private fun ActionButton(label: String, hint: String, danger: Boolean, onClick: 
                 .padding(horizontal = 4.dp),
             contentAlignment = Alignment.Center,
         ) {
-            OreText(label, color = if (hovered) colors.surface else ink, style = Bd.caption, maxLines = 1)
+            OreText(label, color = if (hovered) colors.onAccent else ink, style = Bd.caption, maxLines = 1)
         }
     }
 }
@@ -350,7 +351,7 @@ private fun PrimaryNetView(state: PrimaryNetState, send: (PrimaryNetRequest) -> 
     val screen = LocalBdScreen.current
     var query by remember { mutableStateOf("") }
     var renaming by remember { mutableStateOf<Int?>(null) }
-    Box(Modifier.fillMaxSize().background(Color(0x400A1423)), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(OreTheme.colors.backdrop), contentAlignment = Alignment.Center) {
         BdWindow(Modifier.width(230.dp)) {
             val current = state.options.find { it.id == state.primary }
             BdHeader(
