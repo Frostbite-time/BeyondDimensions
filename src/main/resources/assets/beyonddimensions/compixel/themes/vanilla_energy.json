@@ -1,0 +1,11 @@
+{
+  "format": 1,
+  "ore": {
+    "colors": {
+      "edge": "#373737",
+      "panel": "#300000",
+      "primary": "#C00000",
+      "primaryHover": "#E02020"
+    }
+  }
+}
