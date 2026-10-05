@@ -9,7 +9,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import dev.compixel.forge.config.ComposeConfigScreen;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -18,7 +18,7 @@ public class BeyondDimensionsClient
 {
     public BeyondDimensionsClient(IEventBus modEventBus, ModContainer container)
     {
-        container.registerExtensionPoint(IConfigScreenFactory.class, ComposeConfigScreen::new);
+        container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         modEventBus.register(this);
         modEventBus.addListener(BDBlockRenders::onRegisterRenderers);
 
