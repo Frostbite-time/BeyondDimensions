@@ -132,6 +132,9 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
 
             this.synchronizeDataSlotToRemote(j, k);
         }
+
+        // 有序槽位（标记槽、接口与熔炉的资源槽）没有变化订阅，由服务端在每次广播时比对后再同步
+        if (!player.level().isClientSide() && resources != null) resources.pollOrdered();
     }
 
     // 自定义点击操作
