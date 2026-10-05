@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.sp
 import dev.compixel.ui.UiDesign
 import dev.compixel.ui.ore.theme.OreDesign
 import dev.compixel.ui.ore.theme.OreTheme
+import dev.compixel.ui.ore.theme.OreTypography
 import dev.compixel.ui.theme.ThemeId
 import dev.compixel.ui.theme.ThemeSection
 import dev.compixel.ui.theme.current
@@ -134,7 +135,18 @@ object BdDesign : UiDesign {
     @Composable
     override fun Decorate(theme: ThemeId, content: @Composable () -> Unit) {
         OreDesign.Decorate(theme) {
-            CompositionLocalProvider(LocalBdColors provides BdThemeSection.current(theme), content = content)
+            OreTheme(typography = BdTypography) {
+                CompositionLocalProvider(LocalBdColors provides BdThemeSection.current(theme), content = content)
+            }
         }
     }
+}
+
+/**
+ * 沿用 Ore 的 Compixel 字体，正文改为 9sp：此时 Monocraft 的一个像素正好对应一个界面像素，
+ * 中文等 Unifont 字符是半个像素，和原版一样。
+ */
+private val BdTypography by lazy {
+    val body = OreTypography().body.copy(fontSize = 9.sp, lineHeight = 11.sp)
+    OreTypography(body = body, title = body.copy(fontSize = 10.sp, lineHeight = 13.sp), caption = body)
 }
