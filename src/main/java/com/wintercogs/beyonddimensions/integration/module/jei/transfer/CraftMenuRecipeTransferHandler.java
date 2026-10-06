@@ -47,6 +47,4 @@ public class CraftMenuRecipeTransferHandler implements IRecipeTransferHandler<Di
     }
 
 
-
-
 }

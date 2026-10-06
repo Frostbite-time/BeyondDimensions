@@ -4,56 +4,20 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.absoluteOffset
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -89,8 +53,13 @@ import dev.compixel.ui.ore.display.OrePixelArt
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.overlay.OreTooltip
 import dev.compixel.ui.ore.overlay.OreTooltipMode
-import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
+import kotlin.ranges.IntRange
+import kotlin.ranges.coerceAtLeast
+import kotlin.ranges.coerceAtMost
+import kotlin.ranges.coerceIn
+import kotlin.ranges.until
 
 /** 窗口：深色半透明的玻璃面板加一像素细线框，透出背后的游戏画面；高度随内容 */
 @Composable
@@ -112,7 +81,13 @@ fun BdHeader(icon: ItemIcon?, title: String, onClose: () -> Unit, tag: String? =
             Spacer(Modifier.width(6.dp))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-            OreText("BEYOND DIMENSIONS", color = colors.faint, style = Bd.overline, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            OreText(
+                "BEYOND DIMENSIONS",
+                color = colors.faint,
+                style = Bd.overline,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
             Row(verticalAlignment = Alignment.Bottom) {
                 OreText(
                     title,
@@ -223,7 +198,11 @@ fun Modifier.brackets(color: Color, arm: Dp = 4.dp, stroke: Dp = 1.dp): Modifier
 
 /** 可点击的 BD 控件：与 Ore 控件一样，点击后发出原版的点击声 */
 @Composable
-fun Modifier.bdClickable(interaction: MutableInteractionSource, enabled: Boolean = true, onClick: () -> Unit): Modifier {
+fun Modifier.bdClickable(
+    interaction: MutableInteractionSource,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+): Modifier {
     val feedback = LocalUiFeedback.current
     return clickable(interaction, indication = null, enabled = enabled) {
         onClick()
@@ -279,7 +258,11 @@ fun BdSearchField(
                     .padding(horizontal = 5.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                OreIcon(OreGlyph.MagnifyingGlass, Modifier.size(8.dp), color = if (focused) colors.accent else colors.faint)
+                OreIcon(
+                    OreGlyph.MagnifyingGlass,
+                    Modifier.size(8.dp),
+                    color = if (focused) colors.accent else colors.faint
+                )
                 Spacer(Modifier.width(4.dp))
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                     if (value.isEmpty()) OreText(placeholder, color = colors.faint, maxLines = 1)
@@ -496,11 +479,29 @@ private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onS
             .clip(Bd.ChipInnerShape),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BdGlyphButton(OreGlyph.ChevronLeft, null, { onSelect((selected - 1).mod(options.size)) }, enabled = enabled, size = 13.dp, glyphSize = 6.dp)
+        BdGlyphButton(
+            OreGlyph.ChevronLeft,
+            null,
+            { onSelect((selected - 1).mod(options.size)) },
+            enabled = enabled,
+            size = 13.dp,
+            glyphSize = 6.dp
+        )
         Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            OreText(options.getOrElse(selected) { "" }, color = if (enabled) colors.accentDeep else colors.faint, maxLines = 1)
+            OreText(
+                options.getOrElse(selected) { "" },
+                color = if (enabled) colors.accentDeep else colors.faint,
+                maxLines = 1
+            )
         }
-        BdGlyphButton(OreGlyph.ChevronRight, null, { onSelect((selected + 1).mod(options.size)) }, enabled = enabled, size = 13.dp, glyphSize = 6.dp)
+        BdGlyphButton(
+            OreGlyph.ChevronRight,
+            null,
+            { onSelect((selected + 1).mod(options.size)) },
+            enabled = enabled,
+            size = 13.dp,
+            glyphSize = 6.dp
+        )
     }
 }
 
@@ -524,7 +525,8 @@ fun BdNumberField(value: Int, range: IntRange, enabled: Boolean, onCommit: (Int)
         cursorBrush = SolidColor(colors.accent),
         decorationBox = { inner ->
             Box(
-                Modifier.fillMaxSize().background(colors.surface, Bd.ChipShape).border(1.dp, colors.line, Bd.ChipShape).padding(horizontal = 4.dp),
+                Modifier.fillMaxSize().background(colors.surface, Bd.ChipShape).border(1.dp, colors.line, Bd.ChipShape)
+                    .padding(horizontal = 4.dp),
                 contentAlignment = Alignment.CenterEnd,
             ) {
                 inner()
@@ -545,7 +547,8 @@ fun BdScrollColumn(
     val scrollable = scroll.maxValue in 1 until Int.MAX_VALUE
     Box(modifier) {
         Column(
-            Modifier.fillMaxWidth().padding(end = if (scrollable) (SCROLLBAR_WIDTH + 2).dp else 0.dp).verticalScroll(scroll),
+            Modifier.fillMaxWidth().padding(end = if (scrollable) (SCROLLBAR_WIDTH + 2).dp else 0.dp)
+                .verticalScroll(scroll),
             verticalArrangement = verticalArrangement,
             content = content,
         )
@@ -573,7 +576,11 @@ fun BdMeter(fraction: Float, modifier: Modifier, cell: Dp = 3.dp) {
             val filled = (count * fraction.coerceIn(0f, 1f)).roundToInt()
             val start = (size.width - count * pitch + gap) / 2f
             for (i in 0 until count) {
-                val color = if (i < filled) lerp(colors.cyan, colors.violet, i / (count - 1f).coerceAtLeast(1f)) else colors.sunken
+                val color = if (i < filled) lerp(
+                    colors.cyan,
+                    colors.violet,
+                    i / (count - 1f).coerceAtLeast(1f)
+                ) else colors.sunken
                 drawRect(color, Offset(start + i * pitch, 0f), Size(pitch - gap, size.height))
             }
         }
@@ -665,11 +672,25 @@ fun BdStepper(value: Int, onChange: (Int) -> Unit, range: IntRange, enabled: Boo
             .clip(Bd.ChipInnerShape),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BdGlyphButton(OreGlyph.Minus, null, { onChange(value - 1) }, enabled = enabled && value > range.first, size = 13.dp, glyphSize = 6.dp)
+        BdGlyphButton(
+            OreGlyph.Minus,
+            null,
+            { onChange(value - 1) },
+            enabled = enabled && value > range.first,
+            size = 13.dp,
+            glyphSize = 6.dp
+        )
         Box(Modifier.width(IntrinsicSize.Min).padding(horizontal = 3.dp), contentAlignment = Alignment.Center) {
             OreText(value.toString(), color = colors.text, maxLines = 1)
         }
-        BdGlyphButton(OreGlyph.Plus, null, { onChange(value + 1) }, enabled = enabled && value < range.last, size = 13.dp, glyphSize = 6.dp)
+        BdGlyphButton(
+            OreGlyph.Plus,
+            null,
+            { onChange(value + 1) },
+            enabled = enabled && value < range.last,
+            size = 13.dp,
+            glyphSize = 6.dp
+        )
     }
 }
 

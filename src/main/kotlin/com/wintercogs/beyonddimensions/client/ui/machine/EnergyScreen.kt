@@ -1,38 +1,12 @@
 package com.wintercogs.beyonddimensions.client.ui.machine
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.wintercogs.beyonddimensions.client.ui.base.BdInventoryScreen
-import com.wintercogs.beyonddimensions.client.ui.base.BdInventorySection
-import com.wintercogs.beyonddimensions.client.ui.base.SLOT_WINDOW_WIDTH
-import com.wintercogs.beyonddimensions.client.ui.base.playerSlotIds
-import com.wintercogs.beyonddimensions.client.ui.base.tr
-import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphs
-import com.wintercogs.beyonddimensions.client.ui.kit.BdHeader
-import com.wintercogs.beyonddimensions.client.ui.kit.BdMainPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdMeter
-import com.wintercogs.beyonddimensions.client.ui.kit.BdModeSetting
-import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
-import com.wintercogs.beyonddimensions.client.ui.kit.BdScreenFrame
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSettingRow
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabbedWindow
-import com.wintercogs.beyonddimensions.client.ui.kit.BdToggle
-import com.wintercogs.beyonddimensions.client.ui.kit.formatReadout
+import com.wintercogs.beyonddimensions.client.ui.base.*
+import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.machine.PopMode
@@ -43,10 +17,10 @@ import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OreText
-import kotlin.math.abs
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
+import kotlin.math.abs
 
 /** 维度网络能量通道：网络的能量读数与玩家背包；设置页是弹出模式与红石控制 */
 class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) :
@@ -128,7 +102,8 @@ private class EnergyText(val title: String) {
     val pop = tr("ui.beyonddimensions.machine.pop")
     val popHint = tr("ui.beyonddimensions.energy.pop.hint")
     val redstone = tr("ui.beyonddimensions.machine.redstone")
-    val redstoneOptions = RedStoneControlMode.entries.map { tr("ui.beyonddimensions.machine.redstone.${it.name.lowercase()}") }
+    val redstoneOptions =
+        RedStoneControlMode.entries.map { tr("ui.beyonddimensions.machine.redstone.${it.name.lowercase()}") }
 }
 
 private val TICKS = listOf("0", "25", "50", "75", "100%")
@@ -146,7 +121,11 @@ private fun EnergyReadout(state: EnergyState, text: EnergyText) {
         Spacer(Modifier.weight(1f))
         val rateColor = if (state.rate >= 0) colors.online else colors.danger
         Row(verticalAlignment = Alignment.CenterVertically) {
-            OreIcon(if (state.rate >= 0) OreGlyph.ArrowUp else OreGlyph.ArrowDown, Modifier.size(6.dp), color = rateColor)
+            OreIcon(
+                if (state.rate >= 0) OreGlyph.ArrowUp else OreGlyph.ArrowDown,
+                Modifier.size(6.dp),
+                color = rateColor
+            )
             Spacer(Modifier.width(2.dp))
             OreText(formatReadout(abs(state.rate)) + " FE/t", color = rateColor, style = Bd.caption, maxLines = 1)
         }

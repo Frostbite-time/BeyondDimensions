@@ -7,7 +7,6 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.impl.LongStackKey
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType
-import com.wintercogs.beyonddimensions.client.ui.base.tr
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
@@ -138,7 +137,8 @@ class StorageController(private val menu: DimensionsNetMenu) {
                 CraftState(
                     toggleable = menu !is DimensionsCraftMenuTerminal,
                     returnToStorage = CommonConfigRuntime.uiCraftReturnButton == ButtonState.ENABLED,
-                    recipeChoices = recipeChoices?.snapshot(it)?.map { choice -> RecipeChoice(choice.id(), choice.label()) }.orEmpty(),
+                    recipeChoices = recipeChoices?.snapshot(it)
+                        ?.map { choice -> RecipeChoice(choice.id(), choice.label()) }.orEmpty(),
                 )
             }
         val stored = menu.storage.storage.size
@@ -172,6 +172,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
                 search(action.text)
                 if (CommonConfigRuntime.searchTextWithJEIEMI) RecipeViewerSearch.set(action.text)
             }
+
             is StorageAction.Scroll -> scrollTo(menu.lineData + action.rows)
             is StorageAction.ScrollTo -> scrollTo(action.row)
             is StorageAction.Viewport -> menu.setViewport(action.columns, action.rows)
@@ -182,17 +183,20 @@ class StorageController(private val menu: DimensionsNetMenu) {
                 Config.INSTANCE.commonConfig.UI_PAGE_NUM.set(action.rows)
                 Config.INSTANCE.commonConfig.UI_PAGE_NUM.save()
             }
+
             is StorageAction.Filter -> {
                 menu.setTypeFilter(action.typeId?.let(ResourceLocation::tryParse))
                 menu.lineData = 0
                 menu.updateViewerStorage(false)
             }
+
             is StorageAction.Sort -> {
                 CommonConfigRuntime.uiSortButton = action.policy
                 Config.INSTANCE.commonConfig.UI_SORT_BUTTON.set(action.policy)
                 Config.INSTANCE.commonConfig.UI_SORT_BUTTON.save()
                 menu.buildIndexList()
             }
+
             is StorageAction.SecondarySort -> {
                 val policy = action.policy ?: ButtonState.DISABLED
                 CommonConfigRuntime.uiSecondSortButton = policy
@@ -200,6 +204,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
                 Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.save()
                 menu.buildIndexList()
             }
+
             is StorageAction.Reverse -> {
                 val state = if (action.enabled) ButtonState.ENABLED else ButtonState.DISABLED
                 CommonConfigRuntime.uiReverseButton = state
@@ -207,18 +212,21 @@ class StorageController(private val menu: DimensionsNetMenu) {
                 Config.INSTANCE.commonConfig.UI_REVERSE_BUTTON.save()
                 menu.buildIndexList()
             }
+
             is StorageAction.KeepSearch -> {
                 val state = if (action.enabled) ButtonState.ENABLED else ButtonState.DISABLED
                 CommonConfigRuntime.uiSearchButton = state
                 Config.INSTANCE.commonConfig.UI_SEARCH_BUTTON.set(state)
                 Config.INSTANCE.commonConfig.UI_SEARCH_BUTTON.save()
             }
+
             is StorageAction.SyncSearch -> setSearchSync(action.enabled)
             StorageAction.ToggleCraft -> toggleCraft()
             StorageAction.OpenSwitcher -> {
                 saveTransferContext()
                 PacketDistributor.sendToServer(OpenPrimaryNetSwitcherPacket())
             }
+
             is StorageAction.ClearCraft -> menu.commands().returnCrafting(action.toStorage)
             is StorageAction.ReturnPreference -> {
                 val state = if (action.toStorage) ButtonState.ENABLED else ButtonState.DISABLED
@@ -227,6 +235,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
                 Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.save()
                 menu.commands().preference(action.toStorage)
             }
+
             is StorageAction.ChooseRecipe -> craftMenu?.let { recipeChoices?.select(it, action.id) }
         }
     }
@@ -280,7 +289,9 @@ class StorageController(private val menu: DimensionsNetMenu) {
             samples.putIfAbsent(key.typeId, key)
         }
         val order = listOf(ItemStackKey.ID, FluidStackKey.ID)
-        val ids = counts.keys.sortedWith(compareBy({ order.indexOf(it).let { index -> if (index < 0) order.size else index } }, { it.toString() }))
+        val ids = counts.keys.sortedWith(compareBy({
+            order.indexOf(it).let { index -> if (index < 0) order.size else index }
+        }, { it.toString() }))
         val next = ids.map { TypeTab(it.toString(), typeLabel(it, samples.getValue(it)), counts.getValue(it)) }
         if (next != tabs) tabs = next
         return tabs

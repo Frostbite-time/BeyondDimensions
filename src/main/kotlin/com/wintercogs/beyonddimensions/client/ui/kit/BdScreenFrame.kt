@@ -27,6 +27,7 @@ import kotlin.math.roundToInt
  */
 private const val OPEN_MILLIS = 180
 private const val EXIT_MILLIS = 180
+
 /** 窗口升起的距离占屏幕高度的比例 */
 private const val RISE_OF_SCREEN = 0.25f
 

@@ -5,25 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -34,37 +17,8 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.init.BDShortKeys
-import com.wintercogs.beyonddimensions.client.ui.base.BdInventoryScreen
-import com.wintercogs.beyonddimensions.client.ui.base.BdPlayerInventory
-import com.wintercogs.beyonddimensions.client.ui.base.BdSlot
-import com.wintercogs.beyonddimensions.client.ui.base.BdSlotGrid
-import com.wintercogs.beyonddimensions.client.ui.base.SLOT_PITCH
-import com.wintercogs.beyonddimensions.client.ui.base.tr
-import com.wintercogs.beyonddimensions.client.ui.kit.BdChip
-import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphButton
-import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphs
-import com.wintercogs.beyonddimensions.client.ui.kit.BdHeader
-import com.wintercogs.beyonddimensions.client.ui.kit.BdMainPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdMeter
-import com.wintercogs.beyonddimensions.client.ui.kit.BdPopover
-import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
-import com.wintercogs.beyonddimensions.client.ui.kit.BdScreenFrame
-import com.wintercogs.beyonddimensions.client.ui.kit.BdScrollbar
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSearchField
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSegmented
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSettingRow
-import com.wintercogs.beyonddimensions.client.ui.kit.BdStepper
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabbedWindow
-import com.wintercogs.beyonddimensions.client.ui.kit.BdToggle
-import com.wintercogs.beyonddimensions.client.ui.kit.PAGE_PADDING_BOTTOM
-import com.wintercogs.beyonddimensions.client.ui.kit.PAGE_PADDING_TOP
-import com.wintercogs.beyonddimensions.client.ui.kit.PAGE_PADDING_X
-import com.wintercogs.beyonddimensions.client.ui.kit.SCROLLBAR_WIDTH
-import com.wintercogs.beyonddimensions.client.ui.kit.SIDE_RAIL_WIDTH
-import com.wintercogs.beyonddimensions.client.ui.kit.bdClickable
-import com.wintercogs.beyonddimensions.client.ui.kit.formatExact
+import com.wintercogs.beyonddimensions.client.ui.base.*
+import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
@@ -87,7 +41,8 @@ import org.lwjgl.glfw.GLFW
 class StorageLayout(menu: DimensionsNetMenu) {
     val storageStart = menu.storageStartIndex
     val playerSlots = (menu.inventoryStartIndex until menu.inventoryEndIndex).toList()
-    val craftSlots = (menu as? DimensionsCraftMenu)?.let { (it.craftSlotStartIndex until it.craftSlotEndIndex).toList() }.orEmpty()
+    val craftSlots =
+        (menu as? DimensionsCraftMenu)?.let { (it.craftSlotStartIndex until it.craftSlotEndIndex).toList() }.orEmpty()
     val resultSlot = (menu as? DimensionsCraftMenu)?.resultSlotIndex ?: -1
     val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_TERMINAL_BLOCK.get()))
     val showSwitcher = !ClientConfigRuntime.disableMultiNetworkSwitching
@@ -121,7 +76,13 @@ class StorageText {
     val returnStorage = tr("ui.beyonddimensions.crafting.return.storage")
     val returnInventory = tr("ui.beyonddimensions.crafting.return.inventory")
     val recipe = tr("ui.beyonddimensions.crafting.recipe")
-    val sortNames = SORT_POLICIES.associateWith { tr("ui.beyonddimensions.storage.sort.${it.name.removePrefix("SORT_").lowercase()}") }
+    val sortNames = SORT_POLICIES.associateWith {
+        tr(
+            "ui.beyonddimensions.storage.sort.${
+                it.name.removePrefix("SORT_").lowercase()
+            }"
+        )
+    }
 }
 
 /** 存储终端与合成终端 */
@@ -173,6 +134,7 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
 /** 分区之间的间距 */
 private const val GAP = 7
 private const val SCREEN_MARGIN = 8
+
 /** 分组标题与状态栏的行高：9sp 小字的行高 */
 private const val LABEL = 11
 
@@ -224,10 +186,11 @@ private fun StorageView(
         val gridRows = state.rows
         val width = contentWidth(gridColumns)
         BdTabbedWindow(
-            Modifier.width((CHROME_WIDTH + width).dp).then(slots.areaModifier()).onPointerEvent(PointerEventType.Scroll) { event ->
-                val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
-                if (delta != 0f && !settingsOpen) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
-            },
+            Modifier.width((CHROME_WIDTH + width).dp).then(slots.areaModifier())
+                .onPointerEvent(PointerEventType.Scroll) { event ->
+                    val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
+                    if (delta != 0f && !settingsOpen) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
+                },
             header = {
                 BdHeader(
                     layout.icon,
@@ -251,7 +214,13 @@ private fun StorageView(
                     }
                 }
                 if (layout.showSwitcher) {
-                    BdGlyphButton(OreGlyph.CycleArrows, text.switcher, { send(StorageAction.OpenSwitcher) }, size = 20.dp, glyphSize = 9.dp)
+                    BdGlyphButton(
+                        OreGlyph.CycleArrows,
+                        text.switcher,
+                        { send(StorageAction.OpenSwitcher) },
+                        size = 20.dp,
+                        glyphSize = 9.dp
+                    )
                 }
                 Spacer(Modifier.weight(1f))
                 BdRailTab(text.view, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
@@ -265,7 +234,10 @@ private fun StorageView(
                 }
                 Spacer(Modifier.height(4.dp))
                 Row(Modifier.height((gridRows * SLOT_PITCH + 2).dp)) {
-                    Box(Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight().background(colors.surface).border(1.dp, colors.line).padding(1.dp)) {
+                    Box(
+                        Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight().background(colors.surface)
+                            .border(1.dp, colors.line).padding(1.dp)
+                    ) {
                         val ids = List(gridColumns * gridRows) { layout.storageStart + it }
                         BdSlotGrid(slots, ids, gridColumns)
                     }
@@ -292,7 +264,12 @@ private fun StorageView(
                 BdSectionLabel(text.inventory, Modifier.width(width.dp))
                 Spacer(Modifier.height(4.dp))
                 Box(Modifier.width((gridColumns * SLOT_PITCH + 2).dp), contentAlignment = Alignment.TopCenter) {
-                    Box(Modifier.background(colors.line).padding(0.5.dp)) { BdPlayerInventory(slots, layout.playerSlots) }
+                    Box(Modifier.background(colors.line).padding(0.5.dp)) {
+                        BdPlayerInventory(
+                            slots,
+                            layout.playerSlots
+                        )
+                    }
                 }
             }
             BdTabPage(settingsOpen) { ViewOptions(state, send, text, settingsOpen) }
@@ -335,7 +312,11 @@ private fun Toolbar(state: StorageState, send: (StorageAction) -> Unit, text: St
                 Spacer(Modifier.width(3.dp))
                 OreText(text.sortNames[state.sort] ?: text.sort, color = colors.text, maxLines = 1)
                 Spacer(Modifier.width(3.dp))
-                OreIcon(if (state.reverse) OreGlyph.ArrowUp else OreGlyph.ArrowDown, Modifier.size(7.dp), color = colors.accent)
+                OreIcon(
+                    if (state.reverse) OreGlyph.ArrowUp else OreGlyph.ArrowDown,
+                    Modifier.size(7.dp),
+                    color = colors.accent
+                )
             }
             if (open) BdPopover({ open = false }) { SortOptions(state, send, text) }
         }
@@ -373,7 +354,12 @@ private fun TypeTab(label: String, count: Int, selected: Boolean, onClick: () ->
         Row(verticalAlignment = Alignment.Bottom) {
             OreText(label, color = if (selected || hovered) colors.text else colors.muted, maxLines = 1)
             Spacer(Modifier.width(2.dp))
-            OreText(count.toString(), color = if (selected) colors.accent else colors.faint, style = Bd.caption, maxLines = 1)
+            OreText(
+                count.toString(),
+                color = if (selected) colors.accent else colors.faint,
+                style = Bd.caption,
+                maxLines = 1
+            )
         }
         Spacer(Modifier.weight(1f))
         if (selected) Box(Modifier.fillMaxWidth().height(2.dp).background(colors.signature))
@@ -388,7 +374,12 @@ private fun StatusStrip(state: StorageState, text: StorageText, width: Int) {
         OreText(text.types, color = colors.faint, style = Bd.caption, maxLines = 1)
         Spacer(Modifier.width(3.dp))
         val used = formatExact(state.stored.toLong())
-        OreText(if (limited) "$used / ${formatExact(state.typeLimit.toLong())}" else used, color = colors.muted, style = Bd.caption, maxLines = 1)
+        OreText(
+            if (limited) "$used / ${formatExact(state.typeLimit.toLong())}" else used,
+            color = colors.muted,
+            style = Bd.caption,
+            maxLines = 1
+        )
         if (state.shown != state.stored) {
             Spacer(Modifier.width(6.dp))
             OreText(text.filtered, color = colors.faint, style = Bd.caption, maxLines = 1)
@@ -402,14 +393,32 @@ private fun StatusStrip(state: StorageState, text: StorageText, width: Int) {
 
 /** 合成区：3×3 合成格、产物与退回按钮 */
 @Composable
-private fun CraftSection(craft: CraftState, send: (StorageAction) -> Unit, slots: ComposeMenuSlots<DimensionsNetMenu>, layout: StorageLayout, width: Int) {
+private fun CraftSection(
+    craft: CraftState,
+    send: (StorageAction) -> Unit,
+    slots: ComposeMenuSlots<DimensionsNetMenu>,
+    layout: StorageLayout,
+    width: Int
+) {
     val colors = Bd.colors
     val text = layout.text
     Column(Modifier.width(width.dp)) {
         BdSectionLabel(text.crafting) {
-            BdGlyphButton(BdGlyphs.ToStorage, text.clearToStorage, { send(StorageAction.ClearCraft(true)) }, size = 11.dp, glyphSize = 8.dp)
+            BdGlyphButton(
+                BdGlyphs.ToStorage,
+                text.clearToStorage,
+                { send(StorageAction.ClearCraft(true)) },
+                size = 11.dp,
+                glyphSize = 8.dp
+            )
             Spacer(Modifier.width(2.dp))
-            BdGlyphButton(BdGlyphs.ToInventory, text.clearToInventory, { send(StorageAction.ClearCraft(false)) }, size = 11.dp, glyphSize = 8.dp)
+            BdGlyphButton(
+                BdGlyphs.ToInventory,
+                text.clearToInventory,
+                { send(StorageAction.ClearCraft(false)) },
+                size = 11.dp,
+                glyphSize = 8.dp
+            )
         }
         Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -479,7 +488,11 @@ private fun SortOptions(state: StorageState, send: (StorageAction) -> Unit, text
             Spacer(Modifier.height(3.dp))
             OptionRow(text.none, state.secondarySort == null) { send(StorageAction.SecondarySort(null)) }
             for (policy in SORT_POLICIES) {
-                OptionRow(text.sortNames.getValue(policy), state.secondarySort == policy, enabled = policy != state.sort) {
+                OptionRow(
+                    text.sortNames.getValue(policy),
+                    state.secondarySort == policy,
+                    enabled = policy != state.sort
+                ) {
                     send(StorageAction.SecondarySort(policy))
                 }
             }
@@ -501,7 +514,13 @@ private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text
     }
     BdSectionLabel(text.search)
     BdSettingRow(text.keepSearch) { BdToggle(state.keepSearch, { send(StorageAction.KeepSearch(it)) }, shown) }
-    BdSettingRow(text.syncSearch, text.syncSearchHint) { BdToggle(state.syncSearch, { send(StorageAction.SyncSearch(it)) }, shown) }
+    BdSettingRow(text.syncSearch, text.syncSearchHint) {
+        BdToggle(
+            state.syncSearch,
+            { send(StorageAction.SyncSearch(it)) },
+            shown
+        )
+    }
 }
 
 /** 浮层中的单选项 */

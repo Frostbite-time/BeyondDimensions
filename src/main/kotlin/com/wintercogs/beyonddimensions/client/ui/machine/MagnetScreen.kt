@@ -3,38 +3,13 @@ package com.wintercogs.beyonddimensions.client.ui.machine
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.wintercogs.beyonddimensions.client.ui.base.BdInventoryScreen
-import com.wintercogs.beyonddimensions.client.ui.base.BdInventorySection
-import com.wintercogs.beyonddimensions.client.ui.base.BdSlotSection
-import com.wintercogs.beyonddimensions.client.ui.base.SLOT_WINDOW_WIDTH
-import com.wintercogs.beyonddimensions.client.ui.base.flagSlotIds
-import com.wintercogs.beyonddimensions.client.ui.base.playerSlotIds
-import com.wintercogs.beyonddimensions.client.ui.base.tr
-import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphs
-import com.wintercogs.beyonddimensions.client.ui.kit.BdHeader
-import com.wintercogs.beyonddimensions.client.ui.kit.BdMainPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdModeSetting
-import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
-import com.wintercogs.beyonddimensions.client.ui.kit.BdScreenFrame
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSettingRow
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabbedWindow
-import com.wintercogs.beyonddimensions.client.ui.kit.BdToggle
+import com.wintercogs.beyonddimensions.client.ui.base.*
+import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.common.init.BDItems
-import com.wintercogs.beyonddimensions.common.machine.FilterMode
-import com.wintercogs.beyonddimensions.common.machine.HopperFluidMode
-import com.wintercogs.beyonddimensions.common.machine.HopperItemMode
-import com.wintercogs.beyonddimensions.common.machine.HopperNBTMode
-import com.wintercogs.beyonddimensions.common.machine.HopperXpMode
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode
+import com.wintercogs.beyonddimensions.common.machine.*
 import com.wintercogs.beyonddimensions.common.menu.NetMagnetMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
@@ -105,22 +80,43 @@ class MagnetScreen(menu: NetMagnetMenu, inventory: Inventory, title: Component) 
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
                     BdSettingRow(text.working) {
-                        BdToggle(state.working, { send(MagnetAction.SetWorking(it)) }, settingsOpen && state.workingEditable)
+                        BdToggle(
+                            state.working,
+                            { send(MagnetAction.SetWorking(it)) },
+                            settingsOpen && state.workingEditable
+                        )
                     }
-                    BdModeSetting(text.filter, text.filterOptions, state.filter.ordinal, settingsOpen && state.filterEditable) {
+                    BdModeSetting(
+                        text.filter,
+                        text.filterOptions,
+                        state.filter.ordinal,
+                        settingsOpen && state.filterEditable
+                    ) {
                         send(MagnetAction.SetFilter(FilterMode.entries[it]))
                     }
                     BdSettingRow(text.items) {
                         BdToggle(state.items, { send(MagnetAction.SetItems(it)) }, settingsOpen && state.itemsEditable)
                     }
                     BdSettingRow(text.experience) {
-                        BdToggle(state.experience, { send(MagnetAction.SetExperience(it)) }, settingsOpen && state.experienceEditable)
+                        BdToggle(
+                            state.experience,
+                            { send(MagnetAction.SetExperience(it)) },
+                            settingsOpen && state.experienceEditable
+                        )
                     }
                     BdSettingRow(text.fluids) {
-                        BdToggle(state.fluids, { send(MagnetAction.SetFluids(it)) }, settingsOpen && state.fluidsEditable)
+                        BdToggle(
+                            state.fluids,
+                            { send(MagnetAction.SetFluids(it)) },
+                            settingsOpen && state.fluidsEditable
+                        )
                     }
                     BdSettingRow(text.components) {
-                        BdToggle(state.components, { send(MagnetAction.SetComponents(it)) }, settingsOpen && state.componentsEditable)
+                        BdToggle(
+                            state.components,
+                            { send(MagnetAction.SetComponents(it)) },
+                            settingsOpen && state.componentsEditable
+                        )
                     }
                     BdModeSetting(
                         text.range,

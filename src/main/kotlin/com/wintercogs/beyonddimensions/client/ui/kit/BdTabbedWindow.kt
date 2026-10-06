@@ -8,16 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -50,7 +41,12 @@ private const val SWITCH_MILLIS = 150
 private const val SWITCH_RISE_DP = 6
 
 private val pagePadding =
-    Modifier.padding(start = PAGE_PADDING_X.dp, end = PAGE_PADDING_X.dp, top = PAGE_PADDING_TOP.dp, bottom = PAGE_PADDING_BOTTOM.dp)
+    Modifier.padding(
+        start = PAGE_PADDING_X.dp,
+        end = PAGE_PADDING_X.dp,
+        top = PAGE_PADDING_TOP.dp,
+        bottom = PAGE_PADDING_BOTTOM.dp
+    )
 
 /**
  * BD 的标准窗口：顶部是 [header]，内容区左侧是页签竖条 [rail]，右侧是 [pages]。
@@ -93,7 +89,14 @@ fun BdTabbedWindow(
                     Modifier.width(SIDE_RAIL_WIDTH.dp)
                         .fillMaxHeight()
                         .background(colors.sunken)
-                        .drawBehind { drawLine(colors.line, Offset(size.width - 0.5f, 0f), Offset(size.width - 0.5f, size.height), 1.dp.toPx()) }
+                        .drawBehind {
+                            drawLine(
+                                colors.line,
+                                Offset(size.width - 0.5f, 0f),
+                                Offset(size.width - 0.5f, size.height),
+                                1.dp.toPx()
+                            )
+                        }
                         .padding(vertical = 6.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(3.dp),
@@ -111,7 +114,8 @@ fun BdTabbedWindow(
 private fun Modifier.centerContent() =
     layout { measurable, constraints ->
         val placeable = measurable.measure(constraints)
-        val room = if (constraints.hasBoundedWidth) ((constraints.maxWidth - placeable.width) / 2).coerceAtLeast(0) else 0
+        val room =
+            if (constraints.hasBoundedWidth) ((constraints.maxWidth - placeable.width) / 2).coerceAtLeast(0) else 0
         val shift = minOf(SIDE_RAIL_WIDTH.dp.roundToPx() / 2, room)
         layout(placeable.width, placeable.height) { placeable.place(-shift, 0) }
     }
@@ -136,7 +140,9 @@ fun BdRailTab(label: String, art: OrePixelArt, selected: Boolean, onClick: () ->
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            if (selected) Box(Modifier.align(Alignment.CenterStart).width(2.dp).fillMaxHeight().background(colors.signatureVertical))
+            if (selected) Box(
+                Modifier.align(Alignment.CenterStart).width(2.dp).fillMaxHeight().background(colors.signatureVertical)
+            )
             OreIcon(
                 art,
                 Modifier.size(9.dp),

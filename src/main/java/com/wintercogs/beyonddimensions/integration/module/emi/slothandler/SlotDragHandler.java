@@ -36,7 +36,8 @@ public class SlotDragHandler implements EmiDragDropHandler<Screen>
             if (slot instanceof AbstractStackTypedSlot && slot.isFake())
             {
                 var area = InventoryScreenAccess.slot(screen, slot);
-                if (area != null) draw.fill(area.getX(), area.getY(), area.getX() + area.getWidth(), area.getY() + area.getHeight(), 0x8822BB33);
+                if (area != null)
+                    draw.fill(area.getX(), area.getY(), area.getX() + area.getWidth(), area.getY() + area.getHeight(), 0x8822BB33);
             }
         }
     }

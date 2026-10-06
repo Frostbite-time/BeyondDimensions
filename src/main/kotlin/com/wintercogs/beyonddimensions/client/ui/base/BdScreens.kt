@@ -27,7 +27,8 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
         NativeItemOptions(cacheCapacity = 512),
         design = BdDesign,
     ) {
-    @Suppress("UNCHECKED_CAST") private val adapter = inventory.adapter as BdSlotAdapter<M>
+    @Suppress("UNCHECKED_CAST")
+    private val adapter = inventory.adapter as BdSlotAdapter<M>
 
     override fun inventoryTick() = adapter.tick()
 

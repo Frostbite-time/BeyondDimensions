@@ -39,7 +39,9 @@ public final class TooltipHelper
     public static final int MAX_PENDING = 256;
     private static final int PREFETCH_PER_TICK = 5;
 
-    private record Key(IStackKey<?> resource, long amount, boolean advanced) {}
+    private record Key(IStackKey<?> resource, long amount, boolean advanced)
+    {
+    }
 
     private static final AtomicLong REQUESTED_EPOCH = new AtomicLong();
     private static final LinkedHashMap<Key, List<Component>> CACHE = new LinkedHashMap<>(256, 0.75f, true);

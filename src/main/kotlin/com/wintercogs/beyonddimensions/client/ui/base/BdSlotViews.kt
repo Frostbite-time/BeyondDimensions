@@ -4,25 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.wintercogs.beyonddimensions.client.ui.kit.BdAmountPill
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
-import com.wintercogs.beyonddimensions.client.ui.kit.PAGE_PADDING_X
-import com.wintercogs.beyonddimensions.client.ui.kit.SIDE_RAIL_WIDTH
-import com.wintercogs.beyonddimensions.client.ui.kit.brackets
+import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
@@ -45,7 +34,11 @@ const val SLOT_WINDOW_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 9 * SLOT_PI
 fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
     if ((slots.adapter as? BdSlotAdapter<*>)?.isResource(id) == true) {
         slots.Slot(id, modifier.size(SLOT_PITCH.dp)) { slot ->
-            OreSlot(Modifier.matchParentSize(), highlighted = slot.highlighted, contentModifier = Modifier.size(16.dp)) {
+            OreSlot(
+                Modifier.matchParentSize(),
+                highlighted = slot.highlighted,
+                contentModifier = Modifier.size(16.dp)
+            ) {
                 if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors.accentSoft))
                 slot.icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
             }
@@ -115,4 +108,5 @@ fun BDBaseMenu.playerSlotIds(): List<Int> = (inventoryStartIndex until inventory
 fun BDBaseMenu.flagSlotIds(): List<Int> = slots.filter { it is AbstractStackTypedSlot && it.isFake }.map { it.index }
 
 /** 存放虚拟资源的槽位 */
-fun BDBaseMenu.resourceSlotIds(): List<Int> = slots.filter { it is AbstractStackTypedSlot && !it.isFake }.map { it.index }
+fun BDBaseMenu.resourceSlotIds(): List<Int> =
+    slots.filter { it is AbstractStackTypedSlot && !it.isFake }.map { it.index }

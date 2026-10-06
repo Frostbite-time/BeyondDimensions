@@ -1,52 +1,18 @@
 package com.wintercogs.beyonddimensions.client.ui.machine
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
-import com.wintercogs.beyonddimensions.client.ui.base.BdInventoryScreen
-import com.wintercogs.beyonddimensions.client.ui.base.BdInventorySection
-import com.wintercogs.beyonddimensions.client.ui.base.BdSlot
-import com.wintercogs.beyonddimensions.client.ui.base.BdSlotGrid
-import com.wintercogs.beyonddimensions.client.ui.base.SLOT_PITCH
-import com.wintercogs.beyonddimensions.client.ui.base.SLOT_WINDOW_WIDTH
-import com.wintercogs.beyonddimensions.client.ui.base.playerSlotIds
-import com.wintercogs.beyonddimensions.client.ui.base.tr
-import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphs
-import com.wintercogs.beyonddimensions.client.ui.kit.BdHeader
-import com.wintercogs.beyonddimensions.client.ui.kit.BdMainPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdModeSetting
-import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
-import com.wintercogs.beyonddimensions.client.ui.kit.BdScreenFrame
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSettingRow
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabbedWindow
-import com.wintercogs.beyonddimensions.client.ui.kit.BdToggle
+import com.wintercogs.beyonddimensions.client.ui.base.*
+import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.machine.AutoSortMode
@@ -58,10 +24,10 @@ import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
-import kotlin.math.ceil
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
+import kotlin.math.ceil
 
 /**
  * 网络熔炉（也用于高炉与烟熏炉）：九列熔炼位与每列的进度图标、两侧的输入与燃料标记、返还容器与燃料储备，以及玩家背包；
@@ -76,7 +42,8 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
 
     override fun snapshot() =
         FurnaceState(
-            lanes = container.lanes().map { Lane(fraction(it.cooking(), it.cookingTotal()), fraction(it.burning(), it.burningTotal())) },
+            lanes = container.lanes()
+                .map { Lane(fraction(it.cooking(), it.cookingTotal()), fraction(it.burning(), it.burningTotal())) },
             pop = container.output() == PopMode.OPEN,
             popEditable = container.outputEditable(),
             receive = container.receive() == ReceiveMode.OPEN,
@@ -119,12 +86,25 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
                         BdToggle(state.pop, { send(FurnaceAction.SetPop(it)) }, settingsOpen && state.popEditable)
                     }
                     BdSettingRow(text.receive, text.receiveHint) {
-                        BdToggle(state.receive, { send(FurnaceAction.SetReceive(it)) }, settingsOpen && state.receiveEditable)
+                        BdToggle(
+                            state.receive,
+                            { send(FurnaceAction.SetReceive(it)) },
+                            settingsOpen && state.receiveEditable
+                        )
                     }
                     BdSettingRow(text.sorting, text.sortingHint) {
-                        BdToggle(state.sorting, { send(FurnaceAction.SetSorting(it)) }, settingsOpen && state.sortingEditable)
+                        BdToggle(
+                            state.sorting,
+                            { send(FurnaceAction.SetSorting(it)) },
+                            settingsOpen && state.sortingEditable
+                        )
                     }
-                    BdModeSetting(text.redstone, text.redstoneOptions, state.redstone.ordinal, settingsOpen && state.redstoneEditable) {
+                    BdModeSetting(
+                        text.redstone,
+                        text.redstoneOptions,
+                        state.redstone.ordinal,
+                        settingsOpen && state.redstoneEditable
+                    ) {
                         send(FurnaceAction.SetRedstone(RedStoneControlMode.entries[it]))
                     }
                 }
@@ -164,6 +144,7 @@ private class FurnaceSlots(menu: NetFurnaceMenu) {
     val fuelFilters: List<Int> = menu.fuelFilterSlotIds()
     val inputs: List<Int> = menu.inputStorageSlotIds()
     val outputs: List<Int> = menu.outputStorageSlotIds()
+
     /** 燃料用尽后留下的容器，例如熔岩桶的空桶 */
     val fuelReturn: Int = menu.fuelReturnSlotIds().single()
     val fuelStorage: Int = menu.fuelStorageSlotIds().single()
@@ -182,16 +163,21 @@ private class FurnaceText(val title: String) {
     val sorting = tr("ui.beyonddimensions.furnace.sorting")
     val sortingHint = tr("ui.beyonddimensions.furnace.sorting.hint")
     val redstone = tr("ui.beyonddimensions.machine.redstone")
-    val redstoneOptions = RedStoneControlMode.entries.map { tr("ui.beyonddimensions.machine.redstone.${it.name.lowercase()}") }
+    val redstoneOptions =
+        RedStoneControlMode.entries.map { tr("ui.beyonddimensions.machine.redstone.${it.name.lowercase()}") }
 }
 
 private const val COLUMN_GAP = 4
+
 /** 两侧各一列标记槽与列间距，加上中间九列的标准窗口宽度 */
 private const val FURNACE_WINDOW_WIDTH = SLOT_WINDOW_WIDTH + 2 * (SLOT_PITCH + 1 + COLUMN_GAP)
+
 /** 九列熔炼位加外圈细线的宽度 */
 private const val LANES_WIDTH = 9 * SLOT_PITCH + 1
+
 /** 进度图标按一格一像素绘制 */
 private const val GLYPH = 16
+
 /** 分组标题的行高：9sp 小字的行高 */
 private const val LABEL = 11
 
@@ -236,7 +222,13 @@ private fun FlagColumn(label: String, flags: List<Int>, last: Int, slots: Compos
     Column {
         // 列名可以比一格宽，向两侧伸出
         Box(Modifier.width((SLOT_PITCH + 1).dp).height(LABEL.dp), contentAlignment = Alignment.Center) {
-            OreText(label, Modifier.wrapContentWidth(unbounded = true), color = Bd.colors.muted, style = Bd.overline, maxLines = 1)
+            OreText(
+                label,
+                Modifier.wrapContentWidth(unbounded = true),
+                color = Bd.colors.muted,
+                style = Bd.overline,
+                maxLines = 1
+            )
         }
         Spacer(Modifier.height(4.dp))
         Well { BdSlotGrid(slots, flags, 1) }
@@ -247,7 +239,8 @@ private fun FlagColumn(label: String, flags: List<Int>, last: Int, slots: Compos
 
 /** 槽位外的一圈细线 */
 @Composable
-private fun Well(content: @Composable () -> Unit) = Box(Modifier.background(Bd.colors.line).padding(0.5.dp)) { content() }
+private fun Well(content: @Composable () -> Unit) =
+    Box(Modifier.background(Bd.colors.line).padding(0.5.dp)) { content() }
 
 /** 每列熔炼位一个图标，与上方的槽位对齐 */
 @Composable
@@ -270,7 +263,7 @@ private const val CLOCK_MILLIS = 2000
 /** 导管的各行：第几行、从第几格开始、几格宽。上面四段竖管，下面是箭头尖，自上而下排列 */
 private val CONDUIT =
     listOf(0, 1, 3, 4, 6, 7, 9, 10).map { Triple(it, 7, 4) } +
-        listOf(Triple(12, 5, 8), Triple(13, 6, 6), Triple(14, 7, 4), Triple(15, 8, 2))
+            listOf(Triple(12, 5, 8), Triple(13, 6, 6), Triple(14, 7, 4), Triple(15, 8, 2))
 
 /**
  * 熔炼进度：分段的竖向导管接一个箭头尖，随进度由上往下点亮，颜色沿标志渐变由青到紫。
@@ -285,7 +278,8 @@ private fun CookConduit(progress: Float, clock: State<Float>?) {
         // 亮光占两行，从点亮部分的上方进入、从下方离开
         val flow = if (clock != null && lit > 0) (clock.value * 2f % 1f) * (lit + 2) - 2 else Float.NaN
         CONDUIT.forEachIndexed { index, (row, from, width) ->
-            var color = if (index < lit) lerp(colors.cyan, colors.violet, index / (CONDUIT.size - 1f)) else colors.lineStrong
+            var color =
+                if (index < lit) lerp(colors.cyan, colors.violet, index / (CONDUIT.size - 1f)) else colors.lineStrong
             if (index < lit && index >= flow && index < flow + 2) color = lerp(color, colors.text, 0.6f)
             drawRect(color, Offset(from * cell, row * cell), Size(width * cell, cell))
         }

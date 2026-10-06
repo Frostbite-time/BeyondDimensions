@@ -22,7 +22,8 @@ import net.minecraft.world.inventory.Slot
  */
 class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapter(menu), AutoCloseable {
     // 菜单创建后槽位不再增减，可在任何线程读取
-    private val resourceSlots: Set<Int> = menu.slots.filter { it is AbstractStackTypedSlot }.mapTo(HashSet()) { it.index }
+    private val resourceSlots: Set<Int> =
+        menu.slots.filter { it is AbstractStackTypedSlot }.mapTo(HashSet()) { it.index }
     private val resourceKeys = HashMap<Int, IStackKey<*>>()
     private val resourceValues = HashMap<Int, KeyAmount>()
 
@@ -73,7 +74,14 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         if (slot !is AbstractStackTypedSlot) return super.tooltip(graphics, slot, x, y)
         val resource = slot.stack
         if (!resource.isEmpty) {
-            resource.key().render.renderTooltip(graphics, Minecraft.getInstance().font, resource.key(), resource.amount(), x, y)
+            resource.key().render.renderTooltip(
+                graphics,
+                Minecraft.getInstance().font,
+                resource.key(),
+                resource.amount(),
+                x,
+                y
+            )
         }
     }
 

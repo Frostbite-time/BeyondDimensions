@@ -3,31 +3,11 @@ package com.wintercogs.beyonddimensions.client.ui.machine
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.wintercogs.beyonddimensions.client.ui.base.BdInventoryScreen
-import com.wintercogs.beyonddimensions.client.ui.base.BdInventorySection
-import com.wintercogs.beyonddimensions.client.ui.base.BdSlotSection
-import com.wintercogs.beyonddimensions.client.ui.base.SLOT_WINDOW_WIDTH
-import com.wintercogs.beyonddimensions.client.ui.base.flagSlotIds
-import com.wintercogs.beyonddimensions.client.ui.base.playerSlotIds
-import com.wintercogs.beyonddimensions.client.ui.base.tr
-import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphs
-import com.wintercogs.beyonddimensions.client.ui.kit.BdHeader
-import com.wintercogs.beyonddimensions.client.ui.kit.BdMainPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdModeSetting
-import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
-import com.wintercogs.beyonddimensions.client.ui.kit.BdScreenFrame
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSettingRow
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabbedWindow
-import com.wintercogs.beyonddimensions.client.ui.kit.BdToggle
+import com.wintercogs.beyonddimensions.client.ui.base.*
+import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.common.init.BDItems
 import com.wintercogs.beyonddimensions.common.machine.FeederMode
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode
@@ -85,7 +65,11 @@ class FeederScreen(menu: NetFeederMenu, inventory: Inventory, title: Component) 
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
                     BdSettingRow(text.working) {
-                        BdToggle(state.working, { send(FeederAction.SetWorking(it)) }, settingsOpen && state.workingEditable)
+                        BdToggle(
+                            state.working,
+                            { send(FeederAction.SetWorking(it)) },
+                            settingsOpen && state.workingEditable
+                        )
                     }
                     BdModeSetting(
                         text.feeding,

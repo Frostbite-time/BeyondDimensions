@@ -5,27 +5,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,19 +23,7 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetSwitchAction
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType
 import com.wintercogs.beyonddimensions.client.ui.base.BdMenuScreen
 import com.wintercogs.beyonddimensions.client.ui.base.tr
-import com.wintercogs.beyonddimensions.client.ui.kit.BdChip
-import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphButton
-import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphs
-import com.wintercogs.beyonddimensions.client.ui.kit.BdHeader
-import com.wintercogs.beyonddimensions.client.ui.kit.BdMainPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
-import com.wintercogs.beyonddimensions.client.ui.kit.BdScreenFrame
-import com.wintercogs.beyonddimensions.client.ui.kit.BdScrollColumn
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSearchField
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabbedWindow
-import com.wintercogs.beyonddimensions.client.ui.kit.SIDE_RAIL_WIDTH
-import com.wintercogs.beyonddimensions.client.ui.kit.bdClickable
+import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.NetControlMenu
@@ -65,7 +37,6 @@ import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.overlay.OreTooltip
 import dev.compixel.ui.ore.overlay.OreTooltipMode
-import java.util.UUID
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -73,6 +44,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.phys.Vec2
 import net.neoforged.neoforge.network.PacketDistributor
 import org.lwjgl.glfw.GLFW
+import java.util.*
 
 private fun roleLabel(role: NetPermissionlevel) = tr("ui.beyonddimensions.network.role.${role.name.lowercase()}")
 
@@ -103,7 +75,13 @@ private fun RoleChip(role: NetPermissionlevel, label: String) {
 
 // ---- 网络成员与权限 ----
 
-data class MemberView(val id: UUID, val name: String, val role: NetPermissionlevel, val actions: Set<NetControlAction>, val self: Boolean)
+data class MemberView(
+    val id: UUID,
+    val name: String,
+    val role: NetPermissionlevel,
+    val actions: Set<NetControlAction>,
+    val self: Boolean
+)
 
 data class NetControlState(val networkId: Int, val networkName: String, val members: List<MemberView>)
 
@@ -144,7 +122,14 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
 
     override fun handle(action: NetControlRequest) {
         when (action) {
-            is NetControlRequest.Apply -> container.request(NetControlMenu.Request(action.member, action.action, action.role))
+            is NetControlRequest.Apply -> container.request(
+                NetControlMenu.Request(
+                    action.member,
+                    action.action,
+                    action.role
+                )
+            )
+
             NetControlRequest.Refresh -> container.refresh()
         }
     }
@@ -157,18 +142,34 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
             if (state.members.isNotEmpty()) {
                 BdTabbedWindow(
                     Modifier.width((SIDE_RAIL_WIDTH + 250).dp),
-                    header = { BdHeader(text.icon, state.networkName, ::requestClose, tag = "#%04d".format(state.networkId)) },
+                    header = {
+                        BdHeader(
+                            text.icon,
+                            state.networkName,
+                            ::requestClose,
+                            tag = "#%04d".format(state.networkId)
+                        )
+                    },
                     rail = { BdRailTab(text.title, BdGlyphs.Main, selected = true) {} },
                 ) {
                     BdMainPage(true) {
                         BdSectionLabel(text.members) {
                             OreText(state.members.size.toString(), color = colors.faint, style = Bd.caption)
                             Spacer(Modifier.width(3.dp))
-                            BdGlyphButton(OreGlyph.CycleArrows, text.refresh, { send(NetControlRequest.Refresh) }, size = 11.dp, glyphSize = 7.dp)
+                            BdGlyphButton(
+                                OreGlyph.CycleArrows,
+                                text.refresh,
+                                { send(NetControlRequest.Refresh) },
+                                size = 11.dp,
+                                glyphSize = 7.dp
+                            )
                         }
                         Spacer(Modifier.height(5.dp))
                         ListWell {
-                            BdScrollColumn(Modifier.heightIn(min = LIST_MIN_HEIGHT.dp, max = 200.dp), Arrangement.spacedBy(2.dp)) {
+                            BdScrollColumn(
+                                Modifier.heightIn(min = LIST_MIN_HEIGHT.dp, max = 200.dp),
+                                Arrangement.spacedBy(2.dp)
+                            ) {
                                 for (member in state.members) MemberRow(member, text) { send(it) }
                             }
                         }
@@ -184,8 +185,10 @@ private class NetControlText(val title: String) {
     val members = tr("ui.beyonddimensions.network.members")
     val refresh = tr("ui.beyonddimensions.network.refresh")
     val roles = NetPermissionlevel.entries.associateWith(::roleLabel)
-    val actions = NetControlAction.entries.associateWith { tr("ui.beyonddimensions.network.action.${it.name.lowercase()}") }
-    val actionHints = NetControlAction.entries.associateWith { tr("ui.beyonddimensions.network.action.${it.name.lowercase()}.hint") }
+    val actions =
+        NetControlAction.entries.associateWith { tr("ui.beyonddimensions.network.action.${it.name.lowercase()}") }
+    val actionHints =
+        NetControlAction.entries.associateWith { tr("ui.beyonddimensions.network.action.${it.name.lowercase()}.hint") }
     val leave = tr("ui.beyonddimensions.network.action.leave")
     val leaveHint = tr("ui.beyonddimensions.network.action.leave.hint")
     val you = tr("ui.beyonddimensions.network.you")
@@ -195,7 +198,8 @@ private class NetControlText(val title: String) {
 private fun MemberRow(member: MemberView, text: NetControlText, send: (NetControlRequest) -> Unit) {
     val colors = Bd.colors
     Row(
-        Modifier.fillMaxWidth().height(20.dp).background(colors.surface).border(1.dp, colors.line).padding(horizontal = 5.dp),
+        Modifier.fillMaxWidth().height(20.dp).background(colors.surface).border(1.dp, colors.line)
+            .padding(horizontal = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RoleChip(member.role, text.roles.getValue(member.role))
@@ -279,10 +283,22 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
         when (action) {
             // 成员资格、管理权限与名称长度都由服务器检查
             is PrimaryNetRequest.Select ->
-                PacketDistributor.sendToServer(PrimaryNetSwitchActionPacket(PrimaryNetSwitchAction.SET_EXPLICIT, action.id))
+                PacketDistributor.sendToServer(
+                    PrimaryNetSwitchActionPacket(
+                        PrimaryNetSwitchAction.SET_EXPLICIT,
+                        action.id
+                    )
+                )
+
             is PrimaryNetRequest.Rename -> PacketDistributor.sendToServer(RenameNetPacket(action.id, action.name))
             PrimaryNetRequest.Clear ->
-                PacketDistributor.sendToServer(PrimaryNetSwitchActionPacket(PrimaryNetSwitchAction.CLEAR_PRIMARY, DimensionsNet.NO_PRIMARY_NET_ID))
+                PacketDistributor.sendToServer(
+                    PrimaryNetSwitchActionPacket(
+                        PrimaryNetSwitchAction.CLEAR_PRIMARY,
+                        DimensionsNet.NO_PRIMARY_NET_ID
+                    )
+                )
+
             PrimaryNetRequest.OpenTerminal -> {
                 // 新界面打开时把指针放回原处
                 val x = DoubleArray(1)
@@ -290,7 +306,12 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                 GLFW.glfwGetCursorPos(Minecraft.getInstance().window.window, x, y)
                 UIDataHelper.lastMousePos = Vec2(x[0].toFloat(), y[0].toFloat())
                 UIDataHelper.isTransfer = true
-                PacketDistributor.sendToServer(OpenNetGuiPacket(container.player.stringUUID, NetMenuType.NET_CRAFT_MENU))
+                PacketDistributor.sendToServer(
+                    OpenNetGuiPacket(
+                        container.player.stringUUID,
+                        NetMenuType.NET_CRAFT_MENU
+                    )
+                )
             }
         }
     }
@@ -317,19 +338,32 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                 BdMainPage(true) {
                     BdSearchField(query, { query = it }, text.search, Modifier.fillMaxWidth())
                     Spacer(Modifier.height(6.dp))
-                    BdSectionLabel(text.networks) { OreText(state.options.size.toString(), color = colors.faint, style = Bd.caption) }
+                    BdSectionLabel(text.networks) {
+                        OreText(
+                            state.options.size.toString(),
+                            color = colors.faint,
+                            style = Bd.caption
+                        )
+                    }
                     Spacer(Modifier.height(4.dp))
                     val shown =
                         state.options.filter {
-                            query.isBlank() || it.name.contains(query, ignoreCase = true) || it.id.toString().contains(query.trim().removePrefix("#"))
+                            query.isBlank() || it.name.contains(query, ignoreCase = true) || it.id.toString()
+                                .contains(query.trim().removePrefix("#"))
                         }
                     ListWell {
                         if (shown.isEmpty()) {
-                            Box(Modifier.fillMaxWidth().height(LIST_MIN_HEIGHT.dp), contentAlignment = Alignment.Center) {
+                            Box(
+                                Modifier.fillMaxWidth().height(LIST_MIN_HEIGHT.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 OreText(text.empty, color = colors.faint, style = Bd.caption)
                             }
                         } else {
-                            BdScrollColumn(Modifier.heightIn(min = LIST_MIN_HEIGHT.dp, max = 170.dp), Arrangement.spacedBy(2.dp)) {
+                            BdScrollColumn(
+                                Modifier.heightIn(min = LIST_MIN_HEIGHT.dp, max = 170.dp),
+                                Arrangement.spacedBy(2.dp)
+                            ) {
                                 for (option in shown) {
                                     NetworkRow(
                                         option,
@@ -351,12 +385,22 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         OreText(text.primary, color = colors.faint, style = Bd.caption, maxLines = 1)
                         Spacer(Modifier.width(3.dp))
-                        OreText(current?.name ?: text.none, Modifier.weight(1f), color = colors.text, style = Bd.caption, maxLines = 1)
+                        OreText(
+                            current?.name ?: text.none,
+                            Modifier.weight(1f),
+                            color = colors.text,
+                            style = Bd.caption,
+                            maxLines = 1
+                        )
                         BdChip({ send(PrimaryNetRequest.Clear) }, enabled = current != null) {
                             OreText(text.clear, color = colors.muted, style = Bd.caption, maxLines = 1)
                         }
                         Spacer(Modifier.width(4.dp))
-                        BdChip({ send(PrimaryNetRequest.OpenTerminal) }, enabled = current != null, active = current != null) {
+                        BdChip(
+                            { send(PrimaryNetRequest.OpenTerminal) },
+                            enabled = current != null,
+                            active = current != null
+                        ) {
                             OreText(text.open, color = colors.accentDeep, style = Bd.caption, maxLines = 1)
                         }
                     }
@@ -433,7 +477,10 @@ private fun RowScope.RenameField(initial: String, onCommit: (String?) -> Unit) {
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { onCommit(value) }),
         decorationBox = { inner ->
-            Box(Modifier.fillMaxSize().background(colors.surface).border(1.dp, colors.accent).padding(horizontal = 3.dp), contentAlignment = Alignment.CenterStart) {
+            Box(
+                Modifier.fillMaxSize().background(colors.surface).border(1.dp, colors.accent)
+                    .padding(horizontal = 3.dp), contentAlignment = Alignment.CenterStart
+            ) {
                 inner()
             }
         },

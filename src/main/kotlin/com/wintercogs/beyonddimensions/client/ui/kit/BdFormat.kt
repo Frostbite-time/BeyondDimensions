@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.kit
 
-import java.util.Locale
+import java.util.*
 
 private val UNITS = listOf("K" to 1e3, "M" to 1e6, "G" to 1e9, "T" to 1e12, "P" to 1e15, "E" to 1e18)
 
