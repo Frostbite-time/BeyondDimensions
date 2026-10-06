@@ -35,17 +35,18 @@ const val SLOT_PITCH = 18
 /** 放九列槽位的标准窗口宽度：页签竖条、页面两侧的留白、九格与外圈细线，再加窗口边框 */
 const val SLOT_WINDOW_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 9 * SLOT_PITCH + 1 + 2
 
-/** 一个原生槽位：主题化的槽底，悬停时加上角标；虚拟资源的数量以 BD 的数量标签显示 */
+/**
+ * 一个原生槽位：主题化的槽底，悬停时加上角标；虚拟资源的数量以 BD 的数量标签显示。
+ *
+ * 标记槽与其他槽位用同样的凹槽，只在槽底铺一层强调色。Ore 的标记样式用通用描边色画凹槽的暗边，
+ * 玻璃主题的描边色是半透明白，相邻两格的亮边会连成双线，交点处还留下缺角。
+ */
 @Composable
 fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
     if ((slots.adapter as? BdSlotAdapter<*>)?.isResource(id) == true) {
         slots.Slot(id, modifier.size(SLOT_PITCH.dp)) { slot ->
-            OreSlot(
-                Modifier.matchParentSize(),
-                marked = slot.marked,
-                highlighted = slot.highlighted,
-                contentModifier = Modifier.size(16.dp),
-            ) {
+            OreSlot(Modifier.matchParentSize(), highlighted = slot.highlighted, contentModifier = Modifier.size(16.dp)) {
+                if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors.accentSoft))
                 slot.icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
             }
             if (slot.amount.isNotEmpty())

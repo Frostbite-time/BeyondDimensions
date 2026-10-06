@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.client.ui.kit
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -411,41 +412,31 @@ fun BdSegmented(
     }
 }
 
-/** 开关：开启时轨道为标志渐变，白色滑块沿轨道左右滑动 */
+/**
+ * 开关：细线框的深色轨道里一个小方块。关闭时方块在左侧、是灰色；开启时轨道染上一层强调色、边框变为强调色，
+ * 方块移到右侧并亮起。位置与颜色一起过渡。
+ */
 @Composable
 fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Boolean = true) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val thumbOffset by animateDpAsState(
-        targetValue = if (checked) 11.dp else 0.dp,
-        animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
-        label = "BD switch thumb position",
-    )
+    val pointerOver by interaction.collectIsHoveredAsState()
+    val hovered = pointerOver && enabled
+    val motion = tween<Float>(durationMillis = 150, easing = FastOutSlowInEasing)
+    val progress by animateFloatAsState(if (checked) 1f else 0f, motion, label = "BD switch")
+    val edge = if (hovered) colors.lineStrong else colors.line
+    val edgeOn = colors.accent.copy(alpha = if (hovered) 1f else 0.6f)
     Box(
-        Modifier.size(22.dp, 11.dp)
+        Modifier.size(20.dp, 10.dp)
+            .alpha(if (enabled) 1f else 0.55f)
             .hoverable(interaction, enabled)
             .bdClickable(interaction, enabled = enabled) { onCheckedChange(!checked) }
-            .background(if (checked) colors.signature else SolidColor(colors.sunken), Bd.ChipShape)
-            .border(
-                1.dp,
-                when {
-                    checked -> colors.accentDeep.copy(alpha = 0.35f)
-                    hovered && enabled -> colors.lineStrong
-                    else -> colors.line
-                },
-                Bd.ChipShape,
-            )
-            .padding(2.dp)
-            .alpha(if (enabled) 1f else 0.55f),
+            .background(lerp(colors.sunken, colors.accentSoft, progress))
+            .border(1.dp, lerp(edge, edgeOn, progress))
+            .padding(2.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        Box(
-            Modifier.offset(x = thumbOffset)
-                .size(7.dp)
-                .background(colors.knob)
-                .border(1.dp, if (checked) Color.Transparent else colors.lineStrong)
-        )
+        Box(Modifier.offset(x = 10.dp * progress).size(6.dp).background(lerp(colors.muted, colors.accent, progress)))
     }
 }
 
@@ -495,7 +486,12 @@ fun BdModeSetting(
 private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
     val colors = Bd.colors
     Row(
-        Modifier.fillMaxWidth().height(15.dp).background(colors.sunken, Bd.ChipShape).border(1.dp, colors.line, Bd.ChipShape),
+        Modifier.fillMaxWidth()
+            .height(15.dp)
+            .background(colors.sunken, Bd.ChipShape)
+            .border(1.dp, colors.line, Bd.ChipShape)
+            .padding(1.dp)
+            .clip(Bd.ChipInnerShape),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BdGlyphButton(OreGlyph.ChevronLeft, null, { onSelect((selected - 1).mod(options.size)) }, enabled = enabled, size = 13.dp, glyphSize = 6.dp)
@@ -543,13 +539,20 @@ fun BdScrollColumn(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val scroll = rememberScrollState()
+    // 第一次布局前 maxValue 是表示未知的 Int.MAX_VALUE，这时按放得下处理，否则刚出现的一帧会带上滚动条与右侧留白
+    val scrollable = scroll.maxValue in 1 until Int.MAX_VALUE
     Box(modifier) {
         Column(
-            Modifier.fillMaxWidth().padding(end = if (scroll.maxValue > 0) 7.dp else 0.dp).verticalScroll(scroll),
+            Modifier.fillMaxWidth().padding(end = if (scrollable) 7.dp else 0.dp).verticalScroll(scroll),
             verticalArrangement = verticalArrangement,
             content = content,
         )
-        if (scroll.maxValue > 0) OreScrollbar(scroll, Modifier.align(Alignment.TopEnd).width(4.dp).fillMaxHeight())
+        // 滚动条只跟随内容的高度，不参与测量，不会把容器撑到最大高度
+        if (scrollable) {
+            Box(Modifier.matchParentSize(), contentAlignment = Alignment.TopEnd) {
+                OreScrollbar(scroll, Modifier.width(4.dp).fillMaxHeight())
+            }
+        }
     }
 }
 
@@ -624,7 +627,11 @@ fun BdScrollbar(first: Int, visible: Int, total: Int, onScrollTo: (Int) -> Unit,
 fun BdStepper(value: Int, onChange: (Int) -> Unit, range: IntRange, enabled: Boolean = true) {
     val colors = Bd.colors
     Row(
-        Modifier.height(15.dp).background(colors.sunken, Bd.ChipShape).border(1.dp, colors.line, Bd.ChipShape),
+        Modifier.height(15.dp)
+            .background(colors.sunken, Bd.ChipShape)
+            .border(1.dp, colors.line, Bd.ChipShape)
+            .padding(1.dp)
+            .clip(Bd.ChipInnerShape),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BdGlyphButton(OreGlyph.Minus, null, { onChange(value - 1) }, enabled = enabled && value > range.first, size = 13.dp, glyphSize = 6.dp)

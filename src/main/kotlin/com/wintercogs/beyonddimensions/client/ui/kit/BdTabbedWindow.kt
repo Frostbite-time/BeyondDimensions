@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
@@ -84,7 +85,8 @@ fun BdTabbedWindow(
     BdWindow(Modifier.centerContent().then(modifier)) {
         header()
         Box {
-            Box(Modifier.padding(start = SIDE_RAIL_WIDTH.dp), content = pages)
+            // 切换时新页面从下方浮起，裁剪到内容区，不会画到窗口边框外
+            Box(Modifier.padding(start = SIDE_RAIL_WIDTH.dp).clipToBounds(), content = pages)
             // 竖条高度跟随主页面：深一层的底色，右侧一条细线
             Box(Modifier.matchParentSize()) {
                 Column(

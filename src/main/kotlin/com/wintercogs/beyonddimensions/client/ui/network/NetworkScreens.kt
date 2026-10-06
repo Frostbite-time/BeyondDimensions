@@ -142,28 +142,20 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
     override fun Content(state: NetControlState) {
         val colors = Bd.colors
         BdScreenFrame {
-            BdTabbedWindow(
-                Modifier.width((SIDE_RAIL_WIDTH + 250).dp),
-                header = {
-                    BdHeader(
-                        text.icon,
-                        if (state.networkId >= 0) state.networkName else text.title,
-                        ::requestClose,
-                        tag = if (state.networkId >= 0) "#%04d".format(state.networkId) else null,
-                    )
-                },
-                rail = { BdRailTab(text.title, BdGlyphs.Main, selected = true) {} },
-            ) {
-                BdMainPage(true) {
-                    BdSectionLabel(text.members) {
-                        OreText(state.members.size.toString(), color = colors.faint, style = Bd.caption)
-                        Spacer(Modifier.width(3.dp))
-                        BdGlyphButton(OreGlyph.CycleArrows, text.refresh, { send(NetControlRequest.Refresh) }, size = 11.dp, glyphSize = 7.dp)
-                    }
-                    Spacer(Modifier.height(5.dp))
-                    if (state.members.isEmpty()) {
-                        OreText(text.empty, color = colors.faint, style = Bd.caption)
-                    } else {
+            // 网络里至少有玩家自己，成员为空说明数据还没到：这时只有背景淡入，窗口等数据到了再加入进场动画
+            if (state.members.isNotEmpty()) {
+                BdTabbedWindow(
+                    Modifier.width((SIDE_RAIL_WIDTH + 250).dp),
+                    header = { BdHeader(text.icon, state.networkName, ::requestClose, tag = "#%04d".format(state.networkId)) },
+                    rail = { BdRailTab(text.title, BdGlyphs.Main, selected = true) {} },
+                ) {
+                    BdMainPage(true) {
+                        BdSectionLabel(text.members) {
+                            OreText(state.members.size.toString(), color = colors.faint, style = Bd.caption)
+                            Spacer(Modifier.width(3.dp))
+                            BdGlyphButton(OreGlyph.CycleArrows, text.refresh, { send(NetControlRequest.Refresh) }, size = 11.dp, glyphSize = 7.dp)
+                        }
+                        Spacer(Modifier.height(5.dp))
                         BdScrollColumn(Modifier.heightIn(max = 200.dp), Arrangement.spacedBy(2.dp)) {
                             for (member in state.members) MemberRow(member, text) { send(it) }
                         }
@@ -178,7 +170,6 @@ private class NetControlText(val title: String) {
     val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_CONTROL.get()))
     val members = tr("ui.beyonddimensions.network.members")
     val refresh = tr("ui.beyonddimensions.network.refresh")
-    val empty = tr("ui.beyonddimensions.network.empty")
     val roles = NetPermissionlevel.entries.associateWith(::roleLabel)
     val actions = NetControlAction.entries.associateWith { tr("ui.beyonddimensions.network.action.${it.name.lowercase()}") }
     val actionHints = NetControlAction.entries.associateWith { tr("ui.beyonddimensions.network.action.${it.name.lowercase()}.hint") }

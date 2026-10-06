@@ -27,8 +27,14 @@ import dev.compixel.ui.theme.current
 object Bd {
     val ThemeId: ThemeId = dev.compixel.ui.theme.ThemeId("beyonddimensions", "default")
 
-    val WindowShape = CutCornerShape(topStart = 7.dp, bottomEnd = 7.dp)
+    /** 控件的外形：左上与右下切角 */
     val ChipShape = CutCornerShape(topStart = 3.dp, bottomEnd = 3.dp)
+
+    /**
+     * [ChipShape] 一像素边框以内的外形，切角正好沿边框斜边的内沿（3 − 2 + √2）。
+     * 带边框的控件里有自己底色的子项时，内容先留出一像素再按它裁剪，子项不会盖住边框
+     */
+    val ChipInnerShape = CutCornerShape(topStart = 2.41.dp, bottomEnd = 2.41.dp)
 
     val colors: BdColors
         @Composable get() = LocalBdColors.current
@@ -70,8 +76,6 @@ data class BdColors(
     val violet: Color = Color(0xFF6D6AFF),
     val online: Color = Color(0xFF4FD69A),
     val warning: Color = Color(0xFFF2B544),
-    /** 开关滑块等需要始终醒目的小块 */
-    val knob: Color = Color(0xFFF2F5F9),
     /** 强调色或危险色实底上的文字 */
     val onAccent: Color = Color(0xFF0B1220),
     /** 浮层的底色，比窗口更实，免得下面的内容透上来 */
@@ -110,7 +114,6 @@ object BdThemeSection : ThemeSection<BdColors>("beyonddimensions") {
                     "violet" -> result.copy(violet = color)
                     "online" -> result.copy(online = color)
                     "warning" -> result.copy(warning = color)
-                    "knob" -> result.copy(knob = color)
                     "onAccent" -> result.copy(onAccent = color)
                     "popover" -> result.copy(popover = color)
                     "pill" -> result.copy(pill = color)

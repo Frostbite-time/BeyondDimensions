@@ -344,7 +344,6 @@
   "ui.beyonddimensions.xp.usage": "Usage",
   "ui.beyonddimensions.network.members": "Members",
   "ui.beyonddimensions.network.refresh": "Refresh",
-  "ui.beyonddimensions.network.empty": "No members",
   "ui.beyonddimensions.network.you": "(you)",
   "ui.beyonddimensions.network.role.owner": "Owner",
   "ui.beyonddimensions.network.role.manager": "Manager",
