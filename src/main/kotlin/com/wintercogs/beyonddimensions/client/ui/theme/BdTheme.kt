@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.theme
 
+import androidx.compose.foundation.LocalContextMenuRepresentation
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -10,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.wintercogs.beyonddimensions.client.ui.kit.BdContextMenu
 import dev.compixel.ui.UiDesign
 import dev.compixel.ui.ore.theme.OreDesign
 import dev.compixel.ui.ore.theme.OreTheme
@@ -27,8 +29,11 @@ import dev.compixel.ui.theme.current
 object Bd {
     val ThemeId: ThemeId = dev.compixel.ui.theme.ThemeId("beyonddimensions", "default")
 
+    /** 控件切角的边长 */
+    const val CHIP_CUT = 3
+
     /** 控件的外形：左上与右下切角 */
-    val ChipShape = CutCornerShape(topStart = 3.dp, bottomEnd = 3.dp)
+    val ChipShape = CutCornerShape(topStart = CHIP_CUT.dp, bottomEnd = CHIP_CUT.dp)
 
     /**
      * [ChipShape] 一像素边框以内的外形，切角正好沿边框斜边的内沿（3 − 2 + √2）。
@@ -142,13 +147,17 @@ object BdThemeSection : ThemeSection<BdColors>("beyonddimensions") {
 
 val LocalBdColors = staticCompositionLocalOf { BdColors() }
 
-/** BD 界面的设计：沿用 Ore 为其中的 Ore 组件配色，再提供 BD 自己的颜色 */
+/** BD 界面的设计：沿用 Ore 为其中的 Ore 组件配色，再提供 BD 自己的颜色与文本框的右键菜单 */
 object BdDesign : UiDesign {
     @Composable
     override fun Decorate(theme: ThemeId, content: @Composable () -> Unit) {
         OreDesign.Decorate(theme) {
             OreTheme(typography = BdTypography) {
-                CompositionLocalProvider(LocalBdColors provides BdThemeSection.current(theme), content = content)
+                CompositionLocalProvider(
+                    LocalBdColors provides BdThemeSection.current(theme),
+                    LocalContextMenuRepresentation provides BdContextMenu,
+                    content = content,
+                )
             }
         }
     }

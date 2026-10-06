@@ -178,6 +178,9 @@ private const val LANES_WIDTH = 9 * SLOT_PITCH + 1
 /** 进度图标按一格一像素绘制 */
 private const val GLYPH = 16
 
+/** 熔炼进度与上方的原料、下方的产物之间各空出的距离 */
+private const val CONDUIT_GAP = 2
+
 /** 分组标题的行高：9sp 小字的行高 */
 private const val LABEL = 11
 
@@ -202,7 +205,9 @@ private fun Furnace(
             BdSectionLabel(text.smelting)
             Spacer(Modifier.height(4.dp))
             Well { BdSlotGrid(slots, ids.inputs, 9) }
+            Spacer(Modifier.height(CONDUIT_GAP.dp))
             LaneGlyphs(state.lanes) { lane, _ -> CookConduit(lane.cooking, clock) }
+            Spacer(Modifier.height(CONDUIT_GAP.dp))
             Well { BdSlotGrid(slots, ids.outputs, 9) }
             LaneGlyphs(state.lanes) { lane, index -> Flames(lane.burning, index, clock) }
             Spacer(Modifier.height(6.dp))
@@ -216,8 +221,8 @@ private fun Furnace(
 /** 一列八个标记槽，上方是列名，最下方隔开一个槽位：标记槽与熔炼位上沿对齐，最下方的槽位与快捷栏底边对齐 */
 @Composable
 private fun FlagColumn(label: String, flags: List<Int>, last: Int, slots: ComposeMenuSlots<NetFurnaceMenu>) {
-    // 中间一列：标题、两行槽位与两行图标、背包（标题、三行加 3 的间隔再一行）
-    val lanes = LABEL + 4 + 2 * (SLOT_PITCH + 1) + 2 * GLYPH + 6 + LABEL + 4 + (4 * SLOT_PITCH + 3 + 1)
+    // 中间一列：标题、两行槽位、导管与上下的空隙、火焰、背包（标题、三行加 3 的间隔再一行）
+    val lanes = LABEL + 4 + 2 * (SLOT_PITCH + 1) + 2 * CONDUIT_GAP + 2 * GLYPH + 6 + LABEL + 4 + (4 * SLOT_PITCH + 3 + 1)
     val gap = lanes - (LABEL + 4 + (8 * SLOT_PITCH + 1) + (SLOT_PITCH + 1))
     Column {
         // 列名可以比一格宽，向两侧伸出

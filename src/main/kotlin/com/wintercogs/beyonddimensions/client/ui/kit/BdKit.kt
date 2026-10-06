@@ -23,6 +23,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
@@ -35,14 +36,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.window.PopupProperties
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
@@ -51,8 +46,6 @@ import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OrePixelArt
 import dev.compixel.ui.ore.display.OreText
-import dev.compixel.ui.ore.overlay.OreTooltip
-import dev.compixel.ui.ore.overlay.OreTooltipMode
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.ranges.IntRange
@@ -159,7 +152,7 @@ fun BdGlyphButton(
             OreIcon(art, Modifier.size(glyphSize), color = tint)
         }
     }
-    if (description != null) OreTooltip(description, mode = OreTooltipMode.Immediate) { button() } else button()
+    if (description != null) BdTooltip(description) { button() } else button()
 }
 
 /** 分组标题：强调色方点、标题与延伸到边缘的细线 */
@@ -218,7 +211,10 @@ fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
     }
 }
 
-/** 单行搜索框；右键清空 */
+/**
+ * 单行搜索框。像原版的搜索框一样右键清空，这一下不再弹出右键菜单：清空之后菜单里的剪切、复制已没有对象。
+ * [help] 是悬停时的说明，开始输入后收起，免得挡住下方的内容。
+ */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BdSearchField(
@@ -226,55 +222,65 @@ fun BdSearchField(
     onValueChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
+    help: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
     val hovered by interaction.collectIsHoveredAsState()
-    BasicTextField(
-        value,
-        onValueChange,
-        modifier.height(18.dp).hoverable(interaction).onPointerEvent(PointerEventType.Press) {
-            if (it.buttons.isSecondaryPressed) onValueChange("")
-        },
-        singleLine = true,
-        textStyle = Bd.body.copy(color = colors.text),
-        interactionSource = interaction,
-        cursorBrush = SolidColor(colors.accent),
-        decorationBox = { inner ->
-            Row(
-                Modifier.fillMaxWidth()
-                    .fillMaxHeight()
-                    .background(colors.surface, Bd.ChipShape)
-                    .border(
-                        1.dp,
-                        when {
-                            focused -> colors.accent
-                            hovered -> colors.lineStrong
-                            else -> colors.line
-                        },
-                        Bd.ChipShape,
-                    )
-                    .padding(horizontal = 5.dp),
-                verticalAlignment = Alignment.CenterVertically,
+    BdTooltip(help ?: {}, modifier, enabled = help != null && !focused) {
+        BasicTextField(
+            value,
+            onValueChange,
+            Modifier.fillMaxWidth().height(18.dp).hoverable(interaction).onPointerEvent(
+                PointerEventType.Press,
+                PointerEventPass.Initial,
             ) {
-                OreIcon(
-                    OreGlyph.MagnifyingGlass,
-                    Modifier.size(8.dp),
-                    color = if (focused) colors.accent else colors.faint
-                )
-                Spacer(Modifier.width(4.dp))
-                Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                    if (value.isEmpty()) OreText(placeholder, color = colors.faint, maxLines = 1)
-                    inner()
+                // 先于文本框处理并吞掉右键：文本框不会选词、也不会打开右键菜单
+                if (it.buttons.isSecondaryPressed) {
+                    onValueChange("")
+                    it.changes.forEach { change -> change.consume() }
                 }
-                if (value.isNotEmpty()) {
-                    Spacer(Modifier.width(3.dp))
-                    BdGlyphButton(OreGlyph.Cross, null, { onValueChange("") }, size = 10.dp, glyphSize = 6.dp)
+            },
+            singleLine = true,
+            textStyle = Bd.body.copy(color = colors.text),
+            interactionSource = interaction,
+            cursorBrush = SolidColor(colors.accent),
+            decorationBox = { inner ->
+                Row(
+                    Modifier.fillMaxWidth()
+                        .fillMaxHeight()
+                        .background(colors.surface, Bd.ChipShape)
+                        .border(
+                            1.dp,
+                            when {
+                                focused -> colors.accent
+                                hovered -> colors.lineStrong
+                                else -> colors.line
+                            },
+                            Bd.ChipShape,
+                        )
+                        .padding(horizontal = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OreIcon(
+                        OreGlyph.MagnifyingGlass,
+                        Modifier.size(8.dp),
+                        color = if (focused) colors.accent else colors.faint
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                        if (value.isEmpty()) OreText(placeholder, color = colors.faint, maxLines = 1)
+                        inner()
+                    }
+                    if (value.isNotEmpty()) {
+                        Spacer(Modifier.width(3.dp))
+                        BdGlyphButton(OreGlyph.Cross, null, { onValueChange("") }, size = 10.dp, glyphSize = 6.dp)
+                    }
                 }
-            }
-        },
-    )
+            },
+        )
+    }
 }
 
 /** 带边框的小按钮，用于视图选项等 */
@@ -691,36 +697,5 @@ fun BdStepper(value: Int, onChange: (Int) -> Unit, range: IntRange, enabled: Boo
             size = 13.dp,
             glyphSize = 6.dp
         )
-    }
-}
-
-/** 贴在锚点右侧（放不下时在左侧）的浮层卡片；点击外部关闭 */
-@Composable
-fun BdPopover(onDismissRequest: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    val colors = Bd.colors
-    val gap = with(LocalDensity.current) { 3.dp.roundToPx() }
-    val position = remember(gap) { BesideAnchor(gap) }
-    Popup(position, onDismissRequest, properties = PopupProperties(focusable = true)) {
-        Column(
-            Modifier.shadow(6.dp, Bd.ChipShape, ambientColor = Color(0x33000000), spotColor = Color(0x66000000))
-                .background(colors.popover, Bd.ChipShape)
-                .border(1.dp, colors.lineStrong, Bd.ChipShape)
-                .padding(6.dp),
-            content = content,
-        )
-    }
-}
-
-private class BesideAnchor(private val gap: Int) : PopupPositionProvider {
-    override fun calculatePosition(
-        anchorBounds: IntRect,
-        windowSize: IntSize,
-        layoutDirection: LayoutDirection,
-        popupContentSize: IntSize,
-    ): IntOffset {
-        var x = anchorBounds.right + gap
-        if (x + popupContentSize.width > windowSize.width) x = anchorBounds.left - gap - popupContentSize.width
-        val y = anchorBounds.top.coerceAtMost(windowSize.height - popupContentSize.height).coerceAtLeast(0)
-        return IntOffset(x.coerceAtLeast(0), y)
     }
 }

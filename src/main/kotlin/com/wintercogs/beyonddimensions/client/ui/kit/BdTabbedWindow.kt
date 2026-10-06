@@ -25,8 +25,6 @@ import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OrePixelArt
-import dev.compixel.ui.ore.overlay.OreTooltip
-import dev.compixel.ui.ore.overlay.OreTooltipMode
 import kotlin.math.roundToInt
 
 /** 窗口左侧页签竖条的宽度 */
@@ -126,7 +124,7 @@ fun BdRailTab(label: String, art: OrePixelArt, selected: Boolean, onClick: () ->
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
-    OreTooltip(label, mode = OreTooltipMode.Immediate) {
+    BdTooltip(label, beside = true) {
         Box(
             Modifier.size(20.dp)
                 .hoverable(interaction)

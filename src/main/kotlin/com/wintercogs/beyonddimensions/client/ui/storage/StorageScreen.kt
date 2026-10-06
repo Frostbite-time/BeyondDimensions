@@ -29,8 +29,6 @@ import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OreText
-import dev.compixel.ui.ore.overlay.OreTooltip
-import dev.compixel.ui.ore.overlay.OreTooltipMode
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -52,6 +50,13 @@ class StorageLayout(menu: DimensionsNetMenu) {
 class StorageText {
     val search = tr("ui.beyonddimensions.storage.search")
     val searchHelp = tr("ui.beyonddimensions.storage.search.help")
+
+    /** 搜索写法：每项一个示例与它的含义 */
+    val searchSyntax =
+        listOf("name", "mod", "tag", "tooltip", "id", "exclude", "any").map {
+            tr("ui.beyonddimensions.storage.search.help.$it") to tr("ui.beyonddimensions.storage.search.help.$it.hint")
+        }
+    val searchRule = tr("ui.beyonddimensions.storage.search.help.rule")
     val all = tr("ui.beyonddimensions.storage.all")
     val storage = tr("ui.beyonddimensions.storage.storage")
     val crafting = tr("ui.beyonddimensions.storage.crafting")
@@ -279,31 +284,27 @@ private fun StorageView(
 
 @Composable
 private fun Toolbar(state: StorageState, send: (StorageAction) -> Unit, text: StorageText, width: Int) {
-    // 输入框使用本地状态，避免等待一刻的往返；外部（配方查看器）改动搜索时再同步进来
+    // 输入框使用本地状态，避免等待一刻的往返；外部（配方查看器）改动搜索时再同步进来。
+    // 一刻内输入多个字（快速输入、输入法上屏一个词）时，快照会依次带回较早发出的搜索，这些不算外部改动
     var value by remember { mutableStateOf(state.search) }
-    var sent by remember { mutableStateOf(state.search) }
+    val pending = remember { ArrayDeque<String>() }
     LaunchedEffect(state.search) {
-        if (state.search != sent) {
-            value = state.search
-            sent = state.search
-        }
+        val echo = pending.indexOf(state.search)
+        if (echo >= 0) repeat(echo + 1) { pending.removeFirst() } else value = state.search
     }
     val colors = Bd.colors
     Row(Modifier.width(width.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.weight(1f)) {
-            OreTooltip(text.searchHelp, mode = OreTooltipMode.Immediate) {
-                BdSearchField(
-                    value,
-                    {
-                        value = it
-                        sent = it
-                        send(StorageAction.Search(it))
-                    },
-                    text.search,
-                    Modifier.fillMaxWidth(),
-                )
-            }
-        }
+        BdSearchField(
+            value,
+            {
+                value = it
+                pending.addLast(it)
+                send(StorageAction.Search(it))
+            },
+            text.search,
+            Modifier.weight(1f),
+            help = { SearchHelp(text) },
+        )
         Spacer(Modifier.width(4.dp))
         var open by remember { mutableStateOf(false) }
         Box {
@@ -321,6 +322,25 @@ private fun Toolbar(state: StorageState, send: (StorageAction) -> Unit, text: St
             if (open) BdPopover({ open = false }) { SortOptions(state, send, text) }
         }
     }
+}
+
+/** 搜索框的悬停说明：每行一个写法的示例与含义，最后是组合规则 */
+@Composable
+private fun SearchHelp(text: StorageText) {
+    val colors = Bd.colors
+    OreText(text.searchHelp, color = colors.text, style = Bd.caption, maxLines = 1)
+    Row {
+        Column(Modifier.width(IntrinsicSize.Max)) {
+            for ((example, _) in text.searchSyntax) {
+                OreText(example, color = colors.accentDeep, style = Bd.caption, maxLines = 1)
+            }
+        }
+        Spacer(Modifier.width(8.dp))
+        Column {
+            for ((_, meaning) in text.searchSyntax) OreText(meaning, color = colors.muted, style = Bd.caption, maxLines = 1)
+        }
+    }
+    OreText(text.searchRule, color = colors.faint, style = Bd.caption)
 }
 
 /** 资源类型页签；选中项下方是标志渐变线 */

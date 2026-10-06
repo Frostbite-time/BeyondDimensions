@@ -12,9 +12,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetControlAction
@@ -26,6 +26,7 @@ import com.wintercogs.beyonddimensions.client.ui.base.tr
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
+import com.wintercogs.beyonddimensions.common.init.BDItems
 import com.wintercogs.beyonddimensions.common.menu.NetControlMenu
 import com.wintercogs.beyonddimensions.common.menu.PrimaryNetSwitcherMenu
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket
@@ -35,8 +36,6 @@ import com.wintercogs.beyonddimensions.util.UIDataHelper
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
-import dev.compixel.ui.ore.overlay.OreTooltip
-import dev.compixel.ui.ore.overlay.OreTooltipMode
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -137,9 +136,13 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
     @Composable
     override fun Content(state: NetControlState) {
         val colors = Bd.colors
+        var chosen by remember { mutableStateOf<UUID?>(null) }
         BdScreenFrame {
             // 网络里至少有玩家自己，成员为空说明数据还没到：这时只有背景淡入，窗口等数据到了再加入进场动画
             if (state.members.isNotEmpty()) {
+                // 默认选中自己；选中的成员离开网络后也回到自己
+                val selected =
+                    state.members.find { it.id == chosen } ?: state.members.find { it.self } ?: state.members.first()
                 BdTabbedWindow(
                     Modifier.width((SIDE_RAIL_WIDTH + 250).dp),
                     header = {
@@ -153,25 +156,42 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                     rail = { BdRailTab(text.title, BdGlyphs.Main, selected = true) {} },
                 ) {
                     BdMainPage(true) {
-                        BdSectionLabel(text.members) {
-                            OreText(state.members.size.toString(), color = colors.faint, style = Bd.caption)
-                            Spacer(Modifier.width(3.dp))
-                            BdGlyphButton(
-                                OreGlyph.CycleArrows,
-                                text.refresh,
-                                { send(NetControlRequest.Refresh) },
-                                size = 11.dp,
-                                glyphSize = 7.dp
-                            )
-                        }
-                        Spacer(Modifier.height(5.dp))
-                        ListWell {
-                            BdScrollColumn(
-                                Modifier.heightIn(min = LIST_MIN_HEIGHT.dp, max = 200.dp),
-                                Arrangement.spacedBy(2.dp)
-                            ) {
-                                for (member in state.members) MemberRow(member, text) { send(it) }
+                        Row {
+                            Column(Modifier.weight(1f)) {
+                                BdSectionLabel(text.members) {
+                                    OreText(state.members.size.toString(), color = colors.faint, style = Bd.caption)
+                                    Spacer(Modifier.width(3.dp))
+                                    BdGlyphButton(
+                                        OreGlyph.CycleArrows,
+                                        text.refresh,
+                                        { send(NetControlRequest.Refresh) },
+                                        size = 11.dp,
+                                        glyphSize = 7.dp
+                                    )
+                                }
+                                Spacer(Modifier.height(5.dp))
+                                ListWell {
+                                    BdScrollColumn(
+                                        Modifier.heightIn(min = LIST_MIN_HEIGHT.dp, max = 200.dp),
+                                        Arrangement.spacedBy(2.dp)
+                                    ) {
+                                        for (member in state.members) {
+                                            MemberRow(member, member == selected, text) { chosen = member.id }
+                                        }
+                                        // 只有自己时说明怎样让别人加入，免得只看到一行自己的名字
+                                        if (state.members.size == 1) {
+                                            OreText(
+                                                text.alone,
+                                                Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 8.dp),
+                                                color = colors.faint,
+                                                style = Bd.caption,
+                                            )
+                                        }
+                                    }
+                                }
                             }
+                            Spacer(Modifier.width(8.dp))
+                            MemberPanel(selected, text, Modifier.width(PANEL_WIDTH.dp)) { send(it) }
                         }
                     }
                 }
@@ -180,9 +200,13 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
     }
 }
 
+/** 右侧成员面板的宽度 */
+private const val PANEL_WIDTH = 92
+
 private class NetControlText(val title: String) {
     val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_CONTROL.get()))
     val members = tr("ui.beyonddimensions.network.members")
+    val manage = tr("ui.beyonddimensions.network.manage")
     val refresh = tr("ui.beyonddimensions.network.refresh")
     val roles = NetPermissionlevel.entries.associateWith(::roleLabel)
     val actions =
@@ -192,13 +216,27 @@ private class NetControlText(val title: String) {
     val leave = tr("ui.beyonddimensions.network.action.leave")
     val leaveHint = tr("ui.beyonddimensions.network.action.leave.hint")
     val you = tr("ui.beyonddimensions.network.you")
+    val alone =
+        tr(
+            "ui.beyonddimensions.network.alone",
+            tr(BDItems.NET_MEMBER_INVITER.get().descriptionId),
+            tr(BDItems.NET_MANAGER_INVITER.get().descriptionId),
+        )
 }
 
+/** 成员列表的一行：点选后在右侧面板管理；选中的一行用强调色细框标出 */
 @Composable
-private fun MemberRow(member: MemberView, text: NetControlText, send: (NetControlRequest) -> Unit) {
+private fun MemberRow(member: MemberView, selected: Boolean, text: NetControlText, onSelect: () -> Unit) {
     val colors = Bd.colors
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
     Row(
-        Modifier.fillMaxWidth().height(20.dp).background(colors.surface).border(1.dp, colors.line)
+        Modifier.fillMaxWidth()
+            .height(20.dp)
+            .hoverable(interaction)
+            .bdClickable(interaction, enabled = !selected, onClick = onSelect)
+            .background(if (selected || hovered) colors.accentSoft else colors.surface)
+            .border(1.dp, if (selected) colors.accent else colors.line)
             .padding(horizontal = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -209,38 +247,88 @@ private fun MemberRow(member: MemberView, text: NetControlText, send: (NetContro
             Spacer(Modifier.width(3.dp))
             OreText(text.you, color = colors.faint, style = Bd.caption, maxLines = 1)
         }
-        Spacer(Modifier.weight(1f))
-        for (action in NetControlAction.entries) {
-            if (action !in member.actions) continue
-            Spacer(Modifier.width(3.dp))
-            // 对自己执行“移除”就是退出网络
-            val leaving = member.self && action == NetControlAction.RemovePlayer
-            val label = if (leaving) text.leave else text.actions.getValue(action)
-            val hint = if (leaving) text.leaveHint else text.actionHints.getValue(action)
-            ActionButton(label, hint, danger = action == NetControlAction.RemovePlayer) {
-                send(NetControlRequest.Apply(member.id, action, member.role))
+    }
+}
+
+/**
+ * 选中成员的名字、角色与四个操作。操作总是列出，当前玩家不能对这名成员执行的显示为停用；
+ * 悬停时说明操作的作用。对自己执行“移除”就是退出网络。
+ */
+@Composable
+private fun MemberPanel(
+    member: MemberView,
+    text: NetControlText,
+    modifier: Modifier,
+    send: (NetControlRequest) -> Unit,
+) {
+    val colors = Bd.colors
+    Column(modifier) {
+        BdSectionLabel(text.manage)
+        Spacer(Modifier.height(5.dp))
+        Column(Modifier.fillMaxWidth().background(colors.surface).border(1.dp, colors.line).padding(5.dp)) {
+            OreText(member.name, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.height(3.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RoleChip(member.role, text.roles.getValue(member.role))
+                if (member.self) {
+                    Spacer(Modifier.width(3.dp))
+                    OreText(text.you, color = colors.faint, style = Bd.caption, maxLines = 1)
+                }
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            for (action in NetControlAction.entries) {
+                val leaving = member.self && action == NetControlAction.RemovePlayer
+                ActionButton(
+                    if (leaving) text.leave else text.actions.getValue(action),
+                    if (leaving) text.leaveHint else text.actionHints.getValue(action),
+                    danger = action == NetControlAction.RemovePlayer,
+                    enabled = action in member.actions,
+                ) {
+                    send(NetControlRequest.Apply(member.id, action, member.role))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ActionButton(label: String, hint: String, danger: Boolean, onClick: () -> Unit) {
+private fun ActionButton(label: String, hint: String, danger: Boolean, enabled: Boolean, onClick: () -> Unit) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val ink = if (danger) colors.danger else colors.accentDeep
-    OreTooltip(hint, mode = OreTooltipMode.Immediate) {
+    val lit = hovered && enabled
+    BdTooltip(hint) {
         Box(
-            Modifier.height(13.dp)
-                .hoverable(interaction)
-                .bdClickable(interaction, onClick = onClick)
-                .background(if (hovered) ink else Color.Transparent, Bd.ChipShape)
-                .border(1.dp, ink.copy(alpha = if (hovered) 1f else 0.45f), Bd.ChipShape)
-                .padding(horizontal = 4.dp),
+            Modifier.fillMaxWidth()
+                .height(15.dp)
+                .hoverable(interaction, enabled)
+                .bdClickable(interaction, enabled = enabled, onClick = onClick)
+                .background(if (lit) ink else colors.surface, Bd.ChipShape)
+                .border(
+                    1.dp,
+                    when {
+                        lit -> ink
+                        enabled -> ink.copy(alpha = 0.45f)
+                        else -> colors.line
+                    },
+                    Bd.ChipShape,
+                ),
             contentAlignment = Alignment.Center,
         ) {
-            OreText(label, color = if (hovered) colors.onAccent else ink, style = Bd.caption, maxLines = 1)
+            OreText(
+                label,
+                color =
+                    when {
+                        lit -> colors.onAccent
+                        enabled -> ink
+                        else -> colors.faint
+                    },
+                style = Bd.caption,
+                maxLines = 1,
+            )
         }
     }
 }
