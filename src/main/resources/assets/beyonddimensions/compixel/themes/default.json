@@ -42,6 +42,9 @@
     "violet": "#6D6AFF",
     "online": "#4FD69A",
     "warning": "#F2B544",
+    "flameOuter": "#E2531F",
+    "flameMiddle": "#F5A524",
+    "flameCore": "#FFE680",
     "onAccent": "#0B1220",
     "popover": "#141A26F2",
     "pill": "#000000A6"

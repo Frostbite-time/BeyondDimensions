@@ -315,7 +315,6 @@
   "ui.beyonddimensions.energy.pop.hint": "主動向相鄰方塊輸出能量",
   "ui.beyonddimensions.interface.slots": "標記與緩衝",
   "ui.beyonddimensions.interface.pop.hint": "主動向相鄰方塊輸出緩衝",
-  "ui.beyonddimensions.furnace.filters": "過濾",
   "ui.beyonddimensions.furnace.input": "輸入",
   "ui.beyonddimensions.furnace.fuel": "燃料",
   "ui.beyonddimensions.furnace.smelting": "熔煉",

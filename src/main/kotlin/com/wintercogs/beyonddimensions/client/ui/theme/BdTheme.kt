@@ -76,6 +76,10 @@ data class BdColors(
     val violet: Color = Color(0xFF6D6AFF),
     val online: Color = Color(0xFF4FD69A),
     val warning: Color = Color(0xFFF2B544),
+    /** 熔炉火焰的三层：外焰、中焰与焰心 */
+    val flameOuter: Color = Color(0xFFE2531F),
+    val flameMiddle: Color = Color(0xFFF5A524),
+    val flameCore: Color = Color(0xFFFFE680),
     /** 强调色或危险色实底上的文字 */
     val onAccent: Color = Color(0xFF0B1220),
     /** 浮层的底色，比窗口更实，免得下面的内容透上来 */
@@ -114,6 +118,9 @@ object BdThemeSection : ThemeSection<BdColors>("beyonddimensions") {
                     "violet" -> result.copy(violet = color)
                     "online" -> result.copy(online = color)
                     "warning" -> result.copy(warning = color)
+                    "flameOuter" -> result.copy(flameOuter = color)
+                    "flameMiddle" -> result.copy(flameMiddle = color)
+                    "flameCore" -> result.copy(flameCore = color)
                     "onAccent" -> result.copy(onAccent = color)
                     "popover" -> result.copy(popover = color)
                     "pill" -> result.copy(pill = color)

@@ -61,6 +61,7 @@ import com.wintercogs.beyonddimensions.client.ui.kit.BdToggle
 import com.wintercogs.beyonddimensions.client.ui.kit.PAGE_PADDING_BOTTOM
 import com.wintercogs.beyonddimensions.client.ui.kit.PAGE_PADDING_TOP
 import com.wintercogs.beyonddimensions.client.ui.kit.PAGE_PADDING_X
+import com.wintercogs.beyonddimensions.client.ui.kit.SCROLLBAR_WIDTH
 import com.wintercogs.beyonddimensions.client.ui.kit.SIDE_RAIL_WIDTH
 import com.wintercogs.beyonddimensions.client.ui.kit.bdClickable
 import com.wintercogs.beyonddimensions.client.ui.kit.formatExact
@@ -171,13 +172,12 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
 
 /** 分区之间的间距 */
 private const val GAP = 7
-private const val SCROLLBAR = 5
 private const val SCREEN_MARGIN = 8
 /** 分组标题与状态栏的行高：9sp 小字的行高 */
 private const val LABEL = 11
 
 /** 格子区域（含边框）、间隔与滚动条的总宽度 */
-private fun contentWidth(columns: Int) = columns * SLOT_PITCH + 2 + 2 + SCROLLBAR
+private fun contentWidth(columns: Int) = columns * SLOT_PITCH + 2 + 2 + SCROLLBAR_WIDTH
 
 /** 窗口中除格子区域外的宽度：页签竖条、页面两侧的留白与窗口边框 */
 private const val CHROME_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 2
@@ -276,7 +276,7 @@ private fun StorageView(
                             gridRows,
                             state.totalRows,
                             { send(StorageAction.ScrollTo(it)) },
-                            Modifier.width(SCROLLBAR.dp).fillMaxHeight(),
+                            Modifier.width(SCROLLBAR_WIDTH.dp).fillMaxHeight(),
                         )
                     }
                 }

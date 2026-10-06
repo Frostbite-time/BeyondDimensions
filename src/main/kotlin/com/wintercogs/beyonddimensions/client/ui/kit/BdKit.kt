@@ -4,13 +4,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.text.style.TextAlign
-import dev.compixel.ui.ore.scroll.OreScrollbar
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -30,6 +25,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -37,13 +33,17 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -68,6 +68,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -89,6 +90,7 @@ import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.overlay.OreTooltip
 import dev.compixel.ui.ore.overlay.OreTooltipMode
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 /** 窗口：深色半透明的玻璃面板加一像素细线框，透出背后的游戏画面；高度随内容 */
 @Composable
@@ -531,7 +533,7 @@ fun BdNumberField(value: Int, range: IntRange, enabled: Boolean, onCommit: (Int)
     )
 }
 
-/** 纵向内容：放不下时可滚动，右侧出现细滚动条 */
+/** 纵向内容：放不下时可滚动，右侧出现与存储格子相同的细滚动条 */
 @Composable
 fun BdScrollColumn(
     modifier: Modifier = Modifier,
@@ -543,14 +545,14 @@ fun BdScrollColumn(
     val scrollable = scroll.maxValue in 1 until Int.MAX_VALUE
     Box(modifier) {
         Column(
-            Modifier.fillMaxWidth().padding(end = if (scrollable) 7.dp else 0.dp).verticalScroll(scroll),
+            Modifier.fillMaxWidth().padding(end = if (scrollable) (SCROLLBAR_WIDTH + 2).dp else 0.dp).verticalScroll(scroll),
             verticalArrangement = verticalArrangement,
             content = content,
         )
         // 滚动条只跟随内容的高度，不参与测量，不会把容器撑到最大高度
         if (scrollable) {
             Box(Modifier.matchParentSize(), contentAlignment = Alignment.TopEnd) {
-                OreScrollbar(scroll, Modifier.width(4.dp).fillMaxHeight())
+                BdScrollbar(scroll, Modifier.width(SCROLLBAR_WIDTH.dp).fillMaxHeight())
             }
         }
     }
@@ -578,41 +580,70 @@ fun BdMeter(fraction: Float, modifier: Modifier, cell: Dp = 3.dp) {
     )
 }
 
-/**
- * 按行滚动的细滚动条。[first] 是第一行可见行，[visible] 与 [total] 为可见行数与总行数。
- */
+/** 细滚动条的宽度；内容与它之间另留 2 */
+const val SCROLLBAR_WIDTH = 5
+
+/** 按行滚动的细滚动条，例如存储格子。[first] 是第一个可见行，[visible] 与 [total] 为可见行数与总行数 */
 @Composable
 fun BdScrollbar(first: Int, visible: Int, total: Int, onScrollTo: (Int) -> Unit, modifier: Modifier = Modifier) {
-    val colors = Bd.colors
     val maxFirst = (total - visible).coerceAtLeast(0)
-    val latestScroll by rememberUpdatedState(onScrollTo)
+    val latest by rememberUpdatedState(onScrollTo)
+    BdScrollbarTrack(
+        visibleFraction = if (total > 0) visible.toFloat() / total else 1f,
+        position = if (maxFirst > 0) first.toFloat() / maxFirst else 0f,
+        canScroll = maxFirst > 0,
+        onScrollTo = { latest((it * maxFirst).roundToInt()) },
+        modifier = modifier,
+    )
+}
+
+/** 跟随 [state] 的细滚动条，与按行滚动的外观相同 */
+@Composable
+fun BdScrollbar(state: ScrollState, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
+    // 第一次布局前 maxValue 是表示未知的 Int.MAX_VALUE
+    val maximum = if (state.maxValue == Int.MAX_VALUE) 0 else state.maxValue
+    val content = maximum + state.viewportSize
+    BdScrollbarTrack(
+        visibleFraction = if (content > 0) state.viewportSize.toFloat() / content else 1f,
+        position = if (maximum > 0) state.value.toFloat() / maximum else 0f,
+        canScroll = maximum > 0,
+        onScrollTo = { scope.launch { state.scrollTo((it * maximum).roundToInt()) } },
+        modifier = modifier,
+    )
+}
+
+/**
+ * 两种滚动条共用的外观与操作：一像素细线框的深色凹槽里，一条标志渐变的平直滑块，长度对应可见的比例，至少 12。
+ * 点击或拖动轨道时，滑块中心跳到指针处；[onScrollTo] 收到 0 到 1 之间的位置。
+ */
+@Composable
+private fun BdScrollbarTrack(
+    visibleFraction: Float,
+    position: Float,
+    canScroll: Boolean,
+    onScrollTo: (Float) -> Unit,
+    modifier: Modifier,
+) {
+    val colors = Bd.colors
+    val latest by rememberUpdatedState(onScrollTo)
     val density = LocalDensity.current
-    BoxWithConstraints(modifier.background(colors.sunken).border(1.dp, colors.line)) {
-        val track = maxHeight - 2.dp
-        val thumb = if (total <= 0) track else (track * (visible.toFloat() / total)).coerceIn(12.dp, track)
+    BoxWithConstraints(modifier.background(colors.sunken).border(1.dp, colors.line).padding(1.dp)) {
+        val track = maxHeight
+        val thumb = (track * visibleFraction.coerceIn(0f, 1f)).coerceIn(minOf(12.dp, track), track)
         val travel = track - thumb
-        val offset = if (maxFirst == 0) 0.dp else travel * (first.toFloat() / maxFirst)
-        fun rowAt(y: Float): Int {
-            if (maxFirst == 0) return 0
-            val travelPx = with(density) { travel.toPx() }
-            val thumbPx = with(density) { thumb.toPx() }
-            val fraction = ((y - thumbPx / 2f) / travelPx.coerceAtLeast(1f)).coerceIn(0f, 1f)
-            return (fraction * maxFirst).roundToInt()
-        }
+        fun positionAt(y: Float): Float =
+            with(density) { ((y - thumb.toPx() / 2f) / travel.toPx().coerceAtLeast(1f)).coerceIn(0f, 1f) }
         Box(
-            Modifier.fillMaxWidth()
-                .fillMaxHeight()
-                .pointerInput(maxFirst, travel, thumb) {
-                    detectTapGestures { latestScroll(rowAt(it.y)) }
-                }
-                .pointerInput(maxFirst, travel, thumb) {
-                    detectVerticalDragGestures { change, _ -> latestScroll(rowAt(change.position.y)) }
+            Modifier.fillMaxSize()
+                .pointerInput(travel, thumb) { detectTapGestures { latest(positionAt(it.y)) } }
+                .pointerInput(travel, thumb) {
+                    detectVerticalDragGestures { change, _ -> latest(positionAt(change.position.y)) }
                 }
         ) {
-            if (maxFirst > 0) {
+            if (canScroll) {
                 Box(
-                    Modifier.offset(y = offset + 1.dp)
-                        .padding(horizontal = 1.dp)
+                    Modifier.offset(y = travel * position.coerceIn(0f, 1f))
                         .fillMaxWidth()
                         .height(thumb)
                         .background(colors.signatureVertical)

@@ -314,7 +314,6 @@
   "ui.beyonddimensions.energy.pop.hint": "Pushes energy into adjacent blocks",
   "ui.beyonddimensions.interface.slots": "Marks and buffer",
   "ui.beyonddimensions.interface.pop.hint": "Pushes the buffer into adjacent blocks",
-  "ui.beyonddimensions.furnace.filters": "Filters",
   "ui.beyonddimensions.furnace.input": "In",
   "ui.beyonddimensions.furnace.fuel": "Fuel",
   "ui.beyonddimensions.furnace.smelting": "Smelting",

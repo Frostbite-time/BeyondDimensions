@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -74,6 +75,16 @@ import net.neoforged.neoforge.network.PacketDistributor
 import org.lwjgl.glfw.GLFW
 
 private fun roleLabel(role: NetPermissionlevel) = tr("ui.beyonddimensions.network.role.${role.name.lowercase()}")
+
+/** 列表区至少放得下五行，内容少时窗口也保持面板的比例 */
+private const val LIST_MIN_HEIGHT = 5 * 20 + 4 * 2
+
+/** 成员与网络列表的底槽：深一层的底色和细线框，没有行的部分也看得出是列表区 */
+@Composable
+private fun ListWell(content: @Composable BoxScope.() -> Unit) {
+    val colors = Bd.colors
+    Box(Modifier.fillMaxWidth().background(colors.sunken).border(1.dp, colors.line).padding(2.dp), content = content)
+}
 
 /** 角色徽章：所有者用强调色实底，管理员用浅色，成员为中性色 */
 @Composable
@@ -156,8 +167,10 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                             BdGlyphButton(OreGlyph.CycleArrows, text.refresh, { send(NetControlRequest.Refresh) }, size = 11.dp, glyphSize = 7.dp)
                         }
                         Spacer(Modifier.height(5.dp))
-                        BdScrollColumn(Modifier.heightIn(max = 200.dp), Arrangement.spacedBy(2.dp)) {
-                            for (member in state.members) MemberRow(member, text) { send(it) }
+                        ListWell {
+                            BdScrollColumn(Modifier.heightIn(min = LIST_MIN_HEIGHT.dp, max = 200.dp), Arrangement.spacedBy(2.dp)) {
+                                for (member in state.members) MemberRow(member, text) { send(it) }
+                            }
                         }
                     }
                 }
@@ -310,23 +323,27 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                         state.options.filter {
                             query.isBlank() || it.name.contains(query, ignoreCase = true) || it.id.toString().contains(query.trim().removePrefix("#"))
                         }
-                    if (shown.isEmpty()) {
-                        OreText(text.empty, color = colors.faint, style = Bd.caption)
-                    } else {
-                        BdScrollColumn(Modifier.heightIn(max = 170.dp), Arrangement.spacedBy(2.dp)) {
-                            for (option in shown) {
-                                NetworkRow(
-                                    option,
-                                    option.id == state.primary,
-                                    renaming == option.id,
-                                    text,
-                                    onSelect = { send(PrimaryNetRequest.Select(option.id)) },
-                                    onRename = { renaming = option.id },
-                                    onCommit = { name ->
-                                        renaming = null
-                                        if (name != null) send(PrimaryNetRequest.Rename(option.id, name))
-                                    },
-                                )
+                    ListWell {
+                        if (shown.isEmpty()) {
+                            Box(Modifier.fillMaxWidth().height(LIST_MIN_HEIGHT.dp), contentAlignment = Alignment.Center) {
+                                OreText(text.empty, color = colors.faint, style = Bd.caption)
+                            }
+                        } else {
+                            BdScrollColumn(Modifier.heightIn(min = LIST_MIN_HEIGHT.dp, max = 170.dp), Arrangement.spacedBy(2.dp)) {
+                                for (option in shown) {
+                                    NetworkRow(
+                                        option,
+                                        option.id == state.primary,
+                                        renaming == option.id,
+                                        text,
+                                        onSelect = { send(PrimaryNetRequest.Select(option.id)) },
+                                        onRename = { renaming = option.id },
+                                        onCommit = { name ->
+                                            renaming = null
+                                            if (name != null) send(PrimaryNetRequest.Rename(option.id, name))
+                                        },
+                                    )
+                                }
                             }
                         }
                     }

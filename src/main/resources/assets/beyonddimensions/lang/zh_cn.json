@@ -314,7 +314,6 @@
   "ui.beyonddimensions.energy.pop.hint": "主动向相邻方块输出能量",
   "ui.beyonddimensions.interface.slots": "标记与缓存",
   "ui.beyonddimensions.interface.pop.hint": "主动向相邻方块输出缓存",
-  "ui.beyonddimensions.furnace.filters": "过滤",
   "ui.beyonddimensions.furnace.input": "输入",
   "ui.beyonddimensions.furnace.fuel": "燃料",
   "ui.beyonddimensions.furnace.smelting": "熔炼",
