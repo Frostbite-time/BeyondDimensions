@@ -269,11 +269,6 @@ public class NetFurnaceMenu extends BDBaseMenu
         return sortingEditable;
     }
 
-    public boolean ready()
-    {
-        return synchronization.hasSnapshot();
-    }
-
     public boolean requestOutput(int ordinal)
     {
         return request(SET_OUTPUT, PopMode.values(), ordinal, outputEditable);

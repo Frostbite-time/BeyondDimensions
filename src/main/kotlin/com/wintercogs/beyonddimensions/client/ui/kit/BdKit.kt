@@ -4,6 +4,12 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.text.style.TextAlign
+import dev.compixel.ui.ore.scroll.OreScrollbar
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -90,25 +96,9 @@ fun BdWindow(modifier: Modifier = Modifier, content: @Composable ColumnScope.() 
     Column(modifier.background(colors.window).border(1.dp, colors.line), content = content)
 }
 
-enum class BdTone {
-    Online,
-    Warning,
-    Offline,
-}
-
-class BdStatus(val text: String, val tone: BdTone)
-
-/** 窗口标题栏：设备图标、所属网络与状态 */
+/** 窗口标题栏：设备图标、模组名与标题，右侧是关闭按钮 */
 @Composable
-fun BdHeader(
-    icon: ItemIcon?,
-    overline: String,
-    title: String,
-    tag: String? = null,
-    status: BdStatus? = null,
-    onClose: (() -> Unit)? = null,
-    actions: (@Composable RowScope.() -> Unit)? = null,
-) {
+fun BdHeader(icon: ItemIcon?, title: String, onClose: () -> Unit, tag: String? = null) {
     val colors = Bd.colors
     Row(
         Modifier.fillMaxWidth().height(24.dp).background(colors.surface).padding(start = 7.dp, end = 5.dp),
@@ -119,7 +109,7 @@ fun BdHeader(
             Spacer(Modifier.width(6.dp))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-            OreText(overline, color = colors.faint, style = Bd.overline, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            OreText("BEYOND DIMENSIONS", color = colors.faint, style = Bd.overline, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Row(verticalAlignment = Alignment.Bottom) {
                 OreText(
                     title,
@@ -134,46 +124,10 @@ fun BdHeader(
                 }
             }
         }
-        if (status != null) {
-            Spacer(Modifier.width(4.dp))
-            BdStatusChip(status)
-        }
-        if (actions != null) {
-            Spacer(Modifier.width(4.dp))
-            actions()
-        }
-        if (onClose != null) {
-            Spacer(Modifier.width(4.dp))
-            BdCloseButton(onClose)
-        }
+        Spacer(Modifier.width(4.dp))
+        BdGlyphButton(OreGlyph.Cross, null, onClose, size = 13.dp, glyphSize = 7.dp)
     }
     Box(Modifier.fillMaxWidth().height(1.dp).background(colors.line))
-}
-
-@Composable
-fun BdStatusChip(status: BdStatus) {
-    val colors = Bd.colors
-    val (ink, fill, line) =
-        when (status.tone) {
-            BdTone.Online -> Triple(colors.online, colors.onlineSoft, colors.onlineLine)
-            BdTone.Warning -> Triple(colors.warning, colors.warningSoft, colors.warningLine)
-            BdTone.Offline -> Triple(colors.muted, colors.sunken, colors.line)
-        }
-    Row(
-        Modifier.border(1.dp, line, Bd.ChipShape)
-            .background(fill, Bd.ChipShape)
-            .padding(start = 3.dp, end = 4.dp, top = 1.dp, bottom = 1.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(Modifier.size(3.dp).background(ink))
-        Spacer(Modifier.width(3.dp))
-        OreText(status.text, color = ink, style = Bd.caption, maxLines = 1)
-    }
-}
-
-@Composable
-fun BdCloseButton(onClick: () -> Unit) {
-    BdGlyphButton(OreGlyph.Cross, null, onClick, size = 13.dp, glyphSize = 7.dp)
 }
 
 /** 只有图标的小按钮 */
@@ -502,20 +456,100 @@ fun BdSettingRow(title: String, description: String? = null, control: @Composabl
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             OreText(title, color = colors.text, maxLines = 1)
-            if (description != null) OreText(description, color = colors.faint, style = Bd.caption, maxLines = 1)
+            if (description != null) OreText(description, color = colors.faint, style = Bd.caption, maxLines = 2)
         }
         Spacer(Modifier.width(4.dp))
         control()
     }
 }
 
-/** 一组互斥模式：标题在上，分段按钮占满宽度 */
+/**
+ * 一组互斥模式：标题在上，下面是占满宽度的分段按钮；选项多或文字长时用 [cycle] 改为左右切换。
+ * [description] 是当前选项的说明，显示在最下方。
+ */
 @Composable
-fun BdModeSetting(title: String, options: List<String>, selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
+fun BdModeSetting(
+    title: String,
+    options: List<String>,
+    selected: Int,
+    enabled: Boolean,
+    description: String? = null,
+    cycle: Boolean = false,
+    onSelect: (Int) -> Unit,
+) {
+    val colors = Bd.colors
     Column(Modifier.fillMaxWidth()) {
-        OreText(title, color = Bd.colors.text, maxLines = 1)
+        OreText(title, color = colors.text, maxLines = 1)
         Spacer(Modifier.height(2.dp))
-        BdSegmented(options, selected, onSelect, Modifier.fillMaxWidth(), enabled = enabled, fill = true)
+        if (cycle) BdCycler(options, selected, enabled, onSelect)
+        else BdSegmented(options, selected, onSelect, Modifier.fillMaxWidth(), enabled = enabled, fill = true)
+        if (description != null) {
+            Spacer(Modifier.height(2.dp))
+            OreText(description, color = colors.faint, style = Bd.caption, maxLines = 2)
+        }
+    }
+}
+
+/** 左右箭头依次切换的选择器 */
+@Composable
+private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
+    val colors = Bd.colors
+    Row(
+        Modifier.fillMaxWidth().height(15.dp).background(colors.sunken, Bd.ChipShape).border(1.dp, colors.line, Bd.ChipShape),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        BdGlyphButton(OreGlyph.ChevronLeft, null, { onSelect((selected - 1).mod(options.size)) }, enabled = enabled, size = 13.dp, glyphSize = 6.dp)
+        Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            OreText(options.getOrElse(selected) { "" }, color = if (enabled) colors.accentDeep else colors.faint, maxLines = 1)
+        }
+        BdGlyphButton(OreGlyph.ChevronRight, null, { onSelect((selected + 1).mod(options.size)) }, enabled = enabled, size = 13.dp, glyphSize = 6.dp)
+    }
+}
+
+/** 整数输入框：只接受数字，超出范围时收回到边界；每次输入都提交 */
+@Composable
+fun BdNumberField(value: Int, range: IntRange, enabled: Boolean, onCommit: (Int) -> Unit) {
+    val colors = Bd.colors
+    var text by remember { mutableStateOf(value.toString()) }
+    LaunchedEffect(value) { if (text.toIntOrNull() != value) text = value.toString() }
+    BasicTextField(
+        text,
+        { input ->
+            val digits = input.filter(Char::isDigit).take(range.last.toString().length)
+            text = digits
+            digits.toIntOrNull()?.let { onCommit(it.coerceIn(range)) }
+        },
+        Modifier.width(44.dp).height(15.dp),
+        enabled = enabled,
+        singleLine = true,
+        textStyle = Bd.body.copy(color = colors.text, textAlign = TextAlign.End),
+        cursorBrush = SolidColor(colors.accent),
+        decorationBox = { inner ->
+            Box(
+                Modifier.fillMaxSize().background(colors.surface, Bd.ChipShape).border(1.dp, colors.line, Bd.ChipShape).padding(horizontal = 4.dp),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                inner()
+            }
+        },
+    )
+}
+
+/** 纵向内容：放不下时可滚动，右侧出现细滚动条 */
+@Composable
+fun BdScrollColumn(
+    modifier: Modifier = Modifier,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val scroll = rememberScrollState()
+    Box(modifier) {
+        Column(
+            Modifier.fillMaxWidth().padding(end = if (scroll.maxValue > 0) 7.dp else 0.dp).verticalScroll(scroll),
+            verticalArrangement = verticalArrangement,
+            content = content,
+        )
+        if (scroll.maxValue > 0) OreScrollbar(scroll, Modifier.align(Alignment.TopEnd).width(4.dp).fillMaxHeight())
     }
 }
 

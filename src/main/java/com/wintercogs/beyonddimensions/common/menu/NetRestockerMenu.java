@@ -207,11 +207,6 @@ public class NetRestockerMenu extends BDBaseMenu
         return recycleEditable;
     }
 
-    public boolean ready()
-    {
-        return synchronization.hasSnapshot();
-    }
-
     public boolean requestWorking(int ordinal)
     {
         return workingEditable && ordinal >= 0 && ordinal < WORKING_OPTIONS.size()

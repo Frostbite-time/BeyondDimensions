@@ -67,11 +67,6 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         return synchronization;
     }
 
-    public boolean ready()
-    {
-        return synchronization.hasSnapshot();
-    }
-
     @Override
     protected SlotTransferRoutes createQuickMoveRoutes()
     {

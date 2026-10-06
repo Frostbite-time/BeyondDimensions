@@ -150,11 +150,6 @@ public class NetPumpMenu extends BDBaseMenu
         return redstoneEditable;
     }
 
-    public boolean ready()
-    {
-        return synchronization.hasSnapshot();
-    }
-
     public boolean requestFilter(int ordinal)
     {
         FilterMode[] modes = FilterMode.values();

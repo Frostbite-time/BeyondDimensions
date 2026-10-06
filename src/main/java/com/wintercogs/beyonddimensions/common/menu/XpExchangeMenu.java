@@ -131,11 +131,6 @@ public class XpExchangeMenu extends BDBaseMenu
         return targetEditable;
     }
 
-    public boolean ready()
-    {
-        return synchronization.hasSnapshot();
-    }
-
     public boolean requestKeep(boolean value)
     {
         return keepEditable && synchronization.request(SET_KEEP, value).queued();

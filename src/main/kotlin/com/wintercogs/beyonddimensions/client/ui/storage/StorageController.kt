@@ -7,7 +7,6 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.impl.LongStackKey
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType
-import com.wintercogs.beyonddimensions.client.ui.base.BdController
 import com.wintercogs.beyonddimensions.client.ui.base.tr
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal
@@ -44,7 +43,6 @@ data class CraftState(
 )
 
 data class StorageState(
-    val ready: Boolean = false,
     val networkName: String = "",
     val networkId: Int = -1,
     val columns: Int = 9,
@@ -118,7 +116,7 @@ val SORT_POLICIES =
 /**
  * 存储终端（含合成终端）的控制器，运行在游戏线程。
  */
-class StorageController(private val menu: DimensionsNetMenu) : BdController<StorageState, StorageAction> {
+class StorageController(private val menu: DimensionsNetMenu) {
     private val craftMenu = menu as? DimensionsCraftMenu
     private val recipeChoices =
         if (craftMenu != null && ModPresence.isLoaded(OtherModIds.POLYMORPH)) ComposeRecipeChoices() else null
@@ -133,7 +131,7 @@ class StorageController(private val menu: DimensionsNetMenu) : BdController<Stor
         craftMenu?.let { menu.commands().preference(CommonConfigRuntime.uiCraftReturnButton == ButtonState.ENABLED) }
     }
 
-    override fun snapshot(): StorageState {
+    fun snapshot(): StorageState {
         if (CommonConfigRuntime.searchTextWithJEIEMI) followViewerSearch()
         val craft =
             craftMenu?.let {
@@ -145,7 +143,6 @@ class StorageController(private val menu: DimensionsNetMenu) : BdController<Stor
             }
         val stored = menu.storage.storage.size
         return StorageState(
-            ready = menu.ready(),
             networkName = menu.networkName().string,
             networkId = menu.networkId(),
             columns = menu.columns,
@@ -169,7 +166,7 @@ class StorageController(private val menu: DimensionsNetMenu) : BdController<Stor
         )
     }
 
-    override fun handle(action: StorageAction) {
+    fun handle(action: StorageAction) {
         when (action) {
             is StorageAction.Search -> {
                 search(action.text)

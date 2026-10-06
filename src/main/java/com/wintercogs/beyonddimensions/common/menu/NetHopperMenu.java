@@ -296,11 +296,6 @@ public class NetHopperMenu extends BDBaseMenu
         return rangeEditable;
     }
 
-    public boolean ready()
-    {
-        return synchronization.hasSnapshot();
-    }
-
     public boolean requestFilter(int ordinal)
     {
         FilterMode[] modes = FilterMode.values();

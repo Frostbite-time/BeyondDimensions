@@ -64,17 +64,12 @@ data class BdColors(
     val accent: Color = Color(0xFF22C7F0),
     val accentDeep: Color = Color(0xFF8CE6FF),
     val accentSoft: Color = Color(0x2622C7F0),
-    val cell: Color = Color(0x59000000),
     val danger: Color = Color(0xFFFF6B6B),
     /** 标志渐变的两端 */
     val cyan: Color = Color(0xFF22C7F0),
     val violet: Color = Color(0xFF6D6AFF),
     val online: Color = Color(0xFF4FD69A),
-    val onlineSoft: Color = Color(0x1F4FD69A),
-    val onlineLine: Color = Color(0x594FD69A),
     val warning: Color = Color(0xFFF2B544),
-    val warningSoft: Color = Color(0x1FF2B544),
-    val warningLine: Color = Color(0x59F2B544),
     /** 开关滑块等需要始终醒目的小块 */
     val knob: Color = Color(0xFFF2F5F9),
     /** 强调色或危险色实底上的文字 */
@@ -110,16 +105,11 @@ object BdThemeSection : ThemeSection<BdColors>("beyonddimensions") {
                     "accent" -> result.copy(accent = color)
                     "accentDeep" -> result.copy(accentDeep = color)
                     "accentSoft" -> result.copy(accentSoft = color)
-                    "cell" -> result.copy(cell = color)
                     "danger" -> result.copy(danger = color)
                     "cyan" -> result.copy(cyan = color)
                     "violet" -> result.copy(violet = color)
                     "online" -> result.copy(online = color)
-                    "onlineSoft" -> result.copy(onlineSoft = color)
-                    "onlineLine" -> result.copy(onlineLine = color)
                     "warning" -> result.copy(warning = color)
-                    "warningSoft" -> result.copy(warningSoft = color)
-                    "warningLine" -> result.copy(warningLine = color)
                     "knob" -> result.copy(knob = color)
                     "onAccent" -> result.copy(onAccent = color)
                     "popover" -> result.copy(popover = color)

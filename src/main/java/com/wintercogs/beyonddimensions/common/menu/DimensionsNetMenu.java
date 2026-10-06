@@ -299,11 +299,6 @@ public class DimensionsNetMenu extends BDBaseMenu
         return storageEndIndex;
     }
 
-    public boolean ready()
-    {
-        return synchronization.hasSnapshot();
-    }
-
     /**
      * 所属网络的编号，未知时为 {@link DimensionsNet#NO_PRIMARY_NET_ID}
      */

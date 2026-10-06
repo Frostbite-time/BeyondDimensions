@@ -139,11 +139,6 @@ public class NetControlMenu extends BDBaseMenu
 
     // 客户端读取接口
 
-    public boolean ready()
-    {
-        return synchronization.hasSnapshot();
-    }
-
     public int networkId()
     {
         return networkId;

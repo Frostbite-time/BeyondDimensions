@@ -2,19 +2,16 @@ package com.wintercogs.beyonddimensions.client.ui.storage
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -36,31 +33,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
-import com.wintercogs.beyonddimensions.api.ButtonState
 import com.wintercogs.beyonddimensions.client.init.BDShortKeys
 import com.wintercogs.beyonddimensions.client.ui.base.BdInventoryScreen
 import com.wintercogs.beyonddimensions.client.ui.base.BdPlayerInventory
 import com.wintercogs.beyonddimensions.client.ui.base.BdSlot
 import com.wintercogs.beyonddimensions.client.ui.base.BdSlotGrid
-import com.wintercogs.beyonddimensions.client.ui.base.LocalBdScreen
 import com.wintercogs.beyonddimensions.client.ui.base.SLOT_PITCH
 import com.wintercogs.beyonddimensions.client.ui.base.tr
 import com.wintercogs.beyonddimensions.client.ui.kit.BdChip
 import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphButton
 import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphs
 import com.wintercogs.beyonddimensions.client.ui.kit.BdHeader
+import com.wintercogs.beyonddimensions.client.ui.kit.BdMainPage
 import com.wintercogs.beyonddimensions.client.ui.kit.BdMeter
 import com.wintercogs.beyonddimensions.client.ui.kit.BdPopover
+import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
+import com.wintercogs.beyonddimensions.client.ui.kit.BdScreenFrame
 import com.wintercogs.beyonddimensions.client.ui.kit.BdScrollbar
 import com.wintercogs.beyonddimensions.client.ui.kit.BdSearchField
 import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
 import com.wintercogs.beyonddimensions.client.ui.kit.BdSegmented
 import com.wintercogs.beyonddimensions.client.ui.kit.BdSettingRow
-import com.wintercogs.beyonddimensions.client.ui.kit.BdStatus
 import com.wintercogs.beyonddimensions.client.ui.kit.BdStepper
+import com.wintercogs.beyonddimensions.client.ui.kit.BdTabPage
+import com.wintercogs.beyonddimensions.client.ui.kit.BdTabbedWindow
 import com.wintercogs.beyonddimensions.client.ui.kit.BdToggle
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTone
-import com.wintercogs.beyonddimensions.client.ui.kit.BdWindow
+import com.wintercogs.beyonddimensions.client.ui.kit.PAGE_PADDING_BOTTOM
+import com.wintercogs.beyonddimensions.client.ui.kit.PAGE_PADDING_TOP
+import com.wintercogs.beyonddimensions.client.ui.kit.PAGE_PADDING_X
+import com.wintercogs.beyonddimensions.client.ui.kit.SIDE_RAIL_WIDTH
 import com.wintercogs.beyonddimensions.client.ui.kit.bdClickable
 import com.wintercogs.beyonddimensions.client.ui.kit.formatExact
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
@@ -69,7 +70,6 @@ import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
 import dev.compixel.forge.item.ItemIcon
-import dev.compixel.ui.ore.theme.OreTheme
 import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
@@ -94,9 +94,6 @@ class StorageLayout(menu: DimensionsNetMenu) {
 }
 
 class StorageText {
-    val brand = "BEYOND DIMENSIONS"
-    val online = tr("ui.beyonddimensions.status.online")
-    val syncing = tr("ui.beyonddimensions.status.syncing")
     val search = tr("ui.beyonddimensions.storage.search")
     val searchHelp = tr("ui.beyonddimensions.storage.search.help")
     val all = tr("ui.beyonddimensions.storage.all")
@@ -123,7 +120,6 @@ class StorageText {
     val returnStorage = tr("ui.beyonddimensions.crafting.return.storage")
     val returnInventory = tr("ui.beyonddimensions.crafting.return.inventory")
     val recipe = tr("ui.beyonddimensions.crafting.recipe")
-    val close = tr("ui.beyonddimensions.close")
     val sortNames = SORT_POLICIES.associateWith { tr("ui.beyonddimensions.storage.sort.${it.name.removePrefix("SORT_").lowercase()}") }
 }
 
@@ -138,7 +134,8 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
     override fun handle(action: StorageAction) = controller.handle(action)
 
     @Composable
-    override fun Page(state: StorageState, slots: ComposeMenuSlots<DimensionsNetMenu>) = StorageView(state, ::send, slots, layout)
+    override fun Content(state: StorageState, slots: ComposeMenuSlots<DimensionsNetMenu>) =
+        StorageView(state, ::send, ::requestClose, slots, layout)
 
     override fun menuClosed() {
         super.menuClosed()
@@ -172,8 +169,8 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
     }
 }
 
-private const val RAIL = 24
-private const val PAD = 7
+/** 分区之间的间距 */
+private const val GAP = 7
 private const val SCROLLBAR = 5
 private const val SCREEN_MARGIN = 8
 /** 分组标题与状态栏的行高：9sp 小字的行高 */
@@ -182,12 +179,15 @@ private const val LABEL = 11
 /** 格子区域（含边框）、间隔与滚动条的总宽度 */
 private fun contentWidth(columns: Int) = columns * SLOT_PITCH + 2 + 2 + SCROLLBAR
 
+/** 窗口中除格子区域外的宽度：页签竖条、页面两侧的留白与窗口边框 */
+private const val CHROME_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 2
+
 /** 除格子行外的固定高度 */
 private fun chromeHeight(tabs: Boolean, status: Boolean, craft: Boolean): Int {
-    var height = 25 + 6 + 18 + 4 + 2 + 7 + LABEL + 4 + 76 + PAD + 2
+    var height = 25 + PAGE_PADDING_TOP + 18 + 4 + 2 + GAP + LABEL + 4 + 76 + PAGE_PADDING_BOTTOM + 2
     if (tabs) height += 5 + 13
     if (status) height += 4 + LABEL
-    if (craft) height += 7 + LABEL + 4 + 54
+    if (craft) height += GAP + LABEL + 4 + 54
     return height
 }
 
@@ -196,21 +196,26 @@ private fun chromeHeight(tabs: Boolean, status: Boolean, craft: Boolean): Int {
 private fun StorageView(
     state: StorageState,
     send: (StorageAction) -> Unit,
+    close: () -> Unit,
     slots: ComposeMenuSlots<DimensionsNetMenu>,
     layout: StorageLayout,
 ) {
     val colors = Bd.colors
+    val text = layout.text
     // 方块终端可以在本地隐藏合成区；可切换的终端则重新打开对应的菜单
     var craftHidden by remember { mutableStateOf(false) }
     val craftShown = state.craft != null && !craftHidden
+    var settingsOpen by remember { mutableStateOf(false) }
+    slots.Interaction(enabled = !settingsOpen)
 
-    BoxWithConstraints(Modifier.fillMaxSize().background(OreTheme.colors.backdrop), contentAlignment = Alignment.Center) {
-        val availableHeight = maxHeight.value.toInt() - SCREEN_MARGIN * 2
-        val availableWidth = maxWidth.value.toInt() - SCREEN_MARGIN * 2
+    BdScreenFrame { available ->
+        val availableHeight = available.height.value.toInt() - SCREEN_MARGIN * 2
+        val availableWidth = available.width.value.toInt() - SCREEN_MARGIN * 2
         // 空间不足三行时收起页签与状态栏
         val roomy = (availableHeight - chromeHeight(tabs = true, status = true, craft = craftShown)) / SLOT_PITCH >= 3
         val fitRows = (availableHeight - chromeHeight(roomy, roomy, craftShown)) / SLOT_PITCH
-        val fitColumns = (availableWidth - RAIL - PAD * 2 - contentWidth(0)) / SLOT_PITCH
+        // 内容区居中，竖条对面也留出一条竖条宽的空位
+        val fitColumns = (availableWidth - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0)) / SLOT_PITCH
         val rows = fitRows.coerceAtMost(state.preferredRows).coerceAtLeast(2)
         val columns = fitColumns.coerceAtMost(state.preferredColumns).coerceAtLeast(9)
         LaunchedEffect(columns, rows) { send(StorageAction.Viewport(columns, rows)) }
@@ -218,138 +223,79 @@ private fun StorageView(
         val gridColumns = state.columns
         val gridRows = state.rows
         val width = contentWidth(gridColumns)
-        BdWindow(
-            Modifier.width((RAIL + PAD + width + PAD + 2).dp).then(slots.areaModifier()).onPointerEvent(PointerEventType.Scroll) { event ->
+        BdTabbedWindow(
+            Modifier.width((CHROME_WIDTH + width).dp).then(slots.areaModifier()).onPointerEvent(PointerEventType.Scroll) { event ->
                 val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
-                if (delta != 0f) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
-            }
-        ) {
-            val screen = LocalBdScreen.current
-            BdHeader(
-                layout.icon,
-                layout.text.brand,
-                state.networkName.ifEmpty { layout.text.storage },
-                if (state.networkId >= 0) "#%04d".format(state.networkId) else null,
-                if (state.ready) BdStatus(layout.text.online, BdTone.Online) else BdStatus(layout.text.syncing, BdTone.Warning),
-                onClose = screen::close,
-            )
-            Box {
-                Column(Modifier.padding(start = (RAIL + PAD).dp, end = PAD.dp, top = 6.dp, bottom = PAD.dp)) {
-                    Toolbar(state, send, layout.text, width)
-                    if (roomy) {
-                        Spacer(Modifier.height(5.dp))
-                        TypeTabs(state, send, layout.text, width)
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    Row(Modifier.height((gridRows * SLOT_PITCH + 2).dp)) {
-                        Box(Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight().background(colors.surface).border(1.dp, colors.line).padding(1.dp)) {
-                            val ids = List(gridColumns * gridRows) { layout.storageStart + it }
-                            BdSlotGrid(slots, ids, gridColumns)
-                        }
-                        if (state.totalRows > gridRows) {
-                            Spacer(Modifier.width(2.dp))
-                            BdScrollbar(
-                                state.firstRow,
-                                gridRows,
-                                state.totalRows,
-                                { send(StorageAction.ScrollTo(it)) },
-                                Modifier.width(SCROLLBAR.dp).fillMaxHeight(),
-                            )
-                        }
-                    }
-                    if (roomy) {
-                        Spacer(Modifier.height(4.dp))
-                        StatusStrip(state, layout.text, width)
-                    }
+                if (delta != 0f && !settingsOpen) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
+            },
+            header = {
+                BdHeader(
+                    layout.icon,
+                    state.networkName.ifEmpty { text.storage },
+                    close,
+                    tag = if (state.networkId >= 0) "#%04d".format(state.networkId) else null,
+                )
+            },
+            // 存储与合成两个工作区都在主页面上，合成区显示与否决定选中哪一个
+            rail = {
+                BdRailTab(text.storage, BdGlyphs.Storage, selected = !settingsOpen && !craftShown) {
+                    settingsOpen = false
                     if (craftShown) {
-                        Spacer(Modifier.height(PAD.dp))
-                        CraftSection(state.craft, send, slots, layout, width)
-                    }
-                    Spacer(Modifier.height(PAD.dp))
-                    BdSectionLabel(layout.text.inventory, Modifier.width(width.dp))
-                    Spacer(Modifier.height(4.dp))
-                    Box(Modifier.width((gridColumns * SLOT_PITCH + 2).dp), contentAlignment = Alignment.TopCenter) {
-                        Box(Modifier.background(colors.line).padding(0.5.dp)) { BdPlayerInventory(slots, layout.playerSlots) }
+                        if (state.craft.toggleable) send(StorageAction.ToggleCraft) else craftHidden = true
                     }
                 }
-                Box(Modifier.matchParentSize()) {
-                    Rail(state, send, layout, craftShown) { hidden -> craftHidden = hidden }
-                }
-            }
-        }
-    }
-}
-
-/** 左侧导航：存储与合成两个工作区、切换主网络，底部是视图设置 */
-@Composable
-private fun Rail(state: StorageState, send: (StorageAction) -> Unit, layout: StorageLayout, craftShown: Boolean, setCraftHidden: (Boolean) -> Unit) {
-    val colors = Bd.colors
-    val text = layout.text
-    val craft = state.craft
-    Column(
-        Modifier.width(RAIL.dp)
-            .fillMaxHeight()
-            .background(colors.sunken)
-            .drawBehind { drawLine(colors.line, Offset(size.width - 0.5f, 0f), Offset(size.width - 0.5f, size.height), 1.dp.toPx()) }
-            .padding(vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(3.dp),
-    ) {
-        RailTab(text.storage, selected = !craftShown) {
-            when {
-                craft == null -> {}
-                craft.toggleable -> send(StorageAction.ToggleCraft)
-                else -> setCraftHidden(true)
-            }
-        }
-        RailTab(text.crafting, selected = craftShown, art = BdGlyphs.Crafting) {
-            when {
-                craft == null -> send(StorageAction.ToggleCraft)
-                else -> setCraftHidden(false)
-            }
-        }
-        if (layout.showSwitcher) {
-            BdGlyphButton(OreGlyph.CycleArrows, text.switcher, { send(StorageAction.OpenSwitcher) }, size = 20.dp, glyphSize = 9.dp)
-        }
-        Spacer(Modifier.weight(1f))
-        var open by remember { mutableStateOf(false) }
-        Box {
-            BdGlyphButton(OreGlyph.Sliders, text.view, { open = !open }, selected = open, size = 20.dp, glyphSize = 9.dp)
-            if (open) BdPopover({ open = false }) { ViewOptions(state, send, text) }
-        }
-    }
-}
-
-@Composable
-private fun RailTab(label: String, selected: Boolean, art: dev.compixel.ui.ore.display.OrePixelArt = BdGlyphs.Storage, onClick: () -> Unit) {
-    val colors = Bd.colors
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    OreTooltip(label, mode = OreTooltipMode.Immediate) {
-        Box(
-            Modifier.size(20.dp)
-                .hoverable(interaction)
-                .bdClickable(interaction, enabled = !selected, onClick = onClick)
-                .then(
-                    when {
-                        selected -> Modifier.background(colors.surface).border(1.dp, colors.line)
-                        hovered -> Modifier.background(colors.accentSoft)
-                        else -> Modifier
+                BdRailTab(text.crafting, BdGlyphs.Crafting, selected = !settingsOpen && craftShown) {
+                    settingsOpen = false
+                    if (!craftShown) {
+                        if (state.craft == null) send(StorageAction.ToggleCraft) else craftHidden = false
                     }
-                ),
-            contentAlignment = Alignment.Center,
+                }
+                if (layout.showSwitcher) {
+                    BdGlyphButton(OreGlyph.CycleArrows, text.switcher, { send(StorageAction.OpenSwitcher) }, size = 20.dp, glyphSize = 9.dp)
+                }
+                Spacer(Modifier.weight(1f))
+                BdRailTab(text.view, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
+            },
         ) {
-            if (selected) Box(Modifier.align(Alignment.CenterStart).width(2.dp).fillMaxHeight().background(colors.signatureVertical))
-            OreIcon(
-                art,
-                Modifier.size(9.dp),
-                color =
-                    when {
-                        selected -> colors.accentDeep
-                        hovered -> colors.text
-                        else -> colors.muted
-                    },
-            )
+            BdMainPage(!settingsOpen) {
+                Toolbar(state, send, text, width)
+                if (roomy) {
+                    Spacer(Modifier.height(5.dp))
+                    TypeTabs(state, send, text, width)
+                }
+                Spacer(Modifier.height(4.dp))
+                Row(Modifier.height((gridRows * SLOT_PITCH + 2).dp)) {
+                    Box(Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight().background(colors.surface).border(1.dp, colors.line).padding(1.dp)) {
+                        val ids = List(gridColumns * gridRows) { layout.storageStart + it }
+                        BdSlotGrid(slots, ids, gridColumns)
+                    }
+                    if (state.totalRows > gridRows) {
+                        Spacer(Modifier.width(2.dp))
+                        BdScrollbar(
+                            state.firstRow,
+                            gridRows,
+                            state.totalRows,
+                            { send(StorageAction.ScrollTo(it)) },
+                            Modifier.width(SCROLLBAR.dp).fillMaxHeight(),
+                        )
+                    }
+                }
+                if (roomy) {
+                    Spacer(Modifier.height(4.dp))
+                    StatusStrip(state, text, width)
+                }
+                if (craftShown) {
+                    Spacer(Modifier.height(GAP.dp))
+                    CraftSection(state.craft, send, slots, layout, width)
+                }
+                Spacer(Modifier.height(GAP.dp))
+                BdSectionLabel(text.inventory, Modifier.width(width.dp))
+                Spacer(Modifier.height(4.dp))
+                Box(Modifier.width((gridColumns * SLOT_PITCH + 2).dp), contentAlignment = Alignment.TopCenter) {
+                    Box(Modifier.background(colors.line).padding(0.5.dp)) { BdPlayerInventory(slots, layout.playerSlots) }
+                }
+            }
+            BdTabPage(settingsOpen) { ViewOptions(state, send, text, settingsOpen) }
         }
     }
 }
@@ -543,26 +489,19 @@ private fun SortOptions(state: StorageState, send: (StorageAction) -> Unit, text
     BdSettingRow(text.reverse) { BdToggle(state.reverse, { send(StorageAction.Reverse(it)) }) }
 }
 
-/** 视图设置：行列与搜索行为 */
+/** 设置页的视图设置：行列与搜索行为；[shown] 为 false 时设置页正在淡出，控件不再响应 */
 @Composable
-private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text: StorageText) {
-    Column(Modifier.width(150.dp)) {
-        BdSectionLabel(text.layout)
-        Spacer(Modifier.height(4.dp))
-        BdSettingRow(text.columns) {
-            BdStepper(state.preferredColumns, { send(StorageAction.PreferredSize(it, state.preferredRows)) }, 9..99)
-        }
-        Spacer(Modifier.height(3.dp))
-        BdSettingRow(text.rows) {
-            BdStepper(state.preferredRows, { send(StorageAction.PreferredSize(state.preferredColumns, it)) }, 2..99)
-        }
-        Spacer(Modifier.height(6.dp))
-        BdSectionLabel(text.search)
-        Spacer(Modifier.height(4.dp))
-        BdSettingRow(text.keepSearch) { BdToggle(state.keepSearch, { send(StorageAction.KeepSearch(it)) }) }
-        Spacer(Modifier.height(3.dp))
-        BdSettingRow(text.syncSearch, text.syncSearchHint) { BdToggle(state.syncSearch, { send(StorageAction.SyncSearch(it)) }) }
+private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text: StorageText, shown: Boolean) {
+    BdSectionLabel(text.layout)
+    BdSettingRow(text.columns) {
+        BdStepper(state.preferredColumns, { send(StorageAction.PreferredSize(it, state.preferredRows)) }, 9..99, shown)
     }
+    BdSettingRow(text.rows) {
+        BdStepper(state.preferredRows, { send(StorageAction.PreferredSize(state.preferredColumns, it)) }, 2..99, shown)
+    }
+    BdSectionLabel(text.search)
+    BdSettingRow(text.keepSearch) { BdToggle(state.keepSearch, { send(StorageAction.KeepSearch(it)) }, shown) }
+    BdSettingRow(text.syncSearch, text.syncSearchHint) { BdToggle(state.syncSearch, { send(StorageAction.SyncSearch(it)) }, shown) }
 }
 
 /** 浮层中的单选项 */

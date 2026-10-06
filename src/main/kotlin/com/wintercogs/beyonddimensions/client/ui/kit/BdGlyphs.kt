@@ -25,6 +25,9 @@ object BdGlyphs {
             "................",
         )
 
+    /** 主页面的页签：与存储相同的四个格子 */
+    val Main = Storage
+
     /** 合成：3×3 的合成格 */
     val Crafting =
         OrePixelArt(

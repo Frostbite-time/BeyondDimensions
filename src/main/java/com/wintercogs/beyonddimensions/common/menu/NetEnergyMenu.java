@@ -190,11 +190,6 @@ public class NetEnergyMenu extends BDBaseMenu
         return energyRate;
     }
 
-    public boolean ready()
-    {
-        return synchronization.hasSnapshot();
-    }
-
     public boolean requestOutput(int ordinal)
     {
         PopMode[] modes = PopMode.values();

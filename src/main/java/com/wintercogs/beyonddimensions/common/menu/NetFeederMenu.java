@@ -183,11 +183,6 @@ public class NetFeederMenu extends BDBaseMenu
         return feedingEditable;
     }
 
-    public boolean ready()
-    {
-        return synchronization.hasSnapshot();
-    }
-
     public boolean requestWorking(int ordinal)
     {
         return workingEditable && ordinal >= 0 && ordinal < WORKING_OPTIONS.size()

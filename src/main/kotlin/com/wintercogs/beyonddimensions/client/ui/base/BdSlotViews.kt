@@ -19,13 +19,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.kit.BdAmountPill
+import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
+import com.wintercogs.beyonddimensions.client.ui.kit.PAGE_PADDING_X
+import com.wintercogs.beyonddimensions.client.ui.kit.SIDE_RAIL_WIDTH
 import com.wintercogs.beyonddimensions.client.ui.kit.brackets
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
+import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
 import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.ui.ore.inventory.OreSlot
 
 const val SLOT_PITCH = 18
+
+/** 放九列槽位的标准窗口宽度：页签竖条、页面两侧的留白、九格与外圈细线，再加窗口边框 */
+const val SLOT_WINDOW_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 9 * SLOT_PITCH + 1 + 2
 
 /** 一个原生槽位：主题化的槽底，悬停时加上角标；虚拟资源的数量以 BD 的数量标签显示 */
 @Composable
@@ -81,8 +89,29 @@ fun BdPlayerInventory(slots: ComposeMenuSlots<*>, playerSlots: List<Int>, modifi
     }
 }
 
-/** 包住一组槽位的浅色托盘，使槽位与窗口底色区分 */
+/** 带标题的一组槽位，外面一圈细线 */
 @Composable
-fun BdSlotTray(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Box(modifier.background(Bd.colors.surface).padding(1.dp)) { content() }
+fun BdSlotSection(title: String, ids: List<Int>, slots: ComposeMenuSlots<*>, columns: Int = 9) {
+    BdSectionLabel(title)
+    Spacer(Modifier.height(4.dp))
+    Box(Modifier.background(Bd.colors.line).padding(0.5.dp)) { BdSlotGrid(slots, ids, columns) }
 }
+
+/** 带标题的玩家背包 */
+@Composable
+fun BdInventorySection(title: String, playerSlots: List<Int>, slots: ComposeMenuSlots<*>) {
+    BdSectionLabel(title)
+    Spacer(Modifier.height(4.dp))
+    Box(Modifier.background(Bd.colors.line).padding(0.5.dp)) { BdPlayerInventory(slots, playerSlots) }
+}
+
+// 槽位编号在游戏线程构造界面时取出
+
+/** 玩家背包的槽位：前 27 个是主背包，后 9 个是快捷栏 */
+fun BDBaseMenu.playerSlotIds(): List<Int> = (inventoryStartIndex until inventoryEndIndex).toList()
+
+/** 标记槽：只表示资源种类的虚拟槽位 */
+fun BDBaseMenu.flagSlotIds(): List<Int> = slots.filter { it is AbstractStackTypedSlot && it.isFake }.map { it.index }
+
+/** 存放虚拟资源的槽位 */
+fun BDBaseMenu.resourceSlotIds(): List<Int> = slots.filter { it is AbstractStackTypedSlot && !it.isFake }.map { it.index }
