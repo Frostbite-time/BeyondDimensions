@@ -36,7 +36,6 @@ internal class BdPreviewContent {
     val settings = tr("ui.beyonddimensions.color_preview.settings")
     val search = tr("ui.beyonddimensions.storage.search")
     val stored = tr("ui.beyonddimensions.color_preview.items")
-    val inventory = tr("ui.beyonddimensions.inventory")
     val body = tr("ui.beyonddimensions.color_preview.body")
     val muted = tr("ui.beyonddimensions.color_preview.muted")
     val faint = tr("ui.beyonddimensions.color_preview.faint")
@@ -53,14 +52,15 @@ internal class BdPreviewContent {
 
 /**
  * 颜色编辑器旁的预览：一个缩小的 BD 窗口，由界面里真实的控件组成，每种颜色都有地方显示。
- * 槽位依次是普通、悬停、标记、标记且悬停与空格；开关可以点。
+ * 槽位依次是普通、悬停、标记、标记且悬停与空格；开关可以点。高度与真实的 BD 窗口相当：1080p 在自动界面缩放下，
+ * 编辑器给预览的高度约 230，再矮时编辑器让它滚动。
  */
 @Composable
 internal fun BdPreview(content: BdPreviewContent) {
     val colors = Bd.colors
     val items = content.items
     var checked by remember { mutableStateOf(true) }
-    BdWindow(Modifier.width(200.dp).fillMaxHeight()) {
+    BdWindow(Modifier.width(200.dp).height(228.dp)) {
         BdHeader(content.icon, content.title, {}, tag = "#0001")
         Row(Modifier.weight(1f)) {
             Column(
@@ -93,7 +93,6 @@ internal fun BdPreview(content: BdPreviewContent) {
                     PreviewSlot(null, "")
                     PreviewSlot(items[4], "3")
                     PreviewSlot(items[5], "512")
-                    PreviewSlot(null, "")
                 }
                 Spacer(Modifier.height(6.dp))
                 OreText(content.body, color = colors[BdColors.text], maxLines = 1)
@@ -121,19 +120,6 @@ internal fun BdPreview(content: BdPreviewContent) {
                 }
                 Spacer(Modifier.height(4.dp))
                 BdMeter(0.6f, Modifier.fillMaxWidth().height(5.dp))
-                Spacer(Modifier.height(6.dp))
-                BdSectionLabel(content.inventory)
-                Spacer(Modifier.height(4.dp))
-                Column(Modifier.background(colors[BdColors.line]).padding(0.5.dp)) {
-                    for (row in 0 until 2) {
-                        Row {
-                            for (column in 0 until 8) {
-                                val item = if (row == 1 && column < 3) items[column + 3] else null
-                                PreviewSlot(item, if (item != null) "16" else "")
-                            }
-                        }
-                    }
-                }
                 Spacer(Modifier.weight(1f).heightIn(min = 6.dp))
                 Column(
                     Modifier.fillMaxWidth()
