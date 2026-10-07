@@ -53,6 +53,7 @@ public class BeyondDimensions
         BDBlocks.register(modEventBus);
         BDFluids.register(modEventBus);
         BDBlockEntities.register(modEventBus);
+        BDAttachments.register(modEventBus);
 
         // 分发集成模块
         IntegrationManager.bootstrapCommon(modEventBus, NeoForge.EVENT_BUS);

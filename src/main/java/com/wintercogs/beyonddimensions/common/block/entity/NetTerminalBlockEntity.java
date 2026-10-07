@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProvider
 {
-
+    // 旧版本存在终端里的合成格物品。合成格现在跟随玩家，这里只读出旧数据，打开或拆除终端时还给玩家
     private final NonNullList<ItemStack> craftItems = NonNullList.withSize(9, ItemStack.EMPTY);
 
     public NetTerminalBlockEntity(BlockPos pos, BlockState blockState)
@@ -42,10 +42,13 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
         DimensionsNet net = getNet();
         if (net != null)
         {
-            // 在服务端中craftItems作为直接引用传递。保证为同一个列表
-            // 而后，craftItems会在Menu被包装，并通过Menu的包装类完成网络同步
-            // 最后，利用方块实体进行持久保存
-            return new DimensionsCraftMenuTerminal(containerId, inventory, net.getUnifiedStorage(), craftItems, null, this.getBlockPos());
+            if (craftItems.stream().anyMatch(stack -> !stack.isEmpty()))
+            {
+                DimensionsCraftMenuTerminal.returnLegacyCraftItems(player, net.getUnifiedStorage(), craftItems);
+                craftItems.clear();
+                setChanged();
+            }
+            return new DimensionsCraftMenuTerminal(containerId, inventory, net.getUnifiedStorage(), null, this.getBlockPos());
         }
         return null;
     }
@@ -67,6 +70,8 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.saveAdditional(tag, registries);
+        if (craftItems.stream().allMatch(ItemStack::isEmpty))
+            return;
         ListTag itemsList = new ListTag();
         for (ItemStack stack : craftItems)
         {

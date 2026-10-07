@@ -110,6 +110,7 @@ public class Config
         public final ModConfigSpec.EnumValue<ButtonState> UI_SEARCH_BUTTON;
         public final ModConfigSpec.EnumValue<ButtonState> UI_CRAFT_BUTTON;
         public final ModConfigSpec.EnumValue<ButtonState> UI_CRAFT_RETURN_BUTTON;
+        public final ModConfigSpec.BooleanValue UI_CRAFT_KEEP;
         public final ModConfigSpec.IntValue UI_PAGE_NUM;
         public final ModConfigSpec.IntValue UI_COLUMNS;
         public final ModConfigSpec.ConfigValue<String> UI_SEARCH;
@@ -143,6 +144,9 @@ public class Config
             UI_CRAFT_RETURN_BUTTON = builder
                     .comment("决定工艺菜单关闭时，物品优先转移的方向；启用则优先向存储，关闭则优先向背包")
                     .defineEnum("ui_craft_return_button", ButtonState.DISABLED);
+            UI_CRAFT_KEEP = builder
+                    .comment("关闭合成菜单后是否保留合成格里的物品；合成格按玩家保存在服务器上")
+                    .define("ui_craft_keep", false);
             UI_PAGE_NUM = builder
                     .comment("存储UI当前显示的总页数 (除非你知道你在做什么，否则不要手动修改)")
                     .defineInRange("ui_page_num", 5, 2, 99);
@@ -184,6 +188,7 @@ public class Config
             CommonConfigRuntime.uiSearchButton = UI_SEARCH_BUTTON.get();
             CommonConfigRuntime.uiCraftButton = UI_CRAFT_BUTTON.get();
             CommonConfigRuntime.uiCraftReturnButton = UI_CRAFT_RETURN_BUTTON.get();
+            CommonConfigRuntime.uiCraftKeep = UI_CRAFT_KEEP.get();
             CommonConfigRuntime.uiPageNum = UI_PAGE_NUM.get();
             CommonConfigRuntime.uiColumns = UI_COLUMNS.get();
             CommonConfigRuntime.uiSearch = UI_SEARCH.get();

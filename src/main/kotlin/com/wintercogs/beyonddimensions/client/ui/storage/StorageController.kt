@@ -88,6 +88,8 @@ data class StorageState(
     val reverse: Boolean = false,
     val keepSearch: Boolean = false,
     val syncSearch: Boolean = false,
+    /** 关闭合成菜单后保留合成格里的物品 */
+    val keepCrafting: Boolean = false,
     val craft: CraftState? = null,
 )
 
@@ -158,6 +160,8 @@ sealed interface StorageAction {
 
     data class ReturnPreference(val toStorage: Boolean) : StorageAction
 
+    data class KeepCrafting(val enabled: Boolean) : StorageAction
+
     data class ChooseRecipe(val id: String) : StorageAction
 }
 
@@ -216,7 +220,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
         menu.loadSearchText(lastSearch)
         menu.setCategory(filterOf(categories.getOrNull(selected)))
         restoreTransferContext()
-        craftMenu?.let { menu.commands().preference(CommonConfigRuntime.uiCraftReturnButton == ButtonState.ENABLED) }
+        sendCraftPreference()
     }
 
     fun snapshot(): StorageState {
@@ -251,6 +255,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
             reverse = CommonConfigRuntime.uiReverseButton == ButtonState.ENABLED,
             keepSearch = CommonConfigRuntime.uiSearchButton == ButtonState.ENABLED,
             syncSearch = CommonConfigRuntime.searchTextWithJEIEMI,
+            keepCrafting = CommonConfigRuntime.uiCraftKeep,
             craft = craft,
         )
     }
@@ -367,11 +372,27 @@ class StorageController(private val menu: DimensionsNetMenu) {
                 CommonConfigRuntime.uiCraftReturnButton = state
                 Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.set(state)
                 Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.save()
-                menu.commands().preference(action.toStorage)
+                sendCraftPreference()
+            }
+
+            is StorageAction.KeepCrafting -> {
+                CommonConfigRuntime.uiCraftKeep = action.enabled
+                Config.INSTANCE.commonConfig.UI_CRAFT_KEEP.set(action.enabled)
+                Config.INSTANCE.commonConfig.UI_CRAFT_KEEP.save()
+                sendCraftPreference()
             }
 
             is StorageAction.ChooseRecipe -> craftMenu?.let { recipeChoices?.select(it, action.id) }
         }
+    }
+
+    /** 合成格的偏好由服务器保存在玩家身上，关闭菜单时按它保留或退回；只有合成菜单接收 */
+    private fun sendCraftPreference() {
+        if (craftMenu == null) return
+        menu.commands().preference(
+            CommonConfigRuntime.uiCraftReturnButton == ButtonState.ENABLED,
+            CommonConfigRuntime.uiCraftKeep,
+        )
     }
 
     /** Shift+Z 切换与配方查看器同步搜索 */

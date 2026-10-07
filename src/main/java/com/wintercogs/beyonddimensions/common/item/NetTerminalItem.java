@@ -4,7 +4,6 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -42,9 +41,6 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
         if (!level.isClientSide())
         {
-            if (itemstack.get(BDDataComponents.CRAFT_SLOTS) == null)
-                itemstack.set(BDDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9, ItemStack.EMPTY)));
-
             if (itemstack.getOrDefault(BDDataComponents.NET_ID_DATA, -1) >= 0)
             {
                 DimensionsNet net = DimensionsNet.getNetFromId(itemstack.getOrDefault(BDDataComponents.NET_ID_DATA, -1));
@@ -88,14 +84,11 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
         // 使用上下文中的物品栈
         DimensionsNet net = DimensionsNet.getNetFromId(ctx.stack.getOrDefault(BDDataComponents.NET_ID_DATA, -1));
         if (net == null) return null;
-        return new DimensionsCraftMenuTerminal(
-                containerId,
-                inventory,
-                net.getUnifiedStorage(),
-                ctx.stack.get(BDDataComponents.CRAFT_SLOTS).contents(),
-                ctx.stack,
-                null
-        );
+        // 旧版本的终端物品带着合成格的物品，先还给玩家
+        ItemStackContents legacy = ctx.stack.remove(BDDataComponents.CRAFT_SLOTS);
+        if (legacy != null)
+            DimensionsCraftMenuTerminal.returnLegacyCraftItems(player, net.getUnifiedStorage(), legacy.contents());
+        return new DimensionsCraftMenuTerminal(containerId, inventory, net.getUnifiedStorage(), ctx.stack, null);
     }
 
     @Override

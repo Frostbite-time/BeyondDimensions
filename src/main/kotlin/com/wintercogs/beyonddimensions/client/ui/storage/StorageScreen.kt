@@ -78,6 +78,7 @@ class StorageLayout(menu: DimensionsNetMenu) {
 
 class StorageText {
     val search = tr("ui.beyonddimensions.storage.search")
+    val searchTitle = tr("ui.beyonddimensions.storage.search.title")
     val searchHelp = tr("ui.beyonddimensions.storage.search.help")
 
     /** 搜索写法：每项一个示例与它的含义 */
@@ -125,6 +126,9 @@ class StorageText {
     val clearToStorage = tr("ui.beyonddimensions.crafting.clear_to_storage")
     val clearToInventory = tr("ui.beyonddimensions.crafting.clear_to_inventory")
     val returnTitle = tr("ui.beyonddimensions.crafting.return")
+    val returnOnClear = tr("ui.beyonddimensions.crafting.return.clear")
+    val keepCrafting = tr("ui.beyonddimensions.crafting.keep")
+    val keepCraftingHint = tr("ui.beyonddimensions.crafting.keep.hint")
     val returnStorage = tr("ui.beyonddimensions.crafting.return.storage")
     val returnInventory = tr("ui.beyonddimensions.crafting.return.inventory")
     val recipe = tr("ui.beyonddimensions.crafting.recipe")
@@ -340,7 +344,7 @@ private fun StorageView(
                     }
                     if (craftShown) {
                         Spacer(Modifier.height(GAP.dp))
-                        CraftSection(state.craft, send, slots, layout, width)
+                        CraftSection(state.craft, state.keepCrafting, send, slots, layout, width)
                     }
                     Spacer(Modifier.height(GAP.dp))
                     BdSectionLabel(text.inventory, Modifier.width(width.dp))
@@ -939,6 +943,7 @@ private fun TakeAmountRow(amount: Int, onAmountChange: (Int) -> Unit, max: Int, 
 @Composable
 private fun CraftSection(
     craft: CraftState,
+    keep: Boolean,
     send: (StorageAction) -> Unit,
     slots: ComposeMenuSlots<DimensionsNetMenu>,
     layout: StorageLayout,
@@ -974,7 +979,13 @@ private fun CraftSection(
             Box(Modifier.border(1.dp, colors[BdColors.accent]).padding(2.dp)) { BdSlot(slots, layout.resultSlot) }
             Spacer(Modifier.weight(1f))
             Column(horizontalAlignment = Alignment.End) {
-                OreText(text.returnTitle, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
+                // 保留合成格时关闭不再退回，退回方向只在换入配方清空合成格时用到
+                OreText(
+                    if (keep) text.returnOnClear else text.returnTitle,
+                    color = colors[BdColors.faint],
+                    style = Bd.caption,
+                    maxLines = 1
+                )
                 Spacer(Modifier.height(2.dp))
                 BdSegmented(
                     listOf(text.returnStorage, text.returnInventory),
@@ -1066,7 +1077,7 @@ private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text
             shown
         )
     }
-    BdSectionLabel(text.search)
+    BdSectionLabel(text.searchTitle)
     BdSettingRow(text.keepSearch) { BdToggle(state.keepSearch, { send(StorageAction.KeepSearch(it)) }, shown) }
     BdSettingRow(text.syncSearch, text.syncSearchHint) {
         BdToggle(
@@ -1074,6 +1085,10 @@ private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text
             { send(StorageAction.SyncSearch(it)) },
             shown
         )
+    }
+    BdSectionLabel(text.crafting)
+    BdSettingRow(text.keepCrafting, text.keepCraftingHint) {
+        BdToggle(state.keepCrafting, { send(StorageAction.KeepCrafting(it)) }, shown)
     }
 }
 

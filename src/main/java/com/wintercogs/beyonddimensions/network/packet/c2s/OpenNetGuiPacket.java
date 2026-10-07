@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.network.packet.c2s;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
-import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
@@ -12,7 +11,6 @@ import com.wintercogs.beyonddimensions.common.menu.SwitchMenuProvider;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.Utf8String;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -69,7 +67,7 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
             if (targetMenu == NetMenuType.NET_CRAFT_MENU)
             {
                 player.openMenu(new SwitchMenuProvider(
-                        (containerId, playerInventory, _player) -> new DimensionsCraftMenu(DimensionsCraftMenu.Dimensions_Craft_Menu.get(), containerId, playerInventory, net.getUnifiedStorage(), null, null),
+                        (containerId, playerInventory, _player) -> new DimensionsCraftMenu(DimensionsCraftMenu.Dimensions_Craft_Menu.get(), containerId, playerInventory, net.getUnifiedStorage()),
                         Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                 ));
             }
@@ -116,9 +114,6 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
 
                 if (terminalStack != null)
                 {
-                    if (terminalStack.get(BDDataComponents.CRAFT_SLOTS) == null)
-                        terminalStack.set(BDDataComponents.CRAFT_SLOTS, new ItemStackContents(NonNullList.withSize(9, ItemStack.EMPTY)));
-
                     NetTerminalItem.contextMap.put(player, new NetTerminalItem.MenuTriggerContext(InteractionHand.MAIN_HAND, terminalStack));
                     player.openMenu((NetTerminalItem) terminalStack.getItem());
                 }

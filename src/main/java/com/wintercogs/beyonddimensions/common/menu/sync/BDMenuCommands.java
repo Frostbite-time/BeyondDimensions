@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
+import com.wintercogs.beyonddimensions.common.menu.PlayerCraftingGrid;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
@@ -81,11 +82,25 @@ public final class BDMenuCommands
                 return true;
             });
 
-    public static final MenuAction<BDBaseMenu, Boolean> CRAFT_PREFERENCE = MenuAction.of("bd.craft_preference", SyncCodecs.BOOLEAN,
-            (menu, player, toStorage) -> {
-                if (!(menu instanceof DimensionsCraftMenu craft))
+    /**
+     * 合成格的偏好：清空时优先退回存储还是背包，关闭时是否保留。保存在玩家身上，关闭菜单时由服务器按它处理
+     */
+    public record CraftPreference(boolean toStorage, boolean keep)
+    {
+    }
+
+    private static final SyncCodec<CraftPreference> CRAFT_PREFERENCE_CODEC = SyncCodec.of("beyonddimensions:craft_preference/1",
+            (out, value) -> {
+                out.writeBoolean(value.toStorage());
+                out.writeBoolean(value.keep());
+            },
+            in -> new CraftPreference(in.readBoolean(), in.readBoolean()));
+
+    public static final MenuAction<BDBaseMenu, CraftPreference> CRAFT_PREFERENCE = MenuAction.of("bd.craft_preference", CRAFT_PREFERENCE_CODEC,
+            (menu, player, preference) -> {
+                if (!(menu instanceof DimensionsCraftMenu))
                     return false;
-                craft.firstCraftReturnDir = toStorage;
+                PlayerCraftingGrid.of(player).setPreference(preference.toStorage(), preference.keep());
                 return true;
             });
 
@@ -107,7 +122,7 @@ public final class BDMenuCommands
     public final MenuAction<BDBaseMenu, Recipe> RECIPE;
 
     private final BDBaseMenu menu;
-    private Boolean pendingPreference;
+    private CraftPreference pendingPreference;
     private long lastFeedbackTick = Long.MIN_VALUE;
 
     public BDMenuCommands(BDBaseMenu menu)
@@ -325,11 +340,11 @@ public final class BDMenuCommands
     }
 
     /**
-     * 合成返还方向在首个快照到达后才能发送，之前的设置会暂存
+     * 合成格的偏好在首个快照到达后才能发送，之前的设置会暂存
      */
-    public void preference(boolean toStorage)
+    public void preference(boolean toStorage, boolean keep)
     {
-        pendingPreference = toStorage;
+        pendingPreference = new CraftPreference(toStorage, keep);
         flushPreference();
     }
 

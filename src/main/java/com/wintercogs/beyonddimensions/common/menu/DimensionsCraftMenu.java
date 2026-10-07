@@ -19,8 +19,6 @@ import com.wintercogs.beyonddimensions.integration.module.polymorph.PolymorphHel
 import com.wintercogs.beyonddimensions.util.InventoryHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -57,7 +55,6 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     public int resultSlotIndex;
     public int craftSlotStartIndex;
     public int craftSlotEndIndex;
-    public boolean firstCraftReturnDir = false; // 决定关闭菜单时工艺槽的优先转移方向，true向存储 false背包
 
 
     // 构建注册用的信息
@@ -73,48 +70,26 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     public DimensionsCraftMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
-        this(Dimensions_Craft_Menu.get(), id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE), null, null);
+        this(Dimensions_Craft_Menu.get(), id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE));
     }
 
     /**
-     * 服务端构造函数
+     * 服务端构造函数。合成格直接使用玩家自己的 {@link PlayerCraftingGrid}，上次保留的物品随之出现
      *
      * @param playerInventory 玩家背包
      * @param data            维度网络信息，包含了存储信息
      */
-    public DimensionsCraftMenu(MenuType<?> type, int id, Inventory playerInventory, AbstractUnorderedStackHandler data, @Nullable NonNullList<ItemStack> craftItems, @Nullable BlockPos entityPos)
+    public DimensionsCraftMenu(MenuType<?> type, int id, Inventory playerInventory, AbstractUnorderedStackHandler data)
     {
         // 利用父类函数处理存储槽位 玩家背包 和一些其他数据添加处理
         super(type, id, playerInventory, data);
 
-        TransientCraftingContainer craftContainer;
-        if (craftItems != null)
-            craftContainer = new TransientCraftingContainer(this, 3, 3, craftItems)
-            {
-                @Override
-                public void setChanged()
-                {
-                    super.setChanged();
-                    if (entityPos != null && !player.level().isClientSide())
-                    {
-                        player.level().blockEntityChanged(entityPos);
-                    }
-                }
-            };
-        else
-            craftContainer = new TransientCraftingContainer(this, 3, 3)
-            {
-                @Override
-                public void setChanged()
-                {
-                    super.setChanged();
-                    if (entityPos != null && !player.level().isClientSide())
-                    {
-                        player.level().blockEntityChanged(entityPos);
-                    }
-                }
-            };
+        TransientCraftingContainer craftContainer = player.level().isClientSide()
+                ? new TransientCraftingContainer(this, 3, 3)
+                : new TransientCraftingContainer(this, 3, 3, PlayerCraftingGrid.of(player).items());
         initCraftSlots(playerInventory, craftContainer);
+        // 保留下来的物品可能正好组成配方
+        slotChangedCraftingGrid(this, player.level(), player, craftSlots, resultSlots, resultSlotIndex);
         commands().crafting(menuSync());
     }
 
@@ -271,7 +246,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
             return false;
 
         // 清空工艺槽物品
-        cleanCraftSlots(firstCraftReturnDir);
+        cleanCraftSlots(PlayerCraftingGrid.of(player).returnToStorage());
 
         if (compressOverflow && inputKeys.size() > craftSlots.getContainerSize())
         {
@@ -457,58 +432,54 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     {
         if (player instanceof ServerPlayer)
         {
-            List<ItemStack> stacks = craftSlots.getItems();
-            for (ItemStack stack : stacks)
+            for (ItemStack stack : craftSlots.getItems())
             {
                 if (!stack.isEmpty())
-                {
-                    long remaining;
-                    if (toStorageFirst)
-                    {
-                        remaining = storage.insert(new ItemStackKey(stack), stack.getCount(), false).amount();
-                        if (remaining > 0)
-                        {
-                            stack.setCount((int) remaining);
-                            remaining = InventoryHelper.transferToPlayerInventory(player, stack.copy()).getCount();
-                            if (remaining > 0)
-                            {
-                                stack.setCount((int) remaining);
-                                player.drop(stack, false);
-                            }
-                        }
-                    }
-                    else if (player.isAlive() && !((ServerPlayer) player).hasDisconnected())
-                    {
-                        remaining = InventoryHelper.transferToPlayerInventory(player, stack.copy()).getCount();
-
-                        if (remaining > 0)
-                        {
-                            stack.setCount((int) remaining);
-                            remaining = storage.insert(new ItemStackKey(stack), stack.getCount(), false).amount();
-                            if (remaining > 0)
-                            {
-                                stack.setCount((int) remaining);
-                                player.drop(stack, false);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        player.drop(stack, false);
-                    }
-
-                }
+                    returnStack(player, storage, stack.copy(), toStorageFirst);
             }
             craftSlots.clearContent();
             resultSlots.clearContent();
         }
     }
 
+    /**
+     * 把一堆物品还给玩家：优先存储时依次送回存储、玩家背包，最后掉在玩家脚下；优先背包时先背包再存储。
+     * 玩家已经死亡或断开连接时，优先背包的直接掉落。会修改传入的堆叠
+     */
+    public static void returnStack(Player player, IStackHandler storage, ItemStack stack, boolean toStorageFirst)
+    {
+        if (toStorageFirst)
+        {
+            stack.setCount((int) storage.insert(new ItemStackKey(stack), stack.getCount(), false).amount());
+            if (!stack.isEmpty())
+                InventoryHelper.transferToPlayerInventory(player, stack);
+        }
+        else if (player.isAlive() && !(player instanceof ServerPlayer serverPlayer && serverPlayer.hasDisconnected()))
+        {
+            InventoryHelper.transferToPlayerInventory(player, stack);
+            if (!stack.isEmpty())
+            {
+                long remaining = storage.insert(new ItemStackKey(stack), stack.getCount(), false).amount();
+                stack.setCount((int) remaining);
+            }
+        }
+        if (!stack.isEmpty())
+            player.drop(stack, false);
+    }
+
+    /**
+     * 关闭菜单：玩家选择保留时，合成格里的物品原样留在 {@link PlayerCraftingGrid}，下次打开任何合成菜单时再出现；否则按退回方向清空
+     */
     @Override
     public void removed(@NotNull Player player)
     {
         super.removed(player);
-        // 将合成槽物品优先放入玩家背包 否则掉落
-        cleanCraftSlots(firstCraftReturnDir);
+        if (!(player instanceof ServerPlayer))
+            return;
+        PlayerCraftingGrid grid = PlayerCraftingGrid.of(player);
+        if (grid.keep())
+            resultSlots.clearContent();
+        else
+            cleanCraftSlots(grid.returnToStorage());
     }
 }

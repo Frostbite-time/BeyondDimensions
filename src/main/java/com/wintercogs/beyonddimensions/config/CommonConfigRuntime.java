@@ -14,6 +14,7 @@ public final class CommonConfigRuntime
     public static volatile ButtonState uiSearchButton = ButtonState.DISABLED;
     public static volatile ButtonState uiCraftButton = ButtonState.DISABLED;
     public static volatile ButtonState uiCraftReturnButton = ButtonState.DISABLED;
+    public static volatile boolean uiCraftKeep = false;
     public static volatile int uiPageNum = 5;
     public static volatile int uiColumns = 9;
     public static volatile String uiSearch = "";
