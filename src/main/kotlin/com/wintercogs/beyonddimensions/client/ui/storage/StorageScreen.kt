@@ -173,111 +173,115 @@ private fun StorageView(
     var craftHidden by remember { mutableStateOf(false) }
     val craftShown = state.craft != null && !craftHidden
     var settingsOpen by remember { mutableStateOf(false) }
-    slots.Interaction(enabled = !settingsOpen)
+    // 排序与配方选择的浮层盖在槽位上方，打开期间停用槽位
+    val popovers = remember { BdPopovers() }
+    slots.Interaction(enabled = !settingsOpen && popovers.open == 0)
 
-    BdScreenFrame { available ->
-        val availableHeight = available.height.value.toInt() - SCREEN_MARGIN * 2
-        val availableWidth = available.width.value.toInt() - SCREEN_MARGIN * 2
-        // 空间不足三行时收起页签与状态栏
-        val roomy = (availableHeight - chromeHeight(tabs = true, status = true, craft = craftShown)) / SLOT_PITCH >= 3
-        val fitRows = (availableHeight - chromeHeight(roomy, roomy, craftShown)) / SLOT_PITCH
-        // 内容区居中，竖条对面也留出一条竖条宽的空位
-        val fitColumns = (availableWidth - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0)) / SLOT_PITCH
-        val rows = fitRows.coerceAtMost(state.preferredRows).coerceAtLeast(2)
-        val columns = fitColumns.coerceAtMost(state.preferredColumns).coerceAtLeast(9)
-        LaunchedEffect(columns, rows) { send(StorageAction.Viewport(columns, rows)) }
+    CompositionLocalProvider(LocalBdPopovers provides popovers) {
+        BdScreenFrame { available ->
+            val availableHeight = available.height.value.toInt() - SCREEN_MARGIN * 2
+            val availableWidth = available.width.value.toInt() - SCREEN_MARGIN * 2
+            // 空间不足三行时收起页签与状态栏
+            val roomy = (availableHeight - chromeHeight(tabs = true, status = true, craft = craftShown)) / SLOT_PITCH >= 3
+            val fitRows = (availableHeight - chromeHeight(roomy, roomy, craftShown)) / SLOT_PITCH
+            // 内容区居中，竖条对面也留出一条竖条宽的空位
+            val fitColumns = (availableWidth - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0)) / SLOT_PITCH
+            val rows = fitRows.coerceAtMost(state.preferredRows).coerceAtLeast(2)
+            val columns = fitColumns.coerceAtMost(state.preferredColumns).coerceAtLeast(9)
+            LaunchedEffect(columns, rows) { send(StorageAction.Viewport(columns, rows)) }
 
-        val gridColumns = state.columns
-        val gridRows = state.rows
-        val width = contentWidth(gridColumns)
-        BdTabbedWindow(
-            Modifier.width((CHROME_WIDTH + width).dp).then(slots.areaModifier())
-                .onPointerEvent(PointerEventType.Scroll) { event ->
-                    val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
-                    if (delta != 0f && !settingsOpen) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
-                },
-            header = {
-                BdHeader(
-                    layout.icon,
-                    state.networkName.ifEmpty { text.storage },
-                    close,
-                    tag = if (state.networkId >= 0) "#%04d".format(state.networkId) else null,
-                )
-            },
-            // 存储与合成两个工作区都在主页面上，合成区显示与否决定选中哪一个
-            rail = {
-                BdRailTab(text.storage, BdGlyphs.Storage, selected = !settingsOpen && !craftShown) {
-                    settingsOpen = false
-                    if (craftShown) {
-                        if (state.craft.toggleable) send(StorageAction.ToggleCraft) else craftHidden = true
-                    }
-                }
-                BdRailTab(text.crafting, BdGlyphs.Crafting, selected = !settingsOpen && craftShown) {
-                    settingsOpen = false
-                    if (!craftShown) {
-                        if (state.craft == null) send(StorageAction.ToggleCraft) else craftHidden = false
-                    }
-                }
-                if (layout.showSwitcher) {
-                    BdGlyphButton(
-                        OreGlyph.CycleArrows,
-                        text.switcher,
-                        { send(StorageAction.OpenSwitcher) },
-                        size = 20.dp,
-                        glyphSize = 9.dp
+            val gridColumns = state.columns
+            val gridRows = state.rows
+            val width = contentWidth(gridColumns)
+            BdTabbedWindow(
+                Modifier.width((CHROME_WIDTH + width).dp).then(slots.areaModifier())
+                    .onPointerEvent(PointerEventType.Scroll) { event ->
+                        val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
+                        if (delta != 0f && !settingsOpen) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
+                    },
+                header = {
+                    BdHeader(
+                        layout.icon,
+                        state.networkName.ifEmpty { text.storage },
+                        close,
+                        tag = if (state.networkId >= 0) "#%04d".format(state.networkId) else null,
                     )
-                }
-                Spacer(Modifier.weight(1f))
-                BdRailTab(text.view, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
-            },
-        ) {
-            BdMainPage(!settingsOpen) {
-                Toolbar(state, send, text, width)
-                if (roomy) {
-                    Spacer(Modifier.height(5.dp))
-                    TypeTabs(state, send, text, width)
-                }
-                Spacer(Modifier.height(4.dp))
-                Row(Modifier.height((gridRows * SLOT_PITCH + 2).dp)) {
-                    Box(
-                        Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight().background(colors.surface)
-                            .border(1.dp, colors.line).padding(1.dp)
-                    ) {
-                        val ids = List(gridColumns * gridRows) { layout.storageStart + it }
-                        BdSlotGrid(slots, ids, gridColumns)
+                },
+                // 存储与合成两个工作区都在主页面上，合成区显示与否决定选中哪一个
+                rail = {
+                    BdRailTab(text.storage, BdGlyphs.Storage, selected = !settingsOpen && !craftShown) {
+                        settingsOpen = false
+                        if (craftShown) {
+                            if (state.craft.toggleable) send(StorageAction.ToggleCraft) else craftHidden = true
+                        }
                     }
-                    if (state.totalRows > gridRows) {
-                        Spacer(Modifier.width(2.dp))
-                        BdScrollbar(
-                            state.firstRow,
-                            gridRows,
-                            state.totalRows,
-                            { send(StorageAction.ScrollTo(it)) },
-                            Modifier.width(SCROLLBAR_WIDTH.dp).fillMaxHeight(),
+                    BdRailTab(text.crafting, BdGlyphs.Crafting, selected = !settingsOpen && craftShown) {
+                        settingsOpen = false
+                        if (!craftShown) {
+                            if (state.craft == null) send(StorageAction.ToggleCraft) else craftHidden = false
+                        }
+                    }
+                    if (layout.showSwitcher) {
+                        BdGlyphButton(
+                            OreGlyph.CycleArrows,
+                            text.switcher,
+                            { send(StorageAction.OpenSwitcher) },
+                            size = 20.dp,
+                            glyphSize = 9.dp
                         )
                     }
-                }
-                if (roomy) {
+                    Spacer(Modifier.weight(1f))
+                    BdRailTab(text.view, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
+                },
+            ) {
+                BdMainPage(!settingsOpen) {
+                    Toolbar(state, send, text, width)
+                    if (roomy) {
+                        Spacer(Modifier.height(5.dp))
+                        TypeTabs(state, send, text, width)
+                    }
                     Spacer(Modifier.height(4.dp))
-                    StatusStrip(state, text, width)
-                }
-                if (craftShown) {
+                    Row(Modifier.height((gridRows * SLOT_PITCH + 2).dp)) {
+                        Box(
+                            Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight().background(colors.surface)
+                                .border(1.dp, colors.line).padding(1.dp)
+                        ) {
+                            val ids = List(gridColumns * gridRows) { layout.storageStart + it }
+                            BdSlotGrid(slots, ids, gridColumns)
+                        }
+                        if (state.totalRows > gridRows) {
+                            Spacer(Modifier.width(2.dp))
+                            BdScrollbar(
+                                state.firstRow,
+                                gridRows,
+                                state.totalRows,
+                                { send(StorageAction.ScrollTo(it)) },
+                                Modifier.width(SCROLLBAR_WIDTH.dp).fillMaxHeight(),
+                            )
+                        }
+                    }
+                    if (roomy) {
+                        Spacer(Modifier.height(4.dp))
+                        StatusStrip(state, text, width)
+                    }
+                    if (craftShown) {
+                        Spacer(Modifier.height(GAP.dp))
+                        CraftSection(state.craft, send, slots, layout, width)
+                    }
                     Spacer(Modifier.height(GAP.dp))
-                    CraftSection(state.craft, send, slots, layout, width)
-                }
-                Spacer(Modifier.height(GAP.dp))
-                BdSectionLabel(text.inventory, Modifier.width(width.dp))
-                Spacer(Modifier.height(4.dp))
-                Box(Modifier.width((gridColumns * SLOT_PITCH + 2).dp), contentAlignment = Alignment.TopCenter) {
-                    Box(Modifier.background(colors.line).padding(0.5.dp)) {
-                        BdPlayerInventory(
-                            slots,
-                            layout.playerSlots
-                        )
+                    BdSectionLabel(text.inventory, Modifier.width(width.dp))
+                    Spacer(Modifier.height(4.dp))
+                    Box(Modifier.width((gridColumns * SLOT_PITCH + 2).dp), contentAlignment = Alignment.TopCenter) {
+                        Box(Modifier.background(colors.line).padding(0.5.dp)) {
+                            BdPlayerInventory(
+                                slots,
+                                layout.playerSlots
+                            )
+                        }
                     }
                 }
+                BdTabPage(settingsOpen) { ViewOptions(state, send, text, settingsOpen) }
             }
-            BdTabPage(settingsOpen) { ViewOptions(state, send, text, settingsOpen) }
         }
     }
 }

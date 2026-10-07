@@ -1,13 +1,8 @@
 package com.wintercogs.beyonddimensions.client.ui.base
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,6 +22,9 @@ const val SLOT_WINDOW_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 9 * SLOT_PI
 /**
  * 一个原生槽位：主题化的槽底，悬停时加上角标；虚拟资源的数量以 BD 的数量标签显示。
  *
+ * 悬停只有角标这一种效果，两种槽位都按 CompixelUI 给出的 hovered 画，也就是点击会落到的那一格。
+ * Ore 外观的槽位悬停时还会铺一层悬停色，主题里把它设成与槽底相同，所以看不出来。
+ *
  * 标记槽与其他槽位用同样的凹槽，只在槽底铺一层强调色。Ore 的标记样式用通用描边色画凹槽的暗边，
  * 玻璃主题的描边色是半透明白，相邻两格的亮边会连成双线，交点处还留下缺角。
  */
@@ -34,11 +32,7 @@ const val SLOT_WINDOW_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 9 * SLOT_PI
 fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
     if ((slots.adapter as? BdSlotAdapter<*>)?.isResource(id) == true) {
         slots.Slot(id, modifier.size(SLOT_PITCH.dp)) { slot ->
-            OreSlot(
-                Modifier.matchParentSize(),
-                highlighted = slot.highlighted,
-                contentModifier = Modifier.size(16.dp)
-            ) {
+            OreSlot(Modifier.matchParentSize(), contentModifier = Modifier.size(16.dp)) {
                 if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors.accentSoft))
                 slot.icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
             }
@@ -48,17 +42,12 @@ fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
         }
         return
     }
-    // 原版槽位沿用 Ore 的外观与数量文字
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    Box(
-        modifier
-            .size(SLOT_PITCH.dp)
-            .hoverable(interaction)
-            .then(if (hovered) Modifier.brackets(Bd.colors.accent, arm = 4.dp) else Modifier)
-    ) {
-        slots.Slot(id, Modifier.matchParentSize())
-    }
+    // 原版槽位沿用 Ore 的外观与数量文字，角标叠在上面
+    slots.Slot(
+        id,
+        modifier.size(SLOT_PITCH.dp),
+        overlay = { slot -> if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors.accent, arm = 4.dp)) },
+    )
 }
 
 /** 按列排布的一组槽位；不足一行的末尾留空 */

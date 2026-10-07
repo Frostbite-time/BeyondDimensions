@@ -119,9 +119,26 @@ private class TooltipPosition(private val gap: Int, private val beside: Boolean)
     }
 }
 
+/**
+ * 有原版槽位的界面里打开着的浮层数。浮层盖在槽位上方，但原版槽位不知道浮层的存在，点击会同时落到下面的槽位上，
+ * 所以这类界面提供 [LocalBdPopovers]，在 [open] 大于 0 时停用槽位
+ */
+class BdPopovers {
+    var open by mutableIntStateOf(0)
+        internal set
+}
+
+val LocalBdPopovers = staticCompositionLocalOf<BdPopovers?> { null }
+
 /** 点开的浮层，例如下拉的选项：在锚点下方、与锚点右边对齐，下方放不下时在上方；点击外部关闭 */
 @Composable
 fun BdPopover(onDismissRequest: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    LocalBdPopovers.current?.let { popovers ->
+        DisposableEffect(popovers) {
+            popovers.open++
+            onDispose { popovers.open-- }
+        }
+    }
     if (!LocalWindowInfo.current.isWindowFocused) return
     val gap = with(LocalDensity.current) { 2.dp.roundToPx() }
     Popup(remember(gap) { BelowAnchor(gap) }, onDismissRequest, properties = PopupProperties(focusable = true)) {
