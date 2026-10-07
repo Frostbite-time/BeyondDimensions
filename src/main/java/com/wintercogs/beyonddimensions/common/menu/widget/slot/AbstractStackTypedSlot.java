@@ -100,15 +100,23 @@ public abstract class AbstractStackTypedSlot extends Slot
      */
     public abstract boolean isOrdered();
 
-    /**
-     * 当鼠标直接点击此槽位会发生什么
-     */
-    public abstract void click(KeyAmount clickStack, int button, Player player);
+    // 点击与 Shift 转移由 common.menu.interaction.SlotInteractions 中注册的交互处理
 
     /**
-     * 当鼠标shift点击此槽位会发生什么
+     * Shift 转移的目标槽位区间起点（含），没有时为 -1
      */
-    public abstract void quickMove(KeyAmount clickStack, int button, Player player);
+    public int quickMoveStart()
+    {
+        return quickMoveSlotStartIndex;
+    }
+
+    /**
+     * Shift 转移的目标槽位区间终点（不含），没有时为 -1
+     */
+    public int quickMoveEnd()
+    {
+        return quickMoveSlotEndIndex;
+    }
 
     // 其他有用的slot方法或者为slot运行所用的方法-------------------------------------------------------------------------------
 

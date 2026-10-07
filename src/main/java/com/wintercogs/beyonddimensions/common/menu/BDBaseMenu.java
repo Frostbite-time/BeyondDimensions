@@ -3,6 +3,8 @@ package com.wintercogs.beyonddimensions.common.menu;
 import com.google.common.base.Suppliers;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.menu.interaction.SlotClick;
+import com.wintercogs.beyonddimensions.common.menu.interaction.SlotInteractions;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuCommands;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
@@ -137,32 +139,28 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
         if (!player.level().isClientSide() && resources != null) resources.pollOrdered();
     }
 
-    // 自定义点击操作
+    // 自定义点击操作，交给 SlotInteractions 中注册的交互处理
     public void customClickHandler(int slotIndex, KeyAmount clickedStack, int button, boolean shiftDown)
+    {
+        customClickHandler(slotIndex, clickedStack, button, shiftDown, -1);
+    }
+
+    /**
+     * @param requested 指定取出的数量（右键菜单的"取出 x 个"），没有时为 -1
+     */
+    public void customClickHandler(int slotIndex, KeyAmount clickedStack, int button, boolean shiftDown, long requested)
     {
         // Packet data is a request. Validate before indexing or touching server inventory.
         if (player.level().isClientSide() || player.containerMenu != this || !player.isAlive() || player.isSpectator()
                 || !stillValid(player) || slotIndex < 0 || slotIndex >= slots.size()
                 || button < 0 || button > 2 || clickedStack == null || clickedStack.amount() < 0
-                || clickedStack.amount() > clickedStack.key().getVanillaMaxStackSize()) return;
-
-        if (slots.get(slotIndex) instanceof AbstractStackTypedSlot slot)
-        {
-            if (shiftDown)
-                slot.quickMove(clickedStack, button, player);
-            else
-                slot.click(clickedStack, button, player);
-        }
-        else
-        {
-            // 用于处理原版槽位的快速转移
-            var targets = quickMoveRoutes().targets(slotIndex);
-            if (shiftDown && !targets.isEmpty()) quickMoveHandle(player, slotIndex, clickedStack, targets);
-        }
+                || clickedStack.amount() > clickedStack.key().getVanillaMaxStackSize()
+                || requested > clickedStack.key().getVanillaMaxStackSize()) return;
+        SlotInteractions.dispatch(SlotClick.of(this, player, slots.get(slotIndex), clickedStack, button, shiftDown, requested));
     }
 
     // 处理非AbstractStackTypedSlot槽位的快速转移
-    protected ItemStack quickMoveHandle(Player player, int slotIndex, KeyAmount clickStack, List<Integer> targets)
+    public ItemStack quickMoveHandle(Player player, int slotIndex, KeyAmount clickStack, List<Integer> targets)
     {
         Slot slot = this.slots.get(slotIndex);
         if (slot != null && slot.mayPickup(player) && !clickStack.isEmpty()
