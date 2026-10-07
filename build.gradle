@@ -66,7 +66,7 @@ base {
     archivesName = "${mod_id}-${minecraft_version}-neoforge"
 }
 
-// Minecraft 26.2 snapshots use Java 25.
+// Minecraft 26.3 uses Java 25.
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
@@ -143,11 +143,8 @@ sourceSets {
             srcDir 'src/generated/resources'
         }
         java {
-            // 暂时排除JEI联动
-            exclude 'com/wintercogs/beyonddimensions/integration/module/jei/**'
-            exclude 'com/wintercogs/beyonddimensions/integration/module/ae2/**'
+            // Curios尚未兼容新版配置API；RS与通用拼音搜索暂无26.3版本。
             exclude 'com/wintercogs/beyonddimensions/integration/module/curios/**'
-            exclude 'com/wintercogs/beyonddimensions/integration/module/jade/**'
             exclude 'com/wintercogs/beyonddimensions/integration/module/jech/**'
             exclude 'com/wintercogs/beyonddimensions/integration/module/rs/**'
         }
@@ -172,8 +169,8 @@ dependencies {
     }
 
     // JEI支持
-    //compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
-    //runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
     // 饰品栏支持
     //compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
@@ -185,16 +182,16 @@ dependencies {
     // GuideMe
     //runtimeOnly "curse.maven:guideme-1173950:7929350"
     // AE支持
-    //compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
-    //runtimeOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
+    compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
+    runtimeOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
 
     // RS支持
     //compileOnly "curse.maven:refined-storage-243076:8032789"
     //runtimeOnly "curse.maven:refined-storage-243076:8032789"
 
     // Jade支持
-    compileOnly "curse.maven:jade-324717:8892782"
-    runtimeOnly "curse.maven:jade-324717:8892782"
+    compileOnly "maven.modrinth:jade:${jade_version}"
+    runtimeOnly "maven.modrinth:jade:${jade_version}"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
@@ -204,6 +201,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,
             neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
             mod_id                 : mod_id,
             mod_name               : mod_name,
             mod_license            : mod_license,

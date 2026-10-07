@@ -52,6 +52,6 @@ public class AE2Module implements IIntegrationModule
     @Override
     public void onDatagen(GatherDataEvent.Client event)
     {
-        event.createProvider(AE2ModuleModelProvider::new);
+        event.getGenerator().addProvider(true, new AE2ModuleModelProvider(event.getGenerator().getPackOutput()));
     }
 }

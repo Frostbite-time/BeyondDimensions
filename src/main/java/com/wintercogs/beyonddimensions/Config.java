@@ -26,8 +26,8 @@ public class Config
     {
         container.registerConfig(ModConfig.Type.STARTUP, startUpConfig.spec);
         container.registerConfig(ModConfig.Type.CLIENT, clientConfig.spec);
-        container.registerConfig(ModConfig.Type.COMMON, commonConfig.spec);
-        container.registerConfig(ModConfig.Type.SERVER, serverConfig.spec);
+        container.registerConfig(resolveConfigType("LOCAL", "COMMON"), commonConfig.spec);
+        container.registerConfig(resolveConfigType("SYNCED", "SERVER"), serverConfig.spec);
         container.getEventBus().addListener((ModConfigEvent.Loading evt) ->
         {
             if (evt.getConfig().getSpec() == clientConfig.spec)
@@ -63,6 +63,19 @@ public class Config
     public static void register(ModContainer container)
     {
         INSTANCE = new Config(container);
+    }
+
+    /** 兼容26.3早期与新版FML的配置类型名称。 */
+    private static ModConfig.Type resolveConfigType(String currentName, String legacyName)
+    {
+        try
+        {
+            return ModConfig.Type.valueOf(currentName);
+        }
+        catch (IllegalArgumentException ignored)
+        {
+            return ModConfig.Type.valueOf(legacyName);
+        }
     }
 
     public static class StartUpConfig

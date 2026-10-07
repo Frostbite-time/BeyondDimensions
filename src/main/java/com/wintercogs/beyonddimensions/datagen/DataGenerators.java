@@ -42,13 +42,18 @@ public class DataGenerators
 
         event.createReloadableRegistryObjects(registrySetBuilder);
 
+        // 直接注册provider，避免绑定新版PackGenerator的工厂接口，兼容26.3早期构建。
+        var generator = event.getGenerator();
+        var output = generator.getPackOutput();
+        var lookupProvider = event.getReloadableLookupProvider();
+
         // 生成物品和方块模型
-        event.createProvider(ModModelProvider::new);
+        generator.addProvider(true, new ModModelProvider(output));
 
         // 生成方块、物品、流体标签
-        event.createProvider(ModBlockTagProvider::new);
-        event.createProvider(ModItemTagProvider::new);
-        event.createProvider(ModFluidTagsProvider::new);
+        generator.addProvider(true, new ModBlockTagProvider(output, lookupProvider));
+        generator.addProvider(true, new ModItemTagProvider(output, lookupProvider));
+        generator.addProvider(true, new ModFluidTagsProvider(output, lookupProvider));
 
         IntegrationManager.onDatagen(event);
     }

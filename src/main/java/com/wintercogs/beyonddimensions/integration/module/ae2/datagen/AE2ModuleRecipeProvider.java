@@ -21,7 +21,7 @@ import static net.neoforged.neoforge.common.conditions.NeoForgeConditions.modLoa
 
 public class AE2ModuleRecipeProvider extends BDRecipeProvider
 {
-    protected AE2ModuleRecipeProvider(BootstrapContext<Recipe<?>> recipeOutput, BootstrapContext<Advancement> advancementOutput)
+    public AE2ModuleRecipeProvider(BootstrapContext<Recipe<?>> recipeOutput, BootstrapContext<Advancement> advancementOutput)
     {
         super(recipeOutput, advancementOutput);
     }
