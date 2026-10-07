@@ -17,6 +17,9 @@ import org.lwjgl.glfw.GLFW
 /** 界面文字在游戏线程取出，随快照或构造参数进入界面 */
 fun tr(key: String, vararg args: Any): String = Component.translatable(key, *args).string
 
+// 一屏的图标一帧画完：滚动或重排时新出现的图标不再分几帧陆续补上
+private const val ICONS_PER_FRAME = 512
+
 /**
  * 带原版槽位的 BD 菜单界面：用 [BdSlotAdapter] 显示虚拟资源，套用 BD 的设计与主题。
  * 子类照常实现 snapshot、handle 与 Content；JEI 与 EMI 的联动按这个类识别 BD 界面。
@@ -27,7 +30,7 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
         title,
         ComposeMenuSlots(menu, BdSlotAdapter(menu)),
         Bd.ThemeId,
-        NativeItemOptions(cacheCapacity = 512),
+        NativeItemOptions(cacheCapacity = 512, preparationsPerFrame = ICONS_PER_FRAME),
         design = BdDesign,
     ),
     BdScreen {
@@ -56,7 +59,7 @@ abstract class BdMenuScreen<M : AbstractContainerMenu, S, A>(menu: M, title: Com
         menu,
         title,
         theme = Bd.ThemeId,
-        nativeItemOptions = NativeItemOptions(cacheCapacity = 256),
+        nativeItemOptions = NativeItemOptions(cacheCapacity = 256, preparationsPerFrame = ICONS_PER_FRAME),
         design = BdDesign,
     ),
     BdScreen {
