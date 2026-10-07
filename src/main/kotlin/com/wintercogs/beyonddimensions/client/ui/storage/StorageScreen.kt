@@ -155,9 +155,15 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
     override fun Content(state: StorageState, slots: ComposeMenuSlots<DimensionsNetMenu>) =
         StorageView(state, ::send, ::requestClose, slots, layout)
 
+    override fun inventoryTick() {
+        super.inventoryTick()
+        controller.tick()
+    }
+
     override fun menuClosed() {
         super.menuClosed()
         controller.saveSearch()
+        controller.saveNow()
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {

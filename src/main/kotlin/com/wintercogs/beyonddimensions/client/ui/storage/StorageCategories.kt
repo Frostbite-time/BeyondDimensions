@@ -51,8 +51,14 @@ object StorageCategories {
             else listOf(StorageCategory(I18n.get("ui.beyonddimensions.storage.all")))
         }
 
-    fun save(player: UUID, categories: List<StorageCategory>, registries: HolderLookup.Provider) {
+    /** 改动玩家的分类：之后在本次游戏里打开存储都用它，写进文件要再调用 [save] */
+    fun update(player: UUID, categories: List<StorageCategory>) {
         loaded[player] = categories
+    }
+
+    /** 把玩家当前的分类写进文件，其他玩家的部分保持不变 */
+    fun save(player: UUID, registries: HolderLookup.Provider) {
+        val categories = loaded[player] ?: return
         val document = read() ?: JsonObject().apply { addProperty("format", FORMAT) }
         val players = document.getAsJsonObject("players") ?: JsonObject().also { document.add("players", it) }
         players.add(player.toString(), JsonArray().apply { categories.forEach { add(encode(it, registries)) } })

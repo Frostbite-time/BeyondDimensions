@@ -173,6 +173,9 @@ val SORT_POLICIES =
         ButtonState.SORT_MODIFIED_TIME,
     )
 
+/** 分类停止改动多久后写进文件 */
+private const val SAVE_DELAY_MILLIS = 1000L
+
 /**
  * 存储终端（含合成终端）的控制器，运行在游戏线程。
  */
@@ -202,6 +205,9 @@ class StorageController(private val menu: DimensionsNetMenu) {
     private var version = 0
     private var menuTarget: MenuTarget? = null
     private var menuSerial = 0
+
+    // 最后一次改动分类而还没写进文件的时间，0 表示都已写入
+    private var unsavedSince = 0L
 
     /** 右键菜单针对的资源 */
     private class MenuTarget(val slot: Int, val key: IStackKey<*>, val amount: Long)
@@ -569,9 +575,22 @@ class StorageController(private val menu: DimensionsNetMenu) {
         if (selected >= 0) StorageCategories.selected[player] = selected
     }
 
+    /** 菜单关闭或分类停止改动一会儿后再写文件：输入名称或搜索式时不必每个字都写一次，游戏线程也不会因写盘卡顿 */
+    fun tick() {
+        if (unsavedSince != 0L && Util.getMillis() - unsavedSince >= SAVE_DELAY_MILLIS) saveNow()
+    }
+
+    /** 把还没写进文件的分类立刻写入；菜单关闭时调用 */
+    fun saveNow() {
+        if (unsavedSince == 0L) return
+        unsavedSince = 0L
+        StorageCategories.save(player, registries)
+    }
+
     private fun save() {
         version++
-        StorageCategories.save(player, categories, registries)
+        StorageCategories.update(player, categories)
+        unsavedSince = Util.getMillis()
         // 编辑搜索式时每次输入都会解析一条，只留下仍在使用的
         val searches = categories.mapTo(HashSet()) { it.search }
         queries.keys.retainAll(searches)
