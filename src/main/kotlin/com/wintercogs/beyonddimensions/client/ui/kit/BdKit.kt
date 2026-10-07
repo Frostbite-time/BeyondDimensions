@@ -54,7 +54,7 @@ import kotlin.ranges.coerceAtMost
 import kotlin.ranges.coerceIn
 import kotlin.ranges.until
 
-/** 窗口：深色半透明的玻璃面板加一像素细线框，透出背后的游戏画面；高度随内容 */
+/** 窗口：深色半透明的玻璃面板加一像素细线框，透出背后模糊的游戏画面；高度随内容 */
 @Composable
 fun BdWindow(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = Bd.colors

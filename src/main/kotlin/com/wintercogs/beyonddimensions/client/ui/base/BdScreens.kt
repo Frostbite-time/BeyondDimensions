@@ -1,5 +1,7 @@
 package com.wintercogs.beyonddimensions.client.ui.base
 
+import com.wintercogs.beyonddimensions.client.ui.kit.BdBackdrop
+import com.wintercogs.beyonddimensions.client.ui.kit.BdScreen
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdDesign
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
@@ -7,6 +9,7 @@ import dev.compixel.forge.ComposeInventoryScreen
 import dev.compixel.forge.ComposeMenuScreen
 import dev.compixel.forge.item.NativeItemOptions
 import dev.compixel.forge.slots.ComposeMenuSlots
+import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.network.chat.Component
 import net.minecraft.world.inventory.AbstractContainerMenu
 import org.lwjgl.glfw.GLFW
@@ -26,11 +29,16 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
         Bd.ThemeId,
         NativeItemOptions(cacheCapacity = 512),
         design = BdDesign,
-    ) {
+    ),
+    BdScreen {
     @Suppress("UNCHECKED_CAST")
     private val adapter = inventory.adapter as BdSlotAdapter<M>
 
     override fun inventoryTick() = adapter.tick()
+
+    // 界面本身在背景之后绘制
+    override fun renderBackground(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) =
+        BdBackdrop.behindScreen(graphics, partialTick)
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         val editing = hasTextInputFocus
@@ -50,4 +58,10 @@ abstract class BdMenuScreen<M : AbstractContainerMenu, S, A>(menu: M, title: Com
         theme = Bd.ThemeId,
         nativeItemOptions = NativeItemOptions(cacheCapacity = 256),
         design = BdDesign,
-    )
+    ),
+    BdScreen {
+    override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
+        BdBackdrop.behindScreen(graphics, partialTick)
+        super.render(graphics, mouseX, mouseY, partialTick)
+    }
+}
