@@ -74,8 +74,6 @@ class StorageText {
     val keepSearch = tr("ui.beyonddimensions.storage.keep_search")
     val syncSearch = tr("ui.beyonddimensions.storage.sync_search")
     val syncSearchHint = tr("ui.beyonddimensions.storage.sync_search.hint")
-    val types = tr("ui.beyonddimensions.storage.types")
-    val filtered = tr("ui.beyonddimensions.storage.filtered")
     val inventory = tr("ui.beyonddimensions.inventory")
     val clearToStorage = tr("ui.beyonddimensions.crafting.clear_to_storage")
     val clearToInventory = tr("ui.beyonddimensions.crafting.clear_to_inventory")
@@ -142,7 +140,7 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
 private const val GAP = 7
 private const val SCREEN_MARGIN = 8
 
-/** 分组标题与状态栏的行高：9sp 小字的行高 */
+/** 分组标题的行高：9sp 小字的行高 */
 private const val LABEL = 11
 
 /** 格子区域（含边框）、间隔与滚动条的总宽度 */
@@ -152,10 +150,9 @@ private fun contentWidth(columns: Int) = columns * SLOT_PITCH + 2 + 2 + SCROLLBA
 private const val CHROME_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 2
 
 /** 除格子行外的固定高度 */
-private fun chromeHeight(tabs: Boolean, status: Boolean, craft: Boolean): Int {
+private fun chromeHeight(tabs: Boolean, craft: Boolean): Int {
     var height = 25 + PAGE_PADDING_TOP + 18 + 4 + 2 + GAP + LABEL + 4 + 76 + PAGE_PADDING_BOTTOM + 2
     if (tabs) height += 5 + 13
-    if (status) height += 4 + LABEL
     if (craft) height += GAP + LABEL + 4 + 54
     return height
 }
@@ -183,9 +180,9 @@ private fun StorageView(
         BdScreenFrame { available ->
             val availableHeight = available.height.value.toInt() - SCREEN_MARGIN * 2
             val availableWidth = available.width.value.toInt() - SCREEN_MARGIN * 2
-            // 空间不足三行时收起页签与状态栏
-            val roomy = (availableHeight - chromeHeight(tabs = true, status = true, craft = craftShown)) / SLOT_PITCH >= 3
-            val fitRows = (availableHeight - chromeHeight(roomy, roomy, craftShown)) / SLOT_PITCH
+            // 空间不足三行时收起页签
+            val roomy = (availableHeight - chromeHeight(tabs = true, craft = craftShown)) / SLOT_PITCH >= 3
+            val fitRows = (availableHeight - chromeHeight(roomy, craftShown)) / SLOT_PITCH
             // 内容区居中，竖条对面也留出一条竖条宽的空位
             val fitColumns = (availableWidth - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0)) / SLOT_PITCH
             val rows = fitRows.coerceAtMost(state.preferredRows).coerceAtLeast(2)
@@ -261,10 +258,6 @@ private fun StorageView(
                                 Modifier.width(SCROLLBAR_WIDTH.dp).fillMaxHeight(),
                             )
                         }
-                    }
-                    if (roomy) {
-                        Spacer(Modifier.height(4.dp))
-                        StatusStrip(state, text, width)
                     }
                     if (craftShown) {
                         Spacer(Modifier.height(GAP.dp))
@@ -389,31 +382,6 @@ private fun TypeTab(label: String, count: Int, selected: Boolean, onClick: () ->
         }
         Spacer(Modifier.weight(1f))
         if (selected) Box(Modifier.fillMaxWidth().height(2.dp).background(colors.signature))
-    }
-}
-
-@Composable
-private fun StatusStrip(state: StorageState, text: StorageText, width: Int) {
-    val colors = Bd.colors
-    val limited = state.typeLimit in 1 until Int.MAX_VALUE
-    Row(Modifier.width(width.dp).heightIn(min = 9.dp), verticalAlignment = Alignment.CenterVertically) {
-        OreText(text.types, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
-        Spacer(Modifier.width(3.dp))
-        val used = formatExact(state.stored.toLong())
-        OreText(
-            if (limited) "$used / ${formatExact(state.typeLimit.toLong())}" else used,
-            color = colors[BdColors.muted],
-            style = Bd.caption,
-            maxLines = 1
-        )
-        if (state.shown != state.stored) {
-            Spacer(Modifier.width(6.dp))
-            OreText(text.filtered, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
-            Spacer(Modifier.width(3.dp))
-            OreText(formatExact(state.shown.toLong()), color = colors[BdColors.accentDeep], style = Bd.caption, maxLines = 1)
-        }
-        Spacer(Modifier.weight(1f))
-        if (limited) BdMeter(state.stored.toFloat() / state.typeLimit, Modifier.width(64.dp).height(7.dp))
     }
 }
 

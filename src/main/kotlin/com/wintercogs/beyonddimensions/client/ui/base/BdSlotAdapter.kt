@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
 import com.wintercogs.beyonddimensions.client.ui.kit.formatCompact
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
+import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.MenuSlotVisual
 import dev.compixel.forge.slots.VanillaMenuSlotAdapter
@@ -54,8 +55,8 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         if (slot !is AbstractStackTypedSlot) return super.visual(slot, previous)
         val resource = slot.stack
         val key = resource.key()
-        // 标记槽只表示资源种类；存储行在点击结束前可能暂时保留数量为 0 的资源
-        val shown = !key.isEmpty && (slot.isFake || resource.amount() > 0)
+        // 标记槽只表示资源种类。按住 Shift 时存储格子不重排，被取空的资源留在原位、显示为 0
+        val shown = !key.isEmpty && (slot.isFake || slot is DisorderedStackTypedSlot || resource.amount() > 0)
 
         if (previous != null && resourceValues[slot.index] == resource) return previous
         resourceValues[slot.index] = resource
@@ -76,7 +77,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     override fun tooltip(graphics: GuiGraphics, slot: Slot, x: Int, y: Int) {
         if (slot !is AbstractStackTypedSlot) return super.tooltip(graphics, slot, x, y)
         val resource = slot.stack
-        if (!resource.isEmpty) {
+        if (!resource.isEmpty || slot is DisorderedStackTypedSlot && !resource.key().isEmpty) {
             resource.key().render.renderTooltip(
                 graphics,
                 Minecraft.getInstance().font,
