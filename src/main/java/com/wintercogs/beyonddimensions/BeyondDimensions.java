@@ -61,9 +61,6 @@ public class BeyondDimensions
         // 注册方块实体
         BDBlockEntities.register(modEventBus);
 
-        // 注册GameTest（仅gametest环境生效）
-        com.wintercogs.beyonddimensions.gametest.BDFurnaceGameTests.register(modEventBus);
-
         // 分发集成模块
         IntegrationManager.bootstrapCommon(modEventBus, NeoForge.EVENT_BUS);
     }
