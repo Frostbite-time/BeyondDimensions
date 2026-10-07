@@ -18,20 +18,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerKeyboardModifiers
+import androidx.compose.ui.input.pointer.isCtrlPressed
 import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -46,6 +58,7 @@ import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OrePixelArt
 import dev.compixel.ui.ore.display.OreText
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.ranges.IntRange
@@ -511,36 +524,6 @@ private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onS
     }
 }
 
-/** 整数输入框：只接受数字，超出范围时收回到边界；每次输入都提交 */
-@Composable
-fun BdNumberField(value: Int, range: IntRange, enabled: Boolean, onCommit: (Int) -> Unit) {
-    val colors = Bd.colors
-    var text by remember { mutableStateOf(value.toString()) }
-    LaunchedEffect(value) { if (text.toIntOrNull() != value) text = value.toString() }
-    BasicTextField(
-        text,
-        { input ->
-            val digits = input.filter(Char::isDigit).take(range.last.toString().length)
-            text = digits
-            digits.toIntOrNull()?.let { onCommit(it.coerceIn(range)) }
-        },
-        Modifier.width(44.dp).height(15.dp),
-        enabled = enabled,
-        singleLine = true,
-        textStyle = Bd.body.copy(color = colors.text, textAlign = TextAlign.End),
-        cursorBrush = SolidColor(colors.accent),
-        decorationBox = { inner ->
-            Box(
-                Modifier.fillMaxSize().background(colors.surface, Bd.ChipShape).border(1.dp, colors.line, Bd.ChipShape)
-                    .padding(horizontal = 4.dp),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                inner()
-            }
-        },
-    )
-}
-
 /** 纵向内容：放不下时可滚动，右侧出现与存储格子相同的细滚动条 */
 @Composable
 fun BdScrollColumn(
@@ -666,36 +649,143 @@ private fun BdScrollbarTrack(
     }
 }
 
-/** 数值加减器 */
+/** 停止输入多久后自动提交：连续输入时不把中间值逐个发出去，输完直接关闭界面也不会丢 */
+private const val NUMBER_COMMIT_MILLIS = 800L
+
+/**
+ * 整数编辑器：减号、可输入的数字与加号，参照 Ore 的数字编辑器。
+ * 按钮、上下方向键与滚轮立即改值，按住 Shift 或 Ctrl 时每次改 10 或 100。
+ * 输入的数字在回车、失去焦点或停止输入片刻后提交，超出范围的收回到边界；Esc 放弃这次输入。
+ */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun BdStepper(value: Int, onChange: (Int) -> Unit, range: IntRange, enabled: Boolean = true) {
+fun BdNumberEditor(value: Int, onValueChange: (Int) -> Unit, range: IntRange, enabled: Boolean = true) {
     val colors = Bd.colors
+    val focus = LocalFocusManager.current
+    var draft by remember { mutableStateOf(value.toString()) }
+    var dirty by remember { mutableStateOf(false) }
+    var focused by remember { mutableStateOf(false) }
+    // 值从外部变化时同步进来，正在输入时不打断
+    LaunchedEffect(value, enabled) {
+        if (!focused || !dirty || !enabled) {
+            draft = value.toString()
+            dirty = false
+        }
+    }
+    fun clamp(number: Long) = number.coerceIn(range.first.toLong(), range.last.toLong()).toInt()
+    fun set(next: Int) {
+        draft = next.toString()
+        dirty = false
+        if (next != value) onValueChange(next)
+    }
+    fun commit() {
+        if (enabled && dirty) set(draft.toLongOrNull()?.let(::clamp) ?: value)
+    }
+    fun step(direction: Int, modifiers: PointerKeyboardModifiers) {
+        if (!enabled) return
+        val amount = if (modifiers.isCtrlPressed) 100 else if (modifiers.isShiftPressed) 10 else 1
+        set(clamp((draft.toLongOrNull() ?: value.toLong()) + direction * amount))
+    }
+    LaunchedEffect(draft, dirty) {
+        if (dirty) {
+            delay(NUMBER_COMMIT_MILLIS)
+            commit()
+        }
+    }
+    val invalid = dirty && draft.toIntOrNull()?.let { it in range } != true
+    val digits = maxOf(range.first.toString().length, range.last.toString().length)
+    // 按钮的点击里拿不到修饰键，按下时先记下
+    var pressed by remember { mutableStateOf(PointerKeyboardModifiers()) }
+    val notePress = Modifier.onPointerEvent(PointerEventType.Press, PointerEventPass.Initial) {
+        pressed = it.keyboardModifiers
+    }
     Row(
         Modifier.height(15.dp)
             .background(colors.sunken, Bd.ChipShape)
-            .border(1.dp, colors.line, Bd.ChipShape)
+            .border(
+                1.dp,
+                when {
+                    invalid -> colors.danger
+                    focused -> colors.accent
+                    else -> colors.line
+                },
+                Bd.ChipShape,
+            )
             .padding(1.dp)
-            .clip(Bd.ChipInnerShape),
+            .clip(Bd.ChipInnerShape)
+            .alpha(if (enabled) 1f else 0.55f),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BdGlyphButton(
             OreGlyph.Minus,
             null,
-            { onChange(value - 1) },
+            { step(-1, pressed) },
+            notePress,
             enabled = enabled && value > range.first,
             size = 13.dp,
-            glyphSize = 6.dp
+            glyphSize = 6.dp,
         )
-        Box(Modifier.width(IntrinsicSize.Min).padding(horizontal = 3.dp), contentAlignment = Alignment.Center) {
-            OreText(value.toString(), color = colors.text, maxLines = 1)
-        }
+        BasicTextField(
+            draft,
+            { input ->
+                val negative = range.first < 0 && input.startsWith('-')
+                val body = if (negative) input.drop(1) else input
+                if (body.length <= digits && body.all(Char::isDigit)) {
+                    draft = input
+                    dirty = true
+                }
+            },
+            Modifier.width((digits * 6 + 6).dp)
+                .onFocusChanged {
+                    if (focused && !it.isFocused) commit()
+                    focused = it.isFocused
+                }
+                .onPreviewKeyEvent { event ->
+                    if (!enabled || event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                    when (event.key) {
+                        Key.Enter,
+                        Key.NumPadEnter -> {
+                            commit()
+                            focus.clearFocus()
+                            true
+                        }
+                        Key.Escape -> {
+                            draft = value.toString()
+                            dirty = false
+                            focus.clearFocus()
+                            true
+                        }
+                        Key.DirectionUp,
+                        Key.DirectionDown -> {
+                            step(
+                                if (event.key == Key.DirectionUp) 1 else -1,
+                                PointerKeyboardModifiers(isCtrlPressed = event.isCtrlPressed, isShiftPressed = event.isShiftPressed),
+                            )
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                .onPointerEvent(PointerEventType.Scroll) { event ->
+                    val delta = event.changes.sumOf { it.scrollDelta.y.toDouble() }
+                    if (enabled && delta != 0.0) {
+                        step(if (delta < 0) 1 else -1, event.keyboardModifiers)
+                        event.changes.forEach { it.consume() }
+                    }
+                },
+            enabled = enabled,
+            singleLine = true,
+            textStyle = Bd.body.copy(color = colors.text, textAlign = TextAlign.Center),
+            cursorBrush = SolidColor(colors.accent),
+        )
         BdGlyphButton(
             OreGlyph.Plus,
             null,
-            { onChange(value + 1) },
+            { step(1, pressed) },
+            notePress,
             enabled = enabled && value < range.last,
             size = 13.dp,
-            glyphSize = 6.dp
+            glyphSize = 6.dp,
         )
     }
 }

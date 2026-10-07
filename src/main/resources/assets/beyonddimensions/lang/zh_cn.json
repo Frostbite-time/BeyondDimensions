@@ -364,6 +364,7 @@
   "ui.beyonddimensions.restocker.recycle.hint": "把与模板不符的物品收入网络",
   "ui.beyonddimensions.xp.keep": "维持等级",
   "ui.beyonddimensions.xp.keep.hint": "主动把等级维持在目标值",
+  "ui.beyonddimensions.xp.level": "等级",
   "ui.beyonddimensions.xp.target": "目标等级",
   "ui.beyonddimensions.xp.target.hint": "上限 %s",
   "ui.beyonddimensions.xp.usage": "用法",

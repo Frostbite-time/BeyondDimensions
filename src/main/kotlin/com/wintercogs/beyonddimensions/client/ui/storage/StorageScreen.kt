@@ -531,10 +531,10 @@ private fun SortOptions(state: StorageState, send: (StorageAction) -> Unit, text
 private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text: StorageText, shown: Boolean) {
     BdSectionLabel(text.layout)
     BdSettingRow(text.columns) {
-        BdStepper(state.preferredColumns, { send(StorageAction.PreferredSize(it, state.preferredRows)) }, 9..99, shown)
+        BdNumberEditor(state.preferredColumns, { send(StorageAction.PreferredSize(it, state.preferredRows)) }, 9..99, shown)
     }
     BdSettingRow(text.rows) {
-        BdStepper(state.preferredRows, { send(StorageAction.PreferredSize(state.preferredColumns, it)) }, 2..99, shown)
+        BdNumberEditor(state.preferredRows, { send(StorageAction.PreferredSize(state.preferredColumns, it)) }, 2..99, shown)
     }
     BdSectionLabel(text.search)
     BdSettingRow(text.keepSearch) { BdToggle(state.keepSearch, { send(StorageAction.KeepSearch(it)) }, shown) }

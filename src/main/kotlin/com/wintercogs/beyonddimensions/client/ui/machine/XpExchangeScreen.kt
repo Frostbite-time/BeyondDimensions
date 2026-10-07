@@ -13,7 +13,6 @@ import com.wintercogs.beyonddimensions.common.item.XpExchangeSettings
 import com.wintercogs.beyonddimensions.common.menu.XpExchangeMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
-import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -21,7 +20,7 @@ import net.minecraft.world.item.ItemStack
 
 private val TARGET_RANGE = 0..XpExchangeSettings.MAX_TARGET_LEVEL
 
-/** 经验棒：用法说明与玩家背包；设置页是保留等级的开关与目标等级 */
+/** 经验棒：主页面上是目标等级与维持等级的设置，下面是用法说明与玩家背包 */
 class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Component) :
     BdInventoryScreen<XpExchangeMenu, XpExchangeState, XpExchangeAction>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDItems.XP_EXCHANGE_ITEM.get()))
@@ -46,19 +45,28 @@ class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Compon
     @Composable
     override fun Content(state: XpExchangeState, slots: ComposeMenuSlots<XpExchangeMenu>) {
         val colors = Bd.colors
-        var settingsOpen by remember { mutableStateOf(false) }
-        slots.Interaction(enabled = !settingsOpen)
         BdScreenFrame {
             BdTabbedWindow(
                 Modifier.width(SLOT_WINDOW_WIDTH.dp).then(slots.areaModifier()),
                 header = { BdHeader(icon, text.title, ::requestClose) },
-                rail = {
-                    BdRailTab(text.title, BdGlyphs.Main, selected = !settingsOpen) { settingsOpen = false }
-                    Spacer(Modifier.weight(1f))
-                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
-                },
+                rail = { BdRailTab(text.title, BdGlyphs.Main, selected = true) {} },
             ) {
-                BdMainPage(!settingsOpen) {
+                BdMainPage(true) {
+                    BdSectionLabel(text.level)
+                    Spacer(Modifier.height(5.dp))
+                    BdSettingRow(text.target, text.targetHint) {
+                        BdNumberEditor(
+                            state.target,
+                            { send(XpExchangeAction.SetTarget(it)) },
+                            TARGET_RANGE,
+                            state.targetEditable,
+                        )
+                    }
+                    Spacer(Modifier.height(5.dp))
+                    BdSettingRow(text.keep, text.keepHint) {
+                        BdToggle(state.keep, { send(XpExchangeAction.SetKeep(it)) }, state.keepEditable)
+                    }
+                    Spacer(Modifier.height(7.dp))
                     BdSectionLabel(text.usage)
                     Spacer(Modifier.height(4.dp))
                     Column(Modifier.fillMaxWidth().background(colors.surface).padding(5.dp)) {
@@ -66,17 +74,6 @@ class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Compon
                     }
                     Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
-                }
-                BdTabPage(settingsOpen) {
-                    BdSectionLabel(text.settings)
-                    BdSettingRow(text.keep, text.keepHint) {
-                        BdToggle(state.keep, { send(XpExchangeAction.SetKeep(it)) }, settingsOpen && state.keepEditable)
-                    }
-                    BdSettingRow(text.target, text.targetHint) {
-                        BdNumberField(state.target, TARGET_RANGE, settingsOpen && state.targetEditable) {
-                            send(XpExchangeAction.SetTarget(it))
-                        }
-                    }
                 }
             }
         }
@@ -97,8 +94,8 @@ sealed interface XpExchangeAction {
 }
 
 private class XpExchangeText(val title: String) {
-    val settings = tr("ui.beyonddimensions.machine.settings")
     val inventory = tr("ui.beyonddimensions.inventory")
+    val level = tr("ui.beyonddimensions.xp.level")
     val usage = tr("ui.beyonddimensions.xp.usage")
     val usageLines = tr("tooltip.beyonddimensions.item.xp_exchange").split('\n')
     val keep = tr("ui.beyonddimensions.xp.keep")

@@ -364,6 +364,7 @@
   "ui.beyonddimensions.restocker.recycle.hint": "Stores items that differ from their template",
   "ui.beyonddimensions.xp.keep": "Hold level",
   "ui.beyonddimensions.xp.keep.hint": "Keeps you at the target level",
+  "ui.beyonddimensions.xp.level": "Level",
   "ui.beyonddimensions.xp.target": "Target level",
   "ui.beyonddimensions.xp.target.hint": "At most %s",
   "ui.beyonddimensions.xp.usage": "Usage",
