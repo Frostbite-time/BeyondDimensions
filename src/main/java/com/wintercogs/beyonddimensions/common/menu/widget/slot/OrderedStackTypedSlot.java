@@ -1,7 +1,5 @@
 package com.wintercogs.beyonddimensions.common.menu.widget.slot;
 
-import com.mojang.blaze3d.platform.InputConstants;
-
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
@@ -37,6 +35,9 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+import static net.minecraft.world.inventory.AbstractContainerMenu.CONTAINER_CLICK_PRIMARY;
+import static net.minecraft.world.inventory.AbstractContainerMenu.CONTAINER_CLICK_SECONDARY;
+
 public class OrderedStackTypedSlot extends AbstractStackTypedSlot
 {
     private KeyAmount lastStack = new KeyAmount(EmptyStackKey.INSTANCE, 0);
@@ -69,13 +70,13 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
             {   //槽位物品为空，携带物品存在，将携带物品插入槽位
 
                 AtomicBoolean handled = new AtomicBoolean(false);
-                if (carriedItem.getItem() instanceof XpExchangeItem && button != InputConstants.MOUSE_BUTTON_LEFT)
+                if (carriedItem.getItem() instanceof XpExchangeItem && button != CONTAINER_CLICK_PRIMARY)
                 {
                     int conversionRate = XpExchangeItem.getConversionRate();
                     double currentLevel = XpUtil.levelAsDouble(player);
                     int wantConversionLevel = XpExchangeItem.getXpLevelPerAction(carriedItem);
 
-                    if (button == InputConstants.MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
+                    if (button == CONTAINER_CLICK_SECONDARY) // 鼠标右键--存入一级
                     {
                         handled.set(true); // 走到这一步说明已经进行了交互
                         long needRemovePlayerXp = XpUtil.xpBetweenLevels(Math.max(currentLevel - wantConversionLevel, 0), currentLevel);
@@ -93,7 +94,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                     }
                 }
                 // 堆叠数量为1 右键点击 尝试取出内容物并插入
-                else if (carriedItem.getCount() == 1 && button == InputConstants.MOUSE_BUTTON_RIGHT && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
+                else if (carriedItem.getCount() == 1 && button == CONTAINER_CLICK_SECONDARY && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
                 {
                     if (carriedItem.getItem() instanceof BucketItem bucketItem)
                     {
@@ -169,7 +170,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
 
                 if (!handled.get())
                 {
-                    int changedCount = button == InputConstants.MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
+                    int changedCount = button == CONTAINER_CLICK_PRIMARY ? carriedItem.getCount() : 1;
                     int remaining = (int) storage.insert(getSlotIndex(), new ItemStackKey(carriedItem), changedCount, false).amount();
                     int actualInsert = changedCount - remaining; // 实际被插入的物品数量
 
@@ -196,7 +197,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                 {
                     // 确保一次取出最大不得超过原版数量
                     int woundChangeNum = BDMath.clampLongToInt(Math.min(clickStack.amount(), clickKey.getVanillaMaxStackSize()));
-                    int actualChangeNum = button == InputConstants.MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
+                    int actualChangeNum = button == CONTAINER_CLICK_PRIMARY ? woundChangeNum : (woundChangeNum + 1) / 2;
                     KeyAmount extracted = storage.extract(getSlotIndex(), actualChangeNum, false);
                     if (!extracted.isEmpty() && extracted.toStack() instanceof ItemStack takenItem)
                     {
@@ -209,7 +210,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                 // 槽位物品存在，携带物品存在，当物品为相同类型，尝试插入物品
                 if (clickStack.key().isSameTypeSameComponents(new ItemStackKey(carriedItem)))
                 {
-                    int changedCount = button == InputConstants.MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
+                    int changedCount = button == CONTAINER_CLICK_PRIMARY ? carriedItem.getCount() : 1;
                     int remaining = (int) storage.insert(getSlotIndex(), new ItemStackKey(carriedItem), changedCount, false).amount();
                     int actualInsert = changedCount - remaining; // 实际被插入的物品数量
                     int newCount = carriedItem.getCount() - actualInsert; // 实际剩余物品数
@@ -227,7 +228,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                 else // 槽位物品存在，携带物品存在，不为相同类型
                 {
                     // 先检查是否为经验棒交互
-                    if (carriedItem.getItem() instanceof XpExchangeItem && button != InputConstants.MOUSE_BUTTON_LEFT)
+                    if (carriedItem.getItem() instanceof XpExchangeItem && button != CONTAINER_CLICK_PRIMARY)
                     {
                         KeyAmount actualStack = getStack();
 
@@ -237,7 +238,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
 
                         if (actualStack.key() instanceof FluidStackKey fluidStackKey && fluidStackKey.hasTag(Tags.Fluids.EXPERIENCE))
                         {
-                            if (button == InputConstants.MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
+                            if (button == CONTAINER_CLICK_SECONDARY) // 鼠标右键--存入一级
                             {
                                 long needRemovePlayerXp = XpUtil.xpBetweenLevels(Math.max(currentLevel - wantConversionLevel, 0), currentLevel);
                                 int actualRemovePlayerXp = BDMath.clampLongToInt(needRemovePlayerXp);
@@ -253,7 +254,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                                 player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值
 
                             }
-                            else if (button == InputConstants.MOUSE_BUTTON_MIDDLE) // 鼠标中键--取出一级
+                            else if (button == CONTAINER_CLICK_MIDDLE) // 鼠标中键--取出一级
                             {
                                 int maxXp = XpUtil.xpToGiveForLevels(player, wantConversionLevel);
                                 int actualInsertPlayerXp = XpExchangeItem.extractExperience(storage, fluidStackKey, getSlotIndex(), maxXp);
@@ -265,7 +266,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         }
                     }
                     // 再检查是否为物品交换
-                    else if (button == InputConstants.MOUSE_BUTTON_LEFT)
+                    else if (button == CONTAINER_CLICK_PRIMARY)
                     {
                         KeyAmount actualStack = getStack();
                         if (actualStack.key() instanceof ItemStackKey)
@@ -291,7 +292,7 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
                         }
                     }
                     // 最后检查是否为能力系统交互
-                    else if (carriedItem.getCount() == 1 && button == InputConstants.MOUSE_BUTTON_RIGHT && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
+                    else if (carriedItem.getCount() == 1 && button == CONTAINER_CLICK_SECONDARY && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
                     {
                         if (carriedItem.getItem() instanceof BucketItem)
                         {

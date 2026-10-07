@@ -22,6 +22,12 @@ import org.jetbrains.annotations.NotNull;
 public abstract class AbstractStackTypedSlot extends Slot
 {
     /**
+     * 本模组经验棒的中键操作。原版 slotClicked 保留 SDL 中键编号2，
+     * AbstractContainerMenu 仅为左右键公开了容器点击常量。
+     */
+    protected static final int CONTAINER_CLICK_MIDDLE = 2;
+
+    /**
      * 一个空容器，仅用于欺骗父类构造函数
      */
     private static final Container empty_inv = new SimpleContainer(0);
