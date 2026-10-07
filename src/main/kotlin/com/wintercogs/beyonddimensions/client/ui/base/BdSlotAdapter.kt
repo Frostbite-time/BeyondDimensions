@@ -24,8 +24,18 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     // 菜单创建后槽位不再增减，可在任何线程读取
     private val resourceSlots: Set<Int> =
         menu.slots.filter { it is AbstractStackTypedSlot }.mapTo(HashSet()) { it.index }
-    private val resourceKeys = HashMap<Int, IStackKey<*>>()
     private val resourceValues = HashMap<Int, KeyAmount>()
+
+    /**
+     * 同一种资源在任何格子里都用同一个图标句柄。图集按句柄认图：滚动或排序让资源换了格子时，已经画好的图像可以直接沿用；
+     * 否则大格子区滚动一行就有上百个新句柄，超出每帧能准备的数量，没画好的格子会成片显示成暗色方块。
+     * 最近用过的在前，超过上限时丢掉最久没用的，图集自己的缓存也有上限
+     */
+    private val icons =
+        object : LinkedHashMap<IStackKey<*>, ItemIcon>(256, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<IStackKey<*>, ItemIcon>) =
+                size > ICON_HANDLES
+        }
 
     // 连续两次 Shift 点击同一背包槽时，把背包里同种物品全部存入网络
     private var repeatTicks = 0
@@ -49,23 +59,16 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
 
         if (previous != null && resourceValues[slot.index] == resource) return previous
         resourceValues[slot.index] = resource
-        if (!shown) {
-            resourceKeys.remove(slot.index)
-            return MenuSlotVisual(icon = emptyIcon(slot), marked = slot.isFake)
-        }
-        val icon =
-            if (resourceKeys[slot.index] == key && previous?.icon != null) previous.icon
-            else {
-                resourceKeys[slot.index] = key
-                iconOf(key)
-            }
+        if (!shown) return MenuSlotVisual(icon = emptyIcon(slot), marked = slot.isFake)
         val label = if (slot.isFake) "" else formatCompact(resource.amount())
-        return MenuSlotVisual(icon, amount = label, marked = slot.isFake)
+        return MenuSlotVisual(iconOf(key), amount = label, marked = slot.isFake)
     }
 
     private fun iconOf(key: IStackKey<*>): ItemIcon =
-        if (key is ItemStackKey) ItemIcon.snapshot(key.copyStack().copyWithCount(1))
-        else ItemIcon.drawn(key.toString(), { graphics -> key.render.render(graphics, key, 0, 0) })
+        icons.getOrPut(key) {
+            if (key is ItemStackKey) ItemIcon.snapshot(key.copyStack().copyWithCount(1))
+            else ItemIcon.drawn(key.toString(), { graphics -> key.render.render(graphics, key, 0, 0) })
+        }
 
     /** 虚拟资源不参与原版的拖动分配 */
     override fun canDragTo(slot: Slot) = slot !is AbstractStackTypedSlot
@@ -136,11 +139,14 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     }
 
     override fun close() {
-        resourceKeys.clear()
+        icons.clear()
         resourceValues.clear()
     }
 
     private companion object {
         const val REPEAT_WINDOW_TICKS = 10
+
+        // 与 CompixelUI 图标缓存的上限一致
+        const val ICON_HANDLES = 1024
     }
 }
