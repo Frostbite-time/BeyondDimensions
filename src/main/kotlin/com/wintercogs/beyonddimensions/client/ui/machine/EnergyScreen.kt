@@ -59,10 +59,16 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
             redstone = container.redStoneMode(),
             stored = stored,
             rate = rate,
-            capacity = tr("ui.beyonddimensions.energy.capacity", if (limited) formatReadout(capacity) else text.unlimited),
+            capacity = tr(
+                "ui.beyonddimensions.energy.capacity",
+                if (limited) formatReadout(capacity) else text.unlimited
+            ),
             used =
                 if (limited && capacity > 0)
-                    tr("ui.beyonddimensions.energy.used", String.format(Locale.ROOT, "%.0f%%", stored * 100.0 / capacity))
+                    tr(
+                        "ui.beyonddimensions.energy.used",
+                        String.format(Locale.ROOT, "%.0f%%", stored * 100.0 / capacity)
+                    )
                 else null,
             outlook = outlook(stored, capacity, rate),
             flow = bars,
@@ -77,6 +83,7 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
                 rate < 0 && stored > 0 -> "ui.beyonddimensions.energy.empty_in" to stored / -rate
                 rate > 0 && capacity != Long.MAX_VALUE && capacity > stored ->
                     "ui.beyonddimensions.energy.full_in" to (capacity - stored) / rate
+
                 else -> return null
             }
         val seconds = ceil(ticks / 20).toLong()
@@ -300,7 +307,11 @@ private fun FlowChart(bars: List<Float>, modifier: Modifier) {
             drawRect(color, Offset(left * cell, top), Size((BAR_PITCH - 1) * cell, rows * cell))
             // 柱顶亮一行
             val cap = if (value > 0) top else top + (rows - 1) * cell
-            drawRect(lerp(color, colors[BdColors.text], 0.5f), Offset(left * cell, cap), Size((BAR_PITCH - 1) * cell, cell))
+            drawRect(
+                lerp(color, colors[BdColors.text], 0.5f),
+                Offset(left * cell, cap),
+                Size((BAR_PITCH - 1) * cell, cell)
+            )
         }
     }
 }

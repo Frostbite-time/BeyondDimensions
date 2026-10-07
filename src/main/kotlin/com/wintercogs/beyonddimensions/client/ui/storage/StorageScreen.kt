@@ -20,8 +20,8 @@ import com.wintercogs.beyonddimensions.client.init.BDShortKeys
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
-import com.wintercogs.beyonddimensions.client.ui.theme.signature
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
+import com.wintercogs.beyonddimensions.client.ui.theme.signature
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
@@ -242,7 +242,8 @@ private fun StorageView(
                     Spacer(Modifier.height(4.dp))
                     Row(Modifier.height((gridRows * SLOT_PITCH + 2).dp)) {
                         Box(
-                            Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight().background(colors[BdColors.surface])
+                            Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight()
+                                .background(colors[BdColors.surface])
                                 .border(1.dp, colors[BdColors.line]).padding(1.dp)
                         ) {
                             val ids = List(gridColumns * gridRows) { layout.storageStart + it }
@@ -336,7 +337,12 @@ private fun SearchHelp(text: StorageText) {
         }
         Spacer(Modifier.width(8.dp))
         Column {
-            for ((_, meaning) in text.searchSyntax) OreText(meaning, color = colors[BdColors.muted], style = Bd.caption, maxLines = 1)
+            for ((_, meaning) in text.searchSyntax) OreText(
+                meaning,
+                color = colors[BdColors.muted],
+                style = Bd.caption,
+                maxLines = 1
+            )
         }
     }
     OreText(text.searchRule, color = colors[BdColors.faint], style = Bd.caption)
@@ -348,7 +354,12 @@ private fun TypeTabs(state: StorageState, send: (StorageAction) -> Unit, text: S
     val colors = Bd.colors
     Row(
         Modifier.width(width.dp).height(13.dp).drawBehind {
-            drawLine(colors[BdColors.line], Offset(0f, size.height - 0.5f), Offset(size.width, size.height - 0.5f), 1.dp.toPx())
+            drawLine(
+                colors[BdColors.line],
+                Offset(0f, size.height - 0.5f),
+                Offset(size.width, size.height - 0.5f),
+                1.dp.toPx()
+            )
         },
         horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
@@ -371,7 +382,11 @@ private fun TypeTab(label: String, count: Int, selected: Boolean, onClick: () ->
             .bdClickable(interaction, enabled = !selected, onClick = onClick)
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
-            OreText(label, color = if (selected || hovered) colors[BdColors.text] else colors[BdColors.muted], maxLines = 1)
+            OreText(
+                label,
+                color = if (selected || hovered) colors[BdColors.text] else colors[BdColors.muted],
+                maxLines = 1
+            )
             Spacer(Modifier.width(2.dp))
             OreText(
                 count.toString(),
@@ -501,10 +516,20 @@ private fun SortOptions(state: StorageState, send: (StorageAction) -> Unit, text
 private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text: StorageText, shown: Boolean) {
     BdSectionLabel(text.layout)
     BdSettingRow(text.columns) {
-        BdNumberEditor(state.preferredColumns, { send(StorageAction.PreferredSize(it, state.preferredRows)) }, 9..99, shown)
+        BdNumberEditor(
+            state.preferredColumns,
+            { send(StorageAction.PreferredSize(it, state.preferredRows)) },
+            9..99,
+            shown
+        )
     }
     BdSettingRow(text.rows) {
-        BdNumberEditor(state.preferredRows, { send(StorageAction.PreferredSize(state.preferredColumns, it)) }, 2..99, shown)
+        BdNumberEditor(
+            state.preferredRows,
+            { send(StorageAction.PreferredSize(state.preferredColumns, it)) },
+            2..99,
+            shown
+        )
     }
     BdSectionLabel(text.search)
     BdSettingRow(text.keepSearch) { BdToggle(state.keepSearch, { send(StorageAction.KeepSearch(it)) }, shown) }

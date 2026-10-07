@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.client.ui.base
 
 import com.wintercogs.beyonddimensions.client.ui.kit.BdBackdrop
 import com.wintercogs.beyonddimensions.client.ui.kit.BdScreen
-import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdDesign
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import dev.compixel.forge.ComposeInventoryScreen

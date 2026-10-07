@@ -223,7 +223,8 @@ private fun Furnace(
 @Composable
 private fun FlagColumn(label: String, flags: List<Int>, last: Int, slots: ComposeMenuSlots<NetFurnaceMenu>) {
     // 中间一列：标题、两行槽位、导管与上下的空隙、火焰、背包（标题、三行加 3 的间隔再一行）
-    val lanes = LABEL + 4 + 2 * (SLOT_PITCH + 1) + 2 * CONDUIT_GAP + 2 * GLYPH + 6 + LABEL + 4 + (4 * SLOT_PITCH + 3 + 1)
+    val lanes =
+        LABEL + 4 + 2 * (SLOT_PITCH + 1) + 2 * CONDUIT_GAP + 2 * GLYPH + 6 + LABEL + 4 + (4 * SLOT_PITCH + 3 + 1)
     val gap = lanes - (LABEL + 4 + (8 * SLOT_PITCH + 1) + (SLOT_PITCH + 1))
     Column {
         // 列名可以比一格宽，向两侧伸出
@@ -285,7 +286,11 @@ private fun CookConduit(progress: Float, clock: State<Float>?) {
         val flow = if (clock != null && lit > 0) (clock.value * 2f % 1f) * (lit + 2) - 2 else Float.NaN
         CONDUIT.forEachIndexed { index, (row, from, width) ->
             var color =
-                if (index < lit) lerp(colors[BdColors.cyan], colors[BdColors.violet], index / (CONDUIT.size - 1f)) else colors[BdColors.lineStrong]
+                if (index < lit) lerp(
+                    colors[BdColors.cyan],
+                    colors[BdColors.violet],
+                    index / (CONDUIT.size - 1f)
+                ) else colors[BdColors.lineStrong]
             if (index < lit && index >= flow && index < flow + 2) color = lerp(color, colors[BdColors.text], 0.6f)
             drawRect(color, Offset(from * cell, row * cell), Size(width * cell, cell))
         }

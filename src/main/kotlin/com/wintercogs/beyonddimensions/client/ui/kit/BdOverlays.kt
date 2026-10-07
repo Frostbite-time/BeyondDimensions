@@ -1,11 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.kit
 
-import androidx.compose.foundation.ContextMenuItem
-import androidx.compose.foundation.ContextMenuRepresentation
-import androidx.compose.foundation.ContextMenuState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
@@ -21,17 +16,13 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
-import com.wintercogs.beyonddimensions.client.ui.theme.signature
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
+import com.wintercogs.beyonddimensions.client.ui.theme.signature
 import dev.compixel.ui.ore.display.OreText
 import kotlin.math.roundToInt
 
@@ -111,13 +102,18 @@ private class TooltipPosition(private val gap: Int, private val beside: Boolean)
         val x: Int
         val y: Int
         if (beside) {
-            x = (anchorBounds.right + gap).takeIf { it + width <= windowSize.width } ?: (anchorBounds.left - gap - width)
+            x = (anchorBounds.right + gap).takeIf { it + width <= windowSize.width }
+                ?: (anchorBounds.left - gap - width)
             y = anchorBounds.center.y - height / 2
         } else {
             x = anchorBounds.center.x - width / 2
-            y = (anchorBounds.bottom + gap).takeIf { it + height <= windowSize.height } ?: (anchorBounds.top - gap - height)
+            y = (anchorBounds.bottom + gap).takeIf { it + height <= windowSize.height }
+                ?: (anchorBounds.top - gap - height)
         }
-        return IntOffset(x.coerceIn(0, (windowSize.width - width).coerceAtLeast(0)), y.coerceIn(0, (windowSize.height - height).coerceAtLeast(0)))
+        return IntOffset(
+            x.coerceIn(0, (windowSize.width - width).coerceAtLeast(0)),
+            y.coerceIn(0, (windowSize.height - height).coerceAtLeast(0))
+        )
     }
 }
 
@@ -159,8 +155,12 @@ private class BelowAnchor(private val gap: Int) : PopupPositionProvider {
         val width = popupContentSize.width
         val height = popupContentSize.height
         val x = anchorBounds.right - width
-        val y = (anchorBounds.bottom + gap).takeIf { it + height <= windowSize.height } ?: (anchorBounds.top - gap - height)
-        return IntOffset(x.coerceIn(0, (windowSize.width - width).coerceAtLeast(0)), y.coerceIn(0, (windowSize.height - height).coerceAtLeast(0)))
+        val y =
+            (anchorBounds.bottom + gap).takeIf { it + height <= windowSize.height } ?: (anchorBounds.top - gap - height)
+        return IntOffset(
+            x.coerceIn(0, (windowSize.width - width).coerceAtLeast(0)),
+            y.coerceIn(0, (windowSize.height - height).coerceAtLeast(0))
+        )
     }
 }
 
@@ -168,7 +168,8 @@ private class BelowAnchor(private val gap: Int) : PopupPositionProvider {
 private fun OverlayCard(modifier: Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = Bd.colors
     Column(
-        Modifier.background(colors[BdColors.popover], Bd.ChipShape).border(1.dp, colors[BdColors.lineStrong], Bd.ChipShape).then(modifier),
+        Modifier.background(colors[BdColors.popover], Bd.ChipShape)
+            .border(1.dp, colors[BdColors.lineStrong], Bd.ChipShape).then(modifier),
         content = content,
     )
 }
@@ -211,7 +212,10 @@ private class AtPoint(private val point: IntOffset) : PopupPositionProvider {
         val py = anchorBounds.top + point.y
         val x = px.takeIf { it + width <= windowSize.width } ?: (px - width)
         val y = py.takeIf { it + height <= windowSize.height } ?: (py - height)
-        return IntOffset(x.coerceIn(0, (windowSize.width - width).coerceAtLeast(0)), y.coerceIn(0, (windowSize.height - height).coerceAtLeast(0)))
+        return IntOffset(
+            x.coerceIn(0, (windowSize.width - width).coerceAtLeast(0)),
+            y.coerceIn(0, (windowSize.height - height).coerceAtLeast(0))
+        )
     }
 }
 
@@ -229,6 +233,11 @@ private fun MenuRow(label: String, onClick: () -> Unit) {
             .padding(horizontal = 5.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        OreText(label, color = if (hovered) colors[BdColors.accentDeep] else colors[BdColors.text], style = Bd.caption, maxLines = 1)
+        OreText(
+            label,
+            color = if (hovered) colors[BdColors.accentDeep] else colors[BdColors.text],
+            style = Bd.caption,
+            maxLines = 1
+        )
     }
 }

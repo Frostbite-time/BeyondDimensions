@@ -47,7 +47,11 @@ fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
     slots.Slot(
         id,
         modifier.size(SLOT_PITCH.dp),
-        overlay = { slot -> if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors[BdColors.accent], arm = 4.dp)) },
+        overlay = { slot ->
+            if (slot.hovered) Box(
+                Modifier.matchParentSize().brackets(Bd.colors[BdColors.accent], arm = 4.dp)
+            )
+        },
     )
 }
 

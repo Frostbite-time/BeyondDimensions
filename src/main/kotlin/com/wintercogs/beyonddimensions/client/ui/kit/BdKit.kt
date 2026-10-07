@@ -17,28 +17,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.*
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.isCtrlPressed
-import androidx.compose.ui.input.key.isShiftPressed
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.PointerKeyboardModifiers
-import androidx.compose.ui.input.pointer.isCtrlPressed
-import androidx.compose.ui.input.pointer.isSecondaryPressed
-import androidx.compose.ui.input.pointer.isShiftPressed
-import androidx.compose.ui.input.pointer.onPointerEvent
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
@@ -51,8 +41,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
-import com.wintercogs.beyonddimensions.client.ui.theme.signatureVertical
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
+import com.wintercogs.beyonddimensions.client.ui.theme.signatureVertical
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.ui.LocalUiFeedback
@@ -64,11 +54,6 @@ import dev.compixel.ui.theme.LocalColorEditor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import kotlin.ranges.IntRange
-import kotlin.ranges.coerceAtLeast
-import kotlin.ranges.coerceAtMost
-import kotlin.ranges.coerceIn
-import kotlin.ranges.until
 
 /** 窗口：深色半透明的玻璃面板加一像素细线框，透出背后模糊的游戏画面；高度随内容 */
 @Composable
@@ -227,7 +212,10 @@ fun Modifier.bdClickable(
 /** 数量标签：深色半透明底上的浅色小字 */
 @Composable
 fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
-    Box(modifier.offset(x = (-0.5).dp, y = (-0.5).dp).background(Bd.colors[BdColors.pill]).padding(start = 1.dp, top = 0.5.dp)) {
+    Box(
+        modifier.offset(x = (-0.5).dp, y = (-0.5).dp).background(Bd.colors[BdColors.pill])
+            .padding(start = 1.dp, top = 0.5.dp)
+    ) {
         OreText(text, color = Bd.colors[BdColors.text], style = Bd.amount, maxLines = 1)
     }
 }
@@ -321,8 +309,15 @@ fun BdChip(
             .height(18.dp)
             .hoverable(interaction, enabled)
             .bdClickable(interaction, enabled = enabled, onClick = onClick)
-            .background(if ((hovered || active) && enabled) colors[BdColors.accentSoft] else colors[BdColors.surface], Bd.ChipShape)
-            .border(1.dp, if ((hovered || active) && enabled) colors[BdColors.accent] else colors[BdColors.line], Bd.ChipShape)
+            .background(
+                if ((hovered || active) && enabled) colors[BdColors.accentSoft] else colors[BdColors.surface],
+                Bd.ChipShape
+            )
+            .border(
+                1.dp,
+                if ((hovered || active) && enabled) colors[BdColors.accent] else colors[BdColors.line],
+                Bd.ChipShape
+            )
             .padding(horizontal = 5.dp)
             .alpha(if (enabled) 1f else 0.5f),
         verticalAlignment = Alignment.CenterVertically,
@@ -448,7 +443,10 @@ fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Bool
             .padding(2.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        Box(Modifier.offset(x = 10.dp * progress).size(6.dp).background(lerp(colors[BdColors.muted], colors[BdColors.accent], progress)))
+        Box(
+            Modifier.offset(x = 10.dp * progress).size(6.dp)
+                .background(lerp(colors[BdColors.muted], colors[BdColors.accent], progress))
+        )
     }
 }
 
@@ -459,7 +457,12 @@ fun BdSettingRow(title: String, description: String? = null, control: @Composabl
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             OreText(title, color = colors[BdColors.text], maxLines = 1)
-            if (description != null) OreText(description, color = colors[BdColors.faint], style = Bd.caption, maxLines = 2)
+            if (description != null) OreText(
+                description,
+                color = colors[BdColors.faint],
+                style = Bd.caption,
+                maxLines = 2
+            )
         }
         Spacer(Modifier.width(4.dp))
         control()
@@ -686,9 +689,11 @@ fun BdNumberEditor(value: Int, onValueChange: (Int) -> Unit, range: IntRange, en
         dirty = false
         if (next != value) onValueChange(next)
     }
+
     fun commit() {
         if (enabled && dirty) set(draft.toLongOrNull()?.let(::clamp) ?: value)
     }
+
     fun step(direction: Int, modifiers: PointerKeyboardModifiers) {
         if (!enabled) return
         val amount = if (modifiers.isCtrlPressed) 100 else if (modifiers.isShiftPressed) 10 else 1
@@ -757,20 +762,26 @@ fun BdNumberEditor(value: Int, onValueChange: (Int) -> Unit, range: IntRange, en
                             focus.clearFocus()
                             true
                         }
+
                         Key.Escape -> {
                             draft = value.toString()
                             dirty = false
                             focus.clearFocus()
                             true
                         }
+
                         Key.DirectionUp,
                         Key.DirectionDown -> {
                             step(
                                 if (event.key == Key.DirectionUp) 1 else -1,
-                                PointerKeyboardModifiers(isCtrlPressed = event.isCtrlPressed, isShiftPressed = event.isShiftPressed),
+                                PointerKeyboardModifiers(
+                                    isCtrlPressed = event.isCtrlPressed,
+                                    isShiftPressed = event.isShiftPressed
+                                ),
                             )
                             true
                         }
+
                         else -> false
                     }
                 }

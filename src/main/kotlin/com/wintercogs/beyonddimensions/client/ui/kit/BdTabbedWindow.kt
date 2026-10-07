@@ -23,8 +23,8 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
-import com.wintercogs.beyonddimensions.client.ui.theme.signatureVertical
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
+import com.wintercogs.beyonddimensions.client.ui.theme.signatureVertical
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OrePixelArt
 import kotlin.math.roundToInt

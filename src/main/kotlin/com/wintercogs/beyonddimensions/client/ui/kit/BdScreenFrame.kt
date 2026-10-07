@@ -1,15 +1,7 @@
 package com.wintercogs.beyonddimensions.client.ui.kit
 
-import androidx.compose.animation.EnterExitState
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -49,15 +41,15 @@ fun BdScreenFrame(window: @Composable BoxScope.(available: DpSize) -> Unit) =
     ) {
         // 背后模糊的强度与背景一起淡入淡出
         val visibility by
-            transition.animateFloat(
-                {
-                    if (targetState == EnterExitState.Visible) tween(OPEN_MILLIS, easing = LinearOutSlowInEasing)
-                    else tween(EXIT_MILLIS, easing = LinearEasing)
-                },
-                label = "BD backdrop",
-            ) {
-                if (it == EnterExitState.Visible) 1f else 0f
-            }
+        transition.animateFloat(
+            {
+                if (targetState == EnterExitState.Visible) tween(OPEN_MILLIS, easing = LinearOutSlowInEasing)
+                else tween(EXIT_MILLIS, easing = LinearEasing)
+            },
+            label = "BD backdrop",
+        ) {
+            if (it == EnterExitState.Visible) 1f else 0f
+        }
         BdBackdrop.Follow({ visibility }, { transition.targetState == EnterExitState.PostExit })
         BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             val rise = (constraints.maxHeight * RISE_OF_SCREEN).roundToInt()

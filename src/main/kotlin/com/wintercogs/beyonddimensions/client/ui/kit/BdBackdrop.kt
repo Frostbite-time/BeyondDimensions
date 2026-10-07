@@ -1,15 +1,11 @@
 package com.wintercogs.beyonddimensions.client.ui.kit
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.*
 import com.mojang.blaze3d.systems.RenderSystem
-import java.util.concurrent.CopyOnWriteArrayList
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.LayeredDraw
+import java.util.concurrent.CopyOnWriteArrayList
 
 /** BD 的界面：绘制自己之前调用 [BdBackdrop.behindScreen] */
 interface BdScreen
@@ -22,8 +18,10 @@ interface BdScreen
 object BdBackdrop {
     /** 一个界面框架的进退场，由 Compose 线程写入、游戏线程读取 */
     private class Frame {
-        @Volatile var visibility = 0f
-        @Volatile var exiting = false
+        @Volatile
+        var visibility = 0f
+        @Volatile
+        var exiting = false
     }
 
     private val frames = CopyOnWriteArrayList<Frame>()

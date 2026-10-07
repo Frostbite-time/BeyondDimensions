@@ -53,7 +53,10 @@ private const val LIST_MIN_HEIGHT = 5 * 20 + 4 * 2
 @Composable
 private fun ListWell(content: @Composable BoxScope.() -> Unit) {
     val colors = Bd.colors
-    Box(Modifier.fillMaxWidth().background(colors[BdColors.sunken]).border(1.dp, colors[BdColors.line]).padding(2.dp), content = content)
+    Box(
+        Modifier.fillMaxWidth().background(colors[BdColors.sunken]).border(1.dp, colors[BdColors.line]).padding(2.dp),
+        content = content
+    )
 }
 
 /** 角色徽章：所有者用强调色实底，管理员用浅色，成员为中性色 */
@@ -158,7 +161,11 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                         Row {
                             Column(Modifier.weight(1f)) {
                                 BdSectionLabel(text.members) {
-                                    OreText(state.members.size.toString(), color = colors[BdColors.faint], style = Bd.caption)
+                                    OreText(
+                                        state.members.size.toString(),
+                                        color = colors[BdColors.faint],
+                                        style = Bd.caption
+                                    )
                                     Spacer(Modifier.width(3.dp))
                                     BdGlyphButton(
                                         OreGlyph.CycleArrows,
@@ -264,7 +271,10 @@ private fun MemberPanel(
     Column(modifier) {
         BdSectionLabel(text.manage)
         Spacer(Modifier.height(5.dp))
-        Column(Modifier.fillMaxWidth().background(colors[BdColors.surface]).border(1.dp, colors[BdColors.line]).padding(5.dp)) {
+        Column(
+            Modifier.fillMaxWidth().background(colors[BdColors.surface]).border(1.dp, colors[BdColors.line])
+                .padding(5.dp)
+        ) {
             OreText(member.name, color = colors[BdColors.text], maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(3.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -67,46 +67,59 @@ object Bd {
  */
 object BdColors : ColorSchema("beyonddimensions") {
     val window = color("window", "window", Color(0xC70C1018))
+
     /** 标题栏、卡片等略亮的一层 */
     val surface = color("surface", "window", Color(0x0FFFFFFF))
+
     /** 页签栏、输入框等凹陷的一层 */
     val sunken = color("sunken", "window", Color(0x59000000))
+
     /** 浮层的底色，比窗口更实，免得下面的内容透上来 */
     val popover = color("popover", "window", Color(0xF2141A26))
     val line = color("line", "window", Color(0x24FFFFFF))
     val lineStrong = color("lineStrong", "window", Color(0x40FFFFFF))
+
     /** 界面打开时铺满屏幕、压暗背后画面的一层 */
     val backdrop = color("backdrop", "window", Color(0x330A1018))
     val text = color("text", "text", Color(0xFFF2F5F9))
     val muted = color("muted", "text", Color(0xFFA7B1BF))
     val faint = color("faint", "text", Color(0xFF7D8898))
+
     /** 强调色或危险色实底上的文字 */
     val onAccent = color("onAccent", "text", Color(0xFF0B1220))
     val accent = color("accent", "accent", Color(0xFF22C7F0))
     val accentDeep = color("accentDeep", "accent", Color(0xFF8CE6FF))
+
     /** 标志渐变的终点；起点见 [cyan] */
     val violet = color("violet", "accent", Color(0xFF6D6AFF))
     val online = color("online", "status", Color(0xFF4FD69A))
     val warning = color("warning", "status", Color(0xFFF2B544))
     val danger = color("danger", "status", Color(0xFFFF6B6B))
+
     /** 槽位凹槽的底色，以及左上的暗边与右下的亮边 */
     val slot = color("slot", "slots", Color(0x59000000))
     val slotShadow = color("slotShadow", "slots", Color(0x66000000))
     val slotHighlight = color("slotHighlight", "slots", Color(0x1FFFFFFF))
+
     /** 悬停槽位的描边；悬停时凹槽去掉明暗边 */
     val slotHoverOutline = color("slotHoverOutline", "slots", Color(0x00000000))
+
     /** 格子数量标签的底色 */
     val pill = color("pill", "slots", Color(0xA6000000))
+
     /** 熔炉火焰的三层：外焰、中焰与焰心 */
     val flameOuter = color("flameOuter", "flame", Color(0xFFE2531F))
     val flameMiddle = color("flameMiddle", "flame", Color(0xFFF5A524))
     val flameCore = color("flameCore", "flame", Color(0xFFFFE680))
 
     val accentSoft = derived("accentSoft", "accent", accent) { it[accent].copy(alpha = .15f) }
+
     /** 标志渐变的起点 */
     val cyan = derived("cyan", "accent", accent) { it[accent] }
+
     /** 文本框里选中文字的底色 */
     val selection = derived("selection", "text", accent) { it[accent].copy(alpha = .4f) }
+
     /** 悬停槽位的底色 */
     val slotHover = derived("slotHover", "slots", slot) { it[slot] }
 }
