@@ -30,6 +30,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.signature
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import dev.compixel.ui.ore.display.OreText
 import kotlin.math.roundToInt
 
@@ -49,7 +51,7 @@ fun BdTooltip(
     content: @Composable () -> Unit,
 ) =
     BdTooltip(
-        { OreText(text, color = Bd.colors.text, style = Bd.caption) },
+        { OreText(text, color = Bd.colors[BdColors.text], style = Bd.caption) },
         modifier,
         enabled && text.isNotBlank(),
         beside,
@@ -79,8 +81,8 @@ fun BdTooltip(
                 val colors = Bd.colors
                 Column(
                     Modifier.widthIn(max = 200.dp)
-                        .background(colors.popover, Bd.ChipShape)
-                        .border(1.dp, colors.lineStrong, Bd.ChipShape)
+                        .background(colors[BdColors.popover], Bd.ChipShape)
+                        .border(1.dp, colors[BdColors.lineStrong], Bd.ChipShape)
                         .drawWithContent {
                             drawContent()
                             // 上沿从切角之后开始换成标志渐变
@@ -166,7 +168,7 @@ private class BelowAnchor(private val gap: Int) : PopupPositionProvider {
 private fun OverlayCard(modifier: Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = Bd.colors
     Column(
-        Modifier.background(colors.popover, Bd.ChipShape).border(1.dp, colors.lineStrong, Bd.ChipShape).then(modifier),
+        Modifier.background(colors[BdColors.popover], Bd.ChipShape).border(1.dp, colors[BdColors.lineStrong], Bd.ChipShape).then(modifier),
         content = content,
     )
 }
@@ -223,10 +225,10 @@ private fun MenuRow(label: String, onClick: () -> Unit) {
             .height(13.dp)
             .hoverable(interaction)
             .bdClickable(interaction, onClick = onClick)
-            .background(if (hovered) colors.accentSoft else Color.Transparent)
+            .background(if (hovered) colors[BdColors.accentSoft] else Color.Transparent)
             .padding(horizontal = 5.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        OreText(label, color = if (hovered) colors.accentDeep else colors.text, style = Bd.caption, maxLines = 1)
+        OreText(label, color = if (hovered) colors[BdColors.accentDeep] else colors[BdColors.text], style = Bd.caption, maxLines = 1)
     }
 }

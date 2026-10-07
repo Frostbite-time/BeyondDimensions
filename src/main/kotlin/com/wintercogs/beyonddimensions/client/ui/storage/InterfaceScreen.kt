@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode
 import com.wintercogs.beyonddimensions.common.machine.PopMode
@@ -75,7 +76,7 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
                     Spacer(Modifier.height(4.dp))
                     // 三组“标记行 + 缓存行”
                     for (row in flagRows.indices) {
-                        Box(Modifier.background(colors.line).padding(0.5.dp)) {
+                        Box(Modifier.background(colors[BdColors.line]).padding(0.5.dp)) {
                             Column {
                                 BdSlotGrid(slots, flagRows[row], 9)
                                 BdSlotGrid(slots, storedRows[row], 9)

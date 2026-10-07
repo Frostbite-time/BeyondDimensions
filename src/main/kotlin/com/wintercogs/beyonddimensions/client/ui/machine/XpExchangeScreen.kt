@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDItems
 import com.wintercogs.beyonddimensions.common.item.XpExchangeSettings
 import com.wintercogs.beyonddimensions.common.menu.XpExchangeMenu
@@ -69,8 +70,8 @@ class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Compon
                     Spacer(Modifier.height(7.dp))
                     BdSectionLabel(text.usage)
                     Spacer(Modifier.height(4.dp))
-                    Column(Modifier.fillMaxWidth().background(colors.surface).padding(5.dp)) {
-                        for (line in text.usageLines) OreText(line, color = colors.muted, style = Bd.caption)
+                    Column(Modifier.fillMaxWidth().background(colors[BdColors.surface]).padding(5.dp)) {
+                        for (line in text.usageLines) OreText(line, color = colors[BdColors.muted], style = Bd.caption)
                     }
                     Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)

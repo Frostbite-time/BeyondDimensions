@@ -29,7 +29,6 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
         menu,
         title,
         ComposeMenuSlots(menu, BdSlotAdapter(menu)),
-        Bd.ThemeId,
         NativeItemOptions(cacheCapacity = 512, preparationsPerFrame = ICONS_PER_FRAME),
         design = BdDesign,
     ),
@@ -58,7 +57,6 @@ abstract class BdMenuScreen<M : AbstractContainerMenu, S, A>(menu: M, title: Com
     ComposeMenuScreen<M, S, A>(
         menu,
         title,
-        theme = Bd.ThemeId,
         nativeItemOptions = NativeItemOptions(cacheCapacity = 256, preparationsPerFrame = ICONS_PER_FRAME),
         design = BdDesign,
     ),

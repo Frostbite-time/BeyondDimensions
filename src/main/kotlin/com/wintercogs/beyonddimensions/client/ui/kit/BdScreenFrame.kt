@@ -20,8 +20,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
+import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import dev.compixel.host.ScreenTransition
-import dev.compixel.ui.ore.theme.OreTheme
 import kotlin.math.roundToInt
 
 /*
@@ -61,7 +62,7 @@ fun BdScreenFrame(window: @Composable BoxScope.(available: DpSize) -> Unit) =
         BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             val rise = (constraints.maxHeight * RISE_OF_SCREEN).roundToInt()
             val available = DpSize(maxWidth, maxHeight)
-            Box(Modifier.matchParentSize().background(OreTheme.colors.backdrop))
+            Box(Modifier.matchParentSize().background(Bd.colors[BdColors.backdrop]))
             Box(
                 Modifier.animateEnterExit(
                     enter = slideInVertically(tween(OPEN_MILLIS, easing = LinearOutSlowInEasing)) { rise },

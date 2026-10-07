@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.machine.AutoSortMode
 import com.wintercogs.beyonddimensions.common.machine.PopMode
@@ -230,7 +231,7 @@ private fun FlagColumn(label: String, flags: List<Int>, last: Int, slots: Compos
             OreText(
                 label,
                 Modifier.wrapContentWidth(unbounded = true),
-                color = Bd.colors.muted,
+                color = Bd.colors[BdColors.muted],
                 style = Bd.overline,
                 maxLines = 1
             )
@@ -245,7 +246,7 @@ private fun FlagColumn(label: String, flags: List<Int>, last: Int, slots: Compos
 /** 槽位外的一圈细线 */
 @Composable
 private fun Well(content: @Composable () -> Unit) =
-    Box(Modifier.background(Bd.colors.line).padding(0.5.dp)) { content() }
+    Box(Modifier.background(Bd.colors[BdColors.line]).padding(0.5.dp)) { content() }
 
 /** 每列熔炼位一个图标，与上方的槽位对齐 */
 @Composable
@@ -284,8 +285,8 @@ private fun CookConduit(progress: Float, clock: State<Float>?) {
         val flow = if (clock != null && lit > 0) (clock.value * 2f % 1f) * (lit + 2) - 2 else Float.NaN
         CONDUIT.forEachIndexed { index, (row, from, width) ->
             var color =
-                if (index < lit) lerp(colors.cyan, colors.violet, index / (CONDUIT.size - 1f)) else colors.lineStrong
-            if (index < lit && index >= flow && index < flow + 2) color = lerp(color, colors.text, 0.6f)
+                if (index < lit) lerp(colors[BdColors.cyan], colors[BdColors.violet], index / (CONDUIT.size - 1f)) else colors[BdColors.lineStrong]
+            if (index < lit && index >= flow && index < flow + 2) color = lerp(color, colors[BdColors.text], 0.6f)
             drawRect(color, Offset(from * cell, row * cell), Size(width * cell, cell))
         }
     }
@@ -312,7 +313,7 @@ private val SWAY = intArrayOf(0, 1, 0, -1, 0, 0, 1, 0, -1, -1, 0, 1, 0, 0, -1, 0
  * 燃料用掉的部分由上往下变暗，剩得再少也亮一行。没有燃料时整团火焰暗着、不动。
  */
 @Composable
-private fun Flames(fuel: Float, lane: Int, clock: State<Float>?) {
+internal fun Flames(fuel: Float, lane: Int, clock: State<Float>?) {
     val colors = Bd.colors
     Canvas(Modifier.size(SLOT_PITCH.dp, GLYPH.dp)) {
         val cell = 1.dp.toPx()
@@ -335,12 +336,12 @@ private fun Flames(fuel: Float, lane: Int, clock: State<Float>?) {
                     val edge = x == start || x == start + width - 1
                     val layer =
                         when {
-                            fromTop <= 2 || (edge && row > 0) -> colors.flameOuter
-                            row < core && !edge -> colors.flameCore
-                            else -> colors.flameMiddle
+                            fromTop <= 2 || (edge && row > 0) -> colors[BdColors.flameOuter]
+                            row < core && !edge -> colors[BdColors.flameCore]
+                            else -> colors[BdColors.flameMiddle]
                         }
                     drawRect(
-                        if (row < lit) layer else colors.lineStrong,
+                        if (row < lit) layer else colors[BdColors.lineStrong],
                         Offset(x * cell, (GLYPH - 1 - row) * cell),
                         Size(cell, cell),
                     )

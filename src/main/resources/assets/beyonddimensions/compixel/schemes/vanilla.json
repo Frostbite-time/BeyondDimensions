@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "name": "ui.beyonddimensions.scheme.vanilla",
+  "colors": {
+    "window": "#C6C6C6",
+    "surface": "#D6D6D6",
+    "sunken": "#AFAFAF",
+    "popover": "#E2E2E2F7",
+    "line": "#555555",
+    "lineStrong": "#373737",
+    "backdrop": "#10101050",
+    "text": "#404040",
+    "muted": "#5E5E5E",
+    "faint": "#7A7A7A",
+    "onAccent": "#FFFFFF",
+    "accent": "#3C8527",
+    "accentDeep": "#2A641C",
+    "accentSoft": "#3C852733",
+    "violet": "#7FB238",
+    "online": "#3C8527",
+    "warning": "#B07A10",
+    "danger": "#B02E26",
+    "slot": "#8B8B8B",
+    "slotShadow": "#373737",
+    "slotHighlight": "#FFFFFF",
+    "slotHover": "#C5C5C5",
+    "slotHoverOutline": "#00000000",
+    "pill": "#E2E2E2C8",
+    "flameOuter": "#E2531F",
+    "flameMiddle": "#F5A524",
+    "flameCore": "#FFE680"
+  }
+}

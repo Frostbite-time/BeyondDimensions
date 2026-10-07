@@ -25,6 +25,7 @@ import com.wintercogs.beyonddimensions.client.ui.base.BdMenuScreen
 import com.wintercogs.beyonddimensions.client.ui.base.tr
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.init.BDItems
 import com.wintercogs.beyonddimensions.common.menu.NetControlMenu
@@ -52,7 +53,7 @@ private const val LIST_MIN_HEIGHT = 5 * 20 + 4 * 2
 @Composable
 private fun ListWell(content: @Composable BoxScope.() -> Unit) {
     val colors = Bd.colors
-    Box(Modifier.fillMaxWidth().background(colors.sunken).border(1.dp, colors.line).padding(2.dp), content = content)
+    Box(Modifier.fillMaxWidth().background(colors[BdColors.sunken]).border(1.dp, colors[BdColors.line]).padding(2.dp), content = content)
 }
 
 /** 角色徽章：所有者用强调色实底，管理员用浅色，成员为中性色 */
@@ -61,9 +62,9 @@ private fun RoleChip(role: NetPermissionlevel, label: String) {
     val colors = Bd.colors
     val (ink, fill) =
         when (role) {
-            NetPermissionlevel.Owner -> colors.onAccent to colors.accentDeep
-            NetPermissionlevel.Manager -> colors.accentDeep to colors.accentSoft
-            NetPermissionlevel.Member -> colors.muted to colors.sunken
+            NetPermissionlevel.Owner -> colors[BdColors.onAccent] to colors[BdColors.accentDeep]
+            NetPermissionlevel.Manager -> colors[BdColors.accentDeep] to colors[BdColors.accentSoft]
+            NetPermissionlevel.Member -> colors[BdColors.muted] to colors[BdColors.sunken]
         }
     Box(Modifier.background(fill, Bd.ChipShape).padding(horizontal = 4.dp, vertical = 1.dp)) {
         OreText(label, color = ink, style = Bd.caption, maxLines = 1)
@@ -157,7 +158,7 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                         Row {
                             Column(Modifier.weight(1f)) {
                                 BdSectionLabel(text.members) {
-                                    OreText(state.members.size.toString(), color = colors.faint, style = Bd.caption)
+                                    OreText(state.members.size.toString(), color = colors[BdColors.faint], style = Bd.caption)
                                     Spacer(Modifier.width(3.dp))
                                     BdGlyphButton(
                                         OreGlyph.CycleArrows,
@@ -181,7 +182,7 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                                             OreText(
                                                 text.alone,
                                                 Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 8.dp),
-                                                color = colors.faint,
+                                                color = colors[BdColors.faint],
                                                 style = Bd.caption,
                                             )
                                         }
@@ -233,17 +234,17 @@ private fun MemberRow(member: MemberView, selected: Boolean, text: NetControlTex
             .height(20.dp)
             .hoverable(interaction)
             .bdClickable(interaction, enabled = !selected, onClick = onSelect)
-            .background(if (selected || hovered) colors.accentSoft else colors.surface)
-            .border(1.dp, if (selected) colors.accent else colors.line)
+            .background(if (selected || hovered) colors[BdColors.accentSoft] else colors[BdColors.surface])
+            .border(1.dp, if (selected) colors[BdColors.accent] else colors[BdColors.line])
             .padding(horizontal = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RoleChip(member.role, text.roles.getValue(member.role))
         Spacer(Modifier.width(5.dp))
-        OreText(member.name, Modifier.weight(1f, fill = false), color = colors.text, maxLines = 1)
+        OreText(member.name, Modifier.weight(1f, fill = false), color = colors[BdColors.text], maxLines = 1)
         if (member.self) {
             Spacer(Modifier.width(3.dp))
-            OreText(text.you, color = colors.faint, style = Bd.caption, maxLines = 1)
+            OreText(text.you, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
         }
     }
 }
@@ -263,14 +264,14 @@ private fun MemberPanel(
     Column(modifier) {
         BdSectionLabel(text.manage)
         Spacer(Modifier.height(5.dp))
-        Column(Modifier.fillMaxWidth().background(colors.surface).border(1.dp, colors.line).padding(5.dp)) {
-            OreText(member.name, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Column(Modifier.fillMaxWidth().background(colors[BdColors.surface]).border(1.dp, colors[BdColors.line]).padding(5.dp)) {
+            OreText(member.name, color = colors[BdColors.text], maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(3.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RoleChip(member.role, text.roles.getValue(member.role))
                 if (member.self) {
                     Spacer(Modifier.width(3.dp))
-                    OreText(text.you, color = colors.faint, style = Bd.caption, maxLines = 1)
+                    OreText(text.you, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
                 }
             }
         }
@@ -296,7 +297,7 @@ private fun ActionButton(label: String, hint: String, danger: Boolean, enabled: 
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
-    val ink = if (danger) colors.danger else colors.accentDeep
+    val ink = if (danger) colors[BdColors.danger] else colors[BdColors.accentDeep]
     val lit = hovered && enabled
     BdTooltip(hint) {
         Box(
@@ -304,13 +305,13 @@ private fun ActionButton(label: String, hint: String, danger: Boolean, enabled: 
                 .height(15.dp)
                 .hoverable(interaction, enabled)
                 .bdClickable(interaction, enabled = enabled, onClick = onClick)
-                .background(if (lit) ink else colors.surface, Bd.ChipShape)
+                .background(if (lit) ink else colors[BdColors.surface], Bd.ChipShape)
                 .border(
                     1.dp,
                     when {
                         lit -> ink
                         enabled -> ink.copy(alpha = 0.45f)
-                        else -> colors.line
+                        else -> colors[BdColors.line]
                     },
                     Bd.ChipShape,
                 ),
@@ -320,9 +321,9 @@ private fun ActionButton(label: String, hint: String, danger: Boolean, enabled: 
                 label,
                 color =
                     when {
-                        lit -> colors.onAccent
+                        lit -> colors[BdColors.onAccent]
                         enabled -> ink
-                        else -> colors.faint
+                        else -> colors[BdColors.faint]
                     },
                 style = Bd.caption,
                 maxLines = 1,
@@ -423,7 +424,7 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                     BdSectionLabel(text.networks) {
                         OreText(
                             state.options.size.toString(),
-                            color = colors.faint,
+                            color = colors[BdColors.faint],
                             style = Bd.caption
                         )
                     }
@@ -439,7 +440,7 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                                 Modifier.fillMaxWidth().height(LIST_MIN_HEIGHT.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                OreText(text.empty, color = colors.faint, style = Bd.caption)
+                                OreText(text.empty, color = colors[BdColors.faint], style = Bd.caption)
                             }
                         } else {
                             BdScrollColumn(
@@ -465,17 +466,17 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                     }
                     Spacer(Modifier.height(7.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        OreText(text.primary, color = colors.faint, style = Bd.caption, maxLines = 1)
+                        OreText(text.primary, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
                         Spacer(Modifier.width(3.dp))
                         OreText(
                             current?.name ?: text.none,
                             Modifier.weight(1f),
-                            color = colors.text,
+                            color = colors[BdColors.text],
                             style = Bd.caption,
                             maxLines = 1
                         )
                         BdChip({ send(PrimaryNetRequest.Clear) }, enabled = current != null) {
-                            OreText(text.clear, color = colors.muted, style = Bd.caption, maxLines = 1)
+                            OreText(text.clear, color = colors[BdColors.muted], style = Bd.caption, maxLines = 1)
                         }
                         Spacer(Modifier.width(4.dp))
                         BdChip(
@@ -483,7 +484,7 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                             enabled = current != null,
                             active = current != null
                         ) {
-                            OreText(text.open, color = colors.accentDeep, style = Bd.caption, maxLines = 1)
+                            OreText(text.open, color = colors[BdColors.accentDeep], style = Bd.caption, maxLines = 1)
                         }
                     }
                 }
@@ -523,18 +524,18 @@ private fun NetworkRow(
             .height(20.dp)
             .hoverable(interaction)
             .bdClickable(interaction, enabled = !selected && !renaming, onClick = onSelect)
-            .background(if (selected || hovered) colors.accentSoft else colors.surface)
-            .border(1.dp, if (selected) colors.accent else colors.line)
+            .background(if (selected || hovered) colors[BdColors.accentSoft] else colors[BdColors.surface])
+            .border(1.dp, if (selected) colors[BdColors.accent] else colors[BdColors.line])
             .padding(horizontal = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(4.dp).background(if (selected) colors.accent else colors.line))
+        Box(Modifier.size(4.dp).background(if (selected) colors[BdColors.accent] else colors[BdColors.line]))
         Spacer(Modifier.width(5.dp))
         if (renaming) {
             RenameField(option.name, onCommit)
         } else {
-            OreText(option.name, Modifier.weight(1f), color = colors.text, maxLines = 1)
-            OreText("#%04d".format(option.id), color = colors.faint, style = Bd.caption, maxLines = 1)
+            OreText(option.name, Modifier.weight(1f), color = colors[BdColors.text], maxLines = 1)
+            OreText("#%04d".format(option.id), color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
             Spacer(Modifier.width(4.dp))
             RoleChip(option.role, text.roles.getValue(option.role))
             if (option.renamable) {
@@ -554,13 +555,13 @@ private fun RowScope.RenameField(initial: String, onCommit: (String?) -> Unit) {
         { value = it.take(DimensionsNet.MAX_NETWORK_NAME_LENGTH) },
         Modifier.weight(1f).height(14.dp),
         singleLine = true,
-        textStyle = Bd.body.copy(color = colors.text),
-        cursorBrush = SolidColor(colors.accent),
+        textStyle = Bd.body.copy(color = colors[BdColors.text]),
+        cursorBrush = SolidColor(colors[BdColors.accent]),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { onCommit(value) }),
         decorationBox = { inner ->
             Box(
-                Modifier.fillMaxSize().background(colors.surface).border(1.dp, colors.accent)
+                Modifier.fillMaxSize().background(colors[BdColors.surface]).border(1.dp, colors[BdColors.accent])
                     .padding(horizontal = 3.dp), contentAlignment = Alignment.CenterStart
             ) {
                 inner()

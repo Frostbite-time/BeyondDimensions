@@ -20,6 +20,8 @@ import com.wintercogs.beyonddimensions.client.init.BDShortKeys
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.signature
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
@@ -243,8 +245,8 @@ private fun StorageView(
                     Spacer(Modifier.height(4.dp))
                     Row(Modifier.height((gridRows * SLOT_PITCH + 2).dp)) {
                         Box(
-                            Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight().background(colors.surface)
-                                .border(1.dp, colors.line).padding(1.dp)
+                            Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight().background(colors[BdColors.surface])
+                                .border(1.dp, colors[BdColors.line]).padding(1.dp)
                         ) {
                             val ids = List(gridColumns * gridRows) { layout.storageStart + it }
                             BdSlotGrid(slots, ids, gridColumns)
@@ -272,7 +274,7 @@ private fun StorageView(
                     BdSectionLabel(text.inventory, Modifier.width(width.dp))
                     Spacer(Modifier.height(4.dp))
                     Box(Modifier.width((gridColumns * SLOT_PITCH + 2).dp), contentAlignment = Alignment.TopCenter) {
-                        Box(Modifier.background(colors.line).padding(0.5.dp)) {
+                        Box(Modifier.background(colors[BdColors.line]).padding(0.5.dp)) {
                             BdPlayerInventory(
                                 slots,
                                 layout.playerSlots
@@ -313,14 +315,14 @@ private fun Toolbar(state: StorageState, send: (StorageAction) -> Unit, text: St
         var open by remember { mutableStateOf(false) }
         Box {
             BdChip({ open = !open }, active = open) {
-                OreIcon(OreGlyph.Bars, Modifier.size(7.dp), color = colors.faint)
+                OreIcon(OreGlyph.Bars, Modifier.size(7.dp), color = colors[BdColors.faint])
                 Spacer(Modifier.width(3.dp))
-                OreText(text.sortNames[state.sort] ?: text.sort, color = colors.text, maxLines = 1)
+                OreText(text.sortNames[state.sort] ?: text.sort, color = colors[BdColors.text], maxLines = 1)
                 Spacer(Modifier.width(3.dp))
                 OreIcon(
                     if (state.reverse) OreGlyph.ArrowUp else OreGlyph.ArrowDown,
                     Modifier.size(7.dp),
-                    color = colors.accent
+                    color = colors[BdColors.accent]
                 )
             }
             if (open) BdPopover({ open = false }) { SortOptions(state, send, text) }
@@ -332,19 +334,19 @@ private fun Toolbar(state: StorageState, send: (StorageAction) -> Unit, text: St
 @Composable
 private fun SearchHelp(text: StorageText) {
     val colors = Bd.colors
-    OreText(text.searchHelp, color = colors.text, style = Bd.caption, maxLines = 1)
+    OreText(text.searchHelp, color = colors[BdColors.text], style = Bd.caption, maxLines = 1)
     Row {
         Column(Modifier.width(IntrinsicSize.Max)) {
             for ((example, _) in text.searchSyntax) {
-                OreText(example, color = colors.accentDeep, style = Bd.caption, maxLines = 1)
+                OreText(example, color = colors[BdColors.accentDeep], style = Bd.caption, maxLines = 1)
             }
         }
         Spacer(Modifier.width(8.dp))
         Column {
-            for ((_, meaning) in text.searchSyntax) OreText(meaning, color = colors.muted, style = Bd.caption, maxLines = 1)
+            for ((_, meaning) in text.searchSyntax) OreText(meaning, color = colors[BdColors.muted], style = Bd.caption, maxLines = 1)
         }
     }
-    OreText(text.searchRule, color = colors.faint, style = Bd.caption)
+    OreText(text.searchRule, color = colors[BdColors.faint], style = Bd.caption)
 }
 
 /** 资源类型页签；选中项下方是标志渐变线 */
@@ -353,7 +355,7 @@ private fun TypeTabs(state: StorageState, send: (StorageAction) -> Unit, text: S
     val colors = Bd.colors
     Row(
         Modifier.width(width.dp).height(13.dp).drawBehind {
-            drawLine(colors.line, Offset(0f, size.height - 0.5f), Offset(size.width, size.height - 0.5f), 1.dp.toPx())
+            drawLine(colors[BdColors.line], Offset(0f, size.height - 0.5f), Offset(size.width, size.height - 0.5f), 1.dp.toPx())
         },
         horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
@@ -376,11 +378,11 @@ private fun TypeTab(label: String, count: Int, selected: Boolean, onClick: () ->
             .bdClickable(interaction, enabled = !selected, onClick = onClick)
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
-            OreText(label, color = if (selected || hovered) colors.text else colors.muted, maxLines = 1)
+            OreText(label, color = if (selected || hovered) colors[BdColors.text] else colors[BdColors.muted], maxLines = 1)
             Spacer(Modifier.width(2.dp))
             OreText(
                 count.toString(),
-                color = if (selected) colors.accent else colors.faint,
+                color = if (selected) colors[BdColors.accent] else colors[BdColors.faint],
                 style = Bd.caption,
                 maxLines = 1
             )
@@ -395,20 +397,20 @@ private fun StatusStrip(state: StorageState, text: StorageText, width: Int) {
     val colors = Bd.colors
     val limited = state.typeLimit in 1 until Int.MAX_VALUE
     Row(Modifier.width(width.dp).heightIn(min = 9.dp), verticalAlignment = Alignment.CenterVertically) {
-        OreText(text.types, color = colors.faint, style = Bd.caption, maxLines = 1)
+        OreText(text.types, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
         Spacer(Modifier.width(3.dp))
         val used = formatExact(state.stored.toLong())
         OreText(
             if (limited) "$used / ${formatExact(state.typeLimit.toLong())}" else used,
-            color = colors.muted,
+            color = colors[BdColors.muted],
             style = Bd.caption,
             maxLines = 1
         )
         if (state.shown != state.stored) {
             Spacer(Modifier.width(6.dp))
-            OreText(text.filtered, color = colors.faint, style = Bd.caption, maxLines = 1)
+            OreText(text.filtered, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
             Spacer(Modifier.width(3.dp))
-            OreText(formatExact(state.shown.toLong()), color = colors.accentDeep, style = Bd.caption, maxLines = 1)
+            OreText(formatExact(state.shown.toLong()), color = colors[BdColors.accentDeep], style = Bd.caption, maxLines = 1)
         }
         Spacer(Modifier.weight(1f))
         if (limited) BdMeter(state.stored.toFloat() / state.typeLimit, Modifier.width(64.dp).height(7.dp))
@@ -446,15 +448,15 @@ private fun CraftSection(
         }
         Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.background(colors.line).padding(0.5.dp)) { BdSlotGrid(slots, layout.craftSlots, 3) }
+            Box(Modifier.background(colors[BdColors.line]).padding(0.5.dp)) { BdSlotGrid(slots, layout.craftSlots, 3) }
             Spacer(Modifier.width(7.dp))
-            OreIcon(OreGlyph.ArrowRight, Modifier.size(8.dp), color = colors.accent)
+            OreIcon(OreGlyph.ArrowRight, Modifier.size(8.dp), color = colors[BdColors.accent])
             Spacer(Modifier.width(7.dp))
             // 产物槽带一圈强调色细框
-            Box(Modifier.border(1.dp, colors.accent).padding(2.dp)) { BdSlot(slots, layout.resultSlot) }
+            Box(Modifier.border(1.dp, colors[BdColors.accent]).padding(2.dp)) { BdSlot(slots, layout.resultSlot) }
             Spacer(Modifier.weight(1f))
             Column(horizontalAlignment = Alignment.End) {
-                OreText(text.returnTitle, color = colors.faint, style = Bd.caption, maxLines = 1)
+                OreText(text.returnTitle, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
                 Spacer(Modifier.height(2.dp))
                 BdSegmented(
                     listOf(text.returnStorage, text.returnInventory),
@@ -476,11 +478,11 @@ private fun RecipeChooser(choices: List<RecipeChoice>, send: (StorageAction) -> 
     var open by remember { mutableStateOf(false) }
     Box {
         BdChip({ open = !open }, active = open) {
-            OreText(text.recipe, color = colors.faint, style = Bd.caption, maxLines = 1)
+            OreText(text.recipe, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
             Spacer(Modifier.width(3.dp))
-            OreText(choices.size.toString(), color = colors.accentDeep, maxLines = 1)
+            OreText(choices.size.toString(), color = colors[BdColors.accentDeep], maxLines = 1)
             Spacer(Modifier.width(3.dp))
-            OreIcon(OreGlyph.ChevronRight, Modifier.size(6.dp), color = colors.muted)
+            OreIcon(OreGlyph.ChevronRight, Modifier.size(6.dp), color = colors[BdColors.muted])
         }
         if (open) {
             BdPopover({ open = false }) {
@@ -558,19 +560,19 @@ private fun OptionRow(label: String, selected: Boolean, enabled: Boolean = true,
             .height(13.dp)
             .hoverable(interaction, enabled)
             .bdClickable(interaction, enabled = enabled && !selected, onClick = onClick)
-            .background(if (hovered && enabled && !selected) colors.accentSoft else Color.Transparent)
+            .background(if (hovered && enabled && !selected) colors[BdColors.accentSoft] else Color.Transparent)
             .padding(horizontal = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(3.dp).background(if (selected) colors.accent else Color.Transparent))
+        Box(Modifier.size(3.dp).background(if (selected) colors[BdColors.accent] else Color.Transparent))
         Spacer(Modifier.width(4.dp))
         OreText(
             label,
             color =
                 when {
-                    !enabled -> colors.faint
-                    selected -> colors.accentDeep
-                    else -> colors.text
+                    !enabled -> colors[BdColors.faint]
+                    selected -> colors[BdColors.accentDeep]
+                    else -> colors[BdColors.text]
                 },
             maxLines = 1,
         )

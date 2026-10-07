@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.signatureVertical
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.ui.LocalUiFeedback
@@ -58,6 +60,7 @@ import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OrePixelArt
 import dev.compixel.ui.ore.display.OreText
+import dev.compixel.ui.theme.LocalColorEditor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -71,15 +74,16 @@ import kotlin.ranges.until
 @Composable
 fun BdWindow(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = Bd.colors
-    Column(modifier.background(colors.window).border(1.dp, colors.line), content = content)
+    Column(modifier.background(colors[BdColors.window]).border(1.dp, colors[BdColors.line]), content = content)
 }
 
-/** 窗口标题栏：设备图标、模组名与标题，右侧是关闭按钮 */
+/** 窗口标题栏：设备图标、模组名与标题，右侧是关闭按钮，以及界面能打开 CompixelUI 颜色编辑器时的调色板按钮 */
 @Composable
 fun BdHeader(icon: ItemIcon?, title: String, onClose: () -> Unit, tag: String? = null) {
+    val openColorEditor = LocalColorEditor.current
     val colors = Bd.colors
     Row(
-        Modifier.fillMaxWidth().height(24.dp).background(colors.surface).padding(start = 7.dp, end = 5.dp),
+        Modifier.fillMaxWidth().height(24.dp).background(colors[BdColors.surface]).padding(start = 7.dp, end = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
@@ -89,7 +93,7 @@ fun BdHeader(icon: ItemIcon?, title: String, onClose: () -> Unit, tag: String? =
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
             OreText(
                 "BEYOND DIMENSIONS",
-                color = colors.faint,
+                color = colors[BdColors.faint],
                 style = Bd.overline,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -98,20 +102,24 @@ fun BdHeader(icon: ItemIcon?, title: String, onClose: () -> Unit, tag: String? =
                 OreText(
                     title,
                     Modifier.weight(1f, fill = false),
-                    color = colors.text,
+                    color = colors[BdColors.text],
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (tag != null) {
                     Spacer(Modifier.width(3.dp))
-                    OreText(tag, color = colors.faint, style = Bd.caption, maxLines = 1)
+                    OreText(tag, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
                 }
             }
         }
         Spacer(Modifier.width(4.dp))
+        if (openColorEditor != null) {
+            BdGlyphButton(BdGlyphs.Palette, null, openColorEditor, size = 13.dp, glyphSize = 7.dp)
+            Spacer(Modifier.width(2.dp))
+        }
         BdGlyphButton(OreGlyph.Cross, null, onClose, size = 13.dp, glyphSize = 7.dp)
     }
-    Box(Modifier.fillMaxWidth().height(1.dp).background(colors.line))
+    Box(Modifier.fillMaxWidth().height(1.dp).background(colors[BdColors.line]))
 }
 
 /** 只有图标的小按钮 */
@@ -149,8 +157,8 @@ fun BdGlyphButton(
                 .bdClickable(interaction, enabled = enabled, onClick = onClick)
                 .background(
                     when {
-                        selected -> colors.accentSoft
-                        hovered && enabled -> colors.accentSoft
+                        selected -> colors[BdColors.accentSoft]
+                        hovered && enabled -> colors[BdColors.accentSoft]
                         else -> Color.Transparent
                     }
                 ),
@@ -158,9 +166,9 @@ fun BdGlyphButton(
         ) {
             val tint =
                 when {
-                    !enabled -> colors.faint
-                    selected || hovered -> colors.accentDeep
-                    else -> colors.muted
+                    !enabled -> colors[BdColors.faint]
+                    selected || hovered -> colors[BdColors.accentDeep]
+                    else -> colors[BdColors.muted]
                 }
             OreIcon(art, Modifier.size(glyphSize), color = tint)
         }
@@ -173,11 +181,11 @@ fun BdGlyphButton(
 fun BdSectionLabel(text: String, modifier: Modifier = Modifier, trailing: (@Composable () -> Unit)? = null) {
     val colors = Bd.colors
     Row(modifier.fillMaxWidth().heightIn(min = 9.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(2.dp).background(colors.accent))
+        Box(Modifier.size(2.dp).background(colors[BdColors.accent]))
         Spacer(Modifier.width(3.dp))
-        OreText(text, color = colors.muted, style = Bd.overline, maxLines = 1)
+        OreText(text, color = colors[BdColors.muted], style = Bd.overline, maxLines = 1)
         Spacer(Modifier.width(4.dp))
-        Box(Modifier.weight(1f).height(1.dp).background(colors.line))
+        Box(Modifier.weight(1f).height(1.dp).background(colors[BdColors.line]))
         if (trailing != null) {
             Spacer(Modifier.width(4.dp))
             trailing()
@@ -219,8 +227,8 @@ fun Modifier.bdClickable(
 /** 数量标签：深色半透明底上的浅色小字 */
 @Composable
 fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
-    Box(modifier.offset(x = (-0.5).dp, y = (-0.5).dp).background(Bd.colors.pill).padding(start = 1.dp, top = 0.5.dp)) {
-        OreText(text, color = Bd.colors.text, style = Bd.amount, maxLines = 1)
+    Box(modifier.offset(x = (-0.5).dp, y = (-0.5).dp).background(Bd.colors[BdColors.pill]).padding(start = 1.dp, top = 0.5.dp)) {
+        OreText(text, color = Bd.colors[BdColors.text], style = Bd.amount, maxLines = 1)
     }
 }
 
@@ -256,20 +264,20 @@ fun BdSearchField(
                 }
             },
             singleLine = true,
-            textStyle = Bd.body.copy(color = colors.text),
+            textStyle = Bd.body.copy(color = colors[BdColors.text]),
             interactionSource = interaction,
-            cursorBrush = SolidColor(colors.accent),
+            cursorBrush = SolidColor(colors[BdColors.accent]),
             decorationBox = { inner ->
                 Row(
                     Modifier.fillMaxWidth()
                         .fillMaxHeight()
-                        .background(colors.surface, Bd.ChipShape)
+                        .background(colors[BdColors.surface], Bd.ChipShape)
                         .border(
                             1.dp,
                             when {
-                                focused -> colors.accent
-                                hovered -> colors.lineStrong
-                                else -> colors.line
+                                focused -> colors[BdColors.accent]
+                                hovered -> colors[BdColors.lineStrong]
+                                else -> colors[BdColors.line]
                             },
                             Bd.ChipShape,
                         )
@@ -279,11 +287,11 @@ fun BdSearchField(
                     OreIcon(
                         OreGlyph.MagnifyingGlass,
                         Modifier.size(8.dp),
-                        color = if (focused) colors.accent else colors.faint
+                        color = if (focused) colors[BdColors.accent] else colors[BdColors.faint]
                     )
                     Spacer(Modifier.width(4.dp))
                     Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                        if (value.isEmpty()) OreText(placeholder, color = colors.faint, maxLines = 1)
+                        if (value.isEmpty()) OreText(placeholder, color = colors[BdColors.faint], maxLines = 1)
                         inner()
                     }
                     if (value.isNotEmpty()) {
@@ -313,8 +321,8 @@ fun BdChip(
             .height(18.dp)
             .hoverable(interaction, enabled)
             .bdClickable(interaction, enabled = enabled, onClick = onClick)
-            .background(if ((hovered || active) && enabled) colors.accentSoft else colors.surface, Bd.ChipShape)
-            .border(1.dp, if ((hovered || active) && enabled) colors.accent else colors.line, Bd.ChipShape)
+            .background(if ((hovered || active) && enabled) colors[BdColors.accentSoft] else colors[BdColors.surface], Bd.ChipShape)
+            .border(1.dp, if ((hovered || active) && enabled) colors[BdColors.accent] else colors[BdColors.line], Bd.ChipShape)
             .padding(horizontal = 5.dp)
             .alpha(if (enabled) 1f else 0.5f),
         verticalAlignment = Alignment.CenterVertically,
@@ -343,8 +351,8 @@ fun BdSegmented(
         modifier
             .height(15.dp)
             .clip(Bd.ChipShape)
-            .background(colors.sunken, Bd.ChipShape)
-            .border(1.dp, colors.line, Bd.ChipShape)
+            .background(colors[BdColors.sunken], Bd.ChipShape)
+            .border(1.dp, colors[BdColors.line], Bd.ChipShape)
             .padding(1.dp)
             .alpha(if (enabled) 1f else 0.55f)
     ) {
@@ -373,8 +381,8 @@ fun BdSegmented(
                     Modifier.absoluteOffset(x = left)
                         .width(width)
                         .fillMaxHeight()
-                        .background(colors.surface, segmentShape)
-                        .border(1.dp, colors.accent, segmentShape)
+                        .background(colors[BdColors.surface], segmentShape)
+                        .border(1.dp, colors[BdColors.accent], segmentShape)
                 )
             }
         }
@@ -404,9 +412,9 @@ fun BdSegmented(
                         option,
                         color =
                             when {
-                                chosen -> colors.accentDeep
-                                hovered && enabled -> colors.text
-                                else -> colors.muted
+                                chosen -> colors[BdColors.accentDeep]
+                                hovered && enabled -> colors[BdColors.text]
+                                else -> colors[BdColors.muted]
                             },
                         maxLines = 1,
                     )
@@ -428,19 +436,19 @@ fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Bool
     val hovered = pointerOver && enabled
     val motion = tween<Float>(durationMillis = 150, easing = FastOutSlowInEasing)
     val progress by animateFloatAsState(if (checked) 1f else 0f, motion, label = "BD switch")
-    val edge = if (hovered) colors.lineStrong else colors.line
-    val edgeOn = colors.accent.copy(alpha = if (hovered) 1f else 0.6f)
+    val edge = if (hovered) colors[BdColors.lineStrong] else colors[BdColors.line]
+    val edgeOn = colors[BdColors.accent].copy(alpha = if (hovered) 1f else 0.6f)
     Box(
         Modifier.size(20.dp, 10.dp)
             .alpha(if (enabled) 1f else 0.55f)
             .hoverable(interaction, enabled)
             .bdClickable(interaction, enabled = enabled) { onCheckedChange(!checked) }
-            .background(lerp(colors.sunken, colors.accentSoft, progress))
+            .background(lerp(colors[BdColors.sunken], colors[BdColors.accentSoft], progress))
             .border(1.dp, lerp(edge, edgeOn, progress))
             .padding(2.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        Box(Modifier.offset(x = 10.dp * progress).size(6.dp).background(lerp(colors.muted, colors.accent, progress)))
+        Box(Modifier.offset(x = 10.dp * progress).size(6.dp).background(lerp(colors[BdColors.muted], colors[BdColors.accent], progress)))
     }
 }
 
@@ -450,8 +458,8 @@ fun BdSettingRow(title: String, description: String? = null, control: @Composabl
     val colors = Bd.colors
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            OreText(title, color = colors.text, maxLines = 1)
-            if (description != null) OreText(description, color = colors.faint, style = Bd.caption, maxLines = 2)
+            OreText(title, color = colors[BdColors.text], maxLines = 1)
+            if (description != null) OreText(description, color = colors[BdColors.faint], style = Bd.caption, maxLines = 2)
         }
         Spacer(Modifier.width(4.dp))
         control()
@@ -474,13 +482,13 @@ fun BdModeSetting(
 ) {
     val colors = Bd.colors
     Column(Modifier.fillMaxWidth()) {
-        OreText(title, color = colors.text, maxLines = 1)
+        OreText(title, color = colors[BdColors.text], maxLines = 1)
         Spacer(Modifier.height(2.dp))
         if (cycle) BdCycler(options, selected, enabled, onSelect)
         else BdSegmented(options, selected, onSelect, Modifier.fillMaxWidth(), enabled = enabled, fill = true)
         if (description != null) {
             Spacer(Modifier.height(2.dp))
-            OreText(description, color = colors.faint, style = Bd.caption, maxLines = 2)
+            OreText(description, color = colors[BdColors.faint], style = Bd.caption, maxLines = 2)
         }
     }
 }
@@ -492,8 +500,8 @@ private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onS
     Row(
         Modifier.fillMaxWidth()
             .height(15.dp)
-            .background(colors.sunken, Bd.ChipShape)
-            .border(1.dp, colors.line, Bd.ChipShape)
+            .background(colors[BdColors.sunken], Bd.ChipShape)
+            .border(1.dp, colors[BdColors.line], Bd.ChipShape)
             .padding(1.dp)
             .clip(Bd.ChipInnerShape),
         verticalAlignment = Alignment.CenterVertically,
@@ -509,7 +517,7 @@ private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onS
         Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
             OreText(
                 options.getOrElse(selected) { "" },
-                color = if (enabled) colors.accentDeep else colors.faint,
+                color = if (enabled) colors[BdColors.accentDeep] else colors[BdColors.faint],
                 maxLines = 1
             )
         }
@@ -558,7 +566,7 @@ fun BdScrollColumn(
 fun BdMeter(fraction: Float, modifier: Modifier, cell: Dp = 3.dp) {
     val colors = Bd.colors
     Box(
-        modifier.background(colors.surface).border(1.dp, colors.line).padding(2.dp).drawBehind {
+        modifier.background(colors[BdColors.surface]).border(1.dp, colors[BdColors.line]).padding(2.dp).drawBehind {
             val pitch = cell.toPx()
             val gap = (1.dp.toPx() / 2f).coerceAtLeast(1f)
             val count = (size.width / pitch).toInt().coerceAtLeast(1)
@@ -566,10 +574,10 @@ fun BdMeter(fraction: Float, modifier: Modifier, cell: Dp = 3.dp) {
             val start = (size.width - count * pitch + gap) / 2f
             for (i in 0 until count) {
                 val color = if (i < filled) lerp(
-                    colors.cyan,
-                    colors.violet,
+                    colors[BdColors.cyan],
+                    colors[BdColors.violet],
                     i / (count - 1f).coerceAtLeast(1f)
-                ) else colors.sunken
+                ) else colors[BdColors.sunken]
                 drawRect(color, Offset(start + i * pitch, 0f), Size(pitch - gap, size.height))
             }
         }
@@ -624,7 +632,7 @@ private fun BdScrollbarTrack(
     val colors = Bd.colors
     val latest by rememberUpdatedState(onScrollTo)
     val density = LocalDensity.current
-    BoxWithConstraints(modifier.background(colors.sunken).border(1.dp, colors.line).padding(1.dp)) {
+    BoxWithConstraints(modifier.background(colors[BdColors.sunken]).border(1.dp, colors[BdColors.line]).padding(1.dp)) {
         val track = maxHeight
         val thumb = (track * visibleFraction.coerceIn(0f, 1f)).coerceIn(minOf(12.dp, track), track)
         val travel = track - thumb
@@ -701,13 +709,13 @@ fun BdNumberEditor(value: Int, onValueChange: (Int) -> Unit, range: IntRange, en
     }
     Row(
         Modifier.height(15.dp)
-            .background(colors.sunken, Bd.ChipShape)
+            .background(colors[BdColors.sunken], Bd.ChipShape)
             .border(
                 1.dp,
                 when {
-                    invalid -> colors.danger
-                    focused -> colors.accent
-                    else -> colors.line
+                    invalid -> colors[BdColors.danger]
+                    focused -> colors[BdColors.accent]
+                    else -> colors[BdColors.line]
                 },
                 Bd.ChipShape,
             )
@@ -775,8 +783,8 @@ fun BdNumberEditor(value: Int, onValueChange: (Int) -> Unit, range: IntRange, en
                 },
             enabled = enabled,
             singleLine = true,
-            textStyle = Bd.body.copy(color = colors.text, textAlign = TextAlign.Center),
-            cursorBrush = SolidColor(colors.accent),
+            textStyle = Bd.body.copy(color = colors[BdColors.text], textAlign = TextAlign.Center),
+            cursorBrush = SolidColor(colors[BdColors.accent]),
         )
         BdGlyphButton(
             OreGlyph.Plus,

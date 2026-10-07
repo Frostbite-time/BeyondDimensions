@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
 import dev.compixel.forge.item.MinecraftItemIcon
@@ -23,22 +24,22 @@ const val SLOT_WINDOW_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 9 * SLOT_PI
  * 一个原生槽位：主题化的槽底，悬停时加上角标；虚拟资源的数量以 BD 的数量标签显示。
  *
  * 两种槽位悬停时一样：都按 CompixelUI 给出的 hovered（点击会落到的那一格）画角标，并把凹槽交给 Ore 高亮。
- * 主题里 Ore 的悬停色与槽底相同、悬停描边透明，高亮时凹槽去掉明暗边、变成平的深色。
+ * Ore 的悬停色与悬停描边取自 BD 的 slotHover 与 slotHoverOutline（默认与槽底相同、透明），高亮时凹槽去掉明暗边、变成平的深色。
  *
  * 标记槽与其他槽位用同样的凹槽，只在槽底铺一层强调色。Ore 的标记样式用通用描边色画凹槽的暗边，
- * 玻璃主题的描边色是半透明白，相邻两格的亮边会连成双线，交点处还留下缺角。
+ * 玻璃配色的描边色是半透明白，相邻两格的亮边会连成双线，交点处还留下缺角。
  */
 @Composable
 fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
     if ((slots.adapter as? BdSlotAdapter<*>)?.isResource(id) == true) {
         slots.Slot(id, modifier.size(SLOT_PITCH.dp)) { slot ->
             OreSlot(Modifier.matchParentSize(), highlighted = slot.hovered, contentModifier = Modifier.size(16.dp)) {
-                if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors.accentSoft))
+                if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors[BdColors.accentSoft]))
                 slot.icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
             }
             if (slot.amount.isNotEmpty())
                 BdAmountPill(slot.amount, Modifier.align(Alignment.BottomEnd).padding(end = 1.dp, bottom = 1.dp))
-            if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors.accent, arm = 4.dp))
+            if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors[BdColors.accent], arm = 4.dp))
         }
         return
     }
@@ -46,7 +47,7 @@ fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
     slots.Slot(
         id,
         modifier.size(SLOT_PITCH.dp),
-        overlay = { slot -> if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors.accent, arm = 4.dp)) },
+        overlay = { slot -> if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors[BdColors.accent], arm = 4.dp)) },
     )
 }
 
@@ -77,7 +78,7 @@ fun BdPlayerInventory(slots: ComposeMenuSlots<*>, playerSlots: List<Int>, modifi
 fun BdSlotSection(title: String, ids: List<Int>, slots: ComposeMenuSlots<*>, columns: Int = 9) {
     BdSectionLabel(title)
     Spacer(Modifier.height(4.dp))
-    Box(Modifier.background(Bd.colors.line).padding(0.5.dp)) { BdSlotGrid(slots, ids, columns) }
+    Box(Modifier.background(Bd.colors[BdColors.line]).padding(0.5.dp)) { BdSlotGrid(slots, ids, columns) }
 }
 
 /** 带标题的玩家背包 */
@@ -85,7 +86,7 @@ fun BdSlotSection(title: String, ids: List<Int>, slots: ComposeMenuSlots<*>, col
 fun BdInventorySection(title: String, playerSlots: List<Int>, slots: ComposeMenuSlots<*>) {
     BdSectionLabel(title)
     Spacer(Modifier.height(4.dp))
-    Box(Modifier.background(Bd.colors.line).padding(0.5.dp)) { BdPlayerInventory(slots, playerSlots) }
+    Box(Modifier.background(Bd.colors[BdColors.line]).padding(0.5.dp)) { BdPlayerInventory(slots, playerSlots) }
 }
 
 // 槽位编号在游戏线程构造界面时取出

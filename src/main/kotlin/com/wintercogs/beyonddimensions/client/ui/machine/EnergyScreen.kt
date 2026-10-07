@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.machine.PopMode
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode
@@ -217,18 +218,18 @@ private fun formatRate(rate: Double): String {
 @Composable
 private fun EnergyReadout(state: EnergyState, text: EnergyText) {
     val colors = Bd.colors
-    BdSectionLabel(text.network) { OreText("FE", color = colors.faint, style = Bd.caption) }
+    BdSectionLabel(text.network) { OreText("FE", color = colors[BdColors.faint], style = Bd.caption) }
     Spacer(Modifier.height(5.dp))
     Row(verticalAlignment = Alignment.Bottom) {
         BdTooltip(formatExact(state.stored) + " FE") {
-            OreText(formatReadout(state.stored), color = colors.text, style = Bd.title, maxLines = 1)
+            OreText(formatReadout(state.stored), color = colors[BdColors.text], style = Bd.title, maxLines = 1)
         }
         Spacer(Modifier.weight(1f))
         val rateColor =
             when {
-                state.rate > 0 -> colors.online
-                state.rate < 0 -> colors.danger
-                else -> colors.faint
+                state.rate > 0 -> colors[BdColors.online]
+                state.rate < 0 -> colors[BdColors.danger]
+                else -> colors[BdColors.faint]
             }
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (state.rate != 0.0) {
@@ -244,20 +245,20 @@ private fun EnergyReadout(state: EnergyState, text: EnergyText) {
     }
     Spacer(Modifier.height(1.dp))
     Row(Modifier.fillMaxWidth()) {
-        OreText(state.capacity, color = colors.faint, style = Bd.caption, maxLines = 1)
+        OreText(state.capacity, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
         Spacer(Modifier.weight(1f))
-        if (state.used != null) OreText(state.used, color = colors.faint, style = Bd.caption, maxLines = 1)
+        if (state.used != null) OreText(state.used, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
     }
     Spacer(Modifier.height(4.dp))
     BdTooltip(state.peak, Modifier.fillMaxWidth()) { FlowChart(state.flow, Modifier.fillMaxWidth().height(39.dp)) }
     Spacer(Modifier.height(2.dp))
     Row(Modifier.fillMaxWidth()) {
-        OreText(text.window, color = colors.faint, style = Bd.caption, maxLines = 1)
+        OreText(text.window, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
         Spacer(Modifier.weight(1f))
         state.outlook?.let {
             OreText(
                 it.label,
-                color = if (it.draining) colors.warning else colors.online,
+                color = if (it.draining) colors[BdColors.warning] else colors[BdColors.online],
                 style = Bd.caption,
                 maxLines = 1
             )
@@ -275,17 +276,17 @@ private const val BAR_PITCH = 3
 @Composable
 private fun FlowChart(bars: List<Float>, modifier: Modifier) {
     val colors = Bd.colors
-    Canvas(modifier.background(colors.sunken).border(1.dp, colors.line).padding(2.dp)) {
+    Canvas(modifier.background(colors[BdColors.sunken]).border(1.dp, colors[BdColors.line]).padding(2.dp)) {
         val cell = 1.dp.toPx()
         val columns = (size.width / cell).toInt()
         // 中线上下各 half 行
         val half = ((size.height / cell).toInt() - 1) / 2
         val middle = half * cell
         for (x in 0 until columns step 4) {
-            drawRect(colors.line, Offset(x * cell, (half - half / 2) * cell), Size(cell, cell))
-            drawRect(colors.line, Offset(x * cell, (half + half / 2) * cell), Size(cell, cell))
+            drawRect(colors[BdColors.line], Offset(x * cell, (half - half / 2) * cell), Size(cell, cell))
+            drawRect(colors[BdColors.line], Offset(x * cell, (half + half / 2) * cell), Size(cell, cell))
         }
-        drawRect(colors.lineStrong, Offset(0f, middle), Size(columns * cell, cell))
+        drawRect(colors[BdColors.lineStrong], Offset(0f, middle), Size(columns * cell, cell))
         val peak = bars.maxOfOrNull { abs(it) } ?: 0f
         if (peak == 0f) return@Canvas
         bars.asReversed().forEachIndexed { age, value ->
@@ -293,13 +294,13 @@ private fun FlowChart(bars: List<Float>, modifier: Modifier) {
             val left = columns - (age + 1) * BAR_PITCH + 1
             if (left < 0) return@forEachIndexed
             val rows = (abs(value) / peak * half).toInt().coerceAtLeast(1)
-            val base = if (value > 0) colors.online else colors.danger
+            val base = if (value > 0) colors[BdColors.online] else colors[BdColors.danger]
             val color = base.copy(alpha = 1f - 0.65f * age / FLOW_BARS)
             val top = if (value > 0) middle - rows * cell else middle + cell
             drawRect(color, Offset(left * cell, top), Size((BAR_PITCH - 1) * cell, rows * cell))
             // 柱顶亮一行
             val cap = if (value > 0) top else top + (rows - 1) * cell
-            drawRect(lerp(color, colors.text, 0.5f), Offset(left * cell, cap), Size((BAR_PITCH - 1) * cell, cell))
+            drawRect(lerp(color, colors[BdColors.text], 0.5f), Offset(left * cell, cap), Size((BAR_PITCH - 1) * cell, cell))
         }
     }
 }

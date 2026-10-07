@@ -23,6 +23,8 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.signatureVertical
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OrePixelArt
 import kotlin.math.roundToInt
@@ -86,10 +88,10 @@ fun BdTabbedWindow(
                 Column(
                     Modifier.width(SIDE_RAIL_WIDTH.dp)
                         .fillMaxHeight()
-                        .background(colors.sunken)
+                        .background(colors[BdColors.sunken])
                         .drawBehind {
                             drawLine(
-                                colors.line,
+                                colors[BdColors.line],
                                 Offset(size.width - 0.5f, 0f),
                                 Offset(size.width - 0.5f, size.height),
                                 1.dp.toPx()
@@ -131,8 +133,8 @@ fun BdRailTab(label: String, art: OrePixelArt, selected: Boolean, onClick: () ->
                 .bdClickable(interaction, enabled = !selected, onClick = onClick)
                 .then(
                     when {
-                        selected -> Modifier.background(colors.surface).border(1.dp, colors.line)
-                        hovered -> Modifier.background(colors.accentSoft)
+                        selected -> Modifier.background(colors[BdColors.surface]).border(1.dp, colors[BdColors.line])
+                        hovered -> Modifier.background(colors[BdColors.accentSoft])
                         else -> Modifier
                     }
                 ),
@@ -146,9 +148,9 @@ fun BdRailTab(label: String, art: OrePixelArt, selected: Boolean, onClick: () ->
                 Modifier.size(9.dp),
                 color =
                     when {
-                        selected -> colors.accentDeep
-                        hovered -> colors.text
-                        else -> colors.muted
+                        selected -> colors[BdColors.accentDeep]
+                        hovered -> colors[BdColors.text]
+                        else -> colors[BdColors.muted]
                     },
             )
         }
