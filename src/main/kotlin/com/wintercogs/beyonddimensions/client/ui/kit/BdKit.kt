@@ -26,6 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.*
@@ -224,13 +225,24 @@ fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
  * 单行搜索框。像原版的搜索框一样右键清空，这一下不再弹出右键菜单：清空之后菜单里的剪切、复制已没有对象。
  * [help] 是悬停时的说明，开始输入后收起，免得挡住下方的内容。
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BdSearchField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
+    help: (@Composable ColumnScope.() -> Unit)? = null,
+) = BdTextField(value, onValueChange, placeholder, modifier, OreGlyph.MagnifyingGlass, help)
+
+/** 单行文本框：外观与右键清空同 [BdSearchField]，[glyph] 为 null 时左侧没有图标 */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun BdTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    glyph: OreGlyph? = null,
     help: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     val colors = Bd.colors
@@ -272,12 +284,14 @@ fun BdSearchField(
                         .padding(horizontal = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    OreIcon(
-                        OreGlyph.MagnifyingGlass,
-                        Modifier.size(8.dp),
-                        color = if (focused) colors[BdColors.accent] else colors[BdColors.faint]
-                    )
-                    Spacer(Modifier.width(4.dp))
+                    if (glyph != null) {
+                        OreIcon(
+                            glyph,
+                            Modifier.size(8.dp),
+                            color = if (focused) colors[BdColors.accent] else colors[BdColors.faint]
+                        )
+                        Spacer(Modifier.width(4.dp))
+                    }
                     Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                         if (value.isEmpty()) OreText(placeholder, color = colors[BdColors.faint], maxLines = 1)
                         inner()
@@ -286,6 +300,57 @@ fun BdSearchField(
                         Spacer(Modifier.width(3.dp))
                         BdGlyphButton(OreGlyph.Cross, null, { onValueChange("") }, size = 10.dp, glyphSize = 6.dp)
                     }
+                }
+            },
+        )
+    }
+}
+
+/**
+ * 多行文本框：外观同 [BdTextField]，长文字自动换行，至少 [minLines] 行，超过 [maxLines] 行时在框内滚动。
+ * 右键是剪切、复制、粘贴的菜单而不是清空，长文字不会被一下清掉。[help] 是悬停时的说明，开始输入后收起
+ */
+@Composable
+fun BdTextArea(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    minLines: Int = 3,
+    maxLines: Int = 8,
+    help: (@Composable ColumnScope.() -> Unit)? = null,
+) {
+    val colors = Bd.colors
+    val interaction = remember { MutableInteractionSource() }
+    val focused by interaction.collectIsFocusedAsState()
+    val hovered by interaction.collectIsHoveredAsState()
+    BdTooltip(help ?: {}, modifier, enabled = help != null && !focused) {
+        BasicTextField(
+            value,
+            onValueChange,
+            Modifier.fillMaxWidth().hoverable(interaction),
+            textStyle = Bd.body.copy(color = colors[BdColors.text]),
+            minLines = minLines,
+            maxLines = maxLines,
+            interactionSource = interaction,
+            cursorBrush = SolidColor(colors[BdColors.accent]),
+            decorationBox = { inner ->
+                Box(
+                    Modifier.fillMaxWidth()
+                        .background(colors[BdColors.surface], Bd.ChipShape)
+                        .border(
+                            1.dp,
+                            when {
+                                focused -> colors[BdColors.accent]
+                                hovered -> colors[BdColors.lineStrong]
+                                else -> colors[BdColors.line]
+                            },
+                            Bd.ChipShape,
+                        )
+                        .padding(horizontal = 5.dp, vertical = 3.dp),
+                ) {
+                    if (value.isEmpty()) OreText(placeholder, color = colors[BdColors.faint])
+                    inner()
                 }
             },
         )
@@ -623,6 +688,9 @@ fun BdScrollbar(state: ScrollState, modifier: Modifier = Modifier) {
 /**
  * 两种滚动条共用的外观与操作：一像素细线框的深色凹槽里，一条标志渐变的平直滑块，长度对应可见的比例，至少 12。
  * 点击或拖动轨道时，滑块中心跳到指针处；[onScrollTo] 收到 0 到 1 之间的位置。
+ *
+ * 滑块按轨道的实际高度在绘制时算出，不用 BoxWithConstraints：浮层按内容的固有宽度定宽，
+ * 而子组合布局不支持固有尺寸的测量，浮层里的列表一出现滚动条就会崩溃
  */
 @Composable
 private fun BdScrollbarTrack(
@@ -634,30 +702,28 @@ private fun BdScrollbarTrack(
 ) {
     val colors = Bd.colors
     val latest by rememberUpdatedState(onScrollTo)
-    val density = LocalDensity.current
-    BoxWithConstraints(modifier.background(colors[BdColors.sunken]).border(1.dp, colors[BdColors.line]).padding(1.dp)) {
-        val track = maxHeight
-        val thumb = (track * visibleFraction.coerceIn(0f, 1f)).coerceIn(minOf(12.dp, track), track)
-        val travel = track - thumb
-        fun positionAt(y: Float): Float =
-            with(density) { ((y - thumb.toPx() / 2f) / travel.toPx().coerceAtLeast(1f)).coerceIn(0f, 1f) }
-        Box(
-            Modifier.fillMaxSize()
-                .pointerInput(travel, thumb) { detectTapGestures { latest(positionAt(it.y)) } }
-                .pointerInput(travel, thumb) {
-                    detectVerticalDragGestures { change, _ -> latest(positionAt(change.position.y)) }
-                }
-        ) {
-            if (canScroll) {
-                Box(
-                    Modifier.offset(y = travel * position.coerceIn(0f, 1f))
-                        .fillMaxWidth()
-                        .height(thumb)
-                        .background(colors.signatureVertical)
-                )
-            }
-        }
+    val fraction by rememberUpdatedState(visibleFraction.coerceIn(0f, 1f))
+    val minThumb = with(LocalDensity.current) { 12.dp.toPx() }
+    fun thumbOf(track: Float) = (track * fraction).coerceIn(minOf(minThumb, track), track)
+    fun positionAt(y: Float, track: Float): Float {
+        val thumb = thumbOf(track)
+        return ((y - thumb / 2f) / (track - thumb).coerceAtLeast(1f)).coerceIn(0f, 1f)
     }
+    Box(
+        modifier.background(colors[BdColors.sunken]).border(1.dp, colors[BdColors.line]).padding(1.dp)
+            .pointerInput(Unit) { detectTapGestures { latest(positionAt(it.y, size.height.toFloat())) } }
+            .pointerInput(Unit) {
+                detectVerticalDragGestures { change, _ -> latest(positionAt(change.position.y, size.height.toFloat())) }
+            }
+            .drawBehind {
+                if (!canScroll) return@drawBehind
+                val thumb = thumbOf(size.height)
+                // 渐变按滑块自身的范围铺开
+                translate(top = (size.height - thumb) * position.coerceIn(0f, 1f)) {
+                    drawRect(colors.signatureVertical, size = Size(size.width, thumb))
+                }
+            }
+    )
 }
 
 /** 停止输入多久后自动提交：连续输入时不把中间值逐个发出去，输完直接关闭界面也不会丢 */

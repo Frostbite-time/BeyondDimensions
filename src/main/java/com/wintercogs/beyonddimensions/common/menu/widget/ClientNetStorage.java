@@ -51,8 +51,8 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
     private long cacheEpoch = -1;
     private boolean advancedTooltips;
 
-    // 仅显示某一种资源类型，null 表示全部
-    private @Nullable ResourceLocation typeFilter = null;
+    // 当前打开的分类标签
+    private CategoryFilter category = CategoryFilter.ALL;
 
     /**
      * 语言、资源包或高级提示框变化后，丢弃派生缓存并完整重建视图
@@ -98,21 +98,47 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
     }
 
     /**
-     * 设置资源类型过滤，null 表示显示全部类型
+     * 分类标签的过滤条件：符合搜索式或在特定补充里的资源。两者都没有的分类显示全部
      */
-    public void setTypeFilter(@Nullable ResourceLocation typeId)
+    public record CategoryFilter(ClientNetStorageSearchHelper.Query query, Set<IStackKey<?>> keys)
     {
-        if (Objects.equals(typeFilter, typeId))
+        public static final CategoryFilter ALL = new CategoryFilter(ClientNetStorageSearchHelper.Query.EMPTY, Set.of());
+
+        boolean matches(ClientNetStorageSearchHelper helper, IStackKey<?> key)
+        {
+            if (query.isEmpty() && keys.isEmpty())
+                return true;
+            return keys.contains(key) || !query.isEmpty() && helper.matches(query, key);
+        }
+    }
+
+    /**
+     * 切换分类标签；与当前分类相同时什么也不做
+     */
+    public void setCategory(CategoryFilter filter)
+    {
+        if (category.equals(filter))
             return;
-        typeFilter = typeId;
+        category = filter;
         mustUpdateAllFromSource = true;
         cacheIndexes = null;
     }
 
-    public @Nullable ResourceLocation getTypeFilter()
+    /**
+     * 存储中符合分类的资源种数，不受搜索框影响
+     */
+    public int count(CategoryFilter filter)
     {
-        return typeFilter;
+        refreshContext();
+        int count = 0;
+        for (KeyAmount ka : sourceStorage.getStorage())
+        {
+            if (ka != null && !ka.isEmpty() && filter.matches(searchHelper, ka.key()))
+                count++;
+        }
+        return count;
     }
+
 
     // 初始值给一个不可能出现的按钮值防止命中
     private SortProperties lastSortProperties = new SortProperties(ButtonState.DISABLED, ButtonState.DISABLED, false);
@@ -343,13 +369,11 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
 
 
     /**
-     * 类型过滤与搜索过滤
+     * 分类过滤与搜索过滤
      */
     private boolean matchFilter(IStackKey<?> key)
     {
-        if (typeFilter != null && !typeFilter.equals(key.getTypeId()))
-            return false;
-        return this.searchHelper.matches(key);
+        return category.matches(searchHelper, key) && searchHelper.matches(key);
     }
 
     /**

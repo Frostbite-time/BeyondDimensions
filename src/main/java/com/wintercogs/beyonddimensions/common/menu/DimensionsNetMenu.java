@@ -436,14 +436,14 @@ public class DimensionsNetMenu extends BDBaseMenu
     }
 
     /**
-     * 设置资源类型过滤（仅客户端），null 表示显示全部类型
+     * 切换分类标签（仅客户端）
      */
-    public void setTypeFilter(@Nullable ResourceLocation typeId)
+    public void setCategory(ClientNetStorage.CategoryFilter filter)
     {
         if (clientNetStorage == null)
             return;
 
-        this.clientNetStorage.setTypeFilter(typeId);
+        this.clientNetStorage.setCategory(filter);
     }
 
     public void updateScrollLineData(int dataSize)

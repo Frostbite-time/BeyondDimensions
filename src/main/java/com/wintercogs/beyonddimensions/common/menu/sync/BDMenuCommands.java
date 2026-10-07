@@ -41,6 +41,13 @@ public final class BDMenuCommands
     {
     }
 
+    /**
+     * 右键菜单的"取出 x 个"
+     */
+    public record Take(int slot, Key key, long amount)
+    {
+    }
+
     public record Ghost(int slot, IStackKey<?> key, long amount)
     {
     }
@@ -94,6 +101,7 @@ public final class BDMenuCommands
 
     // 资源键的编解码依赖本菜单的注册表上下文，因此以下操作按菜单实例创建
     public final MenuAction<BDBaseMenu, Click> CLICK;
+    public final MenuAction<BDBaseMenu, Take> TAKE;
     public final MenuAction<BDBaseMenu, Ghost> GHOST;
     public final MenuAction<BDBaseMenu, Batch> BATCH;
     public final MenuAction<BDBaseMenu, Recipe> RECIPE;
@@ -134,6 +142,23 @@ public final class BDMenuCommands
                     || click.amount() < 0 || click.amount() > key.getVanillaMaxStackSize())
                 return false;
             m.customClickHandler(click.slot(), new KeyAmount(key, click.amount()), click.button(), click.shift());
+            m.broadcastChanges();
+            return true;
+        });
+
+        var takeCodec = SyncCodec.<Take>of("beyonddimensions:take/1:" + keyCodec.id(),
+                (out, value) -> {
+                    out.writeInt(value.slot());
+                    keyCodec.write(out, value.key());
+                    out.writeLong(value.amount());
+                },
+                in -> new Take(in.readInt(), keyCodec.read(in), in.readLong()));
+        TAKE = MenuAction.of("bd.take", takeCodec, BDMenuResources.MAX_ACTION_BYTES, (m, player, take) -> {
+            IStackKey<?> key = m.commands().resolve(take.key());
+            if (key == null || take.slot() < 0 || take.slot() >= m.slots.size()
+                    || take.amount() < 1 || take.amount() > key.getVanillaMaxStackSize())
+                return false;
+            m.customClickHandler(take.slot(), new KeyAmount(key, take.amount()), 0, false, take.amount());
             m.broadcastChanges();
             return true;
         });
@@ -211,7 +236,7 @@ public final class BDMenuCommands
      */
     public <M extends BDBaseMenu> MenuSync<M> inventory(MenuSync<M> sync)
     {
-        return sync.action(CLICK).action(GHOST).action(BATCH).onActionResult(this::reportFailure);
+        return sync.action(CLICK).action(TAKE).action(GHOST).action(BATCH).onActionResult(this::reportFailure);
     }
 
     /**
@@ -264,6 +289,11 @@ public final class BDMenuCommands
     public boolean click(int slot, KeyAmount key, int button, boolean shift)
     {
         return menu.menuSync().request(CLICK, new Click(slot, reference(key.key()), key.amount(), button, shift)).queued();
+    }
+
+    public boolean take(int slot, IStackKey<?> key, long amount)
+    {
+        return menu.menuSync().request(TAKE, new Take(slot, reference(key), amount)).queued();
     }
 
     public boolean ghost(int slot, KeyAmount value)

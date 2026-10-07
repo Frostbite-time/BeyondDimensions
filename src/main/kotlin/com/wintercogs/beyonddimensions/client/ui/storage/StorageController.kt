@@ -5,11 +5,15 @@ import com.wintercogs.beyonddimensions.api.ButtonState
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
-import com.wintercogs.beyonddimensions.api.storage.key.impl.LongStackKey
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType
+import com.wintercogs.beyonddimensions.client.ui.base.resourceIcon
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
+import com.wintercogs.beyonddimensions.common.menu.interaction.ResourceContents
+import com.wintercogs.beyonddimensions.common.menu.widget.ClientNetStorage
+import com.wintercogs.beyonddimensions.common.menu.widget.ClientNetStorageSearchHelper
+import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot
 import com.wintercogs.beyonddimensions.config.CommonConfigRuntime
 import com.wintercogs.beyonddimensions.integration.ModPresence
 import com.wintercogs.beyonddimensions.integration.OtherModIds
@@ -18,13 +22,38 @@ import com.wintercogs.beyonddimensions.integration.module.polymorph.ComposeRecip
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenPrimaryNetSwitcherPacket
 import com.wintercogs.beyonddimensions.util.UIDataHelper
+import dev.compixel.forge.item.ItemIcon
 import net.minecraft.Util
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.resources.language.I18n
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.core.registries.BuiltInRegistries
 import net.neoforged.neoforge.network.PacketDistributor
 
-/** 资源类型页签 */
-data class TypeTab(val id: String, val label: String, val count: Int)
+/** 一个分类标签在界面上的样子：名称与图标 */
+data class CategoryTab(val name: String, val icon: ItemIcon?)
+
+/** 分类编辑区里的一个特定补充 */
+data class CategoryKey(val icon: ItemIcon, val name: String)
+
+/**
+ * 分类编辑区：正在编辑第 [index] 个分类。[inspected] 是列出写法的特定补充（没有选中时为图标），
+ * [chips] 是它的模组、标签、耐久与额外组件写法，点击加入搜索式
+ */
+data class CategoryEditor(
+    val index: Int,
+    val name: String,
+    val icon: ItemIcon?,
+    val search: String,
+    val matches: Int,
+    val keys: List<CategoryKey>,
+    val inspected: Int,
+    val chips: List<String>,
+)
+
+/**
+ * 存储格子的右键菜单。[serial] 每次打开都不同；[takeable] 是最多能取出的数量，不是物品时为 0
+ */
+data class SlotMenu(val serial: Int, val name: String, val takeable: Int, val categories: List<String>)
 
 data class RecipeChoice(val id: String, val label: String)
 
@@ -48,8 +77,11 @@ data class StorageState(
     val firstRow: Int = 0,
     val totalRows: Int = 0,
     val stored: Int = 0,
-    val tabs: List<TypeTab> = emptyList(),
-    val typeFilter: String? = null,
+    val categories: List<CategoryTab> = emptyList(),
+    /** 打开的分类标签，没有时为 -1 */
+    val category: Int = -1,
+    val editor: CategoryEditor? = null,
+    val slotMenu: SlotMenu? = null,
     val search: String = "",
     val sort: ButtonState = ButtonState.SORT_NAME,
     val secondarySort: ButtonState? = null,
@@ -72,7 +104,41 @@ sealed interface StorageAction {
     /** 玩家设定的首选行列，会写入配置 */
     data class PreferredSize(val columns: Int, val rows: Int) : StorageAction
 
-    data class Filter(val typeId: String?) : StorageAction
+    data class SelectCategory(val index: Int) : StorageAction
+
+    /** 新建分类并打开编辑区 */
+    data object AddCategory : StorageAction
+
+    data class EditCategory(val index: Int) : StorageAction
+
+    data object CloseEditor : StorageAction
+
+    data class DeleteCategory(val index: Int) : StorageAction
+
+    data class MoveCategory(val from: Int, val to: Int) : StorageAction
+
+    /** 以下修改编辑区里的分类 */
+    data class RenameCategory(val name: String) : StorageAction
+
+    data class CategorySearch(val text: String) : StorageAction
+
+    /** 左键把手上的物品设为图标，右键清除 */
+    data class CategoryIcon(val right: Boolean) : StorageAction
+
+    /**
+     * 点击第 [index] 个特定补充：左键列出它的写法，右键移除。点末尾的空格时，左键加入手上的物品，右键加入手上容器的内容物
+     */
+    data class CategoryKeyClick(val index: Int, val right: Boolean) : StorageAction
+
+    /** 把一个写法加入搜索式：按住 Shift 时与已有条件同时符合，否则符合其一即可 */
+    data class AppendToSearch(val text: String) : StorageAction
+
+    /** 以下是存储格子右键菜单里的操作 */
+    data class TakeFromMenu(val amount: Int) : StorageAction
+
+    data class AddToCategory(val index: Int) : StorageAction
+
+    data object CloseSlotMenu : StorageAction
 
     data class Sort(val policy: ButtonState) : StorageAction
 
@@ -115,12 +181,34 @@ class StorageController(private val menu: DimensionsNetMenu) {
     private val recipeChoices =
         if (craftMenu != null && ModPresence.isLoaded(OtherModIds.POLYMORPH)) ComposeRecipeChoices() else null
     private var lastSearch = CommonConfigRuntime.uiSearch
-    private var tabs = emptyList<TypeTab>()
-    private var tabsStored = -1
-    private var tabsCountedAt = 0L
+    private val player = menu.player.uuid
+    private val registries = menu.player.registryAccess()
+    private var categories = StorageCategories.load(player, registries)
+    private var selected =
+        StorageCategories.selected[player]?.takeIf { it in categories.indices } ?: if (categories.isEmpty()) -1 else 0
+    private var editing = -1
+    private var inspected = -1
+
+    // 同一条搜索式始终用同一个查询对象，分类的匹配结果才能缓存
+    private val queries = HashMap<String, ClientNetStorageSearchHelper.Query>()
+    private val icons = HashMap<IStackKey<*>, ItemIcon>()
+    private var matches = 0
+    private var countedEditing = -1
+    private var countedVersion = -1
+    private var countedStored = -1
+    private var countedAt = 0L
+
+    // 分类每改动一次加一，编辑区里符合的种数随之重算
+    private var version = 0
+    private var menuTarget: MenuTarget? = null
+    private var menuSerial = 0
+
+    /** 右键菜单针对的资源 */
+    private class MenuTarget(val slot: Int, val key: IStackKey<*>, val amount: Long)
 
     init {
         menu.loadSearchText(lastSearch)
+        menu.setCategory(filterOf(categories.getOrNull(selected)))
         restoreTransferContext()
         craftMenu?.let { menu.commands().preference(CommonConfigRuntime.uiCraftReturnButton == ButtonState.ENABLED) }
     }
@@ -147,8 +235,10 @@ class StorageController(private val menu: DimensionsNetMenu) {
             firstRow = menu.lineData,
             totalRows = menu.maxLineData + menu.lines,
             stored = stored,
-            tabs = typeTabs(stored),
-            typeFilter = menu.clientNetStorage?.typeFilter?.toString(),
+            categories = categories.map { CategoryTab(it.name, it.icon?.let(::iconOf)) },
+            category = selected,
+            editor = editorState(stored),
+            slotMenu = slotMenuState(),
             search = lastSearch,
             sort = CommonConfigRuntime.uiSortButton,
             secondarySort = CommonConfigRuntime.uiSecondSortButton.takeIf { it in SORT_POLICIES },
@@ -177,11 +267,56 @@ class StorageController(private val menu: DimensionsNetMenu) {
                 Config.INSTANCE.commonConfig.UI_PAGE_NUM.save()
             }
 
-            is StorageAction.Filter -> {
-                menu.setTypeFilter(action.typeId?.let(ResourceLocation::tryParse))
-                menu.lineData = 0
-                menu.updateViewerStorage(false)
+            is StorageAction.SelectCategory -> select(action.index)
+            StorageAction.AddCategory -> {
+                categories = categories + StorageCategory(I18n.get("ui.beyonddimensions.storage.category.new"))
+                save()
+                openEditor(categories.lastIndex)
             }
+
+            is StorageAction.EditCategory -> openEditor(action.index)
+
+            StorageAction.CloseEditor -> {
+                editing = -1
+                inspected = -1
+            }
+
+            is StorageAction.DeleteCategory -> delete(action.index)
+            is StorageAction.MoveCategory -> move(action.from, action.to)
+            is StorageAction.RenameCategory -> edit { it.copy(name = action.name) }
+            is StorageAction.CategorySearch -> edit { it.copy(search = action.text) }
+            is StorageAction.CategoryIcon -> {
+                val carried = menu.carried
+                if (action.right) edit { it.copy(icon = null) }
+                else if (!carried.isEmpty) edit { it.copy(icon = ItemStackKey(carried)) }
+            }
+
+            is StorageAction.CategoryKeyClick -> clickKey(action.index, action.right)
+            is StorageAction.AppendToSearch -> edit { category ->
+                val search = category.search.trimEnd()
+                category.copy(
+                    search = when {
+                        search.isEmpty() -> action.text
+                        Screen.hasShiftDown() -> "$search ${action.text}"
+                        else -> "$search|${action.text}"
+                    }
+                )
+            }
+
+            is StorageAction.TakeFromMenu -> {
+                menuTarget?.let { menu.commands().take(it.slot, it.key, action.amount.toLong()) }
+                menuTarget = null
+            }
+
+            is StorageAction.AddToCategory -> {
+                val key = menuTarget?.key
+                menuTarget = null
+                if (key != null && action.index in categories.indices) {
+                    update(action.index) { if (key in it.keys) it else it.copy(keys = it.keys + key) }
+                }
+            }
+
+            StorageAction.CloseSlotMenu -> menuTarget = null
 
             is StorageAction.Sort -> {
                 CommonConfigRuntime.uiSortButton = action.policy
@@ -266,35 +401,180 @@ class StorageController(private val menu: DimensionsNetMenu) {
         menu.buildIndexList()
     }
 
-    /** 各类资源的页签；种类数不变时每秒最多重算一次 */
-    private fun typeTabs(stored: Int): List<TypeTab> {
-        // 快照除了每刻一次，输入事件处理完动作后也会再取，所以按时间而不是按调用次数限制重算
-        val now = Util.getMillis()
-        if (stored == tabsStored && now - tabsCountedAt < 1000) return tabs
-        tabsStored = stored
-        tabsCountedAt = now
-        val counts = LinkedHashMap<ResourceLocation, Int>()
-        val samples = HashMap<ResourceLocation, IStackKey<*>>()
-        for (value in menu.storage.storage) {
-            val key = value.key()
-            if (key.isEmpty) continue
-            counts.merge(key.typeId, 1, Int::plus)
-            samples.putIfAbsent(key.typeId, key)
-        }
-        val order = listOf(ItemStackKey.ID, FluidStackKey.ID)
-        val ids = counts.keys.sortedWith(compareBy({
-            order.indexOf(it).let { index -> if (index < 0) order.size else index }
-        }, { it.toString() }))
-        val next = ids.map { TypeTab(it.toString(), typeLabel(it, samples.getValue(it)), counts.getValue(it)) }
-        if (next != tabs) tabs = next
-        return tabs
+    /** 存储格子的右键菜单：空手右键有资源的格子时打开，返回是否打开了 */
+    fun openSlotMenu(slotId: Int): Boolean {
+        val resource = (menu.slots.getOrNull(slotId) as? DisorderedStackTypedSlot)?.stack ?: return false
+        if (resource.key().isEmpty) return false
+        menuTarget = MenuTarget(slotId, resource.key(), resource.amount())
+        menuSerial++
+        return true
     }
 
-    private fun typeLabel(typeId: ResourceLocation, sample: IStackKey<*>): String {
-        val key = "ui.beyonddimensions.resource_type.${typeId.namespace}.${typeId.path.replace('/', '.')}"
-        if (I18n.exists(key)) return I18n.get(key)
-        if (sample is LongStackKey<*>) return sample.render.getDisplayName(sample).string
-        return typeId.path.substringAfterLast('/')
+    private fun slotMenuState(): SlotMenu? {
+        val target = menuTarget ?: return null
+        val key = target.key
+        // 数量以打开菜单时为准；服务器按实际库存取出，取不足时只取到现有的数量
+        val takeable =
+            if (key is ItemStackKey) minOf(target.amount, key.copyStack().maxStackSize.toLong()).toInt() else 0
+        return SlotMenu(menuSerial, nameOf(key), takeable, categories.map { it.name })
+    }
+
+    /**
+     * 编辑区：编辑的分类与当前打开的分类无关，可以一边看着别的分类一边写规则。
+     * 符合的种数在分类或存储种数变化时重算，否则每秒最多一次；快照除了每刻一次，输入事件处理完动作后也会再取
+     */
+    private fun editorState(stored: Int): CategoryEditor? {
+        val category = categories.getOrNull(editing) ?: return null
+        val now = Util.getMillis()
+        val changed = countedEditing != editing || countedVersion != version || countedStored != stored
+        if (changed || now - countedAt >= 1000) {
+            countedEditing = editing
+            countedVersion = version
+            countedStored = stored
+            countedAt = now
+            matches = menu.clientNetStorage?.count(filterOf(category)) ?: 0
+        }
+        val inspectedKey = category.keys.getOrNull(inspected) ?: category.icon
+        return CategoryEditor(
+            index = editing,
+            name = category.name,
+            icon = category.icon?.let(::iconOf),
+            search = category.search,
+            matches = matches,
+            keys = category.keys.map { CategoryKey(iconOf(it), nameOf(it)) },
+            inspected = if (inspected in category.keys.indices) inspected else -1,
+            chips = inspectedKey?.let(::chipsOf).orEmpty(),
+        )
+    }
+
+    /** 一种资源能写进搜索式的条件：模组、ID、各个标签，以及耐久度和额外组件 */
+    private fun chipsOf(key: IStackKey<*>): List<String> {
+        val chips = ArrayList<String>()
+        chips += "@" + key.modId.lowercase()
+        if (key is ItemStackKey) chips += "*" + BuiltInRegistries.ITEM.getKey(key.source).path
+        key.tags.map { "#" + it.location() }.sorted().forEach { chips += it }
+        val stack = (key as? ItemStackKey)?.readOnlyStack
+        if (stack != null && stack.isDamageableItem) chips += "%"
+        val patch =
+            when (key) {
+                is ItemStackKey -> key.readOnlyStack.componentsPatch
+                is FluidStackKey -> key.readOnlyStack.componentsPatch
+                else -> null
+            }
+        if (patch != null && !patch.isEmpty) chips += "&"
+        return chips
+    }
+
+    // 物品的显示名带方括号，界面上用不带括号的名称
+    private fun nameOf(key: IStackKey<*>): String =
+        if (key is ItemStackKey) key.readOnlyStack.hoverName.string else key.render.getDisplayName(key).string
+
+    private fun iconOf(key: IStackKey<*>) = icons.getOrPut(key) { resourceIcon(key) }
+
+    private fun filterOf(category: StorageCategory?): ClientNetStorage.CategoryFilter {
+        if (category == null) return ClientNetStorage.CategoryFilter.ALL
+        val query = queries.getOrPut(category.search) { ClientNetStorageSearchHelper.Query.parse(category.search) }
+        return ClientNetStorage.CategoryFilter(query, category.keys.toSet())
+    }
+
+    private fun select(index: Int) {
+        val target = if (index in categories.indices) index else -1
+        selected = target
+        if (target >= 0) StorageCategories.selected[player] = target else StorageCategories.selected.remove(player)
+        applyCategory()
+    }
+
+    private fun applyCategory() {
+        val filter = filterOf(categories.getOrNull(selected))
+        menu.setCategory(filter)
+        menu.lineData = 0
+        menu.updateViewerStorage(false)
+    }
+
+    /** 在编辑区打开第 [index] 个分类，不切换当前打开的分类 */
+    private fun openEditor(index: Int) {
+        if (index !in categories.indices) return
+        if (index != editing) inspected = -1
+        editing = index
+    }
+
+    /** 修改编辑区里的分类 */
+    private fun edit(change: (StorageCategory) -> StorageCategory) {
+        if (editing in categories.indices) update(editing, change)
+    }
+
+    private fun update(index: Int, change: (StorageCategory) -> StorageCategory) {
+        val before = categories[index]
+        val after = change(before)
+        if (after == before) return
+        categories = categories.toMutableList().also { it[index] = after }
+        save()
+        if (index == selected && (after.search != before.search || after.keys != before.keys)) applyCategory()
+    }
+
+    private fun clickKey(index: Int, right: Boolean) {
+        val category = categories.getOrNull(editing) ?: return
+        if (index in category.keys.indices) {
+            if (!right) {
+                inspected = if (inspected == index) -1 else index
+                return
+            }
+            if (inspected == index) inspected = -1 else if (inspected > index) inspected--
+            edit { it.copy(keys = it.keys.filterIndexed { i, _ -> i != index }) }
+            return
+        }
+        val carried = menu.carried
+        if (carried.isEmpty) return
+        val key = if (right) ResourceContents.of(carried) else ItemStackKey(carried.copyWithCount(1))
+        if (key == null || key in category.keys) return
+        edit { it.copy(keys = it.keys + key) }
+    }
+
+    private fun delete(index: Int) {
+        if (index !in categories.indices) return
+        categories = categories.filterIndexed { i, _ -> i != index }
+        save()
+        if (editing == index) inspected = -1
+        editing =
+            when {
+                editing == index -> -1
+                editing > index -> editing - 1
+                else -> editing
+            }
+        selected =
+            when {
+                selected == index -> minOf(index, categories.lastIndex)
+                selected > index -> selected - 1
+                else -> selected
+            }
+        if (selected >= 0) StorageCategories.selected[player] = selected else StorageCategories.selected.remove(player)
+        applyCategory()
+    }
+
+    private fun move(from: Int, to: Int) {
+        if (from !in categories.indices || to !in categories.indices || from == to) return
+        val list = categories.toMutableList()
+        list.add(to, list.removeAt(from))
+        categories = list
+        save()
+        fun moved(index: Int) =
+            when {
+                index == from -> to
+                from < to && index in from + 1..to -> index - 1
+                from > to && index in to until from -> index + 1
+                else -> index
+            }
+        selected = moved(selected)
+        editing = if (editing >= 0) moved(editing) else -1
+        if (selected >= 0) StorageCategories.selected[player] = selected
+    }
+
+    private fun save() {
+        version++
+        StorageCategories.save(player, categories, registries)
+        // 编辑搜索式时每次输入都会解析一条，只留下仍在使用的
+        val searches = categories.mapTo(HashSet()) { it.search }
+        queries.keys.retainAll(searches)
     }
 
     /** 在存储与合成之间切换会重新打开菜单，先记下滚动位置 */

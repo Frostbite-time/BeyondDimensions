@@ -188,13 +188,30 @@ object BdContextMenu : ContextMenuRepresentation {
         Popup(remember(point) { AtPoint(point) }, close, properties = PopupProperties(focusable = true)) {
             OverlayCard(Modifier.width(IntrinsicSize.Max).widthIn(min = 40.dp).padding(1.dp)) {
                 for (item in items()) {
-                    MenuRow(item.label) {
+                    BdMenuRow(item.label) {
                         close()
                         item.onClick()
                     }
                 }
             }
         }
+    }
+}
+
+/**
+ * 在锚点内 [point] 处展开的菜单，例如右键菜单：点击外部关闭；打开期间与 [BdPopover] 一样计入 [LocalBdPopovers]
+ */
+@Composable
+fun BdPointMenu(point: IntOffset, onDismissRequest: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    LocalBdPopovers.current?.let { popovers ->
+        DisposableEffect(popovers) {
+            popovers.open++
+            onDispose { popovers.open-- }
+        }
+    }
+    if (!LocalWindowInfo.current.isWindowFocused) return
+    Popup(remember(point) { AtPoint(point) }, onDismissRequest, properties = PopupProperties(focusable = true)) {
+        OverlayCard(Modifier.width(IntrinsicSize.Max).widthIn(min = 40.dp).padding(1.dp), content)
     }
 }
 
@@ -219,8 +236,9 @@ private class AtPoint(private val point: IntOffset) : PopupPositionProvider {
     }
 }
 
+/** 菜单中的一行：一行小字，悬停时浅色底 */
 @Composable
-private fun MenuRow(label: String, onClick: () -> Unit) {
+fun BdMenuRow(label: String, onClick: () -> Unit) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()

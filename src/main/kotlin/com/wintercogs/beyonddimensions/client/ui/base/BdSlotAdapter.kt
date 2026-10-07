@@ -38,6 +38,9 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
                 size > ICON_HANDLES
         }
 
+    /** 空手右键存储格子里的资源时调用，返回 true 表示界面打开了自己的菜单，不再发送右键点击 */
+    var resourceMenu: ((slotId: Int) -> Boolean)? = null
+
     // 连续两次 Shift 点击同一背包槽时，把背包里同种物品全部存入网络
     private var repeatTicks = 0
     private var lastPlayerSlot = -1
@@ -65,11 +68,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         return MenuSlotVisual(iconOf(key), amount = label, marked = slot.isFake)
     }
 
-    private fun iconOf(key: IStackKey<*>): ItemIcon =
-        icons.getOrPut(key) {
-            if (key is ItemStackKey) ItemIcon.snapshot(key.copyStack().copyWithCount(1))
-            else ItemIcon.drawn(key.toString(), { graphics -> key.render.render(graphics, key, 0, 0) })
-        }
+    private fun iconOf(key: IStackKey<*>): ItemIcon = icons.getOrPut(key) { resourceIcon(key) }
 
     /** 虚拟资源不参与原版的拖动分配 */
     override fun canDragTo(slot: Slot) = slot !is AbstractStackTypedSlot
@@ -100,6 +99,10 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     }
 
     private fun clickResource(slotId: Int, slot: AbstractStackTypedSlot, button: Int, type: ClickType) {
+        val emptyHand = menu.carried.isEmpty
+        if (type == ClickType.PICKUP && button == 1 && slot is DisorderedStackTypedSlot && emptyHand &&
+            !slot.stack.isEmpty && resourceMenu?.invoke(slotId) == true
+        ) return
         when (type) {
             ClickType.PICKUP, ClickType.CLONE, ClickType.QUICK_MOVE ->
                 menu.commands().click(
@@ -151,3 +154,8 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         const val ICON_HANDLES = 1024
     }
 }
+
+/** 资源的图标：物品取快照，其他资源按自己的渲染方式绘制。在游戏线程调用 */
+fun resourceIcon(key: IStackKey<*>): ItemIcon =
+    if (key is ItemStackKey) ItemIcon.snapshot(key.copyStack().copyWithCount(1))
+    else ItemIcon.drawn(key.toString(), { graphics -> key.render.render(graphics, key, 0, 0) })

@@ -33,7 +33,7 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
     ),
     BdScreen {
     @Suppress("UNCHECKED_CAST")
-    private val adapter = inventory.adapter as BdSlotAdapter<M>
+    protected val adapter = inventory.adapter as BdSlotAdapter<M>
 
     override fun inventoryTick() = adapter.tick()
 
