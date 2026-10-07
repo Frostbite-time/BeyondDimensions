@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "beyonddimensions:space_time_bar"
+        "recipes": "beyonddimensions:space_time_bar"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

@@ -25,10 +25,13 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
-import org.lwjgl.glfw.GLFW;
+
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+
+import static net.minecraft.world.inventory.AbstractContainerMenu.CONTAINER_CLICK_PRIMARY;
+import static net.minecraft.world.inventory.AbstractContainerMenu.CONTAINER_CLICK_SECONDARY;
 
 public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
 {
@@ -62,13 +65,13 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
 
                 AtomicBoolean handled = new AtomicBoolean(false);
                 // 先检查是否为经验棒交互
-                if (carriedItem.getItem() instanceof XpExchangeItem && button != GLFW.GLFW_MOUSE_BUTTON_LEFT)
+                if (carriedItem.getItem() instanceof XpExchangeItem && button != CONTAINER_CLICK_PRIMARY)
                 {
                     int conversionRate = XpExchangeItem.getConversionRate();
                     double currentLevel = XpUtil.levelAsDouble(player);
                     int wantConversionLevel = XpExchangeItem.getXpLevelPerAction(carriedItem);
 
-                    if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
+                    if (button == CONTAINER_CLICK_SECONDARY) // 鼠标右键--存入一级
                     {
                         handled.set(true); // 走到这一步说明已经进行了交互
                         long needRemovePlayerXp = XpUtil.xpBetweenLevels(Math.max(currentLevel - wantConversionLevel, 0), currentLevel);
@@ -86,7 +89,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     }
                 }
                 // 再检查是否为能力交互
-                else if (carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
+                else if (carriedItem.getCount() == 1 && button == CONTAINER_CLICK_SECONDARY && !ItemCapInteractionBlackList.isInBlackList(carriedItem.getItem()))
                 {
                     if (carriedItem.getItem() instanceof BucketItem bucketItem)
                     {
@@ -163,7 +166,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 // 最终回退
                 if (!handled.get())
                 {
-                    int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
+                    int changedCount = button == CONTAINER_CLICK_PRIMARY ? carriedItem.getCount() : 1;
                     int actualInsert = (int) (changedCount - storage.insert(new ItemStackKey(carriedItem), changedCount, false).amount());
                     int newCount = carriedItem.getCount() - actualInsert;
                     if (newCount <= 0)
@@ -189,7 +192,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     //槽位物品存在，携带物品为空，尝试取出槽位物品
                     // 确保一次取出最大不得超过原版数量
                     int woundChangeNum = BDMath.clampLongToInt(Math.min(clickStack.amount(), clickKey.getVanillaMaxStackSize()));
-                    int actualChangeNum = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? woundChangeNum : (woundChangeNum + 1) / 2;
+                    int actualChangeNum = button == CONTAINER_CLICK_PRIMARY ? woundChangeNum : (woundChangeNum + 1) / 2;
                     ItemStack takenItem = (ItemStack) storage.extract(clickKey, actualChangeNum, false, false).toStack();
                     if (takenItem != null)
                     {
@@ -203,7 +206,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 AtomicBoolean handled = new AtomicBoolean(false);
 
                 // 先检查是否为经验棒交互
-                if (carriedItem.getItem() instanceof XpExchangeItem && button != GLFW.GLFW_MOUSE_BUTTON_LEFT)
+                if (carriedItem.getItem() instanceof XpExchangeItem && button != CONTAINER_CLICK_PRIMARY)
                 {
                     KeyAmount actualStack = storage.getStackByKey(clickStack.key());
 
@@ -214,7 +217,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     if (actualStack.key() instanceof FluidStackKey fluidStackKey && fluidStackKey.hasTag(Tags.Fluids.EXPERIENCE))
                     {
                         handled.set(true); // 走到这一步说明已经进行了交互
-                        if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
+                        if (button == CONTAINER_CLICK_SECONDARY) // 鼠标右键--存入一级
                         {
                             long needRemovePlayerXp = XpUtil.xpBetweenLevels(Math.max(currentLevel - wantConversionLevel, 0), currentLevel);
                             int actualRemovePlayerXp = BDMath.clampLongToInt(needRemovePlayerXp);
@@ -229,7 +232,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                             }
                             player.giveExperiencePoints(-actualRemovePlayerXp); // 根据插入的流体给玩家减去经验值
                         }
-                        else if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) // 鼠标中键--取出一级
+                        else if (button == CONTAINER_CLICK_MIDDLE) // 鼠标中键--取出一级
                         {
                             int maxXp = XpUtil.xpToGiveForLevels(player, wantConversionLevel);
                             int actualInsertPlayerXp = XpExchangeItem.extractExperience(storage, fluidStackKey, -1, maxXp);
@@ -241,7 +244,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     }
                     else
                     {
-                        if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) // 鼠标右键--存入一级
+                        if (button == CONTAINER_CLICK_SECONDARY) // 鼠标右键--存入一级
                         {
                             handled.set(true); // 走到这一步说明已经进行了交互
                             long needRemovePlayerXp = XpUtil.xpBetweenLevels(Math.max(currentLevel - wantConversionLevel, 0), currentLevel);
@@ -266,7 +269,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                     // 则，尝试将自身内容物存入网络。
                     // 最后，如果以上两个操作均未进行，则将物品本身存入
 
-                    if (carriedItem.getCount() == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+                    if (carriedItem.getCount() == 1 && button == CONTAINER_CLICK_SECONDARY)
                     {
                         // 对桶物品进行特殊处理
                         if (carriedItem.getItem() instanceof BucketItem)
@@ -409,7 +412,7 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
                 if (!handled.get())
                 {
                     //槽位物品存在，携带物品存在，物品可以放置，尝试将物品放入
-                    int changedCount = button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? carriedItem.getCount() : 1;
+                    int changedCount = button == CONTAINER_CLICK_PRIMARY ? carriedItem.getCount() : 1;
                     int actualInsert = (int) (changedCount - storage.insert(new ItemStackKey(carriedItem), changedCount, false).amount());
                     int newCount = carriedItem.getCount() - actualInsert;
                     if (newCount <= 0)

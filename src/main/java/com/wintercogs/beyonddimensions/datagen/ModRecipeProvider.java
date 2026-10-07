@@ -3,9 +3,10 @@ package com.wintercogs.beyonddimensions.datagen;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.data.recipes.*;
+import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -16,9 +17,9 @@ import java.util.concurrent.CompletableFuture;
 public class ModRecipeProvider extends BDRecipeProvider
 {
 
-    public ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
+    public ModRecipeProvider(BootstrapContext<Recipe<?>> recipeOutput, BootstrapContext<Advancement> advancementOutput)
     {
-        super(registries, output);
+        super(recipeOutput, advancementOutput);
     }
 
     @Override
@@ -274,25 +275,5 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .define('C', BDItems.SPACE_TIME_BAR.get())
                 .unlockedBy("unlock_xp_exchange_item", has(BDItems.SPACE_TIME_BAR.get()))
                 .save(this.output);
-    }
-
-    public static class Runner extends RecipeProvider.Runner
-    {
-        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
-        {
-            super(output, lookupProvider);
-        }
-
-        @Override
-        protected @NotNull RecipeProvider createRecipeProvider(HolderLookup.@NotNull Provider provider, @NotNull RecipeOutput output)
-        {
-            return new ModRecipeProvider(provider, output);
-        }
-
-        @Override
-        public @NotNull String getName()
-        {
-            return "BeyondDimensions Recipe Provider";
-        }
     }
 }

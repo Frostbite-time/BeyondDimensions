@@ -5,12 +5,13 @@ import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlocks;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,9 +22,9 @@ import static net.neoforged.neoforge.common.conditions.NeoForgeConditions.modLoa
 public class RSModuleRecipeProvider extends BDRecipeProvider
 {
 
-    public RSModuleRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
+    public RSModuleRecipeProvider(BootstrapContext<Recipe<?>> recipeOutput, BootstrapContext<Advancement> advancementOutput)
     {
-        super(registries, output);
+        super(recipeOutput, advancementOutput);
     }
 
     @Override
@@ -41,25 +42,5 @@ public class RSModuleRecipeProvider extends BDRecipeProvider
                 .define('D', Items.REDSTONE)
                 .unlockedBy("unlock_rs_net_pathway", has(BDItems.SPACE_TIME_STABLE_FRAME.get()))
                 .save(compatOutput);
-    }
-
-    public static class Runner extends RecipeProvider.Runner
-    {
-        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
-        {
-            super(output, lookupProvider);
-        }
-
-        @Override
-        protected @NotNull RecipeProvider createRecipeProvider(HolderLookup.@NotNull Provider provider, @NotNull RecipeOutput output)
-        {
-            return new RSModuleRecipeProvider(provider, output);
-        }
-
-        @Override
-        public @NotNull String getName()
-        {
-            return "BeyondDimensions RSModule Recipe Provider";
-        }
     }
 }

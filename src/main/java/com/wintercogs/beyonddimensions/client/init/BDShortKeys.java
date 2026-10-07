@@ -25,7 +25,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.lwjgl.glfw.GLFW;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,26 +43,26 @@ public class BDShortKeys
 
     public static final KeyMapping OPEN_GUI_KEY = new KeyMapping(
             "key.beyonddimensions.open_gui", // 键位描述
-            GLFW.GLFW_KEY_Y,                 // 默认按键 "Y"
+            InputConstants.KEY_Y,                 // 默认按键 "Y"
             BDShortCutKeyCategory
     );
 
     public static final KeyMapping OPEN_TERMINAL_QUICK_KEY = new KeyMapping(
             "key.beyonddimensions.open_terminal_quick_key",
-            GLFW.GLFW_KEY_P,
+            InputConstants.KEY_P,
             BDShortCutKeyCategory
     );
 
     public static final KeyMapping MAIN_HAND_ITEM_TRANSFER_KEY = new KeyMapping(
             "key.beyonddimensions.main_hand_item_transfer_key",
             InputConstants.Type.MOUSE,
-            GLFW.GLFW_MOUSE_BUTTON_MIDDLE,
+            InputConstants.MOUSE_BUTTON_MIDDLE,
             BDShortCutKeyCategory
     );
 
     public static final KeyMapping TOGGLE_MAGNET_KEY = new KeyMapping(
             "key.beyonddimensions.toggle_magnet_key",
-            GLFW.GLFW_KEY_LEFT_BRACKET, // 对应[
+            InputConstants.KEY_LBRACKET, // 对应[
             BDShortCutKeyCategory
     );
 
@@ -86,13 +86,13 @@ public class BDShortKeys
 
     public static final KeyMapping OPEN_PRIMARY_NET_SWITCHER_KEY = new KeyMapping(
             "key.beyonddimensions.open_primary_net_switcher_key",
-            GLFW.GLFW_KEY_U,
+            InputConstants.KEY_U,
             BDShortCutKeyCategory
     );
 
     public static final KeyMapping CYCLE_PRIMARY_NET_KEY = new KeyMapping(
             "key.beyonddimensions.cycle_primary_net_key",
-            GLFW.GLFW_KEY_RIGHT_BRACKET,
+            InputConstants.KEY_RBRACKET,
             BDShortCutKeyCategory
     );
 

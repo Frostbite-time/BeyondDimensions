@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -234,7 +234,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
             return true;
         }
 
-        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+        if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT)
         {
             PrimaryNetOptionButton optionButton = getOptionButtonAt(mouseX, mouseY);
             if (optionButton != null && optionButton.option != null)
@@ -255,7 +255,7 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
             searchField.setFocused(false);
             this.setFocused(null);
         }
-        else if (inSearchField && event.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+        else if (inSearchField && event.button() == InputConstants.MOUSE_BUTTON_RIGHT)
         {
             searchField.setValue("");
             return true;
@@ -270,12 +270,12 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
 
         if (renameField != null && renameField.canConsumeInput())
         {
-            if (key.getValue() == GLFW.GLFW_KEY_ENTER || key.getValue() == GLFW.GLFW_KEY_KP_ENTER)
+            if (key.getValue() == InputConstants.KEY_RETURN || key.getValue() == InputConstants.KEY_NUMPADENTER)
             {
                 submitRename();
                 return true;
             }
-            if (key.getValue() == GLFW.GLFW_KEY_ESCAPE)
+            if (key.getValue() == InputConstants.KEY_ESCAPE)
             {
                 cancelRename();
                 return true;
@@ -283,13 +283,13 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
             return renameField.keyPressed(event);
         }
 
-        if (searchField != null && searchField.canConsumeInput() && key.getValue() != GLFW.GLFW_KEY_ESCAPE)
+        if (searchField != null && searchField.canConsumeInput() && key.getValue() != InputConstants.KEY_ESCAPE)
         {
             searchField.keyPressed(event);
             return true;
         }
 
-        if (this.minecraft.options.keyInventory.isActiveAndMatches(key) || BDShortKeys.OPEN_PRIMARY_NET_SWITCHER_KEY.getKey() == key)
+        if (this.minecraft.options.keyInventory.matches(key) || BDShortKeys.OPEN_PRIMARY_NET_SWITCHER_KEY.getKey() == key)
         {
             onClose();
             return true;
@@ -604,22 +604,18 @@ public class PrimaryNetSwitcherGUI extends BDBaseGUI<PrimaryNetSwitcherMenu>
         if (UIDataHelper.lastMousePos == null)
             return;
 
-        Window window = Minecraft.getInstance().getWindow();
-        GLFW.glfwSetCursorPos(
-                window.handle(),
-                UIDataHelper.lastMousePos.x,
-                UIDataHelper.lastMousePos.y
+        SDLMouse.SDL_WarpMouseInWindow(
+                Minecraft.getInstance().getWindow().handle(),
+                (float) UIDataHelper.lastMousePos.x,
+                (float) UIDataHelper.lastMousePos.y
         );
     }
 
     private void saveMousePosition()
     {
-        double[] xpos = new double[1];
-        double[] ypos = new double[1];
-        GLFW.glfwGetCursorPos(Minecraft.getInstance().getWindow().handle(), xpos, ypos);
         UIDataHelper.lastMousePos = new Vec2(
-                (float) xpos[0],
-                (float) ypos[0]
+                (float) Minecraft.getInstance().mouseHandler.xpos(),
+                (float) Minecraft.getInstance().mouseHandler.ypos()
         );
         UIDataHelper.isTransfer = true;
     }

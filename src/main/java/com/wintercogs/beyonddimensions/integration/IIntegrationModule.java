@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.integration;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
@@ -30,6 +31,18 @@ public interface IIntegrationModule
     }
 
     default void onDatagen(GatherDataEvent.Client event)
+    {
+
+    }
+
+    /**
+     * 向全局共享的 reloadable 注册表构建器中追加本模块的数据生成条目（战利品表、配方等）。
+     * <p>
+     * 注意：整个 GatherDataEvent 期间 {@code event.createReloadableRegistryObjects(...)}
+     * 只能由 DataGenerators 统一调用一次，模块不要自行调用，否则会注册重名 provider，
+     * 抛出 "Duplicate provider: Registries for reloadable"。
+     */
+    default void addReloadableRegistryEntries(RegistrySetBuilder registrySetBuilder)
     {
 
     }

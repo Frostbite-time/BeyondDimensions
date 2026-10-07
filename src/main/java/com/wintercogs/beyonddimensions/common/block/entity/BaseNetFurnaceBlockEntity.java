@@ -19,6 +19,10 @@ import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.common.menu.NetFurnaceMenu;
+import com.wintercogs.beyonddimensions.util.ItemStackHelper;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.SimpleContainer;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -215,7 +219,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
             // 能量或者可以燃烧的物品能作为燃料标记
             return (key instanceof EnergyStackKey)
                     || (key instanceof FluidStackKey fluidKey && fluidKey.getSource() == Fluids.LAVA)
-                    || (key instanceof ItemStackKey itemKey && level != null && itemKey.getReadOnlyStack().getBurnTime(recipeType, level.fuelValues()) > 0);
+                    || (key instanceof ItemStackKey itemKey && itemKey.getReadOnlyStack().has(DataComponents.COOKING_FUEL));
         }
 
     };
@@ -289,7 +293,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
             // 能量或者可以燃烧的物品能作为燃料标记
             return (key instanceof EnergyStackKey)
                     || (key instanceof FluidStackKey fluidKey && fluidKey.getSource() == Fluids.LAVA)
-                    || (key instanceof ItemStackKey itemKey && level != null && itemKey.getReadOnlyStack().getBurnTime(recipeType, level.fuelValues()) > 0);
+                    || (key instanceof ItemStackKey itemKey && itemKey.getReadOnlyStack().has(DataComponents.COOKING_FUEL));
         }
     };
 
@@ -591,7 +595,12 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
                 }
                 else if (fuelKey instanceof ItemStackKey fuelItem)
                 {
-                    int burnTime = fuelItem.getReadOnlyStack().getBurnTime(recipeType, level.fuelValues());
+                    ItemStack fuel = fuelItem.copyStackWithCount(fuelStack.amount());
+                    ItemStack ingredient = inputStorageSlots.getStackBySlot(litSlot).toStack() instanceof ItemStack inputItem
+                            ? inputItem : ItemStack.EMPTY;
+                    ItemStack result = outputStorageSlots.getStackBySlot(litSlot).toStack() instanceof ItemStack outputItem
+                            ? outputItem : ItemStack.EMPTY;
+                    int burnTime = ItemStackHelper.getFuelBurnTime(fuel, this, new SimpleContainer(ingredient, fuel, result));
                     if (burnTime <= 0) continue;
 
                     ItemStackTemplate returnTemplate = fuelItem.getReadOnlyStack().getCraftingRemainder();

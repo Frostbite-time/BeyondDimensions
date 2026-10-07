@@ -5,12 +5,13 @@ import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.ae2.init.AE2ModuleItems;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,9 +21,9 @@ import static net.neoforged.neoforge.common.conditions.NeoForgeConditions.modLoa
 
 public class AE2ModuleRecipeProvider extends BDRecipeProvider
 {
-    protected AE2ModuleRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
+    public AE2ModuleRecipeProvider(BootstrapContext<Recipe<?>> recipeOutput, BootstrapContext<Advancement> advancementOutput)
     {
-        super(registries, output);
+        super(recipeOutput, advancementOutput);
     }
 
     @Override
@@ -40,25 +41,5 @@ public class AE2ModuleRecipeProvider extends BDRecipeProvider
                 .define('D', BDItems.SPACE_TIME_STABLE_FRAME)
                 .unlockedBy("unlock_net_ae_storage_cell", has(BDItems.SPACE_TIME_BAR))
                 .save(compatOutput);
-    }
-
-    public static class Runner extends RecipeProvider.Runner
-    {
-        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
-        {
-            super(output, lookupProvider);
-        }
-
-        @Override
-        protected @NotNull RecipeProvider createRecipeProvider(HolderLookup.@NotNull Provider provider, @NotNull RecipeOutput output)
-        {
-            return new AE2ModuleRecipeProvider(provider, output);
-        }
-
-        @Override
-        public @NotNull String getName()
-        {
-            return "BeyondDimensions AE2Module Recipe Provider";
-        }
     }
 }

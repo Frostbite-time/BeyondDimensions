@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
+// button 使用原版容器协议编号（左0/右1/中2），不是 SDL 鼠标事件编号。
 public record CallSeverClickPacket(int slotIndex, KeyAmount clickItem, int button,
                                    boolean shiftDown) implements CustomPacketPayload
 {

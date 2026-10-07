@@ -140,6 +140,7 @@ public abstract class BDBaseGUI<T extends BDBaseMenu> extends AbstractContainerS
     @Override
     protected void slotClicked(@NotNull Slot slot, int slotIndex, int mouseButton, @NotNull ContainerInput containerInput)
     {
+        // mouseButton 已由原版转换为容器按钮编号（左0/右1/中2），数据包原样传递。
         if (!(slot instanceof AbstractStackTypedSlot))
             super.slotClicked(slot, slotIndex, mouseButton, containerInput);
 

@@ -422,7 +422,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                             if (remaining > 0)
                             {
                                 stack.setCount((int) remaining);
-                                player.drop(stack, false);
+                                player.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
                             }
                         }
                     }
@@ -437,13 +437,13 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                             if (remaining > 0)
                             {
                                 stack.setCount((int) remaining);
-                                player.drop(stack, false);
+                                player.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
                             }
                         }
                     }
                     else
                     {
-                        player.drop(stack, false);
+                        player.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
                     }
 
                 }

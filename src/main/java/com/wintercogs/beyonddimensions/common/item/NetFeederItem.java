@@ -131,7 +131,7 @@ public class NetFeederItem extends BaseMachineItem
                                     KeyAmount remainingAgain = storage.insert(new ItemStackKey(remaining), remaining.getCount(), false);
                                     if (!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
                                     {
-                                        player.drop((ItemStack) remainingAgain.toStack(), false);
+                                        player.drop((ItemStack) remainingAgain.toStack(), false, net.minecraft.util.Prediction.SERVER_ONLY);
                                     }
                                 }
                                 return;

@@ -16,6 +16,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
+import static net.minecraft.world.inventory.AbstractContainerMenu.CONTAINER_CLICK_PRIMARY;
+
 public record BatchTransferPacket(KeyAmount clickStack, boolean dirToStorage) implements CustomPacketPayload
 {
     public static final Type<BatchTransferPacket> TYPE =
@@ -51,7 +53,7 @@ public record BatchTransferPacket(KeyAmount clickStack, boolean dirToStorage) im
                         if (menu.inventoryStartIndex <= invSlot.index && invSlot.index < menu.inventoryEndIndex)
                         {
                             if (clickItem.equals(new ItemStackKey(invSlot.getItem())))
-                                menu.customClickHandler(invSlot.index, new KeyAmount(new ItemStackKey(invSlot.getItem()), invSlot.getItem().getCount()), 0, true);
+                                menu.customClickHandler(invSlot.index, new KeyAmount(new ItemStackKey(invSlot.getItem()), invSlot.getItem().getCount()), CONTAINER_CLICK_PRIMARY, true);
                         }
                     }
                 }

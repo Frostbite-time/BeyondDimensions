@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "beyonddimensions:xp_exchange_item"
+        "recipes": "beyonddimensions:xp_exchange_item"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

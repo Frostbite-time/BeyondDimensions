@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "beyonddimensions:unstable_space_time_fragment"
+        "recipes": "beyonddimensions:unstable_space_time_fragment"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

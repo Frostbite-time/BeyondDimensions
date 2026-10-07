@@ -23,6 +23,9 @@ import net.neoforged.neoforge.transfer.access.ItemAccess;
 
 import java.util.function.Function;
 
+import static net.minecraft.world.inventory.AbstractContainerMenu.CONTAINER_CLICK_PRIMARY;
+import static net.minecraft.world.inventory.AbstractContainerMenu.CONTAINER_CLICK_SECONDARY;
+
 // 用于标记性槽位的AbstractStackTypedSlot实现
 // 注意，标记性槽位必须用于有序容器
 public class FlagStackTypedSlot extends AbstractStackTypedSlot
@@ -78,11 +81,11 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
             if (!carriedItem.isEmpty())
             {   //槽位物品为空，携带物品存在，将携带物品插入标记
 
-                if (button == 0)
+                if (button == CONTAINER_CLICK_PRIMARY)
                 {
                     setStackDirectly(new ItemStackKey(carriedItem), 1);
                 }
-                else if (button == 1)
+                else if (button == CONTAINER_CLICK_SECONDARY)
                 {
                     if (carriedItem.getItem() instanceof XpExchangeItem)
                     {
