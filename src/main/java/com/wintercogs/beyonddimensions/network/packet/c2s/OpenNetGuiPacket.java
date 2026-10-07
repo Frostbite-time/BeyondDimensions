@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
+import com.wintercogs.beyonddimensions.common.menu.SwitchMenuProvider;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import io.netty.buffer.ByteBuf;
@@ -19,7 +20,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -68,14 +68,14 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
             NetMenuType targetMenu = this.target();
             if (targetMenu == NetMenuType.NET_CRAFT_MENU)
             {
-                player.openMenu(new SimpleMenuProvider(
+                player.openMenu(new SwitchMenuProvider(
                         (containerId, playerInventory, _player) -> new DimensionsCraftMenu(DimensionsCraftMenu.Dimensions_Craft_Menu.get(), containerId, playerInventory, net.getUnifiedStorage(), null, null),
                         Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                 ));
             }
             else if (targetMenu == NetMenuType.NET_MENU)
             {
-                player.openMenu(new SimpleMenuProvider(
+                player.openMenu(new SwitchMenuProvider(
                         (containerId, playerInventory, _player) -> new DimensionsNetMenu(DimensionsNetMenu.Dimensions_Net_Menu.get(), containerId, playerInventory, net.getUnifiedStorage()),
                         Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                 ));

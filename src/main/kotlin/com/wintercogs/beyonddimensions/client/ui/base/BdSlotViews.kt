@@ -22,8 +22,8 @@ const val SLOT_WINDOW_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 9 * SLOT_PI
 /**
  * 一个原生槽位：主题化的槽底，悬停时加上角标；虚拟资源的数量以 BD 的数量标签显示。
  *
- * 悬停只有角标这一种效果，两种槽位都按 CompixelUI 给出的 hovered 画，也就是点击会落到的那一格。
- * Ore 外观的槽位悬停时还会铺一层悬停色，主题里把它设成与槽底相同，所以看不出来。
+ * 两种槽位悬停时一样：都按 CompixelUI 给出的 hovered（点击会落到的那一格）画角标，并把凹槽交给 Ore 高亮。
+ * 主题里 Ore 的悬停色与槽底相同、悬停描边透明，高亮时凹槽去掉明暗边、变成平的深色。
  *
  * 标记槽与其他槽位用同样的凹槽，只在槽底铺一层强调色。Ore 的标记样式用通用描边色画凹槽的暗边，
  * 玻璃主题的描边色是半透明白，相邻两格的亮边会连成双线，交点处还留下缺角。
@@ -32,7 +32,7 @@ const val SLOT_WINDOW_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 9 * SLOT_PI
 fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
     if ((slots.adapter as? BdSlotAdapter<*>)?.isResource(id) == true) {
         slots.Slot(id, modifier.size(SLOT_PITCH.dp)) { slot ->
-            OreSlot(Modifier.matchParentSize(), contentModifier = Modifier.size(16.dp)) {
+            OreSlot(Modifier.matchParentSize(), highlighted = slot.hovered, contentModifier = Modifier.size(16.dp)) {
                 if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors.accentSoft))
                 slot.icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
             }

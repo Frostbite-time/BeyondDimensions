@@ -40,9 +40,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.phys.Vec2
 import net.neoforged.neoforge.network.PacketDistributor
-import org.lwjgl.glfw.GLFW
 import java.util.*
 
 private fun roleLabel(role: NetPermissionlevel) = tr("ui.beyonddimensions.network.role.${role.name.lowercase()}")
@@ -388,11 +386,7 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                 )
 
             PrimaryNetRequest.OpenTerminal -> {
-                // 新界面打开时把指针放回原处
-                val x = DoubleArray(1)
-                val y = DoubleArray(1)
-                GLFW.glfwGetCursorPos(Minecraft.getInstance().window.window, x, y)
-                UIDataHelper.lastMousePos = Vec2(x[0].toFloat(), y[0].toFloat())
+                // 终端打开时回到上次的滚动位置
                 UIDataHelper.isTransfer = true
                 PacketDistributor.sendToServer(
                     OpenNetGuiPacket(

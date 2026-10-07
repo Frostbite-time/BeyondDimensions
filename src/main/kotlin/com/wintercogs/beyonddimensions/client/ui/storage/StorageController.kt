@@ -19,12 +19,9 @@ import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenPrimaryNetSwitcherPacket
 import com.wintercogs.beyonddimensions.util.UIDataHelper
 import net.minecraft.Util
-import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.language.I18n
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.phys.Vec2
 import net.neoforged.neoforge.network.PacketDistributor
-import org.lwjgl.glfw.GLFW
 
 /** 资源类型页签 */
 data class TypeTab(val id: String, val label: String, val count: Int)
@@ -304,7 +301,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
         return typeId.path.substringAfterLast('/')
     }
 
-    /** 在存储与合成之间切换会重新打开菜单，先记下滚动位置与指针位置 */
+    /** 在存储与合成之间切换会重新打开菜单，先记下滚动位置 */
     private fun toggleCraft() {
         val toCraft = craftMenu == null
         val state = if (toCraft) ButtonState.ENABLED else ButtonState.DISABLED
@@ -316,12 +313,9 @@ class StorageController(private val menu: DimensionsNetMenu) {
         PacketDistributor.sendToServer(OpenNetGuiPacket(menu.player.stringUUID, target))
     }
 
+    // 指针不用处理：服务器直接换菜单（SwitchMenuProvider），客户端不会收起指针
     private fun saveTransferContext() {
         UIDataHelper.currentPage = menu.lineData
-        val x = DoubleArray(1)
-        val y = DoubleArray(1)
-        GLFW.glfwGetCursorPos(Minecraft.getInstance().window.window, x, y)
-        UIDataHelper.lastMousePos = Vec2(x[0].toFloat(), y[0].toFloat())
         UIDataHelper.isTransfer = true
     }
 
@@ -329,9 +323,6 @@ class StorageController(private val menu: DimensionsNetMenu) {
         if (!UIDataHelper.isTransfer) return
         UIDataHelper.isTransfer = false
         menu.lineData = UIDataHelper.currentPage
-        UIDataHelper.lastMousePos?.let {
-            GLFW.glfwSetCursorPos(Minecraft.getInstance().window.window, it.x.toDouble(), it.y.toDouble())
-        }
     }
 
     /** 菜单关闭时按偏好保留或清空搜索文字 */
