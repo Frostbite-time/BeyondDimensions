@@ -48,7 +48,8 @@ interface BdPage<M : AbstractContainerMenu, S, A> {
      * 页面内容，在 Compose 线程组合。与 BD 的设置页相同：有页边距，内容超出高度时在页内滚动，
      * 可以直接使用 BD 的界面组件（`BdSectionLabel`、`BdSettingRow`、`BdToggle` 等）。
      */
-    @Composable fun ColumnScope.Content(state: S, scope: BdPageScope<A>)
+    @Composable
+    fun ColumnScope.Content(state: S, scope: BdPageScope<A>)
 }
 
 /**

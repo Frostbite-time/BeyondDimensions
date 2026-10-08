@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
-import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetOption;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.forge.sync.SyncedMenu;
 import dev.compixel.sync.state.SyncCodec;

@@ -1,12 +1,7 @@
 package com.wintercogs.beyonddimensions.client.ui.base
 
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import com.wintercogs.beyonddimensions.api.ui.page.BdPage
 import com.wintercogs.beyonddimensions.api.ui.page.BdPageContext
 import com.wintercogs.beyonddimensions.api.ui.page.BdPageScope
@@ -35,7 +30,8 @@ class BdPageSelection {
     }
 }
 
-@Composable fun rememberPageSelection() = remember { BdPageSelection() }
+@Composable
+fun rememberPageSelection() = remember { BdPageSelection() }
 
 /**
  * 一个界面上由附属模组注入的页。界面构造时按菜单找出注册的页，在游戏线程取快照、处理动作，
@@ -124,7 +120,9 @@ class BdPageHost<M : AbstractContainerMenu>(
 }
 
 /** 注入页的页签，放在界面自带的页签之后 */
-@Composable fun InjectedTabs(host: BdPageHost<*>, selection: BdPageSelection) = host.Tabs(selection)
+@Composable
+fun InjectedTabs(host: BdPageHost<*>, selection: BdPageSelection) = host.Tabs(selection)
 
 /** 注入页的页面，放在 [com.wintercogs.beyonddimensions.client.ui.kit.BdTabbedWindow] 的页面区里 */
-@Composable fun BoxScope.InjectedPages(host: BdPageHost<*>, selection: BdPageSelection) = with(host) { Pages(selection) }
+@Composable
+fun BoxScope.InjectedPages(host: BdPageHost<*>, selection: BdPageSelection) = with(host) { Pages(selection) }

@@ -20,6 +20,7 @@ object BdBackdrop {
     private class Frame {
         @Volatile
         var visibility = 0f
+
         @Volatile
         var exiting = false
     }

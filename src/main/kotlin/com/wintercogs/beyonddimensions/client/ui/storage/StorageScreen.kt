@@ -1,20 +1,15 @@
 package com.wintercogs.beyonddimensions.client.ui.storage
 
-import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -24,12 +19,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.isPrimaryPressed
-import androidx.compose.ui.input.pointer.isSecondaryPressed
-import androidx.compose.ui.input.pointer.onPointerEvent
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
@@ -40,6 +30,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.zIndex
+import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import com.wintercogs.beyonddimensions.client.init.BDShortKeys
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
@@ -58,11 +49,11 @@ import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.inventory.OreSlot
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 import org.lwjgl.glfw.GLFW
+import kotlin.math.roundToInt
 
 /** 界面不会变化的部分：槽位编号、图标与文字，在游戏线程构造 */
 class StorageLayout(menu: DimensionsNetMenu) {
@@ -249,7 +240,7 @@ private fun StorageView(
             val editorOpen = state.editor != null
             val fitColumns =
                 (availableWidth - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0) -
-                    if (editorOpen) EDITOR_WIDTH else 0) / SLOT_PITCH
+                        if (editorOpen) EDITOR_WIDTH else 0) / SLOT_PITCH
             val rows = fitRows.coerceAtMost(state.preferredRows).coerceAtLeast(2)
             val columns = fitColumns.coerceAtMost(state.preferredColumns).coerceAtLeast(9)
             LaunchedEffect(columns, rows) { send(StorageAction.Viewport(columns, rows)) }
@@ -328,7 +319,16 @@ private fun StorageView(
                         ) {
                             val ids = List(gridColumns * gridRows) { layout.storageStart + it }
                             BdSlotGrid(slots, ids, gridColumns)
-                            state.slotMenu?.let { menu -> key(menu.serial) { SlotMenuPopup(menu, pressAt, send, text) } }
+                            state.slotMenu?.let { menu ->
+                                key(menu.serial) {
+                                    SlotMenuPopup(
+                                        menu,
+                                        pressAt,
+                                        send,
+                                        text
+                                    )
+                                }
+                            }
                         }
                         if (state.totalRows > gridRows) {
                             Spacer(Modifier.width(2.dp))
@@ -861,7 +861,13 @@ private fun HintMark(hint: String) {
 /** 编辑区里的标记格：外观同存储格子，左右键分别响应；[name] 是悬停提示 */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun MarkerBox(icon: ItemIcon?, name: String?, selected: Boolean, enabled: Boolean, onClick: (right: Boolean) -> Unit) {
+private fun MarkerBox(
+    icon: ItemIcon?,
+    name: String?,
+    selected: Boolean,
+    enabled: Boolean,
+    onClick: (right: Boolean) -> Unit
+) {
     val colors = Bd.colors
     var hovered by remember { mutableStateOf(false) }
     BdTooltip(name.orEmpty(), enabled = name != null) {

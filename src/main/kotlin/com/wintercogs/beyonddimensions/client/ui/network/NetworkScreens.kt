@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.client.ui.network
 
-import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
@@ -21,12 +20,9 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetControlAction
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetSwitchAction
+import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType
-import com.wintercogs.beyonddimensions.client.ui.base.BdMenuScreen
-import com.wintercogs.beyonddimensions.client.ui.base.InjectedPages
-import com.wintercogs.beyonddimensions.client.ui.base.InjectedTabs
-import com.wintercogs.beyonddimensions.client.ui.base.rememberPageSelection
-import com.wintercogs.beyonddimensions.client.ui.base.tr
+import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors

@@ -54,7 +54,8 @@ object BdPages {
 
     internal class Entry(val id: ResourceLocation, val menuClass: Class<*>, val page: BdPage<*, *, *>)
 
-    @Volatile private var entries = emptyList<Entry>()
+    @Volatile
+    private var entries = emptyList<Entry>()
 
     @JvmStatic
     @JvmOverloads
@@ -93,7 +94,7 @@ object BdPages {
         val index = list.indexOfFirst { it.id == anchor }
         check(index >= 0) {
             "Cannot register BD page $id $relation $anchor: no page $anchor is registered. " +
-                "Registered, in order: ${list.map { it.id }}"
+                    "Registered, in order: ${list.map { it.id }}"
         }
         return index
     }

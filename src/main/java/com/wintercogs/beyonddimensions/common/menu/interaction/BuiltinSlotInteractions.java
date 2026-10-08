@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.common.menu.interaction;
 
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
+import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
@@ -20,16 +20,11 @@ import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.BucketItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.MilkBucketItem;
+import net.minecraft.world.item.*;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
