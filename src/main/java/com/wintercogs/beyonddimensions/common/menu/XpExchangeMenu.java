@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
@@ -96,7 +97,7 @@ public class XpExchangeMenu extends BDBaseMenu
         this.menuStack = menuStack;
         if (!player.level().isClientSide()) XpExchangeSettings.ensureComponents(this.menuStack);
         addPlayerInv(playerInventory);
-        synchronization = MenuSync.bind(this, SCHEMA).action(SET_KEEP).action(SET_TARGET);
+        synchronization = BdMenuActions.attach(this, MenuSync.bind(this, SCHEMA).action(SET_KEEP).action(SET_TARGET));
     }
 
     private static boolean editable(XpExchangeMenu menu)

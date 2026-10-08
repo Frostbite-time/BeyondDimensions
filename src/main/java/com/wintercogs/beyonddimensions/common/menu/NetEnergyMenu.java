@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
@@ -126,7 +127,7 @@ public class NetEnergyMenu extends BDBaseMenu
         }
         inventoryEndIndex = slots.size();
 
-        synchronization = MenuSync.bind(this, SCHEMA).action(SET_OUTPUT).action(SET_REDSTONE);
+        synchronization = BdMenuActions.attach(this, MenuSync.bind(this, SCHEMA).action(SET_OUTPUT).action(SET_REDSTONE));
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
@@ -208,9 +209,9 @@ public class NetHopperMenu extends BDBaseMenu
 
         addPlayerInv(playerInventory);
         addFlagSlots();
-        synchronization = commands().inventory(BDMenuResources.bind(this, SCHEMA))
+        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SCHEMA))
                 .action(SET_FILTER).action(SET_REDSTONE).action(SET_ITEMS).action(SET_EXPERIENCE)
-                .action(SET_FLUIDS).action(SET_COMPONENTS).action(SET_RANGE);
+                .action(SET_FLUIDS).action(SET_COMPONENTS).action(SET_RANGE));
     }
 
     private static boolean editable(NetHopperMenu menu)

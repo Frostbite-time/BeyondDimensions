@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.machine
 
+import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -52,19 +53,20 @@ class RestockerScreen(menu: NetRestockerMenu, inventory: Inventory, title: Compo
 
     @Composable
     override fun Content(state: RestockerState, slots: ComposeMenuSlots<NetRestockerMenu>) {
-        var settingsOpen by remember { mutableStateOf(false) }
-        slots.Interaction(enabled = !settingsOpen)
+        val page = rememberPageSelection()
+        val settingsOpen = page.settings
         BdScreenFrame {
             BdTabbedWindow(
                 Modifier.width(SLOT_WINDOW_WIDTH.dp).then(slots.areaModifier()),
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 rail = {
-                    BdRailTab(text.title, BdGlyphs.Main, selected = !settingsOpen) { settingsOpen = false }
+                    BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                    InjectedTabs(pages, page)
                     Spacer(Modifier.weight(1f))
-                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
+                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
                 },
             ) {
-                BdMainPage(!settingsOpen) {
+                BdMainPage(page.main) {
                     // 主背包的模板在上，快捷栏的在下，与玩家背包的排布相同
                     BdInventorySection(text.templates, templates.subList(9, 36) + templates.subList(0, 9), slots)
                     Spacer(Modifier.height(7.dp))
@@ -72,6 +74,7 @@ class RestockerScreen(menu: NetRestockerMenu, inventory: Inventory, title: Compo
                     Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
+                InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
                     BdSettingRow(text.working) {

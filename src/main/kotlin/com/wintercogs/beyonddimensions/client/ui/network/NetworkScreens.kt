@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.network
 
+import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
@@ -22,6 +23,9 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetSwitchAction
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType
 import com.wintercogs.beyonddimensions.client.ui.base.BdMenuScreen
+import com.wintercogs.beyonddimensions.client.ui.base.InjectedPages
+import com.wintercogs.beyonddimensions.client.ui.base.InjectedTabs
+import com.wintercogs.beyonddimensions.client.ui.base.rememberPageSelection
 import com.wintercogs.beyonddimensions.client.ui.base.tr
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
@@ -139,6 +143,7 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
     override fun Content(state: NetControlState) {
         val colors = Bd.colors
         var chosen by remember { mutableStateOf<UUID?>(null) }
+        val page = rememberPageSelection()
         BdScreenFrame {
             // 网络里至少有玩家自己，成员为空说明数据还没到：这时只有背景淡入，窗口等数据到了再加入进场动画
             if (state.members.isNotEmpty()) {
@@ -155,9 +160,12 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                             tag = "#%04d".format(state.networkId)
                         )
                     },
-                    rail = { BdRailTab(text.title, BdGlyphs.Main, selected = true) {} },
+                    rail = {
+                        BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                        InjectedTabs(pages, page)
+                    },
                 ) {
-                    BdMainPage(true) {
+                    BdMainPage(page.main) {
                         Row {
                             Column(Modifier.weight(1f)) {
                                 BdSectionLabel(text.members) {
@@ -200,6 +208,7 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                             MemberPanel(selected, text, Modifier.width(PANEL_WIDTH.dp)) { send(it) }
                         }
                     }
+                    InjectedPages(pages, page)
                 }
             }
         }
@@ -414,6 +423,7 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
         val colors = Bd.colors
         var query by remember { mutableStateOf("") }
         var renaming by remember { mutableStateOf<Int?>(null) }
+        val page = rememberPageSelection()
         BdScreenFrame {
             val current = state.options.find { it.id == state.primary }
             BdTabbedWindow(
@@ -426,9 +436,12 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                         tag = current?.let { "#%04d".format(it.id) },
                     )
                 },
-                rail = { BdRailTab(text.title, BdGlyphs.Main, selected = true) {} },
+                rail = {
+                    BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                    InjectedTabs(pages, page)
+                },
             ) {
-                BdMainPage(true) {
+                BdMainPage(page.main) {
                     BdSearchField(query, { query = it }, text.search, Modifier.fillMaxWidth())
                     Spacer(Modifier.height(6.dp))
                     BdSectionLabel(text.networks) {
@@ -498,6 +511,7 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                         }
                     }
                 }
+                InjectedPages(pages, page)
             }
         }
     }

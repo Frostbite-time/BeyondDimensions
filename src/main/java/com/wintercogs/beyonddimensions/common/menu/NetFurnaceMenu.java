@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
@@ -212,8 +213,8 @@ public class NetFurnaceMenu extends BDBaseMenu
         addPlayerInv(playerInventory);
         addFilterSlots();
         addStorageSlots();
-        synchronization = commands().inventory(BDMenuResources.bind(this, SCHEMA))
-                .action(SET_OUTPUT).action(SET_RECEIVE).action(SET_REDSTONE).action(SET_SORTING);
+        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SCHEMA))
+                .action(SET_OUTPUT).action(SET_RECEIVE).action(SET_REDSTONE).action(SET_SORTING));
     }
 
     private static boolean editable(NetFurnaceMenu menu)

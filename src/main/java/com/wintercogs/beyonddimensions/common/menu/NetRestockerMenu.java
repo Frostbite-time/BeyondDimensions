@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.mojang.datafixers.util.Pair;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
@@ -161,8 +162,8 @@ public class NetRestockerMenu extends BDBaseMenu
 
         addPlayerInv(playerInventory);
         addFlagSlots();
-        synchronization = commands().inventory(BDMenuResources.bind(this, SCHEMA))
-                .action(SET_WORKING).action(SET_MATCHING).action(SET_RECYCLE);
+        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SCHEMA))
+                .action(SET_WORKING).action(SET_MATCHING).action(SET_RECYCLE));
     }
 
     private static boolean editable(NetRestockerMenu menu)

@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.machine
 
+import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -107,23 +108,25 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
 
     @Composable
     override fun Content(state: EnergyState, slots: ComposeMenuSlots<NetEnergyMenu>) {
-        var settingsOpen by remember { mutableStateOf(false) }
-        slots.Interaction(enabled = !settingsOpen)
+        val page = rememberPageSelection()
+        val settingsOpen = page.settings
         BdScreenFrame {
             BdTabbedWindow(
                 Modifier.width(SLOT_WINDOW_WIDTH.dp).then(slots.areaModifier()),
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 rail = {
-                    BdRailTab(text.title, BdGlyphs.Main, selected = !settingsOpen) { settingsOpen = false }
+                    BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                    InjectedTabs(pages, page)
                     Spacer(Modifier.weight(1f))
-                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
+                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
                 },
             ) {
-                BdMainPage(!settingsOpen) {
+                BdMainPage(page.main) {
                     EnergyReadout(state, text)
                     Spacer(Modifier.height(8.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
+                InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
                     BdSettingRow(text.pop, text.popHint) {

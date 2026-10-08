@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.storage
 
+import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
@@ -157,7 +158,7 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
 
     @Composable
     override fun Content(state: StorageState, slots: ComposeMenuSlots<DimensionsNetMenu>) =
-        StorageView(state, ::send, ::requestClose, slots, layout)
+        StorageView(state, ::send, ::requestClose, slots, layout, pages)
 
     override fun inventoryTick() {
         super.inventoryTick()
@@ -231,16 +232,18 @@ private fun StorageView(
     close: () -> Unit,
     slots: ComposeMenuSlots<DimensionsNetMenu>,
     layout: StorageLayout,
+    pages: BdPageHost<DimensionsNetMenu>,
 ) {
     val colors = Bd.colors
     val text = layout.text
     // 方块终端可以在本地隐藏合成区；可切换的终端则重新打开对应的菜单
     var craftHidden by remember { mutableStateOf(false) }
     val craftShown = state.craft != null && !craftHidden
-    var settingsOpen by remember { mutableStateOf(false) }
+    val page = rememberPageSelection()
+    val settingsOpen = page.settings
     // 排序与配方选择的浮层盖在槽位上方，打开期间停用槽位
     val popovers = remember { BdPopovers() }
-    slots.Interaction(enabled = !settingsOpen && popovers.open == 0)
+    slots.Interaction(enabled = popovers.open == 0)
 
     CompositionLocalProvider(LocalBdPopovers provides popovers) {
         BdScreenFrame { available ->
@@ -267,14 +270,14 @@ private fun StorageView(
                 tween(EDITOR_MILLIS, easing = FastOutSlowInEasing),
                 label = "category editor",
             )
-            val mainAlpha by animateFloatAsState(if (settingsOpen) 0f else 1f, tween(150), label = "editor fade")
+            val mainAlpha by animateFloatAsState(if (page.main) 1f else 0f, tween(150), label = "editor fade")
             BdTabbedWindow(
                 Modifier.width((CHROME_WIDTH + width + editorWidth).dp).then(slots.areaModifier())
                     .onPointerEvent(PointerEventType.Scroll) { event ->
                         // 分类标签与编辑区自己滚动时不再翻动格子
                         if (event.changes.any { it.isConsumed }) return@onPointerEvent
                         val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
-                        if (delta != 0f && !settingsOpen) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
+                        if (delta != 0f && page.main) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
                     },
                 header = {
                     BdHeader(
@@ -286,18 +289,19 @@ private fun StorageView(
                 },
                 // 存储与合成两个工作区都在主页面上，合成区显示与否决定选中哪一个
                 rail = {
-                    BdRailTab(text.storage, BdGlyphs.Storage, selected = !settingsOpen && !craftShown) {
-                        settingsOpen = false
+                    BdRailTab(text.storage, BdGlyphs.Storage, selected = page.main && !craftShown) {
+                        page.open(BdPages.MAIN)
                         if (craftShown) {
                             if (state.craft.toggleable) send(StorageAction.ToggleCraft) else craftHidden = true
                         }
                     }
-                    BdRailTab(text.crafting, BdGlyphs.Crafting, selected = !settingsOpen && craftShown) {
-                        settingsOpen = false
+                    BdRailTab(text.crafting, BdGlyphs.Crafting, selected = page.main && craftShown) {
+                        page.open(BdPages.MAIN)
                         if (!craftShown) {
                             if (state.craft == null) send(StorageAction.ToggleCraft) else craftHidden = false
                         }
                     }
+                    InjectedTabs(pages, page)
                     if (layout.showSwitcher) {
                         BdGlyphButton(
                             OreGlyph.CycleArrows,
@@ -308,10 +312,10 @@ private fun StorageView(
                         )
                     }
                     Spacer(Modifier.weight(1f))
-                    BdRailTab(text.view, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
+                    BdRailTab(text.view, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
                 },
             ) {
-                BdMainPage(!settingsOpen) {
+                BdMainPage(page.main) {
                     Toolbar(state, send, text, width)
                     Spacer(Modifier.height(5.dp))
                     CategoryTabs(state, send, text, width)
@@ -384,13 +388,14 @@ private fun StorageView(
                                 Spacer(Modifier.width(GAP.dp))
                                 key(editor.index) {
                                     BdScrollColumn(Modifier.width(EDITOR_CONTENT_WIDTH.dp).fillMaxHeight()) {
-                                        CategoryEditorPanel(editor, send, text, enabled = editorOpen && !settingsOpen)
+                                        CategoryEditorPanel(editor, send, text, enabled = editorOpen && page.main)
                                     }
                                 }
                             }
                         }
                     }
                 }
+                InjectedPages(pages, page)
                 BdTabPage(settingsOpen) { ViewOptions(state, send, text, settingsOpen) }
             }
         }

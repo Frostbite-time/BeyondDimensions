@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
@@ -59,7 +60,7 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
                     (m, value) -> m.synchronizedCanConfigurePop = value)
             .build();
 
-    private final MenuSync<NetInterfaceBaseMenu> synchronization = commands().inventory(BDMenuResources.bind(this, SYNC_SCHEMA)).action(BDMenuCommands.MODE);
+    private final MenuSync<NetInterfaceBaseMenu> synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SYNC_SCHEMA)).action(BDMenuCommands.MODE));
 
     @Override
     public MenuSync<NetInterfaceBaseMenu> menuSync()

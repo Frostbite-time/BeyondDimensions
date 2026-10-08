@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.machine
 
+import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -68,19 +69,21 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
 
     @Composable
     override fun Content(state: FurnaceState, slots: ComposeMenuSlots<NetFurnaceMenu>) {
-        var settingsOpen by remember { mutableStateOf(false) }
-        slots.Interaction(enabled = !settingsOpen)
+        val page = rememberPageSelection()
+        val settingsOpen = page.settings
         BdScreenFrame {
             BdTabbedWindow(
                 Modifier.width(FURNACE_WINDOW_WIDTH.dp).then(slots.areaModifier()),
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 rail = {
-                    BdRailTab(text.title, BdGlyphs.Main, selected = !settingsOpen) { settingsOpen = false }
+                    BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                    InjectedTabs(pages, page)
                     Spacer(Modifier.weight(1f))
-                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
+                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
                 },
             ) {
-                BdMainPage(!settingsOpen) { Furnace(state, slotIds, playerSlots, text, slots) }
+                BdMainPage(page.main) { Furnace(state, slotIds, playerSlots, text, slots) }
+                InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
                     BdSettingRow(text.pop, text.popHint) {

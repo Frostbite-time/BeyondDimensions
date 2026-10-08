@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.machine
 
+import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -46,13 +47,17 @@ class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Compon
     @Composable
     override fun Content(state: XpExchangeState, slots: ComposeMenuSlots<XpExchangeMenu>) {
         val colors = Bd.colors
+        val page = rememberPageSelection()
         BdScreenFrame {
             BdTabbedWindow(
                 Modifier.width(SLOT_WINDOW_WIDTH.dp).then(slots.areaModifier()),
                 header = { BdHeader(icon, text.title, ::requestClose) },
-                rail = { BdRailTab(text.title, BdGlyphs.Main, selected = true) {} },
+                rail = {
+                    BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                    InjectedTabs(pages, page)
+                },
             ) {
-                BdMainPage(true) {
+                BdMainPage(page.main) {
                     BdSectionLabel(text.level)
                     Spacer(Modifier.height(5.dp))
                     BdSettingRow(text.target, text.targetHint) {
@@ -76,6 +81,7 @@ class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Compon
                     Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
+                InjectedPages(pages, page)
             }
         }
     }

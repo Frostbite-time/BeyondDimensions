@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.storage
 
+import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
@@ -59,19 +60,20 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
     @Composable
     override fun Content(state: InterfaceState, slots: ComposeMenuSlots<NetInterfaceBaseMenu>) {
         val colors = Bd.colors
-        var settingsOpen by remember { mutableStateOf(false) }
-        slots.Interaction(enabled = !settingsOpen)
+        val page = rememberPageSelection()
+        val settingsOpen = page.settings
         BdScreenFrame {
             BdTabbedWindow(
                 Modifier.width(SLOT_WINDOW_WIDTH.dp).then(slots.areaModifier()),
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 rail = {
-                    BdRailTab(text.title, BdGlyphs.Main, selected = !settingsOpen) { settingsOpen = false }
+                    BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                    InjectedTabs(pages, page)
                     Spacer(Modifier.weight(1f))
-                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
+                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
                 },
             ) {
-                BdMainPage(!settingsOpen) {
+                BdMainPage(page.main) {
                     BdSectionLabel(text.slots)
                     Spacer(Modifier.height(4.dp))
                     // 三组“标记行 + 缓存行”
@@ -87,6 +89,7 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
                     Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
+                InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
                     BdSettingRow(text.pop, if (state.popConfigurable) text.popHint else text.popUnavailable) {

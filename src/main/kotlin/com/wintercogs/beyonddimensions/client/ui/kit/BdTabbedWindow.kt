@@ -9,9 +9,7 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -157,11 +155,30 @@ fun BdRailTab(label: String, art: OrePixelArt, selected: Boolean, onClick: () ->
     }
 }
 
+/**
+ * 页面的显示状态，由 [BdMainPage] 与 [BdTabPage] 提供给其中的内容。[current] 为当前打开的页；
+ * [visible] 在切走后淡出结束前仍为 true。槽位只在当前页上登记点击位置：主页面切走后仍占着位置、只是看不见，
+ * 不这样做的话，点击会落到它看不见的槽位上
+ */
+@Immutable
+data class BdPageVisibility(val current: Boolean, val visible: Boolean)
+
+val LocalBdPageVisibility = compositionLocalOf { BdPageVisibility(current = true, visible = true) }
+
+@Composable
+private fun ProvidePageVisibility(shown: Boolean, progress: State<Float>, content: @Composable () -> Unit) {
+    // 动画中只在可见与否变化时重组，不必每帧重组页面
+    val visible by remember(shown) { derivedStateOf { shown || progress.value > 0f } }
+    CompositionLocalProvider(LocalBdPageVisibility provides BdPageVisibility(shown, visible), content = content)
+}
+
 /** 主页面：决定内容区的大小；切到其他页时淡出，免得与盖在上面的半透明页面叠在一起 */
 @Composable
 fun BoxScope.BdMainPage(shown: Boolean, content: @Composable ColumnScope.() -> Unit) {
-    val progress by switchProgress(shown)
-    Column(Modifier.graphicsLayer { alpha = progress }.then(pagePadding), content = content)
+    val progress = switchProgress(shown)
+    ProvidePageVisibility(shown, progress) {
+        Column(Modifier.graphicsLayer { alpha = progress.value }.then(pagePadding), content = content)
+    }
 }
 
 /**
@@ -174,18 +191,20 @@ fun BoxScope.BdTabPage(
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(6.dp),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val progress by switchProgress(shown)
-    if (!shown && progress == 0f) return
-    BdScrollColumn(
-        Modifier.matchParentSize()
-            .offset { IntOffset(0, ((1f - progress) * SWITCH_RISE_DP.dp.toPx()).roundToInt()) }
-            .graphicsLayer { alpha = progress }
-            // 没有控件的地方也接住指针，点击不会落到下层的主页面
-            .pointerInput(Unit) { awaitPointerEventScope { while (true) awaitPointerEvent() } }
-            .then(pagePadding),
-        verticalArrangement,
-        content,
-    )
+    val progress = switchProgress(shown)
+    if (!shown && progress.value == 0f) return
+    ProvidePageVisibility(shown, progress) {
+        BdScrollColumn(
+            Modifier.matchParentSize()
+                .offset { IntOffset(0, ((1f - progress.value) * SWITCH_RISE_DP.dp.toPx()).roundToInt()) }
+                .graphicsLayer { alpha = progress.value }
+                // 没有控件的地方也接住指针，点击不会落到下层的主页面
+                .pointerInput(Unit) { awaitPointerEventScope { while (true) awaitPointerEvent() } }
+                .then(pagePadding),
+            verticalArrangement,
+            content,
+        )
+    }
 }
 
 @Composable

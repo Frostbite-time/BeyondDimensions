@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
@@ -163,7 +164,7 @@ public class DimensionsNetMenu extends BDBaseMenu
 
         // 添加存储槽
         addStorageSlots();
-        synchronization = commands().inventory(BDMenuResources.bind(this, VIEW_SCHEMA));
+        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, VIEW_SCHEMA)));
     }
 
     // 添加存储槽位

@@ -35,7 +35,26 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
     @Suppress("UNCHECKED_CAST")
     protected val adapter = inventory.adapter as BdSlotAdapter<M>
 
-    override fun inventoryTick() = adapter.tick()
+    /** 附属模组注入这个界面的页；子类在竖条上放 [InjectedTabs]，在页面区放 [InjectedPages] */
+    protected val pages = BdPageHost(container, this, inventory, ::requestClose)
+
+    override fun inventoryTick() {
+        adapter.tick()
+        pages.update()
+    }
+
+    // 注入页在输入事件里送出的动作随即处理，与界面自己的动作一样不等下一刻
+    override fun mouseClicked(x: Double, y: Double, button: Int) =
+        super.mouseClicked(x, y, button).also { pages.update() }
+
+    override fun mouseReleased(x: Double, y: Double, button: Int) =
+        super.mouseReleased(x, y, button).also { pages.update() }
+
+    override fun mouseScrolled(x: Double, y: Double, sx: Double, sy: Double) =
+        super.mouseScrolled(x, y, sx, sy).also { pages.update() }
+
+    override fun charTyped(character: Char, modifiers: Int) =
+        super.charTyped(character, modifiers).also { pages.update() }
 
     // 界面本身在背景之后绘制
     override fun renderBackground(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) =
@@ -44,11 +63,15 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         val editing = hasTextInputFocus
         val handled = super.keyPressed(keyCode, scanCode, modifiers)
+        pages.update()
         // 文字由 charTyped 单独送达；编辑时占用可打印按键，避免配方查看器把 R、U 等当作快捷键
         return handled || (editing && keyCode in GLFW.GLFW_KEY_SPACE..GLFW.GLFW_KEY_GRAVE_ACCENT)
     }
 
-    override fun menuClosed() = adapter.close()
+    override fun menuClosed() {
+        adapter.close()
+        pages.close()
+    }
 }
 
 /** 没有槽位的 BD 菜单界面 */
@@ -60,6 +83,28 @@ abstract class BdMenuScreen<M : AbstractContainerMenu, S, A>(menu: M, title: Com
         design = BdDesign,
     ),
     BdScreen {
+    /** 附属模组注入这个界面的页；子类在竖条上放 [InjectedTabs]，在页面区放 [InjectedPages] */
+    protected val pages = BdPageHost(container, this, null, ::requestClose)
+
+    override fun containerTick() = pages.update()
+
+    override fun mouseClicked(x: Double, y: Double, button: Int) =
+        super.mouseClicked(x, y, button).also { pages.update() }
+
+    override fun mouseReleased(x: Double, y: Double, button: Int) =
+        super.mouseReleased(x, y, button).also { pages.update() }
+
+    override fun mouseScrolled(x: Double, y: Double, sx: Double, sy: Double) =
+        super.mouseScrolled(x, y, sx, sy).also { pages.update() }
+
+    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int) =
+        super.keyPressed(keyCode, scanCode, modifiers).also { pages.update() }
+
+    override fun charTyped(character: Char, modifiers: Int) =
+        super.charTyped(character, modifiers).also { pages.update() }
+
+    override fun menuClosed() = pages.close()
+
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         BdBackdrop.behindScreen(graphics, partialTick)
         super.render(graphics, mouseX, mouseY, partialTick)

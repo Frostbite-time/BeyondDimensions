@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.machine
 
+import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -60,23 +61,25 @@ class HopperScreen(menu: NetHopperMenu, inventory: Inventory, title: Component) 
 
     @Composable
     override fun Content(state: HopperState, slots: ComposeMenuSlots<NetHopperMenu>) {
-        var settingsOpen by remember { mutableStateOf(false) }
-        slots.Interaction(enabled = !settingsOpen)
+        val page = rememberPageSelection()
+        val settingsOpen = page.settings
         BdScreenFrame {
             BdTabbedWindow(
                 Modifier.width(SLOT_WINDOW_WIDTH.dp).then(slots.areaModifier()),
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 rail = {
-                    BdRailTab(text.title, BdGlyphs.Main, selected = !settingsOpen) { settingsOpen = false }
+                    BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                    InjectedTabs(pages, page)
                     Spacer(Modifier.weight(1f))
-                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
+                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
                 },
             ) {
-                BdMainPage(!settingsOpen) {
+                BdMainPage(page.main) {
                     BdSlotSection(text.filters, filterSlots, slots)
                     Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
+                InjectedPages(pages, page)
                 BdTabPage(settingsOpen) { HopperSettings(state, settingsOpen, text, ::send) }
             }
         }

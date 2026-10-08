@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.client.ui.base
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -13,6 +14,7 @@ import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
 import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.forge.slots.MenuSlotState
 import dev.compixel.ui.ore.inventory.OreSlot
 
 const val SLOT_PITCH = 18
@@ -28,18 +30,23 @@ const val SLOT_WINDOW_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 9 * SLOT_PI
  *
  * 标记槽与其他槽位用同样的凹槽，只在槽底铺一层强调色。Ore 的标记样式用通用描边色画凹槽的暗边，
  * 玻璃配色的描边色是半透明白，相邻两格的亮边会连成双线，交点处还留下缺角。
+ *
+ * 槽位只在当前页（[LocalBdPageVisibility]）上登记点击位置，所以任何页面都可以放可操作的槽位，同一个槽位也可以放在几个页上。
+ * 切走的页淡出时，槽位画着最后的样子但不再响应；完全隐藏后只留同样大小的空位，窗口大小不变。
  */
 @Composable
 fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
+    val page = LocalBdPageVisibility.current
+    // 最后一次显示的样子，只供淡出时照画，不参与重组
+    val last = remember(id) { arrayOfNulls<MenuSlotState>(1) }
+    if (!page.current) {
+        Box(modifier.size(SLOT_PITCH.dp)) { if (page.visible) last[0]?.let { ResourceLook(it.copy(hovered = false)) } }
+        return
+    }
     if ((slots.adapter as? BdSlotAdapter<*>)?.isResource(id) == true) {
         slots.Slot(id, modifier.size(SLOT_PITCH.dp)) { slot ->
-            OreSlot(Modifier.matchParentSize(), highlighted = slot.hovered, contentModifier = Modifier.size(16.dp)) {
-                if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors[BdColors.accentSoft]))
-                slot.icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
-            }
-            if (slot.amount.isNotEmpty())
-                BdAmountPill(slot.amount, Modifier.align(Alignment.BottomEnd).padding(end = 1.dp, bottom = 1.dp))
-            if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors[BdColors.accent], arm = 4.dp))
+            last[0] = slot
+            ResourceLook(slot)
         }
         return
     }
@@ -48,11 +55,23 @@ fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
         id,
         modifier.size(SLOT_PITCH.dp),
         overlay = { slot ->
+            last[0] = slot
             if (slot.hovered) Box(
                 Modifier.matchParentSize().brackets(Bd.colors[BdColors.accent], arm = 4.dp)
             )
         },
     )
+}
+
+@Composable
+private fun BoxScope.ResourceLook(slot: MenuSlotState) {
+    OreSlot(Modifier.matchParentSize(), highlighted = slot.hovered, contentModifier = Modifier.size(16.dp)) {
+        if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors[BdColors.accentSoft]))
+        slot.icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
+    }
+    if (slot.amount.isNotEmpty())
+        BdAmountPill(slot.amount, Modifier.align(Alignment.BottomEnd).padding(end = 1.dp, bottom = 1.dp))
+    if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors[BdColors.accent], arm = 4.dp))
 }
 
 /** 按列排布的一组槽位；不足一行的末尾留空 */

@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetControlAction;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
@@ -128,7 +129,7 @@ public class NetControlMenu extends BDBaseMenu
             networkId = net.getId();
             refreshMembers();
         }
-        synchronization = MenuSync.bind(this, SCHEMA).action(APPLY).action(REFRESH);
+        synchronization = BdMenuActions.attach(this, MenuSync.bind(this, SCHEMA).action(APPLY).action(REFRESH));
     }
 
     @Override

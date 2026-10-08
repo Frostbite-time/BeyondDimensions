@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetOption;
@@ -55,8 +56,7 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu implements SyncedMenu
 
     public int currentPrimaryNetId = DimensionsNet.NO_PRIMARY_NET_ID;
     public List<PrimaryNetOption> options = List.of();
-    private final MenuSync<PrimaryNetSwitcherMenu> synchronization =
-            MenuSync.bind(this, SYNC_SCHEMA);
+    private final MenuSync<PrimaryNetSwitcherMenu> synchronization = BdMenuActions.attach(this, MenuSync.bind(this, SYNC_SCHEMA));
 
     @Override
     public MenuSync<PrimaryNetSwitcherMenu> menuSync()
