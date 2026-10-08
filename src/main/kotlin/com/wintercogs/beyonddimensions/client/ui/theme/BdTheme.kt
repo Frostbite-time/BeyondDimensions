@@ -105,7 +105,7 @@ object BdColors : ColorSchema("beyonddimensions") {
     val slotHoverOutline = color("slotHoverOutline", "slots", Color(0x00000000))
 
     /** 格子数量标签的底色 */
-    val pill = color("pill", "slots", Color(0xA6000000))
+    val pill = color("pill", "slots", Color.Transparent)
 
     /** 熔炉火焰的三层：外焰、中焰与焰心 */
     val flameOuter = color("flameOuter", "flame", Color(0xFFE2531F))

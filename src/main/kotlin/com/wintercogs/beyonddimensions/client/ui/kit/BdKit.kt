@@ -210,7 +210,7 @@ fun Modifier.bdClickable(
     }
 }
 
-/** 数量标签：深色半透明底上的浅色小字 */
+/** 数量标签：配色里 pill 色的底板（默认透明）上的小字 */
 @Composable
 fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
     Box(
