@@ -564,7 +564,7 @@ private fun NetworkRow(
             RoleChip(option.role, text.roles.getValue(option.role))
             if (option.renamable) {
                 Spacer(Modifier.width(2.dp))
-                BdGlyphButton(OreGlyph.Pencil, text.rename, onRename, size = 13.dp, glyphSize = 7.dp)
+                BdGlyphButton(OreGlyph.Pencil, text.rename, onRename, size = 13.dp, glyphSize = 8.dp)
             }
         }
     }

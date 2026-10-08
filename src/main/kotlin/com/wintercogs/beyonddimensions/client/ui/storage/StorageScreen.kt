@@ -642,7 +642,7 @@ private fun CategoryTabView(
                 )
                 if (editing) {
                     Spacer(Modifier.width(2.dp))
-                    OreIcon(OreGlyph.Pencil, Modifier.size(7.dp), color = colors[BdColors.accent])
+                    OreIcon(OreGlyph.Pencil, Modifier.size(8.dp), color = colors[BdColors.accent])
                 }
             }
             Spacer(Modifier.weight(1f))
@@ -732,7 +732,7 @@ private fun CategoryOption(tab: CategoryTab, selected: Boolean, editing: Boolean
         )
         if (editing) {
             Spacer(Modifier.width(3.dp))
-            OreIcon(OreGlyph.Pencil, Modifier.size(7.dp), color = colors[BdColors.accent])
+            OreIcon(OreGlyph.Pencil, Modifier.size(8.dp), color = colors[BdColors.accent])
         }
     }
 }
