@@ -58,7 +58,6 @@ import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.inventory.OreSlot
 import kotlinx.coroutines.launch
-import net.minecraft.client.gui.screens.Screen
 import kotlin.math.roundToInt
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -175,15 +174,9 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT) storageMenu.hasShiftDown = true
-        if (!hasTextInputFocus) {
-            if (Screen.hasShiftDown() && keyCode == GLFW.GLFW_KEY_Z) {
-                controller.toggleSearchSync()
-                return true
-            }
-            if (BDShortKeys.OPEN_GUI_KEY.matches(keyCode, scanCode)) {
-                onClose()
-                return true
-            }
+        if (!hasTextInputFocus && BDShortKeys.OPEN_GUI_KEY.matches(keyCode, scanCode)) {
+            onClose()
+            return true
         }
         return super.keyPressed(keyCode, scanCode, modifiers)
     }

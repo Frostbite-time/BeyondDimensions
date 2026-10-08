@@ -395,9 +395,6 @@ class StorageController(private val menu: DimensionsNetMenu) {
         )
     }
 
-    /** Shift+Z 切换与配方查看器同步搜索 */
-    fun toggleSearchSync() = setSearchSync(!CommonConfigRuntime.searchTextWithJEIEMI)
-
     private fun setSearchSync(enabled: Boolean) {
         CommonConfigRuntime.searchTextWithJEIEMI = enabled
         Config.INSTANCE.commonConfig.SEARCH_TEXT_WITH_JEI_EMI.set(enabled)
