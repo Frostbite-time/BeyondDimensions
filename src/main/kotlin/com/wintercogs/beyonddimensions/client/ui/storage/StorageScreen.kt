@@ -94,6 +94,8 @@ class StorageText {
     val delete = tr("ui.beyonddimensions.storage.category.delete")
     val moveLeft = tr("ui.beyonddimensions.storage.category.move_left")
     val moveRight = tr("ui.beyonddimensions.storage.category.move_right")
+    val moveUp = tr("ui.beyonddimensions.storage.category.move_up")
+    val moveDown = tr("ui.beyonddimensions.storage.category.move_down")
     val editorTitle = tr("ui.beyonddimensions.storage.category.editor")
     val name = tr("ui.beyonddimensions.storage.category.name")
     val iconHint = tr("ui.beyonddimensions.storage.category.icon.hint")
@@ -649,25 +651,42 @@ private fun CategoryTabView(
             if (selected) Box(Modifier.fillMaxWidth().height(2.dp).background(colors.signature))
         }
         menuAt?.let { point ->
-            val dismiss = { menuAt = null }
-            BdPointMenu(point, dismiss) {
-                BdMenuRow(text.edit) {
-                    dismiss()
-                    send(StorageAction.EditCategory(index))
-                }
-                if (index > 0) BdMenuRow(text.moveLeft) {
-                    dismiss()
-                    send(StorageAction.MoveCategory(index, index - 1))
-                }
-                if (index < count - 1) BdMenuRow(text.moveRight) {
-                    dismiss()
-                    send(StorageAction.MoveCategory(index, index + 1))
-                }
-                BdMenuRow(text.delete) {
-                    dismiss()
-                    send(StorageAction.DeleteCategory(index))
-                }
-            }
+            CategoryMenu(point, index, count, vertical = false, send, text, onDismiss = { menuAt = null })
+        }
+    }
+}
+
+/**
+ * 分类的右键菜单：编辑、调整次序与删除。[vertical] 为 true 时（标签列表里）次序说上移、下移；[onEdit] 在打开编辑区时调用
+ */
+@Composable
+private fun CategoryMenu(
+    point: IntOffset,
+    index: Int,
+    count: Int,
+    vertical: Boolean,
+    send: (StorageAction) -> Unit,
+    text: StorageText,
+    onDismiss: () -> Unit,
+    onEdit: () -> Unit = {},
+) {
+    BdPointMenu(point, onDismiss) {
+        BdMenuRow(text.edit) {
+            onDismiss()
+            onEdit()
+            send(StorageAction.EditCategory(index))
+        }
+        if (index > 0) BdMenuRow(if (vertical) text.moveUp else text.moveLeft) {
+            onDismiss()
+            send(StorageAction.MoveCategory(index, index - 1))
+        }
+        if (index < count - 1) BdMenuRow(if (vertical) text.moveDown else text.moveRight) {
+            onDismiss()
+            send(StorageAction.MoveCategory(index, index + 1))
+        }
+        BdMenuRow(text.delete) {
+            onDismiss()
+            send(StorageAction.DeleteCategory(index))
         }
     }
 }
@@ -690,7 +709,17 @@ private fun CategoryList(state: StorageState, editing: Int, send: (StorageAction
             BdPopover({ open = false }) {
                 BdScrollColumn(Modifier.widthIn(max = 160.dp).heightIn(max = 150.dp)) {
                     state.categories.forEachIndexed { index, tab ->
-                        CategoryOption(tab, selected = index == state.category, editing = index == editing) {
+                        CategoryOption(
+                            tab,
+                            index,
+                            state.categories.size,
+                            selected = index == state.category,
+                            editing = index == editing,
+                            send = send,
+                            text = text,
+                            // 打开编辑区时收起列表，免得挡住编辑区；移动与删除后列表留着，可以接着整理
+                            onEdit = { open = false },
+                        ) {
                             send(StorageAction.SelectCategory(index))
                             open = false
                         }
@@ -701,38 +730,60 @@ private fun CategoryList(state: StorageState, editing: Int, send: (StorageAction
     }
 }
 
+/** 标签列表里的一行：左键打开这个分类，右键是与标签相同的菜单 */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun CategoryOption(tab: CategoryTab, selected: Boolean, editing: Boolean, onClick: () -> Unit) {
+private fun CategoryOption(
+    tab: CategoryTab,
+    index: Int,
+    count: Int,
+    selected: Boolean,
+    editing: Boolean,
+    send: (StorageAction) -> Unit,
+    text: StorageText,
+    onEdit: () -> Unit,
+    onClick: () -> Unit,
+) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
-    Row(
-        Modifier.fillMaxWidth()
-            .height(13.dp)
-            .hoverable(interaction)
-            .bdClickable(interaction, enabled = !selected, onClick = onClick)
-            .background(if (hovered && !selected) colors[BdColors.accentSoft] else Color.Transparent)
-            .padding(horizontal = 3.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(Modifier.size(3.dp).background(if (selected) colors[BdColors.accent] else Color.Transparent))
-        Spacer(Modifier.width(4.dp))
-        // 没有图标的分类显示一个漏斗作占位
-        Box(Modifier.size(9.dp), contentAlignment = Alignment.Center) {
-            if (tab.icon != null) MinecraftItemIcon(tab.icon, Modifier.fillMaxSize())
-            else OreIcon(OreGlyph.Funnel, Modifier.size(7.dp), color = colors[BdColors.faint])
+    var menuAt by remember { mutableStateOf<IntOffset?>(null) }
+    // 菜单在这个 Box 里，以这一行为锚点展开在按下右键的位置
+    Box {
+        menuAt?.let { point ->
+            CategoryMenu(point, index, count, vertical = true, send, text, { menuAt = null }, onEdit)
         }
-        Spacer(Modifier.width(3.dp))
-        OreText(
-            tab.name,
-            Modifier.weight(1f, fill = false),
-            color = if (selected) colors[BdColors.accentDeep] else colors[BdColors.text],
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        if (editing) {
+        Row(
+            Modifier.fillMaxWidth()
+                .height(13.dp)
+                .hoverable(interaction)
+                .bdClickable(interaction, enabled = !selected, onClick = onClick)
+                .onPointerEvent(PointerEventType.Press) {
+                    if (it.buttons.isSecondaryPressed) menuAt = it.changes.first().position.round()
+                }
+                .background(if (hovered && !selected) colors[BdColors.accentSoft] else Color.Transparent)
+                .padding(horizontal = 3.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(Modifier.size(3.dp).background(if (selected) colors[BdColors.accent] else Color.Transparent))
+            Spacer(Modifier.width(4.dp))
+            // 没有图标的分类显示一个漏斗作占位
+            Box(Modifier.size(9.dp), contentAlignment = Alignment.Center) {
+                if (tab.icon != null) MinecraftItemIcon(tab.icon, Modifier.fillMaxSize())
+                else OreIcon(OreGlyph.Funnel, Modifier.size(7.dp), color = colors[BdColors.faint])
+            }
             Spacer(Modifier.width(3.dp))
-            OreIcon(OreGlyph.Pencil, Modifier.size(8.dp), color = colors[BdColors.accent])
+            OreText(
+                tab.name,
+                Modifier.weight(1f, fill = false),
+                color = if (selected) colors[BdColors.accentDeep] else colors[BdColors.text],
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (editing) {
+                Spacer(Modifier.width(3.dp))
+                OreIcon(OreGlyph.Pencil, Modifier.size(8.dp), color = colors[BdColors.accent])
+            }
         }
     }
 }

@@ -319,6 +319,8 @@
   "ui.beyonddimensions.storage.category.delete": "刪除",
   "ui.beyonddimensions.storage.category.move_left": "左移",
   "ui.beyonddimensions.storage.category.move_right": "右移",
+  "ui.beyonddimensions.storage.category.move_up": "上移",
+  "ui.beyonddimensions.storage.category.move_down": "下移",
   "ui.beyonddimensions.storage.category.editor": "編輯分類",
   "ui.beyonddimensions.storage.category.name": "名稱",
   "ui.beyonddimensions.storage.category.icon.hint": "左鍵設為手上的物品，右鍵清除",
