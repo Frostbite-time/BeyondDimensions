@@ -56,9 +56,9 @@ object Bd {
     val overline: TextStyle
         @Composable get() = OreTheme.typography.caption
 
-    /** 4.5sp 的 Monocraft：GUI 缩放为 2 时每个字体像素正好对应一个屏幕像素 */
+    /** 6sp 的 Monocraft：一个字体像素是 2/3 个界面单位，数字约为原版字体的三分之二大 */
     val amount: TextStyle
-        @Composable get() = OreTheme.typography.body.copy(fontSize = 4.5.sp, lineHeight = 6.sp)
+        @Composable get() = OreTheme.typography.body.copy(fontSize = 6.sp, lineHeight = 8.sp)
 }
 
 /**
@@ -106,6 +106,10 @@ object BdColors : ColorSchema("beyonddimensions") {
 
     /** 格子数量标签的底色 */
     val pill = color("pill", "slots", Color.Transparent)
+
+    /** 格子数量的文字与它右下一个字体像素处的投影；默认是白字与蓝灰色投影，在任何物品上都看得清 */
+    val amount = color("amount", "slots", Color.White)
+    val amountShadow = color("amountShadow", "slots", Color(0xFF413F54))
 
     /** 熔炉火焰的三层：外焰、中焰与焰心 */
     val flameOuter = color("flameOuter", "flame", Color(0xFFE2531F))

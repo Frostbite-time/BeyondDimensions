@@ -23,9 +23,9 @@ const val SLOT_PITCH = 18
 const val SLOT_WINDOW_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 9 * SLOT_PITCH + 1 + 2
 
 /**
- * 一个原生槽位：主题化的槽底，悬停时加上角标；虚拟资源的数量以 BD 的数量标签显示。
+ * 一个原生槽位：主题化的槽底，悬停时加上角标；原版槽位与虚拟资源的数量都以 BD 的数量标签显示。
  *
- * 两种槽位悬停时一样：都按 CompixelUI 给出的 hovered（点击会落到的那一格）画角标，并把凹槽交给 Ore 高亮。
+ * 悬停时按 CompixelUI 给出的 hovered（点击会落到的那一格）画角标，并把凹槽交给 Ore 高亮。
  * Ore 的悬停色与悬停描边取自 BD 的 slotHover 与 slotHoverOutline（默认与槽底相同、透明），高亮时凹槽去掉明暗边、变成平的深色。
  *
  * 标记槽与其他槽位用同样的凹槽，只在槽底铺一层强调色。Ore 的标记样式用通用描边色画凹槽的暗边，
@@ -40,37 +40,23 @@ fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
     // 最后一次显示的样子，只供淡出时照画，不参与重组
     val last = remember(id) { arrayOfNulls<MenuSlotState>(1) }
     if (!page.current) {
-        Box(modifier.size(SLOT_PITCH.dp)) { if (page.visible) last[0]?.let { ResourceLook(it.copy(hovered = false)) } }
+        Box(modifier.size(SLOT_PITCH.dp)) { if (page.visible) last[0]?.let { SlotLook(it.copy(hovered = false)) } }
         return
     }
-    if ((slots.adapter as? BdSlotAdapter<*>)?.isResource(id) == true) {
-        slots.Slot(id, modifier.size(SLOT_PITCH.dp)) { slot ->
-            last[0] = slot
-            ResourceLook(slot)
-        }
-        return
+    slots.Slot(id, modifier.size(SLOT_PITCH.dp)) { slot ->
+        last[0] = slot
+        SlotLook(slot)
     }
-    // 原版槽位沿用 Ore 的外观与数量文字，角标叠在上面
-    slots.Slot(
-        id,
-        modifier.size(SLOT_PITCH.dp),
-        overlay = { slot ->
-            last[0] = slot
-            if (slot.hovered) Box(
-                Modifier.matchParentSize().brackets(Bd.colors[BdColors.accent], arm = 4.dp)
-            )
-        },
-    )
 }
 
 @Composable
-private fun BoxScope.ResourceLook(slot: MenuSlotState) {
+private fun BoxScope.SlotLook(slot: MenuSlotState) {
     OreSlot(Modifier.matchParentSize(), highlighted = slot.hovered, contentModifier = Modifier.size(16.dp)) {
         if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors[BdColors.accentSoft]))
         slot.icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
     }
     if (slot.amount.isNotEmpty())
-        BdAmountPill(slot.amount, Modifier.align(Alignment.BottomEnd).padding(end = 1.dp, bottom = 1.dp))
+        BdAmountPill(slot.amount, Modifier.align(Alignment.BottomEnd).padding(end = 0.5.dp, bottom = 0.5.dp))
     if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors[BdColors.accent], arm = 4.dp))
 }
 

@@ -145,7 +145,7 @@ private fun PreviewSlot(icon: ItemIcon?, amount: String, marked: Boolean = false
             icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
         }
         if (amount.isNotEmpty())
-            BdAmountPill(amount, Modifier.align(Alignment.BottomEnd).padding(end = 1.dp, bottom = 1.dp))
+            BdAmountPill(amount, Modifier.align(Alignment.BottomEnd).padding(end = 0.5.dp, bottom = 0.5.dp))
         if (hovered) Box(Modifier.matchParentSize().brackets(colors[BdColors.accent], arm = 4.dp))
     }
 }

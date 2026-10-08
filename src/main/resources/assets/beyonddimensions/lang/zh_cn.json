@@ -269,6 +269,8 @@
   "color.beyonddimensions.slotHover": "悬停槽位",
   "color.beyonddimensions.slotHoverOutline": "悬停槽位描边",
   "color.beyonddimensions.pill": "数量标签底色",
+  "color.beyonddimensions.amount": "数量文字",
+  "color.beyonddimensions.amountShadow": "数量文字投影",
   "color.beyonddimensions.flameOuter": "外焰",
   "color.beyonddimensions.flameMiddle": "中焰",
   "color.beyonddimensions.flameCore": "焰心",

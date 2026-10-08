@@ -12,6 +12,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +26,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.lerp
@@ -36,11 +38,15 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.client.ui.theme.signatureVertical
@@ -210,14 +216,42 @@ fun Modifier.bdClickable(
     }
 }
 
-/** 数量标签：配色里 pill 色的底板（默认透明）上的小字 */
+/**
+ * 数量标签：像原版的物品数量那样，白字下面右下错开一个字体像素是一层深色投影，在亮色或暗色的物品上都看得清。
+ * 文字与投影取自配色的 amount 与 amountShadow，底板是 pill 色（默认透明）
+ */
 @Composable
 fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
+    val colors = Bd.colors
+    val shadow = with(LocalDensity.current) { AMOUNT_FONT_PIXEL.toPx() }
+    // 四个字符正好占满槽位的宽度；放不下时向左伸出，不截掉末尾的单位
     Box(
-        modifier.offset(x = (-0.5).dp, y = (-0.5).dp).background(Bd.colors[BdColors.pill])
-            .padding(start = 1.dp, top = 0.5.dp)
+        modifier.wrapContentWidth(Alignment.End, unbounded = true)
+            .background(colors[BdColors.pill])
+            .padding(end = AMOUNT_FONT_PIXEL, bottom = AMOUNT_FONT_PIXEL)
     ) {
-        OreText(text, color = Bd.colors[BdColors.text], style = Bd.amount, maxLines = 1)
+        BasicText(
+            remember(text) { narrowDots(text) },
+            // 投影不模糊：像原版文字那样是一份错开的实心字
+            style = Bd.amount.copy(
+                color = colors[BdColors.amount],
+                shadow = Shadow(colors[BdColors.amountShadow], Offset(shadow, shadow), 0f),
+            ),
+            maxLines = 1,
+        )
+    }
+}
+
+/** [Bd.amount] 的一个字体像素 */
+private val AMOUNT_FONT_PIXEL = (2f / 3f).dp
+
+// 字体里每个字符都占 6 个字体像素宽，小数点只在格子中间画一点；原版字体的小数点只占 2 个像素宽。
+// 把小数点与它前一个字符各收紧 2 个像素，点的位置与总宽度就和原版一样，"1.2K" 从 23 个像素缩到 19 个
+private val NARROW = SpanStyle(letterSpacing = (-2f / 9f).em)
+
+private fun narrowDots(text: String) = buildAnnotatedString {
+    text.forEachIndexed { index, char ->
+        if (char == '.' || text.getOrNull(index + 1) == '.') withStyle(NARROW) { append(char) } else append(char)
     }
 }
 

@@ -269,6 +269,8 @@
   "color.beyonddimensions.slotHover": "Hovered slot",
   "color.beyonddimensions.slotHoverOutline": "Hovered slot outline",
   "color.beyonddimensions.pill": "Amount labels",
+  "color.beyonddimensions.amount": "Amount text",
+  "color.beyonddimensions.amountShadow": "Amount text shadow",
   "color.beyonddimensions.flameOuter": "Outer flame",
   "color.beyonddimensions.flameMiddle": "Middle flame",
   "color.beyonddimensions.flameCore": "Flame core",
