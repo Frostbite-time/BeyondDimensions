@@ -22,6 +22,7 @@ public class BDItemIds
     public static final String NET_FEEDER_ITEM = "net_feeder_item";
     public static final String NET_RESTOCKER_ITEM = "net_restocker_item";
     public static final String XP_EXCHANGE_ITEM = "xp_exchange_item";
+    public static final String ERROR_DATA = "error_data";
     public static final String TEST_ITEM_GENERATE = "test_item_generate";
 
     // 模块物品

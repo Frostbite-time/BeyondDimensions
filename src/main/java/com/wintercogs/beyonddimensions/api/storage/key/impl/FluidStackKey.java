@@ -81,19 +81,10 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             final T kAmt = ops.createString(K_AMOUNT);
             final T kAmtOld = ops.createString(K_AMOUNT_OLD);
 
-            // 新格式
+            // 新格式；流体或任一组件解析不了时如实失败，由 IStackKey.CODEC 封装成错误数据
             if (input.get(kFluid) != null)
             {
-                DataResult<FluidStackKey> r = NEW_FMT.decode(ops, input);
-                if (r.result().isPresent()) return r;
-
-                // 宽松兜底：fluid 存在但解析失败 → 仅保留 components，回退 EMPTY
-                T compsNode = input.get(kComps);
-                if (compsNode == null) compsNode = input.get(kCompsOld); // 也兼容大写
-                DataComponentPatch patch = compsNode == null
-                        ? DataComponentPatch.EMPTY
-                        : DataComponentPatch.CODEC.parse(ops, compsNode).result().orElse(DataComponentPatch.EMPTY);
-                return DataResult.success(new FluidStackKey(Fluids.EMPTY, patch));
+                return NEW_FMT.decode(ops, input);
             }
 
 

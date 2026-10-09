@@ -145,6 +145,11 @@
   "item.beyonddimensions.net_restocker_item": "网络补货器",
   "item.beyonddimensions.xp_fluid_bucket": "液态经验桶",
   "item.beyonddimensions.xp_exchange_item": "经验棒",
+  "item.beyonddimensions.error_data": "错误数据",
+  "tooltip.beyonddimensions.error_data": "读不出来的存储数据，原样保存在这里",
+  "tooltip.beyonddimensions.error_data.type": "类型：%s",
+  "tooltip.beyonddimensions.error_data.content": "内容：%s",
+  "tooltip.beyonddimensions.error_data.hint": "对应模组装回后，留在维度网络或设备里的错误数据会在下次载入时自动还原",
   "item.beyonddimensions.warden_soul_tag_item": "灵魂标记器",
 
   "menu.title.beyonddimensions.xp_exchange_menu": "经验棒设置",

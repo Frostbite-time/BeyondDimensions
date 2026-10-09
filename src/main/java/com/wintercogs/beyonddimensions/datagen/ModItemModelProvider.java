@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.datagen;
 
+import com.wintercogs.beyonddimensions.api.ids.BDItemIds;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDItemModelProvider;
@@ -40,6 +41,8 @@ public class ModItemModelProvider extends BDItemModelProvider
         basicItem(BDItems.NET_FEEDER_ITEM.get());
         basicItem(BDItems.NET_RESTOCKER_ITEM.get());
         basicItem(BDItems.XP_EXCHANGE_ITEM.get());
+        // 错误数据沿用原版屏障的贴图
+        withExistingParent(BDItemIds.ERROR_DATA, mcLoc("item/generated")).texture("layer0", mcLoc("item/barrier"));
 
         generateFluidBucketModels();
     }

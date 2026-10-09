@@ -4,6 +4,7 @@ import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.ErrorData;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
@@ -601,15 +602,42 @@ public class StackHandler implements IStackHandler
         return new KeyAmount(k, take);
     }
 
+    /**
+     * 与 key 模糊匹配、各槽合计数量最多的变体；没有时返回 null
+     */
+    private @Nullable IStackKey<?> mostAbundantVariant(IStackKey<?> key)
+    {
+        IStackKey<?> best = null;
+        long most = 0L;
+        for (Map.Entry<IStackKey<?>, SlotBucket> entry : keyBuckets.entrySet())
+        {
+            IStackKey<?> variant = entry.getKey();
+            if (variant == EmptyStackKey.INSTANCE || !variant.isSame(key)) continue;
+            SlotBucket bucket = entry.getValue();
+            long total = 0L;
+            for (int i = 0; i < bucket.size(); i++)
+            {
+                total += amounts[bucket.get(i)];
+            }
+            if (total > most)
+            {
+                most = total;
+                best = variant;
+            }
+        }
+        return best;
+    }
+
+    /**
+     * 模糊匹配时取各槽合计数量最多的变体
+     */
     @Override
     public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy)
     {
         var realKey = key;
         if (fuzzy)
         {
-            realKey = keyBuckets.keySet().stream()
-                    .filter(x -> x.isSame(key))
-                    .findFirst().orElse(null);
+            realKey = mostAbundantVariant(key);
         }
         if (realKey == null || realKey == EmptyStackKey.INSTANCE || amount <= 0L)
         {
@@ -697,12 +725,18 @@ public class StackHandler implements IStackHandler
         return (CompoundTag) encoded; // 记录结构
     }
 
+    /**
+     * 读档；解析不了的资源封装成错误数据留在原槽位
+     */
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag)
     {
         clearStorage();
         RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
-        StackHandler decoded = CODEC.parse(ops, tag)
-                .getOrThrow(IllegalStateException::new);
+        StackHandler decoded;
+        try (ErrorData.Report ignored = ErrorData.report("设备存储"))
+        {
+            decoded = CODEC.parse(ops, tag).getOrThrow(IllegalStateException::new);
+        }
         for (int i = 0; i < decoded.size; i++)
         {
             setStackDirectly(i, decoded.keys[i], decoded.amounts[i]);

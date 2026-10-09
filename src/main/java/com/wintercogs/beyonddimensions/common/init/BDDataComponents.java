@@ -7,6 +7,7 @@ import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -33,6 +34,11 @@ public class BDDataComponents
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> TIME_LINE = register(
             "time_line", builder -> builder.persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG)
+    );
+
+    // 错误数据封装的原始存档内容：{raw: 原样的 NBT}
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<CompoundTag>> ERROR_DATA = register(
+            "error_data", builder -> builder.persistent(CompoundTag.CODEC).networkSynchronized(ByteBufCodecs.COMPOUND_TAG)
     );
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemStackContents>> CRAFT_SLOTS = register(

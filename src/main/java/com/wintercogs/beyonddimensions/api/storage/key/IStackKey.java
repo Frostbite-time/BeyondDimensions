@@ -20,9 +20,9 @@ import java.util.stream.Stream;
 public interface IStackKey<T>
 {
     /**
-     * CODEC定义，根据StackKeyRegistry分发到对应子类
+     * 严格的CODEC，根据StackKeyRegistry分发到对应子类；类型未注册或数据有误时解析失败（可能抛出异常）
      */
-    public static final Codec<IStackKey<?>> CODEC = ResourceLocation.CODEC
+    public static final Codec<IStackKey<?>> STRICT_CODEC = ResourceLocation.CODEC
             .dispatch(
                     "type",
                     IStackKey::getTypeId,  // 分发到具体实现的编解码器
@@ -31,6 +31,11 @@ public interface IStackKey<T>
                         return type.codec(); // A → MapCodec
                     }
             );
+
+    /**
+     * 存档用的CODEC：解析不了的资源原样封装成错误数据而不是失败，解析到错误数据时尝试还原，见 {@link ErrorData}
+     */
+    public static final Codec<IStackKey<?>> CODEC = ErrorData.lenient(STRICT_CODEC);
 
     /*
      * 流编码器定义，根据StackKeyRegistry分发到对应子类
@@ -162,6 +167,16 @@ public interface IStackKey<T>
      * 检查2个实例是否能模糊匹配，即：2个物品，是否为同一种物品，不管NBT等数据
      */
     boolean isSame(IStackKey<?> other);
+
+    /**
+     * 模糊匹配的分组：{@link #isSame} 为真的两个键，类型 id 与分组必须都相等。存储按分组索引模糊匹配
+     * <p>
+     * 默认为 {@link #getSource()}，适用于按物品、流体等来源比较的资源；按其他规则比较的实现应当重写
+     */
+    default Object fuzzyGroup()
+    {
+        return getSource();
+    }
 
     /**
      * 检查2个实例是否能精确匹配，即：2个物品，种类、NBT等数据是否一致

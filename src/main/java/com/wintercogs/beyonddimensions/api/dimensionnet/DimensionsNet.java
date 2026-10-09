@@ -1,7 +1,9 @@
 package com.wintercogs.beyonddimensions.api.dimensionnet;
 
+import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.api.event.dimensionnet.DimensionsNetEvent;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.ErrorData;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
@@ -13,17 +15,19 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.*;
 
@@ -36,6 +40,7 @@ import java.util.*;
  */
 public class DimensionsNet extends SavedData
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
     static final String NET_DATA_PREFIX = "BDNet_";
     public static final int NO_PRIMARY_NET_ID = -1;
     public static final int MAX_NETWORK_NAME_LENGTH = 48;
@@ -95,6 +100,11 @@ public class DimensionsNet extends SavedData
     private int currentTime = 0;
 
     /**
+     * 当前服务器载入的网络，由 {@link #tickLoaded} 统一推进计时，服务器停止时清空
+     */
+    private static final Set<DimensionsNet> LOADED = Collections.newSetFromMap(new IdentityHashMap<>());
+
+    /**
      * 构造函数
      *
      * @param temporary 为真则说明是临时网络
@@ -102,8 +112,29 @@ public class DimensionsNet extends SavedData
     public DimensionsNet(boolean temporary)
     {
         unifiedStorage = new UnifiedStorage(this, AbstractUnorderedStackHandler.UiTimestampPolicy.AUTO);
-        NeoForge.EVENT_BUS.addListener(this::onServerTick);
         this.temporary = temporary;
+        if (!temporary)
+            LOADED.add(this);
+    }
+
+    /**
+     * 每刻推进所有已载入网络的计时，由 BD 注册到事件总线
+     */
+    public static void tickLoaded(ServerTickEvent.Pre event)
+    {
+        for (DimensionsNet net : LOADED)
+        {
+            if (!net.deleted)
+                net.onServerTick(event);
+        }
+    }
+
+    /**
+     * 服务器停止时忘掉它的网络，由 BD 注册到事件总线
+     */
+    public static void forgetLoaded(ServerStoppedEvent event)
+    {
+        LOADED.clear();
     }
 
     // 基本函数
@@ -355,28 +386,23 @@ public class DimensionsNet extends SavedData
             net.owner = owner;
         }
 
-        net.unifiedStorage.deserializeNBT(registryAccess, tag.getCompound("UnifiedStorage"));
+        // 解析不了的资源封装成错误数据，汇总成一条带网络 id 的日志
+        try (ErrorData.Report ignored = ErrorData.report("维度网络 #" + net.id))
+        {
+            net.unifiedStorage.deserializeNBT(registryAccess, tag.getCompound("UnifiedStorage"));
+        }
         // 旧数据兼容
         if (tag.contains("EnergyStorage"))
         {
             CompoundTag energyTag = tag.getCompound("EnergyStorage");
             if (energyTag.contains("Energy"))
             {
-                net.unifiedStorage.insert(EnergyStackKey.INSTANCE, energyTag.getLong("Energy"), false);
+                net.unifiedStorage.restore(EnergyStackKey.INSTANCE, energyTag.getLong("Energy"));
             }
         }
 
-        if (tag.contains("Managers"))
-        {
-            ListTag managerList = tag.getList("Managers", 8);
-            managerList.forEach(manager -> net.managers.add(UUID.fromString(manager.getAsString())));
-        }
-
-        if (tag.contains("Players"))
-        {
-            ListTag playerList = tag.getList("Players", 8); // 8 表示 StringTag
-            playerList.forEach(player -> net.players.add(UUID.fromString(player.getAsString())));
-        }
+        readMembers(tag, "Managers", net.managers, net.id);
+        readMembers(tag, "Players", net.players, net.id);
 
         // 读取倒计时
         net.currentTime = tag.getInt("currentTime");
@@ -433,6 +459,22 @@ public class DimensionsNet extends SavedData
         tag.putBoolean("Deleted", this.deleted);
 
         return tag;
+    }
+
+    // 成员 UUID 逐个解析：坏掉的一条只跳过它本身
+    private static void readMembers(CompoundTag tag, String key, Set<UUID> into, int netId)
+    {
+        for (Tag entry : tag.getList(key, Tag.TAG_STRING))
+        {
+            try
+            {
+                into.add(UUID.fromString(entry.getAsString()));
+            }
+            catch (IllegalArgumentException e)
+            {
+                LOGGER.warn("维度网络 #{} 的 {} 中有无法解析的玩家 UUID：{}，已跳过", netId, key, entry.getAsString());
+            }
+        }
     }
 
 
@@ -733,11 +775,13 @@ public class DimensionsNet extends SavedData
             else if (entry.getValue().level() == NetPermissionlevel.Member)
                 addPlayer(entry.getKey());
         }
-        // 合并统一存储系统
+        // 合并统一存储系统：原样并入，不受容量与种类上限约束，被合并网络的资源不会因放不下而随它销毁
         for (KeyAmount stack : otherNet.getUnifiedStorage().getStorage())
         {
-            unifiedStorage.insert(stack.key(), stack.amount(), false);
+            unifiedStorage.restore(stack.key(), stack.amount());
         }
+        unifiedStorage.onChange();
+        setDirty();
 
         // 销毁另一个网络
         otherNet.destroySelf();
@@ -824,9 +868,10 @@ public class DimensionsNet extends SavedData
     }
 
     /**
-     * 用于执行定期操作，目前仅用于生成破碎的时空结晶
+     * 用于执行定期操作，目前仅用于生成破碎的时空结晶。由 {@link #tickLoaded} 统一调用
+     * <p>
+     * 计时本身不标记脏：只有产出结晶时网络才需要保存，未保存的计时进度在重启后从上次保存的值继续
      */
-    @SubscribeEvent
     public void onServerTick(ServerTickEvent.Pre event)
     {
         // 不对临时网络执行倒计时
@@ -834,7 +879,6 @@ public class DimensionsNet extends SavedData
             return;
 
         currentTime++;
-        setDirty();
         if (currentTime >= ServerConfigRuntime.crystalGenerateTime * 20)
         {
             ItemStack stack = new ItemStack(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(), 1);

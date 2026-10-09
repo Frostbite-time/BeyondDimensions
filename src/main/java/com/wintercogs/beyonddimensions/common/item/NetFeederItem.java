@@ -93,11 +93,10 @@ public class NetFeederItem extends BaseMachineItem
                 KeyAmount foodCache = null;
                 for (KeyAmount filter : filterSlots)
                 {
-                    for (KeyAmount storedStack : storage.getStorage())
+                    // 只查与过滤项同种的变体，由存储的模糊匹配索引给出
+                    for (KeyAmount storedStack : storage.variants(filter.key()))
                     {
-                        // isSame会在最后变为引用比较，所以无需担心，这个比较即使对于大存储来说也非常迅速
                         if (storedStack.key() instanceof ItemStackKey itemStackKey
-                                && itemStackKey.isSame(filter.key())
                                 && itemStackKey.getReadOnlyStack().getFoodProperties(player) != null)
                         {
                             foodCache = new KeyAmount(storedStack.key(), 1);

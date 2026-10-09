@@ -81,21 +81,10 @@ public final class ItemStackKey implements IStackKey<ItemStack>
             final T kAmt = ops.createString(K_AMOUNT);
             final T kAmtOld = ops.createString(K_AMOUNT_OLD);
 
-            // 新格式 item + components
+            // 新格式 item + components；物品或任一组件解析不了时如实失败，由 IStackKey.CODEC 封装成错误数据
             if (input.get(kItem) != null)
             {
-                DataResult<ItemStackKey> r = NEW_FMT.decode(ops, input);
-                if (r.result().isPresent()) return r;
-
-                // 失败时使用Items.AIR的宽松回退
-                DataComponentPatch patch = DataComponentPatch.EMPTY;
-                T compsNode = input.get(kComps);
-                if (compsNode != null)
-                {
-                    patch = DataComponentPatch.CODEC.parse(ops, compsNode)
-                            .result().orElse(DataComponentPatch.EMPTY);
-                }
-                return DataResult.success(new ItemStackKey(Items.AIR, patch));
+                return NEW_FMT.decode(ops, input);
             }
 
             // 旧格式 Item + Components 转为新格式然后转交给新版本解码

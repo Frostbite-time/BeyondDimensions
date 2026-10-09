@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface IStackHandler
@@ -120,6 +121,20 @@ public interface IStackHandler
     default @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate)
     {
         return extract(key, amount, simulate, false);
+    }
+
+    /**
+     * 与 key 模糊匹配（{@link IStackKey#isSame}）的全部资源及数量，不含数量为 0 的
+     */
+    default List<KeyAmount> variants(IStackKey<?> key)
+    {
+        List<KeyAmount> out = new ArrayList<>();
+        if (key == null) return out;
+        for (KeyAmount stack : getStorage())
+        {
+            if (!stack.isEmpty() && stack.key().isSame(key)) out.add(stack);
+        }
+        return out;
     }
 
     /**

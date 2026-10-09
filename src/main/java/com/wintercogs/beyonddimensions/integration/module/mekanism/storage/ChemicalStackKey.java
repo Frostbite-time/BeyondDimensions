@@ -67,9 +67,13 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
             final T kLegacy = ops.createString(K_LEGACY);
             final T kStack = ops.createString(K_STACK);
 
-            // 新格式
-            if (input.get(kChem) != null)
+            // 新格式；未注册的化学品如实失败，由 IStackKey.CODEC 封装成错误数据
+            T chemNode = input.get(kChem);
+            if (chemNode != null)
             {
+                var id = ResourceLocation.CODEC.parse(ops, chemNode).result();
+                if (id.isPresent() && !MekanismAPI.CHEMICAL_REGISTRY.containsKey(id.get()))
+                    return DataResult.error(() -> "Unknown chemical: " + id.get());
                 return NEW_FMT.decode(ops, input);
             }
 

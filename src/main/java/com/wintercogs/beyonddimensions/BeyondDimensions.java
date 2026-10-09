@@ -12,7 +12,9 @@ import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.EnergyHandl
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
@@ -28,6 +30,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
 
@@ -45,6 +48,10 @@ public class BeyondDimensions
         Config.register(modContainer);
 
         modEventBus.addListener(this::commonSetup);
+        // 所有已载入网络共用一个刻处理；标签重载后各存储的标签索引按需重建
+        NeoForge.EVENT_BUS.addListener(DimensionsNet::tickLoaded);
+        NeoForge.EVENT_BUS.addListener(DimensionsNet::forgetLoaded);
+        NeoForge.EVENT_BUS.addListener((TagsUpdatedEvent event) -> AbstractUnorderedStackHandler.invalidateTagIndexes());
 
         BDMenus.register(modEventBus);
         BDCreativeModeTabs.register(modEventBus);

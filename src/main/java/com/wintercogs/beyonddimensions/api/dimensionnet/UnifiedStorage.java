@@ -135,7 +135,7 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
     @Override
     public @NotNull KeyAmount extract(TagKey<?> tagKey, long amount, boolean simulate)
     {
-        var key = tag2stackMap.get(tagKey).stream().findFirst();
+        var key = tagIndex().get(tagKey).stream().findFirst();
         if (key.isEmpty() || amount <= 0L)
             return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
 
