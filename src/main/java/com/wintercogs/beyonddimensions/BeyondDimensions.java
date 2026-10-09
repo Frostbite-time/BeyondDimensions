@@ -14,6 +14,7 @@ import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ItemHandler
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
@@ -48,6 +49,7 @@ public class BeyondDimensions
         Config.register(modContainer);
 
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(BDRegistries::register);
         // 所有已载入网络共用一个刻处理；标签重载后各存储的标签索引按需重建
         NeoForge.EVENT_BUS.addListener(DimensionsNet::tickLoaded);
         NeoForge.EVENT_BUS.addListener(DimensionsNet::forgetLoaded);

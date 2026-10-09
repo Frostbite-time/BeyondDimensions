@@ -1,7 +1,10 @@
 package com.wintercogs.beyonddimensions.api.dimensionnet;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.DataResult;
+import com.wintercogs.beyonddimensions.api.dimensionnet.data.NetDataType;
 import com.wintercogs.beyonddimensions.api.event.dimensionnet.DimensionsNetEvent;
+import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.ErrorData;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
@@ -14,8 +17,11 @@ import com.wintercogs.beyonddimensions.util.PlayerNameHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
@@ -30,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 
 /**
@@ -41,6 +48,8 @@ import java.util.*;
 public class DimensionsNet extends SavedData
 {
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final String ATTACHMENTS_TAG = "Attachments";
+    private static final String QUARANTINE_TAG = "AttachmentsQuarantine";
     static final String NET_DATA_PREFIX = "BDNet_";
     public static final int NO_PRIMARY_NET_ID = -1;
     public static final int MAX_NETWORK_NAME_LENGTH = 48;
@@ -98,6 +107,26 @@ public class DimensionsNet extends SavedData
      * holdTime是固定的时间间隔，用于确定多久生成一次时间间隔，每当currentTime归零，holdTime会为它赋值
      */
     private int currentTime = 0;
+
+    /**
+     * 挂接的数据，见 {@link NetDataType}
+     */
+    private final Map<NetDataType<?>, Object> attachments = new LinkedHashMap<>();
+
+    /**
+     * 类型未注册（例如附属未安装）的挂接数据，原样保留并写回存档
+     */
+    private final Map<String, Tag> unknownAttachments = new LinkedHashMap<>();
+
+    /**
+     * 类型已注册但解析失败的挂接数据，原样隔离保存，不会被自动采用或覆盖
+     */
+    private final Map<String, Tag> quarantinedAttachments = new LinkedHashMap<>();
+
+    /**
+     * 每种挂接数据上一次成功写出的内容，编码失败时沿用，不写成空值
+     */
+    private final Map<NetDataType<?>, Tag> lastWrittenAttachments = new HashMap<>();
 
     /**
      * 当前服务器载入的网络，由 {@link #tickLoaded} 统一推进计时，服务器停止时清空
@@ -403,6 +432,7 @@ public class DimensionsNet extends SavedData
 
         readMembers(tag, "Managers", net.managers, net.id);
         readMembers(tag, "Players", net.players, net.id);
+        net.readAttachments(tag, registryAccess);
 
         // 读取倒计时
         net.currentTime = tag.getInt("currentTime");
@@ -458,6 +488,8 @@ public class DimensionsNet extends SavedData
         // 保存删除状态
         tag.putBoolean("Deleted", this.deleted);
 
+        writeAttachments(tag, registryAccess);
+
         return tag;
     }
 
@@ -475,6 +507,211 @@ public class DimensionsNet extends SavedData
                 LOGGER.warn("维度网络 #{} 的 {} 中有无法解析的玩家 UUID：{}，已跳过", netId, key, entry.getAsString());
             }
         }
+    }
+
+    // ---- 挂接数据 ----
+
+    /**
+     * 这种挂接数据的值；网络还没有时以默认值建立
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getData(NetDataType<T> type)
+    {
+        Object value = attachments.get(type);
+        if (value == null)
+        {
+            value = type.createDefault();
+            attachments.put(type, value);
+            setDirty();
+        }
+        return (T) value;
+    }
+
+    /**
+     * 这种挂接数据的值，网络没有时为空，不会新建
+     */
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> getExistingData(NetDataType<T> type)
+    {
+        return Optional.ofNullable((T) attachments.get(type));
+    }
+
+    public boolean hasData(NetDataType<?> type)
+    {
+        return attachments.containsKey(type);
+    }
+
+    /**
+     * 替换这种挂接数据的值并标记保存
+     *
+     * @return 原来的值，没有时为 null
+     */
+    @SuppressWarnings("unchecked")
+    public <T> @Nullable T setData(NetDataType<T> type, T value)
+    {
+        Object previous = attachments.put(type, Objects.requireNonNull(value));
+        setDirty();
+        return (T) previous;
+    }
+
+    /**
+     * 用 update 的结果替换这种挂接数据的值（没有时先取默认值）并标记保存
+     *
+     * @return 新的值
+     */
+    public <T> T updateData(NetDataType<T> type, UnaryOperator<T> update)
+    {
+        T next = Objects.requireNonNull(update.apply(getData(type)));
+        attachments.put(type, next);
+        setDirty();
+        return next;
+    }
+
+    /**
+     * 移除这种挂接数据
+     *
+     * @return 移除的值，没有时为空
+     */
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> removeData(NetDataType<T> type)
+    {
+        Object previous = attachments.remove(type);
+        if (previous != null)
+        {
+            lastWrittenAttachments.remove(type);
+            setDirty();
+        }
+        return Optional.ofNullable((T) previous);
+    }
+
+    private void writeAttachments(CompoundTag tag, HolderLookup.Provider registryAccess)
+    {
+        CompoundTag out = new CompoundTag();
+        unknownAttachments.forEach(out::put);
+        RegistryOps<Tag> ops = registryAccess.createSerializationContext(NbtOps.INSTANCE);
+        for (Map.Entry<NetDataType<?>, Object> entry : attachments.entrySet())
+        {
+            NetDataType<?> type = entry.getKey();
+            ResourceLocation typeId = BDRegistries.NET_DATA_TYPES.getKey(type);
+            if (typeId == null)
+            {
+                LOGGER.error("维度网络 #{} 有一项挂接数据的类型没有注册到 {}，无法保存", id, BDRegistries.NET_DATA_TYPE_KEY.location());
+                continue;
+            }
+            Tag encoded = encodeAttachment(type, entry.getValue(), ops);
+            if (encoded != null)
+                lastWrittenAttachments.put(type, encoded);
+            else
+                encoded = lastWrittenAttachments.get(type);
+            if (encoded != null)
+                out.put(typeId.toString(), encoded);
+        }
+        if (!out.isEmpty())
+            tag.put(ATTACHMENTS_TAG, out);
+        if (!quarantinedAttachments.isEmpty())
+        {
+            CompoundTag quarantine = new CompoundTag();
+            quarantinedAttachments.forEach(quarantine::put);
+            tag.put(QUARANTINE_TAG, quarantine);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> @Nullable Tag encodeAttachment(NetDataType<T> type, Object value, RegistryOps<Tag> ops)
+    {
+        try
+        {
+            DataResult<Tag> result = type.codec().encodeStart(ops, (T) value);
+            if (result.result().isPresent())
+                return result.result().get();
+            LOGGER.error("维度网络 #{} 的挂接数据 {} 编码失败，沿用上次保存的内容：{}", id,
+                    BDRegistries.NET_DATA_TYPES.getKey(type), result.error().map(DataResult.Error::message).orElse(""));
+        }
+        catch (RuntimeException e)
+        {
+            LOGGER.error("维度网络 #{} 的挂接数据 {} 编码时出错，沿用上次保存的内容", id, BDRegistries.NET_DATA_TYPES.getKey(type), e);
+        }
+        return null;
+    }
+
+    private void readAttachments(CompoundTag tag, HolderLookup.Provider registryAccess)
+    {
+        // 先读出已在隔离中的数据，新解析失败的另起键名，不会覆盖它们
+        CompoundTag quarantine = tag.getCompound(QUARANTINE_TAG);
+        for (String key : quarantine.getAllKeys())
+            quarantinedAttachments.put(key, quarantine.get(key));
+        if (!quarantine.isEmpty())
+            LOGGER.warn("维度网络 #{}：{} 项挂接数据处于隔离中：{}", id, quarantine.size(), quarantine.getAllKeys());
+
+        RegistryOps<Tag> ops = registryAccess.createSerializationContext(NbtOps.INSTANCE);
+        CompoundTag in = tag.getCompound(ATTACHMENTS_TAG);
+        for (String key : in.getAllKeys())
+        {
+            Tag raw = in.get(key);
+            ResourceLocation typeId = ResourceLocation.tryParse(key);
+            NetDataType<?> type = typeId == null ? null : BDRegistries.NET_DATA_TYPES.get(typeId);
+            if (type == null)
+            {
+                unknownAttachments.put(key, raw);
+                continue;
+            }
+            String failure = decodeAttachment(type, raw, ops);
+            if (failure != null)
+            {
+                quarantine(key, raw);
+                LOGGER.error("维度网络 #{} 的挂接数据 {} 无法解析，已原样隔离保存：{}", id, key, failure);
+            }
+        }
+        if (!unknownAttachments.isEmpty())
+            LOGGER.warn("维度网络 #{}：{} 项挂接数据的类型未注册（对应模组未加载？），原样保留：{}", id, unknownAttachments.size(), unknownAttachments.keySet());
+    }
+
+    // 解析成功时放入挂接数据并返回 null，失败时返回原因
+    private <T> @Nullable String decodeAttachment(NetDataType<T> type, Tag raw, RegistryOps<Tag> ops)
+    {
+        try
+        {
+            DataResult<T> result = type.codec().parse(ops, raw);
+            if (result.result().isPresent())
+            {
+                attachments.put(type, result.result().get());
+                lastWrittenAttachments.put(type, raw);
+                return null;
+            }
+            return result.error().map(DataResult.Error::message).orElse("unknown");
+        }
+        catch (RuntimeException e)
+        {
+            return e.toString();
+        }
+    }
+
+    // 合并网络时并入对方的挂接数据：两边都有时按类型声明的方式合并，对方未注册或隔离中的数据原样带过来
+    private void absorbAttachments(DimensionsNet other)
+    {
+        for (Map.Entry<NetDataType<?>, Object> entry : other.attachments.entrySet())
+            absorbAttachment(entry.getKey(), entry.getValue());
+        other.unknownAttachments.forEach((key, raw) -> {
+            if (unknownAttachments.putIfAbsent(key, raw) != null)
+                quarantine(key + "@net" + other.id, raw);
+        });
+        other.quarantinedAttachments.forEach(this::quarantine);
+    }
+
+    // 放入隔离区；键名已被占用时加序号，不覆盖已有的数据
+    private void quarantine(String key, Tag raw)
+    {
+        String free = key;
+        for (int n = 2; quarantinedAttachments.containsKey(free); n++)
+            free = key + "#" + n;
+        quarantinedAttachments.put(free, raw);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void absorbAttachment(NetDataType<T> type, Object absorbed)
+    {
+        T kept = (T) attachments.get(type);
+        attachments.put(type, kept == null ? (T) absorbed : type.merge(kept, (T) absorbed));
     }
 
 
@@ -781,6 +1018,7 @@ public class DimensionsNet extends SavedData
             unifiedStorage.restore(stack.key(), stack.amount());
         }
         unifiedStorage.onChange();
+        absorbAttachments(otherNet);
         setDirty();
 
         // 销毁另一个网络
@@ -804,7 +1042,8 @@ public class DimensionsNet extends SavedData
                 List.copyOf(this.unifiedStorage.getStorage()),
                 this.owner,
                 Set.copyOf(this.managers),
-                Set.copyOf(this.players)
+                Set.copyOf(this.players),
+                Map.copyOf(this.attachments)
         );
 
         List<UUID> playerIds = new ArrayList<>(this.players);
@@ -821,6 +1060,10 @@ public class DimensionsNet extends SavedData
         this.players.clear();
         this.id = -99; // 用-99作为被删除的特殊标记
         this.unifiedStorage.clearStorage();
+        this.attachments.clear();
+        this.unknownAttachments.clear();
+        this.quarantinedAttachments.clear();
+        this.lastWrittenAttachments.clear();
         this.deleted = true;
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null)

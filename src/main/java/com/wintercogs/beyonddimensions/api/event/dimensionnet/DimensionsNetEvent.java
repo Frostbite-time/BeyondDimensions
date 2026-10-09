@@ -1,10 +1,13 @@
 package com.wintercogs.beyonddimensions.api.event.dimensionnet;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
+import com.wintercogs.beyonddimensions.api.dimensionnet.data.NetDataType;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import net.neoforged.bus.api.Event;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -75,7 +78,18 @@ public abstract class DimensionsNetEvent extends Event
          */
         private final Set<UUID> members;
 
+        /**
+         * 被摧毁网络的挂接数据
+         */
+        private final Map<NetDataType<?>, Object> data;
+
         public Destroyed(int destroyedId, String netName, List<KeyAmount> destroyedStorage, UUID owner, Set<UUID> managers, Set<UUID> members)
+        {
+            this(destroyedId, netName, destroyedStorage, owner, managers, members, Map.of());
+        }
+
+        public Destroyed(int destroyedId, String netName, List<KeyAmount> destroyedStorage, UUID owner, Set<UUID> managers, Set<UUID> members,
+                         Map<NetDataType<?>, Object> data)
         {
             this.destroyedId = destroyedId;
             this.netName = netName;
@@ -83,6 +97,16 @@ public abstract class DimensionsNetEvent extends Event
             this.owner = owner;
             this.managers = managers;
             this.members = members;
+            this.data = data;
+        }
+
+        /**
+         * 被摧毁网络上这种挂接数据的值，例如用来退还其中的物品
+         */
+        @SuppressWarnings("unchecked")
+        public <T> Optional<T> getData(NetDataType<T> type)
+        {
+            return Optional.ofNullable((T) data.get(type));
         }
 
         public int getDestroyedId()
