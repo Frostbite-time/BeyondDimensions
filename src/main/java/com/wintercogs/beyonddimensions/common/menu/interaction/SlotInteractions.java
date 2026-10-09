@@ -152,8 +152,8 @@ public final class SlotInteractions
             if (entry.interaction().applies(click) && entry.interaction().perform(click))
             {
                 if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("Slot click {} {} button {}{} handled by {}", click.kind(), click.slot().index,
-                            click.button(), click.shift() ? " with shift" : "", entry.id());
+                    LOGGER.debug("Slot click {} {} button {} modifiers {} handled by {}", click.kind(), click.slot().index,
+                            click.button(), click.modifiers(), entry.id());
                 return true;
             }
         }

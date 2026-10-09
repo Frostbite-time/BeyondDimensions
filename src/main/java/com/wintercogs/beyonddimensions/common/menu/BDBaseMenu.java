@@ -140,23 +140,25 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
     }
 
     // 自定义点击操作，交给 SlotInteractions 中注册的交互处理
-    public void customClickHandler(int slotIndex, KeyAmount clickedStack, int button, boolean shiftDown)
+    public void customClickHandler(int slotIndex, KeyAmount clickedStack, int button, int modifiers)
     {
-        customClickHandler(slotIndex, clickedStack, button, shiftDown, -1);
+        customClickHandler(slotIndex, clickedStack, button, modifiers, -1);
     }
 
     /**
+     * @param modifiers 按住的修饰键，见 {@link SlotClick#SHIFT} 等
      * @param requested 指定取出的数量（右键菜单的"取出 x 个"），没有时为 -1
      */
-    public void customClickHandler(int slotIndex, KeyAmount clickedStack, int button, boolean shiftDown, long requested)
+    public void customClickHandler(int slotIndex, KeyAmount clickedStack, int button, int modifiers, long requested)
     {
         // Packet data is a request. Validate before indexing or touching server inventory.
         if (player.level().isClientSide() || player.containerMenu != this || !player.isAlive() || player.isSpectator()
                 || !stillValid(player) || slotIndex < 0 || slotIndex >= slots.size()
-                || button < 0 || button > 2 || clickedStack == null || clickedStack.amount() < 0
+                || button < 0 || button > 2 || (modifiers & ~SlotClick.MODIFIERS) != 0
+                || clickedStack == null || clickedStack.amount() < 0
                 || clickedStack.amount() > clickedStack.key().getVanillaMaxStackSize()
                 || requested > clickedStack.key().getVanillaMaxStackSize()) return;
-        SlotInteractions.dispatch(SlotClick.of(this, player, slots.get(slotIndex), clickedStack, button, shiftDown, requested));
+        SlotInteractions.dispatch(SlotClick.of(this, player, slots.get(slotIndex), clickedStack, button, modifiers, requested));
     }
 
     // 处理非AbstractStackTypedSlot槽位的快速转移

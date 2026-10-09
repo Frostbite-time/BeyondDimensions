@@ -4,7 +4,9 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
 import com.wintercogs.beyonddimensions.client.ui.kit.formatCompact
+import com.mojang.blaze3d.platform.InputConstants
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
+import com.wintercogs.beyonddimensions.common.menu.interaction.SlotClick
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot
 import dev.compixel.forge.item.ItemIcon
@@ -12,8 +14,10 @@ import dev.compixel.forge.slots.MenuSlotVisual
 import dev.compixel.forge.slots.VanillaMenuSlotAdapter
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.inventory.Slot
+import org.lwjgl.glfw.GLFW
 
 /**
  * BD 菜单的槽位适配：在原生容器界面中显示虚拟资源，并把槽位操作转成菜单命令。
@@ -109,7 +113,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
                     slotId,
                     slot.vanillaActualStack,
                     if (type == ClickType.CLONE) 2 else button,
-                    type == ClickType.QUICK_MOVE,
+                    heldModifiers(type == ClickType.QUICK_MOVE),
                 )
             // 虚拟资源不参与原版的拖动、交换、丢弃与收集
             else -> {}
@@ -126,7 +130,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
             return
         }
         val clicked = KeyAmount(ItemStackKey(stack), stack.count.toLong())
-        val queued = menu.commands().click(slotId, clicked, button, true)
+        val queued = menu.commands().click(slotId, clicked, button, heldModifiers(quickMove = true))
         if (queued && !stack.isEmpty && slotId >= menu.inventoryStartIndex && slotId < menu.inventoryEndIndex) {
             lastPlayerSlot = slotId
             lastPlayerStack = clicked
@@ -134,6 +138,15 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         } else if (!queued) {
             forgetRepeat()
         }
+    }
+
+    /** 随点击发给服务端的修饰键：Shift 以点击类型为准，Ctrl（macOS 上为 Command）、Alt 与空格读当前键盘 */
+    private fun heldModifiers(quickMove: Boolean): Int {
+        var held = if (quickMove) SlotClick.SHIFT else 0
+        if (Screen.hasControlDown()) held = held or SlotClick.CTRL
+        if (Screen.hasAltDown()) held = held or SlotClick.ALT
+        if (InputConstants.isKeyDown(Minecraft.getInstance().window.window, GLFW.GLFW_KEY_SPACE)) held = held or SlotClick.SPACE
+        return held
     }
 
     private fun forgetRepeat() {

@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.*;
+import com.wintercogs.beyonddimensions.common.menu.interaction.SlotClick;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
@@ -34,7 +35,10 @@ public final class BDMenuCommands
     {
     }
 
-    public record Click(int slot, Key key, long amount, int button, boolean shift)
+    /**
+     * @param modifiers 按住的修饰键，见 {@link SlotClick#SHIFT} 等
+     */
+    public record Click(int slot, Key key, long amount, int button, int modifiers)
     {
     }
 
@@ -137,22 +141,22 @@ public final class BDMenuCommands
                     return new Key(handle, handle == LITERAL ? nativeKey.read(in) : null);
                 });
 
-        var clickCodec = SyncCodec.<Click>of("beyonddimensions:click/1:" + keyCodec.id(),
+        var clickCodec = SyncCodec.<Click>of("beyonddimensions:click/2:" + keyCodec.id(),
                 (out, value) -> {
                     out.writeInt(value.slot());
                     keyCodec.write(out, value.key());
                     out.writeLong(value.amount());
                     out.writeInt(value.button());
-                    out.writeBoolean(value.shift());
+                    out.writeByte(value.modifiers());
                 },
-                in -> new Click(in.readInt(), keyCodec.read(in), in.readLong(), in.readInt(), SyncCodecs.BOOLEAN.read(in)));
+                in -> new Click(in.readInt(), keyCodec.read(in), in.readLong(), in.readInt(), in.readUnsignedByte()));
         CLICK = MenuAction.of("bd.click", clickCodec, BDMenuResources.MAX_ACTION_BYTES, (m, player, click) -> {
             IStackKey<?> key = m.commands().resolve(click.key());
             if (key == null || click.slot() < 0 || click.slot() >= m.slots.size()
-                    || click.button() < 0 || click.button() > 2
+                    || click.button() < 0 || click.button() > 2 || (click.modifiers() & ~SlotClick.MODIFIERS) != 0
                     || click.amount() < 0 || click.amount() > key.getVanillaMaxStackSize())
                 return false;
-            m.customClickHandler(click.slot(), new KeyAmount(key, click.amount()), click.button(), click.shift());
+            m.customClickHandler(click.slot(), new KeyAmount(key, click.amount()), click.button(), click.modifiers());
             m.broadcastChanges();
             return true;
         });
@@ -169,7 +173,7 @@ public final class BDMenuCommands
             if (key == null || take.slot() < 0 || take.slot() >= m.slots.size()
                     || take.amount() < 1 || take.amount() > key.getVanillaMaxStackSize())
                 return false;
-            m.customClickHandler(take.slot(), new KeyAmount(key, take.amount()), 0, false, take.amount());
+            m.customClickHandler(take.slot(), new KeyAmount(key, take.amount()), 0, 0, take.amount());
             m.broadcastChanges();
             return true;
         });
@@ -297,9 +301,12 @@ public final class BDMenuCommands
         return new Key(id, null);
     }
 
-    public boolean click(int slot, KeyAmount key, int button, boolean shift)
+    /**
+     * @param modifiers 按住的修饰键，见 {@link SlotClick#SHIFT} 等
+     */
+    public boolean click(int slot, KeyAmount key, int button, int modifiers)
     {
-        return menu.menuSync().request(CLICK, new Click(slot, reference(key.key()), key.amount(), button, shift)).queued();
+        return menu.menuSync().request(CLICK, new Click(slot, reference(key.key()), key.amount(), button, modifiers)).queued();
     }
 
     public boolean take(int slot, IStackKey<?> key, long amount)
@@ -365,7 +372,7 @@ public final class BDMenuCommands
             {
                 ItemStack stack = menu.slots.get(i).getItem();
                 if (item.equals(new ItemStackKey(stack)))
-                    menu.customClickHandler(i, new KeyAmount(new ItemStackKey(stack), stack.getCount()), 0, true);
+                    menu.customClickHandler(i, new KeyAmount(new ItemStackKey(stack), stack.getCount()), 0, SlotClick.SHIFT);
             }
         }
         else if (menu instanceof DimensionsNetMenu net)
