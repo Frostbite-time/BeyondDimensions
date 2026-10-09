@@ -16,9 +16,19 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
@@ -230,6 +240,10 @@ private fun StorageView(
     // 排序与配方选择的浮层盖在槽位上方，打开期间停用槽位
     val popovers = remember { BdPopovers() }
     slots.Interaction(enabled = popovers.open == 0)
+    // Tab 只用来进出搜索框：焦点不在搜索框时聚焦它，在搜索框里再按一次取消聚焦
+    val searchFocus = remember { FocusRequester() }
+    var searchFocused by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     CompositionLocalProvider(LocalBdPopovers provides popovers) {
         BdScreenFrame { available ->
@@ -264,7 +278,23 @@ private fun StorageView(
                         if (event.changes.any { it.isConsumed }) return@onPointerEvent
                         val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
                         if (delta != 0f && page.main) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
-                    },
+                    }
+                    // 焦点在窗口里时由这里处理 Tab；没有焦点时 Tab 按顺序进入窗口，进入时改到搜索框，点击进入的焦点不受影响
+                    .onPreviewKeyEvent { event ->
+                        if (event.key != Key.Tab) return@onPreviewKeyEvent false
+                        if (event.type == KeyEventType.KeyDown) {
+                            if (searchFocused) focusManager.clearFocus() else searchFocus.requestFocus()
+                        }
+                        true
+                    }
+                    .focusProperties {
+                        onEnter = {
+                            if (requestedFocusDirection == FocusDirection.Next ||
+                                requestedFocusDirection == FocusDirection.Previous
+                            ) searchFocus.requestFocus()
+                        }
+                    }
+                    .focusGroup(),
                 header = {
                     BdHeader(
                         layout.icon,
@@ -302,7 +332,7 @@ private fun StorageView(
                 },
             ) {
                 BdMainPage(page.main) {
-                    Toolbar(state, send, text, width)
+                    Toolbar(state, send, text, width, searchFocus) { searchFocused = it }
                     Spacer(Modifier.height(5.dp))
                     CategoryTabs(state, send, text, width)
                     Spacer(Modifier.height(4.dp))
@@ -398,7 +428,14 @@ private fun StorageView(
 }
 
 @Composable
-private fun Toolbar(state: StorageState, send: (StorageAction) -> Unit, text: StorageText, width: Int) {
+private fun Toolbar(
+    state: StorageState,
+    send: (StorageAction) -> Unit,
+    text: StorageText,
+    width: Int,
+    searchFocus: FocusRequester,
+    onSearchFocus: (Boolean) -> Unit,
+) {
     // 配方查看器改动搜索时同步进来
     val search = rememberLocalText(state.search)
     val colors = Bd.colors
@@ -407,7 +444,7 @@ private fun Toolbar(state: StorageState, send: (StorageAction) -> Unit, text: St
             search.value,
             { search.edit(it) { value -> send(StorageAction.Search(value)) } },
             text.search,
-            Modifier.weight(1f),
+            Modifier.weight(1f).focusRequester(searchFocus).onFocusChanged { onSearchFocus(it.hasFocus) },
             help = { SearchHelp(text) },
         )
         Spacer(Modifier.width(4.dp))
