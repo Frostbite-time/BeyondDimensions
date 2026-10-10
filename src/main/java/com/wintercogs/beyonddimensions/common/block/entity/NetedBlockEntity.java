@@ -6,11 +6,14 @@ import com.wintercogs.beyonddimensions.common.block.NetedBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,6 +26,8 @@ import java.util.List;
 
 public abstract class NetedBlockEntity extends BlockEntity
 {
+    private static final String NET_ID = "netId";
+
     // 存储接口所对应的维度网络id，用于和维度网络交互
     private int netId = -1;// 初始化为-1，任何小于0（不包括0）的id表示未绑定网络
     private DimensionsNet net = null; //缓存net
@@ -51,6 +56,7 @@ public abstract class NetedBlockEntity extends BlockEntity
         {
             refreshNetCache();
             setChanged();
+            syncToClient();
 
             if (level instanceof ServerLevel serverLevel && getBlockState().getBlock() instanceof NetedBlock block)
             {
@@ -153,14 +159,14 @@ public abstract class NetedBlockEntity extends BlockEntity
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-        this.netId = tag.getInt("netId");
+        this.netId = tag.getInt(NET_ID);
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.saveAdditional(tag, registries);
-        tag.putInt("netId", this.netId);
+        tag.putInt(NET_ID, this.netId);
     }
 
     @Override
@@ -171,18 +177,69 @@ public abstract class NetedBlockEntity extends BlockEntity
         refreshNetCache();
     }
 
-    // 为子类提供基础的网络同步，需要正确实现loadAdditional和saveAdditional
+    /**
+     * 区块包与方块更新包带给客户端的数据，只含 {@link #saveClientData} 写出的字段，不是完整存档：
+     * 槽位等内容由各自的菜单同步，而整份存档可能大到让区块包超过协议上限。
+     * 在服务端执行：发区块给玩家时，以及 {@link #syncToClient} 之后发方块更新包时
+     */
     @Override
-    public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries)
+    public final @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries)
     {
         CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, registries);
+        saveClientData(tag, registries);
         return tag;
     }
 
     @Override
-    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket()
+    public final @Nullable Packet<ClientGamePacketListener> getUpdatePacket()
     {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    /**
+     * 在客户端执行：随区块包收到 {@link #getUpdateTag} 的数据
+     */
+    @Override
+    public final void handleUpdateTag(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries)
+    {
+        loadClientData(tag, registries);
+    }
+
+    /**
+     * 在客户端执行：收到方块更新包
+     */
+    @Override
+    public final void onDataPacket(@NotNull Connection connection, @NotNull ClientboundBlockEntityDataPacket packet, HolderLookup.@NotNull Provider registries)
+    {
+        loadClientData(packet.getTag(), registries);
+    }
+
+    /**
+     * 在服务端执行：写出客户端需要读取的字段，区块包与方块更新包共用。只写客户端真正用到的数据；子类追加时先调用 super。
+     * 基类写出网络 id，供 Jade 在服务端数据到达前显示绑定状态
+     */
+    protected void saveClientData(CompoundTag tag, HolderLookup.Provider registries)
+    {
+        tag.putInt(NET_ID, netId);
+    }
+
+    /**
+     * 在客户端执行：读入 {@link #saveClientData} 写出的字段。收到的不是完整存档，不要在这里调用 loadAdditional；
+     * 字段可能缺失，读取前先判断。子类追加时先调用 super
+     */
+    protected void loadClientData(CompoundTag tag, HolderLookup.Provider registries)
+    {
+        if (tag.contains(NET_ID, Tag.TAG_INT))
+            this.netId = tag.getInt(NET_ID);
+    }
+
+    /**
+     * 在服务端调用：{@link #saveClientData} 写出的数据改变后，把它发给附近的玩家。
+     * 只在客户端需要的数据改变时调用；只有服务端用到的数据改变时调用 setChanged 即可
+     */
+    protected final void syncToClient()
+    {
+        if (level != null && !level.isClientSide())
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
     }
 }

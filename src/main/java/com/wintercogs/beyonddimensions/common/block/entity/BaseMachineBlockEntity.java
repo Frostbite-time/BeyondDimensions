@@ -52,13 +52,11 @@ public abstract class BaseMachineBlockEntity extends NetedBlockEntity implements
     }
 
     /**
-     * 设置改变之后：标记保存并通知客户端；子类可以追加，例如刷新能力
+     * 设置改变之后：标记保存。客户端不读取设置（设置页由菜单同步），不必发方块更新；子类可以追加，例如刷新能力
      */
     protected void onSettingsChanged()
     {
         setChanged();
-        if (level != null)
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 2);
     }
 
     @Override

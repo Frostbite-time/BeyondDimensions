@@ -89,14 +89,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         return this.fakeStackHandler;
     }
 
-    // 设置改变后同样通知周围，弹出模式决定是否推送缓存
-    @Override
-    protected void onSettingsChanged()
-    {
-        super.onSettingsChanged();
-        onMenuDataChanged();
-    }
-
     @Override
     public boolean isMenuValid()
     {
@@ -109,7 +101,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         if (this.level != null && !this.level.isClientSide())
         {
             this.level.blockEntityChanged(this.getBlockPos());
-            this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 2);
         }
     }
 
