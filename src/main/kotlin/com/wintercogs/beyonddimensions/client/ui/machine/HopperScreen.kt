@@ -10,7 +10,6 @@ import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
-import com.wintercogs.beyonddimensions.common.machine.*
 import com.wintercogs.beyonddimensions.common.menu.NetHopperMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
@@ -27,35 +26,11 @@ class HopperScreen(menu: NetHopperMenu, inventory: Inventory, title: Component) 
     private val playerSlots = menu.playerSlotIds()
     private val text = HopperText(title.string)
 
-    override fun snapshot() =
-        HopperState(
-            filter = container.filter(),
-            filterEditable = container.filterEditable(),
-            redstone = container.redstone(),
-            redstoneEditable = container.redstoneEditable(),
-            items = container.items() == HopperItemMode.ALLOW,
-            itemsEditable = container.itemsEditable(),
-            experience = container.experience() == HopperXpMode.ALLOW,
-            experienceEditable = container.experienceEditable(),
-            fluids = container.fluids() == HopperFluidMode.ALLOW,
-            fluidsEditable = container.fluidsEditable(),
-            components = container.components() == HopperNBTMode.ALLOW,
-            componentsEditable = container.componentsEditable(),
-            range = container.range().ordinal,
-            rangeEditable = container.rangeEditable(),
-        )
+    override fun snapshot() = HopperState(machineSettingRows(container.machineSettings().snapshot()))
 
     override fun handle(action: HopperAction) {
-        // 收集项的第一个选项是“允许”，第二个是“拒绝”
-        fun choice(allowed: Boolean) = if (allowed) 0 else 1
         when (action) {
-            is HopperAction.SetFilter -> container.requestFilter(action.mode.ordinal)
-            is HopperAction.SetRedstone -> container.requestRedstone(action.mode.ordinal)
-            is HopperAction.SetItems -> container.requestItems(choice(action.allowed))
-            is HopperAction.SetExperience -> container.requestExperience(choice(action.allowed))
-            is HopperAction.SetFluids -> container.requestFluids(choice(action.allowed))
-            is HopperAction.SetComponents -> container.requestComponents(choice(action.allowed))
-            is HopperAction.SetRange -> container.requestRange(action.range)
+            is HopperAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
         }
     }
 
@@ -80,103 +55,23 @@ class HopperScreen(menu: NetHopperMenu, inventory: Inventory, title: Component) 
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
                 InjectedPages(pages, page)
-                BdTabPage(settingsOpen) { HopperSettings(state, settingsOpen, text, ::send) }
+                BdTabPage(settingsOpen) {
+                    BdSectionLabel(text.settings)
+                    BdMachineSettings(state.settings, settingsOpen) { send(HopperAction.Setting(it)) }
+                }
             }
         }
     }
 }
 
-/** 设置页的全部设置；[shown] 为 false 时设置页正在淡出，控件不再响应 */
-@Composable
-private fun HopperSettings(state: HopperState, shown: Boolean, text: HopperText, send: (HopperAction) -> Boolean) {
-    BdSectionLabel(text.settings)
-    BdModeSetting(text.filter, text.filterOptions, state.filter.ordinal, shown && state.filterEditable) {
-        send(HopperAction.SetFilter(FilterMode.entries[it]))
-    }
-    BdModeSetting(text.redstone, text.redstoneOptions, state.redstone.ordinal, shown && state.redstoneEditable) {
-        send(HopperAction.SetRedstone(RedStoneControlMode.entries[it]))
-    }
-    BdSettingRow(text.items) {
-        BdToggle(
-            state.items,
-            { send(HopperAction.SetItems(it)) },
-            shown && state.itemsEditable
-        )
-    }
-    BdSettingRow(text.experience) {
-        BdToggle(state.experience, { send(HopperAction.SetExperience(it)) }, shown && state.experienceEditable)
-    }
-    BdSettingRow(text.fluids) {
-        BdToggle(
-            state.fluids,
-            { send(HopperAction.SetFluids(it)) },
-            shown && state.fluidsEditable
-        )
-    }
-    BdSettingRow(text.components) {
-        BdToggle(state.components, { send(HopperAction.SetComponents(it)) }, shown && state.componentsEditable)
-    }
-    BdModeSetting(
-        text.range,
-        text.rangeOptions,
-        state.range,
-        shown && state.rangeEditable,
-        description = text.rangeHints[state.range],
-        cycle = true,
-    ) {
-        send(HopperAction.SetRange(it))
-    }
-}
-
-data class HopperState(
-    val filter: FilterMode,
-    val filterEditable: Boolean,
-    val redstone: RedStoneControlMode,
-    val redstoneEditable: Boolean,
-    val items: Boolean,
-    val itemsEditable: Boolean,
-    val experience: Boolean,
-    val experienceEditable: Boolean,
-    val fluids: Boolean,
-    val fluidsEditable: Boolean,
-    val components: Boolean,
-    val componentsEditable: Boolean,
-    val range: Int,
-    val rangeEditable: Boolean,
-)
+data class HopperState(val settings: List<MachineSettingRow>)
 
 sealed interface HopperAction {
-    data class SetFilter(val mode: FilterMode) : HopperAction
-
-    data class SetRedstone(val mode: RedStoneControlMode) : HopperAction
-
-    data class SetItems(val allowed: Boolean) : HopperAction
-
-    data class SetExperience(val allowed: Boolean) : HopperAction
-
-    data class SetFluids(val allowed: Boolean) : HopperAction
-
-    data class SetComponents(val allowed: Boolean) : HopperAction
-
-    data class SetRange(val range: Int) : HopperAction
+    data class Setting(val pick: MachineSettingPick) : HopperAction
 }
-
-private val RANGES = listOf("lowest", "low", "mid", "high", "highest", "chunk")
 
 private class HopperText(val title: String) {
     val settings = tr("ui.beyonddimensions.machine.settings")
     val inventory = tr("ui.beyonddimensions.inventory")
     val filters = tr("ui.beyonddimensions.machine.filter_slots")
-    val filter = tr("ui.beyonddimensions.machine.filter")
-    val filterOptions = FilterMode.entries.map { tr("ui.beyonddimensions.machine.filter.${it.name.lowercase()}") }
-    val redstone = tr("ui.beyonddimensions.machine.redstone")
-    val redstoneOptions =
-        RedStoneControlMode.entries.map { tr("ui.beyonddimensions.machine.redstone.${it.name.lowercase()}") }
-    val items = tr("ui.beyonddimensions.machine.collect.items")
-    val experience = tr("ui.beyonddimensions.machine.collect.experience")
-    val fluids = tr("ui.beyonddimensions.machine.collect.fluids")
-    val components = tr("ui.beyonddimensions.machine.collect.components")
-    val range = tr("ui.beyonddimensions.machine.range")
-    val rangeOptions = RANGES.map { tr("ui.beyonddimensions.machine.range.$it") }
-    val rangeHints = RANGES.map { tr("ui.beyonddimensions.machine.range.hopper.$it") }
 }

@@ -1,6 +1,14 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
+import com.wintercogs.beyonddimensions.api.machine.BDMachineSettings;
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
+import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -15,41 +23,78 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public interface NetInterfaceAccess
+/**
+ * 网络接口：方块，以及 Create 动态结构里的接口。设置按网络接口的机器类型保存，配置卡连同标记槽一起复制
+ */
+public interface NetInterfaceAccess extends Machine
 {
+    String FLAGS = "flags";
+
     StackHandler getStackHandler();
 
     StackHandler getFakeStackHandler();
 
-    NetInterfaceSettings getNetInterfaceSettings();
+    @Override
+    default MachineType machineType()
+    {
+        return BDMachineTypes.NET_INTERFACE.get();
+    }
 
     default PopMode getPopMode()
     {
-        return getNetInterfaceSettings().getPopMode();
+        return setting(BDMachineSettings.POP.get());
     }
 
     default void setPopMode(PopMode popMode)
     {
-        getNetInterfaceSettings().setPopMode(popMode);
+        setSetting(BDMachineSettings.POP.get(), popMode);
     }
 
     default FuzzyMode getFuzzyMode()
     {
-        return getNetInterfaceSettings().getFuzzyMode();
+        return setting(BDMachineSettings.FUZZY.get());
     }
 
     default void setFuzzyMode(FuzzyMode fuzzyMode)
     {
-        getNetInterfaceSettings().setFuzzyMode(fuzzyMode);
+        setSetting(BDMachineSettings.FUZZY.get(), fuzzyMode);
     }
 
-    RedStoneControlMode getControlMode();
+    default RedStoneControlMode getControlMode()
+    {
+        return setting(BDMachineSettings.REDSTONE.get());
+    }
 
-    void setControlMode(RedStoneControlMode controlMode);
+    default void setControlMode(RedStoneControlMode controlMode)
+    {
+        setSetting(BDMachineSettings.REDSTONE.get(), controlMode);
+    }
 
     default boolean canConfigurePopMode()
     {
         return true;
+    }
+
+    @Override
+    default boolean isSettingAvailable(MachineSetting<?> setting)
+    {
+        return setting != BDMachineSettings.POP.get() || canConfigurePopMode();
+    }
+
+    @Override
+    default void exportConfig(CompoundTag config, HolderLookup.Provider registries)
+    {
+        Machine.super.exportConfig(config, registries);
+        config.put(FLAGS, getFakeStackHandler().serializeNBT(registries));
+    }
+
+    @Override
+    default void applyConfig(CompoundTag config, HolderLookup.Provider registries)
+    {
+        Machine.super.applyConfig(config, registries);
+        if (config.contains(FLAGS, Tag.TAG_COMPOUND))
+            getFakeStackHandler().deserializeNBT(registries, config.getCompound(FLAGS));
+        onMenuDataChanged();
     }
 
     boolean isMenuValid();

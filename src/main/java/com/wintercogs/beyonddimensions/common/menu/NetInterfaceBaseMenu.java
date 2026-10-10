@@ -4,20 +4,21 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
-import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
-import com.wintercogs.beyonddimensions.common.machine.PopMode;
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
-import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuCommands;
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.OrderedStackTypedSlot;
+import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.slots.SlotTransferRoutes;
-import dev.compixel.sync.state.SyncCodecs;
 import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
@@ -25,47 +26,47 @@ import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
 // 网络接口的UI
 // 管理一组虚拟槽、以及一组标记槽
-public class NetInterfaceBaseMenu extends BDBaseMenu
+public class NetInterfaceBaseMenu extends BDBaseMenu implements MachineMenu
 {
-    /**
-     * applyMode 的设置项
-     */
-    public static final int SETTING_POP = 0;
-    public static final int SETTING_REDSTONE = 1;
-    public static final int SETTING_FUZZY = 2;
+    private static final SyncSchema<NetInterfaceBaseMenu> SYNC_SCHEMA =
+            MachineSettingsSync.field(SyncSchema.<NetInterfaceBaseMenu>builder("beyonddimensions:interface", 2)).build();
 
-    // 客户端镜像，由同步 schema 写入
-    public PopMode synchronizedPopMode = PopMode.STOP;
-    public RedStoneControlMode synchronizedControlMode = RedStoneControlMode.IGNORE;
-    public FuzzyMode synchronizedFuzzyMode = FuzzyMode.DISABLE;
-    public boolean synchronizedCanConfigurePop;
+    private static final MenuAction<NetInterfaceBaseMenu, MachineSettingsSync.Change> SET_SETTING = MachineSettingsSync.action();
 
-    private static final SyncSchema<NetInterfaceBaseMenu> SYNC_SCHEMA = SyncSchema.<NetInterfaceBaseMenu>builder("beyonddimensions:interface", 1)
-            .field("pop", SyncCodecs.enumeration(PopMode.class),
-                    m -> m.player.level().isClientSide() ? m.synchronizedPopMode : m.access.getPopMode(),
-                    (m, value) -> m.synchronizedPopMode = value)
-            .field("redstone", SyncCodecs.enumeration(RedStoneControlMode.class),
-                    m -> m.player.level().isClientSide() ? m.synchronizedControlMode : m.access.getControlMode(),
-                    (m, value) -> m.synchronizedControlMode = value)
-            .field("fuzzy", SyncCodecs.enumeration(FuzzyMode.class),
-                    m -> m.player.level().isClientSide() ? m.synchronizedFuzzyMode : m.access.getFuzzyMode(),
-                    (m, value) -> m.synchronizedFuzzyMode = value)
-            .field("configurable_pop", SyncCodecs.BOOLEAN,
-                    m -> m.player.level().isClientSide() ? m.synchronizedCanConfigurePop : m.access.canConfigurePopMode(),
-                    (m, value) -> m.synchronizedCanConfigurePop = value)
-            .build();
+    private final MachineSettingsSync.Mirror machineSettings = new MachineSettingsSync.Mirror();
 
-    private final MenuSync<NetInterfaceBaseMenu> synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SYNC_SCHEMA)).action(BDMenuCommands.MODE));
+    private final MenuSync<NetInterfaceBaseMenu> synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SYNC_SCHEMA)).action(SET_SETTING));
 
     @Override
     public MenuSync<NetInterfaceBaseMenu> menuSync()
     {
         return synchronization;
+    }
+
+    @Override
+    public @Nullable Machine machine()
+    {
+        return player.level().isClientSide() || access instanceof ClientAccess ? null : access;
+    }
+
+    @Override
+    public MachineSettingsSync.Mirror machineSettings()
+    {
+        return machineSettings;
+    }
+
+    /**
+     * 客户端：把设置改成编辑声明里的第 index 个值
+     */
+    public boolean requestSetting(ResourceLocation setting, int index)
+    {
+        return MachineSettingsSync.request(this, synchronization, SET_SETTING, setting, index);
     }
 
     @Override
@@ -77,42 +78,6 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
                 .route("player", "storage")
                 .route("storage", "player")
                 .build();
-    }
-
-    /**
-     * 服务端：修改单个设置项。只接受单项修改，从不接受客户端提交的整份机器状态
-     */
-    public boolean applyMode(int setting, int value)
-    {
-        if (player.level().isClientSide() || player.containerMenu != this || !player.isAlive() || player.isSpectator() || !stillValid(player))
-            return false;
-        switch (setting)
-        {
-            case SETTING_POP ->
-            {
-                if (!access.canConfigurePopMode() || value < 0 || value >= PopMode.values().length)
-                    return false;
-                access.setPopMode(PopMode.values()[value]);
-            }
-            case SETTING_REDSTONE ->
-            {
-                if (value < 0 || value >= RedStoneControlMode.values().length)
-                    return false;
-                access.setControlMode(RedStoneControlMode.values()[value]);
-            }
-            case SETTING_FUZZY ->
-            {
-                if (value < 0 || value >= FuzzyMode.values().length)
-                    return false;
-                access.setFuzzyMode(FuzzyMode.values()[value]);
-            }
-            default ->
-            {
-                return false;
-            }
-        }
-        access.onMenuDataChanged();
-        return true;
     }
 
     private static final int slotStartY = 1 + CommonTextures.TOP_BASE_COMMON_HEIGHT;
@@ -185,10 +150,6 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         this.flagStorage = access.getFakeStackHandler();
 
         this.access = access;
-        synchronizedPopMode = access.getPopMode();
-        synchronizedControlMode = access.getControlMode();
-        synchronizedFuzzyMode = access.getFuzzyMode();
-        synchronizedCanConfigurePop = access.canConfigurePopMode();
 
         addPlayerInv(playerInventory);
         addStorageSlots();
@@ -278,12 +239,11 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         return access != null && access.isMenuValid();
     }
 
+    // 客户端打开动态结构里的接口时的占位：设置由菜单同步
     private static final class ClientAccess implements NetInterfaceAccess
     {
         private final StackHandler stackHandler;
         private final StackHandler fakeStackHandler;
-        private final NetInterfaceSettings settings = new NetInterfaceSettings();
-        private RedStoneControlMode controlMode = RedStoneControlMode.IGNORE;
 
         private ClientAccess(FriendlyByteBuf data)
         {
@@ -308,21 +268,14 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         }
 
         @Override
-        public NetInterfaceSettings getNetInterfaceSettings()
+        public MachineSettings settings()
         {
-            return this.settings;
+            return MachineSettings.EMPTY;
         }
 
         @Override
-        public RedStoneControlMode getControlMode()
+        public void setSettings(MachineSettings settings)
         {
-            return this.controlMode;
-        }
-
-        @Override
-        public void setControlMode(RedStoneControlMode controlMode)
-        {
-            this.controlMode = controlMode;
         }
 
         @Override

@@ -41,6 +41,7 @@ public class ModItemModelProvider extends BDItemModelProvider
         basicItem(BDItems.NET_FEEDER_ITEM.get());
         basicItem(BDItems.NET_RESTOCKER_ITEM.get());
         basicItem(BDItems.XP_EXCHANGE_ITEM.get());
+        basicItem(BDItems.MACHINE_CONFIG_CARD.get());
         // 错误数据沿用原版屏障的贴图
         withExistingParent(BDItemIds.ERROR_DATA, mcLoc("item/generated")).texture("layer0", mcLoc("item/barrier"));
 

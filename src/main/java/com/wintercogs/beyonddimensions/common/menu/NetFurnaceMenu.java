@@ -5,10 +5,9 @@ import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.common.block.entity.BaseNetFurnaceBlockEntity;
-import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
-import com.wintercogs.beyonddimensions.common.machine.PopMode;
-import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.OrderedStackTypedSlot;
@@ -19,6 +18,7 @@ import dev.compixel.sync.state.SyncCodecs;
 import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
@@ -26,6 +26,7 @@ import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +34,9 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 /**
- * 维度网络熔炉：本页四个模式 + 九条产线的实时进度。
+ * 维度网络熔炉：九条产线的实时进度；设置由 MachineSettingsSync 统一同步与修改。
  */
-public class NetFurnaceMenu extends BDBaseMenu
+public class NetFurnaceMenu extends BDBaseMenu implements MachineMenu
 {
 
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
@@ -90,87 +91,13 @@ public class NetFurnaceMenu extends BDBaseMenu
 
     public final BaseNetFurnaceBlockEntity<?> be;
 
-    // 以下字段仅用于客户端镜像，由同步schema的setter写入
-    private PopMode clientOutput = PopMode.STOP;
-    private boolean outputEditable;
-    private ReceiveMode clientReceive = ReceiveMode.STOP;
-    private boolean receiveEditable;
-    private RedStoneControlMode clientRedstone = RedStoneControlMode.IGNORE;
-    private boolean redstoneEditable;
-    private AutoSortMode clientSorting = AutoSortMode.OPEN;
-    private boolean sortingEditable;
-
-    private static final SyncSchema<NetFurnaceMenu> SCHEMA = SyncSchema.<NetFurnaceMenu>builder("beyonddimensions:furnace", 1)
-            .field("value.output", SyncCodecs.enumeration(PopMode.class),
-                    m -> m.player.level().isClientSide() ? m.clientOutput : m.be.popMode,
-                    (m, value) -> m.clientOutput = value)
-            .field("editable.output", SyncCodecs.BOOLEAN,
-                    m -> m.player.level().isClientSide() ? m.outputEditable : editable(m),
-                    (m, value) -> m.outputEditable = value)
-            .field("value.receive", SyncCodecs.enumeration(ReceiveMode.class),
-                    m -> m.player.level().isClientSide() ? m.clientReceive : m.be.receiveMode,
-                    (m, value) -> m.clientReceive = value)
-            .field("editable.receive", SyncCodecs.BOOLEAN,
-                    m -> m.player.level().isClientSide() ? m.receiveEditable : editable(m),
-                    (m, value) -> m.receiveEditable = value)
-            .field("value.redstone", SyncCodecs.enumeration(RedStoneControlMode.class),
-                    m -> m.player.level().isClientSide() ? m.clientRedstone : m.be.controlMode,
-                    (m, value) -> m.clientRedstone = value)
-            .field("editable.redstone", SyncCodecs.BOOLEAN,
-                    m -> m.player.level().isClientSide() ? m.redstoneEditable : editable(m),
-                    (m, value) -> m.redstoneEditable = value)
-            .field("value.sorting", SyncCodecs.enumeration(AutoSortMode.class),
-                    m -> m.player.level().isClientSide() ? m.clientSorting : m.be.sortMode,
-                    (m, value) -> m.clientSorting = value)
-            .field("editable.sorting", SyncCodecs.BOOLEAN,
-                    m -> m.player.level().isClientSide() ? m.sortingEditable : editable(m),
-                    (m, value) -> m.sortingEditable = value)
+    private static final SyncSchema<NetFurnaceMenu> SCHEMA = MachineSettingsSync.field(SyncSchema.<NetFurnaceMenu>builder("beyonddimensions:furnace", 2))
             .keyedCollection("lanes", SyncCodecs.INT, LANE_CODEC, Lane::index, NetFurnaceMenu::captureLanes, (m, value) -> m.lanes = value)
             .build();
 
-    private static final MenuAction<NetFurnaceMenu, PopMode> SET_OUTPUT = MenuAction.of("set.output",
-            SyncCodecs.enumeration(PopMode.class), (m, player, value) -> {
-                if (!editable(m) || m.be == null) return false;
-                if (m.be.popMode != value)
-                {
-                    m.be.popMode = value;
-                    m.markBoardChanged();
-                }
-                return true;
-            });
+    private static final MenuAction<NetFurnaceMenu, MachineSettingsSync.Change> SET_SETTING = MachineSettingsSync.action();
 
-    private static final MenuAction<NetFurnaceMenu, ReceiveMode> SET_RECEIVE = MenuAction.of("set.receive",
-            SyncCodecs.enumeration(ReceiveMode.class), (m, player, value) -> {
-                if (!editable(m) || m.be == null) return false;
-                if (m.be.receiveMode != value)
-                {
-                    m.be.receiveMode = value;
-                    m.markBoardChanged();
-                }
-                return true;
-            });
-
-    private static final MenuAction<NetFurnaceMenu, RedStoneControlMode> SET_REDSTONE = MenuAction.of("set.redstone",
-            SyncCodecs.enumeration(RedStoneControlMode.class), (m, player, value) -> {
-                if (!editable(m) || m.be == null) return false;
-                if (m.be.controlMode != value)
-                {
-                    m.be.controlMode = value;
-                    m.markBoardChanged();
-                }
-                return true;
-            });
-
-    private static final MenuAction<NetFurnaceMenu, AutoSortMode> SET_SORTING = MenuAction.of("set.sorting",
-            SyncCodecs.enumeration(AutoSortMode.class), (m, player, value) -> {
-                if (!editable(m) || m.be == null) return false;
-                if (m.be.sortMode != value)
-                {
-                    m.be.sortMode = value;
-                    m.markBoardChanged();
-                }
-                return true;
-            });
+    private final MachineSettingsSync.Mirror machineSettings = new MachineSettingsSync.Mirror();
 
     private final MenuSync<NetFurnaceMenu> synchronization;
 
@@ -178,6 +105,26 @@ public class NetFurnaceMenu extends BDBaseMenu
     public MenuSync<NetFurnaceMenu> menuSync()
     {
         return synchronization;
+    }
+
+    @Override
+    public @Nullable Machine machine()
+    {
+        return be == null || be.isRemoved() ? null : be;
+    }
+
+    @Override
+    public MachineSettingsSync.Mirror machineSettings()
+    {
+        return machineSettings;
+    }
+
+    /**
+     * 客户端：把设置改成编辑声明里的第 index 个值
+     */
+    public boolean requestSetting(ResourceLocation setting, int index)
+    {
+        return MachineSettingsSync.request(this, synchronization, SET_SETTING, setting, index);
     }
 
     public NetFurnaceMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
@@ -213,86 +160,7 @@ public class NetFurnaceMenu extends BDBaseMenu
         addPlayerInv(playerInventory);
         addFilterSlots();
         addStorageSlots();
-        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SCHEMA))
-                .action(SET_OUTPUT).action(SET_RECEIVE).action(SET_REDSTONE).action(SET_SORTING));
-    }
-
-    private static boolean editable(NetFurnaceMenu menu)
-    {
-        return !menu.player.isSpectator();
-    }
-
-    private void markBoardChanged()
-    {
-        be.setChanged();
-        player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
-    }
-
-    // 客户端读取接口：本页只暴露自己这四个模式
-
-    public PopMode output()
-    {
-        return clientOutput;
-    }
-
-    public ReceiveMode receive()
-    {
-        return clientReceive;
-    }
-
-    public RedStoneControlMode redstone()
-    {
-        return clientRedstone;
-    }
-
-    public AutoSortMode sorting()
-    {
-        return clientSorting;
-    }
-
-    public boolean outputEditable()
-    {
-        return outputEditable;
-    }
-
-    public boolean receiveEditable()
-    {
-        return receiveEditable;
-    }
-
-    public boolean redstoneEditable()
-    {
-        return redstoneEditable;
-    }
-
-    public boolean sortingEditable()
-    {
-        return sortingEditable;
-    }
-
-    public boolean requestOutput(int ordinal)
-    {
-        return request(SET_OUTPUT, PopMode.values(), ordinal, outputEditable);
-    }
-
-    public boolean requestReceive(int ordinal)
-    {
-        return request(SET_RECEIVE, ReceiveMode.values(), ordinal, receiveEditable);
-    }
-
-    public boolean requestRedstone(int ordinal)
-    {
-        return request(SET_REDSTONE, RedStoneControlMode.values(), ordinal, redstoneEditable);
-    }
-
-    public boolean requestSorting(int ordinal)
-    {
-        return request(SET_SORTING, AutoSortMode.values(), ordinal, sortingEditable);
-    }
-
-    private <E extends Enum<E>> boolean request(MenuAction<NetFurnaceMenu, E> action, E[] modes, int ordinal, boolean enabled)
-    {
-        return enabled && ordinal >= 0 && ordinal < modes.length && synchronization.request(action, modes[ordinal]).queued();
+        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SCHEMA)).action(SET_SETTING));
     }
 
     // 槽位分组：由本页建立，也由本页回答各自的下标范围

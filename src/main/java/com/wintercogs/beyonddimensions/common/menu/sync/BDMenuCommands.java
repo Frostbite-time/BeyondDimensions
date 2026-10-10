@@ -57,10 +57,6 @@ public final class BDMenuCommands
     {
     }
 
-    public record Mode(int setting, int value)
-    {
-    }
-
     public record Recipe(List<Key> keys, List<Long> amounts, boolean compress)
     {
         public Recipe
@@ -103,16 +99,6 @@ public final class BDMenuCommands
                 PlayerCraftingGrid.of(player).setPreference(preference.toStorage(), preference.keep());
                 return true;
             });
-
-    private static final SyncCodec<Mode> MODE_CODEC = SyncCodec.of("beyonddimensions:interface_mode/1",
-            (out, value) -> {
-                out.writeInt(value.setting());
-                out.writeInt(value.value());
-            },
-            in -> new Mode(in.readInt(), in.readInt()));
-
-    public static final MenuAction<BDBaseMenu, Mode> MODE = MenuAction.of("bd.interface_mode", MODE_CODEC,
-            (menu, player, mode) -> menu instanceof NetInterfaceBaseMenu face && face.applyMode(mode.setting(), mode.value()));
 
     // 资源键的编解码依赖本菜单的注册表上下文，因此以下操作按菜单实例创建
     public final MenuAction<BDBaseMenu, Click> CLICK;
@@ -330,11 +316,6 @@ public final class BDMenuCommands
             return false;
         List<Key> references = keys.stream().map(this::reference).toList();
         return menu.menuSync().request(RECIPE, new Recipe(references, amounts, compress)).queued();
-    }
-
-    public boolean mode(int setting, int value)
-    {
-        return menu.menuSync().request(MODE, new Mode(setting, value)).queued();
     }
 
     public boolean returnCrafting(boolean toStorage)

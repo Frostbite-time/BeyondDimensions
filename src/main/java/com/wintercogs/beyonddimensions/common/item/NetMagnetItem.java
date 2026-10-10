@@ -1,5 +1,8 @@
 package com.wintercogs.beyonddimensions.common.item;
 
+import com.wintercogs.beyonddimensions.api.machine.BDMachineSettings;
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
+import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -40,7 +43,6 @@ import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class NetMagnetItem extends BaseMachineItem
@@ -75,20 +77,13 @@ public class NetMagnetItem extends BaseMachineItem
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
-        if (!stack.has(BDDataComponents.ISTACK_SLOTS))
-            stack.set(BDDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
-        if (!stack.has(BDDataComponents.FILTER_MODE))
-            stack.set(BDDataComponents.FILTER_MODE, FilterMode.BLACK);
-        if (!stack.has(BDDataComponents.HOPPER_ITEM_MODE))
-            stack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
-        if (!stack.has(BDDataComponents.HOPPER_XP_MODE))
-            stack.set(BDDataComponents.HOPPER_XP_MODE, HopperXpMode.DENY);
-        if (!stack.has(BDDataComponents.HOPPER_NBT_MODE))
-            stack.set(BDDataComponents.HOPPER_NBT_MODE, HopperNBTMode.DENY);
-        if (!stack.has(BDDataComponents.HOPPER_FLUID_MODE))
-            stack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
-        if (!stack.has(BDDataComponents.HOPPER_RANGE_MODE))
-            stack.set(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
+        ensureSlots(stack, capacity);
+    }
+
+    @Override
+    public MachineType machineType()
+    {
+        return BDMachineTypes.NET_MAGNET.get();
     }
 
     @Override
@@ -103,12 +98,12 @@ public class NetMagnetItem extends BaseMachineItem
     {
         super.workContent(stack, level, holder, slotId, isSelected);
 
-        FilterMode filterMode = stack.getOrDefault(BDDataComponents.FILTER_MODE, FilterMode.BLACK);
-        HopperItemMode hopperItemMode = stack.getOrDefault(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
-        HopperXpMode hopperXpMode = stack.getOrDefault(BDDataComponents.HOPPER_XP_MODE, HopperXpMode.DENY);
-        HopperNBTMode hopperNBTMode = stack.getOrDefault(BDDataComponents.HOPPER_NBT_MODE, HopperNBTMode.DENY);
-        HopperFluidMode hopperFluidMode = stack.getOrDefault(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
-        HopperRangeMode hopperRangeMode = stack.getOrDefault(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
+        FilterMode filterMode = settings(stack).get(BDMachineSettings.FILTER.get());
+        HopperItemMode hopperItemMode = settings(stack).get(BDMachineSettings.COLLECT_ITEMS.get());
+        HopperXpMode hopperXpMode = settings(stack).get(BDMachineSettings.COLLECT_EXPERIENCE.get());
+        HopperNBTMode hopperNBTMode = settings(stack).get(BDMachineSettings.COLLECT_COMPONENTS.get());
+        HopperFluidMode hopperFluidMode = settings(stack).get(BDMachineSettings.COLLECT_FLUIDS.get());
+        HopperRangeMode hopperRangeMode = settings(stack).get(BDMachineSettings.RANGE.get());
         List<KeyAmount> filterSlots = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
 
         AABB searchArea = getSearchArea(hopperRangeMode, level, holder.getOnPos());
@@ -184,8 +179,8 @@ public class NetMagnetItem extends BaseMachineItem
     @Override
     public int getTicksPerWork(ItemStack stack, Level level, Entity holder, int slotId, boolean isSelected)
     {
-        HopperRangeMode hopperRangeMode = stack.getOrDefault(BDDataComponents.HOPPER_RANGE_MODE, HopperRangeMode.RADIUS_MID);
-        HopperFluidMode hopperFluidMode = stack.getOrDefault(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
+        HopperRangeMode hopperRangeMode = settings(stack).get(BDMachineSettings.RANGE.get());
+        HopperFluidMode hopperFluidMode = settings(stack).get(BDMachineSettings.COLLECT_FLUIDS.get());
         if (hopperFluidMode == HopperFluidMode.ALLOW)
         {
             return switch (hopperRangeMode)

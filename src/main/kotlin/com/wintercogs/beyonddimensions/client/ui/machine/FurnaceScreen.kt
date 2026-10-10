@@ -18,10 +18,6 @@ import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
-import com.wintercogs.beyonddimensions.common.machine.AutoSortMode
-import com.wintercogs.beyonddimensions.common.machine.PopMode
-import com.wintercogs.beyonddimensions.common.machine.ReceiveMode
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode
 import com.wintercogs.beyonddimensions.common.menu.NetFurnaceMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
@@ -47,24 +43,14 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
         FurnaceState(
             lanes = container.lanes()
                 .map { Lane(fraction(it.cooking(), it.cookingTotal()), fraction(it.burning(), it.burningTotal())) },
-            pop = container.output() == PopMode.OPEN,
-            popEditable = container.outputEditable(),
-            receive = container.receive() == ReceiveMode.OPEN,
-            receiveEditable = container.receiveEditable(),
-            sorting = container.sorting() == AutoSortMode.OPEN,
-            sortingEditable = container.sortingEditable(),
-            redstone = container.redstone(),
-            redstoneEditable = container.redstoneEditable(),
+            settings = machineSettingRows(container.machineSettings().snapshot()),
         )
 
     private fun fraction(value: Int, total: Int) = if (total > 0) (value.toFloat() / total).coerceIn(0f, 1f) else 0f
 
     override fun handle(action: FurnaceAction) {
         when (action) {
-            is FurnaceAction.SetPop -> container.requestOutput((if (action.on) PopMode.OPEN else PopMode.STOP).ordinal)
-            is FurnaceAction.SetReceive -> container.requestReceive((if (action.on) ReceiveMode.OPEN else ReceiveMode.STOP).ordinal)
-            is FurnaceAction.SetSorting -> container.requestSorting((if (action.on) AutoSortMode.OPEN else AutoSortMode.STOP).ordinal)
-            is FurnaceAction.SetRedstone -> container.requestRedstone(action.mode.ordinal)
+            is FurnaceAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
         }
     }
 
@@ -87,31 +73,7 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
-                    BdSettingRow(text.pop, text.popHint) {
-                        BdToggle(state.pop, { send(FurnaceAction.SetPop(it)) }, settingsOpen && state.popEditable)
-                    }
-                    BdSettingRow(text.receive, text.receiveHint) {
-                        BdToggle(
-                            state.receive,
-                            { send(FurnaceAction.SetReceive(it)) },
-                            settingsOpen && state.receiveEditable
-                        )
-                    }
-                    BdSettingRow(text.sorting, text.sortingHint) {
-                        BdToggle(
-                            state.sorting,
-                            { send(FurnaceAction.SetSorting(it)) },
-                            settingsOpen && state.sortingEditable
-                        )
-                    }
-                    BdModeSetting(
-                        text.redstone,
-                        text.redstoneOptions,
-                        state.redstone.ordinal,
-                        settingsOpen && state.redstoneEditable
-                    ) {
-                        send(FurnaceAction.SetRedstone(RedStoneControlMode.entries[it]))
-                    }
+                    BdMachineSettings(state.settings, settingsOpen) { send(FurnaceAction.Setting(it)) }
                 }
             }
         }
@@ -123,24 +85,11 @@ data class Lane(val cooking: Float, val burning: Float)
 
 data class FurnaceState(
     val lanes: List<Lane>,
-    val pop: Boolean,
-    val popEditable: Boolean,
-    val receive: Boolean,
-    val receiveEditable: Boolean,
-    val sorting: Boolean,
-    val sortingEditable: Boolean,
-    val redstone: RedStoneControlMode,
-    val redstoneEditable: Boolean,
+    val settings: List<MachineSettingRow>,
 )
 
 sealed interface FurnaceAction {
-    data class SetPop(val on: Boolean) : FurnaceAction
-
-    data class SetReceive(val on: Boolean) : FurnaceAction
-
-    data class SetSorting(val on: Boolean) : FurnaceAction
-
-    data class SetRedstone(val mode: RedStoneControlMode) : FurnaceAction
+    data class Setting(val pick: MachineSettingPick) : FurnaceAction
 }
 
 /** 熔炉各区的槽位编号 */
@@ -161,15 +110,6 @@ private class FurnaceText(val title: String) {
     val input = tr("ui.beyonddimensions.furnace.input")
     val fuel = tr("ui.beyonddimensions.furnace.fuel")
     val smelting = tr("ui.beyonddimensions.furnace.smelting")
-    val pop = tr("ui.beyonddimensions.machine.pop")
-    val popHint = tr("ui.beyonddimensions.furnace.pop.hint")
-    val receive = tr("ui.beyonddimensions.furnace.receive")
-    val receiveHint = tr("ui.beyonddimensions.furnace.receive.hint")
-    val sorting = tr("ui.beyonddimensions.furnace.sorting")
-    val sortingHint = tr("ui.beyonddimensions.furnace.sorting.hint")
-    val redstone = tr("ui.beyonddimensions.machine.redstone")
-    val redstoneOptions =
-        RedStoneControlMode.entries.map { tr("ui.beyonddimensions.machine.redstone.${it.name.lowercase()}") }
 }
 
 private const val COLUMN_GAP = 4

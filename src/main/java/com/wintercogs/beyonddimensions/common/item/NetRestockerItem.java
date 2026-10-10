@@ -1,5 +1,8 @@
 package com.wintercogs.beyonddimensions.common.item;
 
+import com.wintercogs.beyonddimensions.api.machine.BDMachineSettings;
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
+import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
@@ -24,7 +27,6 @@ import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class NetRestockerItem extends BaseMachineItem
@@ -60,12 +62,13 @@ public class NetRestockerItem extends BaseMachineItem
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
-        if (!stack.has(BDDataComponents.ISTACK_SLOTS))
-            stack.set(BDDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
-        if (!stack.has(BDDataComponents.FUZZY_MODE))
-            stack.set(BDDataComponents.FUZZY_MODE, FuzzyMode.DISABLE);
-        if (!stack.has(BDDataComponents.RECEIVE_MODE))
-            stack.set(BDDataComponents.RECEIVE_MODE, ReceiveMode.STOP);
+        ensureSlots(stack, capacity);
+    }
+
+    @Override
+    public MachineType machineType()
+    {
+        return BDMachineTypes.NET_RESTOCKER.get();
     }
 
     @Override
@@ -83,8 +86,8 @@ public class NetRestockerItem extends BaseMachineItem
         UnifiedStorage storage = NetedItem.getNet(stack).getUnifiedStorage();
         List<KeyAmount> templates = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
 
-        FuzzyMode fuzzyMode = stack.getOrDefault(BDDataComponents.FUZZY_MODE, FuzzyMode.DISABLE);
-        ReceiveMode receiveMode = stack.getOrDefault(BDDataComponents.RECEIVE_MODE, ReceiveMode.STOP);
+        FuzzyMode fuzzyMode = settings(stack).get(BDMachineSettings.FUZZY.get());
+        ReceiveMode receiveMode = settings(stack).get(BDMachineSettings.RECEIVE.get());
 
         if (holder instanceof Player player)
         {

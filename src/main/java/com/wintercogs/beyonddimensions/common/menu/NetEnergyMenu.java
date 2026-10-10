@@ -3,17 +3,19 @@ package com.wintercogs.beyonddimensions.common.menu;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.machine.Machine;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.common.block.entity.NetEnergyPathwayBlockEntity;
-import com.wintercogs.beyonddimensions.common.machine.PopMode;
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.sync.state.SyncCodecs;
 import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
@@ -21,13 +23,14 @@ import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
 /**
- * 维度网络能量通道：只同步本页自己的两个模式与三个能量读数。
+ * 维度网络能量通道：同步三个能量读数；设置由 MachineSettingsSync 统一同步与修改。
  */
-public class NetEnergyMenu extends BDBaseMenu
+public class NetEnergyMenu extends BDBaseMenu implements MachineMenu
 {
     // 构建注册用的信息
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
@@ -35,21 +38,13 @@ public class NetEnergyMenu extends BDBaseMenu
 
     public final NetEnergyPathwayBlockEntity be;
 
-    private PopMode popMode = PopMode.STOP;
-    private RedStoneControlMode redStoneMode = RedStoneControlMode.IGNORE;
     private long energyStored = 0;
     private long energyCapacity = 0;
     private long energyRate = 0;
     private boolean sampledEnergy;
 
 
-    private static final SyncSchema<NetEnergyMenu> SCHEMA = SyncSchema.<NetEnergyMenu>builder("beyonddimensions:energy", 1)
-            .field("value.output", SyncCodecs.enumeration(PopMode.class),
-                    m -> m.popMode,
-                    (m, value) -> m.popMode = value)
-            .field("value.redstone", SyncCodecs.enumeration(RedStoneControlMode.class),
-                    m -> m.redStoneMode,
-                    (m, value) -> m.redStoneMode = value)
+    private static final SyncSchema<NetEnergyMenu> SCHEMA = MachineSettingsSync.field(SyncSchema.<NetEnergyMenu>builder("beyonddimensions:energy", 2))
             .field("number.stored", SyncCodecs.LONG,
                     m -> m.energyStored,
                     (m, value) -> m.energyStored = value)
@@ -61,27 +56,9 @@ public class NetEnergyMenu extends BDBaseMenu
                     (m, value) -> m.energyRate = value)
             .build();
 
-    private static final MenuAction<NetEnergyMenu, PopMode> SET_OUTPUT = MenuAction.of("set.output",
-            SyncCodecs.enumeration(PopMode.class), (m, player, value) -> {
-                if (!editable(m) || m.be == null) return false;
-                if (m.be.getPopMode() != value)
-                {
-                    m.be.setPopMode(value);
-                    m.markBoardChanged();
-                }
-                return true;
-            });
+    private static final MenuAction<NetEnergyMenu, MachineSettingsSync.Change> SET_SETTING = MachineSettingsSync.action();
 
-    private static final MenuAction<NetEnergyMenu, RedStoneControlMode> SET_REDSTONE = MenuAction.of("set.redstone",
-            SyncCodecs.enumeration(RedStoneControlMode.class), (m, player, value) -> {
-                if (!editable(m) || m.be == null) return false;
-                if (m.be.controlMode != value)
-                {
-                    m.be.controlMode = value;
-                    m.markBoardChanged();
-                }
-                return true;
-            });
+    private final MachineSettingsSync.Mirror machineSettings = new MachineSettingsSync.Mirror();
 
     private final MenuSync<NetEnergyMenu> synchronization;
 
@@ -89,6 +66,26 @@ public class NetEnergyMenu extends BDBaseMenu
     public MenuSync<NetEnergyMenu> menuSync()
     {
         return synchronization;
+    }
+
+    @Override
+    public @Nullable Machine machine()
+    {
+        return be == null || be.isRemoved() ? null : be;
+    }
+
+    @Override
+    public MachineSettingsSync.Mirror machineSettings()
+    {
+        return machineSettings;
+    }
+
+    /**
+     * 客户端：把设置改成编辑声明里的第 index 个值
+     */
+    public boolean requestSetting(ResourceLocation setting, int index)
+    {
+        return MachineSettingsSync.request(this, synchronization, SET_SETTING, setting, index);
     }
 
     /**
@@ -127,7 +124,7 @@ public class NetEnergyMenu extends BDBaseMenu
         }
         inventoryEndIndex = slots.size();
 
-        synchronization = BdMenuActions.attach(this, MenuSync.bind(this, SCHEMA).action(SET_OUTPUT).action(SET_REDSTONE));
+        synchronization = BdMenuActions.attach(this, MenuSync.bind(this, SCHEMA).action(SET_SETTING));
     }
 
     /**
@@ -140,9 +137,6 @@ public class NetEnergyMenu extends BDBaseMenu
 
         if (player.level().isClientSide()) return;
 
-        this.popMode = be.getPopMode();
-        this.redStoneMode = be.getControlMode();
-
         DimensionsNet net = be.getNet();
 
         long stored = net == null ? 0 : getEnergyStored(net.getUnifiedStorage());
@@ -150,30 +144,6 @@ public class NetEnergyMenu extends BDBaseMenu
         this.energyStored = stored;
         sampledEnergy = true;
         this.energyCapacity = net == null ? 0 : net.getUnifiedStorage().getSlotCapacity(0);
-    }
-
-    private static boolean editable(NetEnergyMenu menu)
-    {
-        return !menu.player.isSpectator();
-    }
-
-    private void markBoardChanged()
-    {
-        be.setChanged();
-        player.level().invalidateCapabilities(be.getBlockPos());
-        player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
-    }
-
-    // 客户端读取接口：本页只暴露自己这两个模式的当前值
-
-    public PopMode popMode()
-    {
-        return popMode;
-    }
-
-    public RedStoneControlMode redStoneMode()
-    {
-        return redStoneMode;
     }
 
     public long energyStored()
@@ -190,19 +160,6 @@ public class NetEnergyMenu extends BDBaseMenu
     {
         return energyRate;
     }
-
-    public boolean requestOutput(int ordinal)
-    {
-        PopMode[] modes = PopMode.values();
-        return ordinal >= 0 && ordinal < modes.length && synchronization.request(SET_OUTPUT, modes[ordinal]).queued();
-    }
-
-    public boolean requestRedstone(int ordinal)
-    {
-        RedStoneControlMode[] modes = RedStoneControlMode.values();
-        return ordinal >= 0 && ordinal < modes.length && synchronization.request(SET_REDSTONE, modes[ordinal]).queued();
-    }
-
 
     @Override
     public boolean stillValid(@NotNull Player player)

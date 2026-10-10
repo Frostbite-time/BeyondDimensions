@@ -90,5 +90,7 @@ public class BDPackets
                         RenameNetPacket::handle
                 )
         );
+
+        registrar.playToServer(ConfigCardPacket.TYPE, ConfigCardPacket.STREAM_CODEC, ConfigCardPacket::handle);
     }
 }

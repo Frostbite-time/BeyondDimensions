@@ -17,8 +17,6 @@ import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
-import com.wintercogs.beyonddimensions.common.machine.PopMode
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode
 import com.wintercogs.beyonddimensions.common.menu.NetEnergyMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
@@ -56,8 +54,7 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
         val rate = history.recent()
         val bars = history.bars()
         return EnergyState(
-            pop = container.popMode() == PopMode.OPEN,
-            redstone = container.redStoneMode(),
+            settings = machineSettingRows(container.machineSettings().snapshot()),
             stored = stored,
             rate = rate,
             capacity = tr(
@@ -101,8 +98,7 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
 
     override fun handle(action: EnergyAction) {
         when (action) {
-            is EnergyAction.SetPop -> container.requestOutput((if (action.open) PopMode.OPEN else PopMode.STOP).ordinal)
-            is EnergyAction.SetRedstone -> container.requestRedstone(action.mode.ordinal)
+            is EnergyAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
         }
     }
 
@@ -129,12 +125,7 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
-                    BdSettingRow(text.pop, text.popHint) {
-                        BdToggle(state.pop, { send(EnergyAction.SetPop(it)) }, enabled = settingsOpen)
-                    }
-                    BdModeSetting(text.redstone, text.redstoneOptions, state.redstone.ordinal, enabled = settingsOpen) {
-                        send(EnergyAction.SetRedstone(RedStoneControlMode.entries[it]))
-                    }
+                    BdMachineSettings(state.settings, settingsOpen) { send(EnergyAction.Setting(it)) }
                 }
             }
         }
@@ -145,8 +136,7 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
 data class Outlook(val label: String, val draining: Boolean)
 
 data class EnergyState(
-    val pop: Boolean,
-    val redstone: RedStoneControlMode,
+    val settings: List<MachineSettingRow>,
     val stored: Long,
     /** 最近一秒平均每刻的变化，正数为流入 */
     val rate: Double,
@@ -160,9 +150,7 @@ data class EnergyState(
 )
 
 sealed interface EnergyAction {
-    data class SetPop(val open: Boolean) : EnergyAction
-
-    data class SetRedstone(val mode: RedStoneControlMode) : EnergyAction
+    data class Setting(val pick: MachineSettingPick) : EnergyAction
 }
 
 private class EnergyText(val title: String) {
@@ -171,11 +159,6 @@ private class EnergyText(val title: String) {
     val network = tr("ui.beyonddimensions.energy.network")
     val unlimited = tr("ui.beyonddimensions.energy.unlimited")
     val window = tr("ui.beyonddimensions.energy.window", FLOW_BARS * BAR_TICKS / 20)
-    val pop = tr("ui.beyonddimensions.machine.pop")
-    val popHint = tr("ui.beyonddimensions.energy.pop.hint")
-    val redstone = tr("ui.beyonddimensions.machine.redstone")
-    val redstoneOptions =
-        RedStoneControlMode.entries.map { tr("ui.beyonddimensions.machine.redstone.${it.name.lowercase()}") }
 }
 
 /** 收支曲线的格数，每格汇总的刻数 */

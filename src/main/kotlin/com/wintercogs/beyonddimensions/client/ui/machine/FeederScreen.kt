@@ -10,8 +10,6 @@ import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.common.init.BDItems
-import com.wintercogs.beyonddimensions.common.machine.FeederMode
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode
 import com.wintercogs.beyonddimensions.common.menu.NetFeederMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
@@ -28,19 +26,11 @@ class FeederScreen(menu: NetFeederMenu, inventory: Inventory, title: Component) 
     private val playerSlots = menu.playerSlotIds()
     private val text = FeederText(title.string)
 
-    override fun snapshot() =
-        FeederState(
-            working = container.working() == RedStoneControlMode.IGNORE,
-            workingEditable = container.workingEditable(),
-            feeding = container.feeding(),
-            feedingEditable = container.feedingEditable(),
-        )
+    override fun snapshot() = FeederState(machineSettingRows(container.machineSettings().snapshot()))
 
     override fun handle(action: FeederAction) {
         when (action) {
-            // 总开关的第一个选项是“工作”，第二个是“停止”
-            is FeederAction.SetWorking -> container.requestWorking(if (action.on) 0 else 1)
-            is FeederAction.SetFeeding -> container.requestFeeding(action.mode.ordinal)
+            is FeederAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
         }
     }
 
@@ -67,48 +57,21 @@ class FeederScreen(menu: NetFeederMenu, inventory: Inventory, title: Component) 
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
-                    BdSettingRow(text.working) {
-                        BdToggle(
-                            state.working,
-                            { send(FeederAction.SetWorking(it)) },
-                            settingsOpen && state.workingEditable
-                        )
-                    }
-                    BdModeSetting(
-                        text.feeding,
-                        text.feedingOptions,
-                        state.feeding.ordinal,
-                        settingsOpen && state.feedingEditable,
-                        description = text.feedingHints[state.feeding.ordinal],
-                        cycle = true,
-                    ) {
-                        send(FeederAction.SetFeeding(FeederMode.entries[it]))
-                    }
+                    BdMachineSettings(state.settings, settingsOpen) { send(FeederAction.Setting(it)) }
                 }
             }
         }
     }
 }
 
-data class FeederState(
-    val working: Boolean,
-    val workingEditable: Boolean,
-    val feeding: FeederMode,
-    val feedingEditable: Boolean,
-)
+data class FeederState(val settings: List<MachineSettingRow>)
 
 sealed interface FeederAction {
-    data class SetWorking(val on: Boolean) : FeederAction
-
-    data class SetFeeding(val mode: FeederMode) : FeederAction
+    data class Setting(val pick: MachineSettingPick) : FeederAction
 }
 
 private class FeederText(val title: String) {
     val settings = tr("ui.beyonddimensions.machine.settings")
     val inventory = tr("ui.beyonddimensions.inventory")
     val foods = tr("ui.beyonddimensions.feeder.foods")
-    val working = tr("ui.beyonddimensions.machine.working")
-    val feeding = tr("ui.beyonddimensions.feeder.mode")
-    val feedingOptions = FeederMode.entries.map { tr("ui.beyonddimensions.feeder.mode.${it.name.lowercase()}") }
-    val feedingHints = FeederMode.entries.map { tr("ui.beyonddimensions.feeder.mode.${it.name.lowercase()}.hint") }
 }

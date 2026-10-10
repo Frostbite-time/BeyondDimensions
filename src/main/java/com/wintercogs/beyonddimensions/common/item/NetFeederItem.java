@@ -1,5 +1,8 @@
 package com.wintercogs.beyonddimensions.common.item;
 
+import com.wintercogs.beyonddimensions.api.machine.BDMachineSettings;
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
+import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -23,7 +26,6 @@ import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class NetFeederItem extends BaseMachineItem
@@ -59,10 +61,13 @@ public class NetFeederItem extends BaseMachineItem
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
-        if (!stack.has(BDDataComponents.ISTACK_SLOTS))
-            stack.set(BDDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
-        if (!stack.has(BDDataComponents.FEEDER_MODE))
-            stack.set(BDDataComponents.FEEDER_MODE, FeederMode.NORMAL);
+        ensureSlots(stack, capacity);
+    }
+
+    @Override
+    public MachineType machineType()
+    {
+        return BDMachineTypes.NET_FEEDER.get();
     }
 
     @Override
@@ -79,7 +84,7 @@ public class NetFeederItem extends BaseMachineItem
 
         if (holder instanceof Player player) // 只喂食玩家（实际上是其他实体没有FoodData 2333）
         {
-            FeederMode feederMode = stack.getOrDefault(BDDataComponents.FEEDER_MODE, FeederMode.NORMAL);
+            FeederMode feederMode = settings(stack).get(BDMachineSettings.FEEDING.get());
             List<KeyAmount> filterSlots = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
 
             FoodData playerFoodState = player.getFoodData();

@@ -40,6 +40,7 @@ public class BDCreativeModeTabs
                         output.accept(BDItems.NET_FEEDER_ITEM);
                         output.accept(BDItems.NET_RESTOCKER_ITEM);
                         output.accept(BDItems.XP_EXCHANGE_ITEM);
+                        output.accept(BDItems.MACHINE_CONFIG_CARD);
 
                         for (BDFluids.FluidEntry e : BDFluids.ALL)
                         {

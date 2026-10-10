@@ -11,9 +11,6 @@ import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
-import com.wintercogs.beyonddimensions.common.machine.FuzzyMode
-import com.wintercogs.beyonddimensions.common.machine.PopMode
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
@@ -34,26 +31,11 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
     private val playerSlots = menu.playerSlotIds()
     private val text = InterfaceText(title.string)
 
-    override fun snapshot() =
-        InterfaceState(
-            pop = container.synchronizedPopMode == PopMode.OPEN,
-            popConfigurable = container.synchronizedCanConfigurePop,
-            redstone = container.synchronizedControlMode,
-            fuzzy = container.synchronizedFuzzyMode == FuzzyMode.ENABLE,
-        )
+    override fun snapshot() = InterfaceState(machineSettingRows(container.machineSettings().snapshot()))
 
     override fun handle(action: InterfaceAction) {
-        val commands = container.commands()
         when (action) {
-            is InterfaceAction.SetPop ->
-                commands.mode(NetInterfaceBaseMenu.SETTING_POP, (if (action.on) PopMode.OPEN else PopMode.STOP).ordinal)
-
-            is InterfaceAction.SetRedstone -> commands.mode(NetInterfaceBaseMenu.SETTING_REDSTONE, action.mode.ordinal)
-            is InterfaceAction.SetFuzzy ->
-                commands.mode(
-                    NetInterfaceBaseMenu.SETTING_FUZZY,
-                    (if (action.on) FuzzyMode.ENABLE else FuzzyMode.DISABLE).ordinal
-                )
+            is InterfaceAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
         }
     }
 
@@ -92,46 +74,21 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
-                    BdSettingRow(text.pop, if (state.popConfigurable) text.popHint else text.popUnavailable) {
-                        BdToggle(state.pop, { send(InterfaceAction.SetPop(it)) }, settingsOpen && state.popConfigurable)
-                    }
-                    BdModeSetting(text.redstone, text.redstoneOptions, state.redstone.ordinal, settingsOpen) {
-                        send(InterfaceAction.SetRedstone(RedStoneControlMode.entries[it]))
-                    }
-                    BdSettingRow(text.fuzzy, text.fuzzyHint) {
-                        BdToggle(state.fuzzy, { send(InterfaceAction.SetFuzzy(it)) }, settingsOpen)
-                    }
+                    BdMachineSettings(state.settings, settingsOpen) { send(InterfaceAction.Setting(it)) }
                 }
             }
         }
     }
 }
 
-data class InterfaceState(
-    val pop: Boolean,
-    val popConfigurable: Boolean,
-    val redstone: RedStoneControlMode,
-    val fuzzy: Boolean,
-)
+data class InterfaceState(val settings: List<MachineSettingRow>)
 
 sealed interface InterfaceAction {
-    data class SetPop(val on: Boolean) : InterfaceAction
-
-    data class SetRedstone(val mode: RedStoneControlMode) : InterfaceAction
-
-    data class SetFuzzy(val on: Boolean) : InterfaceAction
+    data class Setting(val pick: MachineSettingPick) : InterfaceAction
 }
 
 private class InterfaceText(val title: String) {
     val settings = tr("ui.beyonddimensions.machine.settings")
     val inventory = tr("ui.beyonddimensions.inventory")
     val slots = tr("ui.beyonddimensions.interface.slots")
-    val pop = tr("ui.beyonddimensions.machine.pop")
-    val popHint = tr("ui.beyonddimensions.interface.pop.hint")
-    val popUnavailable = tr("tooltip.button.beyonddimensions.popmode_mounted_unavailable")
-    val redstone = tr("ui.beyonddimensions.machine.redstone")
-    val redstoneOptions =
-        RedStoneControlMode.entries.map { tr("ui.beyonddimensions.machine.redstone.${it.name.lowercase()}") }
-    val fuzzy = tr("ui.beyonddimensions.machine.fuzzy")
-    val fuzzyHint = tr("ui.beyonddimensions.machine.fuzzy.hint")
 }

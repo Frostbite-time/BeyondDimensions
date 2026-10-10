@@ -10,8 +10,6 @@ import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
-import com.wintercogs.beyonddimensions.common.machine.FilterMode
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode
 import com.wintercogs.beyonddimensions.common.menu.NetPumpMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
@@ -28,18 +26,11 @@ class PumpScreen(menu: NetPumpMenu, inventory: Inventory, title: Component) :
     private val playerSlots = menu.playerSlotIds()
     private val text = PumpText(title.string)
 
-    override fun snapshot() =
-        PumpState(
-            filter = container.filter(),
-            filterEditable = container.filterEditable(),
-            redstone = container.redstone(),
-            redstoneEditable = container.redstoneEditable(),
-        )
+    override fun snapshot() = PumpState(machineSettingRows(container.machineSettings().snapshot()))
 
     override fun handle(action: PumpAction) {
         when (action) {
-            is PumpAction.SetFilter -> container.requestFilter(action.mode.ordinal)
-            is PumpAction.SetRedstone -> container.requestRedstone(action.mode.ordinal)
+            is PumpAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
         }
     }
 
@@ -66,48 +57,21 @@ class PumpScreen(menu: NetPumpMenu, inventory: Inventory, title: Component) :
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
-                    BdModeSetting(
-                        text.filter,
-                        text.filterOptions,
-                        state.filter.ordinal,
-                        settingsOpen && state.filterEditable
-                    ) {
-                        send(PumpAction.SetFilter(FilterMode.entries[it]))
-                    }
-                    BdModeSetting(
-                        text.redstone,
-                        text.redstoneOptions,
-                        state.redstone.ordinal,
-                        settingsOpen && state.redstoneEditable
-                    ) {
-                        send(PumpAction.SetRedstone(RedStoneControlMode.entries[it]))
-                    }
+                    BdMachineSettings(state.settings, settingsOpen) { send(PumpAction.Setting(it)) }
                 }
             }
         }
     }
 }
 
-data class PumpState(
-    val filter: FilterMode,
-    val filterEditable: Boolean,
-    val redstone: RedStoneControlMode,
-    val redstoneEditable: Boolean,
-)
+data class PumpState(val settings: List<MachineSettingRow>)
 
 sealed interface PumpAction {
-    data class SetFilter(val mode: FilterMode) : PumpAction
-
-    data class SetRedstone(val mode: RedStoneControlMode) : PumpAction
+    data class Setting(val pick: MachineSettingPick) : PumpAction
 }
 
 private class PumpText(val title: String) {
     val settings = tr("ui.beyonddimensions.machine.settings")
     val inventory = tr("ui.beyonddimensions.inventory")
     val filters = tr("ui.beyonddimensions.machine.filter_slots")
-    val filter = tr("ui.beyonddimensions.machine.filter")
-    val filterOptions = FilterMode.entries.map { tr("ui.beyonddimensions.machine.filter.${it.name.lowercase()}") }
-    val redstone = tr("ui.beyonddimensions.machine.redstone")
-    val redstoneOptions =
-        RedStoneControlMode.entries.map { tr("ui.beyonddimensions.machine.redstone.${it.name.lowercase()}") }
 }

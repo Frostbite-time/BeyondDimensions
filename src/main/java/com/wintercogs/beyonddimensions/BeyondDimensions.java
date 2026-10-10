@@ -14,6 +14,7 @@ import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ItemHandler
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.machine.BDMachineSettings;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
@@ -63,6 +64,8 @@ public class BeyondDimensions
         BDFluids.register(modEventBus);
         BDBlockEntities.register(modEventBus);
         BDAttachments.register(modEventBus);
+        BDMachineSettings.register(modEventBus);
+        BDMachineTypes.register(modEventBus);
 
         // 分发集成模块
         IntegrationManager.bootstrapCommon(modEventBus, NeoForge.EVENT_BUS);

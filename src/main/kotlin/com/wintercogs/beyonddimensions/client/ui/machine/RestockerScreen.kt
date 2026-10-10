@@ -10,9 +10,6 @@ import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.common.init.BDItems
-import com.wintercogs.beyonddimensions.common.machine.FuzzyMode
-import com.wintercogs.beyonddimensions.common.machine.ReceiveMode
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode
 import com.wintercogs.beyonddimensions.common.menu.NetRestockerMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
@@ -32,22 +29,11 @@ class RestockerScreen(menu: NetRestockerMenu, inventory: Inventory, title: Compo
     private val playerSlots = menu.playerSlotIds()
     private val text = RestockerText(title.string)
 
-    override fun snapshot() =
-        RestockerState(
-            working = container.working() == RedStoneControlMode.IGNORE,
-            workingEditable = container.workingEditable(),
-            fuzzy = container.matching() == FuzzyMode.ENABLE,
-            fuzzyEditable = container.matchingEditable(),
-            recycle = container.recycle() == ReceiveMode.OPEN,
-            recycleEditable = container.recycleEditable(),
-        )
+    override fun snapshot() = RestockerState(machineSettingRows(container.machineSettings().snapshot()))
 
     override fun handle(action: RestockerAction) {
         when (action) {
-            // 总开关的第一个选项是“工作”，第二个是“停止”
-            is RestockerAction.SetWorking -> container.requestWorking(if (action.on) 0 else 1)
-            is RestockerAction.SetFuzzy -> container.requestMatching((if (action.on) FuzzyMode.ENABLE else FuzzyMode.DISABLE).ordinal)
-            is RestockerAction.SetRecycle -> container.requestRecycle((if (action.on) ReceiveMode.OPEN else ReceiveMode.STOP).ordinal)
+            is RestockerAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
         }
     }
 
@@ -77,48 +63,17 @@ class RestockerScreen(menu: NetRestockerMenu, inventory: Inventory, title: Compo
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
-                    BdSettingRow(text.working) {
-                        BdToggle(
-                            state.working,
-                            { send(RestockerAction.SetWorking(it)) },
-                            settingsOpen && state.workingEditable
-                        )
-                    }
-                    BdSettingRow(text.fuzzy, text.fuzzyHint) {
-                        BdToggle(
-                            state.fuzzy,
-                            { send(RestockerAction.SetFuzzy(it)) },
-                            settingsOpen && state.fuzzyEditable
-                        )
-                    }
-                    BdSettingRow(text.recycle, text.recycleHint) {
-                        BdToggle(
-                            state.recycle,
-                            { send(RestockerAction.SetRecycle(it)) },
-                            settingsOpen && state.recycleEditable
-                        )
-                    }
+                    BdMachineSettings(state.settings, settingsOpen) { send(RestockerAction.Setting(it)) }
                 }
             }
         }
     }
 }
 
-data class RestockerState(
-    val working: Boolean,
-    val workingEditable: Boolean,
-    val fuzzy: Boolean,
-    val fuzzyEditable: Boolean,
-    val recycle: Boolean,
-    val recycleEditable: Boolean,
-)
+data class RestockerState(val settings: List<MachineSettingRow>)
 
 sealed interface RestockerAction {
-    data class SetWorking(val on: Boolean) : RestockerAction
-
-    data class SetFuzzy(val on: Boolean) : RestockerAction
-
-    data class SetRecycle(val on: Boolean) : RestockerAction
+    data class Setting(val pick: MachineSettingPick) : RestockerAction
 }
 
 private class RestockerText(val title: String) {
@@ -126,9 +81,4 @@ private class RestockerText(val title: String) {
     val inventory = tr("ui.beyonddimensions.inventory")
     val templates = tr("ui.beyonddimensions.restocker.templates")
     val equipment = tr("ui.beyonddimensions.restocker.equipment")
-    val working = tr("ui.beyonddimensions.machine.working")
-    val fuzzy = tr("ui.beyonddimensions.machine.fuzzy")
-    val fuzzyHint = tr("ui.beyonddimensions.machine.fuzzy.hint")
-    val recycle = tr("ui.beyonddimensions.restocker.recycle")
-    val recycleHint = tr("ui.beyonddimensions.restocker.recycle.hint")
 }

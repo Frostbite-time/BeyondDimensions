@@ -2,23 +2,24 @@ package com.wintercogs.beyonddimensions.common.menu;
 
 import com.mojang.datafixers.util.Pair;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.api.machine.MachineItem;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
-import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
-import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
-import dev.compixel.sync.state.SyncCodecs;
 import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
@@ -30,15 +31,16 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * 网络装配器：设置保存在物品组件上，另带五个装备模板槽。
+ * 网络装配器：五个装备模板槽与玩家背包；设置保存在物品上，由 MachineSettingsSync 统一同步与修改。
  */
-public class NetRestockerMenu extends BDBaseMenu
+public class NetRestockerMenu extends BDBaseMenu implements MachineMenu
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
     public static final Supplier<MenuType<NetRestockerMenu>> Net_Restocker_Menu = MENU_TYPES.register("net_restocker_menu", () -> IMenuTypeExtension.create(NetRestockerMenu::new));
@@ -62,72 +64,12 @@ public class NetRestockerMenu extends BDBaseMenu
 
     public final ItemStack menuStack;
 
-    // 以下字段仅用于客户端镜像，由同步schema的setter写入
-    private RedStoneControlMode clientWorking = RedStoneControlMode.IGNORE;
-    private boolean workingEditable;
-    private FuzzyMode clientMatching = FuzzyMode.DISABLE;
-    private boolean matchingEditable;
-    private ReceiveMode clientRecycle = ReceiveMode.STOP;
-    private boolean recycleEditable;
+    private static final SyncSchema<NetRestockerMenu> SCHEMA =
+            MachineSettingsSync.field(SyncSchema.<NetRestockerMenu>builder("beyonddimensions:restocker", 2)).build();
 
-    private static final List<RedStoneControlMode> WORKING_OPTIONS = List.of(RedStoneControlMode.IGNORE, RedStoneControlMode.NOT_WORKING);
+    private static final MenuAction<NetRestockerMenu, MachineSettingsSync.Change> SET_SETTING = MachineSettingsSync.action();
 
-    private static final SyncSchema<NetRestockerMenu> SCHEMA = SyncSchema.<NetRestockerMenu>builder("beyonddimensions:restocker", 1)
-            .field("value.working", SyncCodecs.enumeration(RedStoneControlMode.class),
-                    m -> m.player.level().isClientSide() ? m.clientWorking : m.menuStack.getOrDefault(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE),
-                    (m, value) -> m.clientWorking = value)
-            .field("editable.working", SyncCodecs.BOOLEAN,
-                    m -> m.player.level().isClientSide() ? m.workingEditable : editable(m),
-                    (m, value) -> m.workingEditable = value)
-            .field("value.matching", SyncCodecs.enumeration(FuzzyMode.class),
-                    m -> m.player.level().isClientSide() ? m.clientMatching : m.menuStack.getOrDefault(BDDataComponents.FUZZY_MODE, FuzzyMode.DISABLE),
-                    (m, value) -> m.clientMatching = value)
-            .field("editable.matching", SyncCodecs.BOOLEAN,
-                    m -> m.player.level().isClientSide() ? m.matchingEditable : editable(m),
-                    (m, value) -> m.matchingEditable = value)
-            .field("value.recycle", SyncCodecs.enumeration(ReceiveMode.class),
-                    m -> m.player.level().isClientSide() ? m.clientRecycle : m.menuStack.getOrDefault(BDDataComponents.RECEIVE_MODE, ReceiveMode.STOP),
-                    (m, value) -> m.clientRecycle = value)
-            .field("editable.recycle", SyncCodecs.BOOLEAN,
-                    m -> m.player.level().isClientSide() ? m.recycleEditable : editable(m),
-                    (m, value) -> m.recycleEditable = value)
-            .build();
-
-    private static final MenuAction<NetRestockerMenu, RedStoneControlMode> SET_WORKING = MenuAction.of("set.working",
-            SyncCodecs.enumeration(RedStoneControlMode.class), (m, player, value) -> {
-                if (!editable(m) || !WORKING_OPTIONS.contains(value)) return false;
-                var current = m.menuStack.getOrDefault(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
-                if (current != value)
-                {
-                    m.menuStack.set(BDDataComponents.CONTROL_MODE, value);
-                    m.markItemChanged();
-                }
-                return true;
-            });
-
-    private static final MenuAction<NetRestockerMenu, FuzzyMode> SET_MATCHING = MenuAction.of("set.matching",
-            SyncCodecs.enumeration(FuzzyMode.class), (m, player, value) -> {
-                if (!editable(m)) return false;
-                var current = m.menuStack.getOrDefault(BDDataComponents.FUZZY_MODE, FuzzyMode.DISABLE);
-                if (current != value)
-                {
-                    m.menuStack.set(BDDataComponents.FUZZY_MODE, value);
-                    m.markItemChanged();
-                }
-                return true;
-            });
-
-    private static final MenuAction<NetRestockerMenu, ReceiveMode> SET_RECYCLE = MenuAction.of("set.recycle",
-            SyncCodecs.enumeration(ReceiveMode.class), (m, player, value) -> {
-                if (!editable(m)) return false;
-                var current = m.menuStack.getOrDefault(BDDataComponents.RECEIVE_MODE, ReceiveMode.STOP);
-                if (current != value)
-                {
-                    m.menuStack.set(BDDataComponents.RECEIVE_MODE, value);
-                    m.markItemChanged();
-                }
-                return true;
-            });
+    private final MachineSettingsSync.Mirror machineSettings = new MachineSettingsSync.Mirror();
 
     private final MenuSync<NetRestockerMenu> synchronization;
 
@@ -135,6 +77,26 @@ public class NetRestockerMenu extends BDBaseMenu
     public MenuSync<NetRestockerMenu> menuSync()
     {
         return synchronization;
+    }
+
+    @Override
+    public @Nullable Machine machine()
+    {
+        return !player.level().isClientSide() && menuStack.getItem() instanceof MachineItem item ? item.machine(menuStack) : null;
+    }
+
+    @Override
+    public MachineSettingsSync.Mirror machineSettings()
+    {
+        return machineSettings;
+    }
+
+    /**
+     * 客户端：把设置改成编辑声明里的第 index 个值
+     */
+    public boolean requestSetting(ResourceLocation setting, int index)
+    {
+        return MachineSettingsSync.request(this, synchronization, SET_SETTING, setting, index);
     }
 
     public NetRestockerMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
@@ -162,73 +124,8 @@ public class NetRestockerMenu extends BDBaseMenu
 
         addPlayerInv(playerInventory);
         addFlagSlots();
-        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SCHEMA))
-                .action(SET_WORKING).action(SET_MATCHING).action(SET_RECYCLE));
+        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SCHEMA)).action(SET_SETTING));
     }
-
-    private static boolean editable(NetRestockerMenu menu)
-    {
-        return !menu.player.isSpectator();
-    }
-
-    private void markItemChanged()
-    {
-        player.getInventory().setChanged();
-    }
-
-    // 客户端读取接口：本页只暴露自己这三个模式
-
-    public RedStoneControlMode working()
-    {
-        return clientWorking;
-    }
-
-    public FuzzyMode matching()
-    {
-        return clientMatching;
-    }
-
-    public ReceiveMode recycle()
-    {
-        return clientRecycle;
-    }
-
-    public boolean workingEditable()
-    {
-        return workingEditable;
-    }
-
-    public boolean matchingEditable()
-    {
-        return matchingEditable;
-    }
-
-    public boolean recycleEditable()
-    {
-        return recycleEditable;
-    }
-
-    public boolean requestWorking(int ordinal)
-    {
-        return workingEditable && ordinal >= 0 && ordinal < WORKING_OPTIONS.size()
-                && synchronization.request(SET_WORKING, WORKING_OPTIONS.get(ordinal)).queued();
-    }
-
-    public boolean requestMatching(int ordinal)
-    {
-        FuzzyMode[] modes = FuzzyMode.values();
-        return matchingEditable && ordinal >= 0 && ordinal < modes.length && synchronization.request(SET_MATCHING, modes[ordinal]).queued();
-    }
-
-    public boolean requestRecycle(int ordinal)
-    {
-        ReceiveMode[] modes = ReceiveMode.values();
-        return recycleEditable && ordinal >= 0 && ordinal < modes.length && synchronization.request(SET_RECYCLE, modes[ordinal]).queued();
-    }
-
-    /**
-     * 工作模式只有开/关两个状态，标签也不走通用的模式命名。
-     */
 
     private void addFlagSlots()
     {

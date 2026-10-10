@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.machine.BDMachineSettings;
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -8,6 +10,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
+import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import com.wintercogs.beyonddimensions.common.menu.NetHopperMenu;
 import com.wintercogs.beyonddimensions.util.ItemStackHelper;
@@ -15,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.MenuProvider;
@@ -52,12 +56,62 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         }
     };
 
-    public FilterMode filterMode = FilterMode.BLACK;
-    public HopperItemMode hopperItemMode = HopperItemMode.ALLOW;
-    public HopperFluidMode hopperFluidMode = HopperFluidMode.DENY;
-    public HopperNBTMode hopperNBTMode = HopperNBTMode.DENY;
-    public HopperXpMode hopperXpMode = HopperXpMode.DENY;
-    public HopperRangeMode hopperRangeMode = HopperRangeMode.RADIUS_MID;
+    private static final String FILTERS = "filters";
+
+    @Override
+    public MachineType machineType()
+    {
+        return BDMachineTypes.NET_HOPPER.get();
+    }
+
+    public FilterMode filterMode()
+    {
+        return setting(BDMachineSettings.FILTER.get());
+    }
+
+    public HopperItemMode hopperItemMode()
+    {
+        return setting(BDMachineSettings.COLLECT_ITEMS.get());
+    }
+
+    public HopperFluidMode hopperFluidMode()
+    {
+        return setting(BDMachineSettings.COLLECT_FLUIDS.get());
+    }
+
+    public HopperNBTMode hopperNBTMode()
+    {
+        return setting(BDMachineSettings.COLLECT_COMPONENTS.get());
+    }
+
+    public HopperXpMode hopperXpMode()
+    {
+        return setting(BDMachineSettings.COLLECT_EXPERIENCE.get());
+    }
+
+    public HopperRangeMode hopperRangeMode()
+    {
+        return setting(BDMachineSettings.RANGE.get());
+    }
+
+    /**
+     * 配置卡连同过滤槽一起复制
+     */
+    @Override
+    public void exportConfig(CompoundTag config, HolderLookup.Provider registries)
+    {
+        super.exportConfig(config, registries);
+        config.put(FILTERS, filterSlots.serializeNBT(registries));
+    }
+
+    @Override
+    public void applyConfig(CompoundTag config, HolderLookup.Provider registries)
+    {
+        super.applyConfig(config, registries);
+        if (config.contains(FILTERS, Tag.TAG_COMPOUND))
+            filterSlots.deserializeNBT(registries, config.getCompound(FILTERS));
+        setChanged();
+    }
 
     private List<ItemEntity> itemEntities = new ArrayList<>();
     private List<ExperienceOrb> xpEntities = new ArrayList<>();
@@ -77,7 +131,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     @Override
     public int getTicksPerWork()
     {
-        return switch (hopperRangeMode)
+        return switch (hopperRangeMode())
         {
             case RADIUS_LOWEST -> 5;
             case RADIUS_LOW -> 10;
@@ -92,9 +146,9 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     public void workStart()
     {
         AABB searchArea = getSearchArea();
-        if (hopperItemMode == HopperItemMode.ALLOW)
+        if (hopperItemMode() == HopperItemMode.ALLOW)
             refreshItemEntityCache(searchArea);
-        if (hopperXpMode == HopperXpMode.ALLOW)
+        if (hopperXpMode() == HopperXpMode.ALLOW)
             refreshXpEntityCache(searchArea);
     }
 
@@ -104,7 +158,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         UnifiedStorage storage = getNet().getUnifiedStorage(); // getNet已在shouldWork完成null检查
 
         // 开始收集物品
-        if (hopperItemMode == HopperItemMode.ALLOW)
+        if (hopperItemMode() == HopperItemMode.ALLOW)
         {
             for (ItemEntity itemEntity : itemEntities)
             {
@@ -126,7 +180,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         }
 
         // 开始收集掉落物
-        if (hopperXpMode == HopperXpMode.ALLOW)
+        if (hopperXpMode() == HopperXpMode.ALLOW)
         {
             for (ExperienceOrb orb : xpEntities)
             {
@@ -149,7 +203,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
         }
 
         // 开始抽取流体
-        if (hopperFluidMode == HopperFluidMode.ALLOW)
+        if (hopperFluidMode() == HopperFluidMode.ALLOW)
         {
             fluidCollect(getSearchArea());
         }
@@ -157,10 +211,10 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
 
     private AABB getSearchArea()
     {
-        if (hopperRangeMode != HopperRangeMode.CHUNK_MODE)
+        if (hopperRangeMode() != HopperRangeMode.CHUNK_MODE)
         {
             //更正半径
-            int radius = switch (hopperRangeMode)
+            int radius = switch (hopperRangeMode())
             {
                 case RADIUS_LOWEST -> 2;
                 case RADIUS_LOW -> 3;
@@ -207,7 +261,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
                 searchArea,
                 itemEntity -> {
                     // NBT过滤
-                    if (hopperNBTMode == HopperNBTMode.DENY)
+                    if (hopperNBTMode() == HopperNBTMode.DENY)
                     {
                         return !ItemStackHelper.hasExtraComponents(itemEntity.getItem());
                     }
@@ -292,7 +346,7 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
 
     private boolean matchesFilter(IStackKey<?> otherStack)
     {
-        switch (filterMode)
+        switch (filterMode())
         {
             case BLACK ->
             {
@@ -326,12 +380,6 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     {
         super.loadAdditional(tag, registries);
         filterSlots.deserializeNBT(registries, tag.getCompound("filter_slots"));
-        filterMode = FilterMode.valueOf(tag.getString("filter_type"));
-        hopperFluidMode = HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode"));
-        hopperNBTMode = HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode"));
-        hopperRangeMode = HopperRangeMode.valueOf(tag.getString("hopper_range_mode"));
-        hopperItemMode = tag.contains("hopper_item_model") ? HopperItemMode.valueOf(tag.getString("hopper_item_model")) : HopperItemMode.ALLOW;
-        hopperXpMode = tag.contains("hopper_xp_mode") ? HopperXpMode.valueOf(tag.getString("hopper_xp_mode")) : HopperXpMode.DENY;
     }
 
     @Override
@@ -339,12 +387,6 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
     {
         super.saveAdditional(tag, registries);
         tag.put("filter_slots", filterSlots.serializeNBT(registries));
-        tag.putString("filter_type", filterMode.name());
-        tag.putString("hopper_fluid_mode", hopperFluidMode.name());
-        tag.putString("hopper_nbt_mode", hopperNBTMode.name());
-        tag.putString("hopper_range_mode", hopperRangeMode.name());
-        tag.putString("hopper_item_model", hopperItemMode.name());
-        tag.putString("hopper_xp_mode", hopperXpMode.name());
     }
 
     @Override
