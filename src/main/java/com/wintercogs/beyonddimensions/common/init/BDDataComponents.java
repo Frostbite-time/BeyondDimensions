@@ -2,8 +2,8 @@ package com.wintercogs.beyonddimensions.common.init;
 
 import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
+import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
 import com.wintercogs.beyonddimensions.common.component.MachineConfigCardContents;
 import com.wintercogs.beyonddimensions.common.machine.*;

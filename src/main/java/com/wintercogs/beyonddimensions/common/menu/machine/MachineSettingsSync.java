@@ -1,21 +1,13 @@
 package com.wintercogs.beyonddimensions.common.menu.machine;
 
-import com.wintercogs.beyonddimensions.api.machine.Machine;
-import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
-import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
-import com.wintercogs.beyonddimensions.api.machine.MachineType;
-import com.wintercogs.beyonddimensions.api.machine.SettingEditor;
+import com.wintercogs.beyonddimensions.api.machine.*;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.sync.state.SyncCodec;
 import dev.compixel.sync.state.SyncSchema;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtAccounter;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -203,7 +195,8 @@ public final class MachineSettingsSync
     {
         return switch (editor)
         {
-            case SettingEditor.Choice<T> choice -> index >= 0 && index < choice.options().size() ? choice.options().get(index) : null;
+            case SettingEditor.Choice<T> choice ->
+                    index >= 0 && index < choice.options().size() ? choice.options().get(index) : null;
             case SettingEditor.Toggle<T> toggle -> index == 0 ? toggle.on() : index == 1 ? toggle.off() : null;
         };
     }

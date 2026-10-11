@@ -1,11 +1,11 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
-import com.wintercogs.beyonddimensions.api.machine.Machine;
-import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;

@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.network.packet.c2s;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.client.gui.MagnetToggleType;
 import com.wintercogs.beyonddimensions.api.machine.BDMachineSettings;
 import com.wintercogs.beyonddimensions.api.machine.Machine;
 import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
+import com.wintercogs.beyonddimensions.client.gui.MagnetToggleType;
 import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
 import com.wintercogs.beyonddimensions.common.machine.HopperFluidMode;
 import com.wintercogs.beyonddimensions.common.machine.HopperItemMode;
@@ -59,12 +59,15 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
                 Machine machine = magnet.machine(stack);
                 switch (toggleType)
                 {
-                    case ALL -> toggle(player, machine, BDMachineSettings.WORKING.get(), RedStoneControlMode.IGNORE, RedStoneControlMode.NOT_WORKING,
-                            "msg.beyonddimensions.magnet.open", "msg.beyonddimensions.magnet.close");
-                    case ITEM -> toggle(player, machine, BDMachineSettings.COLLECT_ITEMS.get(), HopperItemMode.ALLOW, HopperItemMode.DENY,
-                            "msg.beyonddimensions.magnet.itemopen", "msg.beyonddimensions.magnet.itemclose");
-                    case FLUID -> toggle(player, machine, BDMachineSettings.COLLECT_FLUIDS.get(), HopperFluidMode.ALLOW, HopperFluidMode.DENY,
-                            "msg.beyonddimensions.magnet.fluidopen", "msg.beyonddimensions.magnet.fluidclose");
+                    case ALL ->
+                            toggle(player, machine, BDMachineSettings.WORKING.get(), RedStoneControlMode.IGNORE, RedStoneControlMode.NOT_WORKING,
+                                    "msg.beyonddimensions.magnet.open", "msg.beyonddimensions.magnet.close");
+                    case ITEM ->
+                            toggle(player, machine, BDMachineSettings.COLLECT_ITEMS.get(), HopperItemMode.ALLOW, HopperItemMode.DENY,
+                                    "msg.beyonddimensions.magnet.itemopen", "msg.beyonddimensions.magnet.itemclose");
+                    case FLUID ->
+                            toggle(player, machine, BDMachineSettings.COLLECT_FLUIDS.get(), HopperFluidMode.ALLOW, HopperFluidMode.DENY,
+                                    "msg.beyonddimensions.magnet.fluidopen", "msg.beyonddimensions.magnet.fluidclose");
                 }
             }
         }

@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.client.ui.base
 
+import com.mojang.blaze3d.platform.InputConstants
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
 import com.wintercogs.beyonddimensions.client.ui.kit.formatCompact
-import com.mojang.blaze3d.platform.InputConstants
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import com.wintercogs.beyonddimensions.common.menu.interaction.SlotClick
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
@@ -131,7 +131,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     /** 空格左键点背包或快捷栏的槽位是整批转移，交给服务端的 BD 命令，不再执行原版的拿起 */
     private fun isMoveAllClick(slotId: Int, button: Int, type: ClickType) =
         type == ClickType.PICKUP && button == 0 && spaceHeld() &&
-            slotId >= menu.inventoryStartIndex && slotId < menu.inventoryEndIndex
+                slotId >= menu.inventoryStartIndex && slotId < menu.inventoryEndIndex
 
     /** 普通槽位的 Shift 点击与空格左键由服务端的 BD 命令处理，不再额外发送原版的点击 */
     private fun clickVanilla(slotId: Int, slot: Slot, button: Int, type: ClickType) {
@@ -139,7 +139,8 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         val current = KeyAmount(ItemStackKey(stack), stack.count.toLong())
         // 双击的第二下带上第一下点到的物品：第一下通常已经把这一格搬空
         val first = firstOfDoubleClick(slotId, button, current)
-        menu.commands().click(slotId, first ?: current, button, heldModifiers(type == ClickType.QUICK_MOVE, first != null))
+        menu.commands()
+            .click(slotId, first ?: current, button, heldModifiers(type == ClickType.QUICK_MOVE, first != null))
     }
 
     /**

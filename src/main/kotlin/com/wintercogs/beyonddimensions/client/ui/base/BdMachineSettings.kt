@@ -53,7 +53,11 @@ private fun <T> settingRow(entry: MachineType.Entry<T>, snapshot: MachineSetting
                 id,
                 title,
                 description?.let(::tr),
-                MachineSettingControl.Choice(editor.options().map { tr(editor.optionLabel().apply(it)) }, selected, editor.cycle()),
+                MachineSettingControl.Choice(
+                    editor.options().map { tr(editor.optionLabel().apply(it)) },
+                    selected,
+                    editor.cycle()
+                ),
                 !locked,
             )
         }
@@ -82,7 +86,11 @@ fun BdMachineSettings(rows: List<MachineSettingRow>, shown: Boolean, onPick: (Ma
 
             is MachineSettingControl.Toggle ->
                 BdSettingRow(row.title, row.description) {
-                    BdToggle(control.on, { onPick(MachineSettingPick(row.setting, if (it) 0 else 1)) }, shown && row.enabled)
+                    BdToggle(
+                        control.on,
+                        { onPick(MachineSettingPick(row.setting, if (it) 0 else 1)) },
+                        shown && row.enabled
+                    )
                 }
         }
     }

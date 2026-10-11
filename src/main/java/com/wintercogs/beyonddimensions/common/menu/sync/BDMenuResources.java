@@ -7,7 +7,10 @@ import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackType
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.forge.sync.MinecraftSyncCodecs;
-import dev.compixel.sync.state.*;
+import dev.compixel.sync.state.SyncCodec;
+import dev.compixel.sync.state.SyncCodecs;
+import dev.compixel.sync.state.SyncMap;
+import dev.compixel.sync.state.SyncSchema;
 
 import java.util.*;
 

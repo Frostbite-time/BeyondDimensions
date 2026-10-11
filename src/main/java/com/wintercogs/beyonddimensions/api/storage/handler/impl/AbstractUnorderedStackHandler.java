@@ -1005,6 +1005,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     /* ---------------- NBT 反序列化（新优先 + 旧兼容） ---------------- */
+
     /**
      * 读档：条目按存档原样恢复，不经过插入钩子，也不受容量与种类上限约束；解析不了的资源封装成错误数据
      */

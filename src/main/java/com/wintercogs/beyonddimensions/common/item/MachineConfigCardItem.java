@@ -24,11 +24,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 机器配置卡：从一台机器复制它导出的配置（{@link Machine#exportConfig}），粘贴到同一类机器上（{@link Machine#applyConfig}）。
