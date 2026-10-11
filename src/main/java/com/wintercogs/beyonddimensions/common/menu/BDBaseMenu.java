@@ -83,7 +83,6 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
         return quickMoveRoutes;
     }
 
-    private boolean init = false; // 需要在客户端Menu完成时才能向其发送的操作是否完成的标志
     public List<DisorderedSlotGroupSync> slotGroupSyncs = new ArrayList<>();
 
     protected BDBaseMenu(@Nullable MenuType<?> menuType, int containerId, Inventory playerInventory)

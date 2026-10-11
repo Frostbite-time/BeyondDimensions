@@ -7,5 +7,4 @@ public class UIDataHelper
 
 
     public static int currentPage = 0;
-    public static int storageColumns = 9;
 }

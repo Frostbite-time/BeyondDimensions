@@ -75,25 +75,17 @@ public class DimensionsNetMenu extends BDBaseMenu
 
     public boolean hasShiftDown = false;
 
-    // 客户端镜像：所属网络与存储上限，由同步 schema 写入
+    // 客户端镜像：所属网络，由同步 schema 写入
     private int clientNetworkId = DimensionsNet.NO_PRIMARY_NET_ID;
     private String clientNetworkName = "";
-    private int clientTypeLimit = Integer.MAX_VALUE;
-    private long clientAmountLimit = Long.MAX_VALUE;
 
-    private static final SyncSchema<DimensionsNetMenu> VIEW_SCHEMA = SyncSchema.<DimensionsNetMenu>builder("beyonddimensions:storage_view", 1)
+    private static final SyncSchema<DimensionsNetMenu> VIEW_SCHEMA = SyncSchema.<DimensionsNetMenu>builder("beyonddimensions:storage_view", 2)
             .field("network.id", SyncCodecs.INT,
                     m -> m.player.level().isClientSide() ? m.clientNetworkId : m.serverNet() == null ? DimensionsNet.NO_PRIMARY_NET_ID : m.serverNet().getId(),
                     (m, value) -> m.clientNetworkId = value)
             .field("network.name", SyncCodecs.STRING,
                     m -> m.player.level().isClientSide() ? m.clientNetworkName : m.serverNet() == null ? "" : m.serverNet().getCustomName(),
                     (m, value) -> m.clientNetworkName = value)
-            .field("limit.types", SyncCodecs.INT,
-                    m -> m.player.level().isClientSide() ? m.clientTypeLimit : m.storage.slotMaxSize,
-                    (m, value) -> m.clientTypeLimit = value)
-            .field("limit.amount", SyncCodecs.LONG,
-                    m -> m.player.level().isClientSide() ? m.clientAmountLimit : m.storage.slotCapacity,
-                    (m, value) -> m.clientAmountLimit = value)
             .build();
 
     protected int storageStartIndex;
@@ -245,16 +237,6 @@ public class DimensionsNetMenu extends BDBaseMenu
         return maxLines;
     }
 
-    public void reduceLines()
-    {
-        maxLines--;
-    }
-
-    public void addLines()
-    {
-        maxLines++;
-    }
-
     public void setLines(int lines)
     {
         this.maxLines = Math.max(1, Math.min(lines, 891 / columns));
@@ -295,22 +277,6 @@ public class DimensionsNetMenu extends BDBaseMenu
     public Component networkName()
     {
         return DimensionsNet.getNetworkName(clientNetworkId, clientNetworkName);
-    }
-
-    /**
-     * 可存放的资源种类上限
-     */
-    public int typeLimit()
-    {
-        return clientTypeLimit;
-    }
-
-    /**
-     * 每种资源的数量上限
-     */
-    public long amountLimit()
-    {
-        return clientAmountLimit;
     }
 
     public int getColumns()

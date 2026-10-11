@@ -154,11 +154,6 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         return litTime;
     }
 
-    public void setLitTime(List<Integer> litTime)
-    {
-        this.litTime = litTime;
-    }
-
     /**
      * 槽位燃料总 tick
      */
@@ -167,11 +162,6 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     public List<Integer> getLitDuration()
     {
         return litDuration;
-    }
-
-    public void setLitDuration(List<Integer> litDuration)
-    {
-        this.litDuration = litDuration;
     }
 
     /**
@@ -184,11 +174,6 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         return cookTime;
     }
 
-    public void setCookTime(List<Integer> cookTime)
-    {
-        this.cookTime = cookTime;
-    }
-
     /**
      * 槽位配方所需 tick
      */
@@ -197,11 +182,6 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     public List<Integer> getCookTimeTotal()
     {
         return cookTimeTotal;
-    }
-
-    public void setCookTimeTotal(List<Integer> cookTimeTotal)
-    {
-        this.cookTimeTotal = cookTimeTotal;
     }
 
     /**

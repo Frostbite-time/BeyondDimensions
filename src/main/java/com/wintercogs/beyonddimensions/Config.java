@@ -127,16 +127,16 @@ public class Config
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
             UI_SORT_BUTTON = builder
-                    .comment("存储UI搜索按钮值 (除非你知道你在做什么，否则不要手动修改)")
+                    .comment("存储UI的主排序方式 (除非你知道你在做什么，否则不要手动修改)")
                     .defineEnum("ui_sort_button", ButtonState.SORT_NAME);
             UI_SECOND_SORT_BUTTON = builder
-                    .comment("存储UI搜索按钮值 (除非你知道你在做什么，否则不要手动修改)")
+                    .comment("存储UI的次排序方式，主排序相同时再按它排列；DISABLED 表示不使用 (除非你知道你在做什么，否则不要手动修改)")
                     .defineEnum("ui_second_sort_button", ButtonState.SORT_INSERTED_TIME);
             UI_REVERSE_BUTTON = builder
-                    .comment("存储UI倒序按钮值 (除非你知道你在做什么，否则不要手动修改)")
+                    .comment("存储UI是否倒序排列 (除非你知道你在做什么，否则不要手动修改)")
                     .defineEnum("ui_reverse_button", ButtonState.DISABLED);
             UI_SEARCH_BUTTON = builder
-                    .comment("存储UI搜索按钮值 (除非你知道你在做什么，否则不要手动修改)")
+                    .comment("关闭存储UI后是否保留搜索框内容 (除非你知道你在做什么，否则不要手动修改)")
                     .defineEnum("ui_search_button", ButtonState.DISABLED);
             UI_CRAFT_BUTTON = builder
                     .comment("决定打开菜单时是否显示合成槽")
@@ -148,7 +148,7 @@ public class Config
                     .comment("关闭合成菜单后是否保留合成格里的物品；合成格按玩家保存在服务器上")
                     .define("ui_craft_keep", false);
             UI_PAGE_NUM = builder
-                    .comment("存储UI当前显示的总页数 (除非你知道你在做什么，否则不要手动修改)")
+                    .comment("存储UI首选的行数，界面会按屏幕高度自动收窄 (除非你知道你在做什么，否则不要手动修改)")
                     .defineInRange("ui_page_num", 5, 2, 99);
             UI_COLUMNS = builder
                     .comment("存储UI首选的列数，界面会按屏幕宽度自动收窄 (除非你知道你在做什么，否则不要手动修改)")
