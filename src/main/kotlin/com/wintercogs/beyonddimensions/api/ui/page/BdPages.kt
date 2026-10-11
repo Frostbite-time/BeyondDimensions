@@ -5,11 +5,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu
 
 /**
  * 附属模组注入 BD 界面的页面。每页按菜单类注册，出现在这种菜单（及其子类）的界面上，
- * 页签排在界面自带的页签之后、设置页签之前；注入页之间按注册时给出的位置排列。
- *
- * 在客户端初始化时注册，之后打开的界面才会带上。位置引用的 id 不存在、或 id 重复时立即抛出 [IllegalStateException]，
- * 报错里列出已注册的全部页面。
- *
+ * 页签排在界面自带的页签之后、设置页签之前。在客户端初始化时注册。
  * ```
  * BdPages.register<NetFurnaceMenu>(
  *     ResourceLocation.fromNamespaceAndPath("example", "fuel_stats"),
@@ -17,11 +13,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu
  *     BdPages.after(ResourceLocation.fromNamespaceAndPath("example", "overview")),
  * )
  * ```
- *
- * 可注入的界面与菜单类：存储与合成终端 `DimensionsNetMenu`（合成为 `DimensionsCraftMenu`），网络接口 `NetInterfaceBaseMenu`，
- * 能量通道 `NetEnergyMenu`，熔炉 `NetFurnaceMenu`，漏斗 `NetHopperMenu`，磁铁 `NetMagnetMenu`，泵 `NetPumpMenu`，
- * 补货器 `NetRestockerMenu`，喂食器 `NetFeederMenu`，经验棒 `XpExchangeMenu`，网络控制器 `NetControlMenu`，
- * 主网络切换 `PrimaryNetSwitcherMenu`。
  */
 object BdPages {
     /** 界面自带的主页面 */

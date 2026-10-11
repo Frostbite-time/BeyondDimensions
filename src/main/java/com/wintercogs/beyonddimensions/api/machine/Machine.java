@@ -7,8 +7,7 @@ import net.minecraft.nbt.Tag;
 import java.util.Objects;
 
 /**
- * 一台机器：所属的机器类型与它的设置。方块机器由方块实体实现，物品机器经 {@link MachineItem#machine} 得到。
- * 机器的设置页、菜单同步、配置卡都只通过这个接口操作机器
+ * 一台机器：所属的机器类型与它的设置。设置页、菜单同步与配置卡都通过这个接口操作机器
  */
 public interface Machine extends Configurable
 {
@@ -27,7 +26,7 @@ public interface Machine extends Configurable
     void setSettings(MachineSettings settings);
 
     /**
-     * 这项设置此刻能否修改；不能修改的设置在设置页上禁用，服务端也拒绝修改，配置卡粘贴时跳过
+     * 这项设置此刻能否修改
      */
     default boolean isSettingAvailable(MachineSetting<?> setting)
     {
@@ -62,7 +61,7 @@ public interface Machine extends Configurable
     }
 
     /**
-     * 写到配置卡上的设置：这类机器的每项设置都写出当前的值，没改过的默认值也写，粘贴时一并覆盖
+     * 写到配置卡上的设置：每项设置都写出当前的值
      */
     static MachineSettings exportSettings(MachineType type, MachineSettings settings)
     {

@@ -169,9 +169,7 @@ public interface IStackKey<T>
     boolean isSame(IStackKey<?> other);
 
     /**
-     * 模糊匹配的分组：{@link #isSame} 为真的两个键，类型 id 与分组必须都相等。存储按分组索引模糊匹配
-     * <p>
-     * 默认为 {@link #getSource()}，适用于按物品、流体等来源比较的资源；按其他规则比较的实现应当重写
+     * 模糊匹配的分组：{@link #isSame} 为真的两个键，类型 id 与分组必须都相等。默认为 {@link #getSource()}
      */
     default Object fuzzyGroup()
     {

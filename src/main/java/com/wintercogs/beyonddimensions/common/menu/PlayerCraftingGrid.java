@@ -12,10 +12,8 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * 玩家的合成格：所有带合成区的菜单（O 键打开的合成、存储终端方块与物品）共用这一份，
- * 保存在服务器的玩家数据里，死亡后保留。物品只在这里，不在客户端，也不在方块或终端物品上，所以不会被复制。
- * <p>
- * 打开合成菜单时，合成格直接以 {@link #items()} 为内容；关闭时按 {@link #keep()} 保留，或按 {@link #returnToStorage()} 退回
+ * 玩家的合成格：所有带合成区的菜单共用这一份，保存在服务器的玩家数据里，死亡后保留。
+ * 物品只在这里，不在客户端，也不在方块或终端物品上
  */
 public final class PlayerCraftingGrid implements INBTSerializable<CompoundTag>
 {

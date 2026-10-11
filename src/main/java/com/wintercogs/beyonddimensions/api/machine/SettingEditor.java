@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * 一项设置的编辑声明：设置页怎样编辑它、哪些值合法。机器的设置页按它统一生成，服务端也按它校验客户端提交的值
+ * 一项设置的编辑声明：设置页怎样编辑它、哪些值合法。服务端也按它校验
  */
 public sealed interface SettingEditor<T> permits SettingEditor.Choice, SettingEditor.Toggle
 {

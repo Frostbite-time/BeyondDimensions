@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProvider
 {
-    // 旧版本把合成格的物品存在终端里。合成格跟随玩家，这里只读出旧存档里的物品，在打开或拆除终端时还给玩家
+    // 旧版本存在终端里的合成格物品，打开或拆除终端时还给玩家
     private final NonNullList<ItemStack> craftItems = NonNullList.withSize(9, ItemStack.EMPTY);
 
     public NetTerminalBlockEntity(BlockPos pos, BlockState blockState)

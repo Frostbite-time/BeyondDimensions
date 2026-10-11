@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 
 /**
- * 物品携带的资源：经验棒代表经验流体，带存储能力的容器代表它的第一份内容物。标记槽与分类编辑区用它把右键放上的容器换成内容
+ * 物品携带的资源：经验棒代表经验流体，带存储能力的容器代表它的第一份内容物
  */
 public final class ResourceContents
 {

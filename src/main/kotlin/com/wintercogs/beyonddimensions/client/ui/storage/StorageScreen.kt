@@ -191,7 +191,7 @@ private const val LABEL = 11
 /** 格子区域（含边框）、间隔与滚动条的总宽度 */
 private fun contentWidth(columns: Int) = columns * SLOT_PITCH + 2 + 2 + SCROLLBAR_WIDTH
 
-/** 窗口中除格子区域外的宽度：页签竖条、页面两侧的留白与窗口边框 */
+/** 窗口中除格子区域外的宽度 */
 private const val CHROME_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 2
 
 /** 分类编辑区：与主内容的间隔、分隔线、间隔与七列标记格 */
@@ -200,7 +200,7 @@ private const val EDITOR_CONTENT_WIDTH = EDITOR_COLUMNS * SLOT_PITCH + 1
 private const val EDITOR_WIDTH = GAP + 1 + GAP + EDITOR_CONTENT_WIDTH
 private const val EDITOR_MILLIS = 180
 
-/** 除格子行外的固定高度。分类标签栏始终计入：空间不够时少放几行格子，标签栏不会被挤掉 */
+/** 除格子行外的固定高度；分类标签栏始终计入 */
 private fun chromeHeight(craft: Boolean): Int {
     var height = 25 + PAGE_PADDING_TOP + 18 + 5 + 13 + 4 + 2 + GAP + LABEL + 4 + 76 + PAGE_PADDING_BOTTOM + 2
     if (craft) height += GAP + LABEL + 4 + 54
@@ -227,7 +227,7 @@ private fun StorageView(
     // 排序与配方选择的浮层盖在槽位上方，打开期间停用槽位
     val popovers = remember { BdPopovers() }
     slots.Interaction(enabled = popovers.open == 0)
-    // Tab 只用来进出搜索框：焦点不在搜索框时聚焦它，在搜索框里再按一次取消聚焦
+    // Tab 只用来进出搜索框
     val searchFocus = remember { FocusRequester() }
     var searchFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
@@ -266,7 +266,7 @@ private fun StorageView(
                         val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
                         if (delta != 0f && page.main) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
                     }
-                    // 焦点在窗口里时由这里处理 Tab；没有焦点时 Tab 按顺序进入窗口，进入时改到搜索框，点击进入的焦点不受影响
+                    // 焦点在窗口里时由这里处理 Tab；没有焦点时 Tab 进入窗口后改到搜索框
                     .onPreviewKeyEvent { event ->
                         if (event.key != Key.Tab) return@onPreviewKeyEvent false
                         if (event.type == KeyEventType.KeyDown) {
@@ -478,8 +478,8 @@ private fun SearchHelp(text: StorageText, rule: String = text.searchRule) {
 }
 
 /**
- * 输入框的本地文字，不必等一刻的往返。一刻内输入多个字（快速输入、输入法上屏一个词）时，快照会依次带回较早发出的文字，
- * 这些不算外部改动；外部改动（如配方查看器的搜索、点选的写法）再同步进来
+ * 输入框的本地文字，不必等一刻的往返。快照带回的较早的文字不算外部改动；
+ * 外部改动（如配方查看器的搜索、点选的写法）才同步进来
  */
 private class LocalText(initial: String) {
     var value by mutableStateOf(initial)
@@ -506,8 +506,8 @@ private fun rememberLocalText(external: String): LocalText {
 }
 
 /**
- * 分类标签：选中项下方是标志渐变线，编辑区打开的分类带一支笔；标签后是新建按钮，最右侧的下拉列出全部标签。
- * 放不下时用滚轮横向滚动，切换到或开始编辑的标签会滚进视野；右键打开编辑、移动与删除的菜单，也可以直接拖动排序
+ * 分类标签：标签后是新建按钮，最右侧的下拉列出全部标签。
+ * 放不下时用滚轮横向滚动；右键打开编辑、移动与删除的菜单，也可以拖动排序
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -530,7 +530,7 @@ private fun CategoryTabs(state: StorageState, send: (StorageAction) -> Unit, tex
         return (0 until count).count { it != dragged && spans[it]?.let { (s, w) -> s + w / 2 < center } == true }
     }
 
-    // 新加的标签要等一帧排好位置。直接跳到位：两次切换接连发生时，第二次按第一次的终点算
+    // 新加的标签要等一帧排好位置，然后直接跳到位
     suspend fun reveal(index: Int) {
         withFrameNanos {}
         val (start, size) = spans[index] ?: return
@@ -673,9 +673,7 @@ private fun CategoryTabView(
     }
 }
 
-/**
- * 分类的右键菜单：编辑、调整次序与删除。[vertical] 为 true 时（标签列表里）次序说上移、下移；[onEdit] 在打开编辑区时调用
- */
+/** 分类的右键菜单：编辑、调整次序与删除。[vertical] 为 true 时次序说上移、下移 */
 @Composable
 private fun CategoryMenu(
     point: IntOffset,
@@ -708,7 +706,7 @@ private fun CategoryMenu(
     }
 }
 
-/** 下拉列出全部标签：标签多到一行放不下时，直接从这里挑选 */
+/** 下拉列出全部标签 */
 @Composable
 private fun CategoryList(state: StorageState, editing: Int, send: (StorageAction) -> Unit, text: StorageText) {
     var open by remember { mutableStateOf(false) }
@@ -734,7 +732,7 @@ private fun CategoryList(state: StorageState, editing: Int, send: (StorageAction
                             editing = index == editing,
                             send = send,
                             text = text,
-                            // 打开编辑区时收起列表，免得挡住编辑区；移动与删除后列表留着，可以接着整理
+                            // 打开编辑区时收起列表；移动与删除后列表留着
                             onEdit = { open = false },
                         ) {
                             send(StorageAction.SelectCategory(index))
@@ -765,7 +763,7 @@ private fun CategoryOption(
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     var menuAt by remember { mutableStateOf<IntOffset?>(null) }
-    // 菜单在这个 Box 里，以这一行为锚点展开在按下右键的位置
+    // 菜单以这一行为锚点，展开在按下右键的位置
     Box {
         menuAt?.let { point ->
             CategoryMenu(point, index, count, vertical = true, send, text, { menuAt = null }, onEdit)
@@ -807,7 +805,7 @@ private fun CategoryOption(
 
 /**
  * 分类编辑区：图标与名称、搜索式、特定补充，以及所选资源能写进搜索式的条件。
- * [enabled] 为 false 时编辑区正在收起或被设置页盖住，不再响应
+ * [enabled] 为 false 时不响应
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -882,7 +880,7 @@ private fun HintMark(hint: String) {
     BdTooltip(hint) { OreIcon(OreGlyph.InformationCircle, Modifier.size(7.dp), color = Bd.colors[BdColors.faint]) }
 }
 
-/** 编辑区里的标记格：外观同存储格子，左右键分别响应；[name] 是悬停提示 */
+/** 编辑区里的标记格：左右键分别响应，[name] 是悬停提示 */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun MarkerBox(
@@ -941,7 +939,7 @@ private fun SyntaxChip(syntax: String, enabled: Boolean, onClick: () -> Unit) {
     }
 }
 
-/** 存储格子的右键菜单：取出一个、取出指定数量（默认一半），以及把这种资源加入某个分类 */
+/** 存储格子的右键菜单：取出一个、取出指定数量，以及把这种资源加入某个分类 */
 @Composable
 private fun SlotMenuPopup(menu: SlotMenu, point: IntOffset, send: (StorageAction) -> Unit, text: StorageText) {
     val colors = Bd.colors
@@ -972,7 +970,7 @@ private fun SlotMenuPopup(menu: SlotMenu, point: IntOffset, send: (StorageAction
                 style = Bd.caption,
                 maxLines = 1
             )
-            // 分类很多时在菜单里滚动，菜单不会长出屏幕
+            // 分类很多时在菜单里滚动
             BdScrollColumn(Modifier.heightIn(max = (13 * MENU_CATEGORY_ROWS).dp)) {
                 for ((index, name) in menu.categories.withIndex()) {
                     BdMenuRow(name) { send(StorageAction.AddToCategory(index)) }
@@ -985,10 +983,7 @@ private fun SlotMenuPopup(menu: SlotMenu, point: IntOffset, send: (StorageAction
 /** 右键菜单最多同时列出的分类数，再多就在菜单里滚动 */
 private const val MENU_CATEGORY_ROWS = 8
 
-/**
- * 菜单里的"取出 x 个"：与"取出一个"一样，点击这一行就取出。数量编辑器的按钮与输入框自己处理点击，不会取出；
- * 点击时先让正在输入的数字提交
- */
+/** 菜单里的"取出 x 个"：点击这一行就取出，数量编辑器自己处理的点击除外 */
 @Composable
 private fun TakeAmountRow(amount: Int, onAmountChange: (Int) -> Unit, max: Int, text: StorageText, onTake: () -> Unit) {
     val colors = Bd.colors
@@ -1136,7 +1131,7 @@ private fun SortOptions(state: StorageState, send: (StorageAction) -> Unit, text
     BdSettingRow(text.reverse) { BdToggle(state.reverse, { send(StorageAction.Reverse(it)) }) }
 }
 
-/** 设置页的视图设置：行列与搜索行为；[shown] 为 false 时设置页正在淡出，控件不再响应 */
+/** 设置页的视图设置：行列与搜索行为；[shown] 为 false 时控件不响应 */
 @Composable
 private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text: StorageText, shown: Boolean) {
     BdSectionLabel(text.layout)

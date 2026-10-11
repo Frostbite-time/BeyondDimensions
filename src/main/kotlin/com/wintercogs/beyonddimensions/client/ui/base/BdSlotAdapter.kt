@@ -22,9 +22,7 @@ import org.lwjgl.glfw.GLFW
 
 /**
  * BD 菜单的槽位适配：在原生容器界面中显示虚拟资源，并把槽位操作转成菜单命令。
- *
- * 虚拟资源的数量随槽位的显示内容一起交给界面，由 [BdSlot] 以 BD 的数量标签显示。
- * 除 [isResource] 外，所有方法都在游戏线程调用；图标回调只捕获不可变的资源键。
+ * 除 [isResource] 外，所有方法都在游戏线程调用
  */
 class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapter(menu), AutoCloseable {
     // 菜单创建后槽位不再增减，可在任何线程读取
@@ -33,9 +31,8 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     private val resourceValues = HashMap<Int, KeyAmount>()
 
     /**
-     * 同一种资源在任何格子里都用同一个图标句柄。图集按句柄认图：滚动或排序让资源换了格子时，已经画好的图像可以直接沿用；
-     * 否则大格子区滚动一行就有上百个新句柄，超出每帧能准备的数量，没画好的格子会成片显示成暗色方块。
-     * 最近用过的在前，超过上限时丢掉最久没用的，图集自己的缓存也有上限
+     * 同一种资源在任何格子里都用同一个图标句柄，滚动或排序后已画好的图像可以沿用。
+     * 超过上限时丢掉最久没用的
      */
     private val icons =
         object : LinkedHashMap<IStackKey<*>, ItemIcon>(256, 0.75f, true) {
@@ -46,7 +43,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     /** 空手右键存储格子里的资源时调用，返回 true 表示界面打开了自己的菜单，不发送右键点击 */
     var resourceMenu: ((slotId: Int) -> Boolean)? = null
 
-    // 上一次交给服务端的点击，用来判定双击；第一下点到的资源随第二下一起发出
+    // 上一次交给服务端的点击，用来判定双击
     private var lastSlot = -1
     private var lastButton = -1
     private var lastTime = 0L
@@ -114,7 +111,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
                 val sentButton = if (type == ClickType.CLONE) 2 else button
                 val current = slot.vanillaActualStack
                 val first = firstOfDoubleClick(slotId, sentButton, current)
-                // 有序槽的第二下带上第一下点到的资源，这一格此时可能已被搬空；存储格子的双击没有特殊处理，照常带当前内容
+                // 有序槽的第二下带上第一下点到的资源：这一格此时可能已被搬空
                 val ordered = !slot.isFake && slot !is DisorderedStackTypedSlot
                 menu.commands().click(
                     slotId,
@@ -144,8 +141,8 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     }
 
     /**
-     * 按原版容器界面的标准判定双击：与上一次点击同一槽位、同一按键，两次按下相隔不到 250 毫秒。
-     * 是第二下时返回第一下点到的资源，否则记下这次点击并返回 null；第三下重新开始计
+     * 按原版的标准判定双击：同一槽位、同一按键，两次按下相隔不到 250 毫秒。
+     * 是第二下时返回第一下点到的资源，否则返回 null
      */
     private fun firstOfDoubleClick(slotId: Int, button: Int, clicked: KeyAmount): KeyAmount? {
         val now = Util.getMillis()
@@ -161,7 +158,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         return null
     }
 
-    /** 随点击发给服务端的修饰键与标志：Shift 以点击类型为准，Ctrl（macOS 上为 Command）、Alt 与空格读当前键盘 */
+    /** 随点击发给服务端的修饰键与标志 */
     private fun heldModifiers(quickMove: Boolean, doubleClick: Boolean): Int {
         var held = if (quickMove) SlotClick.SHIFT else 0
         if (Screen.hasControlDown()) held = held or SlotClick.CTRL
@@ -186,7 +183,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     }
 }
 
-/** 资源的图标：物品取快照，其他资源按自己的渲染方式绘制。在游戏线程调用 */
+/** 资源的图标；在游戏线程调用 */
 fun resourceIcon(key: IStackKey<*>): ItemIcon =
     if (key is ItemStackKey) ItemIcon.snapshot(key.copyStack().copyWithCount(1))
     else ItemIcon.drawn(key.toString(), { graphics -> key.render.render(graphics, key, 0, 0) })

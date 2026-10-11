@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * 网络装配器：五个装备模板槽与玩家背包；设置保存在物品上，由 MachineSettingsSync 统一同步与修改。
+ * 网络装配器：五个装备模板槽与玩家背包，设置保存在物品上
  */
 public class NetRestockerMenu extends BDBaseMenu implements MachineMenu
 {

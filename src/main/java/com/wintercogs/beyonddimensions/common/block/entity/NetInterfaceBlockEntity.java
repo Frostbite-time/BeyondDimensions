@@ -46,7 +46,7 @@ import java.util.function.Function;
 public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider, NetInterfaceAccess
 {
 
-    // 槽位数在创建时按服务端配置确定；客户端的值由加载器在进入服务器时同步
+    // 槽位数在创建时按服务端配置确定
     private final int capacity = ServerConfigRuntime.interfaceCapacity;
 
     // 用来标记物品或者流体的槽位，只由UI控制

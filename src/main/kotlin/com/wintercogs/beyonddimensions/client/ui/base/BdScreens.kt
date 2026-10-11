@@ -16,13 +16,10 @@ import org.lwjgl.glfw.GLFW
 /** 界面文字在游戏线程取出，随快照或构造参数进入界面 */
 fun tr(key: String, vararg args: Any): String = Component.translatable(key, *args).string
 
-// 一屏的图标一帧画完：滚动或重排时新出现的图标不必分几帧陆续补上
+// 一屏的图标一帧画完
 private const val ICONS_PER_FRAME = 512
 
-/**
- * 带原版槽位的 BD 菜单界面：用 [BdSlotAdapter] 显示虚拟资源，套用 BD 的设计与主题。
- * 子类照常实现 snapshot、handle 与 Content；JEI 与 EMI 的联动按这个类识别 BD 界面。
- */
+/** 带原版槽位的 BD 菜单界面，用 [BdSlotAdapter] 显示虚拟资源。JEI 与 EMI 的联动按这个类识别 BD 界面 */
 abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component) :
     ComposeInventoryScreen<M, S, A>(
         menu,
@@ -35,7 +32,7 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
     @Suppress("UNCHECKED_CAST")
     protected val adapter = inventory.adapter as BdSlotAdapter<M>
 
-    /** 附属模组注入这个界面的页；子类在竖条上放 [InjectedTabs]，在页面区放 [InjectedPages] */
+    /** 附属模组注入这个界面的页 */
     protected val pages = BdPageHost(container, this, inventory, ::requestClose)
 
     override fun inventoryTick() {
@@ -43,7 +40,7 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
         pages.update()
     }
 
-    // 注入页在输入事件里送出的动作随即处理，与界面自己的动作一样不等下一刻
+    // 注入页送出的动作随即处理，不等下一刻
     override fun mouseClicked(x: Double, y: Double, button: Int) =
         super.mouseClicked(x, y, button).also { pages.update() }
 
@@ -64,7 +61,7 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
         val editing = hasTextInputFocus
         val handled = super.keyPressed(keyCode, scanCode, modifiers)
         pages.update()
-        // 文字由 charTyped 单独送达；编辑时占用可打印按键，避免配方查看器把 R、U 等当作快捷键
+        // 编辑文字时占用可打印按键，避免配方查看器把 R、U 等当作快捷键
         return handled || (editing && keyCode in GLFW.GLFW_KEY_SPACE..GLFW.GLFW_KEY_GRAVE_ACCENT)
     }
 
@@ -83,7 +80,7 @@ abstract class BdMenuScreen<M : AbstractContainerMenu, S, A>(menu: M, title: Com
         design = BdDesign,
     ),
     BdScreen {
-    /** 附属模组注入这个界面的页；子类在竖条上放 [InjectedTabs]，在页面区放 [InjectedPages] */
+    /** 附属模组注入这个界面的页 */
     protected val pages = BdPageHost(container, this, null, ::requestClose)
 
     override fun containerTick() = pages.update()

@@ -138,7 +138,7 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
     }
 
 
-    // 第一次排序前的占位值：此时还没有缓存的下标，不会被当成命中
+    // 第一次排序前的占位值
     private SortProperties lastSortProperties = new SortProperties(StorageSort.NAME, null, false);
 
     public ClientNetStorage(@NotNull AbstractUnorderedStackHandler sourceStorage)

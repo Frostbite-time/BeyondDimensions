@@ -183,7 +183,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         }
         if (packed && !fitsInMatterBall(inputKeys, amount))
         {
-            // 请求本身有效，只是不能照做：把原因告诉玩家并视为已处理，否则客户端只会提示"服务器拒绝了这次操作"
+            // 请求有效但不能照做：把原因告诉玩家并视为已处理
             player.displayClientMessage(Component.translatable("msg.beyonddimensions.matter_compress_ball.too_large"), false);
             return true;
         }
@@ -219,7 +219,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
     private static final int MAX_MATTER_BALL_BYTES = 1536 * 1024;
 
-    // 压缩物质球是普通物品，随原版数据包同步：过大的球会让持有它和它附近的玩家断线，所以编码超出上限的内容不予打包
+    // 过大的压缩物质球会让持有它和它附近的玩家断线，编码超出上限的内容不予打包
     private boolean fitsInMatterBall(List<IStackKey<?>> inputKeys, List<Long> amount)
     {
         List<KeyAmount> contents = new ArrayList<>(inputKeys.size());
@@ -337,7 +337,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     }
 
     /**
-     * 把一堆物品还给玩家：优先存储时依次送回存储、玩家背包，最后掉在玩家脚下；优先背包时先背包再存储。
+     * 把一堆物品还给玩家：按偏好依次送回存储与背包，最后掉在玩家脚下；
      * 玩家已经死亡或断开连接时，优先背包的直接掉落。会修改传入的堆叠
      */
     public static void returnStack(Player player, IStackHandler storage, ItemStack stack, boolean toStorageFirst)
@@ -362,7 +362,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     }
 
     /**
-     * 关闭菜单：玩家选择保留时，合成格里的物品原样留在 {@link PlayerCraftingGrid}，下次打开任何合成菜单时再出现；否则按退回方向清空
+     * 关闭菜单：保留时合成格里的物品留在 {@link PlayerCraftingGrid}，否则按退回方向清空
      */
     @Override
     public void removed(@NotNull Player player)

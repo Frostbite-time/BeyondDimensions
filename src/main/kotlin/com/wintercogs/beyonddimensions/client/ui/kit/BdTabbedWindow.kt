@@ -79,7 +79,7 @@ fun BdTabbedWindow(
     BdWindow(Modifier.centerContent().then(modifier)) {
         header()
         Box {
-            // 切换时新页面从下方浮起，裁剪到内容区，不会画到窗口边框外
+            // 切换时新页面从下方浮起，裁剪到内容区
             Box(Modifier.padding(start = SIDE_RAIL_WIDTH.dp).clipToBounds(), content = pages)
             // 竖条高度跟随主页面：深一层的底色，右侧一条细线
             Box(Modifier.matchParentSize()) {
@@ -106,8 +106,8 @@ fun BdTabbedWindow(
 }
 
 /**
- * 让内容区（竖条右侧）而不是整个窗口落在居中的位置：窗口左移半个竖条宽；屏幕两侧的空位不够时少移一些，窗口不会移出屏幕。
- * 只在布局阶段移动摆放位置，原生槽位的命中区域随之更新。
+ * 让内容区而不是整个窗口居中：窗口左移半个竖条宽，屏幕两侧空位不够时少移一些。
+ * 只在布局阶段移动，原生槽位的命中区域随之更新
  */
 private fun Modifier.centerContent() =
     layout { measurable, constraints ->
@@ -118,7 +118,7 @@ private fun Modifier.centerContent() =
         layout(placeable.width, placeable.height) { placeable.place(-shift, 0) }
     }
 
-/** 竖条上的页签：选中时有底色、细框与左侧的标志渐变线；[label] 是悬停提示 */
+/** 竖条上的页签；[label] 是悬停提示 */
 @Composable
 fun BdRailTab(label: String, art: OrePixelArt, selected: Boolean, onClick: () -> Unit) {
     val colors = Bd.colors
@@ -156,9 +156,8 @@ fun BdRailTab(label: String, art: OrePixelArt, selected: Boolean, onClick: () ->
 }
 
 /**
- * 页面的显示状态，由 [BdMainPage] 与 [BdTabPage] 提供给其中的内容。[current] 为当前打开的页；
- * [visible] 在切走后淡出结束前仍为 true。槽位只在当前页上登记点击位置：主页面切走后仍占着位置、只是看不见，
- * 不这样做的话，点击会落到它看不见的槽位上
+ * 页面的显示状态，由 [BdMainPage] 与 [BdTabPage] 提供给其中的内容。[current] 为当前打开的页，
+ * [visible] 在切走后淡出结束前仍为 true。槽位只在当前页上响应点击
  */
 @Immutable
 data class BdPageVisibility(val current: Boolean, val visible: Boolean)
@@ -172,7 +171,7 @@ private fun ProvidePageVisibility(shown: Boolean, progress: State<Float>, conten
     CompositionLocalProvider(LocalBdPageVisibility provides BdPageVisibility(shown, visible), content = content)
 }
 
-/** 主页面：决定内容区的大小；切到其他页时淡出，免得与盖在上面的半透明页面叠在一起 */
+/** 主页面：决定内容区的大小，切到其他页时淡出 */
 @Composable
 fun BoxScope.BdMainPage(shown: Boolean, content: @Composable ColumnScope.() -> Unit) {
     val progress = switchProgress(shown)
@@ -182,8 +181,8 @@ fun BoxScope.BdMainPage(shown: Boolean, content: @Composable ColumnScope.() -> U
 }
 
 /**
- * 其他页面：与主页面一样大，切到这一页时从下方浮起并淡入，盖住主页面并挡住它的点击；内容放不下时在页内滚动。
- * 隐藏期间不组合，再次打开时滚动位置回到顶部。
+ * 其他页面：与主页面一样大，打开时盖住主页面并挡住它的点击，内容放不下时在页内滚动。
+ * 隐藏期间不组合
  */
 @Composable
 fun BoxScope.BdTabPage(

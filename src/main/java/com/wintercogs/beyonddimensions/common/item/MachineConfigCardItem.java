@@ -27,11 +27,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 /**
- * 机器配置卡：从一台机器复制它导出的配置（{@link Machine#exportConfig}），粘贴到同一类机器上（{@link Machine#applyConfig}）。
- * 卡上记着复制自哪一类机器，不同类的机器之间不能粘贴。
+ * 机器配置卡：从一台机器复制它导出的配置，粘贴到同一类机器上。
  * <p>
- * 方块机器：手持卡右键复制，Shift 右键粘贴，Ctrl 右键粘贴到这台机器以及与它相连的全部同类机器。
- * 物品机器：卡在副手、机器在主手，右键复制，Shift 右键粘贴。按键由客户端判断，经 ConfigCardPacket 交给服务端执行
+ * 方块机器：手持卡右键复制，Shift 右键粘贴，Ctrl 右键粘贴到与它相连的全部同类机器。
+ * 物品机器：卡在副手、机器在主手，右键复制，Shift 右键粘贴
  */
 public class MachineConfigCardItem extends Item
 {
@@ -41,9 +40,8 @@ public class MachineConfigCardItem extends Item
     public static final int CONNECTED_LIMIT = 256;
 
     /**
-     * 卡上配置的大小上限，按 NBT 的内存估算计，与网络读取物品组件时 2 MiB 配额的口径相同。
-     * 槽位里的物品连同全部组件一起导出，超过上限时整张不复制：过大的卡在网络上读不出来，持卡玩家与周围的玩家都会断线。
-     * 一本写满的成书约 229 KiB，仍能复制
+     * 卡上配置的大小上限，按 NBT 的内存估算计。超过上限时整张不复制：
+     * 过大的卡在网络上读不出来，持卡玩家与周围的玩家都会断线
      */
     public static final int MAX_CONFIG_BYTES = 256 * 1024;
 
@@ -84,7 +82,7 @@ public class MachineConfigCardItem extends Item
     }
 
     /**
-     * 把卡上的配置粘贴到 machines，它们都属于同一类机器；卡是空的或属于另一类机器时提示玩家，返回 false
+     * 把卡上的配置粘贴到 machines；卡是空的或属于另一类机器时提示玩家，返回 false
      */
     public static boolean paste(Player player, List<? extends Machine> machines, ItemStack card)
     {
@@ -112,8 +110,7 @@ public class MachineConfigCardItem extends Item
     }
 
     /**
-     * 从 start 出发，经六个面相邻、与它同属一类的方块机器，包括 start 自己；最多 {@link #CONNECTED_LIMIT} 台。
-     * 客户端绘制提示框与服务端粘贴都用它
+     * 从 start 出发，经六个面相邻、与它同属一类的方块机器，包括 start 自己，最多 {@link #CONNECTED_LIMIT} 台
      */
     public static List<BlockPos> connected(Level level, BlockPos start)
     {

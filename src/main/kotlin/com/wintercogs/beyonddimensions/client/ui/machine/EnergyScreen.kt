@@ -33,7 +33,7 @@ import kotlin.math.roundToLong
 
 /**
  * 维度网络能量通道：网络的存量与收支、近半分钟的收支曲线与玩家背包；设置页是弹出模式与红石控制。
- * 网络默认的容量极大，填充比例看不出变化，所以这里展示收支的走势，以及按当前速率多久后耗尽或充满。
+ * 网络的容量极大，填充比例看不出变化，所以展示收支的走势与预计的耗尽或充满时间
  */
 class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) :
     BdInventoryScreen<NetEnergyMenu, EnergyState, EnergyAction>(menu, title) {
@@ -165,7 +165,7 @@ private class EnergyText(val title: String) {
 private const val FLOW_BARS = 52
 private const val BAR_TICKS = 10
 
-/** 每刻记下网络能量的变化，供收支曲线与平均速率使用；只保留曲线覆盖的那段时间 */
+/** 每刻记下网络能量的变化，只保留曲线覆盖的那段时间 */
 private class FlowHistory {
     private val samples = LongArray(FLOW_BARS * BAR_TICKS)
     private var recorded = 0L
@@ -207,7 +207,7 @@ private fun formatRate(rate: Double): String {
     else formatReadout(magnitude.roundToLong())
 }
 
-/** 网络能量：存量与速率、容量与已用比例、收支曲线（悬停时显示峰值），以及曲线的时间范围与预计时间 */
+/** 网络能量：存量与速率、容量与已用比例、收支曲线与预计时间 */
 @Composable
 private fun EnergyReadout(state: EnergyState, text: EnergyText) {
     val colors = Bd.colors
@@ -263,8 +263,8 @@ private fun EnergyReadout(state: EnergyState, text: EnergyText) {
 private const val BAR_PITCH = 3
 
 /**
- * 收支曲线：中线以上为流入、以下为流出，按曲线里的最大值缩放，最新的一格在最右侧，越旧越淡。
- * 两条点线标出峰值的一半。按格绘制，一格一像素。
+ * 收支曲线：中线以上为流入、以下为流出，按最大值缩放，最新的一格在最右侧，越旧越淡。
+ * 两条点线标出峰值的一半
  */
 @Composable
 private fun FlowChart(bars: List<Float>, modifier: Modifier) {

@@ -20,11 +20,8 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 /**
- * 错误数据：存档里解析不了的资源键（类型未注册、物品或组件来自已移除的模组、数据损坏）原样封装进
- * {@code beyonddimensions:error_data} 物品，以普通物品的身份留在存储里，不会被丢弃，玩家也能取出或清理。
- * <p>
- * 只在读档时特判：解析到错误数据会先尝试重新解析封装的内容，成功就还原成原来的资源，所以对应模组装回后，
- * 留在维度网络或设备里的错误数据会在下次载入时自动还原。
+ * 错误数据：存档里解析不了的资源键原样封装进 {@code beyonddimensions:error_data} 物品，留在存储里不会被丢弃。
+ * 读档时会尝试重新解析封装的内容，成功就还原成原来的资源
  */
 public final class ErrorData
 {
@@ -86,8 +83,7 @@ public final class ErrorData
     }
 
     /**
-     * 把严格的资源键编解码器包装成读档时不会失败的版本：解析失败或抛出异常时封装成错误数据，
-     * 解析到错误数据时尝试还原。编码不变，错误数据按普通物品写出，封装的原始数据随之原样保存
+     * 把严格的资源键编解码器包装成读档时不会失败的版本：解析失败时封装成错误数据，解析到错误数据时尝试还原
      */
     static Codec<IStackKey<?>> lenient(Codec<IStackKey<?>> strict)
     {

@@ -26,11 +26,7 @@ import com.wintercogs.beyonddimensions.client.ui.theme.signature
 import dev.compixel.ui.ore.display.OreText
 import kotlin.math.roundToInt
 
-/*
- * 浮在界面上的几种层：悬停提示、点开的浮层与文本框的右键菜单。
- * 三者同一种外观：比窗口更实的深色底、一像素浅色细线框与控件的切角，提示框的上沿是一条标志渐变线。
- * 界面退场时窗口失去焦点，它们随即消失，不会停在淡出的画面上。
- */
+/* 浮在界面上的几种层：悬停提示、点开的浮层与文本框的右键菜单，三者同一种外观 */
 
 /** 悬停提示：指针停在 [content] 上时显示 [text]；[beside] 为 true 时提示在右侧，否则在下方 */
 @Composable
@@ -89,7 +85,7 @@ fun BdTooltip(
     }
 }
 
-/** 提示框的位置：锚点下方居中，下方放不下时在上方；或锚点右侧居中，右侧放不下时在左侧。都不超出窗口 */
+/** 提示框的位置：锚点下方或右侧居中，放不下时翻到另一侧，不超出窗口 */
 private class TooltipPosition(private val gap: Int, private val beside: Boolean) : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,
@@ -118,8 +114,8 @@ private class TooltipPosition(private val gap: Int, private val beside: Boolean)
 }
 
 /**
- * 有原版槽位的界面里打开着的浮层数。浮层盖在槽位上方，但原版槽位不知道浮层的存在，点击会同时落到下面的槽位上，
- * 所以这类界面提供 [LocalBdPopovers]，在 [open] 大于 0 时停用槽位
+ * 有原版槽位的界面里打开着的浮层数。原版槽位不知道浮层的存在，点击会同时落到下面的槽位上，
+ * 所以 [open] 大于 0 时停用槽位
  */
 class BdPopovers {
     var open by mutableIntStateOf(0)
@@ -128,7 +124,7 @@ class BdPopovers {
 
 val LocalBdPopovers = staticCompositionLocalOf<BdPopovers?> { null }
 
-/** 点开的浮层，例如下拉的选项：在锚点下方、与锚点右边对齐，下方放不下时在上方；点击外部关闭 */
+/** 点开的浮层，例如下拉的选项：在锚点下方、与锚点右边对齐；点击外部关闭 */
 @Composable
 fun BdPopover(onDismissRequest: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     LocalBdPopovers.current?.let { popovers ->
@@ -140,7 +136,7 @@ fun BdPopover(onDismissRequest: () -> Unit, content: @Composable ColumnScope.() 
     if (!LocalWindowInfo.current.isWindowFocused) return
     val gap = with(LocalDensity.current) { 2.dp.roundToPx() }
     Popup(remember(gap) { BelowAnchor(gap) }, onDismissRequest, properties = PopupProperties(focusable = true)) {
-        // 按内容最宽的一行定宽：浮层的约束是整个窗口，占满宽度的行不能把浮层撑到全屏
+        // 按内容最宽的一行定宽，占满宽度的行不能把浮层撑到全屏
         OverlayCard(Modifier.width(IntrinsicSize.Max).padding(6.dp), content)
     }
 }
@@ -174,10 +170,7 @@ private fun OverlayCard(modifier: Modifier, content: @Composable ColumnScope.() 
     )
 }
 
-/**
- * BD 文本框的右键菜单：剪切、复制、粘贴等由 Compose 按选区给出，这里只负责外观。
- * 在指针处展开，每项一行小字，与浮层中的选项同高。
- */
+/** BD 文本框的右键菜单：菜单项由 Compose 按选区给出，这里只负责外观 */
 object BdContextMenu : ContextMenuRepresentation {
     @Composable
     override fun Representation(state: ContextMenuState, items: () -> List<ContextMenuItem>) {
@@ -198,9 +191,7 @@ object BdContextMenu : ContextMenuRepresentation {
     }
 }
 
-/**
- * 在锚点内 [point] 处展开的菜单，例如右键菜单：点击外部关闭；打开期间与 [BdPopover] 一样计入 [LocalBdPopovers]
- */
+/** 在锚点内 [point] 处展开的菜单，例如右键菜单；打开期间计入 [LocalBdPopovers] */
 @Composable
 fun BdPointMenu(point: IntOffset, onDismissRequest: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     LocalBdPopovers.current?.let { popovers ->

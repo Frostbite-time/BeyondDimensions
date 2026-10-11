@@ -52,8 +52,7 @@ internal class BdPreviewContent {
 
 /**
  * 颜色编辑器旁的预览：一个缩小的 BD 窗口，由界面里真实的控件组成，每种颜色都有地方显示。
- * 槽位依次是普通、悬停、标记、标记且悬停与空格；开关可以点。高度与真实的 BD 窗口相当：1080p 在自动界面缩放下，
- * 编辑器给预览的高度约 230，再矮时编辑器让它滚动。
+ * 槽位依次是普通、悬停、标记、标记且悬停与空格
  */
 @Composable
 internal fun BdPreview(content: BdPreviewContent) {
@@ -135,7 +134,7 @@ internal fun BdPreview(content: BdPreviewContent) {
     }
 }
 
-/** 与存储格子里的虚拟槽位画法相同：Ore 凹槽，标记槽铺强调色，数量标签与悬停角标 */
+/** 与存储格子里的虚拟槽位画法相同 */
 @Composable
 private fun PreviewSlot(icon: ItemIcon?, amount: String, marked: Boolean = false, hovered: Boolean = false) {
     val colors = Bd.colors

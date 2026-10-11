@@ -19,10 +19,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 
-/**
- * 网络接口：每行标记槽下方是对应的缓存槽，标记决定从网络中保持哪些资源；
- * 设置页是弹出模式（装在某些方块上时不可用）、红石控制与模糊匹配。
- */
+/** 网络接口：每行标记槽下方是对应的缓存槽，标记决定从网络中保持哪些资源 */
 class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: Component) :
     BdInventoryScreen<NetInterfaceBaseMenu, InterfaceState, InterfaceAction>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_INTERFACE.get()))

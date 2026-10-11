@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * 客户端判断按键后请求使用配置卡：pos 为空时作用于主手的物品机器（卡在副手），否则作用于该位置的方块机器（卡在主手）
+ * 请求使用配置卡：pos 为空时作用于主手的物品机器（卡在副手），否则作用于该位置的方块机器（卡在主手）
  */
 public record ConfigCardPacket(Operation operation, Optional<BlockPos> pos) implements CustomPacketPayload
 {

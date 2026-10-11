@@ -178,9 +178,8 @@ public abstract class NetedBlockEntity extends BlockEntity
     }
 
     /**
-     * 区块包与方块更新包带给客户端的数据，只含 {@link #saveClientData} 写出的字段，不是完整存档：
-     * 槽位等内容由各自的菜单同步，而整份存档可能大到让区块包超过协议上限。
-     * 在服务端执行：发区块给玩家时，以及 {@link #syncToClient} 之后发方块更新包时
+     * 区块包与方块更新包带给客户端的数据，只含 {@link #saveClientData} 写出的字段：
+     * 整份存档可能大到让区块包超过协议上限
      */
     @Override
     public final @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries)
@@ -215,8 +214,7 @@ public abstract class NetedBlockEntity extends BlockEntity
     }
 
     /**
-     * 在服务端执行：写出客户端需要读取的字段，区块包与方块更新包共用。只写客户端真正用到的数据；子类追加时先调用 super。
-     * 基类写出网络 id，供 Jade 在服务端数据到达前显示绑定状态
+     * 在服务端写出客户端需要读取的字段，区块包与方块更新包共用；子类追加时先调用 super
      */
     protected void saveClientData(CompoundTag tag, HolderLookup.Provider registries)
     {
@@ -224,8 +222,7 @@ public abstract class NetedBlockEntity extends BlockEntity
     }
 
     /**
-     * 在客户端执行：读入 {@link #saveClientData} 写出的字段。收到的不是完整存档，不要在这里调用 loadAdditional；
-     * 字段可能缺失，读取前先判断。子类追加时先调用 super
+     * 在客户端读入 {@link #saveClientData} 写出的字段。收到的不是完整存档，字段可能缺失；子类追加时先调用 super
      */
     protected void loadClientData(CompoundTag tag, HolderLookup.Provider registries)
     {
@@ -234,8 +231,7 @@ public abstract class NetedBlockEntity extends BlockEntity
     }
 
     /**
-     * 在服务端调用：{@link #saveClientData} 写出的数据改变后，把它发给附近的玩家。
-     * 只在客户端需要的数据改变时调用；只有服务端用到的数据改变时调用 setChanged 即可
+     * 在服务端调用：{@link #saveClientData} 写出的数据改变后，把它发给附近的玩家
      */
     protected final void syncToClient()
     {

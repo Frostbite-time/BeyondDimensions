@@ -34,7 +34,7 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 /**
- * 维度网络熔炉：九条产线的实时进度；设置由 MachineSettingsSync 统一同步与修改。
+ * 维度网络熔炉：九条产线的实时进度
  */
 public class NetFurnaceMenu extends BDBaseMenu implements MachineMenu
 {

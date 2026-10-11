@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-// 网络磁铁菜单：过滤槽与玩家背包；设置保存在物品上，由 MachineSettingsSync 统一同步与修改。
+// 网络磁铁菜单：过滤槽与玩家背包，设置保存在物品上
 public class NetMagnetMenu extends BDBaseMenu implements MachineMenu
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);

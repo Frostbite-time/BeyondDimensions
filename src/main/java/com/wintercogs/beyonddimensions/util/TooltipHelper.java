@@ -27,10 +27,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 搜索用的资源提示框缓存（仅客户端）。
- * <p>
- * 缓存与预取队列都有上限；延迟的预取请求不持有玩家或世界。
- * 切换世界、玩家、语言或重载资源后，整个缓存进入新的世代。
+ * 搜索用的资源提示框缓存（仅客户端）。切换世界、玩家、语言或重载资源后，整个缓存进入新的世代
  */
 @EventBusSubscriber(modid = BDConstants.MODID, value = Dist.CLIENT)
 public final class TooltipHelper

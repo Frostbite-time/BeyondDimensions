@@ -28,10 +28,7 @@ import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 import kotlin.math.ceil
 
-/**
- * 网络熔炉（也用于高炉与烟熏炉）：九列熔炼位与每列的进度图标、两侧的输入与燃料标记、返还容器与燃料储备，以及玩家背包；
- * 设置页是弹出产物、接收输入、自动整理与红石控制。
- */
+/** 网络熔炉（也用于高炉与烟熏炉）：九列熔炼位、两侧的输入与燃料标记、返还容器与燃料储备，以及玩家背包 */
 class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component) :
     BdInventoryScreen<NetFurnaceMenu, FurnaceState, FurnaceAction>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(menu.be?.blockState?.block ?: BDBlocks.NET_FURNACE_BLOCK.get()))
@@ -130,8 +127,8 @@ private const val CONDUIT_GAP = 2
 private const val LABEL = 11
 
 /**
- * 网络熔炉的主页面：左列是八个输入标记，最下方是返还容器的槽位；右列是八个燃料标记，最下方是燃料储备；
- * 中间九列熔炼位，下方是背包。每列原料下方的箭头随熔炼进度由上往下点亮，产物下方的火焰随剩余燃料由上往下熄灭。
+ * 网络熔炉的主页面：左列是输入标记与返还容器，右列是燃料标记与燃料储备，中间九列熔炼位，下方是背包。
+ * 每列的箭头随熔炼进度点亮，火焰随剩余燃料熄灭
  */
 @Composable
 private fun Furnace(
@@ -163,7 +160,7 @@ private fun Furnace(
     }
 }
 
-/** 一列八个标记槽，上方是列名，最下方隔开一个槽位：标记槽与熔炼位上沿对齐，最下方的槽位与快捷栏底边对齐 */
+/** 一列八个标记槽，上方是列名，最下方隔开一个槽位 */
 @Composable
 private fun FlagColumn(label: String, flags: List<Int>, last: Int, slots: ComposeMenuSlots<NetFurnaceMenu>) {
     // 中间一列：标题、两行槽位、导管与上下的空隙、火焰、背包（标题、三行加 3 的间隔再一行）
@@ -203,7 +200,7 @@ private fun LaneGlyphs(lanes: List<Lane>, glyph: @Composable (Lane, Int) -> Unit
     }
 }
 
-/** 动效的时钟：两秒一圈，从 0 走到 1。只在绘制时读取，动效只重绘、不重组 */
+/** 动效的时钟：两秒一圈，从 0 走到 1；只在绘制时读取 */
 @Composable
 private fun rememberFurnaceClock(): State<Float> =
     rememberInfiniteTransition(label = "furnace")
@@ -216,10 +213,7 @@ private val CONDUIT =
     listOf(0, 1, 3, 4, 6, 7, 9, 10).map { Triple(it, 7, 4) } +
             listOf(Triple(12, 5, 8), Triple(13, 6, 6), Triple(14, 7, 4), Triple(15, 8, 2))
 
-/**
- * 熔炼进度：分段的竖向导管接一个箭头尖，随进度由上往下点亮，颜色沿标志渐变由青到紫。
- * 熔炼时一道亮光沿点亮的部分向下流动，每秒一趟。按格绘制，一格一像素。
- */
+/** 熔炼进度：分段的竖向导管接一个箭头尖，随进度由上往下点亮；熔炼时一道亮光沿点亮的部分向下流动 */
 @Composable
 private fun CookConduit(progress: Float, clock: State<Float>?) {
     val colors = Bd.colors
@@ -257,10 +251,7 @@ private const val FLICKER_FRAMES = 20
 private val FLICKER = intArrayOf(0, 1, 0, 2, 1, 0, 0, 1, 2, 1, 0, 1, 0, 0, 2, 1, 1, 0, 1, 0)
 private val SWAY = intArrayOf(0, 1, 0, -1, 0, 0, 1, 0, -1, -1, 0, 1, 0, 0, -1, 0, 1, 1, 0, -1)
 
-/**
- * 剩余燃料：三簇火苗，焰心、中焰与外焰三层颜色取自主题。燃烧时火苗高低起伏、火尖摆动，各簇与各列节奏错开；
- * 燃料用掉的部分由上往下变暗，剩得再少也亮一行。没有燃料时整团火焰暗着、不动。
- */
+/** 剩余燃料：三簇火苗，燃烧时高低起伏；燃料用掉的部分由上往下变暗，剩得再少也亮一行 */
 @Composable
 internal fun Flames(fuel: Float, lane: Int, clock: State<Float>?) {
     val colors = Bd.colors
@@ -277,7 +268,7 @@ internal fun Flames(fuel: Float, lane: Int, clock: State<Float>?) {
             val core = (height + 1) / 2
             for (row in 0 until height) { // 第 0 行在最下面
                 val fromTop = height - 1 - row
-                // 越往上越窄，收成一格的火尖；收窄的几行随摆动偏向一侧，火尖偏得最多
+                // 越往上越窄，收成一格的火尖；收窄的几行随摆动偏向一侧
                 val width = minOf(tongue.width, 1 + fromTop * tongue.width / 3)
                 val slack = tongue.width - width
                 val start = tongue.left + ((slack + sway * (if (fromTop == 0) 2 else 1)) / 2).coerceIn(0, slack)

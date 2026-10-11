@@ -12,10 +12,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.*
 
-/**
- * 存储界面的一个分类标签。规则是搜索式与特定补充：符合 [search] 或在 [keys] 里的资源属于这个分类；
- * 两者都没有时包含全部资源，例如默认的"全部"。
- */
+/** 存储界面的一个分类标签：符合 [search] 或在 [keys] 里的资源属于这个分类，两者都没有时包含全部资源 */
 data class StorageCategory(
     val name: String,
     val icon: IStackKey<*>? = null,
@@ -24,8 +21,8 @@ data class StorageCategory(
 )
 
 /**
- * 分类标签保存在客户端，跟随玩家：每个玩家一套，在任何网络里打开存储都能用。
- * 文件是 config/beyonddimensions/storage_categories.json，按玩家 UUID 分开；在游戏线程读写
+ * 分类标签保存在客户端，每个玩家一套，在任何网络里打开存储都能用。
+ * 文件是 config/beyonddimensions/storage_categories.json；在游戏线程读写
  */
 object StorageCategories {
     private const val FORMAT = 1
@@ -47,7 +44,7 @@ object StorageCategories {
             else listOf(StorageCategory(I18n.get("ui.beyonddimensions.storage.all")))
         }
 
-    /** 改动玩家的分类：之后在本次游戏里打开存储都用它，写进文件要再调用 [save] */
+    /** 改动玩家的分类；写进文件要再调用 [save] */
     fun update(player: UUID, categories: List<StorageCategory>) {
         loaded[player] = categories
     }

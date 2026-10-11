@@ -15,10 +15,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * 机器的一项设置，注册到 {@link BDRegistries#MACHINE_SETTING_KEY}：值的类型与编解码器、默认值、显示文字与编辑声明，
- * 以及旧版本存档里的写法。机器类型（{@link MachineType}）列出自己用到的设置，设置页、同步与配置卡都由此生成
- * <p>
- * 值应为不可变对象，编解码器不应依赖注册表上下文：设置还会随菜单同步与配置卡传输
+ * 机器的一项设置，注册到 {@link BDRegistries#MACHINE_SETTING_KEY}：值的类型与编解码器、默认值、显示文字与编辑声明。
+ * 值应为不可变对象，编解码器不应依赖注册表上下文
  */
 public final class MachineSetting<T>
 {

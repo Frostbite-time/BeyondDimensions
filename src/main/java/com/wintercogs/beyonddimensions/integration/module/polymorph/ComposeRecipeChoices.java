@@ -14,8 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 通过 Polymorph 的公开接口为合成格提供可选配方（仅客户端，仅在 Polymorph 已加载时使用）。
- * 合成格内容不变时复用上一次的结果。
+ * 通过 Polymorph 的公开接口为合成格提供可选配方；合成格内容不变时复用上一次的结果
  */
 public final class ComposeRecipeChoices
 {

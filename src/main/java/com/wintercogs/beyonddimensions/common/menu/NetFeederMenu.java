@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * 网络喂食器：食物过滤槽与玩家背包；设置保存在物品上，由 MachineSettingsSync 统一同步与修改。
+ * 网络喂食器：食物过滤槽与玩家背包，设置保存在物品上
  */
 public class NetFeederMenu extends BDBaseMenu implements MachineMenu
 {

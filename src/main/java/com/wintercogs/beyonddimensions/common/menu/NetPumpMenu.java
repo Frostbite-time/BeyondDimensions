@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 /**
- * 维度网络泵：过滤槽与玩家背包；设置由 MachineSettingsSync 统一同步与修改。
+ * 维度网络泵：过滤槽与玩家背包
  */
 public class NetPumpMenu extends BDBaseMenu implements MachineMenu
 {

@@ -35,10 +35,7 @@ data class CategoryTab(val name: String, val icon: ItemIcon?)
 /** 分类编辑区里的一个特定补充 */
 data class CategoryKey(val icon: ItemIcon, val name: String)
 
-/**
- * 分类编辑区：正在编辑第 [index] 个分类。[inspected] 是列出写法的特定补充（没有选中时为图标），
- * [chips] 是它的模组、标签、耐久与额外组件写法，点击加入搜索式
- */
+/** 分类编辑区：正在编辑第 [index] 个分类。[inspected] 是选中的特定补充，[chips] 是它能加入搜索式的写法 */
 data class CategoryEditor(
     val index: Int,
     val name: String,
@@ -127,9 +124,7 @@ sealed interface StorageAction {
     /** 左键把手上的物品设为图标，右键清除 */
     data class CategoryIcon(val right: Boolean) : StorageAction
 
-    /**
-     * 点击第 [index] 个特定补充：左键列出它的写法，右键移除。点末尾的空格时，左键加入手上的物品，右键加入手上容器的内容物
-     */
+    /** 点击第 [index] 个特定补充：左键列出它的写法，右键移除；点末尾的空格是加入手上的物品或容器的内容物 */
     data class CategoryKeyClick(val index: Int, val right: Boolean) : StorageAction
 
     /** 把一个写法加入搜索式：按住 Shift 时与已有条件同时符合，否则符合其一即可 */
@@ -376,7 +371,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
         }
     }
 
-    /** 合成格的偏好由服务器保存在玩家身上，关闭菜单时按它保留或退回；只有合成菜单接收 */
+    /** 合成格的偏好由服务器保存在玩家身上；只有合成菜单接收 */
     private fun sendCraftPreference() {
         if (craftMenu == null) return
         menu.commands().preference(
@@ -427,16 +422,13 @@ class StorageController(private val menu: DimensionsNetMenu) {
     private fun slotMenuState(): SlotMenu? {
         val target = menuTarget ?: return null
         val key = target.key
-        // 数量以打开菜单时为准；服务器按实际库存取出，取不足时只取到现有的数量
+        // 数量以打开菜单时为准，服务器按实际库存取出
         val takeable =
             if (key is ItemStackKey) minOf(target.amount, key.copyStack().maxStackSize.toLong()).toInt() else 0
         return SlotMenu(menuSerial, nameOf(key), takeable, categories.map { it.name })
     }
 
-    /**
-     * 编辑区：编辑的分类与当前打开的分类无关，可以一边看着别的分类一边写规则。
-     * 符合的种数在分类或存储种数变化时重算，否则每秒最多一次；快照除了每刻一次，输入事件处理完动作后也会再取
-     */
+    /** 编辑区：编辑的分类与当前打开的分类无关。符合的种数在分类或存储种数变化时重算，否则每秒最多一次 */
     private fun editorState(stored: Int): CategoryEditor? {
         val category = categories.getOrNull(editing) ?: return null
         val now = Util.getMillis()
@@ -583,7 +575,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
         if (selected >= 0) StorageCategories.selected[player] = selected
     }
 
-    /** 菜单关闭或分类停止改动一会儿后再写文件：输入名称或搜索式时不必每个字都写一次，游戏线程也不会因写盘卡顿 */
+    /** 菜单关闭或分类停止改动一会儿后再写文件，不必每个字都写一次 */
     fun tick() {
         if (unsavedSince != 0L && Util.getMillis() - unsavedSince >= SAVE_DELAY_MILLIS) saveNow()
     }
@@ -615,7 +607,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
         PacketDistributor.sendToServer(OpenNetGuiPacket(menu.player.stringUUID, target))
     }
 
-    // 只需记下滚动位置：服务器直接换菜单（见 SwitchMenuProvider），指针留在原处
+    // 服务器直接换菜单（见 SwitchMenuProvider），指针留在原处，只需记下滚动位置
     private fun saveTransferContext() {
         UIDataHelper.currentPage = menu.lineData
         UIDataHelper.isTransfer = true

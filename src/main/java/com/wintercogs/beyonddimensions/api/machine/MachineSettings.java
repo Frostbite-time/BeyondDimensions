@@ -16,9 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 一台机器的设置值，不可变：修改得到新的对象。没有存过的设置取它的默认值
- * <p>
- * 存档里认不出（设置未注册，例如附属已移除）或解析不了的设置原样保留并写回，不会被丢弃
+ * 一台机器的设置值，不可变。没有存过的设置取默认值；认不出或解析不了的设置原样保留并写回
  */
 public final class MachineSettings
 {

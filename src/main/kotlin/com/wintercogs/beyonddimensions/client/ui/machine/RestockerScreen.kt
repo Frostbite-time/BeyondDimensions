@@ -20,7 +20,7 @@ import net.minecraft.world.item.ItemStack
 
 /**
  * 网络补货器：补货模板与玩家背包；设置页是总开关、模糊匹配与回收多余物品。
- * 模板与玩家背包一一对应：模板 0–8 是快捷栏，9–35 是主背包，36–40 是盔甲与副手，所以按背包的排布显示。
+ * 模板与玩家背包一一对应，所以按背包的排布显示
  */
 class RestockerScreen(menu: NetRestockerMenu, inventory: Inventory, title: Component) :
     BdInventoryScreen<NetRestockerMenu, RestockerState, RestockerAction>(menu, title) {

@@ -48,7 +48,7 @@ public abstract class BaseMachineBlockEntity extends NetedBlockEntity implements
     }
 
     /**
-     * 设置改变之后：标记保存。客户端不读取设置（设置页由菜单同步），不必发方块更新；子类可以追加，例如刷新能力
+     * 设置改变之后标记保存；子类可以追加，例如刷新能力
      */
     protected void onSettingsChanged()
     {
@@ -101,7 +101,7 @@ public abstract class BaseMachineBlockEntity extends NetedBlockEntity implements
     }
 
     /**
-     * 读出机器的设置：新存档在 settings 下；旧存档每项设置是一个独立的键，按设置登记的旧写法读出，读不出的取默认值
+     * 读出机器的设置：新存档在 settings 下，旧存档按设置登记的旧写法读出
      */
     public static MachineSettings readSettings(MachineType type, CompoundTag tag)
     {

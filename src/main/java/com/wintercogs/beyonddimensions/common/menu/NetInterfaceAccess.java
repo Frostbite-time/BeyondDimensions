@@ -24,7 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 
 /**
- * 网络接口：方块，以及 Create 动态结构里的接口。设置按网络接口的机器类型保存，配置卡连同标记槽一起复制
+ * 网络接口：方块，以及 Create 动态结构里的接口
  */
 public interface NetInterfaceAccess extends Machine
 {

@@ -11,7 +11,7 @@ import com.wintercogs.beyonddimensions.client.ui.kit.BdToggle
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync
 import net.minecraft.resources.ResourceLocation
 
-/** 设置页的一行：文字已经翻译好，值已经对应到控件，由游戏线程按机器类型生成 */
+/** 设置页的一行，由游戏线程按机器类型生成 */
 data class MachineSettingRow(
     val setting: ResourceLocation,
     val title: String,
@@ -69,7 +69,7 @@ private fun <T> settingRow(entry: MachineType.Entry<T>, snapshot: MachineSetting
     }
 }
 
-/** 机器的设置页：每项设置按自己的编辑声明显示成一行；[shown] 为 false 时设置页正在淡出，控件不再响应 */
+/** 机器的设置页，每项设置一行；[shown] 为 false 时控件不响应 */
 @Composable
 fun BdMachineSettings(rows: List<MachineSettingRow>, shown: Boolean, onPick: (MachineSettingPick) -> Unit) {
     for (row in rows) key(row.setting) {

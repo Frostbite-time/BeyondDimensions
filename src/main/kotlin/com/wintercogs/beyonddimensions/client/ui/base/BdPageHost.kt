@@ -34,10 +34,8 @@ class BdPageSelection {
 fun rememberPageSelection() = remember { BdPageSelection() }
 
 /**
- * 一个界面上由附属模组注入的页。界面构造时按菜单找出注册的页，在游戏线程取快照、处理动作，
- * 在界面的竖条上用 [InjectedTabs] 画页签，在页面区用 [InjectedPages] 画页面。
- *
- * 每页一条 [UiBinding]：在游戏线程构造、更新与关闭，Compose 线程只读状态、送动作
+ * 一个界面上由附属模组注入的页：在游戏线程取快照、处理动作，
+ * 用 [InjectedTabs] 画页签、[InjectedPages] 画页面
  */
 class BdPageHost<M : AbstractContainerMenu>(
     menu: M,
@@ -123,6 +121,6 @@ class BdPageHost<M : AbstractContainerMenu>(
 @Composable
 fun InjectedTabs(host: BdPageHost<*>, selection: BdPageSelection) = host.Tabs(selection)
 
-/** 注入页的页面，放在 [com.wintercogs.beyonddimensions.client.ui.kit.BdTabbedWindow] 的页面区里 */
+/** 注入页的页面 */
 @Composable
 fun BoxScope.InjectedPages(host: BdPageHost<*>, selection: BdPageSelection) = with(host) { Pages(selection) }

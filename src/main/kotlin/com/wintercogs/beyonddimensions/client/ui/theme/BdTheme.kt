@@ -22,10 +22,8 @@ import dev.compixel.ui.theme.SchemeOwner
 import dev.compixel.ui.theme.colors
 
 /**
- * 超越维度的界面风格：深色半透明的玻璃面板透出背后的游戏画面，配一像素的浅色细线、青色强调色，以及由青到紫的标志渐变。
- *
- * 颜色由 [BdColors] 声明，来自玩家选的配色（assets/beyonddimensions/compixel/schemes/ 下的文件，资源包可以覆盖或增加），
- * 玩家在 CompixelUI 颜色编辑器里的修改叠在最上面。读取：`Bd.colors[BdColors.window]`。
+ * 超越维度的界面风格：深色半透明的玻璃面板，配一像素的浅色细线、青色强调色与由青到紫的标志渐变。
+ * 颜色由 [BdColors] 声明，来自玩家选的配色与颜色编辑器里的修改。读取：`Bd.colors[BdColors.window]`
  */
 object Bd {
     /** 控件切角的边长 */
@@ -34,10 +32,7 @@ object Bd {
     /** 控件的外形：左上与右下切角 */
     val ChipShape = CutCornerShape(topStart = CHIP_CUT.dp, bottomEnd = CHIP_CUT.dp)
 
-    /**
-     * [ChipShape] 一像素边框以内的外形，切角正好沿边框斜边的内沿（3 − 2 + √2）。
-     * 带边框的控件里有自己底色的子项时，内容先留出一像素再按它裁剪，子项不会盖住边框
-     */
+    /** [ChipShape] 一像素边框以内的外形：带边框的控件里有自己底色的子项时按它裁剪，子项不会盖住边框 */
     val ChipInnerShape = CutCornerShape(topStart = 2.41.dp, bottomEnd = 2.41.dp)
 
     val colors: ColorValues
@@ -56,14 +51,14 @@ object Bd {
     val overline: TextStyle
         @Composable get() = OreTheme.typography.caption
 
-    /** 6sp 的 Monocraft：一个字体像素是 2/3 个界面单位，数字约为原版字体的三分之二大 */
+    /** 6sp 的 Monocraft：数字约为原版字体的三分之二大 */
     val amount: TextStyle
         @Composable get() = OreTheme.typography.body.copy(fontSize = 6.sp, lineHeight = 8.sp)
 }
 
 /**
- * BD 界面的全部颜色，默认值是玻璃配色。编辑器按这里的分组与先后列出颜色，名称取自语言文件的 color.beyonddimensions.<键>。
- * 强调底色、标志渐变的起点、文字选区与悬停槽位默认跟随别的颜色，配色文件也可以单独指定。
+ * BD 界面的全部颜色，默认值是玻璃配色。编辑器按这里的分组与先后列出颜色，
+ * 名称取自语言文件的 color.beyonddimensions.<键>
  */
 object BdColors : ColorSchema("beyonddimensions") {
     val window = color("window", "window", Color(0xC70C1018))
@@ -107,7 +102,7 @@ object BdColors : ColorSchema("beyonddimensions") {
     /** 格子数量标签的底色 */
     val pill = color("pill", "slots", Color.Transparent)
 
-    /** 格子数量的文字与它右下一个字体像素处的投影；默认是白字与蓝灰色投影，在任何物品上都看得清 */
+    /** 格子数量的文字与它右下一个字体像素处的投影 */
     val amount = color("amount", "slots", Color.White)
     val amountShadow = color("amountShadow", "slots", Color(0xFF413F54))
 
@@ -137,10 +132,7 @@ val ColorValues.signatureVertical: Brush
 
 val LocalBdColors = staticCompositionLocalOf { BdColors.defaults }
 
-/**
- * BD 界面的设计：提供玩家所选配色的 BD 颜色与文本框的右键菜单，并按 BD 的颜色为其中的 Ore 控件配色。
- * 配色或颜色变化时，打开着的 BD 界面就地换色，输入的文字、滚动位置等都保留。
- */
+/** BD 界面的设计：提供玩家所选配色的 BD 颜色与文本框的右键菜单，并按 BD 的颜色为其中的 Ore 控件配色 */
 object BdDesign : UiDesign {
     override val owner = SchemeOwner("beyonddimensions", BdColors, default = "glass")
 
@@ -163,10 +155,7 @@ object BdDesign : UiDesign {
     }
 }
 
-/**
- * BD 界面里 Ore 控件的颜色，全部由 BD 的颜色推出，Ore 自己的配色不参与。BD 用到的 Ore 控件是槽位凹槽（虚拟槽位与原版槽位），
- * 这里也给出其他 Ore 控件会用到的基本颜色；其余是 Ore 的默认值，或跟随这些颜色。
- */
+/** BD 界面里 Ore 控件的颜色，全部由 BD 的颜色推出，Ore 自己的配色不参与 */
 private fun ColorValues.ore() =
     OreColors.values(
         OreColors.backdrop to this[BdColors.backdrop],
@@ -189,10 +178,7 @@ private fun ColorValues.ore() =
         OreColors.selection to this[BdColors.selection],
     )
 
-/**
- * 沿用 Ore 的 Compixel 字体，正文改为 9sp：此时 Monocraft 的一个像素正好对应一个界面像素，
- * 中文等 Unifont 字符是半个像素，和原版一样。
- */
+/** 沿用 Ore 的 Compixel 字体，正文为 9sp：Monocraft 的一个像素正好对应一个界面像素 */
 private val BdTypography by lazy {
     val body = OreTypography().body.copy(fontSize = 9.sp, lineHeight = 11.sp)
     OreTypography(body = body, title = body.copy(fontSize = 10.sp, lineHeight = 13.sp), caption = body)

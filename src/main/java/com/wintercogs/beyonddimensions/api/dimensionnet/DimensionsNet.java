@@ -682,7 +682,7 @@ public class DimensionsNet extends SavedData
         }
     }
 
-    // 合并网络时并入对方的挂接数据：两边都有时按类型声明的方式合并，对方未注册或隔离中的数据原样带过来
+    // 合并网络时并入对方的挂接数据，两边都有时按类型声明的方式合并
     private void absorbAttachments(DimensionsNet other)
     {
         for (Map.Entry<NetDataType<?>, Object> entry : other.attachments.entrySet())
@@ -1008,7 +1008,7 @@ public class DimensionsNet extends SavedData
             else if (entry.getValue().level() == NetPermissionlevel.Member)
                 addPlayer(entry.getKey());
         }
-        // 合并统一存储系统：原样并入，不受容量与种类上限约束，被合并网络的资源不会因放不下而随它销毁
+        // 合并统一存储：原样并入，不受容量与种类上限约束
         for (KeyAmount stack : otherNet.getUnifiedStorage().getStorage())
         {
             unifiedStorage.restore(stack.key(), stack.amount());

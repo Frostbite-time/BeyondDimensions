@@ -18,7 +18,7 @@ import dev.compixel.host.ScreenTransition
 import kotlin.math.roundToInt
 
 /*
- * 参照基岩版的容器界面：打开时窗口从屏幕下方先快后慢地滑上来并淡入，背景同时变暗、变模糊；关闭时先慢后快地滑下去并淡出。
+ * 窗口的进退场：打开时从屏幕下方滑上来并淡入，背景同时变暗、变模糊；关闭时滑下去并淡出。
  * 关闭时玩家立即拿回操作，退场由 CompixelUI 在游戏画面上播完。
  */
 private const val OPEN_MILLIS = 180
@@ -28,10 +28,8 @@ private const val EXIT_MILLIS = 180
 private const val RISE_OF_SCREEN = 0.25f
 
 /**
- * 所有 BD 界面的骨架：变暗、模糊的背景（模糊见 [BdBackdrop]）与居中的窗口一起淡入淡出，窗口同时从下方升起、退场时滑回下方。
- * 滑动在布局阶段移动窗口，原生槽位的命中区域随之更新，动画中途也能点准。
- *
- * [window] 收到可用的屏幕尺寸，用来决定窗口大小；它的 BoxScope 就是窗口本身的范围。
+ * 所有 BD 界面的骨架：变暗、模糊的背景与居中的窗口一起进退场。
+ * 滑动在布局阶段移动窗口，原生槽位的命中区域随之更新。[window] 收到可用的屏幕尺寸，用来决定窗口大小
  */
 @Composable
 fun BdScreenFrame(window: @Composable BoxScope.(available: DpSize) -> Unit) =

@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * 配置卡的按键与提示：使用键按下时代替原版的交互，按住 Ctrl 指着方块机器时框出粘贴会作用到的全部机器
+ * 配置卡的按键与提示：按住 Ctrl 指着方块机器时框出粘贴会作用到的全部机器
  */
 @EventBusSubscriber(modid = BDConstants.MODID, value = Dist.CLIENT)
 public class ConfigCardListener

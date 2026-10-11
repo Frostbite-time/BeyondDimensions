@@ -62,14 +62,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-/** 窗口：深色半透明的玻璃面板加一像素细线框，透出背后模糊的游戏画面；高度随内容 */
+/** 窗口：玻璃面板加一像素细线框，高度随内容 */
 @Composable
 fun BdWindow(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = Bd.colors
     Column(modifier.background(colors[BdColors.window]).border(1.dp, colors[BdColors.line]), content = content)
 }
 
-/** 窗口标题栏：设备图标、模组名与标题，右侧是关闭按钮，以及界面能打开 CompixelUI 颜色编辑器时的调色板按钮 */
+/** 窗口标题栏：图标、模组名与标题，右侧是调色板与关闭按钮 */
 @Composable
 fun BdHeader(icon: ItemIcon?, title: String, onClose: () -> Unit, tag: String? = null) {
     val openColorEditor = LocalColorEditor.current
@@ -202,7 +202,7 @@ fun Modifier.brackets(color: Color, arm: Dp = 4.dp, stroke: Dp = 1.dp): Modifier
     drawRect(color, Offset(w - s, h - a), Size(s, a))
 }
 
-/** 可点击的 BD 控件：与 Ore 控件一样，点击后发出原版的点击声 */
+/** 可点击的 BD 控件，点击后发出原版的点击声 */
 @Composable
 fun Modifier.bdClickable(
     interaction: MutableInteractionSource,
@@ -216,10 +216,7 @@ fun Modifier.bdClickable(
     }
 }
 
-/**
- * 数量标签：像原版的物品数量那样，白字下面右下错开一个字体像素是一层深色投影，在亮色或暗色的物品上都看得清。
- * 文字与投影取自配色的 amount 与 amountShadow，底板是 pill 色（默认透明）
- */
+/** 数量标签：像原版的物品数量那样带一层错开的投影，颜色取自配色的 amount、amountShadow 与 pill */
 @Composable
 fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
     val colors = Bd.colors
@@ -232,7 +229,7 @@ fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
     ) {
         BasicText(
             remember(text) { narrowDots(text) },
-            // 投影不模糊：像原版文字那样是一份错开的实心字
+            // 投影是一份错开的实心字，不模糊
             style = Bd.amount.copy(
                 color = colors[BdColors.amount],
                 shadow = Shadow(colors[BdColors.amountShadow], Offset(shadow, shadow), 0f),
@@ -245,8 +242,7 @@ fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
 /** [Bd.amount] 的一个字体像素 */
 private val AMOUNT_FONT_PIXEL = (2f / 3f).dp
 
-// 字体里每个字符都占 6 个字体像素宽，小数点只在格子中间画一点；原版字体的小数点只占 2 个像素宽。
-// 把小数点与它前一个字符各收紧 2 个像素，点的位置与总宽度就和原版一样，例如 "1.2K" 宽 19 个像素
+// 这个字体的小数点占 6 个像素宽，原版只占 2 个：把小数点与它前一个字符各收紧 2 个像素
 private val NARROW = SpanStyle(letterSpacing = (-2f / 9f).em)
 
 private fun narrowDots(text: String) = buildAnnotatedString {
@@ -255,10 +251,7 @@ private fun narrowDots(text: String) = buildAnnotatedString {
     }
 }
 
-/**
- * 单行搜索框。像原版的搜索框一样右键清空，这一下不弹出右键菜单：清空之后菜单里的剪切、复制已没有对象。
- * [help] 是悬停时的说明，开始输入后收起，免得挡住下方的内容。
- */
+/** 单行搜索框，右键清空。[help] 是悬停时的说明，开始输入后收起 */
 @Composable
 fun BdSearchField(
     value: String,
@@ -291,7 +284,7 @@ fun BdTextField(
                 PointerEventType.Press,
                 PointerEventPass.Initial,
             ) {
-                // 先于文本框处理并吞掉右键：文本框不会选词、也不会打开右键菜单
+                // 先于文本框处理并吞掉右键
                 if (it.buttons.isSecondaryPressed) {
                     onValueChange("")
                     it.changes.forEach { change -> change.consume() }
@@ -341,8 +334,8 @@ fun BdTextField(
 }
 
 /**
- * 多行文本框：外观同 [BdTextField]，长文字自动换行，至少 [minLines] 行，超过 [maxLines] 行时在框内滚动。
- * 右键是剪切、复制、粘贴的菜单而不是清空，长文字不会被一下清掉。[help] 是悬停时的说明，开始输入后收起
+ * 多行文本框：外观同 [BdTextField]，至少 [minLines] 行，超过 [maxLines] 行时在框内滚动。
+ * 右键是剪切、复制、粘贴的菜单；[help] 是悬停时的说明
  */
 @Composable
 fun BdTextArea(
@@ -426,7 +419,7 @@ fun BdChip(
 
 private data class BdSegmentBounds(val left: Dp, val width: Dp)
 
-/** 互斥的模式：白色选中框随选项切换平滑移动，同时适应选项宽度 */
+/** 互斥的模式：选中框随选项切换平滑移动 */
 @Composable
 fun BdSegmented(
     options: List<String>,
@@ -518,10 +511,7 @@ fun BdSegmented(
     }
 }
 
-/**
- * 开关：细线框的深色轨道里一个小方块。关闭时方块在左侧、是灰色；开启时轨道染上一层强调色、边框变为强调色，
- * 方块移到右侧并亮起。位置与颜色一起过渡。
- */
+/** 开关：轨道里一个小方块，开启时移到右侧并染上强调色 */
 @Composable
 fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Boolean = true) {
     val colors = Bd.colors
@@ -569,8 +559,8 @@ fun BdSettingRow(title: String, description: String? = null, control: @Composabl
 }
 
 /**
- * 一组互斥模式：标题在上，下面是占满宽度的分段按钮；选项多或文字长时用 [cycle] 改为左右切换。
- * [description] 是当前选项的说明，显示在最下方。
+ * 一组互斥模式：标题在上，下面是分段按钮；[cycle] 为真时改为左右切换。
+ * [description] 是当前选项的说明
  */
 @Composable
 fun BdModeSetting(
@@ -634,7 +624,7 @@ private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onS
     }
 }
 
-/** 纵向内容：放不下时可滚动，右侧出现与存储格子相同的细滚动条 */
+/** 纵向内容：放不下时可滚动，右侧出现细滚动条 */
 @Composable
 fun BdScrollColumn(
     modifier: Modifier = Modifier,
@@ -651,7 +641,7 @@ fun BdScrollColumn(
             verticalArrangement = verticalArrangement,
             content = content,
         )
-        // 滚动条只跟随内容的高度，不参与测量，不会把容器撑到最大高度
+        // 滚动条不参与测量，不会把容器撑到最大高度
         if (scrollable) {
             Box(Modifier.matchParentSize(), contentAlignment = Alignment.TopEnd) {
                 BdScrollbar(scroll, Modifier.width(SCROLLBAR_WIDTH.dp).fillMaxHeight())
@@ -689,7 +679,7 @@ fun BdMeter(fraction: Float, modifier: Modifier, cell: Dp = 3.dp) {
 /** 细滚动条的宽度；内容与它之间另留 2 */
 const val SCROLLBAR_WIDTH = 5
 
-/** 按行滚动的细滚动条，例如存储格子。[first] 是第一个可见行，[visible] 与 [total] 为可见行数与总行数 */
+/** 按行滚动的细滚动条：[first] 是第一个可见行，[visible] 与 [total] 为可见行数与总行数 */
 @Composable
 fun BdScrollbar(first: Int, visible: Int, total: Int, onScrollTo: (Int) -> Unit, modifier: Modifier = Modifier) {
     val maxFirst = (total - visible).coerceAtLeast(0)
@@ -720,11 +710,9 @@ fun BdScrollbar(state: ScrollState, modifier: Modifier = Modifier) {
 }
 
 /**
- * 两种滚动条共用的外观与操作：一像素细线框的深色凹槽里，一条标志渐变的平直滑块，长度对应可见的比例，至少 12。
- * 点击或拖动轨道时，滑块中心跳到指针处；[onScrollTo] 收到 0 到 1 之间的位置。
- *
- * 滑块按轨道的实际高度在绘制时算出，不用 BoxWithConstraints：浮层按内容的固有宽度定宽，
- * 而子组合布局不支持固有尺寸的测量，浮层里的列表一出现滚动条就会崩溃
+ * 两种滚动条共用的外观与操作：凹槽里一条标志渐变的滑块，长度对应可见的比例。
+ * 点击或拖动轨道时滑块中心跳到指针处，[onScrollTo] 收到 0 到 1 之间的位置。
+ * 滑块在绘制时按轨道的实际高度算出：浮层里的子组合布局不支持固有尺寸的测量，不能用 BoxWithConstraints
  */
 @Composable
 private fun BdScrollbarTrack(
@@ -760,13 +748,12 @@ private fun BdScrollbarTrack(
     )
 }
 
-/** 停止输入多久后自动提交：连续输入时不把中间值逐个发出去，输完直接关闭界面也不会丢 */
+/** 停止输入多久后自动提交 */
 private const val NUMBER_COMMIT_MILLIS = 800L
 
 /**
- * 整数编辑器：减号、可输入的数字与加号，参照 Ore 的数字编辑器。
- * 按钮、上下方向键与滚轮立即改值，按住 Shift 或 Ctrl 时每次改 10 或 100。
- * 输入的数字在回车、失去焦点或停止输入片刻后提交，超出范围的收回到边界；Esc 放弃这次输入。
+ * 整数编辑器：减号、可输入的数字与加号。按钮、方向键与滚轮立即改值，按住 Shift 或 Ctrl 时每次改 10 或 100；
+ * 输入的数字在回车、失去焦点或停止输入片刻后提交，Esc 放弃
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

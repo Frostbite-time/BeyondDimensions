@@ -119,7 +119,7 @@ public class NetInterfaceBaseMenu extends BDBaseMenu implements MachineMenu
         return new NetInterfaceBaseMenu(id, playerInventory, new ClientAccess(data));
     }
 
-    // 打开数据只携带槽位结构，资源内容与设置（包括较大的 NBT）由菜单同步负责
+    // 打开数据只携带槽位结构，资源内容与设置由菜单同步负责
     public static void writeMountedOpeningData(FriendlyByteBuf data, NetInterfaceAccess access)
     {
         data.writeBoolean(true);

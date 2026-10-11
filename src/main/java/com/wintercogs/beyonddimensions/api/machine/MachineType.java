@@ -80,7 +80,7 @@ public final class MachineType
     }
 
     /**
-     * 机器类型里的一项设置；可以替换设置自带的文字与编辑声明，例如同一项设置在不同机器上的说明不同
+     * 机器类型里的一项设置；可以替换设置自带的文字与编辑声明
      */
     public static final class Entry<T>
     {
@@ -181,7 +181,7 @@ public final class MachineType
         }
 
         /**
-         * 在设置自带的编辑声明上修改，例如换一套选项说明。首次用到时才调用，此时设置已经注册
+         * 在设置自带的编辑声明上修改；首次用到时才调用
          */
         public EntryBuilder<T> editor(UnaryOperator<SettingEditor<T>> override)
         {

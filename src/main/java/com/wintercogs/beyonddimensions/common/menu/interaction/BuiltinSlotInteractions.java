@@ -31,9 +31,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * BD 内置的槽位交互，按尝试顺序注册：标记槽、整批转移（空格左键，以及背包槽与有序槽上的 Shift 双击）、有序槽的同种合并、
- * 经验棒、桶、带能力的容器、取出、有序槽的交换、存入兜底，最后是 Shift 转移。除标记槽外，按住 Shift 的点击只走转移。
- * 整批转移都沿用 Shift 转移的路线，标记槽与存储网格的双击没有特殊处理
+ * BD 内置的槽位交互，按尝试顺序注册。除标记槽外，按住 Shift 的点击只走转移
  */
 final class BuiltinSlotInteractions
 {

@@ -7,10 +7,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 物品机器：设置保存在物品堆叠的 {@link BDDataComponents#MACHINE_SETTINGS} 组件上。
- * 用 {@link #machine} 得到这个堆叠对应的 {@link Machine}，设置页与配置卡都经它操作
- * <p>
- * 有更多配置的物品机器重写 {@link #exportConfig} 与 {@link #applyConfig}，先调用默认实现，再写入或读回自己的数据
+ * 物品机器：设置保存在物品堆叠的 {@link BDDataComponents#MACHINE_SETTINGS} 组件上，
+ * 用 {@link #machine} 得到对应的 {@link Machine}
  */
 public interface MachineItem
 {

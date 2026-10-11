@@ -11,9 +11,8 @@ import java.util.concurrent.CopyOnWriteArrayList
 interface BdScreen
 
 /**
- * 窗口背后的模糊：像原版菜单一样按“菜单背景模糊度”模糊整个游戏画面，这项设置关闭时不模糊。
- * 强度跟随 [BdScreenFrame] 的进退场：打开时随窗口淡入；关闭后 CompixelUI 还在游戏画面上播放退场，
- * 这段时间由 [layer] 继续模糊，随退场减弱。
+ * 窗口背后的模糊：按原版的“菜单背景模糊度”模糊整个游戏画面，强度跟随 [BdScreenFrame] 的进退场。
+ * 界面关闭后的退场期间由 [layer] 继续模糊
  */
 object BdBackdrop {
     /** 一个界面框架的进退场，由 Compose 线程写入、游戏线程读取 */
@@ -43,14 +42,11 @@ object BdBackdrop {
         }
     }
 
-    /** BD 界面在绘制自己之前调用；从一个 BD 界面换到另一个时，旧界面的退场与新界面的进场取较强的一方 */
+    /** BD 界面在绘制自己之前调用；两个界面交替时取较强的一方 */
     fun behindScreen(graphics: GuiGraphics, partialTick: Float) =
         blur(graphics, partialTick, frames.maxOfOrNull { it.visibility } ?: 0f)
 
-    /**
-     * 放在 CompixelUI 的退场层之下：BD 界面关闭后、退场播放期间继续模糊。
-     * 被配方查看器等界面覆盖的 BD 界面不在退场，不参与。
-     */
+    /** 放在 CompixelUI 的退场层之下：BD 界面关闭后的退场期间继续模糊 */
     val layer = LayeredDraw.Layer { graphics, deltaTracker ->
         if (Minecraft.getInstance().screen !is BdScreen) {
             val strength = frames.filter { it.exiting }.maxOfOrNull { it.visibility }

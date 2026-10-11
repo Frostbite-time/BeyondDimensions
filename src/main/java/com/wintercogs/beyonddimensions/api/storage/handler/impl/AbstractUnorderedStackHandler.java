@@ -805,8 +805,8 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     /**
-     * 直接加入数量：不经过插入钩子，不受单格容量与种类上限约束，也不拆解物质压缩球。
-     * 用于读档与合并网络，保证已有的资源不会因为上限或钩子而丢失。只发出增量通知，调用方在一批之后调用 {@link #onChange()}
+     * 直接加入数量：不经过插入钩子，不受容量与种类上限约束，用于读档与合并网络。
+     * 只发出增量通知，调用方在一批之后调用 {@link #onChange()}
      */
     public void restore(IStackKey<?> key, long amount)
     {

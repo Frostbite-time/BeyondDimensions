@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 /**
- * 维度网络能量通道：同步三个能量读数；设置由 MachineSettingsSync 统一同步与修改。
+ * 维度网络能量通道：同步三个能量读数
  */
 public class NetEnergyMenu extends BDBaseMenu implements MachineMenu
 {

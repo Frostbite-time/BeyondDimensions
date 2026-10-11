@@ -49,7 +49,7 @@ private fun roleLabel(role: NetPermissionlevel) = tr("ui.beyonddimensions.networ
 /** 列表区至少放得下五行，内容少时窗口也保持面板的比例 */
 private const val LIST_MIN_HEIGHT = 5 * 20 + 4 * 2
 
-/** 成员与网络列表的底槽：深一层的底色和细线框，没有行的部分也看得出是列表区 */
+/** 成员与网络列表的底槽 */
 @Composable
 private fun ListWell(content: @Composable BoxScope.() -> Unit) {
     val colors = Bd.colors
@@ -141,7 +141,7 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
         var chosen by remember { mutableStateOf<UUID?>(null) }
         val page = rememberPageSelection()
         BdScreenFrame {
-            // 网络里至少有玩家自己，成员为空说明数据还没到：这时只有背景淡入，窗口等数据到了再加入进场动画
+            // 成员为空说明数据还没到：这时只有背景淡入，窗口等数据到了再进场
             if (state.members.isNotEmpty()) {
                 // 默认选中自己；选中的成员离开网络后也回到自己
                 val selected =
@@ -235,7 +235,7 @@ private class NetControlText(val title: String) {
         )
 }
 
-/** 成员列表的一行：点选后在右侧面板管理；选中的一行用强调色细框标出 */
+/** 成员列表的一行：点选后在右侧面板管理 */
 @Composable
 private fun MemberRow(member: MemberView, selected: Boolean, text: NetControlText, onSelect: () -> Unit) {
     val colors = Bd.colors
@@ -261,10 +261,7 @@ private fun MemberRow(member: MemberView, selected: Boolean, text: NetControlTex
     }
 }
 
-/**
- * 选中成员的名字、角色与四个操作。操作总是列出，当前玩家不能对这名成员执行的显示为停用；
- * 悬停时说明操作的作用。对自己执行“移除”就是退出网络。
- */
+/** 选中成员的名字、角色与四个操作；当前玩家不能执行的操作显示为停用。对自己执行“移除”就是退出网络 */
 @Composable
 private fun MemberPanel(
     member: MemberView,

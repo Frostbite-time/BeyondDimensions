@@ -20,8 +20,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 /**
- * 存储终端（方块或物品）打开的合成菜单。合成格与 O 键打开的合成一样是玩家自己的 {@link PlayerCraftingGrid}，终端本身不保存物品；
- * 这个菜单只负责在终端被拆除或物品不在手上时失效
+ * 存储终端（方块或物品）打开的合成菜单：只负责在终端被拆除或物品不在手上时失效，
+ * 合成格是玩家自己的 {@link PlayerCraftingGrid}
  */
 public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 {
@@ -48,7 +48,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
     }
 
     /**
-     * 旧版本的终端把合成格的物品存在自己身上。打开这样的终端时把物品还给玩家：依次送回存储、玩家背包，放不下的掉在玩家脚下
+     * 旧版本的终端把合成格的物品存在自己身上，打开这样的终端时把物品还给玩家
      */
     public static void returnLegacyCraftItems(Player player, IStackHandler storage, Iterable<ItemStack> items)
     {
