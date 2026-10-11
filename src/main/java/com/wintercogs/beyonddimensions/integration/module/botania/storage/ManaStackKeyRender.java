@@ -34,7 +34,7 @@ public class ManaStackKeyRender implements IStackRender
         var pose = gui.pose();
         pose.pushPose();
 
-        // 使用你工程里的 BOTANIA_MANA atlas sprite
+        // 使用工程里的 BOTANIA_MANA 图集贴图
         int tintColor = 0xFFFFFFFF;
         TextureAtlasSprite sprite = IngredientRenderer.BOTANIA_MANA.sprite();
         IngredientRenderer.drawTiledSprite(gui, 16, 16, tintColor, 16, sprite, x, y);

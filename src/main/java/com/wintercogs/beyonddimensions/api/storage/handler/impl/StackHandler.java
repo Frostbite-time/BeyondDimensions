@@ -173,7 +173,7 @@ public class StackHandler implements IStackHandler
     public static final class SlotBucket
     {
         final ArrayList<Integer> slots = new ArrayList<>();
-        final HashMap<Integer, Integer> pos = new HashMap<>(); // slot -> index in slots
+        final HashMap<Integer, Integer> pos = new HashMap<>(); // 槽位 -> 它在 slots 中的下标
 
         void add(int slot)
         {

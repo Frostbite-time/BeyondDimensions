@@ -61,7 +61,7 @@ public class BDFluids
             Function<BaseFlowingFluid.Properties, F> flowingCtor
     )
     {
-        // 1) FluidType
+        // 1) 流体类型（FluidType）
         DeferredHolder<FluidType, FluidType> type = FLUID_TYPES.register(name, () -> new FluidType(typeProps));
 
         // 2) 解决循环依赖：propsRef 先占位，之后回填

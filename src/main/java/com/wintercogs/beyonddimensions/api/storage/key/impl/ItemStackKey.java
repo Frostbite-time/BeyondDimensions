@@ -93,8 +93,8 @@ public final class ItemStackKey implements IStackKey<ItemStack>
                 java.util.Map<T, T> map = new java.util.LinkedHashMap<>();
                 input.entries().forEach(p -> {
                     T key = p.getFirst();
-                    if (key.equals(kItemOld)) key = kItem;   // Item -> item
-                    else if (key.equals(kCompsOld)) key = kComps; // Components -> components
+                    if (key.equals(kItemOld)) key = kItem;   // Item 改为 item
+                    else if (key.equals(kCompsOld)) key = kComps; // Components 改为 components
                     // Key 层忽略 amount/Amount
                     if (!key.equals(kAmt) && !key.equals(kAmtOld))
                     {
@@ -429,12 +429,12 @@ public final class ItemStackKey implements IStackKey<ItemStack>
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.parse(ops, nbt)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                            "ItemStackKey 在反序列化(Codec)时出错: {} | Keys={}", err, nbt.getAllKeys()))
+                            "ItemStackKey 在反序列化(Codec)时出错: {} | 键={}", err, nbt.getAllKeys()))
                     .orElse(ItemStackKey.EMPTY);
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.error("ItemStackKey 反序列化异常。Keys={} Error={}",
+            BeyondDimensions.LOGGER.error("ItemStackKey 反序列化异常。键={} 错误={}",
                     nbt.getAllKeys(), t.getMessage(), t);
             return ItemStackKey.EMPTY;
         }
@@ -606,7 +606,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.warn("ItemStackKey patch 断开失败: {}", t.toString());
+            BeyondDimensions.LOGGER.warn("ItemStackKey 组件补丁断开失败: {}", t.toString());
             this.detachedPatchCache = this.patch;
             this.detachedPatchProviderRef = null;
             return this.patch;

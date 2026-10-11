@@ -155,7 +155,7 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
         return INSTANCE;
     }
 
-    // ---------------- NBT ----------------
+    // ---------------- NBT 读写 ----------------
     // 仅写 Type；读取时直接返回单例。旧 LongType 是纯 long，可直接忽略。
 
     @Override

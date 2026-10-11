@@ -261,7 +261,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     /**
-     * 在状态切换到remove zero时，做一个零键清理
+     * 零值策略切换到 REMOVE_ON_ZERO 时，清理数量为零的键
      */
     private void reconcileAfterZeroPolicyChange()
     {
@@ -476,7 +476,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 }
             }
             else
-            { // KEEP_ZERO
+            { // 策略为 KEEP_ZERO：保留数量为零的键
                 storage.put(key, 0L);
                 ensureInIndex(key); // ensureInIndex 内部会做“建槽位时间”记录（首次）
                 if (uiTimestampPolicy == UiTimestampPolicy.AUTO)
@@ -489,7 +489,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             return 0L;
         }
 
-        // target > 0
+        // 以下是 target 大于 0 的情况
         boolean isNew = (current == 0L) && !posMap.containsKey(key);
         if (isNew && slotIndex.size() >= slotMaxSize)
         {
@@ -978,14 +978,14 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             {
                 DataResult<Tag> enc = IStackKey.CODEC.encodeStart(ops, key);
                 Tag encoded = enc.resultOrPartial(err ->
-                        BeyondDimensions.LOGGER.warn("编码 IStackKey 失败：{} | key={}", err, key)
+                        BeyondDimensions.LOGGER.warn("编码 IStackKey 失败：{} | 键={}", err, key)
                 ).orElse(null);
 
                 if (!(encoded instanceof CompoundTag encodedTag))
                 {
                     if (encoded != null)
                     {
-                        BeyondDimensions.LOGGER.warn("IStackKey 编码结果不是 CompoundTag：{} | key={}",
+                        BeyondDimensions.LOGGER.warn("IStackKey 编码结果不是 CompoundTag：{} | 键={}",
                                 encoded.getClass().getName(), key);
                     }
                     continue;
@@ -1065,14 +1065,14 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             String typeStr = entry.getString("Type"); // 旧外层 Type（资源路径）
             if (typeStr.isEmpty())
             {
-                BeyondDimensions.LOGGER.warn("旧格式条目缺少 Type，已跳过（index={}）", i);
+                BeyondDimensions.LOGGER.warn("旧格式条目缺少 Type，已跳过（序号={}）", i);
                 continue;
             }
 
             CompoundTag typed = entry.getCompound("TypedStack");
             if (typed.isEmpty())
             {
-                BeyondDimensions.LOGGER.warn("旧格式条目缺少 TypedStack，已跳过（index={}）", i);
+                BeyondDimensions.LOGGER.warn("旧格式条目缺少 TypedStack，已跳过（序号={}）", i);
                 continue;
             }
 
@@ -1084,12 +1084,12 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             try
             {
                 IStackKey.CODEC.parse(ops, compatKey)
-                        .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("旧格式 IStackKey 解码失败：{} | type={}", err, typeStr))
+                        .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("旧格式 IStackKey 解码失败：{} | 类型={}", err, typeStr))
                         .ifPresent(key -> acceptEntry(key, amount));
             }
             catch (Throwable t)
             {
-                BeyondDimensions.LOGGER.warn("解码旧格式条目时出错（index={} type={}）：{}", i, typeStr, t.toString());
+                BeyondDimensions.LOGGER.warn("解码旧格式条目时出错（序号={} 类型={}）：{}", i, typeStr, t.toString());
             }
         }
     }
@@ -1108,7 +1108,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         if (holder.contains("Stack", Tag.TAG_COMPOUND))
         {
             CompoundTag inner = holder.getCompound("Stack");
-            // ItemStack: count/Count；Fluid/Chemical: amount/Amount
+            // 物品用 count/Count，流体与化学品用 amount/Amount
             if (inner.contains("count", Tag.TAG_INT)) return inner.getInt("count");
             if (inner.contains("Count", Tag.TAG_INT)) return inner.getInt("Count");
             if (inner.contains("amount", Tag.TAG_INT)) return inner.getInt("amount");

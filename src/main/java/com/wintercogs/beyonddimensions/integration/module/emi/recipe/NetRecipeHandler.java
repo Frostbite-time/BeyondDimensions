@@ -60,7 +60,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
     @Override
     public boolean canCraft(EmiRecipe recipe, EmiCraftContext<T> context)
     {
-        // Partial fills are supported. Build the material plan when invoked, not during every availability query.
+        // 支持只填入一部分材料。材料方案在真正执行时才计算，不在每次查询是否可用时计算。
         return active(context.getScreenHandler()) && supportsRecipe(recipe);
     }
 

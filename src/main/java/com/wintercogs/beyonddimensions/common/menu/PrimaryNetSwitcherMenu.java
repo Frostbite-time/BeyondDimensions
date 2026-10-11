@@ -99,7 +99,7 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu implements SyncedMenu
         if (!(player instanceof ServerPlayer serverPlayer)) return;
         currentPrimaryNetId = resolveCurrentPrimaryNetId(serverPlayer);
         List<PrimaryNetOption> next = buildOptions(serverPlayer);
-        // Preserve immutable identity when unchanged; the library then skips collection diffing.
+        // 内容没变时沿用原来的不可变列表，库就会跳过集合比较。
         if (!next.equals(options)) options = List.copyOf(next);
     }
 

@@ -99,7 +99,7 @@ public record KeyAmount(@NotNull IStackKey<?> key, long amount)
     };
 
     // ─────────────────────────────────────────────────────────────
-    // 新格式（纯粹）：{ key, amount } —— 仅在 encode 或新数据 decode 时使用
+    // 新格式（纯粹）：{ key, amount } —— 仅在编码，或解码新数据时使用
     // ─────────────────────────────────────────────────────────────
     private static final MapCodec<KeyAmount> NEW_FMT = RecordCodecBuilder.mapCodec(inst ->
             inst.group(

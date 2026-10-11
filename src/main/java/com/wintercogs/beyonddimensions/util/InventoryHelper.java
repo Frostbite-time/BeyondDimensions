@@ -14,7 +14,7 @@ import top.theillusivec4.curios.api.SlotResult;
 public class InventoryHelper
 {
     /**
-     * Identity matters: another copy of the same device cannot keep an old menu authorized.
+     * 按对象本身比较：同一种设备的另一份堆叠不能让旧菜单继续有效。
      */
     public static boolean containsExactStack(Player player, ItemStack stack)
     {

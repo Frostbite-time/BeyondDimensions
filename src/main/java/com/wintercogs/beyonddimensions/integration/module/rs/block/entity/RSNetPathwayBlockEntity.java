@@ -23,15 +23,15 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
 {
 
     /**
-     * ResourceKey -> amount
+     * ResourceKey -> 数量
      */
     private final Object2LongOpenHashMap<ResourceKey> counts = new Object2LongOpenHashMap<>();
     /**
-     * ResourceKey -> index in all
+     * ResourceKey -> 它在 all 中的下标
      */
     private final Object2IntOpenHashMap<ResourceKey> index = new Object2IntOpenHashMap<>();
     /**
-     * flat view
+     * 展平的视图
      */
     private final ArrayList<ResourceAmount> all = new ArrayList<>();
 
@@ -52,7 +52,7 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
     private long lastFullBuildGt = Long.MIN_VALUE;
 
     /**
-     * 避免重复注册 net-change hook
+     * 避免重复注册网络变化的回调
      */
     private boolean netTaskRegistered = false;
 

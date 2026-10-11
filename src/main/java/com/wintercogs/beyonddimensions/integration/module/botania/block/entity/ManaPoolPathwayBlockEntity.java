@@ -564,7 +564,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
         return refreshHandler() ? handler.getActualMaxMana() : 0;
     }
 
-    // ====== ManaCollector/ManaPool/SparkAttachable/Wandable ======
+    // ====== ManaCollector/ManaPool/SparkAttachable/Wandable 的实现 ======
     @Override
     public void onClientDisplayTick()
     {

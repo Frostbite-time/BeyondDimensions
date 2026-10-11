@@ -128,7 +128,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
         this.chemical = resolveBound((chemical == null) ? MekanismAPI.EMPTY_CHEMICAL_HOLDER : chemical);
     }
 
-    // ===== IStackKey =====
+    // ===== IStackKey 的实现 =====
 
     @Override
     public ResourceLocation getTypeId()
@@ -356,12 +356,12 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.parse(ops, nbt)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                            "ChemicalStackKey 反序列化(Codec)出错: {} | Keys={}", err, nbt.getAllKeys()))
+                            "ChemicalStackKey 反序列化(Codec)出错: {} | 键={}", err, nbt.getAllKeys()))
                     .orElse(ChemicalStackKey.EMPTY);
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.error("ChemicalStackKey 反序列化错误。Keys={} Error={}",
+            BeyondDimensions.LOGGER.error("ChemicalStackKey 反序列化错误。键={} 错误={}",
                     nbt.getAllKeys(), t.getMessage(), t);
             return ChemicalStackKey.EMPTY;
         }
@@ -397,7 +397,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
         return cache;
     }
 
-    // —— equals/hash —— //
+    // —— 相等与哈希 —— //
 
     @Override
     public boolean equals(Object other)

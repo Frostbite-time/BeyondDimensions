@@ -91,7 +91,7 @@ public class NetMagnetMenu extends BDBaseMenu implements MachineMenu
 
     public NetMagnetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        // Client settings and filters arrive through their server-owned sync channels.
+        // 客户端的设置与过滤器经由服务端主导的同步通道送达。
         this(id, playerInventory, ItemStack.EMPTY);
     }
 

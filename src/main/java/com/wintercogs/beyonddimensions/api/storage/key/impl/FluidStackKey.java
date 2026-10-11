@@ -94,8 +94,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
                 java.util.Map<T, T> map = new java.util.LinkedHashMap<>();
                 input.entries().forEach(p -> {
                     T key = p.getFirst();
-                    if (key.equals(kFluidOld)) key = kFluid;  // Fluid -> fluid
-                    else if (key.equals(kCompsOld)) key = kComps;  // Components -> components
+                    if (key.equals(kFluidOld)) key = kFluid;  // Fluid 改为 fluid
+                    else if (key.equals(kCompsOld)) key = kComps;  // Components 改为 components
                     // 忽略 amount/Amount
                     if (!key.equals(kAmt) && !key.equals(kAmtOld))
                     {
@@ -169,7 +169,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         this.patch = (patch == null) ? DataComponentPatch.EMPTY : patch;
     }
 
-    // ===== IStackKey =====
+    // ===== IStackKey 的实现 =====
 
     @Override
     public ResourceLocation getTypeId()
@@ -411,12 +411,12 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.parse(ops, nbt)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                            "FluidStackKey 反序列化(Codec)出错: {} | Keys={}", err, nbt.getAllKeys()))
+                            "FluidStackKey 反序列化(Codec)出错: {} | 键={}", err, nbt.getAllKeys()))
                     .orElse(FluidStackKey.EMPTY);
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.error("FluidStackKey 反序列化错误。Keys={} Error={}",
+            BeyondDimensions.LOGGER.error("FluidStackKey 反序列化错误。键={} 错误={}",
                     nbt.getAllKeys(), t.getMessage(), t);
             return FluidStackKey.EMPTY;
         }
@@ -577,7 +577,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.warn("FluidStackKey patch 断开失败: {}", t.toString());
+            BeyondDimensions.LOGGER.warn("FluidStackKey 组件补丁断开失败: {}", t.toString());
             this.detachedPatchCache = this.patch;
             this.detachedPatchProviderRef = null;
             return this.patch;

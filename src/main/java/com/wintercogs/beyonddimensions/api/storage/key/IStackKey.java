@@ -28,7 +28,7 @@ public interface IStackKey<T>
                     IStackKey::getTypeId,  // 分发到具体实现的编解码器
                     id -> {
                         IStackKey<?> type = StackKeyRegistry.getType(id);
-                        return type.codec(); // A → MapCodec
+                        return type.codec(); // 该类型的 MapCodec
                     }
             );
 

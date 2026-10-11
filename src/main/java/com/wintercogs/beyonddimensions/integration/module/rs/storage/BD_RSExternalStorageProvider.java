@@ -28,7 +28,7 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
         this.pos = pos;
     }
 
-    // ================= ExternalStorageProvider =================
+    // ================= ExternalStorageProvider 的实现 =================
 
     @Override
     public @NotNull Iterator<ResourceAmount> iterator()
@@ -69,7 +69,7 @@ public class BD_RSExternalStorageProvider implements ExternalStorageProvider
                 .orElse(0L);
     }
 
-    // ================= helper =================
+    // ================= 辅助方法 =================
 
     private @Nullable RSNetPathwayBlockEntity getBe()
     {

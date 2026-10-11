@@ -87,7 +87,7 @@ public class WardenSoulStackTypedHandler implements ISoulHandler
         return getEmptySlotAt(rest);
     }
 
-    // ================= ISoulHandler =================
+    // ================= ISoulHandler 的实现 =================
 
     /**
      * 可视槽位 = 幽匿之魂桶 + 空桶。

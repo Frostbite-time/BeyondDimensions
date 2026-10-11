@@ -64,7 +64,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
     private SlotTransferRoutes quickMoveRoutes;
 
     /**
-     * Construct after all slots have been added; subclasses can declare named groups/routes.
+     * 在所有槽位都添加完之后构建；子类可以声明具名的分组与路线。
      */
     protected SlotTransferRoutes createQuickMoveRoutes()
     {
@@ -150,7 +150,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
      */
     public void customClickHandler(int slotIndex, KeyAmount clickedStack, int button, int modifiers, long requested)
     {
-        // Packet data is a request. Validate before indexing or touching server inventory.
+        // 数据包里的内容只是请求：先校验，再用它取下标或改动服务端的物品。
         if (player.level().isClientSide() || player.containerMenu != this || !player.isAlive() || player.isSpectator()
                 || !stillValid(player) || slotIndex < 0 || slotIndex >= slots.size()
                 || button < 0 || button > 2 || (modifiers & ~SlotClick.MODIFIERS) != 0

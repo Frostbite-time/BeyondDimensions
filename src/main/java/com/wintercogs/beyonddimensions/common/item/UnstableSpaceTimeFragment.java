@@ -95,17 +95,17 @@ public class UnstableSpaceTimeFragment extends Item
 
     private static int findGlobalSlotByReference(Inventory inv, ItemStack target)
     {
-        // items: 0..35
+        // 物品栏：0..35
         for (int i = 0; i < inv.items.size(); i++)
         {
             if (inv.items.get(i) == target) return i;
         }
-        // armor: 36..39
+        // 护甲：36..39
         for (int i = 0; i < inv.armor.size(); i++)
         {
             if (inv.armor.get(i) == target) return 36 + i;
         }
-        // offhand: 40
+        // 副手：40
         for (int i = 0; i < inv.offhand.size(); i++)
         {
             if (inv.offhand.get(i) == target) return 36 + 4 + i; // 40

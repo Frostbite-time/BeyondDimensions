@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 /**
- * Shared JEI/EMI accounting. Exact component variants form separate stacks; viewer matching stays in the bridges.
+ * JEI 与 EMI 共用的材料核算。组件不同的变体各算一种堆叠；配方查看器自己的匹配规则留在各自的桥接代码里。
  */
 public record RecipeFillPlan(List<IStackKey<?>> keys, List<Long> amounts, List<Integer> missing)
 {
@@ -69,7 +69,7 @@ public record RecipeFillPlan(List<IStackKey<?>> keys, List<Long> amounts, List<I
         }
 
         /**
-         * Count each physical source once, then merge matching component variants across sources.
+         * 每个实际来源只计一次，再把各来源里相同的变体合并。
          */
         public static Pool capture(DimensionsCraftMenu menu)
         {
@@ -98,7 +98,7 @@ public record RecipeFillPlan(List<IStackKey<?>> keys, List<Long> amounts, List<I
             var missing = new ArrayList<Integer>();
             var order = new ArrayList<Integer>();
             for (int i = 0; i < inputs.size(); i++) if (inputs.get(i).count() > 0) order.add(i);
-            // Reserve narrowly constrained ingredients first, then prefer the largest exact stack pool.
+            // 先给可选种类最少的材料预留，每种材料优先取存量最多的那一种堆叠。
             order.sort(Comparator.<Integer>comparingInt(i -> inputs.get(i).choices().size())
                     .thenComparing(Comparator.<Integer>comparingLong(i -> inputs.get(i).count()).reversed()));
             for (int index : order)
@@ -129,7 +129,7 @@ public record RecipeFillPlan(List<IStackKey<?>> keys, List<Long> amounts, List<I
         }
 
         /**
-         * Unit ingredients use capacitated matching, so overlapping tags cannot starve a later ingredient.
+         * 每格只要一个的材料用带容量的匹配来分配，标签重叠的材料就不会把后面材料要用的占光。
          */
         private RecipeFillPlan unitPlan(List<Input> inputs, int requestedBatches)
         {
