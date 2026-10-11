@@ -15,21 +15,25 @@ import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.common.menu.interaction.SlotClick.Kind;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
+import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.ItemCapInteractionBlackList;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * BD 内置的槽位交互，按尝试顺序注册：标记槽、有序槽的同种合并、经验棒、桶、带能力的容器、取出、有序槽的交换、存入兜底，
- * 最后是 Shift 转移。除标记槽外，按住 Shift 的点击只走转移
+ * BD 内置的槽位交互，按尝试顺序注册：标记槽、整批转移（空格左键，以及背包槽与有序槽上的 Shift 双击）、有序槽的同种合并、
+ * 经验棒、桶、带能力的容器、取出、有序槽的交换、存入兜底，最后是 Shift 转移。除标记槽外，按住 Shift 的点击只走转移。
+ * 整批转移都沿用 Shift 转移的路线，标记槽与存储网格的双击没有特殊处理
  */
 final class BuiltinSlotInteractions
 {
@@ -44,6 +48,16 @@ final class BuiltinSlotInteractions
                 BuiltinSlotInteractions::flagContents);
         add("flag_item", c -> c.kind() == Kind.FLAG && c.clicked().isEmpty() && !c.carried().isEmpty() && c.isLeft(),
                 BuiltinSlotInteractions::flagItem);
+        // 空格左键：背包（不含快捷栏）或快捷栏的全部物品、被点击的那种存储资源、这份有序存储的全部资源
+        add("move_all_vanilla", c -> c.space() && c.isLeft() && inPlayerInventory(c), BuiltinSlotInteractions::moveAllVanilla);
+        add("move_all_stored", c -> c.space() && c.isLeft() && c.kind() == Kind.STORAGE && !c.clicked().isEmpty(),
+                BuiltinSlotInteractions::moveAll);
+        add("move_all_ordered", c -> c.space() && c.isLeft() && c.kind() == Kind.ORDERED, BuiltinSlotInteractions::moveAllOrdered);
+        // Shift 左键双击：背包（含快捷栏）或这份有序存储里，与第一下点到的完全相同的全部资源
+        add("quick_move_same_vanilla", c -> c.shift() && c.doubleClick() && c.isLeft() && inPlayerInventory(c),
+                BuiltinSlotInteractions::quickMoveSameVanilla);
+        add("quick_move_same_ordered", c -> c.shift() && c.doubleClick() && c.isLeft() && c.kind() == Kind.ORDERED,
+                BuiltinSlotInteractions::quickMoveSameOrdered);
         // 有序槽里是同一种物品时先合并，桶、经验棒与容器也一样
         add("ordered_merge", c -> click(c) && c.kind() == Kind.ORDERED && !c.clicked().isEmpty() && !c.carried().isEmpty()
                         && (c.isLeft() || c.isRight())
@@ -327,10 +341,15 @@ final class BuiltinSlotInteractions
     // 资源槽的内容按菜单路线移入目标槽位；流体在原版槽位里装成一桶，每次最多一桶
     private static boolean quickMove(SlotClick c)
     {
+        move(c, new KeyAmount(c.clicked().key(), Math.min(c.sent().amount(), c.clicked().amount())));
+        return true;
+    }
+
+    private static void move(SlotClick c, KeyAmount moving)
+    {
         List<Integer> targets = quickMoveTargets(c);
         if (targets.isEmpty())
-            return true;
-        KeyAmount moving = new KeyAmount(c.clicked().key(), Math.min(c.sent().amount(), c.clicked().amount()));
+            return;
         for (int targetIndex : targets)
         {
             if (moving.isEmpty())
@@ -361,7 +380,6 @@ final class BuiltinSlotInteractions
             }
         }
         c.typedSlot().setChanged();
-        return true;
     }
 
     // 从存储取一个空桶和一桶流体，装好放进目标槽位；放不进就都放回。返回是否装成了
@@ -405,5 +423,107 @@ final class BuiltinSlotInteractions
         if (!targets.isEmpty())
             c.menu().quickMoveHandle(c.player(), c.slot().index, c.sent(), targets);
         return true;
+    }
+
+    // —— 整批转移：每一格都按它自己的 Shift 转移路线送往下一站 ——
+
+    private static boolean inPlayerInventory(SlotClick c)
+    {
+        int index = c.slot().index;
+        return c.kind() == Kind.VANILLA && index >= c.menu().inventoryStartIndex && index < c.menu().inventoryEndIndex;
+    }
+
+    private static boolean inHotbar(Slot slot)
+    {
+        return slot.container instanceof Inventory && Inventory.isHotbarSlot(slot.getContainerSlot());
+    }
+
+    // 点在快捷栏就转移整个快捷栏，点在背包其余部分就转移那一部分
+    private static boolean moveAllVanilla(SlotClick c)
+    {
+        boolean hotbar = inHotbar(c.slot());
+        for (int index = c.menu().inventoryStartIndex; index < c.menu().inventoryEndIndex; index++)
+            if (inHotbar(c.menu().slots.get(index)) == hotbar)
+                moveVanilla(c, index);
+        return true;
+    }
+
+    // 背包与快捷栏里和第一下点到的物品完全相同的每一组
+    private static boolean quickMoveSameVanilla(SlotClick c)
+    {
+        IStackKey<?> key = c.sent().key();
+        if (key.isEmpty())
+            return false;
+        for (int index = c.menu().inventoryStartIndex; index < c.menu().inventoryEndIndex; index++)
+            if (key.equals(new ItemStackKey(c.menu().slots.get(index).getItem())))
+                moveVanilla(c, index);
+        return true;
+    }
+
+    private static void moveVanilla(SlotClick c, int index)
+    {
+        ItemStack stack = c.menu().slots.get(index).getItem();
+        List<Integer> targets = c.menu().quickMoveRoutes().targets(index);
+        if (!stack.isEmpty() && !targets.isEmpty())
+            c.menu().quickMoveHandle(c.player(), index, new KeyAmount(new ItemStackKey(stack), stack.getCount()), targets);
+    }
+
+    // 把这一格的资源反复转移，直到取空或下一站再也放不下
+    private static boolean moveAll(SlotClick c)
+    {
+        IStackKey<?> key = c.clicked().key();
+        for (long before = available(c, key); before > 0; )
+        {
+            move(c, new KeyAmount(key, Math.min(before, key.getVanillaMaxStackSize())));
+            long after = available(c, key);
+            if (after >= before)
+                break;
+            before = after;
+        }
+        return true;
+    }
+
+    private static long available(SlotClick c, IStackKey<?> key)
+    {
+        if (c.kind() == Kind.STORAGE)
+            return c.storage().getStackByKey(key).amount();
+        KeyAmount inSlot = c.typedSlot().getStack();
+        return key.equals(inSlot.key()) ? inSlot.amount() : 0;
+    }
+
+    private static boolean moveAllOrdered(SlotClick c)
+    {
+        for (AbstractStackTypedSlot slot : orderedStorageSlots(c))
+            moveAll(at(c, slot));
+        return true;
+    }
+
+    // 这份有序存储里和第一下点到的资源完全相同的每一格；第一下可能已经把被点击的这一格搬空
+    private static boolean quickMoveSameOrdered(SlotClick c)
+    {
+        IStackKey<?> key = c.sent().key().isEmpty() ? c.clicked().key() : c.sent().key();
+        if (key.isEmpty())
+            return false;
+        for (AbstractStackTypedSlot slot : orderedStorageSlots(c))
+            if (key.equals(slot.getStack().key()))
+                moveAll(at(c, slot));
+        return true;
+    }
+
+    // 与被点击的有序槽属于同一份有序存储的全部槽位
+    private static List<AbstractStackTypedSlot> orderedStorageSlots(SlotClick c)
+    {
+        List<AbstractStackTypedSlot> slots = new ArrayList<>();
+        for (Slot slot : c.menu().slots)
+            if (slot instanceof AbstractStackTypedSlot typed && !typed.isFake() && !(typed instanceof DisorderedStackTypedSlot)
+                    && typed.getStorage() == c.storage())
+                slots.add(typed);
+        return slots;
+    }
+
+    // 同一次点击落在另一个槽位上
+    private static SlotClick at(SlotClick c, AbstractStackTypedSlot slot)
+    {
+        return SlotClick.of(c.menu(), c.player(), slot, slot.getStack(), c.button(), c.modifiers(), -1);
     }
 }

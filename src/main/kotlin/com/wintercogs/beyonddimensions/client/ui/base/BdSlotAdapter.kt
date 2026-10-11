@@ -12,6 +12,7 @@ import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTy
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.MenuSlotVisual
 import dev.compixel.forge.slots.VanillaMenuSlotAdapter
+import net.minecraft.Util
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
@@ -45,14 +46,14 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     /** 空手右键存储格子里的资源时调用，返回 true 表示界面打开了自己的菜单，不再发送右键点击 */
     var resourceMenu: ((slotId: Int) -> Boolean)? = null
 
-    // 连续两次 Shift 点击同一背包槽时，把背包里同种物品全部存入网络
-    private var repeatTicks = 0
-    private var lastPlayerSlot = -1
-    private var lastPlayerStack: KeyAmount? = null
+    // 上一次交给服务端的点击，用来判定双击；第一下点到的资源随第二下一起发出
+    private var lastSlot = -1
+    private var lastButton = -1
+    private var lastTime = 0L
+    private var lastStack: KeyAmount? = null
 
     fun tick() {
         menu.commands().flushPreference()
-        if (repeatTicks > 0 && --repeatTicks == 0) forgetRepeat()
     }
 
     /** 该槽位是否显示虚拟资源；可在 Compose 线程调用 */
@@ -96,7 +97,8 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         val slot = menu.slots.getOrNull(slotId)
         when {
             slot is AbstractStackTypedSlot -> clickResource(slotId, slot, button, type)
-            slot != null && type == ClickType.QUICK_MOVE -> quickMove(slotId, slot, button)
+            slot != null && (type == ClickType.QUICK_MOVE || isMoveAllClick(slotId, button, type)) ->
+                clickVanilla(slotId, slot, button, type)
             // 其余原版手势（拖动、交换、丢弃、收集）仍由原生执行，但要排在已提交的菜单操作之后
             !menu.menuSync().isSendingAction() -> super.execute(slotId, button, type)
         }
@@ -108,52 +110,67 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
             !slot.stack.isEmpty && resourceMenu?.invoke(slotId) == true
         ) return
         when (type) {
-            ClickType.PICKUP, ClickType.CLONE, ClickType.QUICK_MOVE ->
+            ClickType.PICKUP, ClickType.CLONE, ClickType.QUICK_MOVE -> {
+                val sentButton = if (type == ClickType.CLONE) 2 else button
+                val current = slot.vanillaActualStack
+                val first = firstOfDoubleClick(slotId, sentButton, current)
+                // 有序槽的第二下带上第一下点到的资源，这一格此时可能已被搬空；存储格子的双击没有特殊处理，照常带当前内容
+                val ordered = !slot.isFake && slot !is DisorderedStackTypedSlot
                 menu.commands().click(
                     slotId,
-                    slot.vanillaActualStack,
-                    if (type == ClickType.CLONE) 2 else button,
-                    heldModifiers(type == ClickType.QUICK_MOVE),
+                    if (first != null && ordered) first else current,
+                    sentButton,
+                    heldModifiers(type == ClickType.QUICK_MOVE, first != null),
                 )
+            }
             // 虚拟资源不参与原版的拖动、交换、丢弃与收集
             else -> {}
         }
     }
 
-    /** 普通槽位的 Shift 点击由服务端的 BD 命令处理，不再额外发送原版的快速移动 */
-    private fun quickMove(slotId: Int, slot: Slot, button: Int) {
+    /** 空格左键点背包或快捷栏的槽位是整批转移，交给服务端的 BD 命令，不再执行原版的拿起 */
+    private fun isMoveAllClick(slotId: Int, button: Int, type: ClickType) =
+        type == ClickType.PICKUP && button == 0 && spaceHeld() &&
+            slotId >= menu.inventoryStartIndex && slotId < menu.inventoryEndIndex
+
+    /** 普通槽位的 Shift 点击与空格左键由服务端的 BD 命令处理，不再额外发送原版的点击 */
+    private fun clickVanilla(slotId: Int, slot: Slot, button: Int, type: ClickType) {
         val stack = slot.item.copy()
-        val repeated = lastPlayerStack
-        if (lastPlayerSlot == slotId && repeated != null && repeatTicks > 0) {
-            menu.commands().batch(repeated, true)
-            forgetRepeat()
-            return
-        }
-        val clicked = KeyAmount(ItemStackKey(stack), stack.count.toLong())
-        val queued = menu.commands().click(slotId, clicked, button, heldModifiers(quickMove = true))
-        if (queued && !stack.isEmpty && slotId >= menu.inventoryStartIndex && slotId < menu.inventoryEndIndex) {
-            lastPlayerSlot = slotId
-            lastPlayerStack = clicked
-            repeatTicks = REPEAT_WINDOW_TICKS
-        } else if (!queued) {
-            forgetRepeat()
-        }
+        val current = KeyAmount(ItemStackKey(stack), stack.count.toLong())
+        // 双击的第二下带上第一下点到的物品：第一下通常已经把这一格搬空
+        val first = firstOfDoubleClick(slotId, button, current)
+        menu.commands().click(slotId, first ?: current, button, heldModifiers(type == ClickType.QUICK_MOVE, first != null))
     }
 
-    /** 随点击发给服务端的修饰键：Shift 以点击类型为准，Ctrl（macOS 上为 Command）、Alt 与空格读当前键盘 */
-    private fun heldModifiers(quickMove: Boolean): Int {
+    /**
+     * 按原版容器界面的标准判定双击：与上一次点击同一槽位、同一按键，两次按下相隔不到 250 毫秒。
+     * 是第二下时返回第一下点到的资源，否则记下这次点击并返回 null；第三下重新开始计
+     */
+    private fun firstOfDoubleClick(slotId: Int, button: Int, clicked: KeyAmount): KeyAmount? {
+        val now = Util.getMillis()
+        val first = lastStack
+        if (first != null && slotId == lastSlot && button == lastButton && now - lastTime < DOUBLE_CLICK_MILLIS) {
+            lastStack = null
+            return first
+        }
+        lastSlot = slotId
+        lastButton = button
+        lastTime = now
+        lastStack = clicked
+        return null
+    }
+
+    /** 随点击发给服务端的修饰键与标志：Shift 以点击类型为准，Ctrl（macOS 上为 Command）、Alt 与空格读当前键盘 */
+    private fun heldModifiers(quickMove: Boolean, doubleClick: Boolean): Int {
         var held = if (quickMove) SlotClick.SHIFT else 0
         if (Screen.hasControlDown()) held = held or SlotClick.CTRL
         if (Screen.hasAltDown()) held = held or SlotClick.ALT
-        if (InputConstants.isKeyDown(Minecraft.getInstance().window.window, GLFW.GLFW_KEY_SPACE)) held = held or SlotClick.SPACE
+        if (spaceHeld()) held = held or SlotClick.SPACE
+        if (doubleClick) held = held or SlotClick.DOUBLE
         return held
     }
 
-    private fun forgetRepeat() {
-        lastPlayerSlot = -1
-        lastPlayerStack = null
-        repeatTicks = 0
-    }
+    private fun spaceHeld() = InputConstants.isKeyDown(Minecraft.getInstance().window.window, GLFW.GLFW_KEY_SPACE)
 
     override fun close() {
         icons.clear()
@@ -161,7 +178,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     }
 
     private companion object {
-        const val REPEAT_WINDOW_TICKS = 10
+        const val DOUBLE_CLICK_MILLIS = 250L
 
         // 与 CompixelUI 图标缓存的上限一致
         const val ICON_HANDLES = 1024

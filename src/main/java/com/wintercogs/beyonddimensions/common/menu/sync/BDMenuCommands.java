@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.common.menu.sync;
 
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.*;
 import com.wintercogs.beyonddimensions.common.menu.interaction.SlotClick;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
@@ -14,8 +13,6 @@ import dev.compixel.sync.action.ActionStatus;
 import dev.compixel.sync.state.SyncCodec;
 import dev.compixel.sync.state.SyncCodecs;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,7 +33,7 @@ public final class BDMenuCommands
     }
 
     /**
-     * @param modifiers 按住的修饰键，见 {@link SlotClick#SHIFT} 等
+     * @param modifiers 按住的修饰键与点击标志，见 {@link SlotClick#SHIFT} 等
      */
     public record Click(int slot, Key key, long amount, int button, int modifiers)
     {
@@ -50,10 +47,6 @@ public final class BDMenuCommands
     }
 
     public record Ghost(int slot, IStackKey<?> key, long amount)
-    {
-    }
-
-    public record Batch(Key key, boolean toStorage)
     {
     }
 
@@ -104,7 +97,6 @@ public final class BDMenuCommands
     public final MenuAction<BDBaseMenu, Click> CLICK;
     public final MenuAction<BDBaseMenu, Take> TAKE;
     public final MenuAction<BDBaseMenu, Ghost> GHOST;
-    public final MenuAction<BDBaseMenu, Batch> BATCH;
     public final MenuAction<BDBaseMenu, Recipe> RECIPE;
 
     private final BDBaseMenu menu;
@@ -183,15 +175,6 @@ public final class BDMenuCommands
             return true;
         });
 
-        var batchCodec = SyncCodec.<Batch>of("beyonddimensions:batch/1:" + keyCodec.id(),
-                (out, value) -> {
-                    keyCodec.write(out, value.key());
-                    out.writeBoolean(value.toStorage());
-                },
-                in -> new Batch(keyCodec.read(in), SyncCodecs.BOOLEAN.read(in)));
-        BATCH = MenuAction.of("bd.batch", batchCodec, BDMenuResources.MAX_ACTION_BYTES,
-                (m, player, batch) -> m.commands().applyBatch(batch));
-
         var recipeCodec = SyncCodec.<Recipe>of("beyonddimensions:recipe/1:" + keyCodec.id(),
                 (out, value) -> {
                     if (value.keys().size() > MAX_RECIPE_KEYS || value.keys().size() != value.amounts().size())
@@ -233,11 +216,11 @@ public final class BDMenuCommands
     }
 
     /**
-     * 注册槽位点击、标记与批量转移，并在客户端提示失败的请求
+     * 注册槽位点击与标记，并在客户端提示失败的请求
      */
     public <M extends BDBaseMenu> MenuSync<M> inventory(MenuSync<M> sync)
     {
-        return sync.action(CLICK).action(TAKE).action(GHOST).action(BATCH).onActionResult(this::reportFailure);
+        return sync.action(CLICK).action(TAKE).action(GHOST).onActionResult(this::reportFailure);
     }
 
     /**
@@ -303,11 +286,6 @@ public final class BDMenuCommands
         return menu.menuSync().request(GHOST, new Ghost(slot, value.key(), value.amount())).queued();
     }
 
-    public boolean batch(KeyAmount key, boolean toStorage)
-    {
-        return menu.menuSync().request(BATCH, new Batch(reference(key.key()), toStorage)).queued();
-    }
-
     public boolean recipe(List<IStackKey<?>> keys, List<Long> amounts, boolean compress)
     {
         if (keys.size() != amounts.size() || keys.size() > MAX_RECIPE_KEYS)
@@ -335,48 +313,5 @@ public final class BDMenuCommands
         if (pendingPreference != null && menu.menuSync().hasSnapshot()
                 && menu.menuSync().request(CRAFT_PREFERENCE, pendingPreference).queued())
             pendingPreference = null;
-    }
-
-    /**
-     * 批量转移：把背包中所有同种物品存入网络，或把网络中的该物品尽量取到背包
-     */
-    private boolean applyBatch(Batch request)
-    {
-        IStackKey<?> key = resolve(request.key());
-        if (!(key instanceof ItemStackKey item) || menu.inventoryStartIndex < 0 || menu.inventoryEndIndex > menu.slots.size())
-            return false;
-        if (request.toStorage())
-        {
-            for (int i = menu.inventoryStartIndex; i < menu.inventoryEndIndex; i++)
-            {
-                ItemStack stack = menu.slots.get(i).getItem();
-                if (item.equals(new ItemStackKey(stack)))
-                    menu.customClickHandler(i, new KeyAmount(new ItemStackKey(stack), stack.getCount()), 0, SlotClick.SHIFT);
-            }
-        }
-        else if (menu instanceof DimensionsNetMenu net)
-        {
-            for (int i = menu.inventoryStartIndex; i < menu.inventoryEndIndex && net.storage.hasStack(item); i++)
-            {
-                var extracted = net.storage.extract(item, Integer.MAX_VALUE, false, false);
-                if (extracted.toStack() instanceof ItemStack stack)
-                {
-                    Slot slot = menu.slots.get(i);
-                    ItemStack remaining = slot.safeInsert(stack);
-                    if (!remaining.isEmpty())
-                        net.storage.insert(new ItemStackKey(remaining), remaining.getCount(), false);
-                }
-                else
-                {
-                    net.storage.insert(extracted.key(), extracted.amount(), false);
-                }
-            }
-        }
-        else
-        {
-            return false;
-        }
-        menu.broadcastChanges();
-        return true;
     }
 }

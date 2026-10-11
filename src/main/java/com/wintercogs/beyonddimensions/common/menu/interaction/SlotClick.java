@@ -20,7 +20,8 @@ import org.lwjgl.glfw.GLFW;
  * {@link #insert} 与 {@link #extract} 在不存放资源的槽位上什么也不做。
  * <p>
  * 被点击的资源以服务端存储为准：存储槽按客户端给出的资源键查真实数量，有序槽与标记槽直接读槽位内容。
- * 客户端发来的原样内容在 {@link #sent()} 里，只用于核对。
+ * 客户端发来的原样内容在 {@link #sent()} 里，只用于核对；双击的第二下到达时这一格可能已被第一下搬空，
+ * 所以原版槽位与有序槽的双击在 {@link #sent()} 里带的是第一下点到的资源。
  */
 public final class SlotClick
 {
@@ -43,9 +44,13 @@ public final class SlotClick
     public static final int ALT = 1 << 2;
     public static final int SPACE = 1 << 3;
     /**
-     * 全部修饰键；服务端拒绝带有其他位的点击
+     * 双击的第二下：与上一次点击同一槽位、同一按键，两次按下相隔不到 250 毫秒，与原版容器界面的标准相同
      */
-    public static final int MODIFIERS = SHIFT | CTRL | ALT | SPACE;
+    public static final int DOUBLE = 1 << 4;
+    /**
+     * 全部修饰键与点击标志；服务端拒绝带有其他位的点击
+     */
+    public static final int MODIFIERS = SHIFT | CTRL | ALT | SPACE | DOUBLE;
 
     private final BDBaseMenu menu;
     private final Player player;
@@ -149,7 +154,7 @@ public final class SlotClick
     }
 
     /**
-     * 点击时按住的修饰键，{@link #SHIFT}、{@link #CTRL}、{@link #ALT} 与 {@link #SPACE} 的按位组合
+     * 点击时按住的修饰键与点击标志，{@link #SHIFT}、{@link #CTRL}、{@link #ALT}、{@link #SPACE} 与 {@link #DOUBLE} 的按位组合
      */
     public int modifiers()
     {
@@ -180,6 +185,14 @@ public final class SlotClick
     public boolean space()
     {
         return (modifiers & SPACE) != 0;
+    }
+
+    /**
+     * 是否为双击的第二下，见 {@link #DOUBLE}
+     */
+    public boolean doubleClick()
+    {
+        return (modifiers & DOUBLE) != 0;
     }
 
     /**
