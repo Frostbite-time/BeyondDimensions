@@ -72,6 +72,11 @@ public abstract class AbstractStackTypedSlot extends Slot
         this.quickMoveSlotEndIndex = -1;
     }
 
+    public AbstractStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex)
+    {
+        this(menu, storage, slotIndex, 0, 0);
+    }
+
     public AbstractStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
     {
         super(empty_inv, slotIndex, xPosition, yPosition);

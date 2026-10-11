@@ -178,7 +178,7 @@ public class DimensionsNetMenu extends BDBaseMenu
             {
                 for (int col = 0; col < 9; ++col)
                 {
-                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, clientNetStorage, -1, inventoryStartIndex, inventoryEndIndex, 8 + col * 18, 25 + row * 18);
+                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, clientNetStorage, -1, inventoryStartIndex, inventoryEndIndex, 0, 0);
                     if (row >= getLines())
                         newSlot.setActive(false);
                     this.addSlot(newSlot);
@@ -191,7 +191,7 @@ public class DimensionsNetMenu extends BDBaseMenu
             {
                 for (int col = 0; col < 9; ++col)
                 {
-                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, storage, -1, inventoryStartIndex, inventoryEndIndex, 8 + col * 18, 25 + row * 18);
+                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, storage, -1, inventoryStartIndex, inventoryEndIndex, 0, 0);
                     if (row >= getLines())
                         newSlot.setActive(false);
                     this.addSlot(newSlot);
@@ -212,17 +212,17 @@ public class DimensionsNetMenu extends BDBaseMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 25 + (getLines() - 1) * 18 + 26 + 6 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 0, 0));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 25 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4));
+            this.addSlot(new Slot(playerInventory, col, 0, 0));
         }
         inventoryEndIndex = slots.size();
     }
 
-    // 放大和缩小UI所使用的函数，用于重新确定槽位的激活状态以及槽位的位置
+    // 放大和缩小UI所使用的函数，用于重新确定槽位的激活状态；槽位的位置由界面布局决定
     public void rebuildSlots()
     {
         int sSlotNum = 0;
@@ -234,24 +234,6 @@ public class DimensionsNetMenu extends BDBaseMenu
                 sSlot.setActive(sSlotNum < columns * getLines());
                 sSlotNum++; // 先处理再加数，可以防止最后一个槽位出现问题
             }
-        }
-
-        int slotNum = 0;
-        for (int i = inventoryStartIndex; i < inventoryEndIndex; ++i)
-        {
-            Slot slot = slots.get(i);
-            // slot不为null
-            if (slotNum / 9 < 3)
-            {
-                slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + slotNum / 9 * 18;
-            }
-            else
-            {
-                slot.y = 25 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4;
-            }
-
-
-            slotNum++;
         }
     }
 

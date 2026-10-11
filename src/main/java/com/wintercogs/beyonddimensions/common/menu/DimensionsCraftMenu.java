@@ -9,9 +9,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
-import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AutoRefillResultSlot;
-import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import com.wintercogs.beyonddimensions.integration.module.polymorph.PolymorphHelper;
@@ -93,78 +91,19 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         commands().crafting(menuSync());
     }
 
-
-    @Override
-    protected void addStorageSlots()
-    {
-        // 默认添加99行，但将99之外的行全部设置为不激活状态，以实现动态增加和减少行数
-        storageStartIndex = slots.size();
-        vanillaQuickMoveStartIndex = storageStartIndex;
-        if (player.level().isClientSide())
-        {
-            for (int row = 0; row < 99; ++row)
-            {
-                for (int col = 0; col < 9; ++col)
-                {
-                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, clientNetStorage, -1, inventoryStartIndex, inventoryEndIndex, 8 + col * 18, 25 + row * 18);
-                    if (row >= getLines())
-                        newSlot.setActive(false);
-                    this.addSlot(newSlot);
-                }
-            }
-        }
-        else
-        {
-            for (int row = 0; row < 99; ++row)
-            {
-                for (int col = 0; col < 9; ++col)
-                {
-                    DisorderedStackTypedSlot newSlot = new DisorderedStackTypedSlot(this, storage, -1, inventoryStartIndex, inventoryEndIndex, 8 + col * 18, 25 + row * 18);
-                    if (row >= getLines())
-                        newSlot.setActive(false);
-                    this.addSlot(newSlot);
-                }
-            }
-        }
-        storageEndIndex = slots.size();
-        vanillaQuickMoveEndIndex = storageEndIndex;
-    }
-
-
-    @Override
-    protected void addPlayerInv(Inventory playerInventory)
-    {
-        inventoryStartIndex = slots.size();
-        for (int row = 0; row < 3; ++row)
-        {
-            for (int col = 0; col < 9; ++col)
-            {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 25 + 62 + (getLines() - 1) * 18 + 26 + 6 + row * 18));
-            }
-        }
-        for (int col = 0; col < 9; ++col)
-        {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 25 + 62 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4));
-        }
-        inventoryEndIndex = slots.size();
-    }
-
     protected void initCraftSlots(Inventory playerInventory, @Nullable TransientCraftingContainer craftSlots)
     {
         this.craftSlots = Objects.requireNonNullElseGet(craftSlots, () -> new TransientCraftingContainer(this, 3, 3));
         this.resultSlots = new ResultContainer();
 
         // 为其添加工艺槽
-        this.addSlot(new AutoRefillResultSlot(this, playerInventory.player, this.craftSlots, this.resultSlots, 0, 116 + 4, 24 + (getLines() - 1) * 18 + 26 + 21));
+        this.addSlot(new AutoRefillResultSlot(this, playerInventory.player, this.craftSlots, this.resultSlots, 0));
         resultSlotIndex = slots.size() - 1;
 
         craftSlotStartIndex = slots.size();
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < 9; ++i)
         {
-            for (int j = 0; j < 3; ++j)
-            {
-                this.addSlot(new Slot(this.craftSlots, j + i * 3, 26 + j * 18, 24 + (getLines() - 1) * 18 + 26 + 3 + i * 18));
-            }
+            this.addSlot(new Slot(this.craftSlots, i, 0, 0));
         }
         craftSlotEndIndex = slots.size();
     }
@@ -381,57 +320,6 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     {
         super.slotsChanged(container);
         slotChangedCraftingGrid(this, player.level(), player, craftSlots, resultSlots, resultSlotIndex);
-    }
-
-    // 放大和缩小UI所使用的函数，用于重新确定槽位的激活状态以及槽位的位置
-    public void rebuildSlots()
-    {
-        int sSlotNum = 0;
-        for (Slot slot : slots)
-        {
-            if (slot instanceof AbstractStackTypedSlot sSlot)
-            {
-                if (sSlotNum < getColumns() * getLines())
-                    sSlot.setActive(true);
-                else
-                    sSlot.setActive(false);
-                sSlotNum++; // 先处理再加数，可以防止最后一个槽位出现问题
-            }
-        }
-
-        int slotNum = 0;
-        for (int i = inventoryStartIndex; i < inventoryEndIndex; ++i)
-        {
-            Slot slot = slots.get(i);
-            if (slot != null)
-            {
-                if (slotNum / 9 < 3)
-                {
-                    slot.y = 25 + 62 + (getLines() - 1) * 18 + 26 + 6 + slotNum / 9 * 18;
-                }
-                else
-                {
-                    slot.y = 25 + 62 + (getLines() - 1) * 18 + 26 + 6 + 3 * 18 + 4;
-                }
-
-
-                slotNum++;
-            }
-        }
-
-        Slot resultSlot = slots.get(resultSlotIndex);
-        resultSlot.y = 24 + (getLines() - 1) * 18 + 26 + 21;
-
-        slotNum = 0;
-        for (int i = craftSlotStartIndex; i < craftSlotEndIndex; ++i)
-        {
-            Slot slot = slots.get(i);
-            if (slot != null)
-            {
-                slot.y = 24 + (getLines() - 1) * 18 + 26 + 3 + slotNum / 3 * 18;
-                slotNum++;
-            }
-        }
     }
 
     public void cleanCraftSlots(boolean toStorageFirst)

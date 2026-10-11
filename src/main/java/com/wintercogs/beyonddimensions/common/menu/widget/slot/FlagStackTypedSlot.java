@@ -19,6 +19,11 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
         setFake(true); // 标记性槽位为假槽位
     }
 
+    public FlagStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex)
+    {
+        this(menu, storage, slotIndex, 0, 0);
+    }
+
     @Override
     public boolean isOrdered()
     {

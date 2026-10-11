@@ -5,7 +5,6 @@ import com.wintercogs.beyonddimensions.api.machine.Machine;
 import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
-import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
@@ -79,9 +78,6 @@ public class NetInterfaceBaseMenu extends BDBaseMenu implements MachineMenu
                 .route("storage", "player")
                 .build();
     }
-
-    private static final int slotStartY = 1 + CommonTextures.TOP_BASE_COMMON_HEIGHT;
-    private static final int invSlotStartY = 6 + slotStartY + CommonTextures.COMMON_SLOTS_HEIGHT * 3 + CommonTextures.FILTER_SLOTS_HEIGHT * 3 + CommonTextures.COMMON_CONNECTION_HEIGHT;
 
 
     public final StackHandler storage;
@@ -168,27 +164,9 @@ public class NetInterfaceBaseMenu extends BDBaseMenu implements MachineMenu
         vanillaQuickMoveStartIndex = this.slots.size();
 
         final int slotCount = storage.getSlots();
-        final int cols = 9;                // 每行列数
-        final int x0 = 8;                  // 起始 X
-        final int y0 = slotStartY + 18;    // 起始 Y（保持原偏移）
-        final int dx = 18;                 // 横向间距
-        final int dy = 36;                 // 纵向间距（保持原来的 36）
-
         for (int i = 0; i < slotCount; i++)
         {
-            int col = i % cols;
-            int row = i / cols;
-            int x = x0 + col * dx;
-            int y = y0 + row * dy;
-
-            this.addSlot(new OrderedStackTypedSlot(
-                    this,
-                    storage,
-                    i, // 槽索引
-                    inventoryStartIndex,
-                    inventoryEndIndex,
-                    x, y
-            ));
+            this.addSlot(new OrderedStackTypedSlot(this, storage, i, inventoryStartIndex, inventoryEndIndex, 0, 0));
         }
 
         vanillaQuickMoveEndIndex = this.slots.size();
@@ -198,20 +176,9 @@ public class NetInterfaceBaseMenu extends BDBaseMenu implements MachineMenu
     {
         // 动态添加标记槽
         final int slotCount = flagStorage.getSlots();
-        final int cols = 9;             // 每行列数
-        final int x0 = 8;               // 起始 X
-        final int y0 = slotStartY;      // 起始 Y（保持原定位）
-        final int dx = 18;              // 横向间距
-        final int dy = 36;              // 纵向间距
-
         for (int i = 0; i < slotCount; i++)
         {
-            int col = i % cols;
-            int row = i / cols;
-            int x = x0 + col * dx;
-            int y = y0 + row * dy;
-
-            this.addSlot(new FlagStackTypedSlot(this, flagStorage, i, x, y));
+            this.addSlot(new FlagStackTypedSlot(this, flagStorage, i));
         }
     }
 
@@ -223,12 +190,12 @@ public class NetInterfaceBaseMenu extends BDBaseMenu implements MachineMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, invSlotStartY + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 0, 0));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 4 + invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 0, 0));
         }
         inventoryEndIndex = slots.size();
     }

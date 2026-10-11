@@ -16,6 +16,11 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
         super(menu, stackTypedHandler, slotIndex, xPosition, yPosition);
     }
 
+    public OrderedStackTypedSlot(BDBaseMenu menu, IStackHandler stackTypedHandler, int slotIndex)
+    {
+        this(menu, stackTypedHandler, slotIndex, 0, 0);
+    }
+
     public OrderedStackTypedSlot(BDBaseMenu menu, IStackHandler stackTypedHandler, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
     {
         super(menu, stackTypedHandler, slotIndex, quickMoveSlotStartIndex, quickMoveSlotEndIndex, xPosition, yPosition);

@@ -42,8 +42,6 @@ public class NetFurnaceMenu extends BDBaseMenu implements MachineMenu
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
     public static final Supplier<MenuType<NetFurnaceMenu>> Net_Furnace_Menu = MENU_TYPES.register("net_furnace_menu", () -> IMenuTypeExtension.create(NetFurnaceMenu::new));
 
-    private static final int invSlotStartY = 128;
-
     private final IStackHandler inputFilterSlots;
     private final IStackHandler fuelFilterSlots;
     private final IStackHandler inputStorageSlots;
@@ -205,13 +203,13 @@ public class NetFurnaceMenu extends BDBaseMenu implements MachineMenu
         inputFilterStart = slots.size();
         for (int i = 0; i < 8; i++)
         {
-            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, inputFilterSlots, i, 7, 38 + i * 18);
+            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, inputFilterSlots, i);
             this.addSlot(flagSlot);
         }
         fuelFilterStart = slots.size();
         for (int i = 0; i < 8; i++)
         {
-            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, fuelFilterSlots, i, 207, 38 + i * 18);
+            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, fuelFilterSlots, i);
             this.addSlot(flagSlot);
         }
     }
@@ -222,21 +220,21 @@ public class NetFurnaceMenu extends BDBaseMenu implements MachineMenu
         vanillaQuickMoveStartIndex = slots.size();
         for (int i = 0; i < 9; i++)
         {
-            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this, inputStorageSlots, i, inventoryStartIndex, inventoryEndIndex, 31 + i * 19, 38);
+            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this, inputStorageSlots, i, inventoryStartIndex, inventoryEndIndex, 0, 0);
             this.addSlot(storageSlot);
         }
         //燃料
         fuelStorageIndex = slots.size();
-        this.addSlot(new OrderedStackTypedSlot(this, fuelStorageSlots, 0, inventoryStartIndex, inventoryEndIndex, 207, 186));
+        this.addSlot(new OrderedStackTypedSlot(this, fuelStorageSlots, 0, inventoryStartIndex, inventoryEndIndex, 0, 0));
         vanillaQuickMoveEndIndex = slots.size();
         // 燃料返回物槽
         fuelReturnIndex = slots.size();
-        this.addSlot(new OrderedStackTypedSlot(this, fuelReturnSlots, 0, inventoryStartIndex, inventoryEndIndex, 7, 186));
+        this.addSlot(new OrderedStackTypedSlot(this, fuelReturnSlots, 0, inventoryStartIndex, inventoryEndIndex, 0, 0));
         // 输出槽
         outputStorageStart = slots.size();
         for (int i = 0; i < 9; i++)
         {
-            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this, outputStorageSlots, i, inventoryStartIndex, inventoryEndIndex, 31 + i * 19, 90);
+            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this, outputStorageSlots, i, inventoryStartIndex, inventoryEndIndex, 0, 0);
             this.addSlot(storageSlot);
         }
     }
@@ -249,12 +247,12 @@ public class NetFurnaceMenu extends BDBaseMenu implements MachineMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 35 + col * 18, invSlotStartY + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 0, 0));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 35 + col * 18, 4 + invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 0, 0));
         }
         inventoryEndIndex = slots.size();
     }
