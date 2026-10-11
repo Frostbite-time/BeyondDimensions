@@ -287,8 +287,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_version            : mod_version,
             mod_authors            : mod_authors,
             mod_description        : mod_description,
-            compixel_version      : compixel_version,
-            kff_version            : kff_version
+            compixel_version       : compixel_version
     ]
     inputs.properties replaceProperties
     expand replaceProperties

@@ -93,11 +93,11 @@ config="${mod_id}.mixins.json"
     ordering="AFTER"
     side="BOTH"
 
-# Kotlin comes from Kotlin for Forge or from CompixelUI's with-kotlin file.
+# 只需 Kotlin 运行库，不依赖 KFF 的特定 API，因此不限制其版本。
+# Kotlin 运行库可由 KFF 或 CompixelUI 的 with-kotlin 版本提供。
 [[dependencies.${mod_id}]]
     modId="kotlinforforge"
     type="optional"
-    versionRange="[${kff_version},6)"
     ordering="AFTER"
     side="BOTH"
 
