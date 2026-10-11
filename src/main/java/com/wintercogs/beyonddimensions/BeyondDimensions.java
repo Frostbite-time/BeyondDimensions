@@ -108,7 +108,7 @@ public class BeyondDimensions
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event)
     {
-        LOGGER.info("维度网络初始化完成(服务端)");
+        LOGGER.info("Dimensional network initialized (server)");
     }
 
     public static ResourceLocation makeId(String path)

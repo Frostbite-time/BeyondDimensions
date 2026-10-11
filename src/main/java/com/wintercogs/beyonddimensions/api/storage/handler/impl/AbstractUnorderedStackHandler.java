@@ -213,7 +213,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     /**
-     * 获取“建槽位时间表”的引用（按你的要求，返回真实引用）
+     * 获取“建槽位时间表”，返回的是真实引用而不是副本
      */
     public Map<IStackKey<?>, Long> getCreationTimeMap()
     {
@@ -221,7 +221,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     /**
-     * 获取“最后修改时间表”的引用（按你的要求，返回真实引用）
+     * 获取“最后修改时间表”，返回的是真实引用而不是副本
      */
     public Map<IStackKey<?>, Long> getLastModifiedTimeMap()
     {
@@ -978,14 +978,14 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             {
                 DataResult<Tag> enc = IStackKey.CODEC.encodeStart(ops, key);
                 Tag encoded = enc.resultOrPartial(err ->
-                        BeyondDimensions.LOGGER.warn("编码 IStackKey 失败：{} | 键={}", err, key)
+                        BeyondDimensions.LOGGER.warn("Failed to encode IStackKey: {} | key={}", err, key)
                 ).orElse(null);
 
                 if (!(encoded instanceof CompoundTag encodedTag))
                 {
                     if (encoded != null)
                     {
-                        BeyondDimensions.LOGGER.warn("IStackKey 编码结果不是 CompoundTag：{} | 键={}",
+                        BeyondDimensions.LOGGER.warn("Encoded IStackKey is not a CompoundTag: {} | key={}",
                                 encoded.getClass().getName(), key);
                     }
                     continue;
@@ -1011,7 +1011,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
      */
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag)
     {
-        try (ErrorData.Report ignored = ErrorData.report("存储"))
+        try (ErrorData.Report ignored = ErrorData.report("storage"))
         {
             readEntries(provider, tag);
         }
@@ -1044,12 +1044,12 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 try
                 {
                     IStackKey.CODEC.parse(ops, keyTag)
-                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("解码 IStackKey 失败：{}", err))
+                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("Failed to decode IStackKey: {}", err))
                             .ifPresent(key -> acceptEntry(key, amount));
                 }
                 catch (Throwable t)
                 {
-                    BeyondDimensions.LOGGER.warn("解码第 {} 个新格式条目时出错: {}", i, t.toString());
+                    BeyondDimensions.LOGGER.warn("Error while decoding new-format entry {}: {}", i, t.toString());
                 }
             }
             return; // 有新格式就不再读取旧格式，避免重复累加
@@ -1065,14 +1065,14 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             String typeStr = entry.getString("Type"); // 旧外层 Type（资源路径）
             if (typeStr.isEmpty())
             {
-                BeyondDimensions.LOGGER.warn("旧格式条目缺少 Type，已跳过（序号={}）", i);
+                BeyondDimensions.LOGGER.warn("Skipped an old-format entry without Type (index={})", i);
                 continue;
             }
 
             CompoundTag typed = entry.getCompound("TypedStack");
             if (typed.isEmpty())
             {
-                BeyondDimensions.LOGGER.warn("旧格式条目缺少 TypedStack，已跳过（序号={}）", i);
+                BeyondDimensions.LOGGER.warn("Skipped an old-format entry without TypedStack (index={})", i);
                 continue;
             }
 
@@ -1084,12 +1084,12 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             try
             {
                 IStackKey.CODEC.parse(ops, compatKey)
-                        .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("旧格式 IStackKey 解码失败：{} | 类型={}", err, typeStr))
+                        .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("Failed to decode old-format IStackKey: {} | type={}", err, typeStr))
                         .ifPresent(key -> acceptEntry(key, amount));
             }
             catch (Throwable t)
             {
-                BeyondDimensions.LOGGER.warn("解码旧格式条目时出错（序号={} 类型={}）：{}", i, typeStr, t.toString());
+                BeyondDimensions.LOGGER.warn("Error while decoding an old-format entry (index={} type={}): {}", i, typeStr, t.toString());
             }
         }
     }

@@ -43,7 +43,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
                 size > ICON_HANDLES
         }
 
-    /** 空手右键存储格子里的资源时调用，返回 true 表示界面打开了自己的菜单，不再发送右键点击 */
+    /** 空手右键存储格子里的资源时调用，返回 true 表示界面打开了自己的菜单，不发送右键点击 */
     var resourceMenu: ((slotId: Int) -> Boolean)? = null
 
     // 上一次交给服务端的点击，用来判定双击；第一下点到的资源随第二下一起发出
@@ -128,12 +128,12 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         }
     }
 
-    /** 空格左键点背包或快捷栏的槽位是整批转移，交给服务端的 BD 命令，不再执行原版的拿起 */
+    /** 空格左键点背包或快捷栏的槽位是整批转移，交给服务端的 BD 命令，不执行原版的拿起 */
     private fun isMoveAllClick(slotId: Int, button: Int, type: ClickType) =
         type == ClickType.PICKUP && button == 0 && spaceHeld() &&
                 slotId >= menu.inventoryStartIndex && slotId < menu.inventoryEndIndex
 
-    /** 普通槽位的 Shift 点击与空格左键由服务端的 BD 命令处理，不再额外发送原版的点击 */
+    /** 普通槽位的 Shift 点击与空格左键由服务端的 BD 命令处理，不额外发送原版的点击 */
     private fun clickVanilla(slotId: Int, slot: Slot, button: Int, type: ClickType) {
         val stack = slot.item.copy()
         val current = KeyAmount(ItemStackKey(stack), stack.count.toLong())

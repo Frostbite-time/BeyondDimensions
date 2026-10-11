@@ -16,7 +16,7 @@ import org.lwjgl.glfw.GLFW
 /** 界面文字在游戏线程取出，随快照或构造参数进入界面 */
 fun tr(key: String, vararg args: Any): String = Component.translatable(key, *args).string
 
-// 一屏的图标一帧画完：滚动或重排时新出现的图标不再分几帧陆续补上
+// 一屏的图标一帧画完：滚动或重排时新出现的图标不必分几帧陆续补上
 private const val ICONS_PER_FRAME = 512
 
 /**

@@ -126,7 +126,7 @@ public class RSNetPathwayBlockEntity extends NetedBlockEntity
         return net.getUnifiedStorage();
     }
 
-    // ================= 绑定 / 订阅（核心迁移点） =================
+    // ================= 绑定 / 订阅 =================
 
     /**
      * 幂等重绑：当 unified 身份变化（或从/到 null）时，取消旧订阅并订阅新目标

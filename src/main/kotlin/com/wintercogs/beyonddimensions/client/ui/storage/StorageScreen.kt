@@ -261,7 +261,7 @@ private fun StorageView(
             BdTabbedWindow(
                 Modifier.width((CHROME_WIDTH + width + editorWidth).dp).then(slots.areaModifier())
                     .onPointerEvent(PointerEventType.Scroll) { event ->
-                        // 分类标签与编辑区自己滚动时不再翻动格子
+                        // 分类标签与编辑区自己滚动时不翻动格子
                         if (event.changes.any { it.isConsumed }) return@onPointerEvent
                         val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
                         if (delta != 0f && page.main) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
@@ -1058,7 +1058,7 @@ private fun CraftSection(
             Box(Modifier.border(1.dp, colors[BdColors.accent]).padding(2.dp)) { BdSlot(slots, layout.resultSlot) }
             Spacer(Modifier.weight(1f))
             Column(horizontalAlignment = Alignment.End) {
-                // 保留合成格时关闭不再退回，退回方向只在换入配方清空合成格时用到
+                // 保留合成格时关闭不退回，退回方向只在换入配方清空合成格时用到
                 OreText(
                     if (keep) text.returnOnClear else text.returnTitle,
                     color = colors[BdColors.faint],

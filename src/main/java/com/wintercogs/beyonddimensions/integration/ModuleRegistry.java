@@ -62,7 +62,7 @@ public final class ModuleRegistry
             commonModules = deduplicateByClassName(discoveredCommonModules);
             clientModules = deduplicateByClassName(discoveredClientModules);
 
-            BeyondDimensions.LOGGER.info("发现 {} 个通用集成模块、{} 个客户端集成模块",
+            BeyondDimensions.LOGGER.info("Discovered {} common integration modules and {} client integration modules",
                     commonModules.size(), clientModules.size());
         }
     }
@@ -73,7 +73,7 @@ public final class ModuleRegistry
         Object modIdData = annotationData.annotationData().get("modId");
         if (!(modIdData instanceof String modId) || modId.isBlank())
         {
-            BeyondDimensions.LOGGER.warn("集成模块 {} 没有填写 modId，已忽略", annotationData.clazz().getClassName());
+            BeyondDimensions.LOGGER.warn("Ignoring integration module {} because modId is missing", annotationData.clazz().getClassName());
             return null;
         }
 

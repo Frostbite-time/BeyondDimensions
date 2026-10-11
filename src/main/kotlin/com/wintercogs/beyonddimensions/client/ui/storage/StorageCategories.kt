@@ -65,7 +65,7 @@ object StorageCategories {
             Files.writeString(temporary, gson.toJson(document))
             Files.move(temporary, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
         } catch (error: Exception) {
-            logger.warn("无法保存存储分类", error)
+            logger.warn("Cannot save storage categories", error)
         }
     }
 
@@ -76,7 +76,7 @@ object StorageCategories {
             val root = Files.newBufferedReader(path).use(JsonParser::parseReader)
             root.asJsonObject.takeIf { it.get("format")?.asInt == FORMAT }
         } catch (error: Exception) {
-            logger.warn("无法读取存储分类", error)
+            logger.warn("Cannot read storage categories", error)
             null
         }
     }

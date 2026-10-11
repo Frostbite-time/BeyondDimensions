@@ -87,7 +87,7 @@ public class SourceUnifiedStorageHandler implements ISourceCap
         long actualInside = getSource();
 
         long operation = wanted - actualInside;
-        BeyondDimensions.LOGGER.info("某个网络的魔源数量被外界强行设置，可能导致错误，最终魔源数量被设置为：{}", operation);
+        BeyondDimensions.LOGGER.info("The source amount of a network was set from outside, which may cause errors; final source amount set to: {}", operation);
         if (operation > 0)
             storage.insert(SourceStackKey.INSTANCE, operation, false);
         else

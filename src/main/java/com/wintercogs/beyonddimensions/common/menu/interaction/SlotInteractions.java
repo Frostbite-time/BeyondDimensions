@@ -152,7 +152,7 @@ public final class SlotInteractions
             if (entry.interaction().applies(click) && entry.interaction().perform(click))
             {
                 if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("槽位点击 {} {}，按键 {}，修饰键 {}，由 {} 处理", click.kind(), click.slot().index,
+                    LOGGER.debug("Slot click {} {} button {} modifiers {} handled by {}", click.kind(), click.slot().index,
                             click.button(), click.modifiers(), entry.id());
                 return true;
             }

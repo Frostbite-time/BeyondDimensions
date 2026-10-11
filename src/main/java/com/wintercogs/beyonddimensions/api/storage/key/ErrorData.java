@@ -118,7 +118,7 @@ public final class ErrorData
                 if (report != null)
                     report.failed(raw, reason);
                 else
-                    LOGGER.warn("无法解析的存储资源已封装为错误数据：{}，原因：{}", describe(raw), reason);
+                    LOGGER.warn("Wrapped an unparsable stored resource as error data: {}, reason: {}", describe(raw), reason);
                 return DataResult.success(Pair.of(wrap(raw), ops.empty()));
             }
 
@@ -141,7 +141,7 @@ public final class ErrorData
                 if (report != null)
                     report.restored++;
                 else
-                    LOGGER.info("错误数据已还原：{}", describe(raw));
+                    LOGGER.info("Restored error data: {}", describe(raw));
                 return key.get();
             }
         }
@@ -158,13 +158,13 @@ public final class ErrorData
     {
         String type = type(raw);
         String content = content(raw);
-        return (type == null ? "未知类型" : type) + (content == null ? "" : " " + content);
+        return (type == null ? "unknown type" : type) + (content == null ? "" : " " + content);
     }
 
     /**
      * 在当前线程上汇总一次读档中的封装与还原，关闭时打一条日志；嵌套打开时只有最外层汇总
      *
-     * @param what 读档的对象，例如“维度网络 #3”
+     * @param what 读档的对象，会写进日志，例如 "dimensional network #3"
      */
     public static Report report(String what)
     {
@@ -227,13 +227,13 @@ public final class ErrorData
                 return;
             REPORT.remove();
             if (failed > 0)
-                LOGGER.warn("{}：{} 项资源无法解析，已原样封装为错误数据（首个原因：{}）", what, failed, firstReason);
+                LOGGER.warn("{}: {} resources could not be parsed and were wrapped as error data as is (first reason: {})", what, failed, firstReason);
             if (stillWrapped > 0)
-                LOGGER.warn("{}：{} 项错误数据仍无法解析，继续保留", what, stillWrapped);
+                LOGGER.warn("{}: {} error data entries still cannot be parsed and stay wrapped", what, stillWrapped);
             if (failed > 0 || stillWrapped > 0)
-                LOGGER.warn("{}：错误数据内容 {}", what, byContent);
+                LOGGER.warn("{}: error data content {}", what, byContent);
             if (restored > 0)
-                LOGGER.info("{}：{} 项错误数据已还原", what, restored);
+                LOGGER.info("{}: restored {} error data entries", what, restored);
         }
     }
 }

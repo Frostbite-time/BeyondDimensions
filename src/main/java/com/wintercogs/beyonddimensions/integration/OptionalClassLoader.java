@@ -21,11 +21,11 @@ public final class OptionalClassLoader
                 return expectedType.cast(instance);
             }
 
-            BeyondDimensions.LOGGER.warn("集成模块没有实现 {}：{}", expectedType.getSimpleName(), className);
+            BeyondDimensions.LOGGER.warn("Integration module does not implement {}: {}", expectedType.getSimpleName(), className);
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.error("集成模块加载失败：{}", className, t);
+            BeyondDimensions.LOGGER.error("Failed to load integration module: {}", className, t);
         }
 
         return null;

@@ -130,7 +130,7 @@ private const val CONDUIT_GAP = 2
 private const val LABEL = 11
 
 /**
- * 参照改版前的网络熔炉：左列是八个输入标记，最下方是返还容器的槽位；右列是八个燃料标记，最下方是燃料储备；
+ * 网络熔炉的主页面：左列是八个输入标记，最下方是返还容器的槽位；右列是八个燃料标记，最下方是燃料储备；
  * 中间九列熔炼位，下方是背包。每列原料下方的箭头随熔炼进度由上往下点亮，产物下方的火焰随剩余燃料由上往下熄灭。
  */
 @Composable
@@ -244,7 +244,7 @@ private fun CookConduit(progress: Float, clock: State<Float>?) {
 /** 一簇火苗：左边第几格、几格宽、最高几行，以及起伏时最多矮几行 */
 private class Tongue(val left: Int, val width: Int, val height: Int, val flicker: Int)
 
-/** 照改版前的贴图：三簇竖向的火苗，中间一簇最高最宽，簇间各空一格 */
+/** 三簇竖向的火苗，中间一簇最高最宽，簇间各空一格 */
 private val TONGUES = listOf(Tongue(3, 3, 9, 1), Tongue(7, 4, 12, 2), Tongue(12, 3, 9, 1))
 
 /** 火焰区域的行数；剩余燃料按这些行由上往下熄灭 */

@@ -60,7 +60,7 @@ public final class MachineSettings
                 ResourceLocation id = BDRegistries.MACHINE_SETTINGS.getKey(setting);
                 if (id == null)
                 {
-                    LOGGER.error("机器设置 {} 没有注册到 {}，无法保存", setting, BDRegistries.MACHINE_SETTING_KEY.location());
+                    LOGGER.error("Machine setting {} is not registered in {} and cannot be saved", setting, BDRegistries.MACHINE_SETTING_KEY.location());
                     return;
                 }
                 encodeInto(setting, value, ops).ifPresent(encoded -> builder.add(id.toString(), encoded));
@@ -157,7 +157,7 @@ public final class MachineSettings
         }
         catch (RuntimeException e)
         {
-            LOGGER.error("机器设置 {} 编码失败：{}", setting, value, e);
+            LOGGER.error("Failed to encode machine setting {}: {}", setting, value, e);
             return java.util.Optional.empty();
         }
     }

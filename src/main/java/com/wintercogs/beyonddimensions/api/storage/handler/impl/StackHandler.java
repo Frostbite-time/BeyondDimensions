@@ -104,7 +104,7 @@ public class StackHandler implements IStackHandler
                     KeyAmount ka = KeyAmount.CODEC.decode(ops, typedNode)
                             .map(com.mojang.datafixers.util.Pair::getFirst)
                             .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                                    "旧 Stacks -> KeyAmount(来自 TypedStack) 解码失败: {}", err))
+                                    "Failed to decode old Stacks -> KeyAmount (from TypedStack): {}", err))
                             .orElse(new KeyAmount(EmptyStackKey.INSTANCE, 0L));
 
                     out.add(ka);
@@ -251,7 +251,7 @@ public class StackHandler implements IStackHandler
         Arrays.fill(this.keys, EmptyStackKey.INSTANCE);
         Arrays.fill(this.amounts, 0L);
 
-        // ★ 初始化“空桶”：所有槽都是空
+        // 初始化“空桶”：所有槽都是空
         SlotBucket eb = bucketOf(EmptyStackKey.INSTANCE);
         for (int i = 0; i < this.size; i++)
         {
@@ -308,7 +308,7 @@ public class StackHandler implements IStackHandler
         // 清空外部类型缓存
         key2stackMap.clear();
 
-        // ★ 重建空桶
+        // 重建空桶
         SlotBucket eb = bucketOf(EmptyStackKey.INSTANCE);
         for (int i = 0; i < size; i++)
         {
@@ -394,7 +394,7 @@ public class StackHandler implements IStackHandler
             keys[slot] = EmptyStackKey.INSTANCE;
             amounts[slot] = 0L;
 
-            // ★ 加入空桶
+            // 加入空桶
             bucketOf(EmptyStackKey.INSTANCE).add(slot);
 
             removeFromIndex(oldKey);
@@ -407,7 +407,7 @@ public class StackHandler implements IStackHandler
         keys[slot] = key;
         amounts[slot] = clamped;
 
-        // ★ 从空桶移除
+        // 从空桶移除
         SlotBucket eb = keyBuckets.get(EmptyStackKey.INSTANCE);
         if (eb != null) eb.remove(slot);
 
@@ -416,7 +416,7 @@ public class StackHandler implements IStackHandler
         bucketOf(key).add(slot);
         ensureInIndex(key);
 
-        // ★ 如果换键，且旧键已无任何槽位占用，则移除缓存
+        // 如果换键，且旧键已无任何槽位占用，则移除缓存
         removeFromIndex(oldKey);
 
         onChange();
@@ -453,7 +453,7 @@ public class StackHandler implements IStackHandler
                 keys[slot] = key;
                 amounts[slot] = ins;
 
-                // ★ 从空桶移除
+                // 从空桶移除
                 SlotBucket eb = keyBuckets.get(EmptyStackKey.INSTANCE);
                 if (eb != null) eb.remove(slot);
 
@@ -534,7 +534,7 @@ public class StackHandler implements IStackHandler
                             keys[idx] = key;
                             amounts[idx] = ins;
 
-                            // ★ 从空桶移除
+                            // 从空桶移除
                             eb.remove(idx);
 
                             bucketOf(key.getTypeId()).add(idx);
@@ -679,10 +679,10 @@ public class StackHandler implements IStackHandler
                     keys[slot] = EmptyStackKey.INSTANCE;
                     amounts[slot] = 0L;
 
-                    // ★ 加入空桶
+                    // 加入空桶
                     bucketOf(EmptyStackKey.INSTANCE).add(slot);
 
-                    // ★ 仅当容器已无该键时才移除缓存
+                    // 仅当容器已无该键时才移除缓存
                     removeFromIndex(realKey);
                 }
                 else
@@ -733,7 +733,7 @@ public class StackHandler implements IStackHandler
         clearStorage();
         RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
         StackHandler decoded;
-        try (ErrorData.Report ignored = ErrorData.report("设备存储"))
+        try (ErrorData.Report ignored = ErrorData.report("device storage"))
         {
             decoded = CODEC.parse(ops, tag).getOrThrow(IllegalStateException::new);
         }
@@ -766,7 +766,7 @@ public class StackHandler implements IStackHandler
             {
                 keyBuckets.remove(key);
             }
-            key2stackMap.remove(key); // ★ 只有完全没有了才移除缓存
+            key2stackMap.remove(key); // 只有完全没有了才移除缓存
         }
     }
 

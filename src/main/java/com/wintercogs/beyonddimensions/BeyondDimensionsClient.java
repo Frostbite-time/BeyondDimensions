@@ -29,7 +29,7 @@ public class BeyondDimensionsClient
     public void onClientSetup(FMLClientSetupEvent event)
     {
         event.enqueueWork(() -> {
-            BeyondDimensions.LOGGER.info("维度网络初始化完成(客户端)");
+            BeyondDimensions.LOGGER.info("Dimensional network initialized (client)");
         });
     }
 }

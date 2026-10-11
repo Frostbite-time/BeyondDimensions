@@ -14,7 +14,7 @@ import java.util.Objects;
 
 
 /**
- * 统一存储（与旧类同名）：
+ * 维度网络的统一存储：
  * - 策略采用“到0即删除”（继承 UnorderedStackHandlerRemoveZero）
  * - 在 onChange() 时对接 DimensionsNet.setDirty()，再广播变更（调用 super.onChange()）
  * - 注意：此存储仅用于维度网络，维度网络也仅使用此存储，以便存放一些维度网络专用特性

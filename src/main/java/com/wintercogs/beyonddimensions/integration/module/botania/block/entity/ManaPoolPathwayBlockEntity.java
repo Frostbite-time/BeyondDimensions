@@ -278,7 +278,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
             }
         }
 
-        // 新版：转移状态更新 + 结束立即补同步
+        // 更新转移状态，转移结束时立即补一次同步
         if (be.isDoingTransfer)
         {
             be.ticksDoingTransfer++;

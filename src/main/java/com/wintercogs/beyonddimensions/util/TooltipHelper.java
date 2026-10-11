@@ -112,7 +112,7 @@ public final class TooltipHelper
         }
         catch (RuntimeException failure)
         {
-            BeyondDimensions.LOGGER.warn("无法读取资源类型 {} 的提示文字", stack.key().getTypeId(), failure);
+            BeyondDimensions.LOGGER.warn("Could not load tooltip for resource type {}", stack.key().getTypeId(), failure);
             result = List.of();
         }
         CACHE.put(key, result);

@@ -60,7 +60,7 @@ public class XpUtil
     {
         if (fromLevel < 0 || toLevel < 0)
         {
-            System.err.println("[XpUtils] 等级不能为负数。");
+            System.err.println("[XpUtils] Level must be non-negative.");
             return 0L;
         }
         double diff = totalXpAtFractionalLevel(toLevel) - totalXpAtFractionalLevel(fromLevel);

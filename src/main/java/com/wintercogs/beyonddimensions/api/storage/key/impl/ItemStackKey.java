@@ -65,7 +65,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         private static final String K_STACK = "Stack";
         // 3代旧键名
         private static final String K_LEGACY = "internal_stack";
-        // 注意：旧数据中可能还有 amount/Amount；Key 层面不需要，读取时**忽略**即可
+        // 旧数据中可能还有 amount/Amount；Key 层面不需要，读取时忽略
         private static final String K_AMOUNT = "amount";
         private static final String K_AMOUNT_OLD = "Amount";
 
@@ -396,7 +396,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.encodeStart(ops, this)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                            "ItemStackKey 在序列化(Codec)时出错: {}", err))
+                            "ItemStackKey codec serialization error: {}", err))
                     .map(nbt -> {
                         if (nbt instanceof CompoundTag ct)
                         {
@@ -407,7 +407,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
                         {
                             // 理论上不应发生：MapCodec 在 NbtOps 下应产生 CompoundTag
                             BeyondDimensions.LOGGER.error(
-                                    "ItemStackKey 序列化得到的 NBT 非 CompoundTag，已丢弃该结果: {}",
+                                    "ItemStackKey serialized to an NBT that is not a CompoundTag, result discarded: {}",
                                     nbt.getClass().getName());
                             return new CompoundTag();
                         }
@@ -416,7 +416,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.error("ItemStackKey 在序列化时异常: {}", t.getMessage(), t);
+            BeyondDimensions.LOGGER.error("Error while serializing ItemStackKey: {}", t.getMessage(), t);
             return new CompoundTag();
         }
     }
@@ -429,12 +429,12 @@ public final class ItemStackKey implements IStackKey<ItemStack>
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.parse(ops, nbt)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                            "ItemStackKey 在反序列化(Codec)时出错: {} | 键={}", err, nbt.getAllKeys()))
+                            "ItemStackKey codec deserialization error: {} | Keys={}", err, nbt.getAllKeys()))
                     .orElse(ItemStackKey.EMPTY);
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.error("ItemStackKey 反序列化异常。键={} 错误={}",
+            BeyondDimensions.LOGGER.error("Error while deserializing ItemStackKey. Keys={} Error={}",
                     nbt.getAllKeys(), t.getMessage(), t);
             return ItemStackKey.EMPTY;
         }
@@ -566,7 +566,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         catch (Throwable t)
         {
             // 不让逻辑中断，留给 equals/hashCode 回退到 patch.equals/hash
-            BeyondDimensions.LOGGER.warn("ItemStackKey字节序列化失败: {}", t.toString());
+            BeyondDimensions.LOGGER.warn("Failed to serialize ItemStackKey components to bytes: {}", t.toString());
             this.patchByte = new byte[0];
             this.equalsByteProviderRef = null;
         }
@@ -606,7 +606,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.warn("ItemStackKey 组件补丁断开失败: {}", t.toString());
+            BeyondDimensions.LOGGER.warn("Failed to detach ItemStackKey component patch: {}", t.toString());
             this.detachedPatchCache = this.patch;
             this.detachedPatchProviderRef = null;
             return this.patch;

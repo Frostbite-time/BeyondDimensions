@@ -246,7 +246,7 @@ fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
 private val AMOUNT_FONT_PIXEL = (2f / 3f).dp
 
 // 字体里每个字符都占 6 个字体像素宽，小数点只在格子中间画一点；原版字体的小数点只占 2 个像素宽。
-// 把小数点与它前一个字符各收紧 2 个像素，点的位置与总宽度就和原版一样，"1.2K" 从 23 个像素缩到 19 个
+// 把小数点与它前一个字符各收紧 2 个像素，点的位置与总宽度就和原版一样，例如 "1.2K" 宽 19 个像素
 private val NARROW = SpanStyle(letterSpacing = (-2f / 9f).em)
 
 private fun narrowDots(text: String) = buildAnnotatedString {
@@ -256,7 +256,7 @@ private fun narrowDots(text: String) = buildAnnotatedString {
 }
 
 /**
- * 单行搜索框。像原版的搜索框一样右键清空，这一下不再弹出右键菜单：清空之后菜单里的剪切、复制已没有对象。
+ * 单行搜索框。像原版的搜索框一样右键清空，这一下不弹出右键菜单：清空之后菜单里的剪切、复制已没有对象。
  * [help] 是悬停时的说明，开始输入后收起，免得挡住下方的内容。
  */
 @Composable

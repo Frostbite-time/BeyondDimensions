@@ -15,7 +15,7 @@ public class StackKeyRegistry
     {
         if (TYPES.containsKey(type.getTypeId()))
         {
-            throw new IllegalStateException("尝试注册重复类型的Key: " + type.getTypeId());
+            throw new IllegalStateException("Stack key type is already registered: " + type.getTypeId());
         }
         TYPES.put(type.getTypeId(), type);
     }
@@ -26,7 +26,7 @@ public class StackKeyRegistry
         IStackKey<?> type = TYPES.get(id);
         if (type == null)
         {
-            throw new IllegalArgumentException("注册表中不存在此类型的Key，请先注册再使用: " + id);
+            throw new IllegalArgumentException("Stack key type is not registered; register it before use: " + id);
         }
         return (IStackKey<T>) type;
     }

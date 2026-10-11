@@ -331,11 +331,11 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.encodeStart(ops, this)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                            "ChemicalStackKey 序列化(Codec)出错: {}", err))
+                            "ChemicalStackKey codec serialization error: {}", err))
                     .map(nbt -> {
                         if (nbt instanceof CompoundTag ct) return ct; // 期望产物
                         BeyondDimensions.LOGGER.error(
-                                "ChemicalStackKey 序列化得到的 NBT 非 CompoundTag，已丢弃该结果: {}",
+                                "ChemicalStackKey serialized to an NBT that is not a CompoundTag, result discarded: {}",
                                 nbt.getClass().getName());
                         return new CompoundTag();
                     })
@@ -343,7 +343,7 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.error("ChemicalStackKey 序列化时出错: {}", t.getMessage(), t);
+            BeyondDimensions.LOGGER.error("Error while serializing ChemicalStackKey: {}", t.getMessage(), t);
             return new CompoundTag();
         }
     }
@@ -356,12 +356,12 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.parse(ops, nbt)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                            "ChemicalStackKey 反序列化(Codec)出错: {} | 键={}", err, nbt.getAllKeys()))
+                            "ChemicalStackKey codec deserialization error: {} | Keys={}", err, nbt.getAllKeys()))
                     .orElse(ChemicalStackKey.EMPTY);
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.error("ChemicalStackKey 反序列化错误。键={} 错误={}",
+            BeyondDimensions.LOGGER.error("Error while deserializing ChemicalStackKey. Keys={} Error={}",
                     nbt.getAllKeys(), t.getMessage(), t);
             return ChemicalStackKey.EMPTY;
         }

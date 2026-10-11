@@ -49,7 +49,7 @@ public class ModItemModelProvider extends BDItemModelProvider
     }
 
     /**
-     * 为所有流体生成桶模型（基于我们封装的 ModFluids.ALL）
+     * 为 BDFluids.ALL 里的每种流体生成桶模型
      */
     private void generateFluidBucketModels()
     {

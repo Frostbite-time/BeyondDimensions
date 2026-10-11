@@ -615,7 +615,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
         PacketDistributor.sendToServer(OpenNetGuiPacket(menu.player.stringUUID, target))
     }
 
-    // 指针不用处理：服务器直接换菜单（SwitchMenuProvider），客户端不会收起指针
+    // 只需记下滚动位置：服务器直接换菜单（见 SwitchMenuProvider），指针留在原处
     private fun saveTransferContext() {
         UIDataHelper.currentPage = menu.lineData
         UIDataHelper.isTransfer = true

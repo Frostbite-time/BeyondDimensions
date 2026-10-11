@@ -269,7 +269,7 @@ public class DimensionsNet extends SavedData
     /**
      * 尝试从玩家获取主维度网络，仅在服务端调用。
      * <p>
-     * 这是新的主网络语义接口：玩家即使仍然属于其他网络，只要主网络被显式清空，
+     * 只看主网络：玩家即使仍然属于其他网络，只要主网络被显式清空，
      * 这里依然会返回 {@code null}。
      *
      * @param player 玩家
@@ -412,7 +412,7 @@ public class DimensionsNet extends SavedData
         }
 
         // 解析不了的资源封装成错误数据，汇总成一条带网络 id 的日志
-        try (ErrorData.Report ignored = ErrorData.report("维度网络 #" + net.id))
+        try (ErrorData.Report ignored = ErrorData.report("dimensional network #" + net.id))
         {
             net.unifiedStorage.deserializeNBT(registryAccess, tag.getCompound("UnifiedStorage"));
         }
@@ -500,7 +500,7 @@ public class DimensionsNet extends SavedData
             }
             catch (IllegalArgumentException e)
             {
-                LOGGER.warn("维度网络 #{} 的 {} 中有无法解析的玩家 UUID：{}，已跳过", netId, key, entry.getAsString());
+                LOGGER.warn("Dimensional network #{}: skipped an unparsable player UUID in {}: {}", netId, key, entry.getAsString());
             }
         }
     }
@@ -591,7 +591,7 @@ public class DimensionsNet extends SavedData
             ResourceLocation typeId = BDRegistries.NET_DATA_TYPES.getKey(type);
             if (typeId == null)
             {
-                LOGGER.error("维度网络 #{} 有一项挂接数据的类型没有注册到 {}，无法保存", id, BDRegistries.NET_DATA_TYPE_KEY.location());
+                LOGGER.error("Dimensional network #{}: an attached data type is not registered in {} and cannot be saved", id, BDRegistries.NET_DATA_TYPE_KEY.location());
                 continue;
             }
             Tag encoded = encodeAttachment(type, entry.getValue(), ops);
@@ -620,12 +620,12 @@ public class DimensionsNet extends SavedData
             DataResult<Tag> result = type.codec().encodeStart(ops, (T) value);
             if (result.result().isPresent())
                 return result.result().get();
-            LOGGER.error("维度网络 #{} 的挂接数据 {} 编码失败，沿用上次保存的内容：{}", id,
+            LOGGER.error("Dimensional network #{}: failed to encode attached data {}, keeping the last saved content: {}", id,
                     BDRegistries.NET_DATA_TYPES.getKey(type), result.error().map(DataResult.Error::message).orElse(""));
         }
         catch (RuntimeException e)
         {
-            LOGGER.error("维度网络 #{} 的挂接数据 {} 编码时出错，沿用上次保存的内容", id, BDRegistries.NET_DATA_TYPES.getKey(type), e);
+            LOGGER.error("Dimensional network #{}: error while encoding attached data {}, keeping the last saved content", id, BDRegistries.NET_DATA_TYPES.getKey(type), e);
         }
         return null;
     }
@@ -637,7 +637,7 @@ public class DimensionsNet extends SavedData
         for (String key : quarantine.getAllKeys())
             quarantinedAttachments.put(key, quarantine.get(key));
         if (!quarantine.isEmpty())
-            LOGGER.warn("维度网络 #{}：{} 项挂接数据处于隔离中：{}", id, quarantine.size(), quarantine.getAllKeys());
+            LOGGER.warn("Dimensional network #{}: {} attached data entries are quarantined: {}", id, quarantine.size(), quarantine.getAllKeys());
 
         RegistryOps<Tag> ops = registryAccess.createSerializationContext(NbtOps.INSTANCE);
         CompoundTag in = tag.getCompound(ATTACHMENTS_TAG);
@@ -655,11 +655,11 @@ public class DimensionsNet extends SavedData
             if (failure != null)
             {
                 quarantine(key, raw);
-                LOGGER.error("维度网络 #{} 的挂接数据 {} 无法解析，已原样隔离保存：{}", id, key, failure);
+                LOGGER.error("Dimensional network #{}: attached data {} cannot be parsed and is kept in quarantine as is: {}", id, key, failure);
             }
         }
         if (!unknownAttachments.isEmpty())
-            LOGGER.warn("维度网络 #{}：{} 项挂接数据的类型未注册（对应模组未加载？），原样保留：{}", id, unknownAttachments.size(), unknownAttachments.keySet());
+            LOGGER.warn("Dimensional network #{}: {} attached data entries have unregistered types (is their mod missing?), kept as is: {}", id, unknownAttachments.size(), unknownAttachments.keySet());
     }
 
     // 解析成功时放入挂接数据并返回 null，失败时返回原因
