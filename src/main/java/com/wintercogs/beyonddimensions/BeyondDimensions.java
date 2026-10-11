@@ -108,7 +108,7 @@ public class BeyondDimensions
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event)
     {
-        LOGGER.info("Dimensional network initialized (server)");
+        LOGGER.info("Beyond Dimensions initialized (server)");
     }
 
     public static ResourceLocation makeId(String path)
