@@ -165,6 +165,7 @@
   "msg.beyonddimensions.machine_config_card.empty": "配置卡是空的，先對一台機器使用以複製配置",
   "msg.beyonddimensions.machine_config_card.mismatch": "配置卡存的是%s的配置，不能貼上到%s",
   "msg.beyonddimensions.machine_config_card.too_large": "配置資料過大（%s KiB，上限 %s KiB），未複製；請移除槽位裡資料量大的物品",
+  "msg.beyonddimensions.matter_compress_ball.too_large": "伺服器已拒絕：這個配方會產生資料量過大的壓縮物質球，可能造成死檔",
   "item.beyonddimensions.warden_soul_tag_item": "靈魂標記器",
 
   "menu.title.beyonddimensions.xp_exchange_menu": "經驗棒設定",

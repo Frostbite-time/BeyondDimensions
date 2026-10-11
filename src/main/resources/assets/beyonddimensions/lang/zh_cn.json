@@ -165,6 +165,7 @@
   "msg.beyonddimensions.machine_config_card.empty": "配置卡是空的，先对一台机器使用以复制配置",
   "msg.beyonddimensions.machine_config_card.mismatch": "配置卡存的是%s的配置，不能粘贴到%s",
   "msg.beyonddimensions.machine_config_card.too_large": "配置数据过大（%s KiB，上限 %s KiB），未复制；请移除槽位里数据量大的物品",
+  "msg.beyonddimensions.matter_compress_ball.too_large": "服务器已拒绝：这个配方会生成数据量过大的压缩物质球，可能造成死档",
   "item.beyonddimensions.warden_soul_tag_item": "灵魂标记器",
 
   "menu.title.beyonddimensions.xp_exchange_menu": "经验棒设置",

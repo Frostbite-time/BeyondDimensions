@@ -165,6 +165,7 @@
   "msg.beyonddimensions.machine_config_card.empty": "The card is blank; use it on a machine to copy a configuration first",
   "msg.beyonddimensions.machine_config_card.mismatch": "The card holds a configuration for %s and cannot be pasted to %s",
   "msg.beyonddimensions.machine_config_card.too_large": "Configuration too large (%s KiB, limit %s KiB); nothing was copied. Remove items with large data from its slots",
+  "msg.beyonddimensions.matter_compress_ball.too_large": "Refused by the server: this recipe would create a Compressed Matter Orb holding too much data, which could make the save unloadable",
   "item.beyonddimensions.warden_soul_tag_item": "Warden Soul Tagger",
 
   "menu.title.beyonddimensions.xp_exchange_menu": "XP Rod Settings",

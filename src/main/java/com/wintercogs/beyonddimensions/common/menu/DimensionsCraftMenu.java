@@ -21,6 +21,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -242,7 +243,11 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                 return false;
         }
         if (packed && !fitsInMatterBall(inputKeys, amount))
-            return false;
+        {
+            // 请求本身有效，只是不能照做：把原因告诉玩家并视为已处理，否则客户端只会提示"服务器拒绝了这次操作"
+            player.displayClientMessage(Component.translatable("msg.beyonddimensions.matter_compress_ball.too_large"), false);
+            return true;
+        }
 
         // 清空工艺槽物品
         cleanCraftSlots(PlayerCraftingGrid.of(player).returnToStorage());
@@ -275,7 +280,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
 
     private static final int MAX_MATTER_BALL_BYTES = 1536 * 1024;
 
-    // 物质压缩球需要能随物品同步给客户端，编码超出上限的内容不予打包
+    // 压缩物质球是普通物品，随原版数据包同步：过大的球会让持有它和它附近的玩家断线，所以编码超出上限的内容不予打包
     private boolean fitsInMatterBall(List<IStackKey<?>> inputKeys, List<Long> amount)
     {
         List<KeyAmount> contents = new ArrayList<>(inputKeys.size());
