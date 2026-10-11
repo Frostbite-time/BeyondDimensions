@@ -60,7 +60,7 @@ public class NetControlMenu extends BDBaseMenu
     }
 
     private static final int ACTION_MASK = (1 << NetControlAction.values().length) - 1;
-    private static final SyncCodec<String> NAME = SyncCodecs.string(256);
+    private static final SyncCodec<String> NAME = SyncCodecs.STRING;
     private static final SyncCodec<NetPermissionlevel> ROLE = SyncCodecs.enumeration(NetPermissionlevel.class);
     private static final SyncCodec<NetControlAction> ACTION = SyncCodecs.enumeration(NetControlAction.class);
 

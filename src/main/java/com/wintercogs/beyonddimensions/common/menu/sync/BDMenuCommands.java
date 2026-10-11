@@ -114,7 +114,7 @@ public final class BDMenuCommands
     public BDMenuCommands(BDBaseMenu menu)
     {
         this.menu = menu;
-        var nativeKey = MinecraftSyncCodecs.registry("beyonddimensions:stack_key/1", BDMenuResources.MAX_NATIVE_BYTES, IStackKey.STREAM_CODEC);
+        var nativeKey = MinecraftSyncCodecs.registry("beyonddimensions:stack_key/1", IStackKey.STREAM_CODEC);
 
         var keyCodec = SyncCodec.<Key>of("beyonddimensions:command_key/1:" + nativeKey.id(),
                 (out, value) -> {
@@ -258,10 +258,8 @@ public final class BDMenuCommands
         lastFeedbackTick = tick;
         String reason = switch (result.failure())
         {
-            case QUEUE_BYTES, PENDING_ACTIONS -> "busy";
             case BODY_BYTES -> "large";
             case NOT_READY -> "waiting";
-            case QUEUE_TIMEOUT, SEND_TIMEOUT, REPLY_TIMEOUT, ASSEMBLY_TIMEOUT -> "timeout";
             case THROTTLED -> "rate";
             case CODEC, MALFORMED -> "data";
             default -> "rejected";

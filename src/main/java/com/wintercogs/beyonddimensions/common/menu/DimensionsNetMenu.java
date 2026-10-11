@@ -85,7 +85,7 @@ public class DimensionsNetMenu extends BDBaseMenu
             .field("network.id", SyncCodecs.INT,
                     m -> m.player.level().isClientSide() ? m.clientNetworkId : m.serverNet() == null ? DimensionsNet.NO_PRIMARY_NET_ID : m.serverNet().getId(),
                     (m, value) -> m.clientNetworkId = value)
-            .field("network.name", SyncCodecs.string(DimensionsNet.MAX_NETWORK_NAME_LENGTH * 4),
+            .field("network.name", SyncCodecs.STRING,
                     m -> m.player.level().isClientSide() ? m.clientNetworkName : m.serverNet() == null ? "" : m.serverNet().getCustomName(),
                     (m, value) -> m.clientNetworkName = value)
             .field("limit.types", SyncCodecs.INT,

@@ -7,10 +7,7 @@ import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackType
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.forge.sync.MinecraftSyncCodecs;
-import dev.compixel.sync.MenuSyncOptions;
-import dev.compixel.sync.action.ActionLimits;
 import dev.compixel.sync.state.*;
-import dev.compixel.sync.transport.TransferBudget;
 
 import java.util.*;
 
@@ -49,19 +46,8 @@ public final class BDMenuResources implements AutoCloseable
     {
     }
 
-    public static final int MAX_NATIVE_BYTES = 1536 * 1024;
+    // 资源操作可能携带多个较大的资源键
     public static final int MAX_ACTION_BYTES = 8 * 1024 * 1024;
-    private static final int MAX_ENTRIES = 100_000;
-
-    // 资源操作可能携带多个较大的资源键，这些预算属于本模组自己的资源菜单
-    private static final MenuSyncOptions OPTIONS = new MenuSyncOptions(
-            new SyncLimits(128 * 1024,
-                    new TransferBudget(32 * 1024, 4L * 1024 * 1024, 256 * 1024),
-                    16, 2 * 1024 * 1024, 32L * 1024 * 1024, 250_000, 200),
-            new ActionLimits(16 * 1024,
-                    new TransferBudget(64 * 1024, 4L * 1024 * 1024, 256 * 1024),
-                    16L * 1024 * 1024, 64, 32, 600, 200, 200),
-            100);
 
     private static final SyncCodec<Ref> REF = SyncCodec.of("beyonddimensions:resource_ref/1",
             (out, value) -> {
@@ -135,7 +121,7 @@ public final class BDMenuResources implements AutoCloseable
     public BDMenuResources(BDBaseMenu menu)
     {
         this.menu = menu;
-        var nativeKey = MinecraftSyncCodecs.registry("beyonddimensions:stack_key/1", MAX_NATIVE_BYTES, IStackKey.STREAM_CODEC);
+        var nativeKey = MinecraftSyncCodecs.registry("beyonddimensions:stack_key/1", IStackKey.STREAM_CODEC);
         var definition = SyncCodec.<Definition>of("beyonddimensions:resource_definition/1:" + nativeKey.id(),
                 (out, value) -> {
                     out.writeLong(value.id());
@@ -161,7 +147,7 @@ public final class BDMenuResources implements AutoCloseable
                 .include("view", view)
                 .include("resources", menu.resources().schema)
                 .build();
-        return MenuSync.bind(menu, combined, OPTIONS).onUpdate(m -> m.resources().applyClient());
+        return MenuSync.bind(menu, combined).onUpdate(m -> m.resources().applyClient());
     }
 
     /**
@@ -172,7 +158,7 @@ public final class BDMenuResources implements AutoCloseable
         var schema = SyncSchema.<M>builder("beyonddimensions:resources", 2)
                 .include("resources", menu.resources().schema)
                 .build();
-        return MenuSync.bind(menu, schema, OPTIONS).onUpdate(m -> m.resources().applyClient());
+        return MenuSync.bind(menu, schema).onUpdate(m -> m.resources().applyClient());
     }
 
     public void slotAdded(AbstractStackTypedSlot slot)
@@ -225,10 +211,7 @@ public final class BDMenuResources implements AutoCloseable
     {
         if (closed || initial || fullGroups.contains(group))
             return;
-        Set<IStackKey<?>> keys = dirtyKeys.computeIfAbsent(group, ignored -> new HashSet<>());
-        keys.add(key);
-        if (keys.size() > MAX_ENTRIES)
-            invalidateGroup(group);
+        dirtyKeys.computeIfAbsent(group, ignored -> new HashSet<>()).add(key);
     }
 
     public SyncMap<Long, Definition> catalog()
@@ -320,12 +303,6 @@ public final class BDMenuResources implements AutoCloseable
         if (!orderedDirty && fullGroups.isEmpty() && dirtyKeys.isEmpty())
             return;
 
-        long sourceRows = 0;
-        for (DisorderedSlotGroupSync group : menu.slotGroupSyncs)
-            sourceRows += group.getStorage().getSlots();
-        if (sourceRows > MAX_ENTRIES)
-            throw new IllegalStateException("Menu resource entry limit exceeded");
-
         if (orderedDirty)
         {
             captureOrdered();
@@ -353,8 +330,6 @@ public final class BDMenuResources implements AutoCloseable
                 captureAmount(group, key);
         }
         dirtyKeys.clear();
-        if (amounts.size() > MAX_ENTRIES)
-            throw new IllegalStateException("Menu resource entry limit exceeded");
 
         // 同一次采集中资源可能在槽位或槽组之间移动，因此等所有新引用都记录后再回收句柄
         for (long id : retiredHandles)

@@ -30,8 +30,7 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu implements SyncedMenu
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
     public static final Supplier<MenuType<PrimaryNetSwitcherMenu>> PRIMARY_NET_SWITCHER_MENU = MENU_TYPES.register("primary_net_switcher_menu", () -> IMenuTypeExtension.create(PrimaryNetSwitcherMenu::new));
 
-    private static final SyncCodec<String> NAME_CODEC =
-            SyncCodecs.string(DimensionsNet.MAX_NETWORK_NAME_LENGTH * 4);
+    private static final SyncCodec<String> NAME_CODEC = SyncCodecs.STRING;
     private static final NetPermissionlevel[] PERMISSIONS = NetPermissionlevel.values();
     private static final SyncCodec<PrimaryNetOption> OPTION_CODEC = SyncCodec.of(
             "beyonddimensions:primary-option/1",

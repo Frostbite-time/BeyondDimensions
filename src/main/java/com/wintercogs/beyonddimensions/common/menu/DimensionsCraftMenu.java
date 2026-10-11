@@ -9,7 +9,6 @@ import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
-import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
@@ -274,6 +273,8 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         return true;
     }
 
+    private static final int MAX_MATTER_BALL_BYTES = 1536 * 1024;
+
     // 物质压缩球需要能随物品同步给客户端，编码超出上限的内容不予打包
     private boolean fitsInMatterBall(List<IStackKey<?>> inputKeys, List<Long> amount)
     {
@@ -284,7 +285,7 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         }
         ItemStack preview = new ItemStack(BDItems.MATTER_COMPRESS_BALL.get());
         preview.set(BDDataComponents.ISTACK_SLOTS, contents);
-        ByteBuf bytes = Unpooled.buffer(256, BDMenuResources.MAX_NATIVE_BYTES);
+        ByteBuf bytes = Unpooled.buffer(256, MAX_MATTER_BALL_BYTES);
         try
         {
             ItemStack.OPTIONAL_STREAM_CODEC.encode(new RegistryFriendlyByteBuf(bytes, player.registryAccess(), ConnectionType.NEOFORGE), preview);
