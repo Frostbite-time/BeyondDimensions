@@ -24,4 +24,14 @@ public class StringFormat
         }
         return (long) value + UNITS[unit];
     }
+
+    /**
+     * 流体与化学品先换算为桶数，再沿用格子里的数量缩写规则；不足一桶时显示 {@code <.1}。
+     */
+    public static String formatBucket(long amount)
+    {
+        if (amount < 1_000)
+            return "<.1";
+        return formatCompact(amount / 1_000);
+    }
 }

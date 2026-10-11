@@ -4,6 +4,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.util.IngredientRenderer;
+import com.wintercogs.beyonddimensions.util.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -58,6 +59,12 @@ public class FluidStackKeyRender implements IStackRender
             pose.popPose();
         }
 
+    }
+
+    @Override
+    public String getCountText(long count)
+    {
+        return count < 0 ? "" : StringFormat.formatBucket(count);
     }
 
     @Override

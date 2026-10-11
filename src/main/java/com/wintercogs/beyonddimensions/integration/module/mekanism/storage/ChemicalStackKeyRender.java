@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.integration.module.mekanism.storage;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.util.IngredientRenderer;
+import com.wintercogs.beyonddimensions.util.StringFormat;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -54,6 +55,12 @@ public class ChemicalStackKeyRender implements IStackRender
 
             pose.popPose();
         }
+    }
+
+    @Override
+    public String getCountText(long count)
+    {
+        return count < 0 ? "" : StringFormat.formatBucket(count);
     }
 
     @Override
