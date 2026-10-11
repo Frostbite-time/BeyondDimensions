@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.integration.module.jei.transfer;
 
+import com.wintercogs.beyonddimensions.common.init.BDMenus;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -31,7 +32,7 @@ public class CraftTerminalRecipeTransferHandler implements IRecipeTransferHandle
     @Override
     public Optional<MenuType<DimensionsCraftMenuTerminal>> getMenuType()
     {
-        return Optional.of(DimensionsCraftMenuTerminal.Dimensions_Craft_Menu_Terminal.get());
+        return Optional.of(BDMenus.Dimensions_Craft_Menu_Terminal.get());
     }
 
     @Override

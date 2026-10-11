@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.common.menu;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.machine.Machine;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
@@ -13,29 +12,21 @@ import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.sync.state.SyncCodecs;
 import dev.compixel.sync.state.SyncSchema;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Supplier;
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Net_Energy_Menu;
 
 /**
  * 维度网络能量通道：同步三个能量读数
  */
 public class NetEnergyMenu extends BDBaseMenu implements MachineMenu
 {
-    // 构建注册用的信息
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
-    public static final Supplier<MenuType<NetEnergyMenu>> Net_Energy_Menu = MENU_TYPES.register("net_energy_menu", () -> IMenuTypeExtension.create(NetEnergyMenu::new));
-
     public final NetEnergyPathwayBlockEntity be;
 
     private long energyStored = 0;

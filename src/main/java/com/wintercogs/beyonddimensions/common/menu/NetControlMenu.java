@@ -12,25 +12,22 @@ import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.sync.state.SyncCodec;
 import dev.compixel.sync.state.SyncCodecs;
 import dev.compixel.sync.state.SyncSchema;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Net_Control_Menu;
 
 /**
  * 网络成员与权限管理（无槽位）。状态由服务端持有，每个操作都会按当前网络状态重新校验。
@@ -38,9 +35,6 @@ import java.util.stream.Collectors;
 @EventBusSubscriber(modid = BDConstants.MODID)
 public class NetControlMenu extends BDBaseMenu
 {
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
-    public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = MENU_TYPES.register("net_control_menu", () -> IMenuTypeExtension.create(NetControlMenu::new));
-
     /**
      * 成员及当前玩家可以对其执行的操作（按 NetControlAction 序号的位掩码）
      */

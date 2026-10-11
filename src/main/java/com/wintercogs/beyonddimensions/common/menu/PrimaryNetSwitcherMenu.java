@@ -3,33 +3,26 @@ package com.wintercogs.beyonddimensions.common.menu;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetOption;
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.forge.sync.SyncedMenu;
 import dev.compixel.sync.state.SyncCodec;
 import dev.compixel.sync.state.SyncCodecs;
 import dev.compixel.sync.state.SyncSchema;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
-import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
+
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Primary_Net_Switcher_Menu;
 
 public class PrimaryNetSwitcherMenu extends BDBaseMenu implements SyncedMenu
 {
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
-    public static final Supplier<MenuType<PrimaryNetSwitcherMenu>> PRIMARY_NET_SWITCHER_MENU = MENU_TYPES.register("primary_net_switcher_menu", () -> IMenuTypeExtension.create(PrimaryNetSwitcherMenu::new));
-
     private static final SyncCodec<String> NAME_CODEC = SyncCodecs.STRING;
     private static final NetPermissionlevel[] PERMISSIONS = NetPermissionlevel.values();
     private static final SyncCodec<PrimaryNetOption> OPTION_CODEC = SyncCodec.of(
@@ -70,7 +63,7 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu implements SyncedMenu
 
     public PrimaryNetSwitcherMenu(int containerId, Inventory playerInventory)
     {
-        super(PRIMARY_NET_SWITCHER_MENU.get(), containerId, playerInventory);
+        super(Primary_Net_Switcher_Menu.get(), containerId, playerInventory);
 
         if (!player.level().isClientSide())
         {

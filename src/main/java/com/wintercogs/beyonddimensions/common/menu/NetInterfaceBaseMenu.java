@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.machine.Machine;
 import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
@@ -15,19 +14,15 @@ import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.slots.SlotTransferRoutes;
 import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Supplier;
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Net_Interface_Menu;
 
 // 网络接口的UI
 // 管理一组虚拟槽、以及一组标记槽
@@ -85,11 +80,6 @@ public class NetInterfaceBaseMenu extends BDBaseMenu implements MachineMenu
 
     private final NetInterfaceAccess access;
 
-    // 构建注册用的信息
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
-    public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = MENU_TYPES.register("net_interface_menu", () -> IMenuTypeExtension.create(NetInterfaceBaseMenu::fromNetwork));
-
-
     /**
      * 客户端构造函数
      *
@@ -100,7 +90,7 @@ public class NetInterfaceBaseMenu extends BDBaseMenu implements MachineMenu
         this(id, playerInventory, data.readBlockPos());
     }
 
-    private static NetInterfaceBaseMenu fromNetwork(int id, Inventory playerInventory, FriendlyByteBuf data)
+    public static NetInterfaceBaseMenu fromNetwork(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         if (data.readableBytes() == Long.BYTES)
         {

@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeSettings;
@@ -8,28 +7,21 @@ import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.sync.state.SyncCodecs;
 import dev.compixel.sync.state.SyncSchema;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Xp_Exchange_Menu;
 
 /**
  * 经验交换：只有一个开关和一个目标等级，两个设置各自校验。
  */
 public class XpExchangeMenu extends BDBaseMenu
 {
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
-    public static final Supplier<MenuType<XpExchangeMenu>> XP_EXCHANGE_MENU = MENU_TYPES.register("xp_exchange_menu", () -> IMenuTypeExtension.create(XpExchangeMenu::new));
-
     public final ItemStack menuStack;
 
     // 以下字段仅用于客户端镜像，由同步schema的setter写入
@@ -90,7 +82,7 @@ public class XpExchangeMenu extends BDBaseMenu
 
     public XpExchangeMenu(int containerId, Inventory playerInventory, ItemStack menuStack)
     {
-        super(XP_EXCHANGE_MENU.get(), containerId, playerInventory);
+        super(Xp_Exchange_Menu.get(), containerId, playerInventory);
         this.menuStack = menuStack;
         if (!player.level().isClientSide()) XpExchangeSettings.ensureComponents(this.menuStack);
         addPlayerInv(playerInventory);

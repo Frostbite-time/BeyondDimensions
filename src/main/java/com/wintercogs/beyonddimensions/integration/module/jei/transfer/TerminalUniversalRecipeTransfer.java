@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.integration.module.jei.transfer;
 
+import com.wintercogs.beyonddimensions.common.init.BDMenus;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
@@ -24,7 +25,7 @@ public class TerminalUniversalRecipeTransfer implements IUniversalRecipeTransfer
     @Override
     public @NotNull Optional<MenuType<DimensionsCraftMenuTerminal>> getMenuType()
     {
-        return Optional.of(DimensionsCraftMenuTerminal.Dimensions_Craft_Menu_Terminal.get());
+        return Optional.of(BDMenus.Dimensions_Craft_Menu_Terminal.get());
     }
 
     @Override
