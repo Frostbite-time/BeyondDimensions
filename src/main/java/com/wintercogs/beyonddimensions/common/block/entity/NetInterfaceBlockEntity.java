@@ -19,7 +19,7 @@ import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceAccess;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
+import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -46,7 +46,8 @@ import java.util.function.Function;
 public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider, NetInterfaceAccess
 {
 
-    private static final int capacity = CommonConfigRuntime.interfaceUsableCapacity;
+    // 槽位数在创建时按服务端配置确定；客户端的值由加载器在进入服务器时同步
+    private final int capacity = ServerConfigRuntime.interfaceCapacity;
 
     // 用来标记物品或者流体的槽位，只由UI控制
     private final StackHandler fakeStackHandler = new StackHandler(capacity)
@@ -140,13 +141,13 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
         if (getNet() != null)
         {
-            if (CommonConfigRuntime.interfaceCanReceiveResource)
+            if (ServerConfigRuntime.interfaceReceive)
                 transferToNet();
-            if (CommonConfigRuntime.interfaceCanOutputResource)
+            if (ServerConfigRuntime.interfaceOutput)
                 transferFromNet();
         }
 
-        if (CommonConfigRuntime.interfaceCanPopResource)
+        if (ServerConfigRuntime.interfacePushOut)
         {
             // 尝试输出物品到周围
             if (getPopMode() == PopMode.OPEN)

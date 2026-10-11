@@ -1,8 +1,7 @@
 package com.wintercogs.beyonddimensions;
 
-import com.wintercogs.beyonddimensions.api.ButtonState;
+import com.wintercogs.beyonddimensions.common.menu.widget.StorageSort;
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.ModContainer;
@@ -12,6 +11,10 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 
+/**
+ * 客户端配置存放玩家自己的界面偏好与状态；服务端配置存放玩法规则，以服务端的配置文件为准，加载器在玩家进入服务器时把它同步给客户端。
+ * 启动与通用配置暂时没有内容，保留在这里以便以后添加；加载器不会为空配置生成文件。
+ */
 public class Config
 {
 
@@ -28,36 +31,25 @@ public class Config
         container.registerConfig(ModConfig.Type.CLIENT, clientConfig.spec);
         container.registerConfig(ModConfig.Type.COMMON, commonConfig.spec);
         container.registerConfig(ModConfig.Type.SERVER, serverConfig.spec);
-        container.getEventBus().addListener((ModConfigEvent.Loading evt) ->
+        // 服务端配置同步到客户端时触发的是 Reloading
+        container.getEventBus().addListener((ModConfigEvent.Loading evt) -> onLoaded(evt.getConfig()));
+        container.getEventBus().addListener((ModConfigEvent.Reloading evt) -> onLoaded(evt.getConfig()));
+    }
+
+    private void onLoaded(ModConfig config)
+    {
+        if (config.getSpec() == clientConfig.spec)
         {
-            if (evt.getConfig().getSpec() == clientConfig.spec)
-            {
-                clientConfig.onLoaded();
-            }
-            if (evt.getConfig().getSpec() == commonConfig.spec)
-            {
-                commonConfig.onLoaded();
-            }
-            if (evt.getConfig().getSpec() == serverConfig.spec)
-            {
-                serverConfig.onLoaded();
-            }
-        });
-        container.getEventBus().addListener((ModConfigEvent.Reloading evt) ->
+            clientConfig.onLoaded();
+        }
+        if (config.getSpec() == commonConfig.spec)
         {
-            if (evt.getConfig().getSpec() == clientConfig.spec)
-            {
-                clientConfig.onLoaded();
-            }
-            if (evt.getConfig().getSpec() == commonConfig.spec)
-            {
-                commonConfig.onLoaded();
-            }
-            if (evt.getConfig().getSpec() == serverConfig.spec)
-            {
-                serverConfig.onLoaded();
-            }
-        });
+            commonConfig.onLoaded();
+        }
+        if (config.getSpec() == serverConfig.spec)
+        {
+            serverConfig.onLoaded();
+        }
     }
 
     public static void register(ModContainer container)
@@ -83,6 +75,22 @@ public class Config
 
         public final ModConfigSpec.BooleanValue DISABLE_MULTI_NETWORK_SWITCHING;
 
+        public final ModConfigSpec.EnumValue<StorageSort> STORAGE_SORT;
+        public final ModConfigSpec.BooleanValue STORAGE_USE_SECONDARY_SORT;
+        public final ModConfigSpec.EnumValue<StorageSort> STORAGE_SECONDARY_SORT;
+        public final ModConfigSpec.BooleanValue STORAGE_REVERSE;
+        public final ModConfigSpec.IntValue STORAGE_ROWS;
+        public final ModConfigSpec.IntValue STORAGE_COLUMNS;
+        public final ModConfigSpec.BooleanValue STORAGE_KEEP_SEARCH;
+        public final ModConfigSpec.ConfigValue<String> STORAGE_SEARCH;
+        public final ModConfigSpec.BooleanValue STORAGE_OPEN_CRAFTING;
+
+        public final ModConfigSpec.BooleanValue CRAFTING_RETURN_TO_STORAGE;
+        public final ModConfigSpec.BooleanValue CRAFTING_KEEP_GRID;
+
+        public final ModConfigSpec.BooleanValue RECIPE_VIEWER_SYNC_SEARCH;
+        public final ModConfigSpec.BooleanValue RECIPE_VIEWER_EMI_NETWORK_CONTENTS;
+
         public ClientConfig()
         {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -91,12 +99,76 @@ public class Config
                     .comment("是否禁用多网络切换功能")
                     .define("disable_multi_network_switching", false);
 
+            builder.comment("存储界面；在界面中改动时会写回这里").push("storage");
+            STORAGE_SORT = builder
+                    .comment("主排序方式")
+                    .defineEnum("sort", StorageSort.NAME);
+            STORAGE_USE_SECONDARY_SORT = builder
+                    .comment("是否使用次排序")
+                    .define("use_secondary_sort", true);
+            STORAGE_SECONDARY_SORT = builder
+                    .comment("次排序方式，主排序相同时再按它排列")
+                    .defineEnum("secondary_sort", StorageSort.INSERTED_TIME);
+            STORAGE_REVERSE = builder
+                    .comment("是否倒序排列")
+                    .define("reverse", false);
+            STORAGE_ROWS = builder
+                    .comment("首选的行数，界面会按屏幕高度自动收窄")
+                    .defineInRange("rows", 5, 2, 99);
+            STORAGE_COLUMNS = builder
+                    .comment("首选的列数，界面会按屏幕宽度自动收窄")
+                    .defineInRange("columns", 9, 9, 99);
+            STORAGE_KEEP_SEARCH = builder
+                    .comment("关闭界面后是否保留搜索框内容")
+                    .define("keep_search", false);
+            STORAGE_SEARCH = builder
+                    .comment("保留下来的搜索框内容")
+                    .define("search", "");
+            STORAGE_OPEN_CRAFTING = builder
+                    .comment("快捷键是否打开带合成区的界面；在界面中切换合成区时会随之改变")
+                    .define("open_crafting", false);
+            builder.pop();
+
+            builder.comment("合成区").push("crafting");
+            CRAFTING_RETURN_TO_STORAGE = builder
+                    .comment("关闭界面或清空合成格时，物品优先退回存储；关闭此项则优先退回背包")
+                    .define("return_to_storage", false);
+            CRAFTING_KEEP_GRID = builder
+                    .comment("关闭界面后是否保留合成格里的物品；合成格按玩家保存在服务器上")
+                    .define("keep_grid", false);
+            builder.pop();
+
+            builder.comment("配方查看器（JEI / EMI）").push("recipe_viewer");
+            RECIPE_VIEWER_SYNC_SEARCH = builder
+                    .comment("是否与 JEI 或 EMI 的搜索框同步")
+                    .define("sync_search", true);
+            RECIPE_VIEWER_EMI_NETWORK_CONTENTS = builder
+                    .comment("是否允许 EMI 读取维度网络里的全部物品")
+                    .define("emi_network_contents", false);
+            builder.pop();
+
             this.spec = builder.build();
         }
 
         public void onLoaded()
         {
             ClientConfigRuntime.disableMultiNetworkSwitching = DISABLE_MULTI_NETWORK_SWITCHING.get();
+
+            ClientConfigRuntime.storageSort = STORAGE_SORT.get();
+            ClientConfigRuntime.storageUseSecondarySort = STORAGE_USE_SECONDARY_SORT.get();
+            ClientConfigRuntime.storageSecondarySort = STORAGE_SECONDARY_SORT.get();
+            ClientConfigRuntime.storageReverse = STORAGE_REVERSE.get();
+            ClientConfigRuntime.storageRows = STORAGE_ROWS.get();
+            ClientConfigRuntime.storageColumns = STORAGE_COLUMNS.get();
+            ClientConfigRuntime.storageKeepSearch = STORAGE_KEEP_SEARCH.get();
+            ClientConfigRuntime.storageSearch = STORAGE_SEARCH.get();
+            ClientConfigRuntime.storageOpenCrafting = STORAGE_OPEN_CRAFTING.get();
+
+            ClientConfigRuntime.craftingReturnToStorage = CRAFTING_RETURN_TO_STORAGE.get();
+            ClientConfigRuntime.craftingKeepGrid = CRAFTING_KEEP_GRID.get();
+
+            ClientConfigRuntime.recipeViewerSyncSearch = RECIPE_VIEWER_SYNC_SEARCH.get();
+            ClientConfigRuntime.recipeViewerEmiNetworkContents = RECIPE_VIEWER_EMI_NETWORK_CONTENTS.get();
         }
     }
 
@@ -104,101 +176,15 @@ public class Config
     {
         public final ModConfigSpec spec;
 
-        public final ModConfigSpec.EnumValue<ButtonState> UI_SORT_BUTTON;
-        public final ModConfigSpec.EnumValue<ButtonState> UI_SECOND_SORT_BUTTON;
-        public final ModConfigSpec.EnumValue<ButtonState> UI_REVERSE_BUTTON;
-        public final ModConfigSpec.EnumValue<ButtonState> UI_SEARCH_BUTTON;
-        public final ModConfigSpec.EnumValue<ButtonState> UI_CRAFT_BUTTON;
-        public final ModConfigSpec.EnumValue<ButtonState> UI_CRAFT_RETURN_BUTTON;
-        public final ModConfigSpec.BooleanValue UI_CRAFT_KEEP;
-        public final ModConfigSpec.IntValue UI_PAGE_NUM;
-        public final ModConfigSpec.IntValue UI_COLUMNS;
-        public final ModConfigSpec.ConfigValue<String> UI_SEARCH;
-        public final ModConfigSpec.BooleanValue SEARCH_TEXT_WITH_JEI_EMI;
-        public final ModConfigSpec.BooleanValue EMI_ALLOW_NETWORK_STORAGE_INFO;
-
-        public final ModConfigSpec.BooleanValue INTERFACE_CAN_RECEIVE_RESOURCE;
-        public final ModConfigSpec.BooleanValue INTERFACE_CAN_OUTPUT_RESOURCE;
-        public final ModConfigSpec.BooleanValue INTERFACE_CAN_POP_RESOURCE;
-        public final ModConfigSpec.IntValue INTERFACE_USABLE_CAPACITY;
-
         public CommonConfig()
         {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
-
-            UI_SORT_BUTTON = builder
-                    .comment("存储UI的主排序方式 (除非你知道你在做什么，否则不要手动修改)")
-                    .defineEnum("ui_sort_button", ButtonState.SORT_NAME);
-            UI_SECOND_SORT_BUTTON = builder
-                    .comment("存储UI的次排序方式，主排序相同时再按它排列；DISABLED 表示不使用 (除非你知道你在做什么，否则不要手动修改)")
-                    .defineEnum("ui_second_sort_button", ButtonState.SORT_INSERTED_TIME);
-            UI_REVERSE_BUTTON = builder
-                    .comment("存储UI是否倒序排列 (除非你知道你在做什么，否则不要手动修改)")
-                    .defineEnum("ui_reverse_button", ButtonState.DISABLED);
-            UI_SEARCH_BUTTON = builder
-                    .comment("关闭存储UI后是否保留搜索框内容 (除非你知道你在做什么，否则不要手动修改)")
-                    .defineEnum("ui_search_button", ButtonState.DISABLED);
-            UI_CRAFT_BUTTON = builder
-                    .comment("决定打开菜单时是否显示合成槽")
-                    .defineEnum("ui_craft_button", ButtonState.DISABLED);
-            UI_CRAFT_RETURN_BUTTON = builder
-                    .comment("决定工艺菜单关闭时，物品优先转移的方向；启用则优先向存储，关闭则优先向背包")
-                    .defineEnum("ui_craft_return_button", ButtonState.DISABLED);
-            UI_CRAFT_KEEP = builder
-                    .comment("关闭合成菜单后是否保留合成格里的物品；合成格按玩家保存在服务器上")
-                    .define("ui_craft_keep", false);
-            UI_PAGE_NUM = builder
-                    .comment("存储UI首选的行数，界面会按屏幕高度自动收窄 (除非你知道你在做什么，否则不要手动修改)")
-                    .defineInRange("ui_page_num", 5, 2, 99);
-            UI_COLUMNS = builder
-                    .comment("存储UI首选的列数，界面会按屏幕宽度自动收窄 (除非你知道你在做什么，否则不要手动修改)")
-                    .defineInRange("ui_columns", 9, 9, 99);
-            UI_SEARCH = builder
-                    .comment("存储UI搜索框内容 (除非你知道你在做什么，否则不要手动修改)")
-                    .define("ui_search", "");
-            SEARCH_TEXT_WITH_JEI_EMI = builder
-                    .comment("是否与JEI或EMI同步搜索")
-                    .define("search_text_with_jei_emi", true);
-            EMI_ALLOW_NETWORK_STORAGE_INFO = builder
-                    .comment("是否允许EMI获取维度网络内全部物品信息")
-                    .define("emi_allow_network_storage_info", false);
-
-            INTERFACE_CAN_RECEIVE_RESOURCE = builder
-                    .comment("是否允许网络接口将资源送入网络")
-                    .define("interface_can_receive_resource", true);
-            INTERFACE_CAN_OUTPUT_RESOURCE = builder
-                    .comment("是否允许网络接口从网络提取标记的资源")
-                    .define("interface_can_output_resource", true);
-            INTERFACE_CAN_POP_RESOURCE = builder
-                    .comment("是否允许网络接口将内容物弹出到附近容器")
-                    .define("interface_can_pop_resource", true);
-            INTERFACE_USABLE_CAPACITY = builder
-                    .comment("网络接口有多少个槽位实际可用？")
-                    .comment("注意：仅在确定需要时使用，后续版本更新会将其移除并添加其他替代方案，会保证存档兼容。")
-                    .defineInRange("interface_usable_capacity", 27, 1, 27);
 
             this.spec = builder.build();
         }
 
         public void onLoaded()
         {
-            CommonConfigRuntime.uiSortButton = UI_SORT_BUTTON.get();
-            CommonConfigRuntime.uiSecondSortButton = UI_SECOND_SORT_BUTTON.get();
-            CommonConfigRuntime.uiReverseButton = UI_REVERSE_BUTTON.get();
-            CommonConfigRuntime.uiSearchButton = UI_SEARCH_BUTTON.get();
-            CommonConfigRuntime.uiCraftButton = UI_CRAFT_BUTTON.get();
-            CommonConfigRuntime.uiCraftReturnButton = UI_CRAFT_RETURN_BUTTON.get();
-            CommonConfigRuntime.uiCraftKeep = UI_CRAFT_KEEP.get();
-            CommonConfigRuntime.uiPageNum = UI_PAGE_NUM.get();
-            CommonConfigRuntime.uiColumns = UI_COLUMNS.get();
-            CommonConfigRuntime.uiSearch = UI_SEARCH.get();
-            CommonConfigRuntime.searchTextWithJEIEMI = SEARCH_TEXT_WITH_JEI_EMI.get();
-            CommonConfigRuntime.emiAllowNetworkStorageInfo = EMI_ALLOW_NETWORK_STORAGE_INFO.get();
-
-            CommonConfigRuntime.interfaceCanReceiveResource = INTERFACE_CAN_RECEIVE_RESOURCE.get();
-            CommonConfigRuntime.interfaceCanOutputResource = INTERFACE_CAN_OUTPUT_RESOURCE.get();
-            CommonConfigRuntime.interfaceCanPopResource = INTERFACE_CAN_POP_RESOURCE.get();
-            CommonConfigRuntime.interfaceUsableCapacity = INTERFACE_USABLE_CAPACITY.get();
         }
     }
 
@@ -206,21 +192,35 @@ public class Config
     {
         public final ModConfigSpec spec;
 
-        public final ModConfigSpec.LongValue UNSTABLE_SPACE_TIME_FRAGMENT_TRANSFER_TIME;
-        public final ModConfigSpec.IntValue SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME;
-        public final ModConfigSpec.ConfigValue<List<? extends String>> INTERFACE_BLOCKED_INPUT_STACK_TYPES;
+        public final ModConfigSpec.BooleanValue INTERFACE_RECEIVE;
+        public final ModConfigSpec.BooleanValue INTERFACE_OUTPUT;
+        public final ModConfigSpec.BooleanValue INTERFACE_PUSH_OUT;
+        public final ModConfigSpec.IntValue INTERFACE_CAPACITY;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> INTERFACE_BLOCKED_INPUT_TYPES;
+
+        public final ModConfigSpec.LongValue FRAGMENT_TRANSFER_TIME;
+        public final ModConfigSpec.IntValue CRYSTAL_GENERATE_TIME;
 
         public ServerConfig()
         {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
-            UNSTABLE_SPACE_TIME_FRAGMENT_TRANSFER_TIME = builder
-                    .comment("碎片转化间隔")
-                    .defineInRange("fragmentTransferTime", 3600L, 1L, Long.MAX_VALUE);
-            SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME = builder
-                    .comment("结晶生成间隔（0代表不生成）")
-                    .defineInRange("crystalGenerateTime", 600, 0, Integer.MAX_VALUE);
-            INTERFACE_BLOCKED_INPUT_STACK_TYPES = builder
+            builder.comment("网络接口").push("interface");
+            INTERFACE_RECEIVE = builder
+                    .comment("是否允许网络接口将资源送入网络")
+                    .define("receive", true);
+            INTERFACE_OUTPUT = builder
+                    .comment("是否允许网络接口从网络提取标记的资源")
+                    .define("output", true);
+            INTERFACE_PUSH_OUT = builder
+                    .comment("是否允许网络接口将内容物弹出到附近容器")
+                    .define("push_out", true);
+            INTERFACE_CAPACITY = builder
+                    .comment("网络接口有多少个槽位实际可用？")
+                    .comment("改动只对之后放置或重新载入的接口生效；在线的玩家要重新进入服务器才会拿到新值。")
+                    .comment("注意：仅在确定需要时使用，后续版本更新会将其移除并添加其他替代方案，会保证存档兼容。")
+                    .defineInRange("capacity", 27, 1, 27);
+            INTERFACE_BLOCKED_INPUT_TYPES = builder
                     .comment("禁止网络接口向维度网络输入的资源大类 ID；空列表表示不限制。")
                     .comment("常见资源大类 ID：")
                     .comment("物品：beyonddimensions:stack_type/item")
@@ -229,20 +229,35 @@ public class Config
                     .comment("示例：同时禁止流体和能量输入，可填写 [\"beyonddimensions:stack_type/fluid\", \"beyonddimensions:stack_type/energy\"]。")
                     .comment("查找其他资源大类 ID：在对应的 IStackKey 实现中查看 getTypeId() 的返回值，或查找其静态 ID 常量。")
                     .defineListAllowEmpty(
-                            "interfaceBlockedInputStackTypes",
+                            "blocked_input_types",
                             List.of(),
                             () -> "beyonddimensions:stack_type/fluid",
                             ServerConfig::isValidResourceLocation
                     );
+            builder.pop();
+
+            builder.comment("时空材料").push("space_time");
+            FRAGMENT_TRANSFER_TIME = builder
+                    .comment("碎片转化间隔")
+                    .defineInRange("fragment_transfer_time", 3600L, 1L, Long.MAX_VALUE);
+            CRYSTAL_GENERATE_TIME = builder
+                    .comment("结晶生成间隔（0代表不生成）")
+                    .defineInRange("crystal_generate_time", 600, 0, Integer.MAX_VALUE);
+            builder.pop();
 
             this.spec = builder.build();
         }
 
         public void onLoaded()
         {
-            ServerConfigRuntime.fragmentTransferTime = UNSTABLE_SPACE_TIME_FRAGMENT_TRANSFER_TIME.get();
-            ServerConfigRuntime.crystalGenerateTime = SHATTERED_SPACE_TIME_CRYSTALLIZATION_GENERATE_TIME.get();
-            ServerConfigRuntime.setInterfaceBlockedInputStackTypes(INTERFACE_BLOCKED_INPUT_STACK_TYPES.get());
+            ServerConfigRuntime.interfaceReceive = INTERFACE_RECEIVE.get();
+            ServerConfigRuntime.interfaceOutput = INTERFACE_OUTPUT.get();
+            ServerConfigRuntime.interfacePushOut = INTERFACE_PUSH_OUT.get();
+            ServerConfigRuntime.interfaceCapacity = INTERFACE_CAPACITY.get();
+            ServerConfigRuntime.setInterfaceBlockedInputStackTypes(INTERFACE_BLOCKED_INPUT_TYPES.get());
+
+            ServerConfigRuntime.fragmentTransferTime = FRAGMENT_TRANSFER_TIME.get();
+            ServerConfigRuntime.crystalGenerateTime = CRYSTAL_GENERATE_TIME.get();
         }
 
         private static boolean isValidResourceLocation(Object value)

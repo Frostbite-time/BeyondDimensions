@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.storage
 
 import com.wintercogs.beyonddimensions.Config
-import com.wintercogs.beyonddimensions.api.ButtonState
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
@@ -13,8 +12,9 @@ import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
 import com.wintercogs.beyonddimensions.common.menu.interaction.ResourceContents
 import com.wintercogs.beyonddimensions.common.menu.widget.ClientNetStorage
 import com.wintercogs.beyonddimensions.common.menu.widget.ClientNetStorageSearchHelper
+import com.wintercogs.beyonddimensions.common.menu.widget.StorageSort
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime
+import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
 import com.wintercogs.beyonddimensions.integration.ModPresence
 import com.wintercogs.beyonddimensions.integration.OtherModIds
 import com.wintercogs.beyonddimensions.integration.RecipeViewerSearch
@@ -83,8 +83,8 @@ data class StorageState(
     val editor: CategoryEditor? = null,
     val slotMenu: SlotMenu? = null,
     val search: String = "",
-    val sort: ButtonState = ButtonState.SORT_NAME,
-    val secondarySort: ButtonState? = null,
+    val sort: StorageSort = StorageSort.NAME,
+    val secondarySort: StorageSort? = null,
     val reverse: Boolean = false,
     val keepSearch: Boolean = false,
     val syncSearch: Boolean = false,
@@ -142,9 +142,9 @@ sealed interface StorageAction {
 
     data object CloseSlotMenu : StorageAction
 
-    data class Sort(val policy: ButtonState) : StorageAction
+    data class Sort(val policy: StorageSort) : StorageAction
 
-    data class SecondarySort(val policy: ButtonState?) : StorageAction
+    data class SecondarySort(val policy: StorageSort?) : StorageAction
 
     data class Reverse(val enabled: Boolean) : StorageAction
 
@@ -165,18 +165,6 @@ sealed interface StorageAction {
     data class ChooseRecipe(val id: String) : StorageAction
 }
 
-/** 可选的排序方式，按界面中的顺序排列 */
-val SORT_POLICIES =
-    listOf(
-        ButtonState.SORT_NAME,
-        ButtonState.SORT_QUANTITY,
-        ButtonState.SORT_MODID,
-        ButtonState.SORT_CREATIVE_TAB,
-        ButtonState.SORT_MAX_STACK,
-        ButtonState.SORT_INSERTED_TIME,
-        ButtonState.SORT_MODIFIED_TIME,
-    )
-
 /** 分类停止改动多久后写进文件 */
 private const val SAVE_DELAY_MILLIS = 1000L
 
@@ -187,7 +175,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
     private val craftMenu = menu as? DimensionsCraftMenu
     private val recipeChoices =
         if (craftMenu != null && ModPresence.isLoaded(OtherModIds.POLYMORPH)) ComposeRecipeChoices() else null
-    private var lastSearch = CommonConfigRuntime.uiSearch
+    private var lastSearch = ClientConfigRuntime.storageSearch
     private val player = menu.player.uuid
     private val registries = menu.player.registryAccess()
     private var categories = StorageCategories.load(player, registries)
@@ -224,12 +212,12 @@ class StorageController(private val menu: DimensionsNetMenu) {
     }
 
     fun snapshot(): StorageState {
-        if (CommonConfigRuntime.searchTextWithJEIEMI) followViewerSearch()
+        if (ClientConfigRuntime.recipeViewerSyncSearch) followViewerSearch()
         val craft =
             craftMenu?.let {
                 CraftState(
                     toggleable = menu !is DimensionsCraftMenuTerminal,
-                    returnToStorage = CommonConfigRuntime.uiCraftReturnButton == ButtonState.ENABLED,
+                    returnToStorage = ClientConfigRuntime.craftingReturnToStorage,
                     recipeChoices = recipeChoices?.snapshot(it)
                         ?.map { choice -> RecipeChoice(choice.id(), choice.label()) }.orEmpty(),
                 )
@@ -240,8 +228,8 @@ class StorageController(private val menu: DimensionsNetMenu) {
             networkId = menu.networkId(),
             columns = menu.columns,
             rows = menu.lines,
-            preferredColumns = CommonConfigRuntime.uiColumns,
-            preferredRows = CommonConfigRuntime.uiPageNum,
+            preferredColumns = ClientConfigRuntime.storageColumns,
+            preferredRows = ClientConfigRuntime.storageRows,
             firstRow = menu.lineData,
             totalRows = menu.maxLineData + menu.lines,
             stored = stored,
@@ -250,12 +238,12 @@ class StorageController(private val menu: DimensionsNetMenu) {
             editor = editorState(stored),
             slotMenu = slotMenuState(),
             search = lastSearch,
-            sort = CommonConfigRuntime.uiSortButton,
-            secondarySort = CommonConfigRuntime.uiSecondSortButton.takeIf { it in SORT_POLICIES },
-            reverse = CommonConfigRuntime.uiReverseButton == ButtonState.ENABLED,
-            keepSearch = CommonConfigRuntime.uiSearchButton == ButtonState.ENABLED,
-            syncSearch = CommonConfigRuntime.searchTextWithJEIEMI,
-            keepCrafting = CommonConfigRuntime.uiCraftKeep,
+            sort = ClientConfigRuntime.storageSort,
+            secondarySort = ClientConfigRuntime.storageSecondarySort.takeIf { ClientConfigRuntime.storageUseSecondarySort },
+            reverse = ClientConfigRuntime.storageReverse,
+            keepSearch = ClientConfigRuntime.storageKeepSearch,
+            syncSearch = ClientConfigRuntime.recipeViewerSyncSearch,
+            keepCrafting = ClientConfigRuntime.craftingKeepGrid,
             craft = craft,
         )
     }
@@ -264,18 +252,18 @@ class StorageController(private val menu: DimensionsNetMenu) {
         when (action) {
             is StorageAction.Search -> {
                 search(action.text)
-                if (CommonConfigRuntime.searchTextWithJEIEMI) RecipeViewerSearch.set(action.text)
+                if (ClientConfigRuntime.recipeViewerSyncSearch) RecipeViewerSearch.set(action.text)
             }
 
             is StorageAction.Scroll -> scrollTo(menu.lineData + action.rows)
             is StorageAction.ScrollTo -> scrollTo(action.row)
             is StorageAction.Viewport -> menu.setViewport(action.columns, action.rows)
             is StorageAction.PreferredSize -> {
-                CommonConfigRuntime.uiColumns = action.columns
-                CommonConfigRuntime.uiPageNum = action.rows
-                Config.INSTANCE.commonConfig.UI_COLUMNS.set(action.columns)
-                Config.INSTANCE.commonConfig.UI_PAGE_NUM.set(action.rows)
-                Config.INSTANCE.commonConfig.UI_PAGE_NUM.save()
+                ClientConfigRuntime.storageColumns = action.columns
+                ClientConfigRuntime.storageRows = action.rows
+                Config.INSTANCE.clientConfig.STORAGE_COLUMNS.set(action.columns)
+                Config.INSTANCE.clientConfig.STORAGE_ROWS.set(action.rows)
+                Config.INSTANCE.clientConfig.STORAGE_ROWS.save()
             }
 
             is StorageAction.SelectCategory -> select(action.index)
@@ -330,33 +318,36 @@ class StorageController(private val menu: DimensionsNetMenu) {
             StorageAction.CloseSlotMenu -> menuTarget = null
 
             is StorageAction.Sort -> {
-                CommonConfigRuntime.uiSortButton = action.policy
-                Config.INSTANCE.commonConfig.UI_SORT_BUTTON.set(action.policy)
-                Config.INSTANCE.commonConfig.UI_SORT_BUTTON.save()
+                ClientConfigRuntime.storageSort = action.policy
+                Config.INSTANCE.clientConfig.STORAGE_SORT.set(action.policy)
+                Config.INSTANCE.clientConfig.STORAGE_SORT.save()
                 menu.buildIndexList()
             }
 
             is StorageAction.SecondarySort -> {
-                val policy = action.policy ?: ButtonState.DISABLED
-                CommonConfigRuntime.uiSecondSortButton = policy
-                Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.set(policy)
-                Config.INSTANCE.commonConfig.UI_SECOND_SORT_BUTTON.save()
+                // 选"无"时只关掉开关，原来选的次排序留在配置里
+                val policy = action.policy
+                ClientConfigRuntime.storageUseSecondarySort = policy != null
+                Config.INSTANCE.clientConfig.STORAGE_USE_SECONDARY_SORT.set(policy != null)
+                if (policy != null) {
+                    ClientConfigRuntime.storageSecondarySort = policy
+                    Config.INSTANCE.clientConfig.STORAGE_SECONDARY_SORT.set(policy)
+                }
+                Config.INSTANCE.clientConfig.STORAGE_SECONDARY_SORT.save()
                 menu.buildIndexList()
             }
 
             is StorageAction.Reverse -> {
-                val state = if (action.enabled) ButtonState.ENABLED else ButtonState.DISABLED
-                CommonConfigRuntime.uiReverseButton = state
-                Config.INSTANCE.commonConfig.UI_REVERSE_BUTTON.set(state)
-                Config.INSTANCE.commonConfig.UI_REVERSE_BUTTON.save()
+                ClientConfigRuntime.storageReverse = action.enabled
+                Config.INSTANCE.clientConfig.STORAGE_REVERSE.set(action.enabled)
+                Config.INSTANCE.clientConfig.STORAGE_REVERSE.save()
                 menu.buildIndexList()
             }
 
             is StorageAction.KeepSearch -> {
-                val state = if (action.enabled) ButtonState.ENABLED else ButtonState.DISABLED
-                CommonConfigRuntime.uiSearchButton = state
-                Config.INSTANCE.commonConfig.UI_SEARCH_BUTTON.set(state)
-                Config.INSTANCE.commonConfig.UI_SEARCH_BUTTON.save()
+                ClientConfigRuntime.storageKeepSearch = action.enabled
+                Config.INSTANCE.clientConfig.STORAGE_KEEP_SEARCH.set(action.enabled)
+                Config.INSTANCE.clientConfig.STORAGE_KEEP_SEARCH.save()
             }
 
             is StorageAction.SyncSearch -> setSearchSync(action.enabled)
@@ -368,17 +359,16 @@ class StorageController(private val menu: DimensionsNetMenu) {
 
             is StorageAction.ClearCraft -> menu.commands().returnCrafting(action.toStorage)
             is StorageAction.ReturnPreference -> {
-                val state = if (action.toStorage) ButtonState.ENABLED else ButtonState.DISABLED
-                CommonConfigRuntime.uiCraftReturnButton = state
-                Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.set(state)
-                Config.INSTANCE.commonConfig.UI_CRAFT_RETURN_BUTTON.save()
+                ClientConfigRuntime.craftingReturnToStorage = action.toStorage
+                Config.INSTANCE.clientConfig.CRAFTING_RETURN_TO_STORAGE.set(action.toStorage)
+                Config.INSTANCE.clientConfig.CRAFTING_RETURN_TO_STORAGE.save()
                 sendCraftPreference()
             }
 
             is StorageAction.KeepCrafting -> {
-                CommonConfigRuntime.uiCraftKeep = action.enabled
-                Config.INSTANCE.commonConfig.UI_CRAFT_KEEP.set(action.enabled)
-                Config.INSTANCE.commonConfig.UI_CRAFT_KEEP.save()
+                ClientConfigRuntime.craftingKeepGrid = action.enabled
+                Config.INSTANCE.clientConfig.CRAFTING_KEEP_GRID.set(action.enabled)
+                Config.INSTANCE.clientConfig.CRAFTING_KEEP_GRID.save()
                 sendCraftPreference()
             }
 
@@ -390,22 +380,22 @@ class StorageController(private val menu: DimensionsNetMenu) {
     private fun sendCraftPreference() {
         if (craftMenu == null) return
         menu.commands().preference(
-            CommonConfigRuntime.uiCraftReturnButton == ButtonState.ENABLED,
-            CommonConfigRuntime.uiCraftKeep,
+            ClientConfigRuntime.craftingReturnToStorage,
+            ClientConfigRuntime.craftingKeepGrid,
         )
     }
 
     private fun setSearchSync(enabled: Boolean) {
-        CommonConfigRuntime.searchTextWithJEIEMI = enabled
-        Config.INSTANCE.commonConfig.SEARCH_TEXT_WITH_JEI_EMI.set(enabled)
-        Config.INSTANCE.commonConfig.SEARCH_TEXT_WITH_JEI_EMI.save()
+        ClientConfigRuntime.recipeViewerSyncSearch = enabled
+        Config.INSTANCE.clientConfig.RECIPE_VIEWER_SYNC_SEARCH.set(enabled)
+        Config.INSTANCE.clientConfig.RECIPE_VIEWER_SYNC_SEARCH.save()
         if (enabled) RecipeViewerSearch.set(lastSearch)
     }
 
     private fun search(text: String) {
         if (text == lastSearch) return
         lastSearch = text
-        CommonConfigRuntime.uiSearch = text
+        ClientConfigRuntime.storageSearch = text
         menu.loadSearchText(text)
         menu.lineData = 0
         menu.markForceAllUpdateClientView()
@@ -617,10 +607,9 @@ class StorageController(private val menu: DimensionsNetMenu) {
     /** 在存储与合成之间切换会重新打开菜单，先记下滚动位置 */
     private fun toggleCraft() {
         val toCraft = craftMenu == null
-        val state = if (toCraft) ButtonState.ENABLED else ButtonState.DISABLED
-        CommonConfigRuntime.uiCraftButton = state
-        Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.set(state)
-        Config.INSTANCE.commonConfig.UI_CRAFT_BUTTON.save()
+        ClientConfigRuntime.storageOpenCrafting = toCraft
+        Config.INSTANCE.clientConfig.STORAGE_OPEN_CRAFTING.set(toCraft)
+        Config.INSTANCE.clientConfig.STORAGE_OPEN_CRAFTING.save()
         saveTransferContext()
         val target = if (toCraft) NetMenuType.NET_CRAFT_MENU else NetMenuType.NET_MENU
         PacketDistributor.sendToServer(OpenNetGuiPacket(menu.player.stringUUID, target))
@@ -640,10 +629,10 @@ class StorageController(private val menu: DimensionsNetMenu) {
 
     /** 菜单关闭时按偏好保留或清空搜索文字 */
     fun saveSearch() {
-        val keep = CommonConfigRuntime.uiSearchButton == ButtonState.ENABLED && lastSearch.isNotEmpty()
+        val keep = ClientConfigRuntime.storageKeepSearch && lastSearch.isNotEmpty()
         val saved = if (keep) lastSearch else ""
-        CommonConfigRuntime.uiSearch = saved
-        Config.INSTANCE.commonConfig.UI_SEARCH.set(saved)
-        Config.INSTANCE.commonConfig.UI_SEARCH.save()
+        ClientConfigRuntime.storageSearch = saved
+        Config.INSTANCE.clientConfig.STORAGE_SEARCH.set(saved)
+        Config.INSTANCE.clientConfig.STORAGE_SEARCH.save()
     }
 }

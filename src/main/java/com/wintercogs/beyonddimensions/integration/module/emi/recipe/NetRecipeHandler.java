@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.client.recipe.RecipeFillPlan;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
+import com.wintercogs.beyonddimensions.config.ClientConfigRuntime;
 import dev.emi.emi.api.recipe.EmiPlayerInventory;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.recipe.handler.EmiCraftContext;
@@ -54,7 +54,7 @@ public class NetRecipeHandler<T extends DimensionsCraftMenu> implements Standard
     @Override
     public EmiPlayerInventory getInventory(AbstractContainerScreen<T> screen)
     {
-        return collectInventory(screen.getMenu(), CommonConfigRuntime.emiAllowNetworkStorageInfo);
+        return collectInventory(screen.getMenu(), ClientConfigRuntime.recipeViewerEmiNetworkContents);
     }
 
     @Override

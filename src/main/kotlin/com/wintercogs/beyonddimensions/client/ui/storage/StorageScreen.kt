@@ -42,6 +42,7 @@ import com.wintercogs.beyonddimensions.client.ui.theme.signature
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
+import com.wintercogs.beyonddimensions.common.menu.widget.StorageSort
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
@@ -127,13 +128,7 @@ class StorageText {
     val returnStorage = tr("ui.beyonddimensions.crafting.return.storage")
     val returnInventory = tr("ui.beyonddimensions.crafting.return.inventory")
     val recipe = tr("ui.beyonddimensions.crafting.recipe")
-    val sortNames = SORT_POLICIES.associateWith {
-        tr(
-            "ui.beyonddimensions.storage.sort.${
-                it.name.removePrefix("SORT_").lowercase()
-            }"
-        )
-    }
+    val sortNames = StorageSort.entries.associateWith { tr("ui.beyonddimensions.storage.sort.${it.name.lowercase()}") }
 }
 
 /** 存储终端与合成终端 */
@@ -1117,7 +1112,7 @@ private fun SortOptions(state: StorageState, send: (StorageAction) -> Unit, text
         Column(Modifier.width(IntrinsicSize.Max)) {
             BdSectionLabel(text.sort)
             Spacer(Modifier.height(3.dp))
-            for (policy in SORT_POLICIES) {
+            for (policy in StorageSort.entries) {
                 OptionRow(text.sortNames.getValue(policy), state.sort == policy) { send(StorageAction.Sort(policy)) }
             }
         }
@@ -1126,7 +1121,7 @@ private fun SortOptions(state: StorageState, send: (StorageAction) -> Unit, text
             BdSectionLabel(text.secondarySort)
             Spacer(Modifier.height(3.dp))
             OptionRow(text.none, state.secondarySort == null) { send(StorageAction.SecondarySort(null)) }
-            for (policy in SORT_POLICIES) {
+            for (policy in StorageSort.entries) {
                 OptionRow(
                     text.sortNames.getValue(policy),
                     state.secondarySort == policy,

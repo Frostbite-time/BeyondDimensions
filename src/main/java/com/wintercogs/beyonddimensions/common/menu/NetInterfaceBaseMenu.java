@@ -214,9 +214,10 @@ public class NetInterfaceBaseMenu extends BDBaseMenu implements MachineMenu
 
         private ClientAccess(FriendlyByteBuf data)
         {
+            // 槽位数来自服务端配置的接口容量，标记槽与资源槽一一对应
             int slots = data.readVarInt();
             int flags = data.readVarInt();
-            if (slots != 27 || flags != 27)
+            if (slots < 1 || slots > 27 || flags != slots)
                 throw new IllegalArgumentException("Invalid interface slot structure");
             this.stackHandler = new StackHandler(slots);
             this.fakeStackHandler = new StackHandler(flags);

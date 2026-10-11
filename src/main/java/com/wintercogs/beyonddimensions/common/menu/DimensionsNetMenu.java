@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
-import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
@@ -13,7 +12,7 @@ import com.wintercogs.beyonddimensions.common.menu.widget.ClientNetStorage;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
+import com.wintercogs.beyonddimensions.config.ClientConfigRuntime;
 import com.wintercogs.beyonddimensions.util.TooltipHelper;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.slots.SlotTransferRoutes;
@@ -120,8 +119,8 @@ public class DimensionsNetMenu extends BDBaseMenu
         // 初始化搜索方案
         if (player.level().isClientSide())
         {
-            this.maxLines = CommonConfigRuntime.uiPageNum;
-            this.searchText = CommonConfigRuntime.uiSearch;
+            this.maxLines = ClientConfigRuntime.storageRows;
+            this.searchText = ClientConfigRuntime.storageSearch;
         }
 
         // 初始化维度网络容器
@@ -326,9 +325,9 @@ public class DimensionsNetMenu extends BDBaseMenu
         }
         // 1 构建正确的索引数据
         List<Integer> indexes = clientNetStorage.buildSortedIndex(
-                CommonConfigRuntime.uiSortButton,
-                CommonConfigRuntime.uiSecondSortButton,
-                CommonConfigRuntime.uiReverseButton == ButtonState.ENABLED);
+                ClientConfigRuntime.storageSort,
+                ClientConfigRuntime.storageUseSecondarySort ? ClientConfigRuntime.storageSecondarySort : null,
+                ClientConfigRuntime.storageReverse);
 
         // 2 构建linedata
         updateScrollLineData(indexes.size());

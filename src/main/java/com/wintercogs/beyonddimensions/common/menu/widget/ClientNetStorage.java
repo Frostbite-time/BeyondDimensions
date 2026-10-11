@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.common.menu.widget;
 
-import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -91,9 +90,9 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
         }
     }
 
-    private static boolean isTimeSort(ButtonState value)
+    private static boolean isTimeSort(@Nullable StorageSort value)
     {
-        return value == ButtonState.SORT_INSERTED_TIME || value == ButtonState.SORT_MODIFIED_TIME;
+        return value == StorageSort.INSERTED_TIME || value == StorageSort.MODIFIED_TIME;
     }
 
     /**
@@ -139,8 +138,8 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
     }
 
 
-    // 初始值给一个不可能出现的按钮值防止命中
-    private SortProperties lastSortProperties = new SortProperties(ButtonState.DISABLED, ButtonState.DISABLED, false);
+    // 第一次排序前的占位值：此时还没有缓存的下标，不会被当成命中
+    private SortProperties lastSortProperties = new SortProperties(StorageSort.NAME, null, false);
 
     public ClientNetStorage(@NotNull AbstractUnorderedStackHandler sourceStorage)
     {
@@ -222,8 +221,8 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
         }
 
         // 仅数量变化时，只有按数量排序才需要重排
-        boolean quantitySort = lastSortProperties.primarySortPolicy() == ButtonState.SORT_QUANTITY
-                || lastSortProperties.secondarySortPolicy() == ButtonState.SORT_QUANTITY;
+        boolean quantitySort = lastSortProperties.primarySortPolicy() == StorageSort.QUANTITY
+                || lastSortProperties.secondarySortPolicy() == StorageSort.QUANTITY;
         if (membershipChanged || amountsChanged && quantitySort)
         {
             this.cacheIndexes = null;
@@ -261,13 +260,10 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
     /**
      * 根据当前存储的状态，以及对应的排序策略，返回一个下标数组，其下标数组将能够对应到Storage
      */
-    public List<Integer> buildSortedIndex(ButtonState primarySortPolicy, ButtonState secondarySortPolicy, boolean reverse)
+    public List<Integer> buildSortedIndex(@NotNull StorageSort primarySortPolicy, @Nullable StorageSort secondarySortPolicy, boolean reverse)
     {
         if (refreshContext())
             resolvePendingOrAllUpdate(false);
-        primarySortPolicy = isSortPolicy(primarySortPolicy) ? primarySortPolicy : ButtonState.SORT_NAME;
-        if (!isSortPolicy(secondarySortPolicy))
-            secondarySortPolicy = null;
         if (cacheIndexes != null
                 && primarySortPolicy == lastSortProperties.primarySortPolicy()
                 && secondarySortPolicy == lastSortProperties.secondarySortPolicy()
@@ -276,13 +272,13 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
 
         final boolean useSecondary = (secondarySortPolicy != null && secondarySortPolicy != primarySortPolicy);
 
-        final boolean needNameSort = (primarySortPolicy == ButtonState.SORT_NAME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_NAME);
-        final boolean needModIdSort = (primarySortPolicy == ButtonState.SORT_MODID) || (useSecondary && secondarySortPolicy == ButtonState.SORT_MODID);
-        final boolean needQuantitySort = (primarySortPolicy == ButtonState.SORT_QUANTITY) || (useSecondary && secondarySortPolicy == ButtonState.SORT_QUANTITY);
-        final boolean needMaxStackSort = (primarySortPolicy == ButtonState.SORT_MAX_STACK) || (useSecondary && secondarySortPolicy == ButtonState.SORT_MAX_STACK);
-        final boolean needCreationTimeSort = (primarySortPolicy == ButtonState.SORT_INSERTED_TIME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_INSERTED_TIME);
-        final boolean needModificationTimeSort = (primarySortPolicy == ButtonState.SORT_MODIFIED_TIME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_MODIFIED_TIME);
-        final boolean needCreativeTabSort = (primarySortPolicy == ButtonState.SORT_CREATIVE_TAB) || (useSecondary && secondarySortPolicy == ButtonState.SORT_CREATIVE_TAB);
+        final boolean needNameSort = (primarySortPolicy == StorageSort.NAME) || (useSecondary && secondarySortPolicy == StorageSort.NAME);
+        final boolean needModIdSort = (primarySortPolicy == StorageSort.MODID) || (useSecondary && secondarySortPolicy == StorageSort.MODID);
+        final boolean needQuantitySort = (primarySortPolicy == StorageSort.QUANTITY) || (useSecondary && secondarySortPolicy == StorageSort.QUANTITY);
+        final boolean needMaxStackSort = (primarySortPolicy == StorageSort.MAX_STACK) || (useSecondary && secondarySortPolicy == StorageSort.MAX_STACK);
+        final boolean needCreationTimeSort = (primarySortPolicy == StorageSort.INSERTED_TIME) || (useSecondary && secondarySortPolicy == StorageSort.INSERTED_TIME);
+        final boolean needModificationTimeSort = (primarySortPolicy == StorageSort.MODIFIED_TIME) || (useSecondary && secondarySortPolicy == StorageSort.MODIFIED_TIME);
+        final boolean needCreativeTabSort = (primarySortPolicy == StorageSort.CREATIVE_TAB) || (useSecondary && secondarySortPolicy == StorageSort.CREATIVE_TAB);
 
         if (needCreativeTabSort)
         {
@@ -360,13 +356,6 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
         return this.cacheIndexes;
     }
 
-    // 只有具体的排序方式才参与排序，其他按钮状态（如关闭、默认）不算
-    private static boolean isSortPolicy(@Nullable ButtonState value)
-    {
-        return value != null && value.name().startsWith("SORT_") && value != ButtonState.SORT_DEFAULT;
-    }
-
-
     /**
      * 分类过滤与搜索过滤
      */
@@ -378,20 +367,19 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
     /**
      * 比较 Row 中已准备好的字段
      */
-    private Comparator<Row> buildRowComparator(@NotNull ButtonState state)
+    private Comparator<Row> buildRowComparator(@NotNull StorageSort sort)
     {
-        return switch (state)
+        return switch (sort)
         {
-            case SORT_CREATIVE_TAB -> Comparator
+            case CREATIVE_TAB -> Comparator
                     .comparingInt((Row r) -> r.creativeTabOrder)
                     .thenComparingInt(r -> r.creativeItemOrder);
-            case SORT_QUANTITY -> Comparator.comparingLong((Row r) -> r.amount);
-            case SORT_MAX_STACK -> Comparator.comparingLong((Row r) -> r.maxStack);
-            case SORT_NAME -> Comparator.comparing((Row r) -> r.name, String::compareTo);
-            case SORT_MODID -> Comparator.comparing((Row r) -> r.modIdSort, String::compareTo);
-            case SORT_INSERTED_TIME -> Comparator.comparingLong((Row r) -> r.ctime);
-            case SORT_MODIFIED_TIME -> Comparator.comparingLong((Row r) -> r.mtime);
-            default -> Comparator.comparing((Row r) -> r.name, String::compareTo);
+            case QUANTITY -> Comparator.comparingLong((Row r) -> r.amount);
+            case MAX_STACK -> Comparator.comparingLong((Row r) -> r.maxStack);
+            case NAME -> Comparator.comparing((Row r) -> r.name, String::compareTo);
+            case MODID -> Comparator.comparing((Row r) -> r.modIdSort, String::compareTo);
+            case INSERTED_TIME -> Comparator.comparingLong((Row r) -> r.ctime);
+            case MODIFIED_TIME -> Comparator.comparingLong((Row r) -> r.mtime);
         };
     }
 
@@ -471,7 +459,7 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
     {
     }
 
-    private record SortProperties(ButtonState primarySortPolicy, ButtonState secondarySortPolicy, boolean reverse)
+    private record SortProperties(StorageSort primarySortPolicy, @Nullable StorageSort secondarySortPolicy, boolean reverse)
     {
     }
 
