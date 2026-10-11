@@ -45,7 +45,7 @@ public enum DeviceContentsComponent implements IBlockComponentProvider
         if (named)
         {
             for (int i = 0; i < shown; i++)
-                amountWidth = Math.max(amountWidth, font.width(ResourceElement.amountText(contents.get(i).amount())));
+                amountWidth = Math.max(amountWidth, font.width(ResourceElement.amountText(contents.get(i))));
         }
 
         IElementHelper helper = IElementHelper.get();
@@ -63,7 +63,7 @@ public enum DeviceContentsComponent implements IBlockComponentProvider
             KeyAmount stack = contents.get(i);
             if (named)
             {
-                String amount = ResourceElement.amountText(stack.amount());
+                String amount = ResourceElement.amountText(stack);
                 line.add(ResourceElement.small(stack));
                 int width = font.width(amount);
                 if (width < amountWidth)

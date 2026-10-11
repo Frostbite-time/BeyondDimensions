@@ -4,19 +4,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.client.ui.kit.BdFormatKt;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec2;
-import snownee.jade.api.theme.IThemeHelper;
 import snownee.jade.api.ui.Element;
 import snownee.jade.api.ui.IDisplayHelper;
 import snownee.jade.api.ui.IElement;
 
 /**
- * Jade 提示里的一种资源：BD 的资源图标，数量的字号与位置同 Jade 的物品格子
+ * Jade 提示里的一种资源：图标与数量都由资源自己的渲染器画出，与存储界面的格子一致
  */
 final class ResourceElement extends Element
 {
@@ -45,12 +41,9 @@ final class ResourceElement extends Element
         return new ResourceElement(stack, true).translate(new Vec2(0, -1)).message(null);
     }
 
-    /**
-     * 与存储界面格子里的数量写法相同
-     */
-    static String amountText(long amount)
+    static String amountText(KeyAmount stack)
     {
-        return BdFormatKt.formatCompact(amount);
+        return stack.key().getRender().getCountText(stack.amount());
     }
 
     /**
@@ -83,22 +76,7 @@ final class ResourceElement extends Element
             pose.scale(0.5F, 0.5F, 0.5F);
         key.getRender().render(gui, key, 0, 0);
         if (!small && stack.amount() != 1)
-            drawAmount(gui, amountText(stack.amount()));
-        pose.popPose();
-    }
-
-    // 三个字符以内用 0.75 倍字号，更长时用 0.5 倍，靠右下角
-    private static void drawAmount(GuiGraphics gui, String text)
-    {
-        Font font = Minecraft.getInstance().font;
-        boolean longer = text.length() > 3;
-        float scale = longer ? 0.5F : 0.75F;
-        PoseStack pose = gui.pose();
-        pose.pushPose();
-        pose.translate(0, 0, 200);
-        pose.scale(scale, scale, 1);
-        gui.drawString(font, text, (longer ? 32 : 22) - font.width(text), longer ? 23 : 13,
-                IThemeHelper.get().theme().text.itemAmountColor(), true);
+            key.getRender().renderAmount(gui, stack.amount(), 0, 0);
         pose.popPose();
     }
 

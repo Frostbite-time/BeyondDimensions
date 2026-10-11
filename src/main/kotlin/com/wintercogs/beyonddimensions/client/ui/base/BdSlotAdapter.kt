@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
-import com.wintercogs.beyonddimensions.client.ui.kit.formatCompact
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import com.wintercogs.beyonddimensions.common.menu.interaction.SlotClick
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
@@ -66,7 +65,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         if (previous != null && resourceValues[slot.index] == resource) return previous
         resourceValues[slot.index] = resource
         if (!shown) return MenuSlotVisual(icon = emptyIcon(slot), marked = slot.isFake)
-        val label = if (slot.isFake) "" else formatCompact(resource.amount())
+        val label = if (slot.isFake) "" else key.render.getCountText(resource.amount())
         return MenuSlotVisual(iconOf(key), amount = label, marked = slot.isFake)
     }
 

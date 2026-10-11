@@ -1,10 +1,8 @@
 package com.wintercogs.beyonddimensions.api.storage.key.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.util.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -38,39 +36,6 @@ public class ItemStackKeyRender implements IStackRender
             gui.renderItemDecorations(Minecraft.getInstance().font, renderStack, x, y, "");
             poseStack.popPose(); // 恢复矩阵状态，结束渲染
         }
-    }
-
-    @Override
-    public void renderAmount(GuiGraphics gui, long amount, int x, int y)
-    {
-        // 渲染数量文本
-        String countText = getCountText(amount);
-        if (countText.isEmpty()) return;
-
-        float scale = 0.666f; // 文本缩放因数
-        var poseStackText = gui.pose();
-        poseStackText.pushPose();
-        poseStackText.translate(0, 0, 200); // 确保文本在顶层
-        poseStackText.scale(scale, scale, scale); // 文本整体缩放，便于查看
-        RenderSystem.disableBlend(); // 禁用混合渲染模式
-        final int X = (int) (
-                (x + -1 + 16.0f + 2.0f - Minecraft.getInstance().font.width(countText) * 0.666f)
-                        * 1.0f / 0.666f
-        );
-        final int Y = (int) (
-                (y + -1 + 16.0f - 5.0f * 0.666f)
-                        * 1.0f / 0.666f
-        );
-        gui.drawString(Minecraft.getInstance().font, countText, X, Y, 0xFFFFFF);
-        poseStackText.popPose();
-    }
-
-
-    @Override
-    public String getCountText(long count)
-    {
-        if (count < 0) return "";
-        return StringFormat.formatCount(count);
     }
 
     @Override

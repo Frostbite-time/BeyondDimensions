@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
-import com.wintercogs.beyonddimensions.util.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -107,36 +106,6 @@ public class WardenSoulStackKeyRender implements IStackRender
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-    }
-
-    @Override
-    public void renderAmount(GuiGraphics gui, long amount, int x, int y)
-    {
-        String text = getCountText(amount);
-        if (text.isEmpty()) return;
-
-        float scale = 0.666f;
-        var pose = gui.pose();
-        pose.pushPose();
-        pose.translate(0, 0, 200);
-        pose.scale(scale, scale, scale);
-        RenderSystem.disableBlend();
-
-        int w = Minecraft.getInstance().font.width(text);
-        final int X = (int) ((x - 1 + 16.0f + 2.0f - w * 0.666f) / 0.666f);
-        final int Y = (int) ((y - 1 + 16.0f - 5.0f * 0.666f) / 0.666f);
-        gui.drawString(Minecraft.getInstance().font, text, X, Y, 0xFFFFFF);
-
-        pose.popPose();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-    }
-
-    @Override
-    public String getCountText(long count)
-    {
-        if (count < 0) return "";
-        return StringFormat.formatCount(count);
     }
 
     @Override
