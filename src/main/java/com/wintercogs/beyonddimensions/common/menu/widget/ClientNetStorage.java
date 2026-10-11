@@ -459,7 +459,8 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler implements A
     {
     }
 
-    private record SortProperties(StorageSort primarySortPolicy, @Nullable StorageSort secondarySortPolicy, boolean reverse)
+    private record SortProperties(StorageSort primarySortPolicy, @Nullable StorageSort secondarySortPolicy,
+                                  boolean reverse)
     {
     }
 
