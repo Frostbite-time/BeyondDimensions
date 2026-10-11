@@ -21,6 +21,7 @@
   "tooltip.jade.beyonddimensions.net.unbound": "네트워크: 바인딩되지 않음",
   "tooltip.jade.beyonddimensions.net.permission.none": "없음",
   "config.jade.plugin_beyonddimensions.net_info": "네트워크 정보",
+  "config.jade.plugin_beyonddimensions.contents": "장치 내용물",
 
   "istack.beyonddimensions.storage_num.item": "저장됨: %s개",
   "istack.beyonddimensions.storage_num.fluid": "저장됨: %smB",

@@ -21,6 +21,7 @@
   "tooltip.jade.beyonddimensions.net.unbound": "ネットワーク：未バインド",
   "tooltip.jade.beyonddimensions.net.permission.none": "なし",
   "config.jade.plugin_beyonddimensions.net_info": "ネットワーク情報",
+  "config.jade.plugin_beyonddimensions.contents": "装置の中身",
 
   "istack.beyonddimensions.storage_num.item": "保存済み：%s個",
   "istack.beyonddimensions.storage_num.fluid": "保存済み：%smB",

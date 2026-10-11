@@ -21,6 +21,7 @@
   "tooltip.jade.beyonddimensions.net.unbound": "Network: Unbound",
   "tooltip.jade.beyonddimensions.net.permission.none": "None",
   "config.jade.plugin_beyonddimensions.net_info": "Network Info",
+  "config.jade.plugin_beyonddimensions.contents": "Device Contents",
 
   "istack.beyonddimensions.storage_num.item": "Stored: %s Items",
   "istack.beyonddimensions.storage_num.fluid": "Stored: %s mB",

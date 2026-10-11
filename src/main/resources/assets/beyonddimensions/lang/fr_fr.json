@@ -21,6 +21,7 @@
   "tooltip.jade.beyonddimensions.net.unbound": "Réseau : non lié",
   "tooltip.jade.beyonddimensions.net.permission.none": "Aucune",
   "config.jade.plugin_beyonddimensions.net_info": "Informations réseau",
+  "config.jade.plugin_beyonddimensions.contents": "Contenu de l'appareil",
 
   "istack.beyonddimensions.storage_num.item": "Stocké : %s unités",
   "istack.beyonddimensions.storage_num.fluid": "Stocké : %s mB",

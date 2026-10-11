@@ -21,6 +21,7 @@
   "tooltip.jade.beyonddimensions.net.unbound": "Rede: desvinculada",
   "tooltip.jade.beyonddimensions.net.permission.none": "Nenhuma",
   "config.jade.plugin_beyonddimensions.net_info": "Informações da rede",
+  "config.jade.plugin_beyonddimensions.contents": "Conteúdo do dispositivo",
 
   "istack.beyonddimensions.storage_num.item": "Armazenado: %s itens",
   "istack.beyonddimensions.storage_num.fluid": "Armazenado: %s mB",

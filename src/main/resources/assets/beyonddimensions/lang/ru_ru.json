@@ -21,6 +21,7 @@
   "tooltip.jade.beyonddimensions.net.unbound": "Сеть: не привязана",
   "tooltip.jade.beyonddimensions.net.permission.none": "Нет",
   "config.jade.plugin_beyonddimensions.net_info": "Информация о сети",
+  "config.jade.plugin_beyonddimensions.contents": "Содержимое устройства",
 
   "istack.beyonddimensions.storage_num.item": "Сохранено: %s шт.",
   "istack.beyonddimensions.storage_num.fluid": "Сохранено: %s мБ",
