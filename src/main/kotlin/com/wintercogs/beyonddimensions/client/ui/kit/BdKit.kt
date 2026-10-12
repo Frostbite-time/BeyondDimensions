@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.*
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
@@ -473,42 +474,85 @@ fun BdSegmented(
                 )
             }
         }
-        Row(
-            Modifier.fillMaxHeight().onSizeChanged { size ->
-                trackWidth = with(density) { size.width.toDp() }
-            }
-        ) {
-            options.forEachIndexed { index, option ->
-                val interaction = remember { MutableInteractionSource() }
-                val hovered by interaction.collectIsHoveredAsState()
-                val chosen = index == selected
-                Box(
-                    (if (fill) Modifier.weight(1f) else Modifier)
-                        .fillMaxHeight()
-                        .hoverable(interaction, enabled)
-                        .bdClickable(interaction, enabled = enabled && !chosen) { onSelect(index) }
-                        .onGloballyPositioned { position ->
-                            segments[index] = with(density) {
-                                BdSegmentBounds(position.positionInParent().x.toDp(), position.size.width.toDp())
-                            }
-                        }
-                        .padding(horizontal = 5.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    OreText(
-                        option,
-                        color =
-                            when {
-                                chosen -> colors[BdColors.accentDeep]
-                                hovered && enabled -> colors[BdColors.text]
-                                else -> colors[BdColors.muted]
+        Layout(
+            content = {
+                options.forEachIndexed { index, option ->
+                    val interaction = remember { MutableInteractionSource() }
+                    val hovered by interaction.collectIsHoveredAsState()
+                    val chosen = index == selected
+                    Box(
+                        Modifier.hoverable(interaction, enabled)
+                            .bdClickable(interaction, enabled = enabled && !chosen) { onSelect(index) }
+                            .onGloballyPositioned { position ->
+                                segments[index] = with(density) {
+                                    BdSegmentBounds(position.positionInParent().x.toDp(), position.size.width.toDp())
+                                }
                             },
-                        maxLines = 1,
-                    )
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        OreText(
+                            option,
+                            color =
+                                when {
+                                    chosen -> colors[BdColors.accentDeep]
+                                    hovered && enabled -> colors[BdColors.text]
+                                    else -> colors[BdColors.muted]
+                                },
+                            maxLines = 1,
+                        )
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxHeight().onSizeChanged { size ->
+                trackWidth = with(density) { size.width.toDp() }
+            },
+        ) { measurables, constraints ->
+            val height = if (constraints.hasBoundedHeight) constraints.maxHeight else 0
+            val text = measurables.map { it.maxIntrinsicWidth(constraints.maxHeight) }
+            val padding = SEGMENT_PADDING.dp.roundToPx() * 2
+            // 不占满的分段放不下时也收进可用的宽度
+            val available = constraints.maxWidth.takeIf {
+                constraints.hasBoundedWidth && (fill || text.sum() + padding * text.size > it)
+            }
+            val widths = segmentWidths(text, padding, available)
+            val placeables = measurables.mapIndexed { index, measurable ->
+                measurable.measure(
+                    constraints.copy(minWidth = widths[index], maxWidth = widths[index], minHeight = height)
+                )
+            }
+            layout(widths.sum(), placeables.maxOfOrNull { it.height } ?: height) {
+                var x = 0
+                for (placeable in placeables) {
+                    placeable.placeRelative(x, 0)
+                    x += placeable.width
                 }
             }
         }
     }
+}
+
+/** 分段文字两侧各留的空位 */
+private const val SEGMENT_PADDING = 5
+
+/**
+ * 各段的宽度，[text] 是各段文字的宽度。[available] 为 null 时每段是文字加两侧的 [padding]；
+ * 否则占满 [available]：各段等宽，有文字放不下时改为各段按自己的文字宽度，再平分余下的空位
+ */
+private fun segmentWidths(text: List<Int>, padding: Int, available: Int?): List<Int> {
+    if (available == null) return text.map { it + padding }
+    val count = text.size
+    if (count == 0) return emptyList()
+    val total = text.sum()
+    val widths =
+        when {
+            text.all { (it + padding) * count <= available } -> MutableList(count) { available / count }
+            total <= available -> MutableList(count) { text[it] + (available - total) / count }
+            // 文字的总宽就超出时按比例收窄
+            else -> MutableList(count) { text[it] * available / total }
+        }
+    // 取整余下的几个像素给最后一段
+    widths[count - 1] += available - widths.sum()
+    return widths
 }
 
 /** 开关：轨道里一个小方块，开启时移到右侧并染上强调色 */

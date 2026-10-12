@@ -21,7 +21,7 @@
   "tooltip.jade.beyonddimensions.net.unbound": "網路：未綁定",
   "tooltip.jade.beyonddimensions.net.permission.none": "無",
   "config.jade.plugin_beyonddimensions.net_info": "網路資訊",
-  "config.jade.plugin_beyonddimensions.contents": "設備內容",
+  "config.jade.plugin_beyonddimensions.contents": "裝置內容",
 
   "istack.beyonddimensions.storage_num.item": "已儲存：%s個",
   "istack.beyonddimensions.storage_num.fluid": "已儲存：%smB",
@@ -84,7 +84,7 @@
   "menu.text.beyonddimensions.net.default_name": "網路 #%s",
   "menu.text.beyonddimensions.primary_net_switcher.permission.member": "成員",
   "menu.text.beyonddimensions.primary_net_switcher.permission.manager": "管理員",
-  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "所有者",
+  "menu.text.beyonddimensions.primary_net_switcher.permission.owner": "擁有者",
 
   "block.beyonddimensions.net_control": "網路控制器",
   "block.beyonddimensions.net_interface": "網路介面",
@@ -125,7 +125,7 @@
   "msg.beyonddimensions.net_gift_done": "成功合併%s號網路",
 
   "types.beyonddimensions.energytype.name": "FE能量",
-  "types.beyonddimensions.warden_soul_type.name": "監守者之魂",
+  "types.beyonddimensions.warden_soul_type.name": "伏守者之魂",
   "types.beyonddimensions.source_type.name": "魔源",
   "types.beyonddimensions.mana_type.name": "植物魔力",
 
@@ -279,7 +279,7 @@
   "ui.beyonddimensions.crafting.keep.hint": "合成格裡的物品留到下次開啟；快捷鍵與各個終端用的是同一個合成格",
   "ui.beyonddimensions.crafting.recipe": "配方",
   "ui.beyonddimensions.machine.settings": "設定",
-  "ui.beyonddimensions.machine.filter_slots": "過濾欄位",
+  "ui.beyonddimensions.machine.filter_slots": "過濾槽位",
   "ui.beyonddimensions.machine.pop": "彈出模式",
   "ui.beyonddimensions.machine.working": "啟用",
   "ui.beyonddimensions.machine.redstone": "紅石控制",
@@ -338,7 +338,7 @@
   "ui.beyonddimensions.furnace.receive": "產物收入網路",
   "ui.beyonddimensions.furnace.receive.hint": "把產物送入維度網路",
   "ui.beyonddimensions.furnace.sorting": "自動整理",
-  "ui.beyonddimensions.furnace.sorting.hint": "平均分配各列的原料",
+  "ui.beyonddimensions.furnace.sorting.hint": "平均分配各欄的原料",
   "ui.beyonddimensions.feeder.foods": "食物過濾",
   "ui.beyonddimensions.feeder.mode": "餵食時機",
   "ui.beyonddimensions.feeder.mode.saturation_keep": "保持飽和",
@@ -364,7 +364,7 @@
   "ui.beyonddimensions.network.you": "（你）",
   "ui.beyonddimensions.network.manage": "管理",
   "ui.beyonddimensions.network.alone": "網路裡只有你。潛行時右鍵%s或%s，把它綁定到這個網路，再交給其他玩家使用，對方就會加入。",
-  "ui.beyonddimensions.network.role.owner": "所有者",
+  "ui.beyonddimensions.network.role.owner": "擁有者",
   "ui.beyonddimensions.network.role.manager": "管理員",
   "ui.beyonddimensions.network.role.member": "成員",
   "ui.beyonddimensions.network.action.setowner": "轉讓所有權",

@@ -22,11 +22,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.*
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -458,20 +460,25 @@ private fun Toolbar(
 private fun SearchHelp(text: StorageText, rule: String = text.searchRule) {
     val colors = Bd.colors
     OreText(text.searchHelp, color = colors[BdColors.text], style = Bd.caption, maxLines = 1)
-    Row {
-        Column(Modifier.width(IntrinsicSize.Max)) {
-            for ((example, _) in text.searchSyntax) {
-                OreText(example, color = colors[BdColors.accentDeep], style = Bd.caption, maxLines = 1)
+    // 示例一列等宽；含义较长时在自己的一列里换行，不被截断
+    val measurer = rememberTextMeasurer()
+    val style = Bd.caption
+    val examples = with(LocalDensity.current) {
+        text.searchSyntax.maxOf { (example, _) -> measurer.measure(example, style, maxLines = 1).size.width }.toDp()
+    }
+    Column {
+        for ((example, meaning) in text.searchSyntax) {
+            Row {
+                OreText(
+                    example,
+                    Modifier.width(examples),
+                    color = colors[BdColors.accentDeep],
+                    style = Bd.caption,
+                    maxLines = 1
+                )
+                Spacer(Modifier.width(8.dp))
+                OreText(meaning, color = colors[BdColors.muted], style = Bd.caption)
             }
-        }
-        Spacer(Modifier.width(8.dp))
-        Column {
-            for ((_, meaning) in text.searchSyntax) OreText(
-                meaning,
-                color = colors[BdColors.muted],
-                style = Bd.caption,
-                maxLines = 1
-            )
         }
     }
     OreText(rule, color = colors[BdColors.faint], style = Bd.caption)
@@ -1061,17 +1068,56 @@ private fun CraftSection(
                     maxLines = 1
                 )
                 Spacer(Modifier.height(2.dp))
-                BdSegmented(
+                ReturnChoice(
                     listOf(text.returnStorage, text.returnInventory),
                     if (craft.returnToStorage) 0 else 1,
-                    { send(StorageAction.ReturnPreference(it == 0)) },
-                )
+                ) { send(StorageAction.ReturnPreference(it == 0)) }
                 if (craft.recipeChoices.size > 1) {
                     Spacer(Modifier.height(4.dp))
                     RecipeChooser(craft.recipeChoices, send, text)
                 }
             }
         }
+    }
+}
+
+/** 退回方向：分段按钮；文字较长、一行放不下时改为上下两行的选项 */
+@Composable
+private fun ReturnChoice(options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
+    Layout({
+        BdSegmented(options, selected, onSelect)
+        Column {
+            options.forEachIndexed { index, option -> ChoiceRow(option, index == selected) { onSelect(index) } }
+        }
+    }) { (segmented, rows), constraints ->
+        val fits = segmented.maxIntrinsicWidth(constraints.maxHeight) <= constraints.maxWidth
+        val placeable = (if (fits) segmented else rows).measure(constraints)
+        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+    }
+}
+
+/** 上下排列的选项中的一行：选中的一项前有强调色方点 */
+@Composable
+private fun ChoiceRow(label: String, selected: Boolean, onClick: () -> Unit) {
+    val colors = Bd.colors
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    Row(
+        Modifier.height(12.dp).hoverable(interaction).bdClickable(interaction, enabled = !selected, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(3.dp).background(if (selected) colors[BdColors.accent] else Color.Transparent))
+        Spacer(Modifier.width(3.dp))
+        OreText(
+            label,
+            color =
+                when {
+                    selected -> colors[BdColors.accentDeep]
+                    hovered -> colors[BdColors.text]
+                    else -> colors[BdColors.muted]
+                },
+            maxLines = 1,
+        )
     }
 }
 
