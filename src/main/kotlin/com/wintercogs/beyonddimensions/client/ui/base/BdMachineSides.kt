@@ -66,7 +66,7 @@ data class SidePageState(
 
 /**
  * 生成面配置页的状态，在游戏线程使用。展开图以打开界面时玩家的朝向为准：正中是面对玩家的一面，
- * 左右是玩家看过去的左右，最右是背面，上下是顶面与底面。相邻方块变了才重新取图标
+ * 左右是玩家看过去的左右，左下角是背面，上下是顶面与底面。相邻方块变了才重新取图标
  */
 class MachineSidesView(private val level: Level, private val pos: BlockPos, facing: Direction) {
     private val layout =
@@ -75,7 +75,7 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos, faci
             Triple(facing.counterClockWise, 0, 1),
             Triple(facing.opposite, 1, 1),
             Triple(facing.clockWise, 2, 1),
-            Triple(facing, 3, 1),
+            Triple(facing, 0, 2),
             Triple(Direction.DOWN, 1, 2),
         )
     private val neighbors = EnumMap<Direction, Neighbor>(Direction::class.java)
@@ -136,7 +136,7 @@ fun BdMachineSides(state: SidePageState, shown: Boolean, onPick: (MachineSetting
     val colors = Bd.colors
     BdSectionLabel(state.title)
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        Box(Modifier.size((4 * CELL + 3 * CELL_GAP).dp, (3 * CELL + 2 * CELL_GAP).dp)) {
+        Box(Modifier.size((3 * CELL + 2 * CELL_GAP).dp, (3 * CELL + 2 * CELL_GAP).dp)) {
             for (face in state.faces) key(face.setting) {
                 FaceCell(
                     face,
