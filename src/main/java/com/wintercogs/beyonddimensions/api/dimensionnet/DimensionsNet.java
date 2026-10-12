@@ -182,7 +182,7 @@ public class DimensionsNet extends SavedData
      */
     public static @Nullable DimensionsNet createNewNetForPlayer(Player player, long defaultSlotCapability, int defaultSlotMaxSize)
     {
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net != null) return net;
 
         MinecraftServer server = player.getServer();
@@ -252,18 +252,6 @@ public class DimensionsNet extends SavedData
             return net;
         }
         return null;
-    }
-
-    /**
-     * 尝试从玩家获取维度网络，仅在服务端调用
-     *
-     * @param player 玩家
-     * @return 返回玩家所在的维度网络，如果不存在，则返回null
-     */
-    @Deprecated(forRemoval = false)
-    public static @Nullable DimensionsNet getNetFromPlayer(Player player)
-    {
-        return getPrimaryNetFromPlayer(player);
     }
 
     /**

@@ -66,9 +66,7 @@ public class BeyondDimensions
         BDAttachments.register(modEventBus);
         BDMachineSettings.register(modEventBus);
         BDMachineTypes.register(modEventBus);
-
-        // 物质球进入维度网络时拆成内容物
-        MatterCompressionBall.registerStorageRule();
+        BDStorageRules.register();
 
         // 分发集成模块
         IntegrationManager.bootstrapCommon(modEventBus, NeoForge.EVENT_BUS);

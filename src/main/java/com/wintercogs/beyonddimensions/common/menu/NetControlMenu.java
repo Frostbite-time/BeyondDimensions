@@ -117,7 +117,7 @@ public class NetControlMenu extends BDBaseMenu
     public NetControlMenu(int id, Inventory playerInventory)
     {
         super(Net_Control_Menu.get(), id, playerInventory);
-        net = player.level().isClientSide() ? null : DimensionsNet.getNetFromPlayer(player);
+        net = player.level().isClientSide() ? null : DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net != null)
         {
             networkId = net.getId();

@@ -60,7 +60,7 @@ public class NetedItem extends Item
         if (level.isClientSide())
             return;
 
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net != null)
         {
             setNet(stack, player);
@@ -103,7 +103,7 @@ public class NetedItem extends Item
                 return true;
             }
 
-            DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
+            DimensionsNet playerNet = DimensionsNet.getPrimaryNetFromPlayer(player);
             if (playerNet != null && item.validToReWrite(playerNet, player))
             {
                 itemstack.set(BDDataComponents.NET_ID_DATA, playerNet.getId());

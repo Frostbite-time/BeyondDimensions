@@ -158,7 +158,7 @@ public final class TooltipHelper
         oldest.remove();
     }
 
-    @EventBusSubscriber(modid = BDConstants.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = BDConstants.MODID, value = Dist.CLIENT)
     public static final class Reloads
     {
         @SubscribeEvent

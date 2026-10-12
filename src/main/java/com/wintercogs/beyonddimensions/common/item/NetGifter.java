@@ -36,7 +36,7 @@ public class NetGifter extends NetedItem
                 DimensionsNet itemNet = DimensionsNet.getNetFromId(itemstack.getOrDefault(BDDataComponents.NET_ID_DATA, -1));
                 if (itemNet != null)
                 {
-                    DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
+                    DimensionsNet playerNet = DimensionsNet.getPrimaryNetFromPlayer(player);
                     // 只有网络主人能合并其他人的网络
                     if (playerNet != null && playerNet.getId() != itemNet.getId() && playerNet.isOwner(player))
                     {

@@ -61,7 +61,7 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
         //获取玩家上下文
         Player player = context.player();
 
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net != null)
         {
             NetMenuType targetMenu = this.target();

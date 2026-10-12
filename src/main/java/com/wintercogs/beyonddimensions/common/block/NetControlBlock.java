@@ -25,7 +25,7 @@ public class NetControlBlock extends Block
         super.useWithoutItem(state, level, pos, player, hitResult);
         if (!level.isClientSide())
         {
-            if (DimensionsNet.getNetFromPlayer(player) != null)
+            if (DimensionsNet.getPrimaryNetFromPlayer(player) != null)
             {
                 player.openMenu(new SimpleMenuProvider(
                         (containerId, playerInventory, _player) -> new NetControlMenu(containerId, playerInventory),

@@ -26,7 +26,7 @@ public class NetManagerInviter extends NetedItem implements IAddNetMemberHandler
         }
         if (!level.isClientSide())
         {
-            if (DimensionsNet.getNetFromPlayer(player) == null)
+            if (DimensionsNet.getPrimaryNetFromPlayer(player) == null)
             {
                 if (itemstack.getOrDefault(BDDataComponents.NET_ID_DATA, -1) >= 0)
                 {

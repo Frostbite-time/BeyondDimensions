@@ -295,7 +295,7 @@ public final class ServerCommands
                                           @Nullable Integer slotMaxSizeOverride)
     {
         // 对方不能已有网络
-        DimensionsNet existing = DimensionsNet.getNetFromPlayer(target);
+        DimensionsNet existing = DimensionsNet.getPrimaryNetFromPlayer(target);
         if (existing != null)
         {
             source.sendFailure(Component.literal("Player already has a network: player=" + target.getGameProfile().getName() + ", netId=" + existing.getId()));
@@ -343,7 +343,7 @@ public final class ServerCommands
 
     private static int deleteNetByPlayer(CommandSourceStack source, ServerPlayer target)
     {
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(target);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(target);
         if (net == null)
         {
             source.sendFailure(Component.literal("Player does not belong to any network: player=" + target.getGameProfile().getName()));

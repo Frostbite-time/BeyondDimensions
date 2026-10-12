@@ -53,7 +53,7 @@ public class NetCreater extends Item
 
         if (!level.isClientSide())
         {
-            DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+            DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
             if (net != null)
             {
                 return InteractionResultHolder.fail(itemstack);

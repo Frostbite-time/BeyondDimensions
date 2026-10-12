@@ -35,7 +35,7 @@ public class NetedBlock extends Block
                 {
                     if (blockEntity.getNetId() == -1)
                     {
-                        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+                        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
                         if (net != null)
                         {
                             if (net.isManager(player))
@@ -65,7 +65,7 @@ public class NetedBlock extends Block
             {
                 if (blockEntity.getNetId() < 0)
                 {
-                    DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+                    DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
                     if (net != null)
                     {
                         if (net.isManager(player))

@@ -83,7 +83,7 @@ public abstract class NetedBlockEntity extends BlockEntity
 
     public void setNetIdFromPlayer(ServerPlayer player)
     {
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net != null)
         {
             setNetId(net.getId());
@@ -92,7 +92,7 @@ public abstract class NetedBlockEntity extends BlockEntity
 
     public void setNetIdFromPlayerOrClean(ServerPlayer player)
     {
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net != null)
         {
             setNetId(net.getId());

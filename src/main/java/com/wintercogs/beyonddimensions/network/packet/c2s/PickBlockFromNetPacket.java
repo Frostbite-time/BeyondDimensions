@@ -37,7 +37,7 @@ public record PickBlockFromNetPacket(ItemStack targetStack) implements CustomPac
     {
         Player player = context.player();
         if (!player.getMainHandItem().isEmpty()) return;
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net == null) return;
         UnifiedStorage storage = net.getUnifiedStorage();
 

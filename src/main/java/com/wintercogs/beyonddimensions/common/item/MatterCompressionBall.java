@@ -5,12 +5,12 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.dimensionnet.rule.InsertPlan;
 import com.wintercogs.beyonddimensions.api.dimensionnet.rule.UnifiedStorageRules;
-import com.wintercogs.beyonddimensions.api.ids.BDItemIds;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.util.InventoryHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -26,6 +26,8 @@ import java.util.Map;
 
 public class MatterCompressionBall extends Item
 {
+    private static final ResourceLocation UNCOMPRESS_RULE_ID = BeyondDimensions.makeId("uncompress_matter_ball");
+
     public MatterCompressionBall(Properties properties)
     {
         super(properties.stacksTo(1));
@@ -36,7 +38,7 @@ public class MatterCompressionBall extends Item
      */
     public static void registerStorageRule()
     {
-        UnifiedStorageRules.insertMatching(BeyondDimensions.makeId(BDItemIds.MATTER_COMPRESS_BALL), MatterCompressionBall::isBall, request -> {
+        UnifiedStorageRules.insertMatching(UNCOMPRESS_RULE_ID, MatterCompressionBall::isBall, request -> {
             Map<IStackKey<?>, Long> contents = new LinkedHashMap<>();
             try
             {
@@ -52,11 +54,13 @@ public class MatterCompressionBall extends Item
         });
     }
 
+    // 判断是否为物质球
     private static boolean isBall(IStackKey<?> key)
     {
         return key instanceof ItemStackKey itemKey && itemKey.getSource() instanceof MatterCompressionBall;
     }
 
+    // 递归地收集物质球内容
     private static void collectContents(ItemStackKey ball, long count, Map<IStackKey<?>, Long> out)
     {
         List<KeyAmount> entries = ball.getReadOnlyStack().getOrDefault(BDDataComponents.ISTACK_SLOTS, List.of());

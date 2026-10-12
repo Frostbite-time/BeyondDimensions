@@ -44,7 +44,7 @@ public record OpenMagnetGuiPacket() implements CustomPacketPayload
     private void handleInServer(final IPayloadContext context)
     {
         Player player = context.player();
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
 
         if (net == null)
             return;

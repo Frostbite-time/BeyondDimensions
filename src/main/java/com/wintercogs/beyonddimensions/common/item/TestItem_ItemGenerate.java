@@ -34,7 +34,7 @@ public class TestItem_ItemGenerate extends Item
     {
         if (!level.isClientSide())
         {
-            DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+            DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
             if (net != null)
             {
                 UnifiedStorage storage = net.getUnifiedStorage();

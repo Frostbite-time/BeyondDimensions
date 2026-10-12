@@ -59,7 +59,7 @@ public class NetDestroyer extends NetedItem
                 DimensionsNet itemNet = DimensionsNet.getNetFromId(stack.getOrDefault(BDDataComponents.NET_ID_DATA, -1));
                 if (itemNet != null)
                 {
-                    DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
+                    DimensionsNet playerNet = DimensionsNet.getPrimaryNetFromPlayer(player);
                     // 只有网络主人能删除自己的网络
                     if (playerNet != null && playerNet.getId() == itemNet.getId() && playerNet.isOwner(player))
                     {
