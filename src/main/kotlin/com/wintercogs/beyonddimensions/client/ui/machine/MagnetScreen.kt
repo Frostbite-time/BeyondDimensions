@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.common.init.BDItems
+import com.wintercogs.beyonddimensions.common.item.NetMagnetItem
 import com.wintercogs.beyonddimensions.common.menu.NetMagnetMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
@@ -18,11 +19,12 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 
-/** 网络磁铁：过滤槽与玩家背包；设置页是总开关、过滤模式、四类收集与范围 */
+/** 网络磁铁：收集过滤槽、背包保留槽与玩家背包；设置页提供两组独立的过滤模式 */
 class MagnetScreen(menu: NetMagnetMenu, inventory: Inventory, title: Component) :
     BdInventoryScreen<NetMagnetMenu, MagnetState, MagnetAction>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDItems.NET_MAGNET_ITEM.get()))
-    private val filterSlots = menu.flagSlotIds()
+    private val filterSlots = menu.flagSlotIds().take(NetMagnetItem.FILTER_SLOTS)
+    private val inventoryKeepSlots = menu.flagSlotIds().drop(NetMagnetItem.FILTER_SLOTS)
     private val playerSlots = menu.playerSlotIds()
     private val text = MagnetText(title.string)
 
@@ -52,6 +54,8 @@ class MagnetScreen(menu: NetMagnetMenu, inventory: Inventory, title: Component) 
                 BdMainPage(page.main) {
                     BdSlotSection(text.filters, filterSlots, slots)
                     Spacer(Modifier.height(7.dp))
+                    BdSlotSection(text.inventoryKeep, inventoryKeepSlots, slots, hint = text.inventoryKeepHint)
+                    Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
                 InjectedPages(pages, page)
@@ -74,4 +78,6 @@ private class MagnetText(val title: String) {
     val settings = tr("ui.beyonddimensions.machine.settings")
     val inventory = tr("ui.beyonddimensions.inventory")
     val filters = tr("ui.beyonddimensions.machine.filter_slots")
+    val inventoryKeep = tr("ui.beyonddimensions.magnet.inventory_keep_slots")
+    val inventoryKeepHint = tr("ui.beyonddimensions.magnet.inventory_keep_slots.hint")
 }

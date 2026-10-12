@@ -5,8 +5,11 @@ import com.wintercogs.beyonddimensions.api.machine.MachineItem;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
@@ -28,12 +31,19 @@ import java.util.List;
 
 import static com.wintercogs.beyonddimensions.common.init.BDMenus.Net_Magnet_Menu;
 
-// 网络磁铁菜单：过滤槽与玩家背包，设置保存在物品上
+// 网络磁铁菜单：收集过滤槽、背包保留槽与玩家背包，设置保存在物品上
 public class NetMagnetMenu extends BDBaseMenu implements MachineMenu
 {
     // storage的初始数据由itemStack提供，随后storage每次变化都重新向其中写入数据
-    private final IStackHandler storage = new StackHandler(36)
+    private final IStackHandler storage = new StackHandler(NetMagnetItem.capacity)
     {
+        @Override
+        public boolean isStackValid(int slot, IStackKey<?> key)
+        {
+            return super.isStackValid(slot, key)
+                    && (slot < NetMagnetItem.FILTER_SLOTS || key.isEmpty() || key instanceof ItemStackKey);
+        }
+
         @Override
         public void onChange()
         {
@@ -100,7 +110,7 @@ public class NetMagnetMenu extends BDBaseMenu implements MachineMenu
         if (!playerInventory.player.level().isClientSide())
         {
             List<KeyAmount> stacks = menuStack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
-            for (int i = 0; i < stacks.size(); i++)
+            for (int i = 0; i < Math.min(stacks.size(), storage.getSlots()); i++)
             {
                 storage.insert(i, stacks.get(i).key(), stacks.get(i).amount(), false);
             }
@@ -122,6 +132,8 @@ public class NetMagnetMenu extends BDBaseMenu implements MachineMenu
                 this.addSlot(flagSlot);
             }
         }
+        for (int i = 0; i < NetMagnetItem.INVENTORY_KEEP_SLOTS; i++)
+            this.addSlot(new FlagStackTypedSlot(this, storage, NetMagnetItem.FILTER_SLOTS + i));
     }
 
     private void addPlayerInv(Inventory playerInventory)

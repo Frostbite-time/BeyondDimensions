@@ -50,7 +50,9 @@ import java.util.List;
 
 public class NetMagnetItem extends BaseMachineItem
 {
-    public static final int capacity = 36;
+    public static final int FILTER_SLOTS = 36;
+    public static final int INVENTORY_KEEP_SLOTS = 18;
+    public static final int capacity = FILTER_SLOTS + INVENTORY_KEEP_SLOTS;
 
     public NetMagnetItem(Properties properties)
     {
@@ -81,6 +83,20 @@ public class NetMagnetItem extends BaseMachineItem
     {
         super.checkComponents(stack);
         ensureSlots(stack, capacity);
+        List<KeyAmount> slots = stack.get(BDDataComponents.ISTACK_SLOTS);
+        // 旧磁铁保留原来的 36 个过滤标记，只补上背包保留槽。
+        boolean invalidKeepSlot = slots.stream().skip(FILTER_SLOTS).limit(INVENTORY_KEEP_SLOTS)
+                .anyMatch(entry -> !entry.key().isEmpty() && !(entry.key() instanceof ItemStackKey));
+        if (slots.size() < capacity || invalidKeepSlot)
+        {
+            List<KeyAmount> expanded = new ArrayList<>(slots);
+            while (expanded.size() < capacity)
+                expanded.add(new KeyAmount(ItemStackKey.EMPTY, 0));
+            for (int i = FILTER_SLOTS; i < capacity; i++)
+                if (!(expanded.get(i).key() instanceof ItemStackKey))
+                    expanded.set(i, new KeyAmount(ItemStackKey.EMPTY, 0));
+            stack.set(BDDataComponents.ISTACK_SLOTS, expanded);
+        }
     }
 
     @Override
@@ -107,7 +123,10 @@ public class NetMagnetItem extends BaseMachineItem
         HopperNBTMode hopperNBTMode = settings(stack).get(BDMachineSettings.COLLECT_COMPONENTS.get());
         HopperFluidMode hopperFluidMode = settings(stack).get(BDMachineSettings.COLLECT_FLUIDS.get());
         HopperRangeMode hopperRangeMode = settings(stack).get(BDMachineSettings.RANGE.get());
-        List<KeyAmount> filterSlots = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
+        FilterMode inventoryKeepMode = settings(stack).get(BDMachineSettings.INVENTORY_KEEP.get());
+        List<KeyAmount> slots = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, List.of());
+        List<KeyAmount> filterSlots = slots.subList(0, Math.min(FILTER_SLOTS, slots.size()));
+        List<KeyAmount> inventoryKeepSlots = slots.subList(Math.min(FILTER_SLOTS, slots.size()), Math.min(capacity, slots.size()));
 
         AABB searchArea = getSearchArea(hopperRangeMode, level, holder.getOnPos());
 
@@ -123,10 +142,13 @@ public class NetMagnetItem extends BaseMachineItem
             Player player = holder instanceof Player p ? p : null;
             for (ItemEntity itemEntity : itemEntities)
             {
-                if (itemEntity != null && !itemEntity.isRemoved()
-                        && matchesFilter(filterMode, filterSlots, new ItemStackKey(itemEntity.getItem())))
+                if (itemEntity == null || itemEntity.isRemoved())
+                    continue;
+                ItemStackKey itemKey = new ItemStackKey(itemEntity.getItem());
+                if (matchesFilter(filterMode, filterSlots, itemKey))
                 {
-                    pickUp(itemEntity, storage, player, target);
+                    boolean inventoryOnly = matchesFilter(inventoryKeepMode, inventoryKeepSlots, itemKey);
+                    pickUp(itemEntity, storage, player, target, inventoryOnly);
                 }
             }
         }
@@ -161,13 +183,19 @@ public class NetMagnetItem extends BaseMachineItem
 
     /**
      * 掉落物先送到优先的一处，放不下的再送到另一处，都放不下的留在地上。
-     * 只有玩家拿着时才能送进背包
+     * 只有玩家拿着时才能送进背包。背包保留的物品无论优先目标是什么都不送入网络
      */
-    private static void pickUp(ItemEntity itemEntity, UnifiedStorage storage, @Nullable Player player, PickupTarget target)
+    private static void pickUp(ItemEntity itemEntity, UnifiedStorage storage, @Nullable Player player, PickupTarget target, boolean inventoryOnly)
     {
         ItemStack original = itemEntity.getItem();
         ItemStack left = original.copy();
-        if (target == PickupTarget.INVENTORY && player != null)
+        if (inventoryOnly)
+        {
+            if (player == null || itemEntity.hasPickUpDelay())
+                return;
+            left = intoInventory(player, left);
+        }
+        else if (target == PickupTarget.INVENTORY && player != null)
         {
             // 刚扔出的东西等拾取冷却过了再收，不然扔不出去
             if (itemEntity.hasPickUpDelay())

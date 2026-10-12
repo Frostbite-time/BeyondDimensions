@@ -76,8 +76,8 @@ fun BdPlayerInventory(slots: ComposeMenuSlots<*>, playerSlots: List<Int>, modifi
 
 /** 带标题的一组槽位，外面一圈细线 */
 @Composable
-fun BdSlotSection(title: String, ids: List<Int>, slots: ComposeMenuSlots<*>, columns: Int = 9) {
-    BdSectionLabel(title)
+fun BdSlotSection(title: String, ids: List<Int>, slots: ComposeMenuSlots<*>, columns: Int = 9, hint: String? = null) {
+    if (hint == null) BdSectionLabel(title) else BdTooltip(hint) { BdSectionLabel(title) }
     Spacer(Modifier.height(4.dp))
     Box(Modifier.background(Bd.colors[BdColors.line]).padding(0.5.dp)) { BdSlotGrid(slots, ids, columns) }
 }

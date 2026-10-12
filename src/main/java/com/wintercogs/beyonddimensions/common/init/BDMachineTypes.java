@@ -70,6 +70,7 @@ public final class BDMachineTypes
                     .setting(BDMachineSettings.COLLECT_FLUIDS)
                     .setting(BDMachineSettings.COLLECT_COMPONENTS)
                     .setting(BDMachineSettings.PICKUP_TARGET)
+                    .setting(BDMachineSettings.INVENTORY_KEEP)
                     .setting(BDMachineSettings.RANGE, entry -> entry.editor(rangeHints("magnet")))
                     .build());
 
