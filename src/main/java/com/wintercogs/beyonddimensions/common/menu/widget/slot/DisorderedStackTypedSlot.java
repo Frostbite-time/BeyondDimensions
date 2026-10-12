@@ -32,11 +32,11 @@ public class DisorderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public KeyAmount safeInsert(IStackKey<?> stack, long amount)
+    public KeyAmount safeInsert(IStackKey<?> stack, long amount, boolean simulate)
     {
         if (stack != null)
         {
-            return storage.insert(stack, amount, false);
+            return storage.insert(stack, amount, simulate);
         }
         return new KeyAmount(ItemStackKey.EMPTY, 0);
 

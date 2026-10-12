@@ -144,47 +144,15 @@ public class NetRestockerItem extends BaseMachineItem
                 if (missing <= 0)
                     continue;
 
-                KeyAmount extracted = storage.extract(targetKey, missing, false, fuzzyMode == FuzzyMode.ENABLE);
-                if (extracted.isEmpty())
-                    continue;
-
-                if (!(extracted.key() instanceof ItemStackKey extractedItemKey))
-                {
-                    storage.insert(extracted.key(), extracted.amount(), false);
-                    continue;
-                }
-
-                int refillCount = BDMath.clampLongToInt(extracted.amount());
-                if (refillCount <= 0)
-                    continue;
-
-                ItemStack refill = extractedItemKey.copyStackWithCount(refillCount);
-
-                if (currentStack.isEmpty())
-                {
-                    if (setPlayerSlotStack(player, templateSlot, refill))
-                    {
-                        inventoryChanged = true;
-                    }
-                    else
-                    {
-                        storage.insert(extracted.key(), extracted.amount(), false);
-                    }
-                }
-                else
-                {
-                    if (!ItemStack.isSameItemSameComponents(currentStack, refill))
-                    {
-                        storage.insert(extracted.key(), extracted.amount(), false);
-                        continue;
-                    }
-
-                    currentStack.grow(refillCount);
-                    if (setPlayerSlotStack(player, templateSlot, currentStack))
-                        inventoryChanged = true;
-                    else
-                        storage.insert(extracted.key(), extracted.amount(), false);
-                }
+                ItemStack existing = currentStack;
+                int slot = templateSlot;
+                // 槽位已有物品时只补同一种，空槽才按模糊匹配挑变体
+                KeyAmount moved = storage.extractInto(targetKey, missing, existing.isEmpty() && fuzzyMode == FuzzyMode.ENABLE,
+                        offer -> playerSlotAccepts(player, slot, existing, offer),
+                        taken -> setPlayerSlotStack(player, slot, ((ItemStackKey) taken.key()).copyStackWithCount(existing.getCount() + taken.amount()))
+                                ? 0L : taken.amount());
+                if (!moved.isEmpty())
+                    inventoryChanged = true;
             }
 
             if (inventoryChanged)
@@ -255,34 +223,25 @@ public class NetRestockerItem extends BaseMachineItem
             if (missing <= 0)
                 continue;
 
-            KeyAmount extracted = storage.extract(targetKey, missing, false, fuzzyMode == FuzzyMode.ENABLE);
-            if (extracted.isEmpty())
-                continue;
-
-            if (!(extracted.key() instanceof ItemStackKey extractedItemKey))
-            {
-                storage.insert(extracted.key(), extracted.amount(), false);
-                continue;
-            }
-
-            int refillCount = BDMath.clampLongToInt(extracted.amount());
-            if (refillCount <= 0)
-                continue;
-
-            ItemStack refill = extractedItemKey.copyStackWithCount(refillCount);
-
-            if (!currentStack.isEmpty() && !ItemStack.isSameItemSameComponents(currentStack, refill))
-            {
-                storage.insert(extracted.key(), extracted.amount(), false);
-                continue;
-            }
-
-            ItemStack leftover = handler.insertItem(templateSlot, refill, false);
-            if (!leftover.isEmpty())
-            {
-                storage.insert(new ItemStackKey(leftover), leftover.getCount(), false);
-            }
+            IItemHandler target = handler;
+            int slot = templateSlot;
+            // 槽位已有物品时只补同一种，空槽才按模糊匹配挑变体
+            storage.extractInto(targetKey, missing, currentStack.isEmpty() && fuzzyMode == FuzzyMode.ENABLE,
+                    offer -> offer.key() instanceof ItemStackKey key
+                            ? offer.amount() - target.insertItem(slot, key.copyStackWithCount(offer.amount()), true).getCount() : 0L,
+                    taken -> target.insertItem(slot, ((ItemStackKey) taken.key()).copyStackWithCount(taken.amount()), false).getCount());
         }
+    }
+
+    // 玩家槽位能收下多少：空槽要能放下这种物品，有物品时只收同一种，最多补到一组
+    private long playerSlotAccepts(Player player, int templateSlot, ItemStack existing, KeyAmount offer)
+    {
+        if (!(offer.key() instanceof ItemStackKey key))
+            return 0L;
+        ItemStack stack = key.getReadOnlyStack();
+        if (existing.isEmpty() ? !canPlaceInPlayerTemplateSlot(player, templateSlot, stack) : !ItemStack.isSameItemSameComponents(existing, stack))
+            return 0L;
+        return Math.min(offer.amount(), key.getVanillaMaxStackSize() - existing.getCount());
     }
 
     private boolean slotMatchesTemplate(ItemStack stackInSlot, KeyAmount template, FuzzyMode fuzzyMode)

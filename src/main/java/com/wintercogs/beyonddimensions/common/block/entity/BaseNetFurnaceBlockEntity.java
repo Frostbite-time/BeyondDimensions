@@ -432,14 +432,10 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
                     if (!inputStorageSlots.getStackBySlot(inputSlot).isEmpty()) break; // 如果已经插入过则直接跳过
                     if (!(filterStack.key() instanceof ItemStackKey filterItem) || filterItem.isEmpty()) continue;
 
-                    KeyAmount extracted = storage.extract(filterItem, filterItem.getVanillaMaxStackSize(), false, false);
-                    if (extracted.isEmpty()) continue;
-
-                    KeyAmount remaining = inputStorageSlots.insert(inputSlot, extracted.key(), extracted.amount(), false);
-                    if (!remaining.isEmpty())
-                    {
-                        storage.insert(remaining.key(), remaining.amount(), false);
-                    }
+                    int slot = inputSlot;
+                    storage.extractInto(filterItem, filterItem.getVanillaMaxStackSize(), false,
+                            offer -> offer.amount() - inputStorageSlots.insert(slot, offer.key(), offer.amount(), true).amount(),
+                            taken -> inputStorageSlots.insert(slot, taken.key(), taken.amount(), false).amount());
                 }
             }
             // 2.如果开启了自动整理，则每tick进行一次快速整理
@@ -535,14 +531,10 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
                     if (filterStack.isEmpty()) continue;
                     if (!fuelStorageSlots.getStackBySlot(fuelSlot).isEmpty()) break; // 如果已经插入过则直接跳过
 
-                    KeyAmount extracted = storage.extract(filterStack.key(), filterStack.key().getVanillaMaxStackSize(), false, false);
-                    if (extracted.isEmpty()) continue;
-
-                    KeyAmount remaining = fuelStorageSlots.insert(fuelSlot, extracted.key(), extracted.amount(), false);
-                    if (!remaining.isEmpty())
-                    {
-                        storage.insert(remaining.key(), remaining.amount(), false);
-                    }
+                    int slot = fuelSlot;
+                    storage.extractInto(filterStack.key(), filterStack.key().getVanillaMaxStackSize(), false,
+                            offer -> offer.amount() - fuelStorageSlots.insert(slot, offer.key(), offer.amount(), true).amount(),
+                            taken -> fuelStorageSlots.insert(slot, taken.key(), taken.amount(), false).amount());
                 }
             }
         }

@@ -41,9 +41,9 @@ public class FlagStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public KeyAmount safeInsert(IStackKey<?> key, long amount)
+    public KeyAmount safeInsert(IStackKey<?> key, long amount, boolean simulate)
     {
-        if (key != null)
+        if (key != null && !simulate)
         {
             setStackDirectly(key, amount);
         }

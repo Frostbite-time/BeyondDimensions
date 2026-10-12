@@ -199,7 +199,13 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 有序槽位只取出当前槽中数量，无序槽位从整个存储中取出
     // 另一种类型的safeInsert，专用于此种槽位
     // 返回余量
-    public abstract KeyAmount safeInsert(IStackKey<?> key, long amount);
+    public KeyAmount safeInsert(IStackKey<?> key, long amount)
+    {
+        return safeInsert(key, amount, false);
+    }
+
+    // simulate 为真时只算出余量，不改动存储
+    public abstract KeyAmount safeInsert(IStackKey<?> key, long amount, boolean simulate);
 
     // 对于有序槽位，应当从当前槽位中取出对应种类stack的对应数量
     // 对于无序槽位，应当从整个存储中取出对应种类stack的对应数量

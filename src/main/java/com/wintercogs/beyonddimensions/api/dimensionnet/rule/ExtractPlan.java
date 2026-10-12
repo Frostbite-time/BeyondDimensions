@@ -3,8 +3,10 @@ package com.wintercogs.beyonddimensions.api.dimensionnet.rule;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 
 /**
- * 提取规则的计划。交出的永远是网络里现成的请求资源，规则只决定给不给、最多给多少、额外扣什么；
+ * 提取规则的计划。交出的永远是网络里现成的请求资源，规则只决定给不给、最多给多少、每个额外扣什么；
  * 额外扣除的资源会再经过提取规则。
+ * <p>
+ * 提取不分份：模拟给出 n 个时，同样状态下不超过 n 个的实际提取总能足量交出
  * <pre>{@code
  * ExtractPlan.reject()                          // 不给
  * ExtractPlan.allow().limit(request.stored(request.key()) - 1000) // 保留 1000 个
@@ -13,9 +15,9 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
  */
 public final class ExtractPlan extends StoragePlan
 {
-    private ExtractPlan(boolean rejected, long unit)
+    private ExtractPlan(boolean rejected)
     {
-        super(rejected, unit);
+        super(rejected, 1L);
     }
 
     /**
@@ -23,7 +25,7 @@ public final class ExtractPlan extends StoragePlan
      */
     public static ExtractPlan reject()
     {
-        return new ExtractPlan(true, 1L);
+        return new ExtractPlan(true);
     }
 
     /**
@@ -31,19 +33,11 @@ public final class ExtractPlan extends StoragePlan
      */
     public static ExtractPlan allow()
     {
-        return new ExtractPlan(false, 1L);
+        return new ExtractPlan(false);
     }
 
     /**
-     * 每 unit 个算一份交出，{@link #take} 按份计算
-     */
-    public static ExtractPlan allow(long unit)
-    {
-        return new ExtractPlan(false, unit);
-    }
-
-    /**
-     * 每份额外扣除 amount 个 key
+     * 每交出一个额外扣除 amount 个 key
      */
     public ExtractPlan take(IStackKey<?> key, long amount)
     {

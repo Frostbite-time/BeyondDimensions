@@ -129,10 +129,10 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
                 IEnergyStorage otherStorage = level.getCapability(Capabilities.EnergyStorage.BLOCK, targetPos, dir.getOpposite());
                 if (otherStorage != null)
                 {
-                    //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
-                    int maxExtract = BDMath.clampLongToInt(net.getUnifiedStorage().getStackByKey(EnergyStackKey.INSTANCE).amount());
-                    int receive = otherStorage.receiveEnergy(maxExtract, false);
-                    net.getUnifiedStorage().extract(EnergyStackKey.INSTANCE, receive, false, false);
+                    // 先模拟网络能给多少、对方能收多少，再只取出收得下的能量
+                    net.getUnifiedStorage().extractInto(EnergyStackKey.INSTANCE, Integer.MAX_VALUE, false,
+                            offer -> otherStorage.receiveEnergy(BDMath.clampLongToInt(offer.amount()), true),
+                            taken -> taken.amount() - otherStorage.receiveEnergy(BDMath.clampLongToInt(taken.amount()), false));
                 }
             }
         }

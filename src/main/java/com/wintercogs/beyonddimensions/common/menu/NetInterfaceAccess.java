@@ -138,14 +138,12 @@ public interface NetInterfaceAccess extends Machine
             long currentAmount = current.isEmpty() ? 0 : current.amount();
             long missing = flag.key().getVanillaMaxStackSize() - currentAmount;
             if (missing <= 0) continue;
-            KeyAmount stack = net.getUnifiedStorage().extract(flag.key(), missing, false, fuzzyMode == FuzzyMode.ENABLE);
-            if (!stack.isEmpty())
-            {
-                KeyAmount remaining = stackHandler.insert(i, stack.key(), stack.amount(), false);
-                if (!remaining.isEmpty())
-                    net.getUnifiedStorage().insert(remaining.key(), remaining.amount(), false);
-                changed |= remaining.amount() != stack.amount();
-            }
+            int slot = i;
+            // 格子里已有资源时只补同一种，空格子才按模糊匹配挑变体
+            KeyAmount moved = net.getUnifiedStorage().extractInto(flag.key(), missing, current.isEmpty() && fuzzyMode == FuzzyMode.ENABLE,
+                    offer -> offer.amount() - stackHandler.insert(slot, offer.key(), offer.amount(), true).amount(),
+                    taken -> stackHandler.insert(slot, taken.key(), taken.amount(), false).amount());
+            changed |= !moved.isEmpty();
         }
         return changed;
     }

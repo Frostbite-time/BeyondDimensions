@@ -110,34 +110,27 @@ public class NetFeederItem extends BaseMachineItem
                     }
                 }
 
-                if (foodCache != null)
+                if (foodCache != null && foodCache.key() instanceof ItemStackKey foodKey)
                 {
-                    KeyAmount foodToFeed = storage.extract(foodCache.key(), foodCache.amount(), false, false);
-                    if (!foodToFeed.isEmpty() && foodToFeed.key() instanceof ItemStackKey foodKey)
+                    ItemStack foodStack = foodKey.copyStackWithCount(foodCache.amount());
+                    Item foodItem = foodStack.getItem();
+                    FoodProperties foodProperties = foodItem.getFoodProperties(foodStack, player);
+                    // 先对饱食度和饱和度进行判断，合适才从网络取出
+                    if (foodProperties != null
+                            && ((feederMode == FeederMode.SATURATION_KEEP && foodProperties.saturation() > 0)
+                            || (feederMode != FeederMode.SATURATION_KEEP && foodProperties.nutrition() > 0))
+                            && !storage.extract(foodKey, foodCache.amount(), false, false).isEmpty())
                     {
-                        ItemStack foodStack = foodKey.copyStackWithCount(foodCache.amount());
-                        Item foodItem = foodStack.getItem();
-                        FoodProperties foodProperties = foodItem.getFoodProperties(foodStack, player);
-                        // 实际执行效果前对饱食度和饱和度进行二次判断
-                        if (foodProperties != null)
+                        ItemStack remaining = EventHooks.onItemUseFinish(player, foodStack.copy(), 0, foodItem.finishUsingItem(foodStack, level, player));
+                        if (!remaining.isEmpty())
                         {
-                            if ((feederMode == FeederMode.SATURATION_KEEP && foodProperties.saturation() > 0)
-                                    || (feederMode != FeederMode.SATURATION_KEEP && foodProperties.nutrition() > 0))
+                            // 剩余堆叠插送回去
+                            KeyAmount remainingAgain = storage.insert(new ItemStackKey(remaining), remaining.getCount(), false);
+                            if (!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
                             {
-                                ItemStack remaining = EventHooks.onItemUseFinish(player, foodStack.copy(), 0, foodItem.finishUsingItem(foodStack, level, player));
-                                if (!remaining.isEmpty())
-                                {
-                                    // 剩余堆叠插送回去
-                                    KeyAmount remainingAgain = storage.insert(new ItemStackKey(remaining), remaining.getCount(), false);
-                                    if (!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
-                                    {
-                                        player.drop((ItemStack) remainingAgain.toStack(), false);
-                                    }
-                                }
-                                return;
+                                player.drop((ItemStack) remainingAgain.toStack(), false);
                             }
                         }
-                        storage.insert(foodToFeed.key(), foodToFeed.amount(), false); // 如果没能步入食用，则在此处将堆叠插回
                     }
                 }
 

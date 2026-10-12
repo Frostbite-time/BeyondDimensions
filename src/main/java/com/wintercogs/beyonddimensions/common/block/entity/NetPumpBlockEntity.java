@@ -17,6 +17,7 @@ import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.common.machine.FilterMode;
 import com.wintercogs.beyonddimensions.common.menu.NetPumpMenu;
+import com.wintercogs.beyonddimensions.util.ResourceTransfer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -153,11 +154,13 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
                             if (net != null)
                             {
                                 UnifiedStorage storage = net.getUnifiedStorage();
-
-                                long canInsert = ka.amount() - storage.insert(ka.key(), ka.amount(), true).amount();
-                                canInsert = Math.min(canInsert, ka.amount());
-                                long extract = stackHandlerWrapper.extract(slot, canInsert, false);
-                                net.getUnifiedStorage().insert(ka.key(), extract, false);
+                                int index = slot;
+                                // 先模拟对方能抽出多少、网络能收下多少，再只抽出收得下的数量
+                                ResourceTransfer.move(ka.key(), ka.amount(),
+                                        (key, n, simulate) -> new KeyAmount(key, stackHandlerWrapper.extract(index, n, simulate)),
+                                        (key, n, simulate) -> new KeyAmount(key, n - stackHandlerWrapper.insert(index, new KeyAmount(key, n).toStack(), simulate)),
+                                        offer -> offer.amount() - storage.insert(offer.key(), offer.amount(), true).amount(),
+                                        taken -> storage.insert(taken.key(), taken.amount(), false).amount());
                             }
                         }
                     }

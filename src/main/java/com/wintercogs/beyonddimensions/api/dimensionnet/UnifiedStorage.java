@@ -5,12 +5,14 @@ import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHa
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
+import com.wintercogs.beyonddimensions.util.ResourceTransfer;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.function.ToLongFunction;
 
 
 /**
@@ -141,7 +143,8 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
     }
 
     /**
-     * 交出的总是网络里现成的资源；模糊匹配时先定下数量最多的变体，规则看到的就是它
+     * 交出的总是网络里现成的资源；模糊匹配时先定下数量最多的变体，规则看到的就是它。
+     * 模拟给出 n 个时，状态不变的情况下不超过 n 个的实际提取总能足量交出
      */
     @Override
     public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy)
@@ -168,6 +171,19 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
         if (!simulate)
             transaction.commit();
         return new KeyAmount(target, delivered);
+    }
+
+    /**
+     * 取出资源放进别处，不需要先取后放回：先模拟能给出什么、对方能收下多少，再只取出收得下的数量。
+     * 模糊匹配只用来选定变体，之后按这个变体精确取出
+     *
+     * @param accepts 对方能收下多少，只模拟，不改动对方
+     * @param place   把取出的资源放进对方，返回没放下的数量
+     * @return 放进对方的资源
+     */
+    public @NotNull KeyAmount extractInto(IStackKey<?> key, long amount, boolean fuzzy, ToLongFunction<KeyAmount> accepts, ToLongFunction<KeyAmount> place)
+    {
+        return ResourceTransfer.move(key, amount, (k, n, simulate) -> extract(k, n, simulate, simulate && fuzzy), this::insert, accepts, place);
     }
 
     @Override
@@ -209,7 +225,7 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
     }
 
     /**
-     * 不经过规则加入，返回没放下的数量
+     * 不经过规则加入，返回没放下的数量，仅供事务内部处理
      */
     long addWithoutRules(IStackKey<?> key, long amount)
     {
@@ -217,7 +233,7 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
     }
 
     /**
-     * 不经过规则扣除，返回扣除的数量
+     * 不经过规则扣除，返回扣除的数量，仅供事务内部处理
      */
     long removeWithoutRules(IStackKey<?> key, long amount)
     {

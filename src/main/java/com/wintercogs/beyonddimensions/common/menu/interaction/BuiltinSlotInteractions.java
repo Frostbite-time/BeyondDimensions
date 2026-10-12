@@ -18,6 +18,7 @@ import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackType
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.ItemCapInteractionBlackList;
 import com.wintercogs.beyonddimensions.util.BDMath;
+import com.wintercogs.beyonddimensions.util.ResourceTransfer;
 import com.wintercogs.beyonddimensions.util.XpUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -25,9 +26,11 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.ToLongFunction;
 import java.util.stream.IntStream;
 
 /**
@@ -201,12 +204,12 @@ final class BuiltinSlotInteractions
 
     // —— 桶 ——
 
-    // 空桶装满一桶被点击的流体
+    // 空桶装满一桶被点击的流体，取不出整桶就不装
     private static boolean fillBucket(SlotClick c)
     {
         FluidStackKey fluid = (FluidStackKey) c.clicked().key();
         Item filled = fluid.getSource().getBucket();
-        if (filled == Items.AIR || c.clicked().amount() < 1000)
+        if (filled == Items.AIR || c.extract(fluid, 1000, true).amount() < 1000)
             return false;
         c.extract(fluid, 1000, false);
         c.setCarried(new ItemStack(filled));
@@ -244,10 +247,11 @@ final class BuiltinSlotInteractions
         if (handler == null || handler.getSlots() <= 0)
             return false;
         int amount = BDMath.clampLongToInt(Math.min(c.clicked().amount(), key.getVanillaMaxStackSize()));
-        int accepted = amount - (int) handler.insert(key.copyStackWithCount(amount), false);
-        if (accepted <= 0)
+        KeyAmount moved = extractInto(c, key, amount,
+                offer -> offer.amount() - handler.insert(offer.key().copyStackWithCount(offer.amount()), true),
+                taken -> handler.insert(taken.key().copyStackWithCount(taken.amount()), false));
+        if (moved.isEmpty())
             return false;
-        c.extract(key, accepted, false);
         setContainer(c, handler);
         return true;
     }
@@ -266,12 +270,15 @@ final class BuiltinSlotInteractions
                 if (contents == null || contents.isEmpty())
                     continue;
                 int amount = BDMath.clampLongToInt(Math.min(contents.amount(), contents.key().getVanillaMaxStackSize()));
-                int inserted = amount - (int) c.insert(contents.key(), amount, false).amount();
-                if (inserted <= 0)
+                int slot = index;
+                // 先模拟容器能倒出多少、存储能收下多少，再只倒出收得下的数量
+                KeyAmount moved = ResourceTransfer.move(contents.key(), amount,
+                        (key, n, simulate) -> new KeyAmount(key, handler.extract(slot, n, simulate)),
+                        (key, n, simulate) -> new KeyAmount(key, n - handler.insert(slot, key.copyStackWithCount(n), simulate)),
+                        offer -> offer.amount() - c.insert(offer.key(), offer.amount(), true).amount(),
+                        taken -> c.insert(taken.key(), taken.amount(), false).amount());
+                if (moved.isEmpty())
                     continue;
-                long drained = handler.extract(index, inserted, false);
-                if (drained < inserted)
-                    c.extract(contents.key(), inserted - drained, false); // 容器实际给出的更少，把多存的取回
                 setContainer(c, handler);
                 return true;
             }
@@ -353,54 +360,60 @@ final class BuiltinSlotInteractions
             if (moving.isEmpty())
                 break;
             Slot target = c.menu().slots.get(targetIndex);
+            KeyAmount moved;
             if (target instanceof AbstractStackTypedSlot typed)
             {
-                KeyAmount extracted = c.extract(moving.key(), moving.amount(), false);
-                KeyAmount remaining = typed.safeInsert(extracted.key(), extracted.amount());
-                if (!remaining.isEmpty())
-                    c.insert(remaining.key(), remaining.amount(), false);
-                moving = remaining;
+                moved = extractInto(c, moving.key(), moving.amount(),
+                        offer -> offer.amount() - typed.safeInsert(offer.key(), offer.amount(), true).amount(),
+                        taken -> typed.safeInsert(taken.key(), taken.amount(), false).amount());
             }
-            else if (moving.key() instanceof ItemStackKey item)
+            else if (moving.key() instanceof ItemStackKey)
             {
-                KeyAmount extracted = c.extract(item, moving.amount(), false);
-                if (extracted.isEmpty() || !(extracted.toStack() instanceof ItemStack stack))
-                    break;
-                ItemStack remaining = target.safeInsert(stack);
-                if (!remaining.isEmpty())
-                    c.insert(new ItemStackKey(remaining), remaining.getCount(), false);
-                moving = new KeyAmount(new ItemStackKey(remaining), remaining.getCount());
+                moved = extractInto(c, moving.key(), moving.amount(),
+                        offer -> offer.toStack() instanceof ItemStack stack ? accepts(target, stack) : 0L,
+                        taken -> taken.toStack() instanceof ItemStack stack ? target.safeInsert(stack).getCount() : taken.amount());
             }
             else if (moving.key() instanceof FluidStackKey fluid && fluid.getSource().getBucket() != Items.AIR)
             {
                 if (fillBucketInto(c, fluid, target))
                     break;
+                continue;
             }
+            else
+            {
+                continue;
+            }
+            moving = new KeyAmount(moving.key(), moving.amount() - moved.amount());
         }
         c.typedSlot().setChanged();
     }
 
-    // 从存储取一个空桶和一桶流体，装好放进目标槽位；放不进就都放回。返回是否装成了
+    // 从被点击的资源槽取出放进别处：先模拟能给多少、对方能收多少，再只取出收得下的数量
+    private static KeyAmount extractInto(SlotClick c, IStackKey<?> key, long amount, ToLongFunction<KeyAmount> accepts, ToLongFunction<KeyAmount> place)
+    {
+        return ResourceTransfer.move(key, amount, c::extract, c::insert, accepts, place);
+    }
+
+    // 原版槽位没有模拟插入：先看槽位是否允许，再用容器的物品处理器模拟，返回能收下的数量
+    private static long accepts(Slot slot, ItemStack stack)
+    {
+        if (stack.isEmpty() || !slot.mayPlace(stack))
+            return 0L;
+        return stack.getCount() - new InvWrapper(slot.container).insertItem(slot.getContainerSlot(), stack, true).getCount();
+    }
+
+    // 从存储取一个空桶和一桶流体，装好放进目标槽位；先模拟三者都成立再动手。返回是否装成了
     private static boolean fillBucketInto(SlotClick c, FluidStackKey fluid, Slot target)
     {
-        KeyAmount extracted = c.extract(fluid, 1000, false);
-        if (extracted.amount() != 1000)
-        {
-            c.insert(extracted.key(), extracted.amount(), false);
+        ItemStackKey bucket = new ItemStackKey(new ItemStack(Items.BUCKET));
+        ItemStack filled = new ItemStack(fluid.getSource().getBucket());
+        if (c.extract(fluid, 1000, true).amount() < 1000
+                || c.storage().extract(bucket, 1, true, false).isEmpty()
+                || accepts(target, filled) < 1)
             return false;
-        }
-        KeyAmount bucket = c.storage().extract(new ItemStackKey(new ItemStack(Items.BUCKET)), 1, false, false);
-        if (bucket.isEmpty())
-        {
-            c.insert(extracted.key(), extracted.amount(), false);
-            return false;
-        }
-        if (!target.safeInsert(new ItemStack(fluid.getSource().getBucket())).isEmpty())
-        {
-            c.insert(extracted.key(), extracted.amount(), false);
-            c.storage().insert(bucket.key(), bucket.amount(), false);
-            return false;
-        }
+        c.extract(fluid, 1000, false);
+        c.storage().extract(bucket, 1, false, false);
+        target.safeInsert(filled);
         return true;
     }
 

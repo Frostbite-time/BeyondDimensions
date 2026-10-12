@@ -33,12 +33,12 @@ public class OrderedStackTypedSlot extends AbstractStackTypedSlot
     }
 
     @Override
-    public KeyAmount safeInsert(IStackKey<?> key, long amount)
+    public KeyAmount safeInsert(IStackKey<?> key, long amount, boolean simulate)
     {
         if (key != null)
         {
             // storage的insert应当考虑到一切情况
-            return storage.insert(theSlot, key, amount, false);
+            return storage.insert(theSlot, key, amount, simulate);
         }
         return new KeyAmount(ItemStackKey.EMPTY, 0);
     }

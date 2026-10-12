@@ -176,10 +176,12 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
                         slot.getItem().getItem() == cacheStack.getItem() && // 当合成槽物品已经从一个配方变成另一个配方时不执行操作
                         i < slot.getItem().getMaxStackSize() / slot.getItem().getCount(); i++) // 限制单次合成次数
                 {
-                    // 尝试将物品分别插入背包和快速转移区间，并记录回滚信息
+                    // 产物先放进背包与原版槽位，并记录回滚信息；BD 槽位只模拟，整份产物都放得下并合成成功后才真正放入
                     ItemStack remaining = cacheStack.copy();
                     Map<Integer, Integer> insertedToInv = new HashMap<>();
                     Map<Integer, Integer> insertedToSlots = new HashMap<>();
+                    Map<Integer, Integer> plannedTypedSlots = new LinkedHashMap<>();
+                    Set<Object> simulatedStorages = Collections.newSetFromMap(new IdentityHashMap<>());
                     for (int invSlot = inventoryStartIndex; invSlot < inventoryEndIndex && !remaining.isEmpty(); invSlot++)
                     {
                         Slot targetSlot = slots.get(invSlot);
@@ -198,46 +200,36 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
                         int newSize;
                         if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
                         {
+                            // 无序槽位共用一份存储，同一份存储只模拟一次
+                            if (!aTargetSlot.isOrdered() && !simulatedStorages.add(aTargetSlot.getStorage()))
+                                continue;
                             // 此处是安全的转换，remaining不会超出int
-                            // AbstractStackTypedSlot槽位的safeInsert是安全的，并且new ItemStackType会进行被动copy
-                            newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining), remaining.getCount()).amount();
+                            newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining), remaining.getCount(), true).amount();
+                            if ((remaining.getCount() - newSize) != 0)
+                                plannedTypedSlots.put(targetSlotIndex, remaining.getCount() - newSize);
                         }
                         else
                         {
                             newSize = targetSlot.safeInsert(remaining.copy()).getCount();
+                            if ((remaining.getCount() - newSize) != 0)
+                                insertedToSlots.put(targetSlotIndex, remaining.getCount() - newSize);
                         }
-                        if ((remaining.getCount() - newSize) != 0)
-                            insertedToSlots.put(targetSlotIndex, remaining.getCount() - newSize);
                         remaining.setCount(newSize);
                     }
 
-
-                    if (remaining.isEmpty()) // 如果产物被完整取出，则通过safeTake执行一次完整取出流程
+                    // 如果产物能被完整放下，则通过safeTake执行一次完整取出流程
+                    if (remaining.isEmpty() && !resultSlot.safeTake(cacheStack.getCount(), Integer.MAX_VALUE, player).isEmpty())
                     {
-                        ItemStack crafted = resultSlot.safeTake(cacheStack.getCount(), Integer.MAX_VALUE, player);
-                        // 如果未取出任何合成物，则执行回滚
-                        if (crafted.isEmpty())
+                        for (Map.Entry<Integer, Integer> entry : plannedTypedSlots.entrySet())
                         {
-                            for (Map.Entry<Integer, Integer> entry : insertedToInv.entrySet())
-                            {
-                                Slot afterSlot = slots.get(entry.getKey());
-                                afterSlot.safeTake(entry.getValue(), Integer.MAX_VALUE, player);
-                            }
-                            for (Map.Entry<Integer, Integer> entry : insertedToSlots.entrySet())
-                            {
-                                Slot afterSlot = slots.get(entry.getKey());
-                                if (afterSlot instanceof AbstractStackTypedSlot aSlot)
-                                {
-                                    aSlot.safeExtract(new ItemStackKey(cacheStack), entry.getValue());
-                                }
-                                else
-                                {
-                                    afterSlot.safeTake(entry.getValue(), Integer.MAX_VALUE, player);
-                                }
-                            }
+                            AbstractStackTypedSlot aSlot = (AbstractStackTypedSlot) slots.get(entry.getKey());
+                            KeyAmount left = aSlot.safeInsert(new ItemStackKey(cacheStack), entry.getValue());
+                            // 模拟与实际不一致时才会放不下，交给玩家
+                            if (!left.isEmpty() && left.toStack() instanceof ItemStack leftStack)
+                                player.getInventory().placeItemBackInInventory(leftStack);
                         }
                     }
-                    else // 没能完整取出所有产物，则将之前插入仓库的物品进行回滚
+                    else // 没能完整放下或没能合成，则将之前放进背包与原版槽位的物品取回
                     {
                         for (Map.Entry<Integer, Integer> entry : insertedToInv.entrySet())
                         {
@@ -247,14 +239,7 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
                         for (Map.Entry<Integer, Integer> entry : insertedToSlots.entrySet())
                         {
                             Slot afterSlot = slots.get(entry.getKey());
-                            if (afterSlot instanceof AbstractStackTypedSlot aSlot)
-                            {
-                                aSlot.safeExtract(new ItemStackKey(cacheStack), entry.getValue());
-                            }
-                            else
-                            {
-                                afterSlot.safeTake(entry.getValue(), Integer.MAX_VALUE, player);
-                            }
+                            afterSlot.safeTake(entry.getValue(), Integer.MAX_VALUE, player);
                         }
                     }
 
