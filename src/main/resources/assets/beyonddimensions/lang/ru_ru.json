@@ -345,6 +345,8 @@
   "ui.beyonddimensions.feeder.mode.saturation_keep.hint": "Всегда держит насыщение выше 0",
   "ui.beyonddimensions.feeder.mode.crazy": "Всегда сыт",
   "ui.beyonddimensions.feeder.mode.crazy.hint": "Кормит, как только шкала голода уменьшится",
+  "ui.beyonddimensions.feeder.mode.no_waste": "Без потерь",
+  "ui.beyonddimensions.feeder.mode.no_waste.hint": "Кормит, только если еда усвоится без остатка",
   "ui.beyonddimensions.feeder.mode.normal": "Меньше половины",
   "ui.beyonddimensions.feeder.mode.normal.hint": "Кормит, когда шкала голода меньше половины",
   "ui.beyonddimensions.feeder.mode.hunger_to_eat": "При голоде",

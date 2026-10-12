@@ -345,6 +345,8 @@
   "ui.beyonddimensions.feeder.mode.saturation_keep.hint": "隠し満腹度を常に0より上に保つ",
   "ui.beyonddimensions.feeder.mode.crazy": "常に満タン",
   "ui.beyonddimensions.feeder.mode.crazy.hint": "満腹度が少しでも下がったら食べさせる",
+  "ui.beyonddimensions.feeder.mode.no_waste": "無駄なし",
+  "ui.beyonddimensions.feeder.mode.no_waste.hint": "食べ物の回復量をすべて活かせるときだけ食べさせる",
   "ui.beyonddimensions.feeder.mode.normal": "半分未満",
   "ui.beyonddimensions.feeder.mode.normal.hint": "満腹度が半分を下回ったら食べさせる",
   "ui.beyonddimensions.feeder.mode.hunger_to_eat": "空腹時",

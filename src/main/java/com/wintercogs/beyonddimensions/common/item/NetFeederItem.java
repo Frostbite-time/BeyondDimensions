@@ -17,6 +17,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodConstants;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -94,32 +95,29 @@ public class NetFeederItem extends BaseMachineItem
             {
                 UnifiedStorage storage = NetedItem.getNet(stack).getUnifiedStorage();
 
-                // 尝试取出一个Food
-                KeyAmount foodCache = null;
+                // 按过滤槽的顺序找第一种合适的食物
+                ItemStackKey foodKey = null;
+                search:
                 for (KeyAmount filter : filterSlots)
                 {
                     // 只查与过滤项同种的变体，由存储的模糊匹配索引给出
                     for (KeyAmount storedStack : storage.getFuzzyMatches(filter.key()))
                     {
                         if (storedStack.key() instanceof ItemStackKey itemStackKey
-                                && itemStackKey.getReadOnlyStack().getFoodProperties(player) != null)
+                                && suits(itemStackKey, player, playerFoodState, feederMode))
                         {
-                            foodCache = new KeyAmount(storedStack.key(), 1);
-                            break;
+                            foodKey = itemStackKey;
+                            break search;
                         }
                     }
                 }
 
-                if (foodCache != null && foodCache.key() instanceof ItemStackKey foodKey)
+                if (foodKey != null)
                 {
-                    ItemStack foodStack = foodKey.copyStackWithCount(foodCache.amount());
+                    ItemStack foodStack = foodKey.copyStackWithCount(1);
                     Item foodItem = foodStack.getItem();
-                    FoodProperties foodProperties = foodItem.getFoodProperties(foodStack, player);
-                    // 先对饱食度和饱和度进行判断，合适才从网络取出
-                    if (foodProperties != null
-                            && ((feederMode == FeederMode.SATURATION_KEEP && foodProperties.saturation() > 0)
-                            || (feederMode != FeederMode.SATURATION_KEEP && foodProperties.nutrition() > 0))
-                            && !storage.extract(foodKey, foodCache.amount(), false, false).isEmpty())
+                    // 从网络取到了才吃
+                    if (!storage.extract(foodKey, 1, false, false).isEmpty())
                     {
                         ItemStack remaining = EventHooks.onItemUseFinish(player, foodStack.copy(), 0, foodItem.finishUsingItem(foodStack, level, player));
                         if (!remaining.isEmpty())
@@ -146,8 +144,21 @@ public class NetFeederItem extends BaseMachineItem
             case HUNGER_TO_EAT -> playerFoodState.getFoodLevel() <= 2;
             case NORMAL -> playerFoodState.getFoodLevel() <= 10;
             case SATURATION_KEEP -> playerFoodState.getSaturationLevel() <= 0;
-            case CRAZY -> playerFoodState.getFoodLevel() < 20;
-            default -> false;
+            case CRAZY, NO_WASTE -> playerFoodState.getFoodLevel() < FoodConstants.MAX_FOOD;
+        };
+    }
+
+    // 保持饱和要有饱和度，其他模式要能恢复饱食度；不浪费时恢复的量还要能全部吃下
+    private static boolean suits(ItemStackKey key, Player player, FoodData playerFoodState, FeederMode feederMode)
+    {
+        FoodProperties food = key.getReadOnlyStack().getFoodProperties(player);
+        if (food == null)
+            return false;
+        return switch (feederMode)
+        {
+            case SATURATION_KEEP -> food.saturation() > 0;
+            case NO_WASTE -> food.nutrition() > 0 && playerFoodState.getFoodLevel() + food.nutrition() <= FoodConstants.MAX_FOOD;
+            default -> food.nutrition() > 0;
         };
     }
 

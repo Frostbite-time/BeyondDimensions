@@ -345,6 +345,8 @@
   "ui.beyonddimensions.feeder.mode.saturation_keep.hint": "Maintient toujours la saturation au-dessus de 0",
   "ui.beyonddimensions.feeder.mode.crazy": "Toujours plein",
   "ui.beyonddimensions.feeder.mode.crazy.hint": "Nourrit dès que la barre de faim baisse",
+  "ui.beyonddimensions.feeder.mode.no_waste": "Sans gaspillage",
+  "ui.beyonddimensions.feeder.mode.no_waste.hint": "Nourrit seulement si rien n'est gaspillé",
   "ui.beyonddimensions.feeder.mode.normal": "Sous la moitié",
   "ui.beyonddimensions.feeder.mode.normal.hint": "Nourrit quand la barre de faim est sous la moitié",
   "ui.beyonddimensions.feeder.mode.hunger_to_eat": "Affamé",

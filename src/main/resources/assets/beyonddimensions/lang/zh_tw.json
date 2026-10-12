@@ -345,6 +345,8 @@
   "ui.beyonddimensions.feeder.mode.saturation_keep.hint": "時刻保證飽和度高於 0",
   "ui.beyonddimensions.feeder.mode.crazy": "始終填滿",
   "ui.beyonddimensions.feeder.mode.crazy.hint": "飽食度一降低就餵食",
+  "ui.beyonddimensions.feeder.mode.no_waste": "不浪費",
+  "ui.beyonddimensions.feeder.mode.no_waste.hint": "食物恢復的飽食度能全部吃下時才餵食",
   "ui.beyonddimensions.feeder.mode.normal": "低於一半",
   "ui.beyonddimensions.feeder.mode.normal.hint": "飽食度低於一半時餵食",
   "ui.beyonddimensions.feeder.mode.hunger_to_eat": "飢餓時",

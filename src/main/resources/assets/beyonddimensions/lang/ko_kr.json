@@ -345,6 +345,8 @@
   "ui.beyonddimensions.feeder.mode.saturation_keep.hint": "포화도를 항상 0보다 높게 유지",
   "ui.beyonddimensions.feeder.mode.crazy": "항상 가득",
   "ui.beyonddimensions.feeder.mode.crazy.hint": "허기 수치가 조금이라도 줄면 바로 먹임",
+  "ui.beyonddimensions.feeder.mode.no_waste": "낭비 없음",
+  "ui.beyonddimensions.feeder.mode.no_waste.hint": "음식의 회복량을 모두 채울 수 있을 때만 먹임",
   "ui.beyonddimensions.feeder.mode.normal": "절반 미만",
   "ui.beyonddimensions.feeder.mode.normal.hint": "허기 수치가 절반 미만이면 먹임",
   "ui.beyonddimensions.feeder.mode.hunger_to_eat": "배고플 때",

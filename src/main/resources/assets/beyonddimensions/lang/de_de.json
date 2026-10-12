@@ -345,6 +345,8 @@
   "ui.beyonddimensions.feeder.mode.saturation_keep.hint": "Hält die Sättigung stets über 0",
   "ui.beyonddimensions.feeder.mode.crazy": "Immer voll",
   "ui.beyonddimensions.feeder.mode.crazy.hint": "Füttert, sobald die Hungerleiste sinkt",
+  "ui.beyonddimensions.feeder.mode.no_waste": "Ohne Verschwendung",
+  "ui.beyonddimensions.feeder.mode.no_waste.hint": "Füttert nur, wenn der volle Nährwert Platz hat",
   "ui.beyonddimensions.feeder.mode.normal": "Unter der Hälfte",
   "ui.beyonddimensions.feeder.mode.normal.hint": "Füttert unter halber Hungerleiste",
   "ui.beyonddimensions.feeder.mode.hunger_to_eat": "Bei Hunger",
