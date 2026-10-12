@@ -40,7 +40,10 @@ import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.wrapper.PlayerMainInvWrapper;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,34 +119,14 @@ public class NetMagnetItem extends BaseMachineItem
         // 开始收集物品
         if (hopperItemMode == HopperItemMode.ALLOW)
         {
+            PickupTarget target = settings(stack).get(BDMachineSettings.PICKUP_TARGET.get());
+            Player player = holder instanceof Player p ? p : null;
             for (ItemEntity itemEntity : itemEntities)
             {
-                if (itemEntity != null && !itemEntity.isRemoved())
+                if (itemEntity != null && !itemEntity.isRemoved()
+                        && matchesFilter(filterMode, filterSlots, new ItemStackKey(itemEntity.getItem())))
                 {
-                    ItemStack itemStack = itemEntity.getItem();
-                    ItemStackKey itemKey = new ItemStackKey(itemStack);
-                    if (matchesFilter(filterMode, filterSlots, itemKey))
-                    {
-                        int count = itemStack.getCount();
-
-                        if (storage.insert(itemKey, count, true).isEmpty())
-                        {
-                            if (holder instanceof Player player)
-                            {
-                                ItemStack originalCopy = itemStack.copy();
-                                // 发送事件
-                                itemStack.setCount(0);
-                                EventHooks.fireItemPickupPost(itemEntity, player, originalCopy);
-                                // 成就信息
-                                itemStack.setCount(count);
-                                player.awardStat(Stats.ITEM_PICKED_UP.get(originalCopy.getItem()), count);
-                                player.onItemPickup(itemEntity);
-                            }
-
-                            itemEntity.discard();
-                            storage.insert(itemKey, count, false);
-                        }
-                    }
+                    pickUp(itemEntity, storage, player, target);
                 }
             }
         }
@@ -174,6 +157,64 @@ public class NetMagnetItem extends BaseMachineItem
         {
             fluidCollect(filterMode, filterSlots, storage, level, searchArea);
         }
+    }
+
+    /**
+     * 掉落物先送到优先的一处，放不下的再送到另一处，都放不下的留在地上。
+     * 只有玩家拿着时才能送进背包
+     */
+    private static void pickUp(ItemEntity itemEntity, UnifiedStorage storage, @Nullable Player player, PickupTarget target)
+    {
+        ItemStack original = itemEntity.getItem();
+        ItemStack left = original.copy();
+        if (target == PickupTarget.INVENTORY && player != null)
+        {
+            // 刚扔出的东西等拾取冷却过了再收，不然扔不出去
+            if (itemEntity.hasPickUpDelay())
+                return;
+            left = intoInventory(player, left);
+            left = intoNetwork(storage, left);
+        }
+        else
+        {
+            left = intoNetwork(storage, left);
+            // 背包只收过了拾取冷却的掉落物，刚扔出的东西不会马上飞回背包
+            if (player != null && !itemEntity.hasPickUpDelay())
+                left = intoInventory(player, left);
+        }
+
+        int taken = original.getCount() - left.getCount();
+        if (taken <= 0)
+            return;
+        ItemStack picked = original.copyWithCount(taken);
+        if (left.isEmpty())
+            itemEntity.discard();
+        else
+            itemEntity.setItem(left);
+        if (player != null)
+        {
+            // 与原版捡起物品相同的事件与统计
+            EventHooks.fireItemPickupPost(itemEntity, player, picked);
+            player.awardStat(Stats.ITEM_PICKED_UP.get(picked.getItem()), taken);
+            player.onItemPickup(itemEntity);
+        }
+    }
+
+    // 放进玩家背包，返回放不下的部分
+    private static ItemStack intoInventory(Player player, ItemStack stack)
+    {
+        if (stack.isEmpty())
+            return stack;
+        return ItemHandlerHelper.insertItemStacked(new PlayerMainInvWrapper(player.getInventory()), stack, false);
+    }
+
+    // 送入网络，返回送不进的部分
+    private static ItemStack intoNetwork(UnifiedStorage storage, ItemStack stack)
+    {
+        if (stack.isEmpty())
+            return stack;
+        long left = storage.insert(new ItemStackKey(stack), stack.getCount(), false).amount();
+        return stack.copyWithCount((int) left);
     }
 
     @Override

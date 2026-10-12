@@ -161,6 +161,17 @@ public final class BDMachineSettings
                     .legacyComponent(BDDataComponents.FEEDER_MODE)
                     .build());
 
+    /**
+     * 磁铁吸取的物品优先送到哪里
+     */
+    public static final DeferredHolder<MachineSetting<?>, MachineSetting<PickupTarget>> PICKUP_TARGET = SETTINGS.register("pickup_target",
+            () -> MachineSetting.enumeration(PickupTarget.class, PickupTarget.NETWORK)
+                    .label(MACHINE + "pickup_target")
+                    .editor(new SettingEditor.Choice<>(List.of(PickupTarget.values()),
+                            target -> MACHINE + "pickup_target." + lowercase(target),
+                            target -> MACHINE + "pickup_target." + lowercase(target) + ".hint", false))
+                    .build());
+
     private BDMachineSettings()
     {
     }
