@@ -674,7 +674,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     @Override
-    public List<KeyAmount> variants(IStackKey<?> key)
+    public List<KeyAmount> getFuzzyMatches(IStackKey<?> key)
     {
         if (key == null) return List.of();
         Set<IStackKey<?>> variants = fuzzyIndex.get(FuzzyGroup.of(key));

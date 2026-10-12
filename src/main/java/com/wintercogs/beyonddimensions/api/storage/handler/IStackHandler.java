@@ -126,7 +126,7 @@ public interface IStackHandler
     /**
      * 与 key 模糊匹配（{@link IStackKey#isSame}）的全部资源及数量，不含数量为 0 的
      */
-    default List<KeyAmount> variants(IStackKey<?> key)
+    default List<KeyAmount> getFuzzyMatches(IStackKey<?> key)
     {
         List<KeyAmount> out = new ArrayList<>();
         if (key == null) return out;

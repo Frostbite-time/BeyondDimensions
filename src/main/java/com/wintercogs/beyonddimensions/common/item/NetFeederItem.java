@@ -99,7 +99,7 @@ public class NetFeederItem extends BaseMachineItem
                 for (KeyAmount filter : filterSlots)
                 {
                     // 只查与过滤项同种的变体，由存储的模糊匹配索引给出
-                    for (KeyAmount storedStack : storage.variants(filter.key()))
+                    for (KeyAmount storedStack : storage.getFuzzyMatches(filter.key()))
                     {
                         if (storedStack.key() instanceof ItemStackKey itemStackKey
                                 && itemStackKey.getReadOnlyStack().getFoodProperties(player) != null)
