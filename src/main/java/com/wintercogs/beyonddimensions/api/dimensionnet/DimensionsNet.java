@@ -44,8 +44,8 @@ import java.util.function.UnaryOperator;
 public class DimensionsNet extends SavedData
 {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final String ATTACHMENTS_TAG = "Attachments";
-    private static final String QUARANTINE_TAG = "AttachmentsQuarantine";
+    private static final String ATTACHMENTS_TAG = "attachments";
+    private static final String QUARANTINE_TAG = "attachments_quarantine";
     static final String NET_DATA_PREFIX = "BDNet_";
     public static final int NO_PRIMARY_NET_ID = -1;
     public static final int MAX_NETWORK_NAME_LENGTH = 48;
