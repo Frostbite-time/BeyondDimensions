@@ -72,7 +72,7 @@ public class DataComponentPatchHelper
             return EMPTY_BYTES; // 稳定字节（非空）
         }
 
-        // 1) patch -> NBT（RegistryOps<Tag>）
+        // 1) 补丁 -> NBT（RegistryOps<Tag>）
         Tag root = DataComponentPatch.CODEC.encodeStart(
                 registries.createSerializationContext(NbtOps.INSTANCE),
                 patch

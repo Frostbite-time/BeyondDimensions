@@ -76,6 +76,14 @@ public class BDItems
     public static final DeferredItem<Item> XP_EXCHANGE_ITEM = ITEMS.register(BDItemIds.XP_EXCHANGE_ITEM,
             () -> new XpExchangeItem(new Item.Properties()));
 
+    // 机器配置卡
+    public static final DeferredItem<Item> MACHINE_CONFIG_CARD = ITEMS.register(BDItemIds.MACHINE_CONFIG_CARD,
+            () -> new MachineConfigCardItem(new Item.Properties().stacksTo(1)));
+
+    // 错误数据：封装读不懂的存储资源，不进创造物品栏
+    public static final DeferredItem<Item> ERROR_DATA = ITEMS.register(BDItemIds.ERROR_DATA,
+            () -> new ErrorDataItem(new Item.Properties()));
+
 
     // 测试物品 -----------------------
     // 随机物品生成器

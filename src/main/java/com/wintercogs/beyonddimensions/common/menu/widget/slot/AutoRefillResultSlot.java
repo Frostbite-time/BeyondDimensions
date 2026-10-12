@@ -29,6 +29,11 @@ public class AutoRefillResultSlot extends ResultSlot
         this.craftSlots = craftSlots;
     }
 
+    public AutoRefillResultSlot(DimensionsCraftMenu menu, Player player, CraftingContainer craftSlots, Container container, int slot)
+    {
+        this(menu, player, craftSlots, container, slot, 0, 0);
+    }
+
     @Override
     public void onTake(@NotNull Player player, @NotNull ItemStack craftedStack)
     {

@@ -83,11 +83,11 @@ public class SourceUnifiedStorageHandler implements ISourceCap
     @Override
     public void setSource(int amount)
     {
-        int wanted = BDMath.clampLongToInt(storage.getSlotCapacity(0));
-        long actualInside = getSource();
+        long wanted = Math.max(0L, Math.min(amount, storage.getSlotCapacity(0)));
+        long actualInside = storage.getStackByKey(SourceStackKey.INSTANCE).amount();
 
         long operation = wanted - actualInside;
-        BeyondDimensions.LOGGER.info("某个网络的魔源数量被外界强行设置，可能导致错误，最终魔源数量被设置为：{}", operation);
+        BeyondDimensions.LOGGER.info("The source amount of a network was set from outside, which may cause errors; final source amount set to: {}", wanted);
         if (operation > 0)
             storage.insert(SourceStackKey.INSTANCE, operation, false);
         else

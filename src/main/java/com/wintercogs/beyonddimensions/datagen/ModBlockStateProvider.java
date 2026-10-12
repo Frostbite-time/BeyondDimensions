@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.datagen;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.datagen.util.BDBlockStateProvider;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -36,5 +37,10 @@ public class ModBlockStateProvider extends BDBlockStateProvider
         simpleBlockItem(BDBlocks.NET_FURNACE_BLOCK.get(), models().getExistingFile(BeyondDimensions.makeId("net_furnace_block")));
         simpleBlockItem(BDBlocks.NET_BLAST_FURNACE_BLOCK.get(), models().getExistingFile(BeyondDimensions.makeId("net_blast_furnace_block")));
         simpleBlockItem(BDBlocks.NET_SMOKER_BLOCK.get(), models().getExistingFile(BeyondDimensions.makeId("net_smoker_block")));
+        // 流体方块的模型只提供粒子贴图，与原版的水、岩浆相同
+        for (BDFluids.FluidEntry fluid : BDFluids.ALL)
+        {
+            simpleBlock(fluid.block().get(), models().getBuilder(fluid.name()).texture("particle", modLoc("block/" + fluid.name() + "_still")));
+        }
     }
 }

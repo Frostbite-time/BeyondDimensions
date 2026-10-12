@@ -87,7 +87,7 @@ public class ChemicalStackTypedHandler implements IChemicalHandler
         return getEmptySlotAt(rest);
     }
 
-    // ================= IChemicalHandler =================
+    // ================= IChemicalHandler 的实现 =================
 
     /**
      * 可视槽位 = 化学品桶 + 空桶；全空时也会 > 0。

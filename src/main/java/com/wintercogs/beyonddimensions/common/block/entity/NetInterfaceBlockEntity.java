@@ -17,11 +17,9 @@ import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceAccess;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
-import com.wintercogs.beyonddimensions.common.menu.NetInterfaceSettings;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
+import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -48,7 +46,8 @@ import java.util.function.Function;
 public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider, NetInterfaceAccess
 {
 
-    private static final int capacity = CommonConfigRuntime.interfaceUsableCapacity;
+    // 槽位数在创建时按服务端配置确定
+    private final int capacity = ServerConfigRuntime.interfaceCapacity;
 
     // 用来标记物品或者流体的槽位，只由UI控制
     private final StackHandler fakeStackHandler = new StackHandler(capacity)
@@ -72,8 +71,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         }
     };
 
-    private final NetInterfaceSettings settings = new NetInterfaceSettings();
-
     private final Direction[] directions = Direction.values();
 
     private int redstoneLevel = 0;
@@ -94,18 +91,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     }
 
     @Override
-    public NetInterfaceSettings getNetInterfaceSettings()
-    {
-        return this.settings;
-    }
-
-    @Override
-    public void setControlMode(RedStoneControlMode controlMode)
-    {
-        this.controlMode = controlMode;
-    }
-
-    @Override
     public boolean isMenuValid()
     {
         return !this.isRemoved();
@@ -117,7 +102,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         if (this.level != null && !this.level.isClientSide())
         {
             this.level.blockEntityChanged(this.getBlockPos());
-            this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 2);
         }
     }
 
@@ -157,13 +141,13 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
         if (getNet() != null)
         {
-            if (CommonConfigRuntime.interfaceCanReceiveResource)
+            if (ServerConfigRuntime.interfaceReceive)
                 transferToNet();
-            if (CommonConfigRuntime.interfaceCanOutputResource)
+            if (ServerConfigRuntime.interfaceOutput)
                 transferFromNet();
         }
 
-        if (CommonConfigRuntime.interfaceCanPopResource)
+        if (ServerConfigRuntime.interfacePushOut)
         {
             // 尝试输出物品到周围
             if (getPopMode() == PopMode.OPEN)
@@ -331,31 +315,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         super.loadAdditional(tag, registries);
         this.stackHandler.deserializeNBT(registries, tag.getCompound("inventory"));
         this.fakeStackHandler.deserializeNBT(registries, tag.getCompound("flags"));
-
-        // 旧数据兼容
-        String popModeNew = tag.getString("pop_mode");
-        if (!popModeNew.isEmpty())
-        {
-            setPopMode(PopMode.valueOf(popModeNew));
-        }
-        else if (!tag.getString("popMode").isEmpty())
-        {
-            setPopMode(PopMode.valueOf(tag.getString("popMode")));
-        }
-        else if (tag.getBoolean("popMode"))
-        {
-            setPopMode(PopMode.OPEN);
-        }
-        else
-        {
-            setPopMode(PopMode.STOP);
-        }
-
-        String fuzzyModeNew = tag.getString("fuzzy_mode");
-        if (!fuzzyModeNew.isEmpty())
-        {
-            setFuzzyMode(FuzzyMode.valueOf(fuzzyModeNew));
-        }
     }
 
     @Override
@@ -372,8 +331,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         super.saveAdditional(tag, registries);
         tag.put("inventory", stackHandler.serializeNBT(registries));
         tag.put("flags", fakeStackHandler.serializeNBT(registries));
-        tag.putString("pop_mode", getPopMode().name());
-        tag.putString("fuzzy_mode", getFuzzyMode().name());
     }
 
     @Override

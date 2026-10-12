@@ -1,10 +1,11 @@
 package com.wintercogs.beyonddimensions.common.menu.widget;
 
-import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.util.TooltipHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -21,7 +22,7 @@ import java.util.*;
  * 其可以被理解为一个客户端专用的存储视图，其与真存储区分开的原因是需要在一定时间内提供给客户端一个稳定不变的视图
  * 避免因真存储在服务端与客户端之间的变动导致存储视图频繁闪烁
  */
-public class ClientNetStorage extends AbstractUnorderedStackHandler
+public class ClientNetStorage extends AbstractUnorderedStackHandler implements AutoCloseable
 {
     private static final int CREATIVE_SORT_LAST = Integer.MAX_VALUE;
 
@@ -44,8 +45,101 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
 
     private @Nullable List<Integer> cacheIndexes = null;
 
-    // 初始值给一个不可能出现的按钮值防止命中
-    private SortProperties lastSortProperties = new SortProperties(ButtonState.DISABLED, ButtonState.DISABLED, false);
+    // 提示框缓存的世代与高级提示框开关，任一变化都会使名称、提示框等派生缓存失效
+    private long cacheEpoch = -1;
+    private boolean advancedTooltips;
+
+    // 当前打开的分类标签
+    private CategoryFilter category = CategoryFilter.ALL;
+
+    /**
+     * 语言、资源包或高级提示框变化后，丢弃派生缓存并完整重建视图
+     *
+     * @return 缓存是否被重置
+     */
+    public boolean refreshContext()
+    {
+        long epoch = TooltipHelper.epoch();
+        boolean advanced = Minecraft.getInstance().options.advancedItemTooltips;
+        if (epoch == cacheEpoch && advanced == advancedTooltips)
+            return false;
+        cacheEpoch = epoch;
+        advancedTooltips = advanced;
+        searchHelper.clearDerivedCaches();
+        creativeRankCache.clear();
+        creativeRankCacheBuilt = false;
+        mustUpdateAllFromSource = true;
+        cacheIndexes = null;
+        return true;
+    }
+
+    /**
+     * 源存储中的这些资源发生了变化
+     */
+    public void sourceChanged(List<IStackKey<?>> keys)
+    {
+        // 按时间排序时，任何变化都可能改变顺序
+        if (isTimeSort(lastSortProperties.primarySortPolicy()) || isTimeSort(lastSortProperties.secondarySortPolicy()))
+            cacheIndexes = null;
+        for (IStackKey<?> key : keys)
+        {
+            if (!sourceStorage.hasStack(key))
+                searchHelper.forget(key);
+            if (!mustUpdateAllFromSource)
+                pendingCache.add(key);
+        }
+    }
+
+    private static boolean isTimeSort(@Nullable StorageSort value)
+    {
+        return value == StorageSort.INSERTED_TIME || value == StorageSort.MODIFIED_TIME;
+    }
+
+    /**
+     * 分类标签的过滤条件：符合搜索式或在特定补充里的资源。两者都没有的分类显示全部
+     */
+    public record CategoryFilter(ClientNetStorageSearchHelper.Query query, Set<IStackKey<?>> keys)
+    {
+        public static final CategoryFilter ALL = new CategoryFilter(ClientNetStorageSearchHelper.Query.EMPTY, Set.of());
+
+        boolean matches(ClientNetStorageSearchHelper helper, IStackKey<?> key)
+        {
+            if (query.isEmpty() && keys.isEmpty())
+                return true;
+            return keys.contains(key) || !query.isEmpty() && helper.matches(query, key);
+        }
+    }
+
+    /**
+     * 切换分类标签；与当前分类相同时什么也不做
+     */
+    public void setCategory(CategoryFilter filter)
+    {
+        if (category.equals(filter))
+            return;
+        category = filter;
+        mustUpdateAllFromSource = true;
+        cacheIndexes = null;
+    }
+
+    /**
+     * 存储中符合分类的资源种数，不受搜索框影响
+     */
+    public int count(CategoryFilter filter)
+    {
+        refreshContext();
+        int count = 0;
+        for (KeyAmount ka : sourceStorage.getStorage())
+        {
+            if (ka != null && !ka.isEmpty() && filter.matches(searchHelper, ka.key()))
+                count++;
+        }
+        return count;
+    }
+
+
+    // 第一次排序前的占位值
+    private SortProperties lastSortProperties = new SortProperties(StorageSort.NAME, null, false);
 
     public ClientNetStorage(@NotNull AbstractUnorderedStackHandler sourceStorage)
     {
@@ -85,13 +179,14 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
 
     public void resolvePendingOrAllUpdate(boolean onlyAmountUpdate)
     {
-        boolean anyChanged = false;
+        refreshContext();
+        boolean amountsChanged = false, membershipChanged = false;
         if (mustUpdateAllFromSource)
         {
             pendingCache.clear();
             updateViewFromStorage(onlyAmountUpdate);
             this.mustUpdateAllFromSource = false;
-            anyChanged = true;
+            membershipChanged = true;
         }
         else
         {
@@ -99,27 +194,36 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
             while (it.hasNext())
             {
                 IStackKey<?> key = it.next();
-                if (key.isEmpty()) continue;
+                if (key.isEmpty())
+                {
+                    it.remove();
+                    continue;
+                }
 
                 long newAmount = sourceStorage.getStackByKey(key).amount();
+                long oldAmount = this.getStackByKey(key).amount();
                 if (this.hasStack(key))
                 {
                     // 视图内已经有这个键，则说明其符合过滤器，直接设置数量
-                    anyChanged = true;
+                    amountsChanged |= oldAmount != newAmount;
                     this.setAmountByKey(key, newAmount);
                 }
                 else if (!onlyAmountUpdate && matchFilter(key))
                 {
                     // 否则，我们要求符合过滤器，且不处于仅数量更新的情况下，才允许向视图内增加新键
-                    anyChanged = true;
+                    amountsChanged |= oldAmount != newAmount;
                     this.setAmountByKey(key, newAmount);
                 }
+                membershipChanged |= (oldAmount > 0) != (this.getStackByKey(key).amount() > 0);
 
                 it.remove();
             }
         }
 
-        if (anyChanged)
+        // 仅数量变化时，只有按数量排序才需要重排
+        boolean quantitySort = lastSortProperties.primarySortPolicy() == StorageSort.QUANTITY
+                || lastSortProperties.secondarySortPolicy() == StorageSort.QUANTITY;
+        if (membershipChanged || amountsChanged && quantitySort)
         {
             this.cacheIndexes = null;
         }
@@ -156,24 +260,25 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
     /**
      * 根据当前存储的状态，以及对应的排序策略，返回一个下标数组，其下标数组将能够对应到Storage
      */
-    public List<Integer> buildSortedIndex(ButtonState primarySortPolicy, ButtonState secondarySortPolicy, boolean reverse)
+    public List<Integer> buildSortedIndex(@NotNull StorageSort primarySortPolicy, @Nullable StorageSort secondarySortPolicy, boolean reverse)
     {
+        if (refreshContext())
+            resolvePendingOrAllUpdate(false);
         if (cacheIndexes != null
                 && primarySortPolicy == lastSortProperties.primarySortPolicy()
                 && secondarySortPolicy == lastSortProperties.secondarySortPolicy()
                 && reverse == lastSortProperties.reverse())
             return cacheIndexes;
 
-        if (primarySortPolicy == null) primarySortPolicy = ButtonState.SORT_NAME;
         final boolean useSecondary = (secondarySortPolicy != null && secondarySortPolicy != primarySortPolicy);
 
-        final boolean needNameSort = (primarySortPolicy == ButtonState.SORT_NAME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_NAME);
-        final boolean needModIdSort = (primarySortPolicy == ButtonState.SORT_MODID) || (useSecondary && secondarySortPolicy == ButtonState.SORT_MODID);
-        final boolean needQuantitySort = (primarySortPolicy == ButtonState.SORT_QUANTITY) || (useSecondary && secondarySortPolicy == ButtonState.SORT_QUANTITY);
-        final boolean needMaxStackSort = (primarySortPolicy == ButtonState.SORT_MAX_STACK) || (useSecondary && secondarySortPolicy == ButtonState.SORT_MAX_STACK);
-        final boolean needCreationTimeSort = (primarySortPolicy == ButtonState.SORT_INSERTED_TIME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_INSERTED_TIME);
-        final boolean needModificationTimeSort = (primarySortPolicy == ButtonState.SORT_MODIFIED_TIME) || (useSecondary && secondarySortPolicy == ButtonState.SORT_MODIFIED_TIME);
-        final boolean needCreativeTabSort = (primarySortPolicy == ButtonState.SORT_CREATIVE_TAB) || (useSecondary && secondarySortPolicy == ButtonState.SORT_CREATIVE_TAB);
+        final boolean needNameSort = (primarySortPolicy == StorageSort.NAME) || (useSecondary && secondarySortPolicy == StorageSort.NAME);
+        final boolean needModIdSort = (primarySortPolicy == StorageSort.MODID) || (useSecondary && secondarySortPolicy == StorageSort.MODID);
+        final boolean needQuantitySort = (primarySortPolicy == StorageSort.QUANTITY) || (useSecondary && secondarySortPolicy == StorageSort.QUANTITY);
+        final boolean needMaxStackSort = (primarySortPolicy == StorageSort.MAX_STACK) || (useSecondary && secondarySortPolicy == StorageSort.MAX_STACK);
+        final boolean needCreationTimeSort = (primarySortPolicy == StorageSort.INSERTED_TIME) || (useSecondary && secondarySortPolicy == StorageSort.INSERTED_TIME);
+        final boolean needModificationTimeSort = (primarySortPolicy == StorageSort.MODIFIED_TIME) || (useSecondary && secondarySortPolicy == StorageSort.MODIFIED_TIME);
+        final boolean needCreativeTabSort = (primarySortPolicy == StorageSort.CREATIVE_TAB) || (useSecondary && secondarySortPolicy == StorageSort.CREATIVE_TAB);
 
         if (needCreativeTabSort)
         {
@@ -246,37 +351,35 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
         {
             result.add(row.idx);
         }
-        this.cacheIndexes = result;
+        this.cacheIndexes = Collections.unmodifiableList(result);
         this.lastSortProperties = new SortProperties(primarySortPolicy, secondarySortPolicy, reverse);
-        return result;
+        return this.cacheIndexes;
     }
 
-
     /**
-     * 搜索过滤逻辑
+     * 分类过滤与搜索过滤
      */
     private boolean matchFilter(IStackKey<?> key)
     {
-        return this.searchHelper.matches(key);
+        return category.matches(searchHelper, key) && searchHelper.matches(key);
     }
 
     /**
      * 比较 Row 中已准备好的字段
      */
-    private Comparator<Row> buildRowComparator(@NotNull ButtonState state)
+    private Comparator<Row> buildRowComparator(@NotNull StorageSort sort)
     {
-        return switch (state)
+        return switch (sort)
         {
-            case SORT_CREATIVE_TAB -> Comparator
+            case CREATIVE_TAB -> Comparator
                     .comparingInt((Row r) -> r.creativeTabOrder)
                     .thenComparingInt(r -> r.creativeItemOrder);
-            case SORT_QUANTITY -> Comparator.comparingLong((Row r) -> r.amount);
-            case SORT_MAX_STACK -> Comparator.comparingLong((Row r) -> r.maxStack);
-            case SORT_NAME -> Comparator.comparing((Row r) -> r.name, String::compareTo);
-            case SORT_MODID -> Comparator.comparing((Row r) -> r.modIdSort, String::compareTo);
-            case SORT_INSERTED_TIME -> Comparator.comparingLong((Row r) -> r.ctime);
-            case SORT_MODIFIED_TIME -> Comparator.comparingLong((Row r) -> r.mtime);
-            default -> Comparator.comparing((Row r) -> r.name, String::compareTo);
+            case QUANTITY -> Comparator.comparingLong((Row r) -> r.amount);
+            case MAX_STACK -> Comparator.comparingLong((Row r) -> r.maxStack);
+            case NAME -> Comparator.comparing((Row r) -> r.name, String::compareTo);
+            case MODID -> Comparator.comparing((Row r) -> r.modIdSort, String::compareTo);
+            case INSERTED_TIME -> Comparator.comparingLong((Row r) -> r.ctime);
+            case MODIFIED_TIME -> Comparator.comparingLong((Row r) -> r.mtime);
         };
     }
 
@@ -356,7 +459,35 @@ public class ClientNetStorage extends AbstractUnorderedStackHandler
     {
     }
 
-    private record SortProperties(ButtonState primarySortPolicy, ButtonState secondarySortPolicy, boolean reverse)
+    private record SortProperties(StorageSort primarySortPolicy, @Nullable StorageSort secondarySortPolicy,
+                                  boolean reverse)
     {
+    }
+
+    /**
+     * 取消对源存储的订阅并清空视图
+     */
+    @Override
+    public void close()
+    {
+        closeQuietly(anySubscriber);
+        closeQuietly(deltaSubscriber);
+        pendingCache.clear();
+        cacheIndexes = null;
+        searchHelper.clearDerivedCaches();
+        creativeRankCache.clear();
+        clearStorage();
+    }
+
+    private static void closeQuietly(AutoCloseable subscriber)
+    {
+        try
+        {
+            subscriber.close();
+        }
+        catch (Exception ignored)
+        {
+            // 订阅只持有弱引用，关闭失败不影响视图本身
+        }
     }
 }

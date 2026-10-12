@@ -88,6 +88,15 @@ public abstract class LongStackKey<T extends LongType<T>> implements IStackKey<T
         return other != null && Objects.equals(other.getTypeId(), this.getTypeId());
     }
 
+    /**
+     * 同一类型的数值资源互相模糊匹配
+     */
+    @Override
+    public Object fuzzyGroup()
+    {
+        return getTypeId();
+    }
+
     @Override
     public boolean isSameTypeSameComponents(IStackKey<?> other)
     {

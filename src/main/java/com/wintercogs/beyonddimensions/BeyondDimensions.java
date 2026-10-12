@@ -12,13 +12,17 @@ import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.EnergyHandl
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
+import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.*;
+import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -28,6 +32,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
 
@@ -45,6 +50,11 @@ public class BeyondDimensions
         Config.register(modContainer);
 
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(BDRegistries::register);
+        // 所有已载入网络共用一个刻处理；标签重载后各存储的标签索引按需重建
+        NeoForge.EVENT_BUS.addListener(DimensionsNet::tickLoaded);
+        NeoForge.EVENT_BUS.addListener(DimensionsNet::forgetLoaded);
+        NeoForge.EVENT_BUS.addListener((TagsUpdatedEvent event) -> AbstractUnorderedStackHandler.invalidateTagIndexes());
 
         BDMenus.register(modEventBus);
         BDCreativeModeTabs.register(modEventBus);
@@ -53,6 +63,12 @@ public class BeyondDimensions
         BDBlocks.register(modEventBus);
         BDFluids.register(modEventBus);
         BDBlockEntities.register(modEventBus);
+        BDAttachments.register(modEventBus);
+        BDMachineSettings.register(modEventBus);
+        BDMachineTypes.register(modEventBus);
+
+        // 物质球进入维度网络时拆成内容物
+        MatterCompressionBall.registerStorageRule();
 
         // 分发集成模块
         IntegrationManager.bootstrapCommon(modEventBus, NeoForge.EVENT_BUS);
@@ -95,7 +111,7 @@ public class BeyondDimensions
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event)
     {
-        LOGGER.info("维度网络初始化完成(服务端)");
+        LOGGER.info("Beyond Dimensions initialized (server)");
     }
 
     public static ResourceLocation makeId(String path)

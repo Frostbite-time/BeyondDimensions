@@ -88,29 +88,21 @@ public class XpExchangeItem extends NetedItem
         if (available.isEmpty())
             return 0;
 
-        // 先留下库存中不足 1 XP 的零头，避免正常路径依赖回插成功。
+        // 先模拟能取出多少，只按整点 XP 取出，不足 1 XP 的零头留在库存里
         long requestedXp = Math.min((long) maxXp, available.amount() / conversionRate);
         if (requestedXp <= 0)
             return 0;
-
-        long requestedUnits = requestedXp * conversionRate;
-        KeyAmount extracted = slot >= 0
-                ? storage.extract(slot, requestedUnits, false)
-                : storage.extract(key, requestedUnits, false, false);
-        if (extracted.isEmpty())
+        KeyAmount offer = extract(storage, key, slot, requestedXp * conversionRate, true);
+        long gainedXp = Math.min(requestedXp, offer.amount() / conversionRate);
+        if (gainedXp <= 0)
             return 0;
+        KeyAmount extracted = extract(storage, key, slot, gainedXp * conversionRate, false);
+        return (int) Math.min(gainedXp, extracted.amount() / conversionRate);
+    }
 
-        int gainedXp = (int) Math.min(requestedXp, extracted.amount() / conversionRate);
-        long remainder = extracted.amount() - (long) gainedXp * conversionRate;
-        // 提取处理器改变实际数量时，退回不足 1 XP 或超出预算的部分。
-        if (remainder > 0)
-        {
-            if (slot >= 0)
-                storage.insert(slot, extracted.key(), remainder, false);
-            else
-                storage.insert(extracted.key(), remainder, false);
-        }
-        return gainedXp;
+    private static KeyAmount extract(IStackHandler storage, FluidStackKey key, int slot, long amount, boolean simulate)
+    {
+        return slot >= 0 ? storage.extract(slot, amount, simulate) : storage.extract(key, amount, simulate, false);
     }
 
     @Override

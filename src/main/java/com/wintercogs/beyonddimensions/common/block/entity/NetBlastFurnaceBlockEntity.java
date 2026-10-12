@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.crafting.BlastingRecipe;
@@ -12,5 +14,11 @@ public class NetBlastFurnaceBlockEntity extends BaseNetFurnaceBlockEntity<Blasti
     public NetBlastFurnaceBlockEntity(BlockPos pos, BlockState blockState)
     {
         super(BDBlockEntities.NET_BLAST_FURNACE_BLOCK_ENTITY.get(), pos, blockState, RecipeType.BLASTING, Component.translatable("menu.title.beyonddimensions.blast_furnace_menu"));
+    }
+
+    @Override
+    public MachineType machineType()
+    {
+        return BDMachineTypes.NET_BLAST_FURNACE.get();
     }
 }

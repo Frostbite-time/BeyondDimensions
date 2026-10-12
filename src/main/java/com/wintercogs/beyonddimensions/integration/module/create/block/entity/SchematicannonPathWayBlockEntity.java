@@ -144,7 +144,7 @@ public class SchematicannonPathWayBlockEntity extends NetedBlockEntity
         // 允许暴露的方向就是当前缓存里所有有大炮的方向
         Set<Direction> newAllowedDirections = new HashSet<>(otherChecklists.keySet());
 
-        // 如果 checklist key 集合没变，并且暴露方向也没变，而且 handler 不为 null，直接早退
+        // 如果清单的键集合没变，暴露方向也没变，而且 handler 不为 null，就直接返回
         if (!checklistsChanged
                 && schematicannonItemHandler != null
                 && allowedDirections.equals(newAllowedDirections))

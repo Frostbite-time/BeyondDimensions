@@ -87,6 +87,21 @@ config="${mod_id}.mixins.json"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
+    modId="compixel"
+    type="required"
+    versionRange="[${compixel_version},0.2)"
+    ordering="AFTER"
+    side="BOTH"
+
+# 只需 Kotlin 运行库，不依赖 KFF 的特定 API，因此不限制其版本。
+# Kotlin 运行库可由 KFF 或 CompixelUI 的 with-kotlin 版本提供。
+[[dependencies.${mod_id}]]
+    modId="kotlinforforge"
+    type="optional"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
     modId="create"
     type="optional"
     versionRange="[6.0.0,)"

@@ -96,7 +96,7 @@ public class ItemStackTypedHandler implements IItemHandler, IItemHandlerModifiab
         return getEmptySlotAt(rest);
     }
 
-    // ---- IItemHandler ----
+    // ---- IItemHandler 的实现 ----
 
     /**
      * 可视槽位 = Item 桶 + 空桶；全空时也会 > 0。

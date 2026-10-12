@@ -1,9 +1,12 @@
 package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
+import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.common.menu.NetRestockerMenu;
@@ -24,7 +27,6 @@ import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class NetRestockerItem extends BaseMachineItem
@@ -60,12 +62,13 @@ public class NetRestockerItem extends BaseMachineItem
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
-        if (!stack.has(BDDataComponents.ISTACK_SLOTS))
-            stack.set(BDDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
-        if (!stack.has(BDDataComponents.FUZZY_MODE))
-            stack.set(BDDataComponents.FUZZY_MODE, FuzzyMode.DISABLE);
-        if (!stack.has(BDDataComponents.RECEIVE_MODE))
-            stack.set(BDDataComponents.RECEIVE_MODE, ReceiveMode.STOP);
+        ensureSlots(stack, capacity);
+    }
+
+    @Override
+    public MachineType machineType()
+    {
+        return BDMachineTypes.NET_RESTOCKER.get();
     }
 
     @Override
@@ -83,8 +86,8 @@ public class NetRestockerItem extends BaseMachineItem
         UnifiedStorage storage = NetedItem.getNet(stack).getUnifiedStorage();
         List<KeyAmount> templates = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
 
-        FuzzyMode fuzzyMode = stack.getOrDefault(BDDataComponents.FUZZY_MODE, FuzzyMode.DISABLE);
-        ReceiveMode receiveMode = stack.getOrDefault(BDDataComponents.RECEIVE_MODE, ReceiveMode.STOP);
+        FuzzyMode fuzzyMode = settings(stack).get(BDMachineSettings.FUZZY.get());
+        ReceiveMode receiveMode = settings(stack).get(BDMachineSettings.RECEIVE.get());
 
         if (holder instanceof Player player)
         {
@@ -141,47 +144,15 @@ public class NetRestockerItem extends BaseMachineItem
                 if (missing <= 0)
                     continue;
 
-                KeyAmount extracted = storage.extract(targetKey, missing, false, fuzzyMode == FuzzyMode.ENABLE);
-                if (extracted.isEmpty())
-                    continue;
-
-                if (!(extracted.key() instanceof ItemStackKey extractedItemKey))
-                {
-                    storage.insert(extracted.key(), extracted.amount(), false);
-                    continue;
-                }
-
-                int refillCount = BDMath.clampLongToInt(extracted.amount());
-                if (refillCount <= 0)
-                    continue;
-
-                ItemStack refill = extractedItemKey.copyStackWithCount(refillCount);
-
-                if (currentStack.isEmpty())
-                {
-                    if (setPlayerSlotStack(player, templateSlot, refill))
-                    {
-                        inventoryChanged = true;
-                    }
-                    else
-                    {
-                        storage.insert(extracted.key(), extracted.amount(), false);
-                    }
-                }
-                else
-                {
-                    if (!ItemStack.isSameItemSameComponents(currentStack, refill))
-                    {
-                        storage.insert(extracted.key(), extracted.amount(), false);
-                        continue;
-                    }
-
-                    currentStack.grow(refillCount);
-                    if (setPlayerSlotStack(player, templateSlot, currentStack))
-                        inventoryChanged = true;
-                    else
-                        storage.insert(extracted.key(), extracted.amount(), false);
-                }
+                ItemStack existing = currentStack;
+                int slot = templateSlot;
+                // 槽位已有物品时只补同一种，空槽才按模糊匹配挑变体
+                KeyAmount moved = storage.extractInto(targetKey, missing, existing.isEmpty() && fuzzyMode == FuzzyMode.ENABLE,
+                        offer -> playerSlotAccepts(player, slot, existing, offer),
+                        taken -> setPlayerSlotStack(player, slot, ((ItemStackKey) taken.key()).copyStackWithCount(existing.getCount() + taken.amount()))
+                                ? 0L : taken.amount());
+                if (!moved.isEmpty())
+                    inventoryChanged = true;
             }
 
             if (inventoryChanged)
@@ -252,34 +223,25 @@ public class NetRestockerItem extends BaseMachineItem
             if (missing <= 0)
                 continue;
 
-            KeyAmount extracted = storage.extract(targetKey, missing, false, fuzzyMode == FuzzyMode.ENABLE);
-            if (extracted.isEmpty())
-                continue;
-
-            if (!(extracted.key() instanceof ItemStackKey extractedItemKey))
-            {
-                storage.insert(extracted.key(), extracted.amount(), false);
-                continue;
-            }
-
-            int refillCount = BDMath.clampLongToInt(extracted.amount());
-            if (refillCount <= 0)
-                continue;
-
-            ItemStack refill = extractedItemKey.copyStackWithCount(refillCount);
-
-            if (!currentStack.isEmpty() && !ItemStack.isSameItemSameComponents(currentStack, refill))
-            {
-                storage.insert(extracted.key(), extracted.amount(), false);
-                continue;
-            }
-
-            ItemStack leftover = handler.insertItem(templateSlot, refill, false);
-            if (!leftover.isEmpty())
-            {
-                storage.insert(new ItemStackKey(leftover), leftover.getCount(), false);
-            }
+            IItemHandler target = handler;
+            int slot = templateSlot;
+            // 槽位已有物品时只补同一种，空槽才按模糊匹配挑变体
+            storage.extractInto(targetKey, missing, currentStack.isEmpty() && fuzzyMode == FuzzyMode.ENABLE,
+                    offer -> offer.key() instanceof ItemStackKey key
+                            ? offer.amount() - target.insertItem(slot, key.copyStackWithCount(offer.amount()), true).getCount() : 0L,
+                    taken -> target.insertItem(slot, ((ItemStackKey) taken.key()).copyStackWithCount(taken.amount()), false).getCount());
         }
+    }
+
+    // 玩家槽位能收下多少：空槽要能放下这种物品，有物品时只收同一种，最多补到一组
+    private long playerSlotAccepts(Player player, int templateSlot, ItemStack existing, KeyAmount offer)
+    {
+        if (!(offer.key() instanceof ItemStackKey key))
+            return 0L;
+        ItemStack stack = key.getReadOnlyStack();
+        if (existing.isEmpty() ? !canPlaceInPlayerTemplateSlot(player, templateSlot, stack) : !ItemStack.isSameItemSameComponents(existing, stack))
+            return 0L;
+        return Math.min(offer.amount(), key.getVanillaMaxStackSize() - existing.getCount());
     }
 
     private boolean slotMatchesTemplate(ItemStack stackInSlot, KeyAmount template, FuzzyMode fuzzyMode)

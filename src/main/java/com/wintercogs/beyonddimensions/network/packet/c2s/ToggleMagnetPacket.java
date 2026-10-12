@@ -1,8 +1,10 @@
 package com.wintercogs.beyonddimensions.network.packet.c2s;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
 import com.wintercogs.beyonddimensions.client.gui.MagnetToggleType;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
 import com.wintercogs.beyonddimensions.common.machine.HopperFluidMode;
 import com.wintercogs.beyonddimensions.common.machine.HopperItemMode;
@@ -52,61 +54,31 @@ public record ToggleMagnetPacket(MagnetToggleType toggleType) implements CustomP
     {
         for (ItemStack stack : itemStackList)
         {
-            if (stack.getItem() instanceof NetMagnetItem)
+            if (stack.getItem() instanceof NetMagnetItem magnet)
             {
+                Machine machine = magnet.machine(stack);
                 switch (toggleType)
                 {
                     case ALL ->
-                    {
-                        if (stack.has(BDDataComponents.CONTROL_MODE))
-                        {
-                            if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.IGNORE)
-                            {
-                                stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.NOT_WORKING);
-                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.close"));
-                            }
-                            else if (stack.get(BDDataComponents.CONTROL_MODE) == RedStoneControlMode.NOT_WORKING)
-                            {
-                                stack.set(BDDataComponents.CONTROL_MODE, RedStoneControlMode.IGNORE);
-                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.open"));
-                            }
-                        }
-                    }
+                            toggle(player, machine, BDMachineSettings.WORKING.get(), RedStoneControlMode.IGNORE, RedStoneControlMode.NOT_WORKING,
+                                    "msg.beyonddimensions.magnet.open", "msg.beyonddimensions.magnet.close");
                     case ITEM ->
-                    {
-                        if (stack.has(BDDataComponents.HOPPER_ITEM_MODE))
-                        {
-                            if (stack.get(BDDataComponents.HOPPER_ITEM_MODE) == HopperItemMode.ALLOW)
-                            {
-                                stack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.DENY);
-                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.itemclose"));
-                            }
-                            else if (stack.get(BDDataComponents.HOPPER_ITEM_MODE) == HopperItemMode.DENY)
-                            {
-                                stack.set(BDDataComponents.HOPPER_ITEM_MODE, HopperItemMode.ALLOW);
-                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.itemopen"));
-                            }
-                        }
-                    }
+                            toggle(player, machine, BDMachineSettings.COLLECT_ITEMS.get(), HopperItemMode.ALLOW, HopperItemMode.DENY,
+                                    "msg.beyonddimensions.magnet.itemopen", "msg.beyonddimensions.magnet.itemclose");
                     case FLUID ->
-                    {
-                        if (stack.has(BDDataComponents.HOPPER_FLUID_MODE))
-                        {
-                            if (stack.get(BDDataComponents.HOPPER_FLUID_MODE) == HopperFluidMode.ALLOW)
-                            {
-                                stack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.DENY);
-                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.fluidclose"));
-                            }
-                            else if (stack.get(BDDataComponents.HOPPER_FLUID_MODE) == HopperFluidMode.DENY)
-                            {
-                                stack.set(BDDataComponents.HOPPER_FLUID_MODE, HopperFluidMode.ALLOW);
-                                player.sendSystemMessage(Component.translatable("msg.beyonddimensions.magnet.fluidopen"));
-                            }
-                        }
-                    }
+                            toggle(player, machine, BDMachineSettings.COLLECT_FLUIDS.get(), HopperFluidMode.ALLOW, HopperFluidMode.DENY,
+                                    "msg.beyonddimensions.magnet.fluidopen", "msg.beyonddimensions.magnet.fluidclose");
                 }
             }
         }
+    }
+
+    // 在 on 与 off 之间切换一项设置，并告诉玩家切换后的状态
+    private static <T> void toggle(Player player, Machine machine, MachineSetting<T> setting, T on, T off, String openedKey, String closedKey)
+    {
+        boolean opening = !on.equals(machine.setting(setting));
+        machine.setSetting(setting, opening ? on : off);
+        player.sendSystemMessage(Component.translatable(opening ? openedKey : closedKey));
     }
 
     private void handleInServer(final IPayloadContext context)

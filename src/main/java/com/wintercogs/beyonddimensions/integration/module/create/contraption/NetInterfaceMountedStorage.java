@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.create.contraption;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.simibubi.create.api.contraption.storage.item.MountedItemStorage;
@@ -8,15 +9,16 @@ import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
 import com.simibubi.create.content.contraptions.Contraption;
 import com.wintercogs.beyonddimensions.api.capability.helper.ordered.ItemStackTypedHandler;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
+import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
+import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceAccess;
-import com.wintercogs.beyonddimensions.common.menu.NetInterfaceSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
@@ -28,52 +30,80 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public class NetInterfaceMountedStorage extends MountedItemStorage implements NetInterfaceAccess
 {
-    private static final Codec<PopMode> POP_MODE_CODEC = Codec.STRING.xmap(PopMode::valueOf, PopMode::name);
-    private static final Codec<FuzzyMode> FUZZY_MODE_CODEC = Codec.STRING.xmap(FuzzyMode::valueOf, FuzzyMode::name);
-    private static final Codec<RedStoneControlMode> CONTROL_MODE_CODEC = Codec.STRING.xmap(RedStoneControlMode::valueOf, RedStoneControlMode::name);
+    // 旧版本的动态结构把三项设置分开保存；读到坏值时当作没有，取默认值
+    private static final Codec<PopMode> POP_MODE_CODEC = legacyEnum(PopMode.class);
+    private static final Codec<FuzzyMode> FUZZY_MODE_CODEC = legacyEnum(FuzzyMode.class);
+    private static final Codec<RedStoneControlMode> CONTROL_MODE_CODEC = legacyEnum(RedStoneControlMode.class);
 
     public static final MapCodec<NetInterfaceMountedStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             StackHandler.CODEC.fieldOf("inventory").forGetter(NetInterfaceMountedStorage::getStackHandler),
             StackHandler.CODEC.fieldOf("flags").forGetter(NetInterfaceMountedStorage::getFakeStackHandler),
             Codec.INT.fieldOf("net_id").forGetter(NetInterfaceMountedStorage::getNetId),
-            POP_MODE_CODEC.fieldOf("pop_mode").forGetter(NetInterfaceMountedStorage::getPopMode),
-            FUZZY_MODE_CODEC.fieldOf("fuzzy_mode").forGetter(NetInterfaceMountedStorage::getFuzzyMode),
-            CONTROL_MODE_CODEC.fieldOf("control_mode").forGetter(NetInterfaceMountedStorage::getControlMode),
+            MachineSettings.CODEC.optionalFieldOf(SETTINGS).forGetter(storage -> Optional.of(storage.settings)),
+            POP_MODE_CODEC.lenientOptionalFieldOf("pop_mode").forGetter(storage -> Optional.empty()),
+            FUZZY_MODE_CODEC.lenientOptionalFieldOf("fuzzy_mode").forGetter(storage -> Optional.empty()),
+            CONTROL_MODE_CODEC.lenientOptionalFieldOf("control_mode").forGetter(storage -> Optional.empty()),
             Codec.INT.fieldOf("step_tick").forGetter(NetInterfaceMountedStorage::getStepTick)
-    ).apply(instance, NetInterfaceMountedStorage::new));
+    ).apply(instance, NetInterfaceMountedStorage::decoded));
 
     private final StackHandler stackHandler;
     private final ItemStackTypedHandler itemHandlerWrapper;
     private final StackHandler fakeStackHandler;
     private final int netId;
-    private final NetInterfaceSettings settings = new NetInterfaceSettings();
-    private RedStoneControlMode controlMode;
+    private MachineSettings settings;
     private int stepTick;
     private boolean valid = true;
     private boolean dirty;
 
     public NetInterfaceMountedStorage(StackHandler stackHandler, StackHandler fakeStackHandler, int netId,
-                                      PopMode popMode, FuzzyMode fuzzyMode, RedStoneControlMode controlMode,
-                                      int stepTick)
+                                      MachineSettings settings, int stepTick)
     {
-        this(NetInterfaceMountedStorageType.NET_INTERFACE.get(), stackHandler, fakeStackHandler, netId, popMode, fuzzyMode, controlMode, stepTick);
+        this(NetInterfaceMountedStorageType.NET_INTERFACE.get(), stackHandler, fakeStackHandler, netId, settings, stepTick);
     }
 
     public NetInterfaceMountedStorage(MountedItemStorageType<?> type, StackHandler stackHandler, StackHandler fakeStackHandler,
-                                      int netId, PopMode popMode, FuzzyMode fuzzyMode, RedStoneControlMode controlMode,
-                                      int stepTick)
+                                      int netId, MachineSettings settings, int stepTick)
     {
         super(type);
         this.stackHandler = stackHandler;
         this.itemHandlerWrapper = new ItemStackTypedHandler(stackHandler);
         this.fakeStackHandler = fakeStackHandler;
         this.netId = netId;
-        this.settings.setPopMode(popMode);
-        this.settings.setFuzzyMode(fuzzyMode);
-        this.controlMode = controlMode;
+        this.settings = settings;
         this.stepTick = stepTick;
+    }
+
+    private static NetInterfaceMountedStorage decoded(StackHandler stackHandler, StackHandler fakeStackHandler, int netId,
+                                                      Optional<MachineSettings> settings, Optional<PopMode> popMode,
+                                                      Optional<FuzzyMode> fuzzyMode, Optional<RedStoneControlMode> controlMode,
+                                                      int stepTick)
+    {
+        MachineSettings resolved = settings.orElseGet(() -> {
+            MachineSettings legacy = MachineSettings.EMPTY;
+            if (popMode.isPresent()) legacy = legacy.with(BDMachineSettings.POP.get(), popMode.get());
+            if (fuzzyMode.isPresent()) legacy = legacy.with(BDMachineSettings.FUZZY.get(), fuzzyMode.get());
+            if (controlMode.isPresent()) legacy = legacy.with(BDMachineSettings.REDSTONE.get(), controlMode.get());
+            return legacy;
+        });
+        return new NetInterfaceMountedStorage(stackHandler, fakeStackHandler, netId, resolved, stepTick);
+    }
+
+    private static <E extends Enum<E>> Codec<E> legacyEnum(Class<E> type)
+    {
+        return Codec.STRING.comapFlatMap(name -> {
+            try
+            {
+                return DataResult.success(Enum.valueOf(type, name));
+            }
+            catch (IllegalArgumentException e)
+            {
+                return DataResult.error(() -> "Unknown " + type.getSimpleName() + ": " + name);
+            }
+        }, Enum::name);
     }
 
     @Override
@@ -94,59 +124,19 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
     }
 
     @Override
-    public NetInterfaceSettings getNetInterfaceSettings()
+    public MachineSettings settings()
     {
         return this.settings;
     }
 
     @Override
-    public RedStoneControlMode getControlMode()
+    public void setSettings(MachineSettings settings)
     {
-        return this.controlMode;
+        if (this.valid)
+            this.settings = settings;
     }
 
-    @Override
-    public void setControlMode(RedStoneControlMode controlMode)
-    {
-        if (!this.valid)
-        {
-            return;
-        }
-        if (this.controlMode == controlMode)
-        {
-            return;
-        }
-        this.controlMode = controlMode;
-    }
-
-    @Override
-    public void setPopMode(PopMode popMode)
-    {
-        if (!this.valid)
-        {
-            return;
-        }
-        if (getPopMode() == popMode)
-        {
-            return;
-        }
-        NetInterfaceAccess.super.setPopMode(popMode);
-    }
-
-    @Override
-    public void setFuzzyMode(FuzzyMode fuzzyMode)
-    {
-        if (!this.valid)
-        {
-            return;
-        }
-        if (getFuzzyMode() == fuzzyMode)
-        {
-            return;
-        }
-        NetInterfaceAccess.super.setFuzzyMode(fuzzyMode);
-    }
-
+    // 动态结构里的接口不能推送缓存
     @Override
     public boolean canConfigurePopMode()
     {
@@ -246,7 +236,7 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
         }
         this.stepTick = 0;
 
-        return switch (this.controlMode)
+        return switch (getControlMode())
         {
             case IGNORE, UNPOWERED -> true;
             case NOT_WORKING, POWERED -> false;
@@ -279,14 +269,7 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
         player.openMenu(new SimpleMenuProvider(
                 (containerId, inventory, serverPlayer) -> new com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu(containerId, inventory, this),
                 info.state().getBlock().getName()
-        ), buf -> {
-            buf.writeBoolean(true);
-            buf.writeNbt(this.stackHandler.serializeNBT(player.registryAccess()));
-            buf.writeNbt(this.fakeStackHandler.serializeNBT(player.registryAccess()));
-            buf.writeUtf(getPopMode().name());
-            buf.writeUtf(getFuzzyMode().name());
-            buf.writeUtf(this.controlMode.name());
-        });
+        ), buf -> com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu.writeMountedOpeningData(buf, this));
         return true;
     }
 
@@ -298,9 +281,7 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
         {
             copyInto(this.stackHandler, netInterface.getStackHandler());
             copyInto(this.fakeStackHandler, netInterface.getFakeStackHandler());
-            netInterface.setPopMode(getPopMode());
-            netInterface.setFuzzyMode(getFuzzyMode());
-            netInterface.setControlMode(this.controlMode);
+            netInterface.setSettings(this.settings);
             netInterface.setNeedsCapabilityUpdate();
             netInterface.setChanged();
             netInterface.onMenuDataChanged();
@@ -313,9 +294,7 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
                 copyOf(be.getStackHandler()),
                 copyOf(be.getFakeStackHandler()),
                 be.getNetId(),
-                be.getPopMode(),
-                be.getFuzzyMode(),
-                be.getControlMode(),
+                be.settings(),
                 be.getStepTick()
         );
     }

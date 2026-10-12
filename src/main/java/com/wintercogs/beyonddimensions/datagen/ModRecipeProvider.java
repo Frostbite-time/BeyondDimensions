@@ -281,5 +281,15 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .define('C', BDItems.SPACE_TIME_BAR.get())
                 .unlockedBy("unlock_xp_exchange_item", has(BDItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.MACHINE_CONFIG_CARD.get())
+                .pattern(" A ")
+                .pattern("BCB")
+                .pattern(" A ")
+                .define('A', Items.REDSTONE)
+                .define('B', Items.PAPER)
+                .define('C', BDItems.SPACE_TIME_BAR.get())
+                .unlockedBy("unlock_machine_config_card", has(BDItems.SPACE_TIME_BAR.get()))
+                .save(recipeOutput);
     }
 }

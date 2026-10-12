@@ -2,11 +2,14 @@ package com.wintercogs.beyonddimensions.common.init;
 
 import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.common.component.ItemStackContents;
+import com.wintercogs.beyonddimensions.common.component.MachineConfigCardContents;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -33,6 +36,21 @@ public class BDDataComponents
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> TIME_LINE = register(
             "time_line", builder -> builder.persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG)
+    );
+
+    // 物品机器的设置，见 MachineItem；旧版本每项设置是下方的一个独立组件，读档时迁移
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<MachineSettings>> MACHINE_SETTINGS = register(
+            "machine_settings", builder -> builder.persistent(MachineSettings.CODEC).networkSynchronized(ByteBufCodecs.fromCodec(MachineSettings.CODEC))
+    );
+
+    // 机器配置卡记下的机器类型与配置
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<MachineConfigCardContents>> MACHINE_CONFIG_CARD = register(
+            "machine_config_card", builder -> builder.persistent(MachineConfigCardContents.CODEC).networkSynchronized(MachineConfigCardContents.STREAM_CODEC)
+    );
+
+    // 错误数据封装的原始存档内容：{raw: 原样的 NBT}
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<CompoundTag>> ERROR_DATA = register(
+            "error_data", builder -> builder.persistent(CompoundTag.CODEC).networkSynchronized(ByteBufCodecs.COMPOUND_TAG)
     );
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemStackContents>> CRAFT_SLOTS = register(

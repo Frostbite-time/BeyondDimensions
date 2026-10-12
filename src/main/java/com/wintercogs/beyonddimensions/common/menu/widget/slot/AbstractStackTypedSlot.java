@@ -9,14 +9,13 @@ import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * 专用于IStackKey泛型类的slot组件，内部自带click、quick-click以及数据的网络同步处理，以便于在本模组的不同UI中使用时可以被快速而泛化的添加。
- * <p>请确保其只被添加到BDBaseMenu或BDBaseGUI及其子类</p>
+ * <p>请确保其只被添加到BDBaseMenu及其子类</p>
  * <p>如果你需要将其添加到你自定义的菜单或ui，你需要修改他们，以确保会正确调用click函数以及同步函数</p>
  */
 public abstract class AbstractStackTypedSlot extends Slot
@@ -73,6 +72,11 @@ public abstract class AbstractStackTypedSlot extends Slot
         this.quickMoveSlotEndIndex = -1;
     }
 
+    public AbstractStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex)
+    {
+        this(menu, storage, slotIndex, 0, 0);
+    }
+
     public AbstractStackTypedSlot(BDBaseMenu menu, IStackHandler storage, int slotIndex, int quickMoveSlotStartIndex, int quickMoveSlotEndIndex, int xPosition, int yPosition)
     {
         super(empty_inv, slotIndex, xPosition, yPosition);
@@ -100,30 +104,23 @@ public abstract class AbstractStackTypedSlot extends Slot
      */
     public abstract boolean isOrdered();
 
-    /**
-     * 当鼠标直接点击此槽位会发生什么
-     */
-    public abstract void click(KeyAmount clickStack, int button, Player player);
+    // 点击与 Shift 转移由 common.menu.interaction.SlotInteractions 中注册的交互处理
 
     /**
-     * 当鼠标shift点击此槽位会发生什么
+     * Shift 转移的目标槽位区间起点（含），没有时为 -1
      */
-    public abstract void quickMove(KeyAmount clickStack, int button, Player player);
+    public int quickMoveStart()
+    {
+        return quickMoveSlotStartIndex;
+    }
 
     /**
-     * 将数据从服务端向客户端发包
+     * Shift 转移的目标槽位区间终点（不含），没有时为 -1
      */
-    public abstract void updateChange();
-
-    /**
-     * 如何接受同步数据
-     *
-     * @param where     stack应当覆盖的位置
-     * @param newKey    对应位置应当出现的新stackKey
-     * @param newAmount 对应位置stack应当呈现的数量
-     */
-    public abstract void loadChange(int where, IStackKey<?> newKey, long newAmount);
-
+    public int quickMoveEnd()
+    {
+        return quickMoveSlotEndIndex;
+    }
 
     // 其他有用的slot方法或者为slot运行所用的方法-------------------------------------------------------------------------------
 
@@ -145,9 +142,7 @@ public abstract class AbstractStackTypedSlot extends Slot
 
         if (stackType.key() instanceof ItemStackKey itemStackType)
         {
-            ItemStack readOnlyStack = itemStackType.getReadOnlyStack();
-            readOnlyStack.setCount(BDMath.clampLongToInt(stackType.amount()));
-            return readOnlyStack;
+            return itemStackType.copyStackWithCount(BDMath.clampLongToInt(stackType.amount()));
         }
         else
         {
@@ -191,7 +186,6 @@ public abstract class AbstractStackTypedSlot extends Slot
         return storage.getStackBySlot(getSlotIndex());
     }
 
-
     // 以下这些重写 覆盖了slot中最基本的要素，以便将Container驱动的inv系统，替换成IStackKey驱动------------------------------
     public void setStackDirectly(IStackKey<?> key, long amount)
     {
@@ -205,17 +199,25 @@ public abstract class AbstractStackTypedSlot extends Slot
     // 有序槽位只取出当前槽中数量，无序槽位从整个存储中取出
     // 另一种类型的safeInsert，专用于此种槽位
     // 返回余量
-    public abstract KeyAmount safeInsert(IStackKey<?> key, long amount);
+    public KeyAmount safeInsert(IStackKey<?> key, long amount)
+    {
+        return safeInsert(key, amount, false);
+    }
+
+    // simulate 为真时只算出余量，不改动存储
+    public abstract KeyAmount safeInsert(IStackKey<?> key, long amount, boolean simulate);
 
     // 对于有序槽位，应当从当前槽位中取出对应种类stack的对应数量
     // 对于无序槽位，应当从整个存储中取出对应种类stack的对应数量
     // 返回取出量
     public abstract KeyAmount safeExtract(IStackKey<?> key, long amount);
 
-
     @Override
     public @NotNull ItemStack getItem()
     {
+        // 原版整包同步不携带虚拟资源，它们由菜单的资源同步负责
+        if (menu.isVanillaSnapshot())
+            return ItemStack.EMPTY;
         if (getSlotIndex() < 0)
         {
             return ItemStack.EMPTY;
@@ -223,7 +225,7 @@ public abstract class AbstractStackTypedSlot extends Slot
         ItemStack itemStack = getItemStackFromUnifiedStorage();
         if (itemStack.isEmpty())
             return ItemStack.EMPTY;
-        return itemStack.copy();
+        return itemStack;
 
     }
 

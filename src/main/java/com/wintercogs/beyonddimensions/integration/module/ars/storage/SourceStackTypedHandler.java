@@ -85,7 +85,7 @@ public class SourceStackTypedHandler implements ISourceCap
 
         long perSlot = Math.min(
                 SourceStackKey.INSTANCE.getVanillaMaxStackSize(),
-                handlerStorage.getSlotCapacity(0) // 槽位容量在你的实现中对所有槽位相同
+                handlerStorage.getSlotCapacity(0) // 槽位容量对所有槽位相同
         );
 
         long total = perSlot * (long) eligibleSlots;

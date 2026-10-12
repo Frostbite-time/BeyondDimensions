@@ -155,7 +155,7 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
         return INSTANCE;
     }
 
-    // ---------------- NBT ----------------
+    // ---------------- NBT 读写 ----------------
     // 仅写 Type；读取时直接返回单例。旧 LongType 是纯 long，可直接忽略。
 
     @Override
@@ -171,11 +171,11 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
         return INSTANCE;
     }
 
-    // ---------------- 渲染支持（可选：若你的渲染系统通过 getRender() 取渲染器） ----------------
+    // ---------------- 渲染支持 ----------------
 
     @Override
     public @NotNull IStackRender getRender()
     {
-        return EnergyStackKeyRender.INSTANCE; // 若不需要渲染器，可改为抛 UnsupportedOperationException
+        return EnergyStackKeyRender.INSTANCE;
     }
 }

@@ -2,8 +2,11 @@ package com.wintercogs.beyonddimensions.common.block.entity;
 
 import com.wintercogs.beyonddimensions.api.capability.helper.unordered.EnergyUnifiedStorageHandler;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
+import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.util.BDMath;
@@ -28,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implements MenuProvider
 {
 
-    private PopMode popMode = PopMode.STOP;
     private final Direction[] directions = Direction.values();
 
     public NetEnergyPathwayBlockEntity(BlockPos pos, BlockState blockState)
@@ -43,7 +45,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
                 Capabilities.EnergyStorage.BLOCK,
                 BDBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
-                    if (be.popMode == PopMode.OPEN)
+                    if (be.getPopMode() == PopMode.OPEN)
                     {
                         return new EnergyStorage(0);
                     }
@@ -61,18 +63,29 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
         );
     }
 
+    @Override
+    public MachineType machineType()
+    {
+        return BDMachineTypes.NET_ENERGY_PATHWAY.get();
+    }
+
     public PopMode getPopMode()
     {
-        return popMode;
+        return setting(BDMachineSettings.POP.get());
     }
 
     public void setPopMode(PopMode newMode)
     {
-        if (this.popMode != newMode)
-        {
-            this.popMode = newMode;
-            setChanged();
-        }
+        setSetting(BDMachineSettings.POP.get(), newMode);
+    }
+
+    // 推送模式决定对外暴露的能量能力
+    @Override
+    protected void onSettingsChanged()
+    {
+        super.onSettingsChanged();
+        if (level != null)
+            level.invalidateCapabilities(worldPosition);
     }
 
     @Override
@@ -91,7 +104,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     public void workContent()
     {
         super.workContent();
-        if (popMode == PopMode.OPEN)
+        if (getPopMode() == PopMode.OPEN)
         {
             popEnergy();
         }
@@ -116,10 +129,10 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
                 IEnergyStorage otherStorage = level.getCapability(Capabilities.EnergyStorage.BLOCK, targetPos, dir.getOpposite());
                 if (otherStorage != null)
                 {
-                    //getMaxTransfer会返回一个不大于int最大值的long类型数据，因此可以安全转换
-                    int maxExtract = BDMath.clampLongToInt(net.getUnifiedStorage().getStackByKey(EnergyStackKey.INSTANCE).amount());
-                    int receive = otherStorage.receiveEnergy(maxExtract, false);
-                    net.getUnifiedStorage().extract(EnergyStackKey.INSTANCE, receive, false, false);
+                    // 先模拟网络能给多少、对方能收多少，再只取出收得下的能量
+                    net.getUnifiedStorage().extractInto(EnergyStackKey.INSTANCE, Integer.MAX_VALUE, false,
+                            offer -> otherStorage.receiveEnergy(BDMath.clampLongToInt(offer.amount()), true),
+                            taken -> taken.amount() - otherStorage.receiveEnergy(BDMath.clampLongToInt(taken.amount()), false));
                 }
             }
         }
@@ -129,28 +142,12 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-
-        // 旧数据兼容
-        String popModeNew = tag.getString("popMode");
-        if (!popModeNew.isEmpty())
-        {
-            this.popMode = PopMode.valueOf(popModeNew);
-        }
-        else if (tag.getBoolean("popMode"))
-        {
-            this.popMode = PopMode.OPEN;
-        }
-        else
-        {
-            this.popMode = PopMode.STOP;
-        }
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.saveAdditional(tag, registries);
-        tag.putString("popMode", this.popMode.name());
     }
 
     @Override

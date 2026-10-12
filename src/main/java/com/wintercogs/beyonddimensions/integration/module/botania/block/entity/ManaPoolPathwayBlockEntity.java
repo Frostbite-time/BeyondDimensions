@@ -278,7 +278,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
             }
         }
 
-        // 新版：转移状态更新 + 结束立即补同步
+        // 更新转移状态，转移结束时立即补一次同步
         if (be.isDoingTransfer)
         {
             be.ticksDoingTransfer++;
@@ -564,7 +564,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
         return refreshHandler() ? handler.getActualMaxMana() : 0;
     }
 
-    // ====== ManaCollector/ManaPool/SparkAttachable/Wandable ======
+    // ====== ManaCollector/ManaPool/SparkAttachable/Wandable 的实现 ======
     @Override
     public void onClientDisplayTick()
     {
@@ -844,5 +844,20 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
 
         if (tag.contains(TAG_INPUT_KEY)) inputKey = tag.getString(TAG_INPUT_KEY);
         if (tag.contains(TAG_OUTPUT_KEY)) outputKey = tag.getString(TAG_OUTPUT_KEY);
+    }
+
+    // 法杖 HUD 在客户端显示输入或输出方向
+    @Override
+    protected void saveClientData(CompoundTag tag, HolderLookup.Provider registries)
+    {
+        super.saveClientData(tag, registries);
+        tag.putBoolean(TAG_OUTPUTTING, isOutPutting);
+    }
+
+    @Override
+    protected void loadClientData(CompoundTag tag, HolderLookup.Provider registries)
+    {
+        super.loadClientData(tag, registries);
+        if (tag.contains(TAG_OUTPUTTING)) isOutPutting = tag.getBoolean(TAG_OUTPUTTING);
     }
 }

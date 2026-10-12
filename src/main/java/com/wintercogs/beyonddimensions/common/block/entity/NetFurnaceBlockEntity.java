@@ -1,6 +1,8 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -12,5 +14,11 @@ public class NetFurnaceBlockEntity extends BaseNetFurnaceBlockEntity<SmeltingRec
     public NetFurnaceBlockEntity(BlockPos pos, BlockState blockState)
     {
         super(BDBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(), pos, blockState, RecipeType.SMELTING, Component.translatable("menu.title.beyonddimensions.furnace_menu"));
+    }
+
+    @Override
+    public MachineType machineType()
+    {
+        return BDMachineTypes.NET_FURNACE.get();
     }
 }

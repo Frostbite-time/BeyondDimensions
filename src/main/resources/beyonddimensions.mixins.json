@@ -6,7 +6,6 @@
     "integration.create.target.SchematicannonBlockEntityMixin"
   ],
   "client": [
-    "target.blitSpriteMixin"
   ],
   "server": [
   ],

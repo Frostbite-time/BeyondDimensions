@@ -103,7 +103,7 @@ public class XpUtil
         if (fromLevel < 0 || targetLevel < 0) return 0L;
         double diff = totalXpAtIntegerLevel(targetLevel) - totalXpAtFractionalLevel(fromLevel);
         if (diff <= 0) return 0L;
-        return (long) Math.ceil(diff - 1e-9); // epsilon 防止 0.999999 被误判
+        return (long) Math.ceil(diff - 1e-9); // 减去一个极小量，防止 0.999999 被误判
     }
 
     /**
@@ -114,7 +114,7 @@ public class XpUtil
         if (fromLevel < 0 || targetLevel < 0) return 0L;
         double diff = totalXpAtFractionalLevel(fromLevel) - totalXpAtIntegerLevel(targetLevel);
         if (diff <= 0) return 0L;
-        return (long) Math.floor(diff + 1e-9); // epsilon
+        return (long) Math.floor(diff + 1e-9); // 加上一个极小量，抵消浮点误差
     }
 
     /**

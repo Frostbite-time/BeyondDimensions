@@ -1,5 +1,8 @@
 package com.wintercogs.beyonddimensions.api.storage.key;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.wintercogs.beyonddimensions.util.StringFormat;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -28,14 +31,33 @@ public interface IStackRender
     void render(GuiGraphics gui, IStackKey<?> key, int x, int y);
 
     /**
-     * 将数量绘制到屏幕上
+     * 在 (x, y) 处 16×16 图标的右下角画出数量，写法见 {@link #getCountText}。
+     * 字号为原版的 2/3，文字连同投影收在图标内，与存储界面格子里的数量一致
      */
-    void renderAmount(GuiGraphics gui, long amount, int x, int y);
+    @OnlyIn(Dist.CLIENT)
+    default void renderAmount(GuiGraphics gui, long amount, int x, int y)
+    {
+        String text = getCountText(amount);
+        if (text.isEmpty())
+            return;
+        Font font = Minecraft.getInstance().font;
+        float scale = 2f / 3f;
+        PoseStack pose = gui.pose();
+        pose.pushPose();
+        // 原版数字连同投影高 8 像素、宽为 font.width
+        pose.translate(x + 16 - font.width(text) * scale, y + 16 - 8 * scale, 200);
+        pose.scale(scale, scale, 1);
+        gui.drawString(font, text, 0, 0, 0xFFFFFF, true);
+        pose.popPose();
+    }
 
     /**
-     * 对当前存储数量进行格式化
+     * 格子里的数量写法，默认与存储界面相同，见 {@link StringFormat#formatCompact}
      */
-    String getCountText(long count);
+    default String getCountText(long count)
+    {
+        return count < 0 ? "" : StringFormat.formatCompact(count);
+    }
 
     /**
      * 获取资源名称

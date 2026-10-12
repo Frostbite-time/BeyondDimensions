@@ -81,19 +81,10 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             final T kAmt = ops.createString(K_AMOUNT);
             final T kAmtOld = ops.createString(K_AMOUNT_OLD);
 
-            // 新格式
+            // 新格式；流体或任一组件解析不了时如实失败，由 IStackKey.CODEC 封装成错误数据
             if (input.get(kFluid) != null)
             {
-                DataResult<FluidStackKey> r = NEW_FMT.decode(ops, input);
-                if (r.result().isPresent()) return r;
-
-                // 宽松兜底：fluid 存在但解析失败 → 仅保留 components，回退 EMPTY
-                T compsNode = input.get(kComps);
-                if (compsNode == null) compsNode = input.get(kCompsOld); // 也兼容大写
-                DataComponentPatch patch = compsNode == null
-                        ? DataComponentPatch.EMPTY
-                        : DataComponentPatch.CODEC.parse(ops, compsNode).result().orElse(DataComponentPatch.EMPTY);
-                return DataResult.success(new FluidStackKey(Fluids.EMPTY, patch));
+                return NEW_FMT.decode(ops, input);
             }
 
 
@@ -103,8 +94,8 @@ public final class FluidStackKey implements IStackKey<FluidStack>
                 java.util.Map<T, T> map = new java.util.LinkedHashMap<>();
                 input.entries().forEach(p -> {
                     T key = p.getFirst();
-                    if (key.equals(kFluidOld)) key = kFluid;  // Fluid -> fluid
-                    else if (key.equals(kCompsOld)) key = kComps;  // Components -> components
+                    if (key.equals(kFluidOld)) key = kFluid;  // Fluid 改为 fluid
+                    else if (key.equals(kCompsOld)) key = kComps;  // Components 改为 components
                     // 忽略 amount/Amount
                     if (!key.equals(kAmt) && !key.equals(kAmtOld))
                     {
@@ -178,7 +169,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         this.patch = (patch == null) ? DataComponentPatch.EMPTY : patch;
     }
 
-    // ===== IStackKey =====
+    // ===== IStackKey 的实现 =====
 
     @Override
     public ResourceLocation getTypeId()
@@ -394,11 +385,11 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.encodeStart(ops, this)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                            "FluidStackKey 序列化(Codec)出错: {}", err))
+                            "FluidStackKey codec serialization error: {}", err))
                     .map(nbt -> {
                         if (nbt instanceof CompoundTag ct) return ct; // 期望产物
                         BeyondDimensions.LOGGER.error(
-                                "FluidStackKey 序列化得到的 NBT 非 CompoundTag，已丢弃该结果: {}",
+                                "FluidStackKey serialized to an NBT that is not a CompoundTag, result discarded: {}",
                                 nbt.getClass().getName());
                         return new CompoundTag();
                     })
@@ -406,7 +397,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.error("FluidStackKey 序列化时出错: {}", t.getMessage(), t);
+            BeyondDimensions.LOGGER.error("Error while serializing FluidStackKey: {}", t.getMessage(), t);
             return new CompoundTag();
         }
     }
@@ -420,12 +411,12 @@ public final class FluidStackKey implements IStackKey<FluidStack>
             var ops = levelRegistryAccess.createSerializationContext(NbtOps.INSTANCE);
             return CODEC.parse(ops, nbt)
                     .resultOrPartial(err -> BeyondDimensions.LOGGER.warn(
-                            "FluidStackKey 反序列化(Codec)出错: {} | Keys={}", err, nbt.getAllKeys()))
+                            "FluidStackKey codec deserialization error: {} | Keys={}", err, nbt.getAllKeys()))
                     .orElse(FluidStackKey.EMPTY);
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.error("FluidStackKey 反序列化错误。Keys={} Error={}",
+            BeyondDimensions.LOGGER.error("Error while deserializing FluidStackKey. Keys={} Error={}",
                     nbt.getAllKeys(), t.getMessage(), t);
             return FluidStackKey.EMPTY;
         }
@@ -436,7 +427,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     @Override
     public @NotNull IStackRender getRender()
     {
-        // 与 ItemStackKey 一致，采用单独渲染器（请在你的渲染模块提供 FluidStackKeyRender.INSTANCE）
+        // 与 ItemStackKey 一致，采用单独的渲染器
         return FluidStackKeyRender.INSTANCE;
     }
 
@@ -546,7 +537,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.warn("FluidStackKey 组件规范化失败: {}", t.toString());
+            BeyondDimensions.LOGGER.warn("Failed to normalize FluidStackKey components: {}", t.toString());
             this.patchByte = new byte[0];
             this.equalsByteProviderRef = null;
         }
@@ -586,7 +577,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         }
         catch (Throwable t)
         {
-            BeyondDimensions.LOGGER.warn("FluidStackKey patch 断开失败: {}", t.toString());
+            BeyondDimensions.LOGGER.warn("Failed to detach FluidStackKey component patch: {}", t.toString());
             this.detachedPatchCache = this.patch;
             this.detachedPatchProviderRef = null;
             return this.patch;

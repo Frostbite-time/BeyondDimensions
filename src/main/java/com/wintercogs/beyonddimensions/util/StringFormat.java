@@ -2,84 +2,36 @@ package com.wintercogs.beyonddimensions.util;
 
 public class StringFormat
 {
-    private static final String[] UNITS = {"", "k", "M", "G", "T", "P", "E"};
-    private static final long[] THRESHOLDS = {
-            1_000L,                     // k (10^3)
-            1_000_000L,                 // M (10^6)
-            1_000_000_000L,             // G (10^9)
-            1_000_000_000_000L,         // T (10^12)
-            1_000_000_000_000_000L,     // P (10^15)
-            1_000_000_000_000_000_000L  // E (10^18)
-    };
+    private static final String[] UNITS = {"K", "M", "G", "T", "P", "E"};
+    private static final double[] SCALES = {1e3, 1e6, 1e9, 1e12, 1e15, 1e18};
 
     /**
-     * 格式化给定数字
+     * 格子里的数量：最多四个字符，如 999、1.2K、86K、1.3M
      */
-    public static String formatCount(long count)
+    public static String formatCompact(long amount)
     {
-        if (count < 1000) return String.valueOf(count);
-
-        // 寻找最大单位
-        int unitIndex = 0;
-        while (unitIndex < THRESHOLDS.length - 1 && count >= THRESHOLDS[unitIndex + 1])
+        if (amount < 1_000)
+            return Long.toString(amount);
+        int unit = SCALES.length - 1;
+        while (amount < SCALES[unit])
+            unit--;
+        double value = amount / SCALES[unit];
+        if (value < 10)
         {
-            unitIndex++;
+            // 截断而不是四舍五入，避免 9.99K 显示成 10.0K
+            long tenths = (long) (value * 10);
+            return tenths % 10 == 0 ? tenths / 10 + UNITS[unit] : tenths / 10 + "." + tenths % 10 + UNITS[unit];
         }
-
-        // 计算值并格式化
-        double value = count / (double) THRESHOLDS[unitIndex];
-        return String.format("%d%s", (long) value, UNITS[unitIndex + 1]);
+        return (long) value + UNITS[unit];
     }
 
     /**
-     * 与{@link StringFormat#formatCount(long)}一致，但是会将传入的count除以1000。用于流体单位计算
+     * 流体与化学品先换算为桶数，再沿用格子里的数量缩写规则；不足一桶时显示 {@code <1}。
      */
-    public static String formatBucket(long count)
+    public static String formatBucket(long amount)
     {
-        if (count < 1000) return String.valueOf(count / 1000f);
-
-        count = count / 1000;
-
-        if (count < 1000) return String.valueOf(count);
-
-        int unitIndex = 0;
-        while (unitIndex < THRESHOLDS.length - 1 && count >= THRESHOLDS[unitIndex + 1])
-        {
-            unitIndex++;
-        }
-
-        double value = count / (double) THRESHOLDS[unitIndex];
-        return String.format("%d%s", (long) value, UNITS[unitIndex + 1]);
-    }
-
-    /**
-     * 为能量增减等情况使用的格式化
-     */
-    public static String formatChange(long change)
-    {
-        if (change == 0)
-        {
-            return "0";
-        }
-
-        String sign = change > 0 ? "+" : "-";
-        long absValue = Math.abs(change);
-
-        // 特殊处理小于1000的值（直接显示原始值）
-        if (absValue < 1000)
-        {
-            return sign + String.format("%d", absValue);
-        }
-
-        // 寻找匹配的单位
-        int unitIndex = 0;
-        while (unitIndex < THRESHOLDS.length - 1 && absValue >= THRESHOLDS[unitIndex + 1])
-        {
-            unitIndex++;
-        }
-
-        // 计算带单位的值并格式化
-        double value = absValue / (double) THRESHOLDS[unitIndex];
-        return sign + String.format("%.2f%s", value, UNITS[unitIndex + 1]);
+        if (amount < 1_000)
+            return "<1";
+        return formatCompact(amount / 1_000);
     }
 }

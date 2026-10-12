@@ -1,10 +1,13 @@
 package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
+import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.common.machine.FeederMode;
 import com.wintercogs.beyonddimensions.common.machine.FilterMode;
 import com.wintercogs.beyonddimensions.common.menu.NetFeederMenu;
@@ -23,7 +26,6 @@ import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class NetFeederItem extends BaseMachineItem
@@ -59,10 +61,13 @@ public class NetFeederItem extends BaseMachineItem
     public void checkComponents(ItemStack stack)
     {
         super.checkComponents(stack);
-        if (!stack.has(BDDataComponents.ISTACK_SLOTS))
-            stack.set(BDDataComponents.ISTACK_SLOTS, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
-        if (!stack.has(BDDataComponents.FEEDER_MODE))
-            stack.set(BDDataComponents.FEEDER_MODE, FeederMode.NORMAL);
+        ensureSlots(stack, capacity);
+    }
+
+    @Override
+    public MachineType machineType()
+    {
+        return BDMachineTypes.NET_FEEDER.get();
     }
 
     @Override
@@ -79,7 +84,7 @@ public class NetFeederItem extends BaseMachineItem
 
         if (holder instanceof Player player) // 只喂食玩家（实际上是其他实体没有FoodData 2333）
         {
-            FeederMode feederMode = stack.getOrDefault(BDDataComponents.FEEDER_MODE, FeederMode.NORMAL);
+            FeederMode feederMode = settings(stack).get(BDMachineSettings.FEEDING.get());
             List<KeyAmount> filterSlots = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
 
             FoodData playerFoodState = player.getFoodData();
@@ -93,11 +98,10 @@ public class NetFeederItem extends BaseMachineItem
                 KeyAmount foodCache = null;
                 for (KeyAmount filter : filterSlots)
                 {
-                    for (KeyAmount storedStack : storage.getStorage())
+                    // 只查与过滤项同种的变体，由存储的模糊匹配索引给出
+                    for (KeyAmount storedStack : storage.getFuzzyMatches(filter.key()))
                     {
-                        // isSame会在最后变为引用比较，所以无需担心，这个比较即使对于大存储来说也非常迅速
                         if (storedStack.key() instanceof ItemStackKey itemStackKey
-                                && itemStackKey.isSame(filter.key())
                                 && itemStackKey.getReadOnlyStack().getFoodProperties(player) != null)
                         {
                             foodCache = new KeyAmount(storedStack.key(), 1);
@@ -106,34 +110,27 @@ public class NetFeederItem extends BaseMachineItem
                     }
                 }
 
-                if (foodCache != null)
+                if (foodCache != null && foodCache.key() instanceof ItemStackKey foodKey)
                 {
-                    KeyAmount foodToFeed = storage.extract(foodCache.key(), foodCache.amount(), false, false);
-                    if (!foodToFeed.isEmpty() && foodToFeed.key() instanceof ItemStackKey foodKey)
+                    ItemStack foodStack = foodKey.copyStackWithCount(foodCache.amount());
+                    Item foodItem = foodStack.getItem();
+                    FoodProperties foodProperties = foodItem.getFoodProperties(foodStack, player);
+                    // 先对饱食度和饱和度进行判断，合适才从网络取出
+                    if (foodProperties != null
+                            && ((feederMode == FeederMode.SATURATION_KEEP && foodProperties.saturation() > 0)
+                            || (feederMode != FeederMode.SATURATION_KEEP && foodProperties.nutrition() > 0))
+                            && !storage.extract(foodKey, foodCache.amount(), false, false).isEmpty())
                     {
-                        ItemStack foodStack = foodKey.copyStackWithCount(foodCache.amount());
-                        Item foodItem = foodStack.getItem();
-                        FoodProperties foodProperties = foodItem.getFoodProperties(foodStack, player);
-                        // 实际执行效果前对饱食度和饱和度进行二次判断
-                        if (foodProperties != null)
+                        ItemStack remaining = EventHooks.onItemUseFinish(player, foodStack.copy(), 0, foodItem.finishUsingItem(foodStack, level, player));
+                        if (!remaining.isEmpty())
                         {
-                            if ((feederMode == FeederMode.SATURATION_KEEP && foodProperties.saturation() > 0)
-                                    || (feederMode != FeederMode.SATURATION_KEEP && foodProperties.nutrition() > 0))
+                            // 剩余堆叠插送回去
+                            KeyAmount remainingAgain = storage.insert(new ItemStackKey(remaining), remaining.getCount(), false);
+                            if (!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
                             {
-                                ItemStack remaining = EventHooks.onItemUseFinish(player, foodStack.copy(), 0, foodItem.finishUsingItem(foodStack, level, player));
-                                if (!remaining.isEmpty())
-                                {
-                                    // 剩余堆叠插送回去
-                                    KeyAmount remainingAgain = storage.insert(new ItemStackKey(remaining), remaining.getCount(), false);
-                                    if (!remainingAgain.isEmpty()) //防止某些带NBT物品改变NBT导致存储的种类不够用
-                                    {
-                                        player.drop((ItemStack) remainingAgain.toStack(), false);
-                                    }
-                                }
-                                return;
+                                player.drop((ItemStack) remainingAgain.toStack(), false);
                             }
                         }
-                        storage.insert(foodToFeed.key(), foodToFeed.amount(), false); // 如果没能步入食用，则在此处将堆叠插回
                     }
                 }
 

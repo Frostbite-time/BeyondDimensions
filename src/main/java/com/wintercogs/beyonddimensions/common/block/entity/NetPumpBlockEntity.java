@@ -7,17 +7,22 @@ import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandl
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
+import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
+import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.common.machine.FilterMode;
 import com.wintercogs.beyonddimensions.common.menu.NetPumpMenu;
+import com.wintercogs.beyonddimensions.util.ResourceTransfer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.MenuProvider;
@@ -50,7 +55,37 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
         }
     };
 
-    public FilterMode filterMode = FilterMode.BLACK;
+    private static final String FILTERS = "filters";
+
+    @Override
+    public MachineType machineType()
+    {
+        return BDMachineTypes.NET_PUMP.get();
+    }
+
+    public FilterMode filterMode()
+    {
+        return setting(BDMachineSettings.FILTER.get());
+    }
+
+    /**
+     * 配置卡连同过滤槽一起复制
+     */
+    @Override
+    public void exportConfig(CompoundTag config, HolderLookup.Provider registries)
+    {
+        super.exportConfig(config, registries);
+        config.put(FILTERS, filterSlots.serializeNBT(registries));
+    }
+
+    @Override
+    public void applyConfig(CompoundTag config, HolderLookup.Provider registries)
+    {
+        super.applyConfig(config, registries);
+        if (config.contains(FILTERS, Tag.TAG_COMPOUND))
+            filterSlots.deserializeNBT(registries, config.getCompound(FILTERS));
+        setChanged();
+    }
 
     public NetPumpBlockEntity(BlockPos pos, BlockState blockState)
     {
@@ -119,11 +154,13 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
                             if (net != null)
                             {
                                 UnifiedStorage storage = net.getUnifiedStorage();
-
-                                long canInsert = ka.amount() - storage.insert(ka.key(), ka.amount(), true).amount();
-                                canInsert = Math.min(canInsert, ka.amount());
-                                long extract = stackHandlerWrapper.extract(slot, canInsert, false);
-                                net.getUnifiedStorage().insert(ka.key(), extract, false);
+                                int index = slot;
+                                // 先模拟对方能抽出多少、网络能收下多少，再只抽出收得下的数量
+                                ResourceTransfer.move(ka.key(), ka.amount(),
+                                        (key, n, simulate) -> new KeyAmount(key, stackHandlerWrapper.extract(index, n, simulate)),
+                                        (key, n, simulate) -> new KeyAmount(key, n - stackHandlerWrapper.insert(index, new KeyAmount(key, n).toStack(), simulate)),
+                                        offer -> offer.amount() - storage.insert(offer.key(), offer.amount(), true).amount(),
+                                        taken -> storage.insert(taken.key(), taken.amount(), false).amount());
                             }
                         }
                     }
@@ -133,7 +170,7 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
 
     private boolean matchesFilter(IStackKey<?> otherStack)
     {
-        switch (filterMode)
+        switch (filterMode())
         {
             case BLACK ->
             {
@@ -179,7 +216,6 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     {
         super.loadAdditional(tag, registries);
         filterSlots.deserializeNBT(registries, tag.getCompound("filter_slots"));
-        filterMode = FilterMode.valueOf(tag.getString("filter_type"));
     }
 
     @Override
@@ -194,7 +230,6 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     {
         super.saveAdditional(tag, registries);
         tag.put("filter_slots", filterSlots.serializeNBT(registries));
-        tag.putString("filter_type", filterMode.name());
     }
 
     @Override
