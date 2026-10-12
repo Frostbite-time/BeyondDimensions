@@ -10,10 +10,6 @@ import com.wintercogs.beyonddimensions.api.storage.key.ErrorData;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
-import com.wintercogs.beyonddimensions.common.init.BDItems;
-import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -22,7 +18,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -566,11 +561,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         long add = Math.max(0L, amount);
         if (add == 0L) return new KeyAmount(key, 0L);
 
-        if (key instanceof ItemStackKey itemKey && itemKey.getSource() == BDItems.MATTER_COMPRESS_BALL.get())
-        {
-            return unzipMatterBall(itemKey, add, simulate);
-        }
-
         long current = storage.getOrDefault(key, 0L);
         boolean needNewSlot = (current == 0L) && !posMap.containsKey(key);
         if (needNewSlot && slotIndex.size() >= slotMaxSize)
@@ -596,80 +586,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             onContentChanged(key, actual, true);
         }
         return new KeyAmount(key, leftover);
-    }
-
-    protected KeyAmount unzipMatterBall(ItemStackKey ballKey, long ballCount, boolean simulate)
-    {
-        ItemStack ballStack = ballKey.copyStackWithCount(ballCount);
-        if (ballStack.isEmpty() || !(ballStack.getItem() instanceof MatterCompressionBall))
-        {
-            return new KeyAmount(ballKey, ballCount);
-        }
-        List<KeyAmount> contents = ballStack.getOrDefault(BDDataComponents.ISTACK_SLOTS, new ArrayList<>());
-        if (contents.isEmpty()) return new KeyAmount(ballKey, 0L);
-
-        final Map<IStackKey<?>, Long> needMap = new HashMap<>();
-        try
-        {
-            for (KeyAmount entry : contents)
-            {
-                if (entry.isEmpty()) continue;
-                long scaled = Math.multiplyExact(entry.amount(), ballCount);
-                needMap.merge(entry.key(), scaled, Math::addExact);
-            }
-        }
-        catch (ArithmeticException e)
-        {
-            return new KeyAmount(ballKey, ballCount);
-        }
-
-        int freeSlots = Math.max(0, slotMaxSize - slotIndex.size());
-        int newKeysNeeded = 0;
-        for (Map.Entry<IStackKey<?>, Long> e : needMap.entrySet())
-        {
-            IStackKey<?> k = e.getKey();
-            long need = e.getValue();
-            long current = storage.getOrDefault(k, 0L);
-            boolean isNew = (current == 0L) && !posMap.containsKey(k);
-            if (isNew && ++newKeysNeeded > freeSlots) return new KeyAmount(ballKey, ballCount);
-            long room = (slotCapacity <= current) ? 0L : (slotCapacity - current);
-            if (need > room) return new KeyAmount(ballKey, ballCount);
-        }
-
-        if (simulate) return new KeyAmount(ballKey, 0L);
-
-        final ArrayList<KeyAmount> applied = new ArrayList<>();
-        for (KeyAmount entry : contents)
-        {
-            if (entry.isEmpty()) continue;
-            long scaled;
-            try
-            {
-                scaled = Math.multiplyExact(entry.amount(), ballCount);
-            }
-            catch (ArithmeticException e)
-            {
-                for (int i = applied.size() - 1; i >= 0; i--)
-                {
-                    KeyAmount a = applied.get(i);
-                    extract(a.key(), a.amount(), false, false);
-                }
-                return new KeyAmount(ballKey, ballCount);
-            }
-            KeyAmount leftover = insert(entry.key(), scaled, false);
-            long ok = scaled - leftover.amount();
-            if (ok > 0L) applied.add(new KeyAmount(entry.key(), ok));
-            if (leftover.amount() > 0L)
-            {
-                for (int i = applied.size() - 1; i >= 0; i--)
-                {
-                    KeyAmount a = applied.get(i);
-                    extract(a.key(), a.amount(), false, false);
-                }
-                return new KeyAmount(ballKey, ballCount);
-            }
-        }
-        return new KeyAmount(ballKey, 0L);
     }
 
     private @NotNull KeyAmount extractByKey(IStackKey<?> key, long count, boolean simulate)

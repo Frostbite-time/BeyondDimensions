@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.api.dimensionnet;
 
-import com.wintercogs.beyonddimensions.api.dimensionnet.helper.UnifiedStorageBeforeExtractHandler;
-import com.wintercogs.beyonddimensions.api.dimensionnet.helper.UnifiedStorageBeforeInsertHandler;
+import com.wintercogs.beyonddimensions.api.dimensionnet.rule.UnifiedStorageRules;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
@@ -11,16 +10,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.function.Predicate;
 
 
 /**
  * 维度网络的统一存储：
  * - 策略采用“到0即删除”（继承 UnorderedStackHandlerRemoveZero）
  * - 在 onChange() 时对接 DimensionsNet.setDirty()，再广播变更（调用 super.onChange()）
+ * - 资源进出都经过 {@link UnifiedStorageRules}：规则只给出计划，这里在一次事务里算完，接收的整单位一起提交，
+ * 余量总是调用方交来的那种资源
  * - 注意：此存储仅用于维度网络，维度网络也仅使用此存储，以便存放一些维度网络专用特性
  */
 public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
 {
+    // 规则计算计划期间，同一线程不允许真正改动任何统一存储
+    private static final ThreadLocal<int[]> PLANNING = ThreadLocal.withInitial(() -> new int[1]);
 
     /**
      * 对应的维度网络，仅用于持久化脏标记
@@ -86,19 +90,41 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
     @Override
     public @NotNull KeyAmount insert(IStackKey<?> key, long amount, boolean simulate)
     {
-        KeyAmount input = new KeyAmount(Objects.requireNonNullElse(key, EmptyStackKey.INSTANCE), amount);
+        return insert(key, amount, simulate, null);
+    }
 
-        var info = UnifiedStorageBeforeInsertHandler.onBeforeInsert(input, net);
-
-        if (info.cancel())
-            return input;
-
-        KeyAmount adjusted = info.beforeInsert();
-
-        if (adjusted.isEmpty())
-            return adjusted;
-
-        return super.insert(adjusted.key(), adjusted.amount(), simulate);
+    /**
+     * 插入，并且只接收最终加入网络的每种资源都满足 admits 的部分，规则转换出的资源同样要满足
+     *
+     * @param admits null 表示不限
+     * @return 余量，总是传入的那种资源
+     */
+    public @NotNull KeyAmount insert(IStackKey<?> key, long amount, boolean simulate, @Nullable Predicate<IStackKey<?>> admits)
+    {
+        if (!simulate)
+            checkNotPlanning();
+        if (key == null || key.isEmpty() || amount <= 0L)
+            return new KeyAmount(Objects.requireNonNullElse(key, EmptyStackKey.INSTANCE), Math.max(0L, amount));
+        // 没有网络的空存储不走规则，免得销毁类规则在没有网络时吞掉东西
+        if (net == null || !StorageTransaction.hasInsertRule(key))
+        {
+            if (admits != null && !admits.test(key))
+                return new KeyAmount(key, amount);
+            return super.insert(key, amount, simulate);
+        }
+        StorageTransaction transaction = new StorageTransaction(this, admits);
+        long accepted;
+        try
+        {
+            accepted = transaction.insert(key, amount);
+        }
+        catch (StorageTransaction.RuleFailed failed)
+        {
+            return new KeyAmount(key, amount);
+        }
+        if (!simulate)
+            transaction.commit();
+        return new KeyAmount(key, amount - accepted);
     }
 
     @Override
@@ -114,22 +140,34 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
         return extract(stack.key(), amount, simulate, false);
     }
 
+    /**
+     * 交出的总是网络里现成的资源；模糊匹配时先定下数量最多的变体，规则看到的就是它
+     */
     @Override
     public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy)
     {
-        KeyAmount input = new KeyAmount(Objects.requireNonNullElse(key, EmptyStackKey.INSTANCE), amount);
-
-        var info = UnifiedStorageBeforeExtractHandler.onBeforeExtract(input, net);
-
-        if (info.cancel())
-            return new KeyAmount(input.key(), 0);
-
-        KeyAmount adjusted = info.beforeExtract();
-
-        if (adjusted.isEmpty())
-            return adjusted;
-
-        return super.extract(adjusted.key(), adjusted.amount(), simulate, fuzzy);
+        if (!simulate)
+            checkNotPlanning();
+        if (key == null || amount <= 0L)
+            return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
+        IStackKey<?> target = fuzzy ? mostAbundantVariant(key) : key;
+        if (target == null)
+            return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
+        if (net == null || !StorageTransaction.hasExtractRule(target))
+            return super.extract(target, amount, simulate, false);
+        StorageTransaction transaction = new StorageTransaction(this, null);
+        long delivered;
+        try
+        {
+            delivered = transaction.extract(target, amount);
+        }
+        catch (StorageTransaction.RuleFailed failed)
+        {
+            return new KeyAmount(target, 0L);
+        }
+        if (!simulate)
+            transaction.commit();
+        return new KeyAmount(target, delivered);
     }
 
     @Override
@@ -140,6 +178,50 @@ public class UnifiedStorage extends UnorderedStackHandlerRemoveZero
             return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
 
         return extract(key.get(), amount, simulate, false);
+    }
+
+    /* ---------- 供事务使用 ---------- */
+
+    static void beginPlanning()
+    {
+        PLANNING.get()[0]++;
+    }
+
+    static void endPlanning()
+    {
+        PLANNING.get()[0]--;
+    }
+
+    private static void checkNotPlanning()
+    {
+        if (PLANNING.get()[0] > 0)
+            throw new IllegalStateException("A storage rule tried to modify a network storage while planning; put the change in its plan instead");
+    }
+
+    long storedAmount(IStackKey<?> key)
+    {
+        return storage.getOrDefault(key, 0L);
+    }
+
+    int slotsInUse()
+    {
+        return slotIndex.size();
+    }
+
+    /**
+     * 不经过规则加入，返回没放下的数量
+     */
+    long addWithoutRules(IStackKey<?> key, long amount)
+    {
+        return super.insert(key, amount, false).amount();
+    }
+
+    /**
+     * 不经过规则扣除，返回扣除的数量
+     */
+    long removeWithoutRules(IStackKey<?> key, long amount)
+    {
+        return super.extract(key, amount, false, false).amount();
     }
 
 }

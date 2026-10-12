@@ -1,7 +1,11 @@
 package com.wintercogs.beyonddimensions.common.item;
 
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
+import com.wintercogs.beyonddimensions.api.dimensionnet.rule.InsertPlan;
+import com.wintercogs.beyonddimensions.api.dimensionnet.rule.UnifiedStorageRules;
+import com.wintercogs.beyonddimensions.api.ids.BDItemIds;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
@@ -16,13 +20,56 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MatterCompressionBall extends Item
 {
     public MatterCompressionBall(Properties properties)
     {
         super(properties.stacksTo(1));
+    }
+
+    /**
+     * 物质球进入维度网络时拆成内容物，球里的球一并拆开；空球直接吞掉
+     */
+    public static void registerStorageRule()
+    {
+        UnifiedStorageRules.insertMatching(BeyondDimensions.makeId(BDItemIds.MATTER_COMPRESS_BALL), MatterCompressionBall::isBall, request -> {
+            Map<IStackKey<?>, Long> contents = new LinkedHashMap<>();
+            try
+            {
+                collectContents((ItemStackKey) request.key(), 1L, contents);
+            }
+            catch (ArithmeticException overflow)
+            {
+                return InsertPlan.reject();
+            }
+            InsertPlan plan = InsertPlan.convert(1L);
+            contents.forEach(plan::add);
+            return plan;
+        });
+    }
+
+    private static boolean isBall(IStackKey<?> key)
+    {
+        return key instanceof ItemStackKey itemKey && itemKey.getSource() instanceof MatterCompressionBall;
+    }
+
+    private static void collectContents(ItemStackKey ball, long count, Map<IStackKey<?>, Long> out)
+    {
+        List<KeyAmount> entries = ball.getReadOnlyStack().getOrDefault(BDDataComponents.ISTACK_SLOTS, List.of());
+        for (KeyAmount entry : entries)
+        {
+            if (entry == null || entry.isEmpty())
+                continue;
+            long amount = Math.multiplyExact(entry.amount(), count);
+            if (isBall(entry.key()))
+                collectContents((ItemStackKey) entry.key(), amount, out);
+            else
+                out.merge(entry.key(), amount, Math::addExact);
+        }
     }
 
     @Override

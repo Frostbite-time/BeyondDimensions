@@ -8,10 +8,7 @@ import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
-import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
@@ -19,9 +16,8 @@ import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.item.ItemStack;
 
-import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * 网络接口：方块，以及 Create 动态结构里的接口
@@ -104,6 +100,10 @@ public interface NetInterfaceAccess extends Machine
     static boolean transferToNet(DimensionsNet net, StackHandler stackHandler, StackHandler fakeStackHandler, int slotCount)
     {
         if (net == null) return false;
+        // 配置禁止的资源大类按最终进入网络的资源判断，规则转换出的资源同样受限
+        Predicate<IStackKey<?>> admits = ServerConfigRuntime.hasInterfaceInputTypeRestrictions()
+                ? key -> !ServerConfigRuntime.isInterfaceInputTypeBlocked(key.getTypeId())
+                : null;
         boolean changed = false;
         for (int i = 0; i < slotCount; i++)
         {
@@ -111,48 +111,17 @@ public interface NetInterfaceAccess extends Machine
             if (!flag.isEmpty() && flag.key().isSameTypeSameComponents(stackHandler.getStackBySlot(i).key()))
                 continue;
             KeyAmount stack = stackHandler.getStackBySlot(i);
-            if (!stack.isEmpty() && !isInputTypeBlocked(stack.key(), 0))
+            if (stack.isEmpty())
+                continue;
+            // 余量总是格子里的资源：先放进网络，再从格子里扣掉放进去的数量
+            long accepted = stack.amount() - net.getUnifiedStorage().insert(stack.key(), stack.amount(), false, admits).amount();
+            if (accepted > 0)
             {
-                KeyAmount extracted = stackHandler.extract(i, stack.amount(), false);
-                KeyAmount remaining = net.getUnifiedStorage().insert(extracted.key(), extracted.amount(), false);
-                if (!remaining.isEmpty())
-                    stackHandler.insert(i, remaining.key(), remaining.amount(), false);
-                changed |= remaining.amount() != extracted.amount();
+                stackHandler.extract(i, accepted, false);
+                changed = true;
             }
         }
         return changed;
-    }
-
-    private static boolean isInputTypeBlocked(IStackKey<?> key, int depth)
-    {
-        if (!ServerConfigRuntime.hasInterfaceInputTypeRestrictions())
-        {
-            return false;
-        }
-        if (ServerConfigRuntime.isInterfaceInputTypeBlocked(key.getTypeId()))
-        {
-            return true;
-        }
-        if (!(key instanceof ItemStackKey itemKey)
-                || !(itemKey.getSource() instanceof MatterCompressionBall))
-        {
-            return false;
-        }
-        if (depth >= 16)
-        {
-            return true;
-        }
-
-        ItemStack ballStack = itemKey.copyStack();
-        List<KeyAmount> contents = ballStack.getOrDefault(BDDataComponents.ISTACK_SLOTS, List.of());
-        for (KeyAmount content : contents)
-        {
-            if (content != null && !content.isEmpty() && isInputTypeBlocked(content.key(), depth + 1))
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     static boolean transferFromNet(DimensionsNet net, StackHandler stackHandler, StackHandler fakeStackHandler, int slotCount, FuzzyMode fuzzyMode)

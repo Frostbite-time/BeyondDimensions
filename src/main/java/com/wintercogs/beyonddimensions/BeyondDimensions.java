@@ -23,6 +23,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.*;
+import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -66,6 +67,9 @@ public class BeyondDimensions
         BDAttachments.register(modEventBus);
         BDMachineSettings.register(modEventBus);
         BDMachineTypes.register(modEventBus);
+
+        // 物质球进入维度网络时拆成内容物
+        MatterCompressionBall.registerStorageRule();
 
         // 分发集成模块
         IntegrationManager.bootstrapCommon(modEventBus, NeoForge.EVENT_BUS);
