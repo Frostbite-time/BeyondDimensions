@@ -21,6 +21,9 @@ object BdPages {
     /** 界面自带的设置页；没有设置页的界面没有这一页 */
     const val SETTINGS = "settings"
 
+    /** 界面自带的面配置页；没有面配置的界面没有这一页 */
+    const val SIDES = "sides"
+
     sealed interface Placement
 
     private data object First : Placement

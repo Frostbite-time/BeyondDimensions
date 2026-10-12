@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.api.registry.BDRegistries
 import com.wintercogs.beyonddimensions.client.ui.kit.BdModeSetting
 import com.wintercogs.beyonddimensions.client.ui.kit.BdSettingRow
 import com.wintercogs.beyonddimensions.client.ui.kit.BdToggle
+import com.wintercogs.beyonddimensions.common.machine.MachineSides
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync
 import net.minecraft.resources.ResourceLocation
 
@@ -31,13 +32,13 @@ sealed interface MachineSettingControl {
 /** 设置页上的一次修改：编辑声明里的第 [index] 个值，开关的 0 为打开、1 为关闭 */
 data class MachineSettingPick(val setting: ResourceLocation, val index: Int)
 
-/** 按菜单同步来的设置生成设置页的各行；在游戏线程调用 */
+/** 按菜单同步来的设置生成设置页的各行，面配置页上的设置除外；在游戏线程调用 */
 fun machineSettingRows(snapshot: MachineSettingsSync.Snapshot): List<MachineSettingRow> {
     val type = snapshot.machineType() ?: return emptyList()
-    return type.settings().mapNotNull { settingRow(it, snapshot) }
+    return type.settings().filterNot { MachineSides.onSidePage(type, it.setting()) }.mapNotNull { settingRow(it, snapshot) }
 }
 
-private fun <T> settingRow(entry: MachineType.Entry<T>, snapshot: MachineSettingsSync.Snapshot): MachineSettingRow? {
+internal fun <T> settingRow(entry: MachineType.Entry<T>, snapshot: MachineSettingsSync.Snapshot): MachineSettingRow? {
     val setting = entry.setting()
     val id = BDRegistries.MACHINE_SETTINGS.getKey(setting) ?: return null
     val value = snapshot.settings().get(setting)

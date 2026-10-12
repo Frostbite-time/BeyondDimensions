@@ -2,7 +2,11 @@ package com.wintercogs.beyonddimensions.integration.module.create;
 
 import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
 import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
+import com.simibubi.create.api.contraption.transformable.MovedBlockTransformerRegistries;
+import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
+import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
+import com.wintercogs.beyonddimensions.common.machine.MachineSides;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -61,6 +65,15 @@ public class CreateModule implements IIntegrationModule
             MovementBehaviour.REGISTRY.register(
                     BDBlocks.NET_INTERFACE.get(),
                     new NetInterfaceMovementBehaviour()
+            );
+            // 动态结构旋转或镜像后放回时，接口的面配置随之转动
+            MovedBlockTransformerRegistries.BLOCK_ENTITY_TRANSFORMERS.register(
+                    BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
+                    (be, transform) -> {
+                        if (be instanceof NetInterfaceBlockEntity netInterface)
+                            netInterface.setSettings(MachineSides.transformed(netInterface.settings(),
+                                    side -> transform.rotateFacing(transform.mirrorFacing(side))));
+                    }
             );
         });
     }

@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
 import com.wintercogs.beyonddimensions.common.machine.HopperRangeMode;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -21,11 +22,11 @@ public final class BDMachineTypes
     public static final DeferredRegister<MachineType> TYPES = DeferredRegister.create(BDRegistries.MACHINE_TYPE_KEY, BDConstants.MODID);
 
     public static final DeferredHolder<MachineType, MachineType> NET_INTERFACE = TYPES.register("net_interface",
-            () -> MachineType.builder(BDBlocks.NET_INTERFACE)
-                    .setting(BDMachineSettings.POP, entry -> entry.hint("ui.beyonddimensions.interface.pop.hint")
-                            .lockedHint("tooltip.button.beyonddimensions.popmode_mounted_unavailable"))
+            () -> withSides(MachineType.builder(BDBlocks.NET_INTERFACE)
                     .setting(BDMachineSettings.REDSTONE)
-                    .setting(BDMachineSettings.FUZZY)
+                    .setting(BDMachineSettings.FUZZY))
+                    .setting(BDMachineSettings.POP, entry -> entry.label("ui.beyonddimensions.side.push")
+                            .hint("ui.beyonddimensions.interface.pop.hint"))
                     .build());
 
     public static final DeferredHolder<MachineType, MachineType> NET_HOPPER = TYPES.register("net_hopper",
@@ -98,6 +99,14 @@ public final class BDMachineTypes
                 .setting(BDMachineSettings.SORT)
                 .setting(BDMachineSettings.REDSTONE)
                 .build();
+    }
+
+    // 六个面的输入输出，在面配置页上编辑；主动弹出另外加在后面
+    private static MachineType.Builder withSides(MachineType.Builder builder)
+    {
+        for (Direction side : Direction.values())
+            builder.setting(BDMachineSettings.side(side));
+        return builder;
     }
 
     // 各机器的实际收集范围不同，选项说明按机器给出

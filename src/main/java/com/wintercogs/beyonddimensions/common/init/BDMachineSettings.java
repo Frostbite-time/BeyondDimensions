@@ -5,12 +5,15 @@ import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
 import com.wintercogs.beyonddimensions.common.machine.*;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.Tag;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.wintercogs.beyonddimensions.api.machine.MachineSetting.lowercase;
@@ -23,6 +26,7 @@ public final class BDMachineSettings
     public static final DeferredRegister<MachineSetting<?>> SETTINGS = DeferredRegister.create(BDRegistries.MACHINE_SETTING_KEY, BDConstants.MODID);
 
     private static final String MACHINE = "ui.beyonddimensions.machine.";
+    private static final String SIDE = "ui.beyonddimensions.side.";
     private static final List<String> RANGE_NAMES = List.of("lowest", "low", "mid", "high", "highest", "chunk");
 
     /**
@@ -172,8 +176,37 @@ public final class BDMachineSettings
                             target -> MACHINE + "pickup_target." + lowercase(target) + ".hint", false))
                     .build());
 
+    /**
+     * 六个面各自的输入输出，见 {@link MachineSides}
+     */
+    private static final Map<Direction, DeferredHolder<MachineSetting<?>, MachineSetting<SideMode>>> SIDES = new EnumMap<>(Direction.class);
+
+    static
+    {
+        for (Direction side : Direction.values())
+            SIDES.put(side, SETTINGS.register("side_" + side.getName(), () -> sideSetting(side)));
+    }
+
     private BDMachineSettings()
     {
+    }
+
+    /**
+     * 朝 side 的那一面的输入输出
+     */
+    public static DeferredHolder<MachineSetting<?>, MachineSetting<SideMode>> side(Direction side)
+    {
+        return SIDES.get(side);
+    }
+
+    private static MachineSetting<SideMode> sideSetting(Direction side)
+    {
+        return MachineSetting.enumeration(SideMode.class, SideMode.BOTH)
+                .label(SIDE + side.getName())
+                .editor(new SettingEditor.Choice<>(List.of(SideMode.values()),
+                        mode -> SIDE + "mode." + lowercase(mode),
+                        mode -> SIDE + "mode." + lowercase(mode) + ".hint", false))
+                .build();
     }
 
     /**

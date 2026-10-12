@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
+import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu
 import dev.compixel.forge.item.ItemIcon
@@ -28,7 +29,16 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
     private val playerSlots = menu.playerSlotIds()
     private val text = InterfaceText(title.string)
 
-    override fun snapshot() = InterfaceState(machineSettingRows(container.machineSettings().snapshot()))
+    // 动态结构里的接口没有固定的相邻方块，没有面配置页
+    private val sides =
+        (menu.access as? NetInterfaceBlockEntity)?.let { be ->
+            be.level?.let { MachineSidesView(it, be.blockPos, inventory.player.direction) }
+        }
+
+    override fun snapshot(): InterfaceState {
+        val settings = container.machineSettings().snapshot()
+        return InterfaceState(machineSettingRows(settings), sides?.snapshot(settings))
+    }
 
     override fun handle(action: InterfaceAction) {
         when (action) {
@@ -41,12 +51,16 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
         val colors = Bd.colors
         val page = rememberPageSelection()
         val settingsOpen = page.settings
+        val sidesOpen = page.current == BdPages.SIDES
         BdScreenFrame {
             BdTabbedWindow(
                 Modifier.width(SLOT_WINDOW_WIDTH.dp).then(slots.areaModifier()),
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 rail = {
                     BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                    if (sides != null) {
+                        BdRailTab(text.sides, BdGlyphs.Sides, selected = sidesOpen) { page.open(BdPages.SIDES) }
+                    }
                     InjectedTabs(pages, page)
                     Spacer(Modifier.weight(1f))
                     BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
@@ -68,6 +82,11 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
                     Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
+                if (sides != null) {
+                    BdTabPage(sidesOpen) {
+                        state.sides?.let { BdMachineSides(it, sidesOpen) { pick -> send(InterfaceAction.Setting(pick)) } }
+                    }
+                }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
@@ -78,7 +97,8 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
     }
 }
 
-data class InterfaceState(val settings: List<MachineSettingRow>)
+/** [sides] 为面配置页的状态，动态结构里的接口或设置还没同步到时为 null */
+data class InterfaceState(val settings: List<MachineSettingRow>, val sides: SidePageState?)
 
 sealed interface InterfaceAction {
     data class Setting(val pick: MachineSettingPick) : InterfaceAction
@@ -86,6 +106,7 @@ sealed interface InterfaceAction {
 
 private class InterfaceText(val title: String) {
     val settings = tr("ui.beyonddimensions.machine.settings")
+    val sides = tr("ui.beyonddimensions.side.title")
     val inventory = tr("ui.beyonddimensions.inventory")
     val slots = tr("ui.beyonddimensions.interface.slots")
 }

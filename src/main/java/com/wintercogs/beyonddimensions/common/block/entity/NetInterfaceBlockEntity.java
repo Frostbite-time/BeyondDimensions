@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.api.storage.handler.impl.RestrictedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
@@ -16,6 +17,7 @@ import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
+import com.wintercogs.beyonddimensions.common.machine.MachineSides;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceAccess;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
@@ -40,7 +42,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements MenuProvider, NetInterfaceAccess
@@ -71,13 +75,17 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         }
     };
 
+    // 只许放入、只许取出的面各用一个视图
+    private final StackHandler inputOnly = new RestrictedStackHandler(stackHandler, true, false);
+    private final StackHandler outputOnly = new RestrictedStackHandler(stackHandler, false, true);
+
     private final Direction[] directions = Direction.values();
 
     private int redstoneLevel = 0;
 
-    // 存储相邻方块的能力
-    // 按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
-    private final Multimap<ResourceLocation, Object> handlerCache = ArrayListMultimap.create();
+    // 存储相邻方块的能力，按面分开
+    // 每个面按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
+    private final Map<Direction, Multimap<ResourceLocation, Object>> handlerCache = new EnumMap<>(Direction.class);
     private boolean needsCapabilityUpdate = true;
 
     public StackHandler getStackHandler()
@@ -172,17 +180,17 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
             BlockEntity neighbor = level.getBlockEntity(targetPos);
             if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
             {
-
+                Multimap<ResourceLocation, Object> handlers = ArrayListMultimap.create();
                 CapabilityHelper.BlockCapabilityMap.forEach(
                         (resourceLocation, cap) -> {
                             Object handler = level.getCapability(cap, targetPos, dir.getOpposite());
                             if (handler != null)
                             {
-                                handlerCache.put(resourceLocation, handler);
+                                handlers.put(resourceLocation, handler);
                             }
                         }
                 );
-
+                handlerCache.put(dir, handlers);
             }
         }
 
@@ -201,6 +209,25 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         setNeedsCapabilityUpdate();
     }
 
+    @Override
+    protected void onSettingsChanged()
+    {
+        super.onSettingsChanged();
+        // 面配置可能变了，相邻方块要重新取能力
+        invalidateCapabilities();
+    }
+
+    // 按面限制：只许放入的面取不出，只许取出的面放不进
+    private StackHandler storageFor(@Nullable Direction side)
+    {
+        return switch (MachineSides.mode(this, side))
+        {
+            case INPUT -> inputOnly;
+            case OUTPUT -> outputOnly;
+            case BOTH -> stackHandler;
+        };
+    }
+
     //--- 能力注册 (通过事件) ---
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
@@ -214,10 +241,11 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                             (be, side) -> {
                                 if (handler != null)
                                 {
+                                    StackHandler storage = be.storageFor(side);
                                     if (handler.isContextual())
-                                        return handler.apply(be.stackHandler, new CapCtx(be.level, be.getBlockPos(), be));
+                                        return handler.apply(storage, new CapCtx(be.level, be.getBlockPos(), be));
                                     else
-                                        return handler.apply(be.stackHandler, null);
+                                        return handler.apply(storage, null);
                                 }
                                 return null; // 如果handler是null，那么必然返回null
                             }
@@ -239,8 +267,16 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
     public void popStack()
     {
+        // 只送往允许输出的面
+        handlerCache.forEach((dir, handlers) -> {
+            if (MachineSides.mode(this, dir).allowsOutput())
+                popStack(handlers);
+        });
+    }
 
-        handlerCache.forEach(
+    private void popStack(Multimap<ResourceLocation, Object> handlers)
+    {
+        handlers.forEach(
                 (typeId, handler) -> {
                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
 

@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
+import com.wintercogs.beyonddimensions.common.machine.MachineSides;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
@@ -66,7 +67,10 @@ public interface NetInterfaceAccess extends Machine
         setSetting(BDMachineSettings.REDSTONE.get(), controlMode);
     }
 
-    default boolean canConfigurePopMode()
+    /**
+     * 能否修改面配置与主动弹出；动态结构里的接口没有固定的相邻方块，不能修改
+     */
+    default boolean canConfigureSides()
     {
         return true;
     }
@@ -74,7 +78,7 @@ public interface NetInterfaceAccess extends Machine
     @Override
     default boolean isSettingAvailable(MachineSetting<?> setting)
     {
-        return setting != BDMachineSettings.POP.get() || canConfigurePopMode();
+        return canConfigureSides() || !MachineSides.onSidePage(machineType(), setting);
     }
 
     @Override

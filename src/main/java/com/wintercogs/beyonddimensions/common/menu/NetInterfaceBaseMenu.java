@@ -237,7 +237,7 @@ public class NetInterfaceBaseMenu extends BDBaseMenu implements MachineMenu
         }
 
         @Override
-        public boolean canConfigurePopMode()
+        public boolean canConfigureSides()
         {
             return false;
         }

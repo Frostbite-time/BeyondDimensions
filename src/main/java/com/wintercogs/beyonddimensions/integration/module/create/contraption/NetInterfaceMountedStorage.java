@@ -136,9 +136,9 @@ public class NetInterfaceMountedStorage extends MountedItemStorage implements Ne
             this.settings = settings;
     }
 
-    // 动态结构里的接口不能推送缓存
+    // 动态结构里的接口不能推送缓存，也没有固定的相邻方块
     @Override
-    public boolean canConfigurePopMode()
+    public boolean canConfigureSides()
     {
         return false;
     }
