@@ -499,7 +499,7 @@ public class DimensionsNet extends SavedData
      * 这种挂接数据的值；网络还没有时以默认值建立
      */
     @SuppressWarnings("unchecked")
-    public <T> T getData(NetDataType<T> type)
+    public <T> T getOrCreateData(NetDataType<T> type)
     {
         Object value = attachments.get(type);
         if (value == null)
@@ -545,7 +545,7 @@ public class DimensionsNet extends SavedData
      */
     public <T> T updateData(NetDataType<T> type, UnaryOperator<T> update)
     {
-        T next = Objects.requireNonNull(update.apply(getData(type)));
+        T next = Objects.requireNonNull(update.apply(getOrCreateData(type)));
         attachments.put(type, next);
         setDirty();
         return next;
