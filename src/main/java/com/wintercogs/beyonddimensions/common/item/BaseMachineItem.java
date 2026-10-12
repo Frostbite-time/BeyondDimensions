@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.common.item;
 
-import com.wintercogs.beyonddimensions.api.machine.BDMachineSettings;
 import com.wintercogs.beyonddimensions.api.machine.MachineItem;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
+import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.machine.BaseMachine;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import net.minecraft.core.HolderLookup;

@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.api.machine.BDMachineSettings;
 import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;

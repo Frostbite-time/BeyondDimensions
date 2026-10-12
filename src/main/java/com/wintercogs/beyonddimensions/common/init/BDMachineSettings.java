@@ -1,8 +1,9 @@
-package com.wintercogs.beyonddimensions.api.machine;
+package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
+import com.wintercogs.beyonddimensions.api.machine.SettingEditor;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
-import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.machine.*;
 import net.minecraft.nbt.Tag;
 import net.neoforged.bus.api.IEventBus;

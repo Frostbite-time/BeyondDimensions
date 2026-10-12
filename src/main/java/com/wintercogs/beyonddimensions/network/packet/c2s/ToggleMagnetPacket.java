@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.network.packet.c2s;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
-import com.wintercogs.beyonddimensions.api.machine.BDMachineSettings;
 import com.wintercogs.beyonddimensions.api.machine.Machine;
 import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
 import com.wintercogs.beyonddimensions.client.gui.MagnetToggleType;
+import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
 import com.wintercogs.beyonddimensions.common.machine.HopperFluidMode;
 import com.wintercogs.beyonddimensions.common.machine.HopperItemMode;

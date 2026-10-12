@@ -1,6 +1,10 @@
 package com.wintercogs.beyonddimensions.common.block.entity;
 
-import com.wintercogs.beyonddimensions.api.machine.*;
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
+import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
+import com.wintercogs.beyonddimensions.api.machine.MachineType;
+import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.machine.BaseMachine;
 import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
 import net.minecraft.core.BlockPos;
