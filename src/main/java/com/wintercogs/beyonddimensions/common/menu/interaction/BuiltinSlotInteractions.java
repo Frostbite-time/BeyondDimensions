@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu.interaction;
 
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
-import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
@@ -24,17 +23,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.ToLongFunction;
 import java.util.stream.IntStream;
 
 /**
- * BD 内置的槽位交互，按尝试顺序注册。除标记槽外，按住 Shift 的点击只走转移
+ * BD 内置的槽位交互，按尝试顺序注册。除标记槽与手上拿着容器外，按住 Shift 的点击只走转移
  */
 final class BuiltinSlotInteractions
 {
@@ -54,11 +53,6 @@ final class BuiltinSlotInteractions
         add("move_all_stored", c -> c.space() && c.isLeft() && c.kind() == Kind.STORAGE && !c.clicked().isEmpty(),
                 BuiltinSlotInteractions::moveAll);
         add("move_all_ordered", c -> c.space() && c.isLeft() && c.kind() == Kind.ORDERED, BuiltinSlotInteractions::moveAllOrdered);
-        // Shift 左键双击：背包（含快捷栏）或这份有序存储里，与第一下点到的完全相同的全部资源
-        add("quick_move_same_vanilla", c -> c.shift() && c.doubleClick() && c.isLeft() && inPlayerInventory(c),
-                BuiltinSlotInteractions::quickMoveSameVanilla);
-        add("quick_move_same_ordered", c -> c.shift() && c.doubleClick() && c.isLeft() && c.kind() == Kind.ORDERED,
-                BuiltinSlotInteractions::quickMoveSameOrdered);
         // 有序槽里是同一种物品时先合并，桶、经验棒与容器也一样
         add("ordered_merge", c -> click(c) && c.kind() == Kind.ORDERED && !c.clicked().isEmpty() && !c.carried().isEmpty()
                         && (c.isLeft() || c.isRight())
@@ -66,17 +60,17 @@ final class BuiltinSlotInteractions
                 BuiltinSlotInteractions::insertCarried);
         add("xp_rod", c -> click(c) && c.carried().getItem() instanceof XpExchangeItem && !c.isLeft(),
                 BuiltinSlotInteractions::xpRod);
-        add("bucket_fill", c -> containerClick(c) && c.carried().getItem() == Items.BUCKET
-                        && c.clicked().key() instanceof FluidStackKey,
-                BuiltinSlotInteractions::fillBucket);
-        add("bucket_empty", c -> containerClick(c) && isBucket(c.carried()) && c.carried().getItem() != Items.BUCKET,
-                BuiltinSlotInteractions::emptyBucket);
-        add("container_fill", c -> containerClick(c) && !isBucket(c.carried()) && !c.clicked().isEmpty(),
+        // 手上拿着容器（桶、储罐、电池、背包等）：左键把被点击的资源装进去，右键把里面的东西排进存储。
+        // 普通点击转移一个原版堆叠，按住 Shift 一直转移到装满、排空或存储不再收为止
+        add("container_fill", c -> holdsContainer(c) && c.isLeft() && !c.clicked().isEmpty() && fillable(c),
                 BuiltinSlotInteractions::fillContainer);
-        // 有序槽里已有资源时，容器只从这一格抽取，不往里倒
-        add("container_empty", c -> containerClick(c) && !isBucket(c.carried())
-                        && (c.kind() == Kind.STORAGE || c.clicked().isEmpty()),
+        add("container_empty", c -> holdsContainer(c) && c.isRight() && drainable(c),
                 BuiltinSlotInteractions::emptyContainer);
+        // Shift 左键双击：背包（含快捷栏）或这份有序存储里，与第一下点到的完全相同的全部资源
+        add("quick_move_same_vanilla", c -> c.shift() && c.doubleClick() && c.isLeft() && inPlayerInventory(c),
+                BuiltinSlotInteractions::quickMoveSameVanilla);
+        add("quick_move_same_ordered", c -> c.shift() && c.doubleClick() && c.isLeft() && c.kind() == Kind.ORDERED,
+                BuiltinSlotInteractions::quickMoveSameOrdered);
         add("take", c -> click(c) && c.carried().isEmpty() && (c.isLeft() || c.isRight())
                         && c.clicked().key() instanceof ItemStackKey && c.slot().mayPickup(c.player()),
                 BuiltinSlotInteractions::take);
@@ -126,16 +120,10 @@ final class BuiltinSlotInteractions
         return c.isResource() && !c.shift();
     }
 
-    // 拿着单个、未列入黑名单的物品右键：桶与带能力的容器
-    private static boolean containerClick(SlotClick c)
+    // 在资源槽上拿着未列入黑名单的物品；它能不能当容器用，由装入与排出各自判断
+    private static boolean holdsContainer(SlotClick c)
     {
-        return click(c) && c.isRight() && c.carried().getCount() == 1
-                && !ItemCapInteractionBlackList.isInBlackList(c.carried().getItem());
-    }
-
-    private static boolean isBucket(ItemStack stack)
-    {
-        return stack.getItem() instanceof BucketItem || stack.getItem() instanceof MilkBucketItem;
+        return c.isResource() && !c.carried().isEmpty() && !ItemCapInteractionBlackList.isInBlackList(c.carried().getItem());
     }
 
     // —— 标记槽 ——
@@ -202,66 +190,115 @@ final class BuiltinSlotInteractions
         return new FluidStackKey(new FluidStack(BDFluids.XP_FLUID.source(), 1));
     }
 
-    // —— 桶 ——
+    // —— 手上的容器 ——
 
-    // 空桶装满一桶被点击的流体，取不出整桶就不装
-    private static boolean fillBucket(SlotClick c)
+    // 按住 Shift 时一次点击最多转移的轮数；取之不尽的容器（如创造模式储罐）也会在这里停下
+    private static final int MAX_CONTAINER_ROUNDS = 256;
+
+    // 一轮转移的结果：转移的数量，以及转移后的容器（装满的桶会变成另一种物品）
+    private record Round(long moved, ItemStack container)
     {
-        FluidStackKey fluid = (FluidStackKey) c.clicked().key();
-        Item filled = fluid.getSource().getBucket();
-        if (filled == Items.AIR || c.extract(fluid, 1000, true).amount() < 1000)
-            return false;
-        c.extract(fluid, 1000, false);
-        c.setCarried(new ItemStack(filled));
-        return true;
     }
 
-    // 满桶整桶倒入，放不下整桶就不倒
-    private static boolean emptyBucket(SlotClick c)
+    // 手上的容器能不能装下被点击的资源
+    private static boolean fillable(SlotClick c)
     {
-        Object handler = c.carried().getCapability(Capabilities.FluidHandler.ITEM);
-        if (handler == null)
-            return false;
-        FluidHandlerWrapper bucket = new FluidHandlerWrapper(handler);
-        if (bucket.getSlots() <= 0)
-            return false;
-        FluidStack contents = bucket.getStackInSlot(0);
-        if (contents.isEmpty())
-            return false;
-        FluidStackKey key = new FluidStackKey(contents);
-        int amount = BDMath.clampLongToInt(Math.min(contents.getAmount(), key.getVanillaMaxStackSize()));
-        if (!c.insert(key, amount, true).isEmpty())
-            return false;
-        c.insert(key, amount, false);
-        c.setCarried(new ItemStack(Items.BUCKET));
-        return true;
+        IStackKey<?> key = c.clicked().key();
+        IStackHandlerWrapper<Object> handler = wrapper(c.carried().copyWithCount(1), key.getTypeId(), CapabilityHelper.ItemCapabilityMap.get(key.getTypeId()));
+        long amount = roundLimit(key.getVanillaMaxStackSize());
+        return handler != null && handler.getSlots() > 0 && handler.insert(key.copyStackWithCount(amount), true) < amount;
     }
 
-    // —— 带能力的容器 ——
+    // 手上的容器里有没有东西
+    private static boolean drainable(SlotClick c)
+    {
+        ItemStack single = c.carried().copyWithCount(1);
+        for (var entry : CapabilityHelper.ItemCapabilityMap.entrySet())
+        {
+            IStackHandlerWrapper<Object> handler = wrapper(single, entry.getKey(), entry.getValue());
+            if (handler == null)
+                continue;
+            for (int index = 0; index < handler.getSlots(); index++)
+            {
+                KeyAmount contents = StackKeyRegistry.getType(entry.getKey()).fromStackObject(handler.getStackInSlot(index));
+                if (contents != null && !contents.isEmpty())
+                    return true;
+            }
+        }
+        return false;
+    }
 
-    // 把被点击的资源抽进手上的容器，最多一个原版堆叠
+    // 左键：把被点击的资源装进手上的容器
     private static boolean fillContainer(SlotClick c)
     {
         IStackKey<?> key = c.clicked().key();
-        IStackHandlerWrapper<Object> handler = wrapper(c.carried(), key.getTypeId(), CapabilityHelper.ItemCapabilityMap.get(key.getTypeId()));
-        if (handler == null || handler.getSlots() <= 0)
-            return false;
-        int amount = BDMath.clampLongToInt(Math.min(c.clicked().amount(), key.getVanillaMaxStackSize()));
-        KeyAmount moved = extractInto(c, key, amount,
-                offer -> offer.amount() - handler.insert(offer.key().copyStackWithCount(offer.amount()), true),
-                taken -> handler.insert(taken.key().copyStackWithCount(taken.amount()), false));
-        if (moved.isEmpty())
-            return false;
-        setContainer(c, handler);
+        long amount = roundLimit(c.shift() ? Long.MAX_VALUE : key.getVanillaMaxStackSize());
+        for (int round = 0; round < rounds(c); round++)
+            if (useOneContainer(c, single -> fillRound(c, single, key, amount)) <= 0)
+                break;
         return true;
     }
 
-    // 把手上容器的第一份内容物倒出来，最多一个原版堆叠
+    // 右键：把手上容器里的东西排进被点击的存储
     private static boolean emptyContainer(SlotClick c)
+    {
+        for (int round = 0; round < rounds(c); round++)
+            if (useOneContainer(c, single -> drainRound(c, single, c.shift())) <= 0)
+                break;
+        return true;
+    }
+
+    private static int rounds(SlotClick c)
+    {
+        return c.shift() ? MAX_CONTAINER_ROUNDS : 1;
+    }
+
+    // 堆叠对象里的数量多为 int，一轮不超过这个范围
+    private static long roundLimit(long amount)
+    {
+        return Math.min(amount, Integer.MAX_VALUE);
+    }
+
+    // 手上是一叠容器时每轮只处理一个：处理后的容器回到手上，手上还有剩余时放进背包。返回这一轮转移的数量
+    private static long useOneContainer(SlotClick c, Function<ItemStack, Round> round)
+    {
+        // 每一轮都读菜单上此刻的手持物品，上一轮可能已经换过
+        ItemStack carried = c.menu().getCarried();
+        if (carried.isEmpty())
+            return 0L;
+        Round done = round.apply(carried.copyWithCount(1));
+        if (done.moved() <= 0L)
+            return 0L;
+        if (carried.getCount() == 1)
+        {
+            c.setCarried(done.container().copy());
+        }
+        else
+        {
+            c.setCarried(carried.copyWithCount(carried.getCount() - 1));
+            c.player().getInventory().placeItemBackInInventory(done.container().copy());
+        }
+        return done.moved();
+    }
+
+    // 先模拟存储能给多少、容器能收多少，再只取出收得下的数量
+    private static Round fillRound(SlotClick c, ItemStack single, IStackKey<?> key, long amount)
+    {
+        IStackHandlerWrapper<Object> handler = wrapper(single, key.getTypeId(), CapabilityHelper.ItemCapabilityMap.get(key.getTypeId()));
+        if (handler == null || handler.getSlots() <= 0)
+            return new Round(0L, single);
+        KeyAmount moved = extractInto(c, key, amount,
+                offer -> offer.amount() - handler.insert(offer.key().copyStackWithCount(offer.amount()), true),
+                taken -> handler.insert(taken.key().copyStackWithCount(taken.amount()), false));
+        return new Round(moved.amount(), handler.getContainer().orElse(single));
+    }
+
+    // 排出容器里第一份存储收得下的内容物：先模拟容器能倒出多少、存储能收下多少，再只倒出收得下的数量
+    private static Round drainRound(SlotClick c, ItemStack single, boolean all)
     {
         for (var entry : CapabilityHelper.ItemCapabilityMap.entrySet())
         {
-            IStackHandlerWrapper<Object> handler = wrapper(c.carried(), entry.getKey(), entry.getValue());
+            IStackHandlerWrapper<Object> handler = wrapper(single, entry.getKey(), entry.getValue());
             if (handler == null)
                 continue;
             for (int index = 0; index < handler.getSlots(); index++)
@@ -269,32 +306,23 @@ final class BuiltinSlotInteractions
                 KeyAmount contents = StackKeyRegistry.getType(entry.getKey()).fromStackObject(handler.getStackInSlot(index));
                 if (contents == null || contents.isEmpty())
                     continue;
-                int amount = BDMath.clampLongToInt(Math.min(contents.amount(), contents.key().getVanillaMaxStackSize()));
+                long amount = roundLimit(all ? Long.MAX_VALUE : Math.min(contents.amount(), contents.key().getVanillaMaxStackSize()));
                 int slot = index;
-                // 先模拟容器能倒出多少、存储能收下多少，再只倒出收得下的数量
                 KeyAmount moved = ResourceTransfer.move(contents.key(), amount,
                         (key, n, simulate) -> new KeyAmount(key, handler.extract(slot, n, simulate)),
                         (key, n, simulate) -> new KeyAmount(key, n - handler.insert(slot, key.copyStackWithCount(n), simulate)),
                         offer -> offer.amount() - c.insert(offer.key(), offer.amount(), true).amount(),
                         taken -> c.insert(taken.key(), taken.amount(), false).amount());
-                if (moved.isEmpty())
-                    continue;
-                setContainer(c, handler);
-                return true;
+                if (!moved.isEmpty())
+                    return new Round(moved.amount(), handler.getContainer().orElse(single));
             }
         }
-        return false;
+        return new Round(0L, single);
     }
 
     private static IStackHandlerWrapper<Object> wrapper(ItemStack stack, ResourceLocation typeId, net.neoforged.neoforge.capabilities.ItemCapability<?, Void> capability)
     {
         return ResourceContents.wrapper(stack, typeId, capability);
-    }
-
-    // 容器改动后的物品可能是新的实例（例如装满的桶），重新放回手上
-    private static void setContainer(SlotClick c, IStackHandlerWrapper<Object> handler)
-    {
-        handler.getContainer().ifPresentOrElse(container -> c.setCarried(container.copy()), () -> c.setCarried(c.carried().copy()));
     }
 
     // —— 取出、存入、交换 ——
