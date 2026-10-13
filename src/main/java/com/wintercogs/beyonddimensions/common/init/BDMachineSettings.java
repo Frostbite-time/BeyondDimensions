@@ -233,9 +233,7 @@ public final class BDMachineSettings
     {
         return MachineSetting.enumeration(SideMode.class, SideMode.BOTH)
                 .label(SIDE + side.getName())
-                .editor(new SettingEditor.Choice<>(List.of(SideMode.values()),
-                        mode -> SIDE + "mode." + lowercase(mode),
-                        mode -> SIDE + "mode." + lowercase(mode) + ".hint", false))
+                .editor(SettingEditor.choice(List.of(SideMode.values()), mode -> SIDE + "mode." + lowercase(mode)))
                 .build();
     }
 

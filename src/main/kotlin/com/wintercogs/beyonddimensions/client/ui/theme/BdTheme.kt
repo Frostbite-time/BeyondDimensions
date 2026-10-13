@@ -111,6 +111,11 @@ object BdColors : ColorSchema("beyonddimensions") {
     val flameMiddle = color("flameMiddle", "flame", Color(0xFFF5A524))
     val flameCore = color("flameCore", "flame", Color(0xFFFFE680))
 
+    /** 面配置里输入、输出与双向的面；禁用的面与普通的格子一样 */
+    val sideInput = color("sideInput", "sides", Color(0xFFFF6464))
+    val sideOutput = color("sideOutput", "sides", Color(0xFF4C8DFF))
+    val sideBoth = color("sideBoth", "sides", Color(0xFFB46CFF))
+
     val accentSoft = derived("accentSoft", "accent", accent) { it[accent].copy(alpha = .15f) }
 
     /** 标志渐变的起点 */

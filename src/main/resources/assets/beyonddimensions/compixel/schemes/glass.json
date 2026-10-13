@@ -26,6 +26,9 @@
     "pill": "#00000000",
     "flameOuter": "#E2531F",
     "flameMiddle": "#F5A524",
-    "flameCore": "#FFE680"
+    "flameCore": "#FFE680",
+    "sideInput": "#FF6464",
+    "sideOutput": "#4C8DFF",
+    "sideBoth": "#B46CFF"
   }
 }

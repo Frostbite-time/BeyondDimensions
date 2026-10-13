@@ -53,14 +53,11 @@ data class SideFace(
     val neighbor: ItemIcon?,
 )
 
-/** 一种模式的名称与说明 */
-data class SideModeText(val label: String, val hint: String?)
-
 data class SidePageState(
     val title: String,
-    val hint: String,
     val faces: List<SideFace>,
-    val modes: Map<SideMode, SideModeText>,
+    /** 各模式的名称 */
+    val modes: Map<SideMode, String>,
     /** 主动弹出的开关，机器类型没有时为 null */
     val push: MachineSettingRow?,
 )
@@ -81,7 +78,6 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos, faci
         )
     private val neighbors = EnumMap<Direction, Neighbor>(Direction::class.java)
     val title = tr("ui.beyonddimensions.side.title")
-    private val hint = tr("ui.beyonddimensions.side.hint")
 
     private class Neighbor(val block: Block, val icon: ItemIcon?, val name: String?)
 
@@ -89,17 +85,13 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos, faci
     fun snapshot(snapshot: MachineSettingsSync.Snapshot): SidePageState? {
         val type = snapshot.machineType() ?: return null
         if (!MachineSides.hasSides(type)) return null
-        val modes = EnumMap<SideMode, SideModeText>(SideMode::class.java)
+        val modes = EnumMap<SideMode, String>(SideMode::class.java)
         val faces =
             layout.map { (side, column, row) ->
                 val setting = MachineSides.face(side)
                 val entry = checkNotNull(type.entry(setting))
                 val editor = entry.editor() as SettingEditor.Choice<SideMode>
-                for (mode in editor.options()) {
-                    modes.getOrPut(mode) {
-                        SideModeText(tr(editor.optionLabel().apply(mode)), editor.optionHint()?.apply(mode)?.let(::tr))
-                    }
-                }
+                for (mode in editor.options()) modes.getOrPut(mode) { tr(editor.optionLabel().apply(mode)) }
                 val neighbor = neighbor(side)
                 val direction = tr(entry.labelKey())
                 SideFace(
@@ -114,7 +106,7 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos, faci
                 )
             }
         val push = type.entry(BDMachineSettings.POP.get())?.let { settingRow(it, snapshot) }
-        return SidePageState(title, hint, faces, modes.toMap(), push)
+        return SidePageState(title, faces, modes.toMap(), push)
     }
 
     private fun neighbor(side: Direction): Neighbor {
@@ -135,10 +127,9 @@ fun machineSidesView(be: BlockEntity?, player: Player): MachineSidesView? =
 private const val CELL = 20
 private const val CELL_GAP = 2
 
-/** 面配置页：六个面排成展开的方块，左键换到下一种模式、右键换到上一种；下面是图例、说明与主动弹出 */
+/** 面配置页：六个面排成展开的方块，左键换到下一种模式、右键换到上一种；下面是图例与主动弹出 */
 @Composable
 fun BdMachineSides(state: SidePageState, shown: Boolean, onPick: (MachineSettingPick) -> Unit) {
-    val colors = Bd.colors
     BdSectionLabel(state.title)
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Box(Modifier.size((3 * CELL + 2 * CELL_GAP).dp, (3 * CELL + 2 * CELL_GAP).dp)) {
@@ -154,18 +145,17 @@ fun BdMachineSides(state: SidePageState, shown: Boolean, onPick: (MachineSetting
         }
     }
     Legend(state.modes)
-    OreText(state.hint, color = colors[BdColors.faint], style = Bd.caption)
     state.push?.let { BdMachineSettings(listOf(it), shown, onPick) }
 }
 
-/** 输入用强调色，输出用警示色，禁用用危险色；双向是默认，与普通的格子一样 */
+/** 输入、输出与双向各有配色；禁用的面与普通的格子一样 */
 @Composable
 private fun sideColor(mode: SideMode?): Color? =
     when (mode) {
-        SideMode.INPUT -> Bd.colors[BdColors.accent]
-        SideMode.OUTPUT -> Bd.colors[BdColors.warning]
-        SideMode.NONE -> Bd.colors[BdColors.danger]
-        SideMode.BOTH,
+        SideMode.INPUT -> Bd.colors[BdColors.sideInput]
+        SideMode.OUTPUT -> Bd.colors[BdColors.sideOutput]
+        SideMode.BOTH -> Bd.colors[BdColors.sideBoth]
+        SideMode.NONE,
         null -> null
     }
 
@@ -193,7 +183,7 @@ fun BoxScope.BdSidesPage(
 @Composable
 private fun FaceCell(
     face: SideFace,
-    modes: Map<SideMode, SideModeText>,
+    modes: Map<SideMode, String>,
     shown: Boolean,
     onPick: (MachineSettingPick) -> Unit,
     modifier: Modifier,
@@ -207,10 +197,7 @@ private fun FaceCell(
     BdTooltip(
         {
             OreText(face.title, color = colors[BdColors.text], style = Bd.caption)
-            mode?.let(modes::get)?.let { text ->
-                OreText(text.label, color = tint ?: colors[BdColors.text], style = Bd.caption)
-                text.hint?.let { OreText(it, color = colors[BdColors.muted], style = Bd.caption) }
-            }
+            mode?.let(modes::get)?.let { OreText(it, color = tint ?: colors[BdColors.text], style = Bd.caption) }
         },
         modifier,
     ) {
@@ -245,14 +232,14 @@ private fun FaceCell(
 /** 图例：每种模式一个与格子同样配色的小方块，一行放不下时折行 */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Legend(modes: Map<SideMode, SideModeText>) {
+private fun Legend(modes: Map<SideMode, String>) {
     val colors = Bd.colors
     FlowRow(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        for ((mode, text) in modes) {
+        for ((mode, label) in modes) {
             val tint = sideColor(mode)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
@@ -261,7 +248,7 @@ private fun Legend(modes: Map<SideMode, SideModeText>) {
                         .border(1.dp, tint ?: colors[BdColors.lineStrong])
                 )
                 Spacer(Modifier.width(3.dp))
-                OreText(text.label, color = colors[BdColors.muted], style = Bd.caption, maxLines = 1)
+                OreText(label, color = colors[BdColors.muted], style = Bd.caption, maxLines = 1)
             }
         }
     }
