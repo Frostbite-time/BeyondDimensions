@@ -1,10 +1,12 @@
 package com.wintercogs.beyonddimensions.common.machine;
 
 /**
- * 吸取的物品优先送到哪里，放不下的再送到另一处
+ * 吸取的物品送到哪里：只送一处，或者先送一处、放不下的再送另一处
  */
 public enum PickupTarget
 {
-    INVENTORY,
-    NETWORK
+    NETWORK_ONLY,
+    NETWORK_FIRST,
+    INVENTORY_FIRST,
+    INVENTORY_ONLY
 }

@@ -147,8 +147,9 @@ public class NetMagnetItem extends BaseMachineItem
                 ItemStackKey itemKey = new ItemStackKey(itemEntity.getItem());
                 if (matchesFilter(filterMode, filterSlots, itemKey))
                 {
+                    // 背包保留的物品只进背包，不管去向设成什么
                     boolean inventoryOnly = matchesFilter(inventoryKeepMode, inventoryKeepSlots, itemKey);
-                    pickUp(itemEntity, storage, player, target, inventoryOnly);
+                    pickUp(itemEntity, storage, player, inventoryOnly ? PickupTarget.INVENTORY_ONLY : target);
                 }
             }
         }
@@ -182,33 +183,39 @@ public class NetMagnetItem extends BaseMachineItem
     }
 
     /**
-     * 掉落物先送到优先的一处，放不下的再送到另一处，都放不下的留在地上。
-     * 只有玩家拿着时才能送进背包。背包保留的物品无论优先目标是什么都不送入网络
+     * 按去向收起掉落物：只送一处，或者先送一处、放不下的再送另一处，哪里都放不下的留在地上。
+     * 只有玩家拿着时才能送进背包
      */
-    private static void pickUp(ItemEntity itemEntity, UnifiedStorage storage, @Nullable Player player, PickupTarget target, boolean inventoryOnly)
+    private static void pickUp(ItemEntity itemEntity, UnifiedStorage storage, @Nullable Player player, PickupTarget target)
     {
         ItemStack original = itemEntity.getItem();
         ItemStack left = original.copy();
-        if (inventoryOnly)
+        // 背包只收过了拾取冷却的掉落物，刚扔出的东西不会马上飞回背包
+        boolean inventoryOpen = player != null && !itemEntity.hasPickUpDelay();
+        switch (target)
         {
-            if (player == null || itemEntity.hasPickUpDelay())
-                return;
-            left = intoInventory(player, left);
-        }
-        else if (target == PickupTarget.INVENTORY && player != null)
-        {
-            // 刚扔出的东西等拾取冷却过了再收，不然扔不出去
-            if (itemEntity.hasPickUpDelay())
-                return;
-            left = intoInventory(player, left);
-            left = intoNetwork(storage, left);
-        }
-        else
-        {
-            left = intoNetwork(storage, left);
-            // 背包只收过了拾取冷却的掉落物，刚扔出的东西不会马上飞回背包
-            if (player != null && !itemEntity.hasPickUpDelay())
+            case NETWORK_ONLY -> left = intoNetwork(storage, left);
+            case NETWORK_FIRST ->
+            {
+                left = intoNetwork(storage, left);
+                if (inventoryOpen)
+                    left = intoInventory(player, left);
+            }
+            case INVENTORY_FIRST ->
+            {
+                // 刚扔出的东西等拾取冷却过了再收，不然会被送进网络，扔不出去
+                if (player != null && !inventoryOpen)
+                    return;
+                if (inventoryOpen)
+                    left = intoInventory(player, left);
+                left = intoNetwork(storage, left);
+            }
+            case INVENTORY_ONLY ->
+            {
+                if (!inventoryOpen)
+                    return;
                 left = intoInventory(player, left);
+            }
         }
 
         int taken = original.getCount() - left.getCount();

@@ -166,14 +166,14 @@ public final class BDMachineSettings
                     .build());
 
     /**
-     * 磁铁吸取的物品优先送到哪里
+     * 磁铁吸取的物品送到哪里；默认只送网络，旧磁铁的去向不变
      */
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<PickupTarget>> PICKUP_TARGET = SETTINGS.register("pickup_target",
-            () -> MachineSetting.enumeration(PickupTarget.class, PickupTarget.NETWORK)
+            () -> MachineSetting.enumeration(PickupTarget.class, PickupTarget.NETWORK_ONLY)
                     .label(MACHINE + "pickup_target")
                     .editor(new SettingEditor.Choice<>(List.of(PickupTarget.values()),
                             target -> MACHINE + "pickup_target." + lowercase(target),
-                            target -> MACHINE + "pickup_target." + lowercase(target) + ".hint", false))
+                            target -> MACHINE + "pickup_target." + lowercase(target) + ".hint", true))
                     .build());
 
     /** 磁铁的背包保留过滤；默认只保留标记的物品，不影响旧磁铁的行为 */
