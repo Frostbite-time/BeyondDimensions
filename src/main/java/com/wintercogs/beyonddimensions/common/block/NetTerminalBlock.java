@@ -25,6 +25,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class NetTerminalBlock extends NetedBlock implements EntityBlock
 {
+    /**
+     * 终端贴着的那一面，屏幕朝反方向。屏幕朝上或朝下时 {@link FacingRule#TOP} 是屏幕顶边的朝向；
+     * 旧存档里的终端没有这个属性，读出时顶边朝南，与原来的样子一致
+     */
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
     // 定义6个方向的碰撞箱（单位：1/16方块）
@@ -40,27 +44,26 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
         super(properties
                 .noOcclusion()
                 .dynamicShape());
-        this.registerDefaultState(this.stateDefinition.any()
-                .setValue(FACING, Direction.NORTH));
+        registerDefaultState(FacingRule.ALL.defaultState(stateDefinition.any()));
     }
 
     // 注册方块状态属性
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
     {
-        builder.add(FACING);
+        FacingRule.ALL.addProperties(builder);
     }
 
     @Override
     public BlockState rotate(BlockState state, Rotation rot)
     {
-        return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
+        return FacingRule.ALL.rotate(state, rot);
     }
 
     @Override
     public BlockState mirror(BlockState state, Mirror mirror)
     {
-        return state.rotate(mirror.getRotation(state.getValue(FACING)));
+        return FacingRule.ALL.mirror(state, mirror);
     }
 
     @Override
@@ -84,13 +87,13 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
         };
     }
 
-    // 添加放置时自动设置朝向的逻辑
+    // 贴着点击的那个方块，屏幕朝外；放在地上或天花板上时屏幕在玩家看来是正的
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context)
     {
-        // 获取玩家看向的方向的反方向作为方块朝向
-        return this.defaultBlockState()
-                .setValue(FACING, context.getClickedFace().getOpposite());
+        Direction screen = context.getClickedFace();
+        BlockState state = defaultBlockState().setValue(FACING, screen.getOpposite());
+        return screen.getAxis().isVertical() ? state.setValue(FacingRule.TOP, FacingRule.topFor(screen, context)) : state;
     }
 
     @Override

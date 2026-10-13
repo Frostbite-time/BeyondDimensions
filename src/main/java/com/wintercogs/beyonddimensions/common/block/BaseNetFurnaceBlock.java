@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.common.block;
 
 import com.wintercogs.beyonddimensions.common.block.entity.BaseNetFurnaceBlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -24,10 +23,7 @@ public abstract class BaseNetFurnaceBlock extends SidedMachineBlock
     {
         super(properties.lightLevel(state -> state.getValue(LIT) ? 13 : 0));
 
-        this.registerDefaultState(
-                this.stateDefinition.any()
-                        .setValue(FACING, Direction.NORTH)
-                        .setValue(LIT, false));
+        registerDefaultState(facingRule().defaultState(stateDefinition.any()).setValue(LIT, false));
     }
 
     @Override

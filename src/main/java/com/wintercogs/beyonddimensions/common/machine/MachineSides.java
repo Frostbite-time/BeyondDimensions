@@ -4,17 +4,16 @@ import com.wintercogs.beyonddimensions.api.machine.Machine;
 import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
 import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
 import com.wintercogs.beyonddimensions.api.machine.MachineType;
-import com.wintercogs.beyonddimensions.common.block.SidedMachineBlock;
+import com.wintercogs.beyonddimensions.common.block.FacingRule;
 import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.machine.setting.SideMode;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * 机器的面配置：相对正面的六个面各一项 {@link SideMode} 设置，加上主动弹出（{@link BDMachineSettings#POP}）。
- * 机器类型列出了全部六个面才算有面配置，设置页把六个面合成一个展开图。正面由方块的朝向决定，见 {@link SidedMachineBlock}
+ * 机器类型列出了全部六个面才算有面配置，设置页把六个面合成一个展开图。各面按方块的朝向换算，见 {@link FacingRule}
  */
 public final class MachineSides
 {
@@ -54,21 +53,13 @@ public final class MachineSides
     }
 
     /**
-     * 机器方块的正面朝向；没有朝向的方块按朝北算
-     */
-    public static Direction front(BlockState state)
-    {
-        return state.getOptionalValue(SidedMachineBlock.FACING).orElse(Direction.NORTH);
-    }
-
-    /**
      * 朝 side 的那一面的输入输出；不分面的访问（side 为 null）不受限制
      */
     public static <T extends BlockEntity & Machine> SideMode mode(T machine, @Nullable Direction side)
     {
         if (side == null)
             return SideMode.BOTH;
-        return machine.setting(face(RelativeSide.of(front(machine.getBlockState()), side)));
+        return machine.setting(face(RelativeSide.of(FacingRule.orientation(machine.getBlockState()), side)));
     }
 
     /**

@@ -1,9 +1,11 @@
 package com.wintercogs.beyonddimensions.common.machine;
 
 import net.minecraft.core.Direction;
+import net.minecraft.core.FrontAndTop;
+import net.minecraft.core.Vec3i;
 
 /**
- * 机器方块相对正面的六个面。正面是水平方向，左右是站在正面前看过去的左右，顶面与底面总是朝上与朝下
+ * 机器方块相对正面与顶面的六个面；左右是站在正面前、头朝顶面看过去的左右
  */
 public enum RelativeSide
 {
@@ -15,34 +17,44 @@ public enum RelativeSide
     BOTTOM;
 
     /**
-     * 正面朝 front 时，朝 side 的那一面
+     * 方块朝向为 orientation 时，朝 side 的那一面
      */
-    public static RelativeSide of(Direction front, Direction side)
+    public static RelativeSide of(FrontAndTop orientation, Direction side)
     {
-        if (side == Direction.UP)
-            return TOP;
-        if (side == Direction.DOWN)
-            return BOTTOM;
+        Direction front = orientation.front();
+        Direction top = orientation.top();
         if (side == front)
             return FRONT;
         if (side == front.getOpposite())
             return BACK;
-        return side == front.getClockWise() ? LEFT : RIGHT;
+        if (side == top)
+            return TOP;
+        if (side == top.getOpposite())
+            return BOTTOM;
+        return side == left(front, top) ? LEFT : RIGHT;
     }
 
     /**
-     * 正面朝 front 时这一面的朝向
+     * 方块朝向为 orientation 时这一面的朝向
      */
-    public Direction direction(Direction front)
+    public Direction direction(FrontAndTop orientation)
     {
+        Direction front = orientation.front();
+        Direction top = orientation.top();
         return switch (this)
         {
             case FRONT -> front;
             case BACK -> front.getOpposite();
-            case LEFT -> front.getClockWise();
-            case RIGHT -> front.getCounterClockWise();
-            case TOP -> Direction.UP;
-            case BOTTOM -> Direction.DOWN;
+            case LEFT -> left(front, top);
+            case RIGHT -> left(front, top).getOpposite();
+            case TOP -> top;
+            case BOTTOM -> top.getOpposite();
         };
+    }
+
+    private static Direction left(Direction front, Direction top)
+    {
+        Vec3i left = front.getNormal().cross(top.getNormal());
+        return Direction.fromDelta(left.getX(), left.getY(), left.getZ());
     }
 }

@@ -1,15 +1,12 @@
 package com.wintercogs.beyonddimensions.common.block;
 
 import com.wintercogs.beyonddimensions.common.machine.MachineSides;
-import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -17,35 +14,41 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class SidedMachineBlock extends BaseMachineBlock
 {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-
     public SidedMachineBlock(Properties properties)
     {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+        registerDefaultState(facingRule().defaultState(stateDefinition.any()));
+    }
+
+    /**
+     * 正面能朝哪些方向；换成 {@link FacingRule#ALL} 后正面也能朝上朝下。方块构造时就会调用，只能返回常量
+     */
+    protected FacingRule facingRule()
+    {
+        return FacingRule.HORIZONTAL;
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
     {
-        builder.add(FACING);
+        facingRule().addProperties(builder);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context)
     {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+        return facingRule().placed(defaultBlockState(), context);
     }
 
     @Override
     public @NotNull BlockState rotate(BlockState state, Rotation rotation)
     {
-        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+        return facingRule().rotate(state, rotation);
     }
 
     @Override
     public @NotNull BlockState mirror(BlockState state, Mirror mirror)
     {
-        return state.rotate(mirror.getRotation(state.getValue(FACING)));
+        return facingRule().mirror(state, mirror);
     }
 }

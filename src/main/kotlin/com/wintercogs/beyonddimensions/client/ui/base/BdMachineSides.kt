@@ -19,6 +19,7 @@ import com.wintercogs.beyonddimensions.api.registry.BDRegistries
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
+import com.wintercogs.beyonddimensions.common.block.FacingRule
 import com.wintercogs.beyonddimensions.common.machine.MachineSides
 import com.wintercogs.beyonddimensions.common.machine.RelativeSide
 import com.wintercogs.beyonddimensions.common.machine.setting.SideMode
@@ -55,7 +56,7 @@ data class SideFace(
 data class SidesState(val faces: List<SideFace>, val modes: Map<SideMode, String>)
 
 /**
- * 生成设置页上的面配置，在游戏线程使用。展开图以方块的正面为准：正中是正面，左右是站在正面前看过去的左右，
+ * 生成设置页上的面配置，在游戏线程使用。展开图以方块的朝向为准：正中是正面，左右是站在正面前看过去的左右，
  * 左下角是背面，上下是顶面与底面。相邻方块变了才重新取图标
  */
 class MachineSidesView(private val level: Level, private val pos: BlockPos) {
@@ -68,7 +69,7 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos) {
     fun row(snapshot: MachineSettingsSync.Snapshot): MachineSettingRow? {
         val type = snapshot.machineType() ?: return null
         if (!MachineSides.hasSides(type)) return null
-        val front = MachineSides.front(level.getBlockState(pos))
+        val orientation = FacingRule.orientation(level.getBlockState(pos))
         val modes = EnumMap<SideMode, String>(SideMode::class.java)
         val faces =
             LAYOUT.map { (side, column, row) ->
@@ -76,7 +77,7 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos) {
                 val entry = checkNotNull(type.entry(setting))
                 val editor = entry.editor() as SettingEditor.Choice<SideMode>
                 for (mode in editor.options()) modes.getOrPut(mode) { tr(editor.optionLabel().apply(mode)) }
-                val neighbor = neighbor(side.direction(front))
+                val neighbor = neighbor(side.direction(orientation))
                 val name = tr(entry.labelKey())
                 SideFace(
                     checkNotNull(BDRegistries.MACHINE_SETTINGS.getKey(setting)),
