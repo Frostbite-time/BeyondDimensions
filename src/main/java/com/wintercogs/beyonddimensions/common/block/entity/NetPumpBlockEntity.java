@@ -16,6 +16,7 @@ import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.common.machine.FilterMode;
+import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.menu.NetPumpMenu;
 import com.wintercogs.beyonddimensions.util.ResourceTransfer;
 import net.minecraft.core.BlockPos;
@@ -170,31 +171,22 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
 
     private boolean matchesFilter(IStackKey<?> otherStack)
     {
-        switch (filterMode())
+        return switch (filterMode())
         {
-            case BLACK ->
-            {
-                for (KeyAmount stack : filterSlots.getStorage())
-                {
-                    if (stack.key().isSame(otherStack))
-                        return false;
-                }
-                return true;
-            }
-            case WHITE ->
-            {
-                for (KeyAmount stack : filterSlots.getStorage())
-                {
-                    if (stack.key().isSame(otherStack))
-                        return true;
-                }
-                return false;
-            }
-            case IGNORE ->
-            {
-                return true;
-            }
+            case BLACK -> !marked(otherStack);
+            case WHITE -> marked(otherStack);
+            case IGNORE -> true;
+        };
+    }
 
+    // 过滤槽里有没有标记这种资源；模糊匹配时只看种类，否则组件也要相同
+    private boolean marked(IStackKey<?> otherStack)
+    {
+        boolean fuzzy = setting(BDMachineSettings.FILTER_FUZZY.get()) == FuzzyMode.ENABLE;
+        for (KeyAmount stack : filterSlots.getStorage())
+        {
+            if (fuzzy ? stack.key().isSame(otherStack) : stack.key().isSameTypeSameComponents(otherStack))
+                return true;
         }
         return false;
     }

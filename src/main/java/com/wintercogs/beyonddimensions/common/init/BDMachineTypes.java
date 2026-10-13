@@ -41,6 +41,7 @@ public final class BDMachineTypes
     public static final DeferredHolder<MachineType, MachineType> NET_PUMP = TYPES.register("net_pump",
             () -> MachineType.builder(BDBlocks.NET_PUMP_BLOCK)
                     .setting(BDMachineSettings.FILTER)
+                    .setting(BDMachineSettings.FILTER_FUZZY)
                     .setting(BDMachineSettings.REDSTONE)
                     .build());
 

@@ -77,6 +77,16 @@ public final class BDMachineSettings
                     .build());
 
     /**
+     * 过滤槽是否按种类匹配、不比较组件；默认开启，过滤槽一直是这样匹配的
+     */
+    public static final DeferredHolder<MachineSetting<?>, MachineSetting<FuzzyMode>> FILTER_FUZZY = SETTINGS.register("filter_fuzzy",
+            () -> MachineSetting.enumeration(FuzzyMode.class, FuzzyMode.ENABLE)
+                    .label(MACHINE + "fuzzy")
+                    .hint(MACHINE + "fuzzy.hint")
+                    .editor(SettingEditor.toggle(FuzzyMode.ENABLE, FuzzyMode.DISABLE))
+                    .build());
+
+    /**
      * 过滤槽的用法：忽略、白名单或黑名单
      */
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<FilterMode>> FILTER = SETTINGS.register("filter",
