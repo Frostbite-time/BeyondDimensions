@@ -217,14 +217,15 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         invalidateCapabilities();
     }
 
-    // 按面限制：只许放入的面取不出，只许取出的面放不进
-    private StackHandler storageFor(@Nullable Direction side)
+    // 按面限制：只许放入的面取不出，只许取出的面放不进，禁用的面没有能力
+    private @Nullable StackHandler storageFor(@Nullable Direction side)
     {
         return switch (MachineSides.mode(this, side))
         {
             case INPUT -> inputOnly;
             case OUTPUT -> outputOnly;
             case BOTH -> stackHandler;
+            case NONE -> null;
         };
     }
 
@@ -239,15 +240,15 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                             (BlockCapability<? super Object, ? extends Direction>) directionBlockCapability,
                             BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                             (be, side) -> {
-                                if (handler != null)
+                                StackHandler storage = be.storageFor(side);
+                                if (handler != null && storage != null)
                                 {
-                                    StackHandler storage = be.storageFor(side);
                                     if (handler.isContextual())
                                         return handler.apply(storage, new CapCtx(be.level, be.getBlockPos(), be));
                                     else
                                         return handler.apply(storage, null);
                                 }
-                                return null; // 如果handler是null，那么必然返回null
+                                return null; // 没有对应的处理器，或者这一面被禁用
                             }
                     );
                 }

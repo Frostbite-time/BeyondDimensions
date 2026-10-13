@@ -359,6 +359,8 @@
   "ui.beyonddimensions.side.mode.output.hint": "Nachbarn können über diese Seite nur entnehmen; Ausstoßen geht auch hierhin",
   "ui.beyonddimensions.side.mode.both": "Beides",
   "ui.beyonddimensions.side.mode.both.hint": "Nachbarn können einfügen und entnehmen; Ausstoßen geht auch hierhin",
+  "ui.beyonddimensions.side.mode.none": "Deaktiviert",
+  "ui.beyonddimensions.side.mode.none.hint": "Nachbarn können weder einfügen noch entnehmen",
   "ui.beyonddimensions.side.push": "Ausstoßen",
   "ui.beyonddimensions.furnace.input": "Ein",
   "ui.beyonddimensions.furnace.fuel": "Brenn",

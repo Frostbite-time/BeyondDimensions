@@ -359,6 +359,8 @@
   "ui.beyonddimensions.side.mode.output.hint": "Blocos vizinhos só podem extrair por esta face; Expelir também envia para cá",
   "ui.beyonddimensions.side.mode.both": "Ambos",
   "ui.beyonddimensions.side.mode.both.hint": "Blocos vizinhos podem inserir e extrair; Expelir também envia para cá",
+  "ui.beyonddimensions.side.mode.none": "Desativada",
+  "ui.beyonddimensions.side.mode.none.hint": "Blocos vizinhos não podem inserir nem extrair",
   "ui.beyonddimensions.side.push": "Expelir",
   "ui.beyonddimensions.furnace.input": "Ent.",
   "ui.beyonddimensions.furnace.fuel": "Comb.",

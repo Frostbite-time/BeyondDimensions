@@ -359,6 +359,8 @@
   "ui.beyonddimensions.side.mode.output.hint": "Neighbors can only extract; push out also sends here",
   "ui.beyonddimensions.side.mode.both": "Both",
   "ui.beyonddimensions.side.mode.both.hint": "Neighbors can insert and extract; push out also sends here",
+  "ui.beyonddimensions.side.mode.none": "Disabled",
+  "ui.beyonddimensions.side.mode.none.hint": "Neighbors can neither insert nor extract",
   "ui.beyonddimensions.side.push": "Push out",
   "ui.beyonddimensions.furnace.input": "In",
   "ui.beyonddimensions.furnace.fuel": "Fuel",

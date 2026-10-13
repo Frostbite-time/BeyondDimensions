@@ -1,13 +1,15 @@
 package com.wintercogs.beyonddimensions.common.machine;
 
 /**
- * 机器一个面的输入输出：相邻方块能否从这一面放入、取出，主动弹出只送往能取出的面
+ * 机器一个面的输入输出：相邻方块能否从这一面放入、取出，主动弹出只送往能取出的面。
+ * 禁用的面既不能放入也不能取出，不向相邻方块提供能力
  */
 public enum SideMode
 {
     INPUT(true, false),
     OUTPUT(false, true),
-    BOTH(true, true);
+    BOTH(true, true),
+    NONE(false, false);
 
     private final boolean input;
     private final boolean output;

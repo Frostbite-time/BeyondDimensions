@@ -153,12 +153,13 @@ fun BdMachineSides(state: SidePageState, shown: Boolean, onPick: (MachineSetting
     state.push?.let { BdMachineSettings(listOf(it), shown, onPick) }
 }
 
-/** 输入用强调色，输出用警示色；双向是默认，与普通的格子一样 */
+/** 输入用强调色，输出用警示色，禁用用危险色；双向是默认，与普通的格子一样 */
 @Composable
 private fun sideColor(mode: SideMode?): Color? =
     when (mode) {
         SideMode.INPUT -> Bd.colors[BdColors.accent]
         SideMode.OUTPUT -> Bd.colors[BdColors.warning]
+        SideMode.NONE -> Bd.colors[BdColors.danger]
         SideMode.BOTH,
         null -> null
     }

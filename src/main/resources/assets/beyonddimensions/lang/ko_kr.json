@@ -359,6 +359,8 @@
   "ui.beyonddimensions.side.mode.output.hint": "인접 블록은 이 면에서 꺼내기만 할 수 있으며, 밀어내기도 이쪽으로 보냄",
   "ui.beyonddimensions.side.mode.both": "양방향",
   "ui.beyonddimensions.side.mode.both.hint": "인접 블록이 넣고 꺼낼 수 있으며, 밀어내기도 이쪽으로 보냄",
+  "ui.beyonddimensions.side.mode.none": "비활성",
+  "ui.beyonddimensions.side.mode.none.hint": "인접 블록은 넣을 수도 꺼낼 수도 없음",
   "ui.beyonddimensions.side.push": "밀어내기",
   "ui.beyonddimensions.furnace.input": "입력",
   "ui.beyonddimensions.furnace.fuel": "연료",

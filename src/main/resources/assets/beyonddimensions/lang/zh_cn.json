@@ -359,6 +359,8 @@
   "ui.beyonddimensions.side.mode.output.hint": "相邻方块只能取出，主动弹出也送往这里",
   "ui.beyonddimensions.side.mode.both": "双向",
   "ui.beyonddimensions.side.mode.both.hint": "相邻方块可以放入和取出，主动弹出也送往这里",
+  "ui.beyonddimensions.side.mode.none": "禁用",
+  "ui.beyonddimensions.side.mode.none.hint": "相邻方块不能放入也不能取出",
   "ui.beyonddimensions.side.push": "主动弹出",
   "ui.beyonddimensions.furnace.input": "输入",
   "ui.beyonddimensions.furnace.fuel": "燃料",

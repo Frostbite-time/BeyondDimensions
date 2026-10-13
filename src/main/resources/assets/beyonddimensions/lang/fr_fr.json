@@ -359,6 +359,8 @@
   "ui.beyonddimensions.side.mode.output.hint": "Les blocs voisins peuvent seulement extraire par cette face ; l'expulsion envoie aussi ici",
   "ui.beyonddimensions.side.mode.both": "Les deux",
   "ui.beyonddimensions.side.mode.both.hint": "Les blocs voisins peuvent insérer et extraire ; l'expulsion envoie aussi ici",
+  "ui.beyonddimensions.side.mode.none": "Désactivée",
+  "ui.beyonddimensions.side.mode.none.hint": "Les blocs voisins ne peuvent ni insérer ni extraire",
   "ui.beyonddimensions.side.push": "Expulsion",
   "ui.beyonddimensions.furnace.input": "Ent.",
   "ui.beyonddimensions.furnace.fuel": "Comb.",

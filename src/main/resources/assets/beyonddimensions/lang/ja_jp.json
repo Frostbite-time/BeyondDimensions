@@ -359,6 +359,8 @@
   "ui.beyonddimensions.side.mode.output.hint": "隣接ブロックはこの面から取り出すことだけできる。押し出しもこの面へ送る",
   "ui.beyonddimensions.side.mode.both": "双方向",
   "ui.beyonddimensions.side.mode.both.hint": "隣接ブロックは入れることも取り出すこともできる。押し出しもこの面へ送る",
+  "ui.beyonddimensions.side.mode.none": "無効",
+  "ui.beyonddimensions.side.mode.none.hint": "隣接ブロックは入れることも取り出すこともできない",
   "ui.beyonddimensions.side.push": "押し出し",
   "ui.beyonddimensions.furnace.input": "入力",
   "ui.beyonddimensions.furnace.fuel": "燃料",
