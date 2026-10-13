@@ -84,7 +84,7 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos) {
                     row,
                     neighbor.name?.let { tr("ui.beyonddimensions.side.face", name, it) } ?: name,
                     editor.options(),
-                    editor.options().indexOf(snapshot.settings().get(setting)),
+                    editor.options().indexOf(entry.valueIn(snapshot.settings())),
                     !snapshot.isLocked(setting),
                     neighbor.icon,
                 )

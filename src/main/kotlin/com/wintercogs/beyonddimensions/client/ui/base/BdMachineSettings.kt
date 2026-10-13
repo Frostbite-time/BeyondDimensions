@@ -56,7 +56,7 @@ fun machineSettingRows(snapshot: MachineSettingsSync.Snapshot, sides: MachineSid
 private fun <T> settingRow(entry: MachineType.Entry<T>, snapshot: MachineSettingsSync.Snapshot): MachineSettingRow? {
     val setting = entry.setting()
     val id = BDRegistries.MACHINE_SETTINGS.getKey(setting) ?: return null
-    val value = snapshot.settings().get(setting)
+    val value = entry.valueIn(snapshot.settings())
     val locked = snapshot.isLocked(setting)
     val hint = if (locked) entry.lockedHintKey() ?: entry.hintKey() else entry.hintKey()
     val title = tr(entry.labelKey())

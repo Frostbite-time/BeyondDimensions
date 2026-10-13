@@ -17,6 +17,7 @@ import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
 import com.wintercogs.beyonddimensions.common.machine.FilterMode;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
+import com.wintercogs.beyonddimensions.common.machine.MachineSides;
 import com.wintercogs.beyonddimensions.common.menu.NetPumpMenu;
 import com.wintercogs.beyonddimensions.util.ResourceTransfer;
 import net.minecraft.core.BlockPos;
@@ -114,6 +115,9 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
 
         for (Direction dir : directions)
         {
+            // 只从输入的面抽取
+            if (!MachineSides.mode(this, dir).allowsInput())
+                continue;
             BlockPos targetPos = this.getBlockPos().relative(dir);
             BlockEntity neighbor = level.getBlockEntity(targetPos);
             if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
@@ -178,6 +182,13 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
     public void setNeedsCapabilityUpdate()
     {
         needsCapabilityUpdate = true;
+    }
+
+    @Override
+    protected void onSettingsChanged()
+    {
+        super.onSettingsChanged();
+        setNeedsCapabilityUpdate();
     }
 
     @Override

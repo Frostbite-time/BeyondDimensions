@@ -18,15 +18,16 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 
-/** 网络泵：过滤槽与玩家背包；设置页是过滤模式与红石控制 */
+/** 网络泵：过滤槽与玩家背包；设置页是从哪些面抽取、过滤模式与红石控制 */
 class PumpScreen(menu: NetPumpMenu, inventory: Inventory, title: Component) :
     BdInventoryScreen<NetPumpMenu, PumpState, PumpAction>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_PUMP_BLOCK.get()))
     private val filterSlots = menu.flagSlotIds()
     private val playerSlots = menu.playerSlotIds()
     private val text = PumpText(title.string)
+    private val sides = machineSidesView(menu.be)
 
-    override fun snapshot() = PumpState(machineSettingRows(container.machineSettings().snapshot()))
+    override fun snapshot() = PumpState(machineSettingRows(container.machineSettings().snapshot(), sides))
 
     override fun handle(action: PumpAction) {
         when (action) {

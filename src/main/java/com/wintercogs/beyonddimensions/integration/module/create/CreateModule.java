@@ -72,6 +72,7 @@ public class CreateModule implements IIntegrationModule
             for (BlockEntityType<?> sided : List.of(
                     BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                     BDBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
+                    BDBlockEntities.NET_PUMP_BLOCK_ENTITY.get(),
                     BDBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(),
                     BDBlockEntities.NET_BLAST_FURNACE_BLOCK_ENTITY.get(),
                     BDBlockEntities.NET_SMOKER_BLOCK_ENTITY.get()))

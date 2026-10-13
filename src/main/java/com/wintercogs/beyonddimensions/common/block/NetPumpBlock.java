@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class NetPumpBlock extends BaseMachineBlock
+public class NetPumpBlock extends SidedMachineBlock
 {
     public NetPumpBlock(Properties properties)
     {

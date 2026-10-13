@@ -33,9 +33,13 @@ public interface Machine extends Configurable
         return true;
     }
 
+    /**
+     * 这项设置的值；没有存过时取机器类型给的默认值
+     */
     default <T> T setting(MachineSetting<T> setting)
     {
-        return settings().get(setting);
+        MachineType.Entry<T> entry = machineType().entry(setting);
+        return entry != null ? entry.valueIn(settings()) : settings().get(setting);
     }
 
     default <T> void setSetting(MachineSetting<T> setting, T value)
@@ -67,13 +71,13 @@ public interface Machine extends Configurable
     {
         MachineSettings exported = MachineSettings.EMPTY;
         for (MachineType.Entry<?> entry : type.settings())
-            exported = withCurrent(entry.setting(), settings, exported);
+            exported = withCurrent(entry, settings, exported);
         return exported;
     }
 
-    private static <T> MachineSettings withCurrent(MachineSetting<T> setting, MachineSettings from, MachineSettings into)
+    private static <T> MachineSettings withCurrent(MachineType.Entry<T> entry, MachineSettings from, MachineSettings into)
     {
-        return into.with(setting, from.get(setting));
+        return into.with(entry.setting(), entry.valueIn(from));
     }
 
     /**
@@ -96,6 +100,6 @@ public interface Machine extends Configurable
         if (!from.has(setting) || !machine.isSettingAvailable(setting))
             return into;
         T value = from.get(setting);
-        return entry.accepts(value) && !Objects.equals(into.get(setting), value) ? into.with(setting, value) : into;
+        return entry.accepts(value) && !Objects.equals(entry.valueIn(into), value) ? into.with(setting, value) : into;
     }
 }

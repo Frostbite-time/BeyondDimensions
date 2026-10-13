@@ -177,7 +177,7 @@ public class MachineConfigCardItem extends Item
 
     private static <T> Component settingLine(MachineType.Entry<T> entry, MachineSettings settings)
     {
-        T value = settings.get(entry.setting());
+        T value = entry.valueIn(settings);
         Component shown = switch (entry.editor())
         {
             case SettingEditor.Choice<T> choice -> Component.translatable(choice.optionLabel().apply(value));

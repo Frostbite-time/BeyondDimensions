@@ -12,6 +12,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -41,7 +42,7 @@ public final class BDMachineTypes
                     .build());
 
     public static final DeferredHolder<MachineType, MachineType> NET_PUMP = TYPES.register("net_pump",
-            () -> MachineType.builder(BDBlocks.NET_PUMP_BLOCK)
+            () -> withFaces(MachineType.builder(BDBlocks.NET_PUMP_BLOCK), BDMachineTypes::pumpFace)
                     .setting(BDMachineSettings.FILTER)
                     .setting(BDMachineSettings.FILTER_FUZZY)
                     .setting(BDMachineSettings.REDSTONE)
@@ -120,6 +121,15 @@ public final class BDMachineTypes
     private static MachineType.Builder withSides(MachineType.Builder builder, String popHint)
     {
         return withFaces(builder, UnaryOperator.identity()).setting(BDMachineSettings.POP, entry -> entry.hint(popHint));
+    }
+
+    // 网络泵只从输入的面抽取，每一面只能输入或禁用，默认六面都抽取
+    private static MachineType.EntryBuilder<SideMode> pumpFace(MachineType.EntryBuilder<SideMode> entry)
+    {
+        return entry.defaultValue(SideMode.INPUT).editor(base -> {
+            var choice = (SettingEditor.Choice<SideMode>) base;
+            return new SettingEditor.Choice<>(List.of(SideMode.INPUT, SideMode.NONE), choice.optionLabel(), choice.optionHint(), choice.cycle());
+        });
     }
 
     // 各机器的实际收集范围不同，选项说明按机器给出

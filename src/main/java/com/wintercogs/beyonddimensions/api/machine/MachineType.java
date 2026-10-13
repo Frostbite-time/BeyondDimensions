@@ -80,7 +80,7 @@ public final class MachineType
     }
 
     /**
-     * 机器类型里的一项设置；可以替换设置自带的文字与编辑声明
+     * 机器类型里的一项设置；可以替换设置自带的文字、编辑声明与默认值
      */
     public static final class Entry<T>
     {
@@ -89,6 +89,7 @@ public final class MachineType
         private final @Nullable String hintKey;
         private final @Nullable String lockedHintKey;
         private final @Nullable UnaryOperator<SettingEditor<T>> editorOverride;
+        private final @Nullable T defaultValue;
         private volatile @Nullable SettingEditor<T> editor;
 
         private Entry(EntryBuilder<T> builder)
@@ -98,6 +99,7 @@ public final class MachineType
             this.hintKey = builder.hintKey;
             this.lockedHintKey = builder.lockedHintKey;
             this.editorOverride = builder.editorOverride;
+            this.defaultValue = builder.defaultValue;
         }
 
         public MachineSetting<T> setting()
@@ -138,6 +140,22 @@ public final class MachineType
         {
             return editor().accepts(value);
         }
+
+        /**
+         * 这类机器上这项设置没有存过时的值
+         */
+        public T defaultValue()
+        {
+            return defaultValue != null ? defaultValue : setting().defaultValue();
+        }
+
+        /**
+         * 这项设置在 settings 里的值，没有存过时为 {@link #defaultValue()}
+         */
+        public T valueIn(MachineSettings settings)
+        {
+            return settings.has(setting()) ? settings.get(setting()) : defaultValue();
+        }
     }
 
     public static final class EntryBuilder<T>
@@ -147,6 +165,7 @@ public final class MachineType
         private @Nullable String hintKey;
         private @Nullable String lockedHintKey;
         private @Nullable UnaryOperator<SettingEditor<T>> editorOverride;
+        private @Nullable T defaultValue;
 
         private EntryBuilder(Supplier<? extends MachineSetting<T>> setting)
         {
@@ -186,6 +205,15 @@ public final class MachineType
         public EntryBuilder<T> editor(UnaryOperator<SettingEditor<T>> override)
         {
             this.editorOverride = override;
+            return this;
+        }
+
+        /**
+         * 替换设置自带的默认值，只对这类机器生效
+         */
+        public EntryBuilder<T> defaultValue(T value)
+        {
+            this.defaultValue = Objects.requireNonNull(value);
             return this;
         }
     }
