@@ -23,6 +23,6 @@ public class RSModuleBlockStateProvider extends BDBlockStateProvider
     @Override
     protected void registerStatesAndModels()
     {
-        blockWithItem(RSModuleBlocks.RS_NET_PATHWAY);
+        sixFaced(RSModuleBlocks.RS_NET_PATHWAY).build();
     }
 }

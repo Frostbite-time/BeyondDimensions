@@ -23,6 +23,6 @@ public class ArsModuleBlockStateProvider extends BDBlockStateProvider
     @Override
     protected void registerStatesAndModels()
     {
-        blockWithItem(ArsModuleBlocks.ARS_SOURCE_PATHWAY);
+        sixFaced(ArsModuleBlocks.ARS_SOURCE_PATHWAY).build();
     }
 }

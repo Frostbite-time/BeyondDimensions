@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
+    "facing=east": {
+      "model": "beyonddimensions:block/net_interface",
+      "y": 90
+    },
+    "facing=north": {
       "model": "beyonddimensions:block/net_interface"
+    },
+    "facing=south": {
+      "model": "beyonddimensions:block/net_interface",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "beyonddimensions:block/net_interface",
+      "y": 270
     }
   }
 }
