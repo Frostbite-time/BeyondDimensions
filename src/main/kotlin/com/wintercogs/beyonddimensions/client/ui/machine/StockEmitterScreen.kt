@@ -38,7 +38,9 @@ class StockEmitterScreen(menu: NetStockEmitterMenu, inventory: Inventory, title:
 
     override fun snapshot(): StockEmitterState {
         // 发信条件放在主页面，设置页只留其余的设置
-        val (condition, settings) = machineSettingRows(container.machineSettings().snapshot()).partition { it.setting == emitSetting }
+        val (condition, settings) = machineSettingRows(
+            container.machineSettings().snapshot()
+        ).partition { it.setting == emitSetting }
         val key = (container.getSlot(markSlot) as AbstractStackTypedSlot).stack.key()
         val mark =
             when {
@@ -98,10 +100,20 @@ class StockEmitterScreen(menu: NetStockEmitterMenu, inventory: Inventory, title:
                     Spacer(Modifier.height(7.dp))
                     BdSectionLabel(text.condition)
                     Spacer(Modifier.height(4.dp))
-                    state.condition?.let { BdMachineSettings(listOf(it), page.main) { pick -> send(StockEmitterAction.Setting(pick)) } }
+                    state.condition?.let {
+                        BdMachineSettings(
+                            listOf(it),
+                            page.main
+                        ) { pick -> send(StockEmitterAction.Setting(pick)) }
+                    }
                     Spacer(Modifier.height(5.dp))
                     BdSettingRow(text.threshold) {
-                        BdNumberEditor(state.threshold, { send(StockEmitterAction.Threshold(it)) }, 0L..Long.MAX_VALUE, editable)
+                        BdNumberEditor(
+                            state.threshold,
+                            { send(StockEmitterAction.Threshold(it)) },
+                            0L..Long.MAX_VALUE,
+                            editable
+                        )
                     }
                     OreText(text.unit, color = colors[BdColors.faint], style = Bd.caption)
                     Spacer(Modifier.height(7.dp))

@@ -823,6 +823,7 @@ fun BdNumberEditor(value: Long, onValueChange: (Long) -> Unit, range: LongRange,
         }
     }
     fun clamp(number: Long) = number.coerceIn(range.first, range.last)
+
     // 位数超出 Long 的数字按 Long 的上下限处理，提交时再收进范围
     fun parse(text: String): Long? {
         text.toLongOrNull()?.let { return it }
@@ -830,6 +831,7 @@ fun BdNumberEditor(value: Long, onValueChange: (Long) -> Unit, range: LongRange,
         val body = if (negative) text.drop(1) else text
         return if (body.isNotEmpty() && body.all(Char::isDigit)) (if (negative) Long.MIN_VALUE else Long.MAX_VALUE) else null
     }
+
     fun set(next: Long) {
         draft = next.toString()
         dirty = false

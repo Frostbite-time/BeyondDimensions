@@ -35,7 +35,8 @@ data class MachineSettingPick(val setting: ResourceLocation, val index: Int)
 /** 按菜单同步来的设置生成设置页的各行，面配置页上的设置除外；在游戏线程调用 */
 fun machineSettingRows(snapshot: MachineSettingsSync.Snapshot): List<MachineSettingRow> {
     val type = snapshot.machineType() ?: return emptyList()
-    return type.settings().filterNot { MachineSides.onSidePage(type, it.setting()) }.mapNotNull { settingRow(it, snapshot) }
+    return type.settings().filterNot { MachineSides.onSidePage(type, it.setting()) }
+        .mapNotNull { settingRow(it, snapshot) }
 }
 
 internal fun <T> settingRow(entry: MachineType.Entry<T>, snapshot: MachineSettingsSync.Snapshot): MachineSettingRow? {

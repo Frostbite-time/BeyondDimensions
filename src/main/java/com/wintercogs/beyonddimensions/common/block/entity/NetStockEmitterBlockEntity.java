@@ -10,7 +10,6 @@ import com.wintercogs.beyonddimensions.common.block.NetStockEmitterBlock;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
-import com.wintercogs.beyonddimensions.common.machine.EmitMode;
 import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
 import com.wintercogs.beyonddimensions.common.menu.NetStockEmitterMenu;
 import net.minecraft.core.BlockPos;

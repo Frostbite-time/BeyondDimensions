@@ -157,7 +157,8 @@ public class NetFeederItem extends BaseMachineItem
         return switch (feederMode)
         {
             case SATURATION_KEEP -> food.saturation() > 0;
-            case NO_WASTE -> food.nutrition() > 0 && playerFoodState.getFoodLevel() + food.nutrition() <= FoodConstants.MAX_FOOD;
+            case NO_WASTE ->
+                    food.nutrition() > 0 && playerFoodState.getFoodLevel() + food.nutrition() <= FoodConstants.MAX_FOOD;
             default -> food.nutrition() > 0;
         };
     }

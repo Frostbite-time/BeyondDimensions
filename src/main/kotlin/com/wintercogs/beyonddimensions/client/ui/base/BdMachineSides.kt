@@ -17,12 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries
 import com.wintercogs.beyonddimensions.api.ui.page.BdPages
-import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphs
-import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
-import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTabPage
-import com.wintercogs.beyonddimensions.client.ui.kit.BdTooltip
-import com.wintercogs.beyonddimensions.client.ui.kit.brackets
+import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDMachineSettings
@@ -240,7 +235,9 @@ private fun FaceCell(
             contentAlignment = Alignment.Center,
         ) {
             face.neighbor?.let { MinecraftItemIcon(it, Modifier.size(16.dp)) }
-            if (hovered && enabled) Box(Modifier.matchParentSize().brackets(tint ?: colors[BdColors.accent], arm = 4.dp))
+            if (hovered && enabled) Box(
+                Modifier.matchParentSize().brackets(tint ?: colors[BdColors.accent], arm = 4.dp)
+            )
         }
     }
 }
