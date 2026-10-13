@@ -16,7 +16,11 @@ import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries
+import com.wintercogs.beyonddimensions.api.ui.page.BdPages
+import com.wintercogs.beyonddimensions.client.ui.kit.BdGlyphs
+import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
 import com.wintercogs.beyonddimensions.client.ui.kit.BdSectionLabel
+import com.wintercogs.beyonddimensions.client.ui.kit.BdTabPage
 import com.wintercogs.beyonddimensions.client.ui.kit.BdTooltip
 import com.wintercogs.beyonddimensions.client.ui.kit.brackets
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
@@ -32,10 +36,12 @@ import dev.compixel.ui.ore.display.OreText
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.entity.BlockEntity
 import java.util.*
 
 /** 面配置页上的一面：在展开图里的格子、名称、可选与当前的模式，以及相邻的方块 */
@@ -79,7 +85,7 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos, faci
             Triple(Direction.DOWN, 1, 2),
         )
     private val neighbors = EnumMap<Direction, Neighbor>(Direction::class.java)
-    private val title = tr("ui.beyonddimensions.side.title")
+    val title = tr("ui.beyonddimensions.side.title")
     private val hint = tr("ui.beyonddimensions.side.hint")
 
     private class Neighbor(val block: Block, val icon: ItemIcon?, val name: String?)
@@ -126,6 +132,10 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos, faci
     }
 }
 
+/** 方块机器的面配置视图；方块实体不在世界里时为 null，例如动态结构里的接口 */
+fun machineSidesView(be: BlockEntity?, player: Player): MachineSidesView? =
+    be?.level?.let { MachineSidesView(it, be.blockPos, player.direction) }
+
 /** 展开图里一格的边长与格间距 */
 private const val CELL = 20
 private const val CELL_GAP = 2
@@ -163,6 +173,26 @@ private fun sideColor(mode: SideMode?): Color? =
         SideMode.BOTH,
         null -> null
     }
+
+/** 面配置的页签，放在主页面的页签之后；[view] 为 null 时这个界面没有面配置 */
+@Composable
+fun BdSidesTab(view: MachineSidesView?, page: BdPageSelection) {
+    if (view == null) return
+    BdRailTab(view.title, BdGlyphs.Sides, selected = page.current == BdPages.SIDES) { page.open(BdPages.SIDES) }
+}
+
+/** 面配置页；[state] 在设置同步到之前为 null */
+@Composable
+fun BoxScope.BdSidesPage(
+    view: MachineSidesView?,
+    state: SidePageState?,
+    page: BdPageSelection,
+    onPick: (MachineSettingPick) -> Unit,
+) {
+    if (view == null) return
+    val shown = page.current == BdPages.SIDES
+    BdTabPage(shown) { state?.let { BdMachineSides(it, shown, onPick) } }
+}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -215,21 +245,27 @@ private fun FaceCell(
     }
 }
 
-/** 图例：每种模式一个与格子同样配色的小方块 */
+/** 图例：每种模式一个与格子同样配色的小方块，一行放不下时折行 */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun Legend(modes: Map<SideMode, SideModeText>) {
     val colors = Bd.colors
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-        modes.entries.forEachIndexed { index, (mode, text) ->
-            if (index > 0) Spacer(Modifier.width(8.dp))
+    FlowRow(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        for ((mode, text) in modes) {
             val tint = sideColor(mode)
-            Box(
-                Modifier.size(6.dp)
-                    .background(tint?.copy(alpha = 0.18f) ?: colors[BdColors.surface])
-                    .border(1.dp, tint ?: colors[BdColors.lineStrong])
-            )
-            Spacer(Modifier.width(3.dp))
-            OreText(text.label, color = colors[BdColors.muted], style = Bd.caption, maxLines = 1)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier.size(6.dp)
+                        .background(tint?.copy(alpha = 0.18f) ?: colors[BdColors.surface])
+                        .border(1.dp, tint ?: colors[BdColors.lineStrong])
+                )
+                Spacer(Modifier.width(3.dp))
+                OreText(text.label, color = colors[BdColors.muted], style = Bd.caption, maxLines = 1)
+            }
         }
     }
 }

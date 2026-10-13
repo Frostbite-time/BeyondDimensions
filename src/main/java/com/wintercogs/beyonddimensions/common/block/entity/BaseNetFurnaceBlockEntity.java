@@ -17,8 +17,10 @@ import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
+import com.wintercogs.beyonddimensions.common.machine.MachineSides;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
+import com.wintercogs.beyonddimensions.common.machine.SideMode;
 import com.wintercogs.beyonddimensions.common.menu.NetFurnaceMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -347,45 +349,58 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 blockEntityType.get(),
-                (be, side) -> {
-                    ItemStackTypedHandler inputStorage = new ItemStackTypedHandler(be.getInputStorageSlots())
-                    {
-                        @Override
-                        public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
-                        {
-                            return ItemStack.EMPTY; //禁止提取
-                        }
-                    };
-
-                    ItemStackTypedHandler fuelStorage = new ItemStackTypedHandler(be.getFuelStorageSlots())
-                    {
-                        @Override
-                        public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
-                        {
-                            return ItemStack.EMPTY; //禁止提取
-                        }
-                    };
-
-                    ItemStackTypedHandler outputStorage = new ItemStackTypedHandler(be.getOutputStorageSlots())
-                    {
-                        @Override
-                        public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
-                        {
-                            return itemStack; //禁止插入
-                        }
-                    };
-
-                    ItemStackTypedHandler fuelReturn = new ItemStackTypedHandler(be.getFuelReturnSlots())
-                    {
-                        @Override
-                        public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
-                        {
-                            return itemStack; //禁止插入
-                        }
-                    };
-                    return new CombinedItemHandlerWrapper(new ItemStackTypedHandler[]{inputStorage, fuelStorage, outputStorage, fuelReturn});
-                }
+                (be, side) -> be.itemHandlerFor(side)
         );
+    }
+
+    // 按面限制：能放入的面露出原料与燃料，能取出的面露出产物与返还容器，禁用的面没有能力
+    protected @Nullable IItemHandler itemHandlerFor(@Nullable Direction side)
+    {
+        SideMode mode = MachineSides.mode(this, side);
+        List<IItemHandler> parts = new ArrayList<>(4);
+        if (mode.allowsInput())
+        {
+            parts.add(insertOnly(inputStorageSlots));
+            parts.add(insertOnly(fuelStorageSlots));
+        }
+        if (mode.allowsOutput())
+        {
+            parts.add(extractOnly(outputStorageSlots));
+            parts.add(extractOnly(fuelReturnSlots));
+        }
+        return parts.isEmpty() ? null : new CombinedItemHandlerWrapper(parts.toArray(IItemHandler[]::new));
+    }
+
+    private static IItemHandler insertOnly(StackHandler slots)
+    {
+        return new ItemStackTypedHandler(slots)
+        {
+            @Override
+            public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
+            {
+                return ItemStack.EMPTY; //禁止提取
+            }
+        };
+    }
+
+    private static IItemHandler extractOnly(StackHandler slots)
+    {
+        return new ItemStackTypedHandler(slots)
+        {
+            @Override
+            public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
+            {
+                return itemStack; //禁止插入
+            }
+        };
+    }
+
+    // 面配置可能变了，相邻方块要重新取能力
+    @Override
+    protected void onSettingsChanged()
+    {
+        super.onSettingsChanged();
+        invalidateCapabilities();
     }
 
     @Override
@@ -671,6 +686,8 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         {
             for (Direction dir : Direction.values())
             {
+                // 只送往允许输出的面
+                if (!MachineSides.mode(this, dir).allowsOutput()) continue;
                 BlockPos targetPos = this.getBlockPos().relative(dir);
                 BlockEntity neighbor = level.getBlockEntity(targetPos);
                 if (neighbor == null || neighbor instanceof NetedBlockEntity) continue;

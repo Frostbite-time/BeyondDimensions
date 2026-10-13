@@ -3,7 +3,7 @@ package com.wintercogs.beyonddimensions.integration.module.create;
 import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
 import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
 import com.simibubi.create.api.contraption.transformable.MovedBlockTransformerRegistries;
-import com.wintercogs.beyonddimensions.common.block.entity.NetInterfaceBlockEntity;
+import com.wintercogs.beyonddimensions.api.machine.Machine;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.machine.MachineSides;
@@ -24,6 +24,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -66,15 +67,20 @@ public class CreateModule implements IIntegrationModule
                     BDBlocks.NET_INTERFACE.get(),
                     new NetInterfaceMovementBehaviour()
             );
-            // 动态结构旋转或镜像后放回时，接口的面配置随之转动
-            MovedBlockTransformerRegistries.BLOCK_ENTITY_TRANSFORMERS.register(
+            // 动态结构旋转或镜像后放回时，机器的面配置随之转动
+            for (BlockEntityType<?> sided : List.of(
                     BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
-                    (be, transform) -> {
-                        if (be instanceof NetInterfaceBlockEntity netInterface)
-                            netInterface.setSettings(MachineSides.transformed(netInterface.settings(),
-                                    side -> transform.rotateFacing(transform.mirrorFacing(side))));
-                    }
-            );
+                    BDBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
+                    BDBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(),
+                    BDBlockEntities.NET_BLAST_FURNACE_BLOCK_ENTITY.get(),
+                    BDBlockEntities.NET_SMOKER_BLOCK_ENTITY.get()))
+            {
+                MovedBlockTransformerRegistries.BLOCK_ENTITY_TRANSFORMERS.register(sided, (be, transform) -> {
+                    if (be instanceof Machine machine)
+                        machine.setSettings(MachineSides.transformed(machine.settings(),
+                                side -> transform.rotateFacing(transform.mirrorFacing(side))));
+                });
+            }
         });
     }
 

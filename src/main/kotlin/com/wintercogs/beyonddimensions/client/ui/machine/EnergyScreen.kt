@@ -32,7 +32,7 @@ import kotlin.math.ceil
 import kotlin.math.roundToLong
 
 /**
- * 维度网络能量通道：网络的存量与收支、近半分钟的收支曲线与玩家背包；设置页是弹出模式与红石控制。
+ * 维度网络能量通道：网络的存量与收支、近半分钟的收支曲线与玩家背包；面配置页是各面的输入输出与主动弹出，设置页是红石控制。
  * 网络的容量极大，填充比例看不出变化，所以展示收支的走势与预计的耗尽或充满时间
  */
 class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) :
@@ -41,6 +41,7 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
     private val playerSlots = menu.playerSlotIds()
     private val text = EnergyText(title.string)
     private val history = FlowHistory()
+    private val sides = machineSidesView(menu.be, inventory.player)
 
     override fun inventoryTick() {
         super.inventoryTick()
@@ -53,8 +54,10 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
         val limited = capacity != Long.MAX_VALUE
         val rate = history.recent()
         val bars = history.bars()
+        val settings = container.machineSettings().snapshot()
         return EnergyState(
-            settings = machineSettingRows(container.machineSettings().snapshot()),
+            settings = machineSettingRows(settings),
+            sides = sides?.snapshot(settings),
             stored = stored,
             rate = rate,
             capacity = tr(
@@ -112,6 +115,7 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 rail = {
                     BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                    BdSidesTab(sides, page)
                     InjectedTabs(pages, page)
                     Spacer(Modifier.weight(1f))
                     BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
@@ -122,6 +126,7 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
                     Spacer(Modifier.height(8.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
+                BdSidesPage(sides, state.sides, page) { send(EnergyAction.Setting(it)) }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
@@ -137,6 +142,8 @@ data class Outlook(val label: String, val draining: Boolean)
 
 data class EnergyState(
     val settings: List<MachineSettingRow>,
+    /** 面配置页的状态，设置还没同步到时为 null */
+    val sides: SidePageState?,
     val stored: Long,
     /** 最近一秒平均每刻的变化，正数为流入 */
     val rate: Double,

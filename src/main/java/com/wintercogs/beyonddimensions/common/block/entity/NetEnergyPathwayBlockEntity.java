@@ -7,7 +7,9 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
+import com.wintercogs.beyonddimensions.common.machine.MachineSides;
 import com.wintercogs.beyonddimensions.common.machine.PopMode;
+import com.wintercogs.beyonddimensions.common.machine.SideMode;
 import com.wintercogs.beyonddimensions.common.menu.NetEnergyMenu;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import net.minecraft.core.BlockPos;
@@ -44,23 +46,21 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK,
                 BDBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
-                (be, side) -> {
-                    if (be.getPopMode() == PopMode.OPEN)
-                    {
-                        return new EnergyStorage(0);
-                    }
-                    if (be.getNetId() < 0)
-                    {
-                        return new EnergyStorage(0);
-                    }
-                    DimensionsNet net = be.getNet();
-                    if (net != null)
-                    {
-                        return new EnergyUnifiedStorageHandler(net.getUnifiedStorage());
-                    }
-                    return new EnergyStorage(0);
-                }
+                (be, side) -> be.energyFor(side)
         );
+    }
+
+    // 按面限制存取，禁用的面没有能力。开启主动弹出后，会被推送的面不再接收：推出去的能量不能从同一面流回网络
+    private @Nullable IEnergyStorage energyFor(@Nullable Direction side)
+    {
+        SideMode mode = MachineSides.mode(this, side);
+        if (mode == SideMode.NONE)
+            return null;
+        DimensionsNet net = getNetId() < 0 ? null : getNet();
+        if (net == null)
+            return new EnergyStorage(0);
+        boolean receives = mode.allowsInput() && !(mode.allowsOutput() && getPopMode() == PopMode.OPEN);
+        return new EnergyUnifiedStorageHandler(net.getUnifiedStorage(), receives, mode.allowsOutput());
     }
 
     @Override
@@ -79,7 +79,7 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
         setSetting(BDMachineSettings.POP.get(), newMode);
     }
 
-    // 推送模式决定对外暴露的能量能力
+    // 面配置与主动弹出决定对外暴露的能量能力
     @Override
     protected void onSettingsChanged()
     {
@@ -122,6 +122,9 @@ public class NetEnergyPathwayBlockEntity extends BaseMachineBlockEntity implemen
 
         for (Direction dir : directions)
         {
+            // 只送往允许输出的面
+            if (!MachineSides.mode(this, dir).allowsOutput())
+                continue;
             BlockPos targetPos = this.getBlockPos().relative(dir);
             BlockEntity neighbor = level.getBlockEntity(targetPos);
             if (neighbor != null && !(neighbor instanceof NetedBlockEntity))

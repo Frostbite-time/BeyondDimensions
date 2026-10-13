@@ -30,10 +30,7 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
     private val text = InterfaceText(title.string)
 
     // 动态结构里的接口没有固定的相邻方块，没有面配置页
-    private val sides =
-        (menu.access as? NetInterfaceBlockEntity)?.let { be ->
-            be.level?.let { MachineSidesView(it, be.blockPos, inventory.player.direction) }
-        }
+    private val sides = machineSidesView(menu.access as? NetInterfaceBlockEntity, inventory.player)
 
     override fun snapshot(): InterfaceState {
         val settings = container.machineSettings().snapshot()
@@ -51,16 +48,13 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
         val colors = Bd.colors
         val page = rememberPageSelection()
         val settingsOpen = page.settings
-        val sidesOpen = page.current == BdPages.SIDES
         BdScreenFrame {
             BdTabbedWindow(
                 Modifier.width(SLOT_WINDOW_WIDTH.dp).then(slots.areaModifier()),
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 rail = {
                     BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
-                    if (sides != null) {
-                        BdRailTab(text.sides, BdGlyphs.Sides, selected = sidesOpen) { page.open(BdPages.SIDES) }
-                    }
+                    BdSidesTab(sides, page)
                     InjectedTabs(pages, page)
                     Spacer(Modifier.weight(1f))
                     BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
@@ -82,11 +76,7 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
                     Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
-                if (sides != null) {
-                    BdTabPage(sidesOpen) {
-                        state.sides?.let { BdMachineSides(it, sidesOpen) { pick -> send(InterfaceAction.Setting(pick)) } }
-                    }
-                }
+                BdSidesPage(sides, state.sides, page) { send(InterfaceAction.Setting(it)) }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
@@ -106,7 +96,6 @@ sealed interface InterfaceAction {
 
 private class InterfaceText(val title: String) {
     val settings = tr("ui.beyonddimensions.machine.settings")
-    val sides = tr("ui.beyonddimensions.side.title")
     val inventory = tr("ui.beyonddimensions.inventory")
     val slots = tr("ui.beyonddimensions.interface.slots")
 }

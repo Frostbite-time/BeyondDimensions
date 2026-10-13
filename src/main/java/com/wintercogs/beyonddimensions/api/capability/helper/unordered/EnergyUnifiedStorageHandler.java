@@ -8,21 +8,38 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 public class EnergyUnifiedStorageHandler implements IEnergyStorage
 {
     private final UnifiedStorage storage;
+    private final boolean receives;
+    private final boolean extracts;
 
     public EnergyUnifiedStorageHandler(UnifiedStorage storage)
     {
+        this(storage, true, true);
+    }
+
+    /**
+     * @param receives 能否向网络存入能量
+     * @param extracts 能否从网络取出能量
+     */
+    public EnergyUnifiedStorageHandler(UnifiedStorage storage, boolean receives, boolean extracts)
+    {
         this.storage = storage;
+        this.receives = receives;
+        this.extracts = extracts;
     }
 
     @Override
     public int receiveEnergy(int count, boolean simulate)
     {
+        if (!receives)
+            return 0;
         return (int) (count - storage.insert(EnergyStackKey.INSTANCE, count, simulate).amount());
     }
 
     @Override
     public int extractEnergy(int count, boolean simulate)
     {
+        if (!extracts)
+            return 0;
         return (int) storage.extract(EnergyStackKey.INSTANCE, count, simulate, false).amount();
     }
 
@@ -41,12 +58,12 @@ public class EnergyUnifiedStorageHandler implements IEnergyStorage
     @Override
     public boolean canExtract()
     {
-        return true;
+        return extracts;
     }
 
     @Override
     public boolean canReceive()
     {
-        return true;
+        return receives;
     }
 }
