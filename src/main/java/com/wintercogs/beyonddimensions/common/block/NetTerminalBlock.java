@@ -44,26 +44,26 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
         super(properties
                 .noOcclusion()
                 .dynamicShape());
-        registerDefaultState(FacingRule.ALL.defaultState(stateDefinition.any()));
+        registerDefaultState(FacingRule.UPRIGHT.defaultState(stateDefinition.any()));
     }
 
     // 注册方块状态属性
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
     {
-        FacingRule.ALL.addProperties(builder);
+        FacingRule.UPRIGHT.addProperties(builder);
     }
 
     @Override
     public BlockState rotate(BlockState state, Rotation rot)
     {
-        return FacingRule.ALL.rotate(state, rot);
+        return FacingRule.UPRIGHT.rotate(state, rot);
     }
 
     @Override
     public BlockState mirror(BlockState state, Mirror mirror)
     {
-        return FacingRule.ALL.mirror(state, mirror);
+        return FacingRule.UPRIGHT.mirror(state, mirror);
     }
 
     @Override
