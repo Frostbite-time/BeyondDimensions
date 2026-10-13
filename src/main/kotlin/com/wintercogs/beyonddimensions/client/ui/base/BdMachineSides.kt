@@ -16,11 +16,9 @@ import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries
-import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
-import com.wintercogs.beyonddimensions.common.init.BDMachineSettings
 import com.wintercogs.beyonddimensions.common.machine.MachineSides
 import com.wintercogs.beyonddimensions.common.machine.SideMode
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync
@@ -39,7 +37,7 @@ import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.entity.BlockEntity
 import java.util.*
 
-/** 面配置页上的一面：在展开图里的格子、名称、可选与当前的模式，以及相邻的方块 */
+/** 面配置里的一面：在展开图里的格子、名称、可选与当前的模式，以及相邻的方块 */
 data class SideFace(
     val setting: ResourceLocation,
     val column: Int,
@@ -53,17 +51,11 @@ data class SideFace(
     val neighbor: ItemIcon?,
 )
 
-data class SidePageState(
-    val title: String,
-    val faces: List<SideFace>,
-    /** 各模式的名称 */
-    val modes: Map<SideMode, String>,
-    /** 主动弹出的开关，机器类型没有时为 null */
-    val push: MachineSettingRow?,
-)
+/** 设置页上的面配置：六个面与各模式的名称 */
+data class SidesState(val faces: List<SideFace>, val modes: Map<SideMode, String>)
 
 /**
- * 生成面配置页的状态，在游戏线程使用。展开图以打开界面时玩家的朝向为准：正中是面对玩家的一面，
+ * 生成设置页上的面配置，在游戏线程使用。展开图以打开界面时玩家的朝向为准：正中是面对玩家的一面，
  * 左右是玩家看过去的左右，左下角是背面，上下是顶面与底面。相邻方块变了才重新取图标
  */
 class MachineSidesView(private val level: Level, private val pos: BlockPos, facing: Direction) {
@@ -77,12 +69,12 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos, faci
             Triple(Direction.DOWN, 1, 2),
         )
     private val neighbors = EnumMap<Direction, Neighbor>(Direction::class.java)
-    val title = tr("ui.beyonddimensions.side.title")
+    private val title = tr("ui.beyonddimensions.side.title")
 
     private class Neighbor(val block: Block, val icon: ItemIcon?, val name: String?)
 
-    /** 机器类型没有面配置或设置还没同步到时为 null */
-    fun snapshot(snapshot: MachineSettingsSync.Snapshot): SidePageState? {
+    /** 设置页上面配置的一行，代替六个面各自的行；机器类型没有面配置时为 null */
+    fun row(snapshot: MachineSettingsSync.Snapshot): MachineSettingRow? {
         val type = snapshot.machineType() ?: return null
         if (!MachineSides.hasSides(type)) return null
         val modes = EnumMap<SideMode, String>(SideMode::class.java)
@@ -105,8 +97,8 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos, faci
                     neighbor.icon,
                 )
             }
-        val push = type.entry(BDMachineSettings.POP.get())?.let { settingRow(it, snapshot) }
-        return SidePageState(title, faces, modes.toMap(), push)
+        val sides = MachineSettingControl.Sides(SidesState(faces, modes.toMap()))
+        return MachineSettingRow(faces.first().setting, title, null, sides, true)
     }
 
     private fun neighbor(side: Direction): Neighbor {
@@ -127,25 +119,29 @@ fun machineSidesView(be: BlockEntity?, player: Player): MachineSidesView? =
 private const val CELL = 20
 private const val CELL_GAP = 2
 
-/** 面配置页：六个面排成展开的方块，左键换到下一种模式、右键换到上一种；下面是图例与主动弹出 */
+/** 设置页上的面配置：标题下是六个面排成的展开方块，左键换到下一种模式、右键换到上一种；再下面是图例 */
 @Composable
-fun BdMachineSides(state: SidePageState, shown: Boolean, onPick: (MachineSettingPick) -> Unit) {
-    BdSectionLabel(state.title)
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        Box(Modifier.size((3 * CELL + 2 * CELL_GAP).dp, (3 * CELL + 2 * CELL_GAP).dp)) {
-            for (face in state.faces) key(face.setting) {
-                FaceCell(
-                    face,
-                    state.modes,
-                    shown,
-                    onPick,
-                    Modifier.offset((face.column * (CELL + CELL_GAP)).dp, (face.row * (CELL + CELL_GAP)).dp),
-                )
+fun BdMachineSides(title: String, state: SidesState, shown: Boolean, onPick: (MachineSettingPick) -> Unit) {
+    val colors = Bd.colors
+    Column(Modifier.fillMaxWidth()) {
+        OreText(title, color = colors[BdColors.text], maxLines = 1)
+        Spacer(Modifier.height(2.dp))
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            Box(Modifier.size((3 * CELL + 2 * CELL_GAP).dp, (3 * CELL + 2 * CELL_GAP).dp)) {
+                for (face in state.faces) key(face.setting) {
+                    FaceCell(
+                        face,
+                        state.modes,
+                        shown,
+                        onPick,
+                        Modifier.offset((face.column * (CELL + CELL_GAP)).dp, (face.row * (CELL + CELL_GAP)).dp),
+                    )
+                }
             }
         }
+        Spacer(Modifier.height(4.dp))
+        Legend(state.modes)
     }
-    Legend(state.modes)
-    state.push?.let { BdMachineSettings(listOf(it), shown, onPick) }
 }
 
 /** 输入、输出与双向各有配色；禁用的面与普通的格子一样 */
@@ -158,26 +154,6 @@ private fun sideColor(mode: SideMode?): Color? =
         SideMode.NONE,
         null -> null
     }
-
-/** 面配置的页签，放在主页面的页签之后；[view] 为 null 时这个界面没有面配置 */
-@Composable
-fun BdSidesTab(view: MachineSidesView?, page: BdPageSelection) {
-    if (view == null) return
-    BdRailTab(view.title, BdGlyphs.Sides, selected = page.current == BdPages.SIDES) { page.open(BdPages.SIDES) }
-}
-
-/** 面配置页；[state] 在设置同步到之前为 null */
-@Composable
-fun BoxScope.BdSidesPage(
-    view: MachineSidesView?,
-    state: SidePageState?,
-    page: BdPageSelection,
-    onPick: (MachineSettingPick) -> Unit,
-) {
-    if (view == null) return
-    val shown = page.current == BdPages.SIDES
-    BdTabPage(shown) { state?.let { BdMachineSides(it, shown, onPick) } }
-}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

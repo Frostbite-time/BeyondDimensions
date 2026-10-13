@@ -78,7 +78,7 @@ public interface NetInterfaceAccess extends Machine
     @Override
     default boolean isSettingAvailable(MachineSetting<?> setting)
     {
-        return canConfigureSides() || !MachineSides.onSidePage(machineType(), setting);
+        return canConfigureSides() || !MachineSides.isSideSetting(machineType(), setting);
     }
 
     @Override

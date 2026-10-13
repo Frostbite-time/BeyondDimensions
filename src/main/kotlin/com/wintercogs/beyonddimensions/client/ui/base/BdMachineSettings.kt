@@ -27,19 +27,33 @@ sealed interface MachineSettingControl {
     data class Choice(val options: List<String>, val selected: Int, val cycle: Boolean) : MachineSettingControl
 
     data class Toggle(val on: Boolean) : MachineSettingControl
+
+    /** 面配置：六个面合成一个展开图，行的 [MachineSettingRow.setting] 是其中第一个面 */
+    data class Sides(val state: SidesState) : MachineSettingControl
 }
 
 /** 设置页上的一次修改：编辑声明里的第 [index] 个值，开关的 0 为打开、1 为关闭 */
 data class MachineSettingPick(val setting: ResourceLocation, val index: Int)
 
-/** 按菜单同步来的设置生成设置页的各行，面配置页上的设置除外；在游戏线程调用 */
-fun machineSettingRows(snapshot: MachineSettingsSync.Snapshot): List<MachineSettingRow> {
+/**
+ * 按菜单同步来的设置生成设置页的各行，顺序与机器类型的声明相同；在游戏线程调用。
+ * 六个面合成一行面配置，排在第一个面的位置；没有 [sides] 时面配置与主动弹出都不显示，例如动态结构里的接口
+ */
+fun machineSettingRows(snapshot: MachineSettingsSync.Snapshot, sides: MachineSidesView? = null): List<MachineSettingRow> {
     val type = snapshot.machineType() ?: return emptyList()
-    return type.settings().filterNot { MachineSides.onSidePage(type, it.setting()) }
-        .mapNotNull { settingRow(it, snapshot) }
+    val firstFace = type.settings().firstOrNull { MachineSides.isFace(it.setting()) }
+    return type.settings().mapNotNull {
+        when {
+            !MachineSides.isSideSetting(type, it.setting()) -> settingRow(it, snapshot)
+            sides == null -> null
+            it === firstFace -> sides.row(snapshot)
+            MachineSides.isFace(it.setting()) -> null
+            else -> settingRow(it, snapshot)
+        }
+    }
 }
 
-internal fun <T> settingRow(entry: MachineType.Entry<T>, snapshot: MachineSettingsSync.Snapshot): MachineSettingRow? {
+private fun <T> settingRow(entry: MachineType.Entry<T>, snapshot: MachineSettingsSync.Snapshot): MachineSettingRow? {
     val setting = entry.setting()
     val id = BDRegistries.MACHINE_SETTINGS.getKey(setting) ?: return null
     val value = snapshot.settings().get(setting)
@@ -94,6 +108,8 @@ fun BdMachineSettings(rows: List<MachineSettingRow>, shown: Boolean, onPick: (Ma
                         shown && row.enabled
                     )
                 }
+
+            is MachineSettingControl.Sides -> BdMachineSides(row.title, control.state, shown, onPick)
         }
     }
 }

@@ -12,7 +12,7 @@ import java.util.function.UnaryOperator;
 
 /**
  * 机器的面配置：六个面各一项 {@link SideMode} 设置，加上主动弹出（{@link BDMachineSettings#POP}）。
- * 机器类型列出了全部六个面才算有面配置，这些设置在面配置页上编辑，不出现在设置页
+ * 机器类型列出了全部六个面才算有面配置，设置页把六个面合成一个展开图
  */
 public final class MachineSides
 {
@@ -44,9 +44,9 @@ public final class MachineSides
     }
 
     /**
-     * 这项设置是否在面配置页上编辑
+     * 这项设置是否属于面配置：有面配置的机器的六个面与主动弹出
      */
-    public static boolean onSidePage(MachineType type, MachineSetting<?> setting)
+    public static boolean isSideSetting(MachineType type, MachineSetting<?> setting)
     {
         return (isFace(setting) || setting == BDMachineSettings.POP.get()) && hasSides(type);
     }

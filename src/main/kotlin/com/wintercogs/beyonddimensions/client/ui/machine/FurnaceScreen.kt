@@ -30,7 +30,7 @@ import kotlin.math.ceil
 
 /**
  * 网络熔炉（也用于高炉与烟熏炉）：九列熔炼位、两侧的输入与燃料标记、返还容器与燃料储备，以及玩家背包；
- * 面配置页设置各面的输入输出与主动弹出
+ * 设置页最上面是各面的输入输出与主动弹出
  */
 class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component) :
     BdInventoryScreen<NetFurnaceMenu, FurnaceState, FurnaceAction>(menu, title) {
@@ -40,15 +40,12 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
     private val text = FurnaceText(title.string)
     private val sides = machineSidesView(menu.be, inventory.player)
 
-    override fun snapshot(): FurnaceState {
-        val settings = container.machineSettings().snapshot()
-        return FurnaceState(
+    override fun snapshot() =
+        FurnaceState(
             lanes = container.lanes()
                 .map { Lane(fraction(it.cooking(), it.cookingTotal()), fraction(it.burning(), it.burningTotal())) },
-            settings = machineSettingRows(settings),
-            sides = sides?.snapshot(settings),
+            settings = machineSettingRows(container.machineSettings().snapshot(), sides),
         )
-    }
 
     private fun fraction(value: Int, total: Int) = if (total > 0) (value.toFloat() / total).coerceIn(0f, 1f) else 0f
 
@@ -68,14 +65,12 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 rail = {
                     BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
-                    BdSidesTab(sides, page)
                     InjectedTabs(pages, page)
                     Spacer(Modifier.weight(1f))
                     BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
                 },
             ) {
                 BdMainPage(page.main) { Furnace(state, slotIds, playerSlots, text, slots) }
-                BdSidesPage(sides, state.sides, page) { send(FurnaceAction.Setting(it)) }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
@@ -89,11 +84,9 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
 /** 一列熔炼位的熔炼进度与燃料余量，都在 0 到 1 之间 */
 data class Lane(val cooking: Float, val burning: Float)
 
-/** [sides] 为面配置页的状态，设置还没同步到时为 null */
 data class FurnaceState(
     val lanes: List<Lane>,
     val settings: List<MachineSettingRow>,
-    val sides: SidePageState?,
 )
 
 sealed interface FurnaceAction {

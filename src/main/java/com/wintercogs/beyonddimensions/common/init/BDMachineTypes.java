@@ -22,9 +22,9 @@ public final class BDMachineTypes
     public static final DeferredRegister<MachineType> TYPES = DeferredRegister.create(BDRegistries.MACHINE_TYPE_KEY, BDConstants.MODID);
 
     public static final DeferredHolder<MachineType, MachineType> NET_INTERFACE = TYPES.register("net_interface",
-            () -> withSides(MachineType.builder(BDBlocks.NET_INTERFACE)
+            () -> withSides(MachineType.builder(BDBlocks.NET_INTERFACE), "ui.beyonddimensions.interface.pop.hint")
                     .setting(BDMachineSettings.REDSTONE)
-                    .setting(BDMachineSettings.FUZZY), "ui.beyonddimensions.interface.pop.hint")
+                    .setting(BDMachineSettings.FUZZY)
                     .build());
 
     public static final DeferredHolder<MachineType, MachineType> NET_HOPPER = TYPES.register("net_hopper",
@@ -47,8 +47,8 @@ public final class BDMachineTypes
                     .build());
 
     public static final DeferredHolder<MachineType, MachineType> NET_ENERGY_PATHWAY = TYPES.register("net_energy_pathway",
-            () -> withSides(MachineType.builder(BDBlocks.NET_ENERGY_PATHWAY)
-                    .setting(BDMachineSettings.REDSTONE), "ui.beyonddimensions.energy.pop.hint")
+            () -> withSides(MachineType.builder(BDBlocks.NET_ENERGY_PATHWAY), "ui.beyonddimensions.energy.pop.hint")
+                    .setting(BDMachineSettings.REDSTONE)
                     .build());
 
     public static final DeferredHolder<MachineType, MachineType> NET_FURNACE = TYPES.register("net_furnace",
@@ -100,14 +100,14 @@ public final class BDMachineTypes
 
     private static MachineType furnace(Supplier<? extends ItemLike> block)
     {
-        return withSides(MachineType.builder(block)
+        return withSides(MachineType.builder(block), "ui.beyonddimensions.furnace.pop.hint")
                 .setting(BDMachineSettings.RECEIVE)
                 .setting(BDMachineSettings.SORT)
-                .setting(BDMachineSettings.REDSTONE), "ui.beyonddimensions.furnace.pop.hint")
+                .setting(BDMachineSettings.REDSTONE)
                 .build();
     }
 
-    // 六个面的输入输出与主动弹出，都在面配置页上编辑；popHint 说明这类机器弹出什么
+    // 六个面的输入输出与主动弹出；各机器都最先声明它们，面配置排在设置页最上面。popHint 说明这类机器弹出什么
     private static MachineType.Builder withSides(MachineType.Builder builder, String popHint)
     {
         for (Direction side : Direction.values())

@@ -29,13 +29,10 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
     private val playerSlots = menu.playerSlotIds()
     private val text = InterfaceText(title.string)
 
-    // 动态结构里的接口没有固定的相邻方块，没有面配置页
+    // 动态结构里的接口没有固定的相邻方块，设置页上没有面配置
     private val sides = machineSidesView(menu.access as? NetInterfaceBlockEntity, inventory.player)
 
-    override fun snapshot(): InterfaceState {
-        val settings = container.machineSettings().snapshot()
-        return InterfaceState(machineSettingRows(settings), sides?.snapshot(settings))
-    }
+    override fun snapshot() = InterfaceState(machineSettingRows(container.machineSettings().snapshot(), sides))
 
     override fun handle(action: InterfaceAction) {
         when (action) {
@@ -54,7 +51,6 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 rail = {
                     BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
-                    BdSidesTab(sides, page)
                     InjectedTabs(pages, page)
                     Spacer(Modifier.weight(1f))
                     BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
@@ -76,7 +72,6 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
                     Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
-                BdSidesPage(sides, state.sides, page) { send(InterfaceAction.Setting(it)) }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
                     BdSectionLabel(text.settings)
@@ -87,8 +82,7 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
     }
 }
 
-/** [sides] 为面配置页的状态，动态结构里的接口或设置还没同步到时为 null */
-data class InterfaceState(val settings: List<MachineSettingRow>, val sides: SidePageState?)
+data class InterfaceState(val settings: List<MachineSettingRow>)
 
 sealed interface InterfaceAction {
     data class Setting(val pick: MachineSettingPick) : InterfaceAction
