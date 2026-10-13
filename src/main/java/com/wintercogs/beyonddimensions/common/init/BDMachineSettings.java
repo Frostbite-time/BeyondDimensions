@@ -196,6 +196,15 @@ public final class BDMachineSettings
                     .build());
 
     /**
+     * 存量发信器的发信条件
+     */
+    public static final DeferredHolder<MachineSetting<?>, MachineSetting<EmitMode>> EMIT = SETTINGS.register("emit",
+            () -> MachineSetting.enumeration(EmitMode.class, EmitMode.AT_LEAST)
+                    .label("ui.beyonddimensions.emitter.mode")
+                    .editor(SettingEditor.choice(List.of(EmitMode.values()), mode -> "ui.beyonddimensions.emitter.mode." + lowercase(mode)))
+                    .build());
+
+    /**
      * 六个面各自的输入输出，见 {@link MachineSides}
      */
     private static final Map<Direction, DeferredHolder<MachineSetting<?>, MachineSetting<SideMode>>> SIDES = new EnumMap<>(Direction.class);

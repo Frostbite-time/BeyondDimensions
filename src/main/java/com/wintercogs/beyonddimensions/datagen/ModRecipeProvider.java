@@ -221,6 +221,17 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .unlockedBy("unlock_net_smoker_block", has(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
                 .save(recipeOutput);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_STOCK_EMITTER.get())
+                .pattern("AAA")
+                .pattern("BCB")
+                .pattern("ADA")
+                .define('A', Items.COBBLESTONE)
+                .define('B', Items.REDSTONE_TORCH)
+                .define('C', BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .define('D', Items.COMPARATOR)
+                .unlockedBy("unlock_net_stock_emitter", has(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
+                .save(recipeOutput);
+
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_PUMP_BLOCK.get())
                 .pattern("ABA")
                 .pattern("BCB")

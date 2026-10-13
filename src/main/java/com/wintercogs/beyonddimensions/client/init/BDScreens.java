@@ -35,6 +35,7 @@ public class BDScreens
         event.<NetMagnetMenu, MagnetScreen>register(BDMenus.Net_Magnet_Menu.get(), MagnetScreen::new);
         event.<NetFeederMenu, FeederScreen>register(BDMenus.Net_Feeder_Menu.get(), FeederScreen::new);
         event.<NetRestockerMenu, RestockerScreen>register(BDMenus.Net_Restocker_Menu.get(), RestockerScreen::new);
+        event.<NetStockEmitterMenu, StockEmitterScreen>register(BDMenus.Net_Stock_Emitter_Menu.get(), StockEmitterScreen::new);
         event.<XpExchangeMenu, XpExchangeScreen>register(BDMenus.Xp_Exchange_Menu.get(), XpExchangeScreen::new);
         event.<NetControlMenu, NetControlScreen>register(BDMenus.Net_Control_Menu.get(), NetControlScreen::new);
         event.<PrimaryNetSwitcherMenu, PrimaryNetScreen>register(BDMenus.Primary_Net_Switcher_Menu.get(), PrimaryNetScreen::new);

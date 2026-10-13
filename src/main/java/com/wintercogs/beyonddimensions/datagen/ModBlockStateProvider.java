@@ -1,10 +1,13 @@
 package com.wintercogs.beyonddimensions.datagen;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.common.block.NetStockEmitterBlock;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.datagen.util.BDBlockStateProvider;
 import net.minecraft.data.PackOutput;
+import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,6 +40,13 @@ public class ModBlockStateProvider extends BDBlockStateProvider
         simpleBlockItem(BDBlocks.NET_FURNACE_BLOCK.get(), models().getExistingFile(BeyondDimensions.makeId("net_furnace_block")));
         simpleBlockItem(BDBlocks.NET_BLAST_FURNACE_BLOCK.get(), models().getExistingFile(BeyondDimensions.makeId("net_blast_furnace_block")));
         simpleBlockItem(BDBlocks.NET_SMOKER_BLOCK.get(), models().getExistingFile(BeyondDimensions.makeId("net_smoker_block")));
+        // 存量发信器：发信与否各一个六面同贴图的模型
+        ModelFile emitterOff = models().cubeAll("net_stock_emitter", modLoc("block/net_stock_emitter"));
+        ModelFile emitterOn = models().cubeAll("net_stock_emitter_on", modLoc("block/net_stock_emitter_on"));
+        getVariantBuilder(BDBlocks.NET_STOCK_EMITTER.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(state.getValue(NetStockEmitterBlock.POWERED) ? emitterOn : emitterOff)
+                .build());
+        simpleBlockItem(BDBlocks.NET_STOCK_EMITTER.get(), emitterOff);
         // 流体方块的模型只提供粒子贴图，与原版的水、岩浆相同
         for (BDFluids.FluidEntry fluid : BDFluids.ALL)
         {

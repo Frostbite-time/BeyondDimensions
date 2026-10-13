@@ -25,6 +25,7 @@ public class BDMenus
     public static final Supplier<MenuType<NetMagnetMenu>> Net_Magnet_Menu = MENU_TYPES.register("net_magnet_menu", () -> IMenuTypeExtension.create(NetMagnetMenu::new));
     public static final Supplier<MenuType<NetFeederMenu>> Net_Feeder_Menu = MENU_TYPES.register("net_feeder_menu", () -> IMenuTypeExtension.create(NetFeederMenu::new));
     public static final Supplier<MenuType<NetRestockerMenu>> Net_Restocker_Menu = MENU_TYPES.register("net_restocker_menu", () -> IMenuTypeExtension.create(NetRestockerMenu::new));
+    public static final Supplier<MenuType<NetStockEmitterMenu>> Net_Stock_Emitter_Menu = MENU_TYPES.register("net_stock_emitter_menu", () -> IMenuTypeExtension.create(NetStockEmitterMenu::new));
     public static final Supplier<MenuType<XpExchangeMenu>> Xp_Exchange_Menu = MENU_TYPES.register("xp_exchange_menu", () -> IMenuTypeExtension.create(XpExchangeMenu::new));
     public static final Supplier<MenuType<PrimaryNetSwitcherMenu>> Primary_Net_Switcher_Menu = MENU_TYPES.register("primary_net_switcher_menu", () -> IMenuTypeExtension.create(PrimaryNetSwitcherMenu::new));
 

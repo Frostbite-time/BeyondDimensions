@@ -795,13 +795,21 @@ private fun BdScrollbarTrack(
 /** 停止输入多久后自动提交 */
 private const val NUMBER_COMMIT_MILLIS = 800L
 
+/** 输入框最多显示的位数，更长的数字在框内滚动 */
+private const val NUMBER_VISIBLE_DIGITS = 10
+
 /**
  * 整数编辑器：减号、可输入的数字与加号。按钮、方向键与滚轮立即改值，按住 Shift 或 Ctrl 时每次改 10 或 100；
  * 输入的数字在回车、失去焦点或停止输入片刻后提交，Esc 放弃
  */
+@Composable
+fun BdNumberEditor(value: Int, onValueChange: (Int) -> Unit, range: IntRange, enabled: Boolean = true) =
+    BdNumberEditor(value.toLong(), { onValueChange(it.toInt()) }, range.first.toLong()..range.last.toLong(), enabled)
+
+/** 与 Int 版相同，取值范围可以超出 Int */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun BdNumberEditor(value: Int, onValueChange: (Int) -> Unit, range: IntRange, enabled: Boolean = true) {
+fun BdNumberEditor(value: Long, onValueChange: (Long) -> Unit, range: LongRange, enabled: Boolean = true) {
     val colors = Bd.colors
     val focus = LocalFocusManager.current
     var draft by remember { mutableStateOf(value.toString()) }
@@ -814,21 +822,33 @@ fun BdNumberEditor(value: Int, onValueChange: (Int) -> Unit, range: IntRange, en
             dirty = false
         }
     }
-    fun clamp(number: Long) = number.coerceIn(range.first.toLong(), range.last.toLong()).toInt()
-    fun set(next: Int) {
+    fun clamp(number: Long) = number.coerceIn(range.first, range.last)
+    // 位数超出 Long 的数字按 Long 的上下限处理，提交时再收进范围
+    fun parse(text: String): Long? {
+        text.toLongOrNull()?.let { return it }
+        val negative = text.startsWith('-')
+        val body = if (negative) text.drop(1) else text
+        return if (body.isNotEmpty() && body.all(Char::isDigit)) (if (negative) Long.MIN_VALUE else Long.MAX_VALUE) else null
+    }
+    fun set(next: Long) {
         draft = next.toString()
         dirty = false
         if (next != value) onValueChange(next)
     }
 
     fun commit() {
-        if (enabled && dirty) set(draft.toLongOrNull()?.let(::clamp) ?: value)
+        if (enabled && dirty) set(parse(draft)?.let(::clamp) ?: value)
     }
 
     fun step(direction: Int, modifiers: PointerKeyboardModifiers) {
         if (!enabled) return
-        val amount = if (modifiers.isCtrlPressed) 100 else if (modifiers.isShiftPressed) 10 else 1
-        set(clamp((draft.toLongOrNull() ?: value.toLong()) + direction * amount))
+        val amount = if (modifiers.isCtrlPressed) 100L else if (modifiers.isShiftPressed) 10L else 1L
+        val current = clamp(parse(draft) ?: value)
+        // 到边界时停在边界上，不会溢出
+        val next =
+            if (direction > 0) (if (current > range.last - amount) range.last else current + amount)
+            else (if (current < range.first + amount) range.first else current - amount)
+        set(next)
     }
     LaunchedEffect(draft, dirty) {
         if (dirty) {
@@ -836,7 +856,7 @@ fun BdNumberEditor(value: Int, onValueChange: (Int) -> Unit, range: IntRange, en
             commit()
         }
     }
-    val invalid = dirty && draft.toIntOrNull()?.let { it in range } != true
+    val invalid = dirty && parse(draft)?.let { it in range } != true
     val digits = maxOf(range.first.toString().length, range.last.toString().length)
     // 按钮的点击里拿不到修饰键，按下时先记下
     var pressed by remember { mutableStateOf(PointerKeyboardModifiers()) }
@@ -879,7 +899,7 @@ fun BdNumberEditor(value: Int, onValueChange: (Int) -> Unit, range: IntRange, en
                     dirty = true
                 }
             },
-            Modifier.width((digits * 6 + 6).dp)
+            Modifier.width((minOf(digits, NUMBER_VISIBLE_DIGITS) * 6 + 6).dp)
                 .onFocusChanged {
                     if (focused && !it.isFocused) commit()
                     focused = it.isFocused

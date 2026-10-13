@@ -69,6 +69,7 @@ public class BDCreativeModeTabs
                         output.accept(BDBlocks.NET_FURNACE_BLOCK);
                         output.accept(BDBlocks.NET_BLAST_FURNACE_BLOCK);
                         output.accept(BDBlocks.NET_SMOKER_BLOCK);
+                        output.accept(BDBlocks.NET_STOCK_EMITTER);
                         output.accept(BDBlocks.DIMENSIONAL_CONNECT_BLOCK);
 
 

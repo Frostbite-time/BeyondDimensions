@@ -60,6 +60,12 @@ public final class BDMachineTypes
     public static final DeferredHolder<MachineType, MachineType> NET_SMOKER = TYPES.register("net_smoker",
             () -> furnace(BDBlocks.NET_SMOKER_BLOCK));
 
+    public static final DeferredHolder<MachineType, MachineType> NET_STOCK_EMITTER = TYPES.register("net_stock_emitter",
+            () -> MachineType.builder(BDBlocks.NET_STOCK_EMITTER)
+                    .setting(BDMachineSettings.EMIT)
+                    .setting(BDMachineSettings.FUZZY)
+                    .build());
+
     public static final DeferredHolder<MachineType, MachineType> NET_MAGNET = TYPES.register("net_magnet",
             () -> MachineType.builder(BDItems.NET_MAGNET_ITEM)
                     .setting(BDMachineSettings.WORKING)
