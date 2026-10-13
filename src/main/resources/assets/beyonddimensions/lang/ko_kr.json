@@ -400,7 +400,6 @@
   "ui.beyonddimensions.emitter.mode.at_least": "설정값 이상",
   "ui.beyonddimensions.emitter.mode.below": "설정값 미만",
   "ui.beyonddimensions.emitter.threshold": "설정값",
-  "ui.beyonddimensions.emitter.threshold.unit": "아이템은 개수, 유체는 mB, 에너지는 FE 단위",
   "ui.beyonddimensions.xp.keep": "레벨 유지",
   "ui.beyonddimensions.xp.keep.hint": "레벨을 목표값으로 유지",
   "ui.beyonddimensions.xp.level": "레벨",

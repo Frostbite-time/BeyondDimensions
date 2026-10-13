@@ -400,7 +400,6 @@
   "ui.beyonddimensions.emitter.mode.at_least": "Pelo menos",
   "ui.beyonddimensions.emitter.mode.below": "Menos que",
   "ui.beyonddimensions.emitter.threshold": "Limite",
-  "ui.beyonddimensions.emitter.threshold.unit": "Itens por unidade, fluidos em mB, energia em FE",
   "ui.beyonddimensions.xp.keep": "Manter nível",
   "ui.beyonddimensions.xp.keep.hint": "Mantém você no nível alvo",
   "ui.beyonddimensions.xp.level": "Nível",

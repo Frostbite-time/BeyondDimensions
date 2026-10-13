@@ -400,7 +400,6 @@
   "ui.beyonddimensions.emitter.mode.at_least": "Mindestens",
   "ui.beyonddimensions.emitter.mode.below": "Weniger als",
   "ui.beyonddimensions.emitter.threshold": "Schwellenwert",
-  "ui.beyonddimensions.emitter.threshold.unit": "Gegenstände nach Anzahl, Flüssigkeiten in mB, Energie in FE",
   "ui.beyonddimensions.xp.keep": "Level halten",
   "ui.beyonddimensions.xp.keep.hint": "Hält dich aktiv auf dem Ziellevel",
   "ui.beyonddimensions.xp.level": "Level",

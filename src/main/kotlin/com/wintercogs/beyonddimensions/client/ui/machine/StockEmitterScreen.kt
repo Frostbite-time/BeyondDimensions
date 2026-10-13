@@ -115,7 +115,6 @@ class StockEmitterScreen(menu: NetStockEmitterMenu, inventory: Inventory, title:
                             editable
                         )
                     }
-                    OreText(text.unit, color = colors[BdColors.faint], style = Bd.caption)
                     Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
@@ -170,5 +169,4 @@ private class StockEmitterText(val title: String) {
     val off = tr("ui.beyonddimensions.emitter.off")
     val condition = tr("ui.beyonddimensions.emitter.condition")
     val threshold = tr("ui.beyonddimensions.emitter.threshold")
-    val unit = tr("ui.beyonddimensions.emitter.threshold.unit")
 }

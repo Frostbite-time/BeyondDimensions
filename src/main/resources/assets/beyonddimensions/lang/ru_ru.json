@@ -400,7 +400,6 @@
   "ui.beyonddimensions.emitter.mode.at_least": "Не меньше",
   "ui.beyonddimensions.emitter.mode.below": "Меньше",
   "ui.beyonddimensions.emitter.threshold": "Порог",
-  "ui.beyonddimensions.emitter.threshold.unit": "Предметы — штуки, жидкости — mB, энергия — FE",
   "ui.beyonddimensions.xp.keep": "Удерживать уровень",
   "ui.beyonddimensions.xp.keep.hint": "Удерживает вас на целевом уровне",
   "ui.beyonddimensions.xp.level": "Уровень",

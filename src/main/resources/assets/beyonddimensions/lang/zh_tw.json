@@ -400,7 +400,6 @@
   "ui.beyonddimensions.emitter.mode.at_least": "不少於設定值",
   "ui.beyonddimensions.emitter.mode.below": "少於設定值",
   "ui.beyonddimensions.emitter.threshold": "設定值",
-  "ui.beyonddimensions.emitter.threshold.unit": "物品按個數，流體按 mB，能量按 FE",
   "ui.beyonddimensions.xp.keep": "維持等級",
   "ui.beyonddimensions.xp.keep.hint": "主動把等級維持在目標值",
   "ui.beyonddimensions.xp.level": "等級",

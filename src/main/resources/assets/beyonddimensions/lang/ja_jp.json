@@ -400,7 +400,6 @@
   "ui.beyonddimensions.emitter.mode.at_least": "設定値以上",
   "ui.beyonddimensions.emitter.mode.below": "設定値未満",
   "ui.beyonddimensions.emitter.threshold": "設定値",
-  "ui.beyonddimensions.emitter.threshold.unit": "アイテムは個数、液体は mB、エネルギーは FE で数える",
   "ui.beyonddimensions.xp.keep": "レベルを維持",
   "ui.beyonddimensions.xp.keep.hint": "レベルを目標値に保つ",
   "ui.beyonddimensions.xp.level": "レベル",

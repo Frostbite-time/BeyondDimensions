@@ -400,7 +400,6 @@
   "ui.beyonddimensions.emitter.mode.at_least": "Al menos",
   "ui.beyonddimensions.emitter.mode.below": "Menos de",
   "ui.beyonddimensions.emitter.threshold": "Umbral",
-  "ui.beyonddimensions.emitter.threshold.unit": "Objetos por unidades, fluidos en mB, energía en FE",
   "ui.beyonddimensions.xp.keep": "Mantener nivel",
   "ui.beyonddimensions.xp.keep.hint": "Te mantiene en el nivel objetivo",
   "ui.beyonddimensions.xp.level": "Nivel",
