@@ -19,7 +19,7 @@ import com.wintercogs.beyonddimensions.api.registry.BDRegistries
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
-import com.wintercogs.beyonddimensions.common.block.FacingRule
+import com.wintercogs.beyonddimensions.common.block.orientation.FacingRule
 import com.wintercogs.beyonddimensions.common.machine.MachineSides
 import com.wintercogs.beyonddimensions.common.machine.RelativeSide
 import com.wintercogs.beyonddimensions.common.machine.setting.SideMode

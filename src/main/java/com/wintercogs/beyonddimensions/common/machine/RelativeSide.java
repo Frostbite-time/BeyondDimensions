@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.machine;
 
-import com.wintercogs.beyonddimensions.common.block.Orientation;
+import com.wintercogs.beyonddimensions.common.block.orientation.Orientation;
 import net.minecraft.core.Direction;
 
 /**

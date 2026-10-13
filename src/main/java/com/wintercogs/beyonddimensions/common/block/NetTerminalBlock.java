@@ -1,6 +1,7 @@
 package com.wintercogs.beyonddimensions.common.block;
 
 import com.wintercogs.beyonddimensions.common.block.entity.NetTerminalBlockEntity;
+import com.wintercogs.beyonddimensions.common.block.orientation.FacingRule;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;

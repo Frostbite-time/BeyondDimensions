@@ -1,8 +1,8 @@
 package com.wintercogs.beyonddimensions.datagen.util;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.common.block.FacingRule;
-import com.wintercogs.beyonddimensions.common.block.Orientation;
+import com.wintercogs.beyonddimensions.common.block.orientation.FacingRule;
+import com.wintercogs.beyonddimensions.common.block.orientation.Orientation;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;

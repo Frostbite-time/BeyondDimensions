@@ -4,7 +4,7 @@ import com.wintercogs.beyonddimensions.api.machine.Machine;
 import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
 import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
 import com.wintercogs.beyonddimensions.api.machine.MachineType;
-import com.wintercogs.beyonddimensions.common.block.FacingRule;
+import com.wintercogs.beyonddimensions.common.block.orientation.FacingRule;
 import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.machine.setting.SideMode;
 import net.minecraft.core.Direction;

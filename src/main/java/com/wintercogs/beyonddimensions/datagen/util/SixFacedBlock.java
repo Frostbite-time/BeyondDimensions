@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.datagen.util;
 
-import com.wintercogs.beyonddimensions.common.block.FacingRule;
+import com.wintercogs.beyonddimensions.common.block.orientation.FacingRule;
 import com.wintercogs.beyonddimensions.common.machine.RelativeSide;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;

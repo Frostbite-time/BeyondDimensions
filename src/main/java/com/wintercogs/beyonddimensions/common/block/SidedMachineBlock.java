@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.block;
 
+import com.wintercogs.beyonddimensions.common.block.orientation.FacingRule;
 import com.wintercogs.beyonddimensions.common.machine.MachineSides;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
