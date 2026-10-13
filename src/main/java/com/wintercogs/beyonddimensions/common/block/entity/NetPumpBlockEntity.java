@@ -171,24 +171,8 @@ public class NetPumpBlockEntity extends BaseMachineBlockEntity implements MenuPr
 
     private boolean matchesFilter(IStackKey<?> otherStack)
     {
-        return switch (filterMode())
-        {
-            case BLACK -> !marked(otherStack);
-            case WHITE -> marked(otherStack);
-            case IGNORE -> true;
-        };
-    }
-
-    // 过滤槽里有没有标记这种资源；模糊匹配时只看种类，否则组件也要相同
-    private boolean marked(IStackKey<?> otherStack)
-    {
         boolean fuzzy = setting(BDMachineSettings.FILTER_FUZZY.get()) == FuzzyMode.ENABLE;
-        for (KeyAmount stack : filterSlots.getStorage())
-        {
-            if (fuzzy ? stack.key().isSame(otherStack) : stack.key().isSameTypeSameComponents(otherStack))
-                return true;
-        }
-        return false;
+        return filterMode().passes(filterSlots.getStorage(), otherStack, fuzzy);
     }
 
     public void setNeedsCapabilityUpdate()

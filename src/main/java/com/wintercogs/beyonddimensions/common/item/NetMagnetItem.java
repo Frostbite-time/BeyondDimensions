@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.machine.MachineType;
-import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
@@ -118,6 +117,8 @@ public class NetMagnetItem extends BaseMachineItem
         super.workContent(stack, level, holder, slotId, isSelected);
 
         FilterMode filterMode = settings(stack).get(BDMachineSettings.FILTER.get());
+        // 收集过滤与背包保留过滤共用这一项
+        boolean fuzzy = settings(stack).get(BDMachineSettings.FILTER_FUZZY.get()) == FuzzyMode.ENABLE;
         HopperItemMode hopperItemMode = settings(stack).get(BDMachineSettings.COLLECT_ITEMS.get());
         HopperXpMode hopperXpMode = settings(stack).get(BDMachineSettings.COLLECT_EXPERIENCE.get());
         HopperNBTMode hopperNBTMode = settings(stack).get(BDMachineSettings.COLLECT_COMPONENTS.get());
@@ -145,10 +146,10 @@ public class NetMagnetItem extends BaseMachineItem
                 if (itemEntity == null || itemEntity.isRemoved())
                     continue;
                 ItemStackKey itemKey = new ItemStackKey(itemEntity.getItem());
-                if (matchesFilter(filterMode, filterSlots, itemKey))
+                if (filterMode.passes(filterSlots, itemKey, fuzzy))
                 {
                     // 背包保留的物品只进背包，不管去向设成什么
-                    boolean inventoryOnly = matchesFilter(inventoryKeepMode, inventoryKeepSlots, itemKey);
+                    boolean inventoryOnly = inventoryKeepMode.passes(inventoryKeepSlots, itemKey, fuzzy);
                     pickUp(itemEntity, storage, player, inventoryOnly ? PickupTarget.INVENTORY_ONLY : target);
                 }
             }
@@ -178,7 +179,7 @@ public class NetMagnetItem extends BaseMachineItem
         // 开始抽取流体
         if (hopperFluidMode == HopperFluidMode.ALLOW)
         {
-            fluidCollect(filterMode, filterSlots, storage, level, searchArea);
+            fluidCollect(filterMode, filterSlots, fuzzy, storage, level, searchArea);
         }
     }
 
@@ -357,7 +358,7 @@ public class NetMagnetItem extends BaseMachineItem
     }
 
     // 收集区域流体
-    private void fluidCollect(FilterMode filterMode, List<KeyAmount> filterSlots, UnifiedStorage storage, Level level, AABB searchArea)
+    private void fluidCollect(FilterMode filterMode, List<KeyAmount> filterSlots, boolean fuzzy, UnifiedStorage storage, Level level, AABB searchArea)
     {
 
         int minX = Mth.floor(searchArea.minX);
@@ -394,7 +395,7 @@ public class NetMagnetItem extends BaseMachineItem
 
                     // 进行存储交互
                     FluidStackKey fluidKey = new FluidStackKey(extracted);
-                    if (matchesFilter(filterMode, filterSlots, fluidKey))
+                    if (filterMode.passes(filterSlots, fluidKey, fuzzy))
                     {
                         if (storage.insert(fluidKey, amount, true).isEmpty())
                         {
@@ -415,37 +416,5 @@ public class NetMagnetItem extends BaseMachineItem
                 }
             }
         }
-    }
-
-    private boolean matchesFilter(FilterMode filterMode, List<KeyAmount> filterSlots, IStackKey<?> otherStack)
-    {
-        switch (filterMode)
-        {
-
-            case BLACK ->
-            {
-                for (KeyAmount stack : filterSlots)
-                {
-                    if (stack.key().isSame(otherStack))
-                        return false;
-                }
-                return true;
-            }
-            case WHITE ->
-            {
-                for (KeyAmount stack : filterSlots)
-                {
-                    if (stack.key().isSame(otherStack))
-                        return true;
-                }
-                return false;
-            }
-            case IGNORE ->
-            {
-                return true;
-            }
-
-        }
-        return false;
     }
 }

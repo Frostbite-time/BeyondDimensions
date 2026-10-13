@@ -4,7 +4,6 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
@@ -346,33 +345,8 @@ public class NetHopperBlockEntity extends BaseMachineBlockEntity implements Menu
 
     private boolean matchesFilter(IStackKey<?> otherStack)
     {
-        switch (filterMode())
-        {
-            case BLACK ->
-            {
-                for (KeyAmount stack : filterSlots.getStorage())
-                {
-                    if (stack.key().isSame(otherStack))
-                        return false;
-                }
-                return true;
-            }
-            case WHITE ->
-            {
-                for (KeyAmount stack : filterSlots.getStorage())
-                {
-                    if (stack.key().isSame(otherStack))
-                        return true;
-                }
-                return false;
-            }
-            case IGNORE ->
-            {
-                return true;
-            }
-
-        }
-        return false;
+        boolean fuzzy = setting(BDMachineSettings.FILTER_FUZZY.get()) == FuzzyMode.ENABLE;
+        return filterMode().passes(filterSlots.getStorage(), otherStack, fuzzy);
     }
 
     @Override

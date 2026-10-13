@@ -30,6 +30,7 @@ public final class BDMachineTypes
     public static final DeferredHolder<MachineType, MachineType> NET_HOPPER = TYPES.register("net_hopper",
             () -> MachineType.builder(BDBlocks.NET_HOPPER_BLOCK)
                     .setting(BDMachineSettings.FILTER)
+                    .setting(BDMachineSettings.FILTER_FUZZY)
                     .setting(BDMachineSettings.REDSTONE)
                     .setting(BDMachineSettings.COLLECT_ITEMS)
                     .setting(BDMachineSettings.COLLECT_EXPERIENCE)
@@ -63,6 +64,7 @@ public final class BDMachineTypes
             () -> MachineType.builder(BDItems.NET_MAGNET_ITEM)
                     .setting(BDMachineSettings.WORKING)
                     .setting(BDMachineSettings.FILTER)
+                    .setting(BDMachineSettings.FILTER_FUZZY)
                     .setting(BDMachineSettings.COLLECT_ITEMS)
                     .setting(BDMachineSettings.COLLECT_EXPERIENCE)
                     .setting(BDMachineSettings.COLLECT_FLUIDS)
