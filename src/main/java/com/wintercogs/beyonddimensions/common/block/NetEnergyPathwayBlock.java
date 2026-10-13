@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class NetEnergyPathwayBlock extends BaseMachineBlock
+public class NetEnergyPathwayBlock extends SidedMachineBlock
 {
 
     public NetEnergyPathwayBlock(Properties properties)

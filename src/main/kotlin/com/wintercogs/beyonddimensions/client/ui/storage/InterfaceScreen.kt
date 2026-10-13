@@ -30,7 +30,7 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
     private val text = InterfaceText(title.string)
 
     // 动态结构里的接口没有固定的相邻方块，设置页上没有面配置
-    private val sides = machineSidesView(menu.access as? NetInterfaceBlockEntity, inventory.player)
+    private val sides = machineSidesView(menu.access as? NetInterfaceBlockEntity)
 
     override fun snapshot() = InterfaceState(machineSettingRows(container.machineSettings().snapshot(), sides))
 

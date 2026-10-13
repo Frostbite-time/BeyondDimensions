@@ -5,7 +5,6 @@ import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
 import com.wintercogs.beyonddimensions.common.machine.*;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.Tag;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -207,14 +206,14 @@ public final class BDMachineSettings
                     .build());
 
     /**
-     * 六个面各自的输入输出，见 {@link MachineSides}
+     * 相对正面的六个面各自的输入输出，见 {@link MachineSides}
      */
-    private static final Map<Direction, DeferredHolder<MachineSetting<?>, MachineSetting<SideMode>>> SIDES = new EnumMap<>(Direction.class);
+    private static final Map<RelativeSide, DeferredHolder<MachineSetting<?>, MachineSetting<SideMode>>> SIDES = new EnumMap<>(RelativeSide.class);
 
     static
     {
-        for (Direction side : Direction.values())
-            SIDES.put(side, SETTINGS.register("side_" + side.getName(), () -> sideSetting(side)));
+        for (RelativeSide side : RelativeSide.values())
+            SIDES.put(side, SETTINGS.register("side_" + lowercase(side), () -> sideSetting(side)));
     }
 
     private BDMachineSettings()
@@ -222,17 +221,17 @@ public final class BDMachineSettings
     }
 
     /**
-     * 朝 side 的那一面的输入输出
+     * 相对正面的 side 那一面的输入输出
      */
-    public static DeferredHolder<MachineSetting<?>, MachineSetting<SideMode>> side(Direction side)
+    public static DeferredHolder<MachineSetting<?>, MachineSetting<SideMode>> side(RelativeSide side)
     {
         return SIDES.get(side);
     }
 
-    private static MachineSetting<SideMode> sideSetting(Direction side)
+    private static MachineSetting<SideMode> sideSetting(RelativeSide side)
     {
         return MachineSetting.enumeration(SideMode.class, SideMode.BOTH)
-                .label(SIDE + side.getName())
+                .label(SIDE + lowercase(side))
                 .editor(SettingEditor.choice(List.of(SideMode.values()), mode -> SIDE + "mode." + lowercase(mode)))
                 .build();
     }

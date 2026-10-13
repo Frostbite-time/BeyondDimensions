@@ -24,6 +24,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.bus.api.IEventBus;
@@ -67,7 +68,7 @@ public class CreateModule implements IIntegrationModule
                     BDBlocks.NET_INTERFACE.get(),
                     new NetInterfaceMovementBehaviour()
             );
-            // 动态结构旋转或镜像后放回时，机器的面配置随之转动
+            // 面配置跟着方块的正面走，动态结构转动后不用改；镜像后左右两面互换，仍连着原来的相邻方块
             for (BlockEntityType<?> sided : List.of(
                     BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                     BDBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
@@ -76,9 +77,8 @@ public class CreateModule implements IIntegrationModule
                     BDBlockEntities.NET_SMOKER_BLOCK_ENTITY.get()))
             {
                 MovedBlockTransformerRegistries.BLOCK_ENTITY_TRANSFORMERS.register(sided, (be, transform) -> {
-                    if (be instanceof Machine machine)
-                        machine.setSettings(MachineSides.transformed(machine.settings(),
-                                side -> transform.rotateFacing(transform.mirrorFacing(side))));
+                    if (be instanceof Machine machine && transform.mirror != null && transform.mirror != Mirror.NONE)
+                        machine.setSettings(MachineSides.mirrored(machine));
                 });
             }
         });

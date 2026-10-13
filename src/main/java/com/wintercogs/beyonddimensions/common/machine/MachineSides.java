@@ -4,32 +4,33 @@ import com.wintercogs.beyonddimensions.api.machine.Machine;
 import com.wintercogs.beyonddimensions.api.machine.MachineSetting;
 import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
 import com.wintercogs.beyonddimensions.api.machine.MachineType;
+import com.wintercogs.beyonddimensions.common.block.SidedMachineBlock;
 import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.UnaryOperator;
-
 /**
- * 机器的面配置：六个面各一项 {@link SideMode} 设置，加上主动弹出（{@link BDMachineSettings#POP}）。
- * 机器类型列出了全部六个面才算有面配置，设置页把六个面合成一个展开图
+ * 机器的面配置：相对正面的六个面各一项 {@link SideMode} 设置，加上主动弹出（{@link BDMachineSettings#POP}）。
+ * 机器类型列出了全部六个面才算有面配置，设置页把六个面合成一个展开图。正面由方块的朝向决定，见 {@link SidedMachineBlock}
  */
 public final class MachineSides
 {
-    private static final Direction[] DIRECTIONS = Direction.values();
+    private static final RelativeSide[] SIDES = RelativeSide.values();
 
     private MachineSides()
     {
     }
 
-    public static MachineSetting<SideMode> face(Direction side)
+    public static MachineSetting<SideMode> face(RelativeSide side)
     {
         return BDMachineSettings.side(side).get();
     }
 
     public static boolean isFace(MachineSetting<?> setting)
     {
-        for (Direction side : DIRECTIONS)
+        for (RelativeSide side : SIDES)
             if (face(side) == setting)
                 return true;
         return false;
@@ -37,7 +38,7 @@ public final class MachineSides
 
     public static boolean hasSides(MachineType type)
     {
-        for (Direction side : DIRECTIONS)
+        for (RelativeSide side : SIDES)
             if (!type.has(face(side)))
                 return false;
         return true;
@@ -52,21 +53,30 @@ public final class MachineSides
     }
 
     /**
-     * 朝 side 的那一面的输入输出；不分面的访问（side 为 null）不受限制
+     * 机器方块的正面朝向；没有朝向的方块按朝北算
      */
-    public static SideMode mode(Machine machine, @Nullable Direction side)
+    public static Direction front(BlockState state)
     {
-        return side == null ? SideMode.BOTH : machine.setting(face(side));
+        return state.getOptionalValue(SidedMachineBlock.FACING).orElse(Direction.NORTH);
     }
 
     /**
-     * 方块被旋转或镜像后的面配置：原来朝 side 的面改为朝 transform(side)
+     * 朝 side 的那一面的输入输出；不分面的访问（side 为 null）不受限制
      */
-    public static MachineSettings transformed(MachineSettings settings, UnaryOperator<Direction> transform)
+    public static <T extends BlockEntity & Machine> SideMode mode(T machine, @Nullable Direction side)
     {
-        MachineSettings next = settings;
-        for (Direction side : DIRECTIONS)
-            next = next.with(face(transform.apply(side)), settings.get(face(side)));
-        return next;
+        if (side == null)
+            return SideMode.BOTH;
+        return machine.setting(face(RelativeSide.of(front(machine.getBlockState()), side)));
+    }
+
+    /**
+     * 机器镜像后的设置：左右两面互换，仍连着原来的相邻方块
+     */
+    public static MachineSettings mirrored(Machine machine)
+    {
+        SideMode left = machine.setting(face(RelativeSide.LEFT));
+        SideMode right = machine.setting(face(RelativeSide.RIGHT));
+        return machine.settings().with(face(RelativeSide.LEFT), right).with(face(RelativeSide.RIGHT), left);
     }
 }

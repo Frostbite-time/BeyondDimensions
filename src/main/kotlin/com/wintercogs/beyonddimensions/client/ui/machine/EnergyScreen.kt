@@ -41,7 +41,7 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
     private val playerSlots = menu.playerSlotIds()
     private val text = EnergyText(title.string)
     private val history = FlowHistory()
-    private val sides = machineSidesView(menu.be, inventory.player)
+    private val sides = machineSidesView(menu.be)
 
     override fun inventoryTick() {
         super.inventoryTick()

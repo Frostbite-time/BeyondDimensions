@@ -5,7 +5,8 @@ import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
 import com.wintercogs.beyonddimensions.common.machine.HopperRangeMode;
-import net.minecraft.core.Direction;
+import com.wintercogs.beyonddimensions.common.machine.RelativeSide;
+import com.wintercogs.beyonddimensions.common.machine.SideMode;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -107,12 +108,18 @@ public final class BDMachineTypes
                 .build();
     }
 
-    // 六个面的输入输出与主动弹出；各机器都最先声明它们，面配置排在设置页最上面。popHint 说明这类机器弹出什么
+    // 六个面的输入输出；各机器都最先声明它们，面配置排在设置页最上面
+    private static MachineType.Builder withFaces(MachineType.Builder builder, UnaryOperator<MachineType.EntryBuilder<SideMode>> face)
+    {
+        for (RelativeSide side : RelativeSide.values())
+            builder.setting(BDMachineSettings.side(side), face);
+        return builder;
+    }
+
+    // 六个面与主动弹出；popHint 说明这类机器弹出什么
     private static MachineType.Builder withSides(MachineType.Builder builder, String popHint)
     {
-        for (Direction side : Direction.values())
-            builder.setting(BDMachineSettings.side(side));
-        return builder.setting(BDMachineSettings.POP, entry -> entry.hint(popHint));
+        return withFaces(builder, UnaryOperator.identity()).setting(BDMachineSettings.POP, entry -> entry.hint(popHint));
     }
 
     // 各机器的实际收集范围不同，选项说明按机器给出

@@ -38,7 +38,7 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
     private val slotIds = FurnaceSlots(menu)
     private val playerSlots = menu.playerSlotIds()
     private val text = FurnaceText(title.string)
-    private val sides = machineSidesView(menu.be, inventory.player)
+    private val sides = machineSidesView(menu.be)
 
     override fun snapshot() =
         FurnaceState(

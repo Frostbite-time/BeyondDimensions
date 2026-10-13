@@ -20,6 +20,7 @@ import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.machine.MachineSides
+import com.wintercogs.beyonddimensions.common.machine.RelativeSide
 import com.wintercogs.beyonddimensions.common.machine.SideMode
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync
 import dev.compixel.forge.item.ItemIcon
@@ -29,7 +30,6 @@ import dev.compixel.ui.ore.display.OreText
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.Level
@@ -42,7 +42,7 @@ data class SideFace(
     val setting: ResourceLocation,
     val column: Int,
     val row: Int,
-    /** 方向名，有相邻方块时带上它的名字 */
+    /** 面的名称，有相邻方块时带上它的名字 */
     val title: String,
     val options: List<SideMode>,
     /** 当前模式在 [options] 里的下标 */
@@ -55,19 +55,10 @@ data class SideFace(
 data class SidesState(val faces: List<SideFace>, val modes: Map<SideMode, String>)
 
 /**
- * 生成设置页上的面配置，在游戏线程使用。展开图以打开界面时玩家的朝向为准：正中是面对玩家的一面，
- * 左右是玩家看过去的左右，左下角是背面，上下是顶面与底面。相邻方块变了才重新取图标
+ * 生成设置页上的面配置，在游戏线程使用。展开图以方块的正面为准：正中是正面，左右是站在正面前看过去的左右，
+ * 左下角是背面，上下是顶面与底面。相邻方块变了才重新取图标
  */
-class MachineSidesView(private val level: Level, private val pos: BlockPos, facing: Direction) {
-    private val layout =
-        listOf(
-            Triple(Direction.UP, 1, 0),
-            Triple(facing.counterClockWise, 0, 1),
-            Triple(facing.opposite, 1, 1),
-            Triple(facing.clockWise, 2, 1),
-            Triple(facing, 0, 2),
-            Triple(Direction.DOWN, 1, 2),
-        )
+class MachineSidesView(private val level: Level, private val pos: BlockPos) {
     private val neighbors = EnumMap<Direction, Neighbor>(Direction::class.java)
     private val title = tr("ui.beyonddimensions.side.title")
 
@@ -77,20 +68,21 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos, faci
     fun row(snapshot: MachineSettingsSync.Snapshot): MachineSettingRow? {
         val type = snapshot.machineType() ?: return null
         if (!MachineSides.hasSides(type)) return null
+        val front = MachineSides.front(level.getBlockState(pos))
         val modes = EnumMap<SideMode, String>(SideMode::class.java)
         val faces =
-            layout.map { (side, column, row) ->
+            LAYOUT.map { (side, column, row) ->
                 val setting = MachineSides.face(side)
                 val entry = checkNotNull(type.entry(setting))
                 val editor = entry.editor() as SettingEditor.Choice<SideMode>
                 for (mode in editor.options()) modes.getOrPut(mode) { tr(editor.optionLabel().apply(mode)) }
-                val neighbor = neighbor(side)
-                val direction = tr(entry.labelKey())
+                val neighbor = neighbor(side.direction(front))
+                val name = tr(entry.labelKey())
                 SideFace(
                     checkNotNull(BDRegistries.MACHINE_SETTINGS.getKey(setting)),
                     column,
                     row,
-                    neighbor.name?.let { tr("ui.beyonddimensions.side.face", direction, it) } ?: direction,
+                    neighbor.name?.let { tr("ui.beyonddimensions.side.face", name, it) } ?: name,
                     editor.options(),
                     editor.options().indexOf(snapshot.settings().get(setting)),
                     !snapshot.isLocked(setting),
@@ -101,19 +93,29 @@ class MachineSidesView(private val level: Level, private val pos: BlockPos, faci
         return MachineSettingRow(faces.first().setting, title, null, sides, true)
     }
 
-    private fun neighbor(side: Direction): Neighbor {
-        val state = level.getBlockState(pos.relative(side))
-        neighbors[side]?.takeIf { it.block == state.block }?.let { return it }
+    private fun neighbor(direction: Direction): Neighbor {
+        val state = level.getBlockState(pos.relative(direction))
+        neighbors[direction]?.takeIf { it.block == state.block }?.let { return it }
         val item = state.block.asItem()
         val icon = if (item == Items.AIR) null else ItemIcon.snapshot(ItemStack(item))
         val name = if (state.isAir) null else state.block.name.string
-        return Neighbor(state.block, icon, name).also { neighbors[side] = it }
+        return Neighbor(state.block, icon, name).also { neighbors[direction] = it }
     }
 }
 
+/** 展开图里各面的格子：正面居中，背面在左下角 */
+private val LAYOUT =
+    listOf(
+        Triple(RelativeSide.TOP, 1, 0),
+        Triple(RelativeSide.LEFT, 0, 1),
+        Triple(RelativeSide.FRONT, 1, 1),
+        Triple(RelativeSide.RIGHT, 2, 1),
+        Triple(RelativeSide.BACK, 0, 2),
+        Triple(RelativeSide.BOTTOM, 1, 2),
+    )
+
 /** 方块机器的面配置视图；方块实体不在世界里时为 null，例如动态结构里的接口 */
-fun machineSidesView(be: BlockEntity?, player: Player): MachineSidesView? =
-    be?.level?.let { MachineSidesView(it, be.blockPos, player.direction) }
+fun machineSidesView(be: BlockEntity?): MachineSidesView? = be?.level?.let { MachineSidesView(it, be.blockPos) }
 
 /** 展开图里一格的边长与格间距 */
 private const val CELL = 20

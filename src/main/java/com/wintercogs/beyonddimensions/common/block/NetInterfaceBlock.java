@@ -13,7 +13,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-public class NetInterfaceBlock extends BaseMachineBlock
+public class NetInterfaceBlock extends SidedMachineBlock
 {
 
     private static final Logger LOGGER = LogUtils.getLogger();
