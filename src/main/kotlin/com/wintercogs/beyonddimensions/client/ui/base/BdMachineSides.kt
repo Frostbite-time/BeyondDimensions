@@ -21,7 +21,7 @@ import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.machine.MachineSides
 import com.wintercogs.beyonddimensions.common.machine.RelativeSide
-import com.wintercogs.beyonddimensions.common.machine.SideMode
+import com.wintercogs.beyonddimensions.common.machine.setting.SideMode
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon

@@ -10,7 +10,7 @@ import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.init.BDMachineTypes;
-import com.wintercogs.beyonddimensions.common.machine.*;
+import com.wintercogs.beyonddimensions.common.machine.setting.*;
 import com.wintercogs.beyonddimensions.common.menu.NetHopperMenu;
 import com.wintercogs.beyonddimensions.util.ItemStackHelper;
 import net.minecraft.core.BlockPos;

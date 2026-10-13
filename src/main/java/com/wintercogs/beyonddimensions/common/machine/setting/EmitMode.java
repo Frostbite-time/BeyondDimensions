@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.common.machine;
+package com.wintercogs.beyonddimensions.common.machine.setting;
 
 /**
  * 存量发信器的发信条件：网络里的数量不少于设定值，或者少于设定值

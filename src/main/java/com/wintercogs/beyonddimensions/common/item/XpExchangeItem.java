@@ -8,7 +8,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDTags;
-import com.wintercogs.beyonddimensions.common.machine.XpTransferSpeedMode;
+import com.wintercogs.beyonddimensions.common.machine.setting.XpTransferSpeedMode;
 import com.wintercogs.beyonddimensions.common.menu.XpExchangeMenu;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;

@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.common.machine;
+package com.wintercogs.beyonddimensions.common.machine.setting;
 
 public enum HopperRangeMode
 {

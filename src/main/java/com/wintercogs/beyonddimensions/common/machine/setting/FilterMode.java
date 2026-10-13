@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.common.machine;
+package com.wintercogs.beyonddimensions.common.machine.setting;
 
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;

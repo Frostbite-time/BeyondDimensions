@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
-import com.wintercogs.beyonddimensions.common.machine.XpTransferSpeedMode;
+import com.wintercogs.beyonddimensions.common.machine.setting.XpTransferSpeedMode;
 import net.minecraft.world.item.ItemStack;
 
 public final class XpExchangeSettings

@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.machine;
 
+import com.wintercogs.beyonddimensions.common.machine.setting.RedStoneControlMode;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
