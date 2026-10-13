@@ -39,7 +39,10 @@ data class MachineSettingPick(val setting: ResourceLocation, val index: Int)
  * 按菜单同步来的设置生成设置页的各行，顺序与机器类型的声明相同；在游戏线程调用。
  * 六个面合成一行面配置，排在第一个面的位置；没有 [sides] 时面配置与主动弹出都不显示，例如动态结构里的接口
  */
-fun machineSettingRows(snapshot: MachineSettingsSync.Snapshot, sides: MachineSidesView? = null): List<MachineSettingRow> {
+fun machineSettingRows(
+    snapshot: MachineSettingsSync.Snapshot,
+    sides: MachineSidesView? = null
+): List<MachineSettingRow> {
     val type = snapshot.machineType() ?: return emptyList()
     val firstFace = type.settings().firstOrNull { MachineSides.isFace(it.setting()) }
     return type.settings().mapNotNull {

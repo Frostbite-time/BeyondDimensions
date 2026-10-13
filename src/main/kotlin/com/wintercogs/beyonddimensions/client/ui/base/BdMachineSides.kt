@@ -16,7 +16,8 @@ import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries
-import com.wintercogs.beyonddimensions.client.ui.kit.*
+import com.wintercogs.beyonddimensions.client.ui.kit.BdTooltip
+import com.wintercogs.beyonddimensions.client.ui.kit.brackets
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.block.orientation.FacingRule
