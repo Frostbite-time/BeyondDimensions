@@ -1044,6 +1044,9 @@ public class DimensionsNet extends SavedData
         this.players.clear();
         this.id = -99; // 用-99作为被删除的特殊标记
         this.unifiedStorage.clearStorage();
+        // 容量与种类上限清零：还持有这份存储的界面与设备再存入时会被原样退回
+        this.unifiedStorage.setSlotCapacity(0);
+        this.unifiedStorage.setSlotMaxSize(0);
         this.attachments.clear();
         this.unknownAttachments.clear();
         this.quarantinedAttachments.clear();
