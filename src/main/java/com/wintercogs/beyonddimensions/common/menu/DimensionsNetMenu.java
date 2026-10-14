@@ -400,10 +400,24 @@ public class DimensionsNetMenu extends BDBaseMenu
     }
 
 
+    /**
+     * 服务端：存储所属的网络还在，没有被删除或合并掉
+     */
+    protected boolean networkExists()
+    {
+        DimensionsNet net = serverNet();
+        return net != null && !net.deleted;
+    }
+
+    /**
+     * 快捷键打开的页面只给网络成员用：网络被删除、或玩家已不是成员时失效，页面随即关闭
+     */
     @Override
     public boolean stillValid(@NotNull Player player)
     {
-        return true;
+        if (player.level().isClientSide())
+            return true;
+        return networkExists() && serverNet().getPlayers().contains(player.getUUID());
     }
 
     @Override

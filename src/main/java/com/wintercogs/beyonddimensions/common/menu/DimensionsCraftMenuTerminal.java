@@ -15,8 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import static com.wintercogs.beyonddimensions.common.init.BDMenus.Dimensions_Craft_Menu_Terminal;
 
 /**
- * 存储终端（方块或物品）打开的合成菜单：只负责在终端被拆除或物品不在手上时失效，
- * 合成格是玩家自己的 {@link PlayerCraftingGrid}
+ * 存储终端（方块或物品）打开的合成菜单，合成格是玩家自己的 {@link PlayerCraftingGrid}
  */
 public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 {
@@ -50,9 +49,16 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
         }
     }
 
+    /**
+     * 终端谁拿到谁能用，不看玩家是不是网络成员；网络被删除、终端被拆除或物品不在时失效
+     */
     @Override
     public boolean stillValid(@NotNull Player player)
     {
+        if (player.level().isClientSide())
+            return true;
+        if (!networkExists())
+            return false;
         if (entityPos != null)
         {
             BlockEntity be = player.level().getBlockEntity(entityPos);
