@@ -623,7 +623,7 @@ private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onS
     }
 }
 
-/** 纵向内容：放不下时可滚动，右侧出现细滚动条 */
+/** 纵向内容：放不下时可滚动，右侧出现滚动条 */
 @Composable
 fun BdScrollColumn(
     modifier: Modifier = Modifier,
@@ -675,16 +675,18 @@ fun BdMeter(fraction: Float, modifier: Modifier, cell: Dp = 3.dp) {
     )
 }
 
-/** 细滚动条的宽度；内容与它之间另留 2 */
-const val SCROLLBAR_WIDTH = 5
+/** 滚动条的宽度；内容与它之间另留 2 */
+const val SCROLLBAR_WIDTH = 7
 
-/** 按行滚动的细滚动条：[first] 是第一个可见行，[visible] 与 [total] 为可见行数与总行数 */
+/** 滑块的长度：像原版一样固定，不随内容多少变化 */
+private const val SCROLLBAR_KNOB = 13
+
+/** 按行滚动的滚动条：[first] 是第一个可见行，[visible] 与 [total] 为可见行数与总行数 */
 @Composable
 fun BdScrollbar(first: Int, visible: Int, total: Int, onScrollTo: (Int) -> Unit, modifier: Modifier = Modifier) {
     val maxFirst = (total - visible).coerceAtLeast(0)
     val latest by rememberUpdatedState(onScrollTo)
     BdScrollbarTrack(
-        visibleFraction = if (total > 0) visible.toFloat() / total else 1f,
         position = if (maxFirst > 0) first.toFloat() / maxFirst else 0f,
         canScroll = maxFirst > 0,
         onScrollTo = { latest((it * maxFirst).roundToInt()) },
@@ -692,15 +694,13 @@ fun BdScrollbar(first: Int, visible: Int, total: Int, onScrollTo: (Int) -> Unit,
     )
 }
 
-/** 跟随 [state] 的细滚动条，与按行滚动的外观相同 */
+/** 跟随 [state] 的滚动条，与按行滚动的外观相同 */
 @Composable
 fun BdScrollbar(state: ScrollState, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     // 第一次布局前 maxValue 是表示未知的 Int.MAX_VALUE
     val maximum = if (state.maxValue == Int.MAX_VALUE) 0 else state.maxValue
-    val content = maximum + state.viewportSize
     BdScrollbarTrack(
-        visibleFraction = if (content > 0) state.viewportSize.toFloat() / content else 1f,
         position = if (maximum > 0) state.value.toFloat() / maximum else 0f,
         canScroll = maximum > 0,
         onScrollTo = { scope.launch { state.scrollTo((it * maximum).roundToInt()) } },
@@ -709,26 +709,19 @@ fun BdScrollbar(state: ScrollState, modifier: Modifier = Modifier) {
 }
 
 /**
- * 两种滚动条共用的外观与操作：凹槽里一条凸起的滑块，长度对应可见的比例。
+ * 两种滚动条共用的外观与操作：凹槽里一块凸起的机壳滑块，中间三道防滑纹，像原版的滚动条。
  * 点击或拖动轨道时滑块中心跳到指针处，[onScrollTo] 收到 0 到 1 之间的位置。
  * 滑块在绘制时按轨道的实际高度算出：浮层里的子组合布局不支持固有尺寸的测量，不能用 BoxWithConstraints
  */
 @Composable
-private fun BdScrollbarTrack(
-    visibleFraction: Float,
-    position: Float,
-    canScroll: Boolean,
-    onScrollTo: (Float) -> Unit,
-    modifier: Modifier,
-) {
+private fun BdScrollbarTrack(position: Float, canScroll: Boolean, onScrollTo: (Float) -> Unit, modifier: Modifier) {
     val colors = Bd.colors
     val latest by rememberUpdatedState(onScrollTo)
-    val fraction by rememberUpdatedState(visibleFraction.coerceIn(0f, 1f))
-    val minThumb = with(LocalDensity.current) { 12.dp.toPx() }
-    fun thumbOf(track: Float) = (track * fraction).coerceIn(minOf(minThumb, track), track)
+    val knob = with(LocalDensity.current) { SCROLLBAR_KNOB.dp.toPx() }
+    fun knobOf(track: Float) = minOf(knob, track)
     fun positionAt(y: Float, track: Float): Float {
-        val thumb = thumbOf(track)
-        return ((y - thumb / 2f) / (track - thumb).coerceAtLeast(1f)).coerceIn(0f, 1f)
+        val length = knobOf(track)
+        return ((y - length / 2f) / (track - length).coerceAtLeast(1f)).coerceIn(0f, 1f)
     }
     Box(
         modifier.bdInset(colors).padding(1.dp)
@@ -738,14 +731,22 @@ private fun BdScrollbarTrack(
             }
             .drawBehind {
                 if (!canScroll) return@drawBehind
-                val thumb = thumbOf(size.height)
                 val p = 1.dp.toPx()
-                val face = colors[BdColors.lineStrong]
-                // 滑块左侧一像素亮边、右侧一像素暗边
-                translate(top = (size.height - thumb) * position.coerceIn(0f, 1f)) {
-                    drawRect(face, size = Size(size.width, thumb))
-                    drawRect(lerp(face, Color.White, .3f), size = Size(p, thumb))
-                    drawRect(lerp(face, Color.Black, .35f), Offset(size.width - p, 0f), Size(p, thumb))
+                val w = size.width
+                val length = knobOf(size.height)
+                // 滑块停在整像素上
+                val top = ((size.height - length) * position.coerceIn(0f, 1f) / p).roundToInt() * p
+                translate(top = top) {
+                    drawRect(colors[BdColors.window], size = Size(w, length))
+                    drawRect(colors[BdColors.bevelLight], size = Size(w - p, p))
+                    drawRect(colors[BdColors.bevelLight], Offset(0f, p), Size(p, length - 2 * p))
+                    drawRect(colors[BdColors.bevelDark], Offset(p, length - p), Size(w - p, p))
+                    drawRect(colors[BdColors.bevelDark], Offset(w - p, p), Size(p, length - 2 * p))
+                    // 防滑纹：中间三道暗线
+                    val middle = (length / p).toInt() / 2 * p
+                    for (offset in -2..2 step 2) {
+                        drawRect(colors[BdColors.outline], Offset(p, middle + offset * p), Size(w - 2 * p, p))
+                    }
                 }
             }
     )
