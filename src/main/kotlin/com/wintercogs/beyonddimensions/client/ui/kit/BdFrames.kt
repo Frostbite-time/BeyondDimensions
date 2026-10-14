@@ -115,3 +115,23 @@ private fun glowLevel(index: Int, count: Int): Int {
         else -> 0
     }
 }
+
+/**
+ * 凹槽里的滑块，用于滚动条与开关：左上一圈亮边、右下一圈暗边，没有外轮廓，由凹槽的边框住，像原版的滚动条滑块
+ */
+fun Modifier.bdKnob(fill: Color, light: Color, dark: Color): Modifier = drawBehind {
+    knob(Offset.Zero, size, fill, light, dark)
+}
+
+internal fun DrawScope.knob(topLeft: Offset, size: Size, fill: Color, light: Color, dark: Color) {
+    val p = 1.dp.toPx()
+    val x = topLeft.x
+    val y = topLeft.y
+    val w = size.width
+    val h = size.height
+    drawRect(fill, topLeft, size)
+    drawRect(light, Offset(x, y), Size(w - p, p))
+    drawRect(light, Offset(x, y + p), Size(p, h - 2 * p))
+    drawRect(dark, Offset(x + p, y + h - p), Size(w - p, p))
+    drawRect(dark, Offset(x + w - p, y + p), Size(p, h - 2 * p))
+}

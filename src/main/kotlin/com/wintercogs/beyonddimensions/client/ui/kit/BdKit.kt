@@ -511,7 +511,7 @@ private fun segmentWidths(text: List<Int>, padding: Int, available: Int?): List<
     return widths
 }
 
-/** 开关：轨道里一个小方块，开启时移到右侧并染上强调色 */
+/** 开关：凹槽里一块凸起的滑块，与滚动条的滑块相同；开启时滑到右侧并换成强调色 */
 @Composable
 fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Boolean = true) {
     val colors = Bd.colors
@@ -530,12 +530,18 @@ fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Bool
                 fill = lerp(colors[BdColors.sunken], colors[BdColors.accentSoft], progress),
                 edge = if (hovered) colors[BdColors.lineStrong] else null,
             )
-            .padding(2.dp),
+            .padding(1.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
+        val on = colors[BdColors.accent]
         Box(
-            Modifier.offset(x = 10.dp * progress).size(6.dp)
-                .background(lerp(colors[BdColors.muted], colors[BdColors.accent], progress))
+            Modifier.offset(x = 10.dp * progress)
+                .size(8.dp)
+                .bdKnob(
+                    fill = lerp(colors[BdColors.window], on, progress),
+                    light = lerp(colors[BdColors.bevelLight], lerp(on, Color.White, .4f), progress),
+                    dark = lerp(colors[BdColors.bevelDark], lerp(on, Color.Black, .4f), progress),
+                )
         )
     }
 }
@@ -737,11 +743,8 @@ private fun BdScrollbarTrack(position: Float, canScroll: Boolean, onScrollTo: (F
                 // 滑块停在整像素上
                 val top = ((size.height - length) * position.coerceIn(0f, 1f) / p).roundToInt() * p
                 translate(top = top) {
-                    drawRect(colors[BdColors.window], size = Size(w, length))
-                    drawRect(colors[BdColors.bevelLight], size = Size(w - p, p))
-                    drawRect(colors[BdColors.bevelLight], Offset(0f, p), Size(p, length - 2 * p))
-                    drawRect(colors[BdColors.bevelDark], Offset(p, length - p), Size(w - p, p))
-                    drawRect(colors[BdColors.bevelDark], Offset(w - p, p), Size(p, length - 2 * p))
+                    val face = colors[BdColors.window]
+                    knob(Offset.Zero, Size(w, length), face, colors[BdColors.bevelLight], colors[BdColors.bevelDark])
                     // 防滑纹：中间三道暗线
                     val middle = (length / p).toInt() / 2 * p
                     for (offset in -2..2 step 2) {
