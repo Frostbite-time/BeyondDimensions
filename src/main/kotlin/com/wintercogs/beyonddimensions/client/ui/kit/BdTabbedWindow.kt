@@ -3,8 +3,6 @@ package com.wintercogs.beyonddimensions.client.ui.kit
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -15,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
@@ -22,7 +21,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
-import com.wintercogs.beyonddimensions.client.ui.theme.signatureVertical
 import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OrePixelArt
 import kotlin.math.roundToInt
@@ -79,24 +77,24 @@ fun BdTabbedWindow(
     BdWindow(Modifier.centerContent().then(modifier)) {
         header()
         Box {
-            // 切换时新页面从下方浮起，裁剪到内容区
-            Box(Modifier.padding(start = SIDE_RAIL_WIDTH.dp).clipToBounds(), content = pages)
-            // 竖条高度跟随主页面：深一层的底色，右侧一条细线
+            // 页面嵌在屏幕里，切换时新页面从下方浮起，裁剪到内容区
+            Box(
+                Modifier.padding(start = SIDE_RAIL_WIDTH.dp)
+                    .bdScreen(
+                        colors,
+                        start = SCREEN_INSET_X.dp,
+                        top = SCREEN_INSET_TOP.dp,
+                        end = SCREEN_INSET_X.dp,
+                        bottom = SCREEN_INSET_BOTTOM.dp,
+                    )
+                    .clipToBounds(),
+                content = pages,
+            )
+            // 竖条在屏幕左侧的机壳上，高度跟随主页面；页签靠右，选中的页签接进屏幕
             Box(Modifier.matchParentSize()) {
                 Column(
-                    Modifier.width(SIDE_RAIL_WIDTH.dp)
-                        .fillMaxHeight()
-                        .background(colors[BdColors.sunken])
-                        .drawBehind {
-                            drawLine(
-                                colors[BdColors.line],
-                                Offset(size.width - 0.5f, 0f),
-                                Offset(size.width - 0.5f, size.height),
-                                1.dp.toPx()
-                            )
-                        }
-                        .padding(vertical = 6.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    Modifier.width(SIDE_RAIL_WIDTH.dp).fillMaxHeight().padding(vertical = 6.dp),
+                    horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(3.dp),
                     content = rail,
                 )
@@ -104,6 +102,14 @@ fun BdTabbedWindow(
         }
     }
 }
+
+/** 页面内容到屏幕边的距离，四周相同 */
+private const val SCREEN_GAP = 5
+
+/** 屏幕在页面区域四周让出的机壳宽度 */
+const val SCREEN_INSET_X = PAGE_PADDING_X - SCREEN_GAP
+const val SCREEN_INSET_TOP = PAGE_PADDING_TOP - SCREEN_GAP
+const val SCREEN_INSET_BOTTOM = PAGE_PADDING_BOTTOM - SCREEN_GAP
 
 /**
  * 让内容区而不是整个窗口居中：窗口左移半个竖条宽，屏幕两侧空位不够时少移一些。
@@ -118,7 +124,10 @@ private fun Modifier.centerContent() =
         layout(placeable.width, placeable.height) { placeable.place(-shift, 0) }
     }
 
-/** 竖条上的页签；[label] 是悬停提示 */
+/**
+ * 竖条上的页签；[label] 是悬停提示。未选中的页签是机壳上凸起的按钮，
+ * 选中的页签是屏幕伸出的一截：底色与发光边接进右侧的屏幕
+ */
 @Composable
 fun BdRailTab(label: String, art: OrePixelArt, selected: Boolean, onClick: () -> Unit) {
     val colors = Bd.colors
@@ -130,17 +139,23 @@ fun BdRailTab(label: String, art: OrePixelArt, selected: Boolean, onClick: () ->
                 .hoverable(interaction)
                 .bdClickable(interaction, enabled = !selected, onClick = onClick)
                 .then(
-                    when {
-                        selected -> Modifier.background(colors[BdColors.surface]).border(1.dp, colors[BdColors.line])
-                        hovered -> Modifier.background(colors[BdColors.accentSoft])
-                        else -> Modifier
+                    if (selected) Modifier.drawBehind {
+                        val p = 1.dp.toPx()
+                        // 伸到屏幕的发光边上，盖住它与页签相接的一段
+                        val reach = size.width + (SCREEN_INSET_X + 1).dp.toPx()
+                        drawRect(colors[BdColors.screen], Offset.Zero, Size(reach, size.height))
+                        glowLine(colors, 0f, 0f, reach, horizontal = true, p)
+                        glowLine(colors, 0f, size.height - p, reach, horizontal = true, p)
+                        glowLine(colors, 0f, p, size.height - 2 * p, horizontal = false, p)
                     }
+                    else Modifier.bdRaised(
+                        colors,
+                        fill = if (hovered) colors[BdColors.surface] else colors[BdColors.window],
+                        edge = if (hovered) colors[BdColors.accent] else null,
+                    )
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            if (selected) Box(
-                Modifier.align(Alignment.CenterStart).width(2.dp).fillMaxHeight().background(colors.signatureVertical)
-            )
             OreIcon(
                 art,
                 Modifier.size(9.dp),

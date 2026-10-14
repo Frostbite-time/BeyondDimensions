@@ -11,7 +11,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.*
@@ -19,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
@@ -34,23 +32,19 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
-import com.wintercogs.beyonddimensions.client.ui.theme.signatureVertical
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.ui.LocalUiFeedback
@@ -63,46 +57,36 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-/** 窗口：玻璃面板加一像素细线框，高度随内容 */
+/** 窗口：一块机壳，深色外轮廓与一像素的明暗边，高度随内容 */
 @Composable
 fun BdWindow(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    val colors = Bd.colors
-    Column(modifier.background(colors[BdColors.window]).border(1.dp, colors[BdColors.line]), content = content)
+    Column(modifier.bdRaised(Bd.colors), content = content)
 }
 
-/** 窗口标题栏：图标、模组名与标题，右侧是调色板与关闭按钮 */
+/** 窗口标题栏：机壳上的图标与标题，右侧是调色板与关闭按钮 */
 @Composable
 fun BdHeader(icon: ItemIcon?, title: String, onClose: () -> Unit, tag: String? = null) {
     val openColorEditor = LocalColorEditor.current
     val colors = Bd.colors
     Row(
-        Modifier.fillMaxWidth().height(24.dp).background(colors[BdColors.surface]).padding(start = 7.dp, end = 5.dp),
+        Modifier.fillMaxWidth().height(25.dp).padding(start = 7.dp, end = 6.dp, top = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
             MinecraftItemIcon(icon, Modifier.size(16.dp))
-            Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(5.dp))
         }
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+        Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
             OreText(
-                "BEYOND DIMENSIONS",
-                color = colors[BdColors.faint],
-                style = Bd.overline,
+                title,
+                Modifier.weight(1f, fill = false),
+                color = colors[BdColors.text],
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
-            Row(verticalAlignment = Alignment.Bottom) {
-                OreText(
-                    title,
-                    Modifier.weight(1f, fill = false),
-                    color = colors[BdColors.text],
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                if (tag != null) {
-                    Spacer(Modifier.width(3.dp))
-                    OreText(tag, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
-                }
+            if (tag != null) {
+                Spacer(Modifier.width(4.dp))
+                OreText(tag, color = colors[BdColors.faint], maxLines = 1)
             }
         }
         Spacer(Modifier.width(4.dp))
@@ -112,7 +96,6 @@ fun BdHeader(icon: ItemIcon?, title: String, onClose: () -> Unit, tag: String? =
         }
         BdGlyphButton(OreGlyph.Cross, null, onClose, size = 13.dp, glyphSize = 7.dp)
     }
-    Box(Modifier.fillMaxWidth().height(1.dp).background(colors[BdColors.line]))
 }
 
 /** 只有图标的小按钮 */
@@ -169,16 +152,12 @@ fun BdGlyphButton(
     if (description != null) BdTooltip(description) { button() } else button()
 }
 
-/** 分组标题：强调色方点、标题与延伸到边缘的细线 */
+/** 分组标题：一行次要文字，像原版容器里的“物品栏”；[trailing] 放在行末 */
 @Composable
 fun BdSectionLabel(text: String, modifier: Modifier = Modifier, trailing: (@Composable () -> Unit)? = null) {
     val colors = Bd.colors
     Row(modifier.fillMaxWidth().heightIn(min = 9.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(2.dp).background(colors[BdColors.accent]))
-        Spacer(Modifier.width(3.dp))
-        OreText(text, color = colors[BdColors.muted], style = Bd.overline, maxLines = 1)
-        Spacer(Modifier.width(4.dp))
-        Box(Modifier.weight(1f).height(1.dp).background(colors[BdColors.line]))
+        OreText(text, Modifier.weight(1f), color = colors[BdColors.muted], style = Bd.overline, maxLines = 1)
         if (trailing != null) {
             Spacer(Modifier.width(4.dp))
             trailing()
@@ -299,15 +278,13 @@ fun BdTextField(
                 Row(
                     Modifier.fillMaxWidth()
                         .fillMaxHeight()
-                        .background(colors[BdColors.surface], Bd.ChipShape)
-                        .border(
-                            1.dp,
-                            when {
+                        .bdInset(
+                            colors,
+                            edge = when {
                                 focused -> colors[BdColors.accent]
                                 hovered -> colors[BdColors.lineStrong]
-                                else -> colors[BdColors.line]
+                                else -> null
                             },
-                            Bd.ChipShape,
                         )
                         .padding(horizontal = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -365,15 +342,13 @@ fun BdTextArea(
             decorationBox = { inner ->
                 Box(
                     Modifier.fillMaxWidth()
-                        .background(colors[BdColors.surface], Bd.ChipShape)
-                        .border(
-                            1.dp,
-                            when {
+                        .bdInset(
+                            colors,
+                            edge = when {
                                 focused -> colors[BdColors.accent]
                                 hovered -> colors[BdColors.lineStrong]
-                                else -> colors[BdColors.line]
+                                else -> null
                             },
-                            Bd.ChipShape,
                         )
                         .padding(horizontal = 5.dp, vertical = 3.dp),
                 ) {
@@ -402,14 +377,10 @@ fun BdChip(
             .height(18.dp)
             .hoverable(interaction, enabled)
             .bdClickable(interaction, enabled = enabled, onClick = onClick)
-            .background(
-                if ((hovered || active) && enabled) colors[BdColors.accentSoft] else colors[BdColors.surface],
-                Bd.ChipShape
-            )
-            .border(
-                1.dp,
-                if ((hovered || active) && enabled) colors[BdColors.accent] else colors[BdColors.line],
-                Bd.ChipShape
+            .bdRaised(
+                colors,
+                fill = if ((hovered || active) && enabled) colors[BdColors.surface] else colors[BdColors.window],
+                edge = if ((hovered || active) && enabled) colors[BdColors.accent] else null,
             )
             .padding(horizontal = 5.dp)
             .alpha(if (enabled) 1f else 0.5f),
@@ -432,15 +403,11 @@ fun BdSegmented(
 ) {
     val colors = Bd.colors
     val density = LocalDensity.current
-    val layoutDirection = LocalLayoutDirection.current
     val segments = remember(options) { mutableStateMapOf<Int, BdSegmentBounds>() }
-    var trackWidth by remember { mutableStateOf(0.dp) }
     Box(
         modifier
             .height(15.dp)
-            .clip(Bd.ChipShape)
-            .background(colors[BdColors.sunken], Bd.ChipShape)
-            .border(1.dp, colors[BdColors.line], Bd.ChipShape)
+            .bdInset(colors)
             .padding(1.dp)
             .alpha(if (enabled) 1f else 0.55f)
     ) {
@@ -455,22 +422,13 @@ fun BdSegmented(
                 animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
                 label = "BD tab width",
             )
-            val rightGap = trackWidth - left - width
-            val startGap = if (layoutDirection == LayoutDirection.Ltr) left else rightGap
-            val endGap = if (layoutDirection == LayoutDirection.Ltr) rightGap else left
-            // 接近两端时才形成切角，滑动中也保持在外框以内。
-            val segmentShape = CutCornerShape(
-                topStart = (2.dp - startGap).coerceIn(0.dp, 2.dp),
-                bottomEnd = (2.dp - endGap).coerceIn(0.dp, 2.dp),
-            )
             // 选中框不参与轨道测量；轨道尺寸只由实际选项决定。
             Box(Modifier.matchParentSize()) {
                 Box(
                     Modifier.absoluteOffset(x = left)
                         .width(width)
                         .fillMaxHeight()
-                        .background(colors[BdColors.surface], segmentShape)
-                        .border(1.dp, colors[BdColors.accent], segmentShape)
+                        .bdRaised(colors, fill = colors[BdColors.surface], edge = colors[BdColors.accent])
                 )
             }
         }
@@ -503,9 +461,7 @@ fun BdSegmented(
                     }
                 }
             },
-            modifier = Modifier.fillMaxHeight().onSizeChanged { size ->
-                trackWidth = with(density) { size.width.toDp() }
-            },
+            modifier = Modifier.fillMaxHeight(),
         ) { measurables, constraints ->
             val height = if (constraints.hasBoundedHeight) constraints.maxHeight else 0
             val text = measurables.map { it.maxIntrinsicWidth(constraints.maxHeight) }
@@ -564,15 +520,16 @@ fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Bool
     val hovered = pointerOver && enabled
     val motion = tween<Float>(durationMillis = 150, easing = FastOutSlowInEasing)
     val progress by animateFloatAsState(if (checked) 1f else 0f, motion, label = "BD switch")
-    val edge = if (hovered) colors[BdColors.lineStrong] else colors[BdColors.line]
-    val edgeOn = colors[BdColors.accent].copy(alpha = if (hovered) 1f else 0.6f)
     Box(
         Modifier.size(20.dp, 10.dp)
             .alpha(if (enabled) 1f else 0.55f)
             .hoverable(interaction, enabled)
             .bdClickable(interaction, enabled = enabled) { onCheckedChange(!checked) }
-            .background(lerp(colors[BdColors.sunken], colors[BdColors.accentSoft], progress))
-            .border(1.dp, lerp(edge, edgeOn, progress))
+            .bdInset(
+                colors,
+                fill = lerp(colors[BdColors.sunken], colors[BdColors.accentSoft], progress),
+                edge = if (hovered) colors[BdColors.lineStrong] else null,
+            )
             .padding(2.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
@@ -636,10 +593,8 @@ private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onS
     Row(
         Modifier.fillMaxWidth()
             .height(15.dp)
-            .background(colors[BdColors.sunken], Bd.ChipShape)
-            .border(1.dp, colors[BdColors.line], Bd.ChipShape)
-            .padding(1.dp)
-            .clip(Bd.ChipInnerShape),
+            .bdInset(colors)
+            .padding(1.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BdGlyphButton(
@@ -695,14 +650,14 @@ fun BdScrollColumn(
 }
 
 /**
- * 分段仪表：等宽小格、一像素间隔，沿标志渐变填充。
+ * 分段仪表：凹槽里等宽的小格、一像素间隔，亮起的格子从发光边的暗端渐亮到亮端。
  * [cell] 为每格含间隔的宽度。
  */
 @Composable
 fun BdMeter(fraction: Float, modifier: Modifier, cell: Dp = 3.dp) {
     val colors = Bd.colors
     Box(
-        modifier.background(colors[BdColors.surface]).border(1.dp, colors[BdColors.line]).padding(2.dp).drawBehind {
+        modifier.bdInset(colors).padding(2.dp).drawBehind {
             val pitch = cell.toPx()
             val gap = (1.dp.toPx() / 2f).coerceAtLeast(1f)
             val count = (size.width / pitch).toInt().coerceAtLeast(1)
@@ -710,10 +665,10 @@ fun BdMeter(fraction: Float, modifier: Modifier, cell: Dp = 3.dp) {
             val start = (size.width - count * pitch + gap) / 2f
             for (i in 0 until count) {
                 val color = if (i < filled) lerp(
-                    colors[BdColors.cyan],
-                    colors[BdColors.violet],
+                    colors[BdColors.glow],
+                    colors[BdColors.glowBright],
                     i / (count - 1f).coerceAtLeast(1f)
-                ) else colors[BdColors.sunken]
+                ) else lerp(colors[BdColors.sunken], colors[BdColors.glow], .25f)
                 drawRect(color, Offset(start + i * pitch, 0f), Size(pitch - gap, size.height))
             }
         }
@@ -754,7 +709,7 @@ fun BdScrollbar(state: ScrollState, modifier: Modifier = Modifier) {
 }
 
 /**
- * 两种滚动条共用的外观与操作：凹槽里一条标志渐变的滑块，长度对应可见的比例。
+ * 两种滚动条共用的外观与操作：凹槽里一条凸起的滑块，长度对应可见的比例。
  * 点击或拖动轨道时滑块中心跳到指针处，[onScrollTo] 收到 0 到 1 之间的位置。
  * 滑块在绘制时按轨道的实际高度算出：浮层里的子组合布局不支持固有尺寸的测量，不能用 BoxWithConstraints
  */
@@ -776,7 +731,7 @@ private fun BdScrollbarTrack(
         return ((y - thumb / 2f) / (track - thumb).coerceAtLeast(1f)).coerceIn(0f, 1f)
     }
     Box(
-        modifier.background(colors[BdColors.sunken]).border(1.dp, colors[BdColors.line]).padding(1.dp)
+        modifier.bdInset(colors).padding(1.dp)
             .pointerInput(Unit) { detectTapGestures { latest(positionAt(it.y, size.height.toFloat())) } }
             .pointerInput(Unit) {
                 detectVerticalDragGestures { change, _ -> latest(positionAt(change.position.y, size.height.toFloat())) }
@@ -784,9 +739,13 @@ private fun BdScrollbarTrack(
             .drawBehind {
                 if (!canScroll) return@drawBehind
                 val thumb = thumbOf(size.height)
-                // 渐变按滑块自身的范围铺开
+                val p = 1.dp.toPx()
+                val face = colors[BdColors.lineStrong]
+                // 滑块左侧一像素亮边、右侧一像素暗边
                 translate(top = (size.height - thumb) * position.coerceIn(0f, 1f)) {
-                    drawRect(colors.signatureVertical, size = Size(size.width, thumb))
+                    drawRect(face, size = Size(size.width, thumb))
+                    drawRect(lerp(face, Color.White, .3f), size = Size(p, thumb))
+                    drawRect(lerp(face, Color.Black, .35f), Offset(size.width - p, 0f), Size(p, thumb))
                 }
             }
     )
@@ -867,18 +826,15 @@ fun BdNumberEditor(value: Long, onValueChange: (Long) -> Unit, range: LongRange,
     }
     Row(
         Modifier.height(15.dp)
-            .background(colors[BdColors.sunken], Bd.ChipShape)
-            .border(
-                1.dp,
-                when {
+            .bdInset(
+                colors,
+                edge = when {
                     invalid -> colors[BdColors.danger]
                     focused -> colors[BdColors.accent]
-                    else -> colors[BdColors.line]
+                    else -> null
                 },
-                Bd.ChipShape,
             )
             .padding(1.dp)
-            .clip(Bd.ChipInnerShape)
             .alpha(if (enabled) 1f else 0.55f),
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -1,13 +1,10 @@
 package com.wintercogs.beyonddimensions.client.ui.theme
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.base.SLOT_PITCH
@@ -63,15 +60,8 @@ internal fun BdPreview(content: BdPreviewContent) {
         BdHeader(content.icon, content.title, {}, tag = "#0001")
         Row(Modifier.weight(1f)) {
             Column(
-                Modifier.width(SIDE_RAIL_WIDTH.dp)
-                    .fillMaxHeight()
-                    .background(colors[BdColors.sunken])
-                    .drawBehind {
-                        val x = size.width - 0.5f
-                        drawLine(colors[BdColors.line], Offset(x, 0f), Offset(x, size.height), 1.dp.toPx())
-                    }
-                    .padding(vertical = 6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                Modifier.width(SIDE_RAIL_WIDTH.dp).fillMaxHeight().padding(vertical = 6.dp),
+                horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
                 BdRailTab(content.storage, BdGlyphs.Main, selected = true) {}
@@ -79,7 +69,17 @@ internal fun BdPreview(content: BdPreviewContent) {
                 Spacer(Modifier.weight(1f))
                 BdRailTab(content.settings, OreGlyph.Gear.art, selected = false) {}
             }
-            Column(Modifier.fillMaxHeight().padding(6.dp)) {
+            Column(
+                Modifier.fillMaxHeight()
+                    .bdScreen(
+                        colors,
+                        start = SCREEN_INSET_X.dp,
+                        top = SCREEN_INSET_TOP.dp,
+                        end = SCREEN_INSET_X.dp,
+                        bottom = SCREEN_INSET_BOTTOM.dp,
+                    )
+                    .padding(start = 7.dp, top = 5.dp, end = 7.dp, bottom = 6.dp)
+            ) {
                 BdSearchField("", {}, content.search, Modifier.fillMaxWidth())
                 Spacer(Modifier.height(5.dp))
                 BdSectionLabel(content.stored)
@@ -122,8 +122,7 @@ internal fun BdPreview(content: BdPreviewContent) {
                 Spacer(Modifier.weight(1f).heightIn(min = 6.dp))
                 Column(
                     Modifier.fillMaxWidth()
-                        .background(colors[BdColors.popover], Bd.ChipShape)
-                        .border(1.dp, colors[BdColors.lineStrong], Bd.ChipShape)
+                        .bdRaised(colors, fill = colors[BdColors.popover])
                         .padding(horizontal = 4.dp, vertical = 2.dp)
                 ) {
                     OreText(content.popover, color = colors[BdColors.text], style = Bd.caption, maxLines = 1)

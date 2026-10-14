@@ -40,7 +40,6 @@ import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
-import com.wintercogs.beyonddimensions.client.ui.theme.signature
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
@@ -307,14 +306,11 @@ private fun StorageView(
                         }
                     }
                     InjectedTabs(pages, page)
+                    // 切换网络不是页面，用未选中页签的样子当按钮
                     if (layout.showSwitcher) {
-                        BdGlyphButton(
-                            OreGlyph.CycleArrows,
-                            text.switcher,
-                            { send(StorageAction.OpenSwitcher) },
-                            size = 20.dp,
-                            glyphSize = 9.dp
-                        )
+                        BdRailTab(text.switcher, OreGlyph.CycleArrows.art, selected = false) {
+                            send(StorageAction.OpenSwitcher)
+                        }
                     }
                     Spacer(Modifier.weight(1f))
                     BdRailTab(text.view, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
@@ -672,7 +668,14 @@ private fun CategoryTabView(
                 }
             }
             Spacer(Modifier.weight(1f))
-            if (selected) Box(Modifier.fillMaxWidth().height(2.dp).background(colors.signature))
+            // 选中的分类下方一条两像素的发光线
+            if (selected) Box(
+                Modifier.fillMaxWidth().height(2.dp).drawBehind {
+                    val p = 1.dp.toPx()
+                    glowLine(colors, 0f, 0f, size.width, horizontal = true, p)
+                    glowLine(colors, 0f, p, size.width, horizontal = true, p)
+                }
+            )
         }
         menuAt?.let { point ->
             CategoryMenu(point, index, count, vertical = false, send, text, onDismiss = { menuAt = null })

@@ -8,9 +8,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
@@ -22,7 +19,6 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
-import com.wintercogs.beyonddimensions.client.ui.theme.signature
 import dev.compixel.ui.ore.display.OreText
 import kotlin.math.roundToInt
 
@@ -68,14 +64,7 @@ fun BdTooltip(
                 val colors = Bd.colors
                 Column(
                     Modifier.widthIn(max = 200.dp)
-                        .background(colors[BdColors.popover], Bd.ChipShape)
-                        .border(1.dp, colors[BdColors.lineStrong], Bd.ChipShape)
-                        .drawWithContent {
-                            drawContent()
-                            // 上沿从切角之后开始换成标志渐变
-                            val cut = Bd.CHIP_CUT.dp.toPx()
-                            drawRect(colors.signature, Offset(cut, 0f), Size(size.width - cut, 1.dp.toPx()))
-                        }
+                        .bdRaised(colors, fill = colors[BdColors.popover])
                         .padding(horizontal = 5.dp, vertical = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                     content = tooltip,
@@ -164,8 +153,7 @@ private class BelowAnchor(private val gap: Int) : PopupPositionProvider {
 private fun OverlayCard(modifier: Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = Bd.colors
     Column(
-        Modifier.background(colors[BdColors.popover], Bd.ChipShape)
-            .border(1.dp, colors[BdColors.lineStrong], Bd.ChipShape).then(modifier),
+        Modifier.bdRaised(colors, fill = colors[BdColors.popover]).then(modifier),
         content = content,
     )
 }
@@ -179,7 +167,7 @@ object BdContextMenu : ContextMenuRepresentation {
         val close = { state.status = ContextMenuState.Status.Closed }
         val point = IntOffset(status.rect.center.x.roundToInt(), status.rect.center.y.roundToInt())
         Popup(remember(point) { AtPoint(point) }, close, properties = PopupProperties(focusable = true)) {
-            OverlayCard(Modifier.width(IntrinsicSize.Max).widthIn(min = 40.dp).padding(1.dp)) {
+            OverlayCard(Modifier.width(IntrinsicSize.Max).widthIn(min = 40.dp).padding(2.dp)) {
                 for (item in items()) {
                     BdMenuRow(item.label) {
                         close()
@@ -202,7 +190,7 @@ fun BdPointMenu(point: IntOffset, onDismissRequest: () -> Unit, content: @Compos
     }
     if (!LocalWindowInfo.current.isWindowFocused) return
     Popup(remember(point) { AtPoint(point) }, onDismissRequest, properties = PopupProperties(focusable = true)) {
-        OverlayCard(Modifier.width(IntrinsicSize.Max).widthIn(min = 40.dp).padding(1.dp), content)
+        OverlayCard(Modifier.width(IntrinsicSize.Max).widthIn(min = 40.dp).padding(2.dp), content)
     }
 }
 

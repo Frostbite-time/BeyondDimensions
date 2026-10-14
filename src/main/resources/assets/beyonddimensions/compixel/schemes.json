@@ -1,4 +1,4 @@
 {
   "format": 1,
-  "order": ["glass", "vanilla", "create"]
+  "order": ["casing", "glass", "vanilla", "create"]
 }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,18 +23,13 @@ import dev.compixel.ui.theme.SchemeOwner
 import dev.compixel.ui.theme.colors
 
 /**
- * 超越维度的界面风格：深色半透明的玻璃面板，配一像素的浅色细线、青色强调色与由青到紫的标志渐变。
+ * 超越维度的界面风格：窗口像 BD 的方块一样是一块机壳，带深色轮廓与一像素的明暗边，
+ * 页面嵌在四周发光的屏幕里；按钮凸起，输入框与槽位凹下。
  * 颜色由 [BdColors] 声明，来自玩家选的配色与颜色编辑器里的修改。读取：`Bd.colors[BdColors.window]`
  */
 object Bd {
-    /** 控件切角的边长 */
-    const val CHIP_CUT = 3
-
-    /** 控件的外形：左上与右下切角 */
-    val ChipShape = CutCornerShape(topStart = CHIP_CUT.dp, bottomEnd = CHIP_CUT.dp)
-
-    /** [ChipShape] 一像素边框以内的外形：带边框的控件里有自己底色的子项时按它裁剪，子项不会盖住边框 */
-    val ChipInnerShape = CutCornerShape(topStart = 2.41.dp, bottomEnd = 2.41.dp)
+    /** 控件的外形：四角各缺一个像素，像原版的按钮 */
+    val ChipShape = CutCornerShape(1.dp)
 
     val colors: ColorValues
         @Composable get() = LocalBdColors.current
@@ -126,6 +122,20 @@ object BdColors : ColorSchema("beyonddimensions") {
 
     /** 悬停槽位的底色 */
     val slotHover = derived("slotHover", "slots", slot) { it[slot] }
+
+    /** 窗口与凸起控件的深色外轮廓 */
+    val outline = derived("outline", "window", window) { lerp(it[window].copy(alpha = 1f), Color.Black, .7f) }
+
+    /** 凸起处左上的亮边与右下的暗边；凹下处反过来 */
+    val bevelLight = derived("bevelLight", "window", window) { lerp(it[window], Color.White, .14f) }
+    val bevelDark = derived("bevelDark", "window", window) { lerp(it[window], Color.Black, .45f) }
+
+    /** 页面所在的屏幕，比外壳深一层 */
+    val screen = derived("screen", "window", window) { lerp(it[window], Color.Black, .42f) }
+
+    /** 屏幕四周发光的边：每条边两端是 [glow]，向中段渐亮到 [glowBright] */
+    val glow = derived("glow", "accent", accent) { lerp(it[accent], Color.Black, .5f) }
+    val glowBright = derived("glowBright", "accent", accent) { lerp(it[accent], Color.White, .3f) }
 }
 
 /** 由青到紫的标志渐变 */
@@ -139,7 +149,7 @@ val LocalBdColors = staticCompositionLocalOf { BdColors.defaults }
 
 /** BD 界面的设计：提供玩家所选配色的 BD 颜色与文本框的右键菜单，并按 BD 的颜色为其中的 Ore 控件配色 */
 object BdDesign : UiDesign {
-    override val owner = SchemeOwner("beyonddimensions", BdColors, default = "glass")
+    override val owner = SchemeOwner("beyonddimensions", BdColors, default = "casing")
 
     @Composable
     override fun Decorate(content: @Composable () -> Unit) {

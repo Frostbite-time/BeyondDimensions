@@ -31,6 +31,12 @@
     "flameCore": "#FFE680",
     "sideInput": "#B02E26",
     "sideOutput": "#3C44AA",
-    "sideBoth": "#8932B8"
+    "sideBoth": "#8932B8",
+    "outline": "#000000",
+    "bevelLight": "#FFFFFF",
+    "bevelDark": "#555555",
+    "screen": "#C6C6C6",
+    "glow": "#8B8B8B",
+    "glowBright": "#8B8B8B"
   }
 }
