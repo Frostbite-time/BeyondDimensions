@@ -652,6 +652,9 @@ private fun CategoryTabView(
                 if (tab.icon != null) {
                     MinecraftItemIcon(tab.icon, Modifier.size(8.dp))
                     Spacer(Modifier.width(2.dp))
+                } else if (tab.name.isBlank()) {
+                    // 没有名字也没有图标的分类画一个漏斗，不然标签宽度为零，看不见也点不到
+                    BdIcon(BdIcons.Funnel, color = if (selected || hovered) colors[BdColors.text] else colors[BdColors.muted])
                 }
                 OreText(
                     tab.name,
