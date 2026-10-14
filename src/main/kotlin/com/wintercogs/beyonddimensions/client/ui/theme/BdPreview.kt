@@ -14,7 +14,6 @@ import com.wintercogs.beyonddimensions.client.ui.machine.Flames
 import com.wintercogs.beyonddimensions.common.init.BDItems
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
-import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.inventory.OreSlot
 import net.minecraft.world.item.ItemStack
@@ -64,10 +63,10 @@ internal fun BdPreview(content: BdPreviewContent) {
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
-                BdRailTab(content.storage, BdGlyphs.Main, selected = true) {}
-                BdRailTab(content.crafting, BdGlyphs.Crafting, selected = false) {}
+                BdRailTab(content.storage, BdIcons.Main, selected = true) {}
+                BdRailTab(content.crafting, BdIcons.Crafting, selected = false) {}
                 Spacer(Modifier.weight(1f))
-                BdRailTab(content.settings, OreGlyph.Gear.art, selected = false) {}
+                BdRailTab(content.settings, BdIcons.Settings, selected = false) {}
             }
             Column(
                 Modifier.fillMaxHeight()

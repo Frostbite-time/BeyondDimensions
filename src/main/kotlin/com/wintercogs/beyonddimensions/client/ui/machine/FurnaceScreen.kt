@@ -21,7 +21,6 @@ import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.NetFurnaceMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
-import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -63,11 +62,12 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
             BdTabbedWindow(
                 Modifier.width(FURNACE_WINDOW_WIDTH.dp).then(slots.areaModifier()),
                 header = { BdHeader(icon, text.title, ::requestClose) },
-                rail = {
-                    BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                tabs = {
+                    BdRailTab(text.title, BdIcons.Main, selected = page.main) { page.open(BdPages.MAIN) }
                     InjectedTabs(pages, page)
-                    Spacer(Modifier.weight(1f))
-                    BdRailTab(text.settings, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
+                },
+                pinned = {
+                    BdRailTab(text.settings, BdIcons.Settings, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
                 },
             ) {
                 BdMainPage(page.main) { Furnace(state, slotIds, playerSlots, text, slots) }

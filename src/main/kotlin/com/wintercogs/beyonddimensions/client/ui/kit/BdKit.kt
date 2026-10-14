@@ -48,9 +48,6 @@ import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.ui.LocalUiFeedback
-import dev.compixel.ui.ore.display.OreGlyph
-import dev.compixel.ui.ore.display.OreIcon
-import dev.compixel.ui.ore.display.OrePixelArt
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.theme.LocalColorEditor
 import kotlinx.coroutines.delay
@@ -91,36 +88,23 @@ fun BdHeader(icon: ItemIcon?, title: String, onClose: () -> Unit, tag: String? =
         }
         Spacer(Modifier.width(4.dp))
         if (openColorEditor != null) {
-            BdGlyphButton(BdGlyphs.Palette, null, openColorEditor, size = 13.dp, glyphSize = 7.dp)
+            BdGlyphButton(BdIcons.Palette, null, openColorEditor, size = 13.dp)
             Spacer(Modifier.width(2.dp))
         }
-        BdGlyphButton(OreGlyph.Cross, null, onClose, size = 13.dp, glyphSize = 7.dp)
+        BdGlyphButton(BdIcons.Close, null, onClose, size = 13.dp)
     }
 }
 
 /** 只有图标的小按钮 */
 @Composable
 fun BdGlyphButton(
-    glyph: OreGlyph,
+    icon: BdPixelIcon,
     description: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     selected: Boolean = false,
     size: Dp = 16.dp,
-    glyphSize: Dp = 8.dp,
-) = BdGlyphButton(glyph.art, description, onClick, modifier, enabled, selected, size, glyphSize)
-
-@Composable
-fun BdGlyphButton(
-    art: OrePixelArt,
-    description: String?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    selected: Boolean = false,
-    size: Dp = 16.dp,
-    glyphSize: Dp = 8.dp,
 ) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
@@ -146,7 +130,7 @@ fun BdGlyphButton(
                     selected || hovered -> colors[BdColors.accentDeep]
                     else -> colors[BdColors.muted]
                 }
-            OreIcon(art, Modifier.size(glyphSize), color = tint)
+            BdIcon(icon, color = tint)
         }
     }
     if (description != null) BdTooltip(description) { button() } else button()
@@ -239,9 +223,9 @@ fun BdSearchField(
     placeholder: String,
     modifier: Modifier = Modifier,
     help: (@Composable ColumnScope.() -> Unit)? = null,
-) = BdTextField(value, onValueChange, placeholder, modifier, OreGlyph.MagnifyingGlass, help)
+) = BdTextField(value, onValueChange, placeholder, modifier, BdIcons.Search, help)
 
-/** 单行文本框：外观与右键清空同 [BdSearchField]，[glyph] 为 null 时左侧没有图标 */
+/** 单行文本框：外观与右键清空同 [BdSearchField]，[icon] 为 null 时左侧没有图标 */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BdTextField(
@@ -249,7 +233,7 @@ fun BdTextField(
     onValueChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
-    glyph: OreGlyph? = null,
+    icon: BdPixelIcon? = null,
     help: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     val colors = Bd.colors
@@ -289,12 +273,8 @@ fun BdTextField(
                         .padding(horizontal = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (glyph != null) {
-                        OreIcon(
-                            glyph,
-                            Modifier.size(8.dp),
-                            color = if (focused) colors[BdColors.accent] else colors[BdColors.faint]
-                        )
+                    if (icon != null) {
+                        BdIcon(icon, color = if (focused) colors[BdColors.accent] else colors[BdColors.faint])
                         Spacer(Modifier.width(4.dp))
                     }
                     Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
@@ -303,7 +283,7 @@ fun BdTextField(
                     }
                     if (value.isNotEmpty()) {
                         Spacer(Modifier.width(3.dp))
-                        BdGlyphButton(OreGlyph.Cross, null, { onValueChange("") }, size = 10.dp, glyphSize = 6.dp)
+                        BdGlyphButton(BdIcons.Close, null, { onValueChange("") }, size = 10.dp)
                     }
                 }
             },
@@ -604,12 +584,11 @@ private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onS
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BdGlyphButton(
-            OreGlyph.ChevronLeft,
+            BdIcons.ChevronLeft,
             null,
             { onSelect((selected - 1).mod(options.size)) },
             enabled = enabled,
             size = 13.dp,
-            glyphSize = 6.dp
         )
         Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
             OreText(
@@ -619,12 +598,11 @@ private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onS
             )
         }
         BdGlyphButton(
-            OreGlyph.ChevronRight,
+            BdIcons.ChevronRight,
             null,
             { onSelect((selected + 1).mod(options.size)) },
             enabled = enabled,
             size = 13.dp,
-            glyphSize = 6.dp
         )
     }
 }
@@ -843,13 +821,12 @@ fun BdNumberEditor(value: Long, onValueChange: (Long) -> Unit, range: LongRange,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BdGlyphButton(
-            OreGlyph.Minus,
+            BdIcons.Minus,
             null,
             { step(-1, pressed) },
             notePress,
             enabled = enabled && value > range.first,
             size = 13.dp,
-            glyphSize = 6.dp,
         )
         BasicTextField(
             draft,
@@ -911,13 +888,12 @@ fun BdNumberEditor(value: Long, onValueChange: (Long) -> Unit, range: LongRange,
             cursorBrush = SolidColor(colors[BdColors.accent]),
         )
         BdGlyphButton(
-            OreGlyph.Plus,
+            BdIcons.Plus,
             null,
             { step(1, pressed) },
             notePress,
             enabled = enabled && value < range.last,
             size = 13.dp,
-            glyphSize = 6.dp,
         )
     }
 }

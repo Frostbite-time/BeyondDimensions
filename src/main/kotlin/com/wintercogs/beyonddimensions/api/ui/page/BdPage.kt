@@ -2,11 +2,11 @@ package com.wintercogs.beyonddimensions.api.ui.page
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
+import com.wintercogs.beyonddimensions.client.ui.kit.BdPixelIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.forge.sync.MenuAction
 import dev.compixel.forge.sync.MenuSync
 import dev.compixel.forge.sync.SyncedMenu
-import dev.compixel.ui.ore.display.OrePixelArt
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.player.LocalPlayer
@@ -24,8 +24,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu
  * @param A 页面动作
  */
 interface BdPage<M : AbstractContainerMenu, S, A> {
-    /** 竖条上的图标，9×9 显示，例如 `OreGlyph.Gear.art` 或自己画的 [OrePixelArt] */
-    val icon: OrePixelArt
+    /** 竖条上的图标，一格一个界面像素，10×10 与 BD 自己的页签一致，例如 `BdIcons.Settings` 或自己画的 [BdPixelIcon] */
+    val icon: BdPixelIcon
 
     /** 页签的悬停提示；打开界面时在游戏线程取一次 */
     fun title(context: BdPageContext<M>): Component

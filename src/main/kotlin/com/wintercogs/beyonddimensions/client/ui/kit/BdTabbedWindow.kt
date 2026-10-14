@@ -7,6 +7,8 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,8 +23,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
-import dev.compixel.ui.ore.display.OreIcon
-import dev.compixel.ui.ore.display.OrePixelArt
 import kotlin.math.roundToInt
 
 /** 窗口左侧页签竖条的宽度 */
@@ -45,19 +45,17 @@ private val pagePadding =
     )
 
 /**
- * BD 的标准窗口：顶部是 [header]，内容区左侧是页签竖条 [rail]，右侧是 [pages]。
+ * BD 的标准窗口：顶部是 [header]，内容区左侧是页签竖条，右侧是 [pages]。
  *
- * 通常有两页：[BdMainPage] 与设置用的 [BdTabPage]，竖条上方是主页面的页签，底部是设置的页签：
+ * 竖条上方是 [tabs]，页签多到放不下时这一段可以用滚轮滚动；[pinned] 固定在竖条底部，始终可见。
+ * 通常有两页：[BdMainPage] 与设置用的 [BdTabPage]，主页面的页签在上方，设置的页签固定在底部：
  * ```
  * var settingsOpen by remember { mutableStateOf(false) }
  * BdTabbedWindow(
  *     modifier,
  *     header = { BdHeader(icon, title, ::requestClose) },
- *     rail = {
- *         BdRailTab(title, BdGlyphs.Main, selected = !settingsOpen) { settingsOpen = false }
- *         Spacer(Modifier.weight(1f))
- *         BdRailTab(settings, OreGlyph.Gear.art, selected = settingsOpen) { settingsOpen = true }
- *     },
+ *     tabs = { BdRailTab(title, BdIcons.Main, selected = !settingsOpen) { settingsOpen = false } },
+ *     pinned = { BdRailTab(settings, BdIcons.Settings, selected = settingsOpen) { settingsOpen = true } },
  * ) {
  *     BdMainPage(!settingsOpen) { ... }
  *     BdTabPage(settingsOpen) { ... }
@@ -70,7 +68,8 @@ private val pagePadding =
 fun BdTabbedWindow(
     modifier: Modifier,
     header: @Composable () -> Unit,
-    rail: @Composable ColumnScope.() -> Unit,
+    tabs: @Composable ColumnScope.() -> Unit,
+    pinned: @Composable ColumnScope.() -> Unit = {},
     pages: @Composable BoxScope.() -> Unit,
 ) {
     val colors = Bd.colors
@@ -96,8 +95,16 @@ fun BdTabbedWindow(
                     Modifier.width(SIDE_RAIL_WIDTH.dp).fillMaxHeight().padding(vertical = 6.dp),
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(3.dp),
-                    content = rail,
-                )
+                ) {
+                    // 滚动只裁剪上下两端，选中页签伸进屏幕的一截不受影响
+                    Column(
+                        Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(3.dp),
+                        content = tabs,
+                    )
+                    pinned()
+                }
             }
         }
     }
@@ -129,7 +136,7 @@ private fun Modifier.centerContent() =
  * 选中的页签是屏幕伸出的一截：底色与发光边接进右侧的屏幕
  */
 @Composable
-fun BdRailTab(label: String, art: OrePixelArt, selected: Boolean, onClick: () -> Unit) {
+fun BdRailTab(label: String, icon: BdPixelIcon, selected: Boolean, onClick: () -> Unit) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
@@ -156,9 +163,8 @@ fun BdRailTab(label: String, art: OrePixelArt, selected: Boolean, onClick: () ->
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            OreIcon(
-                art,
-                Modifier.size(9.dp),
+            BdIcon(
+                icon,
                 color =
                     when {
                         selected -> colors[BdColors.accentDeep]

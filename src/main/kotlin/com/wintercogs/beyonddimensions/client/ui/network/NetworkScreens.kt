@@ -35,7 +35,6 @@ import com.wintercogs.beyonddimensions.network.packet.c2s.PrimaryNetSwitchAction
 import com.wintercogs.beyonddimensions.network.packet.c2s.RenameNetPacket
 import com.wintercogs.beyonddimensions.util.UIDataHelper
 import dev.compixel.forge.item.ItemIcon
-import dev.compixel.ui.ore.display.OreGlyph
 import dev.compixel.ui.ore.display.OreText
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
@@ -156,8 +155,8 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                             tag = "#%04d".format(state.networkId)
                         )
                     },
-                    rail = {
-                        BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                    tabs = {
+                        BdRailTab(text.title, BdIcons.Main, selected = page.main) { page.open(BdPages.MAIN) }
                         InjectedTabs(pages, page)
                     },
                 ) {
@@ -172,11 +171,10 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                                     )
                                     Spacer(Modifier.width(3.dp))
                                     BdGlyphButton(
-                                        OreGlyph.CycleArrows,
+                                        BdIcons.Refresh,
                                         text.refresh,
                                         { send(NetControlRequest.Refresh) },
                                         size = 11.dp,
-                                        glyphSize = 7.dp
                                     )
                                 }
                                 Spacer(Modifier.height(5.dp))
@@ -419,8 +417,8 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                         tag = current?.let { "#%04d".format(it.id) },
                     )
                 },
-                rail = {
-                    BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                tabs = {
+                    BdRailTab(text.title, BdIcons.Main, selected = page.main) { page.open(BdPages.MAIN) }
                     InjectedTabs(pages, page)
                 },
             ) {
@@ -547,7 +545,7 @@ private fun NetworkRow(
             RoleChip(option.role, text.roles.getValue(option.role))
             if (option.renamable) {
                 Spacer(Modifier.width(2.dp))
-                BdGlyphButton(OreGlyph.Pencil, text.rename, onRename, size = 13.dp, glyphSize = 8.dp)
+                BdGlyphButton(BdIcons.Pencil, text.rename, onRename, size = 13.dp)
             }
         }
     }
@@ -576,6 +574,6 @@ private fun RowScope.RenameField(initial: String, onCommit: (String?) -> Unit) {
         },
     )
     Spacer(Modifier.width(3.dp))
-    BdGlyphButton(OreGlyph.Checkmark, null, { onCommit(value) }, size = 13.dp, glyphSize = 7.dp)
-    BdGlyphButton(OreGlyph.Cross, null, { onCommit(null) }, size = 13.dp, glyphSize = 7.dp)
+    BdGlyphButton(BdIcons.Check, null, { onCommit(value) }, size = 13.dp)
+    BdGlyphButton(BdIcons.Close, null, { onCommit(null) }, size = 13.dp)
 }

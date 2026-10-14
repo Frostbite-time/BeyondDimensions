@@ -52,8 +52,8 @@ class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Compon
             BdTabbedWindow(
                 Modifier.width(SLOT_WINDOW_WIDTH.dp).then(slots.areaModifier()),
                 header = { BdHeader(icon, text.title, ::requestClose) },
-                rail = {
-                    BdRailTab(text.title, BdGlyphs.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                tabs = {
+                    BdRailTab(text.title, BdIcons.Main, selected = page.main) { page.open(BdPages.MAIN) }
                     InjectedTabs(pages, page)
                 },
             ) {

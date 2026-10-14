@@ -48,8 +48,6 @@ import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
-import dev.compixel.ui.ore.display.OreGlyph
-import dev.compixel.ui.ore.display.OreIcon
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.inventory.OreSlot
 import kotlinx.coroutines.launch
@@ -292,14 +290,14 @@ private fun StorageView(
                     )
                 },
                 // 存储与合成两个工作区都在主页面上，合成区显示与否决定选中哪一个
-                rail = {
-                    BdRailTab(text.storage, BdGlyphs.Storage, selected = page.main && !craftShown) {
+                tabs = {
+                    BdRailTab(text.storage, BdIcons.Main, selected = page.main && !craftShown) {
                         page.open(BdPages.MAIN)
                         if (craftShown) {
                             if (state.craft.toggleable) send(StorageAction.ToggleCraft) else craftHidden = true
                         }
                     }
-                    BdRailTab(text.crafting, BdGlyphs.Crafting, selected = page.main && craftShown) {
+                    BdRailTab(text.crafting, BdIcons.Crafting, selected = page.main && craftShown) {
                         page.open(BdPages.MAIN)
                         if (!craftShown) {
                             if (state.craft == null) send(StorageAction.ToggleCraft) else craftHidden = false
@@ -308,12 +306,13 @@ private fun StorageView(
                     InjectedTabs(pages, page)
                     // 切换网络不是页面，用未选中页签的样子当按钮
                     if (layout.showSwitcher) {
-                        BdRailTab(text.switcher, OreGlyph.CycleArrows.art, selected = false) {
+                        BdRailTab(text.switcher, BdIcons.Switch, selected = false) {
                             send(StorageAction.OpenSwitcher)
                         }
                     }
-                    Spacer(Modifier.weight(1f))
-                    BdRailTab(text.view, OreGlyph.Gear.art, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
+                },
+                pinned = {
+                    BdRailTab(text.view, BdIcons.Settings, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
                 },
             ) {
                 BdMainPage(page.main) {
@@ -435,13 +434,12 @@ private fun Toolbar(
         var open by remember { mutableStateOf(false) }
         Box {
             BdChip({ open = !open }, active = open) {
-                OreIcon(OreGlyph.Bars, Modifier.size(7.dp), color = colors[BdColors.faint])
+                BdIcon(BdIcons.Bars, color = colors[BdColors.faint])
                 Spacer(Modifier.width(3.dp))
                 OreText(text.sortNames[state.sort] ?: text.sort, color = colors[BdColors.text], maxLines = 1)
                 Spacer(Modifier.width(3.dp))
-                OreIcon(
-                    if (state.reverse) OreGlyph.ArrowUp else OreGlyph.ArrowDown,
-                    Modifier.size(7.dp),
+                BdIcon(
+                    if (state.reverse) BdIcons.ArrowUp else BdIcons.ArrowDown,
                     color = colors[BdColors.accent]
                 )
             }
@@ -612,11 +610,10 @@ private fun CategoryTabs(state: StorageState, send: (StorageAction) -> Unit, tex
             }
             Spacer(Modifier.width(if (count > 0) 6.dp else 0.dp))
             BdGlyphButton(
-                OreGlyph.Plus,
+                BdIcons.Plus,
                 text.addCategory,
                 { send(StorageAction.AddCategory) },
                 size = 11.dp,
-                glyphSize = 7.dp
             )
         }
         Spacer(Modifier.width(4.dp))
@@ -653,7 +650,7 @@ private fun CategoryTabView(
         Column(Modifier.fillMaxHeight()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (tab.icon != null) {
-                    MinecraftItemIcon(tab.icon, Modifier.size(9.dp))
+                    MinecraftItemIcon(tab.icon, Modifier.size(8.dp))
                     Spacer(Modifier.width(2.dp))
                 }
                 OreText(
@@ -663,7 +660,7 @@ private fun CategoryTabView(
                 )
                 if (editing) {
                     Spacer(Modifier.width(2.dp))
-                    OreIcon(OreGlyph.Pencil, Modifier.size(8.dp), color = colors[BdColors.accent])
+                    BdIcon(BdIcons.Pencil, color = colors[BdColors.accent])
                 }
             }
             Spacer(Modifier.weight(1f))
@@ -721,13 +718,12 @@ private fun CategoryList(state: StorageState, editing: Int, send: (StorageAction
     var open by remember { mutableStateOf(false) }
     Box {
         BdGlyphButton(
-            OreGlyph.ChevronDown,
+            BdIcons.ChevronDown,
             text.categoryList,
             { open = !open },
             enabled = state.categories.isNotEmpty(),
             selected = open,
             size = 11.dp,
-            glyphSize = 7.dp,
         )
         if (open) {
             BdPopover({ open = false }) {
@@ -792,9 +788,9 @@ private fun CategoryOption(
             Box(Modifier.size(3.dp).background(if (selected) colors[BdColors.accent] else Color.Transparent))
             Spacer(Modifier.width(4.dp))
             // 没有图标的分类显示一个漏斗作占位
-            Box(Modifier.size(9.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(8.dp), contentAlignment = Alignment.Center) {
                 if (tab.icon != null) MinecraftItemIcon(tab.icon, Modifier.fillMaxSize())
-                else OreIcon(OreGlyph.Funnel, Modifier.size(7.dp), color = colors[BdColors.faint])
+                else BdIcon(BdIcons.Funnel, color = colors[BdColors.faint])
             }
             Spacer(Modifier.width(3.dp))
             OreText(
@@ -806,7 +802,7 @@ private fun CategoryOption(
             )
             if (editing) {
                 Spacer(Modifier.width(3.dp))
-                OreIcon(OreGlyph.Pencil, Modifier.size(8.dp), color = colors[BdColors.accent])
+                BdIcon(BdIcons.Pencil, color = colors[BdColors.accent])
             }
         }
     }
@@ -826,7 +822,7 @@ private fun ColumnScope.CategoryEditorPanel(
 ) {
     val colors = Bd.colors
     BdSectionLabel(text.editorTitle) {
-        BdGlyphButton(OreGlyph.Cross, null, { send(StorageAction.CloseEditor) }, size = 11.dp, glyphSize = 6.dp)
+        BdGlyphButton(BdIcons.Close, null, { send(StorageAction.CloseEditor) }, size = 11.dp)
     }
     Spacer(Modifier.height(4.dp))
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -886,7 +882,7 @@ private fun ColumnScope.CategoryEditorPanel(
 /** 分组标题末尾的说明：悬停时显示 [hint] */
 @Composable
 private fun HintMark(hint: String) {
-    BdTooltip(hint) { OreIcon(OreGlyph.InformationCircle, Modifier.size(7.dp), color = Bd.colors[BdColors.faint]) }
+    BdTooltip(hint) { BdIcon(BdIcons.Info, color = Bd.colors[BdColors.faint]) }
 }
 
 /** 编辑区里的标记格：左右键分别响应，[name] 是悬停提示 */
@@ -1037,26 +1033,24 @@ private fun CraftSection(
     Column(Modifier.width(width.dp)) {
         BdSectionLabel(text.crafting) {
             BdGlyphButton(
-                BdGlyphs.ToStorage,
+                BdIcons.ToStorage,
                 text.clearToStorage,
                 { send(StorageAction.ClearCraft(true)) },
                 size = 11.dp,
-                glyphSize = 8.dp
             )
             Spacer(Modifier.width(2.dp))
             BdGlyphButton(
-                BdGlyphs.ToInventory,
+                BdIcons.ToInventory,
                 text.clearToInventory,
                 { send(StorageAction.ClearCraft(false)) },
                 size = 11.dp,
-                glyphSize = 8.dp
             )
         }
         Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.background(colors[BdColors.line]).padding(0.5.dp)) { BdSlotGrid(slots, layout.craftSlots, 3) }
             Spacer(Modifier.width(7.dp))
-            OreIcon(OreGlyph.ArrowRight, Modifier.size(8.dp), color = colors[BdColors.accent])
+            BdIcon(BdIcons.ArrowRight, color = colors[BdColors.accent])
             Spacer(Modifier.width(7.dp))
             // 产物槽带一圈强调色细框
             Box(Modifier.border(1.dp, colors[BdColors.accent]).padding(2.dp)) { BdSlot(slots, layout.resultSlot) }
@@ -1133,7 +1127,7 @@ private fun RecipeChooser(choices: List<RecipeChoice>, send: (StorageAction) -> 
             Spacer(Modifier.width(3.dp))
             OreText(choices.size.toString(), color = colors[BdColors.accentDeep], maxLines = 1)
             Spacer(Modifier.width(3.dp))
-            OreIcon(OreGlyph.ChevronRight, Modifier.size(6.dp), color = colors[BdColors.muted])
+            BdIcon(BdIcons.ChevronRight, color = colors[BdColors.muted])
         }
         if (open) {
             BdPopover({ open = false }) {
