@@ -22,8 +22,6 @@
     "slot": "#00000059",
     "slotShadow": "#00000066",
     "slotHighlight": "#FFFFFF1F",
-    "slotHoverOutline": "#00000000",
-    "pill": "#00000000",
     "flameOuter": "#E2531F",
     "flameMiddle": "#F5A524",
     "flameCore": "#FFE680",

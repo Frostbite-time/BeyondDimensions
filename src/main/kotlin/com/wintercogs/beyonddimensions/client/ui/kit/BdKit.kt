@@ -180,7 +180,7 @@ fun Modifier.bdClickable(
     }
 }
 
-/** 数量标签：像原版的物品数量那样带一层错开的投影，颜色取自配色的 amount、amountShadow 与 pill */
+/** 数量标签：像原版的物品数量那样带一层错开的投影，颜色取自配色的 amount 与 amountShadow */
 @Composable
 fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
     val colors = Bd.colors
@@ -188,7 +188,6 @@ fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
     // 四个字符正好占满槽位的宽度；放不下时向左伸出，不截掉末尾的单位
     Box(
         modifier.wrapContentWidth(Alignment.End, unbounded = true)
-            .background(colors[BdColors.pill])
             .padding(end = AMOUNT_FONT_PIXEL, bottom = AMOUNT_FONT_PIXEL)
     ) {
         BasicText(
@@ -631,32 +630,6 @@ fun BdScrollColumn(
             }
         }
     }
-}
-
-/**
- * 分段仪表：凹槽里等宽的小格、一像素间隔，亮起的格子从发光边的暗端渐亮到亮端。
- * [cell] 为每格含间隔的宽度。
- */
-@Composable
-fun BdMeter(fraction: Float, modifier: Modifier, cell: Dp = 3.dp) {
-    val colors = Bd.colors
-    Box(
-        modifier.bdInset(colors).padding(2.dp).drawBehind {
-            val pitch = cell.toPx()
-            val gap = (1.dp.toPx() / 2f).coerceAtLeast(1f)
-            val count = (size.width / pitch).toInt().coerceAtLeast(1)
-            val filled = (count * fraction.coerceIn(0f, 1f)).roundToInt()
-            val start = (size.width - count * pitch + gap) / 2f
-            for (i in 0 until count) {
-                val color = if (i < filled) lerp(
-                    colors[BdColors.glow],
-                    colors[BdColors.glowBright],
-                    i / (count - 1f).coerceAtLeast(1f)
-                ) else lerp(colors[BdColors.sunken], colors[BdColors.glow], .25f)
-                drawRect(color, Offset(start + i * pitch, 0f), Size(pitch - gap, size.height))
-            }
-        }
-    )
 }
 
 /** 滚动条的宽度；内容与它之间另留 2 */

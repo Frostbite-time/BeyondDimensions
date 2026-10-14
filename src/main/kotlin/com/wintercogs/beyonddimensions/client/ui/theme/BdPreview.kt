@@ -116,8 +116,6 @@ internal fun BdPreview(content: BdPreviewContent) {
                     Spacer(Modifier.weight(1f))
                     Flames(1f, 0, null)
                 }
-                Spacer(Modifier.height(4.dp))
-                BdMeter(0.6f, Modifier.fillMaxWidth().height(5.dp))
                 Spacer(Modifier.weight(1f).heightIn(min = 6.dp))
                 Column(
                     Modifier.fillMaxWidth()

@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
@@ -43,7 +42,7 @@ object Bd {
     val caption: TextStyle
         @Composable get() = OreTheme.typography.caption
 
-    /** 分组标题与标题栏上方的小字 */
+    /** 分组标题这类小字 */
     val overline: TextStyle
         @Composable get() = OreTheme.typography.caption
 
@@ -59,10 +58,10 @@ object Bd {
 object BdColors : ColorSchema("beyonddimensions") {
     val window = color("window", "window", Color(0xC70C1018))
 
-    /** 标题栏、卡片等略亮的一层 */
+    /** 卡片，以及悬停与选中的按钮，比外壳略亮 */
     val surface = color("surface", "window", Color(0x0FFFFFFF))
 
-    /** 页签栏、输入框等凹陷的一层 */
+    /** 输入框、开关与滚动条的凹槽等凹下的一层 */
     val sunken = color("sunken", "window", Color(0x59000000))
 
     /** 浮层的底色，比窗口更实，免得下面的内容透上来 */
@@ -81,7 +80,7 @@ object BdColors : ColorSchema("beyonddimensions") {
     val accent = color("accent", "accent", Color(0xFF22C7F0))
     val accentDeep = color("accentDeep", "accent", Color(0xFF8CE6FF))
 
-    /** 标志渐变的终点；起点见 [cyan] */
+    /** 熔炉导管渐变的终点；起点见 [cyan] */
     val violet = color("violet", "accent", Color(0xFF6D6AFF))
     val online = color("online", "status", Color(0xFF4FD69A))
     val warning = color("warning", "status", Color(0xFFF2B544))
@@ -91,12 +90,6 @@ object BdColors : ColorSchema("beyonddimensions") {
     val slot = color("slot", "slots", Color(0x59000000))
     val slotShadow = color("slotShadow", "slots", Color(0x66000000))
     val slotHighlight = color("slotHighlight", "slots", Color(0x1FFFFFFF))
-
-    /** 悬停槽位的描边；悬停时凹槽去掉明暗边 */
-    val slotHoverOutline = color("slotHoverOutline", "slots", Color(0x00000000))
-
-    /** 格子数量标签的底色 */
-    val pill = color("pill", "slots", Color.Transparent)
 
     /** 格子数量的文字与它右下一个字体像素处的投影 */
     val amount = color("amount", "slots", Color.White)
@@ -114,7 +107,7 @@ object BdColors : ColorSchema("beyonddimensions") {
 
     val accentSoft = derived("accentSoft", "accent", accent) { it[accent].copy(alpha = .15f) }
 
-    /** 标志渐变的起点 */
+    /** 熔炉导管渐变的起点，跟随强调色 */
     val cyan = derived("cyan", "accent", accent) { it[accent] }
 
     /** 文本框里选中文字的底色 */
@@ -137,13 +130,6 @@ object BdColors : ColorSchema("beyonddimensions") {
     val glow = derived("glow", "accent", accent) { lerp(it[accent], Color.Black, .5f) }
     val glowBright = derived("glowBright", "accent", accent) { lerp(it[accent], Color.White, .3f) }
 }
-
-/** 由青到紫的标志渐变 */
-val ColorValues.signature: Brush
-    get() = Brush.horizontalGradient(listOf(this[BdColors.cyan], this[BdColors.violet]))
-
-val ColorValues.signatureVertical: Brush
-    get() = Brush.verticalGradient(listOf(this[BdColors.cyan], this[BdColors.violet]))
 
 val LocalBdColors = staticCompositionLocalOf { BdColors.defaults }
 
@@ -183,7 +169,7 @@ private fun ColorValues.ore() =
         OreColors.slot to this[BdColors.slot],
         OreColors.slotEdge to this[BdColors.slotShadow],
         OreColors.slotHover to this[BdColors.slotHover],
-        OreColors.slotHoverEdge to this[BdColors.slotHoverOutline],
+        OreColors.slotHoverEdge to Color.Transparent,
         OreColors.text to this[BdColors.text],
         OreColors.mutedText to this[BdColors.muted],
         OreColors.disabledText to this[BdColors.faint],
