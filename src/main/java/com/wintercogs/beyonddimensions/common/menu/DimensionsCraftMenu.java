@@ -354,16 +354,17 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     }
 
     /**
-     * 关闭菜单：保留时合成格里的物品留在 {@link PlayerCraftingGrid}，否则按退回方向清空
+     * 关闭菜单：保留时合成格里的物品留在 {@link PlayerCraftingGrid}，否则按退回方向清空。
+     * 玩家断线时也留在合成格里：玩家数据在菜单关闭之前就保存了，物品已经在那份数据里，再退回就多出一份
      */
     @Override
     public void removed(@NotNull Player player)
     {
         super.removed(player);
-        if (!(player instanceof ServerPlayer))
+        if (!(player instanceof ServerPlayer serverPlayer))
             return;
         PlayerCraftingGrid grid = PlayerCraftingGrid.of(player);
-        if (grid.keep())
+        if (grid.keep() || serverPlayer.hasDisconnected())
             resultSlots.clearContent();
         else
             cleanCraftSlots(grid.returnToStorage());
