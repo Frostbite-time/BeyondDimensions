@@ -54,7 +54,7 @@ private const val LIST_MIN_HEIGHT = 5 * 20 + 4 * 2
 private fun ListWell(content: @Composable BoxScope.() -> Unit) {
     val colors = Bd.colors
     Box(
-        Modifier.fillMaxWidth().background(colors[BdColors.sunken]).border(1.dp, colors[BdColors.line]).padding(2.dp),
+        Modifier.fillMaxWidth().bdInset(colors).padding(2.dp),
         content = content
     )
 }
@@ -274,8 +274,7 @@ private fun MemberPanel(
         BdSectionLabel(text.manage)
         Spacer(Modifier.height(5.dp))
         Column(
-            Modifier.fillMaxWidth().background(colors[BdColors.surface]).border(1.dp, colors[BdColors.line])
-                .padding(5.dp)
+            Modifier.fillMaxWidth().bdRaised(colors, fill = colors[BdColors.surface]).padding(5.dp)
         ) {
             OreText(member.name, color = colors[BdColors.text], maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(3.dp))
@@ -317,16 +316,7 @@ private fun ActionButton(label: String, hint: String, danger: Boolean, enabled: 
                 .height(15.dp)
                 .hoverable(interaction, enabled)
                 .bdClickable(interaction, enabled = enabled, onClick = onClick)
-                .background(if (lit) ink else colors[BdColors.surface], Bd.ChipShape)
-                .border(
-                    1.dp,
-                    when {
-                        lit -> ink
-                        enabled -> ink.copy(alpha = 0.45f)
-                        else -> colors[BdColors.line]
-                    },
-                    Bd.ChipShape,
-                ),
+                .bdRaised(colors, fill = if (lit) ink else colors[BdColors.window], edge = if (lit) ink else null),
             contentAlignment = Alignment.Center,
         ) {
             OreText(

@@ -1,8 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.machine
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -270,7 +268,7 @@ private const val BAR_PITCH = 3
 @Composable
 private fun FlowChart(bars: List<Float>, modifier: Modifier) {
     val colors = Bd.colors
-    Canvas(modifier.background(colors[BdColors.sunken]).border(1.dp, colors[BdColors.line]).padding(2.dp)) {
+    Canvas(modifier.bdInset(colors).padding(2.dp)) {
         val cell = 1.dp.toPx()
         val columns = (size.width / cell).toInt()
         // 中线上下各 half 行

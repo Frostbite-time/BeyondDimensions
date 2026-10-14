@@ -326,8 +326,7 @@ private fun StorageView(
                         var pressAt by remember { mutableStateOf(IntOffset.Zero) }
                         Box(
                             Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight()
-                                .background(colors[BdColors.surface])
-                                .border(1.dp, colors[BdColors.line]).padding(1.dp)
+                                .bdInset(colors).padding(1.dp)
                                 .onPointerEvent(PointerEventType.Press, PointerEventPass.Initial) {
                                     pressAt = it.changes.first().position.round()
                                 }
