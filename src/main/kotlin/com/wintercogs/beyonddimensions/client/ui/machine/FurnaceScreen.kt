@@ -218,7 +218,7 @@ private val CONDUIT =
 
 /** 熔炼进度：分段的竖向导管接一个箭头尖，随进度由上往下点亮；熔炼时一道亮光沿点亮的部分向下流动 */
 @Composable
-private fun CookConduit(progress: Float, clock: State<Float>?) {
+internal fun CookConduit(progress: Float, clock: State<Float>?) {
     val colors = Bd.colors
     Canvas(Modifier.size(SLOT_PITCH.dp, GLYPH.dp)) {
         val cell = 1.dp.toPx()

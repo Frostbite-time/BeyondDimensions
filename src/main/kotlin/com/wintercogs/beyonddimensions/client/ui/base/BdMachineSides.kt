@@ -212,7 +212,7 @@ private fun FaceCell(
 /** 图例：每种模式一个与格子同样配色的小方块，一行放不下时折行 */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Legend(modes: Map<SideMode, String>) {
+internal fun Legend(modes: Map<SideMode, String>) {
     val colors = Bd.colors
     FlowRow(
         Modifier.fillMaxWidth(),
