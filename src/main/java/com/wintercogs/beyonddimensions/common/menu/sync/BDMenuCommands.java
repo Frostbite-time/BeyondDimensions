@@ -65,7 +65,7 @@ public final class BDMenuCommands
     private static final int MAX_RECIPE_KEYS = 4096;
     private static final int FEEDBACK_INTERVAL_TICKS = 20;
 
-    public static final MenuAction<BDBaseMenu, Boolean> CRAFT_RETURN = MenuAction.of("bd.craft_return", SyncCodecs.BOOLEAN,
+    public static final MenuAction<BDBaseMenu, Boolean> CRAFT_RETURN = MenuAction.of("bd_craft_return", SyncCodecs.BOOLEAN,
             (menu, player, toStorage) -> {
                 if (!(menu instanceof DimensionsCraftMenu craft))
                     return false;
@@ -87,7 +87,7 @@ public final class BDMenuCommands
             },
             in -> new CraftPreference(in.readBoolean(), in.readBoolean()));
 
-    public static final MenuAction<BDBaseMenu, CraftPreference> CRAFT_PREFERENCE = MenuAction.of("bd.craft_preference", CRAFT_PREFERENCE_CODEC,
+    public static final MenuAction<BDBaseMenu, CraftPreference> CRAFT_PREFERENCE = MenuAction.of("bd_craft_preference", CRAFT_PREFERENCE_CODEC,
             (menu, player, preference) -> {
                 if (!(menu instanceof DimensionsCraftMenu))
                     return false;
@@ -130,7 +130,7 @@ public final class BDMenuCommands
                     out.writeByte(value.modifiers());
                 },
                 in -> new Click(in.readInt(), keyCodec.read(in), in.readLong(), in.readInt(), in.readUnsignedByte()));
-        CLICK = MenuAction.of("bd.click", clickCodec, BDMenuResources.MAX_ACTION_BYTES, (m, player, click) -> {
+        CLICK = MenuAction.of("bd_click", clickCodec, BDMenuResources.MAX_ACTION_BYTES, (m, player, click) -> {
             IStackKey<?> key = m.commands().resolve(click.key());
             if (key == null || click.slot() < 0 || click.slot() >= m.slots.size()
                     || click.button() < 0 || click.button() > 2 || (click.modifiers() & ~SlotClick.MODIFIERS) != 0
@@ -148,7 +148,7 @@ public final class BDMenuCommands
                     out.writeLong(value.amount());
                 },
                 in -> new Take(in.readInt(), keyCodec.read(in), in.readLong()));
-        TAKE = MenuAction.of("bd.take", takeCodec, BDMenuResources.MAX_ACTION_BYTES, (m, player, take) -> {
+        TAKE = MenuAction.of("bd_take", takeCodec, BDMenuResources.MAX_ACTION_BYTES, (m, player, take) -> {
             IStackKey<?> key = m.commands().resolve(take.key());
             if (key == null || take.slot() < 0 || take.slot() >= m.slots.size()
                     || take.amount() < 1 || take.amount() > key.getVanillaMaxStackSize())
@@ -165,7 +165,7 @@ public final class BDMenuCommands
                     out.writeLong(value.amount());
                 },
                 in -> new Ghost(in.readInt(), nativeKey.read(in), in.readLong()));
-        GHOST = MenuAction.of("bd.ghost", ghostCodec, BDMenuResources.MAX_ACTION_BYTES, (m, player, ghost) -> {
+        GHOST = MenuAction.of("bd_ghost", ghostCodec, BDMenuResources.MAX_ACTION_BYTES, (m, player, ghost) -> {
             // 标记槽只接受 0 或 1 个资源作为模板
             if (ghost.slot() < 0 || ghost.slot() >= m.slots.size() || ghost.amount() < 0 || ghost.amount() > 1
                     || !(m.slots.get(ghost.slot()) instanceof AbstractStackTypedSlot slot) || !slot.isFake())
@@ -202,7 +202,7 @@ public final class BDMenuCommands
                     }
                     return new Recipe(keys, amounts, SyncCodecs.BOOLEAN.read(in));
                 });
-        RECIPE = MenuAction.of("bd.recipe", recipeCodec, BDMenuResources.MAX_ACTION_BYTES, (m, player, recipe) -> {
+        RECIPE = MenuAction.of("bd_recipe", recipeCodec, BDMenuResources.MAX_ACTION_BYTES, (m, player, recipe) -> {
             if (!(m instanceof DimensionsCraftMenu craft))
                 return false;
             List<IStackKey<?>> keys = new ArrayList<>(recipe.keys().size());

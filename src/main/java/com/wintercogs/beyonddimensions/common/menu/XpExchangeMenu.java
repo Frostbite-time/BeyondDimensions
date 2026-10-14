@@ -31,21 +31,21 @@ public class XpExchangeMenu extends BDBaseMenu
     private boolean targetEditable;
 
     private static final SyncSchema<XpExchangeMenu> SCHEMA = SyncSchema.<XpExchangeMenu>builder("beyonddimensions:xp_exchange", 1)
-            .field("value.keep", SyncCodecs.BOOLEAN,
+            .field("value_keep", SyncCodecs.BOOLEAN,
                     m -> m.player.level().isClientSide() ? m.clientKeep : m.menuStack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false),
                     (m, value) -> m.clientKeep = value)
-            .field("editable.keep", SyncCodecs.BOOLEAN,
+            .field("editable_keep", SyncCodecs.BOOLEAN,
                     m -> m.player.level().isClientSide() ? m.keepEditable : editable(m),
                     (m, value) -> m.keepEditable = value)
-            .field("value.target", SyncCodecs.INT,
+            .field("value_target", SyncCodecs.INT,
                     m -> m.player.level().isClientSide() ? m.clientTarget : XpExchangeSettings.getTargetLevel(m.menuStack),
                     (m, value) -> m.clientTarget = value)
-            .field("editable.target", SyncCodecs.BOOLEAN,
+            .field("editable_target", SyncCodecs.BOOLEAN,
                     m -> m.player.level().isClientSide() ? m.targetEditable : editable(m),
                     (m, value) -> m.targetEditable = value)
             .build();
 
-    private static final MenuAction<XpExchangeMenu, Boolean> SET_KEEP = MenuAction.of("set.keep",
+    private static final MenuAction<XpExchangeMenu, Boolean> SET_KEEP = MenuAction.of("set_keep",
             SyncCodecs.BOOLEAN, (m, player, value) -> {
                 if (!editable(m)) return false;
                 if (m.menuStack.getOrDefault(BDDataComponents.XP_NET_KEEP_MODE, false) != value)
@@ -56,7 +56,7 @@ public class XpExchangeMenu extends BDBaseMenu
                 return true;
             });
 
-    private static final MenuAction<XpExchangeMenu, Integer> SET_TARGET = MenuAction.of("set.target",
+    private static final MenuAction<XpExchangeMenu, Integer> SET_TARGET = MenuAction.of("set_target",
             SyncCodecs.INT, (m, player, value) -> {
                 if (!editable(m) || value < 0 || value > XpExchangeSettings.MAX_TARGET_LEVEL) return false;
                 if (XpExchangeSettings.getTargetLevel(m.menuStack) != value)

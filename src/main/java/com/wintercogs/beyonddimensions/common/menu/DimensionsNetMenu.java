@@ -76,10 +76,10 @@ public class DimensionsNetMenu extends BDBaseMenu
     private String clientNetworkName = "";
 
     private static final SyncSchema<DimensionsNetMenu> VIEW_SCHEMA = SyncSchema.<DimensionsNetMenu>builder("beyonddimensions:storage_view", 2)
-            .field("network.id", SyncCodecs.INT,
+            .field("network_id", SyncCodecs.INT,
                     m -> m.player.level().isClientSide() ? m.clientNetworkId : m.serverNet() == null ? DimensionsNet.NO_PRIMARY_NET_ID : m.serverNet().getId(),
                     (m, value) -> m.clientNetworkId = value)
-            .field("network.name", SyncCodecs.STRING,
+            .field("network_name", SyncCodecs.STRING,
                     m -> m.player.level().isClientSide() ? m.clientNetworkName : m.serverNet() == null ? "" : m.serverNet().getCustomName(),
                     (m, value) -> m.clientNetworkName = value)
             .build();

@@ -36,13 +36,13 @@ public class NetEnergyMenu extends BDBaseMenu implements MachineMenu
 
 
     private static final SyncSchema<NetEnergyMenu> SCHEMA = MachineSettingsSync.field(SyncSchema.<NetEnergyMenu>builder("beyonddimensions:energy", 2))
-            .field("number.stored", SyncCodecs.LONG,
+            .field("number_stored", SyncCodecs.LONG,
                     m -> m.energyStored,
                     (m, value) -> m.energyStored = value)
-            .field("number.capacity", SyncCodecs.LONG,
+            .field("number_capacity", SyncCodecs.LONG,
                     m -> m.energyCapacity,
                     (m, value) -> m.energyCapacity = value)
-            .field("number.rate", SyncCodecs.LONG,
+            .field("number_rate", SyncCodecs.LONG,
                     m -> m.energyRate,
                     (m, value) -> m.energyRate = value)
             .build();

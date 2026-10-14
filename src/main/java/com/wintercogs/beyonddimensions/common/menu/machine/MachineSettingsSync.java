@@ -112,7 +112,7 @@ public final class MachineSettingsSync
      */
     public static <M extends BDBaseMenu & MachineMenu> SyncSchema.Builder<M> field(SyncSchema.Builder<M> builder)
     {
-        return builder.field("machine.settings", SNAPSHOT_CODEC,
+        return builder.field("machine_settings", SNAPSHOT_CODEC,
                 m -> m.player.level().isClientSide() ? m.machineSettings().snapshot() : snapshot(m.machine(), m.player.isSpectator()),
                 (m, value) -> m.machineSettings().set(value));
     }
@@ -122,7 +122,7 @@ public final class MachineSettingsSync
      */
     public static <M extends BDBaseMenu & MachineMenu> MenuAction<M, Change> action()
     {
-        return MenuAction.of("machine.setting", CHANGE_CODEC, (menu, player, change) -> apply(menu.machine(), player, change));
+        return MenuAction.of("machine_setting", CHANGE_CODEC, (menu, player, change) -> apply(menu.machine(), player, change));
     }
 
     /**

@@ -26,7 +26,7 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu implements SyncedMenu
     private static final SyncCodec<String> NAME_CODEC = SyncCodecs.STRING;
     private static final NetPermissionlevel[] PERMISSIONS = NetPermissionlevel.values();
     private static final SyncCodec<PrimaryNetOption> OPTION_CODEC = SyncCodec.of(
-            "beyonddimensions:primary-option/1",
+            "beyonddimensions:primary_option/1",
             (out, option) -> {
                 out.writeInt(option.netId());
                 out.writeByte(option.permission().ordinal());
@@ -38,7 +38,7 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu implements SyncedMenu
                 return new PrimaryNetOption(id, PERMISSIONS[permission], NAME_CODEC.read(in));
             });
     private static final SyncSchema<PrimaryNetSwitcherMenu> SYNC_SCHEMA =
-            SyncSchema.<PrimaryNetSwitcherMenu>builder("beyonddimensions:primary-net-menu", 1)
+            SyncSchema.<PrimaryNetSwitcherMenu>builder("beyonddimensions:primary_net_menu", 1)
                     .field("primary", SyncCodecs.INT, menu -> menu.currentPrimaryNetId,
                             (menu, value) -> menu.currentPrimaryNetId = value)
                     .keyedCollection("networks", SyncCodecs.INT, OPTION_CODEC, PrimaryNetOption::netId,

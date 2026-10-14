@@ -39,20 +39,20 @@ public class NetStockEmitterMenu extends BDBaseMenu implements MachineMenu
 
     private static final SyncSchema<NetStockEmitterMenu> SCHEMA =
             MachineSettingsSync.field(SyncSchema.<NetStockEmitterMenu>builder("beyonddimensions:stock_emitter", 1))
-                    .field("value.threshold", SyncCodecs.LONG,
+                    .field("value_threshold", SyncCodecs.LONG,
                             m -> m.player.level().isClientSide() ? m.threshold : m.be.getThreshold(),
                             (m, value) -> m.threshold = value)
-                    .field("value.amount", SyncCodecs.LONG,
+                    .field("value_amount", SyncCodecs.LONG,
                             m -> m.player.level().isClientSide() ? m.amount : m.be.amount(),
                             (m, value) -> m.amount = value)
-                    .field("value.emitting", SyncCodecs.BOOLEAN,
+                    .field("value_emitting", SyncCodecs.BOOLEAN,
                             m -> m.player.level().isClientSide() ? m.emitting : m.be.shouldEmit(),
                             (m, value) -> m.emitting = value)
                     .build();
 
     private static final MenuAction<NetStockEmitterMenu, MachineSettingsSync.Change> SET_SETTING = MachineSettingsSync.action();
 
-    private static final MenuAction<NetStockEmitterMenu, Long> SET_THRESHOLD = MenuAction.of("set.threshold",
+    private static final MenuAction<NetStockEmitterMenu, Long> SET_THRESHOLD = MenuAction.of("set_threshold",
             SyncCodecs.LONG, (m, player, value) -> {
                 if (player.isSpectator() || value < 0)
                     return false;

@@ -65,19 +65,19 @@ public final class PlayerCraftingGrid implements INBTSerializable<CompoundTag>
         ListTag list = new ListTag();
         for (ItemStack stack : items)
             list.add(stack.saveOptional(registries));
-        tag.put("Items", list);
-        tag.putBoolean("Keep", keep);
-        tag.putBoolean("ReturnToStorage", returnToStorage);
+        tag.put("items", list);
+        tag.putBoolean("keep", keep);
+        tag.putBoolean("return_to_storage", returnToStorage);
         return tag;
     }
 
     @Override
     public void deserializeNBT(@NotNull HolderLookup.Provider registries, @NotNull CompoundTag tag)
     {
-        ListTag list = tag.getList("Items", Tag.TAG_COMPOUND);
+        ListTag list = tag.getList("items", Tag.TAG_COMPOUND);
         for (int i = 0; i < SIZE; i++)
             items.set(i, i < list.size() ? ItemStack.parseOptional(registries, list.getCompound(i)) : ItemStack.EMPTY);
-        keep = tag.getBoolean("Keep");
-        returnToStorage = tag.getBoolean("ReturnToStorage");
+        keep = tag.getBoolean("keep");
+        returnToStorage = tag.getBoolean("return_to_storage");
     }
 }
