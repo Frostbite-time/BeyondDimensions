@@ -113,9 +113,6 @@ object BdColors : ColorSchema("beyonddimensions") {
     /** 文本框里选中文字的底色 */
     val selection = derived("selection", "text", accent) { it[accent].copy(alpha = .4f) }
 
-    /** 悬停槽位的底色 */
-    val slotHover = derived("slotHover", "slots", slot) { it[slot] }
-
     /** 窗口与凸起控件的深色外轮廓 */
     val outline = derived("outline", "window", window) { lerp(it[window].copy(alpha = 1f), Color.Black, .7f) }
 
@@ -168,7 +165,7 @@ private fun ColorValues.ore() =
         OreColors.frameEdge to this[BdColors.lineStrong],
         OreColors.slot to this[BdColors.slot],
         OreColors.slotEdge to this[BdColors.slotShadow],
-        OreColors.slotHover to this[BdColors.slotHover],
+        OreColors.slotHover to this[BdColors.slot],
         OreColors.slotHoverEdge to Color.Transparent,
         OreColors.text to this[BdColors.text],
         OreColors.mutedText to this[BdColors.muted],

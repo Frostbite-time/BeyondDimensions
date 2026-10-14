@@ -206,7 +206,7 @@ internal fun BdPreview(content: BdPreviewContent) {
 private fun PreviewSlot(icon: ItemIcon?, amount: String, marked: Boolean = false, hovered: Boolean = false) {
     val colors = Bd.colors
     Box(Modifier.size(SLOT_PITCH.dp)) {
-        OreSlot(Modifier.matchParentSize(), highlighted = hovered, contentModifier = Modifier.size(16.dp)) {
+        OreSlot(Modifier.matchParentSize(), contentModifier = Modifier.size(16.dp)) {
             if (marked) Box(Modifier.matchParentSize().background(colors[BdColors.accentSoft]))
             icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
         }

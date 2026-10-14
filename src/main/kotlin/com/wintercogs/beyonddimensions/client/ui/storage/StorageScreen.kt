@@ -913,7 +913,7 @@ private fun MarkerBox(
                     }
                 }
         ) {
-            OreSlot(Modifier.matchParentSize(), highlighted = hovered, contentModifier = Modifier.size(16.dp)) {
+            OreSlot(Modifier.matchParentSize(), contentModifier = Modifier.size(16.dp)) {
                 Box(Modifier.matchParentSize().background(colors[BdColors.accentSoft]))
                 icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
             }

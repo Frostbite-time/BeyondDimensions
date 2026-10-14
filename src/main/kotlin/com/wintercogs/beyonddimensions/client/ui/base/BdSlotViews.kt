@@ -43,7 +43,7 @@ fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
 
 @Composable
 private fun BoxScope.SlotLook(slot: MenuSlotState) {
-    OreSlot(Modifier.matchParentSize(), highlighted = slot.hovered, contentModifier = Modifier.size(16.dp)) {
+    OreSlot(Modifier.matchParentSize(), contentModifier = Modifier.size(16.dp)) {
         if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors[BdColors.accentSoft]))
         slot.icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
     }
