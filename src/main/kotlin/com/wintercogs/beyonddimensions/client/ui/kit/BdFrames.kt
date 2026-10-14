@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.kit
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -61,6 +62,19 @@ fun Modifier.bdInset(colors: ColorValues, fill: Color = colors[BdColors.sunken],
             drawRect(edge, Offset(0f, h - p), Size(p, p))
         }
     }
+
+/** 一组槽位外的一圈细线。只画四边：槽位底色半透明时，线色不会从槽位底下透出来 */
+fun Modifier.bdSlotFrame(colors: ColorValues): Modifier =
+    drawBehind {
+        val t = 0.5.dp.toPx()
+        val w = size.width
+        val h = size.height
+        val line = colors[BdColors.line]
+        drawRect(line, Offset.Zero, Size(w, t))
+        drawRect(line, Offset(0f, h - t), Size(w, t))
+        drawRect(line, Offset(0f, t), Size(t, h - 2 * t))
+        drawRect(line, Offset(w - t, t), Size(t, h - 2 * t))
+    }.padding(0.5.dp)
 
 /**
  * 页面所在的屏幕：比外壳深的底色，四周一圈发光的边。屏幕从四边各向里让出一段，露出外壳

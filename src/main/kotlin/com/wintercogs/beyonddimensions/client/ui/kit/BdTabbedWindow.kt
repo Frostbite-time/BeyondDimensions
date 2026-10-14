@@ -16,6 +16,8 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
@@ -148,9 +150,15 @@ fun BdRailTab(label: String, icon: BdPixelIcon, selected: Boolean, onClick: () -
                 .then(
                     if (selected) Modifier.drawBehind {
                         val p = 1.dp.toPx()
-                        // 伸到屏幕的发光边上，盖住它与页签相接的一段
+                        // 伸到屏幕的发光边上，盖住它与页签相接的一段。直接换成屏幕叠在机壳上的颜色，
+                        // 屏幕半透明时发光边也不会从下面透出来
                         val reach = size.width + (SCREEN_INSET_X + 1).dp.toPx()
-                        drawRect(colors[BdColors.screen], Offset.Zero, Size(reach, size.height))
+                        drawRect(
+                            colors[BdColors.screen].compositeOver(colors[BdColors.window]),
+                            Offset.Zero,
+                            Size(reach, size.height),
+                            blendMode = BlendMode.Src,
+                        )
                         glowLine(colors, 0f, 0f, reach, horizontal = true, p)
                         glowLine(colors, 0f, size.height - p, reach, horizontal = true, p)
                         glowLine(colors, 0f, p, size.height - 2 * p, horizontal = false, p)

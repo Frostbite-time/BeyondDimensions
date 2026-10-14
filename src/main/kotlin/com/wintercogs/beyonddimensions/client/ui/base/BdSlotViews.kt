@@ -79,7 +79,7 @@ fun BdPlayerInventory(slots: ComposeMenuSlots<*>, playerSlots: List<Int>, modifi
 fun BdSlotSection(title: String, ids: List<Int>, slots: ComposeMenuSlots<*>, columns: Int = 9, hint: String? = null) {
     if (hint == null) BdSectionLabel(title) else BdTooltip(hint) { BdSectionLabel(title) }
     Spacer(Modifier.height(4.dp))
-    Box(Modifier.background(Bd.colors[BdColors.line]).padding(0.5.dp)) { BdSlotGrid(slots, ids, columns) }
+    Box(Modifier.bdSlotFrame(Bd.colors)) { BdSlotGrid(slots, ids, columns) }
 }
 
 /** 带标题的玩家背包 */
@@ -87,7 +87,7 @@ fun BdSlotSection(title: String, ids: List<Int>, slots: ComposeMenuSlots<*>, col
 fun BdInventorySection(title: String, playerSlots: List<Int>, slots: ComposeMenuSlots<*>) {
     BdSectionLabel(title)
     Spacer(Modifier.height(4.dp))
-    Box(Modifier.background(Bd.colors[BdColors.line]).padding(0.5.dp)) { BdPlayerInventory(slots, playerSlots) }
+    Box(Modifier.bdSlotFrame(Bd.colors)) { BdPlayerInventory(slots, playerSlots) }
 }
 
 // 槽位编号在游戏线程构造界面时取出

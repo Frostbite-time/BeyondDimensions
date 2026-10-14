@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.client.ui.machine
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -192,7 +191,7 @@ private fun FlagColumn(label: String, flags: List<Int>, last: Int, slots: Compos
 /** 槽位外的一圈细线 */
 @Composable
 private fun Well(content: @Composable () -> Unit) =
-    Box(Modifier.background(Bd.colors[BdColors.line]).padding(0.5.dp)) { content() }
+    Box(Modifier.bdSlotFrame(Bd.colors)) { content() }
 
 /** 每列熔炼位一个图标，与上方的槽位对齐 */
 @Composable

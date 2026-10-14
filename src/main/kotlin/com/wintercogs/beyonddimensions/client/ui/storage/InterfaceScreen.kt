@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.client.ui.storage
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -61,7 +60,7 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
                     Spacer(Modifier.height(4.dp))
                     // 三组“标记行 + 缓存行”
                     for (row in flagRows.indices) {
-                        Box(Modifier.background(colors[BdColors.line]).padding(0.5.dp)) {
+                        Box(Modifier.bdSlotFrame(colors)) {
                             Column {
                                 BdSlotGrid(slots, flagRows[row], 9)
                                 BdSlotGrid(slots, storedRows[row], 9)

@@ -56,24 +56,24 @@ object Bd {
  * 名称取自语言文件的 color.beyonddimensions.<键>
  */
 object BdColors : ColorSchema("beyonddimensions") {
-    val window = color("window", "window", Color(0xC70C1018))
+    val window = color("window", "window", Color(0xA30C1018))
 
-    /** 卡片，以及悬停与选中的按钮，比外壳略亮 */
-    val surface = color("surface", "window", Color(0x0FFFFFFF))
+    /** 卡片，以及悬停与选中的按钮 */
+    val surface = color("surface", "window", Color(0x14FFFFFF))
 
     /** 输入框、开关与滚动条的凹槽等凹下的一层 */
-    val sunken = color("sunken", "window", Color(0x59000000))
+    val sunken = color("sunken", "window", Color(0x47000000))
 
     /** 浮层的底色，比窗口更实，免得下面的内容透上来 */
     val popover = color("popover", "window", Color(0xF2141A26))
-    val line = color("line", "window", Color(0x24FFFFFF))
-    val lineStrong = color("lineStrong", "window", Color(0x40FFFFFF))
+    val line = color("line", "window", Color(0x26FFFFFF))
+    val lineStrong = color("lineStrong", "window", Color(0x47FFFFFF))
 
     /** 界面打开时铺满屏幕、压暗背后画面的一层 */
     val backdrop = color("backdrop", "window", Color(0x330A1018))
     val text = color("text", "text", Color(0xFFF2F5F9))
-    val muted = color("muted", "text", Color(0xFFA7B1BF))
-    val faint = color("faint", "text", Color(0xFF7D8898))
+    val muted = color("muted", "text", Color(0xFFAEB8C6))
+    val faint = color("faint", "text", Color(0xFF8591A2))
 
     /** 强调色或危险色实底上的文字 */
     val onAccent = color("onAccent", "text", Color(0xFF0B1220))
@@ -87,7 +87,7 @@ object BdColors : ColorSchema("beyonddimensions") {
     val danger = color("danger", "status", Color(0xFFFF6B6B))
 
     /** 槽位凹槽的底色，以及左上的暗边与右下的亮边 */
-    val slot = color("slot", "slots", Color(0x59000000))
+    val slot = color("slot", "slots", Color(0x52000000))
     val slotShadow = color("slotShadow", "slots", Color(0x66000000))
     val slotHighlight = color("slotHighlight", "slots", Color(0x1FFFFFFF))
 

@@ -85,7 +85,7 @@ class StockEmitterScreen(menu: NetStockEmitterMenu, inventory: Inventory, title:
                     BdSectionLabel(text.watched)
                     Spacer(Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.background(colors[BdColors.line]).padding(0.5.dp)) { BdSlot(slots, markSlot) }
+                        Box(Modifier.bdSlotFrame(colors)) { BdSlot(slots, markSlot) }
                         Spacer(Modifier.width(6.dp))
                         Column(Modifier.weight(1f)) {
                             OreText(

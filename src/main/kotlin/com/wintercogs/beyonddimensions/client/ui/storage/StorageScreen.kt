@@ -362,7 +362,7 @@ private fun StorageView(
                     BdSectionLabel(text.inventory, Modifier.width(width.dp))
                     Spacer(Modifier.height(4.dp))
                     Box(Modifier.width((gridColumns * SLOT_PITCH + 2).dp), contentAlignment = Alignment.TopCenter) {
-                        Box(Modifier.background(colors[BdColors.line]).padding(0.5.dp)) {
+                        Box(Modifier.bdSlotFrame(colors)) {
                             BdPlayerInventory(
                                 slots,
                                 layout.playerSlots
@@ -858,7 +858,7 @@ private fun ColumnScope.CategoryEditorPanel(
     BdSectionLabel(text.keys) { HintMark(text.keysHint) }
     Spacer(Modifier.height(3.dp))
     // 已有的特定补充，末尾一格放入新的
-    Box(Modifier.background(colors[BdColors.line]).padding(0.5.dp)) {
+    Box(Modifier.bdSlotFrame(colors)) {
         Column {
             for (row in (0..editor.keys.size).chunked(EDITOR_COLUMNS)) {
                 Row {
@@ -1051,7 +1051,7 @@ private fun CraftSection(
         }
         Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.background(colors[BdColors.line]).padding(0.5.dp)) { BdSlotGrid(slots, layout.craftSlots, 3) }
+            Box(Modifier.bdSlotFrame(colors)) { BdSlotGrid(slots, layout.craftSlots, 3) }
             Spacer(Modifier.width(7.dp))
             BdIcon(BdIcons.ArrowRight, color = colors[BdColors.accent])
             Spacer(Modifier.width(7.dp))
