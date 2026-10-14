@@ -1,0 +1,69 @@
+name: Maven Publish
+# 手动启动，把 gradle.properties 当前版本的模组 jar、源码包与 POM 发布到 wintercogs Maven 的 /releases。
+# 上传在 maven-publish 环境里进行，它的密钥 REPOSILITE_TOKEN_NAME 与 REPOSILITE_TOKEN_SECRET 是一个对 /releases 有写权限的
+# Reposilite 访问令牌。仓库里已有这个版本时跳过；只有一部分文件时失败，要先在 Reposilite 里删掉这个版本再重试。
+
+on: [workflow_dispatch]
+
+env:
+  JAVA_VERSION: "21"
+  MAVEN_RELEASES: "https://maven.wintercogs.com/releases"
+
+concurrency:
+  group: maven-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    name: Check the repository
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.plan.outputs.publish }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 在审批之前运行，已经发布过的版本不必审批
+      - name: Find whether this version is published
+        id: plan
+        run: bash .github/scripts/maven_publication.sh plan
+
+  publish:
+    name: Publish
+    needs: preflight
+    if: needs.preflight.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    environment: maven-publish
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build
+        run: bash gradlew build --console=plain
+
+      # 重跑失败的任务时会沿用旧的检查结果，上传前重新查询一次
+      - name: Recheck immediately before publishing
+        id: upload
+        run: bash .github/scripts/maven_publication.sh plan
+
+      - name: Publish
+        if: steps.upload.outputs.publish == 'true'
+        env:
+          ORG_GRADLE_PROJECT_wintercogsUsername: ${{ secrets.REPOSILITE_TOKEN_NAME }}
+          ORG_GRADLE_PROJECT_wintercogsPassword: ${{ secrets.REPOSILITE_TOKEN_SECRET }}
+        run: bash gradlew publishMavenJavaPublicationToWintercogsRepository --console=plain
+
+      - name: Check that the publication is complete
+        run: bash .github/scripts/maven_publication.sh complete

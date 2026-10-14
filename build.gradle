@@ -84,6 +84,9 @@ base {
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 kotlin.jvmToolchain(21)
 
+// 发布时附带源码包，引用 BD 的项目在 IDE 里能直接看到原始代码
+java.withSourcesJar()
+
 neoForge {
     // Specify the version of NeoForge to use.
     version = project.neo_version
@@ -170,13 +173,13 @@ configurations {
 
 dependencies {
 
-    // 引入对拼音库的依赖 并将其打包到模组
-    // CompixelUI is installed as its own mod. Compile against the coordinate that includes Kotlin; development runs
-    // the standard library mod with Kotlin for Forge, as players do when they install KFF.
+    // CompixelUI 单独安装：编译用带 Kotlin 的坐标，运行用标准版并由 Kotlin for Forge 提供 Kotlin，与玩家装 KFF 时相同。
+    // 标准版写进发布的 POM，引用 BD 的项目会自动带上它
     compileOnly "dev.compixel:compixel-neoforge-1.21.1-with-kotlin:${compixel_version}"
-    localRuntime "dev.compixel:compixel-neoforge-1.21.1:${compixel_version}"
+    runtimeOnly "dev.compixel:compixel-neoforge-1.21.1:${compixel_version}"
     localRuntime "maven.modrinth:kotlin-for-forge:${kff_version}"
 
+    // 引入对拼音库的依赖 并将其打包到模组
     jarJar(implementation group: 'com.github.promeg', name: 'tinypinyin', version: '2.0.3'){
         version {
             strictly '[2.0.3,)'
@@ -188,7 +191,8 @@ dependencies {
 
 
     // 通用机械 以便使用化学品存储
-    implementation "mekanism:Mekanism:${mekanism_version}"
+    compileOnly "mekanism:Mekanism:${mekanism_version}"
+    localRuntime "mekanism:Mekanism:${mekanism_version}"
 
     // EMI支持
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
@@ -196,29 +200,29 @@ dependencies {
 
     // JEI支持
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
-    runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
     // Jade支持
     compileOnly "curse.maven:jade-324717:7545219"
-    runtimeOnly "curse.maven:jade-324717:7545219"
+    localRuntime "curse.maven:jade-324717:7545219"
 
     // 多态合成支持
     compileOnly "curse.maven:polymorph-388800:6451024"
-    runtimeOnly "curse.maven:polymorph-388800:6451024"
+    localRuntime "curse.maven:polymorph-388800:6451024"
 
     // AE支持
     compileOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
-    runtimeOnly "org.appliedenergistics:appliedenergistics2:${ae_version}"
+    localRuntime "org.appliedenergistics:appliedenergistics2:${ae_version}"
     compileOnly "curse.maven:applied-mekanistics-574300:5978711" // AE的通用机械附属
-    runtimeOnly "curse.maven:applied-mekanistics-574300:5978711" // AE的通用机械附属
+    localRuntime "curse.maven:applied-mekanistics-574300:5978711" // AE的通用机械附属
     compileOnly "curse.maven:applied-flux-965012:6649565" // 应用通量附属
-    runtimeOnly "curse.maven:applied-flux-965012:6649565" // 应用通量附属
-    runtimeOnly "curse.maven:glodium-957920:5821676" // ae flux 前置
-    runtimeOnly "maven.modrinth:guideme:21.1.15" // guideme
+    localRuntime "curse.maven:applied-flux-965012:6649565" // 应用通量附属
+    localRuntime "curse.maven:glodium-957920:5821676" // ae flux 前置
+    localRuntime "maven.modrinth:guideme:21.1.15" // guideme
 
     // 饰品栏支持
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}:api"
-    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}"
+    localRuntime "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}"
 
     // 在本模组的UI禁用IPN 不启用runtime
     compileOnly "maven.modrinth:inventory-profiles-next:neoforge-1.21.1-2.1.9"
@@ -231,45 +235,46 @@ dependencies {
 
     // RS支持
     compileOnly "maven.modrinth:refined-storage:2.0.0-beta.7"
-    runtimeOnly "maven.modrinth:refined-storage:2.0.0-beta.7"
+    localRuntime "maven.modrinth:refined-storage:2.0.0-beta.7"
     // RS 通用机械附属
     compileOnly "maven.modrinth:refined-storage-mekanism-integration:1.0.0"
-    runtimeOnly "maven.modrinth:refined-storage-mekanism-integration:1.0.0"
+    localRuntime "maven.modrinth:refined-storage-mekanism-integration:1.0.0"
     // RS Types附属
     compileOnly "curse.maven:refined-types-1327983:6904430"
-    runtimeOnly "curse.maven:refined-types-1327983:6904430"
+    localRuntime "curse.maven:refined-types-1327983:6904430"
 
     // 工业先锋：灵魂涌动
     compileOnly "maven.modrinth:industrial-foregoing-souls:1.21-1.10.5"
     compileOnly "curse.maven:soulplied-energistics-1143614:6771121" // AE联动
-    runtimeOnly "maven.modrinth:industrial-foregoing-souls:1.21-1.10.5"
-    runtimeOnly "curse.maven:soulplied-energistics-1143614:6771121"
-    runtimeOnly "maven.modrinth:industrial-foregoing:1.21-3.6.36"
-    runtimeOnly "maven.modrinth:titanium:1.21-4.0.40"
+    localRuntime "maven.modrinth:industrial-foregoing-souls:1.21-1.10.5"
+    localRuntime "curse.maven:soulplied-energistics-1143614:6771121"
+    localRuntime "maven.modrinth:industrial-foregoing:1.21-3.6.36"
+    localRuntime "maven.modrinth:titanium:1.21-4.0.40"
 
     // 新生魔艺
     compileOnly "maven.modrinth:ars-nouveau:5.10.3"
     compileOnly "maven.modrinth:ars-energistique:2.1.1-beta" // AE联动
-    runtimeOnly "maven.modrinth:ars-nouveau:5.10.3"
-    runtimeOnly "maven.modrinth:ars-energistique:2.1.1-beta"
-    runtimeOnly "maven.modrinth:geckolib:RVIo5f6E" // geckolib
-    runtimeOnly "maven.modrinth:patchouli:1.21.1-92-neoforge" // 帕秋莎
+    localRuntime "maven.modrinth:ars-nouveau:5.10.3"
+    localRuntime "maven.modrinth:ars-energistique:2.1.1-beta"
+    localRuntime "maven.modrinth:geckolib:RVIo5f6E" // geckolib
+    localRuntime "maven.modrinth:patchouli:1.21.1-92-neoforge" // 帕秋莎
 
     // 植物魔法以及其ae附属
-    implementation "vazkii.botania:botania-neoforge-1.21.1:454-SNAPSHOT"
+    compileOnly "vazkii.botania:botania-neoforge-1.21.1:454-SNAPSHOT"
+    localRuntime "vazkii.botania:botania-neoforge-1.21.1:454-SNAPSHOT"
     // ae-botania对botania新版api的注册时机有一点问题，保留兼容暂不纳入运行
     compileOnly "curse.maven:applied-botanics-addon-610632:8298277"
 
     // 机械动力支持 - 蓝图炮
     compileOnly "maven.modrinth:create:mc1.21.1-6.0.9"
-    runtimeOnly "maven.modrinth:create:mc1.21.1-6.0.9"
+    localRuntime "maven.modrinth:create:mc1.21.1-6.0.9"
 
     compileOnly "net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.69"
 
     // 精妙背包以及精妙存储调试
-    runtimeOnly "curse.maven:sophisticated-backpacks-422301:6679417"
-    runtimeOnly "curse.maven:sophisticated-storage-619320:6712033"
-    runtimeOnly "curse.maven:sophisticated-core-618298:6680823"
+    localRuntime "curse.maven:sophisticated-backpacks-422301:6679417"
+    localRuntime "curse.maven:sophisticated-storage-619320:6712033"
+    localRuntime "curse.maven:sophisticated-core-618298:6680823"
 
 }
 
@@ -316,16 +321,19 @@ tasks.named('processResources', ProcessResources).configure {
 // To avoid having to run "generateModMetadata" manually, make it run on every project reload
 neoForge.ideSyncTask generateModMetadata
 
-// Example configuration to allow publishing using the maven-publish plugin
+// 发布到 wintercogs Maven：模组 jar、源码包与 POM。上传凭据读 Gradle 属性 wintercogsUsername 与 wintercogsPassword
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
+            artifactId = base.archivesName.get()
             from components.java
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            name = 'wintercogs'
+            url = 'https://maven.wintercogs.com/releases'
+            credentials(PasswordCredentials)
         }
     }
 }
