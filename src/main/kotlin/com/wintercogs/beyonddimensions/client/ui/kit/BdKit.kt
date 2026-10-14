@@ -149,21 +149,23 @@ fun BdSectionLabel(text: String, modifier: Modifier = Modifier, trailing: (@Comp
     }
 }
 
-/** 四个 L 形角标：格子悬停时的“锁定”效果 */
+/** 四个 L 形角标：槽位悬停或选中时的“锁定”效果。画在边缘向内一个像素处，不压住槽位的明暗边 */
 fun Modifier.brackets(color: Color, arm: Dp = 4.dp, stroke: Dp = 1.dp): Modifier = drawWithContent {
     drawContent()
     val a = arm.toPx()
     val s = stroke.toPx()
-    val w = size.width
-    val h = size.height
-    drawRect(color, Offset(0f, 0f), Size(a, s))
-    drawRect(color, Offset(0f, 0f), Size(s, a))
-    drawRect(color, Offset(w - a, 0f), Size(a, s))
-    drawRect(color, Offset(w - s, 0f), Size(s, a))
-    drawRect(color, Offset(0f, h - s), Size(a, s))
-    drawRect(color, Offset(0f, h - a), Size(s, a))
-    drawRect(color, Offset(w - a, h - s), Size(a, s))
-    drawRect(color, Offset(w - s, h - a), Size(s, a))
+    val left = 1.dp.toPx()
+    val top = left
+    val right = size.width - left
+    val bottom = size.height - left
+    drawRect(color, Offset(left, top), Size(a, s))
+    drawRect(color, Offset(left, top), Size(s, a))
+    drawRect(color, Offset(right - a, top), Size(a, s))
+    drawRect(color, Offset(right - s, top), Size(s, a))
+    drawRect(color, Offset(left, bottom - s), Size(a, s))
+    drawRect(color, Offset(left, bottom - a), Size(s, a))
+    drawRect(color, Offset(right - a, bottom - s), Size(a, s))
+    drawRect(color, Offset(right - s, bottom - a), Size(s, a))
 }
 
 /** 可点击的 BD 控件，点击后发出原版的点击声 */

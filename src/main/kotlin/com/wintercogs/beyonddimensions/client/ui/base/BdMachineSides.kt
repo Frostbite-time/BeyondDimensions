@@ -9,6 +9,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isPrimaryPressed
 import androidx.compose.ui.input.pointer.isSecondaryPressed
@@ -17,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries
 import com.wintercogs.beyonddimensions.client.ui.kit.BdTooltip
-import com.wintercogs.beyonddimensions.client.ui.kit.brackets
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.block.orientation.FacingRule
@@ -174,6 +174,13 @@ private fun FaceCell(
     val tint = sideColor(mode)
     val enabled = shown && face.enabled && face.options.isNotEmpty()
     var hovered by remember { mutableStateOf(false) }
+    // 悬停时整圈边框更醒目：禁用的面换成醒目细线，其他面的颜色向文字色靠近，深色配色里就是变亮
+    val edge =
+        when {
+            !hovered || !enabled -> tint ?: colors[BdColors.line]
+            tint == null -> colors[BdColors.lineStrong]
+            else -> lerp(tint, colors[BdColors.text], .4f)
+        }
     BdTooltip(
         {
             OreText(face.title, color = colors[BdColors.text], style = Bd.caption)
@@ -185,7 +192,7 @@ private fun FaceCell(
             Modifier.size(CELL.dp)
                 .alpha(if (face.enabled) 1f else 0.55f)
                 .background(tint?.copy(alpha = 0.18f) ?: colors[BdColors.surface])
-                .border(1.dp, tint ?: colors[if (hovered && enabled) BdColors.lineStrong else BdColors.line])
+                .border(1.dp, edge)
                 .onPointerEvent(PointerEventType.Enter) { hovered = true }
                 .onPointerEvent(PointerEventType.Exit) { hovered = false }
                 .onPointerEvent(PointerEventType.Press) {
@@ -202,9 +209,6 @@ private fun FaceCell(
             contentAlignment = Alignment.Center,
         ) {
             face.neighbor?.let { MinecraftItemIcon(it, Modifier.size(16.dp)) }
-            if (hovered && enabled) Box(
-                Modifier.matchParentSize().brackets(tint ?: colors[BdColors.accent], arm = 4.dp)
-            )
         }
     }
 }
