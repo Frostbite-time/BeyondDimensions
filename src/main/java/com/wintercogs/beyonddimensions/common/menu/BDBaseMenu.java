@@ -306,6 +306,18 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
         }
     }
 
+    /**
+     * 原版的容器点击不作用于 BD 槽位，它们的点击由 {@link #customClickHandler} 处理。
+     * 原版点击会把槽里的物品交给玩家、再让槽位清空自己，而 BD 槽位的内容在存储里，不会跟着清空
+     */
+    @Override
+    public void clicked(int slotId, int button, @NotNull ClickType clickType, @NotNull Player player)
+    {
+        if (slotId >= 0 && slotId < slots.size() && slots.get(slotId) instanceof AbstractStackTypedSlot)
+            return;
+        super.clicked(slotId, button, clickType, player);
+    }
+
     // 完全重写快速移动方案
     @Override
     public @NotNull ItemStack quickMoveStack(@NotNull Player player, int slotIndex)
