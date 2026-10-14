@@ -8,6 +8,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
+import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -171,6 +172,9 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
                 return false;
             // 放入合成格的只能是物品；打包进物质压缩球时才允许其他资源
             if (!packed && need > 0 && !key.isEmpty() && !(key instanceof ItemStackKey))
+                return false;
+            // 套到上限的物质球不能再打包进新的物质球
+            if (packed && need > 0 && !MatterCompressionBall.canBePacked(key))
                 return false;
         }
         if (packed && !fitsInMatterBall(inputKeys, amount))

@@ -28,6 +28,11 @@ public class MatterCompressionBall extends Item
 {
     private static final ResourceLocation UNCOMPRESS_RULE_ID = BeyondDimensions.makeId("uncompress_matter_ball");
 
+    /**
+     * 物质球最多套这么多层，球里不装球算一层。套得太深的物品存档读不出来
+     */
+    public static final int MAX_NESTING = 16;
+
     public MatterCompressionBall(Properties properties)
     {
         super(properties.stacksTo(1));
@@ -58,6 +63,29 @@ public class MatterCompressionBall extends Item
     private static boolean isBall(IStackKey<?> key)
     {
         return key instanceof ItemStackKey itemKey && itemKey.getSource() instanceof MatterCompressionBall;
+    }
+
+    /**
+     * 这种资源能否装进物质球：已经套到 {@link #MAX_NESTING} 层的物质球不能再装
+     */
+    public static boolean canBePacked(IStackKey<?> key)
+    {
+        return nesting(key, MAX_NESTING) < MAX_NESTING;
+    }
+
+    // 物质球套了多少层，不是物质球为 0；最多数到 limit 层
+    private static int nesting(IStackKey<?> key, int limit)
+    {
+        if (limit <= 0 || !isBall(key))
+            return 0;
+        List<KeyAmount> entries = ((ItemStackKey) key).getReadOnlyStack().getOrDefault(BDDataComponents.ISTACK_SLOTS, List.of());
+        int inner = 0;
+        for (KeyAmount entry : entries)
+        {
+            if (entry != null && !entry.isEmpty())
+                inner = Math.max(inner, nesting(entry.key(), limit - 1));
+        }
+        return inner + 1;
     }
 
     // 递归地收集物质球内容
