@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  *                 .merge(Upgrades::combine)
  *                 .build());
  *
- * Upgrades upgrades = net.getData(UPGRADES.get());
+ * Upgrades upgrades = net.getOrCreateData(UPGRADES.get());
  * net.updateData(UPGRADES.get(), u -> u.withSpeed(3));
  * }</pre>
  * 值宜为不可变对象，通过 {@link DimensionsNet#setData} 或 {@link DimensionsNet#updateData} 修改；可变对象改动后需调用
