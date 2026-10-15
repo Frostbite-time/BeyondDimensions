@@ -56,7 +56,7 @@ any chunks loaded. Share it with friends and connect it to pipes, machines and o
 | Network Interface | Pulls resources out of the network, or takes them in from outside |
 | Network Pump | Pulls resources from neighboring containers into the network |
 | Network Hopper | Collects dropped items, XP orbs and fluids |
-| Network Furnace, Blast Furnace and Smoker | Handy smelters that take inputs and fuel straight from the network |
+| Network Furnace, Blast Furnace and Smoker | Smelters that take inputs and fuel straight from the network |
 | Stock Emitter | Emits a redstone signal while a resource in the network is above or below a threshold |
 | Network Terminal | Opens the network with a crafting grid |
 | Network Controller | Manages a network's members and permissions |
@@ -169,10 +169,6 @@ dependencies {
     additionalRuntimeClasspath "com.github.promeg:tinypinyin:2.0.3"
 }
 ```
-
-### Building from source
-
-Run `./gradlew build` with JDK 21. The mod jar is written to `build/libs`.
 
 ## Contributing
 
