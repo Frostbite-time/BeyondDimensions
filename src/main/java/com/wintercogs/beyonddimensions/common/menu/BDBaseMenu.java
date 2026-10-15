@@ -1,10 +1,10 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
 import com.google.common.base.Suppliers;
+import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick;
+import com.wintercogs.beyonddimensions.api.menu.interaction.SlotInteractions;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.menu.interaction.SlotClick;
-import com.wintercogs.beyonddimensions.common.menu.interaction.SlotInteractions;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuCommands;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;

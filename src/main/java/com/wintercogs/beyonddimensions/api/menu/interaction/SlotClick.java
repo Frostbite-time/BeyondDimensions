@@ -1,4 +1,4 @@
-package com.wintercogs.beyonddimensions.common.menu.interaction;
+package com.wintercogs.beyonddimensions.api.menu.interaction;
 
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;

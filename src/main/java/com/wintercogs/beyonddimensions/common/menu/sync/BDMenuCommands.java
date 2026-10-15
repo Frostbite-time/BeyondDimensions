@@ -1,11 +1,11 @@
 package com.wintercogs.beyonddimensions.common.menu.sync;
 
+import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.PlayerCraftingGrid;
-import com.wintercogs.beyonddimensions.common.menu.interaction.SlotClick;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;

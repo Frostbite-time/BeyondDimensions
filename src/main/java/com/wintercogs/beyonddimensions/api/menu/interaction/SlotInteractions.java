@@ -1,6 +1,7 @@
-package com.wintercogs.beyonddimensions.common.menu.interaction;
+package com.wintercogs.beyonddimensions.api.menu.interaction;
 
 import com.mojang.logging.LogUtils;
+import com.wintercogs.beyonddimensions.common.menu.interaction.BuiltinSlotInteractions;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 

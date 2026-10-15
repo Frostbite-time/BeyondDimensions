@@ -3,6 +3,9 @@ package com.wintercogs.beyonddimensions.common.menu.interaction;
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick;
+import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick.Kind;
+import com.wintercogs.beyonddimensions.api.menu.interaction.SlotInteractions;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
@@ -12,7 +15,6 @@ import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDTags;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
-import com.wintercogs.beyonddimensions.common.menu.interaction.SlotClick.Kind;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.ItemCapInteractionBlackList;
@@ -36,13 +38,16 @@ import java.util.stream.IntStream;
 /**
  * BD 内置的槽位交互，按尝试顺序注册。除标记槽与手上拿着容器外，按住 Shift 的点击只走转移
  */
-final class BuiltinSlotInteractions
+public final class BuiltinSlotInteractions
 {
     private BuiltinSlotInteractions()
     {
     }
 
-    static void register()
+    /**
+     * 由 {@link SlotInteractions} 在第一次使用时调用，联动模组注册交互时 BD 的交互已经在表里
+     */
+    public static void register()
     {
         add("flag_clear", c -> c.kind() == Kind.FLAG && !c.clicked().isEmpty(), BuiltinSlotInteractions::clearFlag);
         add("flag_contents", c -> c.kind() == Kind.FLAG && c.clicked().isEmpty() && !c.carried().isEmpty() && c.isRight(),

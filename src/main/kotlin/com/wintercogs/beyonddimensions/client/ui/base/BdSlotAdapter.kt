@@ -1,11 +1,11 @@
 package com.wintercogs.beyonddimensions.client.ui.base
 
 import com.mojang.blaze3d.platform.InputConstants
+import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
-import com.wintercogs.beyonddimensions.common.menu.interaction.SlotClick
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot
 import dev.compixel.forge.item.ItemIcon

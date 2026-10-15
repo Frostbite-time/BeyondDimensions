@@ -104,7 +104,7 @@ public abstract class AbstractStackTypedSlot extends Slot
      */
     public abstract boolean isOrdered();
 
-    // 点击与 Shift 转移由 common.menu.interaction.SlotInteractions 中注册的交互处理
+    // 点击与 Shift 转移由 api.menu.interaction.SlotInteractions 中注册的交互处理
 
     /**
      * Shift 转移的目标槽位区间起点（含），没有时为 -1
