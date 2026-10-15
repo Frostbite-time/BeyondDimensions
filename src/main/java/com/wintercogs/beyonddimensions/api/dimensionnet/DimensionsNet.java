@@ -255,6 +255,18 @@ public class DimensionsNet extends SavedData
     }
 
     /**
+     * 尝试从玩家获取维度网络，仅在服务端调用
+     *
+     * @param player 玩家
+     * @return 返回玩家所在的维度网络，如果不存在，则返回null
+     */
+    @Deprecated(forRemoval = true)
+    public static @Nullable DimensionsNet getNetFromPlayer(Player player)
+    {
+        return getPrimaryNetFromPlayer(player);
+    }
+
+    /**
      * 尝试从玩家获取主维度网络，仅在服务端调用。
      * <p>
      * 只看主网络：玩家即使仍然属于其他网络，只要主网络被显式清空，
