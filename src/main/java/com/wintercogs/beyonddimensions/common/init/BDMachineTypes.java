@@ -5,7 +5,8 @@ import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
 import com.wintercogs.beyonddimensions.common.machine.RelativeSide;
-import com.wintercogs.beyonddimensions.common.machine.setting.*;
+import com.wintercogs.beyonddimensions.common.machine.setting.HopperRangeMode;
+import com.wintercogs.beyonddimensions.common.machine.setting.SideMode;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -30,14 +31,16 @@ public final class BDMachineTypes
 
     public static final DeferredHolder<MachineType, MachineType> NET_HOPPER = TYPES.register("net_hopper",
             () -> MachineType.builder(BDBlocks.NET_HOPPER_BLOCK)
-                    .setting(BDMachineSettings.FILTER)
-                    .setting(BDMachineSettings.FILTER_FUZZY)
+                    .section("ui.beyonddimensions.machine.section.collect")
                     .setting(BDMachineSettings.REDSTONE)
                     .setting(BDMachineSettings.COLLECT_ITEMS)
                     .setting(BDMachineSettings.COLLECT_EXPERIENCE)
                     .setting(BDMachineSettings.COLLECT_FLUIDS)
-                    .setting(BDMachineSettings.COLLECT_COMPONENTS)
                     .setting(BDMachineSettings.RANGE, entry -> entry.editor(rangeHints("hopper")))
+                    .section("ui.beyonddimensions.machine.section.filter")
+                    .setting(BDMachineSettings.FILTER)
+                    .setting(BDMachineSettings.FILTER_FUZZY)
+                    .setting(BDMachineSettings.COLLECT_COMPONENTS, entry -> entry.label("ui.beyonddimensions.machine.collect.components.short"))
                     .build());
 
     public static final DeferredHolder<MachineType, MachineType> NET_PUMP = TYPES.register("net_pump",
@@ -69,21 +72,17 @@ public final class BDMachineTypes
 
     public static final DeferredHolder<MachineType, MachineType> NET_MAGNET = TYPES.register("net_magnet",
             () -> MachineType.builder(BDItems.NET_MAGNET_ITEM)
-                    .section("ui.beyonddimensions.magnet.section.collect")
+                    .section("ui.beyonddimensions.machine.section.collect")
                     .setting(BDMachineSettings.WORKING)
-                    .setting(BDMachineSettings.COLLECT_ITEMS, entry -> entry
-                            .editor(SettingEditor.chip(HopperItemMode.ALLOW, HopperItemMode.DENY, "ui.beyonddimensions.magnet.collect.items")))
-                    .setting(BDMachineSettings.COLLECT_EXPERIENCE, entry -> entry
-                            .editor(SettingEditor.chip(HopperXpMode.ALLOW, HopperXpMode.DENY, "ui.beyonddimensions.magnet.collect.experience")))
-                    .setting(BDMachineSettings.COLLECT_FLUIDS, entry -> entry
-                            .editor(SettingEditor.chip(HopperFluidMode.ALLOW, HopperFluidMode.DENY, "ui.beyonddimensions.magnet.collect.fluids")))
+                    .setting(BDMachineSettings.COLLECT_ITEMS)
+                    .setting(BDMachineSettings.COLLECT_EXPERIENCE)
+                    .setting(BDMachineSettings.COLLECT_FLUIDS)
                     .setting(BDMachineSettings.RANGE, entry -> entry.editor(rangeHints("magnet")))
-                    .section("ui.beyonddimensions.magnet.section.filter")
+                    .section("ui.beyonddimensions.machine.section.filter")
                     .setting(BDMachineSettings.FILTER)
                     .setting(BDMachineSettings.FILTER_FUZZY)
-                    .setting(BDMachineSettings.COLLECT_COMPONENTS, entry -> entry.label("ui.beyonddimensions.magnet.components")
-                            .hint("ui.beyonddimensions.magnet.components.hint"))
-                    .section("ui.beyonddimensions.magnet.section.destination")
+                    .setting(BDMachineSettings.COLLECT_COMPONENTS, entry -> entry.label("ui.beyonddimensions.machine.collect.components.short"))
+                    .section("ui.beyonddimensions.machine.section.destination")
                     .setting(BDMachineSettings.PICKUP_TARGET)
                     .build());
 

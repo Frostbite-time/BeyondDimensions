@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 
-/** 网络漏斗：主页面是过滤槽与玩家背包；设置页是过滤、红石、收集的种类与范围 */
+/** 网络漏斗：主页面是过滤槽与玩家背包；设置页分为收集与过滤两组，由机器类型声明 */
 class HopperScreen(menu: NetHopperMenu, inventory: Inventory, title: Component) :
     BdInventoryScreen<NetHopperMenu, HopperState, HopperAction>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_HOPPER_BLOCK.get()))
@@ -56,7 +56,6 @@ class HopperScreen(menu: NetHopperMenu, inventory: Inventory, title: Component) 
                 }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
-                    BdSectionLabel(text.settings)
                     BdMachineSettings(state.settings, settingsOpen) { send(HopperAction.Setting(it)) }
                 }
             }

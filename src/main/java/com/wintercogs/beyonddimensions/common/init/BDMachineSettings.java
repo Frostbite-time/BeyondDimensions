@@ -124,7 +124,7 @@ public final class BDMachineSettings
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<HopperItemMode>> COLLECT_ITEMS = SETTINGS.register("collect_items",
             () -> MachineSetting.enumeration(HopperItemMode.class, HopperItemMode.ALLOW)
                     .label(MACHINE + "collect.items")
-                    .editor(SettingEditor.toggle(HopperItemMode.ALLOW, HopperItemMode.DENY))
+                    .editor(SettingEditor.chip(HopperItemMode.ALLOW, HopperItemMode.DENY, MACHINE + "collect.items.short"))
                     .legacyKey("hopper_item_model")
                     .legacyComponent(BDDataComponents.HOPPER_ITEM_MODE)
                     .build());
@@ -132,7 +132,7 @@ public final class BDMachineSettings
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<HopperXpMode>> COLLECT_EXPERIENCE = SETTINGS.register("collect_experience",
             () -> MachineSetting.enumeration(HopperXpMode.class, HopperXpMode.DENY)
                     .label(MACHINE + "collect.experience")
-                    .editor(SettingEditor.toggle(HopperXpMode.ALLOW, HopperXpMode.DENY))
+                    .editor(SettingEditor.chip(HopperXpMode.ALLOW, HopperXpMode.DENY, MACHINE + "collect.experience.short"))
                     .legacyKey("hopper_xp_mode")
                     .legacyComponent(BDDataComponents.HOPPER_XP_MODE)
                     .build());
@@ -140,7 +140,7 @@ public final class BDMachineSettings
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<HopperFluidMode>> COLLECT_FLUIDS = SETTINGS.register("collect_fluids",
             () -> MachineSetting.enumeration(HopperFluidMode.class, HopperFluidMode.DENY)
                     .label(MACHINE + "collect.fluids")
-                    .editor(SettingEditor.toggle(HopperFluidMode.ALLOW, HopperFluidMode.DENY))
+                    .editor(SettingEditor.chip(HopperFluidMode.ALLOW, HopperFluidMode.DENY, MACHINE + "collect.fluids.short"))
                     .legacyKey("hopper_fluid_mode")
                     .legacyComponent(BDDataComponents.HOPPER_FLUID_MODE)
                     .build());
@@ -148,6 +148,7 @@ public final class BDMachineSettings
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<HopperNBTMode>> COLLECT_COMPONENTS = SETTINGS.register("collect_components",
             () -> MachineSetting.enumeration(HopperNBTMode.class, HopperNBTMode.DENY)
                     .label(MACHINE + "collect.components")
+                    .hint(MACHINE + "collect.components.hint")
                     .editor(SettingEditor.toggle(HopperNBTMode.ALLOW, HopperNBTMode.DENY))
                     .legacyKey("hopper_nbt_mode")
                     .legacyComponent(BDDataComponents.HOPPER_NBT_MODE)
