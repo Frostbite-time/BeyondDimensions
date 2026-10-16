@@ -49,6 +49,7 @@ import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.ui.LocalUiFeedback
+import dev.compixel.ui.isCtrlOrCmdPressed
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.theme.LocalColorEditor
 import kotlinx.coroutines.delay
@@ -794,7 +795,7 @@ fun BdNumberEditor(value: Long, onValueChange: (Long) -> Unit, range: LongRange,
 
     fun step(direction: Int, modifiers: PointerKeyboardModifiers) {
         if (!enabled) return
-        val amount = if (modifiers.isCtrlPressed) 100L else if (modifiers.isShiftPressed) 10L else 1L
+        val amount = if (modifiers.isCtrlOrCmdPressed) 100L else if (modifiers.isShiftPressed) 10L else 1L
         val current = clamp(parse(draft) ?: value)
         // 到边界时停在边界上，不会溢出
         val next =
@@ -875,6 +876,7 @@ fun BdNumberEditor(value: Long, onValueChange: (Long) -> Unit, range: LongRange,
                                 if (event.key == Key.DirectionUp) 1 else -1,
                                 PointerKeyboardModifiers(
                                     isCtrlPressed = event.isCtrlPressed,
+                                    isMetaPressed = event.isMetaPressed,
                                     isShiftPressed = event.isShiftPressed
                                 ),
                             )
