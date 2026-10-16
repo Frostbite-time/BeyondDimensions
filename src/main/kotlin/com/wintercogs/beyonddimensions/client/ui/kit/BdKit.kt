@@ -267,8 +267,8 @@ fun BdTextField(
                         .bdInset(
                             colors,
                             edge = when {
-                                focused -> colors[BdColors.accent]
-                                hovered -> colors[BdColors.lineStrong]
+                                focused -> colors[BdColors.activeEdge]
+                                hovered -> colors[BdColors.hoverEdge]
                                 else -> null
                             },
                         )
@@ -327,8 +327,8 @@ fun BdTextArea(
                         .bdInset(
                             colors,
                             edge = when {
-                                focused -> colors[BdColors.accent]
-                                hovered -> colors[BdColors.lineStrong]
+                                focused -> colors[BdColors.activeEdge]
+                                hovered -> colors[BdColors.hoverEdge]
                                 else -> null
                             },
                         )
@@ -362,7 +362,7 @@ fun BdChip(
             .bdRaised(
                 colors,
                 fill = if ((hovered || active) && enabled) colors[BdColors.surface] else colors[BdColors.window],
-                edge = if ((hovered || active) && enabled) colors[BdColors.accent] else null,
+                edge = if ((hovered || active) && enabled) colors[BdColors.activeEdge] else null,
             )
             .padding(horizontal = 5.dp)
             .alpha(if (enabled) 1f else 0.5f),
@@ -410,7 +410,7 @@ fun BdSegmented(
                     Modifier.absoluteOffset(x = left)
                         .width(width)
                         .fillMaxHeight()
-                        .bdRaised(colors, fill = colors[BdColors.surface], edge = colors[BdColors.accent])
+                        .bdRaised(colors, fill = colors[BdColors.surface], edge = colors[BdColors.activeEdge])
                 )
             }
         }
@@ -510,7 +510,7 @@ fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Bool
             .bdInset(
                 colors,
                 fill = lerp(colors[BdColors.sunken], colors[BdColors.accentSoft], progress),
-                edge = if (hovered) colors[BdColors.lineStrong] else null,
+                edge = if (hovered) colors[BdColors.hoverEdge] else null,
             )
             .padding(1.dp),
         contentAlignment = Alignment.CenterStart,
@@ -613,7 +613,7 @@ fun BdDropdown(options: List<String>, selected: Int, enabled: Boolean, onSelect:
                 .onSizeChanged { width = with(density) { it.width.toDp() } }
                 .hoverable(interaction, enabled)
                 .bdClickable(interaction, enabled = enabled) { open = !open }
-                .bdInset(colors, edge = if (enabled && (open || hovered)) colors[BdColors.accent] else null)
+                .bdInset(colors, edge = if (enabled && (open || hovered)) colors[BdColors.activeEdge] else null)
                 .padding(start = 5.dp, end = 2.dp)
                 .alpha(if (enabled) 1f else 0.55f),
             verticalAlignment = Alignment.CenterVertically,
@@ -821,7 +821,7 @@ fun BdNumberEditor(value: Long, onValueChange: (Long) -> Unit, range: LongRange,
                 colors,
                 edge = when {
                     invalid -> colors[BdColors.danger]
-                    focused -> colors[BdColors.accent]
+                    focused -> colors[BdColors.activeEdge]
                     else -> null
                 },
             )

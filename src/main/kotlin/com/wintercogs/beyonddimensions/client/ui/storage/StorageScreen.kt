@@ -920,7 +920,7 @@ private fun MarkerBox(
                 Box(Modifier.matchParentSize().background(colors[BdColors.accentSoft]))
                 icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
             }
-            if (selected || hovered) Box(Modifier.matchParentSize().brackets(colors[BdColors.accent], arm = 4.dp))
+            if (selected || hovered) Box(Modifier.matchParentSize().brackets(colors[BdColors.marker], arm = 4.dp))
         }
     }
 }

@@ -166,7 +166,7 @@ fun BdRailTab(label: String, icon: BdPixelIcon, selected: Boolean, onClick: () -
                     else Modifier.bdRaised(
                         colors,
                         fill = if (hovered) colors[BdColors.surface] else colors[BdColors.window],
-                        edge = if (hovered) colors[BdColors.accent] else null,
+                        edge = if (hovered) colors[BdColors.activeEdge] else null,
                     )
                 ),
             contentAlignment = Alignment.Center,

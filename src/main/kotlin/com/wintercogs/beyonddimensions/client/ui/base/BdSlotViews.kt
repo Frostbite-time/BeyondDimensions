@@ -49,7 +49,7 @@ private fun BoxScope.SlotLook(slot: MenuSlotState) {
     }
     if (slot.amount.isNotEmpty())
         BdAmountPill(slot.amount, Modifier.align(Alignment.BottomEnd).padding(end = 0.5.dp, bottom = 0.5.dp))
-    if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors[BdColors.accent], arm = 4.dp))
+    if (slot.hovered) Box(Modifier.matchParentSize().brackets(Bd.colors[BdColors.marker], arm = 4.dp))
 }
 
 /** 按列排布的一组槽位；不足一行的末尾留空 */

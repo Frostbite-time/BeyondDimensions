@@ -212,7 +212,7 @@ private fun PreviewSlot(icon: ItemIcon?, amount: String, marked: Boolean = false
         }
         if (amount.isNotEmpty())
             BdAmountPill(amount, Modifier.align(Alignment.BottomEnd).padding(end = 0.5.dp, bottom = 0.5.dp))
-        if (hovered) Box(Modifier.matchParentSize().brackets(colors[BdColors.accent], arm = 4.dp))
+        if (hovered) Box(Modifier.matchParentSize().brackets(colors[BdColors.marker], arm = 4.dp))
     }
 }
 

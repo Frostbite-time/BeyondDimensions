@@ -110,6 +110,9 @@ object BdColors : ColorSchema("beyonddimensions") {
     /** 熔炉导管渐变的起点，跟随强调色 */
     val cyan = derived("cyan", "accent", accent) { it[accent] }
 
+    /** 悬停或选中的槽位四角的角标 */
+    val marker = derived("marker", "slots", accent) { it[accent] }
+
     /** 文本框里选中文字的底色 */
     val selection = derived("selection", "text", accent) { it[accent].copy(alpha = .4f) }
 
@@ -119,6 +122,12 @@ object BdColors : ColorSchema("beyonddimensions") {
     /** 凸起处左上的亮边与右下的暗边；凹下处反过来 */
     val bevelLight = derived("bevelLight", "window", window) { lerp(it[window], Color.White, .14f) }
     val bevelDark = derived("bevelDark", "window", window) { lerp(it[window], Color.Black, .45f) }
+
+    /** 选中或聚焦的控件、悬停的凸起控件换上的外框 */
+    val activeEdge = derived("activeEdge", "window", accent) { it[accent] }
+
+    /** 悬停的输入框与开关换上的边 */
+    val hoverEdge = derived("hoverEdge", "window", lineStrong) { it[lineStrong] }
 
     /** 页面所在的屏幕，比外壳深一层 */
     val screen = derived("screen", "window", window) { lerp(it[window], Color.Black, .42f) }

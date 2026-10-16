@@ -31,6 +31,7 @@
     "outline": "#1E1206",
     "bevelLight": "#EDC46C",
     "bevelDark": "#5A3A18",
+    "activeEdge": "#B44D26",
     "screen": "#33210F",
     "glow": "#8C6430",
     "glowBright": "#FFE08A"

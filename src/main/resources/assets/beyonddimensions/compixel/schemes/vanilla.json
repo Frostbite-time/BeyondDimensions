@@ -23,6 +23,7 @@
     "slot": "#8B8B8B",
     "slotShadow": "#373737",
     "slotHighlight": "#FFFFFF",
+    "marker": "#55FF55",
     "flameOuter": "#E2531F",
     "flameMiddle": "#F5A524",
     "flameCore": "#FFE680",
@@ -32,6 +33,7 @@
     "outline": "#000000",
     "bevelLight": "#FFFFFF",
     "bevelDark": "#555555",
+    "hoverEdge": "#3C8527",
     "screen": "#C6C6C6",
     "glow": "#8B8B8B",
     "glowBright": "#8B8B8B"
