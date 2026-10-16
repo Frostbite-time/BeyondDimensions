@@ -50,6 +50,7 @@
 - Fixed Ars Nouveau setting a network's source to its full capacity instead of the requested amount.
 - Taking resources out of the network checks what the destination accepts first, instead of taking them and putting the rest back.
 - A recipe that would create an oversized Compressed Matter Orb is refused with a message, and orbs nest at most 16 levels deep.
+- Fixed stretched textures on the edges of the Network Pump.
 - Translations completed and corrected for all ten languages.
 - Fuzzy extraction is faster and takes the variant the network holds the most of, and networks no longer mark themselves for saving every tick.
 
@@ -141,6 +142,7 @@ For developers:
 - 修复新生魔艺设置网络魔源时，数量被设为容量上限而非请求数量的问题。
 - 从网络取出资源时先确认目标能接收的数量，不再取出后再把剩余部分放回。
 - 合成会生成数据量过大的压缩物质球时拒绝并提示；压缩物质球最多嵌套 16 层。
+- 修复网络泵边缘的贴图拉伸。
 - 补全并修正十种语言的翻译。
 - 模糊取出更快，并优先取网络中数量最多的变体；网络不再每刻标记为需要保存。
 
