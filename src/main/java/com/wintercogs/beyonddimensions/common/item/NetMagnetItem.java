@@ -50,8 +50,9 @@ import java.util.List;
 public class NetMagnetItem extends BaseMachineItem
 {
     public static final int FILTER_SLOTS = 36;
-    public static final int INVENTORY_KEEP_SLOTS = 18;
-    public static final int capacity = FILTER_SLOTS + INVENTORY_KEEP_SLOTS;
+    // 例外：标记的物品不按物品去向，改送另一处
+    public static final int EXCEPTION_SLOTS = 9;
+    public static final int capacity = FILTER_SLOTS + EXCEPTION_SLOTS;
 
     public NetMagnetItem(Properties properties)
     {
@@ -83,18 +84,18 @@ public class NetMagnetItem extends BaseMachineItem
         super.checkComponents(stack);
         ensureSlots(stack, capacity);
         List<KeyAmount> slots = stack.get(BDDataComponents.ISTACK_SLOTS);
-        // 旧磁铁保留原来的 36 个过滤标记，只补上背包保留槽。
-        boolean invalidKeepSlot = slots.stream().skip(FILTER_SLOTS).limit(INVENTORY_KEEP_SLOTS)
+        // 0.7.30 的磁铁保留原来的 36 个过滤标记，只补上例外槽；例外槽只放物品
+        boolean invalidException = slots.stream().skip(FILTER_SLOTS).limit(EXCEPTION_SLOTS)
                 .anyMatch(entry -> !entry.key().isEmpty() && !(entry.key() instanceof ItemStackKey));
-        if (slots.size() < capacity || invalidKeepSlot)
+        if (slots.size() != capacity || invalidException)
         {
-            List<KeyAmount> expanded = new ArrayList<>(slots);
-            while (expanded.size() < capacity)
-                expanded.add(new KeyAmount(ItemStackKey.EMPTY, 0));
+            List<KeyAmount> resized = new ArrayList<>(slots.subList(0, Math.min(slots.size(), capacity)));
+            while (resized.size() < capacity)
+                resized.add(new KeyAmount(ItemStackKey.EMPTY, 0));
             for (int i = FILTER_SLOTS; i < capacity; i++)
-                if (!(expanded.get(i).key() instanceof ItemStackKey))
-                    expanded.set(i, new KeyAmount(ItemStackKey.EMPTY, 0));
-            stack.set(BDDataComponents.ISTACK_SLOTS, expanded);
+                if (!(resized.get(i).key() instanceof ItemStackKey))
+                    resized.set(i, new KeyAmount(ItemStackKey.EMPTY, 0));
+            stack.set(BDDataComponents.ISTACK_SLOTS, resized);
         }
     }
 
@@ -117,17 +118,16 @@ public class NetMagnetItem extends BaseMachineItem
         super.workContent(stack, level, holder, slotId, isSelected);
 
         FilterMode filterMode = settings(stack).get(BDMachineSettings.FILTER.get());
-        // 收集过滤与背包保留过滤共用这一项
+        // 过滤槽与例外槽共用这一项
         boolean fuzzy = settings(stack).get(BDMachineSettings.FILTER_FUZZY.get()) == FuzzyMode.ENABLE;
         HopperItemMode hopperItemMode = settings(stack).get(BDMachineSettings.COLLECT_ITEMS.get());
         HopperXpMode hopperXpMode = settings(stack).get(BDMachineSettings.COLLECT_EXPERIENCE.get());
         HopperNBTMode hopperNBTMode = settings(stack).get(BDMachineSettings.COLLECT_COMPONENTS.get());
         HopperFluidMode hopperFluidMode = settings(stack).get(BDMachineSettings.COLLECT_FLUIDS.get());
         HopperRangeMode hopperRangeMode = settings(stack).get(BDMachineSettings.RANGE.get());
-        FilterMode inventoryKeepMode = settings(stack).get(BDMachineSettings.INVENTORY_KEEP.get());
         List<KeyAmount> slots = stack.getOrDefault(BDDataComponents.ISTACK_SLOTS, List.of());
         List<KeyAmount> filterSlots = slots.subList(0, Math.min(FILTER_SLOTS, slots.size()));
-        List<KeyAmount> inventoryKeepSlots = slots.subList(Math.min(FILTER_SLOTS, slots.size()), Math.min(capacity, slots.size()));
+        List<KeyAmount> exceptionSlots = slots.subList(Math.min(FILTER_SLOTS, slots.size()), Math.min(capacity, slots.size()));
 
         AABB searchArea = getSearchArea(hopperRangeMode, level, holder.getOnPos());
 
@@ -148,9 +148,9 @@ public class NetMagnetItem extends BaseMachineItem
                 ItemStackKey itemKey = new ItemStackKey(itemEntity.getItem());
                 if (filterMode.passes(filterSlots, itemKey, fuzzy))
                 {
-                    // 背包保留的物品只进背包，不管去向设成什么
-                    boolean inventoryOnly = inventoryKeepMode.passes(inventoryKeepSlots, itemKey, fuzzy);
-                    pickUp(itemEntity, storage, player, inventoryOnly ? PickupTarget.INVENTORY_ONLY : target);
+                    // 例外的物品网络与背包互换，“仅”与“优先”不变
+                    boolean exception = FilterMode.WHITE.passes(exceptionSlots, itemKey, fuzzy);
+                    pickUp(itemEntity, storage, player, exception ? target.opposite() : target);
                 }
             }
         }

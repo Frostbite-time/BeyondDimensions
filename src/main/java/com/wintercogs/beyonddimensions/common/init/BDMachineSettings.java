@@ -188,17 +188,6 @@ public final class BDMachineSettings
                     .build());
 
     /**
-     * 磁铁的背包保留过滤；默认只保留标记的物品，不影响旧磁铁的行为
-     */
-    public static final DeferredHolder<MachineSetting<?>, MachineSetting<FilterMode>> INVENTORY_KEEP = SETTINGS.register("inventory_keep",
-            () -> MachineSetting.enumeration(FilterMode.class, FilterMode.WHITE)
-                    .label(MACHINE + "inventory_keep")
-                    .editor(new SettingEditor.Choice<>(List.of(FilterMode.values()),
-                            mode -> MACHINE + "inventory_keep." + lowercase(mode),
-                            mode -> MACHINE + "inventory_keep." + lowercase(mode) + ".hint", false))
-                    .build());
-
-    /**
      * 存量发信器的发信条件
      */
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<EmitMode>> EMIT = SETTINGS.register("emit",

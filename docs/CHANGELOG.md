@@ -29,7 +29,7 @@
 - Side configuration for the Network Interface, the Network Furnace, Blast Furnace and Smoker, the Dimensional Network Energy Pathway and the Network Pump: set each face, relative to the machine's front, to input, output, both or disabled. The Network Pump's faces are input or disabled, and it only pulls through input faces.
 - The Network Interface, Dimensional Network Energy Pathway and Network Pump face the player when placed.
 - Fuzzy match switches for the filter slots of the Network Pump, Network Hopper and Network Magnet.
-- Network Magnet: choose where picked-up items go (network only, network first, inventory first or inventory only), and use two rows of inventory retention filters for items that should only go into your inventory.
+- Network Magnet: its settings are grouped into collecting, filtering and destination. Choose where picked-up items go (network only, network first, inventory first or inventory only), and mark exceptions that go to the other place instead.
 - Network Feeder: new "No waste" mode, which feeds only when none of the food is wasted.
 - New block: **Stock Emitter**. It emits a redstone signal while the network holds at least, or less than, a set amount of a marked resource, with optional fuzzy matching.
 - A Network Terminal placed on a floor or ceiling faces the player.
@@ -121,7 +121,7 @@ For developers:
 - 网络接口、网络熔炉、网络高炉、网络烟熏炉、维度网络能量通道和网络泵新增面配置：以机器正面为基准，每个面可设为输入、输出、双向或禁用。网络泵的面只能设为输入或禁用，且只从输入面抽取。
 - 网络接口、维度网络能量通道和网络泵放置时正面朝向玩家。
 - 网络泵、网络漏斗和网络磁铁的过滤槽新增模糊匹配开关。
-- 网络磁铁可以选择物品去向（仅网络、优先网络、优先背包、仅背包），并新增两行背包保留过滤槽，匹配的物品只进入背包。
+- 网络磁铁的设置分为收集、过滤和去向三组；可以选择物品去向（仅网络、优先网络、优先背包、仅背包），并标记例外物品，改送另一处。
 - 网络喂食器新增“不浪费”模式，食物恢复的饱食度能全部吃下时才喂食。
 - 新增方块**存量发信器**：网络中标记资源的数量不少于或少于设定值时发出红石信号，可开启模糊匹配。
 - 网络终端放在地面或天花板上时朝向玩家。

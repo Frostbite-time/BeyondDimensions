@@ -44,7 +44,8 @@ public static final DeferredHolder<MachineType, MachineType> PRESS = TYPES.regis
 ```
 
 A machine type can change a setting's label, hint, editor or default for its own machines through the `entry` builder,
-for example to offer only some of the options.
+for example to offer only some of the options. `section(label)` puts the settings declared after it in a titled group
+on the settings page; `entry.chip(label)` shows a toggle as a short button that shares a row with adjacent ones.
 
 ## Implement Machine
 

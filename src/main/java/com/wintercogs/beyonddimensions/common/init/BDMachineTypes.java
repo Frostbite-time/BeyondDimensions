@@ -70,16 +70,19 @@ public final class BDMachineTypes
 
     public static final DeferredHolder<MachineType, MachineType> NET_MAGNET = TYPES.register("net_magnet",
             () -> MachineType.builder(BDItems.NET_MAGNET_ITEM)
+                    .section("ui.beyonddimensions.magnet.section.collect")
                     .setting(BDMachineSettings.WORKING)
+                    .setting(BDMachineSettings.COLLECT_ITEMS, entry -> entry.chip("ui.beyonddimensions.magnet.collect.items"))
+                    .setting(BDMachineSettings.COLLECT_EXPERIENCE, entry -> entry.chip("ui.beyonddimensions.magnet.collect.experience"))
+                    .setting(BDMachineSettings.COLLECT_FLUIDS, entry -> entry.chip("ui.beyonddimensions.magnet.collect.fluids"))
+                    .setting(BDMachineSettings.RANGE, entry -> entry.editor(rangeHints("magnet")))
+                    .section("ui.beyonddimensions.magnet.section.filter")
                     .setting(BDMachineSettings.FILTER)
                     .setting(BDMachineSettings.FILTER_FUZZY)
-                    .setting(BDMachineSettings.COLLECT_ITEMS)
-                    .setting(BDMachineSettings.COLLECT_EXPERIENCE)
-                    .setting(BDMachineSettings.COLLECT_FLUIDS)
-                    .setting(BDMachineSettings.COLLECT_COMPONENTS)
+                    .setting(BDMachineSettings.COLLECT_COMPONENTS, entry -> entry.label("ui.beyonddimensions.magnet.components")
+                            .hint("ui.beyonddimensions.magnet.components.hint"))
+                    .section("ui.beyonddimensions.magnet.section.destination")
                     .setting(BDMachineSettings.PICKUP_TARGET)
-                    .setting(BDMachineSettings.INVENTORY_KEEP)
-                    .setting(BDMachineSettings.RANGE, entry -> entry.editor(rangeHints("magnet")))
                     .build());
 
     public static final DeferredHolder<MachineType, MachineType> NET_FEEDER = TYPES.register("net_feeder",

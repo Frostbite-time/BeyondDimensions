@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
- * 一类机器，注册到 {@link BDRegistries#MACHINE_TYPE_KEY}：列出它的设置，设置页按这个顺序生成。
+ * 一类机器，注册到 {@link BDRegistries#MACHINE_TYPE_KEY}：列出它的设置，设置页按这个顺序生成，可以用 {@link Builder#section} 分组。
  * 配置卡记下复制时的机器类型，只能粘贴到同一类型的机器上
  * <pre>{@code
  * MachineType.builder(MyBlocks.PRESS)
@@ -88,11 +88,13 @@ public final class MachineType
         private final @Nullable String labelKey;
         private final @Nullable String hintKey;
         private final @Nullable String lockedHintKey;
+        private final @Nullable String chipKey;
+        private final @Nullable String sectionKey;
         private final @Nullable UnaryOperator<SettingEditor<T>> editorOverride;
         private final @Nullable T defaultValue;
         private volatile @Nullable SettingEditor<T> editor;
 
-        private Entry(EntryBuilder<T> builder)
+        private Entry(EntryBuilder<T> builder, @Nullable String sectionKey)
         {
             this.setting = builder.setting;
             this.labelKey = builder.labelKey;
@@ -100,6 +102,8 @@ public final class MachineType
             this.lockedHintKey = builder.lockedHintKey;
             this.editorOverride = builder.editorOverride;
             this.defaultValue = builder.defaultValue;
+            this.chipKey = builder.chipKey;
+            this.sectionKey = sectionKey;
         }
 
         public MachineSetting<T> setting()
@@ -123,6 +127,22 @@ public final class MachineType
         public @Nullable String lockedHintKey()
         {
             return lockedHintKey;
+        }
+
+        /**
+         * 设置页上显示为短按钮时按钮上的名称，见 {@link EntryBuilder#chip}；为空时是普通的一行
+         */
+        public @Nullable String chipKey()
+        {
+            return chipKey;
+        }
+
+        /**
+         * 所在分组的标题，见 {@link Builder#section}；没有分组时为空
+         */
+        public @Nullable String sectionKey()
+        {
+            return sectionKey;
         }
 
         public SettingEditor<T> editor()
@@ -164,6 +184,7 @@ public final class MachineType
         private @Nullable String labelKey;
         private @Nullable String hintKey;
         private @Nullable String lockedHintKey;
+        private @Nullable String chipKey;
         private @Nullable UnaryOperator<SettingEditor<T>> editorOverride;
         private @Nullable T defaultValue;
 
@@ -187,6 +208,16 @@ public final class MachineType
         public EntryBuilder<T> lockedHint(String lockedHintKey)
         {
             this.lockedHintKey = lockedHintKey;
+            return this;
+        }
+
+        /**
+         * 开关在设置页上显示为一个短按钮，同一组里相邻的这类开关并排成一行；labelKey 是按钮上的名称，应当很短。
+         * 其他编辑方式的设置忽略这一项
+         */
+        public EntryBuilder<T> chip(String labelKey)
+        {
+            this.chipKey = Objects.requireNonNull(labelKey);
             return this;
         }
 
@@ -222,10 +253,20 @@ public final class MachineType
     {
         private final Supplier<? extends ItemLike> icon;
         private final List<Entry<?>> entries = new ArrayList<>();
+        private @Nullable String section;
 
         private Builder(Supplier<? extends ItemLike> icon)
         {
             this.icon = icon;
+        }
+
+        /**
+         * 之后声明的设置归入一组：设置页在组前显示 labelKey 的标题，组与组之间有分隔线
+         */
+        public Builder section(String labelKey)
+        {
+            this.section = Objects.requireNonNull(labelKey);
+            return this;
         }
 
         public <T> Builder setting(Supplier<? extends MachineSetting<T>> setting)
@@ -235,7 +276,7 @@ public final class MachineType
 
         public <T> Builder setting(Supplier<? extends MachineSetting<T>> setting, UnaryOperator<EntryBuilder<T>> customize)
         {
-            entries.add(new Entry<>(customize.apply(new EntryBuilder<>(Objects.requireNonNull(setting)))));
+            entries.add(new Entry<>(customize.apply(new EntryBuilder<>(Objects.requireNonNull(setting))), section));
             return this;
         }
 

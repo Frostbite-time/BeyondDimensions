@@ -39,7 +39,7 @@ public static final DeferredHolder<MachineType, MachineType> PRESS = TYPES.regis
                 .build());
 ```
 
-机器类型可以通过 `entry` 覆盖某项设置在该类机器上的名称、说明、编辑方式或默认值，例如只开放部分选项。
+机器类型可以通过 `entry` 覆盖某项设置在该类机器上的名称、说明、编辑方式或默认值，例如只开放部分选项。`section(label)` 将其后声明的设置归入一组，设置页在组前显示标题；`entry.chip(label)` 将开关显示为短按钮，同组中相邻的短按钮排成一行。
 
 ## 实现 Machine
 

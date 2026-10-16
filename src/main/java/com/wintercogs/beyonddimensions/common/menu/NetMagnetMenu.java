@@ -132,7 +132,7 @@ public class NetMagnetMenu extends BDBaseMenu implements MachineMenu
                 this.addSlot(flagSlot);
             }
         }
-        for (int i = 0; i < NetMagnetItem.INVENTORY_KEEP_SLOTS; i++)
+        for (int i = 0; i < NetMagnetItem.EXCEPTION_SLOTS; i++)
             this.addSlot(new FlagStackTypedSlot(this, storage, NetMagnetItem.FILTER_SLOTS + i));
     }
 
