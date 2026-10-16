@@ -278,7 +278,7 @@
   "ui.beyonddimensions.storage.reverse": "逆順",
   "ui.beyonddimensions.storage.layout": "レイアウト",
   "ui.beyonddimensions.storage.columns": "列数",
-  "ui.beyonddimensions.storage.rows": "行数（最大）",
+  "ui.beyonddimensions.storage.rows": "行数",
   "ui.beyonddimensions.storage.keep_search": "閉じても検索を保持",
   "ui.beyonddimensions.storage.sync_search": "レシピビューアと同期",
   "ui.beyonddimensions.storage.sync_search.hint": "JEI / EMI の検索欄と同期",

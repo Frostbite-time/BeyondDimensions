@@ -278,7 +278,7 @@
   "ui.beyonddimensions.storage.reverse": "역순",
   "ui.beyonddimensions.storage.layout": "배치",
   "ui.beyonddimensions.storage.columns": "열 수",
-  "ui.beyonddimensions.storage.rows": "행 수(최대)",
+  "ui.beyonddimensions.storage.rows": "행 수",
   "ui.beyonddimensions.storage.keep_search": "닫아도 검색 유지",
   "ui.beyonddimensions.storage.sync_search": "레시피 뷰어와 동기화",
   "ui.beyonddimensions.storage.sync_search.hint": "JEI / EMI 검색창과 동기화",

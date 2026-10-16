@@ -278,7 +278,7 @@
   "ui.beyonddimensions.storage.reverse": "倒序",
   "ui.beyonddimensions.storage.layout": "版面",
   "ui.beyonddimensions.storage.columns": "欄數",
-  "ui.beyonddimensions.storage.rows": "列數（最多）",
+  "ui.beyonddimensions.storage.rows": "列數",
   "ui.beyonddimensions.storage.keep_search": "關閉後保留搜尋",
   "ui.beyonddimensions.storage.sync_search": "同步配方檢視器",
   "ui.beyonddimensions.storage.sync_search.hint": "與 JEI / EMI 的搜尋框同步",

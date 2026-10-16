@@ -278,7 +278,7 @@
   "ui.beyonddimensions.storage.reverse": "Orden inverso",
   "ui.beyonddimensions.storage.layout": "Diseño",
   "ui.beyonddimensions.storage.columns": "Columnas",
-  "ui.beyonddimensions.storage.rows": "Filas (máx.)",
+  "ui.beyonddimensions.storage.rows": "Filas",
   "ui.beyonddimensions.storage.keep_search": "Conservar búsqueda",
   "ui.beyonddimensions.storage.sync_search": "Vincular con JEI/EMI",
   "ui.beyonddimensions.storage.sync_search.hint": "Compartir la búsqueda con JEI / EMI",

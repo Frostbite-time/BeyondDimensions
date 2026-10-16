@@ -278,7 +278,7 @@
   "ui.beyonddimensions.storage.reverse": "Обратный порядок",
   "ui.beyonddimensions.storage.layout": "Макет",
   "ui.beyonddimensions.storage.columns": "Столбцы",
-  "ui.beyonddimensions.storage.rows": "Строки (макс.)",
+  "ui.beyonddimensions.storage.rows": "Строки",
   "ui.beyonddimensions.storage.keep_search": "Сохранять поиск",
   "ui.beyonddimensions.storage.sync_search": "Связать с JEI/EMI",
   "ui.beyonddimensions.storage.sync_search.hint": "Общий поиск с JEI / EMI",

@@ -278,7 +278,7 @@
   "ui.beyonddimensions.storage.reverse": "Reverse order",
   "ui.beyonddimensions.storage.layout": "Layout",
   "ui.beyonddimensions.storage.columns": "Columns",
-  "ui.beyonddimensions.storage.rows": "Rows (max)",
+  "ui.beyonddimensions.storage.rows": "Rows",
   "ui.beyonddimensions.storage.keep_search": "Keep search on close",
   "ui.beyonddimensions.storage.sync_search": "Sync recipe viewer",
   "ui.beyonddimensions.storage.sync_search.hint": "Syncs with the JEI / EMI search box",
